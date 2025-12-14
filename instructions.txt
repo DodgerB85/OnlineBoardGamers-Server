@@ -6,7 +6,7 @@
 6) Create the MySQL database - inside SQL shell: CREATE DATABASE your_local_db_name CHARACTER SET utf8mb4;
 7) Create a  user for your database - inside SQL shell: CREATE USER 'YOUR_LOCAL_USERNAME'@'localhost' IDENTIFIED BY 'YOUR_LOCAL_PASSWORD';
 8) Grant your new user privileges for your new DB - inside SQL shell: GRANT ALL PRIVILEGES ON your_local_db_name.* TO 'YOUR_LOCAL_USERNAME'@'localhost';
-9) FLUSH PRIVILEGES; then exit;
+9) FLUSH PRIVILEGES; then exit; (Also rename .env.example to .env, and add your local DB name/username/password)
 10) Create the databases for django: python manage.py makemigrations  and   python manage.py migrate
 
 Now run your first test - python manage.py runserver - and check there are no errors - browse http://localhost:8000/
