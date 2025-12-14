@@ -1,0 +1,2358 @@
+{% extends "Lobby/layout.html" %}
+
+{% load static %}
+{% load i18n %}
+{% block head %}
+<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
+<link href="{% static 'Lobby/CSS/TGZT.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+<div class="container">
+
+  <div id="playerInfoNameDiv">
+    <h1>The Great Zimbabwe Spring 24 Tournament</h1>
+</div>
+ <h1>Winner: Melk0r</h1>
+<h1>Round 1</h1>
+
+    <h2>Group A</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/jantref">jantref</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/487/'>-2</a></td><td><a href='/TGZ/450/'>-2</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Brent">Brent</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/475/'>-6</a></td><td><a href='/TGZ/463/'>-14</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/silvergoose">silvergoose</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/469/'>0</a></td><td><a href='/TGZ/481/'>-6</a></td><td><a href='/TGZ/487/'>-10</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Steveth">Steveth</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/469/'>0</a></td><td><a href='/TGZ/457/'>-7</a></td><td><a href='/TGZ/450/'>-10</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/vraid">vraid</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/487/'>-3</a></td><td><a href='/TGZ/457/'>-6</a></td><td><a href='/TGZ/463/'>-11</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/fairflixt">fairflixt</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/469/'>-3</a></td><td><a href='/TGZ/475/'>-4</a></td><td><a href='/TGZ/481/'>-16</a></td><td><a href='/TGZ/457/'>-16</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/cromagz">cromagz</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/450/'>-5</a></td><td><a href='/TGZ/475/'>-6</a></td><td><a href='/TGZ/463/'>-14</a></td><td><a href='/TGZ/481/'>-15</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/450/';">
+                        <td><a href='/TGZ/450/'>SPRING 24 A1</a></td>
+                        <td>
+                            
+                            <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                            
+                            <a href="/profile/cromagz">cromagz</a>
+                                ,
+                            
+                            <a href="/profile/jantref">jantref</a>
+                                ,
+                            
+                            <a href="/profile/Steveth">Steveth</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/silvergoose">silvergoose</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/457/';">
+                        <td><a href='/TGZ/457/'>SPRING 24 A2</a></td>
+                        <td>
+                            
+                            <a href="/profile/vraid">vraid</a>
+                                ,
+                            
+                            <a href="/profile/fairflixt">fairflixt</a>
+                                ,
+                            
+                            <a href="/profile/jantref">jantref</a>
+                                ,
+                            
+                            <a href="/profile/Steveth">Steveth</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/jantref">jantref</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/463/';">
+                        <td><a href='/TGZ/463/'>SPRING 24 A3</a></td>
+                        <td>
+                            
+                            <a href="/profile/vraid">vraid</a>
+                                ,
+                            
+                            <a href="/profile/cromagz">cromagz</a>
+                                ,
+                            
+                            <a href="/profile/Steveth">Steveth</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Steveth">Steveth</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/469/';">
+                        <td><a href='/TGZ/469/'>SPRING 24 A4</a></td>
+                        <td>
+                            
+                            <a href="/profile/fairflixt">fairflixt</a>
+                                ,
+                            
+                            <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                            
+                            <a href="/profile/Steveth">Steveth</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Brent">Brent</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/475/';">
+                        <td><a href='/TGZ/475/'>SPRING 24 A5</a></td>
+                        <td>
+                            
+                            <a href="/profile/fairflixt">fairflixt</a>
+                                ,
+                            
+                            <a href="/profile/cromagz">cromagz</a>
+                                ,
+                            
+                            <a href="/profile/jantref">jantref</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/jantref">jantref</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/481/';">
+                        <td><a href='/TGZ/481/'>SPRING 24 A6</a></td>
+                        <td>
+                            
+                            <a href="/profile/vraid">vraid</a>
+                                ,
+                            
+                            <a href="/profile/fairflixt">fairflixt</a>
+                                ,
+                            
+                            <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                            
+                            <a href="/profile/cromagz">cromagz</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/vraid">vraid</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/487/';">
+                        <td><a href='/TGZ/487/'>SPRING 24 A7</a></td>
+                        <td>
+                            
+                            <a href="/profile/vraid">vraid</a>
+                                ,
+                            
+                            <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                            
+                            <a href="/profile/jantref">jantref</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Brent">Brent</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Group B</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/kbbr">kbbr</a></td>
+                        <td>4</td>
+                        <td>3</td>
+                        <td><a href='/TGZ/476/'>-5</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/novasuecia">novasuecia</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/464/'>-4</a></td><td><a href='/TGZ/451/'>-5</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Dracik">Dracik</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/470/'>0</a></td><td><a href='/TGZ/482/'>-10</a></td><td><a href='/TGZ/451/'>-15</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Gauss">Gauss</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/470/'>-1</a></td><td><a href='/TGZ/482/'>-3</a></td><td><a href='/TGZ/458/'>-3</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/rick_s_chris">rick_s_chris</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/488/'>-1</a></td><td><a href='/TGZ/470/'>-5</a></td><td><a href='/TGZ/464/'>-6</a></td><td><a href='/TGZ/476/'>-7</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Venser">Venser</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/458/'>-3</a></td><td><a href='/TGZ/488/'>-5</a></td><td><a href='/TGZ/476/'>-11</a></td><td><a href='/TGZ/451/'>-13</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/freddyknuckles">freddyknuckles</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/464/'>-6</a></td><td><a href='/TGZ/482/'>-17</a></td><td><a href='/TGZ/488/'>-18</a></td><td><a href='/TGZ/458/'>-18</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/451/';">
+                        <td><a href='/TGZ/451/'>SPRING 24 B1</a></td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                                ,
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                            
+                            <a href="/profile/Dracik">Dracik</a>
+                                ,
+                            
+                            <a href="/profile/Venser">Venser</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/458/';">
+                        <td><a href='/TGZ/458/'>SPRING 24 B2</a></td>
+                        <td>
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                            
+                            <a href="/profile/Gauss">Gauss</a>
+                                ,
+                            
+                            <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                            
+                            <a href="/profile/Venser">Venser</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/464/';">
+                        <td><a href='/TGZ/464/'>SPRING 24 B3</a></td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                                ,
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                            
+                            <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                            
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/470/';">
+                        <td><a href='/TGZ/470/'>SPRING 24 B4</a></td>
+                        <td>
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                            
+                            <a href="/profile/Gauss">Gauss</a>
+                                ,
+                            
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                ,
+                            
+                            <a href="/profile/Dracik">Dracik</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/476/';">
+                        <td><a href='/TGZ/476/'>SPRING 24 B5</a></td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                                ,
+                            
+                            <a href="/profile/Gauss">Gauss</a>
+                                ,
+                            
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                ,
+                            
+                            <a href="/profile/Venser">Venser</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Gauss">Gauss</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/482/';">
+                        <td><a href='/TGZ/482/'>SPRING 24 B6</a></td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                                ,
+                            
+                            <a href="/profile/Gauss">Gauss</a>
+                                ,
+                            
+                            <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                            
+                            <a href="/profile/Dracik">Dracik</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/488/';">
+                        <td><a href='/TGZ/488/'>SPRING 24 B7</a></td>
+                        <td>
+                            
+                            <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                            
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                ,
+                            
+                            <a href="/profile/Dracik">Dracik</a>
+                                ,
+                            
+                            <a href="/profile/Venser">Venser</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Dracik">Dracik</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Group C</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/seal">seal</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/489/'>-5</a></td><td><a href='/TGZ/459/'>-15</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/loki37">loki37</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/477/'>-6</a></td><td><a href='/TGZ/483/'>-8</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Burmer">Burmer</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/452/'>-1</a></td><td><a href='/TGZ/489/'>-11</a></td><td><a href='/TGZ/459/'>-19</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/nomad_fet">nomad_fet</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/452/'>-2</a></td><td><a href='/TGZ/483/'>-3</a></td><td><a href='/TGZ/471/'>-3</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/quadroskeptic">quadroskeptic</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/465/'>-4</a></td><td><a href='/TGZ/471/'>-11</a></td><td><a href='/TGZ/459/'>-29</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/MadRex">MadRex</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/489/'>-4</a></td><td><a href='/TGZ/471/'>-4</a></td><td><a href='/TGZ/477/'>-9</a></td><td><a href='/TGZ/465/'>-9</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/8bg">8bg</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/477/'>-8</a></td><td><a href='/TGZ/452/'>-11</a></td><td><a href='/TGZ/483/'>-14</a></td><td><a href='/TGZ/465/'>-14</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/452/';">
+                        <td><a href='/TGZ/452/'>SPRING 24 C1</a></td>
+                        <td>
+                            
+                            <a href="/profile/Burmer">Burmer</a>
+                                ,
+                            
+                            <a href="/profile/nomad_fet">nomad_fet</a>
+                                ,
+                            
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                            
+                            <a href="/profile/8bg">8bg</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/459/';">
+                        <td><a href='/TGZ/459/'>SPRING 24 C2</a></td>
+                        <td>
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/Burmer">Burmer</a>
+                                ,
+                            
+                            <a href="/profile/seal">seal</a>
+                                ,
+                            
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/loki37">loki37</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/465/';">
+                        <td><a href='/TGZ/465/'>SPRING 24 C3</a></td>
+                        <td>
+                            
+                            <a href="/profile/MadRex">MadRex</a>
+                                ,
+                            
+                            <a href="/profile/seal">seal</a>
+                                ,
+                            
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                            
+                            <a href="/profile/8bg">8bg</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/seal">seal</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/471/';">
+                        <td><a href='/TGZ/471/'>SPRING 24 C4</a></td>
+                        <td>
+                            
+                            <a href="/profile/MadRex">MadRex</a>
+                                ,
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/nomad_fet">nomad_fet</a>
+                                ,
+                            
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/loki37">loki37</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/477/';">
+                        <td><a href='/TGZ/477/'>SPRING 24 C5</a></td>
+                        <td>
+                            
+                            <a href="/profile/MadRex">MadRex</a>
+                                ,
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/Burmer">Burmer</a>
+                                ,
+                            
+                            <a href="/profile/8bg">8bg</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Burmer">Burmer</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/483/';">
+                        <td><a href='/TGZ/483/'>SPRING 24 C6</a></td>
+                        <td>
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/seal">seal</a>
+                                ,
+                            
+                            <a href="/profile/nomad_fet">nomad_fet</a>
+                                ,
+                            
+                            <a href="/profile/8bg">8bg</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/seal">seal</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/489/';">
+                        <td><a href='/TGZ/489/'>SPRING 24 C7</a></td>
+                        <td>
+                            
+                            <a href="/profile/MadRex">MadRex</a>
+                                ,
+                            
+                            <a href="/profile/Burmer">Burmer</a>
+                                ,
+                            
+                            <a href="/profile/seal">seal</a>
+                                ,
+                            
+                            <a href="/profile/nomad_fet">nomad_fet</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/nomad_fet">nomad_fet</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Group D</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/Zurcross">Zurcross</a></td>
+                        <td>4</td>
+                        <td>3</td>
+                        <td><a href='/TGZ/466/'>0</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Melk0r">Melk0r</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/466/'>0</a></td><td><a href='/TGZ/460/'>-2</a></td><td><a href='/TGZ/453/'>-5</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/twojays">twojays</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/453/'>-2</a></td><td><a href='/TGZ/466/'>-6</a></td><td><a href='/TGZ/484/'>-8</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/pgh_gamer">pgh_gamer</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/478/'>-8</a></td><td><a href='/TGZ/472/'>-12</a></td><td><a href='/TGZ/490/'>-15</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/ceh245">ceh245</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/478/'>-10</a></td><td><a href='/TGZ/460/'>-10</a></td><td><a href='/TGZ/490/'>-14</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/MojosMonkey">MojosMonkey</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/453/'>-1</a></td><td><a href='/TGZ/490/'>-2</a></td><td><a href='/TGZ/484/'>-4</a></td><td><a href='/TGZ/472/'>-6</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/towehaal">towehaal</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/484/'>-11</a></td><td><a href='/TGZ/478/'>-13</a></td><td><a href='/TGZ/472/'>-16</a></td><td><a href='/TGZ/460/'>-21</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/453/';">
+                        <td><a href='/TGZ/453/'>SPRING 24 D1</a></td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            <a href="/profile/ceh245">ceh245</a>
+                                ,
+                            
+                            <a href="/profile/twojays">twojays</a>
+                                ,
+                            
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/ceh245">ceh245</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/460/';">
+                        <td><a href='/TGZ/460/'>SPRING 24 D2</a></td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            <a href="/profile/ceh245">ceh245</a>
+                                ,
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                ,
+                            
+                            <a href="/profile/towehaal">towehaal</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/466/';">
+                        <td><a href='/TGZ/466/'>SPRING 24 D3</a></td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            <a href="/profile/pgh_gamer">pgh_gamer</a>
+                                ,
+                            
+                            <a href="/profile/twojays">twojays</a>
+                                ,
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/pgh_gamer">pgh_gamer</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/472/';">
+                        <td><a href='/TGZ/472/'>SPRING 24 D4</a></td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            <a href="/profile/pgh_gamer">pgh_gamer</a>
+                                ,
+                            
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                                ,
+                            
+                            <a href="/profile/towehaal">towehaal</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/478/';">
+                        <td><a href='/TGZ/478/'>SPRING 24 D5</a></td>
+                        <td>
+                            
+                            <a href="/profile/pgh_gamer">pgh_gamer</a>
+                                ,
+                            
+                            <a href="/profile/ceh245">ceh245</a>
+                                ,
+                            
+                            <a href="/profile/twojays">twojays</a>
+                                ,
+                            
+                            <a href="/profile/towehaal">towehaal</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/twojays">twojays</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/484/';">
+                        <td><a href='/TGZ/484/'>SPRING 24 D6</a></td>
+                        <td>
+                            
+                            <a href="/profile/twojays">twojays</a>
+                                ,
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                ,
+                            
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                                ,
+                            
+                            <a href="/profile/towehaal">towehaal</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/490/';">
+                        <td><a href='/TGZ/490/'>SPRING 24 D7</a></td>
+                        <td>
+                            
+                            <a href="/profile/pgh_gamer">pgh_gamer</a>
+                                ,
+                            
+                            <a href="/profile/ceh245">ceh245</a>
+                                ,
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                ,
+                            
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Group E</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/pengsoo">pengsoo</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/461/'>-5</a></td><td><a href='/TGZ/467/'>-6</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/DodgerB">DodgerB</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/454/'>-5</a></td><td><a href='/TGZ/491/'>-7</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/durendal">durendal</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/491/'>-15</a></td><td><a href='/TGZ/461/'>-15</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/donk">donk</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/473/'>-3</a></td><td><a href='/TGZ/454/'>-8</a></td><td><a href='/TGZ/485/'>-20</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/JCK_GBG">JCK_GBG</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/473/'>-2</a></td><td><a href='/TGZ/491/'>-12</a></td><td><a href='/TGZ/467/'>-15</a></td><td><a href='/TGZ/479/'>-17</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/PIMM">PIMM</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/461/'>-5</a></td><td><a href='/TGZ/473/'>-12</a></td><td><a href='/TGZ/479/'>-13</a></td><td><a href='/TGZ/485/'>-14</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/bradsmith04">bradsmith04</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/467/'>-8</a></td><td><a href='/TGZ/454/'>-13</a></td><td><a href='/TGZ/485/'>-15</a></td><td><a href='/TGZ/479/'>-16</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/454/';">
+                        <td><a href='/TGZ/454/'>SPRING 24 E1</a></td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                                ,
+                            
+                            <a href="/profile/bradsmith04">bradsmith04</a>
+                                ,
+                            
+                            <a href="/profile/donk">donk</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/461/';">
+                        <td><a href='/TGZ/461/'>SPRING 24 E2</a></td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                                ,
+                            
+                            <a href="/profile/durendal">durendal</a>
+                                ,
+                            
+                            <a href="/profile/PIMM">PIMM</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/467/';">
+                        <td><a href='/TGZ/467/'>SPRING 24 E3</a></td>
+                        <td>
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                                ,
+                            
+                            <a href="/profile/durendal">durendal</a>
+                                ,
+                            
+                            <a href="/profile/bradsmith04">bradsmith04</a>
+                                ,
+                            
+                            <a href="/profile/JCK_GBG">JCK_GBG</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/durendal">durendal</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/473/';">
+                        <td><a href='/TGZ/473/'>SPRING 24 E4</a></td>
+                        <td>
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                                ,
+                            
+                            <a href="/profile/JCK_GBG">JCK_GBG</a>
+                                ,
+                            
+                            <a href="/profile/donk">donk</a>
+                                ,
+                            
+                            <a href="/profile/PIMM">PIMM</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/479/';">
+                        <td><a href='/TGZ/479/'>SPRING 24 E5</a></td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                            
+                            <a href="/profile/bradsmith04">bradsmith04</a>
+                                ,
+                            
+                            <a href="/profile/JCK_GBG">JCK_GBG</a>
+                                ,
+                            
+                            <a href="/profile/PIMM">PIMM</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/485/';">
+                        <td><a href='/TGZ/485/'>SPRING 24 E6</a></td>
+                        <td>
+                            
+                            <a href="/profile/durendal">durendal</a>
+                                ,
+                            
+                            <a href="/profile/bradsmith04">bradsmith04</a>
+                                ,
+                            
+                            <a href="/profile/donk">donk</a>
+                                ,
+                            
+                            <a href="/profile/PIMM">PIMM</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/durendal">durendal</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/491/';">
+                        <td><a href='/TGZ/491/'>SPRING 24 E7</a></td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                            
+                            <a href="/profile/durendal">durendal</a>
+                                ,
+                            
+                            <a href="/profile/JCK_GBG">JCK_GBG</a>
+                                ,
+                            
+                            <a href="/profile/donk">donk</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/donk">donk</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Group F</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/Bigft64">Bigft64</a></td>
+                        <td>4</td>
+                        <td>4</td>
+                        
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/aplassard">aplassard</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/497/'>-2</a></td><td><a href='/TGZ/498/'>-5</a></td><td><a href='/TGZ/493/'>-5</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/jerryyeti">jerryyeti</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/499/'>-4</a></td><td><a href='/TGZ/497/'>-7</a></td><td><a href='/TGZ/496/'>-12</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/xaviludicus">xaviludicus</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/494/'>-8</a></td><td><a href='/TGZ/496/'>-10</a></td><td><a href='/TGZ/493/'>-11</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/triode">triode</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/455/'>-4</a></td><td><a href='/TGZ/497/'>-6</a></td><td><a href='/TGZ/499/'>-7</a></td><td><a href='/TGZ/494/'>-9</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/ThePaul">ThePaul</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/499/'>-4</a></td><td><a href='/TGZ/498/'>-7</a></td><td><a href='/TGZ/455/'>-9</a></td><td><a href='/TGZ/493/'>-17</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/sbird">sbird</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/498/'>-4</a></td><td><a href='/TGZ/496/'>-8</a></td><td><a href='/TGZ/494/'>-10</a></td><td><a href='/TGZ/455/'>-12</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/455/';">
+                        <td><a href='/TGZ/455/'>SPRING 24 F1</a></td>
+                        <td>
+                            
+                            <a href="/profile/ThePaul">ThePaul</a>
+                                ,
+                            
+                            <a href="/profile/sbird">sbird</a>
+                                ,
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/triode">triode</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/493/';">
+                        <td><a href='/TGZ/493/'>SPRING 24 F3</a></td>
+                        <td>
+                            
+                            <a href="/profile/ThePaul">ThePaul</a>
+                                ,
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                ,
+                            
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/494/';">
+                        <td><a href='/TGZ/494/'>SPRING 24 F7</a></td>
+                        <td>
+                            
+                            <a href="/profile/sbird">sbird</a>
+                                ,
+                            
+                            <a href="/profile/triode">triode</a>
+                                ,
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                ,
+                            
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/496/';">
+                        <td><a href='/TGZ/496/'>SPRING 24 F2</a></td>
+                        <td>
+                            
+                            <a href="/profile/sbird">sbird</a>
+                                ,
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                                ,
+                            
+                            <a href="/profile/jerryyeti">jerryyeti</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/497/';">
+                        <td><a href='/TGZ/497/'>SPRING 24 F4</a></td>
+                        <td>
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/triode">triode</a>
+                                ,
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                ,
+                            
+                            <a href="/profile/jerryyeti">jerryyeti</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/498/';">
+                        <td><a href='/TGZ/498/'>SPRING 24 F5</a></td>
+                        <td>
+                            
+                            <a href="/profile/ThePaul">ThePaul</a>
+                                ,
+                            
+                            <a href="/profile/sbird">sbird</a>
+                                ,
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                ,
+                            
+                            <a href="/profile/jerryyeti">jerryyeti</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/jerryyeti">jerryyeti</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/499/';">
+                        <td><a href='/TGZ/499/'>SPRING 24 F6</a></td>
+                        <td>
+                            
+                            <a href="/profile/ThePaul">ThePaul</a>
+                                ,
+                            
+                            <a href="/profile/triode">triode</a>
+                                ,
+                            
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                                ,
+                            
+                            <a href="/profile/jerryyeti">jerryyeti</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Group G</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/Zugzwaaaang">Zugzwaaaang</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/492/'>-1</a></td><td><a href='/TGZ/480/'>-4</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/czlam">czlam</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/480/'>-2</a></td><td><a href='/TGZ/492/'>-4</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/siddhig">siddhig</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/462/'>0</a></td><td><a href='/TGZ/492/'>-2</a></td><td><a href='/TGZ/468/'>-7</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/hohohale">hohohale</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/474/'>-4</a></td><td><a href='/TGZ/462/'>-5</a></td><td><a href='/TGZ/486/'>-7</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/mintroll">mintroll</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/486/'>-7</a></td><td><a href='/TGZ/474/'>-12</a></td><td><a href='/TGZ/456/'>-12</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Billtje">Billtje</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/462/'>-1</a></td><td><a href='/TGZ/468/'>-4</a></td><td><a href='/TGZ/474/'>-5</a></td><td><a href='/TGZ/456/'>-11</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/srxyt">srxyt</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/468/'>-6</a></td><td><a href='/TGZ/486/'>-7</a></td><td><a href='/TGZ/480/'>-7</a></td><td><a href='/TGZ/456/'>-11</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/456/';">
+                        <td><a href='/TGZ/456/'>SPRING 24 G1</a></td>
+                        <td>
+                            
+                            <a href="/profile/Billtje">Billtje</a>
+                                ,
+                            
+                            <a href="/profile/srxyt">srxyt</a>
+                                ,
+                            
+                            <a href="/profile/Zugzwaaaang">Zugzwaaaang</a>
+                                ,
+                            
+                            <a href="/profile/mintroll">mintroll</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Zugzwaaaang">Zugzwaaaang</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/462/';">
+                        <td><a href='/TGZ/462/'>SPRING 24 G2</a></td>
+                        <td>
+                            
+                            <a href="/profile/hohohale">hohohale</a>
+                                ,
+                            
+                            <a href="/profile/siddhig">siddhig</a>
+                                ,
+                            
+                            <a href="/profile/Billtje">Billtje</a>
+                                ,
+                            
+                            <a href="/profile/Zugzwaaaang">Zugzwaaaang</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Zugzwaaaang">Zugzwaaaang</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/468/';">
+                        <td><a href='/TGZ/468/'>SPRING 24 G3</a></td>
+                        <td>
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                            <a href="/profile/siddhig">siddhig</a>
+                                ,
+                            
+                            <a href="/profile/Billtje">Billtje</a>
+                                ,
+                            
+                            <a href="/profile/srxyt">srxyt</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/czlam">czlam</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/474/';">
+                        <td><a href='/TGZ/474/'>SPRING 24 G4</a></td>
+                        <td>
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                            <a href="/profile/hohohale">hohohale</a>
+                                ,
+                            
+                            <a href="/profile/Billtje">Billtje</a>
+                                ,
+                            
+                            <a href="/profile/mintroll">mintroll</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/czlam">czlam</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/480/';">
+                        <td><a href='/TGZ/480/'>SPRING 24 G5</a></td>
+                        <td>
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                            <a href="/profile/hohohale">hohohale</a>
+                                ,
+                            
+                            <a href="/profile/srxyt">srxyt</a>
+                                ,
+                            
+                            <a href="/profile/Zugzwaaaang">Zugzwaaaang</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/hohohale">hohohale</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/486/';">
+                        <td><a href='/TGZ/486/'>SPRING 24 G6</a></td>
+                        <td>
+                            
+                            <a href="/profile/hohohale">hohohale</a>
+                                ,
+                            
+                            <a href="/profile/siddhig">siddhig</a>
+                                ,
+                            
+                            <a href="/profile/srxyt">srxyt</a>
+                                ,
+                            
+                            <a href="/profile/mintroll">mintroll</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/siddhig">siddhig</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/492/';">
+                        <td><a href='/TGZ/492/'>SPRING 24 G7</a></td>
+                        <td>
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                            <a href="/profile/siddhig">siddhig</a>
+                                ,
+                            
+                            <a href="/profile/Zugzwaaaang">Zugzwaaaang</a>
+                                ,
+                            
+                            <a href="/profile/mintroll">mintroll</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/mintroll">mintroll</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h1>Round 2</h1>
+
+    <h2>Group H</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/Melk0r">Melk0r</a></td>
+                        <td>4</td>
+                        <td>3</td>
+                        <td><a href='/TGZ/815/'>-4</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/aplassard">aplassard</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/851/'>-3</a></td><td><a href='/TGZ/848/'>-5</a></td><td><a href='/TGZ/821/'>-7</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/novasuecia">novasuecia</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/815/'>-4</a></td><td><a href='/TGZ/851/'>-5</a></td><td><a href='/TGZ/817/'>-8</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/durendal">durendal</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/849/'>-4</a></td><td><a href='/TGZ/851/'>-11</a></td><td><a href='/TGZ/850/'>-12</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/seal">seal</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/848/'>-5</a></td><td><a href='/TGZ/850/'>-13</a></td><td><a href='/TGZ/821/'>-16</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/jantref">jantref</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/815/'>0</a></td><td><a href='/TGZ/849/'>-1</a></td><td><a href='/TGZ/817/'>-13</a></td><td><a href='/TGZ/848/'>-15</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/pengsoo">pengsoo</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/817/'>-2</a></td><td><a href='/TGZ/850/'>-5</a></td><td><a href='/TGZ/849/'>-7</a></td><td><a href='/TGZ/821/'>-11</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/815/';">
+                        <td><a href='/TGZ/815/'>Spring 24 H1</a></td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                            
+                            <a href="/profile/seal">seal</a>
+                                ,
+                            
+                            <a href="/profile/jantref">jantref</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/seal">seal</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/817/';">
+                        <td><a href='/TGZ/817/'>Spring 24 H3</a></td>
+                        <td>
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                                ,
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                            
+                            <a href="/profile/jantref">jantref</a>
+                                ,
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/821/';">
+                        <td><a href='/TGZ/821/'>Spring 24 H7</a></td>
+                        <td>
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                                ,
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            <a href="/profile/seal">seal</a>
+                                ,
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/848/';">
+                        <td><a href='/TGZ/848/'>Spring 24 H2</a></td>
+                        <td>
+                            
+                            <a href="/profile/durendal">durendal</a>
+                                ,
+                            
+                            <a href="/profile/seal">seal</a>
+                                ,
+                            
+                            <a href="/profile/jantref">jantref</a>
+                                ,
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/durendal">durendal</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/849/';">
+                        <td><a href='/TGZ/849/'>Spring 24 H4</a></td>
+                        <td>
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                                ,
+                            
+                            <a href="/profile/durendal">durendal</a>
+                                ,
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            <a href="/profile/jantref">jantref</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/850/';">
+                        <td><a href='/TGZ/850/'>Spring 24 H5</a></td>
+                        <td>
+                            
+                            <a href="/profile/pengsoo">pengsoo</a>
+                                ,
+                            
+                            <a href="/profile/durendal">durendal</a>
+                                ,
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                            
+                            <a href="/profile/seal">seal</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/851/';">
+                        <td><a href='/TGZ/851/'>Spring 24 H6</a></td>
+                        <td>
+                            
+                            <a href="/profile/durendal">durendal</a>
+                                ,
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Group I</h2>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Played</th>
+                    <th>Won</th>
+                    <th>TB 1</th>
+                    <th>TB 2</th>
+                    <th>TB 3</th>
+                    <th>TB 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr>
+                        <td><a href="/profile/Zurcross">Zurcross</a></td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/826/'>-1</a></td><td><a href='/TGZ/828/'>-14</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/czlam">czlam</a></td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td><a href='/TGZ/824/'>-2</a></td><td><a href='/TGZ/827/'>-10</a></td><td><a href='/TGZ/822/'>-10</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/loki37">loki37</a></td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/825/'>-2</a></td><td><a href='/TGZ/822/'>-3</a></td><td><a href='/TGZ/824/'>-5</a></td><td><a href='/TGZ/1030/'>-8</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Bigft64">Bigft64</a></td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/827/'>-2</a></td><td><a href='/TGZ/828/'>-3</a></td><td><a href='/TGZ/822/'>-5</a></td><td><a href='/TGZ/1030/'>-16</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/Brent">Brent</a></td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/823/'>-3</a></td><td><a href='/TGZ/826/'>-5</a></td><td><a href='/TGZ/825/'>-7</a></td><td><a href='/TGZ/1030/'>-12</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/kbbr">kbbr</a></td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><a href='/TGZ/825/'>-4</a></td><td><a href='/TGZ/827/'>-9</a></td><td><a href='/TGZ/823/'>-14</a></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a href="/profile/DodgerB">DodgerB</a></td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td><a href='/TGZ/824/'>-2</a></td><td><a href='/TGZ/823/'>-3</a></td><td><a href='/TGZ/828/'>-13</a></td><td><a href='/TGZ/826/'>-15</a></td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    <h3>Games</h3>
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTgamesTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/822/';">
+                        <td><a href='/TGZ/822/'>Spring 24 I2</a></td>
+                        <td>
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Brent">Brent</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/823/';">
+                        <td><a href='/TGZ/823/'>Spring 24 I3</a></td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                                ,
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/824/';">
+                        <td><a href='/TGZ/824/'>Spring 24 I5</a></td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                                ,
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/825/';">
+                        <td><a href='/TGZ/825/'>Spring 24 I1</a></td>
+                        <td>
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                                ,
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/826/';">
+                        <td><a href='/TGZ/826/'>Spring 24 I4</a></td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/czlam">czlam</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/827/';">
+                        <td><a href='/TGZ/827/'>Spring 24 I6</a></td>
+                        <td>
+                            
+                            <a href="/profile/kbbr">kbbr</a>
+                                ,
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/828/';">
+                        <td><a href='/TGZ/828/'>Spring 24 I7</a></td>
+                        <td>
+                            
+                            <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/loki37">loki37</a>
+                            
+                        </td>
+                    </tr>
+                
+                    <tr onclick="window.location.href='/TGZ/1030/';">
+                        <td><a href='/TGZ/1030/'>Spring 24 I8</a></td>
+                        <td>
+                            
+                            <a href="/profile/loki37">loki37</a>
+                                ,
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                            <a href="/profile/Bigft64">Bigft64</a>
+                                ,
+                            
+                            <a href="/profile/Brent">Brent</a>
+                                
+                            
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/czlam">czlam</a>
+                            
+                        </td>
+                    </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h1>Final</h1>
+
+    <div class="TGZTplayerTableSpring24-container">
+        <table class="TGZTplayerTableSpring24">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    <tr onclick="window.location.href='/TGZ/1060/';">
+                        <td><a href='/TGZ/1060/'>Spring 24 Final</a></td>
+                        <td>
+                            
+                            <a href="/profile/Zurcross">Zurcross</a>
+                                ,
+                            
+                            <a href="/profile/czlam">czlam</a>
+                                ,
+                            
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                            
+                            
+                            <a href="/profile/aplassard">aplassard</a>
+                                                     
+                        </td>
+                        <td>
+                            
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            
+                        </td>
+                    </tr>
+                
+                
+            </tbody>
+        </table>
+    </div> 
+    <h1>Winner: Melk0r</h1>
+
+</div>
+{% include 'Lobby/common/homeButton.html' %}
+
+{% endblock %}

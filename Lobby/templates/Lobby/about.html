@@ -1,0 +1,82 @@
+{% extends "Lobby/layout.html" %}
+
+{% load static %}
+{% load i18n %}
+{% block head %}
+<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+<div class="container" id="aboutPage">
+
+  {% blocktranslate trimmed %}
+  <h1>Welcome to Online Board Gamers!</h1>
+  Online Board Gamers is a website to play board games online. <br />
+  You can play live against other playes with automatic updates, or
+  play a "practice" game where you make all the moves on your device.
+  <h2>Current Games</h2>
+  {% endblocktranslate %}
+  <b>
+    <div id="aboutCurrentGames">
+      <ul>
+        <li>{% translate "Food Chain Magnate - With all Ketchup Expansions" %}</li>
+        <li> {% translate "Horseless Carriage" %}</li>
+        <li> {% translate "Bus" %}</li>
+        <li> {% translate "The Great Zimbabwe" %}</li>
+        <li> {% translate "Cannes" %}</li>
+        <li> {% translate "Antiquity" %}</li>
+        <li> {% translate "Indonesia" %}</li>
+        <li> {% translate "Keyflower" %}</li>
+        <li> {% translate "Web" %}</li>
+      </ul>
+    </div>
+    <h2>{% translate "Credits" %}</h2>
+    Website Design / Game Programming - DodgerB<br />
+    FCM Chief Playtester - looogic<br />
+    Live-updating Games Support - Jonny<br />
+    <br/>
+    Chinese (Hans) Lobby & FCM - 庄生<br/>
+    Chinese (Hans) HC - 陈斌华<br/>
+    <br/>
+    Cannes Coding Assistance - Rastko<br/>
+    <br/>
+    Antiquity Coding Assistance - kbbr & Rastko<br/>
+    Antiquity Chief Playtester - massibull<br/>
+    Antiquity Additional Playtesters - F1087 & gdc<br/>
+    <br/>
+    Indonesia Coding Consultant - vraid<br/>
+    Indonesia Ship Icons - PhasingPlayer<br/>
+    <br>
+    Keyflower Additional Coding - vraid<br/>
+    <br>
+    Web playtester - Burmer
+    <br/>
+    <br/>
+    <b><u>{% translate "Thanks to all the Playtesters!" %}</u></b><br/>
+    looogic, Benkyo, massibull,  F1087, gdc, vraid, PhasingPlayer, Phil, Burmer, ha.steven, JoshuaAcosta, s4lm, Steveth, enavico
+    <br/>
+    krieg90, your_average_euro
+    <br/>
+    <br/>
+    {% translate "Thank you to everyone for your feedback, comments and suggestions - you have helped to make this site what it is!" %}
+    <br/>
+  </b>
+  <br />
+  <!--
+Food Chain Magnate is a board game by Jeroen Doumen and Joris Wiersinga, published by <a
+  href="https://www.splottershop.com/">Splotter Spellen</a>.<br/>
+<br/>
+
+
+Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf">here</a>
+<br/>
+<br/>
+Ketchup Expansion rules available <a
+  href="https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf">here</a>
+<br/>
+<br/>-->
+{% translate "For further help contact" %} <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width=400 height=30>
+
+</div>
+{% include 'Lobby/common/homeButton.html' %}
+
+{% endblock %}

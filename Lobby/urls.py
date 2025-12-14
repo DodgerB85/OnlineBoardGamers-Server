@@ -1,0 +1,177 @@
+"""mysite URL Configuration
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/2.1/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+
+from django.urls import path, re_path
+from django.views.generic import RedirectView
+
+from . import views
+from .views import registerView, ActivateAccount
+
+# app_name = 'Lobby' # Requires Lobby:index etc after everything
+
+app_name = ''
+
+urlpatterns = [
+    path("", views.index, name="index"),
+    path("index/<str:listType>/", views.indexListType, name="indexListType"),
+
+    path("indexSpecialRedirect/", views.indexSpecialRedirect, name="indexSpecialRedirect"),
+
+    #path('', home, name='home'),
+    path("login/", views.login_view, name="myLogin"),
+    path("logout/", views.logout_view, name="myLogout"),
+    path("profile/", views.profile, name="profile"),
+    path("profileAQY/", views.profileAQY, name="profileAQY"),
+    path("profileIND/", views.profileIND, name="profileIND"),
+    #path("register", views.register, name="register"),
+    path("register/", registerView.as_view(), name="register"),
+    path("help/", views.lobbyHelp, name="lobbyHelp"),
+    path("helpTournaments/", views.helpTournaments, name="helpTournaments"),
+    path("helpTournamentsMini/", views.helpTournamentsMini, name="helpTournamentsMini"),
+    path("newGames/", views.newGamesPage, name="newGamesPage"),
+    path("newMiniTournaments/", views.newMiniTournaments, name="newMiniTournaments"),
+    path("fcmNewCode/", views.fcmNewCode, name="fcmNewCode"),
+
+    path("createFCMpage/", views.createFCMpage, name="createFCMpage"),
+    path("createFCMpage/<int:gameID>/", views.createFCMpage, name="createFCMpage"),
+    path("createFCMminiTournament/", views.createFCMminiTournament, name="createFCMminiTournament"), 
+
+    path("createHCpage/", views.createHCpage, name="createHCpage"),
+    path("createHCpage/<int:gameID>/", views.createHCpage, name="createHCpage"),
+
+    path("createBusPage/", views.createBusPage, name="createBusPage"),
+    path("createBusPage/<int:gameID>/", views.createBusPage, name="createBusPage"),
+
+    path("createTGZpage/", views.createTGZpage, name="createTGZpage"),
+    path("createTGZminiTournament/", views.createTGZminiTournament, name="createTGZminiTournament"), 
+
+
+    path("createTGZpage/<int:gameID>/", views.createTGZpage, name="createTGZpage"),
+    path("showTGZoptions/<int:gameID>/", views.showTGZoptions, name="showTGZoptions"),
+
+    path("createCNSpage/", views.createCNSpage, name="createCNSpage"),
+    path("createCNSpage/<int:gameID>/", views.createCNSpage, name="createCNSpage"),
+    
+    path("createAQYpage/", views.createAQYpage, name="createAQYpage"),
+    path("createAQYpage/<int:gameID>/", views.createAQYpage, name="createAQYpage"),
+
+    path("createINDpage/", views.createINDpage, name="createINDpage"),
+    path("createINDpage/<int:gameID>/", views.createINDpage, name="createINDpage"),
+    
+    path("createKFWpage/", views.createKFWpage, name="createKFWpage"),
+    path("createKFWpage/<int:gameID>/", views.createKFWpage, name="createKFWpage"),
+    
+    path("createWEBpage/", views.createWEBpage, name="createWEBpage"),
+    path("createWEBpage/<int:gameID>/", views.createWEBpage, name="createWEBpage"),
+
+    path("FCMmapEditor/", views.FCMmapEditor, name="FCMmapEditor"),
+    path("TGZmapEditor/", views.TGZmapEditor, name="TGZmapEditor"),
+    path("AQYmapEditor/", views.AQYmapEditor, name="AQYmapEditor"),
+
+    path("donate/", views.donate, name="donate"),
+    path("donate/success/", views.donate_success, name="donate_success"),
+    path("donate/cancel/", views.donate_cancel, name="donate_cancel"),
+    path("about/", views.about, name="about"),
+    path("changelog/", views.changelog_view, name="changelog"),
+    path("contact/", views.contact, name="contact"),
+    path("stats/", views.stats, name="stats"),
+    path("AllTournaments/", views.AllTournaments, name="AllTournaments"),
+    path("TGZtournaments/", views.TGZtournaments, name="TGZtournaments"),
+    path("TGZtournaments/<str:tournamentName>/", views.TGZtournamentMain, name="TGZtournamentMain"),
+    path("TGZtournaments/fixed/spring24/", views.TGZtournamentFixedSpring24, name="TGZtournamentFixedSpring24"),
+    path("TGZtournaments/fixed/autumn24/", views.TGZtournamentFixedAutumn24, name="TGZtournamentFixedAutumn24"),
+    path("TGZtournaments/fixed/summer25/", views.TGZtournamentFixedSummer25, name="TGZtournamentFixedSummer25"),
+
+    path("FCMtournament/<str:gameType>/<int:tournamentID>/", views.Tournament, name="Tournament"),
+    path("HCtournament/<str:gameType>/<int:tournamentID>/", views.Tournament, name="Tournament"),
+    path("Bustournament/<str:gameType>/<int:tournamentID>/", views.Tournament, name="Tournament"),
+    path("AQYtournament/<str:gameType>/<int:tournamentID>/", views.Tournament, name="Tournament"),
+    path("INDtournament/<str:gameType>/<int:tournamentID>/", views.Tournament, name="Tournament"),
+
+    path("MiniTournaments/", views.MiniTournaments, name="MiniTournaments"),
+    path("MiniTournament/<int:Mini_Tournament_id>/", views.MiniTournament, name="MiniTournament"),
+    
+    path("MainTournaments/", views.MainTournaments, name="MainTournaments"),
+    path("MainTournament/<int:Main_Tournament_id>/", views.MainTournament, name="MainTournament"),
+
+    path("testLobby/", views.testLobby, name="testLobby"),
+
+    path("profile/<str:usernameToProfile>/", views.playerInfo, name="playerInfo"),
+    path('activate/<uidb64>/<token>/', ActivateAccount.as_view(), name='activate'),
+
+    path("schism/", views.schism, name="schism"),
+
+    # ADMIN ONLY PATHS
+    path("DBO/", views.DBO, name="DBO"),
+    path("DBO_deleteGame/<str:gameType>/", views.DBO_deleteGame, name="DBO_deleteGame"),
+    path('userStats/', views.userStats, name='userStats'),
+    path('sendAdminMessage/', views.sendAdminMessage, name='sendAdminMessage'),
+    
+
+
+    # API Routes
+    path("TG_webhook/", views.TG_webhook, name="TG_webhook"),
+    path("addTGid/<int:TGid>", views.addTGid, name="addTGid"),
+    
+    #path("gamesList/<str:listType>", views.gamesList, name="gamesList"),
+    path("join/<str:joinGameLink>/", views.joinGameLink, name="joinGameLink"),
+    path("autoCompleteUsername/", views.autoCompleteUsername,
+         name="autoCompleteUsername"),
+    #path("createFCMgame/", views.createFCMgame, name="createFCMgame"),
+    #path("createHCgame/", views.createHCgame, name="createHCgame"),
+    #path("createBusGame/", views.createBusGame, name="createBusGame"),
+    #path("createTGZgame/", views.createTGZgame, name="createTGZgame"),
+ 
+    path("joinGame/<str:gameType>/", views.joinGame, name="joinGame"),
+    path("deleteGame/<str:gameType>/", views.deleteGame, name="deleteGame"),
+    
+    path("addPlayerToMTinvites/", views.addPlayerToMTinvites, name="addPlayerToMTinvites"),
+
+    path("password_reset/", views.password_reset_request, name="password_reset"),
+    path("testWebhook/", views.testWebhook, name="testWebhook"),
+    path("blacklistPlayer/", views.blacklistPlayer, name="blacklistPlayer"),
+
+    path("set_language_custom/", views.set_language_custom, name="set_language_custom"),
+
+    path("addWebhook/", views.addWebhook, name="addWebhook"),
+    path("deleteWebhook/", views.deleteWebhook, name="deleteWebhook"),
+
+
+    path('BGH_API/<str:options>/', views.BGH_API),
+    path('kbbrScraper/<str:game>/', views.kbbrScraper),
+
+    path('dataCheck/', views.dataCheck),
+    path('setStopEmails/', views.setStopEmails),
+    
+    path("sendMTchatMessage/", views.sendMTchatMessage, name="sendMTchatMessage"),
+    path("reloadMTchatData/", views.reloadMTchatData, name="reloadMTchatData"),
+    
+    path("sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"),
+    path("reloadMainTchatData/", views.reloadMainTchatData, name="reloadMainTchatData"),
+    
+    path('user-autocomplete/', views.UserAutocomplete.as_view(), name='user-autocomplete'),
+
+    # Icons
+    re_path(r'^apple-touch-icon\.png$', RedirectView.as_view(url='/static/Lobby/favicon.png')),
+    re_path(r'^apple-touch-icon-precomposed\.png$', RedirectView.as_view(url='/static/Lobby/favicon.png')),
+
+    re_path(r'^apple-touch-icon-120x120\.png$', RedirectView.as_view(url='/static/Lobby/favicon.png')),
+    re_path(r'^apple-touch-icon-120x120-precomposed\.png$', RedirectView.as_view(url='/static/Lobby/favicon.png')),
+    re_path(r'^apple-touch-icon-152x152\.png$', RedirectView.as_view(url='/static/Lobby/favicon.png')),
+    re_path(r'^apple-touch-icon-152x152-precomposed\.png$', RedirectView.as_view(url='/static/Lobby/favicon.png')),
+
+]
+

@@ -1,0 +1,24 @@
+{% load i18n %}
+{% autoescape off %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate %}
+Hi {{ username }},<br/>
+<br/>
+A tournament of {{ box_name }} is now open for signup<br/>
+<br/>
+You can sign up for the tournament here:<br/>
+https://{{ domain }}/AllTournaments/<br/>
+<br/>
+Foramt: {{ format }}<br/>
+Players per game: {{ maxGamePlayers }}<br/>
+<br/>
+Enjoy!<br/>
+<br/>
+<br/>
+Notification preferences can be changed in your Profile<br/>
+https://{{ domain }}/profile/<br/>
+<br/>
+Please do not reply to this email.<br/>
+To contact me please use: OnlineBoardGamers@gmail.com<br/>
+{% endblocktranslate %}
+{% endautoescape %}

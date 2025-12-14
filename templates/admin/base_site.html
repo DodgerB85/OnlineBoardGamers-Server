@@ -1,0 +1,13 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% block extrahead %}
+<link rel="shortcut icon" type="image/png" href="{% static 'Lobby/favicon.ico' %}"/>
+{% endblock %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Online Board Gamers Admin</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

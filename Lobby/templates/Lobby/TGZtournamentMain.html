@@ -1,0 +1,1392 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/TGZT.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div id="playerInfoNameDiv">
+            <h1>The Great Zimbabwe {{ tournamentKey }} Tournament</h1>
+        </div>
+        <h1>Round 2</h1>
+        {% for group_data in tournamentData %}
+            <h2>Group {{ group_data.group }}</h2>
+            <div class="TGZTplayerTable-container">
+                <table class="TGZTplayerTable TGZTplayerTableJumboTHISISREMOVED">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Played</th>
+                            <th>Won</th>
+                            <th>TB 1</th>
+                            <th>TB 2</th>
+                            <th>TB 3</th>
+                            <th>TB 4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player_data in group_data.players %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'playerInfo' usernameToProfile=player_data.username %}">{{ player_data.username }}</a>
+                                </td>
+                                <td>{{ player_data.num_games_finished }}</td>
+                                <td>{{ player_data.num_games_won }}</td>
+                                {% for i in player_data.tie_breakers %}
+                                    <td>
+                                        <a href='{% url 'TGZ:showTGZgame' game_id=i.1 %}'>{{ i.0 }}</a>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <h3>Games</h3>
+            <div class="TGZTgamesTable-container">
+                <table class="TGZTgamesTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Players</th>
+                            <th>Winner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game_data in group_data.games %}
+                            <tr onclick="window.location.href='{% url 'TGZ:showTGZgame' game_id=game_data.gameID %}';">
+                                <td>
+                                    <a href='{% url 'TGZ:showTGZgame' game_id=game_data.gameID %}'>{{ game_data.gameName }}</a>
+                                </td>
+                                <td>
+                                    {% for player in game_data.players.all %}
+                                        <a href="{% url 'playerInfo' usernameToProfile=player.username %}">{{ player.username }}</a>
+                                        {% if not forloop.last %},{% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% if game_data.winner %}
+                                        <a href="{% url 'playerInfo' usernameToProfile=game_data.winner.username %}">{{ game_data.winner.username }}</a>
+                                    {% else %}
+                                        <b>-</b>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        <!-- FIXED ROUND 1-->
+        <h1>Round 1</h1>
+        <h2>Group A</h2>
+        <div class="TGZTplayerTableSpring24-container">
+            <table class="TGZTplayerTableSpring24 TGZTplayerTableJumboAutumn24">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Played</th>
+                        <th>Won</th>
+                        <th>TB 1</th>
+                        <th>TB 2</th>
+                        <th>TB 3</th>
+                        <th>TB 4</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                        <td>5</td>
+                        <td>4</td>
+                        <td>
+                            <a href='/TGZ/4850/'>-4</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/Melk0r">Melk0r</a>
+                        </td>
+                        <td>5</td>
+                        <td>4</td>
+                        <td>
+                            <a href='/TGZ/4876/'>-9</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/vraid">vraid</a>
+                        </td>
+                        <td>5</td>
+                        <td>3</td>
+                        <td>
+                            <a href='/TGZ/4879/'>-3</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4871/'>-4</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                        <td>5</td>
+                        <td>3</td>
+                        <td>
+                            <a href='/TGZ/4869/'>-3</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4844/'>-8</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/twojays">twojays</a>
+                        </td>
+                        <td>5</td>
+                        <td>3</td>
+                        <td>
+                            <a href='/TGZ/4848/'>-4</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4873/'>-12</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/czlam">czlam</a>
+                        </td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td>
+                            <a href='/TGZ/4872/'>-1</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4842/'>-4</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4846/'>-6</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/siddhig">siddhig</a>
+                        </td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td>
+                            <a href='/TGZ/4864/'>-3</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4870/'>-10</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4863/'>-11</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/MadRex">MadRex</a>
+                        </td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td>
+                            <a href='/TGZ/4851/'>-4</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4854/'>-6</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4878/'>-7</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/chaosmagician">chaosmagician</a>
+                        </td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td>
+                            <a href='/TGZ/4848/'>-4</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4851/'>-11</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4849/'>-11</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/Billtje">Billtje</a>
+                        </td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td>
+                            <a href='/TGZ/4843/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4842/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4849/'>-11</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/d_choo">d_choo</a>
+                        </td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td>
+                            <a href='/TGZ/4877/'>-13</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4871/'>-13</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4867/'>-17</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/jantref">jantref</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4856/'>0</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4850/'>-3</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4877/'>-4</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4852/'>-9</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4854/'>0</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4879/'>-7</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4853/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4860/'>-11</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4857/'>-1</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4881/'>-2</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4856/'>-3</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4859/'>-7</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/Avatar73">Avatar73</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4853/'>-1</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4855/'>-2</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4852/'>-4</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4879/'>-8</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/derekmd33">derekmd33</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4850/'>-1</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4844/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4843/'>-6</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4874/'>-10</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/novasuecia">novasuecia</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4856/'>-1</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4858/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4855/'>-11</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4880/'>-16</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/DodgerB">DodgerB</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4873/'>-2</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4866/'>-2</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4878/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4869/'>-12</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/fairflixt">fairflixt</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4864/'>-3</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4868/'>-9</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4862/'>-9</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4861/'>-12</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/nWooch">nWooch</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4870/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4845/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4880/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4871/'>-11</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/durendal">durendal</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4874/'>-6</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4859/'>-7</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4865/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4858/'>-13</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                        </td>
+                        <td>5</td>
+                        <td>1</td>
+                        <td>
+                            <a href='/TGZ/4866/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4859/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4862/'>-11</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4874/'>-16</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4857/'>0</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4864/'>-3</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4881/'>-12</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4860/'>-12</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4858/'>-14</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/olawaco">olawaco</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4857/'>0</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4854/'>-6</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4880/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4855/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4861/'>-18</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/sbird">sbird</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4853/'>0</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4846/'>-7</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4847/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4876/'>-10</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4849/'>-10</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/donk">donk</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4875/'>-1</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4845/'>-2</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4848/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4846/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4852/'>-8</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/Gauss">Gauss</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4875/'>-1</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4847/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4851/'>-6</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4845/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4844/'>-8</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/zaqijo">zaqijo</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4872/'>-3</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4877/'>-7</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4866/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4865/'>-9</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4868/'>-14</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/mintroll">mintroll</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4872/'>-4</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4847/'>-7</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4873/'>-12</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4881/'>-13</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4843/'>-19</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/Burmer">Burmer</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4867/'>-5</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4861/'>-7</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4863/'>-9</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4875/'>-10</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4860/'>-11</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/Venser">Venser</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4842/'>-6</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4868/'>-7</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4878/'>-8</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4867/'>-9</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4870/'>-12</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/profile/secondofthenew">secondofthenew</a>
+                        </td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>
+                            <a href='/TGZ/4862/'>-10</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4876/'>-12</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4869/'>-13</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4865/'>-13</a>
+                        </td>
+                        <td>
+                            <a href='/TGZ/4863/'>-18</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h3>Games</h3>
+        <div class="TGZTgamesTable-container">
+            <table class="TGZTgamesTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Players</th>
+                        <th>Winner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr onclick="window.location.href='/TGZ/4842/';">
+                        <td>
+                            <a href='/TGZ/4842/'>TGZ Summer 25 1</a>
+                        </td>
+                        <td>
+                            <a href="/profile/czlam">czlam</a>
+                            ,
+                            <a href="/profile/twojays">twojays</a>
+                            ,
+                            <a href="/profile/Venser">Venser</a>
+                            ,
+                            <a href="/profile/Billtje">Billtje</a>
+                        </td>
+                        <td>
+                            <a href="/profile/twojays">twojays</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4843/';">
+                        <td>
+                            <a href='/TGZ/4843/'>TGZ Summer 25 2</a>
+                        </td>
+                        <td>
+                            <a href="/profile/vraid">vraid</a>
+                            ,
+                            <a href="/profile/derekmd33">derekmd33</a>
+                            ,
+                            <a href="/profile/Billtje">Billtje</a>
+                            ,
+                            <a href="/profile/mintroll">mintroll</a>
+                        </td>
+                        <td>
+                            <a href="/profile/vraid">vraid</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4844/';">
+                        <td>
+                            <a href='/TGZ/4844/'>TGZ Summer 25 3</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Gauss">Gauss</a>
+                            ,
+                            <a href="/profile/derekmd33">derekmd33</a>
+                            ,
+                            <a href="/profile/twojays">twojays</a>
+                            ,
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                        <td>
+                            <a href="/profile/twojays">twojays</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4845/';">
+                        <td>
+                            <a href='/TGZ/4845/'>TGZ Summer 25 4</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Gauss">Gauss</a>
+                            ,
+                            <a href="/profile/Billtje">Billtje</a>
+                            ,
+                            <a href="/profile/donk">donk</a>
+                            ,
+                            <a href="/profile/nWooch">nWooch</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Billtje">Billtje</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4846/';">
+                        <td>
+                            <a href='/TGZ/4846/'>TGZ Summer 25 5</a>
+                        </td>
+                        <td>
+                            <a href="/profile/sbird">sbird</a>
+                            ,
+                            <a href="/profile/derekmd33">derekmd33</a>
+                            ,
+                            <a href="/profile/czlam">czlam</a>
+                            ,
+                            <a href="/profile/donk">donk</a>
+                        </td>
+                        <td>
+                            <a href="/profile/derekmd33">derekmd33</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4847/';">
+                        <td>
+                            <a href='/TGZ/4847/'>TGZ Summer 25 6</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            ,
+                            <a href="/profile/Gauss">Gauss</a>
+                            ,
+                            <a href="/profile/sbird">sbird</a>
+                            ,
+                            <a href="/profile/mintroll">mintroll</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Melk0r">Melk0r</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4848/';">
+                        <td>
+                            <a href='/TGZ/4848/'>TGZ Summer 25 7</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            ,
+                            <a href="/profile/twojays">twojays</a>
+                            ,
+                            <a href="/profile/donk">donk</a>
+                            ,
+                            <a href="/profile/chaosmagician">chaosmagician</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Melk0r">Melk0r</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4849/';">
+                        <td>
+                            <a href='/TGZ/4849/'>TGZ Summer 25 8</a>
+                        </td>
+                        <td>
+                            <a href="/profile/sbird">sbird</a>
+                            ,
+                            <a href="/profile/jantref">jantref</a>
+                            ,
+                            <a href="/profile/Billtje">Billtje</a>
+                            ,
+                            <a href="/profile/chaosmagician">chaosmagician</a>
+                        </td>
+                        <td>
+                            <a href="/profile/jantref">jantref</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4850/';">
+                        <td>
+                            <a href='/TGZ/4850/'>TGZ Summer 25 9</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            ,
+                            <a href="/profile/derekmd33">derekmd33</a>
+                            ,
+                            <a href="/profile/jantref">jantref</a>
+                            ,
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Melk0r">Melk0r</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4851/';">
+                        <td>
+                            <a href='/TGZ/4851/'>TGZ Summer 25 10</a>
+                        </td>
+                        <td>
+                            <a href="/profile/MadRex">MadRex</a>
+                            ,
+                            <a href="/profile/Gauss">Gauss</a>
+                            ,
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                            ,
+                            <a href="/profile/chaosmagician">chaosmagician</a>
+                        </td>
+                        <td>
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4852/';">
+                        <td>
+                            <a href='/TGZ/4852/'>TGZ Summer 25 11</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Avatar73">Avatar73</a>
+                            ,
+                            <a href="/profile/MadRex">MadRex</a>
+                            ,
+                            <a href="/profile/jantref">jantref</a>
+                            ,
+                            <a href="/profile/donk">donk</a>
+                        </td>
+                        <td>
+                            <a href="/profile/MadRex">MadRex</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4853/';">
+                        <td>
+                            <a href='/TGZ/4853/'>TGZ Summer 25 12</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Avatar73">Avatar73</a>
+                            ,
+                            <a href="/profile/sbird">sbird</a>
+                            ,
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                            ,
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                        <td>
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4854/';">
+                        <td>
+                            <a href='/TGZ/4854/'>TGZ Summer 25 13</a>
+                        </td>
+                        <td>
+                            <a href="/profile/MadRex">MadRex</a>
+                            ,
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            ,
+                            <a href="/profile/olawaco">olawaco</a>
+                            ,
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Melk0r">Melk0r</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4855/';">
+                        <td>
+                            <a href='/TGZ/4855/'>TGZ Summer 25 14</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Avatar73">Avatar73</a>
+                            ,
+                            <a href="/profile/novasuecia">novasuecia</a>
+                            ,
+                            <a href="/profile/olawaco">olawaco</a>
+                            ,
+                            <a href="/profile/chaosmagician">chaosmagician</a>
+                        </td>
+                        <td>
+                            <a href="/profile/chaosmagician">chaosmagician</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4856/';">
+                        <td>
+                            <a href='/TGZ/4856/'>TGZ Summer 25 15</a>
+                        </td>
+                        <td>
+                            <a href="/profile/novasuecia">novasuecia</a>
+                            ,
+                            <a href="/profile/jantref">jantref</a>
+                            ,
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                            ,
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                        </td>
+                        <td>
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4857/';">
+                        <td>
+                            <a href='/TGZ/4857/'>TGZ Summer 25 16</a>
+                        </td>
+                        <td>
+                            <a href="/profile/olawaco">olawaco</a>
+                            ,
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            ,
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                            ,
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                        <td>
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4858/';">
+                        <td>
+                            <a href='/TGZ/4858/'>TGZ Summer 25 17</a>
+                        </td>
+                        <td>
+                            <a href="/profile/durendal">durendal</a>
+                            ,
+                            <a href="/profile/MadRex">MadRex</a>
+                            ,
+                            <a href="/profile/novasuecia">novasuecia</a>
+                            ,
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                        </td>
+                        <td>
+                            <a href="/profile/MadRex">MadRex</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4859/';">
+                        <td>
+                            <a href='/TGZ/4859/'>TGZ Summer 25 18</a>
+                        </td>
+                        <td>
+                            <a href="/profile/durendal">durendal</a>
+                            ,
+                            <a href="/profile/Avatar73">Avatar73</a>
+                            ,
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                            ,
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Avatar73">Avatar73</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4860/';">
+                        <td>
+                            <a href='/TGZ/4860/'>TGZ Summer 25 19</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Burmer">Burmer</a>
+                            ,
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                            ,
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            ,
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                        </td>
+                        <td>
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4861/';">
+                        <td>
+                            <a href='/TGZ/4861/'>TGZ Summer 25 20</a>
+                        </td>
+                        <td>
+                            <a href="/profile/durendal">durendal</a>
+                            ,
+                            <a href="/profile/Burmer">Burmer</a>
+                            ,
+                            <a href="/profile/fairflixt">fairflixt</a>
+                            ,
+                            <a href="/profile/olawaco">olawaco</a>
+                        </td>
+                        <td>
+                            <a href="/profile/durendal">durendal</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4862/';">
+                        <td>
+                            <a href='/TGZ/4862/'>TGZ Summer 25 21</a>
+                        </td>
+                        <td>
+                            <a href="/profile/secondofthenew">secondofthenew</a>
+                            ,
+                            <a href="/profile/novasuecia">novasuecia</a>
+                            ,
+                            <a href="/profile/fairflixt">fairflixt</a>
+                            ,
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                        </td>
+                        <td>
+                            <a href="/profile/novasuecia">novasuecia</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4863/';">
+                        <td>
+                            <a href='/TGZ/4863/'>TGZ Summer 25 22</a>
+                        </td>
+                        <td>
+                            <a href="/profile/secondofthenew">secondofthenew</a>
+                            ,
+                            <a href="/profile/Burmer">Burmer</a>
+                            ,
+                            <a href="/profile/siddhig">siddhig</a>
+                            ,
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                        </td>
+                        <td>
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4864/';">
+                        <td>
+                            <a href='/TGZ/4864/'>TGZ Summer 25 23</a>
+                        </td>
+                        <td>
+                            <a href="/profile/fairflixt">fairflixt</a>
+                            ,
+                            <a href="/profile/siddhig">siddhig</a>
+                            ,
+                            <a href="/profile/d_choo">d_choo</a>
+                            ,
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                        </td>
+                        <td>
+                            <a href="/profile/d_choo">d_choo</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4865/';">
+                        <td>
+                            <a href='/TGZ/4865/'>TGZ Summer 25 24</a>
+                        </td>
+                        <td>
+                            <a href="/profile/durendal">durendal</a>
+                            ,
+                            <a href="/profile/secondofthenew">secondofthenew</a>
+                            ,
+                            <a href="/profile/d_choo">d_choo</a>
+                            ,
+                            <a href="/profile/zaqijo">zaqijo</a>
+                        </td>
+                        <td>
+                            <a href="/profile/d_choo">d_choo</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4866/';">
+                        <td>
+                            <a href='/TGZ/4866/'>TGZ Summer 25 25</a>
+                        </td>
+                        <td>
+                            <a href="/profile/DodgerB">DodgerB</a>
+                            ,
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                            ,
+                            <a href="/profile/siddhig">siddhig</a>
+                            ,
+                            <a href="/profile/zaqijo">zaqijo</a>
+                        </td>
+                        <td>
+                            <a href="/profile/siddhig">siddhig</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4867/';">
+                        <td>
+                            <a href='/TGZ/4867/'>TGZ Summer 25 26</a>
+                        </td>
+                        <td>
+                            <a href="/profile/DodgerB">DodgerB</a>
+                            ,
+                            <a href="/profile/Burmer">Burmer</a>
+                            ,
+                            <a href="/profile/d_choo">d_choo</a>
+                            ,
+                            <a href="/profile/Venser">Venser</a>
+                        </td>
+                        <td>
+                            <a href="/profile/DodgerB">DodgerB</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4868/';">
+                        <td>
+                            <a href='/TGZ/4868/'>TGZ Summer 25 27</a>
+                        </td>
+                        <td>
+                            <a href="/profile/vraid">vraid</a>
+                            ,
+                            <a href="/profile/fairflixt">fairflixt</a>
+                            ,
+                            <a href="/profile/Venser">Venser</a>
+                            ,
+                            <a href="/profile/zaqijo">zaqijo</a>
+                        </td>
+                        <td>
+                            <a href="/profile/vraid">vraid</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4869/';">
+                        <td>
+                            <a href='/TGZ/4869/'>TGZ Summer 25 28</a>
+                        </td>
+                        <td>
+                            <a href="/profile/DodgerB">DodgerB</a>
+                            ,
+                            <a href="/profile/secondofthenew">secondofthenew</a>
+                            ,
+                            <a href="/profile/vraid">vraid</a>
+                            ,
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                        <td>
+                            <a href="/profile/vraid">vraid</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4870/';">
+                        <td>
+                            <a href='/TGZ/4870/'>TGZ Summer 25 29</a>
+                        </td>
+                        <td>
+                            <a href="/profile/siddhig">siddhig</a>
+                            ,
+                            <a href="/profile/Venser">Venser</a>
+                            ,
+                            <a href="/profile/nWooch">nWooch</a>
+                            ,
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                        <td>
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4871/';">
+                        <td>
+                            <a href='/TGZ/4871/'>TGZ Summer 25 30</a>
+                        </td>
+                        <td>
+                            <a href="/profile/vraid">vraid</a>
+                            ,
+                            <a href="/profile/czlam">czlam</a>
+                            ,
+                            <a href="/profile/d_choo">d_choo</a>
+                            ,
+                            <a href="/profile/nWooch">nWooch</a>
+                        </td>
+                        <td>
+                            <a href="/profile/czlam">czlam</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4872/';">
+                        <td>
+                            <a href='/TGZ/4872/'>TGZ Summer 25 31</a>
+                        </td>
+                        <td>
+                            <a href="/profile/czlam">czlam</a>
+                            ,
+                            <a href="/profile/mintroll">mintroll</a>
+                            ,
+                            <a href="/profile/zaqijo">zaqijo</a>
+                            ,
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                        <td>
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4873/';">
+                        <td>
+                            <a href='/TGZ/4873/'>TGZ Summer 25 32</a>
+                        </td>
+                        <td>
+                            <a href="/profile/DodgerB">DodgerB</a>
+                            ,
+                            <a href="/profile/twojays">twojays</a>
+                            ,
+                            <a href="/profile/mintroll">mintroll</a>
+                            ,
+                            <a href="/profile/nWooch">nWooch</a>
+                        </td>
+                        <td>
+                            <a href="/profile/nWooch">nWooch</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4874/';">
+                        <td>
+                            <a href='/TGZ/4874/'>TGZ Summer 25 33</a>
+                        </td>
+                        <td>
+                            <a href="/profile/durendal">durendal</a>
+                            ,
+                            <a href="/profile/derekmd33">derekmd33</a>
+                            ,
+                            <a href="/profile/rick_s_chris">rick_s_chris</a>
+                            ,
+                            <a href="/profile/Billtje">Billtje</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Billtje">Billtje</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4875/';">
+                        <td>
+                            <a href='/TGZ/4875/'>TGZ Summer 25 34</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Burmer">Burmer</a>
+                            ,
+                            <a href="/profile/Gauss">Gauss</a>
+                            ,
+                            <a href="/profile/fairflixt">fairflixt</a>
+                            ,
+                            <a href="/profile/donk">donk</a>
+                        </td>
+                        <td>
+                            <a href="/profile/fairflixt">fairflixt</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4876/';">
+                        <td>
+                            <a href='/TGZ/4876/'>TGZ Summer 25 35</a>
+                        </td>
+                        <td>
+                            <a href="/profile/secondofthenew">secondofthenew</a>
+                            ,
+                            <a href="/profile/Melk0r">Melk0r</a>
+                            ,
+                            <a href="/profile/sbird">sbird</a>
+                            ,
+                            <a href="/profile/siddhig">siddhig</a>
+                        </td>
+                        <td>
+                            <a href="/profile/siddhig">siddhig</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4877/';">
+                        <td>
+                            <a href='/TGZ/4877/'>TGZ Summer 25 36</a>
+                        </td>
+                        <td>
+                            <a href="/profile/jantref">jantref</a>
+                            ,
+                            <a href="/profile/d_choo">d_choo</a>
+                            ,
+                            <a href="/profile/zaqijo">zaqijo</a>
+                            ,
+                            <a href="/profile/chaosmagician">chaosmagician</a>
+                        </td>
+                        <td>
+                            <a href="/profile/chaosmagician">chaosmagician</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4878/';">
+                        <td>
+                            <a href='/TGZ/4878/'>TGZ Summer 25 37</a>
+                        </td>
+                        <td>
+                            <a href="/profile/DodgerB">DodgerB</a>
+                            ,
+                            <a href="/profile/MadRex">MadRex</a>
+                            ,
+                            <a href="/profile/Venser">Venser</a>
+                            ,
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                        <td>
+                            <a href="/profile/bridgefour611">bridgefour611</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4879/';">
+                        <td>
+                            <a href='/TGZ/4879/'>TGZ Summer 25 38</a>
+                        </td>
+                        <td>
+                            <a href="/profile/Avatar73">Avatar73</a>
+                            ,
+                            <a href="/profile/vraid">vraid</a>
+                            ,
+                            <a href="/profile/xaviludicus">xaviludicus</a>
+                            ,
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                        <td>
+                            <a href="/profile/TAda">TAda</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4880/';">
+                        <td>
+                            <a href='/TGZ/4880/'>TGZ Summer 25 39</a>
+                        </td>
+                        <td>
+                            <a href="/profile/novasuecia">novasuecia</a>
+                            ,
+                            <a href="/profile/olawaco">olawaco</a>
+                            ,
+                            <a href="/profile/czlam">czlam</a>
+                            ,
+                            <a href="/profile/nWooch">nWooch</a>
+                        </td>
+                        <td>
+                            <a href="/profile/czlam">czlam</a>
+                        </td>
+                    </tr>
+                    <tr onclick="window.location.href='/TGZ/4881/';">
+                        <td>
+                            <a href='/TGZ/4881/'>TGZ Summer 25 40</a>
+                        </td>
+                        <td>
+                            <a href="/profile/twojays">twojays</a>
+                            ,
+                            <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            ,
+                            <a href="/profile/MojosMonkey">MojosMonkey</a>
+                            ,
+                            <a href="/profile/mintroll">mintroll</a>
+                        </td>
+                        <td>
+                            <a href="/profile/twojays">twojays</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- END FIXED ROUND 1-->
+        {% include 'Lobby/common/homeButton.html' %}
+    </div>
+
+{% endblock %}

@@ -1,0 +1,771 @@
+@media only screen and (max-width: 900px) {
+	#setupOptions,
+	#basicOptions,
+	#ketchupOptions,
+	#mapRouteOptions,
+	#foodOptions,
+	#marketingOptions,
+	#employeeOptions,
+	#expertOptions,
+	#CEoptions {
+		/*width: 320px;*/
+		width: 89%;
+		height: fit-content;
+	}
+}
+
+/*** NEW GAMES PAGE ***/
+
+.newGameLink {
+	font-size: 25px;
+}
+
+#createNewFCM,
+#createNewHC,
+#createNewBus,
+#createNewTGZ,
+#createNewAQY,
+#createNewCNS,
+#createNewIND,
+#createNewKFW {
+	padding: 15px;
+	color: black;
+	text-decoration: none;
+	width: 250px;
+	margin: auto;
+	margin-bottom: 15px;
+	/* margin-top: 15px;*/
+	text-align: center;
+	display: inline-block;
+	height: fit-content;
+}
+
+#createNewWEB {
+	padding: 15px;
+	color: black;
+	text-decoration: none;
+	width: 150px;
+	margin: auto;
+	margin-bottom: 15px;
+	/* margin-top: 15px;*/
+	text-align: center;
+	display: inline-block;
+	height: fit-content;
+}
+
+#createNewFCM img,
+#createNewHC img,
+#createNewAQY img,
+#createNewTGZ img {
+	height: 200px;
+}
+#createNewCNS img {
+	height: 200px;
+	width: 160px;
+}
+#createNewWEB img {
+	height: 200px;
+	widtH: 136px;
+}
+
+#createNewKFW img,
+#createNewBus img {
+	height: 180px;
+}
+#createNewIND img {
+	width: 256px;
+	height: 180px;
+}
+
+#createNewFCM:hover,
+#createNewHC:hover,
+#createNewBus:hover,
+#createNewTGZ:hover,
+#createNewAQY:hover,
+#createNewCNS:hover, 
+#createNewIND:hover,
+#createNewKFW:hover,
+#createNewWEB:hover {
+	background-color: lightblue;
+	cursor: pointer;
+}
+
+#createNewFCMmap,
+#createNewTGZmap,
+#createNewAQYmap {
+	padding: 15px;
+	color: black;
+	text-decoration: none;
+	width: 250px;
+	margin: auto;
+	margin-bottom: 15px;
+	/*  margin-top: 15px;*/
+	text-align: center;
+	display: inline-block;
+	cursor: pointer;
+}
+
+#createNewTGZmap img,
+#createNewFCMmap img,
+#createNewAQYmap img {
+	height: 200px;
+}
+
+#createNewTGZmap:hover,
+#createNewFCMmap:hover,
+#createNewAQYmap:hover {
+	background-color: lightblue;
+}
+/*** END NEW GAMES PAGE ***/
+
+/** COMMON NEW GAMES **/
+
+.actionsLineButton {
+	margin: 10px;
+	width: fit-content;
+	border: 2px solid green;
+	border-radius: 5px;
+	font-weight: bolder;
+	padding: 5px;
+}
+
+.actionsLineButton:hover {
+	background-color: lightgrey;
+}
+
+.actionsLineButton:active {
+	background-color: darkgrey;
+}
+
+.topOfNewGameOptionsDiv {
+	margin: auto;
+	width: fit-content;
+	justify-content: center;
+	display: flex;
+	flex-wrap: wrap;
+}
+.bottomOfNewGameOptionsDiv {
+	margin: auto;
+	width: fit-content;
+	justify-content: center;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.notEnoughExperience {
+	background-color: yellow;
+	color: darkred;
+}
+
+.splotterconSponsorDiv {
+	margin-top: 5px;
+	font-weight: bolder;
+	font-size: 40px;
+	text-shadow:
+		-1px -1px 0 #fff,
+		1px -1px 0 #fff,
+		-1px 1px 0 #fff,
+		1px 1px 0 #fff;
+}
+
+#allOptions {
+	display: flex;
+	flex-flow: column wrap;
+}
+
+.topOfNewGameSpan {
+	font-size: 30px;
+	font-weight: bolder;
+}
+.optionHelp {
+	font-style: italic;
+	font-size: 0.9em;
+	/* 15px */
+}
+.optionsHeader {
+	font-size: 1.35em;
+	/*20px*/
+	font-weight: bold;
+}
+
+.myCheckbox {
+	vertical-align: middle;
+}
+
+.myCheckbox + label,
+.specVRlabel {
+	font-size: 20px;
+	vertical-align: middle;
+	/* 1.25em */
+}
+
+.myCheckbox:checked + label {
+	color: blue;
+}
+
+.myCheckbox:hover + label {
+	color: blue;
+}
+
+.inlineHelp {
+	font-style: italic;
+	font-size: 0.9em;
+}
+
+
+
+.checkboxLabel {
+	vertical-align: middle;
+}
+
+/* autocomplete */
+.autocomplete {
+	position: relative;
+	/*display: inline-block;*/
+}
+
+.autocomplete-items {
+	position: absolute;
+	border: 1px solid #d4d4d4;
+	border-bottom: none;
+	border-top: none;
+	z-index: 99;
+	/*position the autocomplete items to be the same width as the container:*/
+	top: 100%;
+	left: 0;
+	right: 0;
+}
+
+.autocomplete-items div {
+	padding: 10px;
+	cursor: pointer;
+	background-color: #fff;
+	border-bottom: 1px solid #d4d4d4;
+}
+
+.autocomplete-items div:hover {
+	background-color: #e9e9e9;
+}
+
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+	background-color: DodgerBlue !important;
+	color: #ffffff;
+}
+
+/* end autocomplete */
+
+/* NAME FIX*/
+.singleChoiceDiv {
+	display: block;
+}
+.optionSelection {
+	display: inline;
+}	
+	.choiceLabel {
+	vertical-align: middle;
+}
+
+
+.singleChoiceWithTextDiv {
+	display: flex;
+	/*align-items: center;*/
+}
+
+.optionSelectionText {
+	flex: 1; /* This will make the input take up all remaining space */
+}
+
+/* For styling purposes - can be adjusted as needed */
+.choiceLabelText {
+	margin-right: 10px;
+}
+
+.textInput {
+	width: 100%;
+	box-sizing: border-box; /* Include padding and border in the width */
+}
+
+#blitzWarningSpan {
+	display: none;
+	color: red;
+}
+.center-container {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+}
+
+.optionTitleSpan {
+	font-size: 20px;
+}
+
+/** END COMMON NEW GAMES **/
+
+/** END NEW FCM GAME PAGE **/
+
+#FCMallOptions {
+	display: flex;
+	flex-flow: column wrap;
+}
+
+.optionsGroupTop {
+	padding: 10px;
+	margin: 10px;
+	text-align: left;
+	line-height: 30px;
+	float: left;
+	width: 22.38em;
+	height: 370px;
+	min-height: auto;
+	/* height: 340px;*/
+}
+
+.optionsGroupModules {
+	padding: 10px;
+	margin: 10px;
+	text-align: left;
+	line-height: 30px;
+	float: left;
+	width: 22.38em;
+	height: fit-content;
+	min-height: 399px;
+}
+
+.FCMsingleChoiceDiv {
+	display: block;
+}
+
+
+
+#setupOptions {
+	/*width: 470px;*/
+	/*height: 340px;*/
+	border: 10px solid black;
+	background-color: white;
+	height: fit-content;
+	min-height: 370px;
+	height: auto;
+}
+
+#basicOptions {
+	/*height: 340px;*/
+	border: 10px solid black;
+	background-color: #faf2d9;
+	min-height: 370px;
+	height: auto;
+}
+
+#gameOptions {
+	/*height: 340px;*/
+	border: 10px solid black;
+	background-color: #faf2d9;
+	min-height: 399px;
+}
+#expertOptions {
+	/*height: 340px;*/
+	border: 10px solid black;
+	background-color: lightsalmon;
+	min-height: 370px;
+	height: auto;
+}
+
+#ketchupOptions {
+	border: 10px solid black;
+	background-color: lightgreen;
+	/*height: 340px;*/
+}
+
+#mapRouteOptions {
+	border: 10px solid black;
+	background-color: lightgray;
+	/*height: 340px;*/
+}
+
+#foodOptions {
+	/*height: 340px;*/
+	border: 10px solid black;
+	background-color: #8fa960;
+}
+
+#marketingOptions {
+	/*height: 340px;*/
+	border: 10px solid black;
+	background-color: #87c2c8;
+}
+
+#CEoptions {
+	/*height: 340px;*/
+	border: 10px solid black;
+	background-color: white;
+}
+
+#employeeOptions {
+	/*height: 340px;*/
+	border: 10px solid black;
+	background-color: white;
+}
+
+#scenarioOptions {
+	width: 90%;
+	height: fit-content;
+	border: 10px solid black;
+	background-color: #faf2d9;
+}
+
+.purpleLabel {
+	background-color: #b492c4;
+	color: white;
+	padding: 5px;
+}
+
+.greenLabel {
+    background-color: #8FA960;
+    color: black;
+    padding: 5px;
+}
+
+.orangeLabel {
+	background-color: #E98D2A;
+	color: black;
+	padding: 5px;
+}
+
+.blueLabel {
+	background-color: #87c2c8;
+	color: black;
+	padding: 5px;
+}
+
+#nightShiftLabel {
+	background-color: #241e20;
+	color: white;
+	padding: 5px;
+}
+
+.scenarioSelectTab {
+	width: 90%;
+}
+
+.tab .gameCreationTab {
+	width: 49.6%;
+	padding: 14px 0px;
+}
+
+/** END NEW FCM GAME PAGE **/
+
+/*** NEW TGZ GAME PAGE ***/
+.expertSummarySpan {
+	font-size: 20px;
+}
+.valueContainer {
+	display: inline-block;
+}
+
+.valueField {
+	width: 34px;
+}
+
+.narrowHR {
+	padding: 0px;
+	margin-bottom: 2px;
+}
+
+.expertTGZoptions {
+	max-height: 370px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+/**** END NEW TGZ GAME PAGE ***/
+
+/** NEW CNS GAME PAGE **/
+#tableJunkRadio1,
+#tableSizeRadio1 {
+	margin-left: 30px;
+}
+/*** END NEW CNS GAME PAGE ***/
+
+/** FCM Map Editor Page **/
+#playerNumberArea {
+	height: 50px;
+}
+
+#topButtons {
+	height: auto;
+	padding: 10px;
+}
+
+#availableMapTiles {
+	min-height: 100px;
+	padding: 10px;
+}
+
+#availableMapTiles img {
+	padding: 10px;
+}
+
+#boardArea {
+	margin: 0 auto;
+	padding: 10px;
+	height: 100%;
+	position: relative;
+	display: flex;
+}
+
+#board {
+	display: flex;
+	background-color: lightblue;
+	min-height: 400px;
+	position: relative;
+	margin: 0 auto;
+	height: 100%;
+}
+
+.boardTile {
+	border: 3px solid transparent;
+}
+
+.boardTile.over {
+	border: 3px solid lightgreen;
+	/*border: 20px solid green;
+    width: 200px;
+    background-color: #04AA6D;*/
+}
+
+.r1 {
+	-moz-transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+	-o-transform: rotate(90deg);
+	-ms-transform: rotate(90deg);
+	transform: rotate(90deg);
+}
+
+.r2 {
+	-moz-transform: rotate(180deg);
+	-webkit-transform: rotate(180deg);
+	-o-transform: rotate(180deg);
+	-ms-transform: rotate(180deg);
+	transform: rotate(180deg);
+}
+
+.r3 {
+	-moz-transform: rotate(270deg);
+	-webkit-transform: rotate(270deg);
+	-o-transform: rotate(270deg);
+	-ms-transform: rotate(270deg);
+	transform: rotate(270deg);
+}
+
+/** BGH **/
+.BGHdiv {
+	border: 10px solid black;
+	width: fit-content;
+	margin: 0px auto;
+	padding: 5px;
+	vertical-align: top;
+	padding-top: 0px;
+	display: inline-block;
+	min-height: 148px;
+	height: fit-content;
+}
+
+.BGHoptionsDiv {
+	text-align: left;
+	display: inline-block;
+}
+
+.BGHoptionTitle {
+	font-size: 20px;
+	margin: auto;
+}
+
+.BGHoptionMainTitle {
+	font-size: 25px;
+}
+
+.BGH_drinkSpot {
+	width: 30px;
+	height: 30px;
+	vertical-align: middle;
+	margin-right: 10px;
+	/*margin-bottom: 5px;*/
+}
+
+.drinkSpotsSpan {
+	margin-right: 10px;
+}
+
+.BGHstatsDiv {
+	line-height: 30px;
+
+	min-width: fit-content;
+	display: inline-block;
+	text-align: left;
+	vertical-align: top;
+	font-size: 20px;
+}
+
+#BGHBalanceDiv {
+	border: 10px solid black;
+	min-width: fit-content;
+	display: inline-block;
+	vertical-align: top;
+	font-size: 20px;
+}
+
+#BGHBalanceDiv ul {
+	text-align: left;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.BGHrow {
+	min-height: fit-content;
+}
+
+#BGHnameSpan,
+#BGHBalanceDiv,
+#BGHstatsContainer {
+	display: none;
+}
+
+#BGHnameSpan {
+	font-weight: bolder;
+	font-size: 30px;
+}
+
+#BGHerrorSpan {
+	color: darkred;
+	background-color: yellow;
+	font-weight: bolder;
+	font-size: 20px;
+}
+
+#BGHspinnerDiv,
+#BGHerrorDiv {
+	display: none;
+}
+
+#BGHspinnerDiv {
+	height: 30px;
+	width: 30px;
+	vertical-align: middle;
+	margin-left: 10px;
+}
+
+#BGHspinnerImg {
+	width: 100%;
+	height: 100%;
+}
+/** END BGH **/
+
+/*** END FCM Map Editor Page ***/
+
+/*** AQY MAP EDITOR PAGE ***/
+.AQYavailableTileFieldset {
+	width: fit-content;
+	height: fit-content;
+	border: 10px solid black;
+	display: inline-block;
+	margin: 5px;
+}
+
+#mirrorCheckboxDiv {
+	width: fit-content;
+	height: fit-content;
+	margin: auto;
+	padding: 10px;
+	border: 2px solid black;
+}
+
+#invalidMapCautionSpanAQY {
+	font-weight: bolder;
+	color: darkred;
+	background-color: yellow;
+	font-size: 20px;
+	display: none;
+}
+
+#patternsSVG {
+	height: 0px;
+	margin: 0px;
+	padding: 0px;
+	position: absolute;
+}
+
+.availableTileAQY {
+	width: 150px;
+	height: 167px;
+	cursor: move;
+}
+
+.availableTileMoving {
+	width: 100px;
+	cursor: move;
+	opacity: 0.4;
+	position: absolute;
+	z-index: 1000;
+}
+
+#mapSVG {
+	margin: 0 auto;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+}
+
+#boardAreaAQY {
+	margin: 0 auto;
+	padding: 10px;
+	height: 100%;
+	position: relative;
+	display: flex;
+}
+#boardAQYcanvas {
+	position: relative;
+	padding: 0px;
+	width: fit-content;
+	display: inline-block;
+	margin: auto;
+}
+
+.boardHex {
+	stroke: black;
+	stroke-width: 15px;
+	pointer-events: auto;
+	transform-box: fill-box;
+	transform-origin: center center 0px;
+}
+
+.boardHexSelectable:hover {
+	stroke: yellow;
+}
+
+.boardHex.over {
+	stroke: lightgreen;
+}
+
+.yellowBoardHexOutline {
+	stroke: none;
+	stroke-width: 30px;
+	fill: none;
+}
+
+.yellowBoardHexOutlineHover {
+	stroke: yellow;
+}
+
+.yellowBoardHexOutlineHoverEmpty {
+	stroke: lightgreen;
+}
+
+/*** MT STUFF */
+#invitedPlayersWarningSpanMT {
+	font-weight: bolder;
+	background-color: yellow;
+	color: darkred;
+}
+
+
+/*** END MT STUFF ***/

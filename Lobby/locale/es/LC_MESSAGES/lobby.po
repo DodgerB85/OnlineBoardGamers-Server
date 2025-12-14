@@ -1,0 +1,4957 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-10 16:20+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\forms.py:31 .\forms.py:78 .\templates\Lobby\login.html:25
+msgid "Password"
+msgstr ""
+
+#: .\forms.py:37 .\forms.py:84
+msgid "Confirm Password"
+msgstr ""
+
+#: .\forms.py:45
+msgid "Email Address"
+msgstr ""
+
+#: .\forms.py:52
+msgid "Old Password"
+msgstr ""
+
+#: .\forms.py:53
+msgid "New Password"
+msgstr ""
+
+#: .\forms.py:54
+msgid "Confirm New Password"
+msgstr ""
+
+#: .\forms.py:65
+msgid "Username - This will be your in-game Name"
+msgstr ""
+
+#: .\forms.py:70
+msgid "Email Address - Required for Account Activation"
+msgstr ""
+
+#: .\sharedFunctions\sharedFunctions.py:65
+msgid "Your game has been created and is waiting for players<br/>Invite Link: "
+msgstr ""
+
+#: .\sharedFunctions\sharedFunctions.py:67
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:8
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:12
+#: .\templates\Lobby\gameDisplay\waitingGameRow.html:41
+msgid "Copy Link"
+msgstr ""
+
+#: .\sharedFunctions\sharedFunctions.py:448 .\sharedFunctions\sharedRefs.py:102
+msgid "Round"
+msgstr ""
+
+#: .\sharedFunctions\sharedFunctions.py:453
+msgid "Final Round (KO)"
+msgstr ""
+
+#: .\sharedFunctions\sharedFunctions.py:455
+msgid "Final Round"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:34 .\templates\Lobby\index.html:31
+#: .\templates\Lobby\lobby_icons.html:28 .\templates\Lobby\newGames.html:13
+msgid "Food Chain Magnate"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:35
+msgid "Your Food Chain Magnate game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:36
+msgid "It is your turn in FCM"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:37
+msgid "Click here to play FCM"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:38
+msgid "FCM Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:39
+msgid "Food Chain Magnate - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:40
+msgid "Food Chain Magnate - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:41
+msgid "Food Chain Magnate - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:42
+msgid "Your Food Chain Magnate game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:43
+msgid "A player has declined your invitation for FCM"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:44
+msgid "Food Chain Magnate - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:45
+msgid "Food Chain Magnate - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:46
+msgid "Food Chain Magnate - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:50 .\templates\Lobby\about.html:22
+#: .\templates\Lobby\index.html:62 .\templates\Lobby\newGames.html:20
+#: .\templates\Lobby\tournamentsHelp.html:48
+msgid "Horseless Carriage"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:51
+msgid "Your Horseless Carriage game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:52
+msgid "It is your turn at Horseless Carriage"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:53
+msgid "Click here to play Horseless Carriage"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:54
+msgid "HC Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:55
+msgid "Horseless Carriage - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:56
+msgid "Horseless Carriage - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:57
+msgid "Horseless Carriage - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:58
+msgid "Your Horseless Carriage game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:59
+msgid "A player has declined your invitation for Horseless Carriage"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:60
+msgid "Horseless Carriage - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:61
+msgid "Horseless Carriage - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:62
+msgid "Horseless Carriage - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:66 .\templates\Lobby\about.html:23
+#: .\templates\Lobby\index.html:180 .\templates\Lobby\newGames.html:47
+#: .\templates\Lobby\tournamentsHelp.html:52
+msgid "Bus"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:67
+msgid "Your Bus game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:68
+msgid "It is your turn at Bus"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:69
+msgid "Click here to play Bus"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:70
+msgid "Bus Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:71
+msgid "Bus - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:72
+msgid "Bus - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:73
+msgid "Bus - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:74
+msgid "Your Bus game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:75
+msgid "A player has declined your invitation for Bus"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:76
+msgid "Bus - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:77
+msgid "Bus - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:78
+msgid "Bus - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:82 .\templates\Lobby\about.html:24
+#: .\templates\Lobby\index.html:91 .\templates\Lobby\lobby_icons.html:219
+#: .\templates\Lobby\newGames.html:26
+msgid "The Great Zimbabwe"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:83
+msgid "Your The Great Zimbabwe game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:84
+msgid "It is your turn in The Great Zimbabwe"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:85
+msgid "Click here to play The Great Zimbabwe"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:86
+msgid "TGZ Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:87
+msgid "The Great Zimbabwe - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:88
+msgid "The Great Zimbabwe - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:89
+msgid "The Great Zimbabwe - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:90
+msgid "Your Great Zimbabwe game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:91
+msgid "A player has declined your invitation for TGZ"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:92
+msgid "The Great Zimbabwe - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:93
+msgid "The Great Zimbabwe - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:94
+msgid "The Great Zimbabwe - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:98 .\templates\Lobby\about.html:25
+#: .\templates\Lobby\index.html:211 .\templates\Lobby\lobby_icons.html:254
+#: .\templates\Lobby\newGames.html:54
+msgid "Cannes"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:99
+msgid "Your Cannes game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:100
+msgid "It is your turn in Cannes"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:101
+msgid "Click here to play Cannes"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:102
+msgid "CNS Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:103
+msgid "Cannes - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:104
+msgid "Cannes - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:105
+msgid "Cannes - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:106
+msgid "Your Cannes game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:107
+msgid "A player has declined your invitation for Cannes"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:108
+msgid "Cannes - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:109
+msgid "Cannes - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:110
+msgid "Cannes - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:114 .\templates\Lobby\about.html:26
+#: .\templates\Lobby\index.html:155 .\templates\Lobby\newGames.html:40
+#: .\templates\Lobby\tournamentsHelp.html:40
+msgid "Antiquity"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:115
+msgid "Your Antiquity game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:116
+msgid "It is your turn in Antiquity"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:117
+msgid "Click here to play Antiquity"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:118
+msgid "AQY Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:119
+msgid "Antiquity - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:120
+msgid "Antiquity - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:121
+msgid "Antiquity - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:122
+msgid "Your Antiquity game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:123
+msgid "A player has declined your invitation for Antiquity"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:124
+msgid "Antiquity - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:125
+msgid "Antiquity - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:126
+msgid "Antiquity - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:130 .\templates\Lobby\about.html:27
+#: .\templates\Lobby\index.html:121 .\templates\Lobby\lobby_icons.html:313
+#: .\templates\Lobby\newGames.html:33 .\templates\Lobby\tournamentsHelp.html:44
+msgid "Indonesia"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:131
+msgid "Your Indonesia game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:132
+msgid "It is your turn in Indonesia"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:133
+msgid "Click here to play Indonesia"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:134
+msgid "IND Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:135
+msgid "Indonesia - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:136
+msgid "Indonesia - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:137
+msgid "Indonesia - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:138
+msgid "Your Indonesia game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:139
+msgid "A player has declined your invitation for Indonesia"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:140
+msgid "Indonesia - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:141
+msgid "Indonesia - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:142
+msgid "Indonesia - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:146
+msgid "Keyflower"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:147
+msgid "Your Keyflower game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:148
+msgid "It is your turn in Keyflower"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:149
+msgid "Click here to play Keyflower"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:150
+msgid "Keyflower Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:151
+msgid "Keyflower - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:152
+msgid "Keyflower - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:153
+msgid "Keyflower - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:154
+msgid "Your Keyflower game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:155
+msgid "A player has declined your invitation for Keyflower"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:156
+msgid "Keyflower - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:157
+msgid "Keyflower - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:158
+msgid "Keyflower - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:162
+msgid "Roads & Boats"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:163
+msgid "Your Roads & Boats game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:164
+msgid "It is your turn in Roads & Boats"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:165
+msgid "Click here to play Roads & Boats"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:166
+msgid "RNB Bug Report"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:167
+msgid "Roads & Boats - Invitation Received"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:168
+msgid "Roads & Boats - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:169
+msgid "Roads & Boats - Tournament Won!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:170
+msgid "Your Roads & Boats game has started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:171
+msgid "A player has declined your invitation for R&B"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:172
+msgid "Roads & Boats - Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:173
+msgid "Roads & Boats - Turn Expired"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:174
+msgid "Roads & Boats - Tournament Open for Signup"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:314
+#: .\sharedFunctions\sharedNotifications.py:389
+msgid "Congratulations!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:335
+#: .\sharedFunctions\sharedNotifications.py:409
+#, python-format
+msgid ""
+"%(box_name)s Game Finished!\n"
+" In %(gameName)s you came: %(result)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:336
+#: .\sharedFunctions\sharedNotifications.py:410
+msgid "Click here to view the game"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:446
+msgid "Your turn at OnlineBoardGamers"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:526
+#, python-format
+msgid ""
+"Game invite at OnlineBoardGamers\n"
+"%(gameName)s - %(maxPlayers)s players"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:574
+#, python-format
+msgid ""
+"A Tournament Game of %(game_type)s has started\n"
+"%(gameName)s - %(maxPlayers)s players"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:615
+#, python-format
+msgid ""
+"You have won a %(full_game_name)s tournament! \n"
+"%(tournamentName)s"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:616
+msgid "Click here to savour in your victory"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:648
+#, python-format
+msgid "%(gameName)s - Starting Player:  %(currentPlayer)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:712
+#, python-format
+msgid ""
+"A Player has declined your invitation\n"
+"%(gameName)s %(gameDescription)s\n"
+"Player: %(declinerUsername)s\n"
+"Reason: %(reason)s"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:715
+msgid "Click here to view your games"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:782
+#, python-format
+msgid ""
+"Less than 2 hours to move at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:828
+#, python-format
+msgid ""
+"Your time limit has expired at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s\n"
+"You could be kicked out at any time. Please move ASAP"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:867
+msgid "It is Your Turn at OnlineBoardGamers.com"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:878
+msgid ""
+"You have not moved for 24hrs at OnlineBoardGamers!\n"
+"Please make a move to keep the games going! Thanks!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:879
+msgid "Click here to play"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:932
+#, python-format
+msgid ""
+"A tournament of %(boxName)s is now open for signup\n"
+"You can join the tournament here:"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:11
+msgid "Discord"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:12
+msgid "Slack"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:13
+msgid "Telegram"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:14
+msgid "Other"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:23
+msgid "Open"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:24 .\sharedFunctions\sharedRefs.py:53
+msgid "In Progress"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:25 .\templates\Lobby\lobby.html:113
+msgid "Finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:34
+msgid "Rounds"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:35
+msgid "Knockout"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:36
+msgid "Two Lives"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:37 .\sharedFunctions\sharedRefs.py:84
+msgid "Points"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:51
+msgid "OPEN FOR SIGNUP"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:56
+msgid "1st:"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:62
+msgid "2nd:"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:68
+msgid "3rd:"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:106 .\templates\Lobby\AllTournaments.html:42
+#: .\templates\Lobby\tournamentsHelp.html:34
+msgid "Game"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:107 .\templates\Lobby\AllTournaments.html:49
+#: .\templates\Lobby\TGZtournaments.html:66 .\templates\Lobby\lobby.html:315
+#: .\templates\Lobby\playerInfo.html:179 .\templates\Lobby\playerInfo.html:230
+#: .\templates\Lobby\schism.html:88 .\templates\Lobby\stats.html:1120
+msgid "Winner"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:132
+msgid "BYES:"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:147
+msgid "Setup - Draft Modules"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:149
+msgid "Setup - Restaurants"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:151
+msgid "Setup - Reserve Cards"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:153
+msgid "1 - Restructuring"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:155
+msgid "2 - Order of Business"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:157
+msgid "3 - Working 9:00-5:00"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:159
+msgid "4 - Dinnertime"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:161
+msgid "5 - Payday"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:163
+msgid "6 - Marketing Campaigns"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:165
+msgid "7 - Clean up"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:167 .\sharedFunctions\sharedRefs.py:274
+#: .\sharedFunctions\sharedRefs.py:298 .\sharedFunctions\sharedRefs.py:314
+#: .\templates\Lobby\profile.html:240
+msgid "Game End"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:169
+msgid "4 - Pizza Milestone"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:171
+msgid "7 - Coffee Shop Milestone"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:177
+msgid "Factory Setup"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:179
+msgid "1 - Research"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:181
+msgid "2 - Set Focus"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:183
+msgid "3 - Build Factory"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:185
+msgid "4 - Print Sales Brochures"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:187
+msgid "5 - Sell"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:189
+msgid "6 - Game End"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:191
+msgid "7 - Increase Expectations"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:193
+msgid "8 - Grow Demands"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:200
+msgid "Setup Buildings"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:202
+msgid "Setup Lines"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:204
+msgid "1 - Choose Actions"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:206
+msgid "2 - Line Expansion"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:208
+msgid "3 - Add a Bus"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:210
+msgid "4 - Add Passengers"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:212
+msgid "5 - Add Buildings"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:214
+msgid "6 - Alter Time"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:216
+msgid "7 - VRROOOMM!!"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:218
+msgid "8 - Change Start Player"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:220
+msgid "9 - Game End Check"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:222
+msgid "10 - Game Finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:229
+msgid "Place First Monument"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:231
+msgid "The Generosity Of Kings"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:233
+msgid "Religion & Culture"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:235
+msgid "Revenues"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:237
+msgid "Let us compare mythologies"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:239
+msgid "We have found the best mythology"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:244 .\sharedFunctions\sharedRefs.py:246
+#: .\sharedFunctions\sharedRefs.py:247
+msgid "Turn"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:244
+msgid "Production"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:246
+msgid "Move Pirates"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:252
+msgid "Place First City"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:254
+msgid "All Rise"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:256
+msgid "City Building"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:258
+msgid "Turn Order"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:260
+msgid "Countryside Building"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:262
+msgid "Storage"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:264
+msgid "Harvest"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:266
+msgid "Explore"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:268
+msgid "Famine"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:270
+msgid "Pollution"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:272
+msgid "Game End Check"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:280
+msgid "New Era"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:282
+msgid "Turn Order Bidding"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:284
+msgid "Mergers"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:286
+msgid "Merger Bidding"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:288
+msgid "Siap Faji Merger"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:290
+msgid "Acquisitions"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:292
+msgid "R & D"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:294
+msgid "Operations"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:296
+msgid "City Growth"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:304
+msgid "Bidding & Actions"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:306
+msgid "Collect Boat Resources"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:308
+msgid "Village Expansion"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:310
+msgid "Choose Winter Tiles"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:312
+msgid "Final Scoring"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:321
+msgid "Live"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:323
+msgid "Fast<br/>(Several moves/day)"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:325
+msgid "Standard<br/>(1-2+ moves/day)"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:327
+msgid "Slow<br/>(1 move/day)"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:329
+msgid "Casual"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:339 .\templates\Lobby\lobbyHelp.html:134
+#: .\templates\Lobby\lobbyHelp.html:135
+msgid "Kickout after 5 Minutes"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:341 .\templates\Lobby\lobbyHelp.html:142
+#: .\templates\Lobby\lobbyHelp.html:143
+msgid "Kickout after 10 Minutes"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:343 .\templates\Lobby\lobbyHelp.html:150
+#: .\templates\Lobby\lobbyHelp.html:151
+msgid "Kickout after 20 Minutes"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:346 .\templates\Lobby\lobbyHelp.html:158
+#: .\templates\Lobby\lobbyHelp.html:159
+msgid "Kickout after 12 Hours"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:348 .\templates\Lobby\lobbyHelp.html:166
+#: .\templates\Lobby\lobbyHelp.html:167
+msgid "Kickout after 1 day"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:350
+#, python-format
+msgid "Kickout after %(kickoutInDays)s days"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:454 .\templates\Lobby\createFCM.html:457
+#: .\templates\Lobby\lobby_icons.html:159
+#: .\templates\Lobby\lobby_icons.html:160
+msgid "Short Game"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:457 .\templates\Lobby\lobby_icons.html:167
+#: .\templates\Lobby\lobby_icons.html:168
+msgid "No Milestones"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:460 .\templates\Lobby\createFCM.html:475
+#: .\templates\Lobby\lobby_icons.html:175
+#: .\templates\Lobby\lobby_icons.html:176
+msgid "No CFO Milestone"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:463 .\templates\Lobby\createFCM.html:483
+#: .\templates\Lobby\lobby_icons.html:183
+#: .\templates\Lobby\lobby_icons.html:184
+msgid "No Radio Milestone"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:466 .\templates\Lobby\lobby_icons.html:191
+#: .\templates\Lobby\lobby_icons.html:192
+msgid "Hard Choices"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:469 .\templates\Lobby\lobby_icons.html:36
+#: .\templates\Lobby\lobby_icons.html:37
+msgid "New Milestones"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:472 .\templates\Lobby\lobby_icons.html:44
+#: .\templates\Lobby\lobby_icons.html:45
+msgid "Ketchup Milestone"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:475 .\templates\Lobby\lobby_icons.html:52
+#: .\templates\Lobby\lobby_icons.html:53
+msgid "New Reserve Cards"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:478 .\templates\Lobby\lobby_icons.html:60
+#: .\templates\Lobby\lobby_icons.html:61
+msgid "Movie Stars"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:481 .\templates\Lobby\lobby_icons.html:68
+#: .\templates\Lobby\lobby_icons.html:69
+msgid "Mass Marketeers"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:484 .\templates\Lobby\lobby_icons.html:76
+#: .\templates\Lobby\lobby_icons.html:77
+msgid "Gourmet Food Critics"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:487 .\templates\Lobby\lobby_icons.html:84
+#: .\templates\Lobby\lobby_icons.html:85
+msgid "Rural Marketeers"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:490 .\templates\Lobby\lobby_icons.html:92
+#: .\templates\Lobby\lobby_icons.html:93
+msgid "New Districts"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:493 .\templates\Lobby\lobby_icons.html:100
+#: .\templates\Lobby\lobby_icons.html:101
+msgid "Lobbyists"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:496 .\templates\Lobby\lobby_icons.html:108
+#: .\templates\Lobby\lobby_icons.html:109
+msgid "Night Shift Manager"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:499 .\templates\Lobby\lobby_icons.html:116
+#: .\templates\Lobby\lobby_icons.html:117
+msgid "Coffee"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:502 .\templates\Lobby\lobby_icons.html:124
+#: .\templates\Lobby\lobby_icons.html:125
+msgid "Fry Chef"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:505 .\templates\Lobby\lobby_icons.html:132
+#: .\templates\Lobby\lobby_icons.html:133
+msgid "Kimchi"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:508 .\templates\Lobby\lobby_icons.html:140
+#: .\templates\Lobby\lobby_icons.html:141
+msgid "Sushi"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:511 .\templates\Lobby\lobby_icons.html:148
+#: .\templates\Lobby\lobby_icons.html:149
+msgid "Noodles"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:514 .\templates\Lobby\lobby_icons.html:151
+#: .\templates\Lobby\lobby_icons.html:152
+msgid "Strict Payday/Fridge"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:525 .\templates\Lobby\lobby_icons.html:207
+#: .\templates\Lobby\lobby_icons.html:208
+msgid "Random Modules"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:528 .\templates\Lobby\lobby_icons.html:215
+#: .\templates\Lobby\lobby_icons.html:216
+msgid "Draft Modules"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:532
+msgid "Skip Module"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:536 .\templates\Lobby\lobby_icons.html:199
+#: .\templates\Lobby\lobby_icons.html:200
+msgid "Sandbox Mode"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:539 .\sharedFunctions\sharedRefs.py:573
+#: .\sharedFunctions\sharedRefs.py:589 .\sharedFunctions\sharedRefs.py:605
+#: .\sharedFunctions\sharedRefs.py:620 .\sharedFunctions\sharedRefs.py:639
+#: .\sharedFunctions\sharedRefs.py:654 .\templates\Lobby\lobby_icons.html:16
+msgid "Learning Game"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:542 .\sharedFunctions\sharedRefs.py:575
+#: .\sharedFunctions\sharedRefs.py:591 .\sharedFunctions\sharedRefs.py:607
+#: .\sharedFunctions\sharedRefs.py:622 .\sharedFunctions\sharedRefs.py:641
+#: .\sharedFunctions\sharedRefs.py:656 .\templates\Lobby\createAQY.html:186
+#: .\templates\Lobby\createBus.html:179 .\templates\Lobby\createCNS.html:188
+#: .\templates\Lobby\createFCM.html:230 .\templates\Lobby\createHC.html:183
+#: .\templates\Lobby\createIND.html:198 .\templates\Lobby\createKFW.html:217
+#: .\templates\Lobby\createTGZ-OLD.html:227
+#: .\templates\Lobby\createTGZ.html:227 .\templates\Lobby\lobby_icons.html:24
+msgid "Experienced Game"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:559 .\templates\Lobby\createCNS.html:270
+#: .\templates\Lobby\lobby_icons.html:261
+#: .\templates\Lobby\lobby_icons.html:262
+msgid "Use Expansion"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:561
+msgid "Smalll Table"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:563 .\templates\Lobby\lobby_icons.html:277
+#: .\templates\Lobby\lobby_icons.html:278
+msgid "Medium Table"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:565 .\templates\Lobby\lobby_icons.html:285
+#: .\templates\Lobby\lobby_icons.html:286
+msgid "Large Table"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:567
+msgid "Low Junk"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:569
+msgid "Mediumm Junk"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:571
+msgid "High Junk"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:635 .\templates\Lobby\lobby_icons.html:321
+msgid "Hidden Money"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:637
+msgid "Aegean Map"
+msgstr ""
+
+#: .\templates\Lobby\404.html:20
+msgid "Sorry, the page you are requesting does not exist"
+msgstr ""
+
+#: .\templates\Lobby\404.html:21 .\templates\Lobby\500.html:22
+msgid ""
+"If you were doing something that worked before, or expected to work (such as "
+"clicking on a game) then there is a chance the website is being updated."
+msgstr ""
+
+#: .\templates\Lobby\404.html:22 .\templates\Lobby\500.html:23
+msgid "Please wait 5 minutes and try again."
+msgstr ""
+
+#: .\templates\Lobby\404.html:23 .\templates\Lobby\500.html:24
+msgid "If there is still a problem please email"
+msgstr ""
+
+#: .\templates\Lobby\404.html:29 .\templates\Lobby\500.html:30
+#: .\templates\Lobby\AllTournaments.html:89
+#: .\templates\Lobby\TGZT\TGZtournamentFixedSpring24.html:2355
+#: .\templates\Lobby\TGZtournamentMain.html:1708
+#: .\templates\Lobby\TGZtournaments.html:81
+#: .\templates\Lobby\Tournament.html:68 .\templates\Lobby\about.html:72
+#: .\templates\Lobby\changelog.html:40 .\templates\Lobby\contact.html:23
+#: .\templates\Lobby\donate\donate.html:92
+#: .\templates\Lobby\donate\donate_success.html:27
+#: .\templates\Lobby\fcmNewCode.html:73 .\templates\Lobby\layout.html:70
+#: .\templates\Lobby\layout.html:227 .\templates\Lobby\lobbyHelp.html:410
+#: .\templates\Lobby\login.html:35 .\templates\Lobby\newGames.html:87
+#: .\templates\Lobby\password\password_reset.html:35
+#: .\templates\Lobby\playerInfo.html:246 .\templates\Lobby\profile
+#: copy.html:648 .\templates\Lobby\profile.html:869
+#: .\templates\Lobby\profileAQY.html:383 .\templates\Lobby\profileIND.html:526
+#: .\templates\Lobby\register.html:30 .\templates\Lobby\schism.html:103
+#: .\templates\Lobby\showTGZoptions.html:28 .\templates\Lobby\stats.html:1140
+#: .\templates\Lobby\tournamentsHelp.html:135
+msgid "Home"
+msgstr ""
+
+#: .\templates\Lobby\500.html:20
+msgid "Sorry, the page you are requesting cannot be delivered"
+msgstr ""
+
+#: .\templates\Lobby\500.html:21
+msgid ""
+"It appears to be a proper page, but the server is having trouble rendering it"
+msgstr ""
+
+#: .\templates\Lobby\AQYmapEditor.html:174
+#: .\templates\Lobby\FCMmapEditor.html:35
+#: .\templates\Lobby\TGZmapEditor.html:34
+msgid " Create a game with this map"
+msgstr ""
+
+#: .\templates\Lobby\AQYmapEditor.html:177
+#: .\templates\Lobby\FCMmapEditor.html:106
+#: .\templates\Lobby\TGZmapEditor.html:38
+msgid "Drag and drop tiles - then click on tiles to rotate"
+msgstr ""
+
+#: .\templates\Lobby\AQYmapEditor.html:178
+msgid ""
+"Antiquity had a print run with the tiles mirrored. Therefore you have the "
+"option to mirror the tiles."
+msgstr ""
+
+#: .\templates\Lobby\AQYmapEditor.html:180
+msgid ""
+"Antiquity comes with a duplicate set of 4 doubled sided tiles. So in order "
+"to be able to build the map using the contents of one game, at most 2 tiles "
+"should be used from each of the boxes below (mirrored or normal)."
+msgstr ""
+
+#: .\templates\Lobby\AQYmapEditor.html:189
+msgid "Use Mirrored Tiles"
+msgstr ""
+
+#: .\templates\Lobby\AQYmapEditor.html:197
+#: .\templates\Lobby\FCMmapEditor.html:111
+#: .\templates\Lobby\TGZmapEditor.html:43
+msgid " Complete map with random tiles"
+msgstr ""
+
+#: .\templates\Lobby\AQYmapEditor.html:201
+#: .\templates\Lobby\FCMmapEditor.html:114
+#: .\templates\Lobby\TGZmapEditor.html:44
+msgid " Shuffle the current board"
+msgstr ""
+
+#: .\templates\Lobby\AQYmapEditor.html:205
+#: .\templates\Lobby\FCMmapEditor.html:115
+#: .\templates\Lobby\TGZmapEditor.html:45
+msgid " Clear map"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:30 .\templates\Lobby\layout.html:88
+#: .\templates\Lobby\layout.html:205 .\templates\Lobby\lobbyHelp.html:393
+#: .\templates\Lobby\tournamentsHelp.html:19
+msgid "Tournaments"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:31
+msgid ""
+"Horseless Carrige Tournaments will open between 1st and 7th, as long as the "
+"previous tournament has finished. They will start 7 days later, or when "
+"enough players have signed up."
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:32
+msgid ""
+"Food Chain Magnate Tournaments will run at regular intervals. Check the "
+"discord!"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:33
+msgid "For more information on tournaments, see"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:43
+#: .\templates\Lobby\TGZtournaments.html:37
+#: .\templates\Lobby\TGZtournaments.html:61 .\templates\Lobby\admin\DBO.html:49
+#: .\templates\Lobby\createAQY.html:35 .\templates\Lobby\createBus.html:31
+#: .\templates\Lobby\createCNS.html:35 .\templates\Lobby\createFCM.html:34
+#: .\templates\Lobby\createHC.html:31 .\templates\Lobby\createIND.html:33
+#: .\templates\Lobby\createKFW.html:32 .\templates\Lobby\createTGZ-OLD.html:42
+#: .\templates\Lobby\createTGZ.html:42 .\templates\Lobby\joinGameLink.html:68
+#: .\templates\Lobby\lobby.html:172 .\templates\Lobby\lobby.html:202
+#: .\templates\Lobby\lobby.html:253 .\templates\Lobby\lobby.html:282
+#: .\templates\Lobby\lobby.html:310 .\templates\Lobby\playerInfo.html:143
+#: .\templates\Lobby\playerInfo.html:174 .\templates\Lobby\playerInfo.html:199
+#: .\templates\Lobby\playerInfo.html:225 .\templates\Lobby\schism.html:36
+#: .\templates\Lobby\schism.html:59 .\templates\Lobby\schism.html:83
+#: .\templates\Lobby\stats.html:1088 .\templates\Lobby\stats.html:1115
+msgid "Name"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:44
+msgid "Total Players"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:45
+msgid "Players per Game"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:46
+msgid "Format"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:47
+#: .\templates\Lobby\joinGameLink.html:74 .\templates\Lobby\lobby.html:178
+#: .\templates\Lobby\lobby.html:260 .\templates\Lobby\lobby.html:289
+#: .\templates\Lobby\schism.html:42
+msgid "Starting Options"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:48
+#: .\templates\Lobby\TGZtournaments.html:64
+#: .\templates\Lobby\joinGameLink.html:73 .\templates\Lobby\lobby.html:177
+#: .\templates\Lobby\lobby.html:259 .\templates\Lobby\lobby.html:288
+#: .\templates\Lobby\lobby.html:313 .\templates\Lobby\playerInfo.html:177
+#: .\templates\Lobby\playerInfo.html:228 .\templates\Lobby\schism.html:41
+#: .\templates\Lobby\schism.html:86 .\templates\Lobby\stats.html:1118
+msgid "Created"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:42
+msgid ""
+"Generate a map using <a class='linkOther' href='https://boardgamehelpers.com/"
+"FoodChainMagnate/' target='_blank'>BoardGameHelpers</a>"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:47
+msgid "Map Type"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:49
+msgid "Random"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:51
+msgid "Balanced"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:53
+msgid "Interesting"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:57
+msgid "Tile Options"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:59
+msgid "Use Normal Expansion Tiles"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:63
+msgid "Use Apartment Tiles"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:66
+msgid "Use Park Tile"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:100
+#, python-format
+msgid "Note: No map is 100%% balanced!"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:113
+msgid "Complete map with random base game tiles only"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:32
+msgid ""
+"Current Games - for Tournament Moderator info. Check a tournament link for "
+"tournament info"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:38 .\templates\Lobby\admin\DBO.html:50
+#: .\templates\Lobby\joinGameLink.html:69 .\templates\Lobby\lobby.html:173
+#: .\templates\Lobby\lobby.html:203 .\templates\Lobby\lobby.html:254
+#: .\templates\Lobby\lobby.html:283 .\templates\Lobby\playerInfo.html:144
+#: .\templates\Lobby\playerInfo.html:200 .\templates\Lobby\schism.html:37
+#: .\templates\Lobby\schism.html:60 .\templates\Lobby\stats.html:1089
+msgid "Creator"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:39
+#: .\templates\Lobby\TGZtournaments.html:62 .\templates\Lobby\admin\DBO.html:51
+#: .\templates\Lobby\joinGameLink.html:70 .\templates\Lobby\lobby.html:174
+#: .\templates\Lobby\lobby.html:204 .\templates\Lobby\lobby.html:255
+#: .\templates\Lobby\lobby.html:284 .\templates\Lobby\lobby.html:311
+#: .\templates\Lobby\playerInfo.html:75 .\templates\Lobby\playerInfo.html:145
+#: .\templates\Lobby\playerInfo.html:175 .\templates\Lobby\playerInfo.html:201
+#: .\templates\Lobby\playerInfo.html:226 .\templates\Lobby\schism.html:38
+#: .\templates\Lobby\schism.html:61 .\templates\Lobby\schism.html:84
+#: .\templates\Lobby\stats.html:1090 .\templates\Lobby\stats.html:1116
+msgid "Players"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:40
+#: .\templates\Lobby\Tournament.html:31 .\templates\Lobby\admin\DBO.html:52
+#: .\templates\Lobby\joinGameLink.html:72 .\templates\Lobby\lobby.html:176
+#: .\templates\Lobby\lobby.html:205 .\templates\Lobby\lobby.html:257
+#: .\templates\Lobby\lobby.html:286 .\templates\Lobby\playerInfo.html:146
+#: .\templates\Lobby\playerInfo.html:202 .\templates\Lobby\schism.html:40
+#: .\templates\Lobby\schism.html:62 .\templates\Lobby\stats.html:1091
+msgid "Current Players"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:41 .\templates\Lobby\admin\DBO.html:53
+#: .\templates\Lobby\lobby.html:206 .\templates\Lobby\playerInfo.html:147
+#: .\templates\Lobby\playerInfo.html:203 .\templates\Lobby\schism.html:63
+#: .\templates\Lobby\stats.html:1092
+msgid "Current Turn"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:43 .\templates\Lobby\admin\DBO.html:55
+#: .\templates\Lobby\joinGameLink.html:71 .\templates\Lobby\lobby.html:175
+#: .\templates\Lobby\lobby.html:208 .\templates\Lobby\lobby.html:256
+#: .\templates\Lobby\lobby.html:285 .\templates\Lobby\playerInfo.html:149
+#: .\templates\Lobby\playerInfo.html:205 .\templates\Lobby\schism.html:39
+#: .\templates\Lobby\schism.html:65 .\templates\Lobby\stats.html:1094
+msgid "Speed"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:44 .\templates\Lobby\admin\DBO.html:56
+#: .\templates\Lobby\lobby.html:209 .\templates\Lobby\playerInfo.html:150
+#: .\templates\Lobby\playerInfo.html:206 .\templates\Lobby\schism.html:66
+#: .\templates\Lobby\stats.html:1095
+msgid "Last Turn"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:53 .\templates\Lobby\lobby.html:225
+#: .\templates\Lobby\playerInfo.html:216 .\templates\Lobby\schism.html:75
+msgid "No Current Games"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:56 .\templates\Lobby\lobby.html:112
+#: .\templates\Lobby\playerInfo.html:219 .\templates\Lobby\schism.html:78
+msgid "Finished Games"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:63 .\templates\Lobby\lobby.html:312
+#: .\templates\Lobby\playerInfo.html:176 .\templates\Lobby\playerInfo.html:227
+#: .\templates\Lobby\schism.html:85 .\templates\Lobby\stats.html:203
+#: .\templates\Lobby\stats.html:1117
+msgid "All Players"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:65 .\templates\Lobby\lobby.html:314
+#: .\templates\Lobby\playerInfo.html:178 .\templates\Lobby\playerInfo.html:229
+#: .\templates\Lobby\schism.html:87 .\templates\Lobby\stats.html:1119
+msgid "Last Activity"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:75 .\templates\Lobby\lobby.html:331
+#: .\templates\Lobby\playerInfo.html:240 .\templates\Lobby\schism.html:97
+msgid "No Finished Games"
+msgstr ""
+
+#: .\templates\Lobby\Tournament.html:23
+msgid "Max Players"
+msgstr ""
+
+#: .\templates\Lobby\Tournament.html:24
+msgid "Players per game"
+msgstr ""
+
+#: .\templates\Lobby\Tournament.html:25
+msgid "Tournament Format"
+msgstr ""
+
+#: .\templates\Lobby\Tournament.html:53
+msgid "Join Tournament"
+msgstr ""
+
+#: .\templates\Lobby\about.html:11
+msgid ""
+"<h1>Welcome to Online Board Gamers!</h1> Online Board Gamers is a website to "
+"play board games online. <br /> You can play live against other playes with "
+"automatic updates, or play a \"practice\" game where you make all the moves "
+"on your device. <h2>Current Games</h2>"
+msgstr ""
+
+#: .\templates\Lobby\about.html:21
+msgid "Food Chain Magnate - With all Ketchup Expansions"
+msgstr ""
+
+#: .\templates\Lobby\about.html:30
+msgid "Credits"
+msgstr ""
+
+#: .\templates\Lobby\about.html:47
+msgid "Thanks to all the Playtesters!"
+msgstr ""
+
+#: .\templates\Lobby\about.html:51
+msgid ""
+"Thank you to everyone for your feedback, comments and suggestions - you have "
+"helped to make this site what it is!"
+msgstr ""
+
+#: .\templates\Lobby\about.html:68 .\templates\Lobby\lobbyHelp.html:399
+#: .\templates\Lobby\tournamentsHelp.html:124
+msgid "For further help contact"
+msgstr ""
+
+#: .\templates\Lobby\admin\DBO.html:116
+#: .\templates\Lobby\gameDisplay\finishedGameRow.html:33
+msgid "Delete <BR /> Practice<BR /> Game"
+msgstr ""
+
+#: .\templates\Lobby\admin\DBO.html:122
+msgid "Delete <BR /> NORMAL"
+msgstr ""
+
+#: .\templates\Lobby\contact.html:12
+msgid "For any questions / comments / suggestions, please contact"
+msgstr ""
+
+#: .\templates\Lobby\contact.html:16
+msgid ""
+"For any in game problems, you can submit a bug report from the menu at the "
+"top"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:24
+msgid ""
+"New to Antiquity? For Rules, How to Play, and Game Guide, please see <a "
+"class='linkOther' href='/help/'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:33 .\templates\Lobby\createBus.html:29
+#: .\templates\Lobby\createCNS.html:33 .\templates\Lobby\createFCM.html:32
+#: .\templates\Lobby\createHC.html:29 .\templates\Lobby\createIND.html:31
+#: .\templates\Lobby\createKFW.html:30 .\templates\Lobby\createTGZ-OLD.html:40
+#: .\templates\Lobby\createTGZ.html:40
+msgid "Setup Options"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:41 .\templates\Lobby\createBus.html:37
+#: .\templates\Lobby\createHC.html:37
+msgid "Game name"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:46 .\templates\Lobby\createBus.html:42
+#: .\templates\Lobby\createCNS.html:46 .\templates\Lobby\createFCM.html:45
+#: .\templates\Lobby\createHC.html:42 .\templates\Lobby\createIND.html:44
+#: .\templates\Lobby\createKFW.html:43 .\templates\Lobby\createTGZ-OLD.html:53
+#: .\templates\Lobby\createTGZ.html:53
+msgid "Description"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:53 .\templates\Lobby\createBus.html:49
+#: .\templates\Lobby\createCNS.html:53 .\templates\Lobby\createFCM.html:52
+#: .\templates\Lobby\createHC.html:49 .\templates\Lobby\createIND.html:51
+#: .\templates\Lobby\createKFW.html:50 .\templates\Lobby\createTGZ-OLD.html:60
+#: .\templates\Lobby\createTGZ.html:60
+msgid "Optional, eg fast EST time zone"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:58 .\templates\Lobby\createBus.html:54
+#: .\templates\Lobby\createCNS.html:58 .\templates\Lobby\createFCM.html:57
+#: .\templates\Lobby\createHC.html:54 .\templates\Lobby\createIND.html:56
+#: .\templates\Lobby\createKFW.html:55 .\templates\Lobby\createTGZ-OLD.html:65
+#: .\templates\Lobby\createTGZ.html:65
+msgid "Playing Speed"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:61 .\templates\Lobby\createBus.html:57
+#: .\templates\Lobby\createCNS.html:61 .\templates\Lobby\createFCM.html:60
+#: .\templates\Lobby\createHC.html:57 .\templates\Lobby\createIND.html:59
+#: .\templates\Lobby\createKFW.html:58 .\templates\Lobby\createTGZ-OLD.html:68
+#: .\templates\Lobby\createTGZ.html:68
+msgid "Live: Play the game in one session"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:62 .\templates\Lobby\createBus.html:58
+#: .\templates\Lobby\createCNS.html:62 .\templates\Lobby\createFCM.html:61
+#: .\templates\Lobby\createHC.html:58 .\templates\Lobby\createIND.html:60
+#: .\templates\Lobby\createKFW.html:59 .\templates\Lobby\createTGZ-OLD.html:69
+#: .\templates\Lobby\createTGZ.html:69
+msgid "Fast: Several moves per day"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:63 .\templates\Lobby\createBus.html:59
+#: .\templates\Lobby\createCNS.html:63 .\templates\Lobby\createFCM.html:62
+#: .\templates\Lobby\createHC.html:59 .\templates\Lobby\createIND.html:61
+#: .\templates\Lobby\createKFW.html:60 .\templates\Lobby\createTGZ-OLD.html:70
+#: .\templates\Lobby\createTGZ.html:70
+msgid "Standard: 1-2+ moves a day"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:64 .\templates\Lobby\createBus.html:60
+#: .\templates\Lobby\createCNS.html:64 .\templates\Lobby\createHC.html:60
+#: .\templates\Lobby\createIND.html:62 .\templates\Lobby\createKFW.html:61
+#: .\templates\Lobby\createTGZ-OLD.html:71 .\templates\Lobby\createTGZ.html:71
+msgid "Slow: At least one move a day"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:65 .\templates\Lobby\createBus.html:61
+#: .\templates\Lobby\createCNS.html:65 .\templates\Lobby\createFCM.html:64
+#: .\templates\Lobby\createHC.html:61 .\templates\Lobby\createIND.html:63
+#: .\templates\Lobby\createKFW.html:62 .\templates\Lobby\createTGZ-OLD.html:72
+#: .\templates\Lobby\createTGZ.html:72
+msgid "Casual: Just take your time"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:68 .\templates\Lobby\createBus.html:64
+#: .\templates\Lobby\createCNS.html:68 .\templates\Lobby\createFCM.html:67
+#: .\templates\Lobby\createHC.html:64 .\templates\Lobby\createIND.html:66
+#: .\templates\Lobby\createKFW.html:65 .\templates\Lobby\createTGZ-OLD.html:75
+#: .\templates\Lobby\createTGZ.html:75
+msgid "Alters kickout options. All games update 'live'"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:69 .\templates\Lobby\createBus.html:65
+#: .\templates\Lobby\createCNS.html:69 .\templates\Lobby\createFCM.html:68
+#: .\templates\Lobby\createHC.html:65 .\templates\Lobby\createIND.html:67
+#: .\templates\Lobby\createKFW.html:67 .\templates\Lobby\createTGZ-OLD.html:76
+#: .\templates\Lobby\createTGZ.html:76
+msgid ""
+"Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if "
+"the last move was less than 30 minutes ago"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:73 .\templates\Lobby\createBus.html:70
+#: .\templates\Lobby\createCNS.html:74 .\templates\Lobby\createFCM.html:73
+#: .\templates\Lobby\createHC.html:70 .\templates\Lobby\createIND.html:72
+#: .\templates\Lobby\createKFW.html:71 .\templates\Lobby\createTGZ-OLD.html:81
+#: .\templates\Lobby\createTGZ.html:81
+msgid "Number of players"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:83 .\templates\Lobby\createBus.html:80
+#: .\templates\Lobby\createCNS.html:84 .\templates\Lobby\createFCM.html:85
+#: .\templates\Lobby\createHC.html:80 .\templates\Lobby\createIND.html:83
+#: .\templates\Lobby\createKFW.html:83 .\templates\Lobby\createTGZ-OLD.html:108
+#: .\templates\Lobby\createTGZ.html:108
+msgid "Player 2"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:92 .\templates\Lobby\createAQY.html:230
+#: .\templates\Lobby\createBus.html:89 .\templates\Lobby\createBus.html:207
+#: .\templates\Lobby\createCNS.html:94 .\templates\Lobby\createCNS.html:297
+#: .\templates\Lobby\createFCM.html:95 .\templates\Lobby\createFCM.html:846
+#: .\templates\Lobby\createHC.html:90 .\templates\Lobby\createHC.html:210
+#: .\templates\Lobby\createIND.html:92 .\templates\Lobby\createIND.html:266
+#: .\templates\Lobby\createKFW.html:92 .\templates\Lobby\createKFW.html:268
+#: .\templates\Lobby\createTGZ-OLD.html:103
+#: .\templates\Lobby\createTGZ-OLD.html:118
+#: .\templates\Lobby\createTGZ-OLD.html:504
+#: .\templates\Lobby\createTGZ.html:103 .\templates\Lobby\createTGZ.html:118
+#: .\templates\Lobby\createTGZ.html:733
+msgid "Leave blank to invite anybody"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:96 .\templates\Lobby\createBus.html:93
+#: .\templates\Lobby\createCNS.html:98 .\templates\Lobby\createFCM.html:99
+#: .\templates\Lobby\createHC.html:94 .\templates\Lobby\createIND.html:96
+#: .\templates\Lobby\createKFW.html:98 .\templates\Lobby\createTGZ-OLD.html:122
+#: .\templates\Lobby\createTGZ.html:122
+msgid "Player 3"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:108 .\templates\Lobby\createBus.html:105
+#: .\templates\Lobby\createCNS.html:110 .\templates\Lobby\createFCM.html:112
+#: .\templates\Lobby\createHC.html:107 .\templates\Lobby\createIND.html:108
+#: .\templates\Lobby\createKFW.html:112
+#: .\templates\Lobby\createTGZ-OLD.html:135
+#: .\templates\Lobby\createTGZ.html:135
+msgid "Player 4"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:119 .\templates\Lobby\createCNS.html:121
+#: .\templates\Lobby\createIND.html:131
+msgid "Careful: A 5 min game with 3p could still take ~2+ hrs"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:122 .\templates\Lobby\createBus.html:131
+#: .\templates\Lobby\createCNS.html:124 .\templates\Lobby\createFCM.html:152
+#: .\templates\Lobby\createHC.html:135 .\templates\Lobby\createIND.html:134
+#: .\templates\Lobby\createKFW.html:154
+#: .\templates\Lobby\createTGZ-OLD.html:163
+#: .\templates\Lobby\createTGZ.html:163
+msgid "Common Options"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:124 .\templates\Lobby\createBus.html:133
+#: .\templates\Lobby\createCNS.html:126 .\templates\Lobby\createFCM.html:154
+#: .\templates\Lobby\createHC.html:137 .\templates\Lobby\createIND.html:136
+#: .\templates\Lobby\createKFW.html:156
+#: .\templates\Lobby\createTGZ-OLD.html:165
+#: .\templates\Lobby\createTGZ.html:165
+msgid "Kickout available after:"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:127 .\templates\Lobby\createBus.html:136
+#: .\templates\Lobby\createCNS.html:129 .\templates\Lobby\createFCM.html:157
+#: .\templates\Lobby\createHC.html:140 .\templates\Lobby\createIND.html:139
+#: .\templates\Lobby\createKFW.html:159
+#: .\templates\Lobby\createTGZ-OLD.html:168
+#: .\templates\Lobby\createTGZ.html:168
+msgid "1 day"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:128 .\templates\Lobby\createBus.html:137
+#: .\templates\Lobby\createCNS.html:130 .\templates\Lobby\createFCM.html:158
+#: .\templates\Lobby\createHC.html:141 .\templates\Lobby\createIND.html:140
+#: .\templates\Lobby\createKFW.html:160
+#: .\templates\Lobby\createTGZ-OLD.html:169
+#: .\templates\Lobby\createTGZ.html:169
+msgid "2 days"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:129 .\templates\Lobby\createBus.html:138
+#: .\templates\Lobby\createCNS.html:131 .\templates\Lobby\createFCM.html:159
+#: .\templates\Lobby\createHC.html:142 .\templates\Lobby\createIND.html:141
+#: .\templates\Lobby\createKFW.html:161
+#: .\templates\Lobby\createTGZ-OLD.html:170
+#: .\templates\Lobby\createTGZ.html:170
+msgid "3 days"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:130 .\templates\Lobby\createBus.html:139
+#: .\templates\Lobby\createCNS.html:132 .\templates\Lobby\createFCM.html:160
+#: .\templates\Lobby\createHC.html:143 .\templates\Lobby\createIND.html:142
+#: .\templates\Lobby\createKFW.html:162
+#: .\templates\Lobby\createTGZ-OLD.html:171
+#: .\templates\Lobby\createTGZ.html:171
+msgid "5 days"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:134 .\templates\Lobby\createBus.html:143
+#: .\templates\Lobby\createCNS.html:136 .\templates\Lobby\createFCM.html:164
+#: .\templates\Lobby\createHC.html:147 .\templates\Lobby\createIND.html:146
+#: .\templates\Lobby\createKFW.html:166
+#: .\templates\Lobby\createTGZ-OLD.html:175
+#: .\templates\Lobby\createTGZ.html:175
+msgid "Change Playing Speed for different options"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:142 .\templates\Lobby\createBus.html:151
+#: .\templates\Lobby\createCNS.html:144 .\templates\Lobby\createFCM.html:185
+#: .\templates\Lobby\createHC.html:155 .\templates\Lobby\createIND.html:154
+#: .\templates\Lobby\createKFW.html:174
+#: .\templates\Lobby\createTGZ-OLD.html:183
+#: .\templates\Lobby\createTGZ.html:183
+msgid "Practice Game"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:146 .\templates\Lobby\createCNS.html:148
+#, python-format
+msgid ""
+"Play as up to 4 players on the same device. See <a class=\"linkOther\" href="
+"\"%(the_url)s#navGameType\" target=\"_blank\">Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:158 .\templates\Lobby\createBus.html:167
+#: .\templates\Lobby\createCNS.html:160 .\templates\Lobby\createFCM.html:201
+#: .\templates\Lobby\createHC.html:171 .\templates\Lobby\createIND.html:170
+#: .\templates\Lobby\createKFW.html:190
+#: .\templates\Lobby\createTGZ-OLD.html:199
+#: .\templates\Lobby\createTGZ.html:199
+msgid "Private Game"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:161 .\templates\Lobby\createBus.html:170
+#: .\templates\Lobby\createCNS.html:163 .\templates\Lobby\createFCM.html:204
+#: .\templates\Lobby\createHC.html:174 .\templates\Lobby\createIND.html:173
+#: .\templates\Lobby\createKFW.html:192 .\templates\Lobby\createKFW.html:244
+#: .\templates\Lobby\createTGZ-OLD.html:202
+#: .\templates\Lobby\createTGZ.html:202
+msgid "Players can only join with invite or link"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:170 .\templates\Lobby\createCNS.html:172
+#: .\templates\Lobby\createFCM.html:213 .\templates\Lobby\createIND.html:182
+#: .\templates\Lobby\createKFW.html:200
+#: .\templates\Lobby\createTGZ-OLD.html:211
+#: .\templates\Lobby\createTGZ.html:211
+msgid " Request Learning Game"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:174 .\templates\Lobby\createCNS.html:176
+#: .\templates\Lobby\createFCM.html:217 .\templates\Lobby\createIND.html:186
+#: .\templates\Lobby\createKFW.html:204
+#: .\templates\Lobby\createTGZ-OLD.html:215
+#: .\templates\Lobby\createTGZ.html:215
+#, python-format
+msgid ""
+"Request help to learn the game. See <a class=\"linkOther\" href="
+"\"%(the_url)s#navGameType\" target=\"_blank\">Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:190
+#: .\templates\Lobby\createTGZ-OLD.html:231
+#: .\templates\Lobby\createTGZ.html:231
+#, python-format
+msgid ""
+"Minimum Experience Level. See <a class=\"linkOther\" href="
+"\"%(the_url)s#navGameType\" target=\"_blank\">Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:194 .\templates\Lobby\createBus.html:187
+#: .\templates\Lobby\createCNS.html:196 .\templates\Lobby\createFCM.html:238
+#: .\templates\Lobby\createHC.html:191 .\templates\Lobby\createIND.html:206
+#: .\templates\Lobby\createKFW.html:226
+#: .\templates\Lobby\createTGZ-OLD.html:235
+#: .\templates\Lobby\createTGZ.html:235
+msgid "You do not have enough experience"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:205 .\templates\Lobby\createFCM.html:261
+#: .\templates\Lobby\createTGZ-OLD.html:246
+#: .\templates\Lobby\createTGZ.html:299
+msgid "Keep the same map"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:212 .\templates\Lobby\createCNS.html:202
+#: .\templates\Lobby\createFCM.html:435 .\templates\Lobby\createIND.html:212
+#: .\templates\Lobby\createKFW.html:232
+msgid "Game Options"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:220
+msgid "Create Antiquity Game"
+msgstr ""
+
+#: .\templates\Lobby\createAQY.html:231 .\templates\Lobby\createBus.html:208
+#: .\templates\Lobby\createCNS.html:298 .\templates\Lobby\createFCM.html:847
+#: .\templates\Lobby\createHC.html:211 .\templates\Lobby\createIND.html:267
+#: .\templates\Lobby\createKFW.html:269
+#: .\templates\Lobby\createTGZ-OLD.html:505
+#: .\templates\Lobby\createTGZ.html:734
+msgid "You can change the in-game name of the other players"
+msgstr ""
+
+#: .\templates\Lobby\createBus.html:24
+msgid ""
+"New to Bus? For Rules, How to Play, and Game Guide, please see <a "
+"class='linkOther' href='/help/'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createBus.html:117 .\templates\Lobby\createFCM.html:125
+#: .\templates\Lobby\createHC.html:120 .\templates\Lobby\createIND.html:120
+#: .\templates\Lobby\createKFW.html:126
+#: .\templates\Lobby\createTGZ-OLD.html:148
+#: .\templates\Lobby\createTGZ.html:148
+msgid "Player 5"
+msgstr ""
+
+#: .\templates\Lobby\createBus.html:128 .\templates\Lobby\createHC.html:132
+#: .\templates\Lobby\createTGZ-OLD.html:160
+#: .\templates\Lobby\createTGZ.html:160
+msgid "Careful: A 5 min game with 3p could still take ~8 hrs"
+msgstr ""
+
+#: .\templates\Lobby\createBus.html:155 .\templates\Lobby\createHC.html:159
+#: .\templates\Lobby\createIND.html:158 .\templates\Lobby\createKFW.html:178
+#: .\templates\Lobby\createTGZ-OLD.html:187
+#: .\templates\Lobby\createTGZ.html:187
+#, python-format
+msgid ""
+"Play as up to 5 players on the same device. See <a class=\"linkOther\" href="
+"\"%(the_url)s#navGameType\" target=\"_blank\">Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createBus.html:183 .\templates\Lobby\createCNS.html:192
+#: .\templates\Lobby\createFCM.html:234 .\templates\Lobby\createHC.html:187
+#: .\templates\Lobby\createIND.html:202 .\templates\Lobby\createKFW.html:221
+#, python-format
+msgid ""
+"Minmum Experience Level. See <a class=\"linkOther\" href="
+"\"%(the_url)s#navGameType\" target=\"_blank\">Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createBus.html:197
+msgid "Create Bus Game"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:24
+msgid ""
+"New to Cannes? For Rules, How to Play, and Game Guide, please see <a "
+"class='linkOther' href='/help/'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:41 .\templates\Lobby\createIND.html:39
+#: .\templates\Lobby\createKFW.html:38 .\templates\Lobby\createTGZ-OLD.html:48
+#: .\templates\Lobby\createTGZ.html:48
+msgid " Game name"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:209
+msgid "Limit Table Size"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:237
+msgid "Add Table Junk"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:259
+msgid ""
+"According to the rules, you cannot remove items already on the table. This "
+"simulates some items already on the table by blocking some tile spaces."
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:273
+msgid ""
+"Allows storage of 1 tile <br /> Alows you to pirate unfinished movies for € "
+"4 M"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:287
+msgid "Create Cannes Game"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:24
+msgid ""
+"New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please "
+"see <a class='linkOther' href='/help/'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:40
+msgid "Game Name"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:63
+msgid "Standard : At least one move a day"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:138 .\templates\Lobby\createKFW.html:140
+msgid "Player 6"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:174
+msgid "Use turn order for Payday and Fridge"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:176 .\templates\Lobby\createFCM.html:294
+msgid "Completed in turn order - not simultaneously"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:189
+#, python-format
+msgid ""
+"Play as up to 6 players on the same device. See <a class=\"linkOther\" href="
+"\"%(the_url)s#navGameType\" target=\"_blank\">Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:248
+msgid "Auto-enable Rewind"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:251
+msgid "Enable without requiring permissions from all players"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:267
+#: .\templates\Lobby\createTGZ-OLD.html:252
+#: .\templates\Lobby\createTGZ.html:305
+msgid "Expert Options"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:274
+#: .\templates\Lobby\createTGZ-OLD.html:259
+#: .\templates\Lobby\createTGZ.html:312
+msgid "Enable Advanced Setup Options"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:283
+msgid "AI v0.1. Vague intelligence. Very bad!"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:292
+msgid "Use random modules"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:303 .\templates\Lobby\createFCM.html:376
+msgid "Original MS"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:311 .\templates\Lobby\createFCM.html:384
+msgid "New MS"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:364
+msgid "Draft modules"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:366
+msgid "Pick expansion modules at game start"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:394 .\templates\Lobby\createFCM.html:540
+msgid "Use New Districts"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:397 .\templates\Lobby\createFCM.html:542
+msgid "Add new tiles to the pool to make the map"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:407 .\templates\Lobby\createFCM.html:551
+msgid "Guarantee at least 1 Apartment"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:418 .\templates\Lobby\createFCM.html:560
+msgid "Guarantee the Parks tile"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:427
+msgid "Use Individual Options"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:429
+msgid "Use Pre-set Scenarios"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:442
+msgid "Hard Choices with Original Milestones"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:445
+msgid "First to train / First to market good disappear after 2 turns"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:447
+msgid "First to hire 3 disappears after 3 turns"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:449
+msgid "The following options are not normally used"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:459
+msgid "No salaries, bank only breaks once, extra money"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:467
+msgid "Do not use milestones"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:492
+msgid "Sandbox Mode (See"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:492 .\templates\Lobby\layout.html:90
+#: .\templates\Lobby\layout.html:160 .\templates\Lobby\layout.html:211
+#: .\templates\Lobby\layout.html:230 .\templates\Lobby\profile copy.html:176
+#: copy.html:201 .\templates\Lobby\profile.html:391
+msgid "Help"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:497
+msgid "Ketchup Options"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:504
+msgid "Use New Milestones"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:512
+msgid "Use Ketchup Milestone"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:515
+msgid ""
+"Milestone: The first time someone else sells<br /> your demand, gain a "
+"permanent -1 to distance"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:524
+msgid "Use Price Changing Reserve Cards"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:526
+msgid "When the bank breaks, add $200 per player."
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:528
+msgid ""
+"The base price changes to whichever is <br /> selected most, from $5, $10, "
+"or $20.<br /> In a tie, $20 beats $10 and $5, and $5 beats $10"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:533
+msgid "Map / Route Options"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:570
+msgid "Use all 5 new tiles plus random others"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:579
+msgid "Use Lobbyists"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:581
+msgid "Add new roads and parks to the map"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:589
+msgid "Use Coffee"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:591
+msgid "Sell coffee along the route travelled by a house"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:595
+msgid "Food Options"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:602
+msgid "Use Kimchi"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:604
+msgid "Houses prioritise a restaurant with their demands + kimchi"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:612
+msgid "Use Sushi"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:614
+msgid "Houses with gardens will try to replace all demand with Sushi"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:622
+msgid "Use Noodles"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:625
+msgid "Noodles count as any demand item, but only if no one else can supply it"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:634
+msgid "Use Fry Chefs"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:636
+msgid "Adds $10 per total sale"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:640
+msgid "Marketing Options"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:647
+msgid "Use Mass Marketers"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:649
+msgid "Repeat marketing phase for each Mass Marketeer"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:657
+msgid "Use Gourmet Food Critic"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:659
+msgid "Markets to all houses with a garden"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:667
+msgid "Use Rural Marketers"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:669
+msgid "Markets to the Rural Area - accessed by freeway ramps"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:673
+msgid "Employee Options"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:680
+msgid "Use Movie Stars"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:682
+msgid "Decide turn order and break ties"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:690
+msgid "Use Night Shift Managers"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:693
+msgid ""
+"Must be put in a management slot<br /> All unsalaried employees work twice "
+"during 9-5"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:702
+msgid "Scenarios"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:703
+msgid "The scenario name will be added to the front of the game name"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:710
+msgid "Cool original"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:712
+msgid "Play the base game"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:720
+msgid "New milestones"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:723
+msgid ""
+"Use only the “New Milestones” module. This shakes the strategic space up "
+"quite a bit already!"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:732
+msgid "Your first cup of coffee"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:734
+msgid "The “Coffee” module makes board positions even more important"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:742
+msgid "Korean city"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:745
+msgid "New districts (at least 1 apartment building tile in the city) + Kimchi"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:753
+msgid "Nightlife"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:755
+msgid "New milestones + Night shift managers"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:763
+msgid "Sustenance"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:765
+msgid "Coffee + Fry chefs"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:773
+msgid "Upmarket Area"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:776
+msgid ""
+"New milestones + Park tile from new districts + Gourmet food critic + Sushi"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:785
+msgid "City builder"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:787
+msgid "Lobbyist + New districts + rural marketeers"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:795
+msgid "Asian Fusion"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:797
+msgid "Sushi + Kimchi + Noodles + Ketchup"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:805
+msgid "First mover"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:807
+msgid "Hard choices + Ketchup + Movie stars + Lobbyists + Reserve prices"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:815
+msgid "Overtime"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:818
+msgid ""
+"Night shift managers + Mass marketeers + Rural marketeers + New districts + "
+"Noodles + Reserve price"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:827
+msgid "Henri Lo Menu"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:829
+msgid "All modules!"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:837
+msgid "Create Food Chain Magnate Game"
+msgstr ""
+
+#: .\templates\Lobby\createHC.html:24
+msgid ""
+"New to Horseless Carriage? For Rules, How to Play, and Game Guide, please "
+"see <a class='linkOther' href='/help/'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createHC.html:201
+msgid "Create Horseless Carriage Game"
+msgstr ""
+
+#: .\templates\Lobby\createIND.html:23
+msgid ""
+"New to Indonesia? For Rules, How to Play, and Game Guide, please see <a "
+"class='linkOther' href='/help/'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createIND.html:219
+msgid "Keep Money Secret"
+msgstr ""
+
+#: .\templates\Lobby\createIND.html:222
+msgid ""
+"CAUTION: Money can be recalculated using the history at any point. Only use "
+"this options if playing with friends and you have already agreed to keep "
+"money hidden."
+msgstr ""
+
+#: .\templates\Lobby\createIND.html:235
+msgid "Use Aegean Map"
+msgstr ""
+
+#: .\templates\Lobby\createIND.html:238
+msgid "Play on the fan-made Aegean map!<br/> Game will be excluded from stats"
+msgstr ""
+
+#: .\templates\Lobby\createIND.html:256
+msgid "Create Indonesia Game"
+msgstr ""
+
+#: .\templates\Lobby\createKFW.html:22
+msgid ""
+"New to Keyflower? For Rules, How to Play, and Game Guide, please see <a "
+"class='linkOther' href='/help/'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createKFW.html:151
+msgid "Careful: A 5 min game with 2p could still take ~2+ hrs"
+msgstr ""
+
+#: .\templates\Lobby\createKFW.html:240
+msgid "Use Merchants Expansion"
+msgstr ""
+
+#: .\templates\Lobby\createKFW.html:258
+msgid "Create Keyflower Game"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:30 .\templates\Lobby\createTGZ.html:30
+msgid ""
+"New to The Great Zimbabwe? For Rules, How to Play, and Game Guide, please "
+"see <a class='linkOther' href='/help/'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:93 .\templates\Lobby\createTGZ.html:93
+msgid "Player 1"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:273
+#: .\templates\Lobby\createTGZ.html:326
+msgid "Shadipinyi (Extra Plaque)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:287
+#: .\templates\Lobby\createTGZ.html:340
+msgid "Elegua (3 Bid Cows)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:301
+#: .\templates\Lobby\createTGZ.html:354
+msgid "Dziva (Lower Prices)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:315
+#: .\templates\Lobby\createTGZ.html:368
+msgid "Eshu (Range 6)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:329
+#: .\templates\Lobby\createTGZ.html:382
+msgid "Gu (1 VR Craftsmen)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:343
+#: .\templates\Lobby\createTGZ.html:396
+msgid "Obatala (2 Monuments)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:357
+#: .\templates\Lobby\createTGZ.html:410
+msgid "Atete (Use Res Twice)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:371
+#: .\templates\Lobby\createTGZ.html:424
+msgid "Tsui-Goab (Any goods)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:385
+#: .\templates\Lobby\createTGZ.html:438
+msgid "Anansi (Pay 1 cow / good)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:399
+#: .\templates\Lobby\createTGZ.html:452
+msgid "Qamata (Get Hub Cows)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:413
+#: .\templates\Lobby\createTGZ.html:466
+msgid "Engai (2 Cow Income)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:427
+#: .\templates\Lobby\createTGZ.html:480
+msgid "Xango (2nd Tiebreaker)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:436
+#: .\templates\Lobby\createTGZ.html:665
+msgid "Herd"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:443
+#: .\templates\Lobby\createTGZ.html:672
+msgid "Nomads"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:450
+#: .\templates\Lobby\createTGZ.html:679
+msgid "Rain Ceremony"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:457
+#: .\templates\Lobby\createTGZ.html:686
+msgid "Shaman"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:464
+#: .\templates\Lobby\createTGZ.html:693
+msgid "Builder"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:486
+#: .\templates\Lobby\createTGZ.html:715
+msgid " Create And Start The Great Zimbabwe Tournament Game"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ-OLD.html:488
+#: .\templates\Lobby\createTGZ.html:717
+msgid "Create The Great Zimbabwe Game"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:246 .\templates\Lobby\lobby_icons.html:227
+msgid "Use Schism Expansion"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:249
+msgid ""
+"Fan made expansion! Pool of 12 new gods<br/>Game will be excluded from stats"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:260
+msgid "Mix Original & Schism"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:263
+msgid "HIGHLY RECOMMENDED: Intended Experience"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:273
+msgid "4 / 4 Split"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:276
+msgid "Use 4 Original and 4 Schism"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:286
+msgid "Schism Only"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:289
+msgid "Use 8 of the 12 Schism gods"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:497
+msgid "Agwu-Nsi (Use any Res)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:511
+msgid "Aja (Free Pass)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:525
+msgid "Aje-Shaluga (Free Pri)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:539
+msgid "Alajire (+VR)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:553
+msgid "Anyanwu (Raise to 3)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:567
+msgid "Ekwensu (Build Cows)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:582
+msgid "Ogun (Blacksmith Tech)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:597
+msgid "Ovia (1st Craftsman cow)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:611
+msgid "Oya (Monument for RG)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:625
+msgid "Simbi (Res as Water)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:639
+msgid "Tiurakh (One less RG)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:653
+msgid "Yemoja (Raise Any Mon)"
+msgstr ""
+
+#: .\templates\Lobby\donate\donate.html:22
+msgid "Thank you"
+msgstr ""
+
+#: .\templates\Lobby\donate\donate.html:25
+#, python-format
+msgid ""
+"Thank you for taking the time to look at the donation page. All support is "
+"gratefully received, and will go towards the costs of hosting, supporting, "
+"and maintaining this website, and enabling new features. <br /> <br /> "
+"Please note that donating does not grant you any special privileges; however "
+"suggestions for improvements are always welcome using the OnlineBoardGamers "
+"email address. <br /> <br /> You are able to donate with the button below "
+"via paypal, or if you'd rather, you can donate directly to me at <br /> <img "
+"src=\"%(the_url)s\" width=\"400px\" height=\"40px\"> <br /> <br /> If you "
+"are unsure how much, then €5.00 or $5.00 or equivalent is a great place to "
+"start."
+msgstr ""
+
+#: .\templates\Lobby\donate\donate.html:86
+msgid "If you are having trouble in China/Asia, you can donate via AliPay"
+msgstr ""
+
+#: .\templates\Lobby\donate\donate.html:88
+msgid "Pay Link (for devices with AliPay app installed)"
+msgstr ""
+
+#: .\templates\Lobby\donate\donateBanner.html:3
+msgid "Wish to support the project?"
+msgstr ""
+
+#: .\templates\Lobby\donate\donate_success.html:20
+msgid "Thank you!"
+msgstr ""
+
+#: .\templates\Lobby\donate\donate_success.html:21
+msgid "Your support is greatly appreciated!"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameDeclineEmail.html:4
+#, python-format
+msgid ""
+"\n"
+"Hi %(creatorUsername)s,<br/>\n"
+"<br/>\n"
+"A player has declined your invitation for a game of %(box_name)s at https://"
+"%(domain)s<br/>\n"
+"<br/>\n"
+"Game: %(gameName)s %(gameDescription)s<br/>\n"
+"<br/>\n"
+"Player: %(declinerUsername)s<br/>\n"
+"Reason: %(reason)s<br/>\n"
+"<br/>\n"
+"Please check the \"Waiting Games\" tab in the lobby. <br/>\n"
+"<br/>\n"
+"Thanks<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameInvite.html:4
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,<br/>\n"
+"<br/>\n"
+"You have been invited to a game of %(box_name)s at https://%(domain)s<br/>\n"
+"<br/>\n"
+"Name: %(gameName)s<br/>\n"
+"Players: %(maxPlayers)s<br/>\n"
+"<br/>\n"
+"Please check the \"Invitations\" tab in the lobby, or follow this link:<br/"
+">\n"
+"<br/>\n"
+"https://%(domain)s/index/invitations<br/>\n"
+"<br/>\n"
+"Enjoy!<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameReminderEmail.html:17
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,<br/>\n"
+"<br/>\n"
+"Reminder: You have less than 2 hours to make a move in: %(box_name)s<br/>\n"
+"<br/>\n"
+"Game: %(gameName)s<br/>\n"
+"<br/>\n"
+"https://%(domain)s%(the_url)s<br/>\n"
+"<br/>\n"
+"Notification preferences can be changed in your Profile<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameReminderExpiredEmail.html:17
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,<br/>\n"
+"<br/>\n"
+"Your time limit has expired! Please make a move in: %(box_name)s<br/>\n"
+"<br/>\n"
+"Note: You could be kicked at any time. Please move as soon as possible. <br/"
+">\n"
+"<br/>\n"
+"Game: %(gameName)s<br/>\n"
+"<br/>\n"
+"https://%(domain)s%(the_url)s<br/>\n"
+"<br/>\n"
+"Notification preferences can be changed in your Profile<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentGameStart.html:14
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,<br/>\n"
+"<br/>\n"
+"A tournament game of %(box_name)s has started.<br/>\n"
+"<br/>\n"
+"Name: %(gameName)s<br/>\n"
+"Players: %(maxPlayers)s<br/>\n"
+"<br/>\n"
+"https://%(domain)s%(the_url)s<br/>\n"
+"<br/>\n"
+"Enjoy!<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentInvite.html:6
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"A tournament game of Food Chain Magnate has started.\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentInvite_HC.html:6
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"A tournament game of Horseless Carriage has started at OnlineBoardGamers.\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentWon.html:6
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"Congratulations!\n"
+"\n"
+"You have won a tournament of Food Chain Magnate\n"
+"\n"
+"Name: %(tournamentName)s\n"
+"Position: Champion\n"
+"\n"
+"Click to play more Food Chain Magnate\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Well Done!!\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentWonGeneral.html:6
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,<br/>\n"
+"<br/>\n"
+"Congratulations!<br/>\n"
+"<br/>\n"
+"You have won a tournament of %(boxName)s<br/>\n"
+"<br/>\n"
+"Name: %(tournamentName)s<br/>\n"
+"Position: Champion<br/>\n"
+"<br/>\n"
+"Click to play more %(boxName)s<br/>\n"
+"https://%(domain)s%(the_url)s<br/>\n"
+"<br/>\n"
+"Well Done!!<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:19
+msgid "New FCM code"
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:21
+msgid "What's this about?"
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:23
+msgid ""
+"In short, FCM needed a big recode. It is mainly under-the-hood things, so "
+"you hopefully won't notice that much difference. <br /> That being said, "
+"there are a lot of internal changes, so keep an eye an things, and report "
+"any new bugs that you find."
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:30
+msgid "What isn't 'Under-the-hood'?"
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:32
+msgid ""
+"I've added the ability to play the whole payday / fridge phase after your "
+"working day turn. <br /> So instead of simply paying for everyone / no-one, "
+"you can pre-fire employees as you wish. <br /> You can also pre-set which "
+"items you'd like to store in your fridge, in priority order. <br /> <br /> "
+"There is also a summary at the end of the working day to show what you did "
+"in each sub-phase, and remind you if you missed anything. <br /> <br /> For "
+"restructuring, you now have a mini-beach visible at all times, and can "
+"directly select cards from there."
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:47
+msgid "Why did it need a rewrite?"
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:49
+#, python-format
+msgid ""
+"99%% of the time it didn't. But very occasionally it would do odd things. "
+"<br /> EG after the first turn of a game that had salaried employees that it "
+"was possible to directly hire, the game would pause until every player had "
+"\"looked\" at the game, before moving on automatically if they didn't need "
+"to pay anything. <br /> Sometimes it would display oddly if you had the MS "
+"to pay in food.<br/> Occasionally it would wait during the marketing phase "
+"until a certain player had looked at the game. <br/> <br/> These should be "
+"fixed, as well as making it easier to fix and improve the code in the future."
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:62
+msgid "Was it worth it?"
+msgstr ""
+
+#: .\templates\Lobby\fcmNewCode.html:64
+#, python-format
+msgid ""
+"Ha, well it took literally 10s of hours to do; probably over 100 i guess, "
+"with the improvements added as well.<br/> But it was needed to fix those 1%% "
+"situations, and make the code a lot easier to work with in the future!"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:7
+#: .\templates\Lobby\gameDisplay\availableGameSq.html:41
+#: .\templates\Lobby\gameDisplay\waitingGameRow.html:40
+msgid "Leave"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:11
+#: .\templates\Lobby\gameDisplay\availableGameSq.html:43
+#: .\templates\Lobby\gameDisplay\invitationGameRow.html:5
+#: .\templates\Lobby\joinGameLink.html:54 .\templates\Lobby\lobby.html:159
+msgid "Join"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:37
+msgid "5m kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:38
+msgid "10m kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:39
+msgid "20m kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:40
+msgid "12 hr kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:41
+msgid "1d kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:42
+msgid "2d kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:43
+msgid "3d kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:44
+msgid "5d kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\currentGameRow.html:30
+msgid "Delete <br /> Practice <br /> Game"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\invitationGameRow.html:43
+msgid "Decline"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\invitationGameRow.html:44
+msgid "You may give a reason"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\gameEmails\gameEndEmail.html:17
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,<br/>\n"
+"<br/>\n"
+"A game of %(box_name)s has finished at Online Board Gamers.<br/>\n"
+"<br/>\n"
+"Game: %(gameName)s<br/>\n"
+"Position: %(position)s<br/>\n"
+"<br/>\n"
+"https://%(domain)s%(the_url)s<br/>\n"
+"<br/>\n"
+"Thank you for playing at Online Board Gamers.<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\gameEmails\gameStartEmail.html:17
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,<br/>\n"
+"<br/>\n"
+"Your game of %(boxName)s has started at Online Board Gamers!<br/>\n"
+"<br/>\n"
+"Game: %(gameName)s<br/>\n"
+"Starting Player: %(currentPlayer)s<br/>\n"
+"<br/>\n"
+"https://%(domain)s%(the_url)s<br/>\n"
+"<br/>\n"
+"Enjoy!<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\gameEmails\tournamentOpenEmail.html:4
+#, python-format
+msgid ""
+"\n"
+"Hi %(username)s,<br/>\n"
+"<br/>\n"
+"A tournament of %(box_name)s is now open for signup<br/>\n"
+"<br/>\n"
+"You can sign up for the tournament here:<br/>\n"
+"https://%(domain)s/AllTournaments/<br/>\n"
+"<br/>\n"
+"Foramt: %(format)s<br/>\n"
+"Players per game: %(maxGamePlayers)s<br/>\n"
+"<br/>\n"
+"Enjoy!<br/>\n"
+"<br/>\n"
+"<br/>\n"
+"Notification preferences can be changed in your Profile<br/>\n"
+"https://%(domain)s/profile/<br/>\n"
+"<br/>\n"
+"Please do not reply to this email.<br/>\n"
+"To contact me please use: OnlineBoardGamers@gmail.com<br/>\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\gameEmails\yourTurnEmail.html:22
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,<br/>\n"
+"<br/>\n"
+"It is your turn at Online Board Gamers - %(boxName)s.<br/>\n"
+"<br/>\n"
+"https://%(domain)s%(the_url)s<br/>\n"
+"<br/>\n"
+"Game: %(gameName)s<br/>\n"
+"Turn/Phase: %(currentTurnString)s<br/>\n"
+"<br/>\n"
+"Notification preferences can be changed in your Profile<br/>\n"
+"<br/>\n"
+"Please do not reply to this email.<br/>\n"
+"To contact me please use: OnlineBoardGamers@gmail.com<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#: .\templates\Lobby\index.html:19
+msgid "Welcome to Online Board Gamers"
+msgstr ""
+
+#: .\templates\Lobby\index.html:21
+msgid "Please"
+msgstr ""
+
+#: .\templates\Lobby\index.html:21 .\templates\Lobby\layout.html:152
+#: .\templates\Lobby\register.html:26
+msgid "Register"
+msgstr ""
+
+#: .\templates\Lobby\index.html:21
+msgid "or"
+msgstr ""
+
+#: .\templates\Lobby\index.html:21 .\templates\Lobby\login.html:22
+#: .\templates\Lobby\login.html:28
+msgid "Login"
+msgstr ""
+
+#: .\templates\Lobby\index.html:24
+msgid ""
+"Play online for free against other players, or create a practice game to "
+"play as all players on a single device"
+msgstr ""
+
+#: .\templates\Lobby\index.html:27
+msgid ""
+"Online play with games updating live, plus player stats, regular "
+"tournaments, options to rewind, and more"
+msgstr ""
+
+#: .\templates\Lobby\index.html:37
+msgid ""
+"Build up your fast food empire by out advertising and out producing your "
+"opponents to win the match"
+msgstr ""
+
+#: .\templates\Lobby\index.html:40
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i> Food Chain Magnate is a heavy strategy game about "
+"building a fast food chain. The focus is on building your company using a "
+"card-driven (human) resource management system. Players compete on a "
+"variable city map through purchasing, marketing and sales, and on a job "
+"market for key staff members."
+msgstr ""
+
+#: .\templates\Lobby\index.html:56
+msgid "Includes options for all expansion modules"
+msgstr ""
+
+#: .\templates\Lobby\index.html:59
+msgid ""
+"Play with 2-6 people or start a practice game to play as all players on one "
+"device."
+msgstr ""
+
+#: .\templates\Lobby\index.html:68
+msgid ""
+"Compete to build and sell the most vehicles - research and influence the "
+"market to forge your path to victory"
+msgstr ""
+
+#: .\templates\Lobby\index.html:71
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i>Horseless Carriage is a game about the dawn of the "
+"automobile: a time when cars were invented, and no one quite knew yet what "
+"this new contraption would look like, and what features would be essential. "
+"Early cars sometimes used levers or pedals to steer and a wheel to "
+"accelerate. Brakes were not always seen as essential; but sometimes an "
+"outside spot to take along an onboard mechanic was. This early, super "
+"innovative period occurs in the development of many new product categories. "
+"Players are cast as aspiring industrialists trying to find out what features "
+"the public will value when buying these new, expensive, and utterly "
+"unfamiliar horseless carriages."
+msgstr ""
+
+#: .\templates\Lobby\index.html:86 .\templates\Lobby\index.html:207
+msgid ""
+"Play with 3-5 people or start a practice game to play as all players on one "
+"device."
+msgstr ""
+
+#: .\templates\Lobby\index.html:97
+msgid ""
+"Raise your monuments to establish your empire as having the best mythology"
+msgstr ""
+
+#: .\templates\Lobby\index.html:100
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i>The Great Zimbabwe is a game about building a trade "
+"based civilization in ancient Africa. It has been inspired by the old "
+"kingdoms surrounding the Great Zimbabwe, a world heritage site in southern "
+"Africa. <br /> As always in our games, we have used this history for "
+"inspiration; however, first and foremost we wanted to create a highly "
+"playable and replayable Splotter game, so in many cases we took liberties "
+"with historical names, periods and artwork. <br /> In the game, players "
+"strive to build the most impressive monuments to one god of their choice. "
+"They can choose this god themselves - each of the twelve gods offers a "
+"unique blessing, but each also requires a different amount of work to win "
+"the game. Building the monuments is done by developing a logistics network "
+"stretching across the region. Through this network, players produce and "
+"obtain ritual goods to raise their monuments and bring honour to the god of "
+"their choice."
+msgstr ""
+
+#: .\templates\Lobby\index.html:118 .\templates\Lobby\index.html:150
+msgid ""
+"Play with 2-5 people or start a practice game to play as all players on one "
+"device."
+msgstr ""
+
+#: .\templates\Lobby\index.html:127
+msgid "Ship your goods as efficiently as possible to dominate the economy!"
+msgstr ""
+
+#: .\templates\Lobby\index.html:130
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i>Indonesia is a game in which two to five players build "
+"up an economy, trying to acquire the most money. Players acquire production "
+"companies and shipping companies, which deliver goods to cities. As cities "
+"receive goods, they grow, increasing their demands. Production companies "
+"earn money for each good delivered to a city, up to the city's capacity, but "
+"they must pay shipping companies for the distance traveled, even if they end "
+"up losing money. Players can research advantages, like greater shipping "
+"capacity or the ability to merge companies, possibly stealing ownership of "
+"lucrative plantations or shipping routes by buying out other players. <br/> "
+"Players keep their money hidden, trying to accumulate the most by the end of "
+"the third era. When only one type of a company is left, an era ends. New "
+"eras bring new cities, companies, and types of goods. At the end of the "
+"third era, the player with the most money wins. However, money earned from "
+"the last round of operations (selling/shipping goods) counts double, so it "
+"can be important to control the timing."
+msgstr ""
+
+#: .\templates\Lobby\index.html:161
+msgid ""
+"Build up your cities to exploit the countryside and please your chosen Saint!"
+msgstr ""
+
+#: .\templates\Lobby\index.html:164
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i>Antiquity is a strategy game for 2-4 players. It is "
+"set in an environment loosely modeled on Italy in the late Middle Ages. "
+"Players choose their own victory condition: they can focus on population "
+"growth, trade, conquest, or city building by choosing their patron saint. "
+"<br /> <br /> Each strategy requires a completely different style of play. "
+"Or you can choose to adore Santa Maria, the most powerful saint of all -- "
+"but you'll be expected to build a civilization twice as impressive as any "
+"other player. <br /> While your economy is constantly improving, with more "
+"and more advanced cities bringing new options each turn, the land around "
+"your cities is slowly being depleted, forcing you to travel further and "
+"further to gather your raw materials -- until finally, there is no more land "
+"left to farm. Let's hope one of you has won the game before that time!"
+msgstr ""
+
+#: .\templates\Lobby\index.html:177 .\templates\Lobby\index.html:235
+msgid ""
+"Play with 2-4 people or start a practice game to play as all players on one "
+"device."
+msgstr ""
+
+#: .\templates\Lobby\index.html:186
+msgid ""
+"Transport as many passengers as you can - but with a time altering clock in "
+"the mix, the outcome can be hard to predict!"
+msgstr ""
+
+#: .\templates\Lobby\index.html:189
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i>Beep! Beep! Bus is a game about the development of "
+"public transport in a city that is expanding quickly. The citizens are busy "
+"travelling up and down between their houses, the office and, most "
+"importantly: the pub. Your task as a player will be to develop a busline "
+"which takes as many passengers as possible to the place they want to be. You "
+"do this by expanding your busline, by developing new suburbs, by luring new "
+"potential passengers to the city and by investing in more and more buses. "
+"But you can also try to ride just a bit earlier than other companies and "
+"steal their passengers away. <br /> <br /> Sometimes, something unexpected "
+"happens: time comes to a stand-still, and all of a sudden the demand for "
+"transportation is completely different... but you cannot let this happen too "
+"often, as the time-space continuum will rupture and the universe will "
+"collapse, thus ending the game."
+msgstr ""
+
+#: .\templates\Lobby\index.html:217
+msgid ""
+"Shift your network of connections to produce and release movies in Cannes"
+msgstr ""
+
+#: .\templates\Lobby\index.html:220
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i> It's the big screen, and you're playing in the big "
+"league. Well, nearly. Maybe this year you'll make it big… Nominations are "
+"due to be published any day now, and hey, who knows, maybe you will finally "
+"get that Oscar or Palme dÓr you so deserve. Or will you? They say girlie "
+"movies like you've been making lately are going out of fashion, that the "
+"modern public has a yearning for plotless action titles. Maybe it is time to "
+"invite that rotten art critic over for drinks, and convince her of the value "
+"of your masterpieces… or tune into the old boys network and really get the "
+"show on the road."
+msgstr ""
+
+#: .\templates\Lobby\joinGameLink.html:56 .\templates\Lobby\lobby.html:161
+msgid "Cancel"
+msgstr ""
+
+#: .\templates\Lobby\joinGameLink.html:59
+msgid "The link allows you to join the following game:"
+msgstr ""
+
+#: .\templates\Lobby\joinGameLink.html:83 .\templates\Lobby\lobby.html:138
+#: .\templates\Lobby\lobby.html:187
+msgid "No Available Games"
+msgstr ""
+
+#: .\templates\Lobby\joinGameLink.html:87 .\templates\Lobby\lobby.html:143
+#: .\templates\Lobby\lobby.html:191
+#, python-format
+msgid ""
+"For icon explanations see <a class=\"linkOther\" href=\"%(the_url)s\">Help</"
+"a>"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:71
+msgid "Profile"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:72
+msgid "Log Out"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:74
+msgid "Logged in as"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:87 .\templates\Lobby\layout.html:202
+msgid "My Games"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:89 .\templates\Lobby\layout.html:208
+msgid "Stats"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:91 .\templates\Lobby\layout.html:214
+msgid "Updates"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:92 .\templates\Lobby\layout.html:161
+#: .\templates\Lobby\layout.html:217 .\templates\Lobby\layout.html:233
+msgid "About"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:93 .\templates\Lobby\layout.html:162
+#: .\templates\Lobby\layout.html:220 .\templates\Lobby\layout.html:236
+msgid "Contact"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:135
+msgid " Username"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:139
+msgid " Password"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:141
+msgid " Login"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:151
+msgid "Register New Account"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:156
+msgid "Forgot Password?"
+msgstr ""
+
+#: .\templates\Lobby\layout.html:246
+msgid ""
+"Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, "
+"Antiquity, and Indonesia are board games by Jeroen Doumen and Joris "
+"Wiersinga, published by <a href=\"https://www.splottershop.com/\" target="
+"\"_blank\">Splotter Spellen</a>. Permission Provided."
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:38
+#, python-format
+msgid ""
+"Tournament open for signup! See <a class=\"linkOther\" href=\"%(the_url)s"
+"\">Tournaments</a>"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:45
+msgid ""
+"OBG discord! Click <a href=\"https://discord.gg/hCU7Fr77yV\" class="
+"\"linkOther\" target=\"_blank\">Here</a> to join!"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:71
+msgid "Open All Games (My Turn)"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:89
+msgid "Available Games"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:90
+msgid "Available"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:96 .\templates\Lobby\playerInfo.html:193
+msgid "Current Games"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:97
+msgid "Current"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:101
+msgid "Waiting Games"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:102
+msgid "Waiting"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:105 .\templates\Lobby\lobby.html:106
+msgid "Invitations"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:229
+msgid "Colour Guide"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:231
+msgid "It is your move"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:233
+msgid "Waiting for other players to move"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:235
+msgid "Need to move - using Flexi-Time"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:237
+msgid "Need to move - could be kicked out"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:239
+msgid "Current Player is using Flex-Time"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:241
+msgid "Enter game to kickout inactive player"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:258 .\templates\Lobby\lobby.html:287
+msgid "Invited Players"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:270
+msgid "No Waiting Games"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:299
+msgid "No Invitations"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:325
+#, python-format
+msgid ""
+"Check your <a href=\"%(the_url)s\">Game Profile</a> to see all of your "
+"finished games"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:19
+msgid "Games Help"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:20
+msgid "Food Chain Magnate Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:22
+msgid "Horseless Carriage Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:24
+msgid "Bus Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:26
+msgid "The Great Zimbabwe Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:28
+msgid "Cannes Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:30
+msgid "Antiquity Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:32
+msgid "Indonesia Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:34
+msgid "Website Help"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:35
+msgid "Profile Setup"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:37
+msgid "What are the notifications?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:39
+msgid ""
+"All games update live, so you can set whether you wish to hear a beep, bell, "
+"or nothing if a game has an update whilst the game page is open. <br /> In "
+"addition, you can add email notifications, discord notifications, and slack "
+"notifications. <br /> Notifications will be sent when it is your turn, when "
+"you are invited to a game, when a game finishes, etc. <br /> You will also "
+"be notified when your turn is about to expire and you could be kicked out of "
+"a game."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:51 .\templates\Lobby\profile copy.html:81
+#: .\templates\Lobby\profile.html:89
+msgid "Email Notifications"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:53
+msgid ""
+"It is recommended that you use discord / slack / telegram notifications. "
+"<br /> THe email system can occasionally have issues, but it is usually "
+"reliable. <br /> Make sure you check your junk/spam folders to ensure emails "
+"are being delivered properly. <br /> If you don't need email notifications, "
+"then please disable them, as they can lead to cost issues. <br /> Some "
+"important emails will still be sent."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:66
+msgid "How can I add a Discord Notification?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:68
+msgid ""
+"You can add Discord notifications to one of your servers, or an existing "
+"server where you have administrator privileges. <br /> To set up your own "
+"free server, <a href=\"https://support.discord.com/hc/en-us/"
+"articles/204849977-How-do-I-create-a-server-\" target=\"_blank\">click here</"
+"a>. <br /> To set up a webhook and find the URL to copy into your Online "
+"Board Gamers Profile, <a href=\"https://support.discord.com/hc/en-us/"
+"articles/228383668-Intro-to-Webhooks\" target=\"_blank\">click here</a>. "
+"<br /> Follow the guide to set up a webhook and \"Copy Webhook URL\". Then "
+"paste the link in to your profile on Online Board Gamers. <br /> Note that "
+"Discord notifications have to be sent to a channel, not to your private "
+"messages."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:87
+msgid "How can I add a Slack Notification?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:89
+msgid ""
+"Create a slack app and enable/create an incoming Webhook. Set it to post to "
+"a channel or your private messages. Then paste the link in to your profile "
+"on Online Board Gamers. <br /> For details on each step, <a href=\"https://"
+"api.slack.com/messaging/webhooks\" target=\"_blank\">click here</a>."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:97
+msgid "How can I add a Telegram Notification?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:99
+msgid ""
+"Start by initiating a chat with @OnlineBoardGamers_Bot using this link: <br /"
+"> <a href=\"https://t.me/OnlineBoardGamers_Bot\" target=\"_blank\">https://t."
+"me/OnlineBoardGamers_Bot</a> <br /> Send any message to the bot. <br /> To "
+"enable notifications, you need to add your User ID to your profile page at "
+"OnlineBoardGamers. <br /> The easiest way to do this is to search for the "
+"\"userinfobot\" in the search bar on Telegram. <br /> Say anything to it, "
+"such as \"/start\", or \"hello\", and it should reply with your details, "
+"starting with a 10 digit user ID. <br /> Copy and paste this into your "
+"profile, and then add and test the webhook. <br />"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:117
+msgid "Lobby"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:121
+msgid ""
+"<b>Note:</b> There are no specific starting options for HC, Bus, and "
+"Antiquity"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:124
+msgid "What are the kickout icons?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:126
+msgid ""
+"Kickout icons indicate how long someone has to be inactive before they can "
+"be kicked out - this is the hard limit on the speed of a game."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:174 .\templates\Lobby\lobbyHelp.html:175
+msgid "Kickout after 2 days"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:182 .\templates\Lobby\lobbyHelp.html:183
+msgid "Kickout after 3 days"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:190 .\templates\Lobby\lobbyHelp.html:191
+msgid "Kickout after 5 days"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:196
+msgid "What are the times displayed in the lobby?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:198
+msgid ""
+"Times are displayed according to the timezone of your device - so all times "
+"will be in local time, in 24 hour format. Tp be preciese, it uses the "
+"country setting in your browser. <br /> The elapsed times underneath the "
+"date/times, eg 1h 5m 23s, indicates the amount of time that has passed since "
+"the last move was made, or since the game was created."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:207
+msgid "What are the game columns?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:209
+msgid ""
+"Available Games - Games that are available to join and are not waiting for a "
+"repsonse from invited players <br /> Current Games - Games you are currently "
+"playing <br /> Waiting Games - Games you have joined, but are waiting for "
+"more players (either invited players or open to anyone) <br /> Invitations - "
+"Games you have been invited to play <br /> Finished Games - Your finished "
+"games. Games you have resigned or been kicked from will stop showing under "
+"\"Current Games\" but will show here once they are finished <br />"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:222
+msgid ""
+"If you create a game open to anyone, it will be shown under your \"Waiting "
+"Games\" and also visible in \"Available Games\". <br /> If you create a game "
+"and invite other players, it will be shown under your \"Waiting Games\" "
+"only, until all invited players have responded."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:229
+msgid "How can I leave a game that hasn't started?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:231
+msgid ""
+"Under \"Waiting Games\" there is a \"Leave\" button on the right. If you are "
+"not waiting for specific players to join, you can also see the game under "
+"\"Available Games\", with a \"Leave\" button on the left."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:235
+msgid "Game Setup"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:237
+msgid "What is a Practice Game?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:239
+msgid ""
+"With a Practice Game, you will play as any number of players on the same "
+"device. <br /> You will make ALL the moves, and it otherwise functions as a "
+"normal game. <br /> This is useful for learning a game, testing strategies "
+"or trying new options!"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:248
+msgid "What is a Learning Game?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:250
+msgid ""
+"Tick the \"Request Learning Game\" option to request help with learning the "
+"game. <br /> <ul> <li>When someone tries to join this game, it will notify "
+"them that the creator has requested a learning game</li> <li>Use the in-game "
+"chat, discord, or another convenient method to chat with your trainer</li> "
+"<li>This game will be excluded from the stats</li> <li>2 Player Only</li> "
+"<li> <b>Be aware that this does not force the person joining the game to "
+"help you; it is just a request. Usually people will only join these games if "
+"they are willing to help out though. </b> </li> </ul>"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:265
+msgid "What is an Experienced Game?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:267
+#, python-format
+msgid ""
+"An Experienced Game requires a minimum experience level in order to join. "
+"This is to ensure only players with experience of the game, and experience "
+"of this site join the game. The aim is to reduce the chance of someone "
+"abandoning the game and needing to be kicked out. <br /> You need to have a "
+"Fair Play rating of at least <b>80%%</b> in order to join an Experienced "
+"Game.<br/> <br/> There is no required skill level; just a willingness to "
+"finish the game! <br /> <ul> <li>Food Chain Magnate requires 2 finished, non-"
+"practice games</li> <li>Horseless Carriage requires 1 finished, non-practice "
+"game</li> <li>Bus requires 1 finished, non-practice game</li> <li>The Great "
+"Zimbabwe requires 2 finished, non-practice games</li> <li>Cannes requires 2 "
+"finished, non-practice games</li> <li>Antiquity requires 2 finished, non-"
+"practice games</li> </ul> If you do not yet meet these requirements, and are "
+"unable to join an available game, then try starting your own game and "
+"allowing anyone to join. Learning Games do count towards your experience "
+"level."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:289
+msgid "What does the Playing Speed option do?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:291
+msgid ""
+"The Playing Speed option mainly gives other players an idea of how fast you "
+"want the game to play. It is also linked to the options for the length of "
+"time before an inactive player is removed. Please note that often with 4 or "
+"more random players then more than 1 or 2 moves a day could be difficult, "
+"especially if people are in different time zones. With 2 or 3 players "
+"however, it is certainly possible to play several games in an evening!"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:301
+msgid "How much time do I have left in a game?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:303
+msgid ""
+"You can see a timer counting down to the next kickout in the top right, "
+"underneath where it says who you are logged in as. In fact, any game that is "
+"within 20 minutes of a kickout will display the timer. No one will be kicked "
+"out until a player enters the game who isn't currently required to move, and "
+"then they need to also confirm that they would like to proceed with the "
+"kickout. All games will auto-update live, but if you are playing with "
+"5/10/20 minute kickout and your opponent doesn't appear to be moving, then "
+"it is worth refreshing the game, in case you lost internet signal at the "
+"same time the game update signal arrived."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:316
+msgid "General Gameplay"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:318
+#: .\templates\Lobby\tournamentsHelp.html:96
+msgid "How do kickouts work?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:320
+msgid ""
+"For every game with a kickout of 12 hours or above each player is alloted a "
+"\"Flex-Time\" of 24 hours. If someone is inactive for longer than the "
+"kickout duration set during game creation, then their Flex-Time will start "
+"reducing. Once they have used all their Flex-Time, the game will have a bold "
+"yellow highlight in your \"Current Games\" list. You can click on the game "
+"to enter it, and will then be asked if you wish to kick the player, or allow "
+"them more time. <br /> If you do kickout the player, they will be replaced "
+"by a passive Bot, who just passes every move. <br /> Flex-Time is on a per-"
+"game basis - each player has 24 hours of Flex-Time for the whole game. <br /"
+"> Remaining Flex-Time can be viewed at the bottom of the \"Reserve\" screen, "
+"or underneath the board in Bus."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:335
+msgid "What if I don't want to use kickouts"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:337
+msgid ""
+"No player is ever forced to kick another player. In order to kickout another "
+"player, you must enter a game that has timed out, and then confirm that you "
+"would like to proceed with the kickout. So if you don't wish to use the "
+"kickout then simply agree not to actively kick any player who hasn't moved. "
+"<br /> The longest timer is 5 days. If you are playing with friends you can "
+"agree not to kick anyone out if they go over this limit. For games with "
+"random players, it is not really fair to make people wait more than 5 days "
+"for a single move. If you do need some extra time, then ask the other "
+"players using the in-game chat, and most people are fine to wait a bit "
+"longer."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:350
+msgid "What is the penalty for being kicked out?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:352
+msgid ""
+"Everyone makes mistakes, the first kickout in a year will only count as a "
+"loss, and not a kickout. Any further kicks will negate a win for your "
+"statistics. In addition, if you are kicked out of a tournament game you will "
+"be removed from the tournament."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:359
+msgid "When can I resign?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:361
+msgid ""
+"Resignation is available in all games, although it is discouraged in 3p+ "
+"games. Resigning could unbalance the game for the remaning players, so it is "
+"stronly encouraged to stay in the game, and try to meet an alternate "
+"objective (eg don't come last, sell the most trucks, use all the marketeers, "
+"etc). <br /> <b><u>Food Chain Magnate</b></u>: You can resign during any "
+"Restructure phase. You can also resign at the confirmation options when "
+"placing your initial restaurant. This will allow you to exit games you "
+"didn't mean to join. It will still count as a loss in your statistics. <br /"
+"> <b><u>Horseless Carriage</b></u>:  You can resign during the Research "
+"phase. <br /> <b><u>Bus</b></u>: You can resign during your \"Choose Actions"
+"\" phase. <br /> <b><u>The Great Zimbabwe</b></u>: You can resign during "
+"your actions phase; as long as no one has exceeded their VR. In this case "
+"the game will end in the current round anyway. <br /> <b><u>Cannes</b></u>: "
+"You can resign during your \"place tiles\" phase. <br /> <b><u>Antiquity</"
+"b></u>: You can resign during your \"City Build\" phase."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:383
+msgid "What is the penalty for Resigning?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:385
+msgid ""
+"Please note that although resigning is discourageed in 3p+ games, at Online "
+"Board Gamers players will never be penalised if they choose to resign. "
+"Sometimes it is a valid (and best!) option. It will count as a loss."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:395
+msgid "Tournaments Help"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:4
+msgid "What are the icons?"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:6
+msgid ""
+"The icons represent the options selected for that game. You can hover over "
+"the icon to see what it represents."
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:9
+msgid "All Games"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:17
+msgid ""
+"Learning Game - See <a class='linkOther' href='/help/#navGameType'>Help</a>"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:25
+msgid ""
+"Experienced Game - See <a class='linkOther' href='/help/#navGameType'>Help</"
+"a>"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:226
+#: .\templates\Lobby\lobby_icons.html:234
+#: .\templates\Lobby\lobby_icons.html:235
+#: .\templates\Lobby\lobby_icons.html:320
+#: .\templates\Lobby\lobby_icons.html:328
+msgid "Selected gods"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:242
+#: .\templates\Lobby\lobby_icons.html:243
+msgid "Selected gods with altered VR"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:250
+#: .\templates\Lobby\lobby_icons.html:251
+msgid "Altered Spec VR"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:269
+#: .\templates\Lobby\lobby_icons.html:270
+msgid "Small Table"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:293
+#: .\templates\Lobby\lobby_icons.html:294
+msgid "Low Table Junk"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:301
+#: .\templates\Lobby\lobby_icons.html:302
+msgid "Medium Table Junk"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:309
+#: .\templates\Lobby\lobby_icons.html:310
+msgid "High Table Junk"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:329
+msgid "Use Aegean Map Expansion"
+msgstr ""
+
+#: .\templates\Lobby\login.html:24
+msgid "Username"
+msgstr ""
+
+#: .\templates\Lobby\login.html:32
+msgid "Forgotten your password? Click here to send a reset email"
+msgstr ""
+
+#: .\templates\Lobby\newGames.html:62
+msgid "FCM Map Editor"
+msgstr ""
+
+#: .\templates\Lobby\newGames.html:69
+msgid "TGZ Map Editor"
+msgstr ""
+
+#: .\templates\Lobby\newGames.html:76
+msgid "Antiquity Map Editor"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:25
+msgid "Player Stats"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:76
+msgid "Games"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:77 .\templates\Lobby\stats.html:255
+#: .\templates\Lobby\stats.html:300 .\templates\Lobby\stats.html:345
+#: .\templates\Lobby\stats.html:392 .\templates\Lobby\stats.html:437
+#: .\templates\Lobby\stats.html:482 .\templates\Lobby\stats.html:529
+#: .\templates\Lobby\stats.html:574 .\templates\Lobby\stats.html:619
+#: .\templates\Lobby\stats.html:666 .\templates\Lobby\stats.html:711
+#: .\templates\Lobby\stats.html:756 .\templates\Lobby\stats.html:803
+#: .\templates\Lobby\stats.html:848 .\templates\Lobby\stats.html:893
+#: .\templates\Lobby\stats.html:940 .\templates\Lobby\stats.html:985
+#: .\templates\Lobby\stats.html:1030
+msgid "Wins"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:78 .\templates\Lobby\stats.html:274
+#: .\templates\Lobby\stats.html:319 .\templates\Lobby\stats.html:364
+#: .\templates\Lobby\stats.html:411 .\templates\Lobby\stats.html:456
+#: .\templates\Lobby\stats.html:501 .\templates\Lobby\stats.html:548
+#: .\templates\Lobby\stats.html:593 .\templates\Lobby\stats.html:638
+#: .\templates\Lobby\stats.html:685 .\templates\Lobby\stats.html:730
+#: .\templates\Lobby\stats.html:775 .\templates\Lobby\stats.html:822
+#: .\templates\Lobby\stats.html:867 .\templates\Lobby\stats.html:912
+#: .\templates\Lobby\stats.html:959 .\templates\Lobby\stats.html:1004
+#: .\templates\Lobby\stats.html:1049
+#, python-format
+msgid "Win %%"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:119
+msgid "Kickouts in last year"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:120
+msgid "Fair Play rating for last year"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:137
+msgid "Joint Current Games"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:160
+msgid "No Joint Current Games"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:163
+msgid "Joint Finished Games"
+msgstr ""
+
+#: .\templates\Lobby\playerInfo.html:189
+msgid "No Joint Finished Games"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:28 .\templates\Lobby\profile.html:30
+msgid "Live notification when it is your turn"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:35 .\templates\Lobby\profile.html:37
+msgid "No Sound"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:48 .\templates\Lobby\profile.html:50
+msgid "Beep"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:61 .\templates\Lobby\profile.html:63
+msgid "Dinner Bell"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:71
+msgid "Notifications"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:152
+msgid "Discord Notifications"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:159
+msgid "Discord Webhook URL, EG"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:161
+msgid ""
+"18 Digit Discord User ID - if you wish to be @'d with your webhook (Advanced "
+"Option - leave blank if unsure - see <a class='linkOther' href='https://"
+"support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-"
+"Server-Message-ID-'' target='_blank'>here</a>)"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:167 .\templates\Lobby\profile.html:382
+msgid ""
+"Optional: Leave blank if unsure. Input 18 digit discord user ID if you wish "
+"to include '@'"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:169
+msgid "Test Discord Webhook URL"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:172
+msgid "To find your Discord Webhook URL see"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:188
+msgid "Slack Notifications"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:195
+msgid " Slack Webhook URL, EG"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:197
+msgid "Test Slack Webhook URL"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:200
+msgid "To find your Slack Webhook URL see"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:208 .\templates\Lobby\profile.html:313
+msgid "Update Notification Preferences"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:218 .\templates\Lobby\profile.html:401
+msgid "Favourite Food Chain Magnate Restaurant"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:221 copy.html:314 copy.html:382
+#: copy.html:484 copy.html:564 .\templates\Lobby\profile.html:404
+#: .\templates\Lobby\profile.html:497 .\templates\Lobby\profile.html:565
+#: .\templates\Lobby\profile.html:667 .\templates\Lobby\profile.html:747
+#: .\templates\Lobby\profileAQY.html:33 .\templates\Lobby\profileIND.html:69
+msgid "None"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:298 .\templates\Lobby\profile.html:481
+msgid "High Contrast FCM Board Items"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:307 .\templates\Lobby\profile.html:490
+msgid ""
+"Use high contrast board demand (items have white outline instead of black)"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:311 .\templates\Lobby\profile.html:494
+msgid "Favourite Horseless Carriage Colour"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:379 .\templates\Lobby\profile.html:562
+msgid "Favourite Bus Colour and Board"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:481 .\templates\Lobby\profile.html:664
+msgid "Favourite The Great Zimbabwe Colour"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:549 .\templates\Lobby\profile.html:732
+msgid "Minimal Description Text in the UI"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:558 .\templates\Lobby\profile.html:741
+msgid "Tick to remove god and specialist descriptions/VR below the cards"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:561 .\templates\Lobby\profile.html:744
+msgid "Favourite Cannes Colour"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:627 .\templates\Lobby\profile.html:811
+msgid "Update Game Preferences"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:631 .\templates\Lobby\profile.html:815
+msgid "Dedicated Antiquity Preferences Page"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:634 .\templates\Lobby\profile.html:818
+msgid "Dedicated Indonesia Preferences Page"
+msgstr ""
+
+#: .\templates\Lobby\profile copy.html:641 .\templates\Lobby\profile.html:825
+msgid "Change Password"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:73
+msgid "Browser Notifications"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:76
+msgid ""
+"Enabling this will allow your brower to send you a notification when it is "
+"your turn. <br /> This will only work if you have the browser tab open. <br /"
+"> You will need to click the button below, and then \"allow\" notifications "
+"when your browser asks."
+msgstr ""
+
+#: .\templates\Lobby\profile.html:87
+msgid "Request Browser Notifications"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:92
+msgid ""
+"Select which emails you would like to receive <br /> Please consider setting "
+"up a webhook instead, as it's more reliable and you will receive all "
+"notifications. <br /> Make sure you add admin[at]onlineboardgamers.com to "
+"your email whitelist. <br /> Check your spam folder if you aren't receiving "
+"emails."
+msgstr ""
+
+#: .\templates\Lobby\profile.html:105
+msgid "Category"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:106
+msgid "Email Type"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:107
+msgid "Yes"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:108
+msgid "No"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:113 .\templates\Lobby\profile.html:114
+msgid "Your turn"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:131
+msgid "Essential"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:132
+msgid "Game Invite"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:150
+msgid "Turn Expired"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:168
+msgid "Tournament Game Start"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:186
+msgid "Tournament Win "
+msgstr ""
+
+#: .\templates\Lobby\profile.html:203
+msgid "Information"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:204
+msgid "Invite Decline"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:222
+msgid "Game Start"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:258
+msgid "2 Hour Reminder"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:276
+msgid "Tournament Open"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:293
+msgid "Daily Reminder"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:294
+msgid "Reminder if not moved for over 24 hrs"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:345
+msgid "Test Webhook"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:347
+msgid "Delete"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:829
+msgid "Player Blacklist"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:831
+msgid ""
+"Players added to your blacklist will not be able to join your Available Games"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:833
+msgid "You will also not see games they create in your Available Games"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:845
+msgid "Enter player name"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:848
+msgid "Blacklist player"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:29 .\templates\Lobby\profileIND.html:32
+msgid "Favourite Colour"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:100 .\templates\Lobby\profileIND.html:315
+msgid "Select Map Display Type"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:103
+msgid ""
+"You can choose the Original Map, Original Map with a coloured overlay "
+"(Hybrid), or Solid Colours"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:156
+msgid "Select Resource Icon Type"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:159
+msgid "You can choose Original icons, or add a Solid Colour Border"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:196
+msgid "Pull Resources to Worker"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:199
+msgid ""
+"You can choose have the resources centered, or pulled towards the Worker"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:237
+msgid "Keep Forest under Wood"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:240
+msgid "You can choose to keep or remove the forest underneath a wood resource"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:278
+msgid "Show Pollution under Resource"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:281
+msgid "You can choose to show or hide pollution underneath a resource"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:319
+msgid "Set Housing Order"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:322
+msgid "You can choose to have houses arranged by Cost or Number"
+msgstr ""
+
+#: .\templates\Lobby\profileAQY.html:376
+msgid "Update Antiquity Preferences"
+msgstr ""
+
+#: .\templates\Lobby\profileIND.html:318
+msgid "You can choose the 2nd edition map, 3rd edition map, or a hex style map"
+msgstr ""
+
+#: .\templates\Lobby\profileIND.html:373
+msgid "City Size Colours"
+msgstr ""
+
+#: .\templates\Lobby\profileIND.html:408
+msgid "Ship Icon Style"
+msgstr ""
+
+#: .\templates\Lobby\profileIND.html:445
+msgid "Goods Icon Style"
+msgstr ""
+
+#: .\templates\Lobby\profileIND.html:482
+msgid "Initial Territory Outline Setting"
+msgstr ""
+
+#: .\templates\Lobby\profileIND.html:519
+msgid "Update Indonesia Preferences"
+msgstr ""
+
+#: .\templates\Lobby\register.html:38
+msgid "Already have an account?"
+msgstr ""
+
+#: .\templates\Lobby\register.html:38
+msgid "Log In here"
+msgstr ""
+
+#: .\templates\Lobby\schism.html:30
+msgid "Private Games - Available to Join"
+msgstr ""
+
+#: .\templates\Lobby\schism.html:51
+msgid "No Private Games"
+msgstr ""
+
+#: .\templates\Lobby\schism.html:54
+msgid "Active Games"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:21
+msgid "Food Chain Magnate Stats"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:24
+msgid "The Great Zimbabwe Stats"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:26
+msgid "Current Users"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:27
+msgid "Games (non-practice) in Progress"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:83
+msgid "Finished Games (non-practice)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:139
+msgid "Active users in last 24hrs"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:140
+msgid "Top Players"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:200 .\templates\Lobby\stats.html:220
+msgid "Fair Play League"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:204
+msgid "2 Player"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:205
+msgid "3 Player"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:206
+msgid "4 Player"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:207
+msgid "5 Player"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:208
+msgid "6 Player"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:211
+msgid "All Time"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:212
+msgid "Last 3 Months"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:213
+msgid "Last Month"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:221
+#, python-format
+msgid ""
+"This is a table of %% completed games in the last year, along with total "
+"completed games in the last year"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:225 .\templates\Lobby\stats.html:254
+#: .\templates\Lobby\stats.html:273 .\templates\Lobby\stats.html:299
+#: .\templates\Lobby\stats.html:318 .\templates\Lobby\stats.html:344
+#: .\templates\Lobby\stats.html:363 .\templates\Lobby\stats.html:391
+#: .\templates\Lobby\stats.html:410 .\templates\Lobby\stats.html:436
+#: .\templates\Lobby\stats.html:455 .\templates\Lobby\stats.html:481
+#: .\templates\Lobby\stats.html:500 .\templates\Lobby\stats.html:528
+#: .\templates\Lobby\stats.html:547 .\templates\Lobby\stats.html:573
+#: .\templates\Lobby\stats.html:592 .\templates\Lobby\stats.html:618
+#: .\templates\Lobby\stats.html:637 .\templates\Lobby\stats.html:665
+#: .\templates\Lobby\stats.html:684 .\templates\Lobby\stats.html:710
+#: .\templates\Lobby\stats.html:729 .\templates\Lobby\stats.html:755
+#: .\templates\Lobby\stats.html:774 .\templates\Lobby\stats.html:802
+#: .\templates\Lobby\stats.html:821 .\templates\Lobby\stats.html:847
+#: .\templates\Lobby\stats.html:866 .\templates\Lobby\stats.html:892
+#: .\templates\Lobby\stats.html:911 .\templates\Lobby\stats.html:939
+#: .\templates\Lobby\stats.html:958 .\templates\Lobby\stats.html:984
+#: .\templates\Lobby\stats.html:1003 .\templates\Lobby\stats.html:1029
+#: .\templates\Lobby\stats.html:1048
+msgid "Player"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:226
+#, python-format
+msgid "Completion %%"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:227
+msgid "Total Games"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:250
+msgid "Win Totals"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:269
+msgid "Win Percentages"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:288 .\templates\Lobby\stats.html:425
+#: .\templates\Lobby\stats.html:562 .\templates\Lobby\stats.html:699
+#: .\templates\Lobby\stats.html:836 .\templates\Lobby\stats.html:973
+msgid ""
+"Win stats are calculated hourly. You need to complete at least 5 games. "
+"Practice games do not count towards your win stats"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:295
+msgid "Win Totals (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:314
+msgid "Win Percentages (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:333 .\templates\Lobby\stats.html:378
+#: .\templates\Lobby\stats.html:470 .\templates\Lobby\stats.html:515
+#: .\templates\Lobby\stats.html:607 .\templates\Lobby\stats.html:652
+#: .\templates\Lobby\stats.html:744 .\templates\Lobby\stats.html:789
+#: .\templates\Lobby\stats.html:881 .\templates\Lobby\stats.html:926
+#: .\templates\Lobby\stats.html:1018 .\templates\Lobby\stats.html:1063
+#, python-format
+msgid ""
+"Win stats are calculated hourly. You need to complete at least 5 games to be "
+"included in the %% stats. Practice games do not count towards your win stats"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:340
+msgid "Win Totals (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:359
+msgid "Win Percentages (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:387
+msgid "Win Totals 2p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:406
+msgid "Win Percentages 2p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:432
+msgid "Win Totals 2p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:451
+msgid "Win Percentages 2p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:477
+msgid "Win Totals 2p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:496
+msgid "Win Percentages 2p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:524
+msgid "Win Totals 3p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:543
+msgid "Win Percentages 3p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:569
+msgid "Win Totals 3p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:588
+msgid "Win Percentages 3p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:614
+msgid "Win Totals 3p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:633
+msgid "Win Percentages 3p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:661
+msgid "Win Totals 4p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:680
+msgid "Win Percentages 4p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:706
+msgid "Win Totals 4p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:725
+msgid "Win Percentages 4p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:751
+msgid "Win Totals 4p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:770
+msgid "Win Percentages 4p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:798
+msgid "Win Totals 5p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:817
+msgid "Win Percentages 5p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:843
+msgid "Win Totals 5p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:862
+msgid "Win Percentages 5p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:888
+msgid "Win Totals 5p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:907
+msgid "Win Percentages 5p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:935
+msgid "Win Totals 6p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:954
+msgid "Win Percentages 6p"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:980
+msgid "Win Totals 6p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:999
+msgid "Win Percentages 6p (Last 3 Months)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:1025
+msgid "Win Totals 6p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:1044
+msgid "Win Percentages 6p (Last Month)"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:1067
+msgid "Ten most recently active games"
+msgstr ""
+
+#: .\templates\Lobby\stats.html:1108
+msgid "Ten most recently finished games"
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:21
+msgid "When are the tournaments?"
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:25
+msgid ""
+"<b>Indonesia, Horseless Carriage, Antiquity, and Bus</b>: Tournaments are "
+"run at regular intervals<br/> They open on 1st of the month, and start on "
+"7th, or later if more people are needed. <br/> The format is randomly chosen "
+"from Rounds, Two Lives, and Points."
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:35
+msgid "Month"
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:60
+msgid "What are the formats?"
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:62
+msgid ""
+"<b>Rounds</b> consists of (currently) 4 rounds, where all players are "
+"included in the games, after which there is a short knockout of all players "
+"on top points to determine the overall winner. <br /> <br /> <b>Two Lives</"
+"b> is like double elimination; once you've lose twice then you're out of the "
+"tournament. <br /> <br /> <b>Points</b> functions the same as Rounds, except "
+"that instead of “winner takes all”, points awards points per position - "
+"unlike the other formats which are winner takes all. 5 player games award "
+"16 / 8 / 4 / 2 / 1 points, 4 player games award 8 / 4 / 2 / 1 points, and 3 "
+"player games award 4 / 2 / 1 points per position (note that in a single "
+"tournaments all games will have the same number of players). <br /> <br /> "
+"<b>Knockout</b> is simply the winner moves to the next round. This format "
+"will not be used in the regular schedule above, in order to get all players "
+"more games."
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:81
+msgid "How are game players decided?"
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:83
+msgid ""
+"Initially game players are drawn randomly. After this, players are ranked by "
+"number of wins / (or points in a points. tournament). In 2p, players will "
+"play the closest people to them that thay haven't already played. For 3p+ "
+"the system will try to group people who haven’t played together, but there’s "
+"a higher chance you might end up seeing the same person more than once. <br /"
+"> If there are any players left over, they receive a \"Bye\", which counts "
+"as an automatic win (or half max points in a points tournament), and "
+"progress to the next round. \"Byes\" will generally be given to the lowest "
+"ranked players, and are limited to one per tournament. Essentially \"Byes\" "
+"are given randomly to the lowest ranked player who hasn't yet had a \"Bye\"."
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:98
+msgid ""
+"If someone is kicked out then they are ejected from the tournament. They "
+"will lose both lives in Two Lives, and be removed from a Rounds/Points "
+"tournament."
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:104
+msgid "What else should I know?"
+msgstr ""
+
+#: .\templates\Lobby\tournamentsHelp.html:106
+msgid ""
+"Players will not play the same person again until there's no other option "
+"(currently applies to 2p games, and the first 2 players in larger "
+"playercounts). <br /> Players will not receive two \"byes\" until there's no "
+"other option. <br /> Kickout timer will be 1 day, with the exception of the "
+"first move which will be 3 days, in case players don't realise a game has "
+"started. <br /> Notifications are sent out at the start of every new "
+"tournament game. If you finish quickly there could be several days until "
+"your next game starts, so it is strongly recommended to have at least one "
+"form of notification enabled in your profile."
+msgstr ""
+
+#: .\views.py:473
+msgid "Password Reset Requested"
+msgstr ""
+
+#: .\views.py:491
+msgid ""
+"An email with password reset instructions has been sent to your inbox. "
+"Please check spam folders"
+msgstr ""
+
+#: .\views.py:494
+msgid "No user found with this email"
+msgstr ""
+
+#: .\views.py:496
+msgid "Please enter a valid email address"
+msgstr ""
+
+#: .\views.py:503
+msgid ""
+"Authentification problem - possibly using another browser tab. Please login "
+"here"
+msgstr ""
+
+#: .\views.py:679
+msgid "Thank you for taking a look"
+msgstr ""
+
+#: .\views.py:849
+msgid ""
+"Account inactive - check your email for email verification, or contact the "
+"webmaster"
+msgstr ""
+
+#: .\views.py:853
+msgid "Invalid username / password"
+msgstr ""
+
+#: .\views.py:899
+msgid "Your password has been changed"
+msgstr ""
+
+#: .\views.py:934
+msgid "Your colour preferences have been updated successfully"
+msgstr ""
+
+#: .\views.py:1025
+msgid ""
+"A test message has been sent and your notification preferences have been "
+"updated successfully"
+msgstr ""
+
+#: .\views.py:1027
+msgid "Your notification preferences have been updated successfully"
+msgstr ""
+
+#: .\views.py:1126
+msgid "Your Antiquity preferences have been updated successfully"
+msgstr ""
+
+#: .\views.py:1168
+msgid "Your Indonesia preferences have been updated successfully"
+msgstr ""
+
+#: .\views.py:1204 .\views.py:1239 .\views.py:1275 .\views.py:1316
+#: .\views.py:1351 .\views.py:1388 .\views.py:1427 .\views.py:1461
+#: .\views.py:1484 .\views.py:1520
+msgid "Game does not exist"
+msgstr ""
+
+#: .\views.py:1211 .\views.py:1246 .\views.py:1282 .\views.py:1323
+#: .\views.py:1358 .\views.py:1395 .\views.py:1434 .\views.py:1491
+#: .\views.py:1537
+msgid "Game creation for rematch"
+msgstr ""
+
+#: .\views.py:1302 .\views.py:1413 .\views.py:1452 .\views.py:1557
+msgid "Game creation for selected map"
+msgstr ""
+
+#: .\views.py:1578
+msgid "Email Address Already Registered"
+msgstr ""
+
+#: .\views.py:1582
+msgid "Username already taken"
+msgstr ""
+
+#: .\views.py:1589
+msgid "Activate Your Online Gaming Account"
+msgstr ""
+
+#: .\views.py:1602
+#, python-format
+msgid ""
+"Please check %(emailAddress)s to confirm your email address and complete "
+"registration"
+msgstr ""
+
+#: .\views.py:1622
+msgid ""
+"Your account has been activated<br/>Enable Email, Discord, and Slack "
+"notifications here on your profile, and then return to the Home Page to view "
+"games"
+msgstr ""
+
+#: .\views.py:1625
+msgid ""
+"The confirmation link was invalid, possibly because it has already been "
+"used. If you think your email client scanned the link, then try to log in "
+"anyway"
+msgstr ""
+
+#: .\views.py:1639
+msgid ""
+"Thank you for your email confirmation. Now you can login to your account"
+msgstr ""
+
+#: .\views.py:1641
+msgid "Activation link is invalid"
+msgstr ""
+
+#: .\views.py:1648
+msgid "Player does not exist"
+msgstr ""
+
+#: .\views.py:1893 .\views.py:1916
+msgid "Tournament does not exist"
+msgstr ""
+
+#: .\views.py:1899
+msgid "You have joined the Tournament"
+msgstr ""
+
+#: .\views.py:1901
+msgid "The Tournament is already full"
+msgstr ""
+
+#: .\views.py:1974 .\views.py:2100
+msgid "Invalid Game Join Link"
+msgstr ""
+
+#: .\views.py:1990 .\views.py:2026
+msgid "Sorry, the game no longer exists"
+msgstr ""
+
+#: .\views.py:1994
+msgid "Sorry, the game is full"
+msgstr ""
+
+#: .\views.py:2012
+msgid "You must be logged in to join a game"
+msgstr ""
+
+#: .\views.py:2043
+msgid "Illegal Access"
+msgstr ""
+
+#: .\views.py:2049
+msgid "The game has already started"
+msgstr ""
+
+#: .\views.py:2055
+msgid "You have left the game - it has been deleted"
+msgstr ""
+
+#: .\views.py:2057
+msgid "You have left the game - it is available for players to join"
+msgstr ""
+
+#: .\views.py:2065
+msgid "You have declined the invitation - it is available for players to join"
+msgstr ""
+
+#: .\views.py:2068
+msgid "You have declined the invitation"
+msgstr ""
+
+#: .\views.py:2071
+msgid ""
+"You have declined the invitation - the game is waiting for other invitees to "
+"respond"
+msgstr ""
+
+#: .\views.py:2112
+msgid "Sorry, the game does not exist"
+msgstr ""
+
+#: .\views.py:2123
+msgid "Sorry, someone else joined the game and it is full"
+msgstr ""
+
+#: .\views.py:2128
+msgid "Sorry, the game has already finished"
+msgstr ""
+
+#: .\views.py:2133
+msgid ""
+"The host set the usernames of players allowed to join. Unfortunately, you "
+"are not allowed to join this game"
+msgstr ""
+
+#: .\views.py:2138
+msgid "You have already joined this game"
+msgstr ""
+
+#: .\views.py:2143
+msgid "The creator has blocked you from joining their games"
+msgstr ""
+
+#: .\views.py:2181
+msgid ""
+"Not enough Experience. Plese see <a class=\"linkOther\" href=\"/help/"
+"#navGameType\">Help</a><br/>Current Experience Requirements:<br/><br/>FCM: 2 "
+"Games<br/>HC: 1 Game<br/>Bus: 1 Game<br/>TGZ: 2 Games<br/>Cannes:2 Games<br/"
+">Antiquity:2 Games<br/><br/>You may start your own game <a class=\"linkOther"
+"\" href=\"/newGames/\">Here</a>"
+msgstr ""
+
+#: .\views.py:2231
+#, python-brace-format
+msgid ""
+"Your Fair Play rating is too low: {fairplay}%. Please see <a class="
+"\"linkOther\" href=\"/help/#navGameType\">Help</a><br/><br/>"
+msgstr ""
+
+#: .\views.py:2253
+msgid "You have joined the game and the game has started"
+msgstr ""
+
+#: .\views.py:2257
+msgid "You have joined the game - waiting for more players"
+msgstr ""
+
+#: .\views.py:2363 .\views.py:2720
+msgid "Please enter a Valid Discord Webhook URL"
+msgstr ""
+
+#: .\views.py:2367 .\views.py:2371 .\views.py:2732 .\views.py:2736
+msgid "Discord User ID must be an 18+ digit number"
+msgstr ""
+
+#: .\views.py:2377 .\views.py:2387
+msgid "This is a test message from Online Board Gamers"
+msgstr ""
+
+#: .\views.py:2384 .\views.py:2726
+msgid "Please enter a Valid Slack Webhook URL"
+msgstr ""
+
+#: .\views.py:2406
+msgid "Server Error"
+msgstr ""
+
+#: .\views.py:2705
+msgid "Entry too long"
+msgstr ""
+
+#: .\views.py:2714
+msgid "Please enter a valid webhook URL"
+msgstr ""
+
+#: .\views.py:2747
+msgid "Please enter a Telegram user ID"
+msgstr ""
+
+#: .\views.py:2751
+msgid "Telegram user ID is normally a 10 digit number"
+msgstr ""
+
+#: .\views.py:2759
+msgid "Too many webhooks already added"
+msgstr ""
+
+#: .\views.py:2766
+msgid "Webhook Added"
+msgstr ""
+
+#: .\views.py:2782
+msgid "No webhooks to delete"
+msgstr ""
+
+#: .\views.py:2787
+msgid "Error finding webhook to delete"
+msgstr ""
+
+#: .\views.py:2794
+msgid "Webhook Deleted"
+msgstr ""

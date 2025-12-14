@@ -1,0 +1,75 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="lobbyHelpPage">
+      <h1>{% translate "New FCM code" %}</h1>
+      <div class="lobbyHelpSection">
+        <b><u>{% translate "What's this about?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          In short, FCM needed a big recode. It is mainly under-the-hood things, so you hopefully won't notice that much difference.
+          <br />
+          That being said, there are a lot of internal changes, so keep an eye an things, and report any new bugs that you find.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "What isn't 'Under-the-hood'?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          I've added the ability to play the whole payday / fridge phase after your working day turn.
+          <br />
+          So instead of simply paying for everyone / no-one, you can pre-fire employees as you wish.
+          <br />
+          You can also pre-set which items you'd like to store in your fridge, in priority order.
+          <br />
+          <br />
+          There is also a summary at the end of the working day to show what you did in each sub-phase, and remind you if you missed anything.
+          <br />
+          <br />
+          For restructuring, you now have a mini-beach visible at all times, and can directly select cards from there.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "Why did it need a rewrite?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          99% of the time it didn't. But very occasionally it would do odd things.
+          <br />
+          EG after the first turn of a game that had salaried employees that it was possible to directly hire, the game
+          would pause until every player had "looked" at the game, before moving on automatically if they didn't need to pay anything.
+          <br />
+          Sometimes it would display oddly if you had the MS to pay in food.
+          <br />
+          Occasionally it would wait during the marketing phase until a certain player had looked at the game.
+          <br />
+          <br />
+          These should be fixed, as well as making it easier to fix and improve the code in the future.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "Was it worth it?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Ha, well it took literally 10s of hours to do; probably over 100 i guess, with the improvements added as well.
+          <br />
+          But it was needed to fix those 1% situations, and make the code a lot easier to work with in the future!
+        {% endblocktranslate %}
+      </div>
+      {% include 'Lobby/common/homeButton.html' %}
+    </div>
+  </div>
+{% endblock %}

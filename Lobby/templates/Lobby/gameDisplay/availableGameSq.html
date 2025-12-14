@@ -1,0 +1,57 @@
+{% load static i18n %}
+
+<div class="squareGamesDiv  {% if not game.involvedPlayer %}otherWaitingGameSq{% endif %}">
+    <div class="gameNameDiv">
+      {% if game.kickoutDuration < 100 %}<span id="shortKickoutSpan">
+        {% if game.kickoutDuration == 5 %}[ 5 Min Kickout ]
+        {% elif game.kickoutDuration == 10 %}[ 10 Min Kickout ]
+        {% elif game.kickoutDuration == 20 %}[ 20 Min Kickout ]
+        {% elif game.kickoutDuration == 50 %}[ 12 Hour Kickout ]
+        {% endif %}</span>
+        {% endif %}
+        {{ game.gameName }}{% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}
+    </div>
+    <div class="createdDiv">Creator: {{ game.creator }} - {{ game.latestUpdateElapsedTimeString }}</div>
+    <div class="boxPlayersContainer bgImg{{game.game}}" id="{{ game.game }}gamesRow{{ game.gameID }}">
+      <!--<div class="sqBoxCoverDiv">
+        {% if game.game == 'FCM' %}
+        <img src="{% static "FCM/Images/fcm-box.jpg" %}" alt="FCM game" title="FCM Game">
+        {% endif %}
+        {% if game.game == 'HC' %}
+        <img src="{% static "HC/Images/hc-box.jpg" %}" alt="HC game" title="HC Game">
+        {% endif %}
+        {% if game.game == 'Bus' %}
+        <img src="{% static "Bus/images/bus_icon.png" %}" alt="Bus game" title="Bus Game">{% endif %}
+        {% if game.game == 'TGZ' %}
+        <img src="{% static "TGZ/images/tgz_icon.png" %}" alt="TGZ game" title="TGZ Game">
+        {% endif %}
+      </div>-->
+      <div class="sqCurrentPlayersDiv">
+        <b><u>Players</u></b><br/>
+        {% for player in game.allPlayers %}{{ forloop.counter }}) <a
+          href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a><BR /> {% endfor %}
+
+        {% for i in game.remainingPlayers %}
+        {{ i }}) <!--Available Space  {{ forloop.counter }}-->{% if not forloop.last %}<BR /> {% endif %}
+        {% endfor %}
+
+      </div>
+      <div class="sqJoinLeaveDiv">
+        {% if game.involvedPlayer %}
+        <div class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</div>
+        {% else %}
+        <div class="buttonDiv Join availableLink">{% translate "Join" %}</div>
+        {% endif %}
+        <span class="sqPaceSpan"><img class="sqSpeedometer" src="{% static "Lobby/Images/speedometer.svg" %}"
+            alt="Game Pace" title="Game Pace"><BR />{{ game.pace|safe }}</span>
+        {{ game.kickoutHTML|safe }}
+      </div>
+    </div>
+    {% if game.startingMap or game.startingOptions %}
+    <div class="startingOptionsDiv">
+      {% if game.startingMap %} <img class="startingOption startingMap" alt="Map" width="50" height="50"
+        src="{% static "Lobby/Images/createMap.jpg" %}" title="Custom Map - Click to View"
+        data-map="{{game.startingMap}}"> {% endif %}{{ game.startingOptions|safe }}
+    </div>
+    {% endif %}
+  </div>

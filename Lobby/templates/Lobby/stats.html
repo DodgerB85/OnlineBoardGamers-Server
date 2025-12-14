@@ -1,0 +1,1186 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/stats.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <script src="{% static 'Lobby/stats.js' %}?v=20220706"></script>
+  <script src="{% static 'Lobby/common.js' %}"></script>
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <h1>
+      <a class="linkOther" href="{% url 'FCM:FCMstats' %}">{% translate "Food Chain Magnate Stats" %}</a>
+    </h1>
+    <h1>
+      <a class="linkOther" href="{% url 'TGZ:TGZstats' %}">{% translate "The Great Zimbabwe Stats" %}</a>
+    </h1>
+    <hr />
+    <h1>{% translate "Current Users" %}: {{ totalUsers }}</h1>
+    <h1>{% translate "Games (non-practice) in Progress" %}: {{ totalGames }}</h1>
+    <h2>
+      {% for game_count in game_counts %}
+        {% if forloop.counter0 == 0 %}
+          <img src="{% static 'FCM/Images/burger_board.png' %}"
+               alt="FCM game"
+               title="FCM Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 1 %}
+          <img src="{% static 'HC/Images/icon_car.png' %}"
+               alt="HC game"
+               title="HC Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 2 %}
+          <img src="{% static 'Bus/images/bus_icon.png' %}"
+               alt="Bus game"
+               title="Bus Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 3 %}
+          <img src="{% static 'TGZ/images/tgz_icon.png' %}"
+               alt="TGZ game"
+               title="TGZ Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 4 %}
+          <img src="{% static 'CNS/images/cns_icon.png' %}"
+               alt="CNS game"
+               title="CNS Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 5 %}
+          <img src="{% static 'AQY/images/aqy_icon.png' %}"
+               alt="AQY game"
+               title="AQY Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 6 %}
+          <img src="{% static 'IND/images/ind_icon.png' %}"
+               alt="IND game"
+               title="IND Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 7 %}
+          <img src="{% static 'KFW/images/kfw_icon.png' %}"
+               alt="KFW game"
+               title="KFW Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 8 %}
+          <img src="{% static 'WEB/images/web_icon.png' %}"
+               alt="WEB game"
+               title="WEB Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% endif %}
+        {{ game_count }}
+      {% endfor %}
+    </h2>
+    <h1>{% translate "Finished Games (non-practice)" %}: {{ finishedGames }}</h1>
+    <h2>
+      {% for game_count in finished_game_counts %}
+        {% if forloop.counter0 == 0 %}
+          <img src="{% static 'FCM/Images/burger_board.png' %}"
+               alt="FCM game"
+               title="FCM Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 1 %}
+          <img src="{% static 'HC/Images/icon_car.png' %}"
+               alt="HC game"
+               title="HC Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 2 %}
+          <img src="{% static 'Bus/images/bus_icon.png' %}"
+               alt="Bus game"
+               title="Bus Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 3 %}
+          <img src="{% static 'TGZ/images/tgz_icon.png' %}"
+               alt="TGZ game"
+               title="TGZ Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 4 %}
+          <img src="{% static 'CNS/images/cns_icon.png' %}"
+               alt="CNS game"
+               title="CNS Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 5 %}
+          <img src="{% static 'AQY/images/aqy_icon.png' %}"
+               alt="AQY game"
+               title="AQY Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 6 %}
+          <img src="{% static 'IND/images/ind_icon.png' %}"
+               alt="IND game"
+               title="IND Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 7 %}
+          <img src="{% static 'KFW/images/kfw_icon.png' %}"
+               alt="KFW game"
+               title="KFW Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% elif forloop.counter0 == 8 %}
+          <img src="{% static 'WEB/images/web_icon.png' %}"
+               alt="WEB game"
+               title="WEB Game"
+               class="gameCountIcon"
+               width="40"
+               height="40">
+        {% endif %}
+        {{ game_count }}
+      {% endfor %}
+    </h2>
+    <h1>{% translate "Active users in last 24hrs" %}: {{ userActvitiy }}</h1>
+    <hr />
+    <h1>{% translate "Top Players" %}</h1>
+    <div class="tab">
+      <button class="tablinks" id="FCM">
+        <img src="{% static 'FCM/Images/burger_board.png' %}"
+             alt="FCM game"
+             title="FCM Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+      <button class="tablinks" id="HC">
+        <img src="{% static 'HC/Images/icon_car.png' %}"
+             alt="HC game"
+             title="HC Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+      <button class="tablinks" id="Bus">
+        <img src="{% static 'Bus/images/bus_icon.png' %}"
+             alt="Bus game"
+             title="Bus Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+      <button class="tablinks" id="TGZ">
+        <img src="{% static 'TGZ/images/tgz_icon.png' %}"
+             alt="TGZ game"
+             title="TGZ Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+      <button class="tablinks" id="CNS">
+        <img src="{% static 'CNS/images/cns_icon.png' %}"
+             alt="CNS game"
+             title="CNS Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+      <button class="tablinks" id="AQY">
+        <img src="{% static 'AQY/images/aqy_icon.png' %}"
+             alt="AQY game"
+             title="AQY Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+      <button class="tablinks" id="IND">
+        <img src="{% static 'IND/images/ind_icon.png' %}"
+             alt="IND game"
+             title="IND Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+      <button class="tablinks" id="KFW">
+        <img src="{% static 'KFW/images/kfw_icon.png' %}"
+             alt="KFW game"
+             title="KFW Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+            <button class="tablinks" id="WEB">
+        <img src="{% static 'WEB/images/web_icon.png' %}"
+             alt="WEB game"
+             title="WEB Game"
+             class="statsIMG"
+             width="40"
+             height="40">
+      </button>
+    </div>
+    <div class="tab">
+      <button class="tablinks" id="fairPlay">{% translate "Fair Play League" %}</button>
+    </div>
+    <div class="tab">
+      <button class="tablinks" id="allPlayers">{% translate "All Players" %}</button>
+      <button class="tablinks" id="players2">{% translate "2 Player" %}</button>
+      <button class="tablinks" id="players3">{% translate "3 Player" %}</button>
+      <button class="tablinks" id="players4">{% translate "4 Player" %}</button>
+      <button class="tablinks" id="players5">{% translate "5 Player" %}</button>
+      <button class="tablinks" id="players6">{% translate "6 Player" %}</button>
+    </div>
+    <div class="tab">
+      <button class="tablinks" id="allTime">{% translate "All Time" %}</button>
+      <button class="tablinks" id="threeMonths">{% translate "Last 3 Months" %}</button>
+      <button class="tablinks" id="month">{% translate "Last Month" %}</button>
+    </div>
+    <!-- FAIR PLAY -->
+    {% for game in fairPlayArr %}
+      <div id="fairPlayDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Fair Play League" %}</h2>
+            {% translate "This is a table of % completed games in the last year, along with total completed games in the last year" %}
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Completion %" %}</th>
+                <th>{% translate "Total Games" %}</th>
+              </tr>
+              {% for stat in game %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                  <td>{{ stat.2 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    <!-- END FAIR PLAY -->
+    <!-- ALL PLAYERS -->
+    {% for game in winArr %}
+      <div id="winTotalsTotalDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win3mArr %}
+      <div id="winTotalsThreeMonthsDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win1mArr %}
+      <div id="winTotalsMonthDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    <!-- END ALL PLAYERS -->
+    <!-- 2 PLAYERS -->
+    {% for game in winArr2p %}
+      <div id="winTotalsTotal2pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 2p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 2p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win3mArr2p %}
+      <div id="winTotalsThreeMonths2pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 2p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 2p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win1mArr2p %}
+      <div id="winTotalsMonth2pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 2p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 2p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    <!-- END 2 PLAYERS -->
+    <!-- 3 PLAYERS -->
+    {% for game in winArr3p %}
+      <div id="winTotalsTotal3pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 3p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 3p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win3mArr3p %}
+      <div id="winTotalsThreeMonths3pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 3p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 3p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win1mArr3p %}
+      <div id="winTotalsMonth3pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 3p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 3p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    <!-- END 3 PLAYERS -->
+    <!-- 4 PLAYERS -->
+    {% for game in winArr4p %}
+      <div id="winTotalsTotal4pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 4p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 4p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win3mArr4p %}
+      <div id="winTotalsThreeMonths4pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 4p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 4p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win1mArr4p %}
+      <div id="winTotalsMonth4pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 4p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 4p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    <!-- END 4 PLAYERS -->
+    <!-- 5 PLAYERS -->
+    {% for game in winArr5p %}
+      <div id="winTotalsTotal5pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 5p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 5p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win3mArr5p %}
+      <div id="winTotalsThreeMonths5pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 5p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 5p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win1mArr5p %}
+      <div id="winTotalsMonth5pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 5p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 5p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    <!-- END 2 PLAYERS -->
+    <!-- 6 PLAYERS -->
+    {% for game in winArr6p %}
+      <div id="winTotalsTotal6pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 6p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 6p" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win3mArr6p %}
+      <div id="winTotalsThreeMonths6pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 6p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 6p (Last 3 Months)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    {% for game in win1mArr6p %}
+      <div id="winTotalsMonth6pDiv{{ forloop.counter0 }}" class="statsDiv">
+        <div class="playerStatsContainer">
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Totals 6p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Wins" %}</th>
+              </tr>
+              {% for stat in game.0 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <div class="playerStatsDiv">
+            <h2>{% translate "Win Percentages 6p (Last Month)" %}</h2>
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Player" %}</th>
+                <th>{% translate "Win %" %}</th>
+              </tr>
+              {% for stat in game.1 %}
+                <tr class="clickablePlayerRow" id="playerRow{{ stat.0 }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=stat.0 %}">{{ stat.0 }}</a>
+                  </td>
+                  <td>{{ stat.1 }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+      </div>
+    {% endfor %}
+    <!-- END 6 PLAYERS -->
+    <hr />
+    <h1>{% translate "Ten most recently active games" %}</h1>
+    <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
+      {% csrf_token %}
+      <input type="hidden" id="mapData" name="mapData" value="">
+    </form>
+    <form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
+      {% csrf_token %}
+      <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
+    </form>
+    <form id="openInMapEditorFormAQY" action="/AQYmapEditor/" method="post">
+      {% csrf_token %}
+      <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="">
+    </form>
+    <div class="largeTableContainer">
+      <!-- CURRENT GAMES -->
+      <div id="tenGamesListView">
+        {% if tenGames %}
+          <div class="tableOnlyDiv">
+            <table class="gamesTable">
+              <thead>
+                <tr class="headingRow">
+                  <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+                  <td class="creatorHeader">{% translate "Creator" %}</td>
+                  <td class="playersHeader">{% translate "Players" %}</td>
+                  <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+                  <td class="curretnTurnHeader">{% translate "Current Turn" %}</td>
+                  <!--<td class="createdHeader">Created</td>-->
+                  <td class="speedHeader">{% translate "Speed" %}</td>
+                  <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
+                </tr>
+              </thead>
+              {% for game in tenGames %}
+                {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+              {% endfor %}
+            </table>
+          </div>
+        {% else %}
+          <h1>No Current Games</h1>
+        {% endif %}
+      </div>
+      <!-- FINISHED GAMES -->
+      <h1>{% translate "Ten most recently finished games" %}</h1>
+      <div id="tenGamesListView">
+        {% if tenGamesFinished %}
+          <div class="tableOnlyDiv">
+            <table class="gamesTable">
+              <thead>
+                <tr class="headingRow">
+                  <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+                  <td class="playersHeader">{% translate "Players" %}</td>
+                  <td class="currentPlayersHeader">{% translate "All Players" %}</td>
+                  <td class="createdHeader">{% translate "Created" %}</td>
+                  <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
+                  <td class="winnerHeader">{% translate "Winner" %}</td>
+                </tr>
+              </thead>
+              {% for game in tenGamesFinished %}
+                {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+              {% endfor %}
+            </table>
+          </div>
+        {% else %}
+          <h1>No Current Games</h1>
+        {% endif %}
+      </div>
+      {% include 'Lobby/donate/donateBanner.html' %}
+    </div>
+    <br />
+    <br />
+   {% include 'Lobby/common/homeButton.html' %}
+  </div>
+  {% block script %}{% endblock %}
+{% endblock %}

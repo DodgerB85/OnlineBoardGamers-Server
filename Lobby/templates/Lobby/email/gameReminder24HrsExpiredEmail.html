@@ -1,0 +1,16 @@
+{% load i18n %}
+{% autoescape off %}
+{% comment %}Translators: This is an email{% endcomment %}
+Hi {{ playerName }},<br/>
+<br/>
+You have not moved for 24 hours in at least one of the following games:<br/>
+<br/>
+{% for game_info in games_info %}
+Game: {{ game_info.game_name }}, Days Since Last Move: {{ game_info.days_since_last_move }}, Link: {{ game_info.game_link }}<br/>
+{% endfor %}
+<br/>
+Please make a move to keep the games going! Thanks!<br/>
+<br/>
+Notification preferences can be changed in your Profile<br/>
+<br/>
+{% endautoescape %}

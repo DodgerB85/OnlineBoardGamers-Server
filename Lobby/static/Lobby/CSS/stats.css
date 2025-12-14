@@ -1,0 +1,125 @@
+/* Stats page */
+
+.playerStatsContainer {
+	display: flex;
+	margin-bottom: 20px;
+}
+
+.playerInfoStatsContainer {
+	width: 320px;
+	margin: auto;
+}
+
+.playerStatsDiv {
+	flex: 1;
+	/*border: 2px solid yellow;*/
+}
+
+.playerStatsDiv:first-child {
+	margin-right: 20px;
+}
+
+.gameCountIcon {
+	height: 40px;
+	vertical-align: middle;
+}
+
+/**** END STATS PAGE **
+
+/* TGZ/FCM STATS */
+.bar_canvas {
+	margin: auto;
+	/*display: flex;*/
+}
+.specNoteSpan {
+	font-weight: bolder;
+	font-size: 20px;
+}
+.FCMstatsTable {
+	max-width: 800px;
+	font-weight: bolder;
+	font-size: 20px;
+    margin: 0 auto;
+}
+.TGZstatsTable {
+    font-size: 15px;
+    width: fit-content;
+    margin: 0 auto;
+    font-weight: bolder;
+}
+
+.leftTextAlign {
+	text-align: left;
+}
+.inlineBlock {
+	display: inline-block;
+}
+.FCMstatsDiv {
+	background-color: #aed6f1;
+	padding: 10px;
+}
+
+.clickableStatTD:hover {
+	cursor: pointer;
+	background-color: lightgreen;
+}
+/* END TGZ/FCM STATS */
+
+/** PLAYER INFO **/
+.trophyHolderDiv {
+	height: 100px;
+	width: 100px;
+	position: relative;
+}
+
+.trophyIMG {
+	height: 100px;
+	width: 100px;
+}
+
+.trophyNumberDiv {
+	font-weight: bolder;
+	font-size: 40px;
+	text-shadow:
+		-1px -1px 0 #fff,
+		1px -1px 0 #fff,
+		-1px 1px 0 #fff,
+		1px 1px 0 #fff;
+	color: black;
+	position: absolute;
+	top: 8px;
+	left: 40px;
+}
+
+.trophyGameIcon {
+	height: 50px;
+	width: 50px;
+}
+
+.trophyHolderSummaryDiv {
+	height: 50px;
+	width: 50px;
+	position: relative;
+	display: inline-block;
+}
+
+.trophyIMGsummary {
+	height: 50px;
+	width: 50px;
+}
+
+.trophyNumberSummaryDiv {
+	font-weight: bolder;
+	font-size: 40px;
+	text-shadow:
+		-1px -1px 0 #fff,
+		1px -1px 0 #fff,
+		-1px 1px 0 #fff,
+		1px 1px 0 #fff;
+	color: black;
+	position: absolute;
+	top: 0px;
+	left: 15px;
+}
+
+/*** END PLAYER INFO **

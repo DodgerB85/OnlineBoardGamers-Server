@@ -1,0 +1,1193 @@
+/*** COMMON ***/
+
+.container {
+	padding: 16px;
+	/* Goes around the sdge */
+	/*background-color: #d4eafd;*/
+	/*background-color: white;*/
+	background-color: aliceblue;
+	text-align: center;
+	/*font-size: 20px;*/
+}
+
+.size25text {
+	font-size: 25px;
+}
+
+.messages {
+	font-size: 25px;
+	font-weight: bold;
+}
+
+.error {
+	color: darkred;
+	background-color: lightblue;
+}
+
+.success {
+	color: darkgreen;
+	background-color: lightblue;
+}
+
+.warning {
+	color: darkred;
+}
+
+.generalTable {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.generalTable a:link {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.generalTable a:visited {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.generalTable a:hover {
+	text-decoration: underline;
+}
+
+.generalTable a:active {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.generalTable td,
+.generalTable th {
+	border: 1px solid #ddd;
+	padding: 8px;
+}
+
+.generalTable tr {
+	cursor: pointer;
+}
+
+.generalTable tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+.generalTable tr:nth-child(odd) {
+	background-color: white;
+}
+
+.generalTable tr:hover {
+	background-color: #ddd;
+}
+
+.generalTable th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	/*text-align: left;*/
+	/*background-color: #87C2C8;*/
+	background-color: #5875f8;
+	color: white;
+	cursor: default;
+}
+
+.support {
+	font-size: 30px;
+}
+
+.support img {
+	vertical-align: middle;
+}
+
+.support a {
+	text-decoration: none;
+}
+
+.support a:hover {
+	text-decoration: underline;
+}
+
+#donateButton {
+	width: 200px;
+	height: 50px;
+}
+
+.homeButton {
+	text-decoration: none;
+	font-size: 20px;
+	background-color: darkblue;
+	padding: 5px;
+	color: white;
+	margin: 0;
+	border: 2px solid black;
+	border-radius: 15px;
+	cursor: pointer;
+	width: fit-content;
+	opacity: 0.7;
+}
+
+.homeButton:hover {
+	opacity: 1;
+}
+
+#playerInfoNameDiv {
+	display: flex;
+	justify-content: center;
+}
+
+.linkOther {
+	text-align: center;
+	text-decoration: none;
+	outline: none;
+}
+
+.linkOther:hover {
+	/*background: #ddd;*/
+	color: darkblue;
+}
+
+.startingMap:hover {
+	opacity: 0.4;
+	cursor: pointer;
+}
+/*** END COMMON ***/
+
+/*** INDEX PAGE ***/
+.indexRow {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-around;
+	/* ADJUSTMENT */
+	/*background-color: white;*/
+	/*border: 1px solid black;*/
+	/*text-align: justify;*/
+	height: fit-content;
+}
+
+.indexCol {
+	width: 45%;
+	min-width: 400px;
+	/*height: fit-content;*/
+	min-height: 100%;
+	/*background-color: white;*/
+	/*margin: 25px;*/
+	border: 1px solid black;
+	padding: 10px;
+	margin: 5px;
+	text-align: justify;
+	font-size: 1.4em;
+	flex: 1;
+}
+
+.indexColSingle {
+	width: 50%;
+	min-width: 400px;
+	/*height: fit-content;*/
+	min-height: 100%;
+	/*background-color: white;*/
+	/*margin: 25px;*/
+	border: 1px solid black;
+	padding: 10px;
+	margin: auto;
+	text-align: justify;
+	font-size: 1.4em;
+	flex: 1;
+}
+
+@media only screen and (max-width: 800px) {
+	.indexCol {
+		width: 100%;
+	}
+	.indexColSingle {
+		width: fit-content;
+		margin: 5px;
+	}
+}
+
+#indexContainer {
+	/*box-sizing: border-box;*/
+	width: 100%;
+	margin: 0 auto;
+	/*background-color: white;*/
+	/*background-color: #d4eafd;*/
+}
+
+#indexContainer a:hover {
+	/*background: #ddd;*/
+	color: #6bb5f7;
+}
+
+.indexBoxImage {
+	float: left;
+	margin: 5px;
+	width: 141px;
+	height: 199px;
+}
+
+.indexBoxBusImage {
+	float: left;
+	margin: 5px;
+	height: 157px;
+	width: 200px;
+}
+/** END INDEX PAGE **/
+
+/**** SIGN UP / LOGIN / PWD PAGES ****/
+.formsPage {
+	background-color: white;
+}
+
+#registerEmailInfoDiv {
+	font-size: 20px;
+	font-weight: bolder;
+}
+
+/* Full-width input fields */
+.registerInput {
+	width: 90%;
+	padding: 15px;
+	margin: 5px 0 22px 0;
+	display: inline-block;
+	border: none;
+	background: #f1f1f1;
+}
+
+.registerInput:focus {
+	background-color: #ddd;
+	outline: none;
+}
+
+/* Set a style for the submit button */
+.registerbtn {
+	background-color: #04aa6d;
+	color: white;
+	/*padding: 16px 20px;*/
+	padding: 16px 0px;
+	margin: 8px 0;
+	border: none;
+	cursor: pointer;
+	width: 100%;
+	opacity: 0.9;
+	font-size: 20px;
+}
+
+.registerbtn:hover {
+	opacity: 1;
+}
+
+.declineButton {
+	background-color: #eb5353;
+	color: white;
+	/*padding: 16px 20px;*/
+	padding: 16px 0px;
+	margin: 8px 0;
+	border: none;
+	cursor: pointer;
+	width: 100%;
+	opacity: 0.9;
+	font-size: 20px;
+}
+
+.declineButton:hover {
+	opacity: 1;
+}
+
+.resetpwdbtn {
+	/*font-weight: bold;*/
+	background-color: darkblue;
+	color: white;
+	padding: 16px 20px;
+	margin: 8px 0;
+	border: none;
+	cursor: pointer;
+	width: fit-content;
+	opacity: 0.7;
+	font-size: 20px;
+	text-decoration: none;
+}
+
+.resetpwdbtn:hover {
+	opacity: 1;
+}
+
+#passwordResetHR {
+	border: 1px solid #f1f1f1;
+	margin-bottom: 25px;
+}
+
+/* Add a blue text color to links */
+a {
+	color: dodgerblue;
+}
+
+/* Set a grey background color and center the text of the "sign in" section */
+.signin {
+	background-color: #f1f1f1;
+	text-align: center;
+}
+
+/* Forms erros */
+.errorlist {
+	background-color: yellow;
+	color: darkred;
+	font-weight: bolder;
+	list-style-type: none;
+	padding: 10px;
+}
+
+#invalidForm {
+	width: 100%;
+	display: none;
+}
+
+#btWarning {
+	font-weight: bolder;
+	background-color: yellow;
+	color: darkred;
+	font-size: 20px;
+	display: none;
+}
+/*** END SIGN UP / LOGIN / PWD PAGES ****/
+
+/** LOBBY MAIN PAGE **/
+#lobbyPage {
+	text-align: center;
+	font-size: 30px;
+	/*background-color: rgb(255, 255, 255);
+	background-color: rgba(255, 255, 255, 0.75);*/
+	/*background-color: white;*/
+	font-weight: bold;
+}
+
+.openAllMyMoveGamesButton {
+    margin: 10px;
+    width: fit-content;
+    border: 2px solid green;
+    border-radius: 5px;
+	padding: 5px;
+    font-weight: bolder;
+}
+
+.openAllMyMoveGamesButton:hover {
+    background-color: lightgrey;
+}
+
+.availableTournamentsSpan {
+	background-color: lightgreen;
+	color: black;
+	font-size: 20px;
+}
+.newsSpan {
+	background-color: yellow;
+	color: darkred;
+	font-size: 20px;
+}
+
+.noGamesSpan {
+	font-size: 20px;
+}
+
+.colourGuideDiv {
+	font-size: 20px;
+}
+
+.helpStartingOptionSpan {
+	white-space: nowrap;
+}
+
+.startingOptionHelpImg {
+	/*width: 50px;*/
+	height: 40px;
+	width: 40px;
+	border-radius: 10px;
+	margin: 2px;
+	vertical-align: middle;
+	line-height: 30px;
+}
+
+.statsIMG {
+	height: 50px;
+	min-width: 50px;
+}
+
+.splotterconImg {
+	width: 500px;
+	height: 70px;
+	vertical-align: middle;
+}
+
+@media only screen and (max-width: 520px) {
+	.splotterconImg {
+		width: 90%;
+	}
+}
+
+#createNewGamesLink {
+	text-decoration: none;
+	outline: none;
+	background-color: white;
+	width: fit-content;
+	margin: auto;
+	display: inline-block;
+	margin-bottom: 10px;
+}
+
+.createNewGamesDiv {
+	color: rgb(30, 144, 255);
+	text-decoration: none;
+	outline: none;
+	/*background-color: white;*/
+	width: fit-content;
+	margin: auto;
+	display: inline-block;
+}
+
+.createNewGamesDiv:hover {
+	/*background: #ddd;*/
+	cursor: pointer;
+	color: darkblue;
+}
+
+.newGameMiniImg {
+	height: 50px;
+	vertical-align: middle;
+}
+
+.createNewGamesArrow {
+	vertical-align: middle;
+}
+
+#createNewGamesLink:hover {
+	/*background: #ddd;*/
+	color: darkblue;
+}
+
+#availableGamesListView,
+#availableGamesListSquares {
+	display: none;
+}
+
+#currentGamesListView {
+	display: none;
+}
+
+#invitationGamesListView {
+	display: none;
+}
+
+#waitingGamesListView {
+	display: none;
+}
+
+#finishedGamesListView {
+	display: none;
+}
+
+.headingRow {
+	font-weight: bold;
+	background-color: #5875f8;
+	color: white;
+	height: 50px;
+}
+
+#headingRow {
+	background-color: white;
+}
+
+.buttonDiv {
+	padding: 10px;
+	color: black;
+	border-radius: 17px / 15px;
+	color: blue;
+}
+
+.buttonDiv.Join {
+	border: 2px solid blue;
+}
+
+.buttonDiv.Leave {
+	border: 2px solid darkred;
+}
+
+.availableLink:hover {
+	cursor: pointer;
+}
+
+.deleteTrainingGame {
+	border: 2px solid darkred;
+	padding: 10px;
+	color: black;
+	border-radius: 20px;
+}
+
+.deleteTrainingGame:hover {
+	border: 2px solid darkred;
+	border-radius: 20px;
+	padding: 10px;
+	background-color: darkred;
+	color: white;
+	cursor: pointer;
+}
+
+.startingOptionsHeader {
+	max-width: 400px;
+	min-width: 200px;
+}
+
+.availGamesStartingOptionsTD {
+	display: inline-block;
+	max-width: 400px;
+	min-width: 200px;
+}
+
+.nameHeaderCurrent {
+	max-width: 500px;
+	min-width: 200px !important;
+}
+
+
+.nameHeaderAvailable {
+	width: fit-content;
+	max-width: 200px !important;
+}
+
+.nameTDavailable {
+	width: fit-content;
+	max-width: 200px !important;
+}
+.nameTDcurrent {
+	display: inline-block;
+	max-width: 500px;
+	min-width: 200px;
+	cursor: pointer;
+}
+
+.cancelHeader {
+	min-width: 58px;
+}
+
+.listInfo {
+	font-style: italic;
+	font-size: 15px;
+}
+
+.gamesTable {
+	background-color: white;
+	font-weight: bold;
+	margin: 0 auto;
+	/* or margin: 0 auto 0 auto */
+	min-width: 90%;
+	font-size: 15px;
+	border-collapse: collapse;
+	/* background-color: white;*/
+	max-width: 1500px;
+}
+
+.gamesTable td {
+	text-align: center;
+	padding: 10px;
+	min-width: 20px;
+}
+
+.gamesTable a:link {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.gamesTable a:visited {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.gamesTable a:hover {
+	text-decoration: underline;
+}
+
+.gamesTable a:active {
+	text-decoration: none;
+	color: darkblue;
+}
+
+#shortKickoutSpan {
+	color: darkred;
+}
+
+.gameRow {
+	height: 50px;
+	border-top: 3px solid lightgray;
+	border-bottom: 3px solid lightgray;
+	background-color: white;
+}
+
+.clickableGameRow {
+	height: 50px;
+	border-top: 3px solid lightgray;
+	border-bottom: 3px solid lightgray;
+	background-color: white
+}
+
+.clickableGameRow:last-child {
+  border-bottom: 5px solid lightgray;
+}
+
+.clickableGameRow:hover {
+	/*border-top: 5px solid red;
+	border-bottom: 3px solid red;*/
+	/*border: 3px solid lightgreen;*/
+	cursor: pointer;
+  	outline: 5px solid lightgreen; /* Add an outline */
+}
+
+.myMove {
+	background-color: #bdfce5;
+}
+
+.otherWaitingGame {
+	background-color: rgba(173, 216, 230, 0.85);
+}
+
+.kickoutRequired1 {
+	background-color: rgba(253, 255, 113, 0.35);
+}
+
+.kickoutRequired2 {
+	background-color: rgba(253, 255, 113, 0.75);
+}
+
+.myMove.kickoutRequired1 {
+	background-color: rgba(245, 135, 135, 0.25);
+}
+
+.myMove.kickoutRequired2 {
+	background-color: rgba(245, 135, 135, 0.75);
+}
+
+.gameName:hover {
+	cursor: pointer;
+}
+
+.joinHeader {
+	min-width: 58px;
+	width: fit-content;
+}
+
+.lobbyIconsDiv {
+	font-size: 20px;
+}
+
+.tdWithBox {
+	vertical-align: middle;
+}
+
+.tdWithBox img {
+	vertical-align: middle;
+	height: 50px;
+	width: 50px;
+}
+
+.declineInputClass {
+	color: black;
+	margin-top: 5px;
+}
+
+.largeTableContainer {
+	max-width: 100%;
+	/* Adjust the value as per your requirement */
+	/* Enable horizontal scrolling */
+	margin: auto;
+}
+
+.tableOnlyDiv {
+	overflow-x: scroll;
+}
+
+.learningGameSpan {
+	font-weight: bold;
+	background-color: yellow;
+}
+
+/** LG / EG */
+#learningGameConfirmDiv {
+	display: none;
+	position: fixed;
+	background-color: white;
+	border: 1px solid black;
+	padding: 10px;
+	font-size: 15px;
+}
+.learningGameConfirmButtons {
+	display: inline-block;
+	width: fit-content;
+	margin-right: 20px;
+}
+#learningJoin:hover {
+	cursor: pointer;
+	background-color: #5875f8;
+	color: white;
+}
+#learningCancel:hover {
+	background-color: #eb5353;
+	color: white;
+	cursor: pointer;
+}
+
+.copyGameLinkButton {
+	margin: 10px;
+	width: fit-content;
+	border: 2px solid green;
+	border-radius: 5px;
+	font-weight: bolder;
+	padding: 5px;
+	vertical-align: middle;
+}
+
+.copyGameLinkButtonInTable {
+	width: fit-content;
+	border: 2px solid green;
+	border-radius: 5px;
+	font-weight: bolder;
+	font-size: 11px;
+	padding: 5px;
+	margin-top: 2px;
+}
+.copyGameLinkButtonInTable:hover,
+.copyGameLinkButton:hover {
+	background-color: lightgrey;
+}
+
+.copyGameLinkButtonInTable:active,
+.copyGameLinkButton:active {
+	background-color: darkgrey;
+}
+
+.startingOption {
+	/*width: 50px;*/
+	height: 40px;
+	width: 40px;
+	border-radius: 5px;
+	margin: 2px;
+	vertical-align: middle;
+	line-height: 30px;
+}
+
+/** END LOBBY MAIN PAGE **/
+
+/* TGZ INFO */
+.TGZinfoContainer {
+	display: inline-block;
+}
+
+.TGZinfoPopup {
+	display: none;
+	position: absolute;
+
+	border: 2px solid black;
+	background-color: white;
+	z-index: 1000;
+	padding: 5px;
+	white-space: nowrap;
+	width: 625px;
+}
+
+
+
+.godAndVRdiv {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.godOptionImg {
+	width: 100px !important;
+	height: 152px !important;
+	padding: 5px !important;
+}
+
+.diffVR {
+	display: inline-block;
+	background-color: yellow;
+	color: darkred;
+}
+
+/* EMD TGZ INFO */
+
+/** INDIVIDUAL PAGES **/
+#contactPage,
+#aboutPage,
+#FCMstatsPage,
+#TGZstatsPage,
+#changelogPage,
+#HCgameSummaryage {
+	font-size: 20px;
+}
+
+#contactEmailImg {
+	max-width: 100%;
+	width: 400px;
+	height: 30px;
+	vertical-align: middle;
+}
+
+.contactPtext {
+	color: darkred;
+	font-weight: bolder;
+}
+
+#aboutCurrentGames {
+	max-width: 505px;
+	min-width: 380px;
+	margin: auto;
+	text-align: left;
+	/*background-color: #04AA6D;*/
+	padding: 0px;
+}
+
+/** TABS **/
+/* Style the tab */
+.tab {
+	/*border: 1px solid #ccc;*/
+	background-color: #f1f1f1;
+	width: fit-content;
+	margin: auto;
+	/* overflow: none;*/
+	min-height: 40px;
+	margin-bottom: 0px;
+
+	overflow: hidden;
+	/*   white-space: nowrap;*/
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+	background-color: inherit;
+
+	border: none;
+	outline: none;
+	cursor: pointer;
+	padding: 14px 16px;
+	transition: 0.3s;
+	font-weight: bold;
+	font-size: 15px;
+
+	/*float: left;*/
+	display: inline-block;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+	background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+	background-color: #5875f8;
+	color: white;
+}
+
+.tabChatIcon {
+	height: 20px;
+	width: 20px;
+	border-radius: 6px;
+	margin: 0px;
+	vertical-align: middle;
+}
+
+#availableTextBig,
+#currentTextBig,
+#invitationsTextBig,
+#waitingTextBig,
+#finishedTextBig {
+	display: inline-block;
+}
+
+
+#availableTextSmall,
+#currentTextSmall,
+#invitationsTextSmall,
+#waitingTextSmall,
+#finishedTextSmall {
+	display: none;
+}
+
+@media only screen and (max-width: 990px) {
+	#availableTextBig,
+	#currentTextBig,
+	#invitationsTextBig,
+	#waitingTextBig,
+	#finishedTextBig {
+		display: none;
+	}
+	#availableTextSmall,
+	#currentTextSmall,
+	#invitationsTextSmall,
+	#waitingTextSmall,
+	#finishedTextSmall {
+		display: inline-block;
+	}
+}
+/** END TABS **/
+
+
+
+/** ALL TOURNAMENTS PAGE **/
+.allTournamentsContainer {
+	display: flex;
+	margin-bottom: 20px;
+}
+
+.allTournamentsDiv {
+	flex: 1;
+	/*border: 2px solid yellow;*/
+}
+.tournamentGameIMG {
+	height: 50px;
+}
+/** END ALL TOURNAMENTS PAGE **/
+
+/** INDIVIDUAL TOURNAMENT PAGE **/
+.tournamentSignupContainer {
+	margin: auto;
+	width: 320px;
+}
+#tournamentRoundsContainerDiv {
+	/* max-width:fit-content;
+    display: inline-block;
+    min-height: fit-content;
+    margin: auto;
+    background-color: #04AA6D;
+    align-items: center;*/
+
+	/*justify-content: center;
+    align-items: center;*/
+
+	/*float: left;*/
+
+	/*min-height: calc(100% - 58px);*/
+	min-height: fit-content;
+	margin: auto;
+	display: flex;
+	flex-direction: row;
+	text-align: center;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+}
+
+.tournyRoundDiv {
+	/*float: left;
+    min-width: 300px;
+    margin: 10px;*/
+	/*margin: 20px;*/
+	display: inline-block;
+	height: fit-content;
+	margin: 10px;
+	width: fit-content;
+	align-items: center;
+	text-align: center;
+	justify-content: center;
+}
+/** END INDIVIDUAL TOURNAMENT PAGE **/
+
+/** HC SUMMARY PAGE **/
+
+.HCsummaryGraph {
+	/*style="width:100%;min-width:400px"*/
+	min-width: 500px;
+	max-width: 500px;
+	min-height: 300px;
+	max-height: 300px;
+	margin: 0 auto;
+}
+
+.centeredDiv {
+	margin: 0 auto;
+	/*background-color: #04AA6D;*/
+}
+/** END HC SUMMARY PAGE **/
+
+/** SQ GAMES PAGE **/
+/* Sq games */
+.allSqGamesContainerDiv {
+	width: 100%;
+	height: fit-content;
+	display: flex;
+	float: left;
+	flex-wrap: wrap;
+	margin: auto;
+	justify-content: space-around;
+	/* ADJUSTMENT */
+	/*background-color: red;*/
+}
+
+.squareGamesDiv {
+	border: 1px solid black;
+	border-radius: 20px;
+	width: 375px;
+	height: fit-content;
+	/*margin-left: -20px;*/
+	margin-top: 10px;
+	margin-bottom: 10px;
+	background-color: white;
+	font-size: 20px;
+	overflow: hidden;
+}
+
+.otherWaitingGameSq {
+	background-color: rgba(173, 216, 230, 0.85);
+}
+
+.gameNameDiv,
+.createdDiv,
+.boxPlayersContainer,
+.startingOptionsDiv {
+	width: 100%;
+	height: fit-content;
+	padding: 1px;
+	border: 1px solid black;
+}
+
+.gameNameDiv {
+	font-weight: bolder;
+	font-size: 20px;
+	background-color: #d4eafd;
+}
+
+.boxPlayersContainer {
+	display: flex;
+	position: relative;
+
+	/*   background-color: #04AA6D;*/
+}
+
+.bgImgFCM,
+.bgImgHC,
+.bgImgBus,
+.bgImgTGZ {
+	position: relative;
+}
+
+.bgImgFCM:before {
+	background-image: url("/static/FCM/Images/burger_board.png");
+}
+
+.bgImgHC:before {
+	background-image: url("/static/HC/Images/icon_car.png");
+}
+
+.bgImgBus:before {
+	background-image: url("/static/Bus/images/bus_icon.png");
+}
+
+.bgImgTGZ:before {
+	background-image: url("/static/TGZ/images/res_wood.jpg");
+}
+
+.bgImgFCM:before,
+.bgImgHC:before,
+.bgImgBus:before,
+.bgImgTGZ:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+	opacity: 0.5;
+}
+
+.sqBoxCoverDiv {
+	width: 112px;
+	float: left;
+}
+
+.sqBoxCoverDiv img {
+	width: 108px;
+	height: 150px;
+	border: 1px solid black;
+	margin: 2px;
+}
+
+.sqCurrentPlayersDiv {
+	float: left;
+	text-align: left;
+	margin: 2px;
+	padding: 2px;
+	max-width: 261px;
+	inline-size: 261px;
+	overflow-wrap: break-word;
+	word-break: break-all;
+	/* overflow: auto;*/
+	z-index: 9;
+}
+
+.sqCurrentPlayersDiv a:link {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.sqCurrentPlayersDiv a:visited {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.sqCurrentPlayersDiv a:hover {
+	text-decoration: underline;
+}
+
+.sqCurrentPlayersDiv a:active {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.sqJoinLeaveDiv {
+	float: right;
+	min-width: 75px;
+	width: fit-content;
+	margin-right: 2px;
+	margin-top: 2px;
+	/* background-color: red;*/
+	z-index: 9;
+}
+
+.sqJoinLeaveDiv .buttonDiv {
+	padding: 10px;
+	color: black;
+	border-radius: 17px / 15px;
+	color: blue;
+}
+
+.sqJoinLeaveDiv .buttonDiv.Join {
+	border: 2px solid blue;
+}
+
+.sqJoinLeaveDiv .buttonDiv.Leave {
+	border: 2px solid darkred;
+	/*background-color: lightsalmon;*/
+}
+
+.sqSpeedometer {
+	height: 40px;
+	width: 40px;
+	border-radius: 15px;
+	margin-bottom: -10px;
+}
+
+.sqJoinLeaveDiv .startingOption {
+	/*width: 50px;*/
+	height: 40px;
+	width: 40px;
+	border-radius: 15px;
+	margin: 2px;
+}
+
+.sqPaceSpan {
+	font-size: 15px;
+}
+
+.gameIcon {
+	vertical-align: middle;
+}
+
+.speedHeader {
+	min-width: 80px !important;
+}

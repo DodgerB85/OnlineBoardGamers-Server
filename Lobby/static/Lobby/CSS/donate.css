@@ -1,0 +1,198 @@
+.donateButtonDiv {
+	display: inline-block;
+	vertical-align: middle;
+}
+.donateButtonDiv2 {
+	display: inline-block;
+	vertical-align: middle;
+  margin-right: 30px;
+}
+
+.donateTitleSpan {
+	font-weight: bolder;
+	font-size: 20px;
+}
+
+/** PAYPAL **/
+#donateButton {
+	filter: brightness(1); /* Initial brightness */
+	transition: filter 0.3s;
+}
+
+#donateButton:hover {
+	filter: brightness(1.2); /* Brightens the image on hover */
+}
+
+/** PATREON **/
+.patreon-button {
+	display: inline-block;
+	width: 224px;
+	height: 54px;
+	text-align: center;
+	line-height: 54px;
+	background-color: #1a237e; /* Dark blue */
+	color: #fff;
+	font-size: 16px;
+	font-weight: bold;
+	text-decoration: none;
+	border: none;
+	cursor: pointer;
+	transition: background-color 0.3s;
+	border-radius: 7px;
+}
+
+.patreon-button:hover {
+	background-color: #64b5f6; /* Light blue on hover */
+}
+
+/* KOFI */
+
+img.kofiimg {
+	height: 130px !important;
+	width: 220px !important;
+
+	display: initial !important;
+	vertical-align: middle;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+	border: none;
+	margin-top: 0;
+	margin-right: 5px !important;
+	margin-left: 0 !important;
+	margin-bottom: 3px !important;
+	content: url("https://storage.ko-fi.com/cdn/cup-border.png");
+}
+
+.kofiimg:after {
+	height: 25px;
+
+	vertical-align: middle;
+	padding-top: 0;
+	padding-bottom: 0;
+	border: none;
+	margin-top: 0;
+	margin-right: 6px;
+	margin-left: 0;
+	margin-bottom: 4px !important;
+	content: url("https://storage.ko-fi.com/cdn/whitelogo.svg");
+}
+
+.kofi-btn-container {
+	min-width: 220px;
+	width: 220px;
+	display: inline-block !important;
+	white-space: nowrap;
+}
+
+span.kofitext {
+	line-height: 43px !important;
+
+	color: #fff !important;
+	letter-spacing: -0.15px !important;
+	text-wrap: none;
+	vertical-align: middle;
+	padding: 0;
+	text-align: center;
+	text-decoration: none !important;
+	text-shadow: 0 1px 1px rgba(34, 34, 34, 0.05);
+}
+
+.kofitext a {
+	color: #fff !important;
+	text-decoration: none !important;
+}
+
+.kofitext a:hover {
+	color: #fff !important;
+	text-decoration: none;
+}
+
+a.kofi-button {
+	width: 220px;
+	height: 50px;
+	line-height: 46px !important;
+	min-width: 200px;
+	font-size: 20px !important;
+
+	box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+	display: inline-block !important;
+	background-color: #29abe0;
+	padding: 2px 12px !important;
+	text-align: center !important;
+	border-radius: 7px;
+	color: #fff;
+	cursor: pointer;
+	overflow-wrap: break-word;
+	vertical-align: middle;
+	border: 0 none #fff !important;
+	font-family:
+		"Quicksand",
+		Helvetica,
+		Century Gothic,
+		sans-serif !important;
+	text-decoration: none;
+	text-shadow: none;
+	font-weight: 700 !important;
+}
+
+a.kofi-button:visited {
+	color: #fff !important;
+	text-decoration: none !important;
+}
+
+a.kofi-button:hover {
+	opacity: 0.85;
+	color: #f5f5f5 !important;
+	text-decoration: none !important;
+}
+
+a.kofi-button:active {
+	color: #f5f5f5 !important;
+	text-decoration: none !important;
+}
+
+.kofitext img.kofiimg {
+	height: 30px !important;
+	width: 44px !important;
+
+	display: initial;
+	animation: kofi-wiggle 3s infinite;
+}
+
+@keyframes kofi-wiggle {
+	0% {
+		transform: rotate(0) scale(1);
+	}
+
+	60% {
+		transform: rotate(0) scale(1);
+	}
+
+	75% {
+		transform: rotate(0) scale(1.12);
+	}
+
+	80% {
+		transform: rotate(0) scale(1.1);
+	}
+
+	84% {
+		transform: rotate(-10deg) scale(1.1);
+	}
+
+	88% {
+		transform: rotate(10deg) scale(1.1);
+	}
+
+	92% {
+		transform: rotate(-10deg) scale(1.1);
+	}
+
+	96% {
+		transform: rotate(10deg) scale(1.1);
+	}
+
+	100% {
+		transform: rotate(0) scale(1);
+	}
+}

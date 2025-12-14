@@ -1,0 +1,39 @@
+{% autoescape off %}
+    {% if game == "FCM" %}
+        {% url "FCM:showFCMgame" gameID as the_url %}
+    {% elif game == "HC" %}
+        {% url "HC:showHCgame" gameID as the_url %}
+    {% elif game == "Bus" %}
+        {% url "Bus:showBusGame" gameID as the_url %}
+    {% elif game == "TGZ" %}
+        {% url "TGZ:showTGZgame" gameID as the_url %}
+    {% elif game == "CNS" %}
+        {% url "CNS:showCNSgame" gameID as the_url %}
+    {% elif game == "AQY" %}
+        {% url "AQY:showAQYgame" gameID as the_url %}
+    {% elif game == "IND" %}
+        {% url "IND:showINDgame" gameID as the_url %}
+    {% elif game == "KFW" %}
+        {% url "KFW:showKFWgame" gameID as the_url %}
+    {% elif game == "WEB" %}
+        {% url "WEB:showWEBgame" gameID as the_url %}
+    {% elif game == "RNB" %}
+        {% url "RNB:showRNBgame" gameID as the_url %}
+    {% endif %}
+    Hi webamster,
+    Bug reported in : {{ game }}
+    User: {{ username }}
+    Email: {{ userEmail }}
+    **************************
+    {{ bugDescription }}
+    **************************
+    http://{{ domain }}{{ the_url }}
+
+    Starting Map: {{ startingMap }}
+
+    Game Data:
+    {{ gameData }}
+    
+    Rewind Data:
+    {{ rewindData }}
+{% endautoescape %}

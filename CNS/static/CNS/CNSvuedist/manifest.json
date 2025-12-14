@@ -1,0 +1,356 @@
+{
+  "../../static/CNS/images/CNSbox.jpg": {
+    "file": "images/CNSbox.jpg",
+    "src": "../../static/CNS/images/CNSbox.jpg"
+  },
+  "../../static/CNS/images/boxOffice.jpg": {
+    "file": "images/boxOffice.jpg",
+    "src": "../../static/CNS/images/boxOffice.jpg"
+  },
+  "../../static/CNS/images/cigar.png": {
+    "file": "images/cigar.png",
+    "src": "../../static/CNS/images/cigar.png"
+  },
+  "../../static/CNS/images/cigar_d.png": {
+    "file": "images/cigar_d.png",
+    "src": "../../static/CNS/images/cigar_d.png"
+  },
+  "../../static/CNS/images/cigar_u.png": {
+    "file": "images/cigar_u.png",
+    "src": "../../static/CNS/images/cigar_u.png"
+  },
+  "../../static/CNS/images/hex_0.png": {
+    "file": "images/hex_0.png",
+    "src": "../../static/CNS/images/hex_0.png"
+  },
+  "../../static/CNS/images/hex_1.png": {
+    "file": "images/hex_1.png",
+    "src": "../../static/CNS/images/hex_1.png"
+  },
+  "../../static/CNS/images/hex_10.png": {
+    "file": "images/hex_10.png",
+    "src": "../../static/CNS/images/hex_10.png"
+  },
+  "../../static/CNS/images/hex_11.png": {
+    "file": "images/hex_11.png",
+    "src": "../../static/CNS/images/hex_11.png"
+  },
+  "../../static/CNS/images/hex_12.png": {
+    "file": "images/hex_12.png",
+    "src": "../../static/CNS/images/hex_12.png"
+  },
+  "../../static/CNS/images/hex_13.png": {
+    "file": "images/hex_13.png",
+    "src": "../../static/CNS/images/hex_13.png"
+  },
+  "../../static/CNS/images/hex_14.png": {
+    "file": "images/hex_14.png",
+    "src": "../../static/CNS/images/hex_14.png"
+  },
+  "../../static/CNS/images/hex_15.png": {
+    "file": "images/hex_15.png",
+    "src": "../../static/CNS/images/hex_15.png"
+  },
+  "../../static/CNS/images/hex_16.png": {
+    "file": "images/hex_16.png",
+    "src": "../../static/CNS/images/hex_16.png"
+  },
+  "../../static/CNS/images/hex_17.png": {
+    "file": "images/hex_17.png",
+    "src": "../../static/CNS/images/hex_17.png"
+  },
+  "../../static/CNS/images/hex_18.png": {
+    "file": "images/hex_18.png",
+    "src": "../../static/CNS/images/hex_18.png"
+  },
+  "../../static/CNS/images/hex_19.png": {
+    "file": "images/hex_19.png",
+    "src": "../../static/CNS/images/hex_19.png"
+  },
+  "../../static/CNS/images/hex_20.png": {
+    "file": "images/hex_20.png",
+    "src": "../../static/CNS/images/hex_20.png"
+  },
+  "../../static/CNS/images/hex_21.png": {
+    "file": "images/hex_21.png",
+    "src": "../../static/CNS/images/hex_21.png"
+  },
+  "../../static/CNS/images/hex_22.png": {
+    "file": "images/hex_22.png",
+    "src": "../../static/CNS/images/hex_22.png"
+  },
+  "../../static/CNS/images/hex_30.png": {
+    "file": "images/hex_30.png",
+    "src": "../../static/CNS/images/hex_30.png"
+  },
+  "../../static/CNS/images/hex_32.png": {
+    "file": "images/hex_32.png",
+    "src": "../../static/CNS/images/hex_32.png"
+  },
+  "../../static/CNS/images/hex_33.png": {
+    "file": "images/hex_33.png",
+    "src": "../../static/CNS/images/hex_33.png"
+  },
+  "../../static/CNS/images/hex_35.png": {
+    "file": "images/hex_35.png",
+    "src": "../../static/CNS/images/hex_35.png"
+  },
+  "../../static/CNS/images/hex_36.png": {
+    "file": "images/hex_36.png",
+    "src": "../../static/CNS/images/hex_36.png"
+  },
+  "../../static/CNS/images/hex_40.png": {
+    "file": "images/hex_40.png",
+    "src": "../../static/CNS/images/hex_40.png"
+  },
+  "../../static/CNS/images/hex_50.png": {
+    "file": "images/hex_50.png",
+    "src": "../../static/CNS/images/hex_50.png"
+  },
+  "../../static/CNS/images/hex_52.png": {
+    "file": "images/hex_52.png",
+    "src": "../../static/CNS/images/hex_52.png"
+  },
+  "../../static/CNS/images/hex_60.png": {
+    "file": "images/hex_60.png",
+    "src": "../../static/CNS/images/hex_60.png"
+  },
+  "../../static/CNS/images/hex_61.png": {
+    "file": "images/hex_61.png",
+    "src": "../../static/CNS/images/hex_61.png"
+  },
+  "../../static/CNS/images/hex_62.png": {
+    "file": "images/hex_62.png",
+    "src": "../../static/CNS/images/hex_62.png"
+  },
+  "../../static/CNS/images/hex_65.png": {
+    "file": "images/hex_65.png",
+    "src": "../../static/CNS/images/hex_65.png"
+  },
+  "../../static/CNS/images/hex_67.png": {
+    "file": "images/hex_67.png",
+    "src": "../../static/CNS/images/hex_67.png"
+  },
+  "../../static/CNS/images/hex_69.png": {
+    "file": "images/hex_69.png",
+    "src": "../../static/CNS/images/hex_69.png"
+  },
+  "../../static/CNS/images/hex_71.png": {
+    "file": "images/hex_71.png",
+    "src": "../../static/CNS/images/hex_71.png"
+  },
+  "../../static/CNS/images/hex_72.png": {
+    "file": "images/hex_72.png",
+    "src": "../../static/CNS/images/hex_72.png"
+  },
+  "../../static/CNS/images/hex_73.png": {
+    "file": "images/hex_73.png",
+    "src": "../../static/CNS/images/hex_73.png"
+  },
+  "../../static/CNS/images/icon-box.svg": {
+    "file": "images/icon-box.svg",
+    "src": "../../static/CNS/images/icon-box.svg"
+  },
+  "../../static/CNS/images/icon-chat.svg": {
+    "file": "images/icon-chat.svg",
+    "src": "../../static/CNS/images/icon-chat.svg"
+  },
+  "../../static/CNS/images/icon-house.svg": {
+    "file": "images/icon-house.svg",
+    "src": "../../static/CNS/images/icon-house.svg"
+  },
+  "../../static/CNS/images/icon-nextGame.svg": {
+    "file": "images/icon-nextGame.svg",
+    "src": "../../static/CNS/images/icon-nextGame.svg"
+  },
+  "../../static/CNS/images/icon-notebook.svg": {
+    "file": "images/icon-notebook.svg",
+    "src": "../../static/CNS/images/icon-notebook.svg"
+  },
+  "../../static/CNS/images/icon-replay.svg": {
+    "file": "images/icon-replay.svg",
+    "src": "../../static/CNS/images/icon-replay.svg"
+  },
+  "../../static/CNS/images/icon-rewind.svg": {
+    "file": "images/icon-rewind.svg",
+    "src": "../../static/CNS/images/icon-rewind.svg"
+  },
+  "../../static/CNS/images/icon-rulebook.svg": {
+    "file": "images/icon-rulebook.svg",
+    "src": "../../static/CNS/images/icon-rulebook.svg"
+  },
+  "../../static/CNS/images/icon-scroll.svg": {
+    "file": "images/icon-scroll.svg",
+    "src": "../../static/CNS/images/icon-scroll.svg"
+  },
+  "../../static/CNS/images/icon-stop.svg": {
+    "file": "images/icon-stop.svg",
+    "src": "../../static/CNS/images/icon-stop.svg"
+  },
+  "../../static/CNS/images/j1.png": {
+    "file": "images/j1.png",
+    "src": "../../static/CNS/images/j1.png"
+  },
+  "../../static/CNS/images/j2.png": {
+    "file": "images/j2.png",
+    "src": "../../static/CNS/images/j2.png"
+  },
+  "../../static/CNS/images/j3.png": {
+    "file": "images/j3.png",
+    "src": "../../static/CNS/images/j3.png"
+  },
+  "../../static/CNS/images/j4.png": {
+    "file": "images/j4.png",
+    "src": "../../static/CNS/images/j4.png"
+  },
+  "../../static/CNS/images/j5.png": {
+    "file": "images/j5.png",
+    "src": "../../static/CNS/images/j5.png"
+  },
+  "../../static/CNS/images/j6.png": {
+    "file": "images/j6.png",
+    "src": "../../static/CNS/images/j6.png"
+  },
+  "../../static/CNS/images/j7.png": {
+    "file": "images/j7.png",
+    "src": "../../static/CNS/images/j7.png"
+  },
+  "../../static/CNS/images/loading-bar-black.gif": {
+    "file": "images/loading-bar-black.gif",
+    "src": "../../static/CNS/images/loading-bar-black.gif"
+  },
+  "../../static/CNS/images/pirate.png": {
+    "file": "images/pirate.png",
+    "src": "../../static/CNS/images/pirate.png"
+  },
+  "../../static/CNS/images/res0.jpg": {
+    "file": "images/res0.jpg",
+    "src": "../../static/CNS/images/res0.jpg"
+  },
+  "../../static/CNS/images/res1.jpg": {
+    "file": "images/res1.jpg",
+    "src": "../../static/CNS/images/res1.jpg"
+  },
+  "../../static/CNS/images/res2.jpg": {
+    "file": "images/res2.jpg",
+    "src": "../../static/CNS/images/res2.jpg"
+  },
+  "../../static/CNS/images/res3.jpg": {
+    "file": "images/res3.jpg",
+    "src": "../../static/CNS/images/res3.jpg"
+  },
+  "../../static/CNS/images/res4.jpg": {
+    "file": "images/res4.jpg",
+    "src": "../../static/CNS/images/res4.jpg"
+  },
+  "../../static/CNS/images/res5.jpg": {
+    "file": "images/res5.jpg",
+    "src": "../../static/CNS/images/res5.jpg"
+  },
+  "../../static/CNS/images/res6.jpg": {
+    "file": "images/res6.jpg",
+    "src": "../../static/CNS/images/res6.jpg"
+  },
+  "../../static/CNS/images/res7.jpg": {
+    "file": "images/res7.jpg",
+    "src": "../../static/CNS/images/res7.jpg"
+  },
+  "../../static/CNS/images/res8.jpg": {
+    "file": "images/res8.jpg",
+    "src": "../../static/CNS/images/res8.jpg"
+  },
+  "../../static/CNS/images/res9.jpg": {
+    "file": "images/res9.jpg",
+    "src": "../../static/CNS/images/res9.jpg"
+  },
+  "../../static/CNS/images/rot_anticlockwise.svg": {
+    "file": "images/rot_anticlockwise.svg",
+    "src": "../../static/CNS/images/rot_anticlockwise.svg"
+  },
+  "../../static/CNS/images/rot_clockwise.svg": {
+    "file": "images/rot_clockwise.svg",
+    "src": "../../static/CNS/images/rot_clockwise.svg"
+  },
+  "main.css": {
+    "file": "main.css",
+    "src": "main.css"
+  },
+  "main.js": {
+    "assets": [
+      "images/loading-bar-black.gif",
+      "images/icon-house.svg",
+      "images/icon-chat.svg",
+      "images/icon-stop.svg",
+      "images/icon-nextGame.svg",
+      "images/icon-rulebook.svg",
+      "images/icon-notebook.svg",
+      "images/icon-box.svg",
+      "images/icon-scroll.svg",
+      "images/icon-replay.svg",
+      "images/icon-rewind.svg",
+      "images/hex_0.png",
+      "images/hex_1.png",
+      "images/hex_10.png",
+      "images/hex_11.png",
+      "images/hex_12.png",
+      "images/hex_13.png",
+      "images/hex_14.png",
+      "images/hex_15.png",
+      "images/hex_16.png",
+      "images/hex_17.png",
+      "images/hex_18.png",
+      "images/hex_19.png",
+      "images/hex_20.png",
+      "images/hex_21.png",
+      "images/hex_22.png",
+      "images/hex_30.png",
+      "images/hex_32.png",
+      "images/hex_33.png",
+      "images/hex_35.png",
+      "images/hex_36.png",
+      "images/hex_40.png",
+      "images/hex_50.png",
+      "images/hex_52.png",
+      "images/hex_60.png",
+      "images/hex_61.png",
+      "images/hex_62.png",
+      "images/hex_65.png",
+      "images/hex_67.png",
+      "images/hex_69.png",
+      "images/hex_71.png",
+      "images/hex_72.png",
+      "images/hex_73.png",
+      "images/j1.png",
+      "images/j2.png",
+      "images/j3.png",
+      "images/j4.png",
+      "images/j5.png",
+      "images/j6.png",
+      "images/j7.png",
+      "images/res0.jpg",
+      "images/res1.jpg",
+      "images/res2.jpg",
+      "images/res3.jpg",
+      "images/res4.jpg",
+      "images/res5.jpg",
+      "images/res6.jpg",
+      "images/res7.jpg",
+      "images/res8.jpg",
+      "images/res9.jpg",
+      "images/cigar.png",
+      "images/pirate.png",
+      "images/boxOffice.jpg",
+      "images/cigar_u.png",
+      "images/cigar_d.png",
+      "images/CNSbox.jpg",
+      "images/rot_anticlockwise.svg",
+      "images/rot_clockwise.svg"
+    ],
+    "css": [
+      "main.css"
+    ],
+    "file": "main.js",
+    "isEntry": true,
+    "src": "main.js"
+  }
+}

@@ -1,0 +1,38 @@
+{% load i18n %}
+{% autoescape off %}
+{% if game == "FCM" %}
+    {% url "FCM:showFCMgame" gameID as the_url %}
+{% elif game == "HC" %}
+    {% url "HC:showHCgame" gameID as the_url %}
+{% elif game == "Bus" %}
+    {% url "Bus:showBusGame" gameID as the_url %}
+{% elif game == "TGZ" %}
+    {% url "TGZ:showTGZgame" gameID as the_url %}
+{% elif game == "CNS" %}
+    {% url "CNS:showCNSgame" gameID as the_url %}
+{% elif game == "AQY" %}
+    {% url "AQY:showAQYgame" gameID as the_url %}
+{% elif game == "IND" %}
+    {% url "IND:showINDgame" gameID as the_url %}
+{% elif game == "KFW" %}
+    {% url "KFW:showKFWgame" gameID as the_url %}
+{% elif game == "WEB" %}
+    {% url "WEB:showWEBgame" gameID as the_url %}
+{% elif game == "RNB" %}
+    {% url "RNB:showRNBgame" gameID as the_url %}
+{% endif %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate %}
+Hi {{ user }},<br/>
+<br/>
+A game of {{ box_name }} has finished at Online Board Gamers.<br/>
+<br/>
+Game: {{ gameName }}<br/>
+Position: {{ position }}<br/>
+<br/>
+https://{{ domain }}{{ the_url }}<br/>
+<br/>
+Thank you for playing at Online Board Gamers.<br/>
+<br/>
+{% endblocktranslate %}
+{% endautoescape %}

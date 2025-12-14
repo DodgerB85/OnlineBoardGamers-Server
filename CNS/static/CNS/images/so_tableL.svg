@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   style="height: 128px; width: 128px;"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg33"
+   sodipodi:docname="so_tableL.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata37">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     id="namedview35"
+     showgrid="false"
+     inkscape:zoom="1.6445312"
+     inkscape:cx="256"
+     inkscape:cy="256"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg33" />
+  <defs
+     id="defs13">
+    <filter
+       id="shadow-1"
+       height="300%"
+       width="300%"
+       x="-100%"
+       y="-100%">
+      <feFlood
+         flood-color="#999"
+         result="flood"
+         id="feFlood2" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="atop"
+         result="composite"
+         id="feComposite4" />
+      <feGaussianBlur
+         in="composite"
+         stdDeviation="20"
+         result="blur"
+         id="feGaussianBlur6" />
+      <feOffset
+         dx="5"
+         dy="5"
+         result="offset"
+         id="feOffset8" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         id="feComposite10" />
+    </filter>
+  </defs>
+  <path
+     d="M0 0h512v512H0z"
+     fill="#87c2c8"
+     fill-opacity="1"
+     id="path15" />
+  <g
+     class=""
+     style=""
+     transform="translate(0,0)"
+     id="g19">
+    <path
+       d="M41 265v30h430v-30H41zm39 48v158.066h32V313H80zm320 0v158.066h32V313h-32z"
+       fill="#ffffff"
+       fill-opacity="1"
+       stroke="#000000"
+       stroke-opacity="1"
+       stroke-width="4"
+       filter="url(#shadow-1)"
+       id="path17" />
+  </g>
+  <g
+     font-family="'Times New Roman', Times, serif"
+     font-size="300px"
+     font-style="normal"
+     font-weight="bold"
+     text-anchor="middle"
+     text-decoration=" rgba(255, 255, 255, 1)"
+     class=""
+     transform="translate(256,236)"
+     id="g31">
+    <g
+       id="g29">
+      <text
+         stroke="rgba(0, 0, 0, 1)"
+         stroke-width="75"
+         id="text23"><tspan
+           x="0"
+           y="0"
+           id="tspan21">+</tspan></text>
+      <text
+         fill="rgba(255, 255, 255, 1)"
+         id="text27"><tspan
+           x="0"
+           y="0"
+           id="tspan25">+</tspan></text>
+    </g>
+  </g>
+</svg>

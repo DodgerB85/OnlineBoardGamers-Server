@@ -1,0 +1,24 @@
+1) Make sure you have installed python (3.12+), pip, MySQL, NPM
+2) Create a local folder, dowbload the repo, extract to folder
+3) Create Venv: python -m venv .venv
+4) Activate venv: .venv\Scripts\Activate.ps1 (for powershell; similar for others)
+5) Install dependencies: pip install -r requirements.txt
+6) Create the MySQL database - inside SQL shell: CREATE DATABASE your_local_db_name CHARACTER SET utf8mb4;
+7) Create a  user for your database - inside SQL shell: CREATE USER 'YOUR_LOCAL_USERNAME'@'localhost' IDENTIFIED BY 'YOUR_LOCAL_PASSWORD';
+8) Grant your new user privileges for your new DB - inside SQL shell: GRANT ALL PRIVILEGES ON your_local_db_name.* TO 'YOUR_LOCAL_USERNAME'@'localhost';
+9) FLUSH PRIVILEGES; then exit;
+10) Create the databases for django: python manage.py makemigrations  and   python manage.py migrate
+
+Now run your first test - python manage.py runserver - and check there are no errors - browse http://localhost:8000/
+You should be able to browsr around the logged-out pages, eg about, help, etc.
+
+11) Create superuser: python manage.py createsuperuser (use "admin" for the superuser)
+12) Restart the server, and create a normal user (Eg "Joey") using the "Register New Account" link
+13) Now test your admin access; go to http://localhost:8000/admin/ and login with your superuser. Find the user Joey and tick them active in the User DB. Also tick Email Confirmed in their profile.
+14) Back on the website, login with Joey to check it is working.
+15) Before creating a game, user the admin panel to create users "SHADOW" through to "SHADOW_5"
+16) On the website, create a cannes game. It should display in the lobby. You can try to open it, but it will stick on the loading screen. The vue server to display Cannes isn't running yet.
+17) Quit the server, and go to /CNS/vueCNS  then run npm install, and npm run dev. Just check there are no errors, and then quit. 
+18) You can now run ~/A_Run_All_Servers.bat (you might have to force run npm run dev in the CNS prompt)
+19) Now try opening the game of Cannes - if everything works, you've made it! :)
+

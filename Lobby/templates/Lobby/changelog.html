@@ -1,0 +1,41 @@
+{% extends "Lobby/layout.html" %}
+
+{% load static %}
+{% load i18n %}
+{% block head %}
+<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+<script src="{% static 'Lobby/common.js' %}"></script>
+
+<div class="container" id="changelogPage">
+
+  {% if user.username == 'admin' %}
+ Add Update
+ <form method="post">
+  {% csrf_token %}
+  {% for field in changelogFormVar %}
+  {{ field }}<BR/><BR?>
+  {% endfor %}
+  <BR/>
+  <input type="hidden" id="action" name="action" value="dooby">
+  <button type="submit">Add Update</button>
+</form>
+  {% endif %}
+
+  <h1>Online Board Gamers Updates:</h1>
+  For full updates and discussionse see the OBG Discord. Click <a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a> to join<BR/>
+  <BR/>
+
+  {% for change in allChanges %}
+  <B><U><span class="timeToConvertSpan">{{change.timestamp}}</span></U></B><BR/>
+  {{change.update}}<BR/>
+  <BR/>
+{% endfor %}
+
+{% include 'Lobby/donate/donateBanner.html' %}
+
+</div>
+{% include 'Lobby/common/homeButton.html' %}
+
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <script src="{% static 'Lobby/AllTournaments.js' %}"></script>
+  <script src="{% static 'Lobby/common.js' %}"></script>
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <!--<p><span style="background-color: yellow; color: darkred; font-size: 25px;">Note: Tournaments are still in testing phase. Just be aware that whilst everything should work as intended, I can't test more than 5 players, so new issues may be discovered.
+If anything does happen then I will keep the tournament going if at all possible, but be aware that worst case, you should still get a few fun games of FCM!</span><br />
+-->
+    <h1>{% translate "Tournaments" %}</h1>
+    <p style="font-size: 25px;">
+      {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
+      Horseless Carrige,
+      {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
+      Bus,
+      {% include 'Lobby/gameDisplay/gameIcons.html' with game="Bus" %}
+      Indonesia, and
+      {% include 'Lobby/gameDisplay/gameIcons.html' with game="AQY" %}
+      Antiquity Tournaments run at regular intervals
+      <br />
+      {% include 'Lobby/gameDisplay/gameIcons.html' with game="FCM" %}
+      {% translate "Food Chain Magnate Tournaments will run at regular intervals" %}
+      <br />
+      {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
+      {% translate "The Great Zimbabwe Tournaments will run at regular intervals" %}
+      <br />
+      {% translate "For more information on tournaments, see" %} <a class="linkOther" id="helpLink2" href="{% url 'helpTournaments' %}">Tournaments Help</a> and check the Discord!
+    </p>
+    <p style="font-size: 25px;">
+      <a class="linkOther" href="{% url 'MiniTournaments' %}">{% translate "Click here for Mini Tournaments" %}</a>
+    </p>
+    <div class="allTournamentsContainer">
+      <div class="allTournamentsDiv">
+        <table class="generalTable">
+          <tr>
+            <th>{% translate "Game" %}</th>
+            <th>{% translate "Name" %}</th>
+            <th>{% translate "Total Players" %}</th>
+            <th>{% translate "Players per Game" %}</th>
+            <th>{% translate "Format" %}</th>
+            <th>{% translate "Starting Options" %}</th>
+            <th>{% translate "Created" %}</th>
+            <th>{% translate "Winner" %}</th>
+          </tr>
+          {% for tourny in tournamentsJson %}
+            <tr class="clickableTournamentRow {{ tourny.gameCode }}"
+                id="tournamentRow{{ tourny.tournamentID }}">
+              <td>
+                {% if tourny.gameCode == 'FCM' %}
+                  <img class="tournamentGameIMG"
+                       src="{% static 'FCM/Images/burger_board.png' %}"
+                       alt="FCM game"
+                       title="FCM Game">
+                {% elif tourny.gameCode == 'HC' %}
+                  <img class="tournamentGameIMG"
+                       src="{% static 'HC/Images/icon_car.png' %}"
+                       alt="HC game"
+                       title="HC Game">
+                {% elif tourny.gameCode == 'Bus' %}
+                  <img class="tournamentGameIMG"
+                       src="{% static 'Bus/images/bus_icon.png' %}"
+                       alt="Bus game"
+                       title="Bus Game">
+                {% elif tourny.gameCode == 'TGZ' %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
+                {% elif tourny.gameCode == 'AQY' %}
+                 {% include 'Lobby/gameDisplay/gameIcons.html' with game="AQY" %}
+                {% elif tourny.gameCode == 'IND' %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="IND" %}
+                {% endif %}
+              </td>
+              <td>{{ tourny.tournamentName }}</td>
+              <td>{{ tourny.maxTournamentPlayers }}</td>
+              <td>{{ tourny.maxGamePlayers }}</td>
+              <td>{{ tourny.tournamentType }}</td>
+              <td>{{ tourny.startingOptionsHTML|safe }}</td>
+              <td>
+                <span class="timeToConvertSpan">{{ tourny.createdTS }}</span>
+              </td>
+              <td>{{ tourny.winnerHTML|safe }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+    <p style="font-size: 25px;">
+      <img src="{% static "TGZ/images/tgz_icon.png" %}"
+           alt="Tgz Tourney"
+           title="Tgz Tourney"
+           class="statsIMG">
+      Old TGZ Tournaments were run externally. View them on the <a href="{% url 'TGZtournaments' %}" class="linkOther">Old TGZ Tournaments Page</a>
+    </p>
+    <br />
+    <br />
+    {% include 'Lobby/donate/donateBanner.html' %}
+  </div>
+  {% include 'Lobby/common/homeButton.html' %}
+  {% block script %}{% endblock %}
+{% endblock %}

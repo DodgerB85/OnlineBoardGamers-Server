@@ -1,0 +1,142 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="lobbyHelpPage">
+      <h1>{% translate "Tournaments" %}</h1>
+      For Mini Tournaments see <a href="{% url 'helpTournamentsMini' %}" class="linkOther">Mini Tournaments Help</a>
+      <br />
+      <div class="lobbyHelpSection">
+        <b><u>{% translate "When are the tournaments?" %}</u></b>
+        <br />
+        <b>Food Chain Magnate</b>: Tournaments are run at regular intervals
+        <br />
+        <b>The Great Zimbabwe</b>: Tournaments are run at regular intervals
+        <br />
+        {% blocktranslate trimmed %}
+          <b>Indonesia, Horseless Carriage, Antiquity, and Bus</b>: Tournaments are run at regular intervals
+          <br />
+          They open on 1st of the month, and start on 7th, or later if more people are needed.
+          <br />
+          The format is randomly chosen from Rounds, Two Lives, and Points.
+        {% endblocktranslate %}
+        <br />
+        <table class="generalTable tournamentMonthsTable">
+          <thead>
+            <tr>
+              <th>{% translate "Game" %}</th>
+              <th>{% translate "Month" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{% translate "Antiquity" %}</td>
+              <td>February, August</td>
+            </tr>
+            <tr>
+              <td>{% translate "Indonesia" %}</td>
+              <td>March, September</td>
+            </tr>
+            <tr>
+              <td>{% translate "Horseless Carriage" %}</td>
+              <td>April, October</td>
+            </tr>
+            <tr>
+              <td>{% translate "Bus" %}</td>
+              <td>May, November</td>
+            </tr>
+          </tbody>
+        </table>
+        <br />
+        <br />
+        <b><u>{% translate "What are the formats?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          <b>Rounds</b> consists of (currently) 4 rounds, where all players are included in the games,
+          after which there is a short knockout of all players on top points to determine the overall winner.
+          <br />
+          <br />
+          <b>Points</b> functions the same as Rounds, except that instead of “winner takes all”, points
+          awards points per position - unlike the other formats which are winner takes all.
+          5 player games award 16 / 8 / 4 / 2 / 1 points, 4 player games award 8 / 4 / 2 / 1 points,
+          and 3 player games award 4 / 2 / 1 points per position
+          (note that in a single tournaments all games will have the same number of players).
+          <br />
+          <br />
+          <b>Multi-Game</b> has everyyone playing 4 games in round 1. The top 14 progress into two groups of 7 players in round 2,
+          and the top 2 from each group play a single game in the final. Currently applies to 4 player only. 
+          <br/>
+          <br/>
+          <b>Knockout</b> is simply the winner moves to the next round. This format will not be used in the regular schedule above, in order to get all players more games.
+          <br />
+          <br />
+          <b>Two Lives</b> is like double elimination; once you've lose twice then you're out of the tournament.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "How are game players decided?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Initially game players are drawn randomly. After this, players are ranked by number of wins /
+          (or points in a points. tournament). In 2p, players will play the closest people to them that
+          thay haven't already played. For 3p+ the system will try to group people who haven’t played together,
+          but there’s a higher chance you might end up seeing the same person more than once.
+          <br />
+          If there are any players left over, they receive a "Bye", which counts as an automatic win
+          (or half max points in a points tournament), and progress to the next round. "Byes" will
+          generally be given to the lowest ranked players, and are limited to one per tournament.
+          Essentially "Byes" are given randomly to the lowest ranked player who hasn't yet had a "Bye".
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "How do kickouts work?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          If someone is kicked out then they are ejected from the tournament.
+          They will lose both lives in Two Lives, and be removed from a Rounds/Points tournament.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "What else should I know?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Players will not play the same person again until there's no other option
+          (currently applies to 2p games, and the first 2 players in larger playercounts).
+          <br />
+          Players will not receive two "byes" until there's no other option.
+          <br />
+          Kickout timer will be 1 day, with the exception of the first move which will be 3 days,
+          in case players don't realise a game has started.
+          <br />
+          Notifications are sent out at the start of every new tournament game.
+          If you finish quickly there could be several days until your next game starts,
+          so it is strongly recommended to have at least one form of notification enabled in your profile.
+        {% endblocktranslate %}
+        <br />
+        <br />
+      </div>
+      <br />
+      <br />
+      {% translate "For further help contact" %}
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30">
+    </div>
+    {% include 'Lobby/common/homeButton.html' %}
+  </div>
+{% endblock %}

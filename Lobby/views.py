@@ -1,0 +1,4499 @@
+import json
+import time
+import datetime
+import requests
+import traceback
+import re
+import logging
+import base64
+import gzip
+from dal import autocomplete
+
+#from telegram import Update
+#from telegram.ext import Application, CommandHandler, ContextTypes
+import asyncio
+from decouple import config
+
+# import hashlib
+# import urllib
+
+
+# from random import randint
+from itertools import chain  # , islice
+from datetime import timedelta
+from collections import Counter
+
+from django.db import connection, transaction
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash, get_user
+from django.contrib.auth.decorators import login_required
+
+# from django.contrib.auth.hashers import check_password
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.tokens import default_token_generator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+from django.urls import reverse
+
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode, url_has_allowed_host_and_scheme
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext  # , get_language
+from django.utils import translation
+from django.utils import timezone
+
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail, BadHeaderError
+from django.views.generic import View
+from django.views.i18n import set_language as django_set_language
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+# from django.views.decorators.http import etag as etag_decorator
+
+from django.http import (
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+    Http404,
+    HttpResponsePermanentRedirect,
+)  # , HttpResponseNotFound
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q, Sum, Count, IntegerField  # Value, Count, F, ExpressionWrapper, DateTimeField
+from django.db.models.functions import TruncDate, Cast  # , Length, Substr , ExtractDay
+from django.db.models.expressions import RawSQL
+
+from contextlib import contextmanager
+
+from django.template.loader import render_to_string
+
+# from django.contrib.auth.forms import PasswordResetForm
+# from django.contrib.auth.forms import PasswordChangeForm
+from django.conf import settings
+
+from .tokens import account_activation_token
+from .forms import NewUserForm, UpdateProfileForm, PasswordChangeCustomForm, PasswordResetFormCustom, changelogForm
+
+from .models import Profile, changelog, Mini_Tournaments, Main_Tournament
+#from FCM.models import FCM_Game, FCM_Tournament
+#from HC.models import HC_Game, HC_Tournament
+#from Bus.models import Bus_Game, Bus_Tournament
+#from TGZ.models import TGZ_Game  # , HC_Tournament
+from CNS.models import CNS_Game  # , HC_Tournament
+#from AQY.models import AQY_Game, AQY_Tournament
+#from IND.models import IND_Game, IND_Tournament
+#from KFW.models import KFW_Game
+#from WEB.models import WEB_Game
+
+# from RNB.models import RNB_Game  # , HC_Tournament
+
+from user_visit.models import UserVisit
+
+#from FCM.common import buildFCMstartingOptions
+
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_hasRequiredExperience,
+    SF_startTournament,
+    SF_getRequiredExp,
+    SF_startMiniTournament,
+    SF_startMainTournament,
+    SF_getMiniTournamentCreationJsonReturn,
+    SF_TGZadvancedOptions,
+)
+from Lobby.sharedFunctions.sharedNotifications import (
+    SN_sendDeclineEmail,
+    SN_sendAdminErrorMessage,
+    SN_sendMiniTournamentInvite,
+)
+from Lobby.sharedFunctions.sharedRefs import (
+    SR_WEBHOOK_CHOICES,
+    SR_getAnyTournamentPlayersData,
+    SR_getAnyTournamentRoundsData,
+    SR_getFCMstartingOptionsHTML,
+    SR_getTournamentTypeDisplay,
+    SR_getTGZstartingOptionsHTML,
+    SR_getgodsVRoptionsHTML,
+    SR_getPointsForPosition,
+)
+
+# from django.utils import translation
+
+User = get_user_model()
+# from .models import User
+
+logger = logging.getLogger(__name__)
+
+# Initialize Application
+# try:
+#    logger.error(f"Not an error - test log")
+#    application = Application.builder().token(BOT_TOKEN).build()
+# except Exception as e:
+#    logger.error(f"Failed to initialize Application: {str(e)}")
+#    raise
+
+
+# /start command handler
+#async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#    logger.debug("Received /start command")
+#    if update.message:
+#        await update.message.reply_text("Hello! Welcome to OnlineBoardGamers bot. Type /help for more info.")
+#    else:
+#        logger.warning("No message in /start update")
+#
+#
+## /help command handler
+#async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#    logger.debug("Received /help command")
+#    if update.message:
+#        await update.message.reply_text(
+#            "This is the help message for OnlineBoardGamers! Visit https://OnlineBoardGamers.com for more."
+#        )
+#    else:
+#        logger.warning("No message in /help update")
+
+
+# Add handlers
+# application.add_handler(CommandHandler("start", start))
+# application.add_handler(CommandHandler("help", help_command))
+
+
+@csrf_exempt
+def TG_webhook(request):
+    """Handle incoming Telegram webhook updates."""
+    logger.debug(f"Received request: method={request.method}, body={request.body}")
+    if request.method == "POST":
+        try:
+            logger.debug("Attempting to parse JSON")
+            update_data = json.loads(request.body.decode("utf-8"))
+            logger.debug(f"Parsed update: {update_data}")
+            update = Update.de_json(update_data, application.bot)
+            if update:
+                logger.debug(f"Processing update: {update.update_id}")
+                application.process_update(update)  # type: ignore[no-untyped-call]  # Suppress Pylance error
+                logger.debug("Update processed successfully")
+                return HttpResponse(status=200)
+            else:
+                logger.error("Failed to parse update: Update object is None")
+                return HttpResponse(content="Invalid update data: Update object is None", status=400)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON parsing error: {str(e)}")
+            return HttpResponse(content=f"JSON parsing error: {str(e)}", status=400)
+        except Exception as e:
+            logger.error(f"Webhook error: {str(e)}")
+            return HttpResponse(content=f"Webhook error: {str(e)}", status=400)
+    logger.warning(f"Invalid request method: {request.method}")
+    return HttpResponse(status=405)
+
+
+@csrf_exempt
+@login_required
+def addTGid(request, TGid):
+    try:
+        webhookType = "TG"
+        webhookURL = ""
+        webhookUserID = str(TGid)
+
+        if len(str(webhookUserID)) > 50:
+            error_string = gettext("Entry too long")
+            messages.error(request, error_string)
+            return redirect("profile")
+
+        # If telegram, should be a number
+        if webhookType == "TG":
+            if len(str(webhookUserID)) == 0:
+                error_string = gettext("Please enter a Telegram user ID")
+                messages.error(request, error_string)
+                return redirect("profile")
+            if len(str(webhookUserID)) != 0 and not str(webhookUserID).isdigit():
+                error_string = gettext("Telegram user ID is normally a 10 digit number")
+                messages.error(request, error_string)
+                return redirect("profile")
+
+            # Now it is valid, so add it to the profile
+            profile = Profile.objects.get(user=request.user)
+            currentWebhooks = (
+                json.loads(profile.webhooks) if profile.webhooks != "" and profile.webhooks is not None else []
+            )
+            if len(currentWebhooks) >= 6:
+                error_string = gettext("Too many webhooks already added")
+                messages.error(request, error_string)
+                return redirect("profile")
+
+            if any(x[2] == webhookUserID and x[0] == "TG" for x in currentWebhooks):
+                error_string = gettext("This Telegram user ID has already been added")
+                messages.error(request, error_string)
+                return redirect("profile")
+
+            currentWebhooks.append([webhookType, webhookURL, webhookUserID])
+            profile.webhooks = json.dumps(currentWebhooks, separators=(",", ":"))
+            profile.save()
+            messages.success(
+                request, gettext("Telegram Notifications added - send a test message (next to your new webhook entry)")
+            )
+            return redirect("profile")
+
+    except User.DoesNotExist:
+        return HttpResponse(status=500)
+
+
+GAME_NAMES_MODELS = {
+    #"FCM": FCM_Game,
+    #"HC": HC_Game,
+    #"Bus": Bus_Game,
+    #"TGZ": TGZ_Game,
+    "CNS": CNS_Game,
+    #"AQY": AQY_Game,
+    #"IND": IND_Game,
+    #"KFW": KFW_Game,
+    #"WEB": WEB_Game,
+}
+GAME_MODELS = [#FCM_Game, HC_Game, Bus_Game, TGZ_Game, 
+               CNS_Game]
+               #, AQY_Game, IND_Game, KFW_Game, WEB_Game]
+
+
+def testLobby(request):
+    # subject = 'Thank you for registering to our site'
+    # message = ' it  means a world to us '
+    # email_from = settings.EMAIL_HOST_USER
+    # recipient_list = ['rogerball85@hotmail.com', ]
+
+    # send_mail(subject, message, email_from, recipient_list)
+    if request.user.username == "admin":
+        pass
+        # user1 = User.objects.get(username="user1")
+        # p2 = User.objects.get(username="33")
+    # return redirect('index')
+    return HttpResponse(status=204)  # No Content
+
+
+def lobbyHelp(request):
+    return render(request, "Lobby/lobbyHelp.html")
+
+
+def helpTournaments(request):
+    return render(request, "Lobby/tournamentsHelp.html")
+
+
+def helpTournamentsMini(request):
+    return render(request, "Lobby/tournamentsMiniHelp.html")
+
+
+# ALLOWED_USERS = ["admin", "DodgerB", "joshuastarr", "Lemem", "waymost", "timmymayes", "Ftep", "vraid", "RJ_E", "michazhn", "Dopple", "burmer", "siddhig", "Melk0r", "Steveth", "kbbr", "Brent", "Beezy", "durendal", "Gauss"]
+
+
+@login_required
+def indexSpecialRedirect(request):
+    # ALLOWED_USERS = [
+    #    "admin",
+    #    "user1",
+    #    "ha.steven",
+    #    "massibull",
+    #    "durendal",
+    #    "DodgerB",
+    #    "BotKickStarter",
+    #    "Rastko",
+    #    "Benkyo",
+    #    "vraid",
+    #    "F1087",
+    #    "krieg90",
+    #    "gdc",
+    #    "enavico",
+    #    "PhasingPlayer",
+    #    "Acacia",
+    # ]
+    # ALLOWED_USERS += [
+    #    "ha.steven",
+    #    "Kawlos",
+    #    "Jasonbartfast",
+    #    "Batch",
+    #    "Juni",
+    #    "TDUBZ",
+    #    "BigBad",
+    #    "massibull",
+    #    "durendal",
+    #    "DodgerB",
+    #    "BotKickStarter",
+    #    "33",
+    #    "Rastko",
+    #    "Burmer",
+    #    "phil",
+    # ]
+    # ALLOWED_USERS += ["Benkyo", "Steveth", "F1087", "krieg90", "gdc", "michazhn", "Hohohale"]
+    # "Jasonbartfast", "Kawlos", "Batch", "Juni", "TDUBZ", "BigBad",   '33',  'Steveth', ]
+    #'looogic',
+    #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
+    # print("******************************************************************************************************** TGZ ACCESS: =================================================:  " + request.user.username)
+    ALLOWED_USERS = ["admin", "DodgerB", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil"]
+    if request.user.username not in ALLOWED_USERS:
+        return redirect("index")
+
+    # return redirect('index')
+    return HttpResponseRedirect(reverse("RNB:showRNBgame"))
+    # return HttpResponseRedirect(reverse('IND:showINDgame'))
+
+
+def set_language_custom(request):
+    response = django_set_language(request)
+
+    # Check if language was successfully set
+    language_code = request.POST.get("language")
+    if language_code and response.status_code == 302 and request.user.is_authenticated:
+        # Store language choice in database
+        profile = Profile.objects.get(user=request.user)
+        profile.profileLanguage = language_code
+        profile.save()
+
+    return response
+
+
+@login_required()
+def userStats(request):
+    if request.user.username != "admin" and request.user.username != "DodgerB":
+        raise Http404()
+
+    user_stats_data = (
+        User.objects.annotate(date_joined_date=TruncDate("date_joined"))
+        .values("date_joined_date")
+        .annotate(total_users=Count("id"))
+        .order_by("date_joined_date")
+    )
+
+    dates = []
+    user_counts = []
+
+    current_date = user_stats_data[0]["date_joined_date"]
+    cumulative_user_count = 0
+
+    for data in user_stats_data:
+        while data["date_joined_date"] > current_date:
+            dates.append(current_date.strftime("%Y-%m-%d"))
+            user_counts.append(cumulative_user_count)
+            current_date += timedelta(days=1)
+
+        cumulative_user_count += data["total_users"]
+        dates.append(data["date_joined_date"].strftime("%Y-%m-%d"))
+        user_counts.append(cumulative_user_count)
+
+    ###### LAST LOGIN DATA
+    # Query all users and their last login times, excluding None values
+    # users_last_login = User.objects.exclude(last_login__isnull=True)\
+    #                                .exclude(last_login__exact=None)\
+    #                                .values_list('last_login', flat=True)
+    #
+    ## Count the number of users for each unique last login date
+    # user_count_by_date = Counter([login_date.date() for login_date in users_last_login])
+    #
+    ## Sort the data by date for the graph
+    # sorted_user_counts = sorted(user_count_by_date.items(), key=lambda x: x[0])
+    #
+    ## Prepare the data for the graph
+    # last_login_data = [{'date': date.strftime('%Y-%m-%d'), 'count': count} for date, count in sorted_user_counts]
+
+    users_last_login = (
+        User.objects.exclude(last_login__isnull=True)
+        .exclude(last_login__exact=None)
+        .values_list("last_login", flat=True)
+    )
+
+    # Get the current time
+    current_time = timezone.now()
+
+    # Initialize the counter
+    user_counter = Counter()
+
+    for login_date in users_last_login:
+        if login_date <= current_time:
+            user_counter[login_date.date()] += 1
+
+    # Generate the accumulated count for each date
+    cumulative_count = 0
+    last_login_data = []
+
+    for date, count in sorted(user_counter.items()):
+        cumulative_count += count
+        last_login_data.append({"date": date.strftime("%Y-%m-%d"), "count": cumulative_count})
+
+    ###### LAST LOGIN BAR CHART ########
+    # Query the number of users that last logged in on each day
+    user_login_counts = (
+        User.objects.exclude(last_login__isnull=True)
+        .exclude(last_login__exact=None)
+        .annotate(login_date=TruncDate("last_login"))
+        .values("login_date")
+        .annotate(count=Count("id"))
+        .order_by("login_date")
+    )
+
+    # Prepare the data for the bar chart
+    last_login_data_bar = [
+        {"date": entry["login_date"].strftime("%Y-%m-%d"), "count": entry["count"]} for entry in user_login_counts
+    ]
+
+    ###### DIFFERENCE BETWEEN JOIN AND LAST LOGIN ########
+    users = User.objects.all()
+    durations = []
+
+    for user in users:
+        if user.last_login is not None and user.date_joined is not None:
+            duration = (user.last_login.date() - user.date_joined.date()).days
+            durations.append(duration)
+
+    duration_counts = Counter(durations)
+
+    join_to_last_login_data = [
+        {"days_between": duration, "count": count} for duration, count in duration_counts.items()
+    ]
+
+    return render(
+        request,
+        "Lobby/admin/userStats.html",
+        {
+            "dates": dates,
+            "user_counts": user_counts,
+            "last_login_data": last_login_data,
+            "last_login_data_bar": last_login_data_bar,
+            "join_to_last_login_data": join_to_last_login_data,
+        },
+    )
+
+
+@login_required()
+def DBO(request):
+    if request.user.username != "admin" and request.user.username != "DodgerB":
+        raise Http404()
+
+    gamesList = []
+    remaining_start_time_expired = -60 * 60 * 24 * 365 * 5  # 5 years
+    remaining_finish_time_expired = -60 * 60 * 24 * 30  # 30 days
+    totalGamesCount = 0
+    pracGamesCount = 0
+    finishedGamesCount = 0
+
+    GAME_MODELS_2 = []#FCM_Game]
+
+    for game_in_use_model in GAME_MODELS_2:
+        # Query the game_in_use_model to get the players who will timeout within the specified time range
+        query = (
+            Q(gameStatus="ACTIVE") | Q(gameStatus="PRIVATE") | Q(gameStatus="WAITING")
+        )  # & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
+        query_finished = Q(
+            gameStatus="FINISHED"
+        )  # & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
+
+        query2 = Q(gameStatus="ACTIVE")
+
+        allGames = game_in_use_model.objects.filter(query2).all()
+        finishedGamesCount += game_in_use_model.objects.filter(query_finished).all().count()
+        # gamesListLen_nonPrac += game_in_use_model.objects.filter(query_nonPrac).all().count()
+
+        for singleGame in allGames:
+            timeRemaining = singleGame.getSecondsToNextKickout()
+
+            # if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
+            #    if singleGame.allPlayers.filter(username="SHADOW").exists():
+            #        pracGamesCount += 1
+            #    gamesList.append(singleGame.serialize(request.user))
+            #    totalGamesCount += 1
+
+            if not singleGame.allPlayers.filter(username="SHADOW").exists():
+                gamesList.append(singleGame.serialize(request.user))
+                totalGamesCount += 1
+
+    # Sort the list by the latestUpdate property
+    gamesList = sorted(gamesList, key=lambda obj: int(obj["latestUpdate"]))
+    gamesListLen = len(gamesList)
+    return render(
+        request,
+        "Lobby/admin/DBO.html",
+        {
+            "gamesList": gamesList,
+            "gamesListLen": gamesListLen,
+            "totalGamesCount": totalGamesCount,
+            "pracGamesCount": pracGamesCount,
+            "noramlGamesCount": totalGamesCount - pracGamesCount,
+            "finishedGamesCount": finishedGamesCount,
+            #'gamesListLen_nonPrac': gamesListLen_nonPrac,
+        },
+    )
+
+
+@login_required()
+def DBO_deleteGame(request, gameType):
+    if request.user.username != "admin" and request.user.username != "DodgerB":
+        raise Http404()
+
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Invalid Request"}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    currentGame = None
+    if gameType == "FCM":
+        try:
+            currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
+        except FCM_Game.DoesNotExist:
+            return JsonResponse({"noGame": True}, safe=False)
+
+    if gameType == "HC":
+        try:
+            currentGame = HC_Game.objects.get(id=jsonData["gameID"])
+        except HC_Game.DoesNotExist:
+            return JsonResponse({"noGame": True}, safe=False)
+
+    if gameType == "Bus":
+        try:
+            currentGame = Bus_Game.objects.get(id=jsonData["gameID"])
+        except Bus_Game.DoesNotExist:
+            return JsonResponse({"noGame": True}, safe=False)
+
+    if gameType == "TGZ":
+        try:
+            currentGame = TGZ_Game.objects.get(id=jsonData["gameID"])
+        except TGZ_Game.DoesNotExist:
+            return JsonResponse({"noGame": True}, safe=False)
+
+    if gameType == "CNS":
+        try:
+            currentGame = CNS_Game.objects.get(id=jsonData["gameID"])
+        except CNS_Game.DoesNotExist:
+            return JsonResponse({"noGame": True}, safe=False)
+
+    if gameType == "AQY":
+        try:
+            currentGame = AQY_Game.objects.get(id=jsonData["gameID"])
+        except AQY_Game.DoesNotExist:
+            return JsonResponse({"noGame": True}, safe=False)
+
+    if gameType == "IND":
+        try:
+            currentGame = IND_Game.objects.get(id=jsonData["gameID"])
+        except IND_Game.DoesNotExist:
+            return JsonResponse({"noGame": True}, safe=False)
+
+    if gameType == "KFW":
+        try:
+            currentGame = KFW_Game.objects.get(id=jsonData["gameID"])
+        except KFW_Game.DoesNotExist:
+            return JsonResponse({"noGame": True}, safe=False)
+
+    # Delete Training Game // Can never really fail
+    if jsonData["action"] == "deleteTrgGame" and currentGame:
+        if request.user.username == "admin":
+            gameStatus = currentGame.gameStatus
+            currentGame.delete()
+            messages.success(request, f"Game Deleted. Game: {gameType}  ID: {jsonData['gameID']}")
+
+            return JsonResponse(
+                {"gameType": gameType, "gameID": jsonData["gameID"], "gameStatus": gameStatus}, safe=False
+            )
+        else:
+            try:
+                message = ""
+                message += "=== DELETE GAME HACK DELETE GAME HACK DELETE GAME HACK DELETE GAME HACK DELETE GAME HACK DELETE GAME HACK ===================================\n"
+                message += "DELETE GAME HACK DELETE GAME HACK\n"
+                if request.user.is_authenticated:
+                    message += "User: " + request.user.username + "\n"
+                message += "Path: " + request.path + "\n"
+                message += "Method: " + request.method + "\n"
+                message += "User Is Authenticated: " + str(request.user.is_authenticated) + "\n"
+                if request.user.is_authenticated:
+                    message += "Email: " + request.user.email + "\n"
+
+                requests.post(
+                    "https://discord.com/api/webhooks/1146733825649549344/aFVGc6nTLtKDxvS0Ooaln6nxNqyhmrn9nAcyxfLbYiebgQGTj7HGFDqsD_4H7vWV15T4",
+                    data={"content": message},
+                )
+            except Exception as e:
+                print(e)
+
+
+def about(request):
+    showLangs = False
+    if (
+        request.user.username == "admin"
+        or request.user.username == "庄生"
+        or request.user.username == "Salfuman"
+        or request.user.username == "mhmnz2"
+    ):
+        showLangs = True
+
+    return render(request, "Lobby/about.html", {"showLangs": showLangs})
+
+
+@login_required
+def newGamesPage(request):
+    return render(request, "Lobby/newGames.html")
+
+
+@login_required
+def newMiniTournaments(request):
+    return render(request, "Lobby/newMiniTournaments.html")
+
+
+@login_required
+def fcmNewCode(request):
+    return render(request, "Lobby/fcmNewCode.html")
+
+
+def changelog_view(request):
+    allChanges = changelog.objects.order_by("-timestamp").all()
+
+    if request.user.username == "admin":
+        # create object of form
+        changelogFormVar = changelogForm(request.POST or None, request.FILES or None)
+
+        # check if form data is valid
+        if changelogFormVar.is_valid():
+            # save the form data to model
+            changelogFormVar.save()
+            message = changelogFormVar.cleaned_data["update"]
+            requests.post(
+                "https://discord.com/api/webhooks/1085412320836059156/emEyupCBMLwWq6OmVr7-6wfg_8Um13G74Xz2RKJtlHOo1cnE83_TAqev7sMMFbz-rExD",
+                data={"content": message},
+            )
+
+        return render(request, "Lobby/changelog.html", {"allChanges": allChanges, "changelogFormVar": changelogFormVar})
+    return render(request, "Lobby/changelog.html", {"allChanges": allChanges})
+
+
+def contact(request):
+    return render(request, "Lobby/contact.html")
+
+
+def handler404(request, exception):
+    if not request.path.endswith("/"):
+        print("Adding trailing slash to 404 URL: " + request.path)
+        return HttpResponsePermanentRedirect(request.path + "/")
+    data = exception.args
+    exceptionData = data[0]
+    if exceptionData == "Game does not exist":
+        messages.error(request, gettext(exceptionData))
+    # if data:
+    #    return HttpResponseNotFound(data[0])
+    try:
+        message = ""
+        message += "=== 404 ===================================\n"
+        message += "404 ERROR\n"
+        if request.user.is_authenticated:
+            message += "User: " + request.user.username + "\n"
+        else:
+            message += "User Not Logged In\n"
+        message += "Path: " + request.path + "\n"
+        message += "Method: " + request.method + "\n"
+        # NOT WORKING
+        # message += "Current App: " + request.current_app + "\n"
+        message += "User Is Authenticated: " + str(request.user.is_authenticated) + "\n"
+        if request.user.is_authenticated:
+            message += "Email: " + request.user.email + "\n"
+
+        if request.user.is_authenticated and request.user.username != "Gamer" and request.user.username != "MMYCC":
+            requests.post(
+                "https://discord.com/api/webhooks/1146733825649549344/aFVGc6nTLtKDxvS0Ooaln6nxNqyhmrn9nAcyxfLbYiebgQGTj7HGFDqsD_4H7vWV15T4",
+                data={"content": message},
+            )
+    except Exception as e:
+        print("404 handler error: " + str(e))
+
+    return render(
+        request,
+        "Lobby/404.html",
+        {
+            # "exception": exception
+        },
+    )
+
+
+# def handler500(request, exception=None, *_, **_k):
+def handler500(request, exception=None, *_, **_k):
+    try:
+        message = "=== 500 ===================================\n"
+        message += "500 ERROR\n"
+        if request.user.is_authenticated:
+            message += "User: " + request.user.username + "\n"
+            message += "Email: " + request.user.email + "\n"
+        else:
+            message += "User Not Logged In\n"
+        message += "Path: " + request.path + "\n"
+        message += "Method: " + request.method + "\n"
+        message += "User Is Authenticated: " + str(request.user.is_authenticated) + "\n"
+
+        # Get the traceback information for the exception
+        exception_traceback = traceback.format_exc()
+        message += "\nException Traceback:\n" + exception_traceback + "\n"
+
+        requests.post(
+            "https://discord.com/api/webhooks/1146733825649549344/aFVGc6nTLtKDxvS0Ooaln6nxNqyhmrn9nAcyxfLbYiebgQGTj7HGFDqsD_4H7vWV15T4",
+            data={"content": message},
+        )
+    except Exception as e:
+        # Handle any exceptions during error reporting
+        print("Error reporting failed:", str(e))
+        try:
+            requests.post(
+                "https://discord.com/api/webhooks/1146733825649549344/aFVGc6nTLtKDxvS0Ooaln6nxNqyhmrn9nAcyxfLbYiebgQGTj7HGFDqsD_4H7vWV15T4",
+                data={"content": str(e)},
+            )
+        except:
+            print("DOUBLE FAILURE in 500")
+
+    return render(
+        request,
+        "Lobby/500.html",
+        {
+            # "exception": exception
+        },
+    )
+
+
+def password_reset_request(request):
+    if request.method == "POST":
+        password_reset_form = PasswordResetFormCustom(request.POST)
+        if password_reset_form.is_valid():
+            data = password_reset_form.cleaned_data["email"]
+            associated_users = User.objects.filter(Q(email=data))
+            if associated_users.exists():
+                for user in associated_users:
+                    current_site = get_current_site(request)
+                    subject = gettext("Password Reset Requested")
+                    email_template_name = "Lobby/password/password_reset_email.txt"
+                    c = {
+                        "email": user.email,
+                        "domain": current_site.domain,
+                        "site_name": "Website",
+                        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                        "user": user,
+                        "token": default_token_generator.make_token(user),
+                        "protocol": "https",
+                        "username": user.username,
+                    }
+                    email = render_to_string(email_template_name, c)
+                    try:
+                        send_mail(subject, email, "OnlineBoardGamers@gmail.com", [user.email], fail_silently=False)
+                    except BadHeaderError:
+                        return HttpResponse("Invalid header found.")
+
+                    messages.success(
+                        request,
+                        gettext(
+                            "An email with password reset instructions has been sent to your inbox. Please check spam folders"
+                        ),
+                    )
+                    return redirect("/")
+            else:
+                messages.error(request, gettext("No user found with this email"))
+        else:
+            messages.error(request, gettext("Please enter a valid email address"))
+    password_reset_form = PasswordResetFormCustom()
+    return render(
+        request=request,
+        template_name="Lobby/password/password_reset.html",
+        context={"password_reset_form": password_reset_form},
+    )
+
+
+def csrf_failure(request, reason=""):
+    user = get_user(request)
+    username = user.username if user.is_authenticated else "Anonymous"
+    redirect_url = request.META.get("HTTP_REFERER", "unknown")  # Get the referring URL
+
+    # log_message = f"CSRF failure: User: {username}, Redirect from: {redirect_url}, Reason: {reason}"
+    # logger.warning(log_message)
+
+    logger.warning(f"CSRF failure: User: {username}, Redirect from: {redirect_url}, Reason: {reason}")
+    logger.debug(f"Request META: {request.META}")
+    logger.debug(f"CSRF Cookie: {request.COOKIES.get('csrftoken')}")
+
+    messages.error(request, gettext("Authentification problem - possibly using another browser tab. Please login here"))
+    return render(request, "Lobby/login.html")
+
+
+@login_required
+def stats(request):
+    totalUsers = User.objects.all().count()
+    date_from = datetime.datetime.now() - datetime.timedelta(hours=24)
+    date_from = timezone.now() - timezone.timedelta(hours=24)
+
+    userActvitiy = (
+        UserVisit.objects.filter(timestamp__gte=date_from).values_list("user_id", flat=True).distinct().count()
+    )
+    # userActvitiy += 10
+
+    # Initialize counts and lists
+    game_counts = []
+    finished_game_counts = []
+    latestGames = []
+    latestGamesFinished = []
+
+    # Queries for both active and finished games
+    active_query = Q(gameStatus="ACTIVE") & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
+    finished_query = Q(gameStatus="FINISHED") & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
+
+    # Loop through GAME_MODELS once to gather counts and latest games
+    for game_model in GAME_MODELS:
+        active_games = game_model.objects.filter(active_query).annotate(count=Count("id"))
+        finished_games = game_model.objects.filter(finished_query).annotate(count=Count("id"))
+
+        # Count active games
+        active_count = active_games.aggregate(Sum("count"))["count__sum"] if active_games else 0
+        game_counts.append(active_count)
+
+        # Count finished games
+        finished_count = finished_games.aggregate(Sum("count"))["count__sum"] if finished_games else 0
+        finished_game_counts.append(finished_count)
+
+        # Get latest 10 games
+        latestGames.extend(active_games.order_by("-latestUpdate")[:10])
+        latestGamesFinished.extend(finished_games.order_by("-latestUpdate")[:10])
+
+    # Calculate grand totals
+    totalGames = sum(game_counts)
+    finishedGames = sum(finished_game_counts)
+
+    # Sort the latest games by latestUpdate
+    latestGames.sort(key=lambda game: game.latestUpdate, reverse=True)
+    latestGamesFinished.sort(key=lambda game: game.latestUpdate, reverse=True)
+    # latestGames.sort(key=lambda game: game['latestUpdate'], reverse=True)
+
+    # Get the top 10 games
+    tenGamesList = latestGames[:10]
+    tenGamesListFininshed = latestGamesFinished[:10]
+
+    # Serialize the games into JSON
+    tenGamesJSON = [game.serialize(request.user) for game in tenGamesList]
+    tenGamesFinishedJSON = [game.serialize(request.user) for game in tenGamesListFininshed]
+
+    # Fair Play
+    f = open("./Lobby/stats/fairPlayArr_E.json")
+    fairPlayArr = json.load(f)
+    f.close()
+
+    ## Totals
+    f = open("./Lobby/stats/winArr_E.json")
+    winArr = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win3mArr_E.json")
+    win3mArr = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win1mArr_E.json")
+    win1mArr = json.load(f)
+    f.close()
+
+    f = open("./Lobby/stats/winArr2p_E.json")
+    winArr2p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win3mArr2p_E.json")
+    win3mArr2p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win1mArr2p_E.json")
+    win1mArr2p = json.load(f)
+    f.close()
+
+    f = open("./Lobby/stats/winArr3p_E.json")
+    winArr3p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win3mArr3p_E.json")
+    win3mArr3p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win1mArr3p_E.json")
+    win1mArr3p = json.load(f)
+    f.close()
+
+    f = open("./Lobby/stats/winArr4p_E.json")
+    winArr4p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win3mArr4p_E.json")
+    win3mArr4p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win1mArr4p_E.json")
+    win1mArr4p = json.load(f)
+    f.close()
+
+    f = open("./Lobby/stats/winArr5p_E.json")
+    winArr5p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win3mArr5p_E.json")
+    win3mArr5p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win1mArr5p_E.json")
+    win1mArr5p = json.load(f)
+    f.close()
+
+    f = open("./Lobby/stats/winArr6p_E.json")
+    winArr6p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win3mArr6p_E.json")
+    win3mArr6p = json.load(f)
+    f.close()
+    f = open("./Lobby/stats/win1mArr6p_E.json")
+    win1mArr6p = json.load(f)
+    f.close()
+
+    games = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
+
+    return render(
+        request,
+        "Lobby/stats.html",
+        {
+            "totalUsers": totalUsers,
+            "game_counts": game_counts,
+            "totalGames": totalGames,
+            "finishedGames": finishedGames,
+            "finished_game_counts": finished_game_counts,
+            "tenGames": tenGamesJSON,
+            "tenGamesFinished": tenGamesFinishedJSON,
+            "userActvitiy": userActvitiy,
+            "games": games,
+            "winArr": winArr,
+            "win3mArr": win3mArr,
+            "win1mArr": win1mArr,
+            "winArr2p": winArr2p,
+            "win3mArr2p": win3mArr2p,
+            "win1mArr2p": win1mArr2p,
+            "winArr3p": winArr3p,
+            "win3mArr3p": win3mArr3p,
+            "win1mArr3p": win1mArr3p,
+            "winArr4p": winArr4p,
+            "win3mArr4p": win3mArr4p,
+            "win1mArr4p": win1mArr4p,
+            "winArr5p": winArr5p,
+            "win3mArr5p": win3mArr5p,
+            "win1mArr5p": win1mArr5p,
+            "winArr6p": winArr6p,
+            "win3mArr6p": win3mArr6p,
+            "win1mArr6p": win1mArr6p,
+            # Fair Play
+            "fairPlayArr": fairPlayArr,
+        },
+    )
+
+
+def donate(request):
+    return render(request, "Lobby/donate/donate.html")
+
+
+def donate_cancel(request):
+    messages.success(request, gettext("Thank you for taking a look"))
+    return render(request, "Lobby/donate/donate.html")
+
+
+def donate_success(request):
+    return render(request, "Lobby/donate/donate_success.html")
+
+
+def indexListType(request, listType):
+    request.session["listType"] = listType
+    return redirect("index")
+
+
+from django.db.models import Q
+
+# Assuming you have GAME_MODELS and other constants defined elsewhere
+# from .models import Profile, Mini_Tournaments, ...
+
+
+def index(request):
+    if not request.user.is_authenticated:
+        return render(request, "Lobby/index.html")
+    
+    #############
+    start_time = time.time()
+    show_timestamps = False
+    if request.user.username == "admin" or request.user.username == "DodgerB":
+        show_timestamps = True
+    
+    if show_timestamps:
+        print(f"--- Timing Start: {start_time} for user {request.user.username} ---")
+
+    def print_timestamp(label):
+        if show_timestamps:
+            elapsed = time.time() - start_time
+            print(f"[TIMING] {label}: {elapsed:.4f} seconds elapsed")
+    #############
+
+    user = request.user
+    user_id = user.id
+    list_type = request.session.pop("listType", "current")
+
+    # --- Step 1: Fetch Profile and Blacklist Efficiently (1 Query) ---
+    profile = Profile.objects.select_related("user").get(user=user)
+    # Cache blacklisted players for efficient lookups in Python (not DB queries)
+    blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
+    print_timestamp("Step 1: Profile/Blacklist fetched")
+    
+    # --- Step 2: Combine Game Queries (Reduced Queries) ---
+    # We consolidate fetching all relevant games across all models using Q objects and prefetch_related
+    # We still need one query per game model, but each query is highly optimized.
+    all_user_games = []
+
+    for model in GAME_MODELS:
+        # Define base query with necessary prefetches for all subsequent processing
+        base_query = model.objects.filter(
+            Q(allPlayers=user_id) | Q(gameStatus="AVAILABLE") | Q(invitedPlayers=user_id)
+        ).prefetch_related(
+            "allPlayers", 
+            "missingPlayers", 
+            "invitedPlayers"
+        )
+        all_user_games.extend(list(base_query))
+
+    all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
+    print_timestamp("Step 2: All game queries complete and sorted")
+    
+    # --- Step 3: Categorize and Serialize in Python (Efficient Processing) ---
+    available_games = []
+    current_games = []
+    waiting_games = []
+    invitations_games = []
+    finished_games = []
+    my_move_games_data = []
+    current_chat = False
+    finished_chat = False
+    
+    serialization_start_time = time.time()
+
+    for game in all_user_games:
+        if game.gameStatus == "FINISHED" and len(finished_games) >= 10:
+            continue  # Skip further processing for finished games if we already have 10
+        
+        # Check blacklist criteria in Python memory instead of database queries
+        is_blacklisted_game = game.creator_id in blacklisted_players_ids or user_id in set(
+            game.creator.profile.blacklistedPlayers.values_list("id", flat=True)
+        )
+        
+        # Don't skip blacklisted games here, in case you are in an active game with them, or game is finished
+        #if is_blacklisted_game:
+        #    continue  # Skip blacklisted games entirely
+
+        is_involved = user_id in {p.id for p in game.allPlayers.all()}
+        is_invited = user_id in {p.id for p in game.invitedPlayers.all()}
+
+        # Serialization occurs only once per game object
+        serialized = game.serialize(user)
+
+        if is_involved:
+            if game.gameStatus == "ACTIVE" and user_id not in {p.id for p in game.missingPlayers.all()}:
+                current_games.append(serialized)
+                if serialized.get("myMove", False):
+                    my_move_games_data.append([serialized["game"], serialized["gameID"]])
+                if serialized.get("chatNotification", False):
+                    current_chat = True
+            elif game.gameStatus in ["WAITING", "AVAILABLE", "PRIVATE"]:
+                waiting_games.append(serialized)
+            elif game.gameStatus == "FINISHED" and len(finished_games) < 10:
+                finished_games.append(serialized)
+                if serialized.get("chatNotification", False):
+                    finished_chat = True
+
+        elif not is_involved and not is_blacklisted_game and game.gameStatus == "AVAILABLE":
+            available_games.append(serialized)
+
+        elif not is_involved and is_invited and game.gameStatus in ["WAITING", "PRIVATE"]:
+            invitations_games.append(serialized)
+
+    if show_timestamps:
+        elapsed_serialization = time.time() - serialization_start_time
+        print(f"[TIMING] Step 3: Serialization/Categorization loop finished in: {elapsed_serialization:.4f} seconds")
+    print_timestamp("Step 3: Categorization complete")
+
+    # --- Step 4: Mini Tournaments & Tournament Counts (Separate Queries remain necessary here) ---
+    available_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="OP").order_by("-created")
+    available_MT = [item.serialize() for item in available_MT_raw]
+    # ... (other MT queries remain the same as they are efficient enough) ...
+
+    current_MT_raw = Mini_Tournaments.objects.filter(Q(tournamentStatus="IP") & Q(startingPlayers=user)).order_by(
+        "-created"
+    )
+    current_MT = [item.serialize() for item in current_MT_raw]
+    waiting_MT_raw = Mini_Tournaments.objects.filter(
+        Q(tournamentStatus="OP") | Q(tournamentStatus="PR"), startingPlayers=user
+    ).order_by("-created")
+    waiting_MT = [item.serialize() for item in waiting_MT_raw]
+    invitations_MT_raw = Mini_Tournaments.objects.filter(
+        Q(tournamentStatus="OP") | Q(tournamentStatus="PR"), invitedPlayers=user
+    ).order_by("-created")
+    invitations_MT = [item.serialize() for item in invitations_MT_raw]
+
+    print_timestamp("Step 4: Mini Tournaments fetched and serialized")
+
+    # --- Step 5: Counts and Rendering ---
+    counts = {
+        "available": len(available_games) + len(available_MT),
+        "current": len(current_games),
+        "waiting": len(waiting_games) + len(waiting_MT),
+        "invitations": len(invitations_games) + len(invitations_MT),
+        "finished": len(finished_games),
+        "my_move": len(my_move_games_data),
+    }
+
+    # Fetch tournament availability efficiently using .exists() 
+    tournament_models = {
+        #"FCM": FCM_Tournament,
+        #"HC": HC_Tournament,
+        #"Bus": Bus_Tournament,
+        #"AQY": AQY_Tournament,
+        #"IND": IND_Tournament,
+    }
+    available_tournaments = [
+        name for name, model in tournament_models.items() if model.objects.filter(tournamentStatus="OP").exists()
+    ]
+
+    available_tournaments_main = Main_Tournament.objects.filter(tournamentStatus="OP")
+    for tournament in available_tournaments_main:
+        if tournament.gameCode not in available_tournaments:
+            available_tournaments.append(tournament.gameCode)
+
+    # Check for special users
+    show_langs = user.username in {"admin", "庄生", "Salfuman", "mhmnz2"}
+
+    print_timestamp("Step 5: Counts and final prep complete")
+    if show_timestamps:
+        total_elapsed = time.time() - start_time
+        print(f"--- Total Function Execution Time: {total_elapsed:.4f} seconds ---")
+
+    return render(
+        request,
+        "Lobby/lobby.html",
+        {
+            "availableGamesList": available_games,
+            "currentGamesList": current_games,
+            "waitingGamesList": waiting_games,
+            "invitaionsGamesList": invitations_games,  # Fix typo in template variable name in your template/view if necessary
+            "finishedGamesList": finished_games,
+            "invitaionsGamesList": invitations_games,  # Note: Fix typo in template variable
+            "finishedGamesList": finished_games,
+            "availableCount": counts["available"],
+            "currentCount": counts["current"],
+            "waitingCount": counts["waiting"],
+            "invitationsCount": counts["invitations"],
+            "finishedCount": counts["finished"],
+            "listType": list_type,
+            "myMoveGames": counts["my_move"],
+            "availableTournaments": available_tournaments,
+            "showLangs": show_langs,
+            "currentChat": current_chat,
+            "finishedChat": finished_chat,
+            "myMoveGamesData": my_move_games_data,
+            # "stopEmailsUntil": stop_emails_until,
+            "available_MT": available_MT,
+            "current_MT": current_MT,
+            "waiting_MT": waiting_MT,
+            "invitations_MT": invitations_MT,
+        },
+    )
+
+
+############################# Index V2 View - DEPRECATED #####################################
+# def index(request):
+#    if not request.user.is_authenticated:
+#        return render(request, "Lobby/index.html")
+#
+#    # start_time = time.perf_counter()
+#
+#    # Get list type from session
+#    list_type = request.session.pop("listType", "current")
+#
+#    # Fetch profile and handle email suppression
+#    profile = Profile.objects.select_related("user").get(user=request.user)
+#
+#    # Cache blacklisted players for efficient lookups
+#    blacklisted_players = set(profile.blacklistedPlayers.values_list("id", flat=True))
+#    user_id = request.user.id
+#
+#    # Fetch all games in one query per model with prefetching
+#    game_lists = {"available": [], "involved": [], "invited": []}
+#    for model in GAME_MODELS:
+#        # Fetch involved games
+#        involved = model.objects.filter(allPlayers=user_id).prefetch_related(
+#            "allPlayers", "missingPlayers", "invitedPlayers"
+#        )
+#        game_lists["involved"].extend(involved)
+#
+#        # Fetch available games, excluding blacklisted creators
+#        available = (
+#            model.objects.filter(gameStatus="AVAILABLE")
+#            .exclude(Q(creator__in=blacklisted_players) | Q(creator__profile__blacklistedPlayers=user_id))
+#            .prefetch_related("allPlayers", "invitedPlayers")
+#        )
+#        game_lists["available"].extend(available)
+#
+#        # Fetch invited games (WAITING or PRIVATE)
+#        invited = model.objects.filter(gameStatus__in=["WAITING", "PRIVATE"]).prefetch_related("invitedPlayers")
+#        game_lists["invited"].extend(invited)
+#
+#    # MINI TOURNAMENTS
+#    available_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="OP").order_by("-created")
+#    available_MT = [available_MT_raw_item.serialize() for available_MT_raw_item in available_MT_raw]
+#    current_MT_raw = Mini_Tournaments.objects.filter(
+#        Q(tournamentStatus="IP") & Q(startingPlayers=request.user)
+#    ).order_by("-created")
+#    current_MT = [current_MT_raw_item.serialize() for current_MT_raw_item in current_MT_raw]
+#    waiting_MT_raw = Mini_Tournaments.objects.filter(
+#        Q(tournamentStatus="OP") | Q(tournamentStatus="PR"), startingPlayers=request.user
+#    ).order_by("-created")
+#    waiting_MT = [waiting_MT_raw_item.serialize() for waiting_MT_raw_item in waiting_MT_raw]
+#    invitations_MT_raw = Mini_Tournaments.objects.filter(
+#        Q(tournamentStatus="OP") | Q(tournamentStatus="PR"), invitedPlayers=request.user
+#    ).order_by("-created")
+#    invitations_MT = [invitations_MT_raw_item.serialize() for invitations_MT_raw_item in invitations_MT_raw]
+#
+#    # Categorize and serialize games
+#    available_games = []
+#    current_games = []
+#    waiting_games = []
+#    invitations_games = []
+#    finished_games = []
+#    my_move_games_data = []
+#    current_chat = False
+#    finished_chat = False
+#
+#    # Process involved games
+#    for game in sorted(game_lists["involved"], key=lambda g: g.latestUpdate, reverse=True):
+#        serialized = game.serialize(request.user)
+#        if game.gameStatus == "ACTIVE" and user_id not in {p.id for p in game.missingPlayers.all()}:
+#            current_games.append(serialized)
+#            if serialized.get("myMove", False):
+#                my_move_games_data.append([serialized["game"], serialized["gameID"]])
+#            if serialized.get("chatNotification", False):
+#                current_chat = True
+#        elif game.gameStatus in ["WAITING", "AVAILABLE", "PRIVATE"]:
+#            waiting_games.append(serialized)
+#        elif game.gameStatus == "FINISHED" and len(finished_games) < 10:
+#            finished_games.append(serialized)
+#            if serialized.get("chatNotification", False):
+#                finished_chat = True
+#
+#    # Process available games
+#    available_games = [
+#        game.serialize(request.user)
+#        for game in sorted(game_lists["available"], key=lambda g: g.latestUpdate, reverse=True)
+#    ]
+#
+#    # Process invited games (filter by user presence)
+#    invitations_games = [
+#        game.serialize()
+#        for game in sorted(game_lists["invited"], key=lambda g: g.latestUpdate, reverse=True)
+#        if user_id in {p.id for p in game.invitedPlayers.all()}
+#    ]
+#
+#    # Game counts
+#    counts = {
+#        "available": len(available_games) + len(available_MT),
+#        "current": len(current_games),
+#        "waiting": len(waiting_games) + len(waiting_MT),
+#        "invitations": len(invitations_games) + len(invitations_MT),
+#        "finished": len(finished_games),
+#        "my_move": len(my_move_games_data),
+#    }
+#
+#    # Fetch tournament counts efficiently
+#    tournament_models = {
+#        "FCM": FCM_Tournament,
+#        "HC": HC_Tournament,
+#        "Bus": Bus_Tournament,
+#        "AQY": AQY_Tournament,
+#        "IND": IND_Tournament,
+#    }
+#    available_tournaments = [
+#        name for name, model in tournament_models.items() if model.objects.filter(tournamentStatus="OP").exists()
+#    ]
+#
+#    available_tournaments_main = Main_Tournament.objects.filter(tournamentStatus="OP")
+#    for tournament in available_tournaments_main:
+#        if tournament.gameCode not in available_tournaments:
+#            available_tournaments.append(tournament.gameCode)
+#
+#    # Check for special users
+#    show_langs = request.user.username in {"admin", "庄生", "Salfuman", "mhmnz2"}
+#
+#    return render(
+#        request,
+#        "Lobby/lobby.html",
+#        {
+#            "availableGamesList": available_games,
+#            "currentGamesList": current_games,
+#            "waitingGamesList": waiting_games,
+#            "invitaionsGamesList": invitations_games,  # Note: Fix typo in template variable
+#            "finishedGamesList": finished_games,
+#            "availableCount": counts["available"],
+#            "currentCount": counts["current"],
+#            "waitingCount": counts["waiting"],
+#            "invitationsCount": counts["invitations"],
+#            "finishedCount": counts["finished"],
+#            "listType": list_type,
+#            "myMoveGames": counts["my_move"],
+#            "availableTournaments": available_tournaments,
+#            "showLangs": show_langs,
+#            "currentChat": current_chat,
+#            "finishedChat": finished_chat,
+#            "myMoveGamesData": my_move_games_data,
+#            # "stopEmailsUntil": stop_emails_until,
+#            "available_MT": available_MT,
+#            "current_MT": current_MT,
+#            "waiting_MT": waiting_MT,
+#            "invitations_MT": invitations_MT,
+#        },
+#    )
+
+############################## Index V1
+# def index(request):
+#    if not request.user.is_authenticated:
+#        return render(request, "Lobby/index.html")
+#
+#    listType = request.session.pop("listType", "current")
+#
+#    start_time = time.perf_counter()
+#    profile = Profile.objects.get(user=request.user)
+#    stopEmailsUntil = profile.stopEmailsUntil
+#    blacklistedPlayers = profile.blacklistedPlayers.all()
+#    if stopEmailsUntil is not None:
+#        # find minutes from now until stopEmailsUntil
+#        now = round(time.time() / 60)
+#        minsToGo = stopEmailsUntil - now
+#        if minsToGo < 0:
+#            profile.stopEmailsUntil = None
+#            profile.save()
+#            stopEmailsUntil = None
+#
+#    availableGames = []
+#    involvedGames = []
+#    invitedGames = []
+#
+#    for model in GAME_MODELS:
+#        model_games_involved = model.objects.filter(Q(allPlayers=request.user))
+#        model_games_available = (
+#            model.objects.filter(Q(gameStatus="AVAILABLE"))
+#            .exclude(creator__in=blacklistedPlayers)
+#            .exclude(creator__profile__blacklistedPlayers=request.user)
+#        )
+#        model_games_invited = model.objects.filter(Q(gameStatus="WAITING") | Q(gameStatus="PRIVATE"))
+#
+#        availableGames.extend(model_games_available)
+#        involvedGames.extend(model_games_involved)
+#        invitedGames.extend(model_games_invited)
+#
+#    # Order the games by latestUpdate
+#    availableGames.sort(key=lambda game: game.latestUpdate, reverse=True)
+#    involvedGames.sort(key=lambda game: game.latestUpdate, reverse=True)
+#
+#    # Split the games into different lists based on gameStatus
+#    availableGamesList = [game for game in availableGames]
+#    currentGamesList = [
+#        game for game in involvedGames if game.gameStatus == "ACTIVE" and request.user not in game.missingPlayers.all()
+#    ]
+#    waitingGamesList = [game for game in involvedGames if game.gameStatus in ["WAITING", "AVAILABLE", "PRIVATE"]]
+#    invitationsGamesList = [game for game in invitedGames if request.user in game.invitedPlayers.all()]
+#    finishedGamesList = [game for game in involvedGames if game.gameStatus == "FINISHED"][
+#        :10
+#    ]  # Assuming you want the first 10 finished games
+#
+#    # finishedGamesListExperience = [game for game in involvedGames if game.gameStatus == "FINISHED" and not game.allPlayers.filter(username="SHADOW").exists()]
+#
+#    # Count the number of games in each list
+#    availableCount = len(availableGamesList)
+#    currentCount = len(currentGamesList)
+#    waitingCount = len(waitingGamesList)
+#    invitationsCount = len(invitationsGamesList)
+#    finishedCount = len(finishedGamesList)
+#
+#    # Serialize the game objects using Django's serializer
+#    availableGamesListJson = [game.serialize(request.user) for game in availableGamesList]
+#    currentGamesListJson = [game.serialize(request.user) for game in currentGamesList]
+#    waitingGamesListJson = [game.serialize(request.user) for game in waitingGamesList]
+#    invitationsGamesListJson = [game.serialize() for game in invitationsGamesList]
+#    finishedGamesListJson = [game.serialize(request.user) for game in finishedGamesList]
+#
+#    # Check if any current/finished game has the property chatNotification
+#    currentChat = any(game.get("chatNotification", False) for game in currentGamesListJson)
+#    finishedChat = any(game.get("chatNotification", False) for game in finishedGamesListJson)
+#
+#    myMoveGamesData = []
+#    for game in currentGamesListJson:
+#        if game.get("myMove", False):
+#            myMoveGamesData.append([game["game"], game["gameID"]])
+#    # myMoveGames = sum(game.get("myMove", False) for game in currentGamesListJson)
+#    myMoveGames = len(myMoveGamesData)
+#
+#    # Retrieve the open tournament counts
+#    FCMopenTournaments = FCM_Tournament.objects.filter(tournamentStatus="OP").count()
+#    HCopenTournaments = HC_Tournament.objects.filter(tournamentStatus="OP").count()
+#    BusopenTournaments = Bus_Tournament.objects.filter(tournamentStatus="OP").count()
+#    AQYopenTournaments = AQY_Tournament.objects.filter(tournamentStatus="OP").count()
+#    INDopenTournaments = IND_Tournament.objects.filter(tournamentStatus="OP").count()
+#
+#    availableTournaments = []
+#    if FCMopenTournaments > 0:
+#        availableTournaments.append("FCM")
+#    if HCopenTournaments > 0:
+#        availableTournaments.append("HC")
+#    if BusopenTournaments > 0:
+#        availableTournaments.append("Bus")
+#    if AQYopenTournaments > 0:
+#        availableTournaments.append("AQY")
+#    if INDopenTournaments > 0:
+#        availableTournaments.append("IND")
+##
+#    showLangs = request.user.username in ["admin", "庄生", "Salfuman", "mhmnz2"]
+#
+#    return render(
+#        request,
+#        "Lobby/lobby.html",
+#        {
+#            "availableGamesList": availableGamesListJson,
+#            "currentGamesList": currentGamesListJson,
+#            "waitingGamesList": waitingGamesListJson,
+#            "invitaionsGamesList": invitationsGamesListJson,
+#            "finishedGamesList": finishedGamesListJson,
+#            "availableCount": availableCount,
+#            "currentCount": currentCount,
+#            "waitingCount": waitingCount,
+#            "invitationsCount": invitationsCount,
+#            "finishedCount": finishedCount,
+#            "listType": listType,
+#            "myMoveGames": myMoveGames,
+#            "availableTournaments": availableTournaments,
+#            "showLangs": showLangs,
+#            "currentChat": currentChat,
+#            "finishedChat": finishedChat,
+#            "myMoveGamesData": myMoveGamesData,
+#            "stopEmailsUntil": stopEmailsUntil,
+#        },
+#    )
+
+
+@csrf_exempt
+def login_view(request):
+    if request.method == "POST":
+        # Attempt to sign user in
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+
+        # Check if authentication successful
+        if user is not None:
+            login(request, user)
+            request.session.modified = True  # Force session save
+
+            profile = Profile.objects.get(user=user)
+            language_code = profile.profileLanguage
+            translation.activate(language_code)
+
+            nxt = request.POST.get("next", None)  # Use .get() to avoid KeyError
+
+            if nxt is None or nxt == "":  # Check if nxt is None or empty
+                response = HttpResponseRedirect(reverse("index"))
+            elif not url_has_allowed_host_and_scheme(
+                url=nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
+                logger.warning(
+                    f"{user.username}: Possible redirect to unsafe URL: {nxt}"
+                )  # Log the potentially unsafe redirect
+                response = HttpResponseRedirect(reverse("index"))
+            else:
+                response = HttpResponseRedirect(nxt)
+
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code)
+            return response
+        else:
+            try:
+                user = User.objects.get(username=request.POST["username"])
+                if not user.is_active:
+                    messages.error(
+                        request,
+                        (
+                            gettext(
+                                "Account inactive - check your email for email verification, or contact the webmaster"
+                            )
+                        ),
+                    )
+                    return render(request, "Lobby/login.html")
+            except User.DoesNotExist:
+                print("********** USER DOES NOT EXIST ERROR")
+                username = request.POST.get("username", "")
+                logger.warning(f"Login attempt with non-existent user: {username}")
+                # Check if username contains '@' to suggest using username instead of email
+                if "@" in username:
+                    messages.error(
+                        request,
+                        gettext("Invalid username / password. Please use your username, not your email address."),
+                    )
+                else:
+                    messages.error(request, gettext("Invalid username / password"))
+                return render(request, "Lobby/login.html")
+            except Exception as e:
+                print("********** OTHER EXCEPTION")
+                print(e)
+                logger.exception("Unexpected error during login:")
+                messages.error(request, gettext("Invalid username / password"))
+                return render(request, "Lobby/login.html")
+    else:
+        response = render(request, "Lobby/login.html")
+        response["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response["Pragma"] = "no-cache"
+        response["Expires"] = "0"
+        return response
+
+    return render(request, "Lobby/login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse("index"))
+
+
+@login_required
+def FCMmapEditor(request):
+    if request.method == "POST":
+        return render(request, "Lobby/FCMmapEditor.html", {"mapData": request.POST["mapData"]})
+
+    else:
+        return render(request, "Lobby/FCMmapEditor.html")
+
+
+@login_required
+def TGZmapEditor(request):
+    if request.method == "POST":
+        return render(request, "Lobby/TGZmapEditor.html", {"mapData": request.POST["mapDataTGZ"]})
+
+    else:
+        return render(request, "Lobby/TGZmapEditor.html")
+
+
+@login_required
+def AQYmapEditor(request):
+    if request.method == "POST":
+        return render(request, "Lobby/AQYmapEditor.html", {"mapData": request.POST["mapDataAQY"]})
+
+    else:
+        return render(request, "Lobby/AQYmapEditor.html")
+
+
+@login_required
+def profile(request):
+    if request.method == "POST":
+        if request.POST["action"] == "changePassword":
+            form = PasswordChangeCustomForm(request.user, request.POST)
+            if form.is_valid():
+                user = form.save()
+                update_session_auth_hash(request, user)  # Important!
+                messages.success(request, gettext("Your password has been changed"))
+                return redirect("profile")
+            else:
+                error_messages = []
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        if isinstance(error, str):
+                            error_messages.append(error)
+                        else:
+                            error_messages.append(str(error))  # Convert to string if it's not already
+
+                error_string = " ".join(error_messages)
+                messages.error(request, error_string)
+                return redirect("profile")
+        elif request.POST["action"] == "updateProfileFavourites":
+            profile = Profile.objects.get(user=request.user)
+            profile.preferredRestaurantColour = request.POST["fcmResto"]
+            profile.preferredHCcolour = request.POST["hcColour"]
+            try:
+                request.POST["highContrastBoardItems"]
+                profile.highContrastBoardItems = True
+            except Exception:
+                profile.highContrastBoardItems = False
+
+            profile.preferredBusColour = request.POST["busColour"]
+            profile.preferredBusBoard = request.POST["BusBoard"]
+
+            profile.preferredTGZcolour = request.POST["tgzColour"]
+            try:
+                request.POST["TGZminimalText"]
+                profile.TGZminimalText = True
+            except Exception:
+                profile.TGZminimalText = False
+
+            preferredCNScolour = request.POST["cnsColour"] if request.POST["cnsColour"] != "-1" else None
+            profile.preferredCNScolour = preferredCNScolour
+
+            KFWoptions = []
+            KFWoptions.append(int(request.POST["kfwColour"]))
+            profile.preferredKFWoptions = json.dumps(KFWoptions, separators=(",", ":"))
+
+            WEBoptions = []
+            WEBoptions.append(int(request.POST["webColour"]))
+            profile.preferredWEBoptions = json.dumps(WEBoptions, separators=(",", ":"))
+
+            profile.save()
+
+            messages.success(request, gettext("Your colour preferences have been updated successfully"))
+            return redirect(to="profile")
+
+        elif request.POST["action"] == "updateProfileNotifications":
+            profile = Profile.objects.get(user=request.user)
+
+            profile.liveNotification = request.POST["liveNotif"]
+
+            try:
+                request.POST["sendEmails"]
+                profile.sendEmailNotificationOnTurn = True
+            except Exception:
+                profile.sendEmailNotificationOnTurn = False
+
+            emailNotifications = [
+                int(request.POST["yourTurnEmail"]),
+                int(request.POST["gameInviteEmail"]),
+                int(request.POST["turnExpiredEmail"]),
+                int(request.POST["tournamentGameStartEmail"]),
+                int(request.POST["tournamentWinEmail"]),
+                int(request.POST["inviteDeclineEmail"]),
+                int(request.POST["gameStartEmail"]),
+                int(request.POST["gameEndEmail"]),
+                int(request.POST["twoHourReminderEmail"]),
+                int(request.POST["dailyReminderEmail"]),
+                int(request.POST["tournamentOpenEmail"]),
+            ]
+            profile.emailNotifications = json.dumps(emailNotifications, separators=(",", ":"))
+
+            profile.save()
+
+            submission_source = request.POST.get("submissionSource", "")
+
+            if submission_source == "webhookTest":
+                messages.success(
+                    request,
+                    gettext(
+                        "A test message has been sent and your notification preferences have been updated successfully"
+                    ),
+                )
+            else:
+                messages.success(request, gettext("Your notification preferences have been updated successfully"))
+            return redirect(to="profile")
+    else:
+        profile = Profile.objects.get(user=request.user)
+        if profile.stopEmailsUntil is not None:
+            now_minutes = round(time.time() / 60)
+            if profile.stopEmailsUntil <= now_minutes:
+                profile.stopEmailsUntil = None
+                profile.save()
+            stop_emails_until = profile.stopEmailsUntil
+        else:
+            stop_emails_until = -1
+        profile_form = UpdateProfileForm(instance=request.user.profile)
+        favColour = profile.preferredRestaurantColour
+        if favColour == "":
+            favColour = -1
+        favHCcolour = profile.preferredHCcolour
+        if favHCcolour == "":
+            favHCcolour = -1
+        highContrastBoardItems = profile.highContrastBoardItems
+
+        preferredCNScolour = profile.preferredCNScolour if profile.preferredCNScolour is not None else -1
+
+        preferredKFWoptions = (
+            json.loads(profile.preferredKFWoptions)
+            if profile.preferredKFWoptions != "" and profile.preferredKFWoptions is not None
+            else [-1]
+        )
+        favKFWcolour = preferredKFWoptions[0]
+
+        preferredWEBoptions = (
+            json.loads(profile.preferredWEBoptions)
+            if profile.preferredWEBoptions != "" and profile.preferredWEBoptions is not None
+            else [-1]
+        )
+        favWEBcolour = preferredWEBoptions[0]
+
+        sendEmails = profile.sendEmailNotificationOnTurn
+
+        liveNotification = profile.liveNotification
+
+        passwordResetForm = PasswordChangeCustomForm(request.user)
+
+        webhooks = json.loads(profile.webhooks) if profile.webhooks != "" and profile.webhooks is not None else []
+        for entry in webhooks:
+            if entry[0] in SR_WEBHOOK_CHOICES:
+                entry[0] = SR_WEBHOOK_CHOICES[entry[0]]
+
+        emailNotifications = json.loads(profile.emailNotifications)
+        while len(emailNotifications) < 11:
+            emailNotifications.append(0)
+        yourTurnEmail = emailNotifications[0]
+        gameInviteEmail = emailNotifications[1]
+        turnExpiredEmail = emailNotifications[2]
+        tournamentGameStartEmail = emailNotifications[3]
+        tournamentWinEmail = emailNotifications[4]
+        inviteDeclineEmail = emailNotifications[5]
+        gameStartEmail = emailNotifications[6]
+        gameEndEmail = emailNotifications[7]
+        twoHourReminderEmail = emailNotifications[8]
+        dailyReminderEmail = emailNotifications[9]
+        tournamentOpenEmail = emailNotifications[10]
+
+        blacklisted_players = [player.username.strip() for player in profile.blacklistedPlayers.all()]
+
+        return render(
+            request,
+            "Lobby/profile.html",
+            {
+                "form": profile_form,
+                "form2": passwordResetForm,
+                "favColour": favColour,
+                "favHCcolour": favHCcolour,
+                "highContrastBoardItems": highContrastBoardItems,
+                "sendEmails": sendEmails,
+                "liveNotification": liveNotification,
+                "username": request.user.username,
+                "email": request.user.email,
+                "preferredBusColour": profile.preferredBusColour,
+                "preferredBusBoard": profile.preferredBusBoard,
+                "favTGZcolour": profile.preferredTGZcolour,
+                "favCNScolour": preferredCNScolour,
+                "favKFWcolour": favKFWcolour,
+                "favWEBcolour": favWEBcolour,
+                "TGZminimalText": profile.TGZminimalText,
+                "webhooks": webhooks,
+                "yourTurnEmail": yourTurnEmail,
+                "gameInviteEmail": gameInviteEmail,
+                "turnExpiredEmail": turnExpiredEmail,
+                "tournamentGameStartEmail": tournamentGameStartEmail,
+                "tournamentWinEmail": tournamentWinEmail,
+                "inviteDeclineEmail": inviteDeclineEmail,
+                "gameStartEmail": gameStartEmail,
+                "gameEndEmail": gameEndEmail,
+                "twoHourReminderEmail": twoHourReminderEmail,
+                "dailyReminderEmail": dailyReminderEmail,
+                "tournamentOpenEmail": tournamentOpenEmail,
+                "blacklistedPlayers": blacklisted_players,
+                "stop_emails_until": stop_emails_until,  # -1 if not set
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def profileAQY(request):
+    if request.method == "POST":
+        profile = Profile.objects.get(user=request.user)
+
+        AQYoptions = []
+        AQYoptions.append(int(request.POST["aqyColour"]))
+        AQYoptions.append(int(request.POST["mapType"]))
+        AQYoptions.append(int(request.POST["resIcon"]))
+        AQYoptions.append(int(request.POST["pullResToMan"]))
+        AQYoptions.append(int(request.POST["keepForestUnderWoodRes"]))
+        AQYoptions.append(int(request.POST["showPollutionUnderRes"]))
+        AQYoptions.append(int(request.POST["housesInNumOrder"]))
+
+        profile.preferredAQYoptions = json.dumps(AQYoptions, separators=(",", ":"))
+
+        profile.save()
+
+        messages.success(request, gettext("Your Antiquity preferences have been updated successfully"))
+        return redirect(to="profileAQY")
+
+    else:
+        # profile = Profile.objects.get(id=request.user.id)
+        profile = Profile.objects.get(user=request.user)
+        preferredAQYoptions = (
+            json.loads(request.user.profile.preferredAQYoptions)
+            if request.user.profile.preferredAQYoptions != ""
+            else [-1, 1, 0, 0, 1, 1, 0]
+        )
+
+        # [colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes, showPollutionUnderRes, housesInNumOrder]
+
+        return render(
+            request,
+            "Lobby/profileAQY.html",
+            {
+                "colour": preferredAQYoptions[0],
+                "mapType": preferredAQYoptions[1],
+                "resIcon": preferredAQYoptions[2],
+                "pullResToMan": preferredAQYoptions[3],
+                "keepForestUnderWoodRes": preferredAQYoptions[4],
+                "showPollutionUnderRes": preferredAQYoptions[5],
+                "housesInNumOrder": preferredAQYoptions[6],
+            },
+        )
+
+
+@login_required
+def profileIND(request):
+    if request.method == "POST":
+        profile = Profile.objects.get(user=request.user)
+
+        INDoptions = []
+        INDoptions.append(int(request.POST["indColour"]))
+        INDoptions.append(int(request.POST["mapType"]))
+        INDoptions.append(int(request.POST["citySizeColour"]))
+        INDoptions.append(int(request.POST["indOutline"]))
+        INDoptions.append(int(request.POST["goodsIcon"]))
+        INDoptions.append(int(request.POST["shipIcon"]))
+
+        profile.preferredINDoptions = json.dumps(INDoptions, separators=(",", ":"))
+
+        profile.save()
+
+        messages.success(request, gettext("Your Indonesia preferences have been updated successfully"))
+        return redirect(to="profileIND")
+
+    else:
+        profile = Profile.objects.get(user=request.user)
+        preferredINDoptions = (
+            json.loads(request.user.profile.preferredINDoptions)
+            if request.user.profile.preferredINDoptions != ""
+            else [-1, 0, 0, 1, 1, 1]
+        )
+
+        if len(preferredINDoptions) < 6:
+            preferredINDoptions.extend([1] * (6 - len(preferredINDoptions)))
+
+        # [colour, mapType, citySizeColour, indOutline]
+
+        return render(
+            request,
+            "Lobby/profileIND.html",
+            {
+                "colour": preferredINDoptions[0],
+                "mapType": preferredINDoptions[1],
+                "citySizeColour": preferredINDoptions[2],
+                "indOutline": preferredINDoptions[3],
+                "goodsIcon": preferredINDoptions[4],
+                "shipIcon": preferredINDoptions[5],
+            },
+        )
+
+
+@login_required
+def createBusPage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "Bus", Bus_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createBus.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = Bus_Game.objects.get(id=gameID)
+        except Bus_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createBus.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": currentGame.startingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createCNSpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "CNS", CNS_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createCNS.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = CNS_Game.objects.get(id=gameID)
+        except CNS_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        return render(
+            request,
+            "Lobby/createCNS.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.gameName,
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createAQYpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "AQY", AQY_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createAQY.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = AQY_Game.objects.get(id=gameID)
+        except AQY_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        return render(
+            request,
+            "Lobby/createAQY.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.gameName,
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "startingMap": json.loads(currentGame.startingMap),
+                "mapData": json.loads(currentGame.startingMap),
+                "experienced": experienced,
+            },
+        )
+    elif request.method == "POST":
+        messages.success(request, (gettext("Game creation for selected map")))
+        return render(request, "Lobby/createAQY.html", {"experienced": experienced, "mapData": request.POST["mapData"]})
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createINDpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "IND", IND_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createIND.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = IND_Game.objects.get(id=gameID)
+        except IND_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        return render(
+            request,
+            "Lobby/createIND.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.gameName,
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createKFWpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "KFW", IND_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createKFW.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = KFW_Game.objects.get(id=gameID)
+        except KFW_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        return render(
+            request,
+            "Lobby/createKFW.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.gameName,
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createWEBpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "WEB", WEB_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createWEB.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = WEB_Game.objects.get(id=gameID)
+        except WEB_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        return render(
+            request,
+            "Lobby/createWEB.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.gameName,
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createTGZpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "TGZ", TGZ_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createTGZ.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = TGZ_Game.objects.get(id=gameID)
+        except TGZ_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createTGZ.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.gameName,
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": currentGame.startingOptions,
+                "startingMap": json.loads(currentGame.startingMap),
+                "experienced": experienced,
+            },
+        )
+    else:
+        messages.success(request, (gettext("Game creation for selected map")))
+        return render(request, "Lobby/createTGZ.html", {"experienced": experienced, "mapData": request.POST["mapData"]})
+
+
+@login_required
+def showTGZoptions(request, gameID):
+    try:
+        currentGame = TGZ_Game.objects.get(id=gameID)
+    except TGZ_Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+    return render(
+        request,
+        "Lobby/showTGZoptions.html",
+        {
+            "gameName": currentGame.gameName,
+            "gameDescription": currentGame.gameDescription,
+            "godsVRhtml": SR_getgodsVRoptionsHTML(currentGame.startingOptions),
+        },
+    )
+
+
+@login_required
+def createHCpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "HC", HC_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createHC.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = HC_Game.objects.get(id=gameID)
+        except HC_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createHC.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.gameName,
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": currentGame.startingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createFCMpage(request, gameID=None):
+    experienced = SF_hasRequiredExperience(request, "FCM", FCM_Game)
+
+    if request.method != "POST" and gameID is None:
+        return render(request, "Lobby/createFCM.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID is not None:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = FCM_Game.objects.get(id=gameID)
+        except FCM_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        SCENARIO_NAMES = [
+            "[Cool Original]",
+            "[New MS]",
+            "[First Coffee]",
+            "[Korean City]",
+            "[Nightlife]",
+            "[Sustenance]",
+            "[Upmarket Area]",
+            "[City Builder]",
+            "[Asian Fusion]",
+            "[First Mover]",
+            "[Overtime]",
+            "[Henri Lo]",
+        ]
+        gameName = currentGame.gameName
+        scenarioUsed = False
+        scenarioName = ""
+        for scen in SCENARIO_NAMES:
+            if scen in gameName:
+                scenarioUsed = True
+                gameName = gameName.replace(scen, "")
+                scenarioName = scen
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createFCM.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "scenarioUsed": scenarioUsed,
+                "scenarioName": scenarioName,
+                "startingOptions": currentGame.startingOptions,
+                "startingMap": currentGame.startingMap,
+                "experienced": experienced,
+            },
+        )
+    else:
+        messages.success(request, (gettext("Game creation for selected map")))
+        return render(request, "Lobby/createFCM.html", {"experienced": experienced, "mapData": request.POST["mapData"]})
+
+
+class registerView(View):
+    form_class = NewUserForm
+    template_name = "Lobby/register.html"
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            # Limit intial signups
+            # if User.objects.all().count() > 5:
+            #    messages.error(request, "Beta Signup is Already Full")
+            #    return render(request, self.template_name, {'form': form})
+            # Check if email taken
+            if User.objects.filter(email=request.POST["email"]).exists():
+                messages.error(request, gettext("Email Address Already Registered"))
+                return render(request, self.template_name, {"form": form})
+            # Check if any case similar username exists
+            if User.objects.filter(username__iexact=request.POST["username"]).exists():
+                messages.error(request, gettext("Username already taken"))
+                return render(request, self.template_name, {"form": form})
+            user = form.save(commit=False)
+            user.is_active = False  # Deactivate account till it is confirmed
+            user.save()
+
+            current_site = get_current_site(request)
+            subject = gettext("Activate Your Online Gaming Account")
+            emailText = render_to_string(
+                "Lobby/password/account_activation_email.txt",
+                {
+                    "user": user,
+                    "domain": current_site.domain,
+                    "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                    "token": account_activation_token.make_token(user),
+                },
+            )
+            # user.email_user(subject, message)
+            try:
+                send_mail(subject, emailText, "OnlineBoardGamers@gmail.com", [user.email], fail_silently=False)
+            except Exception as e:
+                adminMessage = (
+                    f"Failed to send activation email to username: {user.username} and email {user.email}: {str(e)}"
+                )
+                print(
+                    "****************************************************************************** EMAIL SIGNUP ERROR **************"
+                )
+                SN_sendAdminErrorMessage(request, adminMessage)
+                return HttpResponse("Invalid header found.")
+            # TRANSLATE WITH VAR
+            message = gettext(
+                "Please check %(emailAddress)s to confirm your email address and complete registration"
+            ) % {"emailAddress": user.email}
+            messages.success(request, (message))
+            return redirect("index")
+
+        return render(request, self.template_name, {"form": form})
+
+
+class ActivateAccount(View):
+    def get(self, request, uidb64, token, *args, **kwargs):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            # user.profile.email_confirmed = True
+            profile = getattr(user, "profile")
+            profile.email_confirmed = True
+            profile.save()
+            user.save()
+            login(request, user)
+            messages.success(
+                request,
+                mark_safe(
+                    gettext(
+                        "Your account has been activated<br/>Enable Email, Discord, and Slack notifications here on your profile, and then return to the Home Page to view games"
+                    )
+                ),
+            )
+            return redirect("profile")
+        else:
+            messages.warning(
+                request,
+                (
+                    gettext(
+                        "The confirmation link was invalid, possibly because it has already been used. If you think your email client scanned the link, then try to log in anyway"
+                    )
+                ),
+            )
+            return redirect("index")
+
+
+def activate(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return HttpResponse(gettext("Thank you for your email confirmation. Now you can login to your account"))
+    else:
+        return HttpResponse(gettext("Activation link is invalid"))
+
+
+def playerInfo(request, usernameToProfile):
+    try:
+        userToProfile = get_object_or_404(User, username=usernameToProfile)
+    except Http404:
+        messages.error(request, gettext("Player does not exist"))
+        return render(request, "Lobby/playerInfo.html")
+
+    profileOfUser = Profile.objects.get(user=userToProfile)
+    FCMtournamentTrophies = json.loads(profileOfUser.FCMtournamentTrophies)
+    usernameToProfileID = getattr(userToProfile, "id")  # userToProfile.id
+
+    trophyHTML = ""
+    trophyDetailHTML = ""
+
+    # Game names and image URLs
+    game_names = {1: "FCM", 2: "HC", 3: "Bus", 4: "TGZ", 5: "AQY", 6: "IND", 7: "KFW", 8: "WEB"}
+    image_urls = {
+        1: "/static/FCM/Images/burger_board.png",
+        2: "/static/HC/Images/icon_car.png",
+        3: "/static/Bus/images/bus_icon.png",
+        4: "/static/TGZ/images/tgz_icon.png",
+        5: "/static/AQY/images/aqy_icon.png",
+        6: "/static/IND/images/ind_icon.png",
+        7: "/static/KFW/images/kfw_icon.png",
+        8: "/static/WEB/images/web_icon.png",
+    }
+
+    if len(FCMtournamentTrophies) > 1:
+        totals = [sum(col) for col in zip(*FCMtournamentTrophies[1:])]
+
+        medal_names = ["gold", "silver", "bronze"]
+        medal_images = [
+            "/static/Lobby/Images/trophy_gold.png",
+            "/static/Lobby/Images/trophy_silver.png",
+            "/static/Lobby/Images/trophy_bronze.png",
+        ]
+
+        for total, medal_name, medal_image in zip(totals, medal_names, medal_images):
+            if total > 0:
+                trophyHTML += f'<div class="trophyHolderDiv"><img class="trophyIMG" src="{medal_image}"><div class="trophyNumberDiv">{total}</div></div>'
+
+        for index, game in enumerate(FCMtournamentTrophies[1:], start=1):
+            game_name = game_names.get(index, "")
+            image_url = image_urls.get(index, "")
+
+            if any(value != 0 for value in game):
+                trophyDetailHTML += f'<img src="{image_url}" alt="{game_name} Trophies" title="{game_name} Trophies" class="trophyGameIcon"/>'
+
+                for trophy_colour, amount in enumerate(game):
+                    if amount != 0:
+                        colour = ["gold", "silver", "bronze"][trophy_colour]
+                        trophyDetailHTML += f'<div class="trophyHolderSummaryDiv"><img class="trophyIMGsummary" src="/static/Lobby/Images/trophy_{colour}.png"><div class="trophyNumberSummaryDiv">{amount}</div></div>'
+        # Stats and games
+    minus1year = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp() * 1000)
+    activeJointGamesListJson = []
+    finishedJointGamesListJson = []
+    activeOtherGamesList = []
+    finishedOtherGamesList = []
+    jointWinPercentage = 0
+    jointWinTotal = 0
+    total_finished_games = 0
+    total_wins = 0
+    jointGameStats = []
+
+    if request.user.username != usernameToProfile:
+        activeJointGamesList = []
+        finishedJointGamesList = []
+        activeOtherGamesList = []
+        finishedOtherGamesList = []
+
+        for game_name, game_model in GAME_NAMES_MODELS.items():
+            active_joint_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE").filter(
+                allPlayers=request.user.id
+            )
+            finished_joint_games = game_model.objects.filter(
+                allPlayers=usernameToProfileID, gameStatus="FINISHED"
+            ).filter(allPlayers=request.user.id)
+            active_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE").exclude(
+                allPlayers=request.user.id
+            )
+            finished_other_games = game_model.objects.filter(
+                allPlayers=usernameToProfileID, gameStatus="FINISHED"
+            ).exclude(allPlayers=request.user.id)
+
+            activeJointGamesList.extend(active_joint_games)
+            finishedJointGamesList.extend(finished_joint_games)
+            activeOtherGamesList.extend(active_other_games)
+            finishedOtherGamesList.extend(finished_other_games)
+
+            singleGameWonCount = 0
+
+            for game in finished_joint_games:
+                if hasattr(game.winner, "all"):  # Check if winner is a ManyToManyField
+                    for winner in game.winner.all():
+                        if winner.id == request.user.id:
+                            singleGameWonCount += 1
+                else:
+                    singleGameWonCount += game.winner.id == request.user.id
+
+            singleGameFinishedCount = finished_joint_games.count()
+
+            total_finished_games += singleGameFinishedCount
+            total_wins += singleGameWonCount
+
+            singleGameWonPercent = (
+                str(round((singleGameWonCount / singleGameFinishedCount) * 100)) if singleGameFinishedCount > 0 else "0"
+            )
+
+            if singleGameFinishedCount > 0:
+                jointGameStats.append([game_name, singleGameWonCount, singleGameFinishedCount, singleGameWonPercent])
+
+        jointWinTotal = str(total_wins)
+        jointWinPercentage = str(round((total_wins / total_finished_games) * 100)) if total_finished_games > 0 else "0"
+
+        activeJointGamesList = sorted(activeJointGamesList, key=lambda game: game.latestUpdate, reverse=True)
+        finishedJointGamesList = sorted(finishedJointGamesList, key=lambda game: game.latestUpdate, reverse=True)
+        activeOtherGamesList = sorted(activeOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
+        finishedOtherGamesList = sorted(finishedOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
+
+        activeJointGamesListJson = [game.serialize(request.user) for game in activeJointGamesList]
+        finishedJointGamesListJson = [game.serialize(request.user) for game in finishedJointGamesList]
+        activeOtherGamesListJson = [game.serialize(request.user) for game in activeOtherGamesList]
+        finishedOtherGamesListJson = [game.serialize(request.user) for game in finishedOtherGamesList]
+    else:
+        for game_name, game_model in GAME_NAMES_MODELS.items():
+            active_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE")
+            finished_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="FINISHED")
+
+            activeOtherGamesList.extend(active_other_games)
+            finishedOtherGamesList.extend(finished_other_games)
+
+        activeOtherGamesList = sorted(activeOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
+        finishedOtherGamesList = sorted(finishedOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
+
+        activeOtherGamesListJson = [game.serialize(request.user) for game in activeOtherGamesList]
+        finishedOtherGamesListJson = [game.serialize(request.user) for game in finishedOtherGamesList]
+
+    finishedGamesLastYear = 0
+    kickedOutGamesLastYear = 0
+    fairPlayLastYear = 100
+
+    allGamesArr = []
+
+    for game_name, game_model in GAME_NAMES_MODELS.items():
+        gameArr = []
+
+        finishedGames = game_model.objects.filter(
+            Q(gameStatus="FINISHED"),
+            ~Q(allPlayers__username="SHADOW"),
+            Q(allPlayers=userToProfile),
+        )
+
+        finishedGames_last_year = finishedGames.filter(Q(latestUpdate__gte=minus1year))
+
+        kickedOutGames = finishedGames_last_year.filter(Q(kickedPlayers=userToProfile))
+
+        finishedGamesLastYear += finishedGames_last_year.count()
+        kickedOutGamesLastYear += kickedOutGames.count()
+
+        for player_count in range(2, 7):
+            relevantFinishedGames = finishedGames.filter(Q(maxPlayers=player_count))  # ~Q(statsExcludedGame=True)
+            relevantFinishedGamesTotal = relevantFinishedGames.count()
+            relevantFinishedGamesWon = relevantFinishedGames.filter(Q(winner=getattr(userToProfile, "id"))).count()
+
+            try:
+                winPercentage = relevantFinishedGamesWon / relevantFinishedGamesTotal
+                winPercentage = int(winPercentage * 100)
+            except ZeroDivisionError:
+                winPercentage = 0
+
+            gameArr.extend([relevantFinishedGamesTotal, relevantFinishedGamesWon, winPercentage])
+
+        allFinishedGames = finishedGames  # .filter(~Q(statsExcludedGame=True))
+        allFinishedGamesWon = allFinishedGames.filter(Q(winner=getattr(userToProfile, "id"))).count()
+        allFinishedGamesTotal = allFinishedGames.count()
+
+        try:
+            allWinPercentage = allFinishedGamesWon / allFinishedGamesTotal
+            allWinPercentage = int(allWinPercentage * 100)
+        except ZeroDivisionError:
+            allWinPercentage = 0
+
+        gameArr.extend([allFinishedGamesTotal, allFinishedGamesWon, allWinPercentage])
+
+        allGamesArr.append(gameArr)
+
+    if kickedOutGamesLastYear > 0:
+        kickedOutGamesLastYear -= 1
+    if finishedGamesLastYear > 0:
+        fairPlayLastYear = int((finishedGamesLastYear - kickedOutGamesLastYear) / finishedGamesLastYear * 100)
+
+    return render(
+        request,
+        "Lobby/playerInfo.html",
+        {
+            "trophyHTML": trophyHTML,
+            "trophyDetailHTML": trophyDetailHTML,
+            "activeJointGames": activeJointGamesListJson,
+            "activeOtherGames": activeOtherGamesListJson,
+            "finishedJointGames": finishedJointGamesListJson,
+            "finishedOtherGames": finishedOtherGamesListJson,
+            "usernameToProfile": usernameToProfile,
+            "kickedOutGamesLastYear": kickedOutGamesLastYear,
+            "fairPlayLastYear": fairPlayLastYear,
+            "games": GAME_NAMES_MODELS,
+            "allGamesArr": allGamesArr,
+            "jointWinTotal": jointWinTotal,
+            "jointWinPercentage": jointWinPercentage,
+            "jointGameStats": jointGameStats,
+        },
+    )
+
+
+@login_required()
+def AllTournaments(request):
+    tournaments_FCM = FCM_Tournament.objects.order_by("-id").all()
+    tournaments_HC = HC_Tournament.objects.order_by("-id").all()
+    tournaments_Bus = Bus_Tournament.objects.order_by("-id").all()
+    tournaments_AQY = AQY_Tournament.objects.order_by("-id").all()
+    tournaments_IND = IND_Tournament.objects.order_by("-id").all()
+    tournaments_MAIN = Main_Tournament.objects.order_by("-id").all()
+
+    tournaments = sorted(
+        chain(tournaments_FCM, tournaments_HC, tournaments_Bus, tournaments_AQY, tournaments_IND, tournaments_MAIN),
+        key=lambda instance: instance.created,
+    )
+    tournaments.reverse()
+
+    tournamentsJson = [tourny.serialize() for tourny in tournaments]
+
+    return render(
+        request,
+        "Lobby/tournaments/AllTournaments.html",
+        {
+            "tournamentsJson": tournamentsJson,
+        },
+    )
+
+
+@login_required()
+def Tournament(request, gameType, tournamentID):
+    if request.method == "POST":
+        currentTournament = None
+        try:
+            if gameType == "FCM":
+                currentTournament = FCM_Tournament.objects.get(id=tournamentID)
+            if gameType == "HC":
+                currentTournament = HC_Tournament.objects.get(id=tournamentID)
+            if gameType == "Bus":
+                currentTournament = Bus_Tournament.objects.get(id=tournamentID)
+            if gameType == "AQY":
+                currentTournament = AQY_Tournament.objects.get(id=tournamentID)
+            if gameType == "IND":
+                currentTournament = IND_Tournament.objects.get(id=tournamentID)
+        except Exception:
+            raise Http404(gettext("Tournament does not exist"))
+        if (
+            currentTournament
+            and currentTournament.startingPlayers.all().count() < currentTournament.maxTournamentPlayers
+        ):
+            currentTournament.startingPlayers.add(request.user)
+            currentTournament.save()
+            if currentTournament.startingPlayers.all().count() == currentTournament.maxTournamentPlayers:
+                SF_startTournament(request, currentTournament, gameType)
+            messages.success(request, (gettext("You have joined the Tournament")))
+        else:
+            messages.error(request, gettext("The Tournament is already full"))
+        return HttpResponseRedirect(reverse("Tournament", kwargs={"gameType": gameType, "tournamentID": tournamentID}))
+
+    currentTournament = None
+    try:
+        if gameType == "FCM":
+            currentTournament = FCM_Tournament.objects.get(id=tournamentID)
+        if gameType == "HC":
+            currentTournament = HC_Tournament.objects.get(id=tournamentID)
+        if gameType == "Bus":
+            currentTournament = Bus_Tournament.objects.get(id=tournamentID)
+        if gameType == "AQY":
+            currentTournament = AQY_Tournament.objects.get(id=tournamentID)
+        if gameType == "IND":
+            currentTournament = IND_Tournament.objects.get(id=tournamentID)
+    except Exception:
+        raise Http404(gettext("Tournament does not exist"))
+
+    if currentTournament and currentTournament.tournamentStatus == "OP":
+        openSlots = []
+        for i in range(currentTournament.startingPlayers.all().count() + 1, currentTournament.maxTournamentPlayers + 1):
+            openSlots.append(str(i))
+        return render(
+            request,
+            "Lobby/Tournament.html",
+            {
+                "tournament": currentTournament,
+                "gameType": gameType,
+                "openSlots": openSlots,
+                "isSignedUp": currentTournament.isSignedUp(request.user),
+            },
+        )
+
+    if (
+        currentTournament
+        and currentTournament.tournamentStatus == "IP"
+        or currentTournament
+        and currentTournament.tournamentStatus == "FN"
+    ):
+        winnerHTML = ""
+        if currentTournament.tournamentStatus == "FN":
+            winnersData = json.loads(currentTournament.winnersData)
+            winnersData = winnersData[0]
+            winnerHTML = "Winner"
+            if len(winnersData) > 1:
+                winnerHTML += "s"
+            winnerHTML += ": "
+            for index, name in enumerate(winnersData):
+                winnerHTML += "<B>" + name + "</B>"
+                if index + 1 != len(winnersData):
+                    winnerHTML += ", "
+        tournamentProgressionDataArray = json.loads(currentTournament.tournamentProgressionData)
+        return render(
+            request,
+            "Lobby/Tournament.html",
+            {
+                "tournament": currentTournament,
+                "roundsHTML": currentTournament.getRoundsHTML(),
+                "TPDA": tournamentProgressionDataArray,
+                "winnerHTML": winnerHTML,
+                "gameType": gameType,
+            },
+        )
+
+    return render(request, "Lobby/Tournament.html")
+
+
+def joinGameLink(request, joinGameLink):
+    # if not request.user.is_authenticated:
+    #    messages.error(request, (gettext("You must be logged in to join a game")))
+    #    return render(request, "Lobby/index.html")
+
+    letters = None
+    numbers = None
+
+    match = re.match(r"([A-Za-z]{2,3})(\d+)$", joinGameLink)
+
+    # CHCEK FOR LETTERS/NUMBERS
+    if match:
+        letters = match.group(1)
+        if letters != "Bus":
+            letters = letters.upper()
+        numbers = int(match.group(2))
+    else:
+        messages.error(request, (gettext("Invalid Game Join Link")))
+        return index(request)
+
+    # So With a valid letter / number combo, attempt a join
+    # checkJoinGame(request, letters, numbers)
+
+    # return index(request)
+    # return redirect("index")
+
+    # So with a valid letter / number combo, show a join link page
+    # First, find a serialise the game.
+    # Select the correct model
+    gameModel = GAME_NAMES_MODELS.get(letters)
+    if gameModel is None:
+        messages.error(request, (gettext("Sorry, the game no longer exists")))
+        return HttpResponseRedirect(reverse("index"))
+    try:
+        availableGame = gameModel.objects.get(id=numbers)
+    except gameModel.DoesNotExist:
+        messages.error(request, (gettext("Sorry, the game no longer exists")))
+        return HttpResponseRedirect(reverse("index"))
+
+    if availableGame.allPlayers.count() >= availableGame.maxPlayers:
+        messages.error(request, (gettext("Sorry, the game is full")))
+        return HttpResponseRedirect(reverse("index"))
+
+    availableGamesList = [availableGame]
+
+    # Serialize the game objects using Django's serializer
+    availableGamesListJson = [game.serialize(request.user) for game in availableGamesList]
+
+    return render(
+        request,
+        "Lobby/joinGameLink.html",
+        {"availableGamesList": availableGamesListJson, "gameType": letters, "gameID": numbers},
+    )
+
+
+@login_required
+def joinGame(request, gameType):
+    if not request.user.is_authenticated:
+        messages.error(request, (gettext("You must be logged in to join a game")))
+        return HttpResponseRedirect(reverse("index"))
+    # Joining a game must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid Request"}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    gameModel = GAME_NAMES_MODELS.get(gameType)
+
+    currentGame = None
+    if gameModel:
+        try:
+            currentGame = gameModel.objects.get(id=jsonData["gameID"])
+        except gameModel.DoesNotExist:
+            messages.error(request, (gettext("Sorry, the game no longer exists")))
+            return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
+
+    action = jsonData.get("action", "")
+
+    # Delete Training Game // Can never really fail
+    if currentGame and action == "deleteTrgGame":
+        if request.user in currentGame.allPlayers.all():
+            currentGame.delete()
+            messages.success(request, ("Game Deleted"))
+            return JsonResponse(["Ok"], safe=False)
+        else:
+            messages.error(request, (gettext("Illegal Access")))
+            return JsonResponse(["Error"], safe=False)
+
+    # Leave your own waiting game -- they are already AVAILABLE
+    elif currentGame and action == "vacate":
+        if currentGame.gameStatus == "ACTIVE":
+            messages.error(request, (gettext("The game has already started")))
+        else:
+            currentGame.allPlayers.remove(request.user)
+            currentGame.save()
+            if currentGame.allPlayers.count() == 0:
+                currentGame.delete()
+                messages.success(request, (gettext("You have left the game - it has been deleted")))
+            else:
+                messages.success(request, (gettext("You have left the game - it is available for players to join")))
+        return JsonResponse(["AVAILABLE"], safe=False)
+
+    elif currentGame and action == "decline":
+        currentGame.invitedPlayers.remove(request.user)
+        currentGame.save()
+        if currentGame.invitedPlayers.count() == 0:
+            if currentGame.gameStatus == "WAITING":
+                messages.success(
+                    request, (gettext("You have declined the invitation - it is available for players to join"))
+                )
+                currentGame.gameStatus = "AVAILABLE"
+            elif currentGame.gameStatus == "PRIVATE":
+                messages.success(request, (gettext("You have declined the invitation")))
+            currentGame.save()
+        else:
+            messages.success(
+                request,
+                (gettext("You have declined the invitation - the game is waiting for other invitees to respond")),
+            )
+
+        # Send an email to the creator, telling them who has declined and why
+        reason = jsonData.get("reason", "None Given")
+        SN_sendDeclineEmail(request, request.user, gameType, currentGame, reason)
+
+        return JsonResponse(["AVAILABLE"], safe=False)
+    # Else must be join?
+    else:
+        response = checkJoinGame(request, gameType, jsonData["gameID"])
+        return response
+
+
+# This should be a check all function. Anything and anyone could be entering here
+@login_required
+def checkJoinGame(request, gameType, gameID):
+    errorFound = False
+    ajaxReturn = False
+    body = request.body.decode("utf-8")
+    jsonData = json.loads(body) if body else {}
+    if jsonData.get("source") == "ajax":
+        ajaxReturn = True
+
+    gameModel = None
+
+    # CHECK VALID gameType
+    if gameType in GAME_NAMES_MODELS:
+        gameModel = GAME_NAMES_MODELS[gameType]
+    else:
+        messages.error(request, (gettext("Invalid Game Join Link")))
+        if ajaxReturn:
+            return JsonResponse(
+                {
+                    "listToShow": "AVAILABLE",
+                }
+            )
+        return
+    # CHECK GAME EXISTS
+    try:
+        currentGame = gameModel.objects.get(id=gameID)
+    except gameModel.DoesNotExist:
+        messages.error(request, (gettext("Sorry, the game does not exist")))
+        if ajaxReturn:
+            return JsonResponse(
+                {
+                    "listToShow": "AVAILABLE",
+                }
+            )
+        return
+
+    # CHECK GAME IS NOT ACTIVE OR FINISHED
+    if currentGame.gameStatus == "ACTIVE":
+        messages.error(request, (gettext("Sorry, someone else joined the game and it is full")))
+        errorFound = True
+
+    if currentGame.gameStatus == "FINISHED":
+        messages.error(request, (gettext("Sorry, the game has already finished")))
+        errorFound = True
+
+    # Check that if the game is WAITING, you are in the invites, OR there is a blank space
+    if (
+        currentGame.gameStatus == "WAITING"
+        and request.user not in currentGame.invitedPlayers.all()
+        and (currentGame.invitedPlayers.count() + currentGame.allPlayers.count()) >= currentGame.maxPlayers
+    ):
+        messages.error(
+            request,
+            (
+                gettext(
+                    "The host set the usernames of players allowed to join. Unfortunately, you are not allowed to join this game"
+                )
+            ),
+        )
+        errorFound = True
+
+    # Check you are not already involved
+    if request.user in currentGame.allPlayers.all():
+        messages.success(request, (gettext("You have already joined this game")))
+        errorFound = True
+
+    # Check the host hasn't blacklisted you
+    if request.user in currentGame.creator.profile.blacklistedPlayers.all():  # =request.user:
+        messages.error(request, (gettext("The creator has blocked you from joining their games")))
+        errorFound = True
+
+    if errorFound and ajaxReturn:
+        return JsonResponse(
+            {
+                "listToShow": "AVAILABLE",
+            }
+        )
+    if errorFound:
+        return
+
+    # SO NOW IT IS NOT ACTIVE OR FINISHED, AND IF IT IS "WAITING", YOU ARE AN INVITEE, PLUS YOU ARE NOT ALREADY IN THE GAME
+    _latestUpdate = int(time.time()) * 1000
+
+    # CHECK EXPERIENCE LEVEL HERE
+    if currentGame.isExperiencedGame():
+        shadowUser = User.objects.get(username="SHADOW")
+        model_games_involved = gameModel.objects.filter(
+            Q(allPlayers=request.user, gameStatus="FINISHED") & ~Q(allPlayers=shadowUser)
+        )
+        exp = model_games_involved.count()
+        required_exp = SF_getRequiredExp(gameType)
+        if exp < required_exp:
+            ##### SEND DISCORD ALERT
+            try:
+                message = "==== NEW USER JOINING EXP GAME\n"
+                message += "Game: " + gameType + "\n"
+                message += "User: " + request.user.username + "\n"
+
+                requests.post(
+                    "https://discordapp.com/api/webhooks/1050061190140792893/8yVQEX_JRS4DqU6qeBe2zC29XNw2fPYUkrzjep4KIEahpkMaivAkLEQxi788K6e_oH0w",
+                    data={"content": message},
+                )
+            except Exception:
+                pass
+            messages.error(
+                request,
+                (
+                    mark_safe(
+                        gettext(
+                            'Not enough Experience. Plese see <a class="linkOther" href="/help/#navGameType">Help</a><br/>Current Experience Requirements:<br/><br/>FCM: 2 Games<br/>HC: 1 Game<br/>Bus: 1 Game<br/>TGZ: 2 Games<br/>Cannes:2 Games<br/>Antiquity:2 Games<br/><br/>You may start your own game <a class="linkOther" href="/newGames/">Here</a>'
+                        )
+                    )
+                ),
+            )
+            # return JsonResponse(["AVAILABLE"], safe=False)
+            request.session["listType"] = "available"
+
+            if ajaxReturn:
+                return JsonResponse({"listToShow": "AVAILABLE", "show_div": True})
+            return
+        # Now check the fair play rating
+        minus1year = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp() * 1000)
+        finishedGamesLastYear = 0
+        kickedOutGamesLastYear = 0
+        fairPlayLastYear = 100
+
+        for game_name, game_model in GAME_NAMES_MODELS.items():
+            finishedGames = game_model.objects.filter(
+                Q(gameStatus="FINISHED"),
+                ~Q(allPlayers__username="SHADOW"),
+                Q(allPlayers=request.user),
+            )
+
+            finishedGames_last_year = finishedGames.filter(Q(latestUpdate__gte=minus1year))
+            kickedOutGames = finishedGames_last_year.filter(Q(kickedPlayers=request.user))
+
+            finishedGamesLastYear += finishedGames_last_year.count()
+            kickedOutGamesLastYear += kickedOutGames.count()
+
+        if kickedOutGamesLastYear > 0:
+            kickedOutGamesLastYear -= 1
+        if finishedGamesLastYear > 0:
+            fairPlayLastYear = int((finishedGamesLastYear - kickedOutGamesLastYear) / finishedGamesLastYear * 100)
+
+        if fairPlayLastYear <= 80:
+            ##### SEND DISCORD ALERT
+            try:
+                message = "==== BAD FP RATING JOINING EXP GAME\n"
+                message += "Game: " + gameType + "\n"
+                message += "User: " + request.user.username + "\n"
+
+                requests.post(
+                    "https://discordapp.com/api/webhooks/1050061190140792893/8yVQEX_JRS4DqU6qeBe2zC29XNw2fPYUkrzjep4KIEahpkMaivAkLEQxi788K6e_oH0w",
+                    data={"content": message},
+                )
+            except Exception:
+                pass
+            messages.error(
+                request,
+                (
+                    mark_safe(
+                        gettext(
+                            'Your Fair Play rating is too low: {fairplay}%. Please see <a class="linkOther" href="/help/#navGameType">Help</a><br/><br/>'
+                        ).format(fairplay=fairPlayLastYear)
+                    )
+                ),
+            )
+            request.session["listType"] = "available"
+
+            if ajaxReturn:
+                return JsonResponse({"listToShow": "AVAILABLE", "show_div": True})
+            return
+
+    _newPlayer = request.user
+    currentGame.allPlayers.add(_newPlayer)
+    currentGame.latestUpdate = _latestUpdate
+    currentGame.invitedPlayers.remove(request.user)
+    currentGame.save()
+
+    if currentGame.allPlayers.count() == currentGame.maxPlayers:
+        currentGame.startGame(request)
+        currentGame.save()
+        messages.success(request, (gettext("You have joined the game and the game has started")))
+        request.session["listType"] = "ACTIVE"
+        response = JsonResponse({"listToShow": "ACTIVE"}, safe=False)
+    else:
+        messages.success(request, (gettext("You have joined the game - waiting for more players")))
+        response = JsonResponse({"listToShow": "WAITING"}, safe=False)
+
+    # If all < MAX and no more invites
+    if (
+        currentGame.allPlayers.count() != currentGame.maxPlayers
+        and currentGame.invitedPlayers.count() == 0
+        and currentGame.gameStatus != "PRIVATE"
+    ):
+        currentGame.gameStatus = "AVAILABLE"
+        currentGame.save()
+
+    return response
+
+
+@login_required()
+def deleteGame(request, gameType):
+    # Joining a game must be via POST
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Invalid Request"}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    gameModel = GAME_NAMES_MODELS.get(gameType)
+    try:
+        if gameModel is None:
+            return JsonResponse({"noGame": True}, safe=False)
+        currentGame = gameModel.objects.get(id=jsonData["gameID"])
+    except:  # gameModel.DoesNotExist:
+        return JsonResponse({"noGame": True}, safe=False)
+
+    # Delete Training Game // Can never really fail
+    if jsonData["action"] == "deleteTrgGame":
+        if request.user in currentGame.allPlayers.all():
+            gameStatus = currentGame.gameStatus
+            currentGame.delete()
+            return JsonResponse(
+                {"gameType": gameType, "gameID": jsonData["gameID"], "gameStatus": gameStatus}, safe=False
+            )
+        else:
+            try:
+                message = ""
+                message += "=== DELETE GAME HACK DELETE GAME HACK DELETE GAME HACK DELETE GAME HACK DELETE GAME HACK DELETE GAME HACK ===================================\n"
+                message += "DELETE GAME HACK DELETE GAME HACK\n"
+                if request.user.is_authenticated:
+                    message += "User: " + request.user.username + "\n"
+                message += "Path: " + request.path + "\n"
+                message += "Method: " + request.method + "\n"
+                message += "User Is Authenticated: " + str(request.user.is_authenticated) + "\n"
+                if request.user.is_authenticated:
+                    message += "Email: " + request.user.email + "\n"
+
+                requests.post(
+                    "https://discord.com/api/webhooks/1146733825649549344/aFVGc6nTLtKDxvS0Ooaln6nxNqyhmrn9nAcyxfLbYiebgQGTj7HGFDqsD_4H7vWV15T4",
+                    data={"content": message},
+                )
+            except Exception:
+                pass
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def autoCompleteUsername(request):
+    if request.method == "POST":
+        jsonData = json.loads(request.body)
+        partialString = jsonData["partialString"]
+
+        matchObjects = User.objects.filter(username__icontains=partialString).all()
+
+        matchList = []
+        for user in matchObjects:
+            matchList.append(user.username)
+        return JsonResponse({"matchList": matchList}, safe=False)
+
+    else:
+        return render(request, "Lobby/index.html")
+
+
+def blacklistPlayer(request):
+    if request.method != "PUT":
+        return JsonResponse({"error": "Wrong request."}, status=400)
+
+    jsonData = json.loads(request.body)
+    if jsonData["action"] == "addPlayerToBlacklist":
+        usernameToAdd = jsonData["blackListPlayer"]
+        if usernameToAdd == request.user.username:
+            return JsonResponse({"errorMessage": "You can't blacklist yourself."}, status=400)
+        if User.objects.filter(username=usernameToAdd).exists():
+            userProfile = Profile.objects.get(user=User.objects.get(username=request.user.username))
+            userToAdd = User.objects.get(username=usernameToAdd)
+            # Check if the user is already blacklisted
+            if userToAdd in userProfile.blacklistedPlayers.all():
+                return JsonResponse({"errorMessage": "User is already blacklisted."}, status=400)
+
+            userProfile.blacklistedPlayers.add(userToAdd)
+            userProfile.save()
+            return JsonResponse({"success": True}, safe=False)
+        else:
+            return JsonResponse({"errorMessage": "User does not exist."}, status=400)
+
+    elif jsonData["action"] == "removePlayerFromBlacklist":
+        usernameToRemove = jsonData["blackListPlayer"]
+        userProfile = Profile.objects.get(user=User.objects.get(username=request.user.username))
+        userToRemove = User.objects.get(username=usernameToRemove)
+        userProfile.blacklistedPlayers.remove(userToRemove)
+        userProfile.save()
+        return JsonResponse({"success": True}, safe=False)
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def testWebhook(request):
+    if request.method != "PUT":
+        return JsonResponse({"error": "Wrong request."}, status=400)
+
+    jsonData = json.loads(request.body)
+    notification = jsonData["notification"]
+
+    if notification[0] == "Discord":
+        # Validate Discord URL
+        if (
+            notification[1]
+            and notification[1][0:15] != "https://discord"
+            and notification[1][0:19] != "https://ptb.discord"
+            and notification[1][0:18] != "https://discordapp"
+        ):
+            error_string = gettext("Please enter a Valid Discord Webhook URL")
+            return JsonResponse({"errorMessage": error_string, "type": 0})
+        # Validate Discord ID:
+        if len(notification[2]) != 0 and len(notification[2]) < 18:
+            error_string = gettext("Discord User ID must be an 18+ digit number")
+            return JsonResponse({"errorMessage": error_string, "type": 0})
+
+        if len(notification[2]) != 0 and not notification[2].isdigit():
+            error_string = gettext("Discord User ID must be an 18+ digit number")
+            return JsonResponse({"errorMessage": error_string, "type": 0})
+
+        message = ""
+        if len(notification[2]) != 0:
+            message += "<@" + notification[2] + ">\n"
+        message += gettext("This is a test message from Online Board Gamers")
+        requests.post("" + notification[1], data={"content": message})
+        return JsonResponse({"response": "ok", "type": 0})
+
+    if notification[0] == "Slack":
+        # Validate Slack URL
+        if notification[1] and notification[1][0:33] != "https://hooks.slack.com/services/":
+            error_string = gettext("Please enter a Valid Slack Webhook URL")
+            return JsonResponse({"errorMessage": error_string, "type": 1})
+
+        # Validate Slack Member ID (optional, like Discord)
+        slack_member_id = notification[2] if len(notification) > 2 else ""
+        if slack_member_id and len(slack_member_id) < 8:
+            error_string = gettext("Slack Member ID must be a valid alphanumeric ID (e.g., U123ABC456)")
+            return JsonResponse({"errorMessage": error_string, "type": 1})
+        if slack_member_id and not slack_member_id.replace("U", "").isalnum():
+            error_string = gettext("Slack Member ID must be alphanumeric (starts with U)")
+            return JsonResponse({"errorMessage": error_string, "type": 1})
+
+        # Build message with optional mention
+        message = gettext("This is a test message from Online Board Gamers")
+        if slack_member_id:
+            message = f"<@{slack_member_id}>\n{message}"
+
+        # Payload with link_names=1 to enable mentions
+        payload = {"text": message, "link_names": 1}  # Enables @mentions
+
+        # Send via POST (your existing method works fine)
+        requests.post(notification[1], json=payload)
+
+        return JsonResponse({"response": "ok", "type": 1})
+
+    if notification[0] == "Telegram":
+        TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default=False, cast=str)
+        message = "This is a test message from Online Board Gamers"
+        url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={notification[2]}&text={message}"
+        requests.post(url)
+        return JsonResponse({"response": "ok", "type": 1})
+
+    if notification[0] == "Other":
+        message = "This is a test message from Online Board Gamers"
+        requests.post(notification[1], data={"content": message})
+        return JsonResponse({"response": "ok", "type": 1})
+
+    return JsonResponse({"errorMessage": gettext("Server Error")})
+
+
+def TGZtournaments(request):
+    userToProfile = get_object_or_404(User, username="TGZtourneyAdmin")
+
+    tournamentKey = "TGZ Summer 25 "
+    allTournamentGames = TGZ_Game.objects.filter(gameName__istartswith=tournamentKey, externalTournamentGame=True)
+
+    activeGamesList = sorted(
+        TGZ_Game.objects.filter(
+            Q(creator=userToProfile),
+            Q(gameStatus="ACTIVE"),
+            gameName__istartswith=tournamentKey,
+            externalTournamentGame=True,
+        ),
+        key=lambda instance: instance.latestUpdate,
+        reverse=True,
+    )
+    activeGamesListJson = [game.serialize(request.user) for game in activeGamesList]
+
+    finishedGamesList = sorted(
+        TGZ_Game.objects.filter(
+            Q(creator=userToProfile),
+            Q(gameStatus="FINISHED"),
+            gameName__istartswith=tournamentKey,
+            externalTournamentGame=True,
+        ),
+        key=lambda instance: instance.latestUpdate,
+        reverse=True,
+    )
+    finishedGamesListJson = [game.serialize(request.user) for game in finishedGamesList]
+
+    return render(
+        request,
+        "Lobby/TGZtournaments.html",
+        {
+            "activeGames": activeGamesListJson,
+            "finishedGames": finishedGamesListJson,
+        },
+    )
+
+
+@login_required
+def schism(request):
+    def serializeLocal(game):
+        winner = game.winner.username if game.winner else None
+        latestUpdateString = str(game.latestUpdate)
+        return {
+            "gameID": game.id,
+            "gameName": game.getGameName(),
+            "allPlayers": [user.username for user in game.allPlayers.all()],
+            "currentTurn": game.currentTurnString(),
+            "latestUpdate": latestUpdateString,
+            "startingOptions": "",
+            "maxPlayers": game.maxPlayers,
+            "winner": winner,
+            "created": game.created,
+            "game": "TGZ",
+        }
+
+    # Fetch querysets
+    availableGamesList = TGZ_Game.objects.filter(gameStatus="AVAILABLE").order_by("-latestUpdate")
+    activeGamesList = TGZ_Game.objects.filter(gameStatus="ACTIVE").order_by("-latestUpdate")
+    finishedGamesList = TGZ_Game.objects.filter(gameStatus="FINISHED").order_by("-latestUpdate")
+
+    # Filter finished games for startingOptions containing [7, 8, 9]
+    filtered_finished_games = []
+    for game in finishedGamesList:
+        if game.startingOptions:
+            starting_options = json.loads(game.startingOptions)
+            if any(option in starting_options for option in [7, 8, 9]):
+                filtered_finished_games.append(game)
+
+    # Pagination
+    items_per_page = 20
+    page = request.POST.get("page", 1)  # Changed to POST to match form
+    paginator = Paginator(filtered_finished_games, items_per_page)
+    try:
+        finished_games_page = paginator.page(page)
+    except PageNotAnInteger:
+        finished_games_page = paginator.page(1)
+        page = 1
+    except EmptyPage:
+        finished_games_page = paginator.page(paginator.num_pages) if paginator.num_pages > 0 else paginator.page(1)
+        page = paginator.num_pages if paginator.num_pages > 0 else 1
+
+    # Process available and active games
+    availableGamesJson = []
+    activeGamesJson = []
+    for game_list, game_json in [
+        (availableGamesList, availableGamesJson),
+        (activeGamesList, activeGamesJson),
+    ]:
+        for game in game_list:
+            if game.startingOptions:
+                try:
+                    starting_options = json.loads(game.startingOptions)
+                    logger.debug(
+                        f"Game {getattr(game, 'id', 'unknown')} (non-finished) startingOptions: {starting_options}"
+                    )
+                    if not isinstance(starting_options, list):
+                        logger.warning(
+                            f"Game {getattr(game, 'id', 'unknown')} startingOptions is not a list: {starting_options}"
+                        )
+                        continue
+                    starting_options = [int(opt) if isinstance(opt, str) else opt for opt in starting_options]
+                    if any(option in starting_options for option in [7, 8, 9]):
+                        game_json.append(game.serialize(request.user))  # Use serializeLocal for consistency
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.error(f"Error processing startingOptions for game {getattr(game, 'id', 'unknown')}: {e}")
+                    continue
+            else:
+                logger.warning(f"Game {getattr(game, 'id', 'unknown')} has no startingOptions")
+
+    # Serialize paginated finished games
+    finishedGamesJson = []
+    for game in finished_games_page.object_list:
+        finishedGamesJson.append(serializeLocal(game))
+
+    return render(
+        request,
+        "Lobby/schism.html",
+        {
+            "availableGames": availableGamesJson,
+            "activeGames": activeGamesJson,
+            "finishedGames": finishedGamesJson,
+            "finished_paginator": paginator,
+            "finished_current_page": int(page),
+        },
+    )
+
+
+def TGZtournamentFixedSpring24(request):
+    return render(request, "Lobby/TGZT/TGZtournamentFixedSpring24.html")
+
+
+def TGZtournamentFixedAutumn24(request):
+    return render(request, "Lobby/TGZT/TGZtournamentFixedAutumn24.html")
+
+
+def TGZtournamentFixedSummer25(request):
+    return render(request, "Lobby/TGZT/TGZtournamentFixedSummer25.html")
+
+
+def TGZtournamentMain(request, tournamentName):
+    ##### USE THIS FOR GROUPINGS
+    # Find the tournament key
+    #############
+
+    # word_part = tournamentName[:-2].upper()
+    # digit_part = tournamentName[-2:]
+    # tournamentKey = word_part + " " + digit_part
+
+    tournamentKey = (
+        "TGZ Summer 25"  # Then immewdiately " A1" or " B2" NOTE THE KEY DOESN'T INCLUDE THE SPACE FOR SOME REASON
+    )
+
+    # This line is common to all
+    # allTournamentGames = TGZ_Game.objects.filter(gameName__istartswith=tournamentKey, externalTournamentGame=True, created__gte="1751279600000")
+
+    allTournamentGames = TGZ_Game.objects.annotate(created_int=Cast("created", IntegerField())).filter(
+        gameName__istartswith=tournamentKey, externalTournamentGame=True, created_int__gte=1751279600000
+    )
+
+    ## Split the gameName into groups based on letters A to G
+    grouped_games = (
+        allTournamentGames.annotate(group=RawSQL("SUBSTRING(gameName, %s, %s)", (len(tournamentKey) + 2, 1)))
+        .values("group")
+        .annotate(count_games=Count("id"))
+    )
+
+    tournamentData = []
+
+    # Iterate through the groups
+    for group in grouped_games:
+        group_letter = group["group"]
+        group_data = {"group": group_letter, "players": [], "games": []}
+
+        games_in_group = allTournamentGames.filter(gameName__istartswith=tournamentKey + " " + group_letter)
+
+        # Get unique players in the group
+        unique_players = User.objects.filter(id__in=games_in_group.values_list("allPlayers", flat=True)).distinct()
+
+        # Iterate through each player in the group
+        for player in unique_players:
+            player_games_finished = games_in_group.filter(allPlayers=player, gameStatus="FINISHED")
+
+            # Count the number of games the player participated in
+            num_games_finished = player_games_finished.count()
+
+            # Count the number of games the player won
+            num_games_won = player_games_finished.filter(winner=player).count()
+
+            # Calculate tie breakers
+            tie_breakers = []
+            for game in player_games_finished:
+                if game.winner != player:
+                    if game.kickoutFlexiData != "":
+                        kickout_data = json.loads(game.kickoutFlexiData)
+                        winner_vp_vr = kickout_data[0][1] - kickout_data[0][2]
+
+                        player_index = next(
+                            (index for index, data in enumerate(kickout_data) if data[0] == player.username), None
+                        )
+                        if player_index is not None:
+                            player_vp_vr = kickout_data[player_index][1] - kickout_data[player_index][2]
+                            tie_breakers.append([-winner_vp_vr + player_vp_vr, getattr(game, "id")])
+
+            # Sort tie breakers in descending order
+            tie_breakers.sort(reverse=True)
+
+            # Append player data to the group's player list
+            player_data = {
+                "username": player.username,
+                "num_games_finished": num_games_finished,
+                "num_games_won": num_games_won,
+                "tie_breakers": tie_breakers,
+            }
+            group_data["players"].append(player_data)
+
+        # Sort players by tie breakers
+        # group_data['players'].sort(key=lambda x: ([tb[0] for tb in x['tie_breakers']] + [float('-inf')])[:4])
+        # Sort players in the group by most wins first
+        # group_data['players'].sort(key=lambda x: (x['num_games_won'],), reverse=True)
+
+        # Sort players by tie breakers within each number of wins
+        # group_data['players'] = sorted(group_data['players'], key=lambda x: ([tb[0] for tb in x['tie_breakers']] + [float('-inf')])[:4])
+
+        # Sort players in the group by most wins first, and then by tie breakers
+        group_data["players"] = sorted(
+            group_data["players"], key=lambda x: (x["num_games_won"], [tb[0] for tb in x["tie_breakers"]])
+        )
+
+        # Reverse the sorting order for tie breakers
+        group_data["players"].reverse()
+
+        # Append game data to the group's games list
+        for game in games_in_group:
+            game_data = {
+                "gameName": game.gameName,
+                "players": game.allPlayers,
+                "winner": game.winner,  # .username if game.winner else None,
+                "gameID": getattr(game, "id"),
+            }
+            group_data["games"].append(game_data)
+
+        # Append group data to the tournament data list
+        tournamentData.append(group_data)
+
+    #################################################
+    #
+    # ONE MASSIVE GROUP
+    #
+    # Uncomment everything below. Comment out everything above.
+    # Then it should give you one jumbo group
+    #
+    #################################################
+
+    #    tournamentData = []
+    #    tournamentKey = "TGZ Summer 25 "
+    #    group_data = {'group': "A", 'players': [], 'games': []}
+    #    allTournamentGames = TGZ_Game.objects.filter(gameName__istartswith=tournamentKey, externalTournamentGame=True)
+    #
+    #    # Get unique players in the group
+    #    unique_players = User.objects.filter(id__in=allTournamentGames.values_list('allPlayers', flat=True)).distinct()
+    #
+    #    # Iterate through each player in the group
+    #    for player in unique_players:
+    #        player_games_finished = allTournamentGames.filter(allPlayers=player, gameStatus="FINISHED")
+    #
+    #        # Count the number of games the player participated in
+    #        num_games_finished = player_games_finished.count()
+    #
+    #        # Count the number of games the player won
+    #        num_games_won = player_games_finished.filter(winner=player).count()
+    #
+    #        # Calculate tie breakers
+    #        tie_breakers = []
+    #        for game in player_games_finished:
+    #            if game.winner != player:
+    #                if game.kickoutFlexiData != '':
+    #                    kickout_data = json.loads(game.kickoutFlexiData)
+    #                    winner_vp_vr = kickout_data[0][1] - kickout_data[0][2]
+    #
+    #                    player_index = next((index for index, data in enumerate(kickout_data) if data[0] == player.username), None)
+    #                    if player_index is not None:
+    #                        player_vp_vr = kickout_data[player_index][1] - kickout_data[player_index][2]
+    #                        tie_breakers.append([-winner_vp_vr + player_vp_vr, game.id])
+    #
+    #        # Sort tie breakers in descending order
+    #        tie_breakers.sort(reverse=True)
+    #
+    #        # Append player data to the group's player list
+    #        player_data = {
+    #            'username': player.username,
+    #            'num_games_finished': num_games_finished,
+    #            'num_games_won': num_games_won,
+    #            'tie_breakers': tie_breakers
+    #        }
+    #        group_data['players'].append(player_data)
+    #
+    #    # Sort players by tie breakers
+    #    group_data['players'].sort(key=lambda x: ([tb[0] for tb in x['tie_breakers']] + [float('-inf')])[:4])
+    #    # Sort players in the group by most wins first
+    #    group_data['players'].sort(key=lambda x: (x['num_games_won'],), reverse=True)
+    #
+    #    # Sort players by tie breakers within each number of wins
+    #    group_data['players'] = sorted(group_data['players'], key=lambda x: ([tb[0] for tb in x['tie_breakers']] + [float('-inf')])[:4])
+    #
+    #    # Sort players in the group by most wins first, and then by tie breakers
+    #    group_data['players'] = sorted(group_data['players'], key=lambda x: (x['num_games_won'], [tb[0] for tb in x['tie_breakers']]))
+    #
+    #    # Reverse the sorting order for tie breakers
+    #    group_data['players'].reverse()
+    #
+    #    # Append game data to the group's games list
+    #    for game in allTournamentGames:
+    #            game_data = {
+    #                'gameName': game.gameName,
+    #                'players': game.allPlayers,
+    #                'winner': game.winner,#.username if game.winner else None,
+    #                'gameID': game.id
+    #            }
+    #            group_data['games'].append(game_data)
+    #
+    #    # Append group data to the tournament data list
+    #    tournamentData.append(group_data)
+
+    #################################################
+    #
+    # END OF ONE MASSIVE GROUP
+    #
+    #################################################
+
+    return render(
+        request, "Lobby/TGZtournamentMain.html", {"tournamentData": tournamentData, "tournamentKey": tournamentKey}
+    )
+
+
+@login_required
+def setStopEmails(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    profile = Profile.objects.get(user=request.user)
+    stopEmailsUntil = profile.stopEmailsUntil
+
+    if stopEmailsUntil is None:
+        # Round the Unix timestamp to the nearest minute
+        stopEmailsUntil = round(time.time() / 60)
+        stopEmailsUntil += 61
+    else:
+        stopEmailsUntil = None
+
+    profile.stopEmailsUntil = stopEmailsUntil
+    profile.save()
+
+    return JsonResponse({"result": stopEmailsUntil}, safe=False)
+
+
+@login_required
+def dataCheck(request):
+    # start_time = time.perf_counter()
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    try:
+        jsonData = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data."}, status=400)
+
+    available_count = 0
+    invitations_count = 0
+    my_move_count = 0
+
+    for model in GAME_MODELS:
+        # Optimized queries to fetch counts directly
+        # available_count += model.objects.filter(gameStatus="AVAILABLE").count()
+        # invitations_count += model.objects.filter(gameStatus="WAITING", invitedPlayers=request.user).count()
+
+        available_count += model.objects.filter(gameStatus="AVAILABLE").aggregate(count=Count("id"))["count"]
+        invitations_count += model.objects.filter(gameStatus="WAITING", invitedPlayers=request.user).aggregate(
+            count=Count("id")
+        )["count"]
+
+        # Fetch only active games where the user is not missing
+        # current_games = model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE").exclude(
+        #    missingPlayers=request.user
+        # )
+        current_games = (
+            model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE")
+            .exclude(missingPlayers=request.user)
+            .only("id")
+        )  # Fetch minimal fields needed for serialization
+
+        my_move_count += sum(1 for game in current_games.iterator() if game.quickIsMyMove(request.user.username))
+
+        # Serialize and count 'myMove' efficiently
+        # for game in current_games:
+        #    game_data = game.serialize(request.user)  # Assuming serialize method exists
+        #    if game_data.get("myMove", False):
+        #        my_move_count += 1
+
+    # print(f"Time taken: {time.perf_counter() - start_time}")
+
+    # Add in the MT
+    available_count += Mini_Tournaments.objects.filter(tournamentStatus="OP").count()
+
+    if (
+        my_move_count != jsonData.get("myMoveCount", 0)
+        or available_count != jsonData.get("availableCount", 0)
+        or invitations_count != jsonData.get("invitationsCount", 0)
+    ):
+
+        return JsonResponse(
+            {
+                "latest": False,
+                "availableCount": available_count,
+                "invitationsCount": invitations_count,
+                "myMoveCount": my_move_count,
+            }
+        )
+
+    return JsonResponse({"latest": True}, safe=False)
+
+
+@login_required()
+def addWebhook(request):
+    # Joining a game must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid Request method"}, status=400)
+
+    webhookType = request.POST["webhookType"]
+    webhookURL = request.POST.get("webhookURL", "") if "webhookURL" in request.POST else ""
+    webhookUserID = request.POST.get("webhookUserID", "") if "webhookType" in request.POST else ""
+
+    #### LENGTHS
+    if len(webhookURL) > 200 or len(webhookUserID) > 50:
+        error_string = gettext("Entry too long")
+        messages.error(request, error_string)
+        return redirect("profile")
+    ######## URLs
+    # First validate the URL UNLESS adding telegram
+    if webhookType != "TG":
+        try:
+            URLValidator()(webhookURL)
+        except ValidationError:
+            error_string = gettext("Please enter a valid webhook URL")
+            messages.error(request, error_string)
+            return redirect("profile")
+
+    # Valid URL, so check discord patterns
+    if (
+        webhookType == "DC"
+        and webhookURL[0:15] != "https://discord"
+        and webhookURL[0:19] != "https://ptb.discord"
+        and webhookURL[0:18] != "https://discordapp"
+    ):
+        error_string = gettext("Please enter a Valid Discord Webhook URL")
+        messages.error(request, error_string)
+        return redirect("profile")
+
+    # Valid URL, so check Slack patterns
+    if webhookType == "SL" and webhookURL[0:33] != "https://hooks.slack.com/services/":
+        error_string = gettext("Please enter a Valid Slack Webhook URL")
+        messages.error(request, error_string)
+        return redirect("profile")
+
+    # Validate Slack Member ID (optional, like Discord)
+    if webhookType == "SL" and len(webhookUserID) != 0:
+        slack_member_id = webhookUserID
+        if slack_member_id and len(slack_member_id) < 8:
+            error_string = gettext("Slack Member ID must be a valid alphanumeric ID (e.g., U123ABC456)")
+            return JsonResponse({"errorMessage": error_string, "type": 1})
+        if slack_member_id and not slack_member_id.replace("U", "").isalnum():
+            error_string = gettext("Slack Member ID must be alphanumeric (starts with U)")
+            return JsonResponse({"errorMessage": error_string, "type": 1})
+
+    # If DC, check valid Discord ID:
+    if webhookType == "DC" and len(webhookUserID) != 0 and len(webhookUserID) < 18:
+        error_string = gettext("Discord User ID must be an 18+ digit number")
+        messages.error(request, error_string)
+        return redirect("profile")
+    if webhookType == "DC" and len(webhookUserID) != 0 and not webhookUserID.isdigit():
+        error_string = gettext("Discord User ID must be an 18+ digit number")
+        messages.error(request, error_string)
+        return redirect("profile")
+
+    # If SL, set userID to blank
+    # if webhookType == "SL":
+    #    webhookUserID = ""
+
+    # If telegram, should be a number
+    if webhookType == "TG":
+        if len(webhookUserID) == 0:
+            error_string = gettext("Please enter a Telegram user ID")
+            messages.error(request, error_string)
+            return redirect("profile")
+        if len(webhookUserID) != 0 and not webhookUserID.isdigit():
+            error_string = gettext("Telegram user ID is normally a 10 digit number")
+            messages.error(request, error_string)
+            return redirect("profile")
+
+    # Now it is valid, so add it to the profile
+    profile = Profile.objects.get(user=request.user)
+    currentWebhooks = json.loads(profile.webhooks) if profile.webhooks != "" and profile.webhooks is not None else []
+    if len(currentWebhooks) >= 6:
+        error_string = gettext("Too many webhooks already added")
+        messages.error(request, error_string)
+        return redirect("profile")
+
+    currentWebhooks.append([webhookType, webhookURL, webhookUserID])
+    profile.webhooks = json.dumps(currentWebhooks, separators=(",", ":"))
+    profile.save()
+    messages.success(request, gettext("Webhook Added"))
+    return redirect("profile")
+
+
+@login_required()
+def deleteWebhook(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid Request method"}, status=400)
+
+    webhookID = request.POST["webhookID"]
+    webhookURL = request.POST.get("webhookURL", "") if "webhookURL" in request.POST else ""
+    webhookUserID = request.POST.get("webhookUserID", "") if "webhookUserID" in request.POST else ""
+
+    profile = Profile.objects.get(user=request.user)
+    currentWebhooks = json.loads(profile.webhooks) if profile.webhooks != "" and profile.webhooks is not None else []
+    if len(currentWebhooks) == 0:
+        error_string = gettext("No webhooks to delete")
+        messages.error(request, error_string)
+        return redirect("profile")
+
+    if (currentWebhooks[int(webhookID)][1] != webhookURL) or (currentWebhooks[int(webhookID)][2] != webhookUserID):
+        error_string = gettext("Error finding webhook to delete")
+        messages.error(request, error_string)
+        return redirect("profile")
+
+    currentWebhooks.pop(int(webhookID))
+    profile.webhooks = json.dumps(currentWebhooks, separators=(",", ":"))
+    profile.save()
+    messages.success(request, gettext("Webhook Deleted"))
+    return redirect("profile")
+
+
+@login_required
+@require_POST
+def sendAdminMessage(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        message = data.get("message")
+
+        if message:  # Check if webhook URL is available
+            SN_sendAdminErrorMessage(request, message)  # Call your existing function
+            return JsonResponse({"status": "success"}, status=200)
+        else:
+            return JsonResponse({"status": "error", "message": "Missing message or webhook URL"}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@login_required
+def BGH_API(request, options):
+    url = "http://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/" + options
+    # url = 'http://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/2,2,F,F,F,fcmmgapi4829'
+
+    response = requests.get(url)
+    data = response.json()
+    final_dictionary = {}
+    try:
+        final_dictionary = eval(data)
+    except Exception as e:
+        print("BGH API Error: " + str(e) + " Data: " + str(data))
+
+    try:
+        print(
+            f"BGH API:: User: {request.user.username}   Options: {options}   Data: {final_dictionary['view_map_url']}"
+        )
+    except Exception:
+        print("BGH PRINT ERROR")
+
+    return JsonResponse(final_dictionary)  # , safe=False)
+
+
+@login_required
+def kbbrScraper(request, game):
+    ALLOWED_USERS_SCRAPER = ["admin", "DodgerB", "kbbr"]
+    if request.user.username not in ALLOWED_USERS_SCRAPER:
+        return redirect("index")
+    game_in_use_model = FCM_Game
+    if game == "HC":
+        game_in_use_model = HC_Game
+    if game == "Bus":
+        game_in_use_model = Bus_Game
+    if game == "TGZ":
+        game_in_use_model = TGZ_Game
+
+    query = Q(gameStatus="FINISHED") & ~Q(
+        allPlayers__username="admin"
+    )  # & ~Q(allPlayers__username="SHADOW") & ~Q(statsExcludedGame=True)
+
+    matching_games = game_in_use_model.objects.filter(query)
+    # For each game, [gameID, gameType]
+
+    response_data = {
+        "finished_games": [
+            [
+                getattr(game, "id"),
+                (
+                    1
+                    if "SHADOW" in game.allPlayers.values_list("username", flat=True)
+                    else (
+                        2
+                        if hasattr(game, "relatedTournament") and getattr(game, "relatedTournament", None) is not None
+                        else 0
+                    )
+                ),
+            ]
+            for game in matching_games
+        ]
+    }
+
+    return JsonResponse(response_data)
+
+
+###################################
+#
+#   MINI TOURNAMENT VIEWS
+#
+#####################################
+@login_required
+def addPlayerToMTinvites(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid Request method"}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    try:
+        user = User.objects.get(username=jsonData["username"])
+        if user is not None:
+            if user.username == request.user.username:
+                return JsonResponse({"success": 3})
+            return JsonResponse({"success": 1}, status=200)
+    except User.DoesNotExist:  # Catch User.DoesNotExist instead of generic Exception
+        return JsonResponse({"success": 2}, status=200)
+
+    return JsonResponse({"success": 1}, status=200)
+
+
+@login_required()
+def MiniTournaments(request):
+    available_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="OP").order_by("-created")
+    current_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="IP").order_by("-created")
+    finished_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="FN").order_by("-created")
+    available_MT = [available_MT_raw_item.serialize() for available_MT_raw_item in available_MT_raw]
+    current_MT = [current_MT_raw_item.serialize() for current_MT_raw_item in current_MT_raw]
+    finished_MT = [finished_MT_raw_item.serialize() for finished_MT_raw_item in finished_MT_raw]
+    return render(
+        request,
+        "Lobby/tournaments/AllMiniTournaments.html",
+        {"available_MT": available_MT, "current_MT": current_MT, "finished_MT": finished_MT},
+    )
+
+
+@login_required()
+def MiniTournament(request, Mini_Tournament_id):
+    if request.method == "POST":
+        try:
+            Mini_Tournament = Mini_Tournaments.objects.get(id=Mini_Tournament_id)
+        except Exception:
+            raise Http404(gettext("Tournament does not exist"))
+        # First check if it is a person declining an invite
+        if "declineInvite" in request.POST and request.POST["declineInvite"] == "true":
+            Mini_Tournament = Mini_Tournaments.objects.get(id=Mini_Tournament_id)
+            Mini_Tournament.startingPlayers.remove(request.user)
+            Mini_Tournament.invitedPlayers.remove(request.user)
+            Mini_Tournament.save()
+            messages.success(request, (gettext("You have declined the tournament invitation")))
+            return HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
+
+        if "understand_movement" not in request.POST:
+            messages.error(request, gettext("Please tick to confirm you can move regularly"))
+            HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
+
+        # Always remove from invited just in case
+        Mini_Tournament.invitedPlayers.remove(request.user)
+
+        if Mini_Tournament and Mini_Tournament.startingPlayers.all().count() < Mini_Tournament.maxTournamentPlayers:
+            Mini_Tournament.startingPlayers.add(request.user)
+            Mini_Tournament.save()
+            if Mini_Tournament.startingPlayers.all().count() == Mini_Tournament.maxTournamentPlayers:
+                SF_startMiniTournament(request, Mini_Tournament)
+            messages.success(request, (gettext("You have joined the Tournament")))
+        else:
+            messages.error(request, gettext("The Tournament is already full"))
+        return HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
+
+    # Mini_Tournament = None
+    try:
+        Mini_Tournament = Mini_Tournaments.objects.get(id=Mini_Tournament_id)
+    except Exception:
+        raise Http404(gettext("Tournament does not exist"))
+
+    # Common items
+    chatData = Mini_Tournament.chatData
+    startingOptionsHTML = ""
+    if Mini_Tournament.gameCode == "FCM":
+        startingOptionsHTML = SR_getFCMstartingOptionsHTML(Mini_Tournament.startingOptions)
+        if startingOptionsHTML == "[None]":
+            startingOptionsHTML = "(No Starting Options)"
+    elif Mini_Tournament.gameCode == "TGZ":
+        startingOptionsHTML = SR_getTGZstartingOptionsHTML(Mini_Tournament.startingOptions)
+
+    pointsValues = {}
+    if Mini_Tournament.tournamentType == "PT":
+        pointsValues["normal"] = []
+        for i in range(Mini_Tournament.maxGamePlayers):
+            entry = []
+            if i == 0:
+                entry.append("1st")
+            elif i == 1:
+                entry.append("2nd")
+            elif i == 2:
+                entry.append("3rd")
+            elif i == 3:
+                entry.append("4th")
+            elif i == 4:
+                entry.append("5th")
+            elif i == 5:
+                entry.append("6th")
+            entry.append(SR_getPointsForPosition(i, Mini_Tournament.maxGamePlayers))
+            pointsValues["normal"].append(entry)
+        pointsValues["bye"] = SR_getPointsForPosition(99, Mini_Tournament.maxGamePlayers)
+    returnData = {
+        "tournament": Mini_Tournament,
+        "gameType": Mini_Tournament.gameCode,
+        "startingOptionsHTML": startingOptionsHTML,
+        "MT_CreationTimestamp": Mini_Tournament.created,
+        "MT_ID": Mini_Tournament_id,
+        "chatData": chatData,
+        "creator": Mini_Tournament.creator.username if Mini_Tournament.creator is not None else "None",
+        "pointsValues": pointsValues,
+    }
+
+    if Mini_Tournament.tournamentStatus == "OP" or Mini_Tournament.tournamentStatus == "PR":
+        invitedPlayerList = [User.username for User in Mini_Tournament.invitedPlayers.all()]
+        invitedPlayerString = ", ".join(invitedPlayerList)
+        openSlots = []
+        for i in range(Mini_Tournament.startingPlayers.all().count() + 1, Mini_Tournament.maxTournamentPlayers + 1):
+            openSlots.append(str(i))
+        returnData.update(
+            {
+                "openSlots": openSlots,
+                "isSignedUp": Mini_Tournament.isSignedUp(request.user),
+                "isInvitedPlayer": Mini_Tournament.isInvitedPlayer(request.user),
+                "invitedPlayerString": invitedPlayerString,
+            }
+        )
+        return render(
+            request,
+            "Lobby/tournaments/MiniTournament.html",
+            returnData,
+        )
+
+    if (
+        Mini_Tournament
+        and Mini_Tournament.tournamentStatus == "IP"
+        or Mini_Tournament
+        and Mini_Tournament.tournamentStatus == "FN"
+    ):
+        winnerHTML = ""
+        if Mini_Tournament.tournamentStatus == "FN":
+            winnersData = json.loads(Mini_Tournament.winnersData)
+            winnersData = winnersData[0]
+            winnerHTML = "Winner"
+            if len(winnersData) > 1:
+                winnerHTML += "s"
+            winnerHTML += ": "
+            for index, name in enumerate(winnersData):
+                winnerHTML += "<B>" + name + "</B>"
+                if index + 1 != len(winnersData):
+                    winnerHTML += ", "
+        returnData.update(
+            {
+                "playersData": SR_getAnyTournamentPlayersData(Mini_Tournament),
+                "roundsData": SR_getAnyTournamentRoundsData(Mini_Tournament),
+                "winnerHTML": winnerHTML,
+                "winnersData": json.loads(Mini_Tournament.winnersData) if Mini_Tournament.winnersData else [],
+            }
+        )
+        return render(
+            request,
+            "Lobby/tournaments/MiniTournament.html",
+            returnData,
+        )
+
+    # Un-needed default return
+    return render(request, "Lobby/tournaments/MiniTournament.html")
+
+
+@contextmanager
+def db_mutex(name, timeout=10):
+    mutex_name = "dbmutex_" + name
+    cursor = connection.cursor()
+    got_lock = False  # Initialize got_lock to False
+    try:
+        # timeout returns with error
+        cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
+        ((got,),) = cursor.fetchall()
+        got_lock = bool(got)  # Convert to boolean for clarity
+
+        if got_lock:
+            yield  # Execute the code within the 'with' block
+        else:
+            # time out or can't open?
+            print("ERROR-FCM: Not running, %s mutex not available" % (mutex_name))
+            return  # Important: Exit the context manager if the lock wasn't acquired
+    finally:
+        # Ensure the lock is ALWAYS released, even if there's an exception
+        if got_lock:  # Check if the lock was acquired before releasing
+            try:
+                cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
+                cursor.fetchall()
+            except Exception as e:
+                print(f"ERROR-FCM: Failed to release lock {mutex_name}: {e}")  # Log error
+
+
+@login_required()
+def sendMTchatMessage(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    MT_ID = jsonData["MT_ID"]
+
+    with db_mutex("lockMT_" + str(MT_ID)):
+        return _sendMTchatMessage(request)
+
+
+@login_required()
+def _sendMTchatMessage(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    MT_ID = jsonData["MT_ID"]
+    new_entry = jsonData["newEntry"]
+    new_entry.insert(0, request.user.username)
+
+    currentMT = Mini_Tournaments.objects.get(id=MT_ID)
+
+    currentChatData = []
+    base64_data = currentMT.chatData if currentMT.chatData else ""
+    if len(base64_data) > 0:
+        compressed_data = base64.b64decode(base64_data)
+        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        currentChatData = json.loads(unzipped)
+    currentChatData.insert(0, new_entry)
+
+    json_string = json.dumps(currentChatData, separators=(",", ":"))
+    compressed_data = gzip.compress(json_string.encode("utf-8"))
+    compressedChatData = base64.b64encode(compressed_data).decode("utf-8")
+
+    currentMT.chatData = compressedChatData
+
+    # Now add notifications to everyone except request.user
+    # currentGame.playersWithChatNotification.set(currentGame.allPlayers.exclude(username=request.user.username))
+
+    # currentGame.save(update_fields=["chatData", "playersWithChatNotification"])
+    currentMT.save()
+
+    return JsonResponse({"chatData": compressedChatData})
+
+
+@login_required
+def reloadMTchatData(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    try:
+        Mini_Tournament = Mini_Tournaments.objects.get(id=jsonData["MT_ID"])
+    except Mini_Tournaments.DoesNotExist:
+        raise Http404(gettext("Mini Tournament does not exist"))
+
+    # Remove user from notifications
+    # currentGame.playersWithChatNotification.remove(request.user)
+    # currentGame.save()
+    return JsonResponse(
+        {
+            "chatData": Mini_Tournament.chatData
+            # }, safe=False)
+        },
+        safe=True,
+    )
+
+
+@login_required
+def createFCMminiTournament(request):
+    # experienced = SF_hasRequiredExperience(request, "FCM", FCM_Game)
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createFCM.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startgOptions = buildFCMstartingOptions(request.POST)
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+    if "allowRewind" in request.POST:
+        startgOptions = startgOptions + ",99" if startgOptions != "" else "99"
+
+    with transaction.atomic():
+        newTournament = Mini_Tournaments.objects.create(
+            gameCode="FCM",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=startgOptions,
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    SN_sendMiniTournamentInvite(
+        request,
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(getattr(newTournament, "id")))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+def createTGZminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createTGZ.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    # startingOptions = json.dumps(SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else [])
+    startingOptions = []
+    if "useSchism" in request.POST and "schismRadio" in request.POST:
+        startingOptions.append(int(request.POST.get("schismRadio")))
+
+    if "enableAdvancedOptions" in request.POST:
+        startingOptions.extend(SF_TGZadvancedOptions(request))
+        for entry in startingOptions:
+            if isinstance(entry, list) and entry and entry[0] == 90 and any(12 <= num <= 23 for num in entry):
+                startingOptions.append(7)
+                break
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Mini_Tournaments.objects.create(
+            gameCode="TGZ",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=startingOptions,
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    SN_sendMiniTournamentInvite(
+        request,
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(getattr(newTournament, "id")))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+###################################
+#
+#   MAIN TOURNAMENT VIEWS - MAIN-T
+#
+#####################################
+@login_required()
+def MainTournaments(request):
+    available_MainT_raw = Main_Tournament.objects.filter(tournamentStatus="OP").order_by("-created")
+    current_MainT_raw = Main_Tournament.objects.filter(tournamentStatus="IP").order_by("-created")
+    finished_MainT_raw = Main_Tournament.objects.filter(tournamentStatus="FN").order_by("-created")
+    available_MainT = [available_MainT_raw_item.serialize() for available_MainT_raw_item in available_MainT_raw]
+    current_MainT = [current_MainT_raw_item.serialize() for current_MainT_raw_item in current_MainT_raw]
+    finished_MainT = [finished_MainT_raw_item.serialize() for finished_MainT_raw_item in finished_MainT_raw]
+    return render(
+        request,
+        "Lobby/Main_Tournaments/AllMainTournaments.html",
+        {"available_MainT": available_MainT, "current_MainT": current_MainT, "finished_MainT": finished_MainT},
+    )
+
+
+@login_required()
+def MainTournament(request, Main_Tournament_id):
+    if request.method == "POST":
+        try:
+            currentTournament = Main_Tournament.objects.get(id=Main_Tournament_id)
+        except Main_Tournament.DoesNotExist:
+            raise Http404(gettext("Tournament does not exist"))
+
+        if "understand_movement" not in request.POST:
+            messages.error(request, gettext("Please tick to confirm you can move regularly"))
+            HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
+
+        if (
+            currentTournament
+            and currentTournament.startingPlayers.all().count() < currentTournament.maxTournamentPlayers
+        ):
+            currentTournament.startingPlayers.add(request.user)
+            currentTournament.save()
+            if currentTournament.startingPlayers.all().count() == currentTournament.maxTournamentPlayers:
+                SF_startMainTournament(request, currentTournament)
+            messages.success(request, (gettext("You have joined the Tournament")))
+        else:
+            messages.error(request, gettext("The Tournament is already full"))
+        return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
+
+    # Main_Tournament = None
+    try:
+        currentTournament = Main_Tournament.objects.get(id=Main_Tournament_id)
+    except Main_Tournament.DoesNotExist:
+        raise Http404(gettext("Tournament does not exist"))
+
+    # Common items
+    chatData = currentTournament.chatData
+    startingOptionsHTML = ""
+    if currentTournament.gameCode == "FCM":
+        startingOptionsHTML = SR_getFCMstartingOptionsHTML(currentTournament.startingOptions)
+        if startingOptionsHTML == "[None]":
+            startingOptionsHTML = "(No Starting Options)"
+    elif currentTournament.gameCode == "TGZ":
+        startingOptionsHTML = SR_getTGZstartingOptionsHTML(currentTournament.startingOptions)
+
+    pointsValues = {}
+    if currentTournament.tournamentType == "PT":
+        pointsValues["normal"] = []
+        for i in range(currentTournament.maxGamePlayers):
+            entry = []
+            if i == 0:
+                entry.append("1st")
+            elif i == 1:
+                entry.append("2nd")
+            elif i == 2:
+                entry.append("3rd")
+            elif i == 3:
+                entry.append("4th")
+            elif i == 4:
+                entry.append("5th")
+            elif i == 5:
+                entry.append("6th")
+            entry.append(SR_getPointsForPosition(i, currentTournament.maxGamePlayers))
+            pointsValues["normal"].append(entry)
+        pointsValues["bye"] = SR_getPointsForPosition(99, currentTournament.maxGamePlayers)
+    returnData = {
+        "tournament": currentTournament,
+        "gameCode": currentTournament.gameCode,
+        "startingOptionsHTML": startingOptionsHTML,
+        "MainT_CreationTimestamp": currentTournament.created,
+        "MainT_ID": Main_Tournament_id,
+        "chatData": chatData,
+        "pointsValues": pointsValues,
+    }
+
+    if currentTournament.tournamentStatus == "OP":
+        openSlots = []
+        for i in range(currentTournament.startingPlayers.all().count() + 1, currentTournament.maxTournamentPlayers + 1):
+            openSlots.append(str(i))
+        returnData.update(
+            {
+                "openSlots": openSlots,
+                "isSignedUp": currentTournament.isSignedUp(request.user),
+            }
+        )
+        return render(
+            request,
+            "Lobby/tournaments/MainTournament.html",
+            returnData,
+        )
+
+    if (
+        currentTournament
+        and currentTournament.tournamentStatus == "IP"
+        or currentTournament
+        and currentTournament.tournamentStatus == "FN"
+    ):
+        winnerHTML = ""
+        if currentTournament.tournamentStatus == "FN":
+            winnersData = json.loads(currentTournament.winnersData)
+            winnersData = winnersData[0]
+            winnerHTML = "Winner"
+            if len(winnersData) > 1:
+                winnerHTML += "s"
+            winnerHTML += ": "
+            for index, name in enumerate(winnersData):
+                winnerHTML += "<B>" + name + "</B>"
+                if index + 1 != len(winnersData):
+                    winnerHTML += ", "
+
+        roundsData = SR_getAnyTournamentRoundsData(currentTournament)
+        # For R2 of MG, need to split into groups
+        if currentTournament.tournamentType == "MG" and len(roundsData) >= 2:
+            idx = 0
+            if len(roundsData) == 3:
+                idx = 1
+
+            roundsData[idx]["groups"] = []
+            groupA = roundsData[idx]["gamesData"][:7]
+            groupB = roundsData[idx]["gamesData"][7:]
+            roundsData[idx]["groups"].append(groupA)
+            roundsData[idx]["groups"].append(groupB)
+
+        returnData.update(
+            {
+                "playersData": SR_getAnyTournamentPlayersData(currentTournament),
+                "roundsData": roundsData,
+                "winnerHTML": winnerHTML,
+                "winnersData": json.loads(currentTournament.winnersData) if currentTournament.winnersData else [],
+            }
+        )
+        return render(
+            request,
+            "Lobby/tournaments/MainTournament.html",
+            returnData,
+        )
+
+    # Un-needed default return
+    return render(request, "Lobby/tournaments/MainTournament.html")
+
+
+@login_required()
+def sendMainTchatMessage(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    MainT_ID = jsonData["MainT_ID"]
+
+    with db_mutex("lockMainT_" + str(MainT_ID)):
+        return _sendMainTchatMessage(request)
+
+
+@login_required()
+def _sendMainTchatMessage(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    MainT_ID = jsonData["MainT_ID"]
+    new_entry = jsonData["newEntry"]
+    new_entry.insert(0, request.user.username)
+
+    currentMainT = Main_Tournament.objects.get(id=MainT_ID)
+
+    currentChatData = []
+    base64_data = currentMainT.chatData if currentMainT.chatData else ""
+    if len(base64_data) > 0:
+        compressed_data = base64.b64decode(base64_data)
+        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        currentChatData = json.loads(unzipped)
+    currentChatData.insert(0, new_entry)
+
+    json_string = json.dumps(currentChatData, separators=(",", ":"))
+    compressed_data = gzip.compress(json_string.encode("utf-8"))
+    compressedChatData = base64.b64encode(compressed_data).decode("utf-8")
+
+    currentMainT.chatData = compressedChatData
+
+    currentMainT.save()
+
+    return JsonResponse({"chatData": compressedChatData})
+
+
+@login_required
+def reloadMainTchatData(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    try:
+        currentTournament = Main_Tournament.objects.get(id=jsonData["MainT_ID"])
+    except Main_Tournament.DoesNotExist:
+        raise Http404(gettext("Main Tournament does not exist"))
+
+    # Remove user from notifications
+    # currentGame.playersWithChatNotification.remove(request.user)
+    # currentGame.save()
+    return JsonResponse(
+        {
+            "chatData": currentTournament.chatData
+            # }, safe=False)
+        },
+        safe=True,
+    )
+
+
+def createTGZmainTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createTGZ.html",
+            {
+                "experienced": False,
+                "MainT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = json.dumps(SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else [])
+
+    with transaction.atomic():
+        newTournament = Main_Tournament.objects.create(
+            gameCode="TGZ",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=startingOptions,
+            maxTournamentPlayers=request.POST["totalPlayersMainT"],
+            maxGamePlayers=request.POST["playersPerGameMainT"],
+            roundsBeforeKnockout=4,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        newTournament.save()
+
+    messages.success(request, "Your Tournament has been created")
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+class UserAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = get_user_model().objects.all()
+        if self.q:
+            qs = qs.filter(username__icontains=self.q)
+        return qs[:10]

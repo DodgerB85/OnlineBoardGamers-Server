@@ -1,0 +1,382 @@
+#lobbyHelpPage,
+#coffeeHelpPage,
+#FCMhelpPage,
+#HChelpPage,
+#BusHelpPage,
+#TGZhelpPage,
+#CNShelpPage,
+#AQYhelpPage,
+#INDhelpPage,
+#KFWhelpPage,
+#RNBhelpPage {
+	font-size: 23px;
+}
+
+.maxWidthContainerDiv {
+	width: 100%;
+}
+.leftTextAlignDiv {
+	text-align: left;
+	margin: 0 auto;
+	display: inline-block;
+	justify-content: center;
+	max-width: 90%;
+}
+
+.imageWithTextDiv {
+  display: flex; /* Enable flexbox */
+  align-items: flex-start; /* Align items to the top */
+}
+
+.imageWithTextDiv img {
+  margin-right: 10px; /* Add some space between the image and the text */
+  width: 150px; /* Set the desired width of the image */
+  height: auto; /* Maintain aspect ratio */
+  margin-bottom: 5px;
+}
+
+#WEBselectTileImg {
+  width: 379px !important; /* Set the desired width of the image */
+  height: 50px !important; /* Maintain aspect ratio */
+  margin-top: 40px !important;
+}
+
+.imageWithTextIconImg {
+  margin-right: 10px; /* Add some space between the image and the text */
+  width: 50px !important; /* Set the desired width of the image */
+  height: auto; /* Maintain aspect ratio */
+  margin-bottom: 5px;
+}
+
+.hexHelpDiv {
+	display: inline-block;
+	vertical-align: middle;
+	width: 200px;
+	height: 192px;
+	margin-bottom: 5px;
+}
+
+.hexHelpSVG {
+	width: 200px;
+	height: 167px;
+}
+.hexHelpPolygon {
+	stroke: black;
+	stroke-width: 8;
+}
+
+
+/** LOBBY+ HELP PAGE **/
+.lobbyHelpSection,
+.FCMhelpSection,
+.HChelpSection,
+.BusHelpSection,
+.TGZhelpSection {
+	text-align: left;
+	margin: 0 auto;
+	display: inline-block;
+	justify-content: center;
+	max-width: 90%;
+	font-size: 25px !important;
+}
+
+/** FCM China Help Page **/
+.helpEmployeeImg {
+	border: 2px solid black;
+	border-radius: 10px;
+}
+
+
+/** COFFEE HELP PAGE **/
+.coffeeHelpSection {
+	text-align: left;
+	margin: 0 auto;
+	display: flex;
+	justify-content: center;
+	max-width: 90%;
+}
+.coffeeHelpSectionFormat {
+	text-align: left;
+	margin: 0 auto;
+	display: inline-block;
+	justify-content: center;
+	max-width: 90%;
+}
+.flip-box {
+	background-color: transparent;
+	width: 480px;
+	height: 480px;
+	border: 1px solid #f1f1f1;
+	perspective: 1000px;
+	/* Remove this if you don't want the 3D effect */
+}
+
+.flip-box-inner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	transition: transform 0.8s;
+	transform-style: preserve-3d;
+}
+
+.flip-box-front,
+.flip-box-back {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	-webkit-backface-visibility: hidden;
+	/* Safari */
+	backface-visibility: hidden;
+}
+
+.flip-box-front {
+	background-color: #bbb;
+	color: black;
+}
+
+.flip-box-back {
+	background-color: dodgerblue;
+	color: white;
+	transform: rotateY(180deg);
+}
+
+.coffeeExampleContainer {
+	display: inline-block;
+	/* margin: auto;*/
+}
+
+.coffeeExample {
+	/*flex: 1;*/
+	display: inline-block;
+	/*margin: 10px;*/
+	/*margin: 10px;
+    padding: 10px;*/
+}
+
+.coffeeExample img {
+	width: 480px;
+	height: 480px;
+	/*width: 100%;
+    height: 100%;*/
+}
+/** END COFFEE HELP PAGE **/
+
+/**************** TGZ HELP ***********************/
+.intro_monumentDiv {
+	border-radius: 100%;
+	border: solid black;
+	box-sizing: border-box;
+	width: 40px;
+	height: 40px;
+	border: 3px solid black;
+	font-size: 30px;
+	color: white;
+	text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
+	text-align: center;
+	position: relative;
+	display: inline-block;
+	background-color: rgb(31, 127, 66);
+}
+
+.intro_notEnoguhCraftsmenForMon {
+	position: absolute;
+	top: 27px;
+	left: -3px;
+	background-color: red;
+	border: 2px solid white;
+	width: 40px;
+	height: 13px;
+	box-sizing: border-box;
+}
+
+.intro_notEnoguhCraftsmenForMon img {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	box-sizing: border-box;
+}
+
+.intro_items_list_div {
+	width: fit-content;
+	text-align: left;
+	margin: 9px 19px;
+}
+
+.intro_imgDiv {
+	width: 40px;
+	height: 40px;
+	vertical-align: middle;
+	margin-bottom: 2px;
+	margin-top: 2px;
+	position: relative;
+	display: inline-block;
+}
+
+.intro_img {
+	width: 100%;
+	height: 100%;
+}
+
+.intro_resNotUsed,
+.intro_resUsed,
+.intro_inRange,
+.intro_OutOfRange {
+	border-radius: 100%;
+	width: 20px;
+	height: 20px;
+	border: 1px solid black;
+	display: inline-block;
+	vertical-align: middle;
+	margin-bottom: 2px;
+	margin-top: 2px;
+}
+
+.intro_OutOfRange {
+	background-color: lightgray;
+}
+
+.intro_inRange {
+	background-color: yellow;
+}
+
+.intro_resUsed {
+	background: linear-gradient(to top left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 2px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 2px), rgba(0, 0, 0, 0) 100%), linear-gradient(to top right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 2px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 2px), rgba(0, 0, 0, 0) 100%);
+}
+
+.TGZhelpImg,
+.CNShelpImg {
+	margin: 5px;
+}
+
+.crossBackground_Atete {
+	z-index: 20;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(to top left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%), linear-gradient(to top right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%), linear-gradient(to top, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%), linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%);
+}
+
+/**************** END TGZ HELP ***********************/
+
+/** CNS HELP **/
+.CNShelpSectionMax {
+	text-align: left;
+	margin: 0 auto;
+	display: inline-block;
+	justify-content: center;
+	max-width: 100%;
+	font-size: 25px !important;
+}
+
+.CNSsideBYsideContainer {
+	display: flex;
+	width: fit-content;
+	flex-wrap: wrap;
+	margin: auto;
+}
+
+.CNSsideBYsideLeft {
+	flex: 0 0 auto;
+	height: 304px;
+	width: 492px;
+	padding-right: 10px;
+}
+.CNSsideBYsideLeft img {
+	width: 100%;
+	height: 100%;
+}
+
+.CNSsideBYsideRight {
+	flex: 1 1 100%;
+	max-width: 420px;
+}
+/** END CNS HELP **/
+
+/** AQY HELP **/
+#clickPlayers {
+	width: 300px;
+	display: inline;
+	vertical-align: middle;
+	margin-bottom: 5px;
+}
+#helpCity {
+	display: inline-block;
+	width: 600px;
+}
+
+#helpZOC {
+	height: 500px;
+}
+
+.sideBYsideContainerAQY {
+	display: flex;
+	width: fit-content;
+	flex-wrap: nowrap;
+	margin: auto;
+}
+
+.sideBYsideLeftAQY {
+	flex: 0 0 auto;
+	height: fit-content;
+	width: 600px;
+	padding-right: 10px;
+}
+
+.sideBYsideRightAQY {
+	flex: 1 1 100%;
+}
+
+.greenArea {
+	background-color: lightgreen;
+}
+.purpleArea {
+	background-color: darkorchid;
+	color: white;
+}
+.blueArea {
+	background-color: rgb(4, 12, 255);
+	color: white;
+}
+
+#infoIcon {
+	width: 38px;
+	height: 38px;
+	border: #eee;
+	border-radius: 5px;
+	margin-left: 0px;
+	cursor: pointer;
+	text-align: center;
+	background-color: black;
+}
+/** END AQY HELP **/
+
+.topMenuIconForHelp {
+	width: 38px;
+	height: 38px;
+	border: #eee;
+	border-radius: 5px;
+	margin-left: 0px;
+	cursor: pointer;
+	text-align: center;
+	background-color: black;
+	vertical-align: middle;
+}
+
+#expandTableImg {
+	vertical-align: middle;
+}
+
+.tournamentMonthsTable {
+	width: 460px;
+	max-width: 460px;
+	text-align: center;
+}

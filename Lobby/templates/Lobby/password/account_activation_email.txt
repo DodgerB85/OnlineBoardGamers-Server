@@ -1,0 +1,26 @@
+{% autoescape off %}
+Hi {{ user.username }},
+
+Please click on the link below to confirm your registration at Online Board Gamers:
+
+https://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+Note: If your email client has scanned the link, it might already have activated your account. 
+If you see an error, then try logging in anyway.  
+
+After you login, you can set Email, Discord, Telegram and Slack notification preferences from your Profile. 
+Use Telegram/Discord/Slack webhooks for increased reliability.
+
+Always let me know if you have any suggestions/questions/comments. 
+
+Join us on the Discord! Click here to join! https://discord.gg/hCU7Fr77yV
+
+Tournaments are run regularly; normally one will start between 1st - 7th of the month.
+Food Chain Magnate Tournaments have a lot more options, and so I will start these manually at regular intervals. 
+
+Thanks for joining Online Board Gamers!
+
+Roger. 
+
+
+{% endautoescape %}

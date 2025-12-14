@@ -1,0 +1,104 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="lobbyHelpPage">
+      <h1>{% translate "Mini Tournaments" %}</h1>
+      For Main Tournaments see <a href="{% url 'helpTournaments' %}" class="linkOther">Tournaments Help</a>
+      <br/>
+      <br />
+      <div class="lobbyHelpSection">
+        Mini Tournaments function similarly to tournaments; please check the <a href="{% url 'helpTournaments' %}" class="linkOther">Tournaments Help Page</a>
+        for general information.
+        <br />
+        <br />
+        The main differences are that Mini Tournaments can be created by anyone, are meant to be played at a faster pace, they have a smaller player pool, and prioritise playing games over player count.
+        Min Tournaments will always start with the correct number of players to fill every game, eg 12 total players with 4 players per game.
+        <br />
+        However, if in later rounds there are not enough players to start a full game, due to lost lives or kickouts, then a game will still be created provided
+        the minimum number of players are available.
+        <br />
+        <br />
+        <b><u>{% translate "What are the formats?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          <b>Rounds</b> consists of (currently) 4 rounds, where all players are included in the games,
+          after which there is a short knockout of all players on top points to determine the overall winner.
+          <br />
+          <br />
+          <b>Two Lives</b> is like double elimination; once you've lose twice then you're out of the tournament.
+          <br />
+          <br />
+          <b>Points</b> functions the same as Rounds, except that instead of “winner takes all”, points
+          awards points per position - unlike the other formats which are winner takes all.
+          5 player games award 16 / 8 / 4 / 2 / 1 points, 4 player games award 8 / 4 / 2 / 1 points,
+          and 3 player games award 4 / 2 / 1 points per position.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "How are game players decided?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Initially game players are drawn randomly. After this, players are ranked by number of wins /
+          (or points in a points. tournament). In 2p, players will play the closest people to them that
+          thay haven't already played. For 3p+ the system will create games so that as many people as possible are playing
+          new players. This is priorisied over current points/ranking, so the current "top" player may end up in a game
+          with the current "bottom" player.
+          <br />
+          If there are at least enough players to start a game, then a game will start, even if there aren't enough player to
+          match the tournament "Players per Game" setting.
+          <br />
+          If there is a single player left, then the lowest ranked player who has not yet received a bye will receive one.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "How do kickouts work?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          If someone is kicked out then they are ejected from the tournament.
+          They will lose both lives in Two Lives, and be removed from a Rounds/Points tournament.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "What else should I know?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Players will not play the same person again until there's no other option.
+          <br />
+          Players will not receive two "byes" until there's no other option.
+          <br />
+          Kickout timer will be 1 day, with the exception of the first move which will be 3 days,
+          in case players don't realise a game has started.
+          <br />
+          Notifications are sent out at the start of every new tournament game.
+          If you finish quickly there could be several days until your next game starts,
+          so it is strongly recommended to have at least one form of notification enabled in your profile.
+        {% endblocktranslate %}
+        <br />
+        <br />
+      </div>
+      <br />
+      <br />
+      {% translate "For further help contact" %}
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30">
+    </div>
+   {% include 'Lobby/common/homeButton.html' %}
+  </div>
+{% endblock %}

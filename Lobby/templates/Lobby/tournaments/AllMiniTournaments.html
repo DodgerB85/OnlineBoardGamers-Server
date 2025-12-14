@@ -1,0 +1,105 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/tournaments.css' %}?v=20230230"
+          rel="stylesheet">
+    <script src="{% static 'Lobby/common.js' %}"></script>
+{% endblock %}
+{% block body %}
+    <div class="container miniTournamentsMainPage">
+        <h1>{% translate "Mini Tournaments" %}</h1>
+        {% blocktranslate trimmed %}
+            Mini Tournaments are meant to be faced paced tournaments with a smaller player pool
+            <br />
+            Anyone is free to create or join a mini tournament
+            <br />
+        {% endblocktranslate %}
+        <b><a class="linkOther size25text" href="{% url 'newMiniTournaments' %}">{% translate "Click here to create a Mini Tournament" %}</a></b>
+        <br />
+        {% if available_MT %}
+            <h2>Available MIni Tournaments</h2>
+            <div class="tableOnlyDiv">
+                <table class="gamesTable">
+                    <thead>
+                        <tr class="headingRow">
+                            <th>{% translate "Game" %}</th>
+                            <th>{% translate "Name" %}</th>
+                            <th>{% translate "Total Players" %}</th>
+                            <th>{% translate "Players per Game" %}</th>
+                            <th>{% translate "Format" %}</th>
+                            <th>{% translate "Starting Options" %}</th>
+                            <th>{% translate "Created" %}</th>
+                        </tr>
+                    </thead>
+                    {% for Mini_Tournament in available_MT %}
+                        {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
+                    {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <h2>{% translate "No Available Mini Tournaments" %}</h2>
+        {% endif %}
+        {% if current_MT %}
+            <h2>Current MIni Tournaments</h2>
+            <div class="tableOnlyDiv">
+                <table class="gamesTable">
+                    <thead>
+                        <tr class="headingRow">
+                            <th>{% translate "Game" %}</th>
+                            <th>{% translate "Name" %}</th>
+                            <th>{% translate "Total Players" %}</th>
+                            <th>{% translate "Players per Game" %}</th>
+                            <th>{% translate "Format" %}</th>
+                            <th>{% translate "Starting Options" %}</th>
+                            <th>{% translate "Created" %}</th>
+                        </tr>
+                    </thead>
+                    {% for Mini_Tournament in current_MT %}
+                        {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
+                    {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <h2>{% translate "No Current Mini Tournaments" %}</h2>
+        {% endif %}
+        {% if finished_MT %}
+            <h2>Finished MIni Tournaments</h2>
+            <div class="tableOnlyDiv">
+                <table class="gamesTable">
+                    <thead>
+                        <tr class="headingRow">
+                            <th>{% translate "Game" %}</th>
+                            <th>{% translate "Name" %}</th>
+                            <th>{% translate "Total Players" %}</th>
+                            <th>{% translate "Players per Game" %}</th>
+                            <th>{% translate "Format" %}</th>
+                            <th>{% translate "Starting Options" %}</th>
+                            <th>{% translate "Winner" %}</th>
+                        </tr>
+                    </thead>
+                    {% for Mini_Tournament in finished_MT %}
+                        {% include 'Lobby/gameDisplay/finished_MT_row.html' with Mini_Tournament=Mini_Tournament %}
+                    {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <h2>{% translate "No Finished Mini Tournaments" %}</h2>
+        {% endif %}
+        <br />
+    </div>
+    <div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>
+    {% include 'Lobby/common/homeButton.html' %}
+    {% block script %}
+        <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+        <script>
+    var global = {}
+    global.MT_CreationTimestamp = {{ MT_CreationTimestamp }};
+    global.MT_ID = {{ MT_ID }};
+    global.chatArray = [];
+	  global.chatData = "{{ chatData }}";
+        </script>
+    {% endblock %}
+{% endblock %}

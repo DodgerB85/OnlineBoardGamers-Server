@@ -1,0 +1,201 @@
+***********
+notes
+***********
+Sentry - free tier to monitor stuff?
+
+
+********
+TO DO LIST
+********
+all games mutual delete option
+HC - change popup aka fcm, add backgrounds to "also on TT"
+Change bus scoring as per rules?
+FCM stats - split to All - no ms, OG, OG HC, new
+
+********
+general
+********
+get page HTML
+<a onclick="this.href='data:text/html;charset=UTF-8,'+encodeURIComponent(document.documentElement.outerHTML)" href="#" download="page.html">Download all as HTML</a>
+
+adjusted win rate column?
+Click on more player names to open profile
+
+points tournament mode?
+
+adjust BG colour if it's your turn
+
+TGZ - auto pass after first mon
+
+
+*************************
+Antiquity
+*************************
+improved warnings
+better res use / warning count
+
+PRE TURNS
+=========
+doule check graves actually match
+what if dont store food?
+Allow pollution on 
+
+LOW PRIORITY
+=============
+include banner thru whole history phase?
+
+
+Add costs to city buildings? image on top?
+
+Would it be possible to have a "San Giorgio Sanbox Mode" for the Countryside view?
+What I mean is: it would be useful to have, during CB phase, the chance to place Inns and cities in Countryside, and foresee the impact they have on the ZOCs (and ZOCx interactions) in order to get an idea, while planning the CB, of how many Inns/cities a player would need to cover a certain part of the territory.
+[7:41 PM]
+well it would be in general a Sandbox Mode for the Caountryside, not espcially for SG. Of course SG would. be the saint that woul benfit the most from having it.
+
+
+************
+Bus
+************
+- bus - if all players timeout, not remaining player could win on turn 0
+- bus - placing lines on ipad highlights one ahead. only after placing one already
+
+- Notificaionts: KICK // RESIGN // GAME end
+- Undo
+   undoPlayer - saved in the model.gameflow, If POV matches, can undo
+   On undo, action rewind and set undoPlayer to -1, then save
+   undo:   :class pov!== undo player -- hover, opacity 1.0, ELSE opacity lower, no hover
+   also add to hist
+
+
+- hard to tap lines
+
+- High contrast / colour blind ?
+
+- need to fix IO end game positions data
+
+
+Maybe just a larger font saying CHOOSE ACTIONS, LINE EXTENSION, ADD PASSENGERS, etc
+[12:04 PM]
+And something to denote the start of a new round
+
+***************
+Cannes
+***************
+Tile inspector to right? See CNS thread. 
+Maybe with tiles left?
+
+Display tile funciton in reserve?
+
+Massibulls idea for better UI next to the map?
+
+**************
+FoodChainMagnate
+***************
+See notes
+
+
+**************
+Horseless Carriage
+**************
+
+check bots don't affect game and still allow correct techs in fac build
+
+Schema.org tags
+
+sales in same order
+
+check notif sent on kickout
+
+allow sandboxxing others factories?
+
+- add option to show all facs under MB
+
+NO PLAN
+=======
+- player aids
+- cars only variant with more mainlines 
+
+
+/////
+hc - player vs tech colours?
+
+hc vehicles per turn. split by type. dealerships, per d and total.
+
+
+*************
+Indonesia
+*************
+small X's on operated ship co's?
+pre turn - auto 0 turn bid?
+
+***********
+The Great Zimbabwe
+************
+- add avg turns to stats
+- pick and adjust a just placed item
+
+Path finding
+
+=========
+count water as single sq?
+
+get all sqs in hub distance array
+
+FIRST TRY WITH NO HUBS
+
+So get all sqs in distance from origin array
+
+Go thru array to find first index of SINGLE sq in ZoneTo
+
+Get neighbours of this sq
+
+Find first index in previous array entry that matches
+
+NOTES:  Need to have FROM. Zone stored somewhere to go from 0 back to the zone (only when using hub path finding)
+
+        Check any sq for water, and if so, expand to a zone
+
+
+
+/*********************************************
+
+
+* Details of our tournament: players sign up using google forms. They must have played at least 4 games of TGZ on boardgamecore. 
+For Round 1 put them into groups of 7 where they play 4 games each, meeting each other player in the group twice. 
+Finalists from the last tournament and winners of previous tournaments are distributed among the groups, the remaining 6 spaces in each group are random. 
+The number of groups depends on the number of signups. Based on wins (with tiebreakers) we take 14 people from Round 1 into two groups of 7 for Round 2. 
+The top 2 from each Round 2 group then go into a Final game. So Round 1 varies, but so far Round 2 and the final remain the same.
+
+We likely want the ability to change group size, number of games played, whether they meet each other twice or once or at most twice etc. 
+This is something vraid has been doing the math on. If we do have extra players remaining after making the groups, 
+they don't get to be in the tournament and are kept as replacements. First come first served. 
+I have players that are banned for the next tournament for taking too long and being a dick about it when reminded, 
+so they would be manually removed if they return.
+
+I think we want to avoid a hard kick-out. People often have good reasons for the occasional delay.
+It's just repeat offenders that slow the show. We would need the ability to replace players and restart 
+those games without it messing up whatever is tracking the tournament. In siddhig's site we just update the game links.
+
+Initially we can run the tournament separately as before, then look into integrating depending on how much enthusiasm you have at that point. 
+Maybe a good first step would be for us would be to have siddhigs functionality integrated into the site, so everyone can see the status of the tournament.
+
+The automated tournaments you do would be cool too, they can co-exist.
+
+Oh and while I think of it, both outside and inside of tournaments, being able to have open invites for games, 
+but with the requirement that players have played at least N games, or have some kind of status like veteran, 
+beginner etc would be a nice feature for players looking for certain levels.
+
+
+
+
+- resign early puts bot at end and allows a useless pass move
+
+injecct player4 notes with [[chosen gods], [blank, or  set god VR], [blank, or set spte VR]]
+
+
+pre-shrink
+NrDeCIDsEMFsFNwC5wGUASBBAIgeQOrgA04AJgJYDOADgDbQCeAcnIihjgceAMYD2tPgFcATsgAsJfgHdKyAMwB2ErD6QhCSABc5SEAEZ9ygEwBdIsEMBOImfO8R0AGY7NyA-ONEADEX2n7HkcXSk0ABRFyHnhdYC99P0SE5PsAcz5Sd31fb3saeB5yaFoqHXdgHICSLQKAC1iKv1zTAF8iCBgEZDQsPHwAfWNuChp6ZlZujj7B7n5BUWRfXj5ZZGyVNQ14bQbDSTspYNdt8qtlFIsAVnO-c0sANhsUwKPQ7YiomKzbJN--EnSmT0lRI+UKxVKDUkzWqdQaXgAHAE2h0JuxegR+uJhlQ6IwWF10ZwBtipAJhGIkPIyaskMpwKp1JoynpLJdLrY7vpLgl5FzLtSDg5nMdIO4XiK3pAPtFYsk-kk0hlvrlQdQCkUSpQWSAvDDwDUePVxSioGjwNBSLByGKSCM8eNCRarTbZuSFkgEstafTGVsduVjN4bGYLPpxDY+RYrPsqsKQm49BKE+9IrLvvLM7cAcq9NTVeAwZrIeV83HDcak6bOmwesT+vIcaN8eappjG2T5pSvN7dPoe37mfDvPds8AEb5-pYEaOp-p5LOufJJP5k6LyoplBzVcBxKPt3cEdSD2upTKvnos-Lqf9wID3Ae1RqIdrdpz7BXdpO7C07qP4kQ1KCkQHJ6okAH7EQyi+AiY6WEQSIWAi8Q7lYTw7sY5wwgY4iwVO4gXJY3iTnc8g2DuEZjgiHJzsYhH3HhVTwdCvw5D47FsZOiScexvJELO3HsSxo75qx7GjlxbFXoJvjGPsLEJDxkm8QpYmyfJvGJCxymTpIGlyYBRBWIp-G2Bp8o0Wp7EIgkBkGeG4ngeZHFWVJiT3MkLE8ok3nKcJLluckonGexIVuUpLmiQkNl+NSigJJI8XsUlEURVF7HxCxompa57HbkZnkBUVviWdJ8o8WF1kmTx5XFUV1V1Tx2kuRJmmSPlZUyY1bUuRZ3W+NlvX1V1+WBVZ0k5TVCpjdejXmBAWiiGKnpetQtTQJQbA9otIiQLgIikPAlIVPYThCLQtAACpLfth3HV4N5ENCaSsAAopAh1At4bRxOxQGGQNpn-SCIC+AAtCZoPgYZ4gBFyKlhkYTGZqOljhsjPz6LBbKXBjgq+HEwYY-s1KE-cyOjhDZlhkxXj7MojSw3cD2AaTA20z8y4WLJHMJV4jSrhYYHiJIwBgwcwDUlTIsWALnNPXcqWkYZ-18sjsHSxYasWCxNhEUxsGTgz85gdVTHkbY-MAWVTErqz3MG1potnGJEtPE9xuYwqgu7j89yoz7-5QaL3I+5I1LUVrTEiUZBPhlYttPU0BO43+SfZBy46TjOyOSFT2TY40YFcbDYbDaGvtTaXv1V8rtfIxy+feIX4teG3Zl3K3hlt9X4t6d3iid8Yllt4PFji61bdIhTRBN9jEum9y3MK8zSRY8v2u-SuQbLwvmPGKjN4cze8gEyRq-xKf48S1LQUE791J2zuPHxHc-f96ndygX44gExL-aYxlpYXC3Fo6Y0uHrbkm8OQ3gRKLTe85DJY0gQhHwTFlA3hjLLeOnJZYux5rcR2+xDAWE3CBXq2EbDEJDt7JBTER7yEzkzJCTlM7XF+F4CG5twL3E9tbP49CMqKDZsjEymEmHvgsJPGKaME5cjzrZZCstZKmS4tkN+w05xCS9mPSWGV9HVzAulT+YZG6KP5mLYw7dBS42vv9emQ8OTtUAjuCeiRBQJ3HvIEyQEmZckpuYqOq9ZIInnivIWSdjChPHglXmtgQqNE3izYwWCi4cwet4eBhCwwa15EvSWHMBp0WXj7axxTLFMVvoBcpNckEKxKdDKcHIbDNPfHcEwgFvIGG8hXSwngMrmHDOTdBf0PLYKMLgjwYFQxGFXO00ZetZGTOAGQ3k5hh7Rmgrg7kdg06P0wtGZh45wKKEuCHR4YkuF3HduIgOXsrxENsIoCcOt9wuSuSw+mR4kLHneT7KhTyEQoOkkfeRs9FHN2UT8XwkFPGVz+okXRDVrY7kGio3Rxd9EmLZOC2wE4W47y8KBWxliEpGRcUPFmoFdHi0svsOF4stkYL8WGAJeLIW7kKXiqwZ9wlb25WzQCcSompJ5qvQUQKGbnwiVPNC19Km4pFYslmZLn7FS-lBJomq5Fcnbik4wpMCLuORv9FJAokIoUkcAxVVh7j3xUWxS+GipqIXglNQwddoU-DhUY-Rg8G42rtbLcWKjiVDzJZGVxVjDLUscVpeJQ8mWARZQ8QNKcuUpPuPzGFHN6X3EzuzVetlbWozFREjxvCSnpPiQxeVysqaZsLiqpOaqlLzKeNFWKcMwx6rOHHYixqlzdzOKjOV6x-5cRSTOHWVqHINrQqTIuLl4i6OalxOFYjNL9k9dMvwU5fUqJ1aYm1VhF0hp+GG6+EaKXXypU8uNZKUmJuSsm7tqb52nqkRmtCBa+V03iS7RJwq0LYzLQ-ADetpW-QyQOip9beTEXvs256y823Rj3X4LwTx-W6s5sRTOZE-ompVt4A1QssKzoUS4lJULMVt3wponcDU1FRj0Q6zGrGD2Yzmceqmp8aMgHPUS2wJLxbXtPpSmN97r50oTdfJNy4336DZfxvW-qIkDW8N45eRz-2n36UBotLiuZpPFcZ0t2ToPmbrVrXF+nUbgdVYrdViNYpufHTxyw1itPY0omssFfHvDslo8ukTzqhoerLu66uaLwHBIBhxpTZiXHBcE4S8hw9w1J0jZJ35mEH2RIZQc3wzKlMqaC5naeGmUtSr-UnU+lxQNCqMw1yDVqWanzGQLatnWEhwds4FrrjmW3ObQ30vwNEVy2WxQAjJtbxyWQQVR0+3yoZ0bk-CwKFdmNJBJbFld8XRLxBm8llbZ70uXtJdlm9li735Zk-Gp98mX2KZnoF1bcjqsrd-bp+rzdatJPcc3Nre8gLBl5aUvDCTxYKsCwk4bKHGhjaXhMlHbcj1eah5nfs15c52eyBY9jKj5CsbXUkVjO3kjk1sy-PwPqEUqKRgGvjBPg0XbC1e67Enb1Sfu5Y2TT3LEKZTcp-HpGwzYSMdkQVv3w7ZFFoWiJeSgu72PoBbIFnIcPWyAzGH8H1feAZgjtBqGApcnOE8WcQE1a4e1+vYAtb-NhmW-2BzRPOars0dXSnfhdH7dsPuhnmMMdLxZwfNnoaOdXckDlnneWaUbMfUV4XZX8fh7Rly7xBzGa5vV1EjecTvFX1M+W9X2nusXzL-zPXA28kGeN62s3YYQzJHOOHHDpD97YO8qxvp0zBl7juCsrZUZFCo3YQQzzHT9CLKgcsk2Ay-D3BTR0jZ3TQJD4X7ZQZ8U30YJAosrBvSyHsxE1cLZMzLi7M73Fe+ODe8L8n3C4fRHbBdYn7gg1K-DLPNlkGEMm+-SBCigGONw8u4ysYsse4xq-EkCFy2+ZkNuVw6cIClgYCK4FyfSVuIu0BY+SQy+vu02E28QIYYyX+UENgFyckUYHQ8A0g10u0t0R04oUgogIg2wWgAAQuQF9NUHwFoMUNwaQLoN9DOqOHCgEEAA
+
+post
+NohEGUAkEEBEHkDqoA0EYOSgLCgzAOwogCMJRATALrFkCcK1NpeFKADCiVc2yVwP5DmJTu2bAxPYpK7jpwdHCQB9CqiWY1qTqJllcTGXSLDiAVlNcRANgbCRjQc+7EpM3PJlsAHD2aaqtgaUMqIKsH4KESk5uaMIub8eIl4CcyOQi7WtBwSbF7ACqAAhgAmALYAlgB2GuXVdQIxwBTsDNS02AwpxHSGCpnZZsBp4jJjgwGhWnghGKpzTiRsIG02OcA+uiI+G67AJHj7Ini43BIERPHjwNgbN8w+aY9DWcmbj-rp+rpMChs+FE0mx4gUBEDDNEOCgfJtDrCnnxbnR7LcKKZCodsHCDtgRqIdsQ8Axbt1Nj54gcViMbLiFPxPM4xDCWSysmyYR99gIWUyNmNmTCNrpWcNeTCKIYmfxOaL2TKhZwpYxFYyxbKubhpaqonRNYCdVkqUqYT5+CqVSR+RCjRqJZysjYhEykgI3fKcMKxezBIL9TCA765WLBfxzVw0gR1dGYbGQyGw5KuEzBQnTSybigA9afXnOCb3tlOUGzZrHQ78-b0yGmZyRVyvVmi0Wa-a684s+m09X7eWUF3G62hxmq6Lh+PnD22SILW5eFF1YVwWlVzC0gKou4QJwALSancQqLYfy5XS4Q7kBmCDaXk+OPhww5xa8gzitdrXwxpD82BkbfddUOBQ2EMGJOHvYg2FXH9OBSBdoIvZUQIEbBVh2BcIIvXcjFGFBAOwC9ZDnNITzcfNmDXKjT0OOECOJBQmQYQ5CjhXQYiOcFywUUlGFWIEW2sZhznwWCFFxHALxMIVcPsHAOOWYZGKcGxbwuYhAWiC8SCSZS0kpBjmE3Oh32tOhlPOdh33MAEvVEeItl0PYGVwQDRCfWRwVFMiEQrTo7jzRlMPbSjApwGidPwoR2A8nC2Hi1VmDiqJ4p8nDtRSggkooE14qy4gcIbeK-H-KK5CfXCuMi2RINaQQSCfOCUPONpyMq5YKFvNJ1Lq7q8HfDCoOWfqCtwtI3JGtZj15ZhOT4YSvQymyFDBFN31wlZlkIroJMKTSdOYnT4IsRcfAvY7DjXBrDthPJmCIbr+n0cl-OAaTkKEp4vQoMhiCuAcNUKBhDFzBFBO6laITwBzaokqUHMsZw2H3HiIRsBSBJcSHlQIMTZ0lAgYZ+YAiojS9zJEVyLR8VZPJQBtooWitqRhKF+HyvDlWTHyV0bZbEjKigaZkZLoMYGzRrXMDsviXB4n67KeRBcyCrwTVV3vWxBeF0YUOVHwKvChdDANgqgoXC0A1kC6xYoJ7PJQ6D2HOoTaDo5Jqpt9cfvInqEtYfhgBwhRxuSH2prg1DZqRz5swBjoaMofA3ViC0JE4yUaGtP8FCIODnX0cgEn0VhM64aNE-XOxC4TmR-uSGgcr6PPi50-4NOPDE+lhiFCe06uOSi1GLUJtTFJbcTvoIbZiHuAGWRRr6wOeYgV8HRe+innwbvB13sW1mKZC5iCnBVgKWW66JHBZATbmnJwOa85N+doeJAKFw+QBwrmwQloOfdwD0W4yUXiMA5jhE0hgz44Rbg9TWtAALU0-rVcEQsTLkRQd9besF8AoWpvbZCC4QTb3AnvBKaDmLB1Cu-bezFeqoTyOROUzB4iYmhBTEQ5C6AUB-PiAQF0jgpToOYH8ws9AbSpowOgNh3x0xvpGJm9o-Bnj7AcQUqDszBXUVfBkb9LYyJFq1UE4tsrqiAdlMWYJwFN3VHbbKsD8DwMOIgqRBjgDLSGsqaR6EjZDSgTYByTULauNvIQoayt0a+0dq4p8VDiSC2kR5MWS5o7ML+nHX6uJ4KcKcHbAgpkrL8IZGuPJt5URyGJnoS2exZ6VMkXbOgP45HJivLUisZ9NRcS4P5bRXMyBaOTBw1+CTGmGJ-iY0aZj8DAIoJYsBMsGF2NGg4s4EUXENJ-DnTxUjhEYOajs0hXtLZ0EasTW2qJmKDTqk7Qp-8Q5lX6rc+hKSmE+mYPYIQbB7BZQZP7KyDkSTrmKcCdgPCoJsIkQ80FdDj7Jh+oo30ohr59l6JzJwfTUW8z6RcAWgF+p2zGU4X+pivTmNGnMjECzbHQK7pwOBayoUEuAD87Z-U1Z7ONtM0u1s8FcqQmckFxwokIS5beOJeE8XsCFVNS+nhUlvNoEIPqFT4W-KcGyp85IG6UyhXEI+6K4V-w7OOFmzMfL3z4H-LFw0Ip6OmXqr+RiAY5RJYA6ZFiohWKpd9GlKynEkBcf1B1JVWXsERjVfZQbTlHPtZcgVq52AF2ItE-qSbxWh2mUm55XpbgJlOFwKk5wLQv0OH8ukq8TQCMkf1Feh4n7xTPsawQ-l+zjj-ha8uAy+klsipK2t-9xkusmaS915LPXzNGpAqR9i4yOIZX2n8FNQ0GQjZymthzeU1rje1BN6Dk0iv6lbdNUKrbZrla8mcwyi6RU2nYtVTtdmlqyFWh5ohaawq5ngVFTalXIsRX+eJc0uBn2tXwH5uKPagsJcYod-8pkKzHaAylk7Fm+tnas0qeK320GXOuUQODMG4DVs7ciMbiOBPjfgUQoSyHqtEDEY9WH2AtGSTm+Vl7DimHsPsGCEV-ZkCfOW7VXRX2dX1fW-AHMf0pj-UODmHb4WspaUM58onbwDqJRMuDI6EP-wpdYqdSz-5+vnR7MTl49ZUa7quvxVno2bqOANSjat2X7qGtBDOdzqEe25Wexhsg0mHA6EIUwRHwPpL4LTHSDcS6oKzvcS4LdegEFvIjD6OKIvAf0CI4uLA4tcBsE4pOTdYhgnTqXNO5cMvMs9XQp6r1-pNXFhYFunQ26VyjLIsyuDYtlxIGfZlSXG5JrS8XHhRWojT28O0XLl18sEBU1YUQREDCzbnjF6uzi5KdClNkk65wcS0FsucTbRweP+rnilm85xYw2PMHwDoBdxvRAYNXXbEgaDblwBsM+PAgA
+

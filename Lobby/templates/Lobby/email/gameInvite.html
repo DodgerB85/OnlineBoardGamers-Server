@@ -1,0 +1,19 @@
+{% load i18n %}
+{% autoescape off %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate %}
+Hi {{ user }},<br/>
+<br/>
+You have been invited to a game of {{ box_name }} at https://{{ domain }}<br/>
+<br/>
+Name: {{ gameName }}<br/>
+Players: {{ maxPlayers }}<br/>
+<br/>
+Please check the "Invitations" tab in the lobby, or follow this link:<br/>
+<br/>
+https://{{ domain }}/index/invitations<br/>
+<br/>
+Enjoy!<br/>
+<br/>
+{% endblocktranslate %}
+{% endautoescape %}

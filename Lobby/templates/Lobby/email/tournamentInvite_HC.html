@@ -1,0 +1,19 @@
+{% load i18n %}
+
+{% autoescape off %}
+{% url "HC:showHCgame" gameID as the_url %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate %}
+Hi {{ user }},
+
+A tournament game of Horseless Carriage has started at OnlineBoardGamers.
+
+Name: {{ gameName }}
+Players: {{ maxPlayers }}
+
+https://{{ domain }}{{ the_url }}
+
+Enjoy!
+
+{% endblocktranslate %}
+{% endautoescape %}
