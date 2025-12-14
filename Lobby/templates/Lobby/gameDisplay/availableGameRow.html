@@ -1,0 +1,66 @@
+{% load static i18n %}
+
+<tr class="gameRow {% if not game.involvedPlayer %}otherWaitingGame{% endif %} {% if game.learningGame %}learningGame{% endif %}"
+id="{{ game.game }}gamesRow{{ game.gameID }}">
+{% if game.involvedPlayer %}
+<td>
+  <div class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</div>
+  <button class="copyGameLinkButtonInTable" onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.game }}{{ game.gameID }}/', event); event.preventDefault();">{% translate "Copy Link" %}</button></td>
+{% else %}
+<td>
+  <div class="buttonDiv Join availableLink">{% translate "Join" %}</div>
+  <button class="copyGameLinkButtonInTable" onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.game }}{{ game.gameID }}/', event); event.preventDefault();">{% translate "Copy Link" %}</button></td>
+{% endif %}
+
+<td class="tdWithBox">
+  {% if game.kickoutDuration < 100 %} <span id="shortKickoutSpan">
+    {% if game.kickoutDuration == 5 %} [ 5 Min Kickout ]
+    {% elif game.kickoutDuration == 10 %}[ 10 Min Kickout ]
+    {% elif game.kickoutDuration == 20 %}[ 20 Min Kickout ]
+    {% elif game.kickoutDuration == 50 %}[ 12 Hour Kickout ]
+    {% endif %}
+    </span>
+    {% endif %}
+    {% if game.learningGame %}
+    <span class="learningGameSpan">[Learning Game]</span>
+    {% endif %}
+    {% if game.experiencedGame %}
+    <span class="learningGameSpan">[Experienced Game]</span>
+    {% endif %}
+
+    {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.game %}
+
+    {{ game.gameName }}{% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}</td>
+<td><a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></td>
+<td>{{ game.maxPlayers }}</td>
+<td>{{ game.pace|safe }}<br /><i>
+    {% if game.kickoutDuration == 5 %}{% translate "5m kick" %}{% endif %}
+    {% if game.kickoutDuration == 10 %}{% translate "10m kick" %}{% endif %}
+    {% if game.kickoutDuration == 20 %}{% translate "20m kick" %}{% endif %}
+    {% if game.kickoutDuration == 50 %}{% translate "12 hr kick" %}{% endif %}
+    {% if game.kickoutDuration == 100 %}{% translate "1d kick" %}{% endif %}
+    {% if game.kickoutDuration == 200 %}{% translate "2d kick" %}{% endif %}
+    {% if game.kickoutDuration == 300 %}{% translate "3d kick" %}{% endif %}
+    {% if game.kickoutDuration == 500 %}{% translate "5d kick" %}{% endif %}
+  </i></td>
+<td>{% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">
+    {{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+<td><span class="timeToConvertSpan">{{ game.created }}</span><BR />{{ game.latestUpdateElapsedTimeString }}</td>
+<td class="availGamesStartingOptionsTD">
+  {% if game.startingMap and game.game == "FCM" %} 
+  <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMap.jpg" %}" 
+  title="Custom Map - Click to View"
+    data-map="{{game.startingMap}}" data-game="FCM"> 
+    {% endif %}
+    {% if game.startingMap and game.game == "TGZ" %} 
+    <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapTGZ.jpg" %}" 
+    title="Custom Map - Click to View"
+      data-map="{{game.startingMap}}" data-game="TGZ"> 
+      {% endif %}
+      {% if game.startingMap and game.game == "AQY" %} 
+      <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapAQY.jpg" %}" 
+      title="Custom Map - Click to View"
+        data-map="{{game.startingMap}}" data-game="AQY"> 
+        {% endif %}
+    {{ game.startingOptions|safe }}{{ game.kickoutHTML|safe }}</td>
+</tr>

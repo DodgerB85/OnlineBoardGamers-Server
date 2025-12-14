@@ -1,0 +1,387 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
+<link href="{% static 'Lobby/CSS/profile.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <script src="{% static 'Lobby/Lobby.js' %}?v=20220706"></script>
+    <div class="container formsPage">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <!--<h1>Please click "Update Profile" to save changes</h1>-->
+        <h1>Antiquity Settings</h1>
+        <b>Note: These settings are cosmetic and do not affect gameplay</b>
+        <div class="profilePreferenceDiv">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden"
+                       id="action"
+                       name="action"
+                       value="updateProfileFavourites">
+                <label class="preferenceTitle">{% translate "Favourite Colour" %}</label>
+                <div>
+                    <div class="favRestChoice">
+                        <label for="aqyRadM1">
+                            <b>{% translate "None" %}</b>
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="aqyRadM1"
+                               name="aqyColour"
+                               value="-1"
+                               {% if colour == -1 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="aqyRad0">
+                            <img src="{% static 'AQY/images/c_inn_blue.png' %}"
+                                 width="140"
+                                 height="122"
+                                 alt="Blue" />
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="aqyRad0"
+                               name="aqyColour"
+                               value="0"
+                               {% if colour == 0 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="aqyRad1">
+                            <img src="{% static 'AQY/images/c_inn_purple.png' %}"
+                                 width="140"
+                                 height="122"
+                                 alt="Purple" />
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="aqyRad1"
+                               name="aqyColour"
+                               value="1"
+                               {% if colour == 1 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="aqyRad2">
+                            <img src="{% static 'AQY/images/c_inn_red.png' %}"
+                                 width="140"
+                                 height="122"
+                                 alt="Red" />
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="aqyRad2"
+                               name="aqyColour"
+                               value="2"
+                               {% if colour == 2 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="aqyRad3">
+                            <img src="{% static 'AQY/images/c_inn_yellow.png' %}"
+                                 width="140"
+                                 height="122"
+                                 alt="Yellow" />
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="aqyRad3"
+                               name="aqyColour"
+                               value="3"
+                               {% if colour == 3 %}checked{% endif %} />
+                    </div>
+                </div>
+                <br />
+                <label class="preferenceTitle">{% translate "Select Map Display Type" %}</label>
+                <br />
+                <label class="preferenceExplanation">
+                    {% translate "You can choose the Original Map, Original Map with a coloured overlay (Hybrid), or Solid Colours" %}
+                </label>
+                <br />
+                <div class="favRestChoice">
+                    <label for="aqyMap0">
+                        <img src="{% static 'Lobby/Images/AQYprofile/map_original.jpg' %}"
+                             width="230"
+                             height="152"
+                             alt="Original" />
+                    </label>
+                    <br />
+                    <b>Original</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyMap0"
+                           name="mapType"
+                           value="0"
+                           {% if mapType == 0 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="aqyMap05">
+                        <img src="{% static 'Lobby/Images/AQYprofile/map_hybrid.jpg' %}"
+                             width="230"
+                             height="152"
+                             alt="Hybrid" />
+                    </label>
+                    <br />
+                    <b>Hybrid</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyMap05"
+                           name="mapType"
+                           value="1"
+                           {% if mapType == 1 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="aqyMap1">
+                        <img src="{% static 'Lobby/Images/AQYprofile/map_solid.jpg' %}"
+                             width="230"
+                             height="152"
+                             alt="Solid Colour" />
+                    </label>
+                    <br />
+                    <b>Solid Colour</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyMap1"
+                           name="mapType"
+                           value="2"
+                           {% if mapType == 2 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
+                <label class="preferenceTitle">{% translate "Select Resource Icon Type" %}</label>
+                <br />
+                <label class="preferenceExplanation">
+                    {% translate "You can choose Original icons, or add a Solid Colour Border" %}
+                </label>
+                <br />
+                <div class="favRestChoice">
+                    <label for="aqyRes0">
+                        <img src="{% static 'Lobby/Images/AQYprofile/res_original.jpg' %}"
+                             width="147"
+                             height="143"
+                             alt="Original" />
+                    </label>
+                    <br />
+                    <b>Original</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyRes0"
+                           name="resIcon"
+                           value="0"
+                           {% if resIcon == 0 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="aqyRes1">
+                        <img src="{% static 'Lobby/Images/AQYprofile/res_border.jpg' %}"
+                             width="147"
+                             height="143"
+                             alt="Solid Colour" />
+                    </label>
+                    <br />
+                    <b>Colour Border</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyRes1"
+                           name="resIcon"
+                           value="1"
+                           {% if resIcon == 1 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
+                <label class="preferenceTitle">{% translate "Pull Resources to Worker" %}</label>
+                <br />
+                <label class="preferenceExplanation">
+                    {% translate "You can choose have the resources centered, or pulled towards the Worker" %}
+                </label>
+                <br />
+                <div class="favRestChoice">
+                    <label for="aqyPull0">
+                        <img src="{% static 'Lobby/Images/AQYprofile/pull_none.jpg' %}"
+                             width="190"
+                             height="159"
+                             alt="Original" />
+                    </label>
+                    <br />
+                    <b>Keep Centered</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyPull0"
+                           name="pullResToMan"
+                           value="0"
+                           {% if pullResToMan == 0 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="aqyPull1">
+                        <img src="{% static 'Lobby/Images/AQYprofile/pull_man.jpg' %}"
+                             width="190"
+                             height="159"
+                             alt="Solid Colour" />
+                    </label>
+                    <br />
+                    <b>Pull Resources</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyPull1"
+                           name="pullResToMan"
+                           value="1"
+                           {% if pullResToMan == 1 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
+
+                <label class="preferenceTitle">{% translate "Keep Forest under Wood" %}</label>
+                <br />
+                <label class="preferenceExplanation">
+                    {% translate "You can choose to keep or remove the forest underneath a wood resource" %}
+                </label>
+                <br />
+                <div class="favRestChoice">
+                    <label for="aqyWood0">
+                        <img src="{% static 'Lobby/Images/AQYprofile/forest_under_res.jpg' %}"
+                             width="124"
+                             height="125"
+                             alt="Keep Forest" />
+                    </label>
+                    <br />
+                    <b>Keep Forest</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyWood0"
+                           name="keepForestUnderWoodRes"
+                           value="1"
+                           {% if keepForestUnderWoodRes == 1 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="aqyWood1">
+                        <img src="{% static 'Lobby/Images/AQYprofile/forest_under_res_none.jpg' %}"
+                             width="124"
+                             height="125"
+                             alt="Remove Forest" />
+                    </label>
+                    <br />
+                    <b>Remove Forest</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyWood1"
+                           name="keepForestUnderWoodRes"
+                           value="0"
+                           {% if keepForestUnderWoodRes == 0 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
+
+                <label class="preferenceTitle">{% translate "Show Pollution under Resource" %}</label>
+                <br />
+                <label class="preferenceExplanation">
+                    {% translate "You can choose to show or hide pollution underneath a resource" %}
+                </label>
+                <br />
+                <div class="favRestChoice">
+                    <label for="aqyPollution0">
+                        <img src="{% static 'Lobby/Images/AQYprofile/pollution_under_res.jpg' %}"
+                             width="124"
+                             height="124"
+                             alt="Keep Forest" />
+                    </label>
+                    <br />
+                    <b>Show Pollution</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyPollution0"
+                           name="showPollutionUnderRes"
+                           value="1"
+                           {% if showPollutionUnderRes == 1 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="aqyPollution1">
+                        <img src="{% static 'Lobby/Images/AQYprofile/pollution_under_res_none.jpg' %}"
+                             width="124"
+                             height="124"
+                             alt="Remove Forest" />
+                    </label>
+                    <br />
+                    <b>Hide Pollution</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyPollution1"
+                           name="showPollutionUnderRes"
+                           value="0"
+                           {% if showPollutionUnderRes == 0 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
+
+                <label class="preferenceTitle">{% translate "Set Housing Order" %}</label>
+                <br />
+                <label class="preferenceExplanation">
+                    {% translate "You can choose to have houses arranged by Cost or Number" %}
+                </label>
+                <br />
+                <div class="favRestChoice">
+                    <label for="aqyHouse0">
+                        <img src="{% static 'Lobby/Images/AQYprofile/houses_goods.jpg' %}"
+                             width="248"
+                             height="150"
+                             alt="Goods" />
+                    </label>
+                    <br />
+                    <b>Arrange By Cost</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyHouse0"
+                           name="housesInNumOrder"
+                           value="0"
+                           {% if housesInNumOrder == 0 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="aqyHouse1">
+                        <img src="{% static 'Lobby/Images/AQYprofile/houses_numbers.jpg' %}"
+                             width="243"
+                             height="212"
+                             alt="Numbers" />
+                    </label>
+                    <br />
+                    <b>Arrange By Number</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyHouse1"
+                           name="housesInNumOrder"
+                           value="1"
+                           {% if housesInNumOrder == 1 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="aqyHouse2">
+                        <img src="{% static 'Lobby/Images/AQYprofile/houses_no_coords.jpg' %}"
+                             width="243"
+                             height="212"
+                             alt="No Coords" />
+                    </label>
+                    <br />
+                    <b>Clean Cost Arrangement</b>
+                    <br />
+                    <input type="radio"
+                           id="aqyHouse2"
+                           name="housesInNumOrder"
+                           value="2"
+                           {% if housesInNumOrder == 2 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
+               
+                <button type="submit" class="updateProfilebtn">{% translate "Update Antiquity Preferences" %}</button>
+            </form>
+        </div>
+        {% include 'Lobby/common/homeButton.html' %}
+    </div>
+    {% block script %}
+        <script>
+    var global = {};
+    global.halt = true;
+        </script>
+    {% endblock %}
+{% endblock %}

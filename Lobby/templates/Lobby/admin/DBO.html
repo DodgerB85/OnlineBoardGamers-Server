@@ -1,0 +1,149 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Game Search</title>
+    <script src="{% static 'Lobby/admin/DBO.js' %}?v=20220706"></script>
+    <link href="{% static 'Lobby/admin/DBO.css' %}?v=20230230" rel="stylesheet">
+  </head>
+  <body>
+    <h1>Game Search</h1>
+    <label for="gameSelect">Select a game:</label>
+    <select id="gameSelect">
+      <option value="FCM">FCM</option>
+      <option value="HC">HC</option>
+      <option value="Bus">Bus</option>
+      <option value="TGZ">TGZ</option>
+    </select>
+    <br />
+    <label for="practiceCheckbox">Practice games only:</label>
+    <input type="checkbox" id="practiceCheckbox">
+    <br />
+    <label for="updatedWithinCheckbox">Updated within 3 months:</label>
+    <input type="checkbox" id="updatedWithinCheckbox">
+    <br />
+    <br />
+    <button onclick="searchGames()">Search</button>
+    <div id="results"></div>
+    <br />
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+      <div {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    There are {{ totalGamesCount }} games.<br/>
+    There are {{ noramlGamesCount }} normal games.<br/>
+    There are {{pracGamesCount}} practice games.<br/>
+    [[ Total {{finishedGamesCount}}]] finished games<br/>
+    <br />
+    <br />
+    <div id="currentGamesListView">
+      {% if gamesList %}
+      <table class="gamesTable">
+        <thead>
+          <tr class="headingRow">
+            <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+            <td class="creatorHeader">{% translate "Creator" %}</td>
+            <td class="playersHeader">{% translate "Players" %}</td>
+            <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+            <td class="curretnTurnHeader">{% translate "Current Turn" %}</td>
+            <!--<td class="createdHeader">Created</td>-->
+            <td class="speedHeader">{% translate "Speed" %}</td>
+            <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
+          </tr>
+        </thead>
+
+        {% for game in gamesList %}
+        <tr
+          class="clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %} kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
+          id="{{ game.game }}gamesRow{{ game.gameID }}">
+          <td class="nameTDcurrent tdWithBox" id="td1">{% if game.chatNotification %}<img class="startingOption" alt="Str Opt" width="50" height="50"
+              src="{% static "Lobby/Images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
+
+            {% if game.game == 'FCM' %}<img src="{% static "FCM/Images/burger_board.png" %}" alt="FCM game" height="50" width="50"
+              title="FCM Game">{% endif %}
+            {% if game.game == 'HC' %}<img src="{% static "HC/Images/icon_car.png" %}" alt="HC game" title="HC Game" height="50" width="50">
+            {% endif %}
+            {% if game.game == 'Bus' %}<img src="{% static "Bus/images/bus_icon.png" %}" alt="Bus game" title="Bus Game" height="50" width="50">
+            {% endif %}
+            {% if game.game == 'TGZ' %}<img src="{% static "TGZ/images/tgz_icon.png" %}" alt="TGZ game" height="50" width="50"
+              title="TGZ Game">{% endif %}
+              {% if game.game == 'CNS' %}<img src="{% static "CNS/images/cns_icon.png" %}" alt="CNS game" title="CNS Game" height="50" width="50">
+              {% endif %}
+              {% if game.game == 'AQY' %}<img src="{% static "AQY/images/aqy_icon.png" %}" alt="AQY game" title="AQY Game" height="50" width="50">
+              {% endif %}
+              {% if game.game == 'IND' %}<img src="{% static "IND/images/ind_icon.png" %}" alt="IND game" title="IND Game" height="50" width="50">
+              {% endif %}
+              {% if game.game == 'KFW' %}<img src="{% static "LFW/images/kfw_icon.png" %}" alt="KFW game" title="KFW Game" height="50" width="50">
+              {% endif %}
+
+            <a target="_blank" 
+            {% if game.game == "FCM" %}
+            href="{% url 'FCM:showFCMgame' game_id=game.gameID %}" 
+{% elif game.game == "HC" %}
+href="{% url 'HC:showHCgame' game_id=game.gameID %}" 
+{% elif game.game == "Bus" %}
+href="{% url 'Bus:showBusGame' game_id=game.gameID %}" 
+{% elif game.game == "TGZ" %}
+href="{% url 'TGZ:showTGZgame' game_id=game.gameID %}" 
+{% elif game.game == "CNS" %}
+href="{% url 'CNS:showCNSgame' game_id=game.gameID %}" 
+{% elif game.game == "AQY" %}
+href="{% url 'AQY:showAQYgame' game_id=game.gameID %}" 
+{% elif game.game == "IND" %}
+href="{% url 'IND:showINDgame' game_id=game.gameID %}" 
+{% endif %}
+            >
+            {{ game.gameName }} ID: {{game.gameID }} {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i> {% endif %} i={{ forloop.counter }}</a>
+            {% if game.startingMap and game.game == "FCM" %} 
+            <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMap.jpg" %}" 
+            title="Click to View Map"
+              data-map="{{game.startingMap}}" data-game="FCM"> 
+              {% endif %}
+              {% if game.startingMap and game.game == "TGZ" %} 
+              <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapTGZ.jpg" %}" 
+              title="Click to View Map"
+                data-map="{{game.startingMap}}" data-game="TGZ"> 
+                {% endif %}
+            {{ game.startingOptions|safe }}
+          </td>
+
+          <td>
+            {% if game.deleteableGame %}
+            <div id="{{ game.game }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
+              {% blocktranslate trimmed %}
+              Delete <BR /> Practice<BR /> Game
+              {% endblocktranslate %}
+            </div>
+            {% else  %}
+            <div id="{{ game.game }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
+              {% blocktranslate trimmed %}
+              Delete <BR /> NORMAL 
+              {% endblocktranslate %}
+            {% endif %}
+
+          </td>
+
+          <td>{% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">
+              {{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+
+          <td>{{ game.currentPlayers }}</td>
+          <td>{{ game.currentTurn }}</td>
+          <!--<td>{{ game.created }}</td>-->
+          <td>{{ game.pace|safe }}</td>
+          <td><span class="timeToConvertSpan">{{ game.latestUpdate }}</span>{% if 'SHADOW' not in game.allPlayers %}
+            {{ game.kickoutHTML|safe }}{% endif %}<BR />{{ game.latestUpdateElapsedTimeString }}</td>
+        </tr>
+        {% endfor %}
+
+      </table>
+      {% else %}
+      No games found
+      {% endif %}
+         </div>
+  </body>
+</html>

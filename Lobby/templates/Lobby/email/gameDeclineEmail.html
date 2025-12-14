@@ -1,0 +1,19 @@
+{% load i18n %}
+{% autoescape off %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate %}
+Hi {{ creatorUsername }},<br/>
+<br/>
+A player has declined your invitation for a game of {{ box_name }} at https://{{ domain }}<br/>
+<br/>
+Game: {{ gameName }} {{ gameDescription }}<br/>
+<br/>
+Player: {{ declinerUsername }}<br/>
+Reason: {{ reason }}<br/>
+<br/>
+Please check the "Waiting Games" tab in the lobby. <br/>
+<br/>
+Thanks<br/>
+<br/>
+{% endblocktranslate %}
+{% endautoescape %}

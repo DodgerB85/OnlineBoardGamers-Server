@@ -1,0 +1,93 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/donate.css' %}?v=20230230"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:400,700"
+          rel="stylesheet"
+          type="text/css" />
+{% endblock %}
+{% block body %}
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <h1>{% translate "Thank you" %}</h1>
+        {% static 'Lobby/Images/emailDonate.png' as the_url %}
+        <h2>
+            {% blocktranslate trimmed %}
+                Thank you for taking the time to look at the donation page. All support is gratefully received, and will go towards
+                the costs of hosting, supporting,
+                and maintaining this website, and enabling new features.
+                <br />
+                <br />
+                Please note that donating does not grant you any special privileges; however suggestions for improvements are always
+                welcome using the OnlineBoardGamers email address.
+                <br />
+                <br />
+                You are able to donate with the button below via paypal, or if you'd rather, you can donate directly to me at
+                <br />
+                <img src="{{ the_url }}" width="400px" height="40px">
+                <br />
+                <br />
+                If you are unsure how much, then €5.00 or $5.00 or equivalent is a great place to start.
+            {% endblocktranslate %}
+        </h2>
+        <div class="donateButtonDiv">
+            <span class="donateTitleSpan">Paypal</span><br/>
+                                   <!--src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif"-->
+            <form action="https://www.paypal.com/donate" method="post" target="_top">
+                <input type="hidden" name="hosted_button_id" value="SMKSLMCJHWZ8G" />
+                <input id="donateButton"
+                       type="image"
+                       src="{% static 'Lobby/Images/paypalButton.png' %}"
+                       border="0"
+                       name="submit"
+                       title="PayPal - The safer, easier way to pay online!"
+                       alt="Donate with PayPal button" />
+                <img alt=""
+                     border="0"
+                     src="https://www.paypal.com/en_GB/i/scr/pixel.gif"
+                     width="1"
+                     height="1" />
+            </form>
+        </div>
+        <div class="donateButtonDiv2">
+            <span class="donateTitleSpan">Ko-fi (works in China)</span><br/>
+
+            <div class="kofi-btn-container">
+                <a href="https://ko-fi.com/Q5Q3ZVWMJ"
+                   title="Support me on ko-fi.com"
+                   class="kofi-button"
+                   style="background-color: #29abe0;
+                          cursor: pointer"
+                   target="_blank">
+                    <span class="kofitext">
+                        <img src="https://storage.ko-fi.com/cdn/cup-border.png"
+                             alt="Ko-fi donations"
+                             class="kofiimg">
+                    Buy me a coffee</span>
+                </a>
+            </div>
+        </div>
+        <div class="donateButtonDiv">
+            <span class="donateTitleSpan">Patreon</span><br/>
+
+            <a href="https://www.patreon.com/c/OnlineBoardGamers"
+               class="patreon-button" target="_blank">Support me on Patreon</a>
+        </div>
+        <!-- <h2>{% translate "If you are having trouble in China/Asia, you can donate via AliPay" %}</h2>
+    <img alt="" border="0" src="{% static 'Lobby/Images/alipayQR.jpg' %}" width="200px" height="200px"><br />
+<a href="https://qr.alipay.hk/2810040101cptpemzwqry9dz6e">{% translate "Pay Link (for devices with AliPay app installed)" %}</a>-->
+        <hr>
+        <br />
+        {% include 'Lobby/common/homeButton.html' %}
+    </div>
+{% endblock %}

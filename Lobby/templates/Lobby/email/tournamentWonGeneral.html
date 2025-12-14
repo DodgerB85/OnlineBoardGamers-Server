@@ -1,0 +1,22 @@
+{% load i18n %}
+
+{% autoescape off %}
+{% url "index" as the_url %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate %}
+Hi {{ user }},<br/>
+<br/>
+Congratulations!<br/>
+<br/>
+You have won a tournament of {{ boxName }}<br/>
+<br/>
+Name: {{ tournamentName }}<br/>
+Position: Champion<br/>
+<br/>
+Click to play more {{ boxName }}<br/>
+https://{{ domain }}{{ the_url }}<br/>
+<br/>
+Well Done!!<br/>
+<br/>
+{% endblocktranslate %}
+{% endautoescape %}

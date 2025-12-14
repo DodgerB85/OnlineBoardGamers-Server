@@ -1,0 +1,72 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230"
+        rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    <h1>Create a Mini Tournament</h1>
+    <span class="size25text">See <a href="{% url 'helpTournamentsMini' %}" class="linkOther">Mini Tournaments Help</a></span><br/>
+    <a href="{% url 'createFCMminiTournament' %}" class="newGameLink">
+      <div id="createNewFCM">
+        {% translate "Food Chain Magnate" %}
+        <img src="{% static "FCM/Images/fcm-box.jpg" %}" alt="Food Chain Magnate">
+      </div>
+    </a>
+    <!--
+    <a href="{% url 'createHCpage' %}" class="newGameLink">
+      <div id="createNewHC">
+        {% translate "Horseless Carriage" %}
+        <img src="{% static "HC/Images/hc-box.jpg" %}" alt="Horseless Carriage">
+      </div>
+    </a>-->
+    <a href="{% url 'createTGZminiTournament' %}" class="newGameLink">
+      <div id="createNewTGZ">
+        {% translate "The Great Zimbabwe" %}
+        <img src="{% static "TGZ/images/TGZ_box.jpg" %}" alt="Create new Game">
+      </div>
+    </a>
+    <!--
+    <a href="{% url 'createINDpage' %}" class="newGameLink">
+      <div id="createNewIND">
+        {% translate "Indonesia" %}
+        <img src="{% static "IND/images/INDbox.jpg" %}" alt="Indonesia">
+      </div>
+    </a>
+
+    <a href="{% url 'createKFWpage' %}" class="newGameLink">
+      <div id="createNewKFW">
+        {% translate "Keyflower" %}
+        <img src="{% static "KFW/images/KFWbox.jpg" %}" alt="Keyflower">
+      </div>
+    </a>
+
+    <a href="{% url 'createAQYpage' %}" class="newGameLink">
+      <div id="createNewAQY">
+        {% translate "Antiquity" %}<br />
+        <img src="{% static "AQY/images/AQYbox.jpg" %}" alt="Create new Game">
+      </div>
+    </a>
+
+    <a href="{% url 'createBusPage' %}" class="newGameLink">
+      <div id="createNewBus">
+        {% translate "Bus" %}
+        <img src="{% static "Bus/images/bus-box.jpg" %}" alt="Bus">
+      </div>
+    </a>
+    
+    <a href="{% url 'createCNSpage' %}" class="newGameLink">
+      <div id="createNewCNS">
+        {% translate "Cannes" %}
+        <img src="{% static "CNS/images/CNSbox.jpg" %}" alt="Cannes">
+      </div>
+    </a>
+-->
+    {% include 'Lobby/donate/donateBanner.html' %}
+  </div>
+ {% include 'Lobby/common/homeButton.html' %}
+{% endblock %}

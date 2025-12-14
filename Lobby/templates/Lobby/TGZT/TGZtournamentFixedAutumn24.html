@@ -1,0 +1,2198 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/TGZT.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+    <div class="container">
+        <div class="container">
+            <div id="playerInfoNameDiv">
+                <h1>The Great Zimbabwe Autumn 24 Tournament</h1>
+            </div>
+            <h1>Winner: Avatar73</h1>
+            <!-- HARD CODE -->
+            <h1>Round 1</h1>
+            <div class="TGZTplayerTableSpring24-container">
+                <table class="TGZTplayerTableSpring24 TGZTplayerTableJumboAutumn24">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Played</th>
+                            <th>Won</th>
+                            <th>TB 1</th>
+                            <th>TB 2</th>
+                            <th>TB 3</th>
+                            <th>TB 4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                            </td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>
+                                <a href='/TGZ/1951/'>-7</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                            </td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>
+                                <a href='/TGZ/1932/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1969/'>-5</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                            </td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>
+                                <a href='/TGZ/1975/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1945/'>-7</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                            </td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>
+                                <a href='/TGZ/1942/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1948/'>-12</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/jantref">jantref</a>
+                            </td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>
+                                <a href='/TGZ/1973/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1958/'>-8</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>
+                                <a href='/TGZ/1957/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1959/'>-9</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/derekmd33">derekmd33</a>
+                            </td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/1945/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1952/'>-10</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1946/'>-11</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/silvergoose">silvergoose</a>
+                            </td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/1934/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1931/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1970/'>-8</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/1950/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1969/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1957/'>-7</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Gauss">Gauss</a>
+                            </td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/1938/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1941/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1939/'>-8</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            </td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/1944/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1950/'>-5</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1943/'>-12</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/1937/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1931/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1930/'>-6</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/1937/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1971/'>-10</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1941/'>-13</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Burmer">Burmer</a>
+                            </td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/1964/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1976/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1965/'>-12</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Steveth">Steveth</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1939/'>0</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1974/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1942/'>-5</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1946/'>-7</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Lazzarone">Lazzarone</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1967/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1961/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1963/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1960/'>-14</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Venser">Venser</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1954/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1955/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1971/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1957/'>-8</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/siddhig">siddhig</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1972/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1962/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1956/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1958/'>-14</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/ceh245">ceh245</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1949/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1956/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1969/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1952/'>-8</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/secondofthenew">secondofthenew</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1975/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1961/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1968/'>-11</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1964/'>-12</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/MojosMonkey">MojosMonkey</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1944/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1938/'>-5</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1940/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1973/'>-8</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/bridgefour611">bridgefour611</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1948/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1949/'>-5</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1955/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1951/'>-16</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/SirLoin027">SirLoin027</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1945/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1944/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1951/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1976/'>-7</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/olawaco">olawaco</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1932/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1968/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1977/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1966/'>-9</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/twojays">twojays</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1970/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1955/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1953/'>-10</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1952/'>-11</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/crander">crander</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1976/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1930/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1963/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1964/'>-18</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/MadRex">MadRex</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1960/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1956/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1954/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1953/'>-8</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/durendal">durendal</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1931/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1929/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1935/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1978/'>-14</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/xaviludicus">xaviludicus</a>
+                            </td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/1943/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1972/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1937/'>-11</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1936/'>-15</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/sbird">sbird</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1962/'>0</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1965/'>-5</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1929/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1975/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1963/'>-15</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/rick_s_chris">rick_s_chris</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1948/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1950/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1978/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1954/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1947/'>-11</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/novasuecia">novasuecia</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1938/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1942/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1972/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1936/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1935/'>-7</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/freddyknuckles">freddyknuckles</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1974/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1943/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1940/'>-10</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1941/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1947/'>-14</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/bradsmith04">bradsmith04</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1967/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1934/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1978/'>-5</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1930/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1968/'>-14</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/JCK_GBG">JCK_GBG</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1933/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1934/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1971/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1936/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1940/'>-13</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/zaqijo">zaqijo</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1977/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1967/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1966/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1933/'>-11</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1929/'>-16</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/mintroll">mintroll</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1949/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1977/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1946/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1953/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1947/'>-14</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/il-Rob">il-Rob</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1958/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1959/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1961/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1965/'>-13</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1973/'>-16</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/cromagz">cromagz</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1939/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1970/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1933/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1932/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1935/'>-16</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/hijammer">hijammer</a>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/1962/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1959/'>-10</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1966/'>-11</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1974/'>-13</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/1960/'>-15</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Games</h3>
+            <div class="TGZTplayerTableSpring24-container">
+                <table class="TGZTgamesTableSpring24">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Players</th>
+                            <th>Winner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="window.location.href='/TGZ/1929/';">
+                            <td>
+                                <a href='/TGZ/1929/'>TGZ Autumn 2024 1</a>
+                            </td>
+                            <td>
+                                <a href="/profile/durendal">durendal</a>
+                                ,
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/sbird">sbird</a>
+                                ,
+                                <a href="/profile/zaqijo">zaqijo</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1930/';">
+                            <td>
+                                <a href='/TGZ/1930/'>TGZ Autumn 2024 2</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/crander">crander</a>
+                                ,
+                                <a href="/profile/Brent">Brent</a>
+                                ,
+                                <a href="/profile/bradsmith04">bradsmith04</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1931/';">
+                            <td>
+                                <a href='/TGZ/1931/'>TGZ Autumn 2024 3</a>
+                            </td>
+                            <td>
+                                <a href="/profile/durendal">durendal</a>
+                                ,
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Burmer">Burmer</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1932/';">
+                            <td>
+                                <a href='/TGZ/1932/'>TGZ Autumn 2024 4</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                                <a href="/profile/olawaco">olawaco</a>
+                                ,
+                                <a href="/profile/cromagz">cromagz</a>
+                            </td>
+                            <td>
+                                <a href="/profile/silvergoose">silvergoose</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1933/';">
+                            <td>
+                                <a href='/TGZ/1933/'>TGZ Autumn 2024 5</a>
+                            </td>
+                            <td>
+                                <a href="/profile/cromagz">cromagz</a>
+                                ,
+                                <a href="/profile/Brent">Brent</a>
+                                ,
+                                <a href="/profile/JCK_GBG">JCK_GBG</a>
+                                ,
+                                <a href="/profile/zaqijo">zaqijo</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1934/';">
+                            <td>
+                                <a href='/TGZ/1934/'>TGZ Autumn 2024 6</a>
+                            </td>
+                            <td>
+                                <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                                ,
+                                <a href="/profile/bradsmith04">bradsmith04</a>
+                                ,
+                                <a href="/profile/JCK_GBG">JCK_GBG</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1935/';">
+                            <td>
+                                <a href='/TGZ/1935/'>TGZ Autumn 2024 7</a>
+                            </td>
+                            <td>
+                                <a href="/profile/durendal">durendal</a>
+                                ,
+                                <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                                <a href="/profile/cromagz">cromagz</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1936/';">
+                            <td>
+                                <a href='/TGZ/1936/'>TGZ Autumn 2024 8</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                                <a href="/profile/JCK_GBG">JCK_GBG</a>
+                                ,
+                                <a href="/profile/xaviludicus">xaviludicus</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1937/';">
+                            <td>
+                                <a href='/TGZ/1937/'>TGZ Autumn 2024 9</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Brent">Brent</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                                ,
+                                <a href="/profile/MojosMonkey">MojosMonkey</a>
+                                ,
+                                <a href="/profile/xaviludicus">xaviludicus</a>
+                            </td>
+                            <td>
+                                <a href="/profile/MojosMonkey">MojosMonkey</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1938/';">
+                            <td>
+                                <a href='/TGZ/1938/'>TGZ Autumn 2024 10</a>
+                            </td>
+                            <td>
+                                <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                                <a href="/profile/Gauss">Gauss</a>
+                                ,
+                                <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                                <a href="/profile/MojosMonkey">MojosMonkey</a>
+                            </td>
+                            <td>
+                                <a href="/profile/silvergoose">silvergoose</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1939/';">
+                            <td>
+                                <a href='/TGZ/1939/'>TGZ Autumn 2024 11</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Gauss">Gauss</a>
+                                ,
+                                <a href="/profile/cromagz">cromagz</a>
+                                ,
+                                <a href="/profile/Steveth">Steveth</a>
+                                ,
+                                <a href="/profile/xaviludicus">xaviludicus</a>
+                            </td>
+                            <td>
+                                <a href="/profile/xaviludicus">xaviludicus</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1940/';">
+                            <td>
+                                <a href='/TGZ/1940/'>TGZ Autumn 2024 12</a>
+                            </td>
+                            <td>
+                                <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                                <a href="/profile/Steveth">Steveth</a>
+                                ,
+                                <a href="/profile/MojosMonkey">MojosMonkey</a>
+                                ,
+                                <a href="/profile/JCK_GBG">JCK_GBG</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Steveth">Steveth</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1941/';">
+                            <td>
+                                <a href='/TGZ/1941/'>TGZ Autumn 2024 13</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/Gauss">Gauss</a>
+                                ,
+                                <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1942/';">
+                            <td>
+                                <a href='/TGZ/1942/'>TGZ Autumn 2024 14</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/Steveth">Steveth</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1943/';">
+                            <td>
+                                <a href='/TGZ/1943/'>TGZ Autumn 2024 15</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/xaviludicus">xaviludicus</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1944/';">
+                            <td>
+                                <a href='/TGZ/1944/'>TGZ Autumn 2024 16</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/MojosMonkey">MojosMonkey</a>
+                                ,
+                                <a href="/profile/SirLoin027">SirLoin027</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1945/';">
+                            <td>
+                                <a href='/TGZ/1945/'>TGZ Autumn 2024 17</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/Gauss">Gauss</a>
+                                ,
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/SirLoin027">SirLoin027</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Gauss">Gauss</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1946/';">
+                            <td>
+                                <a href='/TGZ/1946/'>TGZ Autumn 2024 18</a>
+                            </td>
+                            <td>
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/Steveth">Steveth</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/mintroll">mintroll</a>
+                            </td>
+                            <td>
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1947/';">
+                            <td>
+                                <a href='/TGZ/1947/'>TGZ Autumn 2024 19</a>
+                            </td>
+                            <td>
+                                <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                                <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                ,
+                                <a href="/profile/mintroll">mintroll</a>
+                                ,
+                                <a href="/profile/SirLoin027">SirLoin027</a>
+                            </td>
+                            <td>
+                                <a href="/profile/SirLoin027">SirLoin027</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1948/';">
+                            <td>
+                                <a href='/TGZ/1948/'>TGZ Autumn 2024 20</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                ,
+                                <a href="/profile/bridgefour611">bridgefour611</a>
+                            </td>
+                            <td>
+                                <a href="/profile/derekmd33">derekmd33</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1949/';">
+                            <td>
+                                <a href='/TGZ/1949/'>TGZ Autumn 2024 21</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/ceh245">ceh245</a>
+                                ,
+                                <a href="/profile/mintroll">mintroll</a>
+                                ,
+                                <a href="/profile/bridgefour611">bridgefour611</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1950/';">
+                            <td>
+                                <a href='/TGZ/1950/'>TGZ Autumn 2024 22</a>
+                            </td>
+                            <td>
+                                <a href="/profile/ceh245">ceh245</a>
+                                ,
+                                <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>
+                                <a href="/profile/ceh245">ceh245</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1951/';">
+                            <td>
+                                <a href='/TGZ/1951/'>TGZ Autumn 2024 23</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                                ,
+                                <a href="/profile/bridgefour611">bridgefour611</a>
+                                ,
+                                <a href="/profile/SirLoin027">SirLoin027</a>
+                            </td>
+                            <td>
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1952/';">
+                            <td>
+                                <a href='/TGZ/1952/'>TGZ Autumn 2024 24</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/ceh245">ceh245</a>
+                                ,
+                                <a href="/profile/twojays">twojays</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1953/';">
+                            <td>
+                                <a href='/TGZ/1953/'>TGZ Autumn 2024 25</a>
+                            </td>
+                            <td>
+                                <a href="/profile/MadRex">MadRex</a>
+                                ,
+                                <a href="/profile/twojays">twojays</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                                ,
+                                <a href="/profile/mintroll">mintroll</a>
+                            </td>
+                            <td>
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1954/';">
+                            <td>
+                                <a href='/TGZ/1954/'>TGZ Autumn 2024 26</a>
+                            </td>
+                            <td>
+                                <a href="/profile/MadRex">MadRex</a>
+                                ,
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                ,
+                                <a href="/profile/Venser">Venser</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1955/';">
+                            <td>
+                                <a href='/TGZ/1955/'>TGZ Autumn 2024 27</a>
+                            </td>
+                            <td>
+                                <a href="/profile/siddhig">siddhig</a>
+                                ,
+                                <a href="/profile/twojays">twojays</a>
+                                ,
+                                <a href="/profile/Venser">Venser</a>
+                                ,
+                                <a href="/profile/bridgefour611">bridgefour611</a>
+                            </td>
+                            <td>
+                                <a href="/profile/siddhig">siddhig</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1956/';">
+                            <td>
+                                <a href='/TGZ/1956/'>TGZ Autumn 2024 28</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/MadRex">MadRex</a>
+                                ,
+                                <a href="/profile/ceh245">ceh245</a>
+                                ,
+                                <a href="/profile/siddhig">siddhig</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1957/';">
+                            <td>
+                                <a href='/TGZ/1957/'>TGZ Autumn 2024 29</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                                ,
+                                <a href="/profile/Venser">Venser</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>
+                                <a href="/profile/jantref">jantref</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1958/';">
+                            <td>
+                                <a href='/TGZ/1958/'>TGZ Autumn 2024 30</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                                ,
+                                <a href="/profile/siddhig">siddhig</a>
+                                ,
+                                <a href="/profile/il-Rob">il-Rob</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1959/';">
+                            <td>
+                                <a href='/TGZ/1959/'>TGZ Autumn 2024 31</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/hijammer">hijammer</a>
+                                ,
+                                <a href="/profile/twojays">twojays</a>
+                                ,
+                                <a href="/profile/il-Rob">il-Rob</a>
+                            </td>
+                            <td>
+                                <a href="/profile/twojays">twojays</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1960/';">
+                            <td>
+                                <a href='/TGZ/1960/'>TGZ Autumn 2024 32</a>
+                            </td>
+                            <td>
+                                <a href="/profile/MadRex">MadRex</a>
+                                ,
+                                <a href="/profile/hijammer">hijammer</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                                ,
+                                <a href="/profile/Lazzarone">Lazzarone</a>
+                            </td>
+                            <td>
+                                <a href="/profile/jantref">jantref</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1961/';">
+                            <td>
+                                <a href='/TGZ/1961/'>TGZ Autumn 2024 33</a>
+                            </td>
+                            <td>
+                                <a href="/profile/secondofthenew">secondofthenew</a>
+                                ,
+                                <a href="/profile/Venser">Venser</a>
+                                ,
+                                <a href="/profile/il-Rob">il-Rob</a>
+                                ,
+                                <a href="/profile/Lazzarone">Lazzarone</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Venser">Venser</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1962/';">
+                            <td>
+                                <a href='/TGZ/1962/'>TGZ Autumn 2024 34</a>
+                            </td>
+                            <td>
+                                <a href="/profile/secondofthenew">secondofthenew</a>
+                                ,
+                                <a href="/profile/sbird">sbird</a>
+                                ,
+                                <a href="/profile/hijammer">hijammer</a>
+                                ,
+                                <a href="/profile/siddhig">siddhig</a>
+                            </td>
+                            <td>
+                                <a href="/profile/secondofthenew">secondofthenew</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1963/';">
+                            <td>
+                                <a href='/TGZ/1963/'>TGZ Autumn 2024 35</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/crander">crander</a>
+                                ,
+                                <a href="/profile/sbird">sbird</a>
+                                ,
+                                <a href="/profile/Lazzarone">Lazzarone</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1964/';">
+                            <td>
+                                <a href='/TGZ/1964/'>TGZ Autumn 2024 36</a>
+                            </td>
+                            <td>
+                                <a href="/profile/secondofthenew">secondofthenew</a>
+                                ,
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/crander">crander</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                            </td>
+                            <td>
+                                <a href="/profile/jantref">jantref</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1965/';">
+                            <td>
+                                <a href='/TGZ/1965/'>TGZ Autumn 2024 37</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/sbird">sbird</a>
+                                ,
+                                <a href="/profile/olawaco">olawaco</a>
+                                ,
+                                <a href="/profile/il-Rob">il-Rob</a>
+                            </td>
+                            <td>
+                                <a href="/profile/olawaco">olawaco</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1966/';">
+                            <td>
+                                <a href='/TGZ/1966/'>TGZ Autumn 2024 38</a>
+                            </td>
+                            <td>
+                                <a href="/profile/crander">crander</a>
+                                ,
+                                <a href="/profile/olawaco">olawaco</a>
+                                ,
+                                <a href="/profile/hijammer">hijammer</a>
+                                ,
+                                <a href="/profile/zaqijo">zaqijo</a>
+                            </td>
+                            <td>
+                                <a href="/profile/crander">crander</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1967/';">
+                            <td>
+                                <a href='/TGZ/1967/'>TGZ Autumn 2024 39</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/bradsmith04">bradsmith04</a>
+                                ,
+                                <a href="/profile/Lazzarone">Lazzarone</a>
+                                ,
+                                <a href="/profile/zaqijo">zaqijo</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Burmer">Burmer</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1968/';">
+                            <td>
+                                <a href='/TGZ/1968/'>TGZ Autumn 2024 40</a>
+                            </td>
+                            <td>
+                                <a href="/profile/durendal">durendal</a>
+                                ,
+                                <a href="/profile/secondofthenew">secondofthenew</a>
+                                ,
+                                <a href="/profile/olawaco">olawaco</a>
+                                ,
+                                <a href="/profile/bradsmith04">bradsmith04</a>
+                            </td>
+                            <td>
+                                <a href="/profile/durendal">durendal</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1969/';">
+                            <td>
+                                <a href='/TGZ/1969/'>TGZ Autumn 2024 41</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/ceh245">ceh245</a>
+                                ,
+                                <a href="/profile/Brent">Brent</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1970/';">
+                            <td>
+                                <a href='/TGZ/1970/'>TGZ Autumn 2024 42</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                                <a href="/profile/cromagz">cromagz</a>
+                                ,
+                                <a href="/profile/twojays">twojays</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1971/';">
+                            <td>
+                                <a href='/TGZ/1971/'>TGZ Autumn 2024 43</a>
+                            </td>
+                            <td>
+                                <a href="/profile/MadRex">MadRex</a>
+                                ,
+                                <a href="/profile/Venser">Venser</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                                ,
+                                <a href="/profile/JCK_GBG">JCK_GBG</a>
+                            </td>
+                            <td>
+                                <a href="/profile/MadRex">MadRex</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1972/';">
+                            <td>
+                                <a href='/TGZ/1972/'>TGZ Autumn 2024 44</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/novasuecia">novasuecia</a>
+                                ,
+                                <a href="/profile/siddhig">siddhig</a>
+                                ,
+                                <a href="/profile/xaviludicus">xaviludicus</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1973/';">
+                            <td>
+                                <a href='/TGZ/1973/'>TGZ Autumn 2024 45</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Gauss">Gauss</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                                ,
+                                <a href="/profile/MojosMonkey">MojosMonkey</a>
+                                ,
+                                <a href="/profile/il-Rob">il-Rob</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Gauss">Gauss</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1974/';">
+                            <td>
+                                <a href='/TGZ/1974/'>TGZ Autumn 2024 46</a>
+                            </td>
+                            <td>
+                                <a href="/profile/freddyknuckles">freddyknuckles</a>
+                                ,
+                                <a href="/profile/hijammer">hijammer</a>
+                                ,
+                                <a href="/profile/Steveth">Steveth</a>
+                                ,
+                                <a href="/profile/Lazzarone">Lazzarone</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Lazzarone">Lazzarone</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1975/';">
+                            <td>
+                                <a href='/TGZ/1975/'>TGZ Autumn 2024 47</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/secondofthenew">secondofthenew</a>
+                                ,
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/sbird">sbird</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1976/';">
+                            <td>
+                                <a href='/TGZ/1976/'>TGZ Autumn 2024 48</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/crander">crander</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/SirLoin027">SirLoin027</a>
+                            </td>
+                            <td>
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1977/';">
+                            <td>
+                                <a href='/TGZ/1977/'>TGZ Autumn 2024 49</a>
+                            </td>
+                            <td>
+                                <a href="/profile/olawaco">olawaco</a>
+                                ,
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/mintroll">mintroll</a>
+                                ,
+                                <a href="/profile/zaqijo">zaqijo</a>
+                            </td>
+                            <td>
+                                <a href="/profile/derekmd33">derekmd33</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/1978/';">
+                            <td>
+                                <a href='/TGZ/1978/'>TGZ Autumn 2024 50</a>
+                            </td>
+                            <td>
+                                <a href="/profile/durendal">durendal</a>
+                                ,
+                                <a href="/profile/rick_s_chris">rick_s_chris</a>
+                                ,
+                                <a href="/profile/bradsmith04">bradsmith04</a>
+                                ,
+                                <a href="/profile/bridgefour611">bridgefour611</a>
+                            </td>
+                            <td>
+                                <a href="/profile/bridgefour611">bridgefour611</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h1>Round 2</h1>
+            <h2>Group A</h2>
+            <div class="TGZTplayerTableSpring24-container">
+                <table class="TGZTplayerTableSpring24">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Played</th>
+                            <th>Won</th>
+                            <th>TB 1</th>
+                            <th>TB 2</th>
+                            <th>TB 3</th>
+                            <th>TB 4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                            </td>
+                            <td>4</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/2298/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2301/'>-4</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                            <td>4</td>
+                            <td>2</td>
+                            <td>
+                                <a href='/TGZ/2302/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2300/'>-11</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/derekmd33">derekmd33</a>
+                            </td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/2303/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2297/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2302/'>-9</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                            </td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/2299/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2300/'>-11</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2297/'>-11</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            </td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/2299/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2298/'>-12</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2302/'>-13</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/jantref">jantref</a>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/2301/'>-2</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2303/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2299/'>-15</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2297/'>-21</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/2303/'>-5</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2298/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2301/'>-8</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2300/'>-12</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Games</h3>
+            <div class="TGZTplayerTableSpring24-container">
+                <table class="TGZTgamesTableSpring24">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Players</th>
+                            <th>Winner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="window.location.href='/TGZ/2297/';">
+                            <td>
+                                <a href='/TGZ/2297/'>Autumn 24 A1</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2298/';">
+                            <td>
+                                <a href='/TGZ/2298/'>Autumn 24 A2</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2299/';">
+                            <td>
+                                <a href='/TGZ/2299/'>Autumn 24 A3</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2300/';">
+                            <td>
+                                <a href='/TGZ/2300/'>Autumn 24 A4</a>
+                            </td>
+                            <td>
+                                <a href="/profile/kbbr">kbbr</a>
+                                ,
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>
+                                <a href="/profile/derekmd33">derekmd33</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2301/';">
+                            <td>
+                                <a href='/TGZ/2301/'>Autumn 24 A5</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2302/';">
+                            <td>
+                                <a href='/TGZ/2302/'>Autumn 24 A6</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                            <td>
+                                <a href="/profile/vraid">vraid</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2303/';">
+                            <td>
+                                <a href='/TGZ/2303/'>Autumn 24 A7</a>
+                            </td>
+                            <td>
+                                <a href="/profile/derekmd33">derekmd33</a>
+                                ,
+                                <a href="/profile/jantref">jantref</a>
+                                ,
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                                ,
+                                <a href="/profile/donk">donk</a>
+                            </td>
+                            <td>
+                                <a href="/profile/quadroskeptic">quadroskeptic</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h2>Group B</h2>
+            <div class="TGZTplayerTableSpring24-container">
+                <table class="TGZTplayerTableSpring24">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Played</th>
+                            <th>Won</th>
+                            <th>TB 1</th>
+                            <th>TB 2</th>
+                            <th>TB 3</th>
+                            <th>TB 4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>
+                                <a href='/TGZ/2306/'>-1</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                            </td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>
+                                <a href='/TGZ/2304/'>-5</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/silvergoose">silvergoose</a>
+                            </td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>
+                                <a href='/TGZ/2307/'>-9</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2304/'>-10</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2310/'>-16</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/2304/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2305/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2309/'>-6</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2308/'>-10</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/2306/'>-1</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2305/'>-3</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2310/'>-10</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2309/'>-10</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Burmer">Burmer</a>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/2309/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2306/'>-4</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2308/'>-10</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2307/'>-14</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/profile/Gauss">Gauss</a>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                <a href='/TGZ/2307/'>-5</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2308/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2305/'>-7</a>
+                            </td>
+                            <td>
+                                <a href='/TGZ/2310/'>-9</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Games</h3>
+            <div class="TGZTplayerTableSpring24-container">
+                <table class="TGZTgamesTableSpring24">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Players</th>
+                            <th>Winner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="window.location.href='/TGZ/2304/';">
+                            <td>
+                                <a href='/TGZ/2304/'>Autumn 24 B1</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/silvergoose">silvergoose</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2305/';">
+                            <td>
+                                <a href='/TGZ/2305/'>Autumn 24 B2</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/Gauss">Gauss</a>
+                                ,
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2306/';">
+                            <td>
+                                <a href='/TGZ/2306/'>Autumn 24 B3</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2307/';">
+                            <td>
+                                <a href='/TGZ/2307/'>Autumn 24 B4</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/Gauss">Gauss</a>
+                                ,
+                                <a href="/profile/silvergoose">silvergoose</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Melk0r">Melk0r</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2308/';">
+                            <td>
+                                <a href='/TGZ/2308/'>Autumn 24 B5</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/Gauss">Gauss</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2309/';">
+                            <td>
+                                <a href='/TGZ/2309/'>Autumn 24 B6</a>
+                            </td>
+                            <td>
+                                <a href="/profile/DodgerB">DodgerB</a>
+                                ,
+                                <a href="/profile/Burmer">Burmer</a>
+                                ,
+                                <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                            <td>
+                                <a href="/profile/silvergoose">silvergoose</a>
+                            </td>
+                        </tr>
+                        <tr onclick="window.location.href='/TGZ/2310/';">
+                            <td>
+                                <a href='/TGZ/2310/'>Autumn 24 B7</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/Gauss">Gauss</a>
+                                ,
+                                <a href="/profile/silvergoose">silvergoose</a>
+                                ,
+                                <a href="/profile/Brent">Brent</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h1>Final</h1>
+
+            <div class="TGZTplayerTableSpring24-container">
+                <table class="TGZTplayerTableSpring24">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Players</th>
+                            <th>Winner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="window.location.href='/TGZ/2573/';">
+                            <td>
+                                <a href='/TGZ/2573/'>AUTUMN 24 FINAL</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                                ,
+                                <a href="/profile/Melk0r">Melk0r</a>
+                                ,
+                                <a href="/profile/vraid">vraid</a>
+                                ,
+                                <a href="/profile/Billtje">Billtje</a>
+                            </td>
+                            <td>
+                                <a href="/profile/Avatar73">Avatar73</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h1>Winner: Avatar73</h1>
+        </div>
+        <div class="container signin">
+            <input class="homeButton"
+                   type="button"
+                   onclick="location.href='/';"
+                   value="Home" />
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{% static 'CNS/images/cns_icon.png' %}" />
+
+    <meta name="title" content="Online Board Gamers - Cannes">
+    <meta name="description"
+          content="Play Splotter's Cannes Online for free with others, or solo!">
+    <meta name="keywords"
+          content="Cannes,Online,Play,Board,Game,Games,Gamers">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="200 days">
+    <meta name="author" content="Online Board Gamers">
+    <title>OBG - {{ gameName }}</title>
+
+    <style>
+    body {
+      margin: 0px !important;
+      background-color: #d4eafd;
+      font-family: Arial, sans-serif;
+    }
+
+    #loadingText {
+      transform: translate(-50%, 0%);
+      position: absolute;
+      font-size: 40px;
+      margin-top: 20px;
+      left: 50%;
+      white-space: nowrap;
+    }
+
+.box {
+  position: relative;
+  top: 100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(#fff, #757575);
+  overflow: hidden;
+  margin: auto;
+}
+
+.box:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 5px;
+  background: #000;
+}
+
+.box:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 100%;
+  background: #000;
+}
+
+.circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  border: 5px solid #fff;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.circle.circle2 {
+  width: 600px;
+  height: 600px;
+}
+
+.needle {
+  position: absolute;
+  top: calc(50% - 2px);
+  left: 50%;
+  height: 4px;
+  width: 1200px;
+  background: #000;
+  animation: animate 1s linear 4;
+  transform-origin: left;
+}
+
+@keyframes animate {
+  0% {
+    transform: rotate(-90deg);
+  }
+  
+  100% {
+    transform: rotate(270deg);
+  }
+}
+
+.number {
+  width: 10%;
+  height: 100%;
+}
+
+.number div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-size: 25em;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  animation: animateNumber 10s linear 1;
+}
+
+.number div:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.number div:nth-child(2) {
+  animation-delay: 1s;
+}
+
+.number div:nth-child(3) {
+  animation-delay: 2s;
+}
+
+.number div:nth-child(4) {
+  animation-delay: 3s;
+}
+
+
+@keyframes animateNumber {
+  0%, 10% {
+    opacity: 1;
+  }
+  
+  10.01%, 100% {
+    opacity: 0;
+  }
+}
+
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if debug %}
+      <script type="module" src="http://localhost:3012/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3012/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'CNS/CNSvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module"
+              crossorigin=""
+              src="{% static 'CNS/CNSvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>Please enable Javascript to continue.</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">Cannes is loading.........</div>
+      <!--<div>
+      <img id="TGZloadingImg" src="{% static 'TGZ/images/TGZ_Tile_Back.jpg' %}" />
+</div>-->
+      <div class="box">
+        <div class="circle circle1"></div>
+        <div class="circle circle2"></div>
+        <div class="needle"></div>
+        <div class="number">
+          <div>3</div>
+          <div>2</div>
+          <div>1</div>
+          <div>0</div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    var initData = {};
+  
+    ///////////////////////
+    initData.gameID = {{ gameID }};
+    initData.gameName = "{{ gameName }}";
+    initData.gameData = '{{ gameData|safe }}';
+    initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+    initData.myZoomLevel = {{ myZoomLevel }};
+    initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+    initData.startingOptions = {{startingOptions}};
+    
+    {% if spoilerFree %}
+    initData.spoilerFree = true;
+    initData.replayStep = {{replayStep}}-1;
+    {% endif %}
+
+    ///////////////////////
+    {% if user.is_authenticated %}
+    initData.name = '{{ name }}';
+    initData.chatData = "{{ chatData }}";
+    initData.latestUpdate = {{ latestUpdateLiteral }};
+    initData.nextURL = '{{ nextURL }}';
+    {% endif %}
+  
+    ///////////////////////
+    {% if involvedPlayer %}
+    initData.myStatsExcludeConsent = {{ myStatsExcludeConsent }};
+    initData.statsExcludedGame = {{ statsExcludedGame|lower }};
+    initData.pov = {{ pov }};
+    
+    initData.secondsToNextKickout = {{ secondsToNextKickout }};
+    {% if kickoutRequired > 0 and not myMove %}
+    initData.kickoutRequired = {{kickoutRequired}};
+    {% endif %}
+    initData.notes = '{{ notes | safe }}';
+    {% if chatNotification %}
+    initData.chatNotification = true;
+    {% endif %}
+    initData.preferredCNScolour = {{ preferredCNScolour }};
+    initData.yourTurnAudioType = {{ yourTurnAudioType }};
+
+    /////////////////////
+    {% if not gameData %}
+    {% if displayNames %}
+    initData.displayNames = {{ displayNames | safe }};
+    {% endif %}
+    initData.playerNames = {{ allPlayerListBySeat | safe }};
+    {% endif %}
+    {% endif %}
+  </script>
+</html>

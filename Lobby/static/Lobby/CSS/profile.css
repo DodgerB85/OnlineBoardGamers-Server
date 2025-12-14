@@ -1,0 +1,428 @@
+/**** PROFILE ****/
+
+.preferenceTitle {
+	font-size: 30px;
+	font-weight: bolder;
+}
+
+.webhookHelpSpan {
+	font-size: 30px;
+	font-weight: bolder;
+}
+.preferenceExplanation {
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.profilePreferenceDiv {
+	border: 1px solid black;
+	padding: 5px;
+	margin: 5px;
+}
+
+.notifIamge {
+	width: 150px;
+	height: 150px;
+}
+
+.profileTable {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.profileTable a:link {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.profileTable a:visited {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.profileTable a:hover {
+	text-decoration: underline;
+}
+
+.profileTable a:active {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.profileTable td,
+.profileTable th {
+	border: 1px solid #ddd;
+	padding: 8px;
+}
+
+.profileTable tr {
+	cursor: pointer;
+}
+
+.profileTable tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+.profileTable tr:nth-child(odd) {
+	background-color: white;
+}
+
+/*.profileTable tr:hover {
+	background-color: #ddd;
+}*/
+
+.profileTable th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	/*text-align: left;*/
+	/*background-color: #87C2C8;*/
+	background-color: #5875f8;
+	color: white;
+	cursor: default;
+}
+
+.webhookTypeSelect {
+	padding: 5px;
+}
+
+.webhookInputText {
+	padding: 8px 16px;
+}
+
+.webhookInputText::placeholder {
+	font-weight: bolder;
+}
+
+#webhookURL {
+	width: 400px;
+}
+
+#webhookUserID {
+	width: 200px;
+}
+
+.telegramInfo {
+	display: none;
+}
+
+.webhookButton {
+	background-color: #04aa6d; /* Green */
+	border: none;
+	color: white;
+	padding: 16px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	margin: 4px 2px;
+	transition-duration: 0.4s;
+	cursor: pointer;
+	transition-duration: 0.4s;
+	border-radius: 20px;
+}
+
+.deleteWebhookButton {
+	background-color: white;
+	color: black;
+	border: 2px solid #f44336;
+}
+
+.deleteWebhookButton:hover {
+	background-color: #f44336;
+	color: white;
+}
+
+.addWebhookButton {
+	background-color: white;
+	color: black;
+	border: 2px solid #04aa6d;
+}
+
+.addWebhookButton:hover {
+	background-color: #04aa6d;
+	color: white;
+}
+
+.testWebhookButton {
+	background-color: white;
+	color: black;
+	border: 2px solid darkblue;
+}
+
+.testWebhookButton:hover {
+	background-color: darkblue;
+	color: white;
+}
+
+.favRestChoice,
+.favHCchoice,
+.favBusColour,
+.favBusMap,
+.favTGZchoice,
+.favCNSchoice,
+.favKFWchoice,
+.favWEBchoice {
+	display: inline-block;
+}
+
+.favBusColour img {
+	width: 100px;
+}
+
+.favBusMap img {
+	width: 200px;
+}
+
+.favTGZchoice img {
+	width: 100px;
+	height: 100px;
+}
+
+.favCNSchoice,
+.favKFWchoice,
+.favWEBchoice {
+	width: 100px;
+}
+
+.cnsPrefSVG,
+.kfwPrefSVG,
+.webPrefSVG {
+	width: 100px;
+	height: 20px;
+}
+.cnsPrefPolygon,
+.kfwPrefPolygon,
+.webPrefPolygon {
+	stroke-width: 6;
+	stroke: purple;
+}
+.cnsPrefPolygon0 {
+	fill: black;
+}
+.cnsPrefPolygon1 {
+	fill: blue;
+}
+.cnsPrefPolygon2 {
+	fill: red;
+}
+.cnsPrefPolygon3 {
+	fill: yellow;
+}
+
+.kfwPrefPolygon0 {
+	fill: #84C3E2;
+}
+.kfwPrefPolygon1 {
+	fill: #3E7139;
+}
+.kfwPrefPolygon2 {
+	fill: #D65A1E;
+}
+.kfwPrefPolygon3 {
+	fill: #92385C;
+}
+.kfwPrefPolygon4 {
+	fill: #808080;
+}
+.kfwPrefPolygon5 {
+	fill: #000000;
+}
+
+.webPrefPolygon0 {
+	fill: #000000;
+}
+.webPrefPolygon1 {
+	fill: #3474a9;
+}
+.webPrefPolygon2 {
+	fill: #F5F5F5;
+}
+.webPrefPolygon3 {
+	fill: #c28727;
+}
+
+.updateProfilebtn {
+	background-color: #04aa6d;
+	color: white;
+	padding: 16px 0px;
+	/*margin: 8px 0;*/
+	border: none;
+	cursor: pointer;
+	width: 100%;
+	opacity: 0.9;
+	font-size: 20px;
+}
+
+.updateProfilebtn:hover {
+	opacity: 1;
+}
+
+.verticalSeperator {
+	border-left: 3px solid #38546d;
+	border-right: 3px solid #16222c;
+	height: 200px;
+	display: inline-block;
+}
+
+.myCheckbox + label,
+.specVRlabel {
+	font-size: 20px;
+	/* 1.25em */
+}
+
+.myCheckbox:checked + label {
+	color: blue;
+}
+
+.myCheckbox:hover + label {
+	color: blue;
+}
+
+.checkboxLabel {
+	vertical-align: middle;
+}
+
+/**** END PROFILE ****/
+.AQYpreferencesDiv {
+	font-size: 30px;
+}
+/** AQY PROFILE **/
+
+/** IND PROFILE **/
+.indColourChoiceSVG {
+	width: 100px;
+	height: 100px;
+}
+
+.defsSVG {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 0pc;
+	width: 0pc;
+	visibility: hidden;
+}
+
+.cityMarker {
+	border-radius: 100%;
+	width: 30px;
+	height: 30px;
+	border: 2px solid black;
+	display: inline-block;
+}
+
+.greenCity {
+	background-color: green;
+}
+.yellowCity {
+	background-color: yellow;
+}
+.redCity {
+	background-color: red;
+}
+.orangeCity {
+	background-color: orange;
+}
+
+.emailHelpSpan {
+	font-style: italic;
+	font-size: 10px;
+}
+
+.emailSelectTable {
+	width: 400px;
+	margin: auto;
+}
+
+.yourTurnTR {
+	background-color: rgb(198, 184, 226) !important;
+}
+
+.essentialTR {
+	background-color: lightgreen !important;
+}
+
+.informationTR {
+	background-color: lightblue !important;
+}
+
+.dailyReminderTR {
+	background-color: lightgoldenrodyellow !important;
+}
+
+#emailSelectionTitleSpan {
+	font-weight: bolder;
+	font-size: 20px;
+}
+
+/** Blaclist **/
+.blacklistSection {
+	display: flex;
+	width: fit-content;
+	margin: auto;
+}
+
+.inputButtonWrapper {
+	display: flex;
+	margin-right: 20px;
+}
+
+#addBlacklistButton {
+	padding: 5px;
+	height: 30px;
+}
+
+
+.textInput {
+	padding: 5px;
+	margin-right: 10px;
+}
+
+.removePlayerBtn {
+	color: red;
+	cursor: pointer;
+	margin-left: 5px;
+}
+
+#blacklistError {
+	color: red;
+	font-weight: bolder;
+}
+#blacklistSuccess {
+	color: green;
+	font-weight: bolder;
+}
+
+.autocomplete {
+	position: relative;
+	/*display: inline-block;*/
+}
+
+.autocomplete-items {
+	position: absolute;
+	border: 1px solid #d4d4d4;
+	border-bottom: none;
+	border-top: none;
+	z-index: 99;
+	/*position the autocomplete items to be the same width as the container:*/
+	top: 100%;
+	left: 0;
+	right: 0;
+}
+
+.autocomplete-items div {
+	padding: 10px;
+	cursor: pointer;
+	background-color: #fff;
+	border-bottom: 1px solid #d4d4d4;
+}
+
+.autocomplete-items div:hover {
+	background-color: #e9e9e9;
+}
+
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+	background-color: DodgerBlue !important;
+	color: #ffffff;
+}

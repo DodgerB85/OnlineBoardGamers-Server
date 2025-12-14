@@ -1,0 +1,892 @@
+
+
+.main {
+    padding: 16px;
+    margin-top: 85px;
+    margin-bottom: 30px;
+}
+
+
+.headingRow {
+    font-weight: bold;
+    background-color: #5875f8;
+    color: white;
+    height: 50px;
+}
+
+#headingRow {
+    background-color: white;
+}
+
+.buttonDiv {
+    padding: 10px;
+    color: black;
+    border-radius: 17px / 15px;
+    color: blue;
+}
+
+.buttonDiv.Join {
+    border: 2px solid blue;
+}
+
+.buttonDiv.Leave {
+    border: 2px solid darkred;
+}
+
+.deleteTrainingGame {
+    border: 2px solid darkred;
+    padding: 10px;
+    color: black;
+    border-radius: 20px;
+}
+
+.deleteTrainingGame:hover {
+    border: 2px solid darkred;
+    border-radius: 20px;
+    padding: 10px;
+    background-color: darkred;
+    color: white;
+    cursor: pointer;
+}
+
+.startingOptionsHeader {
+    max-width: 400px;
+    min-width: 200px;
+}
+
+.availGamesStartingOptionsTD {
+    display: inline-block;
+    max-width: 400px;
+    min-width: 200px;
+}
+
+.nameHeaderCurrent {
+    max-width: 500px;
+    min-width: 200px;
+}
+
+.nameTDcurrent {
+    display: inline-block;
+    max-width: 500px;
+    min-width: 200px;
+    cursor: pointer;
+}
+
+.cancelHeader {
+    min-width: 58px;
+}
+
+.listInfo {
+    font-style: italic;
+    font-size: 15px;
+}
+
+.inlineHelp {
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.gamesTable {
+    background-color: white;
+}
+
+.gamesTable a:link {
+    text-decoration: none;
+    color: darkblue;
+}
+
+.gamesTable a:visited {
+    text-decoration: none;
+    color: red;
+
+}
+
+.gamesTable a:hover {
+    text-decoration: underline;
+}
+
+.gamesTable a:active {
+    text-decoration: none;
+    color: darkblue;
+
+}
+
+#shortKickoutSpan {
+    color: darkred;
+}
+
+.gameRow {
+    height: 50px;
+    border-top: 3px solid lightgray;
+    border-bottom: 3px solid lightgray;
+    background-color: white;
+}
+
+.clickableGameRow {
+    height: 50px;
+    border-top: 3px solid lightgray;
+    border-bottom: 3px solid lightgray;
+}
+
+
+
+.myMove {
+    background-color: #bdfce5;
+}
+
+.kickoutRequired {
+    background-color: rgba(253, 255, 113, 0.75);
+
+}
+
+.myMove.kickoutRequired {
+    background-color: rgba(245, 135, 135, 0.75);
+
+}
+
+
+.gameName:hover {
+    cursor: pointer;
+}
+
+
+
+table {
+    margin: 0 auto;
+    /* or margin: 0 auto 0 auto */
+    min-width: 80%;
+    font-size: 15px;
+    border-collapse: collapse;
+    /* background-color: white;*/
+}
+
+td {
+    text-align: center;
+    padding: 10px;
+    min-width: 20px;
+
+}
+
+.joinHeader {
+    min-width: 58px;
+    width: fit-content;
+}
+
+.whenOver {
+    background-color: lightblue;
+}
+
+.preferenceTitle {
+    font-size: 30px;
+    font-weight: bolder;
+}
+
+.favRestChoice {
+    display: inline-block;
+}
+
+.favHCchoice {
+    display: inline-block;
+}
+
+.favBusColour {
+    display: inline-block;
+}
+.favBusColour img {
+    width: 100px;
+}
+
+.favBusMap {
+    display: inline-block;
+}
+.favBusMap img {
+    width: 200px;
+}
+.favTGZchoice {
+    display: inline-block;
+}
+.favTGZchoice img {
+    width: 100px;
+    height: 100px;
+}
+/* START OF CHECKBOX */
+
+#allOptions {
+    display: flex;
+    flex-flow: column wrap;
+}
+
+.optionsGroup {
+    padding: 10px;
+    margin: 10px;
+    text-align: left;
+    line-height: 30px;
+    float: left;
+    width: 22.38em;
+    height: 340px;
+}
+.optionsGroupTop {
+    padding: 10px;
+    margin: 10px;
+    text-align: left;
+    line-height: 30px;
+    float: left;
+    width: 22.38em;
+    height: 370px;
+    min-height: auto;
+   /* height: 340px;*/
+}
+
+.singleChoiceDiv {
+    display: block;
+}
+
+.optionSelection {
+    display: inline;
+}
+
+#setupOptions {
+    /*width: 470px;*/
+    /*height: 340px;*/
+    border: 10px solid black;
+    background-color: white;
+    height: fit-content;
+}
+
+#basicOptions {
+    /*height: 340px;*/
+    border: 10px solid black;
+    background-color: #FAF2D9;
+}
+
+#expertOptions {
+    /*height: 340px;*/
+    border: 10px solid black;
+	background-color: lightsalmon;
+    min-height: 370px;
+    height: auto;
+}
+.valueContainer {
+    display: inline-block;
+}
+
+.valueField {
+    width: 34px;
+}
+
+#ketchupOptions {
+    border: 10px solid black;
+    background-color: lightgreen;
+    /*height: 340px;*/
+
+}
+
+#mapRouteOptions {
+    border: 10px solid black;
+    background-color: lightgray;
+    /*height: 340px;*/
+
+}
+
+#foodOptions {
+    /*height: 340px;*/
+    border: 10px solid black;
+    background-color: #8FA960;
+}
+
+#marketingOptions {
+    /*height: 340px;*/
+    border: 10px solid black;
+    background-color: #87C2C8
+}
+
+#employeeOptions {
+    /*height: 340px;*/
+    border: 10px solid black;
+    background-color: white;
+}
+
+#scenarioOptions {
+    width: 90%;
+    height: fit-content;
+    border: 10px solid black;
+    background-color: #FAF2D9;
+}
+
+.purpleLabel {
+    background-color: #B492C4;
+    color: white;
+    padding: 5px;
+}
+
+.greenLabel {
+    background-color: #8FA960;
+    color: black;
+    padding: 5px;
+}
+
+#nightShiftLabel {
+    background-color: #241E20;
+    color: white;
+    padding: 5px;
+}
+
+.startingOption {
+    /*width: 50px;*/
+    height: 50px;
+    width: 50px;
+    border-radius: 15px;
+    margin: 2px;
+    vertical-align: middle;
+    line-height: 30px;
+}
+
+.helpStartingOptionSpan {
+    white-space:nowrap;
+}
+
+.optionHelp {
+    font-style: italic;
+    font-size: 0.9em;
+    /* 15px */
+}
+
+#submitOptions {
+    width: 90%;
+}
+
+.optionsHeader {
+    font-size: 1.35em;
+    /*20px*/
+    font-weight: bold;
+}
+
+.myCheckbox+label {
+    font-size: 1.25em;
+    /* 20px */
+}
+
+.myCheckbox:checked+label {
+    color: blue;
+}
+
+.myCheckbox:hover+label {
+    color: blue;
+}
+
+.generalLabel {
+    font-size: 1.25em;
+}
+
+label {
+    vertical-align: middle;
+}
+
+
+
+/* END OF CHECKBOX */
+
+
+
+/* signup */
+
+/*
+* {
+    box-sizing: border-box;
+}*/
+
+/* Add padding to containers */
+.container {
+    padding: 16px;
+    background-color: white;
+    text-align: center;
+}
+
+
+/* Full-width input fields */
+.registerInput {
+    width: 90%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    display: inline-block;
+    border: none;
+    background: #f1f1f1;
+}
+
+.registerInput:focus {
+    background-color: #ddd;
+    outline: none;
+}
+
+.notificationTableOdd {
+    background-color: #d6eaf8;
+}
+
+.notificationTableEven {
+    background-color: #aed6f1;
+}
+
+
+/* Overwrite default styles of hr */
+hr {
+    border: 1px solid #f1f1f1;
+    margin-bottom: 25px;
+}
+
+/* Set a style for the submit button */
+.registerbtn {
+    background-color: #04AA6D;
+    color: white;
+    /*padding: 16px 20px;*/
+    padding: 16px 0px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    opacity: 0.9;
+    font-size: 20px;
+}
+
+.registerbtn:hover {
+    opacity: 1;
+}
+
+.updateProfilebtn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px 0px;
+    /*margin: 8px 0;*/
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    opacity: 0.9;
+    font-size: 20px;
+}
+
+.updateProfilebtn:hover {
+    opacity: 1;
+}
+
+.resetpwdbtn {
+    /*font-weight: bold;*/
+    background-color: darkblue;
+    color: white;
+    padding: 16px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: fit-content;
+    opacity: 0.7;
+    font-size: 20px;
+}
+
+.resetpwdbtn:hover {
+    opacity: 1;
+}
+
+
+
+html {
+    display: block;
+}
+
+/* Stats page */
+
+.playerStatsContainer {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.playerInfoStatsContainer {
+    width: 300px;
+    margin: auto;
+}
+
+.playerStatsDiv {
+    flex: 1;
+    /*border: 2px solid yellow;*/
+}  
+
+.playerStatsDiv:first-child {
+    margin-right: 20px;
+} 
+
+.winStats {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .winStats a:link {
+    text-decoration: none;
+    color: darkblue;
+}
+
+.winStats a:visited {
+    text-decoration: none;
+    color: darkblue;
+
+}
+
+.winStats a:hover {
+    text-decoration: underline;
+}
+
+.winStats a:active {
+    text-decoration: none;
+    color: darkblue;
+
+}
+  
+  .winStats td, .winStats th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  .winStats tr {
+    cursor: pointer;
+  }
+  
+  .winStats tr:nth-child(even){background-color: #f2f2f2;}
+  .winStats tr:nth-child(odd){background-color: white;}
+  
+  .winStats tr:hover {background-color: #ddd;}
+  
+  .winStats th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    /*text-align: left;*/
+    /*background-color: #87C2C8;*/
+    background-color: #5875f8;
+    color: white;
+    cursor: default;
+      
+  }
+
+  #winTotalsTotalDiv, #winTotalsThreeMonthsDiv, #winTotalsMonthDiv {
+    display: none;
+  }
+
+/* end stats page */
+
+#tournamentRoundsContainerDiv {
+   /* max-width:fit-content;
+    display: inline-block;
+    min-height: fit-content;
+    margin: auto;
+    background-color: #04AA6D;
+    align-items: center;*/
+
+    /*justify-content: center;
+    align-items: center;*/
+    
+    
+    /*float: left;*/
+
+    /*min-height: calc(100% - 58px);*/
+    min-height: fit-content;
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.tournyRoundDiv {
+    /*float: left;
+    min-width: 300px;
+    margin: 10px;*/
+    /*margin: 20px;*/
+    display: inline-block;
+    height: fit-content;
+    margin: 10px;
+    width: fit-content;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+
+    
+}
+
+.lobbyIconsDiv {
+    font-size: 0.75em;
+}
+
+.trophyHolderDiv {
+    height: 100px;
+    width: 100px;
+    position: relative;
+}
+
+.trophyIMG {
+    height: 100px;
+    width: 100px;
+}
+
+.trophyNumberDiv{
+    font-weight: bolder;
+    font-size: 40px;
+	text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+    color: black;
+    position: absolute;
+    top: 8px;
+    left: 40px;
+}
+
+#playerInfoNameDiv {
+    display: flex;
+    justify-content: center;
+}
+
+.tdWithBox {
+    vertical-align: middle;
+}
+.tdWithBox img {
+    vertical-align: middle;
+    height: 50px;
+    width: 50px;
+}
+
+.sqGamesContainerDiv {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    float: left;
+    flex-wrap: wrap;
+    margin: auto;
+    justify-content: space-around; /* ADJUSTMENT */
+
+    /*background-color: red;*/
+
+}
+
+.squareGamesDiv {
+    border: 1px solid black;
+    width: 375px;
+    height: fit-content;
+    /*margin-left: -20px;*/
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: white;
+    font-size: 20px;
+
+}
+
+.gameNameDiv, .createdDiv, .boxPlayersContainer, .startingOptionsDiv {
+    width: 373px;
+    height: fit-content;
+    border: 1px solid black;
+    padding: 1px;
+}
+
+.gameNameDiv {
+    font-weight: bolder;
+    font-size: 20px;
+    background-color: #d4eafd;
+
+}
+
+.boxPlayersContainer {
+    display: flex;
+    position: relative;
+ /*   background-color: #04AA6D;*/
+}
+
+.sqBoxCoverDiv {
+    width: 112px;
+    float: left;
+}
+
+.sqBoxCoverDiv img {
+    width: 108px;
+    height: 150px;
+    border: 1px solid black;
+    margin: 2px;
+}
+
+.sqCurrentPlayersDiv {
+    float: left;
+    text-align: left;
+    margin: 2px;
+    padding: 2px;
+    max-width: 261px;
+    inline-size: 261px;
+    overflow-wrap: break-word;
+    word-break: break-all;
+   /* overflow: auto;*/
+}
+
+.sqCurrentPlayersDiv a:link {
+    text-decoration: none;
+    color: darkblue;
+}
+
+.sqCurrentPlayersDiv a:visited {
+    text-decoration: none;
+    color: darkblue;
+
+}
+
+.sqCurrentPlayersDiv a:hover {
+    text-decoration: underline;
+}
+
+.sqCurrentPlayersDiv a:active {
+    text-decoration: none;
+    color: darkblue;
+
+}
+
+.sqJoinLeaveDiv {
+    float: right;
+    min-width: 75px;
+    width: fit-content;
+    margin-right: 2px;
+    margin-top: 2px;
+   /* background-color: red;*/
+}
+
+.sqJoinLeaveDiv .buttonDiv {
+    padding: 10px;
+    color: black;
+    border-radius: 17px / 15px;
+    color: blue;
+}
+
+.sqJoinLeaveDiv .buttonDiv.Join {
+    border: 2px solid blue;
+}
+
+.sqJoinLeaveDiv .buttonDiv.Leave {
+    border: 2px solid darkred;
+    /*background-color: lightsalmon;*/
+}
+
+.sqSpeedometer {
+    height: 40px;
+    width: 40px;
+    border-radius: 15px;
+    margin-bottom: -10px;
+}
+.sqJoinLeaveDiv .startingOption {
+    /*width: 50px;*/
+    height: 40px;
+    width: 40px;
+    border-radius: 15px;
+    margin: 2px;
+
+}
+
+.sqPaceSpan {
+    font-size: 15px;
+}
+
+.startingOptionsDiv .startingOption {
+    /*width: 50px;*/
+    height: 40px;
+    width: 40px;
+    border-radius: 15px;
+    margin: 2px;
+    vertical-align: middle;
+    line-height: 30px;
+}
+
+.profilePreferenceDiv {
+    border: 1px solid black;
+    padding: 5px;
+    margin: 5px;
+}
+
+.profileTable {
+    margin: 0 auto;
+    /* or margin: 0 auto 0 auto */
+    width: 100%;
+    font-size: 15px;
+    border-collapse: collapse;
+    /* background-color: white;*/
+}
+
+.profileTr {
+    text-align: center;
+    padding: 10px;
+    min-width: 20px;
+
+}
+
+#contactEmailImg {
+    max-width: 100%;
+    width: 400px; 
+    height: 30px;
+}
+
+#aboutCurrentGames {
+    max-width: 505px;
+    min-width: 380px;
+    margin: auto;
+    text-align: left;
+    /*background-color: #04AA6D;*/
+    padding: 0px;
+}
+
+.HCsummaryGraph {
+    /*style="width:100%;min-width:400px"*/
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 300px;
+    max-height: 300px;
+    margin: 0 auto;
+
+}
+
+.centeredDiv {
+    margin: 0 auto;
+    /*background-color: #04AA6D;*/
+}
+
+.changeLangForm {
+    display: inline;
+   /* background-color: #04AA6D;*/
+}
+
+#changelogPage,
+#HCgameSummaryPage {
+    font-size: 1.3em;
+}
+
+#id_update {
+    width: 500px;
+}
+
+#blitzWarningSpan {
+    display: none;
+    color: red;
+}
+
+.tournamentGameIMG {
+    height: 50px;
+}
+
+
+
+/**************** END TGZ HELP ***********************/
+
+.homeButton {
+    text-decoration: none;
+    font-size: 20px;
+    background-color: darkblue;
+    padding: 5px;
+    color: white;
+    margin: 0;
+    border: 2px solid black;
+    border-radius: 15px;
+    cursor: pointer;
+    width: fit-content;
+    opacity: 0.7;
+}
+
+.homeButton:hover {
+    opacity: 1;
+}
+

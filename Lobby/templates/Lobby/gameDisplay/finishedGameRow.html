@@ -1,0 +1,43 @@
+{% load static i18n %}
+
+<tr class="clickableGameRow" id="{{ game.game }}gamesRow{{ game.gameID }}" onclick="window.location.href='/{{game.game}}/{{game.gameID}}/';">
+    <td class="nameTDcurrent tdWithBox">
+
+      {% if game.chatNotification %}<img class="startingOption" alt="Str Opt" width="50" height="50" src="{% static "Lobby/Images/icon-chat-lobby.svg" %}"
+        title="New Chat Message">{% endif %}
+
+        {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.game %}
+
+        <a href="/{{game.game}}/{{game.gameID}}">{{ game.gameName }}</a>
+        {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}
+      {% if game.startingMap and game.game == "FCM" %} 
+      <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMap.jpg" %}" 
+      title="Click to View Map"
+        data-map="{{game.startingMap}}" data-game="FCM"> 
+        {% endif %}
+        {% if game.startingMap and game.game == "TGZ" %} 
+        <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapTGZ.jpg" %}" 
+        title="Click to View Map"
+          data-map="{{game.startingMap}}" data-game="TGZ"> 
+          {% endif %}
+          {% if game.startingMap and game.game == "AQY" %}
+          <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">
+        {% endif %}
+      {{ game.startingOptions|safe }}</td>
+    <td>{{ game.maxPlayers }}</td>
+    <td>{% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">
+        {{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+    <td>
+      {% if game.deleteableGame %}
+      <div id="{{ game.game }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
+        {% blocktranslate trimmed %}
+        Delete <BR /> Practice<BR /> Game
+        {% endblocktranslate %}
+      </div>
+      {% else %}
+      <span class="timeToConvertSpan">{{ game.created }}</span>
+      {% endif %}
+    </td>
+    <td><span class="timeToConvertSpan">{{ game.latestUpdate }}</span></td>
+    <td>{{ game.winner }}</td>
+  </tr>

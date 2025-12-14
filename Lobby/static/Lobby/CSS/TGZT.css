@@ -1,0 +1,227 @@
+/*** TGZT IN PROGRESS */
+.TGZTplayerTable-container {
+	max-width: 800px;
+	/* Adjust the value as per your requirement */
+	overflow-x: auto;
+	margin: auto;
+}
+
+.TGZTplayerTable {
+	border-collapse: collapse;
+	/*width: 100%;*/
+	width: 100%;
+	/*max-width: 500px; */
+	/* Adjust the value as per your requirement */
+	/*table-layout: fixed;*/
+}
+
+.TGZTplayerTable a:link,
+.TGZTplayerTable a:visited,
+.TGZTplayerTable a:active {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.TGZTplayerTable a:hover {
+	text-decoration: underline;
+}
+
+.TGZTplayerTable td,
+.TGZTplayerTable th {
+	border: 1px solid #ddd;
+	padding: 8px;
+	/*min-width: fit-content !important;*/
+	/*width: 100px;*/
+}
+
+.TGZTplayerTable tr {
+	cursor: pointer;
+}
+
+.TGZTplayerTable tr:nth-child(-n + 2) {
+	background-color: lightgreen;
+}
+
+.TGZTplayerTable tr:nth-child(even):not(:nth-child(-n + 2)) {
+	background-color: #f2f2f2;
+}
+
+.TGZTplayerTable tr:nth-child(odd):not(:nth-child(-n + 2)) {
+	background-color: white;
+}
+
+.TGZTplayerTableJumbo tr:nth-child(-n + 14) {
+	background-color: lightgreen !important;
+}
+
+.TGZTplayerTableJumbo tr:nth-child(even):not(:nth-child(-n + 14)) {
+	background-color: #f2f2f2 !important;
+}
+
+.TGZTplayerTableJumbo tr:nth-child(odd):not(:nth-child(-n + 14)) {
+	background-color: white !important;
+}
+
+/*.TGZTplayerTable tr:hover {
+    background-color: #ddd;
+}*/
+
+.TGZTplayerTable th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	/*text-align: left;*/
+	/*background-color: #87C2C8;*/
+	background-color: #5875f8;
+	color: white;
+	cursor: default;
+}
+
+
+
+.TGZTgamesTable-container {
+	max-width: 800px;
+	/* Adjust the value as per your requirement */
+	overflow-x: auto;
+	margin: auto;
+}
+
+.TGZTgamesTable {
+	background-color: white;
+	max-width: 800px;
+}
+
+.TGZTgamesTable a:link {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.TGZTgamesTable a:visited {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.TGZTgamesTable a:hover {
+	text-decoration: underline;
+}
+
+.TGZTgamesTable a:active {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.TGZTgamesTable th {
+	font-weight: bold;
+	background-color: #5875f8;
+	color: white;
+}
+
+.TGZTgamesTable tr {
+	height: 50px;
+	border-top: 3px solid lightgray;
+	border-bottom: 3px solid lightgray;
+}
+
+.TGZTgamesTable tr:hover {
+	background-color: lightblue;
+	cursor: pointer;
+}
+
+/** END FIXED TGZT IN PROGRESS **/
+
+
+/*** FIXED Spring 24 */
+.TGZTplayerTableSpring24-container {
+	max-width: 800px;
+	overflow-x: auto;
+	margin: auto;
+}
+
+.TGZTplayerTableSpring24 {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.TGZTplayerTableSpring24 th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	background-color: #5875f8;
+	color: white;
+	cursor: default;
+}
+
+.TGZTplayerTableSpring24 a:link,
+.TGZTplayerTableSpring24 a:visited,
+.TGZTplayerTableSpring24 a:active,
+.TGZTgamesTableSpring24 a:link,
+.TGZTgamesTableSpring24 a:visited,
+.TGZTgamesTableSpring24 a:active {
+	text-decoration: none;
+	color: darkblue;
+}
+
+.TGZTgamesTableSpring24 a:hover,
+.TGZTplayerTableSpring24 a:hover {
+	text-decoration: underline;
+}
+
+.TGZTplayerTableSpring24 td,
+.TGZTplayerTableSpring24 th,
+.TGZTgamesTableSpring24 td,
+.TGZTgamesTableSpring24 th {
+	border: 1px solid #ddd;
+	padding: 8px;
+}
+
+.TGZTplayerTableSpring24 tr,
+.TGZTgamesTableSpring24 tr {
+	cursor: pointer;
+}
+
+.TGZTplayerTableSpring24 tr:nth-child(-n + 2) {
+	background-color: lightgreen;
+}
+
+.TGZTplayerTableSpring24 tr:nth-child(even):not(:nth-child(-n + 2)) {
+	background-color: #f2f2f2;
+}
+
+.TGZTplayerTableSpring24 tr:nth-child(odd):not(:nth-child(-n + 2)) {
+	background-color: white;
+}
+
+.TGZTgamesTableSpring24 {
+		border-collapse: collapse;
+	width: 100%;
+}
+
+.TGZTgamesTableSpring24 tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+.TGZTgamesTableSpring24 tr:nth-child(odd) {
+	background-color: white;
+}
+
+.TGZTgamesTableSpring24 th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	background-color: #5875f8;
+	color: white;
+	cursor: default;
+}
+
+
+/** END FIXED SPRING 24 **/
+
+/** FIXED AUTUMN 24 **/
+.TGZTplayerTableJumboAutumn24 tr:nth-child(-n + 14) {
+	background-color: lightgreen !important;
+}
+
+.TGZTplayerTableJumboAutumn24 tr:nth-child(even):not(:nth-child(-n + 14)) {
+	background-color: #f2f2f2 !important;
+}
+
+.TGZTplayerTableJumboAutumn24 tr:nth-child(odd):not(:nth-child(-n + 14)) {
+	background-color: white !important;
+}

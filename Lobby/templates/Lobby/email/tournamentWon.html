@@ -1,0 +1,21 @@
+{% load i18n %}
+
+{% autoescape off %}
+{% url "index" as the_url %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate %}
+Hi {{ user }},
+
+Congratulations!
+
+You have won a tournament of Food Chain Magnate
+
+Name: {{ tournamentName }}
+Position: Champion
+
+Click to play more Food Chain Magnate
+https://{{ domain }}{{ the_url }}
+
+Well Done!!
+{% endblocktranslate %}
+{% endautoescape %}

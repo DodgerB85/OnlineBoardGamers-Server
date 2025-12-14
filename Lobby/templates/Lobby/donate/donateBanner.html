@@ -1,0 +1,17 @@
+{% load static i18n %}
+<div class="support">
+  <a href="{% url 'donate' %}">{% translate "Wish to support the project?" %}
+    <img src="{% static 'Lobby/Images/paypalButton.png' %}"
+         alt="Support OBG"
+         width="194"
+         height="44" />
+    <img src="{% static 'Lobby/Images/kofiImage.jpg' %}"
+         alt="Support OBG"
+         width="194"
+         height="44" />
+    <img src="{% static 'Lobby/Images/patreonImage.jpg' %}"
+         alt="Support OBG"
+         width="194"
+         height="44" />
+  </a>
+</div>

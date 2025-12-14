@@ -1,0 +1,4122 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-07 02:27+0800\n"
+"PO-Revision-Date: 2023-10-07 20:27+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: .\forms.py:31 .\forms.py:78 .\templates\Lobby\login.html:21
+msgid "Password"
+msgstr "密码"
+
+#: .\forms.py:37 .\forms.py:84
+msgid "Confirm Password"
+msgstr "确认密码"
+
+#: .\forms.py:45
+msgid "Email Address"
+msgstr "电子邮件地址"
+
+#: .\forms.py:52
+msgid "Old Password"
+msgstr "旧密码"
+
+#: .\forms.py:53
+msgid "New Password"
+msgstr "新密码"
+
+#: .\forms.py:54
+msgid "Confirm New Password"
+msgstr "确认新密码"
+
+#: .\forms.py:65
+msgid "Username - This will be your in-game Name"
+msgstr ""
+
+#: .\forms.py:70
+msgid "Email Address - Required for Account Activation"
+msgstr "电子邮件地址 - 需要激活账户"
+
+#: .\sharedFunctions\sharedFunctions.py:480
+#, fuzzy
+#| msgid "No Sound"
+msgid "Round"
+msgstr "没有声音"
+
+#: .\sharedFunctions\sharedFunctions.py:486
+msgid "Final Round (KO)"
+msgstr ""
+
+#: .\sharedFunctions\sharedFunctions.py:488
+msgid "Final Round"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:46
+msgid "Your game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:49
+#, fuzzy
+#| msgid "Create Food Chain Magnate Game"
+msgid "Your Food Chain Magnate game has finished"
+msgstr "创建快餐连锁大亨游戏"
+
+#: .\sharedFunctions\sharedNotifications.py:50 .\templates\Lobby\index.html:58
+#: .\templates\Lobby\newGames.html:32
+msgid "Food Chain Magnate"
+msgstr "快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:52
+#, fuzzy
+#| msgid "Create Horseless Carriage Game"
+msgid "Your Horseless Carriage game has finished"
+msgstr "创建 Horseless Carriage"
+
+#: .\sharedFunctions\sharedNotifications.py:53
+#: .\sharedFunctions\sharedNotifications.py:145
+#: .\sharedFunctions\sharedNotifications.py:568
+#: .\sharedFunctions\sharedNotifications.py:625 .\templates\Lobby\about.html:20
+#: .\templates\Lobby\index.html:32 .\templates\Lobby\newGames.html:26
+msgid "Horseless Carriage"
+msgstr "Horseless Carriage"
+
+#: .\sharedFunctions\sharedNotifications.py:55
+msgid "Your Bus game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:56
+#: .\sharedFunctions\sharedNotifications.py:150
+#: .\sharedFunctions\sharedNotifications.py:569
+#: .\sharedFunctions\sharedNotifications.py:626 .\templates\Lobby\about.html:21
+#: .\templates\Lobby\index.html:114 .\templates\Lobby\newGames.html:20
+msgid "Bus"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:58
+msgid "Your Great Zimbabwe game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:59
+#: .\sharedFunctions\sharedNotifications.py:155
+#: .\sharedFunctions\sharedNotifications.py:570
+#: .\sharedFunctions\sharedNotifications.py:627 .\templates\Lobby\about.html:22
+#: .\templates\Lobby\index.html:86 .\templates\Lobby\newGames.html:8
+msgid "The Great Zimbabwe"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:61
+msgid "Your Cannes game has finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:62
+#: .\sharedFunctions\sharedNotifications.py:159
+msgid "Cannes"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:67
+#, fuzzy
+#| msgid "No Invitations"
+msgid "Congratulations!"
+msgstr "没有邀请中的游戏"
+
+#: .\sharedFunctions\sharedNotifications.py:84
+#, python-format
+msgid ""
+"%(box_name)s Game Finished!\n"
+" In %(gameName)s you came: %(result)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:86
+#, fuzzy
+#| msgid "Click here to play Food Chain Magnate"
+msgid "Click here to view the game"
+msgstr "单击此处开始快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:133
+#, fuzzy
+#| msgid "It is your move"
+msgid "It is your turn"
+msgstr "轮到你行动"
+
+#: .\sharedFunctions\sharedNotifications.py:135
+#: .\sharedFunctions\sharedNotifications.py:441
+#: .\sharedFunctions\sharedNotifications.py:586
+#: .\sharedFunctions\sharedNotifications.py:643
+#, fuzzy
+#| msgid "Click here to play Food Chain Magnate"
+msgid "Click here to play"
+msgstr "单击此处开始快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:136
+#, fuzzy, python-format
+#| msgid ""
+#| "Game invite at OnlineBoardGamers\n"
+#| "%(gameName)s - %(maxPlayers)s players"
+msgid ""
+"Your turn at OnlineBoardGamers!\n"
+"%(gameName)s - %(currentTurnString)s."
+msgstr ""
+"在 OnlineBoardGamers 上的游戏邀请\n"
+"%(gameName)s - %(maxPlayers)s 人游戏"
+
+#: .\sharedFunctions\sharedNotifications.py:139
+msgid "It is your turn in FCM"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:140
+#: .\sharedFunctions\sharedNotifications.py:567
+#: .\sharedFunctions\sharedNotifications.py:624
+#, fuzzy
+#| msgid "Food Chain Magnate"
+msgid "Food Chain Magnate"
+msgstr "快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:141
+#: .\sharedFunctions\sharedNotifications.py:448
+msgid "Click here to play Food Chain Magnate"
+msgstr "单击此处开始快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:144
+#, fuzzy
+#| msgid "Click here to play Horseless Carriage"
+msgid "It is your turn at Horseless Carriage"
+msgstr "单击此处开始 Horseless Carriage"
+
+#: .\sharedFunctions\sharedNotifications.py:146
+#: .\sharedFunctions\sharedNotifications.py:453
+msgid "Click here to play Horseless Carriage"
+msgstr "单击此处开始 Horseless Carriage"
+
+#: .\sharedFunctions\sharedNotifications.py:149
+msgid "It is your turn in Bus"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:151
+#: .\sharedFunctions\sharedNotifications.py:458
+#, fuzzy
+#| msgid "Click here to play Horseless Carriage"
+msgid "Click here to play Bus"
+msgstr "单击此处开始 Horseless Carriage"
+
+#: .\sharedFunctions\sharedNotifications.py:154
+msgid "It is your turn in TGZ"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:156
+#: .\sharedFunctions\sharedNotifications.py:463
+#, fuzzy
+#| msgid "Click here to play Horseless Carriage"
+msgid "Click here to play The Great Zimbabwe"
+msgstr "单击此处开始 Horseless Carriage"
+
+#: .\sharedFunctions\sharedNotifications.py:158
+#, fuzzy
+#| msgid "It is your move"
+msgid "It is your turn in Cannes"
+msgstr "轮到你行动"
+
+#: .\sharedFunctions\sharedNotifications.py:160
+#, fuzzy
+#| msgid "Click here to play Food Chain Magnate"
+msgid "Click here to play Cannes"
+msgstr "单击此处开始快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:163
+#, fuzzy
+#| msgid "Welcome to Online Board Gamers"
+msgid "Your turn at OnlineBoardGamers"
+msgstr "欢迎来到 Online Board Gamers"
+
+#: .\sharedFunctions\sharedNotifications.py:275 .\views.py:2969
+#, fuzzy
+#| msgid "Food Chain Magnate - Game Invitation Received"
+msgid " - Game Invitation Received"
+msgstr "快餐连锁大亨 - 收到游戏邀请"
+
+#: .\sharedFunctions\sharedNotifications.py:285 .\views.py:2979
+#, python-format
+msgid ""
+"Game invite at OnlineBoardGamers\n"
+"%(gameName)s - %(maxPlayers)s players"
+msgstr ""
+"在 OnlineBoardGamers 上的游戏邀请\n"
+"%(gameName)s - %(maxPlayers)s 人游戏"
+
+#: .\sharedFunctions\sharedNotifications.py:287
+#: .\sharedFunctions\sharedNotifications.py:347 .\views.py:2981
+#, fuzzy
+#| msgid "Click here to play Food Chain Magnate"
+msgid "Click here to play "
+msgstr "单击此处开始快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:334
+#, python-format
+msgid "%(game_type)s - Tournament Game Started"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:346
+#, fuzzy, python-format
+#| msgid ""
+#| "Game invite at OnlineBoardGamers\n"
+#| "%(gameName)s - %(maxPlayers)s players"
+msgid ""
+"A Tournament Game of %(game_type)s has started\n"
+"%(gameName)s - %(maxPlayers)s players"
+msgstr ""
+"在 OnlineBoardGamers 上的游戏邀请\n"
+"%(gameName)s - %(maxPlayers)s 人游戏"
+
+#: .\sharedFunctions\sharedNotifications.py:385
+#, python-format
+msgid "%(box_name)s - Tournament Won"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:395
+#, python-format
+msgid ""
+"You have won a %(full_game_name)s tournament! \n"
+"%(tournamentName)s"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:396
+#, fuzzy, python-format
+#| msgid "Click here to play Food Chain Magnate"
+msgid "Click here to play %(full_game_name)s"
+msgstr "单击此处开始快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:439
+#, fuzzy
+#| msgid "The game has already started"
+msgid "Your game has started!"
+msgstr "游戏已经开始"
+
+#: .\sharedFunctions\sharedNotifications.py:440
+#, python-format
+msgid ""
+"Your game has started!\n"
+"%(gameName)s - Starting Player:  %(currentPlayer)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:445
+#, fuzzy
+#| msgid "Favourite Food Chain Magnate Restaurant"
+msgid "Your Food Chain Magnate game has started!"
+msgstr "快餐连锁大亨 - 最喜欢的餐厅"
+
+#: .\sharedFunctions\sharedNotifications.py:447
+#, python-format
+msgid ""
+"Your Food Chain Magnate game has started!\n"
+"%(gameName)s - Starting Player:  %(currentPlayer)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:450
+#, fuzzy
+#| msgid "Create Horseless Carriage Game"
+msgid "Your Horseless Carriage game has started!"
+msgstr "创建 Horseless Carriage"
+
+#: .\sharedFunctions\sharedNotifications.py:452
+#, python-format
+msgid ""
+"Your Horseless Carriage game has started!\n"
+"%(gameName)s - Starting Player:  %(currentPlayer)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:455
+#, fuzzy
+#| msgid "The game has already started"
+msgid "Your Bus game has started!"
+msgstr "游戏已经开始"
+
+#: .\sharedFunctions\sharedNotifications.py:457
+#, python-format
+msgid ""
+"Your Bus game has started!\n"
+"%(gameName)s - Starting Player:  %(currentPlayer)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:460
+#, fuzzy
+#| msgid "You have joined the game and the game has started"
+msgid "Your Great Zimbabwe game has started!"
+msgstr "你已经加入游戏，游戏开始"
+
+#: .\sharedFunctions\sharedNotifications.py:462
+#, python-format
+msgid ""
+"Your Great Zimbabwe game has started!\n"
+"%(gameName)s - Starting Player:  %(currentPlayer)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:514
+msgid "A player has declined your invitation"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:526
+#, python-format
+msgid ""
+"A Player has declined your invitation\n"
+"%(gameName)s %(gameDescription)s\n"
+"Player: %(declinerUsername)s\n"
+"Reason: %(reason)s"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:527
+#, fuzzy
+#| msgid "Click here to play Food Chain Magnate"
+msgid "Click here to view your games"
+msgstr "单击此处开始快餐连锁大亨"
+
+#: .\sharedFunctions\sharedNotifications.py:574
+msgid "Less than 2 hours to move"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:585
+#, python-format
+msgid ""
+"Less than 2 hours to move at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s."
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:631
+msgid "Turn Expired!"
+msgstr ""
+
+#: .\sharedFunctions\sharedNotifications.py:642
+#, python-format
+msgid ""
+"Your time limit has expired at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s.\n"
+"You could be kicked out at any time. Please move ASAP"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:10
+#, fuzzy
+#| msgid "Draft modules"
+msgid "Setup - Draft Modules"
+msgstr "所有模组"
+
+#: .\sharedFunctions\sharedRefs.py:12
+msgid "Setup - Restaurants"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:14
+#, fuzzy
+#| msgid "New Reserve Cards"
+msgid "Setup - Reserve Cards"
+msgstr "新的储备卡"
+
+#: .\sharedFunctions\sharedRefs.py:16
+msgid "1 - Restructuring"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:18
+msgid "2 - Order of Business"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:20
+msgid "3 - Working 9:00-5:00"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:22
+msgid "4 - Dinnertime"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:24
+msgid "5 - Payday"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:26
+#, fuzzy
+#| msgid "Marketing Options"
+msgid "6 - Marketing Campaigns"
+msgstr "营销选项"
+
+#: .\sharedFunctions\sharedRefs.py:28
+msgid "7 - Clean up"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:30
+#, fuzzy
+#| msgid "Game name"
+msgid "Game End"
+msgstr "游戏名称"
+
+#: .\sharedFunctions\sharedRefs.py:32
+#, fuzzy
+#| msgid "No Radio Milestone"
+msgid "4 - Pizza Milestone"
+msgstr "不使用广播里程碑"
+
+#: .\sharedFunctions\sharedRefs.py:34
+#, fuzzy
+#| msgid "Ketchup Milestone"
+msgid "7 - Coffee Shop Milestone"
+msgstr "番茄酱里程碑"
+
+#: .\sharedFunctions\sharedRefs.py:40
+#, fuzzy
+#| msgid "Game Setup"
+msgid "Factory Setup"
+msgstr "游戏设置"
+
+#: .\sharedFunctions\sharedRefs.py:42
+msgid "1 - Research"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:44
+msgid "2 - Set Focus"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:46
+msgid "3 - Build Factory"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:48
+msgid "4 - Print Sales Brochures"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:50
+msgid "5 - Sell"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:52
+#, fuzzy
+#| msgid "Game name"
+msgid "6 - Game End"
+msgstr "游戏名称"
+
+#: .\sharedFunctions\sharedRefs.py:54
+msgid "7 - Increase Expectations"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:56
+msgid "8 - Grow Demands"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:63
+#, fuzzy
+#| msgid "Setup Options"
+msgid "Setup Buildings"
+msgstr "游戏设置"
+
+#: .\sharedFunctions\sharedRefs.py:65
+#, fuzzy
+#| msgid "Setup Options"
+msgid "Setup Lines"
+msgstr "游戏设置"
+
+#: .\sharedFunctions\sharedRefs.py:67
+msgid "1 - Choose Actions"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:69
+msgid "2 - Line Expansion"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:71
+msgid "3 - Add a Bus"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:73
+msgid "4 - Add Passengers"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:75
+msgid "5 - Add Buildings"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:77
+#, fuzzy
+#| msgid "All Time"
+msgid "6 - Alter Time"
+msgstr "所有时间"
+
+#: .\sharedFunctions\sharedRefs.py:79
+msgid "7 - VRROOOMM!!"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:81
+msgid "8 - Change Start Player"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:83
+msgid "9 - Game End Check"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:85
+msgid "10 - Game Finished"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:92
+msgid "Place First Monument"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:94
+msgid "The Generosity Of Kings"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:96
+msgid "Religion & Culture"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:98
+msgid "Revenues"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:100
+msgid "Let us compare mythologies"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:102
+msgid "We have found the best mythology"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:106 .\sharedFunctions\sharedRefs.py:107
+#: .\sharedFunctions\sharedRefs.py:108
+#, fuzzy
+#| msgid "Last Turn"
+msgid "Turn"
+msgstr "上一回合"
+
+#: .\sharedFunctions\sharedRefs.py:106
+msgid "Production"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:107
+msgid "Move Pirates"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:112
+msgid "Blitz"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:113
+msgid "Live"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:114
+msgid "Fast"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:115
+msgid "Standard"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:116
+msgid "Slow"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:126 .\templates\Lobby\lobbyHelp.html:42
+msgid "Kickout after 5 Minutes"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:129 .\templates\Lobby\lobbyHelp.html:43
+msgid "Kickout after 10 Minutes"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:132 .\templates\Lobby\lobbyHelp.html:44
+msgid "Kickout after 20 Minutes"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:136 .\templates\Lobby\lobbyHelp.html:46
+msgid "Kickout after 12 Hours"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:139 .\templates\Lobby\lobbyHelp.html:47
+#, fuzzy
+#| msgid "Kickouts in last year"
+msgid "Kickout after 1 day"
+msgstr "最近一年被踢的游戏"
+
+#: .\sharedFunctions\sharedRefs.py:141
+#, python-format
+msgid "Kickout after %(kickoutInDays)s days"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:240 .\templates\Lobby\createFCM.html:303
+#: .\templates\Lobby\lobby_icons.html:137
+#: .\templates\Lobby\lobby_icons.html:138
+msgid "Short Game"
+msgstr "短游戏"
+
+#: .\sharedFunctions\sharedRefs.py:244 .\templates\Lobby\lobby_icons.html:145
+#: .\templates\Lobby\lobby_icons.html:146
+msgid "No Milestones"
+msgstr "不使用里程碑"
+
+#: .\sharedFunctions\sharedRefs.py:248 .\templates\Lobby\createFCM.html:313
+#: .\templates\Lobby\lobby_icons.html:153
+#: .\templates\Lobby\lobby_icons.html:154
+msgid "No CFO Milestone"
+msgstr "不使用 CFO 里程碑"
+
+#: .\sharedFunctions\sharedRefs.py:252 .\templates\Lobby\createFCM.html:317
+#: .\templates\Lobby\lobby_icons.html:161
+#: .\templates\Lobby\lobby_icons.html:162
+msgid "No Radio Milestone"
+msgstr "不使用广播里程碑"
+
+#: .\sharedFunctions\sharedRefs.py:256 .\templates\Lobby\lobby_icons.html:169
+#: .\templates\Lobby\lobby_icons.html:170
+msgid "Hard Choices"
+msgstr "艰难的抉择"
+
+#: .\sharedFunctions\sharedRefs.py:260 .\templates\Lobby\lobby_icons.html:14
+#: .\templates\Lobby\lobby_icons.html:15
+msgid "New Milestones"
+msgstr "新里程碑"
+
+#: .\sharedFunctions\sharedRefs.py:264 .\templates\Lobby\lobby_icons.html:22
+#: .\templates\Lobby\lobby_icons.html:23
+msgid "Ketchup Milestone"
+msgstr "番茄酱里程碑"
+
+#: .\sharedFunctions\sharedRefs.py:268 .\templates\Lobby\lobby_icons.html:30
+#: .\templates\Lobby\lobby_icons.html:31
+msgid "New Reserve Cards"
+msgstr "新的储备卡"
+
+#: .\sharedFunctions\sharedRefs.py:272 .\templates\Lobby\lobby_icons.html:38
+#: .\templates\Lobby\lobby_icons.html:39
+msgid "Movie Stars"
+msgstr "电影明星"
+
+#: .\sharedFunctions\sharedRefs.py:276 .\templates\Lobby\lobby_icons.html:46
+#: .\templates\Lobby\lobby_icons.html:47
+msgid "Mass Marketeers"
+msgstr "大众营销"
+
+#: .\sharedFunctions\sharedRefs.py:280 .\templates\Lobby\lobby_icons.html:54
+#: .\templates\Lobby\lobby_icons.html:55
+msgid "Gourmet Food Critics"
+msgstr "美食评论家"
+
+#: .\sharedFunctions\sharedRefs.py:284 .\templates\Lobby\lobby_icons.html:62
+#: .\templates\Lobby\lobby_icons.html:63
+msgid "Rural Marketeers"
+msgstr "乡村营销"
+
+#: .\sharedFunctions\sharedRefs.py:288 .\templates\Lobby\lobby_icons.html:70
+#: .\templates\Lobby\lobby_icons.html:71
+msgid "New Districts"
+msgstr "新城区"
+
+#: .\sharedFunctions\sharedRefs.py:292 .\templates\Lobby\lobby_icons.html:78
+#: .\templates\Lobby\lobby_icons.html:79
+msgid "Lobbyists"
+msgstr "提案人"
+
+#: .\sharedFunctions\sharedRefs.py:296 .\templates\Lobby\lobby_icons.html:86
+#: .\templates\Lobby\lobby_icons.html:87
+msgid "Night Shift Manager"
+msgstr "夜班经理"
+
+#: .\sharedFunctions\sharedRefs.py:300 .\templates\Lobby\lobby_icons.html:94
+#: .\templates\Lobby\lobby_icons.html:95
+msgid "Coffee"
+msgstr "咖啡"
+
+#: .\sharedFunctions\sharedRefs.py:304 .\templates\Lobby\lobby_icons.html:102
+#: .\templates\Lobby\lobby_icons.html:103
+msgid "Fry Chef"
+msgstr "炸薯条大厨"
+
+#: .\sharedFunctions\sharedRefs.py:308 .\templates\Lobby\lobby_icons.html:110
+#: .\templates\Lobby\lobby_icons.html:111
+msgid "Kimchi"
+msgstr "泡菜"
+
+#: .\sharedFunctions\sharedRefs.py:312 .\templates\Lobby\lobby_icons.html:118
+#: .\templates\Lobby\lobby_icons.html:119
+msgid "Sushi"
+msgstr "寿司"
+
+#: .\sharedFunctions\sharedRefs.py:316 .\templates\Lobby\lobby_icons.html:126
+#: .\templates\Lobby\lobby_icons.html:127
+msgid "Noodles"
+msgstr "面条"
+
+#: .\sharedFunctions\sharedRefs.py:320 .\templates\Lobby\lobby_icons.html:129
+#: .\templates\Lobby\lobby_icons.html:130
+msgid "Strict Payday/Fridge"
+msgstr "严格的发薪/冰箱顺序"
+
+#: .\sharedFunctions\sharedRefs.py:332 .\templates\Lobby\lobby_icons.html:185
+#: .\templates\Lobby\lobby_icons.html:186
+msgid "Random Modules"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:336 .\templates\Lobby\lobby_icons.html:193
+#: .\templates\Lobby\lobby_icons.html:194
+msgid "Draft Modules"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:341
+msgid "Skip Module"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:346 .\templates\Lobby\lobby_icons.html:177
+#: .\templates\Lobby\lobby_icons.html:178
+msgid "Sandbox Mode"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:359 .\templates\Lobby\createCNS.html:211
+msgid "Use Expansion"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:361
+msgid "Smalll Table"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:363
+msgid "Medium Table"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:365
+msgid "Large Table"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:367
+msgid "Low Junk"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:369
+msgid "Mediumm Junk"
+msgstr ""
+
+#: .\sharedFunctions\sharedRefs.py:371
+msgid "High Junk"
+msgstr ""
+
+#: .\templates\Lobby\404.html:19
+msgid "Sorry, the page you are requesting does not exist"
+msgstr "对不起，您请求的页面不存在"
+
+#: .\templates\Lobby\404.html:20 .\templates\Lobby\500.html:21
+msgid ""
+"If you were doing something that worked before, or expected to work (such as "
+"clicking on a game) then there is a chance the website is being updated."
+msgstr ""
+"如果您之前正在进行操作或者希望进行操作（例如在游戏中进行点击），那么有可能该"
+"网站正在进行更新。"
+
+#: .\templates\Lobby\404.html:21 .\templates\Lobby\500.html:22
+msgid "Please wait 5 minutes and try again."
+msgstr "请等待5分钟再试。"
+
+#: .\templates\Lobby\404.html:22 .\templates\Lobby\500.html:23
+msgid "If there is still a problem please email"
+msgstr "如果还有问题请发邮件联系管理员"
+
+#: .\templates\Lobby\404.html:28 .\templates\Lobby\500.html:29
+#: .\templates\Lobby\AllTournaments.html:82
+#: .\templates\Lobby\TGZtournamentMain.html:81
+#: .\templates\Lobby\TGZtournaments.html:76
+#: .\templates\Lobby\Tournament.html:92 .\templates\Lobby\about.html:54
+#: .\templates\Lobby\changelog.html:39 .\templates\Lobby\contact.html:21
+#: .\templates\Lobby\donate\donate_success.html:28
+#: .\templates\Lobby\layout.html:61 .\templates\Lobby\layout.html:262
+#: .\templates\Lobby\lobbyHelp.html:257 .\templates\Lobby\login.html:30
+#: .\templates\Lobby\newGames.html:56
+#: .\templates\Lobby\password\password_reset.html:33
+#: .\templates\Lobby\playerInfo.html:198 .\templates\Lobby\profile.html:579
+#: .\templates\Lobby\register.html:23 .\templates\Lobby\showTGZoptions.html:25
+#: .\templates\Lobby\stats.html:951
+msgid "Home"
+msgstr "首页"
+
+#: .\templates\Lobby\500.html:19
+msgid "Sorry, the page you are requesting cannot be delivered"
+msgstr "对不起，无法提供您请求的页面"
+
+#: .\templates\Lobby\500.html:20
+msgid ""
+"It appears to be a proper page, but the server is having trouble rendering it"
+msgstr "这似乎是一个正确的页面，但服务器在渲染它时遇到了问题"
+
+#: .\templates\Lobby\AllTournaments.html:28 .\templates\Lobby\layout.html:111
+#: .\templates\Lobby\layout.html:240 .\templates\Lobby\lobbyHelp.html:217
+msgid "Tournaments"
+msgstr "锦标赛"
+
+#: .\templates\Lobby\AllTournaments.html:29
+msgid ""
+"Horseless Carrige Tournaments will open between 1st and 7th, as long as the "
+"previous tournament has finished. They will start 7 days later, or when "
+"enough players have signed up."
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:30
+msgid ""
+"Food Chain Magnate Tournaments will run at regular intervals. Check the "
+"discord!"
+msgstr ""
+
+#: .\templates\Lobby\AllTournaments.html:31
+msgid "For more information on tournaments, see"
+msgstr "有关锦标赛的更多信息，请参阅"
+
+#: .\templates\Lobby\AllTournaments.html:40
+#, fuzzy
+#| msgid "Games"
+msgid "Game"
+msgstr "总局数"
+
+#: .\templates\Lobby\AllTournaments.html:41
+#: .\templates\Lobby\TGZtournaments.html:32
+#: .\templates\Lobby\TGZtournaments.html:56 .\templates\Lobby\admin\DBO.html:49
+#: .\templates\Lobby\createFCM.html:31 .\templates\Lobby\lobby.html:205
+#: .\templates\Lobby\lobby.html:238 .\templates\Lobby\lobby.html:282
+#: .\templates\Lobby\lobby.html:311 .\templates\Lobby\lobby.html:340
+#: .\templates\Lobby\playerInfo.html:107 .\templates\Lobby\playerInfo.html:131
+#: .\templates\Lobby\playerInfo.html:154 .\templates\Lobby\playerInfo.html:178
+#: .\templates\Lobby\stats.html:919
+msgid "Name"
+msgstr "名称"
+
+#: .\templates\Lobby\AllTournaments.html:42
+msgid "Total Players"
+msgstr "玩家总数"
+
+#: .\templates\Lobby\AllTournaments.html:43
+msgid "Players per Game"
+msgstr "每场游戏的玩家数"
+
+#: .\templates\Lobby\AllTournaments.html:44
+msgid "Format"
+msgstr "赛制"
+
+#: .\templates\Lobby\AllTournaments.html:45 .\templates\Lobby\lobby.html:211
+#: .\templates\Lobby\lobby.html:289 .\templates\Lobby\lobby.html:318
+msgid "Starting Options"
+msgstr "起始游戏选项"
+
+#: .\templates\Lobby\AllTournaments.html:46
+#: .\templates\Lobby\TGZtournaments.html:59 .\templates\Lobby\lobby.html:210
+#: .\templates\Lobby\lobby.html:288 .\templates\Lobby\lobby.html:317
+#: .\templates\Lobby\lobby.html:343 .\templates\Lobby\playerInfo.html:134
+#: .\templates\Lobby\playerInfo.html:181
+msgid "Created"
+msgstr "创建时间"
+
+#: .\templates\Lobby\AllTournaments.html:47
+#: .\templates\Lobby\TGZtournaments.html:61 .\templates\Lobby\lobby.html:345
+#: .\templates\Lobby\playerInfo.html:136 .\templates\Lobby\playerInfo.html:183
+msgid "Winner"
+msgstr "获胜玩家"
+
+#: .\templates\Lobby\AllTournaments.html:76
+#: .\templates\Lobby\Tournament.html:83 .\templates\Lobby\changelog.html:34
+#: .\templates\Lobby\contact.html:16 .\templates\Lobby\createBus.html:153
+#: .\templates\Lobby\createCNS.html:231 .\templates\Lobby\createFCM.html:547
+#: .\templates\Lobby\createHC.html:155 .\templates\Lobby\createTGZ.html:397
+#: .\templates\Lobby\lobby.html:367 .\templates\Lobby\newGames.html:44
+#: .\templates\Lobby\stats.html:944
+msgid "Wish to support the project?"
+msgstr "希望支持该项目？"
+
+#: .\templates\Lobby\FCMmapEditor.html:32
+#: .\templates\Lobby\TGZmapEditor.html:31
+#, fuzzy
+#| msgid "Create a game with this map"
+msgid " Create a game with this map"
+msgstr "使用该地图创建游戏"
+
+#: .\templates\Lobby\FCMmapEditor.html:39
+msgid ""
+"Generate a map using <a class='linkOther' href='https://boardgamehelpers.com/"
+"FoodChainMagnate/' target='_blank'>BoardGameHelpers</a>"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:44
+msgid "Map Type"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:46
+msgid "Random"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:48
+msgid "Balanced"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:50
+msgid "Interesting"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:54
+#, fuzzy
+#| msgid "Setup Options"
+msgid "Tile Options"
+msgstr "游戏设置"
+
+#: .\templates\Lobby\FCMmapEditor.html:56
+msgid "Use Normal Expansion Tiles"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:60
+msgid "Use Apartment Tiles"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:63
+msgid "Use Park Tile"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:97
+#, python-format
+msgid "Note: No map is 100%% balanced!"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:103
+#: .\templates\Lobby\TGZmapEditor.html:35
+msgid "Drag and drop tiles - then click on tiles to rotate"
+msgstr "拖放板块 - 然后点击板块进行旋转"
+
+#: .\templates\Lobby\FCMmapEditor.html:108
+#: .\templates\Lobby\TGZmapEditor.html:40
+#, fuzzy
+#| msgid "Complete map with random tiles"
+msgid " Complete map with random tiles"
+msgstr "带有随机板块的完整地图"
+
+#: .\templates\Lobby\FCMmapEditor.html:110
+msgid "Complete map with random base game tiles only"
+msgstr "仅使用基础游戏板块随机生成地图"
+
+#: .\templates\Lobby\FCMmapEditor.html:111
+#: .\templates\Lobby\TGZmapEditor.html:41
+#, fuzzy
+#| msgid "Shuffle the current board"
+msgid " Shuffle the current board"
+msgstr "打乱当前版图"
+
+#: .\templates\Lobby\FCMmapEditor.html:112
+#: .\templates\Lobby\TGZmapEditor.html:42
+#, fuzzy
+#| msgid "Clear map"
+msgid " Clear map"
+msgstr "清空当前版图"
+
+#: .\templates\Lobby\TGZtournaments.html:27
+msgid ""
+"Current Games - for Tournament Moderator info. Check a tournament link for "
+"tournament info"
+msgstr ""
+
+#: .\templates\Lobby\TGZtournaments.html:33 .\templates\Lobby\admin\DBO.html:50
+#: .\templates\Lobby\lobby.html:206 .\templates\Lobby\lobby.html:239
+#: .\templates\Lobby\lobby.html:283 .\templates\Lobby\lobby.html:312
+#: .\templates\Lobby\playerInfo.html:108 .\templates\Lobby\playerInfo.html:155
+#: .\templates\Lobby\stats.html:920
+msgid "Creator"
+msgstr "创建者"
+
+#: .\templates\Lobby\TGZtournaments.html:34
+#: .\templates\Lobby\TGZtournaments.html:57 .\templates\Lobby\admin\DBO.html:51
+#: .\templates\Lobby\lobby.html:207 .\templates\Lobby\lobby.html:240
+#: .\templates\Lobby\lobby.html:284 .\templates\Lobby\lobby.html:313
+#: .\templates\Lobby\lobby.html:341 .\templates\Lobby\playerInfo.html:52
+#: .\templates\Lobby\playerInfo.html:109 .\templates\Lobby\playerInfo.html:132
+#: .\templates\Lobby\playerInfo.html:156 .\templates\Lobby\playerInfo.html:179
+#: .\templates\Lobby\stats.html:921
+msgid "Players"
+msgstr "玩家"
+
+#: .\templates\Lobby\TGZtournaments.html:35
+#: .\templates\Lobby\Tournament.html:29 .\templates\Lobby\admin\DBO.html:52
+#: .\templates\Lobby\lobby.html:209 .\templates\Lobby\lobby.html:241
+#: .\templates\Lobby\lobby.html:286 .\templates\Lobby\lobby.html:315
+#: .\templates\Lobby\playerInfo.html:110 .\templates\Lobby\playerInfo.html:157
+#: .\templates\Lobby\stats.html:922
+msgid "Current Players"
+msgstr "当前玩家"
+
+#: .\templates\Lobby\TGZtournaments.html:36 .\templates\Lobby\admin\DBO.html:53
+#: .\templates\Lobby\lobby.html:242 .\templates\Lobby\playerInfo.html:111
+#: .\templates\Lobby\playerInfo.html:158 .\templates\Lobby\stats.html:923
+msgid "Current Turn"
+msgstr "当前回合"
+
+#: .\templates\Lobby\TGZtournaments.html:38 .\templates\Lobby\admin\DBO.html:55
+#: .\templates\Lobby\lobby.html:208 .\templates\Lobby\lobby.html:244
+#: .\templates\Lobby\lobby.html:285 .\templates\Lobby\lobby.html:314
+#: .\templates\Lobby\playerInfo.html:113 .\templates\Lobby\playerInfo.html:160
+#: .\templates\Lobby\stats.html:925
+msgid "Speed"
+msgstr "游戏速度"
+
+#: .\templates\Lobby\TGZtournaments.html:39 .\templates\Lobby\admin\DBO.html:56
+#: .\templates\Lobby\lobby.html:245 .\templates\Lobby\playerInfo.html:114
+#: .\templates\Lobby\playerInfo.html:161 .\templates\Lobby\stats.html:926
+msgid "Last Turn"
+msgstr "上一回合"
+
+#: .\templates\Lobby\TGZtournaments.html:48 .\templates\Lobby\lobby.html:262
+#: .\templates\Lobby\playerInfo.html:170
+msgid "No Current Games"
+msgstr "没有进行中的游戏"
+
+#: .\templates\Lobby\TGZtournaments.html:51 .\templates\Lobby\lobby.html:160
+#: .\templates\Lobby\playerInfo.html:173
+msgid "Finished Games"
+msgstr "已结束"
+
+#: .\templates\Lobby\TGZtournaments.html:58 .\templates\Lobby\lobby.html:342
+#: .\templates\Lobby\playerInfo.html:133 .\templates\Lobby\playerInfo.html:180
+#: .\templates\Lobby\stats.html:71
+msgid "All Players"
+msgstr "所有游戏"
+
+#: .\templates\Lobby\TGZtournaments.html:60 .\templates\Lobby\lobby.html:344
+#: .\templates\Lobby\playerInfo.html:135 .\templates\Lobby\playerInfo.html:182
+msgid "Last Activity"
+msgstr "最近更新"
+
+#: .\templates\Lobby\TGZtournaments.html:70 .\templates\Lobby\lobby.html:360
+#: .\templates\Lobby\playerInfo.html:145 .\templates\Lobby\playerInfo.html:192
+msgid "No Finished Games"
+msgstr "没有已完成游戏"
+
+#: .\templates\Lobby\Tournament.html:20
+msgid "Max Players"
+msgstr "最大玩家数"
+
+#: .\templates\Lobby\Tournament.html:21
+msgid "Players per game"
+msgstr "每场游戏的玩家数"
+
+#: .\templates\Lobby\Tournament.html:22
+msgid "Tournament Format"
+msgstr "锦标赛赛制"
+
+#: .\templates\Lobby\Tournament.html:56 .\templates\Lobby\Tournament.html:64
+#: .\templates\Lobby\Tournament.html:72
+msgid "Join Tournament"
+msgstr "加入锦标赛"
+
+#: .\templates\Lobby\about.html:9
+msgid ""
+"<h1>Welcome to Online Board Gamers!</h1> Online Board Gamers is a website to "
+"play board games online. <BR /> You can play live against other playes with "
+"automatic updates, or play a \"practice\" game where you make all the moves "
+"on your device. <h2>Current Games</h2>"
+msgstr ""
+"<h1>欢迎来到 Online Board Gamers! </h1> Online Board Gamers 是一个在线桌游网"
+"站。<BR/>您可以与其他玩家实时对战，或者在训练模式下进行游戏（在训练模式中您可"
+"以在自己的设备上进行所有行动）。 <h2>当前游戏</h2>"
+
+#: .\templates\Lobby\about.html:19
+msgid "Food Chain Magnate - With all Ketchup Expansions"
+msgstr "快餐连锁大亨 - 包括所有番茄酱扩展"
+
+#: .\templates\Lobby\about.html:25
+msgid "Credits"
+msgstr "贡献"
+
+#: .\templates\Lobby\about.html:33
+msgid ""
+"Thank you to everyone for your feedback, comments and suggestions - you have "
+"helped to make this site what it is!"
+msgstr "感谢大家的反馈、评论和建议——你们帮助打造了这个网站！"
+
+#: .\templates\Lobby\about.html:50 .\templates\Lobby\lobbyHelp.html:252
+msgid "For further help contact"
+msgstr "如需进一步帮助，请联系"
+
+#: .\templates\Lobby\admin\DBO.html:104
+#: .\templates\Lobby\gameDisplay\finishedGameRow.html:40
+msgid "Delete <BR /> Practice<BR /> Game"
+msgstr "删除<BR />训练模式<BR />游戏"
+
+#: .\templates\Lobby\admin\DBO.html:110
+msgid "Delete <BR /> NORMAL"
+msgstr ""
+
+#: .\templates\Lobby\contact.html:9
+msgid "For any questions / comments / suggestions, please contact"
+msgstr "如有任何问题/意见/建议，请联系"
+
+#: .\templates\Lobby\contact.html:13
+msgid ""
+"For any in game problems, you can submit a bug report from the menu at the "
+"top"
+msgstr "如果游戏中出现任何问题，您可以在顶部菜单提交漏洞"
+
+#: .\templates\Lobby\createBus.html:27 .\templates\Lobby\createCNS.html:26
+#: .\templates\Lobby\createFCM.html:28 .\templates\Lobby\createHC.html:21
+#: .\templates\Lobby\createTGZ.html:32
+msgid "Setup Options"
+msgstr "游戏设置"
+
+#: .\templates\Lobby\createBus.html:30 .\templates\Lobby\createCNS.html:28
+#: .\templates\Lobby\createHC.html:23 .\templates\Lobby\createTGZ.html:34
+msgid "Name / Description"
+msgstr "名称/描述"
+
+#: .\templates\Lobby\createBus.html:32 .\templates\Lobby\createHC.html:28
+msgid "Game name"
+msgstr "游戏名称"
+
+#: .\templates\Lobby\createBus.html:38 .\templates\Lobby\createCNS.html:38
+#: .\templates\Lobby\createFCM.html:40 .\templates\Lobby\createHC.html:33
+#: .\templates\Lobby\createTGZ.html:44
+#, fuzzy
+#| msgid "Name / Description"
+msgid "Description"
+msgstr "名称/描述"
+
+#: .\templates\Lobby\createBus.html:40 .\templates\Lobby\createCNS.html:44
+#: .\templates\Lobby\createFCM.html:43 .\templates\Lobby\createHC.html:39
+#: .\templates\Lobby\createTGZ.html:50
+msgid "Optional, eg fast EST time zone"
+msgstr ""
+
+#: .\templates\Lobby\createBus.html:46 .\templates\Lobby\createCNS.html:49
+#: .\templates\Lobby\createFCM.html:48 .\templates\Lobby\createHC.html:44
+#: .\templates\Lobby\createTGZ.html:55
+msgid "Playing Speed"
+msgstr "游戏速度"
+
+#: .\templates\Lobby\createBus.html:50 .\templates\Lobby\createCNS.html:52
+#: .\templates\Lobby\createHC.html:47 .\templates\Lobby\createTGZ.html:58
+msgid "Blitz: As fast as possible!"
+msgstr "闪电战：越快越好！"
+
+#: .\templates\Lobby\createBus.html:51 .\templates\Lobby\createCNS.html:53
+#: .\templates\Lobby\createHC.html:48 .\templates\Lobby\createTGZ.html:59
+msgid "Live: Play the game in one session"
+msgstr "即时制：实时游戏"
+
+#: .\templates\Lobby\createBus.html:52 .\templates\Lobby\createCNS.html:54
+#: .\templates\Lobby\createHC.html:49 .\templates\Lobby\createTGZ.html:60
+msgid "Fast: Several moves a day"
+msgstr "快速游戏：每天进行几个行动"
+
+#: .\templates\Lobby\createBus.html:53 .\templates\Lobby\createCNS.html:55
+#: .\templates\Lobby\createHC.html:50 .\templates\Lobby\createTGZ.html:61
+msgid "Standard: At least one move a day"
+msgstr "标准游戏：每天至少一个行动"
+
+#: .\templates\Lobby\createBus.html:54 .\templates\Lobby\createCNS.html:56
+#: .\templates\Lobby\createHC.html:51 .\templates\Lobby\createTGZ.html:62
+msgid "Slow: Just take your time"
+msgstr "慢速游戏：你方便的时候行动"
+
+#: .\templates\Lobby\createBus.html:58 .\templates\Lobby\createCNS.html:59
+#: .\templates\Lobby\createFCM.html:62 .\templates\Lobby\createHC.html:54
+#: .\templates\Lobby\createTGZ.html:65
+msgid "Alters kickout options. All games update 'live' when online"
+msgstr "改变踢除选项。在线时，所有游戏都会进行实时更新"
+
+#: .\templates\Lobby\createBus.html:64 .\templates\Lobby\createCNS.html:63
+#: .\templates\Lobby\createFCM.html:68 .\templates\Lobby\createHC.html:58
+#: .\templates\Lobby\createTGZ.html:69
+msgid "Number of players"
+msgstr "玩家人数"
+
+#: .\templates\Lobby\createBus.html:77 .\templates\Lobby\createCNS.html:73
+#: .\templates\Lobby\createFCM.html:83 .\templates\Lobby\createHC.html:68
+#: .\templates\Lobby\createTGZ.html:96
+msgid "Player 2"
+msgstr "玩家2"
+
+#: .\templates\Lobby\createBus.html:83 .\templates\Lobby\createBus.html:162
+#: .\templates\Lobby\createCNS.html:83 .\templates\Lobby\createCNS.html:243
+#: .\templates\Lobby\createFCM.html:89 .\templates\Lobby\createFCM.html:557
+#: .\templates\Lobby\createHC.html:78 .\templates\Lobby\createHC.html:164
+#: .\templates\Lobby\createTGZ.html:91 .\templates\Lobby\createTGZ.html:106
+#: .\templates\Lobby\createTGZ.html:409
+msgid "Leave blank to invite anybody"
+msgstr "填入玩家账号以邀请特定玩家，留空允许任意玩家加入"
+
+#: .\templates\Lobby\createBus.html:88 .\templates\Lobby\createCNS.html:87
+#: .\templates\Lobby\createFCM.html:94 .\templates\Lobby\createHC.html:82
+#: .\templates\Lobby\createTGZ.html:110
+msgid "Player 3"
+msgstr "玩家3"
+
+#: .\templates\Lobby\createBus.html:97 .\templates\Lobby\createCNS.html:99
+#: .\templates\Lobby\createFCM.html:103 .\templates\Lobby\createHC.html:94
+#: .\templates\Lobby\createTGZ.html:122
+msgid "Player 4"
+msgstr "玩家4"
+
+#: .\templates\Lobby\createBus.html:106 .\templates\Lobby\createFCM.html:112
+#: .\templates\Lobby\createHC.html:106 .\templates\Lobby\createTGZ.html:134
+msgid "Player 5"
+msgstr "玩家5"
+
+#: .\templates\Lobby\createBus.html:114 .\templates\Lobby\createHC.html:117
+#: .\templates\Lobby\createTGZ.html:145
+msgid "Careful: A 5 min game with 3p could still take ~8 hrs"
+msgstr ""
+
+#: .\templates\Lobby\createBus.html:119 .\templates\Lobby\createCNS.html:113
+#: .\templates\Lobby\createFCM.html:132 .\templates\Lobby\createHC.html:120
+#: .\templates\Lobby\createTGZ.html:148
+msgid "Common Options"
+msgstr "常用选项"
+
+#: .\templates\Lobby\createBus.html:122 .\templates\Lobby\createCNS.html:115
+#: .\templates\Lobby\createFCM.html:135 .\templates\Lobby\createHC.html:122
+#: .\templates\Lobby\createTGZ.html:150
+msgid "Remove inactive players after:"
+msgstr "在以下时间后移除闲置玩家："
+
+#: .\templates\Lobby\createBus.html:126 .\templates\Lobby\createCNS.html:118
+#: .\templates\Lobby\createFCM.html:140 .\templates\Lobby\createHC.html:125
+#: .\templates\Lobby\createTGZ.html:153
+msgid "1 day"
+msgstr "1 天"
+
+#: .\templates\Lobby\createBus.html:127 .\templates\Lobby\createCNS.html:119
+#: .\templates\Lobby\createFCM.html:141 .\templates\Lobby\createHC.html:126
+#: .\templates\Lobby\createTGZ.html:154
+msgid "2 days"
+msgstr "2 天"
+
+#: .\templates\Lobby\createBus.html:128 .\templates\Lobby\createCNS.html:120
+#: .\templates\Lobby\createFCM.html:142 .\templates\Lobby\createHC.html:127
+#: .\templates\Lobby\createTGZ.html:155
+msgid "3 days"
+msgstr "3 天"
+
+#: .\templates\Lobby\createBus.html:129 .\templates\Lobby\createCNS.html:121
+#: .\templates\Lobby\createFCM.html:143 .\templates\Lobby\createHC.html:128
+#: .\templates\Lobby\createTGZ.html:156
+msgid "5 days"
+msgstr "5 天"
+
+#: .\templates\Lobby\createBus.html:133 .\templates\Lobby\createCNS.html:125
+#: .\templates\Lobby\createFCM.html:147 .\templates\Lobby\createHC.html:132
+#: .\templates\Lobby\createTGZ.html:160
+msgid "Change Playing Speed for different options"
+msgstr "改变游戏速度时将会有不同选项可供选择"
+
+#: .\templates\Lobby\createBus.html:138 .\templates\Lobby\createCNS.html:133
+#: .\templates\Lobby\createFCM.html:160 .\templates\Lobby\createHC.html:140
+#: .\templates\Lobby\createTGZ.html:168
+msgid "Practice Game"
+msgstr "训练模式"
+
+#: .\templates\Lobby\createBus.html:141 .\templates\Lobby\createCNS.html:136
+#: .\templates\Lobby\createHC.html:143 .\templates\Lobby\createTGZ.html:171
+msgid ""
+"Play with up to 5 players on the same device. You will make ALL moves. "
+"Otherwise functions as a normal game. Useful for testing strategies or "
+"trying out the game!"
+msgstr ""
+"可以在同一台设备上与最多5名玩家一起玩。您将进行所有行动操作。除此之外，游戏将"
+"像普通游戏一样运行。这对于测试策略或尝试游戏非常有用！"
+
+#: .\templates\Lobby\createBus.html:148
+#, fuzzy
+#| msgid "Practice Game"
+msgid "Create Bus Game"
+msgstr "训练模式"
+
+#: .\templates\Lobby\createBus.html:163 .\templates\Lobby\createCNS.html:244
+#: .\templates\Lobby\createFCM.html:558 .\templates\Lobby\createHC.html:165
+#: .\templates\Lobby\createTGZ.html:410
+#, fuzzy
+#| msgid "You have joined the game - waiting for more players"
+msgid "You can change the in-game name of the other players"
+msgstr "你已加入游戏 - 等待更多玩家"
+
+#: .\templates\Lobby\createCNS.html:33 .\templates\Lobby\createTGZ.html:39
+#, fuzzy
+#| msgid "Game name"
+msgid " Game name"
+msgstr "游戏名称"
+
+#: .\templates\Lobby\createCNS.html:110
+msgid "Careful: A 5 min game with 3p could still take ~2+ hrs"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:144 .\templates\Lobby\createFCM.html:291
+#, fuzzy
+#| msgid "Setup Options"
+msgid "Game Options"
+msgstr "游戏设置"
+
+#: .\templates\Lobby\createCNS.html:151
+msgid "Limit Table Size"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:178
+msgid "Add Table Junk"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:200
+msgid ""
+"According to the rules, you cannot remove items already on the table. This "
+"simulates some items already on the table by blocking some tile spaces."
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:214
+msgid ""
+"Allows storage of 1 tile <br /> Alows you to pirate unfinished movies for € "
+"4 M"
+msgstr ""
+
+#: .\templates\Lobby\createCNS.html:227
+#, fuzzy
+#| msgid "Practice Game"
+msgid " Create Cannes Game"
+msgstr "训练模式"
+
+#: .\templates\Lobby\createFCM.html:33
+#, fuzzy
+#| msgid "Game name"
+msgid "Game Name"
+msgstr "游戏名称"
+
+#: .\templates\Lobby\createFCM.html:52
+msgid "Blitz Dual : As fast as possible!"
+msgstr "闪电战：越快越好！"
+
+#: .\templates\Lobby\createFCM.html:53
+msgid "Live : Play the game in one session"
+msgstr "即时制 : 实时游戏"
+
+#: .\templates\Lobby\createFCM.html:54
+msgid "Fast : Several moves a day"
+msgstr "快速游戏：每天进行几个行动"
+
+#: .\templates\Lobby\createFCM.html:55
+msgid "Standard : At least one move a day"
+msgstr "标准游戏：每天至少一个行动"
+
+#: .\templates\Lobby\createFCM.html:57
+msgid "Slow : Just take your time"
+msgstr "慢速游戏：你方便的时候行动"
+
+#: .\templates\Lobby\createFCM.html:121
+msgid "Player 6"
+msgstr "玩家6"
+
+#: .\templates\Lobby\createFCM.html:155
+msgid "Use turn order for Payday and Fridge"
+msgstr "对发薪和冰箱使用回合顺位"
+
+#: .\templates\Lobby\createFCM.html:156 .\templates\Lobby\createFCM.html:194
+msgid "Completed in turn order - not simultaneously"
+msgstr "按照游戏顺位完成这些行动 - 而非同时行动"
+
+#: .\templates\Lobby\createFCM.html:163
+msgid ""
+"Play with up to 6 players on the same device. You will make ALL moves. "
+"Otherwise functions as a normal game. Useful for testing strategies or "
+"trying new modules!"
+msgstr ""
+"最多可在同一设备上进行6人游戏。您需要进行所有行动操作。除此之外，游戏将像普通"
+"游戏一样运行。这对于测试策略或尝试新模组非常有用！"
+
+#: .\templates\Lobby\createFCM.html:173 .\templates\Lobby\createTGZ.html:184
+msgid "Keep the same map"
+msgstr "使用相同地图"
+
+#: .\templates\Lobby\createFCM.html:181 .\templates\Lobby\createTGZ.html:190
+#, fuzzy
+#| msgid "Setup Options"
+msgid "Expert Options"
+msgstr "游戏设置"
+
+#: .\templates\Lobby\createFCM.html:185 .\templates\Lobby\createTGZ.html:197
+#, fuzzy
+#| msgid "Setup Options"
+msgid "Enable Advanced Setup Options"
+msgstr "游戏设置"
+
+#: .\templates\Lobby\createFCM.html:189
+msgid "AI v0.1. Vague intelligence. Very bad!"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:193
+#, fuzzy
+#| msgid "Use Noodles"
+msgid "Use random modules"
+msgstr "使用面条"
+
+#: .\templates\Lobby\createFCM.html:197 .\templates\Lobby\createFCM.html:248
+#, fuzzy
+#| msgid "No Milestones"
+msgid "Original Milestones"
+msgstr "不使用里程碑"
+
+#: .\templates\Lobby\createFCM.html:201 .\templates\Lobby\createFCM.html:252
+#: .\templates\Lobby\createFCM.html:471
+msgid "New milestones"
+msgstr "新里程碑"
+
+#: .\templates\Lobby\createFCM.html:243
+msgid "Draft modules"
+msgstr "所有模组"
+
+#: .\templates\Lobby\createFCM.html:244
+msgid "Pick expansion modules at game start"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:256 .\templates\Lobby\createFCM.html:351
+msgid "Use New Districts"
+msgstr "使用新城区"
+
+#: .\templates\Lobby\createFCM.html:258 .\templates\Lobby\createFCM.html:353
+msgid "Add new tiles to the pool to make the map"
+msgstr "将新的板块添加到版图中"
+
+#: .\templates\Lobby\createFCM.html:263 .\templates\Lobby\createFCM.html:358
+msgid "Guarantee at least 1 Apartment"
+msgstr "保证至少拥有一个公寓"
+
+#: .\templates\Lobby\createFCM.html:269 .\templates\Lobby\createFCM.html:364
+msgid "Guarantee the Parks tile"
+msgstr "保证有公园板块"
+
+#: .\templates\Lobby\createFCM.html:282
+msgid "Use Individual Options"
+msgstr "使用单独选项"
+
+#: .\templates\Lobby\createFCM.html:284
+msgid "Use Pre-set Scenarios"
+msgstr "使用预设场景"
+
+#: .\templates\Lobby\createFCM.html:294
+msgid "Hard Choices with Original Milestones"
+msgstr "带艰难抉择的基础里程碑"
+
+#: .\templates\Lobby\createFCM.html:296
+msgid "First to train / First to market good disappear after 2 turns"
+msgstr "首次培训 / 首次进行营销里程碑会在第2回合后消失"
+
+#: .\templates\Lobby\createFCM.html:297
+msgid "First to hire 3 disappears after 3 turns"
+msgstr "首次进行3次雇佣里程碑在第3回合后消失"
+
+#: .\templates\Lobby\createFCM.html:299
+msgid "The following options are not normally used"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:306
+msgid "No salaries, bank only breaks once, extra money"
+msgstr "没有薪水，银行只破产一次，额外的储备金"
+
+#: .\templates\Lobby\createFCM.html:309
+msgid "Do not use milestones"
+msgstr "不使用里程碑"
+
+#: .\templates\Lobby\createFCM.html:321
+msgid "Sandbox Mode (See"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:321 .\templates\Lobby\layout.html:113
+#: .\templates\Lobby\layout.html:203 .\templates\Lobby\layout.html:246
+#: .\templates\Lobby\layout.html:265 .\templates\Lobby\profile.html:113
+#: .\templates\Lobby\profile.html:138
+msgid "Help"
+msgstr "帮助"
+
+#: .\templates\Lobby\createFCM.html:324
+msgid "Ketchup Options"
+msgstr "番茄酱选项"
+
+#: .\templates\Lobby\createFCM.html:328
+msgid "Use New Milestones"
+msgstr "使用新的里程碑"
+
+#: .\templates\Lobby\createFCM.html:332
+msgid "Use Ketchup Milestone"
+msgstr "使用番茄酱里程碑"
+
+#: .\templates\Lobby\createFCM.html:334
+#, fuzzy
+#| msgid ""
+#| "Milestone: The first time someone else sells<BR/> your demand, gain a "
+#| "permanent -1 to distance"
+msgid ""
+"Milestone: The first time someone else sells<BR /> your demand, gain a "
+"permanent -1 to distance"
+msgstr "里程碑：当有人第一次出售<BR/> 您的需求时，距离永久减少1"
+
+#: .\templates\Lobby\createFCM.html:339
+msgid "Use Price Changing Reserve Cards"
+msgstr "使用预设价格储备卡"
+
+#: .\templates\Lobby\createFCM.html:340
+msgid "When the bank breaks, add $200 per player."
+msgstr "当银行破产时，增加玩家数乘以 200 美元的储备金。"
+
+#: .\templates\Lobby\createFCM.html:341
+#, fuzzy
+#| msgid ""
+#| "The base price changes to whichever is <BR/> selected most, from $5, $10, "
+#| "or $20.<BR/> In a tie, $20 beats $10 and $5, and $5 beats $10"
+msgid ""
+"The base price changes to whichever is <BR /> selected most, from $5, $10, "
+"or $20.<BR /> In a tie, $20 beats $10 and $5, and $5 beats $10"
+msgstr ""
+"基础价格更改为 <BR/> 选择的价格之一，即 $5、$10 或 $20。<BR/> 在平局情况"
+"下，$20 比 $10 和 $5 更优先，而 $5 比 $10 优先"
+
+#: .\templates\Lobby\createFCM.html:347
+msgid "Map / Route Options"
+msgstr "地图/路线选项"
+
+#: .\templates\Lobby\createFCM.html:370
+msgid "Use all 5 new tiles plus random others"
+msgstr "使用全部 5 个新板块加上随机的其他板块"
+
+#: .\templates\Lobby\createFCM.html:374
+msgid "Use Lobbyists"
+msgstr "使用提案人"
+
+#: .\templates\Lobby\createFCM.html:375
+msgid "Add new roads and parks to the map"
+msgstr "在地图上添加新的道路和公园"
+
+#: .\templates\Lobby\createFCM.html:379
+msgid "Use Coffee"
+msgstr "使用咖啡"
+
+#: .\templates\Lobby\createFCM.html:380
+msgid "Sell coffee along the route travelled by a house"
+msgstr "沿着顾客经过的路线卖咖啡"
+
+#: .\templates\Lobby\createFCM.html:386
+msgid "Food Options"
+msgstr "食物选项"
+
+#: .\templates\Lobby\createFCM.html:390
+msgid "Use Kimchi"
+msgstr "使用泡菜"
+
+#: .\templates\Lobby\createFCM.html:392
+msgid "Houses prioritise a restaurant with their demands + kimchi"
+msgstr "顾客优先选择一家拥有泡菜并且满足他们需求的餐厅"
+
+#: .\templates\Lobby\createFCM.html:396
+msgid "Use Sushi"
+msgstr "使用寿司"
+
+#: .\templates\Lobby\createFCM.html:398
+msgid "Houses with gardens will try to replace all demand with Sushi"
+msgstr "带花园的房子里的顾客会优先用寿司代替所有需求"
+
+#: .\templates\Lobby\createFCM.html:402
+msgid "Use Noodles"
+msgstr "使用面条"
+
+#: .\templates\Lobby\createFCM.html:404
+msgid "Noodles count as any demand item, but only if no one else can supply it"
+msgstr "当没有其他食物可以满足需求时，面条可以供应任何需求"
+
+#: .\templates\Lobby\createFCM.html:409
+msgid "Use Fry Chefs"
+msgstr "使用炸薯条主厨"
+
+#: .\templates\Lobby\createFCM.html:410
+msgid "Adds $10 per total sale"
+msgstr "每次销售总销售额增加 10 美元"
+
+#: .\templates\Lobby\createFCM.html:415
+msgid "Marketing Options"
+msgstr "营销选项"
+
+#: .\templates\Lobby\createFCM.html:419
+msgid "Use Mass Marketers"
+msgstr "使用大众营销"
+
+#: .\templates\Lobby\createFCM.html:421
+msgid "Repeat marketing phase for each Mass Marketeer"
+msgstr "为每个大众营销重复营销阶段"
+
+#: .\templates\Lobby\createFCM.html:425
+msgid "Use Gourmet Food Critic"
+msgstr "使用美食评论家"
+
+#: .\templates\Lobby\createFCM.html:426
+msgid "Markets to all houses with a garden"
+msgstr "对所有带花园的房子进行营销"
+
+#: .\templates\Lobby\createFCM.html:430
+msgid "Use Rural Marketers"
+msgstr "使用乡村营销"
+
+#: .\templates\Lobby\createFCM.html:432
+msgid "Markets to the Rural Area - accessed by freeway ramps"
+msgstr "对乡村地区的市场进行营销 - 可通过高速公路坡道进入"
+
+#: .\templates\Lobby\createFCM.html:437
+msgid "Employee Options"
+msgstr "员工选项"
+
+#: .\templates\Lobby\createFCM.html:441
+msgid "Use Movie Stars"
+msgstr "使用电影明星"
+
+#: .\templates\Lobby\createFCM.html:442
+msgid "Decide turn order and break ties"
+msgstr "决定回合顺序，平局时优先"
+
+#: .\templates\Lobby\createFCM.html:447
+msgid "Use Night Shift Managers"
+msgstr "使用夜班经理"
+
+#: .\templates\Lobby\createFCM.html:449
+#, fuzzy
+#| msgid ""
+#| "Must be put in a management slot<BR/> All unsalaried employees work twice "
+#| "during 9-5"
+msgid ""
+"Must be put in a management slot<BR /> All unsalaried employees work twice "
+"during 9-5"
+msgstr ""
+"必须放在管理（CEO直属）空格上。<BR/> 所有不需要薪水的员工在9点到5点期间工作两"
+"次"
+
+#: .\templates\Lobby\createFCM.html:461
+msgid "Scenarios"
+msgstr "预设场景"
+
+#: .\templates\Lobby\createFCM.html:462
+msgid "The scenario name will be added to the front of the game name"
+msgstr "预设场景名会加在游戏名前面"
+
+#: .\templates\Lobby\createFCM.html:466
+msgid "Cool original"
+msgstr "基础游戏"
+
+#: .\templates\Lobby\createFCM.html:467
+msgid "Play the base game"
+msgstr "玩基础游戏"
+
+#: .\templates\Lobby\createFCM.html:473
+msgid ""
+"Use only the “New Milestones” module. This shakes the strategic space up "
+"quite a bit already!"
+msgstr ""
+"只使用“新里程碑”模组进行游戏。仅是这个模组就足以对游戏的策略体系产生不小的震"
+"撼！"
+
+#: .\templates\Lobby\createFCM.html:478
+msgid "Your first cup of coffee"
+msgstr "您的第一杯咖啡"
+
+#: .\templates\Lobby\createFCM.html:480
+msgid "The “Coffee” module makes board positions even more important"
+msgstr "“咖啡”模组将使得游戏版图位置的影响变得更加重要"
+
+#: .\templates\Lobby\createFCM.html:484
+msgid "Korean city"
+msgstr "韩国城"
+
+#: .\templates\Lobby\createFCM.html:486
+msgid "New districts (at least 1 apartment building tile in the city) + Kimchi"
+msgstr "新城区（请确保至少有1个公寓楼板块出现在设置好的城市地图中）+ 泡菜"
+
+#: .\templates\Lobby\createFCM.html:490
+msgid "Nightlife"
+msgstr "夜生活"
+
+#: .\templates\Lobby\createFCM.html:491
+msgid "New milestones + Night shift managers"
+msgstr "新里程碑 + 夜班经理"
+
+#: .\templates\Lobby\createFCM.html:495
+msgid "Sustenance"
+msgstr "维持生计"
+
+#: .\templates\Lobby\createFCM.html:496
+msgid "Coffee + Fry chefs"
+msgstr "咖啡 + 炸薯条主厨"
+
+#: .\templates\Lobby\createFCM.html:500
+msgid "Upmarket Area"
+msgstr "高档居民区"
+
+#: .\templates\Lobby\createFCM.html:502
+msgid ""
+"New milestones + Park tile from new districts + Gourmet food critic + Sushi"
+msgstr "新里程碑 + 新城区中带有公园的地图板块+ 美食评论家 + 寿司"
+
+#: .\templates\Lobby\createFCM.html:507
+msgid "City builder"
+msgstr "城市建设者"
+
+#: .\templates\Lobby\createFCM.html:508
+msgid "Lobbyist + New districts + rural marketeers"
+msgstr "提案人 + 新城区 + 乡村营销"
+
+#: .\templates\Lobby\createFCM.html:513
+msgid "Asian Fusion"
+msgstr "亚洲聚合"
+
+#: .\templates\Lobby\createFCM.html:514
+msgid "Sushi + Kimchi + Noodles + Ketchup"
+msgstr "寿司 + 泡菜 + 面条 + 番茄酱"
+
+#: .\templates\Lobby\createFCM.html:518
+msgid "First mover"
+msgstr "先发制人"
+
+#: .\templates\Lobby\createFCM.html:520
+msgid "Hard choices + Ketchup + Movie stars + Lobbyists + Reserve prices"
+msgstr "艰难的抉择 + 番茄酱 + 电影明星 + 提案人 + 预设价格"
+
+#: .\templates\Lobby\createFCM.html:525
+msgid "Overtime"
+msgstr "加班加点"
+
+#: .\templates\Lobby\createFCM.html:527
+msgid ""
+"Night shift managers + Mass marketeers + Rural marketeers + New districts + "
+"Noodles + Reserve price"
+msgstr "夜班经理 + 大众营销 + 乡村营销 + 新城区 + 面条 + 预设价格"
+
+#: .\templates\Lobby\createFCM.html:532
+msgid "Henri Lo Menu"
+msgstr "一步到胃菜单"
+
+#: .\templates\Lobby\createFCM.html:533
+msgid "All modules!"
+msgstr "所有模组！"
+
+#: .\templates\Lobby\createFCM.html:542
+msgid "Create Food Chain Magnate Game"
+msgstr "创建快餐连锁大亨游戏"
+
+#: .\templates\Lobby\createHC.html:151
+msgid "Create Horseless Carriage Game"
+msgstr "创建 Horseless Carriage"
+
+#: .\templates\Lobby\createTGZ.html:81
+#, fuzzy
+#| msgid "Player 2"
+msgid "Player 1"
+msgstr "玩家2"
+
+#: .\templates\Lobby\createTGZ.html:211
+msgid "Shadipinyi (Extra Plaque)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:225
+msgid "Elegua (3 Bid Cows)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:239
+msgid "Dziva (Lower Prices)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:253
+msgid "Eshu (Range 6)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:267
+msgid "Gu (1 VR Craftsmen)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:281
+msgid "Obatala (2 Monuments)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:295
+msgid "Atete (Use Resources Twice)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:309
+msgid "Tsui-Goab (Any goods)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:323
+msgid "Anansi (Pay 1 cow per good)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:337
+msgid "Qamata (Get Hub Cows)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:351
+msgid "Engai (2 Cow Income)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:365
+msgid "Xango (2nd Tiebreaker)"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:385
+msgid " Create And Start The Great Zimbabwe Tournament Game"
+msgstr ""
+
+#: .\templates\Lobby\createTGZ.html:387
+msgid " Create The Great Zimbabwe Game"
+msgstr ""
+
+#: .\templates\Lobby\donate\donate.html:20
+msgid "Thank you"
+msgstr "谢谢"
+
+#: .\templates\Lobby\donate\donate.html:23
+#, python-format
+msgid ""
+"Thank you for taking the time to look at the donation page. All support is "
+"gratefully received, and will go towards the costs of hosting, supporting, "
+"and maintaining this website, and enabling new features. <BR/><BR/> Please "
+"note that donating does not grant you any special privileges; however "
+"suggestions for improvements are always welcome using the OnlineBoardGamers "
+"email address. <BR/><BR/> You are able to donate with the button below via "
+"paypal, or if you'd rather, you can donate directly to me at<BR/><img src="
+"\"%(the_url)s\" width=\"400px\" height=\"40px\"><BR/><BR/> If you are unsure "
+"how much, then €5.00 or $5.00 or equivalent is a great place to start."
+msgstr ""
+"感谢您抽出时间查看捐赠页面。我们非常感谢您的支持，这将用于承担本网站的托管、"
+"支持和维护成本，并实现新的功能。<BR/><BR/>请注意，捐赠不会为您授予任何特殊权"
+"限；但是，您可以随时向 OnlineBoardGamers 的电子邮件地址提出改进建议。<BR/"
+"><BR/>您可以通过下面的按钮使用PayPal捐赠，或者，如果您愿意，您也可以直接向我"
+"捐赠：<BR/><img src=\"%(the_url)s\" width=\"400px\" height=\"40px\"><BR/><BR/"
+">如果您不确定捐赠多少，那么5欧元或5美元或相当金额是一个很好的起点。"
+
+#: .\templates\Lobby\donate\donate.html:41
+msgid "If you are having trouble in China/Asia, you can donate via AliPay"
+msgstr "如果您在中国/亚洲，可以通过支付宝捐款"
+
+#: .\templates\Lobby\donate\donate.html:43
+msgid "Pay Link (for devices with AliPay app installed)"
+msgstr "支付链接（适用于安装了支付宝app的设备）"
+
+#: .\templates\Lobby\donate\donate_success.html:20
+msgid "Thank you!"
+msgstr "谢谢！"
+
+#: .\templates\Lobby\donate\donate_success.html:21
+msgid "Your support is greatly appreciated!"
+msgstr "非常感谢您的支持！"
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameDeclineEmail.html:4
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "You have been invited to a game of Food Chain Magnate at https://"
+#| "%(domain)s\n"
+#| "\n"
+#| "Name: %(gameName)s\n"
+#| "Players: %(maxPlayers)s\n"
+#| "\n"
+#| "Please check the \"Invitations\" tab in the lobby. \n"
+#| "\n"
+#| "Enjoy!\n"
+#| "\n"
+msgid ""
+"\n"
+"Hi %(creatorUsername)s,\n"
+"\n"
+"A player has declined your invitation for a game of %(box_name)s at https://"
+"%(domain)s\n"
+"\n"
+"Game: %(gameName)s %(gameDescription)s\n"
+"\n"
+"Player: %(declinerUsername)s\n"
+"Reason: %(reason)s\n"
+"\n"
+"Please check the \"Waiting Games\" tab in the lobby. \n"
+"\n"
+"Thanks\n"
+"\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"您已经被邀请参加 https://%(domain)s 的“快餐连锁大亨”游戏。\n"
+"\n"
+"游戏名称：%(gameName)s\n"
+"玩家数量：%(maxPlayers)s\n"
+"\n"
+"请在游戏大厅中查看“邀请”选项卡。\n"
+"\n"
+"祝您游戏愉快！\n"
+"\n"
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameInvite.html:4
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "You have been invited to a game of Food Chain Magnate at https://"
+#| "%(domain)s\n"
+#| "\n"
+#| "Name: %(gameName)s\n"
+#| "Players: %(maxPlayers)s\n"
+#| "\n"
+#| "Please check the \"Invitations\" tab in the lobby. \n"
+#| "\n"
+#| "Enjoy!\n"
+#| "\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"You have been invited to a game of %(box_name)s at https://%(domain)s\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"Please check the \"Invitations\" tab in the lobby, or follow this link:\n"
+"\n"
+"https://%(domain)s/index/invitations\n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"您已经被邀请参加 https://%(domain)s 的“快餐连锁大亨”游戏。\n"
+"\n"
+"游戏名称：%(gameName)s\n"
+"玩家数量：%(maxPlayers)s\n"
+"\n"
+"请在游戏大厅中查看“邀请”选项卡。\n"
+"\n"
+"祝您游戏愉快！\n"
+"\n"
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameReminderEmail.html:13
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,\n"
+"\n"
+"Reminder: You have less than 2 hours to make a move in: %(box_name)s\n"
+"\n"
+"Game: %(gameName)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Notification preferences can be changed in your Profile\n"
+"\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameReminderExpiredEmail.html:13
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,\n"
+"\n"
+"Your time limit has expired! Please make a move in: %(box_name)s\n"
+"\n"
+"Note: You could be kicked at any time. Please move as soon as possible. \n"
+"\n"
+"Game: %(gameName)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Notification preferences can be changed in your Profile\n"
+"\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentGameStart.html:14
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "A tournament game of Food Chain Magnate has started.\n"
+#| "\n"
+#| "Name: %(gameName)s\n"
+#| "Players: %(maxPlayers)s\n"
+#| "\n"
+#| "https://%(domain)s%(the_url)s\n"
+#| "\n"
+#| "Enjoy!\n"
+#| "\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"A tournament game of %(box_name)s has started.\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"一局快餐连锁大亨锦标赛的游戏已经开始了。\n"
+"\n"
+"游戏名称：%(gameName)s\n"
+"玩家人数：%(maxPlayers)s\n"
+"\n"
+"链接：https://%(domain)s%(the_url)s\n"
+"\n"
+"祝您玩得愉快！\n"
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentInvite.html:6
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "A tournament game of Food Chain Magnate has started.\n"
+#| "\n"
+#| "Name: %(gameName)s\n"
+#| "Players: %(maxPlayers)s\n"
+#| "\n"
+#| "https://%(domain)s%(the_url)s\n"
+#| "\n"
+#| "Enjoy!\n"
+#| "\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"A tournament game of Food Chain Magnate has started.\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"一局快餐连锁大亨锦标赛的游戏已经开始了。\n"
+"\n"
+"游戏名称：%(gameName)s\n"
+"玩家人数：%(maxPlayers)s\n"
+"\n"
+"链接：https://%(domain)s%(the_url)s\n"
+"\n"
+"祝您玩得愉快！\n"
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentInvite_HC.html:6
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "A tournament game of Food Chain Magnate has started.\n"
+#| "\n"
+#| "Name: %(gameName)s\n"
+#| "Players: %(maxPlayers)s\n"
+#| "\n"
+#| "https://%(domain)s%(the_url)s\n"
+#| "\n"
+#| "Enjoy!\n"
+#| "\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"A tournament game of Horseless Carriage has started at OnlineBoardGamers.\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"一局快餐连锁大亨锦标赛的游戏已经开始了。\n"
+"\n"
+"游戏名称：%(gameName)s\n"
+"玩家人数：%(maxPlayers)s\n"
+"\n"
+"链接：https://%(domain)s%(the_url)s\n"
+"\n"
+"祝您玩得愉快！\n"
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentWon.html:6
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "Congratulations!\n"
+#| "\n"
+#| "You have won a tournament of Food Chain Magnate\n"
+#| "\n"
+#| "Name: %(tournamentName)s\n"
+#| "Position: Champion\n"
+#| "\n"
+#| "Click to play more Food Chain Magnate\n"
+#| "https://%(domain)s%(the_url)s\n"
+#| "\n"
+#| "Well Done!!\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"Congratulations!\n"
+"\n"
+"You have won a tournament of Food Chain Magnate\n"
+"\n"
+"Name: %(tournamentName)s\n"
+"Position: Champion\n"
+"\n"
+"Click to play more Food Chain Magnate\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Well Done!!\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"恭喜您！\n"
+"\n"
+"您在快餐连锁大亨锦标赛中获得了胜利。\n"
+"\n"
+"比赛名称：%(tournamentName)s\n"
+"排名：冠军\n"
+"\n"
+"点击链接玩更多的“快餐连锁大亨”游戏\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"做得好！！\n"
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentWonGeneral.html:6
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "Congratulations!\n"
+#| "\n"
+#| "You have won a tournament of Food Chain Magnate\n"
+#| "\n"
+#| "Name: %(tournamentName)s\n"
+#| "Position: Champion\n"
+#| "\n"
+#| "Click to play more Food Chain Magnate\n"
+#| "https://%(domain)s%(the_url)s\n"
+#| "\n"
+#| "Well Done!!\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"Congratulations!\n"
+"\n"
+"You have won a tournament of %(boxName)s\n"
+"\n"
+"Name: %(tournamentName)s\n"
+"Position: Champion\n"
+"\n"
+"Click to play more %(boxName)s\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Well Done!!\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"恭喜您！\n"
+"\n"
+"您在快餐连锁大亨锦标赛中获得了胜利。\n"
+"\n"
+"比赛名称：%(tournamentName)s\n"
+"排名：冠军\n"
+"\n"
+"点击链接玩更多的“快餐连锁大亨”游戏\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"做得好！！\n"
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:7
+#: .\templates\Lobby\gameDisplay\availableGameSq.html:41
+#: .\templates\Lobby\gameDisplay\waitingGameRow.html:50
+msgid "Leave"
+msgstr "离开"
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:11
+#: .\templates\Lobby\gameDisplay\availableGameSq.html:43
+#: .\templates\Lobby\gameDisplay\invitationGameRow.html:5
+msgid "Join"
+msgstr "加入"
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:41
+msgid "5m kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:42
+msgid "10m kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:43
+msgid "20m kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:44
+msgid "12 hr kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:45
+msgid "1d kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:46
+msgid "2d kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:47
+msgid "3d kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\availableGameRow.html:48
+msgid "5d kick"
+msgstr ""
+
+#: .\templates\Lobby\gameDisplay\currentGameRow.html:35
+#, fuzzy
+#| msgid "Delete <BR /> Practice<BR /> Game"
+msgid "Delete <br /> Practice <br /> Game"
+msgstr "删除<BR />训练模式<BR />游戏"
+
+#: .\templates\Lobby\gameDisplay\invitationGameRow.html:52
+msgid "Decline"
+msgstr "拒绝"
+
+#: .\templates\Lobby\gameDisplay\invitationGameRow.html:53
+msgid "You may give a reason"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\gameEmails\gameEndEmail.html:13
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "A tournament game of Food Chain Magnate has started.\n"
+#| "\n"
+#| "Name: %(gameName)s\n"
+#| "Players: %(maxPlayers)s\n"
+#| "\n"
+#| "https://%(domain)s%(the_url)s\n"
+#| "\n"
+#| "Enjoy!\n"
+#| "\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"A game of %(boxName)s has finished at Online Board Gamers.\n"
+"\n"
+"Game: %(gameName)s\n"
+"Position: %(position)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Thank you for playing at Online Board Gamers.\n"
+"\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"一局快餐连锁大亨锦标赛的游戏已经开始了。\n"
+"\n"
+"游戏名称：%(gameName)s\n"
+"玩家人数：%(maxPlayers)s\n"
+"\n"
+"链接：https://%(domain)s%(the_url)s\n"
+"\n"
+"祝您玩得愉快！\n"
+
+#. Translators: This is an email
+#: .\templates\Lobby\gameEmails\gameStartEmail.html:13
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user.username)s,\n"
+#| "\n"
+#| "A tournament game of Food Chain Magnate has started.\n"
+#| "\n"
+#| "Name: %(gameName)s\n"
+#| "Players: %(maxPlayers)s\n"
+#| "\n"
+#| "https://%(domain)s%(the_url)s\n"
+#| "\n"
+#| "Enjoy!\n"
+#| "\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"Your game of %(boxName)s has started at Online Board Gamers!\n"
+"\n"
+"Game: %(gameName)s\n"
+"Starting Player: %(currentPlayer)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+"\n"
+"您好 %(user.username)s，\n"
+"\n"
+"一局快餐连锁大亨锦标赛的游戏已经开始了。\n"
+"\n"
+"游戏名称：%(gameName)s\n"
+"玩家人数：%(maxPlayers)s\n"
+"\n"
+"链接：https://%(domain)s%(the_url)s\n"
+"\n"
+"祝您玩得愉快！\n"
+
+#. Translators: This is an email
+#: .\templates\Lobby\gameEmails\yourTurnEmail.html:14
+#, python-format
+msgid ""
+"\n"
+"Hi %(user)s,<br/>\n"
+"<br/>\n"
+"It is your turn at Online Board Gamers - %(boxName)s.<br/>\n"
+"<br/>\n"
+"https://%(domain)s%(the_url)s<br/>\n"
+"<br/>\n"
+"Game: %(gameName)s<br/>\n"
+"Turn/Phase: %(currentTurnString)s<br/>\n"
+"<br/>\n"
+"Notification preferences can be changed in your Profile<br/>\n"
+"<br/>\n"
+"Please do not reply to this email.<br/>\n"
+"To contact me please use: OnlineBoardGamers@gmail.com<br/>\n"
+"<br/>\n"
+msgstr ""
+
+#: .\templates\Lobby\index.html:23
+msgid "Welcome to Online Board Gamers"
+msgstr "欢迎来到 Online Board Gamers"
+
+#: .\templates\Lobby\index.html:24
+msgid "Please"
+msgstr "请"
+
+#: .\templates\Lobby\index.html:24 .\templates\Lobby\register.html:20
+msgid "Register"
+msgstr "注册"
+
+#: .\templates\Lobby\index.html:24
+msgid "or"
+msgstr "或者"
+
+#: .\templates\Lobby\index.html:24 .\templates\Lobby\login.html:18
+#: .\templates\Lobby\login.html:24
+msgid "Login"
+msgstr "登录"
+
+#: .\templates\Lobby\index.html:26
+msgid ""
+"Play online for free against other players, or create a practice game to "
+"play as all players on a single device"
+msgstr "在线免费对战其他玩家，或者进行训练游戏，在同一台设备上进行所有行动"
+
+#: .\templates\Lobby\index.html:28
+msgid ""
+"Online play with games updating live, plus player stats, regular "
+"tournaments, options to rewind, and more"
+msgstr ""
+"在线对战，游戏实时更新，提供玩家统计数据、定期举办的锦标赛、撤销功能等，为您"
+"带来更加丰富的游戏体验"
+
+#: .\templates\Lobby\index.html:36
+msgid ""
+"Compete to build and sell the most vehicles - research and influence the "
+"market to forge your path to victory"
+msgstr "通过建造，研究和销售更多汽车，影响市场，开辟通往胜利的道路"
+
+#: .\templates\Lobby\index.html:39
+#, fuzzy
+#| msgid ""
+#| "From <a href=\"https://www.splottershop.com/\" target=\"_blank"
+#| "\">Splotter's</a> website: <BR /> <i>Horseless Carriage is a game about "
+#| "the dawn of the automobile: a time when cars were invented, and no one "
+#| "quite knew yet what this new contraption would look like, and what "
+#| "features would be essential. Early cars sometimes used levers or pedals "
+#| "to steer and a wheel to accelerate. Brakes were not always seen as "
+#| "essential; but sometimes an outside spot to take along an onboard "
+#| "mechanic was. This early, super innovative period occurs in the "
+#| "development of many new product categories. Players are cast as aspiring "
+#| "industrialists trying to find out what features the public will value "
+#| "when buying these new, expensive, and utterly unfamiliar horseless "
+#| "carriages."
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i>Horseless Carriage is a game about the dawn of the "
+"automobile: a time when cars were invented, and no one quite knew yet what "
+"this new contraption would look like, and what features would be essential. "
+"Early cars sometimes used levers or pedals to steer and a wheel to "
+"accelerate. Brakes were not always seen as essential; but sometimes an "
+"outside spot to take along an onboard mechanic was. This early, super "
+"innovative period occurs in the development of many new product categories. "
+"Players are cast as aspiring industrialists trying to find out what features "
+"the public will value when buying these new, expensive, and utterly "
+"unfamiliar horseless carriages."
+msgstr ""
+"来自<a href=\"https://www.splottershop.com/\" target=\"_blank\"> Splotter </"
+"a>网站：<BR /><i>《Horseless Carriage》是一款关于汽车黎明时期的游戏：当汽车被"
+"发明时，没有人知道这个新装置会长什么样子，什么功能是必要的。早期的汽车有时使"
+"用杆或踏板来转向，使用方向盘来加速。制动系统并不总是被视为必要的，有时候还要"
+"带一个额外的机械师。许多新产品的早期超级创新期都会发生这种情况。玩家将扮演有"
+"抱负的实业家，试图找出公众购买这些新的、昂贵的、完全陌生的后马车时代汽车时会"
+"重视哪些功能。"
+
+#: .\templates\Lobby\index.html:54 .\templates\Lobby\index.html:138
+msgid ""
+"Play with 3-5 people or start a practice game to play as all players on one "
+"device."
+msgstr "可以与3-5个人一起玩，或者进行训练游戏，在同一台设备上进行所有行动。"
+
+#: .\templates\Lobby\index.html:60
+msgid ""
+"Build up your fast food empire by out advertising and out producing your "
+"opponents to win the match"
+msgstr "通过超越对手的广告宣传和生产能力，建立起你的快餐帝国，赢得商业胜利"
+
+#: .\templates\Lobby\index.html:63
+#, fuzzy
+#| msgid ""
+#| "From <a href=\"https://www.splottershop.com/\" target=\"_blank"
+#| "\">Splotter's</a> website:<BR /> <i> Food Chain Magnate is a heavy "
+#| "strategy game about building a fast food chain. The focus is on building "
+#| "your company using a card-driven (human) resource management system. "
+#| "Players compete on a variable city map through purchasing, marketing and "
+#| "sales, and on a job market for key staff members."
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website:<br /> <i> Food Chain Magnate is a heavy strategy game about "
+"building a fast food chain. The focus is on building your company using a "
+"card-driven (human) resource management system. Players compete on a "
+"variable city map through purchasing, marketing and sales, and on a job "
+"market for key staff members."
+msgstr ""
+"来自<a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter</a>"
+"网站：<BR /><i>《快餐连锁大亨》（Food Chain Magnate）是一款关于建立快餐连锁店"
+"的重度策略类游戏，主要使用卡牌驱动（人力）的资源管理系统来建立属于你自己的公"
+"司。玩家们通过采购、营销和销售，以及在人才市场招聘核心员工等方式，在可变的城"
+"市版图上相互竞争。"
+
+#: .\templates\Lobby\index.html:77
+msgid "Includes options for all expansion modules"
+msgstr "包括所有扩展模组"
+
+#: .\templates\Lobby\index.html:79
+msgid ""
+"Play with 2-6 people or start a practice game to play as all players on one "
+"device."
+msgstr "可以与2-6个人一起玩，或者进行训练游戏，在同一台设备上进行所有行动。"
+
+#: .\templates\Lobby\index.html:90
+msgid ""
+"Raise your monuments to establish your empire as having the best mythology"
+msgstr ""
+
+#: .\templates\Lobby\index.html:93
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i>The Great Zimbabwe is a game about building a trade "
+"based civilization in ancient Africa. It has been inspired by the old "
+"kingdoms surrounding the Great Zimbabwe, a world heritage site in southern "
+"Africa.  <br/> As always in our games, we have used this history for "
+"inspiration; however, first and foremost we wanted to create a highly "
+"playable and replayable Splotter game, so in many cases we took liberties "
+"with historical names, periods and artwork. <br/>In the game, players strive "
+"to build the most impressive monuments to one god of their choice. They can "
+"choose this god themselves - each of the twelve gods offers a unique "
+"blessing, but each also requires a different amount of work to win the game. "
+"Building the monuments is done by developing a logistics network stretching "
+"across the region. Through this network, players produce and obtain ritual "
+"goods to raise their monuments and bring honour to the god of their choice."
+msgstr ""
+
+#: .\templates\Lobby\index.html:109
+#, fuzzy
+#| msgid ""
+#| "Play with 3-5 people or start a practice game to play as all players on "
+#| "one device."
+msgid ""
+"Play with 2-5 people or start a practice game to play as all players on one "
+"device."
+msgstr "可以与3-5个人一起玩，或者进行训练游戏，在同一台设备上进行所有行动。"
+
+#: .\templates\Lobby\index.html:118
+msgid ""
+"Transport as many passengers as you can - but with a time altering clock in "
+"the mix, the outcome can be hard to predict!"
+msgstr ""
+
+#: .\templates\Lobby\index.html:121
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <br /> <i>Beep! Beep! Bus is a game about the development of "
+"public transport in a city that is expanding quickly. The citizens are busy "
+"travelling up and down between their houses, the office and, most "
+"importantly: the pub. Your task as a player will be to develop a busline "
+"which takes as many passengers as possible to the place they want to be. You "
+"do this by expanding your busline, by developing new suburbs, by luring new "
+"potential passengers to the city and by investing in more and more buses. "
+"But you can also try to ride just a bit earlier than other companies and "
+"steal their passengers away. <br/><br/> Sometimes, something unexpected "
+"happens: time comes to a stand-still, and all of a sudden the demand for "
+"transportation is completely different... but you cannot let this happen too "
+"often, as the time-space continuum will rupture and the universe will "
+"collapse, thus ending the game."
+msgstr ""
+
+#: .\templates\Lobby\layout.html:62
+msgid "Profile"
+msgstr "档案"
+
+#: .\templates\Lobby\layout.html:63
+msgid "Log Out"
+msgstr "退出"
+
+#: .\templates\Lobby\layout.html:66
+msgid "Logged in as"
+msgstr "登录为"
+
+#: .\templates\Lobby\layout.html:110 .\templates\Lobby\layout.html:237
+msgid "My Games"
+msgstr "我的游戏"
+
+#: .\templates\Lobby\layout.html:112 .\templates\Lobby\layout.html:243
+msgid "Stats"
+msgstr "统计"
+
+#: .\templates\Lobby\layout.html:114 .\templates\Lobby\layout.html:249
+msgid "Updates"
+msgstr "更新"
+
+#: .\templates\Lobby\layout.html:115 .\templates\Lobby\layout.html:204
+#: .\templates\Lobby\layout.html:252 .\templates\Lobby\layout.html:268
+msgid "About"
+msgstr "关于"
+
+#: .\templates\Lobby\layout.html:116 .\templates\Lobby\layout.html:205
+#: .\templates\Lobby\layout.html:255 .\templates\Lobby\layout.html:271
+msgid "Contact"
+msgstr "联系"
+
+#: .\templates\Lobby\layout.html:150
+msgid " Username"
+msgstr " 用户名"
+
+#: .\templates\Lobby\layout.html:152
+msgid " Password"
+msgstr " 密码"
+
+#: .\templates\Lobby\layout.html:156
+msgid " Login"
+msgstr " 登录"
+
+#: .\templates\Lobby\layout.html:164
+msgid "Register New Account"
+msgstr "注册新帐号"
+
+#: .\templates\Lobby\layout.html:166
+msgid "Forgotten Password?"
+msgstr "忘记密码？"
+
+#: .\templates\Lobby\layout.html:288
+#, fuzzy
+#| msgid ""
+#| "Horseless Carriage & Food Chain Magnate are board games by Jeroen Doumen "
+#| "and Joris Wiersinga, published by <a href=\"https://www.splottershop.com/"
+#| "\" target=\"_blank\">Splotter Spellen</a>."
+msgid ""
+"Food Chain Magnate, Horseless Carriage, Bus, and The Great Zimbabwe are "
+"board games by Jeroen Doumen and Joris Wiersinga, published by <a href="
+"\"https://www.splottershop.com/\" target=\"_blank\">Splotter Spellen</a>. "
+"Permission Provided."
+msgstr ""
+"《Horseless Carriage》和《快餐连锁大亨》是由 Jeroen Doumen 和 Joris "
+"Wiersinga 设计，由<a href=\"https://www.splottershop.com/\" target=\"_blank"
+"\">Splotter Spellen</a>出版的桌游。"
+
+#: .\templates\Lobby\lobby.html:95
+#, python-format
+msgid ""
+"Tournament open for signup! See <a class=\"linkOther\" href=\"%(the_url)s"
+"\">Tournaments</a>"
+msgstr ""
+"锦标赛现已开放报名！请参见 <a class=\"linkOther\" href=\"%(the_url)s\"> 锦标"
+"赛 </a>"
+
+#: .\templates\Lobby\lobby.html:103
+msgid ""
+"OBG discord available! Click <a href=\"https://discord.gg/hCU7Fr77yV\" class="
+"\"linkOther\" target=\"_blank\">Here</a> to join!"
+msgstr ""
+"OBG Discord 群组已开放！点击<a href=\"https://discord.gg/hCU7Fr77yV\" class="
+"\"linkOther\" target=\"_blank\"> 这里 </a>加入！"
+
+#: .\templates\Lobby\lobby.html:124
+msgid "New Game"
+msgstr "新游戏"
+
+#: .\templates\Lobby\lobby.html:147
+msgid "Available Games"
+msgstr "可加入"
+
+#: .\templates\Lobby\lobby.html:151 .\templates\Lobby\playerInfo.html:149
+msgid "Current Games"
+msgstr "进行中"
+
+#: .\templates\Lobby\lobby.html:154
+msgid "Waiting Games"
+msgstr "等待中"
+
+#: .\templates\Lobby\lobby.html:157
+msgid "Invitations"
+msgstr "邀请中"
+
+#: .\templates\Lobby\lobby.html:184 .\templates\Lobby\lobby.html:220
+msgid "No Available Games"
+msgstr "没有可加入的游戏"
+
+#: .\templates\Lobby\lobby.html:190 .\templates\Lobby\lobby.html:227
+#, python-format
+msgid ""
+"For icon explanations see <a class=\"linkOther\" href=\"%(the_url)s\">Help</"
+"a>"
+msgstr ""
+"有关图标解释，请参见<a class=\"linkOther\" href=\"%(the_url)s\">帮助</a>"
+
+#: .\templates\Lobby\lobby.html:267
+msgid "Colour Guide"
+msgstr "颜色指南"
+
+#: .\templates\Lobby\lobby.html:268
+msgid "It is your move"
+msgstr "轮到你行动"
+
+#: .\templates\Lobby\lobby.html:269
+msgid "Waiting for other players to move"
+msgstr "等待其他玩家行动"
+
+#: .\templates\Lobby\lobby.html:270
+#, fuzzy
+#| msgid "Need to move or risk being kicked out"
+msgid "Need to move - using Flexi-Time"
+msgstr "需要马上行动否则可能被踢"
+
+#: .\templates\Lobby\lobby.html:271
+msgid "Need to move or risk being kicked out"
+msgstr "需要马上行动否则可能被踢"
+
+#: .\templates\Lobby\lobby.html:272
+#, fuzzy
+#| msgid "Current Players"
+msgid "Current Player is using Flex-Time"
+msgstr "当前玩家"
+
+#: .\templates\Lobby\lobby.html:273
+msgid "Enter game to kickout inactive player"
+msgstr "进入游戏踢除闲置玩家"
+
+#: .\templates\Lobby\lobby.html:287 .\templates\Lobby\lobby.html:316
+msgid "Invited Players"
+msgstr "受邀玩家"
+
+#: .\templates\Lobby\lobby.html:298
+msgid "No Waiting Games"
+msgstr "没有等待中的游戏"
+
+#: .\templates\Lobby\lobby.html:327
+msgid "No Invitations"
+msgstr "没有邀请中的游戏"
+
+#: .\templates\Lobby\lobby.html:355
+#, python-format
+msgid ""
+"Check your <a href=\"%(the_url)s\">Game Profile</a> to see all of your "
+"finished games"
+msgstr "请点击您的<a href=\"%(the_url)s\">游戏档案</a>，以查看您的所有游戏"
+
+#: .\templates\Lobby\lobbyHelp.html:19
+msgid "Games Help"
+msgstr "游戏帮助"
+
+#: .\templates\Lobby\lobbyHelp.html:20
+msgid "Food Chain Magnate Help Page"
+msgstr "快餐连锁大亨 帮助页面"
+
+#: .\templates\Lobby\lobbyHelp.html:22
+msgid "Horseless Carriage Help Page"
+msgstr "Horseless Carriage 帮助页面"
+
+#: .\templates\Lobby\lobbyHelp.html:24
+msgid "Bus Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:26
+msgid "The Great Zimbabwe Help Page"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:29
+msgid "Website Help"
+msgstr "网站帮助"
+
+#: .\templates\Lobby\lobbyHelp.html:31
+msgid "Lobby"
+msgstr "游戏大厅"
+
+#: .\templates\Lobby\lobbyHelp.html:36
+msgid "<b>Note:</b> There are no starting options for HC and Bus"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:39
+#, fuzzy
+#| msgid "What are the game columns?"
+msgid "What are the kickout icons?"
+msgstr "游戏栏目有哪些？"
+
+#: .\templates\Lobby\lobbyHelp.html:40
+msgid ""
+"Kickout icons indicate how long someone has to be inactive before they can "
+"be kicked out - this is the hard limit on the speed of a game."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:48
+msgid "Kickout after 2 days"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:49
+msgid "Kickout after 3 days"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:50
+msgid "Kickout after 5 days"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:54
+msgid "What are the times displayed in the lobby?"
+msgstr "游戏大厅显示的时间是基于什么时区？"
+
+#: .\templates\Lobby\lobbyHelp.html:55
+msgid ""
+"Times are displayed according to the timezone of your device - so all times "
+"will be in local time, in 24 hour format. Tp be preciese, it uses the "
+"country setting in your browser.<br /> The elapsed times underneath the date/"
+"times, eg 1h 5m 23s, indicates the amount of time that has passed since the "
+"last move was made, or since the game was created."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:63
+msgid "What are the game columns?"
+msgstr "游戏栏目有哪些？"
+
+#: .\templates\Lobby\lobbyHelp.html:64
+#, fuzzy
+#| msgid ""
+#| "Available Games - Games that are available to join and are not waiting "
+#| "for a repsonse from invited players<BR /> Current Games - Games you are "
+#| "currently playing<BR /> Waiting Games - Games you have joined, but are "
+#| "waiting for more players (either invited players or open to anyone)<BR /> "
+#| "Invitations - Games you have been invited to play<BR /> Finished Games - "
+#| "Your finished games. Games you have resigned or been kicked from will "
+#| "stop showing under \"Current Games\" but will show here once they are "
+#| "finished<BR /> <BR /> If you create a game open to anyone, it will be "
+#| "shown under your \"Waiting Games\" and also visible in \"Available Games"
+#| "\".<BR /> If you create a game and invite other players, it will be shown "
+#| "under your \"Waiting Games\" only, until all invited players have "
+#| "responded.<BR /> <B><U>How can I laave a game that hasn't started?</U></"
+#| "B><BR /> Under \"Waiting Games\" there is a \"Leave\" button on the "
+#| "right. If you are not waiting for specific players to join, you can also "
+#| "see the game under \"Available Games\", with a \"Leave\" button on the "
+#| "left.<BR />"
+msgid ""
+"Available Games - Games that are available to join and are not waiting for a "
+"repsonse from invited players<br /> Current Games - Games you are currently "
+"playing<br /> Waiting Games - Games you have joined, but are waiting for "
+"more players (either invited players or open to anyone)<br /> Invitations - "
+"Games you have been invited to play<br /> Finished Games - Your finished "
+"games. Games you have resigned or been kicked from will stop showing under "
+"\"Current Games\" but will show here once they are finished<br />"
+msgstr ""
+"可加入 - 可供加入且未等待邀请玩家响应的游戏<BR /> 游戏中 - 您当前正在进行的游"
+"戏<BR /> 等待中 - 您已加入但正在等待更多玩家（已邀请玩家或开放给任意玩家）的"
+"游戏<BR /> 邀请中 - 邀请您参加的游戏<BR /> 已完成 - 您完成的游戏。您已放弃或"
+"被踢出的游戏将不再显示在“游戏中”下，但在完成后将在此处显示<BR /> <BR /> 如果"
+"您创建了一个对所有人开放的游戏，它将显示在您的“等待中”，同时也可以在“可加"
+"入”中看到。<BR /> 如果您创建了一个游戏并邀请了其他玩家，它将仅显示在您的“等待"
+"中”，直到所有邀请的玩家都回应。<BR /> <B><U>我如何离开未开始的游戏？</U></"
+"B><BR /> 在“等待中”，右侧有一个“离开”按钮。如果您不等待特定玩家加入，您还可以"
+"在“可加入”看到该游戏，在左侧有一个“离开”按钮"
+
+#: .\templates\Lobby\lobbyHelp.html:72
+msgid ""
+"If you create a game open to anyone, it will be shown under your \"Waiting "
+"Games\" and also visible in \"Available Games\".<br /> If you create a game "
+"and invite other players, it will be shown under your \"Waiting Games\" "
+"only, until all invited players have responded."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:78
+msgid "How can I leave a game that hasn't started?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:79
+msgid ""
+"Under \"Waiting Games\" there is a \"Leave\" button on the right. If you are "
+"not waiting for specific players to join, you can also see the game under "
+"\"Available Games\", with a \"Leave\" button on the left."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:85
+msgid "Profile Setup"
+msgstr "档案设置"
+
+#: .\templates\Lobby\lobbyHelp.html:87
+#, fuzzy
+#| msgid "What are the game columns?"
+msgid "What are the notifications?"
+msgstr "游戏栏目有哪些？"
+
+#: .\templates\Lobby\lobbyHelp.html:88
+msgid ""
+"All games update live, so you can set whether you wish to hear a beep, bell, "
+"or nothing if a game has an update whilst the game page is open.<br /> In "
+"addition, you can add email notifications, discord notifications, and slack "
+"notifications."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:95
+#, fuzzy
+#| msgid "Discord Notifications"
+msgid "How can I add a Discord Notification?"
+msgstr "Discord 通知"
+
+#: .\templates\Lobby\lobbyHelp.html:96
+#, fuzzy
+#| msgid ""
+#| "<B><U>What are the notifications?</U></B><BR /> All games update live, so "
+#| "you can set whether you wish to hear a beep, bell, or nothing if a game "
+#| "comes to your turn whilst the game page is open.<BR /> In addition, you "
+#| "can add email notifications, discord notifications, and slack "
+#| "notifications<BR /> <BR /> <B><U>How can I add a Discord Notification?</"
+#| "U></B><BR /> You can add Discord notifications to one of your servers, or "
+#| "an existing server where you have administrator privileges.<BR /> To set "
+#| "up your own free server, <a href=\"https://support.discord.com/hc/en-us/"
+#| "articles/204849977-How-do-I-create-a-server-\" target=\"_blank\">click "
+#| "here</a>.<BR /> To set up a webhook and find the URL to copy into your "
+#| "Online Board Gamers Profile, <a href=\"https://support.discord.com/hc/en-"
+#| "us/articles/228383668-Intro-to-Webhooks\" target=\"_blank\">click here</"
+#| "a>.<BR /> Follow the guide to set up a webhook and \"Copy Webhook URL\". "
+#| "Then paste the link in to your profile on Online Board Gamers. <BR /> "
+#| "Note that Discord notifications will be sent to a channel, not to your "
+#| "private messages. <BR /> <BR /> <B><U>How can I add a Slack Notification?"
+#| "</U></B><BR /> Create a slack app and enable/create an incoming Webhook. "
+#| "Set it to post to a channel or your private messages. Then paste the link "
+#| "in to your profile on Online Board Gamers.<BR /> For details on each "
+#| "step, <a href=\"https://api.slack.com/messaging/webhooks\" target=\"_blank"
+#| "\">click here</a>.<BR />"
+msgid ""
+"You can add Discord notifications to one of your servers, or an existing "
+"server where you have administrator privileges.<br /> To set up your own "
+"free server, <a href=\"https://support.discord.com/hc/en-us/"
+"articles/204849977-How-do-I-create-a-server-\" target=\"_blank\">click here</"
+"a>.<br /> To set up a webhook and find the URL to copy into your Online "
+"Board Gamers Profile, <a href=\"https://support.discord.com/hc/en-us/"
+"articles/228383668-Intro-to-Webhooks\" target=\"_blank\">click here</a>.<br /"
+"> Follow the guide to set up a webhook and \"Copy Webhook URL\". Then paste "
+"the link in to your profile on Online Board Gamers. <br /> Note that Discord "
+"notifications have to be sent to a channel, not to your private messages."
+msgstr ""
+"<B><U>通知是什么？</U></B><BR /> 所有游戏都会实时更新，因此您可以设置在游戏页"
+"面打开时，如果游戏轮到您，是否希望听到提示音、铃声或不听任何声音。<BR /> 此"
+"外，您还可以添加电子邮件通知、Discord通知和Slack通知。<BR /> <BR /> <B><U>如"
+"何添加Discord通知？</U></B><BR /> 您可以将Discord通知添加到您的一个服务器或具"
+"有管理员权限的现有服务器中。<BR /> 要设置自己的免费服务器，请<a href="
+"\"https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-"
+"server-\" target=\"_blank\">点击此处</a>。<BR /> 要设置 Webhook 并找到要复制"
+"到您的Online Board Gamers个人资料的URL，请<a href=\"https://support.discord."
+"com/hc/en-us/articles/228383668-Intro-to-Webhooks\" target=\"_blank\">点击此"
+"处</a>。按照指南设置 Webhook 并“复制Webhook URL”。然后将链接粘贴到Online "
+"Board Gamers个人资料中。<BR /> 请注意，Discord通知将发送到频道，而不是发送到"
+"您的私人消息。<BR /> <BR /> <B><U>如何添加Slack通知？</U></B><BR /> 创建一个"
+"Slack应用程序并启用/创建传入的Webhook。将其设置为发布到一个频道或您的私人消"
+"息。然后将链接粘贴到您的Online Board Gamers个人资料中。<BR /> 有关每个步骤的"
+"详细信息，请<a href=\"https://api.slack.com/messaging/webhooks\" target="
+"\"_blank\">点击此处</a>"
+
+#: .\templates\Lobby\lobbyHelp.html:111
+#, fuzzy
+#| msgid "Slack Notifications"
+msgid "How can I add a Slack Notification?"
+msgstr "Slack 通知"
+
+#: .\templates\Lobby\lobbyHelp.html:112
+msgid ""
+"Create a slack app and enable/create an incoming Webhook. Set it to post to "
+"a channel or your private messages. Then paste the link in to your profile "
+"on Online Board Gamers.<br /> For details on each step, <a href=\"https://"
+"api.slack.com/messaging/webhooks\" target=\"_blank\">click here</a>.<br />"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:121
+msgid "Game Setup"
+msgstr "游戏设置"
+
+#: .\templates\Lobby\lobbyHelp.html:124
+#, fuzzy
+#| msgid "Change Playing Speed for different options"
+msgid "What does the Playing Speed option do?"
+msgstr "改变游戏速度时将会有不同选项可供选择"
+
+#: .\templates\Lobby\lobbyHelp.html:125
+msgid ""
+"The Playing Speed option mainly gives other players an idea of how fast you "
+"want the game to play. It is also linked to the options for the length of "
+"time before an inactive player is removed. Blitz Dual is limited to 2 "
+"player, and has optiona from 5 minutes to 20 minutes. Live speed allows "
+"kickouts of 12 hours or 1 day. The other speeds allow kickouts between 1 day "
+"and 5 days. Please note that often with 4 or more random players then more "
+"than 1 or 2 moves a day could be difficult, especially if people are in "
+"different time zones. With 2 or 3 players however, it is certainly possible "
+"to play several games in an evening!"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:137
+msgid "How much time do I have left in a Blitz Dual speed game?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:138
+msgid ""
+"You can see a timer counting down to the next kickout in the top right, "
+"underneath where it says who you are logged in as. In fact, any game that is "
+"within 20 minutes of a kickout will display the timer. No one will be kicked "
+"out until a player enters the game who isn't currently required to move, and "
+"then they need to also confirm that they would like to proceed with the "
+"kickout. All games will auto-update live, but if you are playing Blitz Dual "
+"and your opponent doesn't appear to be moving, then it is worth refreshing "
+"the game, in case you lost internet signal at the same time the game update "
+"signal arrived."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:152
+msgid "General Gameplay"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:155
+msgid "How do kickouts work?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:156
+msgid ""
+"For every game with a kickout of 12 hours or above (IE non-Blitz games) each "
+"player is alloted a \"Flex-Time\" of 24 hours. If someone is inactive for "
+"longer than the kickout duration set during game creation, then their Flex-"
+"Time will start reducing. Once they have used all their Flex-Time, the game "
+"will have a bold yellow highlight in your \"Current Games\" list. You can "
+"click on the game to enter it, and will then be asked if you wish to kick "
+"the player, or allow them more time. <br/> If you do kickout the player, "
+"they will be replaced by a passive Bot, who just passes every move. <br/> "
+"Flex-Time is on a per-game basis - each player has 24 hours of Flex-Time for "
+"the whole game. <br/> Remaining Flex-Time can be viewed at the bottom of the "
+"\"Reserve\" screen, or underneath the board in Bus."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:169
+msgid "What if I don't want to use kickouts"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:170
+msgid ""
+"No player is ever forced to kick another player. In order to kickout another "
+"player, you must enter a game that has timed out, and then confirm that you "
+"would like to proceed with the kickout. So if you don't wish to use the "
+"kickout then simply agree not to actively kick any player who hasn't moved."
+"<br/> The longest timer is 5 days. If you are playing with friends you can "
+"agree not to kick anyone out if they go over this limit. For games with "
+"random players, it is not really fair to make people wait more than 5 days "
+"for a single move. If you do need some extra time, then ask the other "
+"players using the in-game chat, and most people are fine to wait a bit "
+"longer."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:182
+#, fuzzy
+#| msgid "Need to move or risk being kicked out"
+msgid "What is the penalty for being kicked out?"
+msgstr "需要马上行动否则可能被踢"
+
+#: .\templates\Lobby\lobbyHelp.html:183
+msgid ""
+"Everyone makes mistakes, the first kickout in a year will only count as a "
+"loss, and not a kickout. Any further kicks will negate a win for your "
+"statistics. In addition, if you are kicked out of a tournament game you will "
+"be removed from the tournament."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:190
+msgid "When can I resign?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:191
+msgid ""
+"Resignation is available in all games, although it is discouraged in 3p+ "
+"games. Resigning could unbalance the game for the remaning players, so it is "
+"stronly encouraged to stay in the game, and try to meet an alternate "
+"objective (eg don't come last, sell the most trucks, use all the marketeers, "
+"etc). <br /><b><u>Food Chain Magnate</b></u>: You can resign after 4 turns. "
+"You can also resign at the confirmation options when placing your initial "
+"restaurant. This will allow you to exit games you didn't mean to join. It "
+"will still count as a loss in your statistics. <br /><b><u>Horseless "
+"Carriage</b></u>:  You can resign during the Research phase. <br /"
+"><b><u>Bus</b></u>: You can resign during your \"Choose Actions\" phase. "
+"<br /><b><u>The Great Zimbabwe</b></u>: You can resign during your actions "
+"phase; as long as no one has exceeded their VR. In this case the game will "
+"end in the current round anyway. <br /><b><u>Cannes</b></u>: You can resign "
+"during your \"place tiles\" phase."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:206
+msgid "What is the penalty for Resigning?"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:207
+msgid ""
+"Please note that although resigning is discourageed in 3p+ games, at Online "
+"Board Gamers players will never be penalised if they choose to resign. "
+"Sometimes it is a valid (and best!) option. It will count as a loss."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:220
+#, fuzzy
+#| msgid ""
+#| "<B><U>What are the formats?</U></B><BR /> Knockout is simply the winner "
+#| "moves to the next round. Two Lives is like double elimination; once "
+#| "you've lose twice then you're out of the tournament. Rounds consists of "
+#| "(currently) 4 rounds, where all players are included in the games, after "
+#| "which there is a short knockout of all players on top points to determine "
+#| "the overall winner. <BR /> <BR /> <B><U>How are game players decided?</"
+#| "U></B><BR /> Initially game players are drawn randomly. After this, "
+#| "players are ranked by number of wins. Players will play the closest "
+#| "person to them that thay haven't already played. <BR/> If there are any "
+#| "players left over, they receive a \"bye\", which counts as an automatic "
+#| "win, and progress to the next round. \"Byes\" will generally be given to "
+#| "the lowest ranked players, and are limited to one per tournament. "
+#| "Essentially \"Byes\" are given randomly to the lowest ranked player who "
+#| "hasn't yet had a \"Bye\".<BR/> <BR /> <B><U>How do kickouts work?</U></"
+#| "B><BR /> If someone is kicked out then they are ejected from the "
+#| "tournament. They will lose both lives in Two Lives, and be removed from a "
+#| "Rounds tournament <BR/> <BR /> <B><U>What else should I know?</U></B><BR /"
+#| "> Players will not play the same person again until there's no other "
+#| "option<BR/> Players will not receive two \"byes\" until there's no other "
+#| "option<BR/> Kickout timer will be 1 day, with the exception of the first "
+#| "move (restaurant placement) which will be 3 days, in case players don't "
+#| "realise a game has started<BR/> Notifications are sent out at the start "
+#| "of every new tournament game. If you finish quickly there could be "
+#| "several days until your next game starts, so it is strongly recommended "
+#| "to have at least one form of notification enabled in your profile<BR/> I "
+#| "can start a tournament any time, but too many could lead to tournament "
+#| "fatigue! So I'm planning to always have some sort of tournament available "
+#| "or ongoing. Initially, there will be a bit of an open testing phase, as I "
+#| "can't test more than about 5 players myself! After this, there might be "
+#| "one of each tournament that starts at the begining of each month, or one "
+#| "every two weeks, or something<BR/>"
+msgid ""
+"<b><u>What are the formats?</u></b><br /> Knockout is simply the winner "
+"moves to the next round. Two Lives is like double elimination; once you've "
+"lose twice then you're out of the tournament. Rounds consists of (currently) "
+"4 rounds, where all players are included in the games, after which there is "
+"a short knockout of all players on top points to determine the overall "
+"winner. <br /> <br /> <b><u>How are game players decided?</u></b><br /> "
+"Initially game players are drawn randomly. After this, players are ranked by "
+"number of wins. Players will play the closest person to them that thay "
+"haven't already played. <br/> If there are any players left over, they "
+"receive a \"Bye\", which counts as an automatic win, and progress to the "
+"next round. \"Byes\" will generally be given to the lowest ranked players, "
+"and are limited to one per tournament. Essentially \"Byes\" are given "
+"randomly to the lowest ranked player who hasn't yet had a \"Bye\".<br/> <br /"
+"> <b><u>How do kickouts work?</u></b><br /> If someone is kicked out then "
+"they are ejected from the tournament. They will lose both lives in Two "
+"Lives, and be removed from a Rounds tournament <br/> <br /> <b><u>What else "
+"should I know?</u></b><br /> Players will not play the same person again "
+"until there's no other option (currently applies to 2p games, and the first "
+"2 players in larger playercounts). <br/> Players will not receive two \"byes"
+"\" until there's no other option<br/> Kickout timer will be 1 day, with the "
+"exception of the first move which will be 3 days, in case players don't "
+"realise a game has started.<br/> Notifications are sent out at the start of "
+"every new tournament game. If you finish quickly there could be several days "
+"until your next game starts, so it is strongly recommended to have at least "
+"one form of notification enabled in your profile<br/> <b><u>Food Chain "
+"Magnate</b></u>: Tournaments are run at regular intervals<br/> "
+"<b><u>Horseless Carriage</b></u>: Tournaments will open between 1st - 7th of "
+"the month, and start after 7 days, or longer if there aren't enough players. "
+"If a tournament is already running, a tournament won't open unless the "
+"current tournament started 2 months agp<br/> <b><u>Bus</b></u>: Same as "
+"above<br/> <b><u>The Great Zimbabwe</b></u>: Tournaments are coming soon! "
+"They will probably be run externally.<br/> <br/>"
+msgstr ""
+"<B><U>比赛的赛制是什么?</U></B><BR /> 淘汰赛规则是胜者晋级下一轮。双败淘汰制"
+"的规则类似于双重淘汰赛，如果您输了两次，那么您就被淘汰出局。回合制赛制包括"
+"（目前）4个回合，所有参赛选手都参与比赛，比赛结束后，排名前几的选手将进行一次"
+"淘汰赛，以决定总冠军。 <BR /> <BR /> <B><U>参赛选手是如何确定的？</U></"
+"B><BR /> 初始阶段参赛选手是随机抽取的。然后，选手按胜利次数进行排名。选手将与"
+"离他们最近但尚未比赛过的对手进行比赛。如果有剩余选手，则他们将获得“轮空”，这"
+"将被视为自动获胜，并晋级下一轮。通常会将“轮空”分配给排名最低的选手，并每个比"
+"赛限定一个“轮空”。基本上，“轮空”将随机分配给尚未获得“轮空”的最低排名选手。"
+"<BR/> <BR /> <B><U>淘汰是如何进行的？</U></B><BR /> 如果有人被淘汰，他们将被"
+"驱逐出比赛。在双败淘汰制比赛中，他们将失去两次生命，在回合制比赛中被移出比"
+"赛。 <BR/> <BR /> <B><U>还有什么需要知道的？</U></B><BR /> 参赛选手不会再与同"
+"一人比赛，直到没有其他选项为止。参赛选手不会在没有其他选项时获得两个“轮空”。"
+"淘汰计时器将设置为1天，但首个行动（餐厅放置）将设置为3天，以防选手没有意识到"
+"比赛已经开始。每个新比赛开始时都会发送通知。如果您完成得很快，您可能需要等待"
+"几天才能开始下一场比赛，因此强烈建议在您的个人资料中至少启用一种通知方式。我"
+"可以随时开始比赛，但过多的比赛可能会导致比赛厌倦！因此，我计划始终有某种类型"
+"的比赛可用或正在进行中。最初，将有一段开放测试阶段，因为我自己无法测试超过5名"
+"选手！之后，可能每个月开始一个比赛，或每两周开始一个比赛，或其他某种方式"
+
+#: .\templates\Lobby\lobby_icons.html:4
+#, fuzzy
+#| msgid "What are the icons next to Food Chain Magnate games?"
+msgid ""
+"What are the icons next to Food Chain Magnate / The Great Zimbabwe games?"
+msgstr "快餐连锁大亨游戏信息上的图标代表什么？"
+
+#: .\templates\Lobby\lobby_icons.html:6
+msgid ""
+"The icons represent the options selected for that game. You can hover over "
+"the icon to see what it represents."
+msgstr ""
+"这些图标代表了该局所选的选项。您可以将鼠标悬停在图标上以查看其代表的内容。"
+
+#: .\templates\Lobby\lobby_icons.html:202
+#: .\templates\Lobby\lobby_icons.html:203
+msgid "Selected gods"
+msgstr ""
+
+#: .\templates\Lobby\lobby_icons.html:210
+#: .\templates\Lobby\lobby_icons.html:211
+msgid "Selected gods with altered VR"
+msgstr ""
+
+#: .\templates\Lobby\login.html:20
+msgid "Username"
+msgstr "用户名"
+
+#: .\templates\Lobby\login.html:28
+msgid "Forgotten your password? Click here to send a reset email"
+msgstr "忘记密码？点击这里发送重置邮件"
+
+#: .\templates\Lobby\newGames.html:14
+#, fuzzy
+#| msgid "Map Editor"
+msgid "TGZ Map Editor"
+msgstr "地图编辑器"
+
+#: .\templates\Lobby\newGames.html:38
+#, fuzzy
+#| msgid "Map Editor"
+msgid "FCM Map Editor"
+msgstr "地图编辑器"
+
+#: .\templates\Lobby\playerInfo.html:20
+msgid "Player Stats"
+msgstr "玩家统计"
+
+#: .\templates\Lobby\playerInfo.html:53
+msgid "Games"
+msgstr "总局数"
+
+#: .\templates\Lobby\playerInfo.html:54 .\templates\Lobby\stats.html:124
+#: .\templates\Lobby\stats.html:167 .\templates\Lobby\stats.html:210
+#: .\templates\Lobby\stats.html:255 .\templates\Lobby\stats.html:298
+#: .\templates\Lobby\stats.html:341 .\templates\Lobby\stats.html:386
+#: .\templates\Lobby\stats.html:429 .\templates\Lobby\stats.html:472
+#: .\templates\Lobby\stats.html:517 .\templates\Lobby\stats.html:560
+#: .\templates\Lobby\stats.html:603 .\templates\Lobby\stats.html:648
+#: .\templates\Lobby\stats.html:691 .\templates\Lobby\stats.html:734
+#: .\templates\Lobby\stats.html:779 .\templates\Lobby\stats.html:822
+#: .\templates\Lobby\stats.html:865
+msgid "Wins"
+msgstr "胜利"
+
+#: .\templates\Lobby\playerInfo.html:55 .\templates\Lobby\stats.html:142
+#: .\templates\Lobby\stats.html:185 .\templates\Lobby\stats.html:228
+#: .\templates\Lobby\stats.html:273 .\templates\Lobby\stats.html:316
+#: .\templates\Lobby\stats.html:359 .\templates\Lobby\stats.html:404
+#: .\templates\Lobby\stats.html:447 .\templates\Lobby\stats.html:490
+#: .\templates\Lobby\stats.html:535 .\templates\Lobby\stats.html:578
+#: .\templates\Lobby\stats.html:621 .\templates\Lobby\stats.html:666
+#: .\templates\Lobby\stats.html:709 .\templates\Lobby\stats.html:752
+#: .\templates\Lobby\stats.html:797 .\templates\Lobby\stats.html:840
+#: .\templates\Lobby\stats.html:883
+#, python-format
+msgid "Win %%"
+msgstr "胜率"
+
+#: .\templates\Lobby\playerInfo.html:96
+msgid "Kickouts in last year"
+msgstr "最近一年被踢的游戏"
+
+#: .\templates\Lobby\playerInfo.html:97
+msgid "Fair Play rating for last year"
+msgstr "最近一年的名誉等级"
+
+#: .\templates\Lobby\playerInfo.html:102
+#, fuzzy
+#| msgid "No Current Games"
+msgid "Joint Current Games"
+msgstr "没有进行中的游戏"
+
+#: .\templates\Lobby\playerInfo.html:123
+#, fuzzy
+#| msgid "No Current Games"
+msgid "No Joint Current Games"
+msgstr "没有进行中的游戏"
+
+#: .\templates\Lobby\playerInfo.html:126
+#, fuzzy
+#| msgid "No Finished Games"
+msgid "Joint Finished Games"
+msgstr "没有已完成游戏"
+
+#: .\templates\Lobby\profile.html:24
+msgid "Live notification when it is your turn"
+msgstr "轮到你时的实时通知"
+
+#: .\templates\Lobby\profile.html:31
+msgid "No Sound"
+msgstr "没有声音"
+
+#: .\templates\Lobby\profile.html:44
+msgid "Beep"
+msgstr "哔"
+
+#: .\templates\Lobby\profile.html:57
+msgid "Dinner Bell"
+msgstr "晚餐铃声"
+
+#: .\templates\Lobby\profile.html:67
+msgid "Notifications"
+msgstr "通知选项"
+
+#: .\templates\Lobby\profile.html:77
+msgid "Email Notifications"
+msgstr "电子邮件通知"
+
+#: .\templates\Lobby\profile.html:89
+msgid "Discord Notifications"
+msgstr "Discord 通知"
+
+#: .\templates\Lobby\profile.html:96
+msgid "Discord Webhook URL, EG"
+msgstr "Discord Webhook URL，比如"
+
+#: .\templates\Lobby\profile.html:98
+msgid ""
+"18 Digit Discord User ID - if you wish to be @'d with your webhook (Advanced "
+"Option - leave blank if unsure - see <a class='linkOther' href='https://"
+"support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-"
+"Server-Message-ID-'' target='_blank'>here</a>)"
+msgstr ""
+"18位数字 Discord用户ID - 如果您希望在 Webhook 中被@（高级选项 - 如果不确定，"
+"请留空 - 参见<a class='linkOther' href='https://support.discord.com/hc/en-us/"
+"articles/206346498-Where-can-I-find-my-User-Server-Message-ID-'' "
+"target='_blank'>此处</a>）"
+
+#: .\templates\Lobby\profile.html:104
+msgid ""
+"Optional: Leave blank if unsure. Input 18 digit discord user ID if you wish "
+"to include '@'"
+msgstr ""
+"可选项：如果不确定，请留空。如果您希望被@，请输入 18 位数字的 Discord 用户 "
+"ID。"
+
+#: .\templates\Lobby\profile.html:106
+msgid "Test Discord Webhook URL"
+msgstr "测试 Discord Webhook URL"
+
+#: .\templates\Lobby\profile.html:109
+msgid "To find your Discord Webhook URL see"
+msgstr "要找到您的 Discord Webhook URL，请参阅"
+
+#: .\templates\Lobby\profile.html:125
+msgid "Slack Notifications"
+msgstr "Slack 通知"
+
+#: .\templates\Lobby\profile.html:132
+#, fuzzy
+#| msgid "Slack Webhook URL, EG"
+msgid " Slack Webhook URL, EG"
+msgstr "Slack Webhook URL, 比如"
+
+#: .\templates\Lobby\profile.html:134
+msgid "Test Slack Webhook URL"
+msgstr "测试 Slack Webhook URL"
+
+#: .\templates\Lobby\profile.html:137
+msgid "To find your Slack Webhook URL see"
+msgstr "要查找您的 Slack Webhook URL，请参阅"
+
+#: .\templates\Lobby\profile.html:145
+msgid "Update Notification Preferences"
+msgstr "更改通知选项"
+
+#: .\templates\Lobby\profile.html:155
+msgid "Favourite Food Chain Magnate Restaurant"
+msgstr "快餐连锁大亨 - 最喜欢的餐厅"
+
+#: .\templates\Lobby\profile.html:158 .\templates\Lobby\profile.html:251
+#: .\templates\Lobby\profile.html:319 .\templates\Lobby\profile.html:421
+#: .\templates\Lobby\profile.html:501
+msgid "None"
+msgstr "无"
+
+#: .\templates\Lobby\profile.html:235
+msgid "High Contrast FCM Board Items"
+msgstr "快餐连锁大亨 - 高对比度"
+
+#: .\templates\Lobby\profile.html:244
+msgid ""
+"Use high contrast board demand (items have white outline instead of black)"
+msgstr "使用高对比度游戏（食物带有白色轮廓而不是黑色）"
+
+#: .\templates\Lobby\profile.html:248
+msgid "Favourite Horseless Carriage Colour"
+msgstr "Horseless Carriage - 最喜欢的颜色"
+
+#: .\templates\Lobby\profile.html:316
+msgid "Favourite Bus Colour and Board"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:418
+#, fuzzy
+#| msgid "Favourite Horseless Carriage Colour"
+msgid "Favourite The Great Zimbabwe Colour"
+msgstr "Horseless Carriage - 最喜欢的颜色"
+
+#: .\templates\Lobby\profile.html:486
+msgid "Minimal Description Text in the UI"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:495
+msgid "Tick to remove god and specialist descriptions/VR below the cards"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:498
+#, fuzzy
+#| msgid "Favourite Horseless Carriage Colour"
+msgid "Favourite Cannes Colour"
+msgstr "Horseless Carriage - 最喜欢的颜色"
+
+#: .\templates\Lobby\profile.html:564
+#, fuzzy
+#| msgid "Update Colour Preferences"
+msgid "Update Game Preferences"
+msgstr "更改颜色选项"
+
+#: .\templates\Lobby\profile.html:572
+msgid "Change Password"
+msgstr "更改密码"
+
+#: .\templates\Lobby\register.html:31
+msgid "Already have an account?"
+msgstr "已有账号？"
+
+#: .\templates\Lobby\register.html:31
+msgid "Log In here"
+msgstr "在这里登录"
+
+#: .\templates\Lobby\stats.html:23
+msgid "Current Users"
+msgstr "当前用户"
+
+#: .\templates\Lobby\stats.html:25
+msgid "Games (non-practice) in Progress"
+msgstr "游戏（非训练模式）进行中"
+
+#: .\templates\Lobby\stats.html:41
+#, fuzzy
+#| msgid "Games (non-practice) in Progress"
+msgid "Finished Games (non-practice)"
+msgstr "游戏（非训练模式）进行中"
+
+#: .\templates\Lobby\stats.html:57
+msgid "Active users in last 24hrs"
+msgstr "最近24小时的活跃用户"
+
+#: .\templates\Lobby\stats.html:59
+msgid "Top Players"
+msgstr "玩家排行榜"
+
+#: .\templates\Lobby\stats.html:68 .\templates\Lobby\stats.html:89
+msgid "Fair Play League"
+msgstr "名誉"
+
+#: .\templates\Lobby\stats.html:72
+msgid "2 Player"
+msgstr "2 人游戏"
+
+#: .\templates\Lobby\stats.html:73
+msgid "3 Player"
+msgstr "3 人游戏"
+
+#: .\templates\Lobby\stats.html:74
+msgid "4 Player"
+msgstr "4 人游戏"
+
+#: .\templates\Lobby\stats.html:75
+msgid "5 Player"
+msgstr "5 人游戏"
+
+#: .\templates\Lobby\stats.html:76
+msgid "6 Player"
+msgstr "6 人游戏"
+
+#: .\templates\Lobby\stats.html:79
+msgid "All Time"
+msgstr "所有时间"
+
+#: .\templates\Lobby\stats.html:80
+msgid "Last 3 Months"
+msgstr "最近3个月"
+
+#: .\templates\Lobby\stats.html:81
+msgid "Last Month"
+msgstr "最近1个月"
+
+#: .\templates\Lobby\stats.html:90
+#, python-format
+msgid ""
+"This is a table of %% completed games in the last year, along with total "
+"completed games in the last year"
+msgstr "这是最近一年游戏完成（不被踢）比例与总数的数据"
+
+#: .\templates\Lobby\stats.html:94 .\templates\Lobby\stats.html:123
+#: .\templates\Lobby\stats.html:141 .\templates\Lobby\stats.html:166
+#: .\templates\Lobby\stats.html:184 .\templates\Lobby\stats.html:209
+#: .\templates\Lobby\stats.html:227 .\templates\Lobby\stats.html:254
+#: .\templates\Lobby\stats.html:272 .\templates\Lobby\stats.html:297
+#: .\templates\Lobby\stats.html:315 .\templates\Lobby\stats.html:340
+#: .\templates\Lobby\stats.html:358 .\templates\Lobby\stats.html:385
+#: .\templates\Lobby\stats.html:403 .\templates\Lobby\stats.html:428
+#: .\templates\Lobby\stats.html:446 .\templates\Lobby\stats.html:471
+#: .\templates\Lobby\stats.html:489 .\templates\Lobby\stats.html:516
+#: .\templates\Lobby\stats.html:534 .\templates\Lobby\stats.html:559
+#: .\templates\Lobby\stats.html:577 .\templates\Lobby\stats.html:602
+#: .\templates\Lobby\stats.html:620 .\templates\Lobby\stats.html:647
+#: .\templates\Lobby\stats.html:665 .\templates\Lobby\stats.html:690
+#: .\templates\Lobby\stats.html:708 .\templates\Lobby\stats.html:733
+#: .\templates\Lobby\stats.html:751 .\templates\Lobby\stats.html:778
+#: .\templates\Lobby\stats.html:796 .\templates\Lobby\stats.html:821
+#: .\templates\Lobby\stats.html:839 .\templates\Lobby\stats.html:864
+#: .\templates\Lobby\stats.html:882
+msgid "Player"
+msgstr "玩家"
+
+#: .\templates\Lobby\stats.html:95
+#, python-format
+msgid "Completion %%"
+msgstr "完成率"
+
+#: .\templates\Lobby\stats.html:96
+msgid "Total Games"
+msgstr "游戏总数"
+
+#: .\templates\Lobby\stats.html:119
+msgid "Win Totals"
+msgstr "胜场"
+
+#: .\templates\Lobby\stats.html:137
+msgid "Win Percentages"
+msgstr "胜率"
+
+#: .\templates\Lobby\stats.html:154 .\templates\Lobby\stats.html:285
+#: .\templates\Lobby\stats.html:416 .\templates\Lobby\stats.html:547
+#: .\templates\Lobby\stats.html:678 .\templates\Lobby\stats.html:809
+#, fuzzy
+#| msgid ""
+#| "Win stats are calculated hourly. You need to complete at least 5 games. "
+#| "Practice games do not count towards your win stats"
+msgid ""
+"Win stats are calculated hourly. You need to complete at least 5 games. "
+"Practice games do not count towards your win stats"
+msgstr ""
+"胜利统计数据每小时计算一次。您需要完成至少5场游戏。训练模式的游戏不计入胜率统"
+"计"
+
+#: .\templates\Lobby\stats.html:162
+msgid "Win Totals (Last 3 Months)"
+msgstr "胜场（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:180
+msgid "Win Percentages (Last 3 Months)"
+msgstr "胜率（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:197 .\templates\Lobby\stats.html:240
+#: .\templates\Lobby\stats.html:328 .\templates\Lobby\stats.html:371
+#: .\templates\Lobby\stats.html:459 .\templates\Lobby\stats.html:502
+#: .\templates\Lobby\stats.html:590 .\templates\Lobby\stats.html:633
+#: .\templates\Lobby\stats.html:721 .\templates\Lobby\stats.html:764
+#: .\templates\Lobby\stats.html:852 .\templates\Lobby\stats.html:895
+#, fuzzy, python-format
+#| msgid ""
+#| "Win stats are calculated hourly. You need to complete at least 5 games to "
+#| "be included in the %% stats. Practice games do not count towards your win "
+#| "stats"
+msgid ""
+"Win stats are calculated hourly. You need to complete at least 5 games to be "
+"included in the %% stats. Practice games do not count towards your win stats"
+msgstr ""
+"胜利统计数据每小时计算一次。您需要完成至少5场游戏才会被记入胜率数据。训练模式"
+"的游戏不计入胜率统计"
+
+#: .\templates\Lobby\stats.html:205
+msgid "Win Totals (Last Month)"
+msgstr "胜场（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:223
+msgid "Win Percentages (Last Month)"
+msgstr "胜率（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:250
+msgid "Win Totals 2p"
+msgstr "胜场 2人游戏"
+
+#: .\templates\Lobby\stats.html:268
+msgid "Win Percentages 2p"
+msgstr "胜率 2人游戏"
+
+#: .\templates\Lobby\stats.html:293
+msgid "Win Totals 2p (Last 3 Months)"
+msgstr "胜场 2人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:311
+msgid "Win Percentages 2p (Last 3 Months)"
+msgstr "胜率 2人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:336
+msgid "Win Totals 2p (Last Month)"
+msgstr "胜场 2人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:354
+msgid "Win Percentages 2p (Last Month)"
+msgstr "胜率 2人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:381
+msgid "Win Totals 3p"
+msgstr "胜场 3人游戏"
+
+#: .\templates\Lobby\stats.html:399
+msgid "Win Percentages 3p"
+msgstr "胜率 3人游戏"
+
+#: .\templates\Lobby\stats.html:424
+msgid "Win Totals 3p (Last 3 Months)"
+msgstr "胜场 3人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:442
+msgid "Win Percentages 3p (Last 3 Months)"
+msgstr "胜率 3人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:467
+msgid "Win Totals 3p (Last Month)"
+msgstr "胜场 3 人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:485
+msgid "Win Percentages 3p (Last Month)"
+msgstr "胜率 3人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:512
+msgid "Win Totals 4p"
+msgstr "胜场 4人游戏"
+
+#: .\templates\Lobby\stats.html:530
+msgid "Win Percentages 4p"
+msgstr "胜率 4人游戏"
+
+#: .\templates\Lobby\stats.html:555
+msgid "Win Totals 4p (Last 3 Months)"
+msgstr "胜场 4人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:573
+msgid "Win Percentages 4p (Last 3 Months)"
+msgstr "胜率 4人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:598
+msgid "Win Totals 4p (Last Month)"
+msgstr "胜场 4人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:616
+msgid "Win Percentages 4p (Last Month)"
+msgstr "胜率 4人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:643
+msgid "Win Totals 5p"
+msgstr "胜场 5人游戏"
+
+#: .\templates\Lobby\stats.html:661
+msgid "Win Percentages 5p"
+msgstr "胜率 5人游戏"
+
+#: .\templates\Lobby\stats.html:686
+msgid "Win Totals 5p (Last 3 Months)"
+msgstr "胜场 5人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:704
+msgid "Win Percentages 5p (Last 3 Months)"
+msgstr "胜率 5人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:729
+msgid "Win Totals 5p (Last Month)"
+msgstr "胜场 5人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:747
+msgid "Win Percentages 5p (Last Month)"
+msgstr "胜率 5人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:774
+msgid "Win Totals 6p"
+msgstr "胜场 6人游戏"
+
+#: .\templates\Lobby\stats.html:792
+msgid "Win Percentages 6p"
+msgstr "胜率 6人游戏"
+
+#: .\templates\Lobby\stats.html:817
+msgid "Win Totals 6p (Last 3 Months)"
+msgstr "胜场 6 人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:835
+msgid "Win Percentages 6p (Last 3 Months)"
+msgstr "胜率 6人游戏（最近 3 个月）"
+
+#: .\templates\Lobby\stats.html:860
+msgid "Win Totals 6p (Last Month)"
+msgstr "胜场 6 人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:878
+msgid "Win Percentages 6p (Last Month)"
+msgstr "胜率 6人游戏（最近 1 个月）"
+
+#: .\templates\Lobby\stats.html:900
+msgid "Ten most recently active games"
+msgstr "最近活跃的十个游戏"
+
+#: .\views.py:341
+msgid "Password Reset Requested"
+msgstr "请求密码重置"
+
+#: .\views.py:361
+msgid ""
+"An email with password reset instructions has been sent to your inbox. "
+"Please check spam folders"
+msgstr ""
+"一封包含重置密码链接的电子邮件已发送到您的收件箱，如果没有找到，请检查垃圾邮"
+"件文件夹"
+
+#: .\views.py:365
+msgid "No user found with this email"
+msgstr "找不到使用此电子邮件的用户"
+
+#: .\views.py:368
+msgid "Please enter a valid email address"
+msgstr "请输入有效的电子邮件地址"
+
+#: .\views.py:376
+msgid ""
+"Authentification problem - possibly using another browser tab. Please login "
+"here"
+msgstr "身份验证问题 - 可能在使用另一个浏览器标签页。请在此处登录"
+
+#: .\views.py:637
+msgid "Thank you for taking a look"
+msgstr "感谢您查看"
+
+#: .\views.py:938
+msgid ""
+"Account inactive - check your email for email verification, or contact the "
+"webmaster"
+msgstr "账户未激活 - 请检查您的电子邮件以进行邮件验证，或联系网站管理员"
+
+#: .\views.py:942
+msgid "Invalid username / password"
+msgstr "无效的用户名/密码"
+
+#: .\views.py:983
+msgid "Your password has been changed"
+msgstr "您的密码已更改"
+
+#: .\views.py:1019
+msgid "Your colour preferences have been updated successfully"
+msgstr "您的颜色偏好已成功更新"
+
+#: .\views.py:1048
+msgid "Please enter a valid Discord Webhook URL"
+msgstr "请输入有效的 Discord Webhook URL"
+
+#: .\views.py:1054 .\views.py:3076
+msgid "Please enter a Valid Discord Webhook URL"
+msgstr "请输入有效的 Discord Webhook URL"
+
+#: .\views.py:1061 .\views.py:1066 .\views.py:3081 .\views.py:3086
+msgid "Discord User ID must be an 18+ digit number"
+msgstr "Discord 用户 ID 必须是 18 位数字"
+
+#: .\views.py:1079
+msgid "Please enter a valid Slack Webhook URL"
+msgstr "请输入有效的 Slack Webhook URL"
+
+#: .\views.py:1084 .\views.py:3099
+msgid "Please enter a Valid Slack Webhook URL"
+msgstr "请输入有效的 Slack Webhook URL"
+
+#: .\views.py:1098
+#, fuzzy
+#| msgid "Your notification preferences have been updated successfully"
+msgid ""
+"A test message has been sent and your notification preferences have been "
+"updated successfully"
+msgstr "您的通知选项已成功更新"
+
+#: .\views.py:1101
+msgid "Your notification preferences have been updated successfully"
+msgstr "您的通知选项已成功更新"
+
+#: .\views.py:1155 .\views.py:1183 .\views.py:1211 .\views.py:1241
+#: .\views.py:1259 .\views.py:1288
+msgid "Game does not exist"
+msgstr "游戏不存在"
+
+#: .\views.py:1162 .\views.py:1190 .\views.py:1218 .\views.py:1266
+#: .\views.py:1317
+msgid "Game creation for rematch"
+msgstr "创建重赛游戏"
+
+#: .\views.py:1231 .\views.py:1338
+msgid "Game creation for selected map"
+msgstr "为选定的地图创建游戏"
+
+#: .\views.py:1362
+msgid "Email Address Already Registered"
+msgstr "电子邮件地址已注册"
+
+#: .\views.py:1366
+msgid "Username already taken"
+msgstr "用户名已被占用"
+
+#: .\views.py:1373
+msgid "Activate Your Online Gaming Account"
+msgstr "激活您的在线游戏帐户"
+
+#: .\views.py:1383
+#, python-format
+msgid ""
+"Please check %(emailAddress)s to confirm your email address and complete "
+"registration"
+msgstr "请检查 %(emailAddress)s 以确认您的电子邮件地址并完成注册"
+
+#: .\views.py:1407
+#, fuzzy
+#| msgid ""
+#| "Your account has been confirmed<BR/>Complete your profile or return to "
+#| "the Home Page to view games"
+msgid ""
+"Your account has been activated<br/>Enable Email, Discord, and Slack "
+"notifications here on your profile, and then return to the Home Page to view "
+"games"
+msgstr "您的帐户已确认<BR/>请完成您的个人资料或返回主页查看游戏"
+
+#: .\views.py:1411
+msgid ""
+"The confirmation link was invalid, possibly because it has already been "
+"used. If you think your email client scanned the link, then try to log in "
+"anyway"
+msgstr ""
+"确认链接无效，可能是因为它已经被使用过了。如果您认为您的电子邮件客户端扫描了"
+"该链接，请尝试重新登录"
+
+#: .\views.py:1425
+msgid ""
+"Thank you for your email confirmation. Now you can login to your account"
+msgstr "感谢您的电子邮件确认。现在您可以登录您的账户"
+
+#: .\views.py:1427
+msgid "Activation link is invalid"
+msgstr "激活链接无效"
+
+#: .\views.py:1434
+msgid "Player does not exist"
+msgstr "玩家不存在"
+
+#: .\views.py:1705 .\views.py:1726
+msgid "Tournament does not exist"
+msgstr "锦标赛不存在"
+
+#: .\views.py:1712
+msgid "You have joined the Tournament"
+msgstr "您已经参加了锦标赛"
+
+#: .\views.py:1715
+msgid "The Tournament is already full"
+msgstr "锦标赛已经满员"
+
+#: .\views.py:1797 .\views.py:1982 .\views.py:2332 .\views.py:2502
+msgid "You cannot add yourself as another player"
+msgstr "您不能将自己添加为其他玩家"
+
+#: .\views.py:1806 .\views.py:1991 .\views.py:2511
+msgid "Error: Player 2 does not exist"
+msgstr "错误：玩家 2 不存在"
+
+#: .\views.py:1813 .\views.py:1998 .\views.py:2518
+msgid "Error: Player 3 does not exist"
+msgstr "错误：玩家 3 不存在"
+
+#: .\views.py:1820 .\views.py:2005 .\views.py:2525
+msgid "Error: Player 4 does not exist"
+msgstr "错误：玩家 4 不存在"
+
+#: .\views.py:1827 .\views.py:2012 .\views.py:2532
+msgid "Error: Player 5 does not exist"
+msgstr "错误：玩家 5 不存在"
+
+#: .\views.py:1960 .\views.py:2127 .\views.py:2471
+msgid "Your game has been created and has been started"
+msgstr "您的游戏已经创建并开始"
+
+#: .\views.py:1964 .\views.py:2131 .\views.py:2475 .\views.py:2789
+msgid "Your game has been created and is waiting for players"
+msgstr "您的游戏已经创建，等待玩家"
+
+#: .\views.py:2240
+#, python-brace-format
+msgid "Error: {player} is required"
+msgstr ""
+
+#: .\views.py:2245 .\views.py:2344
+#, fuzzy, python-brace-format
+#| msgid "Error: Player 2 does not exist"
+msgid "Error: {username} does not exist"
+msgstr "错误：玩家 2 不存在"
+
+#: .\views.py:2251
+#, python-brace-format
+msgid "Error: {player} should be blank"
+msgstr ""
+
+#: .\views.py:2313
+msgid "Game created and started. New Game Notifications sent"
+msgstr ""
+
+#: .\views.py:2487
+msgid "Please Select an Expert Option"
+msgstr ""
+
+#: .\views.py:2539
+msgid "Error: Player 6 does not exist"
+msgstr "错误：玩家 6 不存在"
+
+#: .\views.py:2781
+#, fuzzy
+#| msgid "Your game has been created and has been started"
+msgid "Your Practice game has been started"
+msgstr "您的游戏已经创建并开始"
+
+#: .\views.py:2785
+#, fuzzy
+#| msgid "Your game has been created and has been started"
+msgid "Your AI game has been started"
+msgstr "您的游戏已经创建并开始"
+
+#: .\views.py:2807
+msgid "Sorry, the game no longer exists"
+msgstr "对不起，游戏不存在了"
+
+#: .\views.py:2826
+msgid "Illegal Access"
+msgstr ""
+
+#: .\views.py:2833
+msgid "The game has already started"
+msgstr "游戏已经开始"
+
+#: .\views.py:2840
+msgid "You have left the game - it has been deleted"
+msgstr "你已经离开游戏-该局游戏已被删除"
+
+#: .\views.py:2843
+msgid "You have left the game - it is available for players to join"
+msgstr "你已经离开游戏-可供玩家加入"
+
+#: .\views.py:2851
+msgid "You have declined the invitation - it is available for players to join"
+msgstr "你拒绝了邀请 - 其他玩家可以加入"
+
+#: .\views.py:2856
+msgid ""
+"You have declined the invitation - the game is waiting for other invitees to "
+"respond"
+msgstr "您已经拒绝了邀请 - 游戏正在等待其他受邀者的回复"
+
+#: .\views.py:2868
+msgid "Sorry, someone else joined the game and it is full"
+msgstr "抱歉，有人加入游戏，游戏已满"
+
+#: .\views.py:2881
+msgid "You have joined the game and the game has started"
+msgstr "你已经加入游戏，游戏开始"
+
+#: .\views.py:2885
+msgid "You have joined the game - waiting for more players"
+msgstr "你已加入游戏 - 等待更多玩家"
+
+#: .\views.py:3070
+msgid "Please enter a valid URL"
+msgstr "请输入有效网址"
+
+#: .\views.py:3092 .\views.py:3103
+msgid "This is a test message from Online Board Gamers"
+msgstr "这是来自 Online Board Gamers 的测试消息"
+
+#~ msgid "Basic Options"
+#~ msgstr "基本选项"
+
+#, python-format
+#~ msgid ""
+#~ "\n"
+#~ "Hi %(user.username)s,\n"
+#~ "\n"
+#~ "You have been invited to a game of Horseless Carriage at https://"
+#~ "%(domain)s\n"
+#~ "\n"
+#~ "Name: %(gameName)s\n"
+#~ "Players: %(maxPlayers)s\n"
+#~ "\n"
+#~ "Please check the \"Invitations\" tab in the lobby. \n"
+#~ "\n"
+#~ "Enjoy!\n"
+#~ "\n"
+#~ msgstr ""
+#~ "\n"
+#~ "您好 %(user.username)s，\n"
+#~ "\n"
+#~ "您已经被邀请参加 https://%(domain)s 的“Horseless Carriage”游戏。\n"
+#~ "\n"
+#~ "游戏名称：%(gameName)s\n"
+#~ "玩家数量：%(maxPlayers)s\n"
+#~ "\n"
+#~ "请在游戏大厅中查看“邀请”选项卡。\n"
+#~ "\n"
+#~ "祝您游戏愉快！\n"
+#~ "\n"
+
+#~ msgid "Custom Map - Click to View"
+#~ msgstr "自定义地图 - 点击查看"
+
+#~ msgid ""
+#~ "Times are displayed according to the timezone of your device - so all "
+#~ "times will be in local time."
+#~ msgstr "时间按照您设备的时区显示 - 所以所有的时间都是本地时间。"
+
+#~ msgid ""
+#~ "<B><U>What does the Playing Speed option do?</U></B><BR /> The Playing "
+#~ "Speed option mainly gives other players an idea of how fast you want the "
+#~ "game to play. It is also linked to the options for the length of time "
+#~ "before an inactive player is removed. Blitz Dual is limited to 2 player, "
+#~ "and has optiona from 5 minutes to 20 minutes. Live speed allows kickouts "
+#~ "of 12 hours or 1 day. The other speeds allow kickouts between 1 day and 5 "
+#~ "days. Please note that often with 4 or more random players then more than "
+#~ "1 or 2 moves a day could be difficult, especially if people are in "
+#~ "different time zones. With 2 or 3 players however, it is certainly "
+#~ "possible to play several games in an evening!<BR /> <BR /> <B><U>How much "
+#~ "time do I have left in a Blitz Dual speed game?</U></B><BR /> You can see "
+#~ "a timer counting down to the next kickout in the top right, underneath "
+#~ "where it says who you are logged in as. In fact, any game that is within "
+#~ "20 minutes of a kickout will display the timer. There is a short grace "
+#~ "period once the timer reaches zero, and no one is kicked until a player "
+#~ "enters the game who isn't currently required to move, thus activiating "
+#~ "the kickout. All games will auto-update live, but if you are playing "
+#~ "Blitz Dual and your opponent doesn't appear to be moving, then it is "
+#~ "worth refreshing the game, in case you lost internet signal at the same "
+#~ "time the game update signal arrived.<BR /> <BR /> <B><U>Where do the FCM "
+#~ "scenarios come from?</U></B><BR /> They are suggested in the Ketchup "
+#~ "Expansion manual. <BR />"
+#~ msgstr ""
+#~ "<B><U>游戏速度选项是什么？</U></B><BR /> 游戏速度选项主要让其他玩家知道你"
+#~ "想让游戏以何种速度进行。它也与移除闲置玩家之前的时间长度选项相关联。闪电战"
+#~ "仅限于2个玩家，并有从5分钟到20分钟的选项。实时游戏可以选择12小时或1天后踢"
+#~ "出游戏。其他速度可以选择1天到5天之间的踢除时间。请注意，如果有4个或更多的"
+#~ "随机玩家，则每天进行1或2个以上的行动可能会很困难，特别是如果他们处于不同的"
+#~ "时区。然而，如果只有2或3个玩家，则可以在一个晚上玩好几局！<BR /> <BR /> "
+#~ "<B><U>在闪电战速度游戏中还剩下多少时间？</U></B><BR /> 您可以在右上方看到"
+#~ "一个倒计时器，显示距离下一次踢出还有多少时间，该位置也会显示您的登录信息。"
+#~ "实际上，任何在20分钟内即将踢出的游戏都将显示计时器。一旦计时器归零，将有一"
+#~ "个短暂的宽限期，直到进入游戏的玩家不需要行动时，才可以踢出一个玩家，从而激"
+#~ "活踢出。所有游戏都将自动实时更新，但如果您正在玩闪电战，而您的对手似乎没有"
+#~ "行动，请刷新游戏，以防您在游戏更新信号到达前断网。<BR /> <BR /> <B><U>FCM"
+#~ "场景是从哪里来的？</U></B><BR /> 它们是在番茄酱扩展官方说明书中提供的建"
+#~ "议。 <BR />"
+
+#~ msgid "Horseless Carriage - Game Invitation Received"
+#~ msgstr "Horseless Carriage -游戏邀请函"
+
+#~ msgid "Food Chain Magnate Tournaments"
+#~ msgstr "快餐连锁大亨锦标赛"
+
+#~ msgid ""
+#~ "If you were doing something that worked before, or expected to work (such "
+#~ "as clicking on a game) then there is a chance the website is being "
+#~ "updated. "
+#~ msgstr ""
+#~ "如果您之前正在进行操作或者希望进行操作（例如在游戏中进行点击），那么有可能"
+#~ "该网站正在进行更新 "
+
+#~ msgid "Please wait 5 minutes and try again. "
+#~ msgstr "请等待5分钟后再试。 "
+
+#~ msgid "For further help contact "
+#~ msgstr "如需进一步帮助，请联系 "
+
+#, python-format
+#~ msgid ""
+#~ "Game invite at OnlineBoardGamers\n"
+#~ "%(gameName)s - %(maxPlayers)s players \n"
+#~ "[Click here to play Horseless Carriage](https://www.OnlineBoardGamers."
+#~ "com/)"
+#~ msgstr ""
+#~ "在OnlineBoardGamers网站上的游戏邀请\n"
+#~ "%(gameName)s - 最多%(maxPlayers)s个玩家\n"
+#~ "[点击这里玩 Horseless Carriage](https://www.OnlineBoardGamers.com/)"

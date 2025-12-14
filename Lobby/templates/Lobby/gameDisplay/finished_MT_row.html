@@ -1,0 +1,16 @@
+{% load static i18n %}
+
+     <tr class="clickableGameRow {{Mini_Tournament.gameCode}}" id="tournamentRow{{ Mini_Tournament.Mini_Tournament_id }}"
+     onclick="window.location.href='/MiniTournament/{{ Mini_Tournament.Mini_Tournament_id }}/';"
+     >
+        <td>
+        {% include 'Lobby/gameDisplay/gameIcons.html' with game=Mini_Tournament.gameCode %}
+        </td>
+        <td class="nameTDavailable">{{ Mini_Tournament.tournamentName }}{% if Mini_Tournament.tournamentDescription %}<br/><i>{{ Mini_Tournament.tournamentDescription }}</i>{% endif %}</td>
+        <td>{{ Mini_Tournament.maxTournamentPlayers }} </td>
+        <td>{{ Mini_Tournament.maxGamePlayers }}</td>
+        <td>{{ Mini_Tournament.tournamentType }}</td>
+        <td>{{ Mini_Tournament.startingOptionsHTML|safe }}</td>
+        <td>{{ Mini_Tournament.winnerHTML|safe }}</td>
+
+      </tr>

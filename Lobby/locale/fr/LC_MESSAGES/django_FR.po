@@ -1,0 +1,2049 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-07-04 10:25+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: .\forms.py:31 .\forms.py:77 .\templates\Lobby\layout.html:157
+#: .\templates\Lobby\login.html:22
+msgid "Password"
+msgstr "Mot de passe"
+
+#: .\forms.py:37 .\forms.py:83
+msgid "Confirm Password"
+msgstr "Confirmer le mot de passe"
+
+#: .\forms.py:45
+msgid "Email Address"
+msgstr "Adresse e-mail"
+
+#: .\forms.py:52
+msgid "Old Password"
+msgstr "Ancien mot de passe"
+
+#: .\forms.py:53
+msgid "New Password"
+msgstr "Nouveau mot de passe"
+
+#: .\forms.py:54
+msgid "Confirm New Password"
+msgstr "Confirmer le nouveau mot de passe"
+
+#: .\forms.py:65 .\templates\Lobby\layout.html:155
+#: .\templates\Lobby\login.html:21
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#: .\forms.py:70
+msgid "Email Address - Required for Account Activation"
+msgstr "Adresse e-mail - Requise pour l'activation du compte"
+
+#: .\templates\Lobby\404.html:20
+msgid "Sorry, the page you are requesting does not exist"
+msgstr "Désolé, la page que vous demandez n'existe pas"
+
+#: .\templates\Lobby\404.html:21 .\templates\Lobby\500.html:22
+msgid ""
+"If you were doing something that worked before, or expected to work (such as "
+"clicking on a game) then there is a chance the website is being updated."
+msgstr ""
+
+#: .\templates\Lobby\404.html:22 .\templates\Lobby\500.html:23
+msgid "Please wait 5 minutes and try again."
+msgstr "Veuillez patienter 5 minutes et réessayer."
+
+#: .\templates\Lobby\404.html:23 .\templates\Lobby\500.html:24
+msgid "If there is still a problem please email"
+msgstr "Si le problème persiste, veuillez envoyer un e-mail"
+
+#: .\templates\Lobby\404.html:31 .\templates\Lobby\500.html:32
+#: .\templates\Lobby\FCMstats.html:901 .\templates\Lobby\FCMtournaments.html:68
+#: .\templates\Lobby\about.html:52 .\templates\Lobby\changelog.html:45
+#: .\templates\Lobby\contact.html:21
+#: .\templates\Lobby\donate\donate_success.html:28
+#: .\templates\Lobby\layout.html:52 .\templates\Lobby\layout.html:274
+#: .\templates\Lobby\lobbyHelp.html:218 .\templates\Lobby\login.html:31
+#: .\templates\Lobby\password\password_reset.html:33
+#: .\templates\Lobby\playerInfo.html:161 .\templates\Lobby\profile.html:187
+#: .\templates\Lobby\register.html:23
+msgid "Home"
+msgstr "Maison"
+
+#: .\templates\Lobby\500.html:20
+msgid "Sorry, the page you are requesting cannot be delivered"
+msgstr "Désolé, la page que vous demandez ne peut pas être livrée"
+
+#: .\templates\Lobby\500.html:21
+msgid ""
+"It appears to be a proper page, but the server is having trouble rendering it"
+msgstr ""
+
+#: .\templates\Lobby\FCMmapEditor.html:34
+msgid "Create a game with this map"
+msgstr "Créer un jeu avec cette carte"
+
+#: .\templates\Lobby\FCMmapEditor.html:36
+msgid "Drag and drop tiles - then click on tiles to rotate"
+msgstr "Faites glisser et déposez les tuiles - puis cliquez sur les tuiles pour les faire pivoter"
+
+#: .\templates\Lobby\FCMmapEditor.html:42
+msgid "Complete map with random tiles"
+msgstr "Carte complète avec des tuiles aléatoires"
+
+#: .\templates\Lobby\FCMmapEditor.html:43
+msgid "Complete map with random base game tiles only"
+msgstr "Carte complète avec des tuiles de jeu de base aléatoires uniquement"
+
+#: .\templates\Lobby\FCMmapEditor.html:44
+msgid "Shuffle the current board"
+msgstr "Mélanger le tableau actuel"
+
+#: .\templates\Lobby\FCMmapEditor.html:45
+msgid "Clear map"
+msgstr "Effacer la carte"
+
+#: .\templates\Lobby\FCMstats.html:25
+msgid "Current Users"
+msgstr "Utilisateurs actuels"
+
+#: .\templates\Lobby\FCMstats.html:27
+msgid "Games (non-practice) in Progress"
+msgstr "Matchs (hors entraînement) en cours"
+
+#: .\templates\Lobby\FCMstats.html:29
+msgid "Active users in last 24hrs"
+msgstr ""
+
+#: .\templates\Lobby\FCMstats.html:31
+msgid "Top Players"
+msgstr "Meilleurs joueurs"
+
+#: .\templates\Lobby\FCMstats.html:33 .\templates\Lobby\FCMstats.html:53
+msgid "Fair Play League"
+msgstr "Ligue du fair-play"
+
+#: .\templates\Lobby\FCMstats.html:36 .\templates\Lobby\lobby.html:694
+msgid "All Players"
+msgstr "Tous les joueurs"
+
+#: .\templates\Lobby\FCMstats.html:37
+msgid "2 Player"
+msgstr "2 Joueur"
+
+#: .\templates\Lobby\FCMstats.html:38
+msgid "3 Player"
+msgstr "3 Joueur"
+
+#: .\templates\Lobby\FCMstats.html:39
+msgid "4 Player"
+msgstr "4 Joueur"
+
+#: .\templates\Lobby\FCMstats.html:40
+msgid "5 Player"
+msgstr "5 Joueur"
+
+#: .\templates\Lobby\FCMstats.html:41
+msgid "6 Player"
+msgstr "6 Joueur"
+
+#: .\templates\Lobby\FCMstats.html:44
+msgid "All Time"
+msgstr "Tous les temps"
+
+#: .\templates\Lobby\FCMstats.html:45
+msgid "Last 3 Months"
+msgstr "3 derniers mois"
+
+#: .\templates\Lobby\FCMstats.html:46
+msgid "Last Month"
+msgstr "Le mois dernier"
+
+#: .\templates\Lobby\FCMstats.html:54
+#, python-format
+msgid ""
+"This is a table of %% completed games in the last year, along with total "
+"completed games in the last year"
+msgstr ""
+
+#: .\templates\Lobby\FCMstats.html:58 .\templates\Lobby\FCMstats.html:87
+#: .\templates\Lobby\FCMstats.html:105 .\templates\Lobby\FCMstats.html:128
+#: .\templates\Lobby\FCMstats.html:146 .\templates\Lobby\FCMstats.html:169
+#: .\templates\Lobby\FCMstats.html:187 .\templates\Lobby\FCMstats.html:212
+#: .\templates\Lobby\FCMstats.html:230 .\templates\Lobby\FCMstats.html:253
+#: .\templates\Lobby\FCMstats.html:271 .\templates\Lobby\FCMstats.html:294
+#: .\templates\Lobby\FCMstats.html:312 .\templates\Lobby\FCMstats.html:337
+#: .\templates\Lobby\FCMstats.html:355 .\templates\Lobby\FCMstats.html:378
+#: .\templates\Lobby\FCMstats.html:396 .\templates\Lobby\FCMstats.html:419
+#: .\templates\Lobby\FCMstats.html:437 .\templates\Lobby\FCMstats.html:462
+#: .\templates\Lobby\FCMstats.html:480 .\templates\Lobby\FCMstats.html:503
+#: .\templates\Lobby\FCMstats.html:521 .\templates\Lobby\FCMstats.html:544
+#: .\templates\Lobby\FCMstats.html:562 .\templates\Lobby\FCMstats.html:587
+#: .\templates\Lobby\FCMstats.html:605 .\templates\Lobby\FCMstats.html:628
+#: .\templates\Lobby\FCMstats.html:646 .\templates\Lobby\FCMstats.html:669
+#: .\templates\Lobby\FCMstats.html:687 .\templates\Lobby\FCMstats.html:712
+#: .\templates\Lobby\FCMstats.html:730 .\templates\Lobby\FCMstats.html:753
+#: .\templates\Lobby\FCMstats.html:771 .\templates\Lobby\FCMstats.html:794
+#: .\templates\Lobby\FCMstats.html:812
+msgid "Player"
+msgstr "Joueur"
+
+#: .\templates\Lobby\FCMstats.html:59
+#, python-format
+msgid "Completion %%"
+msgstr "Achèvement %%"
+
+#: .\templates\Lobby\FCMstats.html:60
+msgid "Total Games"
+msgstr "Jeux totaux"
+
+#: .\templates\Lobby\FCMstats.html:83
+msgid "Win Totals"
+msgstr "Totaux des gains"
+
+#: .\templates\Lobby\FCMstats.html:88 .\templates\Lobby\FCMstats.html:129
+#: .\templates\Lobby\FCMstats.html:170 .\templates\Lobby\FCMstats.html:213
+#: .\templates\Lobby\FCMstats.html:254 .\templates\Lobby\FCMstats.html:295
+#: .\templates\Lobby\FCMstats.html:338 .\templates\Lobby\FCMstats.html:379
+#: .\templates\Lobby\FCMstats.html:420 .\templates\Lobby\FCMstats.html:463
+#: .\templates\Lobby\FCMstats.html:504 .\templates\Lobby\FCMstats.html:545
+#: .\templates\Lobby\FCMstats.html:588 .\templates\Lobby\FCMstats.html:629
+#: .\templates\Lobby\FCMstats.html:670 .\templates\Lobby\FCMstats.html:713
+#: .\templates\Lobby\FCMstats.html:754 .\templates\Lobby\FCMstats.html:795
+#: .\templates\Lobby\playerInfo.html:31
+msgid "Wins"
+msgstr "Victoires"
+
+#: .\templates\Lobby\FCMstats.html:101
+msgid "Win Percentages"
+msgstr "Pourcentages de gains"
+
+#: .\templates\Lobby\FCMstats.html:106 .\templates\Lobby\FCMstats.html:147
+#: .\templates\Lobby\FCMstats.html:188 .\templates\Lobby\FCMstats.html:231
+#: .\templates\Lobby\FCMstats.html:272 .\templates\Lobby\FCMstats.html:313
+#: .\templates\Lobby\FCMstats.html:356 .\templates\Lobby\FCMstats.html:397
+#: .\templates\Lobby\FCMstats.html:438 .\templates\Lobby\FCMstats.html:481
+#: .\templates\Lobby\FCMstats.html:522 .\templates\Lobby\FCMstats.html:563
+#: .\templates\Lobby\FCMstats.html:606 .\templates\Lobby\FCMstats.html:647
+#: .\templates\Lobby\FCMstats.html:688 .\templates\Lobby\FCMstats.html:731
+#: .\templates\Lobby\FCMstats.html:772 .\templates\Lobby\FCMstats.html:813
+#: .\templates\Lobby\playerInfo.html:32
+#, python-format
+msgid "Win %%"
+msgstr "Gagner %%"
+
+#: .\templates\Lobby\FCMstats.html:118 .\templates\Lobby\FCMstats.html:243
+#: .\templates\Lobby\FCMstats.html:368 .\templates\Lobby\FCMstats.html:493
+#: .\templates\Lobby\FCMstats.html:618 .\templates\Lobby\FCMstats.html:743
+msgid ""
+"Win stats are calculated hourly. You need to complete at least 5 games. "
+"Practice games do not count towards your win stats"
+msgstr ""
+
+#: .\templates\Lobby\FCMstats.html:124
+msgid "Win Totals (Last 3 Months)"
+msgstr "Totaux de gains (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:142
+msgid "Win Percentages (Last 3 Months)"
+msgstr "Pourcentages de gains (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:159 .\templates\Lobby\FCMstats.html:200
+#: .\templates\Lobby\FCMstats.html:284 .\templates\Lobby\FCMstats.html:325
+#: .\templates\Lobby\FCMstats.html:409 .\templates\Lobby\FCMstats.html:450
+#: .\templates\Lobby\FCMstats.html:534 .\templates\Lobby\FCMstats.html:575
+#: .\templates\Lobby\FCMstats.html:659 .\templates\Lobby\FCMstats.html:700
+#: .\templates\Lobby\FCMstats.html:784 .\templates\Lobby\FCMstats.html:825
+#, python-format
+msgid ""
+"Win stats are calculated hourly. You need to complete at least 5 games to be "
+"included in the %% stats. Practice games do not count towards your win stats"
+msgstr ""
+
+#: .\templates\Lobby\FCMstats.html:165
+msgid "Win Totals (Last Month)"
+msgstr "Totaux des gains (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:183
+msgid "Win Percentages (Last Month)"
+msgstr "Pourcentages de gains (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:208
+msgid "Win Totals 2p"
+msgstr "Totaux gagnés 2p"
+
+#: .\templates\Lobby\FCMstats.html:226
+msgid "Win Percentages 2p"
+msgstr "Pourcentages de gains 2p"
+
+#: .\templates\Lobby\FCMstats.html:249
+msgid "Win Totals 2p (Last 3 Months)"
+msgstr "Totaux gagnés 2p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:267
+msgid "Win Percentages 2p (Last 3 Months)"
+msgstr "Pourcentages de gains 2p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:290
+msgid "Win Totals 2p (Last Month)"
+msgstr "Totaux gagnés 2p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:308
+msgid "Win Percentages 2p (Last Month)"
+msgstr "Pourcentages de gains 2p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:333
+msgid "Win Totals 3p"
+msgstr "Totaux gagnants 3p"
+
+#: .\templates\Lobby\FCMstats.html:351
+msgid "Win Percentages 3p"
+msgstr "Pourcentages de gains 3p"
+
+#: .\templates\Lobby\FCMstats.html:374
+msgid "Win Totals 3p (Last 3 Months)"
+msgstr "Totaux gagnants 3p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:392
+msgid "Win Percentages 3p (Last 3 Months)"
+msgstr "Pourcentages de gains 3p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:415
+msgid "Win Totals 3p (Last Month)"
+msgstr "3 pixels totaux gagnés (le mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:433
+msgid "Win Percentages 3p (Last Month)"
+msgstr "Pourcentages de gains 3p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:458
+msgid "Win Totals 4p"
+msgstr "Totaux gagnés 4p"
+
+#: .\templates\Lobby\FCMstats.html:476
+msgid "Win Percentages 4p"
+msgstr "Pourcentages de gains 4p"
+
+#: .\templates\Lobby\FCMstats.html:499
+msgid "Win Totals 4p (Last 3 Months)"
+msgstr "Totaux gagnés 4p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:517
+msgid "Win Percentages 4p (Last 3 Months)"
+msgstr "Pourcentages de gains 4p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:540
+msgid "Win Totals 4p (Last Month)"
+msgstr "Totaux gagnés 4p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:558
+msgid "Win Percentages 4p (Last Month)"
+msgstr "Pourcentages de gains 4p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:583
+msgid "Win Totals 5p"
+msgstr "Totaux gagnés 5p"
+
+#: .\templates\Lobby\FCMstats.html:601
+msgid "Win Percentages 5p"
+msgstr "Pourcentages de gains 5p"
+
+#: .\templates\Lobby\FCMstats.html:624
+msgid "Win Totals 5p (Last 3 Months)"
+msgstr "Totaux gagnants 5p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:642
+msgid "Win Percentages 5p (Last 3 Months)"
+msgstr "Pourcentages de gains 5p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:665
+msgid "Win Totals 5p (Last Month)"
+msgstr "Totaux de gains 5p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:683
+msgid "Win Percentages 5p (Last Month)"
+msgstr "Pourcentages de gains 5p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:708
+msgid "Win Totals 6p"
+msgstr "Totaux gagnés 6p"
+
+#: .\templates\Lobby\FCMstats.html:726
+msgid "Win Percentages 6p"
+msgstr "Pourcentages de gains 6p"
+
+#: .\templates\Lobby\FCMstats.html:749
+msgid "Win Totals 6p (Last 3 Months)"
+msgstr "Totaux gagnés 6p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:767
+msgid "Win Percentages 6p (Last 3 Months)"
+msgstr "Pourcentages de gains 6 p (3 derniers mois)"
+
+#: .\templates\Lobby\FCMstats.html:790
+msgid "Win Totals 6p (Last Month)"
+msgstr "Totaux de gains 6p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:808
+msgid "Win Percentages 6p (Last Month)"
+msgstr "Pourcentages de gains 6p (mois dernier)"
+
+#: .\templates\Lobby\FCMstats.html:829
+msgid "Ten most recently active games"
+msgstr "10 derniers jeux actifs"
+
+#: .\templates\Lobby\FCMstats.html:844 .\templates\Lobby\FCMtournaments.html:35
+#: .\templates\Lobby\lobby.html:130 .\templates\Lobby\lobby.html:263
+#: .\templates\Lobby\lobby.html:451 .\templates\Lobby\lobby.html:570
+#: .\templates\Lobby\lobby.html:692 .\templates\Lobby\playerInfo.html:84
+#: .\templates\Lobby\playerInfo.html:127
+msgid "Name"
+msgstr "Nom"
+
+#: .\templates\Lobby\FCMstats.html:845 .\templates\Lobby\lobby.html:131
+#: .\templates\Lobby\lobby.html:264 .\templates\Lobby\lobby.html:452
+#: .\templates\Lobby\lobby.html:571 .\templates\Lobby\playerInfo.html:85
+msgid "Creator"
+msgstr "Créateur"
+
+#: .\templates\Lobby\FCMstats.html:846 .\templates\Lobby\lobby.html:132
+#: .\templates\Lobby\lobby.html:265 .\templates\Lobby\lobby.html:453
+#: .\templates\Lobby\lobby.html:572 .\templates\Lobby\lobby.html:693
+#: .\templates\Lobby\playerInfo.html:29 .\templates\Lobby\playerInfo.html:86
+#: .\templates\Lobby\playerInfo.html:128
+msgid "Players"
+msgstr "Joueurs"
+
+#: .\templates\Lobby\FCMstats.html:847 .\templates\Lobby\FCMtournament.html:38
+#: .\templates\Lobby\lobby.html:134 .\templates\Lobby\lobby.html:266
+#: .\templates\Lobby\lobby.html:455 .\templates\Lobby\lobby.html:574
+#: .\templates\Lobby\playerInfo.html:87
+msgid "Current Players"
+msgstr "Joueurs actuels"
+
+#: .\templates\Lobby\FCMstats.html:848 .\templates\Lobby\lobby.html:267
+#: .\templates\Lobby\playerInfo.html:88
+msgid "Current Turn"
+msgstr "Tour actuel"
+
+#: .\templates\Lobby\FCMstats.html:850 .\templates\Lobby\lobby.html:133
+#: .\templates\Lobby\lobby.html:269 .\templates\Lobby\lobby.html:454
+#: .\templates\Lobby\lobby.html:573
+msgid "Speed"
+msgstr "Vitesse"
+
+#: .\templates\Lobby\FCMstats.html:851 .\templates\Lobby\lobby.html:270
+msgid "Last Turn"
+msgstr "Dernier tour"
+
+#: .\templates\Lobby\FCMstats.html:894 .\templates\Lobby\FCMtournament.html:76
+#: .\templates\Lobby\FCMtournaments.html:61 .\templates\Lobby\changelog.html:38
+#: .\templates\Lobby\contact.html:16 .\templates\Lobby\lobby.html:817
+msgid "Wish to support the project?"
+msgstr "Envie de soutenir le projet ?"
+
+#: .\templates\Lobby\FCMtournament.html:28
+msgid "Max Players"
+msgstr "Joueurs max."
+
+#: .\templates\Lobby\FCMtournament.html:29
+msgid "Players per game"
+msgstr "Joueurs par partie"
+
+#: .\templates\Lobby\FCMtournament.html:30
+msgid "Tournament Format"
+msgstr "Format du tournoi"
+
+#: .\templates\Lobby\FCMtournament.html:64
+msgid "Join Tournament"
+msgstr "Rejoindre le tournoi"
+
+#: .\templates\Lobby\FCMtournaments.html:28
+msgid "Food Chain Magnate Tournaments"
+msgstr "Tournois de magnat de la chaîne alimentaire"
+
+#: .\templates\Lobby\FCMtournaments.html:29
+msgid "For more information on tournaments, see"
+msgstr "Pour plus d'informations sur les tournois, voir"
+
+#: .\templates\Lobby\FCMtournaments.html:36
+msgid "Total Players"
+msgstr "Nombre total de joueurs"
+
+#: .\templates\Lobby\FCMtournaments.html:37
+msgid "Players per Game"
+msgstr "Joueurs par match"
+
+#: .\templates\Lobby\FCMtournaments.html:38
+msgid "Format"
+msgstr "Formater"
+
+#: .\templates\Lobby\FCMtournaments.html:39 .\templates\Lobby\lobby.html:136
+#: .\templates\Lobby\lobby.html:458 .\templates\Lobby\lobby.html:577
+msgid "Starting Options"
+msgstr "Options de démarrage"
+
+#: .\templates\Lobby\FCMtournaments.html:40 .\templates\Lobby\lobby.html:135
+#: .\templates\Lobby\lobby.html:457 .\templates\Lobby\lobby.html:576
+#: .\templates\Lobby\lobby.html:695
+msgid "Created"
+msgstr "Créé"
+
+#: .\templates\Lobby\FCMtournaments.html:41 .\templates\Lobby\lobby.html:697
+#: .\templates\Lobby\playerInfo.html:130
+msgid "Winner"
+msgstr "Vainqueur"
+
+#: .\templates\Lobby\about.html:9
+msgid ""
+"<h1>Welcome to Online Board Gamers!</h1> Online Board Gamers is a website to "
+"play board games online. <BR /> You can play live against other playes with "
+"automatic updates, or play a \"practice\" game where you make all the moves "
+"on your device. <h2>Current Games</h2>"
+msgstr ""
+
+#: .\templates\Lobby\about.html:19
+msgid "Food Chain Magnate - With all Ketchup Expansions"
+msgstr "Magnat de la chaîne alimentaire - Avec toutes les extensions de ketchup"
+
+#: .\templates\Lobby\about.html:20 .\templates\Lobby\index.html:32
+msgid "Horseless Carriage"
+msgstr "Calèche sans chevaux"
+
+#: .\templates\Lobby\about.html:23
+msgid "Credits"
+msgstr "Crédits"
+
+#: .\templates\Lobby\about.html:31
+msgid ""
+"Thank you to everyone for your feedback, comments and suggestions - you have "
+"helped to make this site what it is!"
+msgstr ""
+
+#: .\templates\Lobby\about.html:48 .\templates\Lobby\lobbyHelp.html:212
+msgid "For further help contact"
+msgstr "Pour obtenir de l'aide, contactez"
+
+#: .\templates\Lobby\contact.html:9
+msgid "For any questions / comments / suggestions, please contact"
+msgstr "Pour toutes questions/commentaires/suggestions, veuillez contacter"
+
+#: .\templates\Lobby\contact.html:13
+msgid ""
+"For any in game problems, you can submit a bug report from the menu at the "
+"top"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:30 .\templates\Lobby\createHC.html:28
+msgid "Setup Options"
+msgstr "Options de configuration"
+
+#: .\templates\Lobby\createFCM.html:33 .\templates\Lobby\createHC.html:31
+msgid "Name / Description"
+msgstr "Nom / Descriptif"
+
+#: .\templates\Lobby\createFCM.html:35 .\templates\Lobby\createHC.html:33
+msgid "Game name"
+msgstr "Nom du jeu"
+
+#: .\templates\Lobby\createFCM.html:41 .\templates\Lobby\createHC.html:39
+msgid "Playing Speed"
+msgstr "vitesse de lecture"
+
+#: .\templates\Lobby\createFCM.html:45
+msgid "Blitz Dual : As fast as possible!"
+msgstr "Blitz Dual : Aussi vite que possible !"
+
+#: .\templates\Lobby\createFCM.html:46
+msgid "Live : Play the game in one session"
+msgstr "Live : Jouez au jeu en une seule session"
+
+#: .\templates\Lobby\createFCM.html:47
+msgid "Fast : Several moves a day"
+msgstr "Rapide : plusieurs mouvements par jour"
+
+#: .\templates\Lobby\createFCM.html:48
+msgid "Standard : At least one move a day"
+msgstr "Standard : Au moins un déménagement par jour"
+
+#: .\templates\Lobby\createFCM.html:49
+msgid "Slow : Just take your time"
+msgstr "Lent : Prends juste ton temps"
+
+#: .\templates\Lobby\createFCM.html:53 .\templates\Lobby\createHC.html:51
+msgid "Alters kickout options. All games update 'live' when online"
+msgstr "Modifie les options de désactivation. "
+
+#: .\templates\Lobby\createFCM.html:59 .\templates\Lobby\createHC.html:57
+msgid "Number of players"
+msgstr "Nombre de joueurs"
+
+#: .\templates\Lobby\createFCM.html:75 .\templates\Lobby\createHC.html:71
+msgid "Player 2"
+msgstr "Joueur 2"
+
+#: .\templates\Lobby\createFCM.html:81 .\templates\Lobby\createHC.html:77
+msgid "Leave blank to invite anybody"
+msgstr "Laisser vide pour inviter quelqu'un"
+
+#: .\templates\Lobby\createFCM.html:87 .\templates\Lobby\createHC.html:83
+msgid "Player 3"
+msgstr "Joueur 3"
+
+#: .\templates\Lobby\createFCM.html:96 .\templates\Lobby\createHC.html:92
+msgid "Player 4"
+msgstr "Joueur 4"
+
+#: .\templates\Lobby\createFCM.html:105 .\templates\Lobby\createHC.html:101
+msgid "Player 5"
+msgstr "Joueur 5"
+
+#: .\templates\Lobby\createFCM.html:114
+msgid "Player 6"
+msgstr "Joueur 6"
+
+#: .\templates\Lobby\createFCM.html:127 .\templates\Lobby\createHC.html:116
+msgid "Common Options"
+msgstr "Options communes"
+
+#: .\templates\Lobby\createFCM.html:130 .\templates\Lobby\createHC.html:119
+msgid "Remove inactive players after:"
+msgstr "Supprimer les joueurs inactifs après :"
+
+#: .\templates\Lobby\createFCM.html:134 .\templates\Lobby\createHC.html:123
+msgid "1 day"
+msgstr "1 jour"
+
+#: .\templates\Lobby\createFCM.html:135 .\templates\Lobby\createHC.html:124
+msgid "2 days"
+msgstr "2 jours"
+
+#: .\templates\Lobby\createFCM.html:136 .\templates\Lobby\createHC.html:125
+msgid "3 days"
+msgstr "3 jours"
+
+#: .\templates\Lobby\createFCM.html:137 .\templates\Lobby\createHC.html:126
+msgid "5 days"
+msgstr "5 jours"
+
+#: .\templates\Lobby\createFCM.html:141 .\templates\Lobby\createHC.html:130
+msgid "Change Playing Speed for different options"
+msgstr "Modifier la vitesse de lecture pour différentes options"
+
+#: .\templates\Lobby\createFCM.html:149
+msgid "Use turn order for Payday and Fridge"
+msgstr "Utilisez l'ordre du tour pour Payday et Fridge"
+
+#: .\templates\Lobby\createFCM.html:150
+msgid "Completed in turn order - not simultaneously"
+msgstr "Terminé dans l'ordre du tour - pas simultanément"
+
+#: .\templates\Lobby\createFCM.html:155 .\templates\Lobby\createHC.html:135
+msgid "Practice Game"
+msgstr "Jeu d'entraînement"
+
+#: .\templates\Lobby\createFCM.html:158
+msgid ""
+"Play with up to 6 players on the same device. You will make ALL moves. "
+"Otherwise functions as a normal game. Useful for testing strategies or "
+"trying new modules!"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:168
+msgid "Keep the same map"
+msgstr "Garder la même carte"
+
+#: .\templates\Lobby\createFCM.html:179
+msgid "Use Individual Options"
+msgstr "Utiliser les options individuelles"
+
+#: .\templates\Lobby\createFCM.html:180
+msgid "Use Pre-set Scenarios"
+msgstr "Utiliser des scénarios prédéfinis"
+
+#: .\templates\Lobby\createFCM.html:188
+msgid "Basic Options"
+msgstr "Options de base"
+
+#: .\templates\Lobby\createFCM.html:191 .\templates\Lobby\lobby.html:232
+#: .\templates\Lobby\lobby.html:421 .\templates\Lobby\lobby.html:544
+#: .\templates\Lobby\lobby.html:667 .\templates\Lobby\lobby.html:798
+#: .\templates\Lobby\lobbyHelp.html:82
+msgid "Short Game"
+msgstr "Jeu court"
+
+#: .\templates\Lobby\createFCM.html:193
+msgid "No salaries, bank only breaks once, extra money"
+msgstr "Pas de salaires, la banque ne casse qu'une seule fois, plus d'argent"
+
+#: .\templates\Lobby\createFCM.html:197
+msgid "Do not use milestones"
+msgstr "Ne pas utiliser de jalons"
+
+#: .\templates\Lobby\createFCM.html:201 .\templates\Lobby\lobby.html:238
+#: .\templates\Lobby\lobby.html:427 .\templates\Lobby\lobby.html:550
+#: .\templates\Lobby\lobby.html:673 .\templates\Lobby\lobby.html:804
+#: .\templates\Lobby\lobbyHelp.html:88
+msgid "No CFO Milestone"
+msgstr "Aucun jalon du directeur financier"
+
+#: .\templates\Lobby\createFCM.html:205 .\templates\Lobby\lobby.html:241
+#: .\templates\Lobby\lobby.html:430 .\templates\Lobby\lobby.html:553
+#: .\templates\Lobby\lobby.html:676 .\templates\Lobby\lobby.html:807
+#: .\templates\Lobby\lobbyHelp.html:91
+msgid "No Radio Milestone"
+msgstr "Pas de jalon radio"
+
+#: .\templates\Lobby\createFCM.html:209
+msgid "Hard Choices with Original Milestones"
+msgstr "Des choix difficiles avec des jalons originaux"
+
+#: .\templates\Lobby\createFCM.html:210
+msgid "First to train / First to market good disappear after 2 turns"
+msgstr "Premier à s'entraîner / Premier à vendre la marchandise disparaît après 2 tours"
+
+#: .\templates\Lobby\createFCM.html:211
+msgid "First to hire 3 disappears after 3 turns"
+msgstr "Le premier à embaucher 3 disparaît après 3 tours"
+
+#: .\templates\Lobby\createFCM.html:215
+msgid "Ketchup Options"
+msgstr "Options de ketchup"
+
+#: .\templates\Lobby\createFCM.html:219
+msgid "Use New Milestones"
+msgstr "Utiliser de nouveaux jalons"
+
+#: .\templates\Lobby\createFCM.html:223
+msgid "Use Ketchup Milestone"
+msgstr "Utiliser le Ketchup"
+
+#: .\templates\Lobby\createFCM.html:225
+msgid ""
+"Milestone: The first time someone else sells<BR/> your demand, gain a "
+"permanent -1 to distance"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:230
+msgid "Use Price Changing Reserve Cards"
+msgstr "Utiliser des cartes de réserve à prix variable"
+
+#: .\templates\Lobby\createFCM.html:231
+msgid "When the bank breaks, add $200 per player."
+msgstr "Lorsque la banque fait faillite, ajoutez 200 $ par joueur."
+
+#: .\templates\Lobby\createFCM.html:232
+msgid ""
+"The base price changes to whichever is <BR/> selected most, from $5, $10, or "
+"$20.<BR/> In a tie, $20 beats $10 and $5, and $5 beats $10"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:238
+msgid "Map / Route Options"
+msgstr "Options de carte/d'itinéraire"
+
+#: .\templates\Lobby\createFCM.html:242
+msgid "Use New Districts"
+msgstr "Utiliser de nouveaux quartiers"
+
+#: .\templates\Lobby\createFCM.html:243
+msgid "Add new tiles to the pool to make the map"
+msgstr "Ajouter de nouvelles tuiles au pool pour créer la carte"
+
+#: .\templates\Lobby\createFCM.html:247
+msgid "Guarantee at least 1 Apartment"
+msgstr "Garantir au moins 1 Appartement"
+
+#: .\templates\Lobby\createFCM.html:251
+msgid "Guarantee the Parks tile"
+msgstr "Garantir la tuile Parcs"
+
+#: .\templates\Lobby\createFCM.html:255
+msgid "Use all 5 new tiles plus random others"
+msgstr "Utilisez les 5 nouvelles tuiles plus d'autres au hasard"
+
+#: .\templates\Lobby\createFCM.html:259
+msgid "Use Lobbyists"
+msgstr "Utiliser des lobbyistes"
+
+#: .\templates\Lobby\createFCM.html:260
+msgid "Add new roads and parks to the map"
+msgstr "Ajouter de nouvelles routes et de nouveaux parcs à la carte"
+
+#: .\templates\Lobby\createFCM.html:264
+msgid "Use Coffee"
+msgstr "Utiliser du café"
+
+#: .\templates\Lobby\createFCM.html:265
+msgid "Sell coffee along the route travelled by a house"
+msgstr "Vendre du café le long de la route empruntée par une maison"
+
+#: .\templates\Lobby\createFCM.html:271
+msgid "Food Options"
+msgstr "Options alimentaires"
+
+#: .\templates\Lobby\createFCM.html:275
+msgid "Use Kimchi"
+msgstr "Utiliser du kimchi"
+
+#: .\templates\Lobby\createFCM.html:276
+msgid "Houses prioritise a restaurant with their demands + kimchi"
+msgstr "Les maisons donnent la priorité à un restaurant avec leurs demandes de kimchi"
+
+#: .\templates\Lobby\createFCM.html:281
+msgid "Use Sushi"
+msgstr "Utiliser des sushis"
+
+#: .\templates\Lobby\createFCM.html:282
+msgid "Houses with gardens will try to replace all demand with Sushi"
+msgstr "Les maisons avec jardin essaieront de remplacer toute la demande par des sushis"
+
+#: .\templates\Lobby\createFCM.html:287
+msgid "Use Noodles"
+msgstr "Utiliser des nouilles"
+
+#: .\templates\Lobby\createFCM.html:289
+msgid "Noodles count as any demand item, but only if no one else can supply it"
+msgstr "Les nouilles comptent comme n'importe quel article de demande, mais seulement si personne d'autre ne peut le fournir"
+
+#: .\templates\Lobby\createFCM.html:295
+msgid "Use Fry Chefs"
+msgstr "Utiliser les friteuses"
+
+#: .\templates\Lobby\createFCM.html:296
+msgid "Adds $10 per total sale"
+msgstr "Ajoute 10 $ par vente totale"
+
+#: .\templates\Lobby\createFCM.html:302
+msgid "Marketing Options"
+msgstr "Options de commercialisation"
+
+#: .\templates\Lobby\createFCM.html:306
+msgid "Use Mass Marketers"
+msgstr "Utiliser des spécialistes du marketing de masse"
+
+#: .\templates\Lobby\createFCM.html:307
+msgid "Repeat marketing phase for each Mass Marketeer"
+msgstr "Répéter la phase de marketing pour chaque Mass Marketeer"
+
+#: .\templates\Lobby\createFCM.html:312
+msgid "Use Gourmet Food Critic"
+msgstr "Utilisez un critique gastronomique"
+
+#: .\templates\Lobby\createFCM.html:313
+msgid "Markets to all houses with a garden"
+msgstr "Marchés à toutes les maisons avec jardin"
+
+#: .\templates\Lobby\createFCM.html:317
+msgid "Use Rural Marketers"
+msgstr "Utiliser des commerçants ruraux"
+
+#: .\templates\Lobby\createFCM.html:318
+msgid "Markets to the Rural Area - accessed by freeway ramps"
+msgstr "Marchés vers la zone rurale - accessible par des bretelles d'autoroute"
+
+#: .\templates\Lobby\createFCM.html:323
+msgid "Employee Options"
+msgstr "Options des employés"
+
+#: .\templates\Lobby\createFCM.html:327
+msgid "Use Movie Stars"
+msgstr "Utiliser des vedettes de cinéma"
+
+#: .\templates\Lobby\createFCM.html:328
+msgid "Decide turn order and break ties"
+msgstr "Décidez de l'ordre du tour et brisez les égalités"
+
+#: .\templates\Lobby\createFCM.html:334
+msgid "Use Night Shift Managers"
+msgstr "Utiliser les gestionnaires d'équipe de nuit"
+
+#: .\templates\Lobby\createFCM.html:336
+msgid ""
+"Must be put in a management slot<BR/> All unsalaried employees work twice "
+"during 9-5"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:348
+msgid "Scenarios"
+msgstr "Scénarios"
+
+#: .\templates\Lobby\createFCM.html:349
+msgid "The scenario name will be added to the front of the game name"
+msgstr "Le nom du scénario sera ajouté devant le nom du jeu"
+
+#: .\templates\Lobby\createFCM.html:353
+msgid "Cool original"
+msgstr "Sympa l'original"
+
+#: .\templates\Lobby\createFCM.html:354
+msgid "Play the base game"
+msgstr "Jouez au jeu de base"
+
+#: .\templates\Lobby\createFCM.html:358
+msgid "New milestones"
+msgstr "Nouveaux jalons"
+
+#: .\templates\Lobby\createFCM.html:360
+msgid ""
+"Use only the “New Milestones” module. This shakes the strategic space up "
+"quite a bit already!"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:365
+msgid "Your first cup of coffee"
+msgstr "Votre première tasse de café"
+
+#: .\templates\Lobby\createFCM.html:366
+msgid "The “Coffee” module makes board positions even more important"
+msgstr "Le module « Café » rend les postes au conseil d'administration encore plus importants"
+
+#: .\templates\Lobby\createFCM.html:373
+msgid "Korean city"
+msgstr "ville coréenne"
+
+#: .\templates\Lobby\createFCM.html:374
+msgid "New districts (at least 1 apartment building tile in the city) + Kimchi"
+msgstr "Nouveaux quartiers (au moins 1 tuile d'immeuble d'appartements dans la ville) Kimchi"
+
+#: .\templates\Lobby\createFCM.html:380
+msgid "Nightlife"
+msgstr "Vie nocturne"
+
+#: .\templates\Lobby\createFCM.html:381
+msgid "New milestones + Night shift managers"
+msgstr "Nouveaux jalons Gestionnaires de nuit"
+
+#: .\templates\Lobby\createFCM.html:385
+msgid "Sustenance"
+msgstr "Restauration"
+
+#: .\templates\Lobby\createFCM.html:386
+msgid "Coffee + Fry chefs"
+msgstr "Chefs de la friture de café"
+
+#: .\templates\Lobby\createFCM.html:392
+msgid "Upmarket Area"
+msgstr "Quartier haut de gamme"
+
+#: .\templates\Lobby\createFCM.html:393
+msgid ""
+"New milestones + Park tile from new districts + Gourmet food critic + Sushi"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:399
+msgid "City builder"
+msgstr "Bâtisseur de ville"
+
+#: .\templates\Lobby\createFCM.html:400
+msgid "Lobbyist + New districts + rural marketeers"
+msgstr "Lobbyiste Commercialisation rurale dans les nouveaux districts"
+
+#: .\templates\Lobby\createFCM.html:406
+msgid "Asian Fusion"
+msgstr "fusion asiatique"
+
+#: .\templates\Lobby\createFCM.html:407
+msgid "Sushi + Kimchi + Noodles + Ketchup"
+msgstr "Ketchup de nouilles de sushi kimchi"
+
+#: .\templates\Lobby\createFCM.html:413
+msgid "First mover"
+msgstr "Premier joueur"
+
+#: .\templates\Lobby\createFCM.html:414
+msgid "Hard choices + Ketchup + Movie stars + Lobbyists + Reserve prices"
+msgstr "Choix difficiles Ketchup Stars de cinéma Lobbyistes Prix de réserve"
+
+#: .\templates\Lobby\createFCM.html:421
+msgid "Overtime"
+msgstr "Heures supplémentaires"
+
+#: .\templates\Lobby\createFCM.html:423
+msgid ""
+"Night shift managers + Mass marketeers + Rural marketeers + New districts + "
+"Noodles + Reserve price"
+msgstr ""
+
+#: .\templates\Lobby\createFCM.html:430
+msgid "Henri Lo Menu"
+msgstr "Henri LoMenu"
+
+#: .\templates\Lobby\createFCM.html:431
+msgid "All modules!"
+msgstr "Tous les modules !"
+
+#: .\templates\Lobby\createFCM.html:443
+msgid "Create Food Chain Magnate Game"
+msgstr "Créer un jeu de magnat de la chaîne alimentaire"
+
+#: .\templates\Lobby\createHC.html:43
+msgid "Blitz: As fast as possible!"
+msgstr "Blitz : Aussi vite que possible !"
+
+#: .\templates\Lobby\createHC.html:44
+msgid "Live: Play the game in one session"
+msgstr "Live : Jouez au jeu en une seule session"
+
+#: .\templates\Lobby\createHC.html:45
+msgid "Fast: Several moves a day"
+msgstr "Rapide : plusieurs mouvements par jour"
+
+#: .\templates\Lobby\createHC.html:46
+msgid "Standard: At least one move a day"
+msgstr "Standard : au moins un déplacement par jour"
+
+#: .\templates\Lobby\createHC.html:47
+msgid "Slow: Just take your time"
+msgstr "Lent : prenez votre temps"
+
+#: .\templates\Lobby\createHC.html:109
+msgid "Careful: A 5 min game with 3p could still take ~8 hrs"
+msgstr "Attention : une partie de 5 min à 3 contre 3 peut encore prendre environ 8 heures"
+
+#: .\templates\Lobby\createHC.html:138
+msgid ""
+"Play with up to 5 players on the same device. You will make ALL moves. "
+"Otherwise functions as a normal game. Useful for testing strategies or "
+"trying out the game!"
+msgstr ""
+
+#: .\templates\Lobby\createHC.html:147
+msgid "Create Horseless Carriage Game"
+msgstr "Créer un jeu de calèche sans chevaux"
+
+#: .\templates\Lobby\donate\donate.html:20
+msgid "Thank you"
+msgstr "Merci"
+
+#: .\templates\Lobby\donate\donate.html:23
+#, python-format
+msgid ""
+"Thank you for taking the time to look at the donation page. All support is "
+"gratefully received, and will go towards the costs of hosting, supporting, "
+"and maintaining this website, and enabling new features. <BR/><BR/> Please "
+"note that donating does not grant you any special privileges; however "
+"suggestions for improvements are always welcome using the OnlineBoardGamers "
+"email address. <BR/><BR/> You are able to donate with the button below via "
+"paypal, or if you'd rather, you can donate directly to me at<BR/><img src="
+"\"%(the_url)s\" width=\"400px\" height=\"40px\"><BR/><BR/> If you are unsure "
+"how much, then €5.00 or $5.00 or equivalent is a great place to start."
+msgstr ""
+
+#: .\templates\Lobby\donate\donate.html:41
+msgid "If you are having trouble in China/Asia, you can donate via AliPay"
+msgstr "Si vous rencontrez des problèmes en Chine/Asie, vous pouvez faire un don via AliPay"
+
+#: .\templates\Lobby\donate\donate.html:43
+msgid "Pay Link (for devices with AliPay app installed)"
+msgstr "Pay Link (pour les appareils sur lesquels l'application AliPay est installée)"
+
+#: .\templates\Lobby\donate\donate_success.html:20
+msgid "Thank you!"
+msgstr "Merci !"
+
+#: .\templates\Lobby\donate\donate_success.html:21
+msgid "Your support is greatly appreciated!"
+msgstr "Votre soutien est grandement apprécié !"
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameInvite.html:4
+#, python-format
+msgid ""
+"\n"
+"Hi %(user.username)s,\n"
+"\n"
+"You have been invited to a game of Food Chain Magnate at https://%(domain)s\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"Please check the \"Invitations\" tab in the lobby. \n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\gameInviteHC.html:5
+#, python-format
+msgid ""
+"\n"
+"Hi %(user.username)s,\n"
+"\n"
+"You have been invited to a game of Horseless Carriage at https://%(domain)s\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"Please check the \"Invitations\" tab in the lobby. \n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentInvite.html:6
+#, python-format
+msgid ""
+"\n"
+"Hi %(user.username)s,\n"
+"\n"
+"A tournament game of Food Chain Magnate has started.\n"
+"\n"
+"Name: %(gameName)s\n"
+"Players: %(maxPlayers)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Enjoy!\n"
+"\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\Lobby\email\tournamentWon.html:6
+#, python-format
+msgid ""
+"\n"
+"Hi %(user.username)s,\n"
+"\n"
+"Congratulations!\n"
+"\n"
+"You have won a tournament of Food Chain Magnate\n"
+"\n"
+"Name: %(tournamentName)s\n"
+"Position: Champion\n"
+"\n"
+"Click to play more Food Chain Magnate\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Well Done!!\n"
+msgstr ""
+
+#: .\templates\Lobby\index.html:23
+msgid "Welcome to Online Board Gamers"
+msgstr "Bienvenue aux joueurs de société en ligne"
+
+#: .\templates\Lobby\index.html:24
+msgid "Please"
+msgstr "S'il vous plaît"
+
+#: .\templates\Lobby\index.html:24 .\templates\Lobby\register.html:20
+msgid "Register"
+msgstr "Enregistrer"
+
+#: .\templates\Lobby\index.html:24
+msgid "or"
+msgstr "ou"
+
+#: .\templates\Lobby\index.html:24 .\templates\Lobby\layout.html:161
+#: .\templates\Lobby\login.html:19 .\templates\Lobby\login.html:25
+msgid "Login"
+msgstr "Connexion"
+
+#: .\templates\Lobby\index.html:26
+msgid ""
+"Play online for free against other players, or create a practice game to "
+"play as all players on a single device"
+msgstr ""
+
+#: .\templates\Lobby\index.html:28
+msgid ""
+"Online play with games updating live, plus player stats, regular "
+"tournaments, options to rewind, and more"
+msgstr ""
+
+#: .\templates\Lobby\index.html:36
+msgid ""
+"Compete to build and sell the most vehicles - research and influence the "
+"market to forge your path to victory"
+msgstr ""
+
+#: .\templates\Lobby\index.html:39
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website: <BR /> <i>Horseless Carriage is a game about the dawn of the "
+"automobile: a time when cars were invented, and no one quite knew yet what "
+"this new contraption would look like, and what features would be essential. "
+"Early cars sometimes used levers or pedals to steer and a wheel to "
+"accelerate. Brakes were not always seen as essential; but sometimes an "
+"outside spot to take along an onboard mechanic was. This early, super "
+"innovative period occurs in the development of many new product categories. "
+"Players are cast as aspiring industrialists trying to find out what features "
+"the public will value when buying these new, expensive, and utterly "
+"unfamiliar horseless carriages."
+msgstr ""
+
+#: .\templates\Lobby\index.html:54
+msgid ""
+"Play with 3-5 people or start a practice game to play as all players on one "
+"device."
+msgstr ""
+
+#: .\templates\Lobby\index.html:59
+msgid "Food Chain Magnate"
+msgstr "Magnat de la chaîne alimentaire"
+
+#: .\templates\Lobby\index.html:61
+msgid ""
+"Build up your fast food empire by out advertising and out producing your "
+"opponents to win the match"
+msgstr ""
+
+#: .\templates\Lobby\index.html:64
+msgid ""
+"From <a href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter's</"
+"a> website:<BR /> <i> Food Chain Magnate is a heavy strategy game about "
+"building a fast food chain. The focus is on building your company using a "
+"card-driven (human) resource management system. Players compete on a "
+"variable city map through purchasing, marketing and sales, and on a job "
+"market for key staff members."
+msgstr ""
+
+#: .\templates\Lobby\index.html:79
+msgid "Includes options for all expansion modules"
+msgstr "Inclut des options pour tous les modules d'extension"
+
+#: .\templates\Lobby\index.html:81
+msgid ""
+"Play with 2-6 people or start a practice game to play as all players on one "
+"device."
+msgstr ""
+
+#: .\templates\Lobby\layout.html:53
+msgid "Profile"
+msgstr "Profil"
+
+#: .\templates\Lobby\layout.html:54
+msgid "Log Out"
+msgstr "Déconnexion"
+
+#: .\templates\Lobby\layout.html:60
+msgid "Logged in as"
+msgstr "Connecté en tant que"
+
+#: .\templates\Lobby\layout.html:111 .\templates\Lobby\layout.html:249
+msgid "My Games"
+msgstr "Mes jeux"
+
+#: .\templates\Lobby\layout.html:112 .\templates\Lobby\layout.html:252
+#: .\templates\Lobby\lobbyHelp.html:181
+msgid "Tournaments"
+msgstr "Tournois"
+
+#: .\templates\Lobby\layout.html:113 .\templates\Lobby\layout.html:255
+msgid "Stats"
+msgstr "Statistiques"
+
+#: .\templates\Lobby\layout.html:114 .\templates\Lobby\layout.html:213
+#: .\templates\Lobby\layout.html:258 .\templates\Lobby\layout.html:277
+#: .\templates\Lobby\profile.html:145 .\templates\Lobby\profile.html:160
+msgid "Help"
+msgstr "Aide"
+
+#: .\templates\Lobby\layout.html:115 .\templates\Lobby\layout.html:261
+msgid "Updates"
+msgstr "Mises à jour"
+
+#: .\templates\Lobby\layout.html:116 .\templates\Lobby\layout.html:214
+#: .\templates\Lobby\layout.html:264 .\templates\Lobby\layout.html:280
+msgid "About"
+msgstr "À propos"
+
+#: .\templates\Lobby\layout.html:117 .\templates\Lobby\layout.html:215
+#: .\templates\Lobby\layout.html:267 .\templates\Lobby\layout.html:283
+msgid "Contact"
+msgstr "Contacter"
+
+#: .\templates\Lobby\layout.html:171
+msgid "Register New Account"
+msgstr "Enregistrer un nouveau compte"
+
+#: .\templates\Lobby\layout.html:173
+msgid "Forgotten Password?"
+msgstr "Mot de passe oublié ?"
+
+#: .\templates\Lobby\layout.html:301
+msgid ""
+"Horseless Carriage & Food Chain Magnate are board games by Jeroen Doumen and "
+"Joris Wiersinga, published by <a href=\"https://www.splottershop.com/\" "
+"target=\"_blank\">Splotter Spellen</a>."
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:25
+#, python-format
+msgid ""
+"Tournament open for signup! See <a class=\"linkOther\" href=\"%(the_url)s"
+"\">Tournaments</a>"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:33
+msgid ""
+"OBG discord available! Click <a href=\"https://discord.gg/hCU7Fr77yV\" class="
+"\"linkOther\" target=\"_blank\">Here</a> to join!"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:43 .\templates\Lobby\lobby.html:47
+msgid "New Game"
+msgstr "Nouveau jeu"
+
+#: .\templates\Lobby\lobby.html:51
+msgid "Map Editor"
+msgstr "Éditeur de carte"
+
+#: .\templates\Lobby\lobby.html:57
+msgid "Available Games"
+msgstr "Jeux disponibles"
+
+#: .\templates\Lobby\lobby.html:58 .\templates\Lobby\playerInfo.html:78
+msgid "Current Games"
+msgstr "Jeux en cours"
+
+#: .\templates\Lobby\lobby.html:59
+msgid "Waiting Games"
+msgstr "Jeux d'attente"
+
+#: .\templates\Lobby\lobby.html:60
+msgid "Invitations"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:61 .\templates\Lobby\playerInfo.html:121
+msgid "Finished Games"
+msgstr "Jeux terminés"
+
+#: .\templates\Lobby\lobby.html:97 .\templates\Lobby\lobby.html:145
+#: .\templates\Lobby\lobby.html:483
+msgid "Leave"
+msgstr "Partir"
+
+#: .\templates\Lobby\lobby.html:99 .\templates\Lobby\lobby.html:149
+#: .\templates\Lobby\lobby.html:584
+msgid "Join"
+msgstr "Rejoindre"
+
+#: .\templates\Lobby\lobby.html:177
+msgid "No Available Games"
+msgstr "Aucun jeu disponible"
+
+#: .\templates\Lobby\lobby.html:180 .\templates\Lobby\lobby.html:369
+#: .\templates\Lobby\lobby.html:492 .\templates\Lobby\lobby.html:615
+#: .\templates\Lobby\lobby.html:746 .\templates\Lobby\lobbyHelp.html:30
+msgid "What are the icons next to Food Chain Magnate games?"
+msgstr "Quelles sont les icônes à côté des jeux Food Chain Magnate ?"
+
+#: .\templates\Lobby\lobby.html:181 .\templates\Lobby\lobby.html:370
+#: .\templates\Lobby\lobby.html:493 .\templates\Lobby\lobby.html:616
+#: .\templates\Lobby\lobby.html:747 .\templates\Lobby\lobbyHelp.html:31
+msgid ""
+"The icons represent the options selected for that game. You can hover over "
+"the icon to see what it represents."
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:184 .\templates\Lobby\lobby.html:373
+#: .\templates\Lobby\lobby.html:496 .\templates\Lobby\lobby.html:619
+#: .\templates\Lobby\lobby.html:750 .\templates\Lobby\lobbyHelp.html:34
+msgid "New Milestones"
+msgstr "Nouveaux jalons"
+
+#: .\templates\Lobby\lobby.html:187 .\templates\Lobby\lobby.html:376
+#: .\templates\Lobby\lobby.html:499 .\templates\Lobby\lobby.html:622
+#: .\templates\Lobby\lobby.html:753 .\templates\Lobby\lobbyHelp.html:37
+msgid "Ketchup Milestone"
+msgstr "étape importante du ketchup"
+
+#: .\templates\Lobby\lobby.html:190 .\templates\Lobby\lobby.html:379
+#: .\templates\Lobby\lobby.html:502 .\templates\Lobby\lobby.html:625
+#: .\templates\Lobby\lobby.html:756 .\templates\Lobby\lobbyHelp.html:40
+msgid "New Reserve Cards"
+msgstr "Nouvelles cartes de réserve"
+
+#: .\templates\Lobby\lobby.html:193 .\templates\Lobby\lobby.html:382
+#: .\templates\Lobby\lobby.html:505 .\templates\Lobby\lobby.html:628
+#: .\templates\Lobby\lobby.html:759 .\templates\Lobby\lobbyHelp.html:43
+msgid "Movie Stars"
+msgstr "Étoiles de cinéma"
+
+#: .\templates\Lobby\lobby.html:196 .\templates\Lobby\lobby.html:385
+#: .\templates\Lobby\lobby.html:508 .\templates\Lobby\lobby.html:631
+#: .\templates\Lobby\lobby.html:762 .\templates\Lobby\lobbyHelp.html:46
+msgid "Mass Marketeers"
+msgstr "Marketing de masse"
+
+#: .\templates\Lobby\lobby.html:199 .\templates\Lobby\lobby.html:388
+#: .\templates\Lobby\lobby.html:511 .\templates\Lobby\lobby.html:634
+#: .\templates\Lobby\lobby.html:765 .\templates\Lobby\lobbyHelp.html:49
+msgid "Gourmet Food Critics"
+msgstr "Critiques gastronomiques"
+
+#: .\templates\Lobby\lobby.html:202 .\templates\Lobby\lobby.html:391
+#: .\templates\Lobby\lobby.html:514 .\templates\Lobby\lobby.html:637
+#: .\templates\Lobby\lobby.html:768 .\templates\Lobby\lobbyHelp.html:52
+msgid "Rural Marketeers"
+msgstr "Marketeurs ruraux"
+
+#: .\templates\Lobby\lobby.html:205 .\templates\Lobby\lobby.html:394
+#: .\templates\Lobby\lobby.html:517 .\templates\Lobby\lobby.html:640
+#: .\templates\Lobby\lobby.html:771 .\templates\Lobby\lobbyHelp.html:55
+msgid "New Districts"
+msgstr "Nouveaux quartiers"
+
+#: .\templates\Lobby\lobby.html:208 .\templates\Lobby\lobby.html:397
+#: .\templates\Lobby\lobby.html:520 .\templates\Lobby\lobby.html:643
+#: .\templates\Lobby\lobby.html:774 .\templates\Lobby\lobbyHelp.html:58
+msgid "Lobbyists"
+msgstr "Lobbyistes"
+
+#: .\templates\Lobby\lobby.html:211 .\templates\Lobby\lobby.html:400
+#: .\templates\Lobby\lobby.html:523 .\templates\Lobby\lobby.html:646
+#: .\templates\Lobby\lobby.html:777 .\templates\Lobby\lobbyHelp.html:61
+msgid "Night Shift Manager"
+msgstr "Gestionnaire de l'équipe de nuit"
+
+#: .\templates\Lobby\lobby.html:214 .\templates\Lobby\lobby.html:403
+#: .\templates\Lobby\lobby.html:526 .\templates\Lobby\lobby.html:649
+#: .\templates\Lobby\lobby.html:780 .\templates\Lobby\lobbyHelp.html:64
+msgid "Coffee"
+msgstr "Café"
+
+#: .\templates\Lobby\lobby.html:217 .\templates\Lobby\lobby.html:406
+#: .\templates\Lobby\lobby.html:529 .\templates\Lobby\lobby.html:652
+#: .\templates\Lobby\lobby.html:783 .\templates\Lobby\lobbyHelp.html:67
+msgid "Fry Chef"
+msgstr "Chef de friture"
+
+#: .\templates\Lobby\lobby.html:220 .\templates\Lobby\lobby.html:409
+#: .\templates\Lobby\lobby.html:532 .\templates\Lobby\lobby.html:655
+#: .\templates\Lobby\lobby.html:786 .\templates\Lobby\lobbyHelp.html:70
+msgid "Kimchi"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:223 .\templates\Lobby\lobby.html:412
+#: .\templates\Lobby\lobby.html:535 .\templates\Lobby\lobby.html:658
+#: .\templates\Lobby\lobby.html:789 .\templates\Lobby\lobbyHelp.html:73
+msgid "Sushi"
+msgstr "Sushis"
+
+#: .\templates\Lobby\lobby.html:226 .\templates\Lobby\lobby.html:415
+#: .\templates\Lobby\lobby.html:538 .\templates\Lobby\lobby.html:661
+#: .\templates\Lobby\lobby.html:792 .\templates\Lobby\lobbyHelp.html:76
+msgid "Noodles"
+msgstr "Nouilles"
+
+#: .\templates\Lobby\lobby.html:229 .\templates\Lobby\lobby.html:418
+#: .\templates\Lobby\lobby.html:541 .\templates\Lobby\lobby.html:664
+#: .\templates\Lobby\lobby.html:795 .\templates\Lobby\lobbyHelp.html:79
+msgid "Strict Payday/Fridge"
+msgstr "jour de paie strict/réfrigérateur"
+
+#: .\templates\Lobby\lobby.html:235 .\templates\Lobby\lobby.html:424
+#: .\templates\Lobby\lobby.html:547 .\templates\Lobby\lobby.html:670
+#: .\templates\Lobby\lobby.html:801 .\templates\Lobby\lobbyHelp.html:85
+msgid "No Milestones"
+msgstr "Pas de jalons"
+
+#: .\templates\Lobby\lobby.html:244 .\templates\Lobby\lobby.html:433
+#: .\templates\Lobby\lobby.html:556 .\templates\Lobby\lobby.html:679
+#: .\templates\Lobby\lobby.html:810 .\templates\Lobby\lobbyHelp.html:94
+msgid "Hard Choices"
+msgstr "Choix difficiles"
+
+#: .\templates\Lobby\lobby.html:251
+#, python-format
+msgid ""
+"For icon explanations see <a class=\"linkOther\" href=\"%(the_url)s\">Help</"
+"a>"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:294 .\templates\Lobby\lobby.html:340
+#: .\templates\Lobby\lobby.html:721
+msgid "Delete <BR /> Practice<BR /> Game"
+msgstr "Supprimer le jeu <BR /> Entraînement<BR />"
+
+#: .\templates\Lobby\lobby.html:366 .\templates\Lobby\playerInfo.html:117
+msgid "No Current Games"
+msgstr "Aucun jeu en cours"
+
+#: .\templates\Lobby\lobby.html:438
+msgid "Colour Guide"
+msgstr "Guide des couleurs"
+
+#: .\templates\Lobby\lobby.html:439
+msgid "It is your move"
+msgstr "C'est ton coup"
+
+#: .\templates\Lobby\lobby.html:440
+msgid "Waiting for other players to move"
+msgstr "Attendre que les autres joueurs se déplacent"
+
+#: .\templates\Lobby\lobby.html:441
+msgid "Need to move or risk being kicked out"
+msgstr "Besoin de bouger ou risque d'être expulsé"
+
+#: .\templates\Lobby\lobby.html:442
+msgid "Enter game to kickout inactive player"
+msgstr "Entrez dans le jeu pour expulser le joueur inactif"
+
+#: .\templates\Lobby\lobby.html:456 .\templates\Lobby\lobby.html:575
+msgid "Invited Players"
+msgstr "Joueurs invités"
+
+#: .\templates\Lobby\lobby.html:489
+msgid "No Waiting Games"
+msgstr "Pas de jeux d'attente"
+
+#: .\templates\Lobby\lobby.html:603
+msgid "Custom Map - Click to View"
+msgstr "Carte personnalisée - Cliquez pour afficher"
+
+#: .\templates\Lobby\lobby.html:606
+msgid "Decline"
+msgstr "Refuser"
+
+#: .\templates\Lobby\lobby.html:612
+msgid "No Invitations"
+msgstr "Aucune invitation"
+
+#: .\templates\Lobby\lobby.html:696 .\templates\Lobby\playerInfo.html:91
+#: .\templates\Lobby\playerInfo.html:129
+msgid "Last Activity"
+msgstr "Dernière activité"
+
+#: .\templates\Lobby\lobby.html:738
+#, python-format
+msgid ""
+"Check your <a href=\"%(the_url)s\">Game Profile</a> to see all of your "
+"finished games"
+msgstr ""
+
+#: .\templates\Lobby\lobby.html:743 .\templates\Lobby\playerInfo.html:155
+msgid "No Finished Games"
+msgstr "Aucune partie terminée"
+
+#: .\templates\Lobby\lobbyHelp.html:19
+msgid "Games Help"
+msgstr "Aide des jeux"
+
+#: .\templates\Lobby\lobbyHelp.html:20
+msgid "Food Chain Magnate Help Page"
+msgstr "Page d'aide de Magnat de la chaîne alimentaire"
+
+#: .\templates\Lobby\lobbyHelp.html:22
+msgid "Horseless Carriage Help Page"
+msgstr "Page d'aide sur la calèche"
+
+#: .\templates\Lobby\lobbyHelp.html:26
+msgid "Website Help"
+msgstr "Aide du site Web"
+
+#: .\templates\Lobby\lobbyHelp.html:28
+msgid "Lobby"
+msgstr "Hall"
+
+#: .\templates\Lobby\lobbyHelp.html:97
+msgid "What are the times displayed in the lobby?"
+msgstr "Quelles sont les heures affichées dans le hall ?"
+
+#: .\templates\Lobby\lobbyHelp.html:98
+msgid ""
+"Times are displayed according to the timezone of your device - so all times "
+"will be in local time."
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:100
+msgid "What are the game columns?"
+msgstr "Quelles sont les rubriques du jeu ?"
+
+#: .\templates\Lobby\lobbyHelp.html:101
+msgid ""
+"Available Games - Games that are available to join and are not waiting for a "
+"repsonse from invited players<BR /> Current Games - Games you are currently "
+"playing<BR /> Waiting Games - Games you have joined, but are waiting for "
+"more players (either invited players or open to anyone)<BR /> Invitations - "
+"Games you have been invited to play<BR /> Finished Games - Your finished "
+"games. Games you have resigned or been kicked from will stop showing under "
+"\"Current Games\" but will show here once they are finished<BR /> <BR /> If "
+"you create a game open to anyone, it will be shown under your \"Waiting Games"
+"\" and also visible in \"Available Games\".<BR /> If you create a game and "
+"invite other players, it will be shown under your \"Waiting Games\" only, "
+"until all invited players have responded.<BR /> <B><U>How can I laave a game "
+"that hasn't started?</U></B><BR /> Under \"Waiting Games\" there is a \"Leave"
+"\" button on the right. If you are not waiting for specific players to join, "
+"you can also see the game under \"Available Games\", with a \"Leave\" button "
+"on the left.<BR />"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:117
+msgid "Profile Setup"
+msgstr "Configuration du profil"
+
+#: .\templates\Lobby\lobbyHelp.html:120
+msgid ""
+"<B><U>What are the notifications?</U></B><BR /> All games update live, so "
+"you can set whether you wish to hear a beep, bell, or nothing if a game "
+"comes to your turn whilst the game page is open.<BR /> In addition, you can "
+"add email notifications, discord notifications, and slack notifications<BR /"
+"> <BR /> <B><U>How can I add a Discord Notification?</U></B><BR /> You can "
+"add Discord notifications to one of your servers, or an existing server "
+"where you have administrator privileges.<BR /> To set up your own free "
+"server, <a href=\"https://support.discord.com/hc/en-us/articles/204849977-"
+"How-do-I-create-a-server-\" target=\"_blank\">click here</a>.<BR /> To set "
+"up a webhook and find the URL to copy into your Online Board Gamers Profile, "
+"<a href=\"https://support.discord.com/hc/en-us/articles/228383668-Intro-to-"
+"Webhooks\" target=\"_blank\">click here</a>.<BR /> Follow the guide to set "
+"up a webhook and \"Copy Webhook URL\". Then paste the link in to your "
+"profile on Online Board Gamers. <BR /> Note that Discord notifications will "
+"be sent to a channel, not to your private messages. <BR /> <BR /> <B><U>How "
+"can I add a Slack Notification?</U></B><BR /> Create a slack app and enable/"
+"create an incoming Webhook. Set it to post to a channel or your private "
+"messages. Then paste the link in to your profile on Online Board Gamers.<BR /"
+"> For details on each step, <a href=\"https://api.slack.com/messaging/"
+"webhooks\" target=\"_blank\">click here</a>.<BR />"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:150
+msgid "Game Setup"
+msgstr "Configuration du jeu"
+
+#: .\templates\Lobby\lobbyHelp.html:153
+msgid ""
+"<B><U>What does the Playing Speed option do?</U></B><BR /> The Playing Speed "
+"option mainly gives other players an idea of how fast you want the game to "
+"play. It is also linked to the options for the length of time before an "
+"inactive player is removed. Blitz Dual is limited to 2 player, and has "
+"optiona from 5 minutes to 20 minutes. Live speed allows kickouts of 12 hours "
+"or 1 day. The other speeds allow kickouts between 1 day and 5 days. Please "
+"note that often with 4 or more random players then more than 1 or 2 moves a "
+"day could be difficult, especially if people are in different time zones. "
+"With 2 or 3 players however, it is certainly possible to play several games "
+"in an evening!<BR /> <BR /> <B><U>How much time do I have left in a Blitz "
+"Dual speed game?</U></B><BR /> You can see a timer counting down to the next "
+"kickout in the top right, underneath where it says who you are logged in as. "
+"In fact, any game that is within 20 minutes of a kickout will display the "
+"timer. There is a short grace period once the timer reaches zero, and no one "
+"is kicked until a player enters the game who isn't currently required to "
+"move, thus activiating the kickout. All games will auto-update live, but if "
+"you are playing Blitz Dual and your opponent doesn't appear to be moving, "
+"then it is worth refreshing the game, in case you lost internet signal at "
+"the same time the game update signal arrived.<BR /> <BR /> <B><U>Where do "
+"the FCM scenarios come from?</U></B><BR /> They are suggested in the Ketchup "
+"Expansion manual. <BR />"
+msgstr ""
+
+#: .\templates\Lobby\lobbyHelp.html:184
+msgid ""
+"<B><U>What are the formats?</U></B><BR /> Knockout is simply the winner "
+"moves to the next round. Two Lives is like double elimination; once you've "
+"lose twice then you're out of the tournament. Rounds consists of (currently) "
+"4 rounds, where all players are included in the games, after which there is "
+"a short knockout of all players on top points to determine the overall "
+"winner. <BR /> <BR /> <B><U>How are game players decided?</U></B><BR /> "
+"Initially game players are drawn randomly. After this, players are ranked by "
+"number of wins. Players will play the closest person to them that thay "
+"haven't already played. <BR/> If there are any players left over, they "
+"receive a \"bye\", which counts as an automatic win, and progress to the "
+"next round. \"Byes\" will generally be given to the lowest ranked players, "
+"and are limited to one per tournament. Essentially \"Byes\" are given "
+"randomly to the lowest ranked player who hasn't yet had a \"Bye\".<BR/> <BR /"
+"> <B><U>How do kickouts work?</U></B><BR /> If someone is kicked out then "
+"they are ejected from the tournament. They will lose both lives in Two "
+"Lives, and be removed from a Rounds tournament <BR/> <BR /> <B><U>What else "
+"should I know?</U></B><BR /> Players will not play the same person again "
+"until there's no other option<BR/> Players will not receive two \"byes\" "
+"until there's no other option<BR/> Kickout timer will be 1 day, with the "
+"exception of the first move (restaurant placement) which will be 3 days, in "
+"case players don't realise a game has started<BR/> Notifications are sent "
+"out at the start of every new tournament game. If you finish quickly there "
+"could be several days until your next game starts, so it is strongly "
+"recommended to have at least one form of notification enabled in your "
+"profile<BR/> I can start a tournament any time, but too many could lead to "
+"tournament fatigue! So I'm planning to always have some sort of tournament "
+"available or ongoing. Initially, there will be a bit of an open testing "
+"phase, as I can't test more than about 5 players myself! After this, there "
+"might be one of each tournament that starts at the begining of each month, "
+"or one every two weeks, or something<BR/>"
+msgstr ""
+
+#: .\templates\Lobby\login.html:29
+msgid "Forgotten your password? Click here to send a reset email"
+msgstr "Mot de passe oublié ? "
+
+#: .\templates\Lobby\playerInfo.html:24
+msgid "Player Stats"
+msgstr "Statistiques du joueur"
+
+#: .\templates\Lobby\playerInfo.html:30
+msgid "Games"
+msgstr "Jeux"
+
+#: .\templates\Lobby\playerInfo.html:72
+msgid "Kickouts in last year"
+msgstr "Kickouts l'année dernière"
+
+#: .\templates\Lobby\playerInfo.html:73
+msgid "Fair Play rating for last year"
+msgstr "Classement du fair-play pour l'année dernière"
+
+#: .\templates\Lobby\profile.html:30
+msgid "Favourite Food Chain Magnate Restaurant"
+msgstr "Restaurant préféré des magnats de la chaîne alimentaire"
+
+#: .\templates\Lobby\profile.html:32 .\templates\Lobby\profile.html:59
+msgid "None"
+msgstr "Aucun"
+
+#: .\templates\Lobby\profile.html:57
+msgid "Favourite Horseless Carriage Colour"
+msgstr "Couleur préférée des calèches sans chevaux"
+
+#: .\templates\Lobby\profile.html:81
+msgid "High Contrast FCM Board Items"
+msgstr "Éléments de la carte FCM à contraste élevé"
+
+#: .\templates\Lobby\profile.html:84
+msgid ""
+"Use high contrast board demand (items have white outline instead of black)"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:87
+msgid "Update Colour Preferences"
+msgstr "Mettre à jour les préférences de couleur"
+
+#: .\templates\Lobby\profile.html:97
+msgid "Live notification when it is your turn"
+msgstr "notification en direct lorsque c'est votre tour"
+
+#: .\templates\Lobby\profile.html:100
+msgid "No Sound"
+msgstr "Pas de son"
+
+#: .\templates\Lobby\profile.html:103
+msgid "Beep"
+msgstr "Bip"
+
+#: .\templates\Lobby\profile.html:106
+msgid "Dinner Bell"
+msgstr "Cloche du dîner"
+
+#: .\templates\Lobby\profile.html:112
+msgid "Notifications"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:121
+msgid "Email Notifications"
+msgstr "Notifications par e-mail"
+
+#: .\templates\Lobby\profile.html:131
+msgid "Discord Notifications"
+msgstr "Notifications de discorde"
+
+#: .\templates\Lobby\profile.html:134
+msgid "Discord Webhook URL, EG"
+msgstr "URL du Webhook Discord, par exemple"
+
+#: .\templates\Lobby\profile.html:136
+msgid ""
+"18 Digit Discord User ID - if you wish to be @'d with your webhook (Advanced "
+"Option - leave blank if unsure - see <a class='linkOther' href='https://"
+"support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-"
+"Server-Message-ID-'' target='_blank'>here</a>)"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:140
+msgid ""
+"Optional: Leave blank if unsure. Input 18 digit discord user ID if you wish "
+"to include '@'"
+msgstr ""
+
+#: .\templates\Lobby\profile.html:143
+msgid "Test Discord Webhook URL"
+msgstr "Tester l'URL du webhook Discord"
+
+#: .\templates\Lobby\profile.html:144
+msgid "To find your Discord Webhook URL see"
+msgstr "Pour trouver l'URL de votre Webhook Discord, consultez"
+
+#: .\templates\Lobby\profile.html:154
+msgid "Slack Notifications"
+msgstr "Notifications de relâchement"
+
+#: .\templates\Lobby\profile.html:157
+msgid "Slack Webhook URL, EG"
+msgstr "URL Webhook Slack, par exemple"
+
+#: .\templates\Lobby\profile.html:158
+msgid "Test Slack Webhook URL"
+msgstr "Tester l'URL du webhook Slack"
+
+#: .\templates\Lobby\profile.html:159
+msgid "To find your Slack Webhook URL see"
+msgstr "Pour trouver l'URL de votre Webhook Slack, consultez"
+
+#: .\templates\Lobby\profile.html:168
+msgid "Update Notification Preferences"
+msgstr "Mettre à jour les préférences de notification"
+
+#: .\templates\Lobby\profile.html:183
+msgid "Change Password"
+msgstr "Modifier le mot de passe"
+
+#: .\templates\Lobby\register.html:31
+msgid "Already have an account?"
+msgstr "Vous avez déjà un compte ?"
+
+#: .\templates\Lobby\register.html:31
+msgid "Log In here"
+msgstr "Connectez-vous ici"
+
+#: .\views.py:161
+msgid "Password Reset Requested"
+msgstr "Réinitialisation du mot de passe demandée"
+
+#: .\views.py:181
+msgid ""
+"An email with password reset instructions has been sent to your inbox. "
+"Please check spam folders"
+msgstr ""
+
+#: .\views.py:184
+msgid "No user found with this email"
+msgstr "Aucun utilisateur trouvé avec cet e-mail"
+
+#: .\views.py:186
+msgid "Please enter a valid email address"
+msgstr "Veuillez saisir une adresse e-mail valide"
+
+#: .\views.py:194
+msgid ""
+"Authentification problem - possibly using another browser tab. Please login "
+"here"
+msgstr ""
+
+#: .\views.py:546
+msgid "Thank you for taking a look"
+msgstr "Merci d'avoir jeté un coup d'œil"
+
+#: .\views.py:712
+msgid ""
+"Account inactive - check your email for email verification, or contact the "
+"webmaster"
+msgstr ""
+
+#: .\views.py:716
+msgid "Invalid username / password"
+msgstr "Nom d'utilisateur/mot de passe invalide"
+
+#: .\views.py:745
+msgid "Your password has been changed"
+msgstr "Votre mot de passe a été modifié"
+
+#: .\views.py:769
+msgid "Your colour preferences have been updated successfully"
+msgstr "Vos préférences de couleur ont été mises à jour avec succès"
+
+#: .\views.py:797
+msgid "Please enter a valid Discord Webhook URL"
+msgstr "Veuillez saisir une URL Webhook Discord valide"
+
+#: .\views.py:802 .\views.py:1951
+msgid "Please enter a Valid Discord Webhook URL"
+msgstr "Veuillez saisir une URL Webhook Discord valide"
+
+#: .\views.py:808 .\views.py:812 .\views.py:1955 .\views.py:1959
+msgid "Discord User ID must be an 18+ digit number"
+msgstr "L'ID utilisateur Discord doit être un numéro à 18 chiffres"
+
+#: .\views.py:824
+msgid "Please enter a valid Slack Webhook URL"
+msgstr "Veuillez saisir une URL Webhook Slack valide"
+
+#: .\views.py:828 .\views.py:1971
+msgid "Please enter a Valid Slack Webhook URL"
+msgstr "Veuillez saisir une URL Webhook Slack valide"
+
+#: .\views.py:839
+msgid "Your notification preferences have been updated successfully"
+msgstr "Vos préférences de notification ont été mises à jour avec succès"
+
+#: .\views.py:886 .\views.py:916
+msgid "Game does not exist"
+msgstr "Le jeu n'existe pas"
+
+#: .\views.py:895 .\views.py:947
+msgid "Game creation for rematch"
+msgstr "Création du jeu pour le match revanche"
+
+#: .\views.py:967
+msgid "Game creation for selected map"
+msgstr "Création du jeu pour la carte sélectionnée"
+
+#: .\views.py:990
+msgid "Email Address Already Registered"
+msgstr "Adresse e-mail déjà enregistrée"
+
+#: .\views.py:994
+msgid "Username already taken"
+msgstr "Nom d'utilisateur déjà pris"
+
+#: .\views.py:1001
+msgid "Activate Your Online Gaming Account"
+msgstr "Activez votre compte de jeu en ligne"
+
+#: .\views.py:1011
+#, python-format
+msgid ""
+"Please check %(emailAddress)s to confirm your email address and complete "
+"registration"
+msgstr ""
+
+#: .\views.py:1034
+msgid ""
+"Your account has been confirmed<BR/>Complete your profile or return to the "
+"Home Page to view games"
+msgstr ""
+
+#: .\views.py:1038
+msgid ""
+"The confirmation link was invalid, possibly because it has already been "
+"used. If you think your email client scanned the link, then try to log in "
+"anyway"
+msgstr ""
+
+#: .\views.py:1052
+msgid ""
+"Thank you for your email confirmation. Now you can login to your account"
+msgstr ""
+
+#: .\views.py:1054
+msgid "Activation link is invalid"
+msgstr "Le lien d'activation n'est pas valide"
+
+#: .\views.py:1062
+msgid "Player does not exist"
+msgstr "Le joueur n'existe pas"
+
+#: .\views.py:1225
+msgid "You have joined the Tournament"
+msgstr "Vous avez rejoint le Tournoi"
+
+#: .\views.py:1228
+msgid "The Tournament is already full"
+msgstr "Le Tournoi est déjà complet"
+
+#: .\views.py:1234
+msgid "Tournament does not exist"
+msgstr "Le tournoi n'existe pas"
+
+#: .\views.py:1298 .\views.py:1433
+msgid "You cannot add yourself as another player"
+msgstr "Vous ne pouvez pas vous ajouter en tant qu'autre joueur"
+
+#: .\views.py:1306 .\views.py:1441
+msgid "Error: Player 2 does not exist"
+msgstr "Erreur : le joueur 2 n'existe pas"
+
+#: .\views.py:1312 .\views.py:1447
+msgid "Error: Player 3 does not exist"
+msgstr "Erreur : le joueur 3 n'existe pas"
+
+#: .\views.py:1318 .\views.py:1453
+msgid "Error: Player 4 does not exist"
+msgstr "Erreur : le joueur 4 n'existe pas"
+
+#: .\views.py:1324 .\views.py:1459
+msgid "Error: Player 5 does not exist"
+msgstr "Erreur : le joueur 5 n'existe pas"
+
+#: .\views.py:1415 .\views.py:1641
+msgid "Your game has been created and has been started"
+msgstr "Votre jeu a été créé et lancé"
+
+#: .\views.py:1419 .\views.py:1645
+msgid "Your game has been created and is waiting for players"
+msgstr "Votre jeu a été créé et attend des joueurs"
+
+#: .\views.py:1465
+msgid "Error: Player 6 does not exist"
+msgstr "Erreur : le joueur 6 n'existe pas"
+
+#: .\views.py:1661 .\views.py:1671
+msgid "Sorry, the game no longer exists"
+msgstr "Désolé, le jeu n'existe plus"
+
+#: .\views.py:1696
+msgid "The game has already started"
+msgstr "Le jeu a déjà commencé"
+
+#: .\views.py:1703
+msgid "You have left the game - it has been deleted"
+msgstr "Vous avez quitté le jeu - il a été supprimé"
+
+#: .\views.py:1706
+msgid "You have left the game - it is available for players to join"
+msgstr "Vous avez quitté le jeu ; les joueurs peuvent le rejoindre"
+
+#: .\views.py:1714
+msgid "You have declined the invitation - it is available for players to join"
+msgstr "Vous avez décliné l'invitation : elle est disponible pour les joueurs."
+
+#: .\views.py:1719
+msgid ""
+"You have declined the invitation - the game is waiting for other invitees to "
+"respond"
+msgstr ""
+
+#: .\views.py:1726
+msgid "Sorry, someone else joined the game and it is full"
+msgstr "Désolé, quelqu'un d'autre a rejoint le jeu et il est plein"
+
+#: .\views.py:1738
+msgid "You have joined the game and the game has started"
+msgstr "Vous avez rejoint le jeu et le jeu a commencé"
+
+#: .\views.py:1742
+msgid "You have joined the game - waiting for more players"
+msgstr "Vous avez rejoint le jeu - en attente de plus de joueurs"
+
+#: .\views.py:1786
+msgid "Food Chain Magnate - Game Invitation Received"
+msgstr "Magnat de la chaîne alimentaire - Invitation au jeu reçue"
+
+#: .\views.py:1795 .\views.py:1855
+#, python-format
+msgid ""
+"Game invite at OnlineBoardGamers\n"
+"%(gameName)s - %(maxPlayers)s players"
+msgstr ""
+
+#: .\views.py:1796
+msgid "Click here to play Food Chain Magnate"
+msgstr "Cliquez ici pour jouer au magnat de la chaîne alimentaire"
+
+#: .\views.py:1846
+msgid "Horseless Carriage - Game Invitation Received"
+msgstr "Calèche sans chevaux - Invitation au jeu reçue"
+
+#: .\views.py:1856
+msgid "Click here to play Horseless Carriage"
+msgstr "Cliquez ici pour jouer à Calèche sans chevaux"
+
+#: .\views.py:1945
+msgid "Please enter a valid URL"
+msgstr "Veuillez saisir une URL valide"
+
+#: .\views.py:1964 .\views.py:1974
+msgid "This is a test message from Online Board Gamers"
+msgstr "Ceci est un message de test des joueurs de plateau en ligne"
+

@@ -1,0 +1,1051 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/profile.css' %}?v=20230230"
+          rel="stylesheet">
+{% endblock %}
+{% block body %}
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <script src="{% static 'Lobby/profile.js' %}"></script>
+    <div class="container formsPage">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <!--<h1>Please click "Update Profile" to save changes</h1>-->
+        <h1>{{ username }} - {{ email }}</h1>
+        <div class="profilePreferenceDiv">
+            <form method="post" id="notificationForm">
+                {% csrf_token %}
+                <input type="hidden"
+                       id="action"
+                       name="action"
+                       value="updateProfileNotifications" />
+                <label class="preferenceTitle">{% translate "Live notification when it is your turn" %}</label>
+                <div>
+                    <div class="favRestChoice">
+                        <label for="notif0">
+                            <img class="notifIamge"
+                                 src="{% static 'Lobby/Images/notif_noSound.svg' %} " />
+                            <br />
+                            {% translate "No Sound" %}
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="notif0"
+                               name="liveNotif"
+                               value="0"
+                               {% if liveNotification == 0 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="notif1">
+                            <img class="notifIamge" src="{% static 'Lobby/Images/notif_beep.svg' %} " />
+                            <br />
+                            {% translate "Beep" %}
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="notif1"
+                               name="liveNotif"
+                               value="1"
+                               {% if liveNotification == 1 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="notif2">
+                            <img class="notifIamge" src="{% static 'Lobby/Images/notif_bell.svg' %} " />
+                            <br />
+                            {% translate "Dinner Bell" %}
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="notif2"
+                               name="liveNotif"
+                               value="2"
+                               {% if liveNotification == 2 %}checked{% endif %} />
+                    </div>
+                </div>
+                <label class="preferenceTitle">{% translate "Browser Notifications" %}</label>
+                <br />
+                <b>
+                    {% blocktranslate trimmed %}
+                        Enabling this will allow your brower to send you a notification when it is your turn.
+                        <br />
+                        This will only work if you have the browser tab open.
+                        <br />
+                        You will need to click the button below, and then "allow" notifications when your browser asks.
+                    {% endblocktranslate %}
+                </b>
+                <br />
+                <button type="button"
+                        class="webhookButton testWebhookButton"
+                        onclick="askForBrowserNotifications()">{% translate "Request Browser Notifications" %}</button>
+                <br />
+                <label class="preferenceTitle">{% translate "Email Notifications" %}</label>
+                <br />
+                <span id="emailSelectionTitleSpan">
+                    {% blocktranslate trimmed %}
+                        Select which emails you would like to receive
+                        <br />
+                        Please consider setting up a webhook instead, as it's more reliable and you will receive all notifications.
+                        <br />
+                        Make sure you add admin[at]onlineboardgamers.com to your email whitelist.
+                        <br />
+                        Check your spam folder if you aren't receiving emails.
+                    {% endblocktranslate %}
+                </span>
+                <br />
+                <button id="stopEmailsButton" class="openAllMyMoveGamesButton">Set in js</button>
+                <br />
+                <table class="generalTable emailSelectTable">
+                    <thead>
+                        <tr>
+                            <th>{% translate "Category" %}</th>
+                            <th>{% translate "Email Type" %}</th>
+                            <th>{% translate "Yes" %}</th>
+                            <th>{% translate "No" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="yourTurnTR">
+                            <td>{% translate "Your turn" %}</td>
+                            <td>{% translate "Your turn" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="yourTurnEmail"
+                                       value="1"
+                                       {% if yourTurnEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="yourTurnEmail"
+                                       value="0"
+                                       {% if yourTurnEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="essentialTR">
+                            <td>{% translate "Essential" %}</td>
+                            <td>{% translate "Game Invite" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="gameInviteEmail"
+                                       value="1"
+                                       {% if gameInviteEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="gameInviteEmail"
+                                       value="0"
+                                       {% if gameInviteEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="essentialTR">
+                            <td></td>
+                            <td>{% translate "Turn Expired" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="turnExpiredEmail"
+                                       value="1"
+                                       {% if turnExpiredEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="turnExpiredEmail"
+                                       value="0"
+                                       {% if turnExpiredEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="essentialTR">
+                            <td></td>
+                            <td>{% translate "Tournament Game Start" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="tournamentGameStartEmail"
+                                       value="1"
+                                       {% if tournamentGameStartEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="tournamentGameStartEmail"
+                                       value="0"
+                                       {% if tournamentGameStartEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="essentialTR">
+                            <td></td>
+                            <td>{% translate "Tournament Win " %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="tournamentWinEmail"
+                                       value="1"
+                                       {% if tournamentWinEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="tournamentWinEmail"
+                                       value="0"
+                                       {% if tournamentWinEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="informationTR">
+                            <td>{% translate "Information" %}</td>
+                            <td>{% translate "Invite Decline" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="inviteDeclineEmail"
+                                       value="1"
+                                       {% if inviteDeclineEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="inviteDeclineEmail"
+                                       value="0"
+                                       {% if inviteDeclineEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="informationTR">
+                            <td></td>
+                            <td>{% translate "Game Start" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="gameStartEmail"
+                                       value="1"
+                                       {% if gameStartEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="gameStartEmail"
+                                       value="0"
+                                       {% if gameStartEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="informationTR">
+                            <td></td>
+                            <td>{% translate "Game End" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="gameEndEmail"
+                                       value="1"
+                                       {% if gameEndEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="gameEndEmail"
+                                       value="0"
+                                       {% if gameEndEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="informationTR">
+                            <td></td>
+                            <td>{% translate "2 Hour Reminder" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="twoHourReminderEmail"
+                                       value="1"
+                                       {% if twoHourReminderEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="twoHourReminderEmail"
+                                       value="0"
+                                       {% if twoHourReminderEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="informationTR">
+                            <td></td>
+                            <td>{% translate "Tournament Open" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="tournamentOpenEmail"
+                                       value="1"
+                                       {% if tournamentOpenEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="tournamentOpenEmail"
+                                       value="0"
+                                       {% if tournamentOpenEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                        <tr class="dailyReminderTR">
+                            <td>{% translate "Daily Reminder" %}</td>
+                            <td>{% translate "Reminder if not moved for over 24 hrs" %}</td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="dailyReminderEmail"
+                                       value="1"
+                                       {% if dailyReminderEmail == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="radio"
+                                       class="myCheckbox"
+                                       name="dailyReminderEmail"
+                                       value="0"
+                                       {% if dailyReminderEmail == 0 %}checked{% endif %}>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="hidden" id="submissionSource" name="submissionSource" value="" />
+                <button type="submit" class="updateProfilebtn">{% translate "Update Notification Preferences" %}</button>
+            </form>
+            <br />
+            <!-- TOP -->
+            <table class="profileTable">
+                <thead>
+                    <tr>
+                        <th>Notification Type</th>
+                        <th>URL</th>
+                        <th>User ID</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if webhooks %}
+                        {% for notification in webhooks %}
+                            <tr>
+                                <td>{{ notification.0 }}</td>
+                                <td>{{ notification.1 }}</td>
+                                <td>{{ notification.2 }}</td>
+                                <td>
+                                    <form id="webhookDeleteForm"
+                                          action="{% url 'deleteWebhook' %}"
+                                          method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="webhookID" value="{{ forloop.counter0 }}" />
+                                        <input type="hidden" name="webhookURL" value="{{ notification.1 }}" />
+                                        <input type="hidden" name="webhookUserID" value="{{ notification.2 }}" />
+                                        <button type="button"
+                                                id="webhookTestButton{{ forloop.counter0 }}"
+                                                class="webhookButton testWebhookButton"
+                                                onclick="testWebhook(this.id, {{ notification }})">
+                                            {% translate "Test Webhook" %}
+                                        </button>
+                                        <button class="webhookButton deleteWebhookButton" type="submit">{% translate "Delete" %}</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4">No webhooks set up</td>
+                        </tr>
+                    {% endif %}
+                    <form id="webhookAddForm" action="{% url 'addWebhook' %}" method="post">
+                        {% csrf_token %}
+                        <tr>
+                            <td>
+                                <select class="webhookTypeSelect"
+                                        name="webhookType"
+                                        onchange="changeWebhookType(this.value)">
+                                    <option value="DC">Discord</option>
+                                    <option value="SL">Slack</option>
+                                    <option value="TG">Telegram</option>
+                                    <option value="OT">Other</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input class="webhookInputText"
+                                       id="webhookURL"
+                                       type="text"
+                                       name="webhookURL"
+                                       placeholder="EG https://discordapp.com/api/webhooks/xxxxxxxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+                                <span class="telegramInfo">Click to actiavte Bot: <a class="linkOther"
+    href="https://t.me/OnlineBoardGamers_Bot?start=OBG"
+    target="_blank">https://t.me/OnlineBoardGamers_Bot?start=OBG</a></span>
+                            </td>
+                            <td>
+                                <input class="webhookInputText"
+                                       id="webhookUserID"
+                                       type="text"
+                                       name="webhookUserID"
+                                       placeholder="{% translate "Optional: Leave blank if unsure. Input 18 digit discord user ID if you wish to include '@'" %}">
+                            <span class="telegramInfo"><a class="linkOther"
+   href="https://t.me/OnlineBoardGamers_Bot?start=OBG"
+   target="_blank">Click here to open the OBG Telegram Bot</a>
+                            <br />
+                        Then click the link to easily add Telegram notifications to your profile</span>
+                    </td>
+                    <td>
+                        <button class="webhookButton addWebhookButton" type="submit">Add New Webhook</button>
+                    </td>
+                </tr>
+            </form>
+        </tbody>
+    </table>
+    <span class="webhookHelpSpan">For help adding webhook notifications, see <a class="linkOther" href="{% url 'lobbyHelp' %}" target="_blank">{% translate "Help" %}</a></span>
+    <!-- BOT -->
+</div>
+<div class="profilePreferenceDiv">
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden"
+               id="action"
+               name="action"
+               value="updateProfileFavourites" />
+        <label class="preferenceTitle">{% translate "Favourite Food Chain Magnate Restaurant" %}</label>
+        <div>
+            <div class="favRestChoice">
+                <label for="fcmRadM1">{% translate "None" %}</label>
+                <br />
+                <input type="radio"
+                       id="fcmRadM1"
+                       name="fcmResto"
+                       value="-1"
+                       {% if favColour == -1 %}checked{% endif %}
+                       {% if not favColour %}checked{% endif %} />
+            </div>
+            <div class="favRestChoice">
+                <label for="fcmRad0">
+                    <img src="{% static 'FCM/Images/p_fried_geese.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="fcmRad0"
+                       name="fcmResto"
+                       value="0"
+                       {% if favColour == 0 %}checked{% endif %} />
+            </div>
+            <div class="favRestChoice">
+                <label for="fcmRad1">
+                    <img src="{% static 'FCM/Images/p_gluttony_inc.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="fcmRad1"
+                       name="fcmResto"
+                       value="1"
+                       {% if favColour == 1 %}checked{% endif %} />
+            </div>
+            <div class="favRestChoice">
+                <label for="fcmRad2">
+                    <img src="{% static 'FCM/Images/p_duck_dinner.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="fcmRad2"
+                       name="fcmResto"
+                       value="2"
+                       {% if favColour == 2 %}checked{% endif %} />
+            </div>
+            <div class="favRestChoice">
+                <label for="fcmRad3">
+                    <img src="{% static 'FCM/Images/p_santa_maria.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="fcmRad3"
+                       name="fcmResto"
+                       value="3"
+                       {% if favColour == 3 %}checked{% endif %} />
+            </div>
+            <div class="favRestChoice">
+                <label for="fcmRad4">
+                    <img src="{% static 'FCM/Images/p_xango_blues.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="fcmRad4"
+                       name="fcmResto"
+                       value="4"
+                       {% if favColour == 4 %}checked{% endif %} />
+            </div>
+            <div class="favRestChoice">
+                <label for="fcmRad5">
+                    <img src="{% static 'FCM/Images/p_siap_faji.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="fcmRad5"
+                       name="fcmResto"
+                       value="5"
+                       {% if favColour == 5 %}checked{% endif %} />
+            </div>
+        </div>
+        <br />
+        <label class="preferenceTitle">{% translate "High Contrast FCM Board Items" %}</label>
+        <br />
+        <input type="checkbox"
+               class="myCheckbox"
+               id="highContrastBoardItems"
+               name="highContrastBoardItems"
+               value="highContrastBoardItems"
+               {% if highContrastBoardItems %}checked{% endif %} />
+        <label for="highContrastBoardItems" class="checkboxLabel">
+            {% translate "Use high contrast board demand (items have white outline instead of black)" %}
+        </label>
+        <br />
+        <br />
+        <label class="preferenceTitle">{% translate "Favourite Horseless Carriage Colour" %}</label>
+        <div>
+            <div class="favHCchoice">
+                <label for="hcRadM1">{% translate "None" %}</label>
+                <br />
+                <input type="radio"
+                       id="hcRadM1"
+                       name="hcColour"
+                       value="-1"
+                       {% if favHCcolour == -1 %}checked{% endif %}
+                       {% if not favHCcolour %}checked{% endif %} />
+            </div>
+            <div class="favHCchoice">
+                <label for="hcRad0">
+                    <img src="{% static 'HC/Images/piece_R.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="hcRad0"
+                       name="hcColour"
+                       value="0"
+                       {% if favHCcolour == 0 %}checked{% endif %} />
+            </div>
+            <div class="favHCchoice">
+                <label for="hcRad1">
+                    <img src="{% static 'HC/Images/piece_G.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="hcRad1"
+                       name="hcColour"
+                       value="1"
+                       {% if favHCcolour == 1 %}checked{% endif %} />
+            </div>
+            <div class="favHCchoice">
+                <label for="hcRad2">
+                    <img src="{% static 'HC/Images/piece_P.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="hcRad2"
+                       name="hcColour"
+                       value="2"
+                       {% if favHCcolour == 2 %}checked{% endif %} />
+            </div>
+            <div class="favHCchoice">
+                <label for="hcRad3">
+                    <img src="{% static 'HC/Images/piece_B.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="hcRad3"
+                       name="hcColour"
+                       value="3"
+                       {% if favHCcolour == 3 %}checked{% endif %} />
+            </div>
+            <div class="favHCchoice">
+                <label for="hcRad4">
+                    <img src="{% static 'HC/Images/piece_Y.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="hcRad4"
+                       name="hcColour"
+                       value="4"
+                       {% if favHCcolour == 4 %}checked{% endif %} />
+            </div>
+        </div>
+        <label class="preferenceTitle">{% translate "Favourite Bus Colour and Board" %}</label>
+        <div>
+            <div class="favBusColour">
+                <label for="busRadM1">{% translate "None" %}</label>
+                <br />
+                <input type="radio"
+                       id="busRadM1"
+                       name="busColour"
+                       value="-1"
+                       {% if preferredBusColour == -1 %}checked{% endif %}
+                       {% if not favHCcolour %}checked{% endif %} />
+            </div>
+            <div class="favBusColour">
+                <label for="busRad0">
+                    <img src="{% static 'Lobby/Images/bus_blue.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="busRad0"
+                       name="busColour"
+                       value="0"
+                       {% if preferredBusColour == 0 %}checked{% endif %} />
+            </div>
+            <div class="favBusColour">
+                <label for="busRad1">
+                    <img src="{% static 'Lobby/Images/bus_green.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="busRad1"
+                       name="busColour"
+                       value="1"
+                       {% if preferredBusColour == 1 %}checked{% endif %} />
+            </div>
+            <div class="favBusColour">
+                <label for="busRad2">
+                    <img src="{% static 'Lobby/Images/bus_purple.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="busRad2"
+                       name="busColour"
+                       value="2"
+                       {% if preferredBusColour == 2 %}checked{% endif %} />
+            </div>
+            <div class="favBusColour">
+                <label for="busRad3">
+                    <img src="{% static 'Lobby/Images/bus_red.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="busRad3"
+                       name="busColour"
+                       value="3"
+                       {% if preferredBusColour == 3 %}checked{% endif %} />
+            </div>
+            <div class="favBusColour">
+                <label for="busRad4">
+                    <img src="{% static 'Lobby/Images/bus_yellow.png' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="busRad4"
+                       name="busColour"
+                       value="4"
+                       {% if preferredBusColour == 4 %}checked{% endif %} />
+            </div>
+            <div class="verticalSeperator"></div>
+            <div class="favBusMap">
+                <label for="BusBoard0">
+                    <img src="{% static 'Bus/images/Board_orig.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="BusBoard0"
+                       name="BusBoard"
+                       value="1"
+                       {% if preferredBusBoard == 1 %}checked{% endif %} />
+            </div>
+            <div class="favBusMap">
+                <label for="BusBoard1">
+                    <img src="{% static 'Bus/images/Board_20A.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="BusBoard1"
+                       name="BusBoard"
+                       value="0"
+                       {% if preferredBusBoard == 0 %}checked{% endif %} />
+            </div>
+            <div class="favBusMap">
+                <label for="BusBoard2">
+                    <img src="{% static 'Bus/images/Board_20AC_fav.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="BusBoard2"
+                       name="BusBoard"
+                       value="2"
+                       {% if preferredBusBoard == 2 %}checked{% endif %} />
+            </div>
+        </div>
+        <label class="preferenceTitle">{% translate "Favourite The Great Zimbabwe Colour" %}</label>
+        <div>
+            <div class="favTGZchoice">
+                <label for="tgzRadM1">{% translate "None" %}</label>
+                <br />
+                <input type="radio"
+                       id="tgzRadM1"
+                       name="tgzColour"
+                       value="-1"
+                       {% if favTGZcolour == -1 %}checked{% endif %}
+                       {% if not favTGZcolour %}checked{% endif %} />
+            </div>
+            <div class="favTGZchoice">
+                <label for="tgzRad0">
+                    <img src="{% static 'TGZ/images/empire_black.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="tgzRad0"
+                       name="tgzColour"
+                       value="0"
+                       {% if favTGZcolour == 0 %}checked{% endif %} />
+            </div>
+            <div class="favTGZchoice">
+                <label for="tgzRad1">
+                    <img src="{% static 'TGZ/images/empire_green.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="tgzRad1"
+                       name="tgzColour"
+                       value="1"
+                       {% if favTGZcolour == 1 %}checked{% endif %} />
+            </div>
+            <div class="favTGZchoice">
+                <label for="tgzRad2">
+                    <img src="{% static 'TGZ/images/empire_red.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="tgzRad2"
+                       name="tgzColour"
+                       value="2"
+                       {% if favTGZcolour == 2 %}checked{% endif %} />
+            </div>
+            <div class="favTGZchoice">
+                <label for="tgzRad3">
+                    <img src="{% static 'TGZ/images/empire_white.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="tgzRad3"
+                       name="tgzColour"
+                       value="3"
+                       {% if favTGZcolour == 3 %}checked{% endif %} />
+            </div>
+            <div class="favTGZchoice">
+                <label for="tgzRad4">
+                    <img src="{% static 'TGZ/images/empire_yellow.jpg' %} " />
+                </label>
+                <br />
+                <input type="radio"
+                       id="tgzRad4"
+                       name="tgzColour"
+                       value="4"
+                       {% if favTGZcolour == 4 %}checked{% endif %} />
+            </div>
+        </div>
+        <label class="preferenceTitle">{% translate "Minimal Description Text in the UI" %}</label>
+        <br />
+        <input type="checkbox"
+               class="myCheckbox"
+               id="TGZminimalText"
+               name="TGZminimalText"
+               value="TGZminimalText"
+               {% if TGZminimalText %}checked{% endif %} />
+        <label for="TGZminimalText" class="checkboxLabel">
+            {% translate "Tick to remove god and specialist descriptions/VR below the cards" %}
+        </label>
+        <br />
+        <label class="preferenceTitle">{% translate "Favourite Cannes Colour" %}</label>
+        <div>
+            <div class="favCNSchoice">
+                <label for="cnsRadM1">{% translate "None" %}</label>
+                <br />
+                <input type="radio"
+                       id="cnsRadM1"
+                       name="cnsColour"
+                       value="-1"
+                       {% if favCNScolour == -1 %}checked{% endif %}
+                       {% if not favCNScolour %}checked{% endif %} />
+            </div>
+            <div class="favCNSchoice">
+                <label for="cnsRad0">
+                    <svg class="cnsPrefSVG">
+                        <polygon class="cnsPrefPolygon cnsPrefPolygon0" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="cnsRad0"
+                       name="cnsColour"
+                       value="0"
+                       {% if favCNScolour == 0 %}checked{% endif %} />
+            </div>
+            <div class="favCNSchoice">
+                <label for="cnsRad1">
+                    <svg class="cnsPrefSVG">
+                        <polygon class="cnsPrefPolygon cnsPrefPolygon1" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="cnsRad1"
+                       name="cnsColour"
+                       value="1"
+                       {% if favCNScolour == 1 %}checked{% endif %} />
+            </div>
+            <div class="favCNSchoice">
+                <label for="cnsRad2">
+                    <svg class="cnsPrefSVG">
+                        <polygon class="cnsPrefPolygon cnsPrefPolygon2" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="cnsRad2"
+                       name="cnsColour"
+                       value="2"
+                       {% if favCNScolour == 2 %}checked{% endif %} />
+            </div>
+            <div class="favCNSchoice">
+                <label for="cnsRad3">
+                    <svg class="cnsPrefSVG">
+                        <polygon class="cnsPrefPolygon cnsPrefPolygon3" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="cnsRad3"
+                       name="cnsColour"
+                       value="3"
+                       {% if favCNScolour == 3 %}checked{% endif %} />
+            </div>
+        </div>
+        <br />
+        <br />
+        <label class="preferenceTitle">{% translate "Favourite Keyflower Colour" %}</label>
+        <div>
+            <div class="favKFWchoice">
+                <label for="kfwRadM1">{% translate "None" %}</label>
+                <br />
+                <input type="radio"
+                       id="kfwRadM1"
+                       name="kfwColour"
+                       value="-1"
+                       {% if favKFWcolour == -1 %}checked{% endif %}
+                       {% if not favKFWcolour %}checked{% endif %} />
+            </div>
+            <div class="favKFWchoice">
+                <label for="kfwRad0">
+                    <svg class="kfwPrefSVG">
+                        <polygon class="kfwPrefPolygon kfwPrefPolygon0" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="kfwRad0"
+                       name="kfwColour"
+                       value="0"
+                       {% if favKFWcolour == 0 %}checked{% endif %} />
+            </div>
+            <div class="favKFWchoice">
+                <label for="kfwRad1">
+                    <svg class="kfwPrefSVG">
+                        <polygon class="kfwPrefPolygon kfwPrefPolygon1" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="kfwRad1"
+                       name="kfwColour"
+                       value="1"
+                       {% if favKFWcolour == 1 %}checked{% endif %} />
+            </div>
+            <div class="favKFWchoice">
+                <label for="kfwRad2">
+                    <svg class="kfwPrefSVG">
+                        <polygon class="kfwPrefPolygon kfwPrefPolygon2" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="kfwRad2"
+                       name="kfwColour"
+                       value="2"
+                       {% if favKFWcolour == 2 %}checked{% endif %} />
+            </div>
+            <div class="favKFWchoice">
+                <label for="kfwRad3">
+                    <svg class="kfwPrefSVG">
+                        <polygon class="kfwPrefPolygon kfwPrefPolygon3" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="kfwRad3"
+                       name="kfwColour"
+                       value="3"
+                       {% if favKFWcolour == 3 %}checked{% endif %} />
+            </div>
+            <div class="favKFWchoice">
+                <label for="kfwRad4">
+                    <svg class="kfwPrefSVG">
+                        <polygon class="kfwPrefPolygon kfwPrefPolygon4" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="kfwRad4"
+                       name="kfwColour"
+                       value="4"
+                       {% if favKFWcolour == 4 %}checked{% endif %} />
+            </div>
+            <div class="favKFWchoice">
+                <label for="kfwRad5">
+                    <svg class="kfwPrefSVG">
+                        <polygon class="kfwPrefPolygon kfwPrefPolygon5" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="kfwRad5"
+                       name="kfwColour"
+                       value="5"
+                       {% if favKFWcolour == 5 %}checked{% endif %} />
+            </div>
+        </div>
+        <br />
+        <br />
+        <label class="preferenceTitle">{% translate "Favourite Web Colour" %}</label>
+        <div>
+            <div class="favWEBchoice">
+                <label for="webRadM1">{% translate "None" %}</label>
+                <br />
+                <input type="radio"
+                       id="webRadM1"
+                       name="webColour"
+                       value="-1"
+                       {% if favWEBcolour == -1 %}checked{% endif %}
+                       {% if not favWEBcolour %}checked{% endif %} />
+            </div>
+            <div class="favWEBchoice">
+                <label for="webRad0">
+                    <svg class="webPrefSVG">
+                        <polygon class="webPrefPolygon webPrefPolygon0" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="webRad0"
+                       name="webColour"
+                       value="0"
+                       {% if favWEBcolour == 0 %}checked{% endif %} />
+            </div>
+            <div class="favWEBchoice">
+                <label for="webRad1">
+                    <svg class="webPrefSVG">
+                        <polygon class="webPrefPolygon webPrefPolygon1" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="webRad1"
+                       name="webColour"
+                       value="1"
+                       {% if favWEBcolour == 1 %}checked{% endif %} />
+            </div>
+            <div class="favWEBchoice">
+                <label for="webRad2">
+                    <svg class="webPrefSVG">
+                        <polygon class="webPrefPolygon webPrefPolygon2" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="webRad2"
+                       name="webColour"
+                       value="2"
+                       {% if favWEBcolour == 2 %}checked{% endif %} />
+            </div>
+            <div class="favWEBchoice">
+                <label for="webRad3">
+                    <svg class="webPrefSVG">
+                        <polygon class="webPrefPolygon webPrefPolygon3" points="0,0 100,0 100,20 0,20" />
+                    </svg>
+                </label>
+                <br />
+                <input type="radio"
+                       id="webRad3"
+                       name="webColour"
+                       value="3"
+                       {% if favWEBcolour == 3 %}checked{% endif %} />
+            </div>
+        </div>
+        <br />
+        <br />
+        <button type="submit" class="updateProfilebtn">{% translate "Update Game Preferences" %}</button>
+    </form>
+</div>
+<div class="profilePreferenceDiv">
+    <b><a class="linkOther AQYpreferencesDiv" href="{% url 'profileAQY' %}">{% translate "Dedicated Antiquity Preferences Page" %}</a></b>
+</div>
+<div class="profilePreferenceDiv">
+    <b><a class="linkOther AQYpreferencesDiv" href="{% url 'profileIND' %}">{% translate "Dedicated Indonesia Preferences Page" %}</a></b>
+</div>
+<div class="profilePreferenceDiv">
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form2 %}{{ field }}{% endfor %}
+        <input type="hidden" id="action" name="action" value="changePassword" />
+        <button type="submit" class="updateProfilebtn">{% translate "Change Password" %}</button>
+    </form>
+</div>
+<div class="profilePreferenceDiv">
+    <label class="preferenceTitle">{% translate "Player Blacklist" %}</label>
+    <br />
+    <b>
+        {% translate "Players added to your blacklist will not be able to join your Available Games" %}
+        <br />
+        {% translate "You will also not see games they create in your Available Games" %}
+    </b>
+    <br />
+    <br />
+    <span id="blacklistError"></span><span id="blacklistSuccess"></span>
+    <div class="blacklistSection">
+        <div class="inputButtonWrapper">
+            <div class="autocomplete">
+                <input type="text"
+                       name="blacklistPlayer"
+                       id="blacklistPlayer"
+                       class="textInput"
+                       placeholder="{% translate 'Enter player name' %}"
+                       autocomplete="off" />
+            </div>
+            <button type="submit"
+                    id="addBlacklistButton"
+                    onclick="event.preventDefault(); addPlayerToBlacklist();">
+                {% translate 'Blacklist player' %}
+            </button>
+        </div>
+        <div class="blacklistedPlayers">
+            <b><u>Blacklisted Players</u></b>
+            <br />
+            {% if blacklistedPlayers %}
+                {% for player in blacklistedPlayers %}
+                    <div class="blacklistedPlayer" id="BL{{ player }}">
+                        <span>{{ player }}</span>
+                        <button class="removePlayerBtn"
+                                onclick="event.preventDefault(); removePlayerFromBlacklist('{{ player }}')">❌</button>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div id="noBlacklistedPlayers">No names</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% include 'Lobby/common/homeButton.html' %}
+</div>
+{% block script %}
+    <script>
+    global = {}
+    global.stop_emails_until = {{stop_emails_until}};
+    </script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,45 @@
+{% load i18n %}
+{% autoescape off %}
+{% if game == "FCM" %}
+    {% url "FCM:showFCMgame" gameID as the_url %}
+{% elif game == "HC" %}
+    {% url "HC:showHCgame" gameID as the_url %}
+{% elif game == "Bus" %}
+    {% url "Bus:showBusGame" gameID as the_url %}
+{% elif game == "TGZ" %}
+    {% url "TGZ:showTGZgame" gameID as the_url %}
+{% elif game == "CNS" %}
+    {% url "CNS:showCNSgame" gameID as the_url %}
+{% elif game == "AQY" %}
+    {% url "AQY:showAQYgame" gameID as the_url %}
+{% elif game == "IND" %}
+    {% url "IND:showINDgame" gameID as the_url %}
+{% elif game == "KFW" %}
+    {% url "KFW:showKFWgame" gameID as the_url %}
+{% elif game == "WEB" %}
+    {% url "WEB:showWEBgame" gameID as the_url %}
+{% elif game == "RNB" %}
+    {% url "RNB:showRNBgame" gameID as the_url %}
+{% endif %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate with profile_url=profile_url %}
+Hi {{ user }},<br/>
+<br/>
+Your game of {{ boxName }} has started at Online Board Gamers!<br/>
+<br/>
+https://{{ domain }}{{ the_url }}<br/>
+<br/>
+Game: {{ gameName }}<br/>
+Starting Player: {{ currentPlayer }}<br/>
+<br/>
+<br/>
+Notification preferences can be changed in your <a href="https://{{ domain }}/profile/">Profile</a><br/>
+Use telegram/discord/slack webhooks for increased reliability<br/>
+<br/>
+Join us on the Discord! Click <a href="https://discord.gg/hCU7Fr77yV" target="_blank">Here</a> to join!<br/>
+<br/>
+Please do not reply to this email.<br/>
+To contact me please use: OnlineBoardGamers@gmail.com<br/>
+<br/>
+{% endblocktranslate %}
+{% endautoescape %}
