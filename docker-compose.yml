@@ -1,0 +1,33 @@
+services:
+  db:
+    image: mysql:9.5
+    volumes:
+      - data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: obs
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+      MYSQL_ROOT_PASSWORD: rootpass
+    restart: always
+    ports:
+      - "3306:3306"
+
+  obs:
+    build:
+      context: .
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    links:
+      - db
+      - cns
+
+  cns:
+    build:
+      context: CNS/vueCNS
+    ports:
+      - "3012:3012"
+
+volumes:
+  data:
