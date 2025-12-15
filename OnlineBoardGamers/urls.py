@@ -46,16 +46,17 @@ urlpatterns = [
     path("robots.txt",TemplateView.as_view(template_name="Lobby/robots.txt", content_type="text/plain")),  #add the robots.txt file
 
     path('', include('Lobby.urls')),
-	#path('FCM/', include('FCM.urls')),
-	#path('Bus/', include('Bus.urls')),
-	#path('HC/', include('HC.urls')),
-	#path('TGZ/', include('TGZ.urls')),
+	path('FCM/', include('FCM.urls')),
+	path('Bus/', include('Bus.urls')),
+	path('HC/', include('HC.urls')),
+	path('TGZ/', include('TGZ.urls')),
 	path('CNS/', include('CNS.urls')),
-	#path('AQY/', include('AQY.urls')),
-	#path('IND/', include('IND.urls')),
-    #path('KFW/', include('KFW.urls')),
-    #path('PPF/', include('PPF.urls')),
-    #path('WEB/', include('WEB.urls')),
+	path('AQY/', include('AQY.urls')),
+	path('IND/', include('IND.urls')),
+    path('KFW/', include('KFW.urls')),
+    path('PPF/', include('PPF.urls')),
+    path('WEB/', include('WEB.urls')),
+    path('RNB/', include('RNB.urls')),
 
     path('admin/', admin.site.urls),
 
