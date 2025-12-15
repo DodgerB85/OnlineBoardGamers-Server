@@ -12,7 +12,7 @@ You should be able to browsr around the logged-out pages, eg about, help, etc.
 
 4) Exit back to the command prompt. Confirm containers are running using: docker compose up -d
 
-The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW), plus Joey and Rachel as a couple of default normal users. All the pre-built users have their password set to their username.
+The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). All the pre-built users have their password set to their username - however the hash will be incorrect so in practive you'll need to edit in a pasxword in the admin panel, although in practice you won't ever really need to login as any of these users anyway.
 
 5) Go back to the website, and create a normal user for yourself (Eg "DodgerB") using the "Register New Account" link
 6) Now test your admin access; go to http://localhost:8000/admin/ and login with the superuser. Find the user you made and tick them active in the User DB. Also tick Email Confirmed in their profile.
