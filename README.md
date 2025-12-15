@@ -5,7 +5,7 @@ If you get stuck, paste the error into AI and it should help you on to the next 
 
 1) Make sure you have a working Docker installation.
 2) Copy .env.docker and rename it to just .env
-3) Navigate to the root of the repo and run `docker compose up --build -d` (MySQL port is mapped to 3307 so as not to conflict if you're running your own MySQL server)
+3) Navigate to the root of the repo and run `docker compose up --build` (MySQL port is mapped to 3307 so as not to conflict if you're running your own MySQL server)
 
 Now browse http://localhost:8000/ and check there are no errors
 You should be able to browsr around the logged-out pages, eg about, help, etc.

@@ -2,6 +2,7 @@
 logs
 *.pot
 *.pyc
+.setup_complete
 __pycache__/
 db.sqlite3
 db.sqlite3-journal
