@@ -5,6 +5,7 @@ import lzstring
 
 from contextlib import contextmanager
 from itertools import chain
+from django.conf import settings
 
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
@@ -243,6 +244,7 @@ def showBusGame(request, game_id):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
         "startingOptions": startingOptions,
+        "settingsDEBUG": settings.DEBUG,
     }
 
     if not request.user.is_authenticated:

@@ -9,6 +9,7 @@ from itertools import chain
 from contextlib import contextmanager
 
 from django.contrib import messages
+from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
@@ -217,6 +218,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "currentPlayers": currentGame.getCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+        "settingsDebug": settings.DEBUG,
     }
 
     if not request.user.is_authenticated:

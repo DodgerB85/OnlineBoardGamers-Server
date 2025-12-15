@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-
+from django.conf import settings
 
 def index(request):
     return HttpResponse("Hello, world. You're at RNB")
