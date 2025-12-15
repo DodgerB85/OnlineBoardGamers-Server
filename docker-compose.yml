@@ -22,18 +22,32 @@ services:
       - "8000:8000"
     links:
       - db
-      - cns
+    #  - cns
     environment:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@example.com
       DJANGO_SUPERUSER_PASSWORD: password 
+
+    env_file:
+      - .env
+
     command: ["sh", "./initial_db_setup.sh"]
 
   cns:
-    build:
-      context: CNS/vueCNS
+    # We use a standard Node image directly for simplicity since you don't have a Dockerfile there
+    image: node:22-alpine 
+    working_dir: /app
+    volumes:
+      # Mount the vue source code here
+      - ./CNS/vueCNS:/app
+      # Mount node modules using a named volume for HMR reliability
+      - node_modules_cns:/app/node_modules
     ports:
+      # Expose the Vite dev server port
       - "3012:3012"
+    # Command to install dependencies and run the dev server
+    command: sh -c "npm install --force && npm run dev"
 
 volumes:
   data:
+  node_modules_cns: 
