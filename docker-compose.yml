@@ -12,12 +12,10 @@ services:
     ports:
       - "3307:3306"
 
-  services:
-  # ... (db service configuration) ...
-
   obs:
     build:
       context: .
+    working_dir: /app
     volumes:
       - .:/app
     ports:
@@ -29,12 +27,7 @@ services:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@example.com
       DJANGO_SUPERUSER_PASSWORD: password 
-    command: ["./initial_db_setup.sh"] 
-
-  # ... (cns service configuration) ...
-
-volumes:
-  data:
+    command: ["sh", "./initial_db_setup.sh"]
 
   cns:
     build:

@@ -3,6 +3,8 @@ FROM python:3.13-alpine
 RUN apk add --no-cache mariadb-connector-c-dev
 RUN apk add --no-cache --virtual build-deps gcc musl-dev pkgconf mariadb-dev
 
+RUN apk add --no-cache mysql-client 
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
