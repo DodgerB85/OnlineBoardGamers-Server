@@ -36,3 +36,4 @@ vuePPF/
 
 # Ignore any directory that contains the word 'vuedist' anywhere (*vuedist*)
 *vuedist*/
+*migration*/
