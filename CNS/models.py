@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Q
 
 from django.conf import settings
+from decouple import config, Csv
 
 # from django.utils.translation import gettext
 
@@ -66,14 +67,14 @@ class CNS_Game(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name="CNSgame_creator_relName",
-        default="admin",
+        default=config("ADMIN_DB_KEY", default=1, cast=int),
     )
     host = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="CNSgame_host_relName",
-        default="admin",
+        default=config("ADMIN_DB_KEY", default=1, cast=int),
     )
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 

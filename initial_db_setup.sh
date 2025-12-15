@@ -38,8 +38,8 @@ else
     python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
 
     # Load default users
-    # echo "Adding default users via data migration..."
-    # python manage.py loaddata initial_users.json
+    echo "Adding default users via data migration..."
+    python manage.py loaddata initial_users.json
 
     echo "Initial setup commands complete."
 fi
