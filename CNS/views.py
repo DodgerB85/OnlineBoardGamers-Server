@@ -9,6 +9,7 @@ from itertools import chain
 from contextlib import contextmanager
 
 from django.contrib import messages
+from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
@@ -189,6 +190,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         "replayStep": replayStep,
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
+        "settingsDebug": settings.DEBUG,
     }
 
     if not request.user.is_authenticated:

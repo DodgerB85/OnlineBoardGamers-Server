@@ -81,15 +81,15 @@ export default defineConfig(({ command, mode }) => ({
   plugins: [vue()],
   root: resolve('./src'),
   server: {
-    host: 'localhost',
+    host: '0.0.0.0',
     port: 3012,
     open: false,
     watch: {
       usePolling: true,
-      disableGlobbing: false
+      disableGlobbing: false,
+      interval: 1000,   // Check every 1000ms (1 second)
     }
   },
-
 
     resolve: {
     alias:
