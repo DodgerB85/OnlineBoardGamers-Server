@@ -18,3 +18,4 @@ urllib3==2.6.2
 user-agents==2.2.0
 django-statici18n 
 lzstring
+djlint
