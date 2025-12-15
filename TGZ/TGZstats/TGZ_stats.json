@@ -1,0 +1,1804 @@
+{
+    "time_string": "10:05 GMT - 07 October 2025",
+    "player_counts": {
+        "2": {
+            "finishedGamesCount": 0,
+            "god_stats": {
+                "Shadipinyi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Elegua": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Dziva": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Eshu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Gu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Obatala": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Atete": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Tsui-Goab": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Anansi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Qamata": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Engai": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Xango": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "spec_stats": {
+                "Herd": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Nomads": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Rain Ceremony": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Shaman": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Builder": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            }
+        },
+        "3": {
+            "finishedGamesCount": 0,
+            "god_stats": {
+                "Shadipinyi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Elegua": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Dziva": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Eshu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Gu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Obatala": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Atete": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Tsui-Goab": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Anansi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Qamata": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Engai": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Xango": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "spec_stats": {
+                "Herd": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Nomads": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Rain Ceremony": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Shaman": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Builder": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            }
+        },
+        "4": {
+            "finishedGamesCount": 0,
+            "god_stats": {
+                "Shadipinyi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Elegua": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Dziva": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Eshu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Gu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Obatala": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Atete": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Tsui-Goab": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Anansi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Qamata": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Engai": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Xango": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "spec_stats": {
+                "Herd": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Nomads": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Rain Ceremony": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Shaman": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Builder": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "seat_wins": [
+                [
+                    "1st",
+                    0,
+                    []
+                ],
+                [
+                    "2nd",
+                    0,
+                    []
+                ],
+                [
+                    "3rd",
+                    0,
+                    []
+                ],
+                [
+                    "4th",
+                    0,
+                    []
+                ]
+            ]
+        },
+        "5": {
+            "finishedGamesCount": 0,
+            "god_stats": {
+                "Shadipinyi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Elegua": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Dziva": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Eshu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Gu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Obatala": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Atete": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Tsui-Goab": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Anansi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Qamata": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Engai": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Xango": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "spec_stats": {
+                "Herd": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Nomads": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Rain Ceremony": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Shaman": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Builder": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            }
+        },
+        "4.5": {
+            "finishedGamesCount": 0,
+            "god_stats": {
+                "Shadipinyi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Elegua": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Dziva": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Eshu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Gu": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Obatala": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Atete": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Tsui-Goab": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Anansi": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Qamata": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Engai": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Xango": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "available": 0,
+                    "available_game_ids": [],
+                    "picked": 0,
+                    "picked_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "not_chosen": 0,
+                    "not_chosen_game_ids": [],
+                    "picked_percentage": 0,
+                    "won_percentage": 0,
+                    "won_when_picked_percentage": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "spec_stats": {
+                "Herd": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Nomads": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Rain Ceremony": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Shaman": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "Builder": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                "None": {
+                    "lost": 0,
+                    "lost_game_ids": [],
+                    "won": 0,
+                    "won_game_ids": [],
+                    "lost_percentage": 0,
+                    "won_percentage": 0,
+                    "win_loss_ratio": 0,
+                    "bar_chart_data": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "seat_wins": [
+                [
+                    "1st",
+                    0,
+                    []
+                ],
+                [
+                    "2nd",
+                    0,
+                    []
+                ],
+                [
+                    "3rd",
+                    0,
+                    []
+                ],
+                [
+                    "4th",
+                    0,
+                    []
+                ]
+            ]
+        }
+    }
+}

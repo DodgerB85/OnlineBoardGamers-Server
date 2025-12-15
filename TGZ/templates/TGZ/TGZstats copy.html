@@ -1,0 +1,399 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <script src="{% static 'TGZ/TGZstats.js' %}?v=20220706"></script>
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/stats.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="TGZstatsPage">
+      <a class="linkOther" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
+      <br />
+      <br />
+      Data Generated: {{ timeString }}
+      <br />
+      <br />
+      <b>Note:</b> These are stats of what happened historically.
+      <br />
+      They give an interesting insight into what has happened in previous games.
+      <br />
+      Be aware that part of the genius of Splotter games is that the winner will
+      <br />
+      almost always be the player who can read and respond to the current game state in the best way tactically.
+      <br />
+      Therefore, you should not use these stats to drive your strategy, but see them as
+      <br />
+      an interesting indication of how the game is being played.
+      <br />
+      <br />
+      <div class="tab">
+        <button class="tablinks" id="originalgodstab">{% translate "Original gods" %}</button>
+        <button class="tablinks" id="schismgodstab">{% translate "Schism gods" %}</button>
+      </div>
+      <div class="tab">
+        <button class="tablinks" id="players2tab">{% translate "2 Player" %}</button>
+        <button class="tablinks" id="players3tab">{% translate "3 Player" %}</button>
+        <button class="tablinks" id="players4tab">{% translate "4 Player" %}</button>
+        <button class="tablinks" id="playersttab">{% translate "4p Tournament" %}</button>
+        <button class="tablinks" id="players5tab">{% translate "5 Player" %}</button>
+      </div>
+      {% for row in all_data %}
+        <div class="statsDiv" id="{{ row.0 }}">
+          <br />
+          Total OG Games: {{ row.1 }}
+          <br />
+          <br />
+          <canvas class="bar_canvas" id="bar-chart{{ row.0 }}" width="1000"></canvas>
+          <script>
+            var bar_ctx = document.getElementById('bar-chart{{row.0}}').getContext('2d');
+            
+            var bar_chart = new Chart(bar_ctx, {
+              type: 'bar',
+              data: {
+                labels: [{% for row_god in row.2 %}"{{ row_god.0 }}",{% endfor %}],
+                datasets: [{
+                    label: 'Picked and Won',
+                    data: [ {% for row_god in row.2 %}{{ row_god.7 }},{% endfor %}],
+                    backgroundColor: 'green', // This is the bottom colour
+                  }, {
+                    label: 'Picked and Lost',
+                    data: [ {% for row_god in row.2 %}{{ row_god.8  }},{% endfor %}],
+                    backgroundColor: 'red' // net next colour
+                  },
+                  {
+                    label: 'Not Picked',
+                    data: [ {% for row_god in row.2 %}{{ row_god.9 }},{% endfor %}],
+                    backgroundColor: 'grey' // net top colour
+                  }
+                ]
+              },
+              options: {
+                responsive: false, // Prevent resizing
+                legend: {
+                  display: true
+                },
+                      title: {
+                          display: true,
+                          text: 'Available / Picked / Won gods', // Specify the title text
+                          fontSize: 40 // Set the font size to be large
+                      },
+                scales: {
+                  yAxes: [{
+                    stacked: true,
+                    ticks: {
+                      beginAtZero: true,
+
+                    }
+                  }],
+                  xAxes: [{
+                    stacked: true,
+                    ticks: {
+                    fontStyle: 'bold',
+                    fontSize: 20,
+                    },
+                  }]
+                }
+              }
+            });
+            
+          </script>
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "TGZ god" %}</th>
+              <th>{% translate "Available" %}</th>
+              <th>{% translate "Picked" %}</th>
+              <th>{% translate "Won" %}</th>
+              <th>{% translate "Picked When Available %" %}</th>
+              <th>{% translate "Won When Available %" %}</th>
+              <th>{% translate "Won When Picked %" %}</th>
+            </tr>
+            {% for row_god in row.2 %}
+              <tr>
+                <td>{{ row_god.0 }}</td>
+                <td>{{ row_god.1 }}</td>
+                <td>{{ row_god.2 }}</td>
+                <td>{{ row_god.3 }}</td>
+                <td>{{ row_god.4 }} %</td>
+                <td>{{ row_god.5 }} %</td>
+                <td>{{ row_god.6 }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+          <br />
+          <canvas class="bar_canvas" id="bar-chart-spec{{ row.0 }}" width="1000"></canvas>
+          <script>
+              var bar_ctx = document.getElementById('bar-chart-spec{{row.0}}').getContext('2d');
+              
+              var bar_chart = new Chart(bar_ctx, {
+                type: 'bar',
+                data: {
+                  labels: [{% for row_spec in row.3 %}"{{ row_spec.0 }}",{% endfor %}],
+                  datasets: [{
+                      label: 'Picked and Won',
+                      data: [ {% for row_spec in row.3 %}{{ row_spec.6 }},{% endfor %}],
+                      backgroundColor: 'green', // This is the bottom colour
+                    }, {
+                      label: 'Picked and Lost',
+                      data: [ {% for row_spec in row.3 %}{{ row_spec.7  }},{% endfor %}],
+                      backgroundColor: 'red' // net next colour
+                    },
+                    {
+                      label: 'Not Picked',
+                      data: [ {% for row_spec in row.3 %}{{ row_spec.8 }},{% endfor %}],
+                      backgroundColor: 'grey' // net top colour
+                    }
+                  ]
+                },
+                options: {
+                  responsive: false, // Prevent resizing
+                  legend: {
+                    display: true
+                  },
+                    title: {
+                        display: true,
+                        text: 'Available / Picked / Won specialists', // Specify the title text
+                        fontSize: 40 // Set the font size to be large
+                    },
+                    subtitle: {
+                        display: true,
+                        text: 'Specialistsssssssssssssssss', // Subtitle text
+                        font: {
+                            size: 16 // Set the font size for the subtitle
+                        }
+                        
+                    },
+                  scales: {
+                    yAxes: [{
+                      stacked: true,
+                      ticks: {
+                        beginAtZero: true
+                      }
+                    }],
+                    xAxes: [{
+                      stacked: true,
+                      ticks: {
+                      fontStyle: 'bold',
+                      fontSize: 20,
+                      },
+                    }]
+                  }
+                }
+              });     
+          </script>
+          <span class="specNoteSpan">Note: Multiple players per game can lose with 0 specialists</span>
+          <br />
+          <br />
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "Specialist" %}</th>
+              <th>{% translate "Lost When Picked" %}</th>
+              <th>{% translate "Won When Picked" %}</th>
+              <th>{% translate "Lost %" %}</th>
+              <th>{% translate "Won %" %}</th>
+              <th>{% translate "Win to Loss when picked %" %}</th>
+            </tr>
+            {% for row_spec in row.3 %}
+              <tr>
+                <td>{{ row_spec.0 }}</td>
+                <td>{{ row_spec.1 }}</td>
+                <td>{{ row_spec.2 }}</td>
+                <td>{{ row_spec.3 }} %</td>
+                <td>{{ row_spec.4 }} %</td>
+                <td>{{ row_spec.5 }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      {% endfor %}
+      <!-- SCHISM START SCHISM START -->
+       {% for row in all_data_schism %}
+        <div class="statsDiv_schism" id="schism_{{ row.0 }}">
+          <br />
+          Total Schism Games: {{ row.1 }}
+          <br />
+          <br />
+          <canvas class="bar_canvas" id="schism_bar-chart{{ row.0 }}" width="1000"></canvas>
+          <script>
+            var bar_ctx = document.getElementById('schism_bar-chart{{row.0}}').getContext('2d');
+            
+            var bar_chart = new Chart(bar_ctx, {
+              type: 'bar',
+              data: {
+                labels: [{% for row_god in row.2 %}"{{ row_god.0 }}",{% endfor %}],
+                datasets: [{
+                    label: 'Picked and Won',
+                    data: [ {% for row_god in row.2 %}{{ row_god.7 }},{% endfor %}],
+                    backgroundColor: 'green', // This is the bottom colour
+                  }, {
+                    label: 'Picked and Lost',
+                    data: [ {% for row_god in row.2 %}{{ row_god.8  }},{% endfor %}],
+                    backgroundColor: 'red' // net next colour
+                  },
+                  {
+                    label: 'Not Picked',
+                    data: [ {% for row_god in row.2 %}{{ row_god.9 }},{% endfor %}],
+                    backgroundColor: 'grey' // net top colour
+                  }
+                ]
+              },
+              options: {
+                responsive: false, // Prevent resizing
+                legend: {
+                  display: true
+                },
+                      title: {
+                          display: true,
+                          text: 'Available / Picked / Won gods', // Specify the title text
+                          fontSize: 40 // Set the font size to be large
+                      },
+                scales: {
+                  yAxes: [{
+                    stacked: true,
+                    ticks: {
+                      beginAtZero: true,
+
+                    }
+                  }],
+                  xAxes: [{
+                    stacked: true,
+                    ticks: {
+                    fontStyle: 'bold',
+                    fontSize: 20,
+                    },
+                  }]
+                }
+              }
+            });
+            
+          </script>
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "TGZ god" %}</th>
+              <th>{% translate "Available" %}</th>
+              <th>{% translate "Picked" %}</th>
+              <th>{% translate "Won" %}</th>
+              <th>{% translate "Picked When Available %" %}</th>
+              <th>{% translate "Won When Available %" %}</th>
+              <th>{% translate "Won When Picked %" %}</th>
+            </tr>
+            {% for row_god in row.2 %}
+              <tr>
+                <td>{{ row_god.0 }}</td>
+                <td>{{ row_god.1 }}</td>
+                <td>{{ row_god.2 }}</td>
+                <td>{{ row_god.3 }}</td>
+                <td>{{ row_god.4 }} %</td>
+                <td>{{ row_god.5 }} %</td>
+                <td>{{ row_god.6 }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+          <br />
+          <canvas class="bar_canvas" id="schism_bar-chart-spec{{ row.0 }}" width="1000"></canvas>
+          <script>
+              var bar_ctx = document.getElementById('schism_bar-chart-spec{{row.0}}').getContext('2d');
+              
+              var bar_chart = new Chart(bar_ctx, {
+                type: 'bar',
+                data: {
+                  labels: [{% for row_spec in row.3 %}"{{ row_spec.0 }}",{% endfor %}],
+                  datasets: [{
+                      label: 'Picked and Won',
+                      data: [ {% for row_spec in row.3 %}{{ row_spec.6 }},{% endfor %}],
+                      backgroundColor: 'green', // This is the bottom colour
+                    }, {
+                      label: 'Picked and Lost',
+                      data: [ {% for row_spec in row.3 %}{{ row_spec.7  }},{% endfor %}],
+                      backgroundColor: 'red' // net next colour
+                    },
+                    {
+                      label: 'Not Picked',
+                      data: [ {% for row_spec in row.3 %}{{ row_spec.8 }},{% endfor %}],
+                      backgroundColor: 'grey' // net top colour
+                    }
+                  ]
+                },
+                options: {
+                  responsive: false, // Prevent resizing
+                  legend: {
+                    display: true
+                  },
+                    title: {
+                        display: true,
+                        text: 'Available / Picked / Won specialists', // Specify the title text
+                        fontSize: 40 // Set the font size to be large
+                    },
+                    subtitle: {
+                        display: true,
+                        text: 'Specialistsssssssssssssssss', // Subtitle text
+                        font: {
+                            size: 16 // Set the font size for the subtitle
+                        }
+                        
+                    },
+                  scales: {
+                    yAxes: [{
+                      stacked: true,
+                      ticks: {
+                        beginAtZero: true
+                      }
+                    }],
+                    xAxes: [{
+                      stacked: true,
+                      ticks: {
+                      fontStyle: 'bold',
+                      fontSize: 20,
+                      },
+                    }]
+                  }
+                }
+              });     
+          </script>
+          <span class="specNoteSpan">Note: Multiple players per game can lose with 0 specialists</span>
+          <br />
+          <br />
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "Specialist" %}</th>
+              <th>{% translate "Lost When Picked" %}</th>
+              <th>{% translate "Won When Picked" %}</th>
+              <th>{% translate "Lost %" %}</th>
+              <th>{% translate "Won %" %}</th>
+              <th>{% translate "Win to Loss when picked %" %}</th>
+            </tr>
+            {% for row_spec in row.3 %}
+              <tr>
+                <td>{{ row_spec.0 }}</td>
+                <td>{{ row_spec.1 }}</td>
+                <td>{{ row_spec.2 }}</td>
+                <td>{{ row_spec.3 }} %</td>
+                <td>{{ row_spec.4 }} %</td>
+                <td>{{ row_spec.5 }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      {% endfor %}
+      <!-- SCHISM END SCHIDM END -->
+      <br />
+    </div>
+    <br />
+    <br />
+  </div>
+  {% include 'Lobby/common/homeButton.html' %}
+{% endblock %}

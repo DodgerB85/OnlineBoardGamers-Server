@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{% static 'TGZ/images/tgz_icon.png' %}" />
+
+    <meta name="title" content="Online Board Gamers - The Great Zimbabwe">
+    <meta name="description"
+          content="Play Splotter's The Great Zimbabwe Online for free with others, or solo!">
+    <meta name="keywords"
+          content="Great,Zimbabwe,Online,Play,Board,Game,Games,Gamers">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="200 days">
+    <meta name="author" content="Online Board Gamers">
+    <title>OBG - {{ gameName }}</title>
+
+    <style>
+    body {
+      margin: 0px !important;
+      background-color: #d4eafd;
+      font-family: Arial, sans-serif;
+      /*-webkit-touch-callout: none !important;*/
+      /*user-select: auto;
+      -webkit-user-select: none !important;*/
+    }
+
+    /*#app {
+      /*-webkit-touch-callout: none !important;*/
+    /* user-select: auto;
+      -webkit-user-select: none !important;*/
+    /*}*/
+
+
+    #loadingText {
+      transform: translate(-50%, 0%);
+      position: absolute;
+      font-size: 40px;
+      margin-top: 20px;
+      left: 50%;
+      white-space: nowrap;
+    }
+
+    #TGZloadingImg {
+      /* animation properties */
+      animation-name: my-animation;
+      animation-duration: 2s;
+      animation-direction: alternate;
+      animation-iteration-count: 1;
+      /*animation-timing-function: linear;*/
+      animation-timing-function: ease-in-out;
+      animation-fill-mode: forwards;
+
+      /* other properties */
+      width: 500px;
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translate(-50%, -0%);
+    }
+
+    @keyframes my-animation {
+      from {
+        height: 1px;
+      }
+
+      to {
+        height: 500px;
+      }
+    }
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if debug %}
+      <script type="module" src="http://localhost:3006/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3006/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'TGZ/TGZvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module"
+              crossorigin=""
+              src="{% static 'TGZ/TGZvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>Please enable Javascript to continue.</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">TGZ is loading.........</div>
+      <div>
+        <img id="TGZloadingImg" src="{% static 'TGZ/images/TGZ_Tile_Back.jpg' %}" />
+      </div>
+    </div>
+  </body>
+  <script>
+  var initData = {};
+
+  ///////////////////////
+  initData.gameID = {{ gameID }};
+  initData.gameName = "{{ gameName }}";
+  initData.gameData = '{{ gameData|safe }}';
+  initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+  initData.myZoomLevel = {{ myZoomLevel }};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+  initData.latestUpdate = {{ latestUpdateLiteral }};
+  
+  {% if spoilerFree %}
+  initData.spoilerFree = true;
+  initData.replayStep = {{replayStep}}-1;
+  {% endif %}
+
+  ///////////////////////
+  {% if user.is_authenticated %}
+  initData.name = '{{ name }}';
+  initData.chatData = "{{ chatData }}";
+
+  initData.nextURL = '{{ nextURL }}';
+  {% if TGZminimalText %}
+  initData.TGZminimalText = true;
+  {% endif %}
+  {% endif %}
+
+  ///////////////////////
+  {% if involvedPlayer %}
+  {% if experiencedPlayer %}
+  initData.experiencedPlayer = true;
+  {% endif %}
+  initData.myStatsExcludeConsent = {{ myStatsExcludeConsent }};
+  initData.statsExcludedGame = {{ statsExcludedGame|lower }};
+  initData.autoPass = {{ autoPass}};
+  initData.pov = {{ pov }};
+  initData.startingOptions = {{startingOptions}};
+  initData.secondsToNextKickout = {{ secondsToNextKickout }};
+  {% if kickoutRequired > 0 and not myMove %}
+  initData.kickoutRequired = {{kickoutRequired}};
+  {% endif %}
+  initData.notes = '{{ notes | safe }}';
+  {% if chatNotification %}
+  initData.chatNotification = true;
+  {% endif %}
+  initData.preferredTGZcolour = {{ preferredTGZcolour }};
+  initData.yourTurnAudioType = {{ yourTurnAudioType }};
+  {% if externalTournamentGame %}
+  initData.externalTournamentGame = true;
+  {% endif %}
+  /////////////////////
+  {% if not gameData %}
+  {% if startingMap %}
+  initData.startingMap = {{ startingMap }};
+  {% endif %}
+  {% if displayNames %}
+  initData.displayNames = {{ displayNames | safe }};
+  {% endif %}
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  {% endif %}
+  {% endif %}
+  </script>
+</html>
