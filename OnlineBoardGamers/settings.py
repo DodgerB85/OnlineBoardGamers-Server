@@ -172,7 +172,7 @@ if LOCAL_USER:
             "NAME": config("LOCAL_DB_NAME"),
             "USER": config("LOCAL_DB_USER"),
             "PASSWORD": config("LOCAL_DB_PWD"),
-            "HOST": "127.0.0.1",
+            "HOST": config("LOCAL_DB_HOST"),
             "PORT": "3306",
             "OPTIONS": {
                 "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
