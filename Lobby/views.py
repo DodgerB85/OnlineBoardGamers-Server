@@ -9,8 +9,8 @@ import base64
 import gzip
 from dal import autocomplete
 
-#from telegram import Update
-#from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 import asyncio
 from decouple import config
 
@@ -76,21 +76,21 @@ from .tokens import account_activation_token
 from .forms import NewUserForm, UpdateProfileForm, PasswordChangeCustomForm, PasswordResetFormCustom, changelogForm
 
 from .models import Profile, changelog, Mini_Tournaments, Main_Tournament
-#from FCM.models import FCM_Game, FCM_Tournament
-#from HC.models import HC_Game, HC_Tournament
-#from Bus.models import Bus_Game, Bus_Tournament
-#from TGZ.models import TGZ_Game  # , HC_Tournament
+from FCM.models import FCM_Game, FCM_Tournament
+from HC.models import HC_Game, HC_Tournament
+from Bus.models import Bus_Game, Bus_Tournament
+from TGZ.models import TGZ_Game  # , HC_Tournament
 from CNS.models import CNS_Game  # , HC_Tournament
-#from AQY.models import AQY_Game, AQY_Tournament
-#from IND.models import IND_Game, IND_Tournament
-#from KFW.models import KFW_Game
-#from WEB.models import WEB_Game
+from AQY.models import AQY_Game, AQY_Tournament
+from IND.models import IND_Game, IND_Tournament
+from KFW.models import KFW_Game
+from WEB.models import WEB_Game
 
 # from RNB.models import RNB_Game  # , HC_Tournament
 
 from user_visit.models import UserVisit
 
-#from FCM.common import buildFCMstartingOptions
+from FCM.common import buildFCMstartingOptions
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_hasRequiredExperience,
@@ -134,23 +134,23 @@ logger = logging.getLogger(__name__)
 
 
 # /start command handler
-#async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-#    logger.debug("Received /start command")
-#    if update.message:
-#        await update.message.reply_text("Hello! Welcome to OnlineBoardGamers bot. Type /help for more info.")
-#    else:
-#        logger.warning("No message in /start update")
-#
-#
-## /help command handler
-#async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-#    logger.debug("Received /help command")
-#    if update.message:
-#        await update.message.reply_text(
-#            "This is the help message for OnlineBoardGamers! Visit https://OnlineBoardGamers.com for more."
-#        )
-#    else:
-#        logger.warning("No message in /help update")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.debug("Received /start command")
+    if update.message:
+        await update.message.reply_text("Hello! Welcome to OnlineBoardGamers bot. Type /help for more info.")
+    else:
+        logger.warning("No message in /start update")
+
+
+# /help command handler
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.debug("Received /help command")
+    if update.message:
+        await update.message.reply_text(
+            "This is the help message for OnlineBoardGamers! Visit https://OnlineBoardGamers.com for more."
+        )
+    else:
+        logger.warning("No message in /help update")
 
 
 # Add handlers
@@ -238,19 +238,17 @@ def addTGid(request, TGid):
 
 
 GAME_NAMES_MODELS = {
-    #"FCM": FCM_Game,
-    #"HC": HC_Game,
-    #"Bus": Bus_Game,
-    #"TGZ": TGZ_Game,
+    "FCM": FCM_Game,
+    "HC": HC_Game,
+    "Bus": Bus_Game,
+    "TGZ": TGZ_Game,
     "CNS": CNS_Game,
-    #"AQY": AQY_Game,
-    #"IND": IND_Game,
-    #"KFW": KFW_Game,
-    #"WEB": WEB_Game,
+    "AQY": AQY_Game,
+    "IND": IND_Game,
+    "KFW": KFW_Game,
+    "WEB": WEB_Game,
 }
-GAME_MODELS = [#FCM_Game, HC_Game, Bus_Game, TGZ_Game, 
-               CNS_Game]
-               #, AQY_Game, IND_Game, KFW_Game, WEB_Game]
+GAME_MODELS = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game]
 
 
 def testLobby(request):
@@ -471,9 +469,9 @@ def DBO(request):
     pracGamesCount = 0
     finishedGamesCount = 0
 
-    GAME_MODELS_2 = []#FCM_Game]
+    #GAME_MODELS_2 = [FCM_Game]
 
-    for game_in_use_model in GAME_MODELS_2:
+    for game_in_use_model in GAME_MODELS:
         # Query the game_in_use_model to get the players who will timeout within the specified time range
         query = (
             Q(gameStatus="ACTIVE") | Q(gameStatus="PRIVATE") | Q(gameStatus="WAITING")
@@ -482,24 +480,24 @@ def DBO(request):
             gameStatus="FINISHED"
         )  # & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
 
-        query2 = Q(gameStatus="ACTIVE")
+        #query2 = Q(gameStatus="ACTIVE")
 
-        allGames = game_in_use_model.objects.filter(query2).all()
+        allGames = game_in_use_model.objects.filter(query).all()
         finishedGamesCount += game_in_use_model.objects.filter(query_finished).all().count()
         # gamesListLen_nonPrac += game_in_use_model.objects.filter(query_nonPrac).all().count()
 
         for singleGame in allGames:
             timeRemaining = singleGame.getSecondsToNextKickout()
 
-            # if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
-            #    if singleGame.allPlayers.filter(username="SHADOW").exists():
-            #        pracGamesCount += 1
+            if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
+               if singleGame.allPlayers.filter(username="SHADOW").exists():
+                   pracGamesCount += 1
+               gamesList.append(singleGame.serialize(request.user))
+               totalGamesCount += 1
+
+            #if not singleGame.allPlayers.filter(username="SHADOW").exists():
             #    gamesList.append(singleGame.serialize(request.user))
             #    totalGamesCount += 1
-
-            if not singleGame.allPlayers.filter(username="SHADOW").exists():
-                gamesList.append(singleGame.serialize(request.user))
-                totalGamesCount += 1
 
     # Sort the list by the latestUpdate property
     gamesList = sorted(gamesList, key=lambda obj: int(obj["latestUpdate"]))
@@ -1129,11 +1127,11 @@ def index(request):
 
     # Fetch tournament availability efficiently using .exists() 
     tournament_models = {
-        #"FCM": FCM_Tournament,
-        #"HC": HC_Tournament,
-        #"Bus": Bus_Tournament,
-        #"AQY": AQY_Tournament,
-        #"IND": IND_Tournament,
+        "FCM": FCM_Tournament,
+        "HC": HC_Tournament,
+        "Bus": Bus_Tournament,
+        "AQY": AQY_Tournament,
+        "IND": IND_Tournament,
     }
     available_tournaments = [
         name for name, model in tournament_models.items() if model.objects.filter(tournamentStatus="OP").exists()

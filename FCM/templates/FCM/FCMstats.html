@@ -1,0 +1,1395 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <script src="{% static 'FCM/FCMstats.js' %}?v=20220706"></script>
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/stats.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="FCMstatsPage">
+      <a class="linkOther" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
+      <br />
+      <br />
+      Data Generated: {{ basicData.time_string }}
+      <br />
+      <br />
+      <b>Note: Any game with a resigned/kicked player is not considered for these stats</b>
+      <br />
+      <br />
+      <b>Note:</b> These are stats of what happened historically.
+      <br />
+      They give an interesting insight into what has happened in previous games.
+      <br />
+      Be aware that part of the genius of Splotter games is that the winner will
+      <br />
+      almost always be the player who can read and respond to the current game state in the best way tactically.
+      <br />
+      Therefore, you should not use these stats to drive your strategy, but see them as
+      <br />
+      an interesting indication of how the game is being played.
+      <br />
+      <br />
+      Finished Games: {{ basicData.finishedGames_all }} (Non-practice, not stats excluded, etc)
+      <br />
+      <br />
+      Finished Games Old MS: {{ basicData.finishedGames_oldMS }}
+      <br />
+      Average Turns Old MS: {{ basicData.avg_turn_oldMS|floatformat:1 }}
+      <br />
+      <br />
+      Finished Games New MS: {{ basicData.finishedGames_newMS }}
+      <br />
+      Average Turns Old MS: {{ basicData.avg_turn_newMS|floatformat:1 }}
+      <br />
+      <br />
+      <br />
+      <b><u>Module Choices (could be multiple in 1 game)</u></b>
+      <br />
+      This shows how often a module / option is selected.
+      <br />
+      Note that the number of Original MS vs New MS can be seen from the number of finished games shown above.
+      <canvas class="bar_canvas" id="moduleChoiceBar" width="1400"></canvas>
+      <script>
+  const moduleLinkData = [
+      {{ modulesUsed.game_ids_HARD_CHOICES_OLD_MS }},
+      {{ modulesUsed.game_ids_KETCHUP_MS }}, 
+      {{ modulesUsed.game_ids_NEW_RESERVE_CARDS }}, 
+      {{ modulesUsed.game_ids_NEW_DISTRICTS }},  
+          {{ modulesUsed.game_ids_LOBBYISTS }},
+      {{ modulesUsed.game_ids_COFFEE }}, 
+      {{ modulesUsed.game_ids_KIMCHI }}, 
+      {{ modulesUsed.game_ids_SUSHI }},
+       {{ modulesUsed.game_ids_NOODLES }},
+      {{ modulesUsed.game_ids_FRY_CHEFS }}, 
+      {{ modulesUsed.game_ids_MASS_MARKTERS }}, 
+      {{ modulesUsed.game_ids_GOURMET_FOOD_CRITIC }},    
+        {{ modulesUsed.game_ids_RURAL_MARKETERS }},    
+          {{ modulesUsed.game_ids_MOVIE_STARS }},      
+          {{ modulesUsed.game_ids_NIGHT_SHIFT_MANAGER }},
+
+          {{ modulesUsed.game_ids_RANDOM_MODULES }}, 
+          {{ modulesUsed.game_ids_DRAFT_MODULES }}, 
+
+          {{ modulesUsed.game_ids_SHORT_GAME }}, 
+      {{ modulesUsed.game_ids_NO_MS }}, 
+      {{ modulesUsed.game_ids_NO_CFO_MS }}, 
+      {{ modulesUsed.game_ids_NO_RADIO_MS }},   
+  ];
+  
+        const images2 = [
+              "/static/FCM/Images/hardchoices2.jpg", 
+              "/static/FCM/Images/so_ketchupMS.svg", 
+              "/static/FCM/Images/so_reservePrice.jpg", 
+              "/static/FCM/Images/map23.jpg", 
+              "/static/FCM/Images/so_lobbyists.jpg", 
+              "/static/FCM/Images/so_coffee.svg", 
+              "/static/FCM/Images/so_kimchi.svg", 
+              "/static/FCM/Images/so_sushi.svg", 
+              "/static/FCM/Images/so_noodles.svg", 
+              "/static/FCM/Images/so_fryChef.svg", 
+              "/static/FCM/Images/so_massMarketeers.jpg", 
+              "/static/FCM/Images/so_GFC.jpg", 
+              "/static/FCM/Images/so_rural.jpg", 
+              "/static/FCM/Images/so_movieStars.svg", 
+              "/static/FCM/Images/so_nightShift.jpg",
+
+              "/static/FCM/Images/so_randomMods.svg", 
+              "/static/FCM/Images/so_draftMods.jpg", 
+
+              "/static/FCM/Images/so_shortGame.svg", 
+              "/static/FCM/Images/so_noMS.svg", 
+              "/static/FCM/Images/so_noCEO.svg", 
+              "/static/FCM/Images/so_noRadio.svg", 
+      ]
+  .map(png => {
+    const image = new Image();
+    image.src = png;
+   // image.classList.add('FCMstatsBarIcon'); // Add a class for styling
+    return image;
+  });
+
+            let bar_ctx = document.getElementById('moduleChoiceBar').getContext('2d');
+            let bar_chart = new Chart(bar_ctx, {
+            type: 'bar',
+            plugins: [{
+              afterDraw: chart => {      
+                var ctx = chart.chart.ctx; 
+                var xAxis = chart.scales['x-axis-0'];
+                var yAxis = chart.scales['y-axis-0'];
+                xAxis.ticks.forEach((value, index) => {  
+                  var x = xAxis.getPixelForTick(index);   
+                  ctx.drawImage(images2[index], x - 20, yAxis.bottom + 10, 40,40);
+                });      
+              }
+            }],
+            data: {
+              labels: [
+              "Hard Choices Old MS", 
+              "Ketchup MS", 
+              "New Reserve Cards", 
+              "New Districts", 
+              "Lobbyists", 
+              "Coffee", 
+              "Kimchi", 
+              "Sushi", 
+              "Noodles", 
+              "Fry Chefs", 
+              "Mass Marketers", 
+              "Gourmet Food Critic", 
+              "Rural Marketers", 
+              "Movie Stars", 
+              "Night Shift Manager",
+
+              "Random Modules", 
+              "Draft Modules", 
+
+              "Short Game", 
+              "No MS", 
+              "No CFO MS", 
+              "No Radio MS", 
+            ],
+              datasets: [{
+                    label: 'Number of Games',
+                    data: [
+                    {{ modulesUsed.finished_games_HARD_CHOICES_OLD_MS }},
+      {{ modulesUsed.finished_games_KETCHUP_MS }}, 
+      {{ modulesUsed.finished_games_NEW_RESERVE_CARDS }}, 
+      {{ modulesUsed.finished_games_NEW_DISTRICTS }},  
+          {{ modulesUsed.finished_games_LOBBYISTS }},
+      {{ modulesUsed.finished_games_COFFEE }}, 
+      {{ modulesUsed.finished_games_KIMCHI }}, 
+      {{ modulesUsed.finished_games_SUSHI }},
+       {{ modulesUsed.finished_games_NOODLES }},
+      {{ modulesUsed.finished_games_FRY_CHEFS }}, 
+      {{ modulesUsed.finished_games_MASS_MARKTERS }}, 
+      {{ modulesUsed.finished_games_GOURMET_FOOD_CRITIC }},    
+        {{ modulesUsed.finished_games_RURAL_MARKETERS }},    
+          {{ modulesUsed.finished_games_MOVIE_STARS }},      
+          {{ modulesUsed.finished_games_NIGHT_SHIFT_MANAGER }},
+
+          {{ modulesUsed.finished_games_RANDOM_MODULES }}, 
+          {{ modulesUsed.finished_games_DRAFT_MODULES }}, 
+
+          {{ modulesUsed.finished_games_SHORT_GAME }}, 
+      {{ modulesUsed.finished_games_NO_MS }}, 
+      {{ modulesUsed.finished_games_NO_CFO_MS }}, 
+      {{ modulesUsed.finished_games_NO_RADIO_MS }},
+      ],
+      backgroundColor: [
+                '#B8312D', // Red
+                '#B8312D', // red
+                '#BEB6B4', // grey
+                '#BEB6B4', // grey
+                '#B492C4', // purple
+                '#a1cfa8', // coffee
+                '#8FA960', // food
+                '#8FA960', // food
+                '#8FA960', // food
+                '#8FA960', // food
+                '#87C2C8', // mkt
+                '#87C2C8', // mkt
+                '#87C2C8', // mkt
+                '#B492C4', // purple
+                '#000000', // black
+                'rgba(54, 162, 235, 0.6)', // Red
+                'rgba(54, 162, 235, 0.6)', // Blue
+                'rgba(54, 162, 235, 0.6)', // Yellow
+                'rgba(54, 162, 235, 0.6)', // Red
+                'rgba(54, 162, 235, 0.6)', // Blue
+                'rgba(54, 162, 235, 0.6)', // Yellow
+            ],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+              responsive: false,
+            maintainAspectRatio: true,
+            title: {
+                display: true,
+                text: 'Frequency of module/option selection',
+                fontSize: 20,
+                fontColor: 'black'
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: 'black',
+                        fontStyle: 'bold',
+                        fontSize: 18,
+                        padding: 50,
+                    }
+                }]
+            },
+          onClick: (event, elements) => {
+            if (elements.length > 0) {
+              const clickedIndex = elements[0]._index;
+              const gameIds = moduleLinkData[clickedIndex];
+
+              if (gameIds && gameIds.length > 0) {
+                // Create a form element
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/FCM/FCMstatGames/';
+
+                // Add a CSRF token (important for Django)
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+
+                // Add the game IDs as a hidden input
+                const gameIdsInput = document.createElement('input');
+                gameIdsInput.type = 'hidden';
+                gameIdsInput.name = 'game_ids';
+                gameIdsInput.value = JSON.stringify(gameIds); // Convert the array to a JSON string
+                form.appendChild(gameIdsInput);
+
+                // Append the form to the document and submit it
+                document.body.appendChild(form);
+                form.submit();
+              } else {
+                alert("No game IDs found for this module.");
+              }
+            }
+          }
+
+        }
+    });
+      </script>
+      <br />
+      <br />
+      <!--<b><u>Module Choices (could be multiple in 1 game)</u></b>
+      <br />
+      Random Modules: {{ modulesUsed.finished_games_RANDOM_MODULES }}
+      <br />
+      Draft Modules: {{ modulesUsed.finished_games_DRAFT_MODULES }}
+      <br />
+      Hard Choices Old MS: {{ modulesUsed.finished_games_HARD_CHOICES_OLD_MS }}
+      <br />
+      Short Game: {{ modulesUsed.finished_games_SHORT_GAME }}
+      <br />
+      No MS: {{ modulesUsed.finished_games_NO_MS }}
+      <br />
+      No CFO MS: {{ modulesUsed.finished_games_NO_CFO_MS }}
+      <br />
+      No Radio MS: {{ modulesUsed.finished_games_NO_RADIO_MS }}
+      <br />
+      Ketchup MS: {{ modulesUsed.finished_games_KETCHUP_MS }}
+      <br />
+      New Reserve Cards: {{ modulesUsed.finished_games_NEW_RESERVE_CARDS }}
+      <br />
+      New Districts: {{ modulesUsed.finished_games_NEW_DISTRICTS }}
+      <br />
+      Lobbyists: {{ modulesUsed.finished_games_LOBBYISTS }}
+      <br />
+      Coffee: {{ modulesUsed.finished_games_COFFEE }}
+      <br />
+      Kimchi: {{ modulesUsed.finished_games_KIMCHI }}
+      <br />
+      Sushi: {{ modulesUsed.finished_games_SUSHI }}
+      <br />
+      Noodles: {{ modulesUsed.finished_games_NOODLES }}
+      <br />
+      Fry Chefs: {{ modulesUsed.finished_games_FRY_CHEFS }}
+      <br />
+      Mass Marketers: {{ modulesUsed.finished_games_MASS_MARKTERS }}
+      <br />
+      Gourmet Food Critic: {{ modulesUsed.finished_games_GOURMET_FOOD_CRITIC }}
+      <br />
+      Rural Marketers: {{ modulesUsed.finished_games_RURAL_MARKETERS }}
+      <br />
+      Movie Stars: {{ modulesUsed.finished_games_MOVIE_STARS }}
+      <br />
+      Night Shift Manager: {{ modulesUsed.finished_games_NIGHT_SHIFT_MANAGER }}
+      <br />
+      <br />-->
+      <br />
+      <b><u>Opening Milestones </u></b>
+      <br />
+      This table shows the relative win to loss rates when a particular opening is chosen.
+      <br />
+      Of course, if an opening is very popular, it will show up as a win and (potentially multiple) losses.
+      <br />
+      This is for all players. See 2 player data for more head to head results.
+      <br />
+      The higher the win to loss ratio, approximately the better the opening.
+      <br />
+      The original MS openings considered are:
+      <br />
+      <div style="text-align: center;">
+        <ul class="leftTextAlign inlineBlock">
+          <li class="leftTextAlign">First Train AND First Hire 3</li>
+          <li class="leftTextAlign">First Hire 3 (but not First Train)</li>
+          <li class="leftTextAlign">First Train (but not First Hire 3)</li>
+        </ul>
+      </div>
+      2 Player stats give a slighly better indication of how openings perform, as they are head to head.
+      <br />
+      Of course, they can still be skewed if one opening is picked most of the time.
+      <div class="tab">
+        <button class="tablinks" id="playersAlltab">{% translate "All Players" %}</button>
+        <button class="tablinks" id="players2tab">{% translate "2 Player" %}</button>
+        <button class="tablinks" id="players3tab">{% translate "3 Player" %}</button>
+        <button class="tablinks" id="players4tab">{% translate "4 Player" %}</button>
+        <button class="tablinks" id="players5tab">{% translate "5 Player" %}</button>
+        <button class="tablinks" id="players6tab">{% translate "6 Player" %}</button>
+      </div>
+      <div class="statsDiv FCMstatsDiv" id="playersAll">
+        <h3>All Players New MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "Marketing Trainee" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mt_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mkt_ids|safe }}')">
+                {{ rg_t_m_stats.new_ms_winner_mkt }}
+              </a>
+            </td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mkt_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mkt_ids|safe }}')">
+                {{ rg_t_m_stats.new_ms_picked_mkt }}
+              </a>
+            </td>
+            <td>{{ rg_t_m_stats.new_ms_mkt_ratio|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Recruiting Girl" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_ids|safe }}')">
+                {{ rg_t_m_stats.new_ms_winner_rg }}
+              </a>
+            </td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_ids|safe }}')">
+                {{ rg_t_m_stats.new_ms_picked_rg }}
+              </a>
+            </td>
+            <td>{{ rg_t_m_stats.new_ms_rg_ratio|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_t }}</a>
+            </td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_t }} </a>
+            </td>
+            <td>{{ rg_t_m_stats.new_ms_t_ratio|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_none }} </a>
+            </td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_none }} </a>
+            </td>
+            <td>{{ rg_t_m_stats.new_ms_none_ratio|floatformat:0 }} %</td>
+          </tr>
+        </table>
+        <h3>All Players Original MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "First Train AND First Hire 3" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_and_rg }} </a>
+            </td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_and_rg }} </a>
+            </td>
+            <td>{{ rg_t_m_stats.old_ms_t_and_rg_ratio|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "First Hire 3 Only" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_rg }} </a>
+            </td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_rg }} </a>
+            </td>
+            <td>{{ rg_t_m_stats.old_ms_rg_ratio|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t }}   </a>
+            </td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t }}  </a>
+            </td>
+            <td>{{ rg_t_m_stats.old_ms_t_ratio|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_none }} </a>
+            </td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_ids|safe }}')">
+              <a href="#"
+                 onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_none }} </a>
+            </td>
+            <td>{{ rg_t_m_stats.old_ms_none_ratio|floatformat:0 }} %</td>
+          </tr>
+        </table>
+      </div>
+      <div class="statsDiv FCMstatsDiv" id="players2">
+        <h3>2p New MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "Marketing Trainee" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mt_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mkt_2p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_mkt_2p }}</a> </td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mt_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mkt_2p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_mkt_2p }}</a> </td>
+            <td>{{ rg_t_m_stats.new_ms_mkt_ratio_2p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Recruiting Girl" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_2p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_rg_2p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_2p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_rg_2p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_rg_ratio_2p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_2p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_t_2p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_2p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_t_2p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_t_ratio_2p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_2p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_none_2p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_2p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_none_2p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_none_ratio_2p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+        <h3>2p Original MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "First Train AND First Hire 3" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_2p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_and_rg_2p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_2p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_and_rg_2p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_and_rg_ratio_2p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "First Hire 3 Only" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_2p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_rg_2p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_2p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_rg_2p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_rg_ratio_2p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_2p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_2p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_2p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_2p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_ratio_2p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_2p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_none_2p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_2p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_2p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_none_2p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_none_ratio_2p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+      </div>
+      <div class="statsDiv FCMstatsDiv" id="players3">
+        <h3>3p New MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "Marketing Trainee" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mt_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mkt_3p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_mkt_3p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mt_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mkt_3p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_mkt_3p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_mkt_ratio_3p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Recruiting Girl" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_3p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_rg_3p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_3p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_rg_3p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_rg_ratio_3p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_3p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_t_3p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_3p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_t_3p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_t_ratio_3p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_3p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_none_3p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_3p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_none_3p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_none_ratio_3p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+        <h3>3p Original MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "First Train AND First Hire 3" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_3p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_and_rg_3p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_3p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_and_rg_3p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_and_rg_ratio_3p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "First Hire 3 Only" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_3p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_rg_3p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_3p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_rg_3p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_rg_ratio_3p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_3p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_3p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_3p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_3p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_ratio_3p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_3p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_none_3p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_3p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_3p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_none_3p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_none_ratio_3p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+      </div>
+      <div class="statsDiv FCMstatsDiv" id="players4">
+        <h3>4p New MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "Marketing Trainee" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mt_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mkt_4p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_mkt_4p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mt_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mkt_4p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_mkt_4p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_mkt_ratio_4p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Recruiting Girl" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_4p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_rg_4p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_4p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_rg_4p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_rg_ratio_4p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_4p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_t_4p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_4p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_t_4p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_t_ratio_4p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_4p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_none_4p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_4p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_none_4p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_none_ratio_4p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+        <h3>4p Original MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "First Train AND First Hire 3" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_4p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_and_rg_4p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_4p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_and_rg_4p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_and_rg_ratio_4p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "First Hire 3 Only" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_4p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_rg_4p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_4p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_rg_4p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_rg_ratio_4p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_4p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_4p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_4p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_4p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_ratio_4p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_4p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_none_4p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_4p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_4p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_none_4p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_none_ratio_4p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+      </div>
+      <div class="statsDiv FCMstatsDiv" id="players5">
+        <h3>5p New MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "Marketing Trainee" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mt_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mkt_5p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_mkt_5p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mt_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mkt_5p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_mkt_5p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_mkt_ratio_5p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Recruiting Girl" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_5p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_rg_5p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_5p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_rg_5p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_rg_ratio_5p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_5p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_t_5p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_5p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_t_5p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_t_ratio_5p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_5p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_none_5p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_5p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_none_5p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_none_ratio_5p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+        <h3>5p Original MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "First Train AND First Hire 3" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_5p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_and_rg_5p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_5p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_and_rg_5p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_and_rg_ratio_5p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "First Hire 3 Only" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_5p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_rg_5p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_5p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_rg_5p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_rg_ratio_5p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_5p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_5p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_5p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_5p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_ratio_5p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_5p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_none_5p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_5p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_5p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_none_5p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_none_ratio_5p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+      </div>
+      <div class="statsDiv FCMstatsDiv" id="players6">
+        <h3>6p New MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "Marketing Trainee" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mt_6p_ids|safe }}')"><a  href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_mkt_6p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_mkt_6p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mt_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_mkt_6p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_mkt_6p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_mkt_ratio_6p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Recruiting Girl" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_rg_6p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_rg_6p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_rg_6p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_rg_6p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_rg_ratio_6p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_t_6p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_t_6p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_t_6p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_t_6p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_t_ratio_6p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_winner_none_6p_ids|safe }}')">{{ rg_t_m_stats.new_ms_winner_none_6p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.new_ms_picked_none_6p_ids|safe }}')">{{ rg_t_m_stats.new_ms_picked_none_6p }} </a></td>
+            <td>{{ rg_t_m_stats.new_ms_none_ratio_6p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+        <h3>6p Original MS</h3>
+        <table class="generalTable FCMstatsTable">
+          <tr>
+            <th>{% translate "Opening" %}</th>
+            <th>{% translate "# Wins" %}</th>
+            <th>{% translate "# Losses" %}</th>
+            <th>{% translate "Win to Loss Ratio" %}</th>
+          </tr>
+          <tr>
+            <td>{% translate "First Train AND First Hire 3" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_and_rg_6p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_and_rg_6p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_and_rg_6p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_and_rg_6p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_and_rg_ratio_6p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "First Hire 3 Only" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_rg_6p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_rg_6p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_rg_6p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_rg_6p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_rg_ratio_6p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "Trainer" %}</td>
+            <td  class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_t_6p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_t_6p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_6p_ids|safe }}')"><a  href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_t_6p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_t_6p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_t_ratio_6p|floatformat:0 }} %</td>
+          </tr>
+          <tr>
+            <td>{% translate "None of the above" %}</td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_winner_none_6p_ids|safe }}')">{{ rg_t_m_stats.old_ms_winner_none_6p }} </a></td>
+            <td class="clickableStatTD" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_6p_ids|safe }}')"><a href="#" onclick="submitGameIds('{{ rg_t_m_stats.old_ms_picked_none_6p_ids|safe }}')">{{ rg_t_m_stats.old_ms_picked_none_6p }} </a></td>
+            <td>{{ rg_t_m_stats.old_ms_none_ratio_6p|floatformat:0 }} %</td>
+          </tr>
+        </table>
+      </div>
+      <br />
+      <br />
+      <b><u>MS Vs Player Count Charts</u></b>
+      <br />
+      These charts show the relative historical success of different openings as player count increases.
+      <br />
+      You would expect the lines to slope down, as higher player counts still only have 1 winner, but also more losers.
+      <br />
+      <canvas class="bar_canvas" id="mewMSchart" width="1000"></canvas>
+      <script>
+        var ctx = document.getElementById("mewMSchart").getContext('2d');
+        
+        var data = {
+            labels: ["2p", "3p", "4p", "5p", "6p",],
+            datasets: [
+            {
+                    label: "Marketing Trainee",
+                    borderColor: "blue",
+                    data: [
+                      {{ rg_t_m_stats.new_ms_mkt_ratio_2p }},
+                      {{ rg_t_m_stats.new_ms_mkt_ratio_3p }},
+                      {{ rg_t_m_stats.new_ms_mkt_ratio_4p }},
+                      {{ rg_t_m_stats.new_ms_mkt_ratio_5p }},
+                      {{ rg_t_m_stats.new_ms_mkt_ratio_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "Recruiting Girl",
+                    borderColor: "grey",
+                    data: [
+                      {{ rg_t_m_stats.new_ms_rg_ratio_2p }},
+                      {{ rg_t_m_stats.new_ms_rg_ratio_3p }},
+                      {{ rg_t_m_stats.new_ms_rg_ratio_4p }},
+                      {{ rg_t_m_stats.new_ms_rg_ratio_5p }},
+                      {{ rg_t_m_stats.new_ms_rg_ratio_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "Trainer",
+                    borderColor: "purple",
+                    data: [
+                      {{ rg_t_m_stats.new_ms_t_ratio_2p }},
+                      {{ rg_t_m_stats.new_ms_t_ratio_3p }},
+                      {{ rg_t_m_stats.new_ms_t_ratio_4p }},
+                      {{ rg_t_m_stats.new_ms_t_ratio_5p }},
+                      {{ rg_t_m_stats.new_ms_t_ratio_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "None of the above",
+                    borderColor: "red",
+                    data: [
+                      {{ rg_t_m_stats.new_ms_none_ratio_2p }},
+                      {{ rg_t_m_stats.new_ms_none_ratio_3p }},
+                      {{ rg_t_m_stats.new_ms_none_ratio_4p }},
+                      {{ rg_t_m_stats.new_ms_none_ratio_5p }},
+                      {{ rg_t_m_stats.new_ms_none_ratio_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+            ]
+        };
+        
+        var mewMSchart = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+              responsive: false,
+            maintainAspectRatio: true,
+              title: {
+          display: true,
+          text: 'New MS Win Ratio against Player Count',
+          fontColor: 'black', // Set the color of the title
+          fontSize: 25, // Set the font size of the title
+          fontStyle: 'bold' // Set the font weight of the title to bold
+        },
+        legend: {
+            labels: {
+                fontSize: 20, // Set the font size of the legend labels
+                fontStyle: 'bold' // Set the font weight of the legend labels to bold
+            }
+        },
+          scales: {
+              yAxes: [{
+                  ticks: {
+                      beginAtZero: true
+                  }
+              }],
+              xAxes: [{
+                  ticks: {
+                      fontSize: 25, // Set the font size of the labels on the x-axis
+                      fontStyle: 'bold' // Set the font weight of the labels on the x-axis to bold
+                  }
+              }]
+          },
+                elements: {
+                point: {
+                  radius: 8, // Increase the size of the points
+                    hoverRadius: 10 // Increase the size of the points on hover
+                }
+          }
+        }
+        });
+      </script>
+      <canvas class="bar_canvas" id="oldMSchart"  width="1000"></canvas>
+      <script>
+        var ctx = document.getElementById("oldMSchart").getContext('2d');
+        
+        var data = {
+            labels: ["2p", "3p", "4p", "5p", "6p",],
+            datasets: [
+            {
+                    label: "First Train AND First Hire 3",
+                    borderColor: "blue",
+                    data: [
+                      {{ rg_t_m_stats.old_ms_t_and_rg_ratio_2p }},
+                      {{ rg_t_m_stats.old_ms_t_and_rg_ratio_3p }},
+                      {{ rg_t_m_stats.old_ms_t_and_rg_ratio_4p }},
+                      {{ rg_t_m_stats.old_ms_t_and_rg_ratio_5p }},
+                      {{ rg_t_m_stats.old_ms_t_and_rg_ratio_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "First Hire 3",
+                    borderColor: "green",
+                    data: [
+                      {{ rg_t_m_stats.old_ms_rg_ratio_2p }},
+                      {{ rg_t_m_stats.old_ms_rg_ratio_3p }},
+                      {{ rg_t_m_stats.old_ms_rg_ratio_4p }},
+                      {{ rg_t_m_stats.old_ms_rg_ratio_5p }},
+                      {{ rg_t_m_stats.old_ms_rg_ratio_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "First Train",
+                    borderColor: "purple",
+                    data: [
+                      {{ rg_t_m_stats.old_ms_t_ratio_2p }},
+                      {{ rg_t_m_stats.old_ms_t_ratio_3p }},
+                      {{ rg_t_m_stats.old_ms_t_ratio_4p }},
+                      {{ rg_t_m_stats.old_ms_t_ratio_5p }},
+                      {{ rg_t_m_stats.old_ms_t_ratio_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "None of the above",
+                    borderColor: "red",
+                    data: [
+                      {{ rg_t_m_stats.old_ms_none_ratio_2p }},
+                      {{ rg_t_m_stats.old_ms_none_ratio_3p }},
+                      {{ rg_t_m_stats.old_ms_none_ratio_4p }},
+                      {{ rg_t_m_stats.old_ms_none_ratio_5p }},
+                      {{ rg_t_m_stats.old_ms_none_ratio_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+            ]
+          };
+        
+            var oldMSchart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                  responsive: false,
+                maintainAspectRatio: true,
+                  title: {
+              display: true,
+              text: 'Original MS Win Ratio against Player Count',
+              fontColor: 'black', // Set the color of the title
+              fontSize: 25, // Set the font size of the title
+              fontStyle: 'bold' // Set the font weight of the title to bold
+            },
+            legend: {
+                labels: {
+                    fontSize: 20, // Set the font size of the legend labels
+                    fontStyle: 'bold' // Set the font weight of the legend labels to bold
+                }
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontSize: 25, // Set the font size of the labels on the x-axis
+                        fontStyle: 'bold' // Set the font weight of the labels on the x-axis to bold
+                    }
+                }]
+            },
+                  elements: {
+                  point: {
+                    radius: 8, // Increase the size of the points
+                      hoverRadius: 10 // Increase the size of the points on hover
+                  }
+            }
+        }
+            });
+      </script>
+      <!--Mkt: {{ rg_t_m_stats.new_ms_winner_mkt }}
+      <br />
+      RG: {{ rg_t_m_stats.new_ms_winner_rg }}
+      <br />
+      Tr: {{ rg_t_m_stats.new_ms_winner_t }}
+      <br />
+      None: {{ rg_t_m_stats.new_ms_winner_none }}
+      <br />
+      <br />
+      <b><u>New MS Losers: </u></b>
+      <br />
+      Mkt: {{ rg_t_m_stats.new_ms_picked_mkt }}
+      <br />
+      RG: {{ rg_t_m_stats.new_ms_picked_rg }}
+      <br />
+      Tr: {{ rg_t_m_stats.new_ms_picked_t }}
+      <br />
+      None: {{ rg_t_m_stats.new_ms_picked_none }}
+      <br />
+      <br />
+      <br />
+      <b><u>Old MS Winners: </u></b>
+      <br />
+      RG+T: {{ rg_t_m_stats.old_ms_winner_t_and_rg }}
+      <br />
+      RG no t: {{ rg_t_m_stats.old_ms_winner_rg }}
+      <br />
+      T no rg: {{ rg_t_m_stats.old_ms_winner_t }}
+      <br />
+      Neither: {{ rg_t_m_stats.old_ms_winner_none }}
+      <br />
+      <br />
+      <b><u>Old MS Losers: </u></b>
+      <br />
+      RG+T: {{ rg_t_m_stats.old_ms_picked_t_and_rg }}
+      <br />
+      RG no t: {{ rg_t_m_stats.old_ms_picked_rg }}
+      <br />
+      T no rg: {{ rg_t_m_stats.old_ms_picked_t }}
+      <br />
+      Neither: {{ rg_t_m_stats.old_ms_picked_none }}
+      <br />
+      <br />
+      <br />
+      <br />
+      <b><u>New MS Winners 2P: </u></b>
+      <br />
+      Mkt: {{ rg_t_m_stats.new_ms_winner_mkt_2p }}
+      <br />
+      RG: {{ rg_t_m_stats.new_ms_winner_rg_2p }}
+      <br />
+      Tr: {{ rg_t_m_stats.new_ms_winner_t_2p }}
+      <br />
+      None: {{ rg_t_m_stats.new_ms_winner_none_2p }}
+      <br />
+      <br />
+      <b><u>New MS Losers 2P: </u></b>
+      <br />
+      Mkt: {{ rg_t_m_stats.new_ms_picked_mkt_2p }}
+      <br />
+      RG: {{ rg_t_m_stats.new_ms_picked_rg_2p }}
+      <br />
+      Tr: {{ rg_t_m_stats.new_ms_picked_t_2p }}
+      <br />
+      None: {{ rg_t_m_stats.new_ms_picked_none_2p }}
+      <br />
+      <br />
+      <br />
+      <b><u>Old MS Winners 2P: </u></b>
+      <br />
+      RG+T: {{ rg_t_m_stats.old_ms_winner_t_and_rg_2p }}
+      <br />
+      RG no t: {{ rg_t_m_stats.old_ms_winner_rg_2p }}
+      <br />
+      T no rg: {{ rg_t_m_stats.old_ms_winner_t_2p }}
+      <br />
+      Neither: {{ rg_t_m_stats.old_ms_winner_none_2p }}
+      <br />
+      <br />
+      <b><u>Old MS Losers 2P: </u></b>
+      <br />
+      RG+T: {{ rg_t_m_stats.old_ms_picked_t_and_rg_2p }}
+      <br />
+      RG no t: {{ rg_t_m_stats.old_ms_picked_rg_2p }}
+      <br />
+      T no rg: {{ rg_t_m_stats.old_ms_picked_t_2p }}
+      <br />
+      Neither: {{ rg_t_m_stats.old_ms_picked_none_2p }}-->
+      <br />
+      <br />
+      <!-- ADJUSTED CHARTS -->
+      <br />
+      <br />
+      <b><u>MS Vs Player Count Charts - adjusted for player count</u></b>
+      <br />
+      These charts show the same information as above, but adjusted for player count.
+      <br />
+      You would expect the lines to be flat if it is performing equally well at all player counts.
+      <br />
+      <canvas class="bar_canvas" id="mewMSchart_adjusted" width="1000"></canvas>
+      <script>
+        var ctx = document.getElementById("mewMSchart_adjusted").getContext('2d');
+        //  (wins * player count) / (wins + picks)
+        var data = {
+            labels: ["2p", "3p", "4p", "5p", "6p",],
+            datasets: [
+            {
+                    label: "Marketing Trainee",
+                    borderColor: "blue",
+                    data: [           
+                      {{ rg_t_m_stats.new_ms_ratio_mkt_adjusted_2p }},
+                      {{ rg_t_m_stats.new_ms_ratio_mkt_adjusted_3p }},
+                      {{ rg_t_m_stats.new_ms_ratio_mkt_adjusted_4p }},
+                      {{ rg_t_m_stats.new_ms_ratio_mkt_adjusted_5p }},
+                      {{ rg_t_m_stats.new_ms_ratio_mkt_adjusted_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "Recruiting Girl",
+                    borderColor: "grey",
+                    data: [
+                      {{ rg_t_m_stats.new_ms_ratio_rg_adjusted_2p }},
+                      {{ rg_t_m_stats.new_ms_ratio_rg_adjusted_3p }},
+                      {{ rg_t_m_stats.new_ms_ratio_rg_adjusted_4p }},
+                      {{ rg_t_m_stats.new_ms_ratio_rg_adjusted_5p }},
+                      {{ rg_t_m_stats.new_ms_ratio_rg_adjusted_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "Trainer",
+                    borderColor: "purple",
+                    data: [
+                      {{ rg_t_m_stats.new_ms_ratio_t_adjusted_2p }},
+                      {{ rg_t_m_stats.new_ms_ratio_t_adjusted_3p }},
+                      {{ rg_t_m_stats.new_ms_ratio_t_adjusted_4p }},
+                      {{ rg_t_m_stats.new_ms_ratio_t_adjusted_5p }},
+                      {{ rg_t_m_stats.new_ms_ratio_t_adjusted_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "None of the above",
+                    borderColor: "red",
+                    data: [
+                      {{ rg_t_m_stats.new_ms_ratio_none_adjusted_2p }},
+                      {{ rg_t_m_stats.new_ms_ratio_none_adjusted_3p }},
+                      {{ rg_t_m_stats.new_ms_ratio_none_adjusted_4p }},
+                      {{ rg_t_m_stats.new_ms_ratio_none_adjusted_5p }},
+                      {{ rg_t_m_stats.new_ms_ratio_none_adjusted_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+            ]
+        };
+        
+        var mewMSchart = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+              responsive: false,
+            maintainAspectRatio: true,
+              title: {
+          display: true,
+          text: 'New MS Win Ratio against Player Count - Adjusted',
+          fontColor: 'black', // Set the color of the title
+          fontSize: 25, // Set the font size of the title
+          fontStyle: 'bold' // Set the font weight of the title to bold
+        },
+        legend: {
+            labels: {
+                fontSize: 20, // Set the font size of the legend labels
+                fontStyle: 'bold' // Set the font weight of the legend labels to bold
+            }
+        },
+          scales: {
+              yAxes: [{
+                  ticks: {
+                      beginAtZero: true
+                  }
+              }],
+              xAxes: [{
+                  ticks: {
+                      fontSize: 25, // Set the font size of the labels on the x-axis
+                      fontStyle: 'bold' // Set the font weight of the labels on the x-axis to bold
+                  }
+              }]
+          },
+                elements: {
+                point: {
+                  radius: 8, // Increase the size of the points
+                    hoverRadius: 10 // Increase the size of the points on hover
+                }
+          }
+        }
+        });
+      </script>
+      <canvas class="bar_canvas" id="oldMSchart_adjusted"  width="1000"></canvas>
+      <script>
+        var ctx = document.getElementById("oldMSchart_adjusted").getContext('2d');
+        
+        var data = {
+            labels: ["2p", "3p", "4p", "5p", "6p",],
+            datasets: [
+            {
+                    label: "First Train AND First Hire 3",
+                    borderColor: "blue",
+                    data: [
+                      {{ rg_t_m_stats.old_ms_ratio_t_and_rg_adjusted_2p }},
+                      {{ rg_t_m_stats.old_ms_ratio_t_and_rg_adjusted_3p }},
+                      {{ rg_t_m_stats.old_ms_ratio_t_and_rg_adjusted_4p }},
+                      {{ rg_t_m_stats.old_ms_ratio_t_and_rg_adjusted_5p }},
+                      {{ rg_t_m_stats.old_ms_ratio_t_and_rg_adjusted_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "First Hire 3",
+                    borderColor: "green",
+                    data: [
+                      {{ rg_t_m_stats.old_ms_ratio_rg_adjusted_2p }},
+                      {{ rg_t_m_stats.old_ms_ratio_rg_adjusted_3p }},
+                      {{ rg_t_m_stats.old_ms_ratio_rg_adjusted_4p }},
+                      {{ rg_t_m_stats.old_ms_ratio_rg_adjusted_5p }},
+                      {{ rg_t_m_stats.old_ms_ratio_rg_adjusted_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "First Train",
+                    borderColor: "purple",
+                    data: [
+                      {{ rg_t_m_stats.old_ms_ratio_t_adjusted_2p }},
+                      {{ rg_t_m_stats.old_ms_ratio_t_adjusted_3p }},
+                      {{ rg_t_m_stats.old_ms_ratio_t_adjusted_4p }},
+                      {{ rg_t_m_stats.old_ms_ratio_t_adjusted_5p }},
+                      {{ rg_t_m_stats.old_ms_ratio_t_adjusted_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+                {
+                    label: "None of the above",
+                    borderColor: "red",
+                    data: [
+                      {{ rg_t_m_stats.old_ms_ratio_none_adjusted_2p }},
+                      {{ rg_t_m_stats.old_ms_ratio_none_adjusted_3p }},
+                      {{ rg_t_m_stats.old_ms_ratio_none_adjusted_4p }},
+                      {{ rg_t_m_stats.old_ms_ratio_none_adjusted_5p }},
+                      {{ rg_t_m_stats.old_ms_ratio_none_adjusted_6p }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+            ]
+          };
+        
+            var oldMSchart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                  responsive: false,
+                maintainAspectRatio: true,
+                  title: {
+              display: true,
+              text: 'Original MS Win Ratio against Player Count - Adjusted',
+              fontColor: 'black', // Set the color of the title
+              fontSize: 25, // Set the font size of the title
+              fontStyle: 'bold' // Set the font weight of the title to bold
+            },
+            legend: {
+                labels: {
+                    fontSize: 20, // Set the font size of the legend labels
+                    fontStyle: 'bold' // Set the font weight of the legend labels to bold
+                }
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontSize: 25, // Set the font size of the labels on the x-axis
+                        fontStyle: 'bold' // Set the font weight of the labels on the x-axis to bold
+                    }
+                }]
+            },
+                  elements: {
+                  point: {
+                    radius: 8, // Increase the size of the points
+                      hoverRadius: 10 // Increase the size of the points on hover
+                  }
+            }
+        }
+            });
+      </script>
+      <!-- END ADJUSTED CHARTS -->
+      <br />
+    </div>
+    <br />
+    <br />
+    {% translate "For further help contact" %}
+    <img id="contactEmailImg"
+         src="{% static 'Lobby/email.png' %}"
+         alt="Email Address"
+         width="400"
+         height="30">
+  </div>
+  {% include 'Lobby/common/homeButton.html' %}
+  <form id="gameIdsForm"
+        method="POST"
+        action="/FCM/FCMstatGames/"
+        style="display: none">
+    {% csrf_token %}
+    <input type="hidden" id="game_ids" name="game_ids">
+  </form>
+  <script>
+function submitGameIds(gameIdsJson) {
+  try {
+    const gameIds = JSON.parse(gameIdsJson); // Parse the JSON string back into an array
+
+    if (gameIds && gameIds.length > 0) {
+      // Set the game IDs in the hidden input field
+      document.getElementById('game_ids').value = JSON.stringify(gameIds);
+
+      // Submit the form
+      document.getElementById('gameIdsForm').submit();
+    } else {
+      alert("No game IDs found for this module.");
+    }
+  } catch (error) {
+    console.error("Error parsing game IDs:", error);
+    alert("Error processing game IDs.");
+  }
+}
+  </script>
+{% endblock %}

@@ -1,0 +1,477 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-23 11:52+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\models.py:75
+msgid ""
+"Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any "
+"suggestions, questions or comments, then please do contact the webmaster at "
+"the email address in Contact (top right in the lobby). Thanks!"
+msgstr ""
+
+#: .\models.py:199
+msgid "Factory Setup"
+msgstr "Configuración de fábrica"
+
+#: .\models.py:202
+msgid "1 - Research"
+msgstr "1 - Investigación"
+
+#: .\models.py:204
+msgid "2 - Set Focus"
+msgstr "2 - Establecer enfoque"
+
+#: .\models.py:206
+msgid "3 - Build Factory"
+msgstr "3 - Construir fábrica"
+
+#: .\models.py:208
+msgid "4 - Print Sales Brochures"
+msgstr "4 - Imprimir folletos de ventas"
+
+#: .\models.py:210
+msgid "5 - Sell"
+msgstr "5 - Vender"
+
+#: .\models.py:212
+msgid "6 - Game End"
+msgstr "6 - Fin del juego"
+
+#: .\models.py:214
+msgid "7 - Increase Expectations"
+msgstr "7 - Aumentar las expectativas"
+
+#: .\models.py:216
+msgid "8 - Grow Demands"
+msgstr "8 - Crecen las demandas"
+
+#: .\models.py:357
+msgid "Blitz"
+msgstr "bombardeo"
+
+#: .\models.py:359
+msgid "Live"
+msgstr "En vivo"
+
+#: .\models.py:361
+msgid "Fast"
+msgstr "rápido"
+
+#: .\models.py:363
+msgid "Standard"
+msgstr "Estándar"
+
+#: .\models.py:365
+msgid "Slow"
+msgstr "lento"
+
+#: .\models.py:417
+msgid "Kickout after 5 Minutes"
+msgstr "Expulsión después de 5 minutos"
+
+#: .\models.py:419
+msgid "Kickout after 10 Minutes"
+msgstr "Expulsión después de 10 minutos"
+
+#: .\models.py:421
+msgid "Kickout after 20 Minutes"
+msgstr "Expulsión después de 20 minutos"
+
+#: .\models.py:424
+msgid "Kickout after 12 Hours"
+msgstr "Expulsión después de 12 horas"
+
+#: .\models.py:426
+msgid "Kickout after 1 day"
+msgstr "Expulsión después de 1 día"
+
+#: .\models.py:428
+#, python-format
+msgid "Kickout after %(kickoutInDays)s days"
+msgstr "Expulsión después de %(kickoutInDays)s días"
+
+#: .\templates\HC\HCgameSummary.html:19
+msgid "Horseless Carriage Game Summary"
+msgstr "Resumen del juego del carruaje sin caballos"
+
+#: .\templates\HC\HCgameSummary.html:30 .\templates\HC\HChelp.html:108
+msgid "Home"
+msgstr "Inicio"
+
+#: .\templates\HC\HChelp.html:19
+msgid "Rules"
+msgstr "Reglas"
+
+#: .\templates\HC\HChelp.html:20
+msgid ""
+"Horseless Carriage rules available <a href='https://boardgamegeek.com/"
+"filepage/251309/first-edition-english-rulebook' target='_blank'>here</a>"
+msgstr ""
+
+#: .\templates\HC\HChelp.html:22
+msgid "Horseless Carriage Help"
+msgstr "Ayuda de carruaje sin caballos"
+
+#: .\templates\HC\HChelp.html:25
+msgid "Playing the Game"
+msgstr "Jugando el juego"
+
+#: .\templates\HC\HChelp.html:28
+msgid ""
+"<LI>The active player has a yellow highlight</LI> <LI>Click on a player's "
+"name to view their factory - their name will get a green border to show you "
+"are looking at their factory. You can also click their name again as a "
+"shortcut to go back to the Market Board screen</LI> <LI>If the pieces are "
+"obscuring the Tech Track, click the \"Hide Pieces\" button, next to the Min "
+"Specs board</LI> <LI>Factory building can be done simultaneously.<BR /> If "
+"you are not first in turn order, you can submit your factory and it will be "
+"verified in turn order.<BR /> In the lobby, you will show up under \"current "
+"players\" until your factory is verified<BR /> In this case the game won't "
+"have the green \"Your Move\" highlight until you need to make a move again."
+"<BR /> If previous players use up the components, factory building will be "
+"re-enabled and you will need to remove those components.<BR /> To prevent "
+"losing your factory mid-build, the game won't update live during this phase. "
+"Check the lobby or refresh your game<br /> - you will also be sent a "
+"notification once you need to move, if you have enabled this in your "
+"profile. </LI> <LI>During factory building, a tech level summary is "
+"displayed. <BR /> Your techs have a bar with a green outline<BR /> Techs you "
+"have access to this turn (but have not researched yourself) have a bar with "
+"a yellow outline </LI>"
+msgstr ""
+
+#: .\templates\HC\HChelp.html:52
+msgid "How can I see which Market Windows have been placed?"
+msgstr "¿Cómo puedo ver qué Market Windows se han colocado?"
+
+#: .\templates\HC\HChelp.html:53
+msgid ""
+"Any dealership with sales potential will be shown under the player names. "
+"Clicking on a dealership with a placed Market Window will show you the "
+"remaining squares it can sell to. If the Market Window has not been placed, "
+"then all eligible squares will be highlighted. <BR/> The Market Windows also "
+"have a name on them, in the top left, althought this can be obscured if "
+"other Market Windows are placed on top."
+msgstr ""
+
+#: .\templates\HC\HChelp.html:63
+msgid ""
+"I am second in Engineering Focus. Why can't I build techs from people with "
+"lower Engineering Focus?"
+msgstr ""
+
+#: .\templates\HC\HChelp.html:64
+msgid ""
+"From the rulebook: \"The player with the second highest engineering focus "
+"has access to every technology researched by at least two players; the "
+"third, to any researched by three others; and the fourth to any research "
+"done by 4 players already.\"<BR/> So in fact, you can build techs you "
+"haven't researched, but it must have been researched by at least 2 players. "
+"If there is a tech that has only been researched by one person, even if they "
+"are lower in engineering focus, then you will not have access to it."
+msgstr ""
+
+#: .\templates\HC\HChelp.html:75
+msgid "Why do I have to have a set focus turn if there is only one slot left?"
+msgstr "¿Por qué tengo que tener un turno de enfoque fijo si solo queda una ranura?"
+
+#: .\templates\HC\HChelp.html:76
+msgid ""
+"You are probably missing a crucial point; you are now in the situation where "
+"if you were to go over 10 Gantt and there is only 1 clock left, then you can "
+"decide if the game ends or goes another round. Pretty important really! So I "
+"decided to leave the game as per the actual rules, rather thank try to make "
+"a skip. <BR/>Additionally, the factory building phase happens before Gantt "
+"are increased, so it's basically impossible to know if someone below 10 "
+"Gantt will end up above or below 10 after the end of the factory building "
+"phase. <BR/>Similarly, if someone is on 10 Gantt or higher, they might wish "
+"to spend them all right now in order to reset their Gantt, for example, if "
+"they only have 5 Planning Departments, and wish to have the opportunity to "
+"decrease the punchclock number in a later turn."
+msgstr ""
+
+#: .\templates\HC\HChelp.html:102
+msgid "For further help contact"
+msgstr "Para obtener más ayuda, póngase en contacto con"
+
+#: .\templates\HC\HCtemplate.html:20
+msgid "HOME"
+msgstr "CASA"
+
+#: .\templates\HC\HCtemplate.html:23
+msgid "HELP"
+msgstr "AYUDA"
+
+#: .\templates\HC\HCtemplate.html:25
+msgid "BUG"
+msgstr "ERROR"
+
+#: .\templates\HC\HCtemplate.html:27
+msgid "CHAT"
+msgstr "CHARLA"
+
+#: .\templates\HC\HCtemplate.html:30
+msgid "RESERVE"
+msgstr "RESERVA"
+
+#: .\templates\HC\HCtemplate.html:33
+msgid "NOTES"
+msgstr "NOTAS"
+
+#: .\templates\HC\HCtemplate.html:39
+msgid "HISTORY"
+msgstr "HISTORIA"
+
+#: .\templates\HC\HCtemplate.html:43 .\templates\HC\HCtemplate.html:146
+msgid "REWIND"
+msgstr "REBOBINAR"
+
+#: .\templates\HC\HCtemplate.html:56
+msgid "Connecting to server"
+msgstr "Conectando al servidor"
+
+#: .\templates\HC\HCtemplate.html:57
+msgid "Logged in as"
+msgstr "Iniciado sesión como"
+
+#: .\templates\HC\HCtemplate.html:58
+msgid "Time to next kickout"
+msgstr "Tiempo hasta la próxima expulsión"
+
+#: .\templates\HC\HCtemplate.html:76
+msgid ""
+"You can give permission for the host to rewind the game back to the start of "
+"the restructuring phase. All players must give permission before the host is "
+"able to rewind the game."
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:83
+msgid ""
+"Tournament games are a bit more competitive, so rewinds should not be "
+"expected"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:94
+msgid "Permission for single rewind"
+msgstr "Permiso para rebobinado simple"
+
+#: .\templates\HC\HCtemplate.html:97
+msgid "Permanent permission"
+msgstr "permiso permanente"
+
+#: .\templates\HC\HCtemplate.html:102 .\templates\HC\HCtemplate.html:150
+msgid ""
+"Rewinding from the start of the sales phase will go to the very start of the "
+"factory building phase"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:131
+msgid ""
+"As the game host, you must wait for all players to give permission. They can "
+"allow you to rewind once, or as much as you like. Try asking in chat for "
+"permission if you wish to rewind. Current Permissions:"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:140
+msgid "Reload the whole page to refresh permissions"
+msgstr "Vuelva a cargar toda la página para actualizar los permisos"
+
+#: .\templates\HC\HCtemplate.html:142
+msgid ""
+"Tournament games are a bit more competitive, so you should not feel "
+"obligated to accept a rewind request"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:148
+msgid "Please wait for all players to give permission"
+msgstr "Espera a que todos los jugadores den permiso"
+
+#: .\templates\HC\HCtemplate.html:179
+msgid "Game"
+msgstr "Juego"
+
+#: .\templates\HC\HCtemplate.html:181
+msgid "Turn"
+msgstr "Giro"
+
+#: .\templates\HC\HCtemplate.html:182
+msgid "Phase"
+msgstr "Fase"
+
+#: .\templates\HC\HCtemplate.html:183
+msgid "Current player"
+msgstr "Jugador actual"
+
+#: .\templates\HC\HCtemplate.html:192
+msgid "Send a message"
+msgstr "Enviar un mensaje"
+
+#: .\templates\HC\HCtemplate.html:194
+msgid "Send"
+msgstr "Enviar"
+
+#: .\templates\HC\HCtemplate.html:201
+msgid "Oldest First"
+msgstr "El más antiguo primero"
+
+#: .\templates\HC\HCtemplate.html:207
+msgid "Newest First"
+msgstr "Lo más nuevo primero"
+
+#: .\templates\HC\HCtemplate.html:219
+msgid "Bug Report"
+msgstr "Informe de error"
+
+#: .\templates\HC\HCtemplate.html:221
+msgid ""
+"Please submit a bug report if you encounter any issues, giving as much "
+"detail as possbile.<BR/> The game data will be submitted along with your "
+"report. <BR> You can also report it on the OBG discord. Click <a href="
+"\"https://discord.gg/hCU7Fr77yV\" class=\"linkOther\" target=\"_blank"
+"\">Here</a> to join"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:230 .\templates\HC\HCtemplate.html:237
+msgid "Submit"
+msgstr "Enviar"
+
+#: .\templates\HC\HCtemplate.html:230
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: .\templates\HC\HCtemplate.html:234
+msgid "Personal game notes"
+msgstr "notas de juego personales"
+
+#: .\templates\HC\HCtemplate.html:235
+msgid "Only you can see these notes"
+msgstr "Solo tu puedes ver estas notas"
+
+#: .\templates\HC\HCtemplate.html:237
+msgid "Clear"
+msgstr "Borrar"
+
+#: .\templates\HC\HCtemplate.html:238
+msgid "Close"
+msgstr "Cerrar"
+
+#: .\templates\HC\HCtemplate.html:290
+msgid ""
+"Horseless Carriage is a board game by Jeroen Doumen and Joris Wiersinga, "
+"published by <a href='https://www.splottershop.com/'>Splotter Spellen</a>."
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\HC\yourTurnEmail.html:5
+#, python-format
+msgid ""
+"\n"
+"Hi %(user.username)s,\n"
+"\n"
+"It is your turn at Online Board Gamers - Horseless Carriage.\n"
+"\n"
+"Game: %(gameName)s\n"
+"Turn/Phase: %(currentTurnString)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+msgstr ""
+
+#. Translators: This is an email
+#: .\templates\HC\yourTurnEmailFactory.html:5
+#, python-format
+msgid ""
+"\n"
+"Hi %(user.username)s,\n"
+"\n"
+"It is your turn at Online Board Gamers - Horseless Carriage.\n"
+"\n"
+"Previous players have used up some components, so you need to fix up your "
+"factory.\n"
+"\n"
+"Game: %(gameName)s\n"
+"Turn/Phase: %(currentTurnString)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+msgstr ""
+
+#: .\views.py:35 .\views.py:65 .\views.py:598 .\views.py:1002 .\views.py:1029
+msgid "Game does not exist"
+msgstr "El juego no existe"
+
+#: .\views.py:411
+msgid ""
+"<b>No rewind data. Rewind limit reached. Please play on to generate more "
+"rewind data </b>"
+msgstr ""
+
+#: .\views.py:413
+msgid "<b>Permissions missing. Please reload the page and check again</b>"
+msgstr "<b>Faltan permisos. "
+
+#: .\views.py:602
+msgid "The game is not Active"
+msgstr "El juego no está activo"
+
+#: .\views.py:838
+msgid "It is your turn at Horseless Carriage - Factory Building"
+msgstr "Es tu turno en Horseless Carriage - Factory Building"
+
+#: .\views.py:855
+#, python-format
+msgid ""
+"Your turn at OnlineBoardGamers - Horseless Carriage\n"
+"Your factory needs fixing!\n"
+"%(gameName)s - %(currentTurnString)s.\n"
+"[Click here to play Horseless Carriage](https://www.OnlineBoardGamers.com/HC/"
+"%(gameOD)s/)"
+msgstr ""
+
+#: .\views.py:867
+#, python-format
+msgid ""
+"Your turn at OnlineBoardGamers - Horseless Carriage\n"
+"Your factory needs fixing!\n"
+"%(gameName)s - %(currentTurnString)s.\n"
+"<https://www.OnlineBoardGamers.com/HC/%(gameOD)s/|Click here to play "
+"Horseless Carriage>"
+msgstr ""
+
+#: .\views.py:895
+msgid "It is your turn at Horseless Carriage"
+msgstr "Es tu turno en Horseless Carriage"
+
+#: .\views.py:912
+#, python-format
+msgid ""
+"Your turn at OnlineBoardGamers - Horseless Carriage\n"
+"%(gameName)s - %(currentTurnString)s.\n"
+"[Click here to play Horseless Carriage](https://www.OnlineBoardGamers.com/HC/"
+"%(gameOD)s/)"
+msgstr ""
+
+#: .\views.py:927
+#, python-format
+msgid ""
+"Your turn at OnlineBoardGamers - Horseless Carriage\n"
+"%(gameName)s - %(currentTurnString)s.\n"
+"<https://www.OnlineBoardGamers.com/HC/%(gameOD)s/|Click here to play "
+"Horseless Carriage>"
+msgstr ""
+

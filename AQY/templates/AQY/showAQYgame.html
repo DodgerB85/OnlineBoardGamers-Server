@@ -1,0 +1,672 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{% static 'AQY/images/aqy_icon.png' %}" />
+
+    <meta name="title" content="Online Board Gamers - Antiquity">
+    <meta name="description"
+          content="Play Splotter's Antiquity Online for free with others, or solo!">
+    <meta name="keywords"
+          content="Antiquity,Online,Play,Board,Game,Games,Gamers">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="200 days">
+    <meta name="author" content="Online Board Gamers">
+    <title>OBG - {{ gameName }}</title>
+
+<style>
+    body {
+      margin: 0px !important;
+      background-color: #d4eafd;
+      font-family: Arial, sans-serif;
+
+    }
+
+    #loadingText {
+      transform: translate(-50%, 0%);
+      position: absolute;
+      font-size: 40px;
+      margin-top: 20px;
+      left: 50%;
+      white-space: nowrap;
+    }
+
+    .clock {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translate(-55%, -0%);
+        width: 320px;
+        height: 320px;
+        border: 10px solid #333;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fff;
+    }
+
+    .numeral {
+        position: absolute;
+        font-size: 18px;
+        font-weight: bold;
+        transform-origin: center;
+    }
+
+    .year {
+        /*font-size: 60px;*/
+        font-weight: bold;
+        /*transition: font-size 5s;*/
+        animation: rotateYear 2s ease-out 1; /* shrinkFont 2s ease-out 1;*/
+    }
+
+    @keyframes rotateYear {
+        from {
+            transform: rotate(0deg);
+            font-size: 150px;
+        }
+        to {
+            transform: rotate(-360deg);
+            font-size: 20px;
+        }
+    }
+
+   /* @keyframes shrinkFont {
+        from {
+            font-size: 150px;
+            transform: translateZ(0);
+        }
+        to {
+            font-size: 5px;
+            transform: translateZ(0);
+        }
+    }*/
+
+    .numeral:nth-child(1) { transform: rotate(330deg) translateY(-135px); }
+    .numeral:nth-child(2) { transform: rotate(0deg) translateY(-135px); }
+    .numeral:nth-child(3) { transform: rotate(30deg) translateY(-135px); }
+    .numeral:nth-child(4) { transform: rotate(60deg) translateY(-135px); }
+    .numeral:nth-child(5) { transform: rotate(90deg) translateY(-135px); }
+    .numeral:nth-child(6) { transform: rotate(120deg) translateY(-135px); }
+    .numeral:nth-child(7) { transform: rotate(150deg) translateY(-135px); }
+    .numeral:nth-child(8) { transform: rotate(180deg) translateY(-135px); }
+    .numeral:nth-child(9) { transform: rotate(210deg) translateY(-135px); }
+    .numeral:nth-child(10) { transform: rotate(240deg) translateY(-135px); }
+    .numeral:nth-child(11) { transform: rotate(270deg) translateY(-135px); }
+    .numeral:nth-child(12) { transform: rotate(300deg) translateY(-135px); }
+
+
+    .number {
+  position: relative;
+}
+
+.number div {
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /*animation: animateNumber 0.025s linear forwards;*/
+}
+.number div:not(:last-child) {
+  animation: animateNumber 0.025s linear forwards;
+}
+.number div:last-child {
+  animation: animateNumberRemaining 0.025s linear forwards;
+}
+
+
+.number div:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.number div:nth-child(2) {
+  animation-delay: 0.025s;
+}
+
+.number div:nth-child(3) {
+  animation-delay: 0.05s;
+}
+
+.number div:nth-child(4) {
+  animation-delay: 0.075s;
+}
+
+.number div:nth-child(5) {
+  animation-delay: 0.1s;
+}
+
+.number div:nth-child(6) {
+  animation-delay: 0.125s;
+}
+
+.number div:nth-child(7) {
+  animation-delay: 0.15s;
+}
+
+
+.number div:nth-child(8) {
+  animation-delay: 0.175s;
+}
+
+.number div:nth-child(9) {
+  animation-delay: 0.2s;
+}
+
+.number div:nth-child(10) {
+  animation-delay: 0.225s;
+}   
+
+.number div:nth-child(11) {
+  animation-delay: 0.25s;
+}
+
+.number div:nth-child(12) {
+  animation-delay: 0.275s;
+}
+
+
+.number div:nth-child(13) { 
+  animation-delay: 0.3s;
+}
+
+.number div:nth-child(14) {
+  animation-delay: 0.325s;
+}
+
+.number div:nth-child(15) {
+  animation-delay: 0.35s;
+}
+
+.number div:nth-child(16) {
+  animation-delay: 0.375s;
+}
+
+.number div:nth-child(17) {
+  animation-delay: 0.4s;
+}
+
+.number div:nth-child(18) {
+  animation-delay: 0.425s;
+}
+
+.number div:nth-child(19) {
+  animation-delay: 0.45s;
+}
+
+.number div:nth-child(20) {
+  animation-delay: 0.475s;
+}
+
+.number div:nth-child(21) {
+  animation-delay: 0.5s;
+}
+
+.number div:nth-child(22) {
+  animation-delay: 0.525s;
+}
+
+.number div:nth-child(23) {
+  animation-delay: 0.55s;
+}
+
+.number div:nth-child(24) {
+  animation-delay: 0.575s;
+}
+
+.number div:nth-child(25) {
+  animation-delay: 0.6s;
+}
+
+.number div:nth-child(26) {
+  animation-delay: 0.625s;
+}
+
+.number div:nth-child(27) {
+  animation-delay: 0.65s;
+}
+
+.number div:nth-child(28) {
+  animation-delay: 0.675s;
+}
+
+.number div:nth-child(29) {
+  animation-delay: 0.7s;
+}
+
+.number div:nth-child(30) {
+  animation-delay: 0.725s;
+}
+
+.number div:nth-child(31) {
+  animation-delay: 0.75s;
+}
+
+.number div:nth-child(32) {
+  animation-delay: 0.775s;
+}
+
+.number div:nth-child(33) {
+  animation-delay: 0.8s;
+}
+
+.number div:nth-child(34) {
+  animation-delay: 0.825s;
+}
+
+.number div:nth-child(35) {
+  animation-delay: 0.85s;
+}
+
+.number div:nth-child(36) {
+  animation-delay: 0.875s;
+}
+
+.number div:nth-child(37) {
+  animation-delay: 0.9s;
+}
+
+.number div:nth-child(38) {
+  animation-delay: 0.925s;
+}
+
+.number div:nth-child(39) {
+  animation-delay: 0.95s;
+}
+
+.number div:nth-child(40) {
+  animation-delay: 0.975s;
+}
+
+.number div:nth-child(41) {
+  animation-delay: 1s;
+}
+
+
+.number div:nth-child(42) {
+  animation-delay: 1.025s;
+}
+
+.number div:nth-child(43) {
+  animation-delay: 1.05s;
+}
+
+.number div:nth-child(44) {
+  animation-delay: 1.075s;
+}
+
+.number div:nth-child(45) {
+  animation-delay: 1.1s;
+}
+
+.number div:nth-child(46) {
+  animation-delay: 1.125s;
+}
+
+.number div:nth-child(47) {
+  animation-delay: 1.15s;
+}
+
+
+.number div:nth-child(48) { 
+  animation-delay: 1.175s;
+}
+
+.number div:nth-child(49) {
+  animation-delay: 1.2s;
+}
+
+.number div:nth-child(50) {
+  animation-delay: 1.225s;
+}
+
+
+.number div:nth-child(51) {
+  animation-delay: 1.25s;
+}
+
+.number div:nth-child(52) {
+  animation-delay: 1.275s;
+}
+
+.number div:nth-child(53) {
+  animation-delay: 1.3s;
+}
+
+.number div:nth-child(54) {
+  animation-delay: 1.325s;
+}
+.number div:nth-child(55) {
+  animation-delay: 1.35s;
+}
+
+.number div:nth-child(56) {
+  animation-delay: 1.375s;
+}
+
+.number div:nth-child(57) {
+  animation-delay: 1.4s;
+}
+
+.number div:nth-child(58) {
+  animation-delay: 1.425s;
+}
+
+.number div:nth-child(59) {
+  animation-delay: 1.45s;
+}
+
+.number div:nth-child(60) {
+  animation-delay: 1.475s;
+}
+
+.number div:nth-child(61) {
+  animation-delay: 1.5s;
+}
+
+.number div:nth-child(62) {
+  animation-delay: 1.525s;
+}
+
+.number div:nth-child(63) {
+  animation-delay: 1.55s;
+}
+
+.number div:nth-child(64) {
+  animation-delay: 1.575s;
+}
+
+.number div:nth-child(65) {
+  animation-delay: 1.6s;
+}
+
+.number div:nth-child(66) {
+  animation-delay: 1.625s;
+}
+
+.number div:nth-child(67) {
+  animation-delay: 1.65s;
+}
+
+.number div:nth-child(68) {
+  animation-delay: 1.675s;
+}
+
+.number div:nth-child(69) {
+  animation-delay: 1.7s;
+}
+
+.number div:nth-child(70) {
+  animation-delay: 1.725s;
+}
+
+.number div:nth-child(71) {
+  animation-delay: 1.75s;
+}
+
+.number div:nth-child(72) {
+  animation-delay: 1.775s;
+}
+
+.number div:nth-child(73) {
+  animation-delay: 1.8s;
+}
+
+.number div:nth-child(74) {
+  animation-delay: 1.825s;
+}
+
+.number div:nth-child(75) {
+  animation-delay: 1.85s;
+}
+
+
+
+
+
+@keyframes animateNumber {
+  0% {
+    opacity: 0;
+  }
+
+  1% {
+    opacity: 1;
+  }
+
+  99% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes animateNumberRemaining {
+  0% {
+    opacity: 0;
+  }
+
+  1% {
+    opacity: 1;
+  }
+
+
+
+  100% {
+    opacity: 1;
+  }
+}
+
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if debug %}
+      <script type="module" src="http://localhost:3018/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3018/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'AQY/AQYvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module"
+              crossorigin=""
+              src="{% static 'AQY/AQYvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>Please enable Javascript to continue.</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">Antiquity is loading........</div>
+      <div class="clock">
+        <div class="numeral">XI</div>
+        <div class="numeral">XII</div>
+        <div class="numeral">I</div>
+        <div class="numeral">II</div>
+        <div class="numeral">III</div>
+        <div class="numeral">IV</div>
+        <div class="numeral">V</div>
+        <div class="numeral">VI</div>
+        <div class="numeral">VII</div>
+        <div class="numeral">VIII</div>
+        <div class="numeral">IX</div>
+        <div class="numeral">X</div>
+        <div class="year number" id="year">
+          <div>1899</div>
+          <div>1898</div>
+          <div>1897</div>
+          <div>1896</div>
+          <div>1895</div>
+          <div>1894</div>
+          <div>1893</div>
+          <div>1892</div>
+          <div>1891</div>
+          <div>1890</div>
+          <div>1889</div>
+          <div>1888</div>
+          <div>1887</div>
+          <div>1886</div>
+          <div>1885</div>
+          <div>1884</div>
+          <div>1883</div>
+          <div>1882</div>
+          <div>1881</div>
+          <div>1880</div>
+          <div>1879</div>
+          <div>1878</div>
+          <div>1877</div>
+          <div>1876</div>
+          <div>1875</div>
+          <div>1874</div>
+          <div>1873</div>
+          <div>1872</div>
+          <div>1871</div>
+          <div>1870</div>
+          <div>1869</div>
+          <div>1868</div>
+          <div>1867</div>
+          <div>1866</div>
+          <div>1865</div>
+          <div>1864</div>
+          <div>1863</div>
+          <div>1862</div>
+          <div>1861</div>
+          <div>1860</div>
+          <div>1859</div>
+          <div>1858</div>
+          <div>1857</div>
+          <div>1856</div>
+          <div>1855</div>
+          <div>1854</div>
+          <div>1853</div>
+          <div>1852</div>
+          <div>1851</div>
+          <div>1850</div>
+          <div>1849</div>
+          <div>1848</div>
+          <div>1847</div>
+          <div>1846</div>
+          <div>1845</div>
+          <div>1844</div>
+          <div>1843</div>
+          <div>1842</div>
+          <div>1841</div>
+          <div>1840</div>
+          <div>1839</div>
+          <div>1838</div>
+          <div>1837</div>
+          <div>1836</div>
+          <div>1835</div>
+          <div>1834</div>
+          <div>1833</div>
+          <div>1832</div>
+          <div>1831</div>
+          <div>1830</div>
+          <div>1829</div>
+          <div>1828</div>
+          <div>1827</div>
+          <div>1826</div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+  /*const yearElement = document.getElementById('year');
+
+  //const startYear = new Date().getFullYear();
+  const endYear = 1826;
+  //const duration = 3000;
+  //const fontSizeDifference = 2000; // Increase the font size difference
+
+  let currentYear = 1900;
+
+  setInterval(() => {
+            if (currentYear > 1826) {
+                currentYear--;
+                yearElement.innerText = currentYear;
+            }
+        }, 3);*/
+
+  /*function updateYear() {
+      /*if (currentYear >= endYear) {
+          yearElement.innerText = currentYear;
+          const fontSize = 120 - ((currentYear - startYear) / (endYear - startYear) * fontSizeDifference);
+          yearElement.style.fontSize = `${fontSize}px`;
+          currentYear--;
+      } else {
+          clearInterval(yearInterval);
+      }*/
+  //}
+  //updateYear();
+
+  //const yearInterval = setInterval(updateYear, duration / (startYear - endYear));
+
+  
+    var initData = {};
+  
+    ///////////////////////
+    initData.gameID = {{ gameID }};
+    initData.gameName = "{{ gameName }}";
+    initData.gameData = '{{ gameData|safe }}';
+    initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+    initData.myZoomLevel = {{ myZoomLevel }};
+    initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+    initData.startingOptions = {{startingOptions}};
+    initData.playerNames = {{ allPlayerListBySeat | safe }};
+    initData.currentPlayers = '{{ currentPlayers }}'
+    initData.preferredAQYoptions = {{ preferredAQYoptions }};
+    initData.deleteVotesData = {{ deleteVotesData | safe }};
+
+    {% if spoilerFree %}
+    initData.spoilerFree = true;
+    initData.replayStep = {{replayStep}}-1;
+    {% endif %}
+
+    ///////////////////////
+    {% if user.is_authenticated %}
+    initData.name = '{{ name }}';
+    initData.chatData = "{{ chatData }}";
+    initData.latestUpdate = {{ latestUpdateLiteral }};
+    initData.nextURL = '{{ nextURL }}';
+    {% if chatNotification %}
+    initData.chatNotification = true;
+    {% endif %}
+    {% endif %}
+  
+    ///////////////////////
+    {% if involvedPlayer %}
+    initData.myStatsExcludeConsent = {{ myStatsExcludeConsent }};
+    initData.statsExcludedGame = {{ statsExcludedGame|lower }};
+    initData.pov = {{ pov }};
+    initData.move = '{{ move }}';
+    initData.trade = '{{ trade }}';
+    
+    initData.secondsToNextKickout = {{ secondsToNextKickout }};
+    {% if kickoutRequired > 0 and not myMove %}
+    initData.kickoutRequired = {{kickoutRequired}};
+    {% endif %}
+    initData.notes = '{{ notes | safe }}';
+    initData.yourTurnAudioType = {{ yourTurnAudioType }};
+
+    {% if preMove %}
+    initData.preMove = "{{preMove}}";
+    {% else %}
+    initData.preMove = "";
+    {% endif %}
+    /////////////////////
+    {% if not gameData %}
+    {% if startingMap %}
+  initData.startingMap = {{ startingMap }};
+  {% endif %}
+    {% if displayNames %}
+    initData.displayNames = {{ displayNames | safe }};
+    {% endif %}
+    initData.playerNames = {{ allPlayerListBySeat | safe }};
+    {% endif %}
+    {% endif %}
+
+  </script>
+</html>

@@ -1,0 +1,38 @@
+Aegean map available online at www.OnlineBoardGamers.com!
+
+
+
+The fan made Aegean map by @westbrookgamer is now available to play at OBG!
+
+<image of the map from OBG>
+
+You can find the original post and PnP files from the original author @westbrookgamer here:
+https://boardgamegeek.com/filepage/279905/aegean-variant-map
+
+What is this?
+=============
+An unofficial fan-made amp, based around the Aegean.
+The trusty Indonesian gameplay with a spicy Mediterranean twist!
+
+How does it play?
+=================
+The rules are exactly the same as Indonesia - the changes come in the map!
+With a deliberate grouping of goods in distinct areas, longer shipping lines are generally required. 
+This map focuses more on the logistics of shipping your goods over larger distances. 
+Games will generally last slightly longer than the Indonesian map.
+
+Has it been play-tested?
+=======================
+Yes! Changes have been made to give it more balance. 
+Algorithms were used to help create the map, in order to achieve a good balance within the game.  
+Minor tweaks can still be made if more feedback comes with more plays on this map. 
+
+Given the different game style between this and the original map, Aegean games will be excluded from the stats
+
+---
+
+I've also added a couple of new preference options
+<IMAGE>
+You can choose between fancy or simple ship icons for both maps, and also between 1st edition and 2nd edition icons for the Indonesia map.
+
+Enjoy!

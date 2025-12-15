@@ -1,0 +1,103 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <h1>FCM Stat Games</h1>
+    <!-- FINIHED GAMES -->
+    <div id="finishedGamesListView222">
+      <div class="tableOnlyDiv">
+        <table class="gamesTable">
+          <thead>
+            <tr class="headingRow">
+              <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+              <td class="playersHeader">{% translate "Players" %}</td>
+              <td class="currentPlayersHeader">{% translate "All Players" %}</td>
+              <td class="createdHeader">{% translate "Created" %}</td>
+              <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
+              <td class="winnerHeader">{% translate "Winner" %}</td>
+            </tr>
+          </thead>
+          {% for game in finishedGamesList %}
+            <tr class="clickableGameRow"
+                id="{{ game.game }}gamesRow{{ game.gameID }}"
+                onclick="window.location.href='/{{ game.game }}/{{ game.gameID }}/';">
+              <td class="nameTDcurrent tdWithBox">
+                {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.game %}
+                <a href="/{{ game.game }}/{{ game.gameID }}">{{ game.gameName }}</a>
+                {{ game.startingOptions|safe }}
+              </td>
+              <td>{{ game.maxPlayers }}</td>
+              <td>
+                {% for player in game.allPlayers %}
+                  <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
+                  {% if not forloop.last %},{% endif %}
+                {% endfor %}
+              </td>
+              <td>
+                {% if game.deleteableGame %}
+                  <div id="{{ game.game }}deleteTrainingGame{{ game.gameID }}"
+                       class="deleteTrainingGame">
+                    {% blocktranslate trimmed %}
+                      Delete
+                      <br />
+                      Practice
+                      <br />
+                      Game
+                    {% endblocktranslate %}
+                  </div>
+                {% else %}
+                  <span class="timeToConvertSpan">{{ game.created }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
+              </td>
+              <td>{{ game.winner }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+      <br />
+      <div class="pagination">
+        <span class="step-links">
+          {% if page > 1 %}
+            <a href="#" onclick="submitForm('1')">&laquo; first</a>
+            <a href="#" onclick="submitForm('{{ page|add:'-1' }}')">previous</a>
+          {% endif %}
+          <span class="current">
+            {% translate "Page" %} {{ page }} {% translate "of" %} {{ num_pages }}. {% translate "Total Games:" %}
+            {{ total_games_count }}
+          </span>
+          {% if page < num_pages %}
+            <a href="#" onclick="submitForm('{{ page|add:'1' }}')">next</a>
+            <a href="#" onclick="submitForm('{{ num_pages }}')">last &raquo;</a>
+          {% endif %}
+        </span>
+      </div>
+      <form id="paginationForm" method="post" action="/FCM/FCMstatGames/">
+        {% csrf_token %}
+        <input type="hidden" name="game_ids" value="{{ game_ids_json }}">
+        <input type="hidden" id="pageInput" name="page" value="{{ page }}">
+      </form>
+      <script>
+          function submitForm(page) {
+              document.getElementById('pageInput').value = page;
+              document.getElementById('paginationForm').submit();
+          }
+      </script>
+    </div>
+    {% include 'Lobby/common/homeButton.html' %}
+  </div>
+{% endblock %}

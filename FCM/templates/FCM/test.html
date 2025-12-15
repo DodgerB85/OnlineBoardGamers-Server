@@ -1,0 +1,123 @@
+{% load static %}
+<script src="https://unpkg.com/htmx.org@1.7.0"
+    integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo"
+    crossorigin="anonymous"></script>
+
+
+<!--<div id="HTMXcontent" hx-get="../1/checkNewData/" hx-trigger="every 2s" style="display: none;"></div>-->
+<!--<div id="HTMXcontent" hx-get="{% url 'FCM:checkNewData' game_id=1 %}" hx-trigger="every 2s" style="display: none;"></div>-->
+{% csrf_token %}
+
+<!--<BR/><BR/>
+this is decompressed data, but not parsed <BR/>
+<p id="inputData">
+    [0,1,"k0f3a113e0o293i2c0",[["DodgerB",2,[[9,2,1]],15,[19],[13],1,[12,15,9],[23,13],[3],null,null,1,null,null,null],["admin",3,[[128,0,1]],30,[19],[13],1,[12,15,9,3],[23,14],[],null,null,null,null,null,null]],[1,2,3,4,5,6,7,8,9,10,11,17,18,19,20],[12,6,6,1,1,18,12,6,6,1,12,2,6,10,6,1,12,6,1,10,6,6,1,10,6,6,1,12,6,1,6,1,6,1,6,1,6,1,null,null,null,1,null,null,6,null,6,1],[0,1,2,3,4,5,6,7,8,9,10,11,13,14,16,17,37],55,[7,3,0,[0,1],null,null],[[13,10,3,1,3,9],[14,9,6,0,4,9]],null,[[25,15,0]],3,[],[1,3],null,null,[1657270870,[0,0,[1,0,0,"k0f3a113e0o293i2c0","DodgerB",2,"admin",3]],[0,1,[9]],[1,1,[128]],[0,2,null],[1,2,null],[-1,23,[1]],[1,5,[1]],[0,5,[0,1]],[0,6,[23]],[0,9,[[],[0,0,0,0,0,0,0,0]]],[1,6,[23]],[1,9,[[],[0,0,0,0,0,0,0,0]]],[63,15,[]],[63,18,[null,null,[0,0,3,0,0],[0,0,3,0,0]]],[63,17,[]],[-1,23,[2]],[0,3,[[23],[19]]],[1,3,[[23],[]]],[0,5,[0]],[1,5,[1,1]],[0,6,[19]],[0,19,[12]],[0,19,[15]],[0,8,[23,13,55,3,1,9]],[0,9,[[],[0,0,0,0,0,0,0,0]]],[1,6,[19]],[1,19,[12]],[1,19,[15]],[1,8,[23,14,99,4,0,9]],[1,9,[[],[0,0,0,0,0,0,0,0]]],[63,15,[]],[63,18,[null,null,[0,0,3,0,0],[0,0,3,0,0]]],[0,21,[]],[1,21,[]],[63,16,[2,0,3,0]],[63,17,[[13,[2],3],[14,[9.75],4]]],[-1,23,[3]],[0,3,[[19],[13]]],[1,3,[[19],[]]],[0,19,[9]],[1,19,[9]],[0,5,[0]],[1,5,[1,1]],[0,6,[13]],[0,9,[[19],[0,0,0,2,0,0,0,0]]],[1,6,[13]],[1,9,[[19],[0,0,0,0,2,0,0,0]]],[63,15,[[2,[3],[[2,10,0,0,0]],2,5,0,15,0],[9.75,[4,4],[[3,10,1,0,1]],3,10,0,30,0]]],[1,19,[3]],[63,18,[null,null,[15,0,3,0,15],[30,0,3,0,30]]]],[0,24,29,36,34,36,40,40,43,43,46,46,46,46,46,46,58,56,60,60,63,64,65,67,69,80,81,82,83,84,85,85,88,89,90,90,90,98,95,98,98,103,103,109,110,122,124,125,125,125],1,[0,1,1,1,1,1,1,1,1,0,1,0,0,1,0,0],0,0]
+</p>
+<p id="output"></p>
+
+<form name="form" id="form" onsubmit="return false">
+    <button name="button" id="button" onclick="clicky();" value="before">Click Me!</button>
+</form>-->
+Test for wbh101
+<BR />
+<BR />
+<span class="timeToConvertSpan">1661288012000</span>
+<BR />
+<BR />
+<span class="timeToConvertSpan">1661891884032</span>
+<BR />
+<BR />
+<span class="timeToConvertSpan">1657874277000</span>
+<BR />
+<BR />
+<span class="timeToConvertSpan">1661891856001</span>
+<BR />
+<BR />
+<span class="timeToConvertSpan"></span>
+<BR />
+<BR />
+<span class="timeToConvertSpan">1661891856001
+</span>
+
+<script type="text/javascript">
+    function clicky() {
+
+
+    }
+
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        //if (global.halt == true) return;
+        // Update all times to local
+        //timeSpans = document.getElementsByClassName('timeToConvertSpan');
+        //var content = ;
+        //alert(parseInt(timeSpans[i].innerHTML))1671862221000
+        /* var ourDateTime = new Date(parseInt(timeSpans[i].innerHTML)).toLocaleString();
+         ourDateTime = ourDateTime.slice(0, -3);
+         ourDateTime = ourDateTime.replaceAll(',', '');*/
+        //console.log(ourDateTime.toString());
+        //console.log(ourDateTime.toLocaleString());
+        //timeSpans[i].innerHTML = ourDateTime;
+        var time1 = 1671862221000;
+        var time1 = 1671715248000;
+        var converted = new Date(time1);
+        alert("AAA 1  " + converted)
+        var converted2 = converted.toLocaleString();
+        alert("AAA 2  " + converted2)
+        converted2 = converted2.slice(0, -3)
+        alert("AAA 3  " + converted2)
+        /*converted2 = converted2.replaceAll(',', '');
+        alert("AAA 4  " + converted2)*/
+        alert("AAA 4 NOW TEST B")
+
+        timeSpans = document.getElementsByClassName('timeToConvertSpan');
+        alert("BBB 1")
+        for (var i = 0; i < timeSpans.length; i++) {
+            //var content = ;
+            //alert(parseInt(timeSpans[i].innerHTML))1671862221000
+            var ourDateTime = new Date(parseInt(timeSpans[i].innerText)).toLocaleString();
+            ourDateTime = ourDateTime.slice(0, -3);
+            //ourDateTime = ourDateTime.replaceAll(',', '');
+            //console.log(ourDateTime.toString());
+            //console.log(ourDateTime.toLocaleString());
+            timeSpans[i].innerHTML = ourDateTime;
+        }
+        alert("BBB 2")
+
+    });
+
+
+</script>
+<!--<script src="{% static 'FCM/JS/lib/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'FCM/JS/lib/lodash.min.js' %}"></script>
+<script src="{% static 'FCM/JS/Roger.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/utils.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/reference.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/map.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/player.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/rules.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/model.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/view.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/controller.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/history.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/io.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/bot.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/websocket.js' %}?v=20220706"></script>
+
+<script src="{% static 'FCM/JS/main.js' %}?v=20220706"></script>-->

@@ -17,7 +17,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getCNSstartingOptionsHTML,
-    SR_getKickoutHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
     SR_GAME_STATUS_CHOICES,
 )
@@ -67,14 +66,14 @@ class CNS_Game(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name="CNSgame_creator_relName",
-        default=1,
+        default="admin",
     )
     host = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="CNSgame_host_relName",
-        default=1,
+        default="admin",
     )
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
@@ -249,7 +248,7 @@ class CNS_Game(models.Model):
             "pace": gamePaceString,
             "latestUpdate": latestUpdateString,
             "startingOptions": startingOptionsHTML,
-            "kickoutHTML": SR_getKickoutHTML(self.kickoutDuration),
+            "kickoutDuration": self.kickoutDuration,
             "maxPlayers": self.maxPlayers,
             "winner": winner,  # Used for Finished Games
             "myMove": myMove,

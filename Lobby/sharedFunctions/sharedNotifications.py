@@ -1409,7 +1409,13 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
     ]
 
     PASSWORDS = [
-
+        config("OBG_EMAIL_APP_PWD", default="", cast=str),  # 0
+        config("OBG_TURN1_EMAIL_APP_PWD", default="", cast=str),  # !
+        config("OBG_TURN2_EMAIL_APP_PWD", default="", cast=str),  # 2
+        config("OBG_TURN3_EMAIL_APP_PWD", default="", cast=str),  # 3
+        config("OBG_TURN4_EMAIL_APP_PWD", default="", cast=str),  # 4
+        config("OBG_MAILER_EMAIL_APP_PWD", default="", cast=str),  # 5
+        config("MAIL_RELAY_PWD", default="", cast=str),  # 6
     ]
 
     idx = 0

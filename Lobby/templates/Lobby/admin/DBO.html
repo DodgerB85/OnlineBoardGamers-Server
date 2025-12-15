@@ -64,22 +64,7 @@
           <td class="nameTDcurrent tdWithBox" id="td1">{% if game.chatNotification %}<img class="startingOption" alt="Str Opt" width="50" height="50"
               src="{% static "Lobby/Images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
 
-            {% if game.game == 'FCM' %}<img src="{% static "FCM/Images/burger_board.png" %}" alt="FCM game" height="50" width="50"
-              title="FCM Game">{% endif %}
-            {% if game.game == 'HC' %}<img src="{% static "HC/Images/icon_car.png" %}" alt="HC game" title="HC Game" height="50" width="50">
-            {% endif %}
-            {% if game.game == 'Bus' %}<img src="{% static "Bus/images/bus_icon.png" %}" alt="Bus game" title="Bus Game" height="50" width="50">
-            {% endif %}
-            {% if game.game == 'TGZ' %}<img src="{% static "TGZ/images/tgz_icon.png" %}" alt="TGZ game" height="50" width="50"
-              title="TGZ Game">{% endif %}
-              {% if game.game == 'CNS' %}<img src="{% static "CNS/images/cns_icon.png" %}" alt="CNS game" title="CNS Game" height="50" width="50">
-              {% endif %}
-              {% if game.game == 'AQY' %}<img src="{% static "AQY/images/aqy_icon.png" %}" alt="AQY game" title="AQY Game" height="50" width="50">
-              {% endif %}
-              {% if game.game == 'IND' %}<img src="{% static "IND/images/ind_icon.png" %}" alt="IND game" title="IND Game" height="50" width="50">
-              {% endif %}
-              {% if game.game == 'KFW' %}<img src="{% static "LFW/images/kfw_icon.png" %}" alt="KFW game" title="KFW Game" height="50" width="50">
-              {% endif %}
+            {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.game %}
 
             <a target="_blank" 
             {% if game.game == "FCM" %}
@@ -96,6 +81,10 @@ href="{% url 'CNS:showCNSgame' game_id=game.gameID %}"
 href="{% url 'AQY:showAQYgame' game_id=game.gameID %}" 
 {% elif game.game == "IND" %}
 href="{% url 'IND:showINDgame' game_id=game.gameID %}" 
+{% elif game.game == "KFW" %}
+href="{% url 'KFW:showKFWgame' game_id=game.gameID %}"
+{% elif game.game == "WEB" %}
+href="{% url 'WEB:showWEBgame' game_id=game.gameID %}"
 {% endif %}
             >
             {{ game.gameName }} ID: {{game.gameID }} {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i> {% endif %} i={{ forloop.counter }}</a>
@@ -136,7 +125,7 @@ href="{% url 'IND:showINDgame' game_id=game.gameID %}"
           <!--<td>{{ game.created }}</td>-->
           <td>{{ game.pace|safe }}</td>
           <td><span class="timeToConvertSpan">{{ game.latestUpdate }}</span>{% if 'SHADOW' not in game.allPlayers %}
-            {{ game.kickoutHTML|safe }}{% endif %}<BR />{{ game.latestUpdateElapsedTimeString }}</td>
+            {% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}<BR />{{ game.latestUpdateElapsedTimeString }}</td>
         </tr>
         {% endfor %}
 

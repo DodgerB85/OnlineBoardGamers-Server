@@ -1,4 +1,5 @@
 *.log
+logs
 *.pot
 *.pyc
 __pycache__/
@@ -13,3 +14,25 @@ ENV/
 env.bak/
 venv.bak/
 local_settings.py
+node_modules
+
+# Exclude the entire 'Private' directory in the project root
+/Private/
+
+# Exclude specific static directories
+/FCM/static/FCM/
+/HC/static/HC/
+
+# Exclude any folder found anywhere in subdirectories
+vueTGZ/
+vueAQY/
+busvue/
+vueIND/
+vueKFW/
+vueRNB/
+vueWEB/
+vuePPF/
+
+# Ignore any directory that contains the word 'vuedist' anywhere (*vuedist*)
+*vuedist*/
+*migrations*/

@@ -1,0 +1,3338 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-10 15:22+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1213
+#: .\static\FCM\JS\view.js:467
+msgid "Hard Choices"
+msgstr "Elecciones duras"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1217
+#: .\static\FCM\JS\view.js:471
+msgid "Ketchup Milestone"
+msgstr "Ketchup hito"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1221
+#: .\static\FCM\JS\view.js:475
+msgid "New Reserve Cards"
+msgstr "Nuevas tarjetas de reserva"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1261
+#: .\static\FCM\JS\view.js:515
+msgid "Sushi"
+msgstr "Sushi"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1265
+#: .\static\FCM\JS\view.js:519
+msgid "Noodles"
+msgstr "Fideos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1269
+#: .\static\FCM\JS\view.js:523
+msgid "Skip Module"
+msgstr "Módulo de salto"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:783
+msgid "Available Modules:"
+msgstr "Módulos disponibles:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:816
+msgid "First to train / First to market good disappear after 2 turns"
+msgstr ""
+"Primero en entrenar / primero para comercializar bien desaparecer después de"
+" 2 turnosPrimero en entrenar / primero para comercializar bien desaparecer "
+"después de 2 turnos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:819
+msgid "Houses prioritise a restaurant with their demands + kimchi"
+msgstr "Las casas priorizan un restaurante con sus demandas + kimchi"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:820
+msgid ""
+"Noodles count as any demand item, but only if no one else can supply it"
+msgstr ""
+"los fideos cuentan como cualquier elemento de demanda, pero solo si nadie "
+"más puede suministrarloLos fideos cuentan como cualquier elemento de "
+"demanda, pero solo si nadie más puede suministrarlo"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:821
+msgid "Houses with gardens will try to replace all demand with Sushi"
+msgstr ""
+"Las casas con jardines intentarán reemplazar toda la demanda con sushiLas "
+"casas con jardines intentarán reemplazar toda la demanda con sushi"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:822
+msgid "Sell coffee along the route travelled by a house"
+msgstr "Vender café a lo largo de la ruta recorrida por una casa"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:824
+msgid "Adds $10 per total sale"
+msgstr "Agrega $ 10 por venta total"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:828
+msgid "Decide turn order and break ties"
+msgstr "Decidir el pedido de giro y romper los lazos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:1347
+msgid "No More Parks"
+msgstr "No más parques"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:2044
+msgid "No Available Space"
+msgstr "Sin espacio disponible"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:2994
+#: .\static\FCM\JS\view.js:3158
+msgid "No Active Gourmet Food Critics"
+msgstr "No hay críticos activos de alimentos gourmet"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1653
+#: .\static\FCM\JS\view.js:4238 .\static\FCM\JS\view.js:4854
+#: .\static\FCM\JS\view.js:5048
+msgid "Close"
+msgstr "Cerca"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:4456
+#: .\static\FCM\JS\view.js:4459
+msgid "Fancy a <a href='/createFCMpage/%(gameID)s/'>rematch</a>?"
+msgstr "Fancy a <a href = '/createfcmpage/%(gameId) s/'> revatch </a>?"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:4982
+msgid "Available Roads:"
+msgstr "Caminos disponibles:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:5625
+msgid "Total demand on board:"
+msgstr "Demanda total a bordo:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:5629
+msgid "No demand on board"
+msgstr "Sin demanda a bordo"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\view.js:5813
+#: .\static\FCM\JS\view.js:5858
+msgid "Marketers"
+msgstr "vendedores"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:597
+msgid "First to have $20"
+msgstr "Primero en tener $ 20"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:597
+msgid "May see bank reserve cards"
+msgstr "Puede ver tarjetas de reserva bancaria"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:602
+msgid "First pizza produced"
+msgstr "Primera pizza producida"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:604
+#: .\static\FCM\JS\reference.js:628
+msgid "First cart operator"
+msgstr "operador del primer carro"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:605
+msgid "First to pay $20 in salaries"
+msgstr "Primero en pagar $ 20 en salarios"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:606
+msgid "First billboard"
+msgstr "Primera cartelera"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:606
+msgid "First billboard placed"
+msgstr "Primera cartelera colocada"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:610
+msgid "First airplane campaign"
+msgstr "Primera campaña de aviones"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:610
+msgid "Count +2 open slots when determining order of play"
+msgstr "Contar +2 ranuras abiertas al determinar el orden de juego"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:611
+msgid "Your radios market 2 goods per turn instead of 1"
+msgstr "Sus radios mercado 2 bienes por turno en lugar de 1"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:612
+msgid "First marketeer"
+msgstr "Primer vendedor"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:613
+msgid "Get a free kitchen trainee and an errand boy"
+msgstr "Obtenga un aprendiz de cocina gratis y un chico de recado"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:614
+msgid "First campaign manager used"
+msgstr "Primer gerente de campaña utilizado"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:616
+msgid "Your radio is permanent"
+msgstr "Tu radio es permanente"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:618
+msgid "Place radio (pizza, 2 turns) on tile of each house that bought pizza"
+msgstr ""
+"Radio de lugar (pizza, 2 vueltas) en el azulejo de cada casa que compró "
+"pizzaLugar radio (pizza, 2 vueltas) en el azulejo de cada casa que compró "
+"pizza"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:619
+msgid "Any employee can be trained on the job, preserving color"
+msgstr ""
+"cualquier empleado puede recibir capacitación en el trabajo, preservando el "
+"colorCualquier empleado puede recibir capacitación en el trabajo, "
+"preservando el color"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:620
+msgid "First beer sold"
+msgstr "Primera cerveza vendida"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:621
+msgid "First coke sold"
+msgstr "Primera Coca -Cola vendida"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:622
+msgid "First recruiting girl used"
+msgstr "Primera chica de reclutamiento usada"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:623
+msgid "Get a free trainer; no longer need to fire employees if broke"
+msgstr ""
+"Obtenga un entrenador gratis; Consigue un entrenador libre;ya no necesita "
+"despedir a los empleados si se rompen"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:626
+msgid "First restaurant"
+msgstr "Primer restaurante"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:628
+msgid "Double the amount of drinks hauled by cart/truck/zeppelin"
+msgstr ""
+"duplique la cantidad de bebidas transportadas por "
+"carrito/camión/zeppelinDoble la cantidad de bebidas transportadas por "
+"carrito/camión/zeppelin"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:631
+msgid "Distance -1"
+msgstr "Distancia -1"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:632
+msgid "First lobbyist"
+msgstr "Primer cabildero"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:637
+msgid "New Business Developer"
+msgstr "Nuevo desarrollador de negocios"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:639
+msgid "Regional Manager"
+msgstr "Gerente regional"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:640
+msgid "CFO"
+msgstr "director de Finanzas"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:642
+msgid "Junior Vice President"
+msgstr "Vicepresidente Junior"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:643
+msgid "Vice President"
+msgstr "Vicepresidente"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:644
+msgid "5 slots"
+msgstr "5 espacios"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:645
+msgid "10 slots"
+msgstr "10 espacios"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:647
+msgid "Luxuries Manager"
+msgstr "Gerente de lujos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:648
+msgid "Price -$3"
+msgstr "Precio -$ 3"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:655
+msgid "Recruiting Manager"
+msgstr "Gerente de reclutamiento"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:658
+msgid "Coach"
+msgstr "entrenador"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:661
+msgid "Get 2 drinks from each source on route"
+msgstr "Obtenga 2 bebidas de cada fuente en la ruta"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:663
+msgid "Zeppelin Pilot"
+msgstr "Piloto de zeppelin"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:651
+msgid "Brand Manager"
+msgstr "Gerente de marca"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:652
+msgid "Brand Director"
+msgstr "Director de la marca"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:668
+msgid "Burger Chef"
+msgstr "Chef de hamburguesas"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:668
+msgid "Produce 8 burgers"
+msgstr "Producir 8 hamburguesas"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:673
+msgid "Noodle Cook"
+msgstr "Cocinero de fideos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:674
+msgid "Noodle Chef"
+msgstr "Chef de fideos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:676
+msgid "Produce 5 sushi"
+msgstr "Producir 5 sushi"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:677
+msgid "Produce 1 coffee"
+msgstr "Producir 1 café"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:679
+msgid "Produce 5 coffee"
+msgstr "Producir 5 café"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:680
+msgid "Win all ties; first choice in turn order"
+msgstr "Gana todos los lazos;Primera opción a su vez orden"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:682
+msgid "Win all ties; first choice in turn order (unless B or C at work)"
+msgstr ""
+"Gana todos los lazos; Gana todos los lazos;Primera opción a su vez (a menos "
+"que b o c en el trabajo)"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:584
+msgid "5 - Payday"
+msgstr "5 - Día de pago"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:585
+msgid "6 - Marketing Campaigns"
+msgstr "6 - Campañas de marketing"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\reference.js:590
+msgid "Setup - Draft Modules"
+msgstr "Configuración - Borrador de módulos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1341
+#: .\static\FCM\JS\controller.js:1545
+msgid "Yes I want to resign"
+msgstr "Si quiero renunciar"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1556
+msgid "Auto-fill Structure"
+msgstr "Estructura de relleno automático"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:373
+msgid ""
+"You could send more employees to work. Are you sure you want to confirm?"
+msgstr ""
+"podría enviar más empleados al trabajo. Podría enviar más empleados para "
+"trabajar.¿Estás seguro de que quieres confirmar?"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:278
+msgid ""
+"You have not used all your producers. Make sure you click on each one in "
+"order to produce. Continue anyway?"
+msgstr ""
+"No has utilizado a todos tus productores. No has usado todos tus "
+"productores.Asegúrese de hacer clic en cada uno para producir.¿Continuar de "
+"todos modos?"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:193
+msgid "You have not used all your training points. Continue anyway?"
+msgstr ""
+"No has usado todos tus puntos de entrenamiento. No has usado todos tus "
+"puntos de entrenamiento.¿Continuar de todos modos?"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1082
+msgid "Latest possible"
+msgstr "Último posible"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1080
+#: .\static\FCM\JS\controller.js:1126 .\static\FCM\JS\controller.js:1135
+#: .\static\FCM\JS\controller.js:1146
+msgid "Choose normally"
+msgstr "Elija normalmente"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1
+msgid "Pay salary with as much food as possible and then money"
+msgstr "Pagar salario con la mayor cantidad de comida posible y luego dinero"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1144
+msgid "Keep all items if less than 10"
+msgstr "Mantenga todos los artículos si es menos de 10"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1190
+msgid "No"
+msgstr "No"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1280
+msgid "Choose a module to add to the game"
+msgstr "Elija un módulo para agregar al juego"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1280
+msgid "Total Modules: 6 for 2p, 6 for 3p, 4 for 4p, 5 for 5p, 6 for 6p"
+msgstr ""
+"Módulos totales: 6 para 2p, 6 para 3p, 4 para 4p, 5 para 5p, 6 para "
+"6pMódulos totales: 6 para 2p, 6 para 3p, 4 para 4p, 5 para 5p, 6 para 6p"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1290
+msgid "Skip Module and End Turn"
+msgstr "Omitir el módulo y el giro final"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1316
+msgid ""
+"Welcome to this practice game<BR/>If you wish to rewind your game, use the "
+"button in the top left<BR/>Each rewind will move the game back by one step"
+msgstr ""
+"Bienvenido a este juego de práctica <br/> Si desea rebobinar su juego, use "
+"el botón en la parte superior izquierda <br/> Cada rebobinado moverá el "
+"juego por un pasoBienvenido a este juego de práctica <br/> Si desea "
+"rebobinar su juego, use el botón en la parte superior izquierda <br/> Cada "
+"rebobinado moverá el juego de nuevo por un paso"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1318
+msgid ""
+"Lower expectations! This is AI v 0.1 - It has some vague intelligence.<br/> "
+"Contact me if you're interested in helping develop an AI"
+msgstr ""
+"¡Mayores expectativas! ¡Mayores expectativas!Este es AI V 0.1: tiene cierta "
+"inteligencia vaga. <br/> Contáctame si estás interesado en ayudar a "
+"desarrollar una IA"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1323
+#: .\static\FCM\JS\controller.js:1389 .\static\FCM\JS\controller.js:1849
+msgid "Remember: you are using the <b>Original Milestones</b>"
+msgstr "Recuerde: está utilizando los hitos originales <b> </b>"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1346
+msgid "Delay placing your restaurant for one round"
+msgstr "Retrasar colocar su restaurante para una ronda"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1368
+msgid "Are you sure you want to delay placing your restaurant?"
+msgstr ""
+"¿Estás seguro de que quieres retrasar la colocación de tu restaurante?"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1386
+msgid "To save time, you may choose your reserve card early"
+msgstr "Para ahorrar tiempo, puede elegir su tarjeta de reserva temprano"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1322
+#: .\static\FCM\JS\controller.js:1388 .\static\FCM\JS\controller.js:1848
+msgid "Remember: you are using the <b>New Milestones</b>"
+msgstr "Recuerde: está utilizando los nuevos hitos <b> </b>"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:1981
+msgid ""
+"Each employee can only be trained once, so just select the final promotion"
+msgstr ""
+"cada empleado solo puede recibir capacitación una vez, así que simplemente "
+"seleccione la promoción finalCada empleado solo puede recibir capacitación "
+"una vez, así que simplemente seleccione la promoción final"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:2073
+msgid "From:"
+msgstr "De:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:2406
+msgid "Choose a mailbox campaign for your 'First New Restaurant' milestone"
+msgstr "Elija una campaña de buzón para su hito de 'primer restaurante nuevo'"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:2894
+msgid "Select Food item to produce"
+msgstr "Seleccione el alimento para producir"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3283
+msgid "No more tiles"
+msgstr "No más azulejos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3399
+msgid "Select a Local or Regional Manager"
+msgstr "seleccione un gerente local o regional"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3439
+msgid "No more restaurants"
+msgstr "No más restaurantes"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3448
+msgid "Move an existing restaurant or place a new one"
+msgstr "Mude un restaurante existente o coloque uno nuevo"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3453
+msgid "Create"
+msgstr "Crear"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3483
+msgid "Choose a restaurant to move"
+msgstr "Elija un restaurante para mudarse"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3622
+#: .\static\FCM\JS\controller.js:4859
+msgid "You need to pay: $%(salaryAmount)s"
+msgstr "Debe pagar: $%(salaryamunt) s"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3629
+#: .\static\FCM\JS\controller.js:4866
+msgid ""
+"<p style='color:#f00'>You cannot afford to pay all of your employees! "
+"However, your <i>First Trainer Used</i> milestone allows you to keep "
+"everyone</p>If you wish, you <b>may</b> click on employees to fire them "
+"anyway"
+msgstr ""
+"<p style = 'color:<p style = 'color:#f00'>> ¡No puede pagar a todos sus "
+"empleados!Sin embargo, su <i> First Trainer usó </i> Milestone le permite "
+"mantener a todos </p> Si lo desea, usted <b> puede </b> hacer clic en los "
+"empleados para despedirlos de todos modos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3631
+#: .\static\FCM\JS\controller.js:4868
+msgid ""
+"<p style='color:#f00'>You cannot pay for all of your employees - You must "
+"fire employees until you can pay for the remainder"
+msgstr ""
+"<p style = 'color:#f00'> No puede pagar por todos sus empleados: debe "
+"despedir a los empleados hasta que pueda pagar el resto"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3671
+#: .\static\FCM\JS\controller.js:4928
+msgid "Choose payment type"
+msgstr "Elija el tipo de pago"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:3876
+#: .\static\FCM\JS\controller.js:5195
+msgid "Store other items"
+msgstr "Almacenar otros artículos"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1
+msgid "You are about to confirm the whole Working day"
+msgstr "Estás a punto de confirmar todo el día laboral"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:4060
+msgid "WARNING: YOU HAVE NOT HIRED ANYONE"
+msgstr "Advertencia: no has contratado a nadie"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1
+msgid ""
+"You have no salary to pay this turn. You can decide now to keep all of your "
+"employees in order to save time during the next phase"
+msgstr ""
+"No tienes salario para pagar este turno.Ahora puede decidir mantener a todos"
+" sus empleados para ahorrar tiempo durante la siguiente fase."
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:43
+#: .\static\FCM\JS\controller.js:4089
+msgid "Reset the whole working day"
+msgstr "Restablecer todo el día laboral"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:4455
+msgid "There is no space left for your pizza radio for house #%(houseNumber)s"
+msgstr ""
+"No queda espacio para su radio de pizza para la casa #%(Housenumber) s"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:2442
+#: .\static\FCM\JS\controller.js:3284 .\static\FCM\JS\controller.js:4456
+msgid "Never mind"
+msgstr "No importa"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\controller.js:4459
+msgid "Choose a space on the tile of house #%(houseNumber)s"
+msgstr "Elija un espacio en el mosaico de la casa #%(Housenumber) s"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:156
+#: .\static\FCM\JS\history.js:421 .\static\FCM\JS\history.js:445
+msgid "NE"
+msgstr "Es"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:157
+#: .\static\FCM\JS\history.js:422 .\static\FCM\JS\history.js:446
+msgid "SE"
+msgstr "Con"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:158
+#: .\static\FCM\JS\history.js:423 .\static\FCM\JS\history.js:447
+msgid "SW"
+msgstr "SUDOESTE"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:154
+#: .\static\FCM\JS\history.js:420 .\static\FCM\JS\history.js:444
+msgid "NW"
+msgstr "noroeste"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:161
+msgid ""
+"%(playerName)s chooses their starting restaurant at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s) facing %(direction)s"
+msgstr ""
+"%(PlayEn nombre) S Elige su restaurante inicial en Coordenadas ( %(XCOord) "
+"S, %(YCoord) S) que enfrenta %(dirección) S"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:179
+msgid "(auto late)"
+msgstr "(Auto tarde)"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:188
+msgid "%(playerName)s has no employees"
+msgstr "%(nombre de playern) s no tiene empleados"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:191
+msgid "%(playerName)s sends to work:"
+msgstr "%(playername) s envía al trabajo:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:208
+msgid "%(playerName)s hires:"
+msgstr "%(nombre de juego) s contrataciones:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:224
+msgid "%(playerName)s trains:"
+msgstr "%(nombre de juego) s trenes:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:284
+#: .\static\FCM\JS\history.js:287 .\static\FCM\JS\history.js:315
+#: .\static\FCM\JS\history.js:386 .\static\FCM\JS\history.js:394
+#: .\static\FCM\JS\history.js:404 .\static\FCM\JS\history.js:408
+#: .\static\FCM\JS\history.js:1027 .\static\FCM\JS\history.js:1066
+msgid "vertically"
+msgstr "verticalmente"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:285
+#: .\static\FCM\JS\history.js:286 .\static\FCM\JS\history.js:316
+#: .\static\FCM\JS\history.js:385 .\static\FCM\JS\history.js:395
+#: .\static\FCM\JS\history.js:405 .\static\FCM\JS\history.js:407
+#: .\static\FCM\JS\history.js:1028 .\static\FCM\JS\history.js:1065
+msgid "horizontally"
+msgstr "horizontalmente"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:305
+#: .\static\FCM\JS\history.js:328
+msgid "for %(turnLength)s turns"
+msgstr "para %(giros) s giros"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:484
+msgid "House"
+msgstr "Casa"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:519
+msgid "player"
+msgstr ""
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:496
+msgid "No one can fulfill these demands"
+msgstr "Nadie puede satisfacer estas demandas"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:562
+#: .\static\FCM\JS\history.js:624
+msgid "The base price is doubled, because the house is adjacent to a park."
+msgstr "El precio base se duplica, porque la casa está adyacente a un parque."
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:605
+msgid "Coffee sales for house #%(houseNumber)s:"
+msgstr "Ventas de café para la casa #%(Housenumber) S:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:685
+msgid "What are the highlighed road squares?"
+msgstr "¿Cuáles son los cuadrados de carretera resaltados?"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:689
+msgid ""
+"Don't worry; coffee can be quite complicated. Please read more help <a "
+"href='/FCM/coffeeHelp/' target='_blank'>here</a>."
+msgstr ""
+"No te preocupes;El café puede ser bastante complicado.Lea más ayuda <a href "
+"= '/fcm/caféhelp/' target = '_ en blanco'> aquí </a>."
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:846
+msgid "%(player)s received a new milestone:"
+msgstr "%(jugador) S recibió un nuevo hito:"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:486
+#: .\static\FCM\JS\history.js:963
+msgid "Rural Area"
+msgstr "Área rural"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:988
+msgid ""
+"earned $%(earnings)s for %(numberOfItems)s item on buildings %(buildings)s"
+msgid_plural ""
+"earned $%(earnings)s for %(numberOfItems)s items on buildings %(buildings)s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1006
+msgid ""
+"%(player)s starts radio campaign #%(radioNumber)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s) due to the First Pizza Sold milestone"
+msgstr ""
+"%(Player) s comienza la campaña de radio #%(Radionumber) s en las "
+"coordenadas (%(xcoord) s,%(ycoord) s) debido a la primera pizza vendida hito"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1009
+msgid ""
+"$100 has been removed from the bank due to the First Discount Manager Used "
+"milestone"
+msgstr ""
+"Se han eliminado $ 100 del banco debido a que el primer gerente de descuento"
+" usó hito"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1017
+msgid "a 4 length park"
+msgstr "un parque de 4 longitud"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1062
+msgid "4 length road"
+msgstr "4 longitud"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1404
+msgid "first"
+msgstr ""
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\io.js:425
+#: .\static\FCM\JS\io.js:583 .\static\FCM\JS\io.js:736
+#: .\static\FCM\JS\io.js:790 .\static\FCM\JS\io.js:879
+#: .\static\FCM\JS\io.js:988
+msgid ""
+"It appears you have an older version of the game. Please refresh the page"
+msgstr "Parece que tienes una versión anterior del juego.Actualiza la página"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\io.js:579
+msgid ""
+"The game is no longer active; perhaps you have been removed for being "
+"inactive"
+msgstr ""
+"El juego ya no está activo;Quizás te hayan eliminado por estar inactivo"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1
+msgid ""
+"Something went wrong during kickout. Please submit a bug report so I can "
+"restart the game"
+msgstr ""
+"Algo salió mal durante el inicio.Envíe un informe de error para que pueda "
+"reiniciar el juego"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\io.js:1064
+msgid "You cannot use this rewind during Turn Order"
+msgstr "No puede usar este rebobinado durante la orden de turno"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\io.js:1420
+#: .\static\FCM\JS\io.js:1509
+msgid "Permission Changed"
+msgstr "Permiso cambiado"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\io.js:1475
+msgid "Please tick the box first"
+msgstr "POR FAVOR Marque la casilla primero"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\io.js:1505
+msgid "Excluded from Stats"
+msgstr "excluidos de las estadísticas"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\websocket.js:64
+msgid "Error"
+msgstr "Error"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:228
+msgid ""
+"Player <b>%(playerToKickName)s</b> has used all the standard kickout time."
+msgstr ""
+"el jugador <b>%(playerTokickName) S </b> ha utilizado todo el tiempo de "
+"inicio estándar.El jugador <b>%(playerTokickName) S </b> ha utilizado todo "
+"el tiempo de inicio estándar."
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:265
+msgid "As this is a tournament game, you cannot kick other player"
+msgstr "Como este es un juego de torneo, no puedes patear a otro jugador"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:268
+msgid ""
+"Please use the button below to alert the tournament admins, who will "
+"continue to make moves for this player"
+msgstr ""
+"Utilice el botón a continuación para alertar a los administradores del "
+"torneo, quién continuará haciendo movimientos para este jugadorUtilice el "
+"botón a continuación para alertar a los administradores del torneo, quién "
+"continuará haciendo movimientos para este jugador"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:272
+#: .\static\FCM\JS\main.js:292
+msgid "Not now - allow more time"
+msgstr "Ahora no - Permitir más tiempo"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:273
+msgid "Alert Admins"
+msgstr "Alerta de administradores"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:514
+msgid ""
+"Do you think there are too many 1x Luxury Managers? Please note that COFFEE,"
+" KIMCHI, SUSHI, and NOODLES add one extra"
+msgstr ""
+"¿Crees que hay demasiados gerentes de lujo 1X? ¿Crees que hay demasiados "
+"gerentes de lujo 1X?Tenga en cuenta que el café, el kimchi, el sushi y los "
+"fideos agregan un extra"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:515
+msgid ""
+"Please note: Cart / Truck drivers can drive around a 'roundabout' on the "
+"same tile as many times as they like. Drinks will only be collected once"
+msgstr ""
+"Tenga en cuenta: los conductores de carrito / camiones pueden conducir "
+"alrededor de una 'rotonda' en el mismo mosaico tantas veces como quieran. "
+"Tenga en cuenta: los conductores de carrito / camiones pueden conducir "
+"alrededor de una 'rotonda' en el mismo mosaico tantas veces como quieran.Las"
+" bebidas solo se recopilarán una vez"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:519
+msgid ""
+"Please also make sure you fully understand the coffee rules and example in "
+"the official rules, found <a "
+"href='https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf'"
+" target='_blank'>here</a>"
+msgstr ""
+"también asegúrese de comprender completamente las reglas y el ejemplo del "
+"café en las reglas oficiales, encontrado <a href = 'https: "
+"//www.boardgamehelpers.com/foodchainmagnate/images/fcm_ketchup_regels_eng_web.pdf'"
+" target = '_ en blanco'> aquí </a>También asegúrese de comprender "
+"completamente las reglas y el ejemplo del café en las reglas oficiales, "
+"encontrado <a href = 'https: "
+"//www.boardgamehelpers.com/foodchainmagnate/images/fcm_ketchup_regels_eng_web.pdf'"
+" target = '_ en blanco'> aquí </a>"
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:520
+msgid ""
+"If you still think there is a bug, please check carefully:<ul><li>Which "
+"players had coffee and how much</li><li>If you think a route has not been "
+"considered, could it sell the same amount of coffee as the route "
+"chosen?</li><li>Remmeber that any part of the coffee route that could have "
+"multiple paths each selling the same amount of coffee (even if it's to the "
+"same player) will be skipped</li></ul>"
+msgstr ""
+"Si todavía cree que hay un error, verifique con cuidado: <ul> <li> ¿Qué "
+"jugadores tomaron café y cuánto </li> <li> Si cree que no se ha considerado "
+"una ruta, podría vender la misma cantidad de café que la ruta elegida? </li>"
+" <li>Si todavía cree que hay un error, verifique con cuidado: <ul> <li> ¿Qué"
+" jugadores tomaron café y cuánto </li> <li> Si cree que no se ha considerado"
+" una ruta, podría vender la misma cantidad de café que la ruta elegida? "
+"</li> <li> Remmeber que cualquier parte de la ruta del café podría tener "
+"múltiples rutas cada uno vendiendo la misma cantidad de café (incluso si es "
+"el mismo jugador) </li li> </li ulpil."
+
+#: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\main.js:525
+msgid "Submit"
+msgstr "Entregar"
+
+#: .\static\FCM\JS\controller.js:51 .\static\FCM\JS\main.js:525
+msgid "Reset"
+msgstr "Reiniciar"
+
+#: .\static\FCM\JS\controller.js:60
+msgid "Skip Freeway Placement"
+msgstr "Saltar la colocación de la autopista"
+
+#: .\static\FCM\JS\controller.js:64
+msgid "Place Giant Billboard"
+msgstr "Place Giant Billboard"
+
+#: .\static\FCM\JS\controller.js:68
+msgid "Skip Night Shift Manager"
+msgstr "Skip Night Shift Manager"
+
+#: .\static\FCM\JS\controller.js:72
+msgid "Place Gourmet Guide"
+msgstr "Guía gourmet de lugar"
+
+#: .\static\FCM\JS\controller.js:76
+msgid "Skip Second Campaign Manager"
+msgstr "Omitir el segundo gerente de campaña"
+
+#: .\static\FCM\JS\controller.js:81
+msgid "Skip the Lobbyist Milestone Bonus"
+msgstr "Skip the cabildero bono de hito"
+
+#: .\static\FCM\JS\controller.js:87
+msgid "Skip the New Restaurant Milestone Bonus"
+msgstr "Omita la nueva bonificación del hito en el restaurante"
+
+#: .\static\FCM\JS\controller.js:91
+msgid "Skip Creating Restaurants"
+msgstr "Saltar creando restaurantes"
+
+#: .\static\FCM\JS\controller.js:145 .\static\FCM\JS\controller.js:1550
+#: .\static\FCM\JS\controller.js:1822 .\static\FCM\JS\controller.js:3655
+#: .\static\FCM\JS\controller.js:3809 .\static\FCM\JS\controller.js:3832
+#: .\static\FCM\JS\controller.js:3930 .\static\FCM\JS\controller.js:4502
+#: .\static\FCM\JS\controller.js:4543
+msgid "Reset Whole Turn"
+msgstr "Restablecer todo el giro"
+
+#: .\static\FCM\JS\controller.js:193 .\static\FCM\JS\controller.js:278
+msgid "Yes, continue anyway"
+msgstr "Sí, continúa de todos modos"
+
+#: .\static\FCM\JS\controller.js:193
+msgid "No, continue training"
+msgstr "No, continúa entrenando"
+
+#: .\static\FCM\JS\controller.js:278
+msgid "No, restart production phase"
+msgstr "No, reiniciar la fase de producción"
+
+#: .\static\FCM\JS\controller.js:369
+msgid "There is no one at work. Are you sure you want to confirm?"
+msgstr "No hay nadie en el trabajo.¿Estás seguro de que quieres confirmar?"
+
+#: .\static\FCM\JS\controller.js:1075
+msgid ""
+"<b>Expert Options</b>: If unsure leave on \"Choose Normally\"<BR/>Indicate "
+"your preference in turn order:"
+msgstr ""
+"<b> Opciones de expertos </b>: si no está seguro de que permita \"elija "
+"normalmente\" <br/> Indique su preferencia a su vez: orden:<b> Opciones de "
+"experto </b>: si no está seguro de que permita \"elija normalmente\" <br/> "
+"indique su preferencia a su vez: orden:"
+
+#: .\static\FCM\JS\controller.js:1078
+msgid "Earliest possible"
+msgstr "Más temprano posible"
+
+#: .\static\FCM\JS\controller.js:1115
+msgid "<b>Expert Options</b>: If unsure leave on \"Choose Normally\""
+msgstr ""
+"<b> Opciones de expertos </b>: si no está seguro de que permita \"elija "
+"normalmente \"<b> Opciones de expertos </b>: si no está seguro, permita "
+"\"Elija normalmente\""
+
+#: .\static\FCM\JS\controller.js:1118
+msgid ""
+"You <b>do not have enough money currently</b> to pay your salary. Do you "
+"wish to autopay everyone if you have enough after the dinnertime phase?"
+msgstr ""
+"Usted <b> no tiene suficiente dinero actualmente </b> para pagar su salario."
+" Usted <b> no tiene suficiente dinero actualmente </b> para pagar su "
+"salario.¿Desea automáticamente a todos si tiene suficiente después de la "
+"fase de cena?"
+
+#: .\static\FCM\JS\controller.js:1122
+msgid "Pay all salary if possible"
+msgstr "Pagar todo salario si es posible"
+
+#: .\static\FCM\JS\controller.js:1123
+msgid ". The <b>First Trainer Used</b> MS allows you to keep everyone"
+msgstr ""
+".El primer entrenador <b> utilizado </b> ms le permite mantener a todos"
+
+#: .\static\FCM\JS\controller.js:1130
+msgid ""
+"You have the <b>First Beer Sold Milestone</b> and <b>no Fridge</b>. Do you "
+"wish to autopay everyone with available food and then with money?"
+msgstr ""
+"Tienes la primera cerveza vendida hito </b> y <b> sin nevera </b>. Tienes la"
+" primera cerveza vendida hito </b> y <b> sin nevera </b>.¿Desea automática a"
+" todos con comida disponible y luego con dinero?"
+
+#: .\static\FCM\JS\controller.js:1133
+msgid "Pay salary with as many items as possible and then money"
+msgstr "Pagar salario con tantos artículos como sea posible y luego dinero"
+
+#: .\static\FCM\JS\controller.js:1140
+msgid ""
+"You have a <b>Fridge</b>. Do you wish to automatically keep everything if "
+"you have less than 10 items?"
+msgstr ""
+"tienes una nevera <b> </b>. Tienes una nevera <b> </b>.¿Desea mantener "
+"automáticamente todo si tiene menos de 10 artículos?"
+
+#: .\static\FCM\JS\controller.js:1189
+msgid "Yes"
+msgstr "Sí"
+
+#: .\static\FCM\JS\controller.js:1259
+msgid "Expert Option"
+msgstr "Opción experta"
+
+#: .\static\FCM\JS\controller.js:1261
+msgid "Redo Restructuring"
+msgstr "Reestructuración de rehacer"
+
+#: .\static\FCM\JS\controller.js:1261
+msgid "Redo Payday"
+msgstr "Día de pago de rehacer"
+
+#: .\static\FCM\JS\controller.js:1284
+msgid "Add Module to Game and End Turn"
+msgstr "Agregar módulo al juego y finalizar el giro"
+
+#: .\static\FCM\JS\controller.js:1310
+msgid ""
+"<b>Welcome to Food Chain Magnate Online!</b><BR/>If you have any "
+"suggestions, questions or comments, then please do contact the webmaster at "
+"<img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">. "
+"Thanks!"
+msgstr ""
+"<b> ¡Bienvenido al magnate de la cadena alimentaria en línea! </b> <br/> Si "
+"tiene alguna sugerencia, pregunta o comentario, entonces comuníquese con el "
+"webmaster en <img src = \"/static/lobby/correo electrónico.png \" width = "
+"\"400px \" altura = \"30px \">. <b> ¡Bienvenido al magnate de la cadena "
+"alimentaria en línea! </b> <br/> Si tiene alguna sugerencia, pregunta o "
+"comentario, entonces comuníquese con el webmaster en <img src = "
+"\"/static/lobby/correo electrónico.png\" width = \"400px\" altura = "
+"\"30px\">.¡Gracias!"
+
+#: .\static\FCM\JS\controller.js:1311
+msgid ""
+"<b>Using new code! Currently in BETA. Keep an eye out and Submit Bug "
+"Reports!<br/>For info see <a href='/fcmNewCode' target='_blank'>Here</a></b>"
+msgstr ""
+"<b> ¡Uso de un nuevo código! <b> ¡Uso de un nuevo código!Actualmente en "
+"Beta.¡Esté atento y envíe informes de errores! <br/> Para obtener "
+"información, consulte <a href = '/fcmnewcode' target = '_ en blanco'> aquí "
+"</a> </b>"
+
+#: .\static\FCM\JS\controller.js:1313
+msgid ""
+"To place an item on the board, click any of the squares that are highlighted"
+" in red"
+msgstr ""
+"Para colocar un elemento en el tablero, haga clic en cualquiera de los "
+"cuadrados que se resaltan en rojoPara colocar un elemento en el tablero, "
+"haga clic en cualquiera de los cuadrados que se resaltan en rojo"
+
+#: .\static\FCM\JS\controller.js:1313
+msgid ""
+"To rotate an item, use the arrows displayed next to the item just above the "
+"board"
+msgstr ""
+"Para rotar un elemento, use las flechas que se muestran al lado del elemento"
+" justo encima del tableroPara rotar un elemento, use las flechas que se "
+"muestran al lado del elemento justo encima de la placa"
+
+#: .\static\FCM\JS\controller.js:1313
+msgid ""
+"To see any player's employees and current structure, click on their name in "
+"the black bar at the top of the screen"
+msgstr ""
+"Para ver los empleados de cualquier jugador y la estructura actual, haga "
+"clic en su nombre en la barra negra en la parte superior de la pantallaPara "
+"ver los empleados de cualquier jugador y la estructura actual, haga clic en "
+"su nombre en la barra negra en la parte superior de la pantalla"
+
+#: .\static\FCM\JS\controller.js:1313
+msgid ""
+"To see the remaining employees, milestones, and other items, click "
+"\"Reserve\" in the menu at the top"
+msgstr ""
+"Para ver a los empleados, hitos y otros elementos restantes, haga clic en "
+"\"Reserve\" en el menú en la parte superiorPara ver a los empleados, hitos y"
+" otros elementos restantes, haga clic en \"Reserva\" en el menú en la parte "
+"superior"
+
+#: .\static\FCM\JS\controller.js:1313
+msgid ""
+"You will always have the option to reset the current phase / whole working "
+"day before you end your turn"
+msgstr ""
+"siempre tendrá la opción de restablecer la fase actual / día laboral "
+"completo antes de finalizar su turnoSiempre tendrá la opción de restablecer "
+"la fase actual / el día de trabajo completo antes de finalizar su turno"
+
+#: .\static\FCM\JS\controller.js:1321
+msgid "Choose your restaurant direction, and then its location on the board"
+msgstr ""
+"Elija la dirección de su restaurante y luego su ubicación en el tableroElija"
+" la dirección de su restaurante y luego su ubicación en el tablero"
+
+#: .\static\FCM\JS\controller.js:1333 .\static\FCM\JS\controller.js:1538
+msgid "Resign"
+msgstr "Renunciar"
+
+#: .\static\FCM\JS\controller.js:1340 .\static\FCM\JS\controller.js:1544
+msgid ""
+"You may not resign from a tournament game. Please carry on playing. <br/>If "
+"you must leave, you may prompt the tournament admin"
+msgstr ""
+"Es posible que no renuncie a un juego de torneo. Es posible que no renuncie "
+"a un juego de torneo.Por favor, continúe jugando.<br/> Si debe irse, puede "
+"solicitar el administrador del torneo"
+
+#: .\static\FCM\JS\controller.js:1340 .\static\FCM\JS\controller.js:1544
+msgid "Alert Tournament Admin"
+msgstr "Administrador del torneo de alerta"
+
+#: .\static\FCM\JS\controller.js:1340 .\static\FCM\JS\controller.js:1544
+msgid "Keep playing"
+msgstr "Seguir jugando"
+
+#: .\static\FCM\JS\controller.js:1341 .\static\FCM\JS\controller.js:1545
+msgid "Are you sure you want to resign?"
+msgstr "¿Estás seguro de que quieres renunciar?"
+
+#: .\static\FCM\JS\controller.js:1341 .\static\FCM\JS\controller.js:1545
+msgid "No, I want to keep playing"
+msgstr "No, quiero seguir jugando"
+
+#: .\static\FCM\JS\controller.js:1387
+msgid "Choose your reserve card"
+msgstr "Elija su tarjeta de reserva"
+
+#: .\static\FCM\JS\controller.js:1437
+msgid ""
+"Choose your employees to send to work - select a slot, or choose an employee"
+" directly from the beach"
+msgstr ""
+"Elija a sus empleados para enviar al trabajo: seleccione una ranura o elija "
+"un empleado directamente desde la playaElija a sus empleados para enviar al "
+"trabajo: seleccione una ranura o elija un empleado directamente desde la "
+"playa"
+
+#: .\static\FCM\JS\controller.js:1560
+msgid "Confirm & End Turn"
+msgstr "Confirmar y finalizar"
+
+#: .\static\FCM\JS\controller.js:1650
+msgid "Return to the beach"
+msgstr "Regreso a la playa"
+
+#: .\static\FCM\JS\controller.js:1755
+msgid "Choose your position in turn order:"
+msgstr "Elija su posición a su vez, ordene:"
+
+#: .\static\FCM\JS\controller.js:1828 .\static\FCM\JS\controller.js:3677
+#: .\static\FCM\JS\controller.js:3936 .\static\FCM\JS\controller.js:4509
+msgid "End Turn"
+msgstr "Giro final"
+
+#: .\static\FCM\JS\controller.js:1846
+msgid "After the first turn, you won't be asked to fire anyone"
+msgstr "Después del primer turno, no se le pedirá que dispare a nadie"
+
+#: .\static\FCM\JS\controller.js:1847
+msgid ""
+"After the first turn, you won't be asked to fire anyone (as long as you "
+"don't hire a salaried level 0 employee)"
+msgstr ""
+"Después del primer turno, no se le pedirá que dispare a nadie (siempre que "
+"no contrate a un empleado de nivel 0 asalariado)Después del primer turno, no"
+" se le pedirá que dispare a nadie (siempre que no contrate a un empleado de "
+"nivel 0 asalariado)"
+
+#: .\static\FCM\JS\controller.js:1851
+msgid "You can recruit new employees"
+msgstr "puede reclutar nuevos empleados"
+
+#: .\static\FCM\JS\controller.js:1852
+msgid "Your Night Shift Manager allows each recruiting girl to work twice"
+msgstr ""
+"Su gerente de turno nocturno permite que cada niña reclutada trabaje dos "
+"vecesSu gerente de turno nocturno permite que cada chica reclutada trabaje "
+"dos veces"
+
+#: .\static\FCM\JS\controller.js:1865
+msgid ""
+"At least one base employee is no longer available. Keep recruiting points "
+"for the training phase if you wish to train an employee directly"
+msgstr ""
+"Al menos un empleado base ya no está disponible. Al menos un empleado base "
+"ya no está disponible.Siga puntos de reclutamiento para la fase de "
+"capacitación si desea capacitar a un empleado directamente"
+
+#: .\static\FCM\JS\controller.js:1876
+msgid "%(recruitingAmountLeft)s remaining point"
+msgid_plural "%(recruitingAmountLeft)s remaining points"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\controller.js:1950
+msgid "Your Night Shift Manager allows each trainer to work twice"
+msgstr ""
+"su gerente de turno nocturno permite a cada entrenador trabajar dos vecesSu "
+"gerente de turno nocturno permite que cada entrenador funcione dos veces"
+
+#: .\static\FCM\JS\controller.js:1955
+msgid "You can train %(trainingAmountLeft)s employee"
+msgid_plural "You can train up to  %(trainingAmountLeft)s slots"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\controller.js:1964
+msgid "You can train %(train2amount)s employee up to 2 levels. "
+msgid_plural "You can train up to %(train2amount)s employees up to 2 level. "
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\controller.js:1967
+msgid "You can train 1 employee up to 3 levels"
+msgstr "Puede capacitar a 1 empleado hasta 3 niveles"
+
+#: .\static\FCM\JS\controller.js:1973
+msgid "You have %(recruitingAmountLeft)s recruiting point remaining"
+msgid_plural "You have %(recruitingAmountLeft)s recruiting points remaining"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\controller.js:1978
+msgid "Please choose an employee to train"
+msgstr "Elija un empleado para capacitar"
+
+#: .\static\FCM\JS\controller.js:2006
+msgid "Train from hiring"
+msgstr "Entrena de la contratación"
+
+#: .\static\FCM\JS\controller.js:2013
+msgid "You have training capacity available, but no one to train"
+msgstr ""
+"tiene capacidad de capacitación disponible, pero nadie para entrenarTienes "
+"capacidad de entrenamiento disponible, pero nadie para entrenar"
+
+#: .\static\FCM\JS\controller.js:2019
+msgid "You can train staff from your working employees (preserving colour):"
+msgstr ""
+"Puede capacitar al personal de sus empleados que trabajan (preservar el "
+"color):Puede capacitar al personal de sus empleados que trabajan (preservar "
+"el color):"
+
+#: .\static\FCM\JS\controller.js:2078
+msgid "To:"
+msgstr "A:"
+
+#: .\static\FCM\JS\controller.js:2178
+msgid "Trained:"
+msgstr "Entrenado:"
+
+#: .\static\FCM\JS\controller.js:2205
+msgid ""
+"Training a Barista allows you to place/move a coffee shop with a range of 2 "
+"- Remaining: %(baristaCoffeeShops)s"
+msgstr ""
+"Entrenar un barista le permite colocar/mover una cafetería con un rango de 2"
+" - restante: %(baristacoffeeshops) sEntrenar un barista le permite "
+"colocar/mover una cafetería con una gama de 2 - restante: "
+"%(baristacoffeeshops) s"
+
+#: .\static\FCM\JS\controller.js:2210
+msgid ""
+"Training a Lead Barista from a Barista allows you to place/move a coffee "
+"shop with unlimited range - Remaining: %(leadBaristaCoffeeShopsFromB)s"
+msgstr ""
+"Entrenar un barista principal de un barista le permite colocar/mover una "
+"cafetería con un rango ilimitado: restante: %(LeadBaristacoffeShopsFromb) "
+"sEntrenar un barista principal de un barista le permite colocar/mover una "
+"cafetería con un rango ilimitado: restante: %(LeadBaristacoffeeshopsFromb) s"
+
+#: .\static\FCM\JS\controller.js:2222
+msgid ""
+"Training a Lead Barista from a Trainee Barista allows you to <B>first "
+"place/move a coffee shop with range 2 (included above) and then another with"
+" unlimited range</b> - Remaining: %(leadBaristaCoffeeShopsFromTB)s"
+msgstr ""
+"Entrenar un barista principal de un aprendiz de barista le permite <b> "
+"primer lugar/mover una cafetería con el rango 2 (incluido arriba) y luego "
+"otro con rango ilimitado </b> - restante: %(LeadBaristacoffeeshopsFromTb) "
+"sEntrenar a un barista principal de un aprendiz de barista le permite <b> "
+"primer lugar/mover una cafetería con el rango 2 (incluido arriba) y luego "
+"otro con rango ilimitado </b> - restante: %(liderbaristacoffeShopsFromTb) s"
+
+#: .\static\FCM\JS\controller.js:2232
+msgid ""
+"<b>Place a coffee shop with unlimited range</b><BR/>There can only be 1 "
+"coffee shop per tile, and it must be next to a road"
+msgstr ""
+"<b> Coloque una cafetería con una gama ilimitada </b> <br/> Solo puede haber"
+" 1 cafetería por azulejo, y debe estar al lado de una carretera<b> Coloque "
+"una cafetería con gama ilimitada </b> <br/> Solo puede haber 1 cafetería por"
+" mosaico, y debe estar al lado de una carretera"
+
+#: .\static\FCM\JS\controller.js:2233
+msgid ""
+"<b>Place a coffee shop with range 2</b><BR/>There can only be 1 coffee shop "
+"per tile, and it must be next to a road"
+msgstr ""
+"<b> Coloque una cafetería con el rango 2 </b> <br/> Solo puede haber 1 "
+"cafetería por azulejo, y debe estar al lado de una carretera<b> Coloque una "
+"cafetería con el rango 2 </b> <br/> Solo puede haber 1 cafetería por "
+"mosaico, y debe estar al lado de una carretera"
+
+#: .\static\FCM\JS\controller.js:2264 .\static\FCM\JS\controller.js:4555
+msgid "No more Coffee Shops. Select a placed Coffee Shop to move it"
+msgstr "No más cafeterías.Seleccione una cafetería colocada para moverlo"
+
+#: .\static\FCM\JS\controller.js:2342
+msgid "Select a marketeer to start a marketing campaign"
+msgstr "Seleccione un vendedor para comenzar una campaña de marketing"
+
+#: .\static\FCM\JS\controller.js:2440
+msgid "There are no suitable marketing campaigns left"
+msgstr "No quedan campañas de marketing adecuadas"
+
+#: .\static\FCM\JS\controller.js:2441
+msgid ""
+"There are no available campaigns. EIther there is no space for it on the "
+"board, or no mailboxes left"
+msgstr ""
+"No hay campañas disponibles. No hay campañas disponibles.O no hay espacio "
+"para ello en el tablero, o no quedan buzones"
+
+#: .\static\FCM\JS\controller.js:2466
+msgid "Choose a marketing campaign for the Night Shift Manager"
+msgstr "Elija una campaña de marketing para el gerente de turno nocturno"
+
+#: .\static\FCM\JS\controller.js:2468
+msgid "Choose a marketing campaign"
+msgstr "Elija una campaña de marketing"
+
+#: .\static\FCM\JS\controller.js:2469
+msgid ""
+"Your Night Shift Manager allows your Marketing Trainee to market twice. Your"
+" trainee will be attached to the longer of the 2 campaigns"
+msgstr ""
+"Su gerente de turno nocturno permite que su aprendiz de marketing se "
+"comercialice dos veces. Su gerente de turno nocturno permite que su alumno "
+"de marketing se comercialice dos veces.Su aprendiz se adjuntará al más largo"
+" de las 2 campañas."
+
+#: .\static\FCM\JS\controller.js:2515
+msgid "Choose a mailbox campaign for the Campaign Manager Milestone"
+msgstr "Elija una campaña de buzón para el hito del gerente de la campaña"
+
+#: .\static\FCM\JS\controller.js:2743
+msgid ""
+"Place a Highway Ramp to connect to the Rural Area<BR/>You can place it side "
+"on or end on to any edge of the board, as long as it connects to at least "
+"one road"
+msgstr ""
+"Coloque una rampa de carretera para conectarse al área rural <br/> Puede "
+"colocarlo de lado o terminar en cualquier borde del tablero, siempre que se "
+"conecte a al menos una carreteraColoque una rampa de carretera para "
+"conectarse al área rural <br/> Puede colocarla de lado o terminar en "
+"cualquier borde de la placa, siempre que se conecte a al menos una carretera"
+
+#: .\static\FCM\JS\controller.js:2750
+msgid "There are no more freeways left."
+msgstr "No quedan más autopistas."
+
+#: .\static\FCM\JS\controller.js:2805
+msgid "Select the Food / Drink producer"
+msgstr "Seleccione el productor de alimentos / bebidas"
+
+#: .\static\FCM\JS\controller.js:2807
+msgid ""
+"Your Night Shift Manager allows each Errand Boy and Kitchen Trainee to work "
+"twice. They are displayed twice each below"
+msgstr ""
+"Su gerente de turno nocturno permite que cada niño y aprendiz de cocina "
+"trabajen dos veces. Su gerente de turno nocturno permite que cada niño y "
+"aprendiz de cocina trabajen dos veces.Se muestran dos veces cada uno a "
+"continuación"
+
+#: .\static\FCM\JS\controller.js:2808
+msgid ""
+"Your Night Shift Manager allows each Barista Trainee, Errand Boy and Kitchen"
+" Trainee to work twice. They are displayed twice each below"
+msgstr ""
+"Su gerente de turno nocturno permite que cada aprendiz de barista, recado y "
+"aprendiz de cocina trabaje dos veces. Su gerente de turno nocturno permite "
+"que cada aprendiz de barista, recado y aprendiz de cocina trabaje dos "
+"veces.Se muestran dos veces cada uno a continuación"
+
+#: .\static\FCM\JS\controller.js:2893
+msgid "Select Drink to produce"
+msgstr "Seleccione bebida para producir"
+
+#: .\static\FCM\JS\controller.js:2968
+msgid "Stop and collect drinks"
+msgstr "Detente y recoge bebidas"
+
+#: .\static\FCM\JS\controller.js:3096
+msgid "You can build new houses and gardens"
+msgstr "Puedes construir casas y jardines nuevas"
+
+#: .\static\FCM\JS\controller.js:3194
+msgid ""
+"You can build a new road or park<BR>The lobbyist has a range of 2 but can "
+"also build next to any road that is within a range of 2"
+msgstr ""
+"Puede construir una nueva carretera o parque <br> El cabildero tiene un "
+"rango de 2 pero también puede construir junto a cualquier camino que esté "
+"dentro de un rango de 2Puede construir una nueva carretera o parque <br> El "
+"cabildero tiene un rango de 2 pero también puede construir junto a cualquier"
+" camino que esté dentro de un rango de 2"
+
+#: .\static\FCM\JS\controller.js:3200
+msgid "Unfortunately there are no more roads or parks available"
+msgstr "Lamentablemente no hay más caminos o parques disponibles."
+
+#: .\static\FCM\JS\controller.js:3201
+msgid "Ok, Move to the next phase"
+msgstr "Ok, pasa a la siguiente fase"
+
+#: .\static\FCM\JS\controller.js:3271
+msgid ""
+"For the First Lobbyist Used milestone, you are allowed to add a new tile to "
+"the board"
+msgstr ""
+"para el primer cabildero usado Milestone, se le permite agregar un nuevo "
+"mosaico al tableroPara el primer cabildero usado Milestone, puede agregar un"
+" nuevo mosaico al tablero"
+
+#: .\static\FCM\JS\controller.js:3272
+msgid ""
+"Choose the tile and rotation you would like, and then add it to a completely"
+" free map edge"
+msgstr ""
+"Elija el mosaico y la rotación que le gustaría, y luego agrégalo a un borde "
+"de mapa completamente libreElija el mosaico y la rotación que desee, y luego"
+" agréguelo a un borde de mapa completamente libre"
+
+#: .\static\FCM\JS\controller.js:3450
+msgid "Move"
+msgstr "Mover"
+
+#: .\static\FCM\JS\controller.js:3592
+msgid "You can fire any available employees"
+msgstr "Puede despedir a cualquier empleado disponible"
+
+#: .\static\FCM\JS\controller.js:3596 .\static\FCM\JS\controller.js:4834
+msgid "Marketing employees you can't fire:"
+msgstr "Empleados de marketing que no puede disparar:"
+
+#: .\static\FCM\JS\controller.js:3611 .\static\FCM\JS\controller.js:4848
+msgid ""
+"You need to pay: $%(salaryAmount)s or %(itemsAmount)s resource tokens (or a "
+"mix of both)"
+msgstr ""
+"Debe pagar: $ %(salaryamount) s o %(elementos sáculos) s tokens de recursos "
+"(o una combinación de ambos)Debe pagar: $ %(salaryamount) s o %(elementos "
+"súbitos) s tokens de recursos (o una combinación de ambos)"
+
+#: .\static\FCM\JS\controller.js:3666
+msgid "Ok, thank you very much"
+msgstr "Ok, muchas gracias"
+
+#: .\static\FCM\JS\controller.js:3710 .\static\FCM\JS\controller.js:4965
+msgid "You're Fired!"
+msgstr "¡Estás despedido!"
+
+#: .\static\FCM\JS\controller.js:3759 .\static\FCM\JS\controller.js:5014
+msgid "You have to pay for %(employeesToPayFor)s employee."
+msgid_plural "You have to pay for %(employeesToPayFor)s employees."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\controller.js:3765 .\static\FCM\JS\controller.js:5020
+msgid "Choose the item you want to use:"
+msgid_plural ""
+"Choose the %(remainingEmployeesToPayFor)s items you want to use:"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\controller.js:3775 .\static\FCM\JS\controller.js:5035
+msgid ""
+"You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> item"
+msgid_plural ""
+"You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> "
+"items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\controller.js:3863 .\static\FCM\JS\controller.js:5182
+msgid "You can store either Kimchi or other types of food/drink in a fridge"
+msgstr ""
+"Puede almacenar kimchi u otros tipos de alimentos/bebidas en una neveraPuede"
+" almacenar kimchi u otros tipos de alimentos/bebidas en una nevera"
+
+#: .\static\FCM\JS\controller.js:3863 .\static\FCM\JS\controller.js:5182
+msgid "Your items:"
+msgstr "Tus artículos:"
+
+#: .\static\FCM\JS\controller.js:3876 .\static\FCM\JS\controller.js:5195
+msgid "Store Kimchi"
+msgstr "Almacenar kimchi"
+
+#: .\static\FCM\JS\controller.js:3889
+msgid "You may keep up to 10 items. Choose the item you want to throw away"
+msgid_plural ""
+"You may keep up to 10 items. Choose the %(remainingItems)s items you want to"
+" throw away"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\controller.js:3893
+msgid ""
+"You may keep all remaining items, or click on items to throw them away:"
+msgstr ""
+"puede mantener todos los artículos restantes o hacer clic en los elementos "
+"para tirarlos:Puede mantener todos los artículos restantes o hacer clic en "
+"los elementos para tirarlos:"
+
+#: .\static\FCM\JS\controller.js:4056 .\static\FCM\JS\controller.js:4107
+msgid "You are about to confirm the whole Working Day"
+msgstr "Estás a punto de confirmar todo el día laboral"
+
+#: .\static\FCM\JS\controller.js:4076
+msgid ""
+"<br/>Payday will be skipped as you have no salary to pay and it is turn 1 or"
+" 2"
+msgstr ""
+"<br/> El día de pago se omitirá ya que no tiene salario para pagar y es el "
+"turno 1 o 2<br/> El día de pago se omitirá ya que no tiene salario para "
+"pagar y es el turno 1 o 2"
+
+#: .\static\FCM\JS\controller.js:4077
+msgid "<br/>Payday will be played in turn order"
+msgstr "<br/> El día de pago se jugará a su vez"
+
+#: .\static\FCM\JS\controller.js:4087
+msgid ""
+"You have <b>enough money</b> to keep all your employees. You can decide now "
+"to keep all of them in order to save time"
+msgstr ""
+"tiene <b> suficiente dinero </b> para mantener a todos sus empleados. Tiene "
+"<b> suficiente dinero </b> para mantener a todos sus empleados.Puede decidir"
+" ahora mantenerlos a todos para ahorrar tiempo"
+
+#: .\static\FCM\JS\controller.js:4091
+msgid "End Turn. Play Payday Phase"
+msgstr "Giro final.Jugar fase de día de pago"
+
+#: .\static\FCM\JS\controller.js:4094
+msgid "End Turn. Auto-pay salaries and keep all employees"
+msgstr ""
+"Final Turn. Giro final.Salarios de pago automático y mantener a todos los "
+"empleados"
+
+#: .\static\FCM\JS\controller.js:4132
+msgid "Recruit"
+msgstr "Recluta"
+
+#: .\static\FCM\JS\controller.js:4155
+msgid "Used to reduce salary"
+msgstr "Se utiliza para reducir el salario"
+
+#: .\static\FCM\JS\controller.js:4162
+msgid "can be used to reduce salary"
+msgstr "se puede usar para reducir el salario"
+
+#: .\static\FCM\JS\controller.js:4170
+msgid "Train"
+msgstr "Tren"
+
+#: .\static\FCM\JS\controller.js:4200
+msgid "Market"
+msgstr "Mercado"
+
+#: .\static\FCM\JS\controller.js:4238
+msgid "Produce"
+msgstr "Producir"
+
+#: .\static\FCM\JS\controller.js:4280
+msgid "Build Houses/Gardens"
+msgstr "Construir casas/jardines"
+
+#: .\static\FCM\JS\controller.js:4315
+msgid "Lobby"
+msgstr "Vestíbulo"
+
+#: .\static\FCM\JS\controller.js:4356
+msgid "New Restaurants"
+msgstr "Nuevos restaurantes"
+
+#: .\static\FCM\JS\controller.js:4523
+msgid ""
+"<b>The \"First Coffee Sold\" Milestone allows you to place a coffee shop "
+"with unlimited range </b><BR/>There can only be 1 coffee shop per tile, and "
+"it must be next to a road"
+msgstr ""
+"<b> El hito \"primer café vendido \" le permite colocar una cafetería con "
+"una gama ilimitada </b> <br/> Solo puede haber 1 cafetería por mosaico, y "
+"debe estar al lado de una carretera<b> El hito \"primer café vendido\" le "
+"permite colocar una cafetería con una gama ilimitada </b> <br/> Solo puede "
+"haber 1 cafetería por mosaico, y debe estar al lado de una carretera"
+
+#: .\static\FCM\JS\controller.js:4549
+msgid "Skip Coffee Milestone"
+msgstr "Skip Coffee Mito"
+
+#: .\static\FCM\JS\controller.js:4635
+msgid "<b>Expert Options</b>"
+msgstr "<b> Opciones de expertos </b>"
+
+#: .\static\FCM\JS\controller.js:4642 .\static\FCM\JS\controller.js:4643
+#: .\static\FCM\JS\controller.js:4711 .\static\FCM\JS\controller.js:4712
+msgid "No Move Set"
+msgstr "Sin conjunto de movimiento"
+
+#: .\static\FCM\JS\controller.js:4644
+msgid "No Salary - Skip Payday"
+msgstr "Sin salario - Saltar el día de pago"
+
+#: .\static\FCM\JS\controller.js:4645
+msgid "Enough money - Pay Everyone"
+msgstr "Suficiente dinero - pagar a todos"
+
+#: .\static\FCM\JS\controller.js:4646
+msgid "Pay Everyone if Enough Money"
+msgstr "Pague a todos si es suficiente dinero"
+
+#: .\static\FCM\JS\controller.js:4647
+msgid "Keep everyone - Pay with items then with $$$"
+msgstr "Mantenga a todos: pagar con artículos y luego con $$$"
+
+#: .\static\FCM\JS\controller.js:4648
+msgid "Keep everyone - Trainer MS"
+msgstr "Mantenga a todos - Trainer MS"
+
+#: .\static\FCM\JS\controller.js:4651
+msgid "Keep Everyone"
+msgstr "Mantenga a todos"
+
+#: .\static\FCM\JS\controller.js:4652
+msgid "Keep everyone: "
+msgstr "Mantenga a todos: "
+
+#: .\static\FCM\JS\controller.js:4654
+msgid "Fire:"
+msgstr "Fuego:"
+
+#: .\static\FCM\JS\controller.js:4662
+msgid "Pay with: "
+msgstr "Pagar con:"
+
+#: .\static\FCM\JS\controller.js:4673 .\static\FCM\JS\controller.js:4729
+msgid "Cancel Move"
+msgstr "Cancelar movimiento"
+
+#: .\static\FCM\JS\controller.js:4675
+msgid "Pre-set Payday"
+msgstr "Día de pago preestablecido"
+
+#: .\static\FCM\JS\controller.js:4681
+msgid "Pay salary with items then money"
+msgstr "Pagar salario con artículos y luego dinero"
+
+#: .\static\FCM\JS\controller.js:4683
+msgid "Keep All (No Salary to pay)"
+msgstr "Mantenga todo (sin salario para pagar)"
+
+#: .\static\FCM\JS\controller.js:4685
+msgid "Keep All (Enough Money)"
+msgstr "Mantenga todo (suficiente dinero)"
+
+#: .\static\FCM\JS\controller.js:4687
+msgid "Keep All (First Trainer Used MS)"
+msgstr "Mantenga todo (primer entrenador usado MS)"
+
+#: .\static\FCM\JS\controller.js:4689
+msgid "Keep All (If you earn Enough Money)"
+msgstr "Mantenga todo (si gana suficiente dinero)"
+
+#: .\static\FCM\JS\controller.js:4713
+msgid "Keep all items if possible"
+msgstr "Mantenga todos los artículos si es posible"
+
+#: .\static\FCM\JS\controller.js:4716
+msgid "Keep items in the folowing priority order: "
+msgstr "Mantenga los elementos en el siguiente orden de prioridad:"
+
+#: .\static\FCM\JS\controller.js:4723
+msgid "Discard everything - keep nothing"
+msgstr "Descarte todo - no guarda nada"
+
+#: .\static\FCM\JS\controller.js:4731
+msgid "Pre-set Clean Up"
+msgstr "Limpieza preestablecida"
+
+#: .\static\FCM\JS\controller.js:4734
+msgid "Keep All (If you have 10 or fewer items)"
+msgstr "Mantenga todo (si tiene 10 o menos artículos)"
+
+#: .\static\FCM\JS\controller.js:4830
+msgid ""
+"You can pre-select which employees to fire. If you do not have enough money "
+"after this, you will play the phase as normal"
+msgstr ""
+"Puede pre-seleccionar qué empleados disparar. Puede pre-seleccionar qué "
+"empleados disparar.Si no tienes suficiente dinero después de esto, jugarás "
+"la fase de manera normal"
+
+#: .\static\FCM\JS\controller.js:4888
+msgid "There are no employees you can choose to pre-fire"
+msgstr "No hay empleados que pueda elegir prefirir"
+
+#: .\static\FCM\JS\controller.js:4896 .\static\FCM\JS\controller.js:5069
+#: .\static\FCM\JS\controller.js:5123
+msgid "Cancel Pre-Payday"
+msgstr "Cancelar el pre-pagado"
+
+#: .\static\FCM\JS\controller.js:4912 .\static\FCM\JS\controller.js:5085
+#: .\static\FCM\JS\controller.js:5139
+msgid "Reset Payday"
+msgstr "Restablecer el día de pago"
+
+#: .\static\FCM\JS\controller.js:4932 .\static\FCM\JS\controller.js:5153
+msgid "Save Payday Turn"
+msgstr "Ahorre el turno del día de pago"
+
+#: .\static\FCM\JS\controller.js:5027
+msgid ""
+"IF ANY ITEM IS NO LONGER AVAILABLE AFTER PAYDAY THEN MONEY WILL BE USED "
+"INSTEAD"
+msgstr ""
+"si algún artículo ya no está disponible después del día de pago, entonces se"
+" usará dinero en su lugarSi algún artículo ya no está disponible después del"
+" día de pago, entonces se usará dinero en su lugar"
+
+#: .\static\FCM\JS\controller.js:5100
+msgid "Pay the rest in $$$ - Save Payday Turn"
+msgstr "Pague el resto en $$$ - Ahorre el turno del día de pago"
+
+#: .\static\FCM\JS\controller.js:5201
+msgid ""
+"Your fridge can store up to 10 items. Some may be sold during the Dinnertime"
+" phase."
+msgstr ""
+"su refrigerador puede almacenar hasta 10 artículos. Su refrigerador puede "
+"almacenar hasta 10 artículos.Algunos se pueden vender durante la fase de "
+"cena."
+
+#: .\static\FCM\JS\controller.js:5202
+msgid "Click items in the priority you would like them to be stored"
+msgstr ""
+"haga clic en los elementos en la prioridad que le gustaría que se "
+"almacenenHaga clic en los elementos en la prioridad que le gustaría que se "
+"almacenen"
+
+#: .\static\FCM\JS\controller.js:5206
+msgid "Highest Priority to store > "
+msgstr "La más alta prioridad para almacenar>"
+
+#: .\static\FCM\JS\controller.js:5214
+msgid " < Lowest Priority to store"
+msgstr "<Prioridad más baja para almacenar"
+
+#: .\static\FCM\JS\controller.js:5253
+msgid "Cancel Pre-Cleanup"
+msgstr "Cancelar pre-limpieza"
+
+#: .\static\FCM\JS\controller.js:5266
+msgid "Reset Cleanup"
+msgstr "Restablecer limpieza"
+
+#: .\static\FCM\JS\controller.js:5277
+msgid "Save Clean Up Turn"
+msgstr "Guardar el giro de limpieza"
+
+#: .\static\FCM\JS\history.js:163
+msgid "%(playerName)s chooses to delay their first restaurant"
+msgstr "%(nombre de playern) s elige retrasar su primer restaurante"
+
+#: .\static\FCM\JS\history.js:165
+msgid "%(playerName)s chooses their reserve card"
+msgstr "%(PlayEn nombre) S elige su carta de reserva"
+
+#: .\static\FCM\JS\history.js:167 .\static\FCM\JS\history.js:173
+#: .\static\FCM\JS\history.js:178
+msgid "%(playerName)s chooses to play %(position)s"
+msgstr "%(PlayEn nombre) S elige jugar %(posición) s"
+
+#: .\static\FCM\JS\history.js:170
+msgid "%(playerName)s has to play %(position)s"
+msgstr "%(playername) s tiene que jugar %(posición) s"
+
+#: .\static\FCM\JS\history.js:174
+msgid "(auto early)"
+msgstr "(Auto temprano)"
+
+#: .\static\FCM\JS\history.js:202
+msgid "%(playerName)s sends no one to work"
+msgstr "%(nombre de playern) s no envía a nadie a trabajar"
+
+#: .\static\FCM\JS\history.js:220
+msgid "%(playerName)s hires no one"
+msgstr "%(nombre de playern) s no contrata a nadie"
+
+#: .\static\FCM\JS\history.js:230
+msgid "[From Hiring]"
+msgstr "[De la contratación]"
+
+#: .\static\FCM\JS\history.js:234
+msgid "[From Structure]"
+msgstr "[De la estructura]"
+
+#: .\static\FCM\JS\history.js:244
+msgid "%(playerName)s trains no one"
+msgstr "%(nombre de playern) S no"
+
+#: .\static\FCM\JS\history.js:291
+msgid ""
+"%(player)s started marketing campaign #%(marketingCampaignNumber)s with "
+"%(employee)s, advertising:"
+msgstr ""
+"%(jugador) S comenzó la campaña de marketing%(jugador) S comenzó la campaña "
+"de marketing # %(marketingcampaignnumber) s con %(empleado) s, publicidad:"
+
+#: .\static\FCM\JS\history.js:292
+msgid ""
+"%(player)s started marketing campaign #%(marketingCampaignNumber)s with "
+"%(employee)s, %(orientation)s at co-ordinates (%(Xcoord)s, %(Ycoord)s), "
+"advertising:"
+msgstr ""
+"%(jugador) S comenzó la campaña de marketing # %(marketingcampaignnumber) s "
+"con %(empleado) s, %(orientación) s en coordenadas ( %(xcoord) s, %(ycoord) "
+"s), publicidad:"
+
+#: .\static\FCM\JS\history.js:303 .\static\FCM\JS\history.js:327
+#: .\static\FCM\JS\history.js:344
+msgid "eternally"
+msgstr "eternamente"
+
+#: .\static\FCM\JS\history.js:306 .\static\FCM\JS\history.js:329
+msgid "for %(turnLength)s turn"
+msgstr "para %(gira) s giro"
+
+#: .\static\FCM\JS\history.js:323
+msgid ""
+"%(player)s used their %(marketingTrainee)s again with their "
+"%(NightShiftManager)s to start marketing campaign "
+"#%(marketingCampaignNumber)s at co-ordinates (%(Xcoord)s, %(Ycoord)s), "
+"advertising:"
+msgstr ""
+"%(jugador) S usó su %(marketingTrainee) S nuevamente con su "
+"%(NightshiftManager) para comenzar la campaña de marketing%(jugador) S usó "
+"su %(marketingTrainee) S nuevamente con su %(NightshiftManager) para "
+"comenzar la campaña de marketing # %(marketingcampaignnumber) s en "
+"coordenadas ( %(xcoord) s, %(ycoord) s), publicidad:"
+
+#: .\static\FCM\JS\history.js:324
+msgid ""
+"%(player)s used their %(marketingTrainee)s again with their "
+"%(NightShiftManager)s to start marketing campaign "
+"#%(marketingCampaignNumber)s, %(orientation)s at co-ordinates (%(Xcoord)s, "
+"%(Ycoord)s), advertising:"
+msgstr ""
+"%(jugador) S usó su %(marketingTrainee) S nuevamente con su "
+"%(NightshiftManager) para comenzar la campaña de marketing # "
+"%(marketingcampaignnumber) s, %(orientación) s en las coordenadas ( "
+"%(xcoord) s, %(ycoord) s), anunciando:"
+
+#: .\static\FCM\JS\history.js:342
+msgid ""
+"%(player)s started marketing campaign #%(marketingCampaignNumber)s (no "
+"marketer is used for the Restaurant Milestone), at co-ordinates (%(Xcoord)s,"
+" %(Ycoord)s), advertising:"
+msgstr ""
+"%(Player) s Comenzó la campaña de marketing #%(marketingcampaignnumber) s "
+"(ningún vendedor se utiliza para el hito del restaurante), en las "
+"coordenadas (%(xcoord) s,%(ycoord) s), publicidad:"
+
+#: .\static\FCM\JS\history.js:348 .\static\FCM\JS\history.js:370
+msgid "%(player)s uses: "
+msgstr "%(jugador) s usos:"
+
+#: .\static\FCM\JS\history.js:358
+msgid "to produce/collect:"
+msgstr "Para producir/recolectar:"
+
+#: .\static\FCM\JS\history.js:374
+msgid "during cleanup to produce:"
+msgstr "durante la limpieza para producir:"
+
+#: .\static\FCM\JS\history.js:387
+msgid ""
+"%(player)s builds house #%(houseNumber)s %(orientation)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(Jugador) S Construye House # %(Housenumber) S %(Orientación) S en "
+"Coordenadas ( %(XCOord) S, %(YCOord) S) S)"
+
+#: .\static\FCM\JS\history.js:396
+msgid ""
+"%(player)s builds a garden for house #%(houseNumber)s %(orientation)s at co-"
+"ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(jugador) S construye un jardín para la casa # %(Housenumber) S "
+"%(Orientación) S en las coordenadas ( %(XCOord) S, %(YCOord) S) S) S)"
+
+#: .\static\FCM\JS\history.js:410
+msgid ""
+"%(player)s builds a Freeway %(orientation)s at co-ordinates (%(Xcoord)s, "
+"%(Ycoord)s)"
+msgstr ""
+"%(jugador) S construye una autopista %(orientación) s en las coordenadas ( "
+"%(xcoord) s, %(ycoord) s)"
+
+#: .\static\FCM\JS\history.js:425
+msgid ""
+"%(player)s builds a new restaurant at co-ordinates (%(Xcoord)s, %(Ycoord)s) "
+"facing %(orientation)s, opening next turn"
+msgstr ""
+"%(jugador) S construye un nuevo restaurante en coordenadas ( %(xcoord) s, "
+"%(ycoord) s) que enfrenta %(orientación) S, apertura siguiente turno"
+
+#: .\static\FCM\JS\history.js:426
+msgid ""
+"%(player)s opens a new restaurant at co-ordinates (%(Xcoord)s, %(Ycoord)s) "
+"facing %(orientation)s"
+msgstr ""
+"%(jugador) S abre un nuevo restaurante en las coordenadas ( %(xcoord) s, "
+"%(ycoord) s) que enfrenta %(orientación) s"
+
+#: .\static\FCM\JS\history.js:449
+msgid ""
+"%(player)s moves a restaurant from co-ordinates (%(Xcoord)s, %(Ycoord)s) to "
+"co-ordinates (%(Xcoord2)s, %(Ycoord2)s) facing %(orientation)s"
+msgstr ""
+"%(jugador) m mueve un restaurante de coordenadas ( %(xcoord) s, %(ycoord) s)"
+" a coordenadas ( %(xcoord2) s, %(ycoord2) s) que enfrenta %(orientación) s"
+
+#: .\static\FCM\JS\history.js:454
+msgid ""
+"Dinner time: No sales occurred, either due to lack of demand or lack of "
+"items"
+msgstr ""
+"Hora de la cena: no se produjeron ventas, ya sea debido a la falta de "
+"demanda o la falta de artículos"
+
+#: .\static\FCM\JS\history.js:457 .\static\FCM\JS\history.js:702
+msgid "Dinner time"
+msgstr "Hora de la cena"
+
+#: .\static\FCM\JS\history.js:485
+msgid "Apartment"
+msgstr "Departamento"
+
+#: .\static\FCM\JS\history.js:509
+msgid ""
+"Houses required to travel over a roadworks marker this turn add +1 distance "
+"per roadworks"
+msgstr ""
+"Casas requeridas para viajar a través de un marcador de obras viales Este "
+"turno agregue +1 distancia por vías"
+
+#: .\static\FCM\JS\history.js:512
+msgid "Players who can fulfill this demand:"
+msgstr "Jugadores que pueden satisfacer esta demanda:"
+
+#: .\static\FCM\JS\history.js:519
+msgid "distance"
+msgstr "distancia"
+
+#: .\static\FCM\JS\history.js:535
+msgid "Only %(player)s can fulfill these demands"
+msgstr "Solo % %(jugador) s puede satisfacer estas demandas"
+
+#: .\static\FCM\JS\history.js:555
+msgid "House #%(houseNumber)s goes to %(player)s for $%(saleAmount)s"
+msgstr "House #%(Housenumber) S va al%(jugador) s por $%(saleAment) s"
+
+#: .\static\FCM\JS\history.js:556
+msgid "Apartment #%(apartmentNumber)s goes to %(player)s for $%(saleAmount)s"
+msgstr "Apartamento #%(apartamnumber) S va al%(jugador) s por $%(saleamont) s"
+
+#: .\static\FCM\JS\history.js:557
+msgid "Rural Area goes to %(player)s for $%(saleAmount)s"
+msgstr "El área rural va a %(jugador) s por $ %(saleamont) s"
+
+#: .\static\FCM\JS\history.js:559 .\static\FCM\JS\history.js:621
+msgid "Base price"
+msgstr "Precio base"
+
+#: .\static\FCM\JS\history.js:559
+msgid "item"
+msgstr "artículo"
+
+#: .\static\FCM\JS\history.js:560 .\static\FCM\JS\history.js:622
+msgid "The base price is doubled, because the house has a garden."
+msgstr "El precio base se duplica, porque la casa tiene un jardín."
+
+#: .\static\FCM\JS\history.js:561 .\static\FCM\JS\history.js:623
+msgid ""
+"The base price is doubled, because the apartment is adjacent to a park."
+msgstr ""
+"El precio base se duplica, porque el apartamento está adyacente a un "
+"parque.El precio base se duplica, porque el apartamento está adyacente a un "
+"parque."
+
+#: .\static\FCM\JS\history.js:563 .\static\FCM\JS\history.js:625
+msgid ""
+"The base price is tripled, because the house is adjacent to a park and has a"
+" garden."
+msgstr ""
+"El precio base se triplica, porque la casa está adyacente a un parque y "
+"tiene un jardín.El precio base se triplica, porque la casa está adyacente a "
+"un parque y tiene un jardín."
+
+#: .\static\FCM\JS\history.js:565
+msgid "The player has a bonus of $%(bonusAmount)s"
+msgstr "el jugador tiene una bonificación de $%(Bonusamunt) s"
+
+#: .\static\FCM\JS\history.js:576 .\static\FCM\JS\history.js:633
+msgid "A Fry Chef adds a bonus of $%(fryChefsBonus)s"
+msgid_plural "Fry Chefs add a bonus of $%(fryChefsBonus)s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\history.js:579
+msgid "The Fry Chef bonus was already added to the coffee sale."
+msgstr "El bono del chef Fry ya se agregó a la venta de café."
+
+#: .\static\FCM\JS\history.js:606
+msgid "Coffee sales for apartment #%(apartmentNumber)s:"
+msgstr "Ventas de café para apartamentos #%(apartamnumber) s:"
+
+#: .\static\FCM\JS\history.js:607
+msgid "Coffee sales for Rural Area:"
+msgstr "Ventas de café para área rural:"
+
+#: .\static\FCM\JS\history.js:621
+msgid "Total Income:"
+msgstr "Ingresos totales:"
+
+#: .\static\FCM\JS\history.js:642
+msgid "No coffee sold"
+msgstr "No se vende café"
+
+#: .\static\FCM\JS\history.js:648
+msgid "More Information"
+msgstr "Más información"
+
+#: .\static\FCM\JS\history.js:682
+msgid "What are the highlighted restaurants / coffee shops?"
+msgstr "¿Cuáles son los restaurantes / cafeterías destacados?"
+
+#: .\static\FCM\JS\history.js:683
+msgid ""
+"Restaurants / coffee shops that are highlighted indicate where coffee was "
+"sold along the route taken by this house."
+msgstr ""
+"las restaurantes / cafeterías que se destacan indican dónde se vendió el "
+"café a lo largo de la ruta tomada por esta casa.Las restaurantes / "
+"cafeterías que se destacan indican dónde se vendió el café a lo largo de la "
+"ruta tomada por esta casa."
+
+#: .\static\FCM\JS\history.js:686
+msgid ""
+"If there is only one valid coffee route from the house to the restaurant, it"
+" will be shown.<BR/>If there are multiple valid routes, the road squares "
+"common to all valid coffee routes will be shown."
+msgstr ""
+"Si solo hay una ruta de café válida desde la casa al restaurante, se "
+"mostrará. <br/> Si hay múltiples rutas válidas, se mostrarán las cuadrados "
+"de carreteras comunes a todas las rutas de café válidas.Si solo hay una ruta"
+" de café válida desde la casa al restaurante, se mostrará. <br/> Si hay "
+"múltiples rutas válidas, se mostrarán los cuadrados de carreteras comunes a "
+"todas las rutas de café válidas."
+
+#: .\static\FCM\JS\history.js:688
+msgid "I'm still confused?"
+msgstr "¿Todavía estoy confundido?"
+
+#: .\static\FCM\JS\history.js:706
+msgid "No income"
+msgstr "Sin ingresos"
+
+#: .\static\FCM\JS\history.js:708
+msgid "CFO bonus"
+msgstr "Bono de CFO"
+
+#: .\static\FCM\JS\history.js:708
+msgid "Total"
+msgstr "Total"
+
+#: .\static\FCM\JS\history.js:721
+msgid "Income"
+msgstr "Ingreso"
+
+#: .\static\FCM\JS\history.js:725
+msgid "No salaries"
+msgstr "Sin salarios"
+
+#: .\static\FCM\JS\history.js:735 .\static\FCM\JS\history.js:757
+msgid "%(dollarAmount)s and %(itemsAmount)s item"
+msgid_plural "%(dollarAmount)s and %(itemsAmount)s items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\history.js:742
+msgid "Salaries"
+msgstr "Salarios"
+
+#: .\static\FCM\JS\history.js:765
+msgid "No marketing campaigns"
+msgstr "Sin campañas de marketing"
+
+#: .\static\FCM\JS\history.js:767
+msgid "Marketing Campaigns"
+msgstr "Campañas de marketing"
+
+#: .\static\FCM\JS\history.js:772
+msgid "Normal Advertising Round"
+msgstr "Ronda de publicidad normal"
+
+#: .\static\FCM\JS\history.js:773
+msgid "Mass Marketeer Round %(round)s"
+msgstr "Mass Marketeer Round %(Round) s"
+
+#: .\static\FCM\JS\history.js:812
+msgid "#%(campaignNumber)s put %(item)s on house %(affectedHouses)s"
+msgid_plural "#%(campaignNumber)s put %(item)s on houses %(affectedHouses)s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\history.js:830
+msgid ""
+"#%(campaignNumber)s put 2x %(item)s on apartment %(affectedApartments)s"
+msgid_plural ""
+"#%(campaignNumber)s put 2x %(item)s on apartments %(affectedApartments)s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\history.js:835
+msgid "#Giant Billboard put 2x %(item)s on the Rural Area"
+msgstr "#Giant Billboard Poner 2x %(elemento) s en el área rural"
+
+#: .\static\FCM\JS\history.js:837
+msgid "#%(campaignNumber)s was not able to market %(item)s"
+msgstr "# %(el número de campaña no pudo comercializar %(artículos"
+
+#: .\static\FCM\JS\history.js:850
+msgid "The reserve cards are:"
+msgstr "Las tarjetas de reserva son:"
+
+#: .\static\FCM\JS\history.js:875
+msgid "%(player)s fires no employees"
+msgstr "%(jugador) s incendios no empleados"
+
+#: .\static\FCM\JS\history.js:878
+msgid "%(player)s fires:"
+msgstr "%(jugador) S incendios:"
+
+#: .\static\FCM\JS\history.js:893
+msgid "%(player)s keeps:"
+msgstr "%(jugador) s mantiene:"
+
+#: .\static\FCM\JS\history.js:907
+msgid "%(player)s keeps nothing"
+msgstr "%(jugador) s no guarda nada"
+
+#: .\static\FCM\JS\history.js:912
+msgid "Welcome to Food Chain Magnate"
+msgstr "Bienvenido al magnate de la cadena alimentaria"
+
+#: .\static\FCM\JS\history.js:917
+msgid "Start of turn %(turnNumber)s"
+msgstr "Inicio de Turn %(Turnnumber) S"
+
+#: .\static\FCM\JS\history.js:917
+msgid "Bank:"
+msgstr "Banco:"
+
+#: .\static\FCM\JS\history.js:923
+msgid "%(playerName)s chooses: %(moduleChoiceImg)s %(moduleChoice)s"
+msgstr "%(nombre de playern) S Elige: %(ModuleCoiceImg) S %(Modulecoice) S"
+
+#: .\static\FCM\JS\history.js:927
+msgid "Game rewound to here by %(rewindingPlayer)s"
+msgstr "Juego repleto de aquí por %(rewindingplayer) s"
+
+#: .\static\FCM\JS\history.js:928
+msgid "Game rewound to here by admin"
+msgstr "Juego repleto de aquí por administrador"
+
+#: .\static\FCM\JS\history.js:930
+msgid "%(resignedPlayer)s Resigns"
+msgstr "%(resignado player) s renuncia"
+
+#: .\static\FCM\JS\history.js:932
+msgid "%(kickedPlayer)s was kicked out"
+msgstr "%(KickedPlayer) S fue expulsado"
+
+#: .\static\FCM\JS\history.js:934
+msgid "Game Over"
+msgstr "Juego terminado"
+
+#: .\static\FCM\JS\history.js:935
+msgid "The winner is: %(winner)s"
+msgstr "El ganador es: %(ganador) S"
+
+#: .\static\FCM\JS\history.js:938
+msgid "The bank broke. Refill: $%(refillAmount)s"
+msgstr "El banco se rompió.Recarga: $%(recarga) s"
+
+#: .\static\FCM\JS\history.js:941
+msgid "Bankrupted!"
+msgstr "¡En quiebra!"
+
+#: .\static\FCM\JS\history.js:943
+msgid "All players went bankrupted! Game over"
+msgstr "¡Todos los jugadores se declararon en bancarrota!Juego terminado"
+
+#: .\static\FCM\JS\history.js:945
+msgid "Only one player left! Game over"
+msgstr "¡Solo se fue un jugador!Juego terminado"
+
+#: .\static\FCM\JS\history.js:979
+msgid ""
+"earned $%(earnings)s for %(numberOfItems)s item on building %(building)s"
+msgid_plural ""
+"earned $%(earnings)s for %(numberOfItems)s items on building %(building)s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\FCM\JS\history.js:994
+msgid "Marketeers earnings"
+msgstr "Ganancias de los vendedores"
+
+#: .\static\FCM\JS\history.js:1018
+msgid "a T shaped park"
+msgstr "un parque en forma de t"
+
+#: .\static\FCM\JS\history.js:1019
+msgid "an L shaped park"
+msgstr "Un parque en forma de L"
+
+#: .\static\FCM\JS\history.js:1048
+msgid ""
+"%(player)s uses a lobbyist to place %(parkDetails)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(jugador) S utiliza un cabildero para colocar %(colas de parkdetaL) en "
+"coordenadas ( %(xcoord) s, %(ycoord) s) s) s)%(jugador) S utiliza un "
+"cabildero para colocar %(colas de parkdetails) en coordenadas ( %(xcoord) s,"
+" %(ycoord) s)"
+
+#: .\static\FCM\JS\history.js:1061
+msgid "2 length road"
+msgstr "2 camino de longitud"
+
+#: .\static\FCM\JS\history.js:1063
+msgid "corner road"
+msgstr "carretera de esquina"
+
+#: .\static\FCM\JS\history.js:1075
+msgid ""
+"%(player)s uses a lobbyist to place a %(roadDetails)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(jugador) S utiliza un cabildero para colocar un %(colas de carretera) s en"
+" las coordenadas ( %(xcoord) s, %(ycoord) s) s)%(Jugador) S utiliza un "
+"cabildero para colocar un %(colas de carretera) s en las coordenadas ( "
+"%(xcoord) s, %(ycoord) s) s)"
+
+#: .\static\FCM\JS\history.js:1087
+msgid "%(player)s adds a new Tile at co-ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(jugador) S agrega un nuevo mosaico en las coordenadas (%(xcoord) "
+"s,%(ycoord) s)%(jugador) S agrega un nuevo mosaico en las coordenadas ( "
+"%(xcoord) s, %(ycoord) s) s)"
+
+#: .\static\FCM\JS\history.js:1102
+msgid ""
+"%(player)s builds a coffee shop at co-ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(jugador) S construye una cafetería en las coordenadas (%(xcoord) "
+"s,%(ycoord) s)%(jugador) S construye una cafetería en las coordenadas ( "
+"%(xcoord) s, %(ycoord) s)"
+
+#: .\static\FCM\JS\history.js:1111
+msgid ""
+"%(player)s removes a coffee shop from co-ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(jugador) S Elimina una cafetería de las coordenadas (%(xcoord) s,%(ycoord)"
+" s)%(Jugador) El elimina una cafetería de las coordenadas ( %(xcoord) s, "
+"%(ycoord) s)"
+
+#: .\static\FCM\JS\history.js:1225 .\static\FCM\JS\view.js:479
+msgid "Movie Stars"
+msgstr "Estrellas de cine"
+
+#: .\static\FCM\JS\history.js:1229 .\static\FCM\JS\view.js:483
+msgid "Mass Marketeers"
+msgstr "Vendedores masivos"
+
+#: .\static\FCM\JS\history.js:1233 .\static\FCM\JS\view.js:487
+msgid "Gourmet Food Critics"
+msgstr "críticos de comida gourmet"
+
+#: .\static\FCM\JS\history.js:1237 .\static\FCM\JS\view.js:491
+msgid "Rural Marketeers"
+msgstr "Vendedores rurales"
+
+#: .\static\FCM\JS\history.js:1241 .\static\FCM\JS\view.js:495
+msgid "Lobbyists"
+msgstr "cabilderos"
+
+#: .\static\FCM\JS\history.js:1245 .\static\FCM\JS\reference.js:686
+#: .\static\FCM\JS\view.js:499
+msgid "Night Shift Manager"
+msgstr "Gerente de turno nocturno"
+
+#: .\static\FCM\JS\history.js:1249 .\static\FCM\JS\view.js:503
+msgid "Coffee"
+msgstr "Café"
+
+#: .\static\FCM\JS\history.js:1253 .\static\FCM\JS\reference.js:671
+#: .\static\FCM\JS\view.js:507
+msgid "Fry Chef"
+msgstr "Freír chef"
+
+#: .\static\FCM\JS\history.js:1257 .\static\FCM\JS\view.js:511
+msgid "Kimchi"
+msgstr "Kimchi"
+
+#: .\static\FCM\JS\history.js:1355
+msgid "Show all history"
+msgstr "Mostrar toda la historia"
+
+#: .\static\FCM\JS\history.js:1407
+msgid "second"
+msgstr "segundo"
+
+#: .\static\FCM\JS\history.js:1410
+msgid "third"
+msgstr "tercero"
+
+#: .\static\FCM\JS\history.js:1413
+msgid "fourth"
+msgstr "cuatro"
+
+#: .\static\FCM\JS\history.js:1416
+msgid "fifth"
+msgstr "quinto"
+
+#: .\static\FCM\JS\history.js:1419
+msgid "sixth"
+msgstr "sexto"
+
+#: .\static\FCM\JS\history.js:1429
+msgid "1st"
+msgstr "1 tallo"
+
+#: .\static\FCM\JS\history.js:1432
+msgid "2nd"
+msgstr "Pera"
+
+#: .\static\FCM\JS\history.js:1435
+msgid "3rd"
+msgstr "una oferta"
+
+#: .\static\FCM\JS\history.js:1438
+msgid "4th"
+msgstr "fth"
+
+#: .\static\FCM\JS\history.js:1441
+msgid "5th"
+msgstr "Quinto"
+
+#: .\static\FCM\JS\history.js:1444
+msgid "6th"
+msgstr "mentón"
+
+#: .\static\FCM\JS\io.js:1057
+msgid ""
+"Something went wrong. Please reload the page. If the problem persists, "
+"please contact the webmaster"
+msgstr ""
+"Algo salió mal. Algo salió mal.Recargue la página.Si el problema persiste, "
+"comuníquese con el webmaster"
+
+#: .\static\FCM\JS\io.js:1069
+msgid "You cannot use this rewind as the first player in the working day"
+msgstr ""
+"No puedes usar este rebobinado como el primer jugador en la jornada "
+"laboralNo puedes usar este rebobinado como el primer jugador en la jornada "
+"laboral"
+
+#: .\static\FCM\JS\io.js:1078
+msgid "You cannot rewind a finished game"
+msgstr "No puedes rebobinar un juego terminado"
+
+#: .\static\FCM\JS\io.js:1083
+msgid "You cannot rewind during replay"
+msgstr "No puedes rebobinar durante la repetición"
+
+#: .\static\FCM\JS\io.js:1124
+msgid "Game Rewound"
+msgstr "Juego rebelado"
+
+#: .\static\FCM\JS\io.js:1150
+msgid "Could not rewind"
+msgstr "No pudo rebobinar"
+
+#: .\static\FCM\JS\io.js:1382
+msgid "Please tick a permission option first"
+msgstr "Marque una opción de permiso primero"
+
+#: .\static\FCM\JS\io.js:1507
+msgid "Waiting for other players"
+msgstr "Esperando a otros jugadores"
+
+#: .\static\FCM\JS\main.js:212
+msgid ""
+"Please <a href='/register'>REGISTER</a> or <a href='/login'>LOGIN</a> to "
+"play a game"
+msgstr ""
+"por favor <a href = '/registrar'> registrar </a> o <a href = '/login'> Login"
+" </a> Para jugar un juegoPor favor <a href = '/registrar'> registrar </a> o "
+"<a href = '/login'> Iniciar sesión </a> Para jugar un juego"
+
+#: .\static\FCM\JS\main.js:230
+msgid "Remaining Flex-Time:"
+msgstr "Tiempo flexible restante:"
+
+#: .\static\FCM\JS\main.js:233
+msgid "For more information see <b><a href=\"/help/\" target=\"_blank\">Help</a></b>"
+msgstr ""
+"Para más información, consulte <b> <a href = \"/ayuda/\" Target = \"_ Blank "
+"\"> Ayuda </a> </b>Para obtener más información, consulte <b> <a href "
+"=\"/ayuda/\" target = \"_ en blanco\"> Ayuda </a> </b>"
+
+#: .\static\FCM\JS\main.js:285
+msgid ""
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out "
+"<b>%(playerToKickName)s</b> press Confirm Kickout"
+msgstr ""
+"el jugador <b>%(playerTokickName) S </b> ha programado <br/> para expulsar "
+"<b>%(playerTokickName) s </b> presione confirmar el inicioEl jugador "
+"<b>%(playerTokickName) S </b> ha programado <br/> para expulsar "
+"<b>%(playerTokickName) S </b> Presione Confirmar Kickout"
+
+#: .\static\FCM\JS\main.js:288
+msgid "All other players will be allowed to move again in this phase"
+msgstr "Todos los demás jugadores podrán moverse nuevamente en esta fase."
+
+#: .\static\FCM\JS\main.js:289
+msgid "The game will proceed to the next player/phase/turn"
+msgstr "El juego procederá al próximo jugador/fase/turno"
+
+#: .\static\FCM\JS\main.js:291
+msgid ""
+"Otherwise you can allow <b>%(playerToKickName)s</b> more time - reload the "
+"page to initiate kickout again<BR/>"
+msgstr ""
+"de lo contrario, puede permitir <b>%(playerTokickName) S </b> más tiempo - "
+"Recargar la página para iniciar el inicio nuevamente <br/>De lo contrario, "
+"puede permitir <b>%(playerTokickName) s </b> más tiempo - recargar la página"
+" para iniciar el inicio nuevamente <br/>"
+
+#: .\static\FCM\JS\main.js:293
+msgid "Confirm Kickout"
+msgstr "Confirmar Kickout"
+
+#: .\static\FCM\JS\main.js:512
+msgid "Bug Report"
+msgstr "Informe de error"
+
+#: .\static\FCM\JS\main.js:512
+msgid ""
+"Please submit a bug report if you encounter any issues, giving as much "
+"detail as possbile"
+msgstr ""
+"Envíe un informe de error si encuentra algún problema, dando tantos detalles"
+" como PossbileEnvíe un informe de error si encuentra algún problema, dando "
+"tantos detalles como Possbile"
+
+#: .\static\FCM\JS\main.js:516
+msgid ""
+"Please note: In New MS you need to actually USE an employee to get their "
+"Milestone"
+msgstr ""
+"Tenga en cuenta: en la nueva EM debe usar un empleado para obtener su "
+"hitoTenga en cuenta: en la nueva EM, debe usar un empleado para obtener su "
+"hito"
+
+#: .\static\FCM\JS\main.js:518
+msgid "Is your bug to do with coffee?"
+msgstr "¿Tu error tiene que ver con el café?"
+
+#: .\static\FCM\JS\main.js:518
+msgid ""
+"Please first read the <a href='/FCM/coffeeHelp/' target='_blank'>coffee help"
+" page</a>."
+msgstr ""
+"primero lea la <a href = '/fcm/cafetera/' target = '_ en blanco'> página de "
+"ayuda de café </a>.Primero lea la <a href = '/fcm/caféhelp/' target = '_ en "
+"blanco'> página de ayuda de café </a>."
+
+#: .\static\FCM\JS\main.js:521
+msgid "If you still think there is a problem, please submit a bug report"
+msgstr "Si todavía cree que hay un problema, envíe un informe de error"
+
+#: .\static\FCM\JS\reference.js:577
+msgid "Setup - Restaurants"
+msgstr "Configuración - restaurantes"
+
+#: .\static\FCM\JS\reference.js:578
+msgid "Setup - Restaurants Round 2"
+msgstr "Configuración - Ronda de restaurantes 2"
+
+#: .\static\FCM\JS\reference.js:579
+msgid "Setup - Reserve Cards"
+msgstr "Configuración - Tarjetas de reserva"
+
+#: .\static\FCM\JS\reference.js:580
+msgid "1 - Restructuring"
+msgstr "1 - Reestructuración"
+
+#: .\static\FCM\JS\reference.js:581
+msgid "2 - Order of Business"
+msgstr "2 - Orden de negocios"
+
+#: .\static\FCM\JS\reference.js:582
+msgid "3 - Working 9:00-5:00"
+msgstr "3 - Trabajando 9: 00-5: 00"
+
+#: .\static\FCM\JS\reference.js:583
+msgid "4 - Dinnertime"
+msgstr "4 - Cinnerte"
+
+#: .\static\FCM\JS\reference.js:586
+msgid "7 - Clean up"
+msgstr "7 - Limpiar"
+
+#: .\static\FCM\JS\reference.js:587
+msgid "Game End"
+msgstr "Final del juego"
+
+#: .\static\FCM\JS\reference.js:588
+msgid "4 - Pizza Milestone"
+msgstr "4 - Pizza Milestone"
+
+#: .\static\FCM\JS\reference.js:589
+msgid "7 - Coffee Selling Milestone"
+msgstr "7 - Hito de venta de café"
+
+#: .\static\FCM\JS\reference.js:594
+msgid "First to Hire 3"
+msgstr "Primero en contratar 3"
+
+#: .\static\FCM\JS\reference.js:594
+msgid "First to Hire 3 people in 1 turn"
+msgstr "Primero en contratar a 3 personas en 1 turno"
+
+#: .\static\FCM\JS\reference.js:594
+msgid "+ 2 Management Trainees"
+msgstr "+ 2 aprendices de gestión"
+
+#: .\static\FCM\JS\reference.js:595
+msgid "First to throw away"
+msgstr "Primero en tirar"
+
+#: .\static\FCM\JS\reference.js:595
+msgid "First to throw away food/drink"
+msgstr "Primero en tirar comida/bebida"
+
+#: .\static\FCM\JS\reference.js:595
+msgid "Get a freezer that stores 10 items (food/drink or kimchi)"
+msgstr ""
+"Obtenga un congelador que almacene 10 artículos (comida/bebida o "
+"kimchi)Obtenga un congelador que almacene 10 artículos (comida/bebida o "
+"kimchi)"
+
+#: .\static\FCM\JS\reference.js:596 .\static\FCM\JS\reference.js:627
+msgid "First waitress"
+msgstr "Primera camarera"
+
+#: .\static\FCM\JS\reference.js:596
+msgid "First waitress played"
+msgstr "La primera camarera jugó"
+
+#: .\static\FCM\JS\reference.js:596
+msgid "Each Waitress +$2 ($5 total)"
+msgstr "Cada camarera +$ 2 ($ 5 en total)"
+
+#: .\static\FCM\JS\reference.js:598
+msgid "First to have $100"
+msgstr "Primero en tener $ 100"
+
+#: .\static\FCM\JS\reference.js:598
+#, javascript-format
+msgid "Your CEO counts as CFO (+50% cash earned). May not have a CFO"
+msgstr ""
+"Su CEO cuenta como CFO (50% de efectivo ganado). Su CEO cuenta como CFO "
+"(+50% de efectivo ganado).Puede no tener un CFO"
+
+#: .\static\FCM\JS\reference.js:599
+msgid "First to lower prices"
+msgstr "Primero a los precios más bajos"
+
+#: .\static\FCM\JS\reference.js:599
+msgid "First to lower price"
+msgstr "Primero a un precio más bajo"
+
+#: .\static\FCM\JS\reference.js:599 .\static\FCM\JS\reference.js:646
+msgid "Price -$1"
+msgstr "Precio -$ 1"
+
+#: .\static\FCM\JS\reference.js:600
+msgid "First to train"
+msgstr "Primero en entrenar"
+
+#: .\static\FCM\JS\reference.js:600
+msgid "First to train someone"
+msgstr "Primero en entrenar a alguien"
+
+#: .\static\FCM\JS\reference.js:600
+msgid "$15 discount on salaries"
+msgstr "Descuento de $ 15 en salarios"
+
+#: .\static\FCM\JS\reference.js:601
+msgid "First burger produced"
+msgstr "Primera hamburguesa producida"
+
+#: .\static\FCM\JS\reference.js:601
+msgid "+1 Burger Cook"
+msgstr "+1 hamburguesa cocinero"
+
+#: .\static\FCM\JS\reference.js:602
+msgid "+1 Pizza Cook"
+msgstr "+1 cocinero de pizza"
+
+#: .\static\FCM\JS\reference.js:603
+msgid "First errand boy"
+msgstr "Primer recado chico"
+
+#: .\static\FCM\JS\reference.js:603
+msgid "First errand boy played"
+msgstr "El primer recado jugado"
+
+#: .\static\FCM\JS\reference.js:603
+msgid "All buyers get + 1 drink from each source"
+msgstr "Todos los compradores obtienen 1 bebida de cada fuente"
+
+#: .\static\FCM\JS\reference.js:604
+msgid "First cart operator played"
+msgstr "El operador del primer carro jugó"
+
+#: .\static\FCM\JS\reference.js:604
+msgid "Buyers get range +1"
+msgstr "los compradores obtienen el rango 1"
+
+#: .\static\FCM\JS\reference.js:605 .\static\FCM\JS\reference.js:625
+msgid "May use multiple trainers on the same person"
+msgstr "puede usar múltiples entrenadores en la misma persona"
+
+#: .\static\FCM\JS\reference.js:606
+msgid "No salaries for marketeers; Eternal marketing"
+msgstr "No hay salarios para los vendedores;Marketing eterno"
+
+#: .\static\FCM\JS\reference.js:607
+msgid "First burger marketed"
+msgstr "Primera hamburguesa comercializada"
+
+#: .\static\FCM\JS\reference.js:607
+msgid "+ $5 for every burger sold"
+msgstr "+ $ 5 por cada hamburguesa vendida"
+
+#: .\static\FCM\JS\reference.js:608
+msgid "First pizza marketed"
+msgstr "Primera pizza comercializada"
+
+#: .\static\FCM\JS\reference.js:608
+msgid "+ $5 for every pizza sold"
+msgstr "+ $ 5 por cada pizza vendida"
+
+#: .\static\FCM\JS\reference.js:609
+msgid "First drink marketed"
+msgstr "Primera bebida comercializada"
+
+#: .\static\FCM\JS\reference.js:609
+msgid "+ $5 for every drink sold"
+msgstr "+ $ 5 por cada bebida vendida"
+
+#: .\static\FCM\JS\reference.js:610
+msgid "First airplane"
+msgstr "Primer avión"
+
+#: .\static\FCM\JS\reference.js:611
+msgid "First radio"
+msgstr "Primera radio"
+
+#: .\static\FCM\JS\reference.js:611
+msgid "First radio campaign"
+msgstr "Primera campaña de radio"
+
+#: .\static\FCM\JS\reference.js:612
+msgid "First marketeer used"
+msgstr "Primer vendedor utilizado"
+
+#: .\static\FCM\JS\reference.js:612
+msgid "Get $5 for every good your marketeers market. Distance -2"
+msgstr "Obtenga $ 5 por cada bien de su mercado de Marketeers.Distancia -2"
+
+#: .\static\FCM\JS\reference.js:613
+msgid "First marketing trainee"
+msgstr "Primer aprendiz de marketing"
+
+#: .\static\FCM\JS\reference.js:613
+msgid "First marketing trainee used"
+msgstr "Primer aprendiz de marketing utilizado"
+
+#: .\static\FCM\JS\reference.js:614
+msgid "First campaign manager"
+msgstr "Primer gerente de campaña"
+
+#: .\static\FCM\JS\reference.js:614
+msgid ""
+"This turn, may place 1 marketing tile with same type, duration and range"
+msgstr ""
+"Este turno puede colocar 1 mosaico de marketing con el mismo tipo, duración "
+"y rangoEste turno puede colocar 1 mosaico de marketing con el mismo tipo, "
+"duración y rango"
+
+#: .\static\FCM\JS\reference.js:615
+msgid "First brand manager"
+msgstr "Gerente de primera marca"
+
+#: .\static\FCM\JS\reference.js:615
+msgid "First brand manager used"
+msgstr "el primer gerente de marca usado"
+
+#: .\static\FCM\JS\reference.js:615
+msgid "This turn, may place 2 different goods on 1 plane"
+msgstr "Este turno, puede colocar 2 bienes diferentes en 1 avión"
+
+#: .\static\FCM\JS\reference.js:616
+msgid "First brand director"
+msgstr "Primera marca Director"
+
+#: .\static\FCM\JS\reference.js:616
+msgid "First brand director used"
+msgstr "Primer director de marca usado"
+
+#: .\static\FCM\JS\reference.js:617
+msgid "First burger sold"
+msgstr "Primera hamburguesa vendida"
+
+#: .\static\FCM\JS\reference.js:617
+msgid "Your CEO always has 4 slots (regardless of reserve cards)"
+msgstr ""
+"Su CEO siempre tiene 4 espacios (independientemente de las tarjetas de "
+"reserva)Su CEO siempre tiene 4 espacios (independientemente de las tarjetas "
+"de reserva)"
+
+#: .\static\FCM\JS\reference.js:618
+msgid "First pizza sold"
+msgstr "Primera pizza vendida"
+
+#: .\static\FCM\JS\reference.js:619
+msgid "First lemonade sold"
+msgstr "Primera limonada vendida"
+
+#: .\static\FCM\JS\reference.js:620
+msgid "May pay salary with food/drink"
+msgstr "Puede pagar salario con comida/bebida"
+
+#: .\static\FCM\JS\reference.js:621
+msgid "Get a freezer that stores 10 items"
+msgstr "Obtenga un congelador que almacene 10 artículos"
+
+#: .\static\FCM\JS\reference.js:622
+msgid "First recruiting girl"
+msgstr "Primera chica de reclutamiento"
+
+#: .\static\FCM\JS\reference.js:622
+msgid "Get a free executive vice president; pay no salary for him"
+msgstr ""
+"Obtenga un vicepresidente ejecutivo gratuito; Obtenga un vicepresidente "
+"ejecutivo gratuito;No pagar el salario por él"
+
+#: .\static\FCM\JS\reference.js:623
+msgid "First trainer"
+msgstr "Primer entrenador"
+
+#: .\static\FCM\JS\reference.js:623
+msgid "First trainer used"
+msgstr "Primer entrenador usado"
+
+#: .\static\FCM\JS\reference.js:624
+msgid "First discount manager"
+msgstr "Primer gerente de descuento"
+
+#: .\static\FCM\JS\reference.js:624
+msgid "First discount manager used"
+msgstr "Primer gerente de descuento utilizado"
+
+#: .\static\FCM\JS\reference.js:624
+msgid "Remove $100 from bank each round you discount by $3 or more"
+msgstr "Elimine $ 100 del banco cada ronda de descuento por $ 3 o más"
+
+#: .\static\FCM\JS\reference.js:625
+msgid "First house"
+msgstr "Primera casa"
+
+#: .\static\FCM\JS\reference.js:625
+msgid "First house built"
+msgstr "Primera casa construida"
+
+#: .\static\FCM\JS\reference.js:626
+msgid "First new restaurant"
+msgstr "Primer restaurante nuevo"
+
+#: .\static\FCM\JS\reference.js:626
+msgid "Place a permanent mailbox in restaurant area"
+msgstr "Coloque un buzón permanente en el área del restaurante"
+
+#: .\static\FCM\JS\reference.js:627
+msgid "First waitress used"
+msgstr "Primera camarera utilizada"
+
+#: .\static\FCM\JS\reference.js:627
+msgid "Your salaries are $3 each"
+msgstr "Tus salarios cuestan $ 3 cada uno"
+
+#: .\static\FCM\JS\reference.js:628
+msgid "First cart operator used"
+msgstr "el operador del primer carrito utilizado"
+
+#: .\static\FCM\JS\reference.js:629
+msgid "First rural marketeer"
+msgstr "Primer vendedor rural"
+
+#: .\static\FCM\JS\reference.js:629
+msgid "First rural marketeer used"
+msgstr "Primer vendedor rural utilizado"
+
+#: .\static\FCM\JS\reference.js:629
+msgid "Place highway offramp"
+msgstr "Coloque la carretera fuera de rampa"
+
+#: .\static\FCM\JS\reference.js:630
+msgid "First coffee sold"
+msgstr "Primer café vendido"
+
+#: .\static\FCM\JS\reference.js:630
+msgid "Build one coffee shop in the next clean up phase"
+msgstr "Construya una cafetería en la próxima fase de limpieza"
+
+#: .\static\FCM\JS\reference.js:631
+msgid "Someone sells your demand"
+msgstr "Alguien vende tu demanda"
+
+#: .\static\FCM\JS\reference.js:632
+msgid "First lobbyist used"
+msgstr "Primer cabilderista usado"
+
+#: .\static\FCM\JS\reference.js:632
+msgid "Add tile to city"
+msgstr "Agregar azulejos a la ciudad"
+
+#: .\static\FCM\JS\reference.js:636
+msgid "Waitress"
+msgstr "Camarera"
+
+#: .\static\FCM\JS\reference.js:636
+msgid "Get $3 cash. Win ties against restaurant with fewer waitresses"
+msgstr ""
+"Obtenga $ 3 en efectivo. Obtenga $ 3 en efectivo.Gana lazos contra el "
+"restaurante con menos camareras"
+
+#: .\static\FCM\JS\reference.js:637
+msgid "Place house or garden"
+msgstr "Casa o jardín"
+
+#: .\static\FCM\JS\reference.js:638
+msgid "Local Manager"
+msgstr "Gerente local"
+
+#: .\static\FCM\JS\reference.js:638
+msgid "Place new restaurant, \"COMING SOON\". Drive-in available"
+msgstr "Coloque el nuevo restaurante, \"Próximamente\".DISPARA"
+
+#: .\static\FCM\JS\reference.js:639
+msgid "Place or move restaurant, opens immediately. Drive-in available"
+msgstr "Coloque o mude el restaurante, se abre de inmediato.DISPARA"
+
+#: .\static\FCM\JS\reference.js:640
+msgid "Add +50% to cash earned this round"
+msgstr "Agregue +50% al efectivo ganado esta ronda"
+
+#: .\static\FCM\JS\reference.js:641
+msgid "Management Trainee"
+msgstr "Aprendiz de gestión"
+
+#: .\static\FCM\JS\reference.js:641
+msgid "2 slots"
+msgstr "2 ranuras"
+
+#: .\static\FCM\JS\reference.js:642
+msgid "3 slots"
+msgstr "3 ranuras"
+
+#: .\static\FCM\JS\reference.js:643
+msgid "4 slots"
+msgstr "4 espacios"
+
+#: .\static\FCM\JS\reference.js:644
+msgid "Senior Vice President"
+msgstr "vicepresidente senior"
+
+#: .\static\FCM\JS\reference.js:645
+msgid "Executive Vice President"
+msgstr "Vicepresidente Ejecutivo"
+
+#: .\static\FCM\JS\reference.js:646
+msgid "Pricing Manager"
+msgstr "Gerente de precios"
+
+#: .\static\FCM\JS\reference.js:647
+msgid "Price +$10"
+msgstr "Precio +$ 10"
+
+#: .\static\FCM\JS\reference.js:648
+msgid "Discount Manager"
+msgstr "Gerente de descuento"
+
+#: .\static\FCM\JS\reference.js:649
+msgid "Marketing Trainee"
+msgstr "Alumno de marketing"
+
+#: .\static\FCM\JS\reference.js:649
+msgid "Place billboard, max duration 2"
+msgstr "Coloque la cartelera, máxima duración 2"
+
+#: .\static\FCM\JS\reference.js:650
+msgid "Campaign Manager"
+msgstr "Gerente de campaña"
+
+#: .\static\FCM\JS\reference.js:650
+msgid "Place mailbox or lower, max duration 3"
+msgstr "Coloque el buzón o inferior, máxima duración 3"
+
+#: .\static\FCM\JS\reference.js:651
+msgid "Place airplane or lower, max duration 4"
+msgstr "Coloque el avión o inferior, la duración máxima 4"
+
+#: .\static\FCM\JS\reference.js:652
+msgid "Place radio or lower, max duration 5"
+msgstr "Coloque la radio o inferior, la duración máxima 5"
+
+#: .\static\FCM\JS\reference.js:654
+msgid "Recruiting Girl"
+msgstr "Reclutamiento de niña"
+
+#: .\static\FCM\JS\reference.js:654
+msgid "Hire 1 person"
+msgstr "Contratar a 1 persona"
+
+#: .\static\FCM\JS\reference.js:655
+msgid "2x Hire 1 person or $5 less salary"
+msgstr "2x alquiler 1 persona o $ 5 menos salario"
+
+#: .\static\FCM\JS\reference.js:656
+msgid "HR Director"
+msgstr "Director de recursos humanos"
+
+#: .\static\FCM\JS\reference.js:656
+msgid "4x Hire 1 person or $5 less salary"
+msgstr "4x alquiler 1 persona o $ 5 menos salario"
+
+#: .\static\FCM\JS\reference.js:657
+msgid "Trainer"
+msgstr "entrenador"
+
+#: .\static\FCM\JS\reference.js:657
+msgid "Train 1 person"
+msgstr "Entrenar a 1 persona"
+
+#: .\static\FCM\JS\reference.js:658
+msgid "2 training slots. May train the same person two steps"
+msgstr ""
+"2 espacios de entrenamiento. 2 espacios de entrenamiento.Puede entrenar a la"
+" misma persona dos pasos"
+
+#: .\static\FCM\JS\reference.js:659
+msgid "Guru"
+msgstr "Gurú"
+
+#: .\static\FCM\JS\reference.js:659
+msgid "3 training slots. May train the same person up to three steps"
+msgstr ""
+"3 espacios de entrenamiento. 3 espacios de entrenamiento.Puede entrenar a la"
+" misma persona hasta tres pasos"
+
+#: .\static\FCM\JS\reference.js:660
+msgid "Errand Boy"
+msgstr "Recado chico"
+
+#: .\static\FCM\JS\reference.js:660
+msgid "Get 1 drink of any type"
+msgstr "Obtenga 1 bebida de cualquier tipo"
+
+#: .\static\FCM\JS\reference.js:661
+msgid "Cart Operator"
+msgstr "Operador de carro"
+
+#: .\static\FCM\JS\reference.js:662
+msgid "Truck Driver"
+msgstr "Camionero"
+
+#: .\static\FCM\JS\reference.js:662
+msgid "Get 3 drinks from each source on route"
+msgstr "Obtenga 3 bebidas de cada fuente en la ruta"
+
+#: .\static\FCM\JS\reference.js:663
+msgid "Get 2 drinks from each source on route, ignore roads"
+msgstr "Obtenga 2 bebidas de cada fuente en la ruta, ignore las carreteras"
+
+#: .\static\FCM\JS\reference.js:666
+msgid "Kitchen Trainee"
+msgstr "Aprendiz de cocina"
+
+#: .\static\FCM\JS\reference.js:666
+msgid "Produce 1 burger or 1 pizza"
+msgstr "Producir 1 hamburguesa o 1 pizza"
+
+#: .\static\FCM\JS\reference.js:667
+msgid "Burger Cook"
+msgstr "Hamburguesa cocinero"
+
+#: .\static\FCM\JS\reference.js:667
+msgid "Produce 3 burgers"
+msgstr "Producir 3 hamburguesas"
+
+#: .\static\FCM\JS\reference.js:669
+msgid "Pizza Cook"
+msgstr "Cocinero de pizza"
+
+#: .\static\FCM\JS\reference.js:669
+msgid "Produce 3 pizzas"
+msgstr "Producir 3 pizzas"
+
+#: .\static\FCM\JS\reference.js:670
+msgid "Pizza Chef"
+msgstr "Jefe de pizza"
+
+#: .\static\FCM\JS\reference.js:670
+msgid "Produce 8 pizzas"
+msgstr "Producir 8 pizzas"
+
+#: .\static\FCM\JS\reference.js:671
+msgid "Bonus: +$10 per sale"
+msgstr "Bonificación: +$ 10 por venta"
+
+#: .\static\FCM\JS\reference.js:672
+msgid "Kimchi Master"
+msgstr "Maestro de kimchi"
+
+#: .\static\FCM\JS\reference.js:672
+msgid "Produce 1 kimchi at end of cleanup phase"
+msgstr "Producir 1 kimchi al final de la fase de limpieza"
+
+#: .\static\FCM\JS\reference.js:673
+msgid "Produce 6 noodles"
+msgstr "Producir 6 fideos"
+
+#: .\static\FCM\JS\reference.js:674
+msgid "Produce 16 noodles"
+msgstr "Producir 16 fideos"
+
+#: .\static\FCM\JS\reference.js:675
+msgid "Sushi Cook"
+msgstr "Sushi cocinero"
+
+#: .\static\FCM\JS\reference.js:675
+msgid "Produce 2 sushi"
+msgstr "Producir 2 sushi"
+
+#: .\static\FCM\JS\reference.js:676
+msgid "Sushi Chef"
+msgstr "Jefe de sushi"
+
+#: .\static\FCM\JS\reference.js:677
+msgid "Barista Trainee"
+msgstr "Aprendiz de barista"
+
+#: .\static\FCM\JS\reference.js:678
+msgid "Barista"
+msgstr "Barista"
+
+#: .\static\FCM\JS\reference.js:678
+msgid "Produce 2 coffee"
+msgstr "Producir 2 café"
+
+#: .\static\FCM\JS\reference.js:679
+msgid "Lead Barista"
+msgstr "Barista principal"
+
+#: .\static\FCM\JS\reference.js:680
+msgid "B-Movie Star"
+msgstr "Estrella de la película B"
+
+#: .\static\FCM\JS\reference.js:681
+msgid "C-Movie Star"
+msgstr "Estrella de la película C"
+
+#: .\static\FCM\JS\reference.js:681
+msgid "Win all ties; first choice in turn order (unless B at work)"
+msgstr ""
+"Gana todos los lazos; Gana todos los lazos;Primera opción a su vez (a menos "
+"que B en el trabajo)"
+
+#: .\static\FCM\JS\reference.js:682
+msgid "D-Movie Star"
+msgstr "Estrella D-Movie"
+
+#: .\static\FCM\JS\reference.js:683
+msgid "Gourmet Food Critic"
+msgstr "Crítico de comida gourmet"
+
+#: .\static\FCM\JS\reference.js:683
+msgid "Market to all houses with a garden. Max duration 3"
+msgstr "Mercado a todas las casas con un jardín.Duración máxima 3"
+
+#: .\static\FCM\JS\reference.js:684
+msgid "Lobbyist"
+msgstr "cabildero"
+
+#: .\static\FCM\JS\reference.js:684
+msgid "Place 1 road or park"
+msgstr "Coloque 1 carretera o parque"
+
+#: .\static\FCM\JS\reference.js:685
+msgid "Mass Marketeer"
+msgstr "Vendedor masivo"
+
+#: .\static\FCM\JS\reference.js:685
+msgid ""
+"Play an extra marketing phase this turn. Do not remove an extra duration "
+"token"
+msgstr ""
+"Juega una fase de marketing adicional este turno. Juega una fase de "
+"marketing adicional en este giro.No elimine una token de duración adicional"
+
+#: .\static\FCM\JS\reference.js:686
+msgid "All employees who don't require a salary work twice"
+msgstr "Todos los empleados que no requieren un trabajo salarial dos veces"
+
+#: .\static\FCM\JS\reference.js:687
+msgid "Rural Marketeer"
+msgstr "Vendedor rural"
+
+#: .\static\FCM\JS\reference.js:687
+msgid "Place a giant billboard next to the rural area tile"
+msgstr "Coloque una cartelera gigante al lado de la baldosa del área rural"
+
+#: .\static\FCM\JS\view.js:771
+msgid "Drafted Modules:"
+msgstr "Módulos redactados:"
+
+#: .\static\FCM\JS\view.js:809
+msgid "Selected Module:"
+msgstr "Módulo seleccionado:"
+
+#: .\static\FCM\JS\view.js:816
+msgid "First to hire 3 disappears after 3 turns"
+msgstr "Primero en contratar 3 desaparece después de 3 turnos"
+
+#: .\static\FCM\JS\view.js:817
+msgid ""
+"Milestone: The first time someone else sells<BR /> your demand, gain a "
+"permanent -1 to distance"
+msgstr ""
+"Milestone: la primera vez que alguien más vende <Br /> su demanda, obtenga "
+"un permanente -1 a la distanciaMilestone: la primera vez que alguien más "
+"vende <Br /> su demanda, obtenga un permanente -1 a la distancia"
+
+#: .\static\FCM\JS\view.js:818
+msgid "When the bank breaks, add $200 per player."
+msgstr "Cuando el banco se rompe, agregue $ 200 por jugador."
+
+#: .\static\FCM\JS\view.js:818
+msgid ""
+"The base price changes to whichever is <BR /> selected most, from $5, $10, "
+"or $20.<BR /> In a tie, $20 beats $10 and $5, and $5 beats $10"
+msgstr ""
+"El precio base cambia a lo que se seleccione más <Br />, desde $ 5, $ 10 o $"
+" 20. <Br /> en un empate, $ 20 latidos $ 10 y $ 5, y $ 5 latidos $ 10El "
+"precio base cambia a lo que se seleccione más <Br /> desde $ 5, $ 10 o $ 20."
+" <Br /> en un empate, $ 20 superan $ 10 y $ 5, y $ 5 superan $ 10"
+
+#: .\static\FCM\JS\view.js:823
+msgid "Add new roads and parks to the map"
+msgstr "Agregue nuevas carreteras y parques al mapa"
+
+#: .\static\FCM\JS\view.js:825
+msgid "Repeat marketing phase for each Mass Marketeer"
+msgstr "Repita la fase de marketing para cada vendedor de masas"
+
+#: .\static\FCM\JS\view.js:826
+msgid "Markets to the Rural Area - accessed by freeway ramps"
+msgstr "Mercados para el área rural, accedido por rampas de autopistas"
+
+#: .\static\FCM\JS\view.js:827
+msgid "Markets to all houses with a garden"
+msgstr "Mercados para todas las casas con un jardín"
+
+#: .\static\FCM\JS\view.js:829
+msgid ""
+"Must be put in a management slot<BR /> All unsalaried employees work twice "
+"during 9-5"
+msgstr ""
+"Debe colocarse en una ranura de gestión <Br /> Todos los empleados no listas"
+" trabajan dos veces durante 9-5Debe colocarse en una ranura de gestión <Br "
+"/> Todos los empleados no listas trabajan dos veces durante 9-5"
+
+#: .\static\FCM\JS\view.js:1107
+msgid "Duration (turns):"
+msgstr "Duración (giros):"
+
+#: .\static\FCM\JS\view.js:1318
+msgid "No More Roads"
+msgstr "No más caminos"
+
+#: .\static\FCM\JS\view.js:1896
+msgid "No More Houses"
+msgstr "No más casas"
+
+#: .\static\FCM\JS\view.js:1924
+msgid "No More Gardens"
+msgstr "No más jardines"
+
+#: .\static\FCM\JS\view.js:1983
+msgid "Choose a house to add a garden"
+msgstr "Elija una casa para agregar un jardín"
+
+#: .\static\FCM\JS\view.js:2005
+msgid "No suitable houses"
+msgstr "No hay casas adecuadas"
+
+#: .\static\FCM\JS\view.js:4153
+msgid "Reserve cards:"
+msgstr "Tarjetas de reserva:"
+
+#: .\static\FCM\JS\view.js:4186
+msgid "Marketeers:"
+msgstr "Vendedores:"
+
+#: .\static\FCM\JS\view.js:4223
+msgid "On the beach:"
+msgstr "En la playa:"
+
+#: .\static\FCM\JS\view.js:4231
+msgid "At work:"
+msgstr "En el trabajo:"
+
+#: .\static\FCM\JS\view.js:4452
+msgid "The winner is:"
+msgstr "El ganador es:"
+
+#: .\static\FCM\JS\view.js:4454
+msgid "CONGRATULATIONS!"
+msgstr "¡FELICIDADES!"
+
+#: .\static\FCM\JS\view.js:4484
+msgid "Drive in"
+msgstr "Conducir"
+
+#: .\static\FCM\JS\view.js:4787
+msgid "Your bug report has been submitted"
+msgstr "Su informe de error ha sido enviado"
+
+#: .\static\FCM\JS\view.js:4858
+msgid "More details"
+msgstr "Más detalles"
+
+#: .\static\FCM\JS\view.js:4866
+msgid "Reserve"
+msgstr "Reservar"
+
+#: .\static\FCM\JS\view.js:4868
+msgid "Selected Modules"
+msgstr "Módulos seleccionados"
+
+#: .\static\FCM\JS\view.js:4883
+msgid "Available marketing campaigns"
+msgstr "Campañas de marketing disponibles"
+
+#: .\static\FCM\JS\view.js:4898
+msgid "Available freeways"
+msgstr "ALTES DE ALGO DE ASERCIONES"
+
+#: .\static\FCM\JS\view.js:4909
+msgid " (but the Milestone is no longer available)"
+msgstr "(Pero el hito ya no está disponible)"
+
+#: .\static\FCM\JS\view.js:4918
+msgid "Available houses & gardens:"
+msgstr "Casas y jardines disponibles:"
+
+#: .\static\FCM\JS\view.js:4946
+msgid "Available Parks:"
+msgstr "Parques disponibles:"
+
+#: .\static\FCM\JS\view.js:5015
+msgid "Available Tiles for Lobbyist Milestone:"
+msgstr "Azulejos disponibles para el hito de los cabilderos:"
+
+#: .\static\FCM\JS\view.js:5083 .\static\FCM\JS\view.js:5225
+msgid "Available Milestones:"
+msgstr "Hitos disponibles:"
+
+#: .\static\FCM\JS\view.js:5178 .\static\FCM\JS\view.js:5265
+msgid "Taken Milestones:"
+msgstr "Tomado hitos:"
+
+#: .\static\FCM\JS\view.js:5367
+msgid "Employees:"
+msgstr "empleados:"
+
+#: .\static\FCM\JS\view.js:5801 .\static\FCM\JS\view.js:5804
+msgid "Stock"
+msgstr "Existencias"
+
+#: .\static\FCM\JS\view.js:5804
+msgid "No resources"
+msgstr "Sin recursos"
+
+#: .\static\FCM\JS\view.js:5858
+msgid "No Marketers"
+msgstr "No hay vendedores"
+
+#: .\static\FCM\JS\view.js:5919 .\static\FCM\JS\view.js:5983
+msgid "Prod"
+msgstr "Pinchar"
+
+#: .\static\FCM\JS\view.js:5955
+msgid "None"
+msgstr "ninguno"
+
+#: .\static\FCM\JS\websocket.js:53
+msgid "Connected"
+msgstr "conectado"
+
+#: .\static\FCM\JS\websocket.js:59
+msgid "Disconnected"
+msgstr "desconectado"

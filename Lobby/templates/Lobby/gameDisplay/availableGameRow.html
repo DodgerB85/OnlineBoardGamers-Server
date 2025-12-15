@@ -62,5 +62,5 @@ id="{{ game.game }}gamesRow{{ game.gameID }}">
       title="Custom Map - Click to View"
         data-map="{{game.startingMap}}" data-game="AQY"> 
         {% endif %}
-    {{ game.startingOptions|safe }}{{ game.kickoutHTML|safe }}</td>
+    {{ game.startingOptions|safe }}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}</td>
 </tr>

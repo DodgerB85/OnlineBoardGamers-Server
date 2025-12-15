@@ -50,7 +50,7 @@
   <td>{{ game.pace|safe }}</td>
   <td>
     <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
-    {% if 'SHADOW' not in game.allPlayers %}{{ game.kickoutHTML|safe }}{% endif %}
+    {% if 'SHADOW' not in game.allPlayers %}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}
     <br />
     {{ game.latestUpdateElapsedTimeString }}
   </td>
