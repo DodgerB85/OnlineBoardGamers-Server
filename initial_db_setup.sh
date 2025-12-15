@@ -17,7 +17,7 @@ wait_for_db
 
 # Try to sync the auth content types table (a prerequisite for counting users)
 python manage.py makemigrations
-python manage.py migrate
+python manage.py migrate --no-input
 
 # Get the raw user count using a robust Python one-liner
 USER_COUNT=$(python manage.py shell --command="from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.count());" | tail -n 1)
@@ -30,8 +30,8 @@ else
     echo "Fewer than 10 users found. Running initial setup (migrations, users, etc)..."
     
     # Run Full Migrations (Fix 3 must be applied locally first)
-    echo "Running migrations..."
-    python manage.py migrate --no-input
+    #echo "Running migrations..."
+    #python manage.py migrate --no-input
 
     # Create Superuser (non-interactive, using env variables)
     echo "Creating superuser (if it doesn't exist)..."
