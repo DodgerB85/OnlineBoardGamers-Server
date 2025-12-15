@@ -6,8 +6,8 @@ RUN apk add --no-cache --virtual build-deps gcc musl-dev pkgconf mariadb-dev
 RUN apk add --no-cache mysql-client 
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Set the working directory
 WORKDIR /app
