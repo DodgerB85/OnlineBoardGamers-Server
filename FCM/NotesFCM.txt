@@ -1,0 +1,47 @@
+- FCM email / winning notification order incorrect, admin vs dodgerb tie breaker is turn order
+
+
+IDEAS TO DO
+===========
+- Allow pre turn order DURING turn order
+
+- better intro text, eg where to find things
+
+- check into bankrupt. Better info. Staff?
+
+IDEAS MAYBE
+===========
+- tile drafting
+- NSM for mod draft
+- passing in mod draft
+- change up icons
+- rewind TO points, in history
+
+TIDYING UP
+===========
+- having demand on the board misaligns lower assistance
+- firing BM with 2 goods removes a good from plane. Plane should remain as is with no BM
+- allow sending mgr to beach if enough slots including ceo
+- strict payday fridge forces players to cleanup even if no fridge. maybe one has one not?
+
+NO PLANS
+========
+option for 1/24hrs notif all games
+
+
+save history on rewind - take difference?
+
+add delete trg game to player profile
+
+https://boardgamehelpers.com/FoodChainMagnate/
+
+auto fridge with kimchi
+
+
+
+high contrast better colours
+
+fire with T MS won't give money/food back
+
+tiles can twiddle round on phones
+

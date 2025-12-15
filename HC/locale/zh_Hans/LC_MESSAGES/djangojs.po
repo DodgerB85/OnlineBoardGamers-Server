@@ -1,0 +1,1353 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-07 02:27+0800\n"
+"PO-Revision-Date: 2023-10-07 20:04+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: .\static\HC\HCgameSummary.js:37
+msgid "Turn"
+msgstr "回合"
+
+#: .\static\HC\HCgameSummary.js:38
+msgid "Turn Income"
+msgstr "回合收入"
+
+#: .\static\HC\HCgameSummary.js:39
+msgid "Total Money"
+msgstr "总金额"
+
+#: .\static\HC\HCgameSummary.js:41
+msgid "Total Money VS Turn"
+msgstr "总金钱VS回合"
+
+#: .\static\HC\HCgameSummary.js:42
+msgid "Income On Each Turn"
+msgstr "每回合收益"
+
+#: .\static\HC\JS\HCcontroller.js:39 .\static\HC\JS\HCcontroller.js:705
+msgid ""
+"These players have passed and will be inserted in leftover spaces in this "
+"order:"
+msgstr "这些玩家已经略过并且会按这个顺序插入剩余顺位:"
+
+#: .\static\HC\JS\HCcontroller.js:53
+msgid "Previous Focus Order:"
+msgstr "上一个焦点顺位："
+
+#: .\static\HC\JS\HCcontroller.js:63
+msgid "New Focus Order:"
+msgstr "新焦点顺位："
+
+#: .\static\HC\JS\HCcontroller.js:188
+msgid "Reset"
+msgstr "重置"
+
+#: .\static\HC\JS\HCcontroller.js:253
+msgid ""
+"Welcome to Horseless Carriage Online!</b><BR/>If you have any suggestions, "
+"questions or comments, then please do contact the webmaster at <img src='/"
+"static/Lobby/email.png' width='400px' height='30px'>. Thanks!"
+msgstr ""
+"欢迎来到Horseless Carriage线上游戏！</b><BR/>如果您有任何建议、问题或意见，那"
+"么请与网站管理员联系：<img src='/static/Lobby/email.png' width='400px' "
+"height='30px'> 。谢谢!"
+
+#: .\static\HC\JS\HCcontroller.js:261
+msgid ""
+"In this practice game You will play all 3 players. Submit a bug report to "
+"report errors and game data to the webmaster. Thanks!"
+msgstr ""
+"在这个练习游戏中，你将操控所有3个玩家进行游戏。提交错误报告，向网站管理员报告"
+"错误和游戏数据。谢谢!"
+
+#: .\static\HC\JS\HCcontroller.js:266
+msgid "Orientate your main fatory tile"
+msgstr "定位你的主要工厂板块"
+
+#: .\static\HC\JS\HCcontroller.js:304
+msgid "Place one Research Department and one Planning Department"
+msgstr "放置1个研究部，1个规划部"
+
+#: .\static\HC\JS\HCcontroller.js:332 .\static\HC\JS\HCcontroller.js:652
+#: .\static\HC\JS\HCcontroller.js:1029 .\static\HC\JS\HCcontroller.js:1723
+#: .\static\HC\JS\HCfactory.js:1360
+msgid "End Turn"
+msgstr "结束回合"
+
+#: .\static\HC\JS\HCcontroller.js:363
+msgid "Advance your Assembly Capacity or any player's Research"
+msgstr "提高你的装配容量或任意玩家的研究"
+
+#: .\static\HC\JS\HCcontroller.js:369 .\static\HC\JS\HCcontroller.js:734
+#: .\static\HC\JS\HCcontroller.js:864
+msgid ""
+"NOTE: Bot players do not restrict tech access. So the first human player in "
+"Eng order will have access to all techs"
+msgstr ""
+
+#: .\static\HC\JS\HCcontroller.js:374
+#, fuzzy
+#| msgid "Design"
+msgid "Resign"
+msgstr "设计"
+
+#: .\static\HC\JS\HCcontroller.js:382
+msgid "Are you sure you want to resign?"
+msgstr ""
+
+#: .\static\HC\JS\HCcontroller.js:387
+msgid "Resigning will unbalance the game for the remaining playes."
+msgstr ""
+
+#: .\static\HC\JS\HCcontroller.js:393
+msgid "Please carry on playing if that is at all possible."
+msgstr ""
+
+#: .\static\HC\JS\HCcontroller.js:399
+msgid ""
+"Even if you think you can't win, you could still aim for 2nd place / not "
+"last place / funny factory layout / etc."
+msgstr ""
+
+#: .\static\HC\JS\HCcontroller.js:413
+msgid "Yes, I still want to resign"
+msgstr ""
+
+#: .\static\HC\JS\HCcontroller.js:415
+msgid "Carry on playing"
+msgstr ""
+
+#: .\static\HC\JS\HCcontroller.js:428
+msgid "Research points remaining:"
+msgstr "剩余研究点数："
+
+#: .\static\HC\JS\HCcontroller.js:620
+msgid ""
+"You moved %(playerName)s %(playerToken)s to %(techTrack)s %(newPosition)s"
+msgstr ""
+
+#: .\static\HC\JS\HCcontroller.js:719
+msgid "Previous Focus Order"
+msgstr "上一个焦点顺位"
+
+#: .\static\HC\JS\HCcontroller.js:742
+msgid ""
+"Spend all Gantt to choose focus, or keep your Gantt. Remember: reaching 10 "
+"Gantt will reduce the punch clock by 1"
+msgstr ""
+"支付所有甘特点数来选择焦点顺位，或者保留你的甘特点数。记住：抵达10甘特点数时"
+"将会降低1点考勤钟"
+
+#: .\static\HC\JS\HCcontroller.js:771
+msgid "Pass & Keep Gantt"
+msgstr "略过并保留甘特点数"
+
+#: .\static\HC\JS\HCcontroller.js:801
+msgid "Eng"
+msgstr "工程顺位"
+
+#: .\static\HC\JS\HCcontroller.js:805 .\static\HC\JS\HCview.js:186
+#: .\static\HC\JS\HCview.js:246
+msgid "Sales"
+msgstr "销售顺位"
+
+#: .\static\HC\JS\HCcontroller.js:853 .\static\HC\JS\HCio.js:347
+msgid "Previous players used up the components. Please rearrange your factory"
+msgstr "之前的玩家用完了组件。请重新安排你的工厂"
+
+#: .\static\HC\JS\HCcontroller.js:858 .\static\HC\JS\HCcontroller.js:1050
+msgid "Place components into your factory"
+msgstr "将组件放进你的工厂"
+
+#: .\static\HC\JS\HCcontroller.js:874
+msgid "You are the current player. You can use any available component"
+msgstr "你作为当前玩家。你可以使用任意可用组件"
+
+#: .\static\HC\JS\HCcontroller.js:882
+msgid ""
+"You are not the current player. If previous players use up components that "
+"you also use, you will need to modify your factory"
+msgstr ""
+"你不是当前玩家。如果上一位玩家用光了你也在使用的组件，则你必须修整你的工厂"
+
+#: .\static\HC\JS\HCcontroller.js:893 .\static\HC\JS\HCcontroller.js:1054
+msgid "Remove Last Component"
+msgstr "移除最后一个组件"
+
+#: .\static\HC\JS\HCcontroller.js:903
+msgid "Save Without Ending Turn"
+msgstr "保存但不结束回合"
+
+#: .\static\HC\JS\HCcontroller.js:917
+msgid "Finish Building"
+msgstr "完成建造"
+
+#: .\static\HC\JS\HCcontroller.js:1003 .\static\HC\JS\HCcontroller.js:1126
+msgid "Expand your Factory"
+msgstr "扩建你的工厂"
+
+#: .\static\HC\JS\HCcontroller.js:1005
+msgid "Reset Whole Factory"
+msgstr "重置整个工厂"
+
+#: .\static\HC\JS\HCcontroller.js:1009
+msgid "Go back to Factory Building"
+msgstr "回到工厂建造"
+
+#: .\static\HC\JS\HCcontroller.js:1046
+msgid "SANDBOX MODE - USE THE BUTTON TO EXIT SANDBOX MODE"
+msgstr "沙盒模式 - 使用这个按钮来离开沙盒模式"
+
+#: .\static\HC\JS\HCcontroller.js:1085
+msgid "Expand Factory"
+msgstr "扩建工厂"
+
+#: .\static\HC\JS\HCcontroller.js:1096 .\static\HC\JS\HCcontroller.js:1130
+msgid "Exit Sandbox Mode"
+msgstr "离开沙盒模式"
+
+#: .\static\HC\JS\HCcontroller.js:1121
+msgid "SANDBOX MODE - REFRESH THE PAGE OR USE THE BUTTON TO EXIT SANDBOX MODE"
+msgstr "沙盒模式 - 刷新页面或使用按钮退出沙盒模式"
+
+#: .\static\HC\JS\HCcontroller.js:1152
+msgid "Start Building Again"
+msgstr "再次开始建造"
+
+#: .\static\HC\JS\HCcontroller.js:1186
+msgid ""
+"Choose a dealership, place a Market Window, then if possible, sell to a "
+"niche<BR/>Once you select a dealership, you can rotate the market window "
+"using the buttons that appear underneath the dealerships"
+msgstr ""
+"选择1个经销商，放置市场窗口，然后如果有可能的话，向利基市场销售<BR/>选择经销"
+"商后，可以使用经销商下方的按钮旋转市场窗口"
+
+#: .\static\HC\JS\HCcontroller.js:1497
+msgid "No sales possible"
+msgstr "无法销售"
+
+#: .\static\HC\JS\HCcontroller.js:1505 .\static\HC\JS\HCcontroller.js:1616
+msgid "End turn"
+msgstr "回合结束"
+
+#: .\static\HC\JS\HCcontroller.js:1646
+msgid "Choose a card, then select the quadrant you wish to add it to"
+msgstr "选取一张卡牌，然后选取你想要添加的象限区域"
+
+#: .\static\HC\JS\HCcontroller.js:1736 .\static\HC\JS\HCcontroller.js:1826
+msgid "You are in sandbox mode. Please refresh the page"
+msgstr "你正在沙盒模式中。请刷新页面"
+
+#: .\static\HC\JS\HCfactory.js:232 .\static\HC\JS\HCfactory.js:1033
+msgid "No Space"
+msgstr "没有空间"
+
+#: .\static\HC\JS\HCfactory.js:646
+msgid "Not pointing at suitable tech"
+msgstr "没有指向合适的技术站"
+
+#: .\static\HC\JS\HCfactory.js:671
+msgid "Tech level too low for Spec"
+msgstr "科技水平太低，不符合规范"
+
+#: .\static\HC\JS\HCfactory.js:1087
+msgid "Not Adjacent to Factory"
+msgstr "没有与工厂相邻"
+
+#: .\static\HC\JS\HCfactory.js:1241
+msgid "Blocking Factory Loading Bay"
+msgstr "阻塞工厂装卸区"
+
+#: .\static\HC\JS\HCfactory.js:1315
+msgid "New Expansion Loading Bay Blocked"
+msgstr "新的扩建装卸区被阻塞"
+
+#: .\static\HC\JS\HChistory.js:116
+msgid "%(playerName)s sets up factory"
+msgstr "设置工厂"
+
+#: .\static\HC\JS\HChistory.js:129
+#, fuzzy
+#| msgid "Game rewound to here by"
+msgid "Game rewound to here by %(playerName)s"
+msgstr "游戏回放到这里"
+
+#: .\static\HC\JS\HChistory.js:145
+#, fuzzy
+#| msgid "was kicked out"
+msgid "%(playerName)s was kicked out"
+msgstr "被踢出"
+
+#: .\static\HC\JS\HChistory.js:159
+msgid "%(resignedPlayer)s Resigns"
+msgstr ""
+
+#: .\static\HC\JS\HChistory.js:178
+msgid "moves"
+msgstr "移动"
+
+#: .\static\HC\JS\HChistory.js:181
+msgid "to"
+msgstr "到"
+
+#: .\static\HC\JS\HChistory.js:212
+#, fuzzy
+#| msgid "passes and keeps their Gantt"
+msgid "%(playerName)s passes and keeps their Gantt"
+msgstr "略过并保留甘特点数"
+
+#: .\static\HC\JS\HChistory.js:224
+msgid "%(playerName)s spends all Gantt to choose position: %(position)s"
+msgstr ""
+
+#: .\static\HC\JS\HChistory.js:240 .\static\HC\JS\HChistory.js:256
+msgid "builds"
+msgstr "建造"
+
+#: .\static\HC\JS\HChistory.js:301
+msgid "%(playerName)s passes: %(reason)s"
+msgstr ""
+
+#: .\static\HC\JS\HChistory.js:312
+msgid "Gantt Increases"
+msgstr "增加甘特点数"
+
+#: .\static\HC\JS\HChistory.js:315
+#, fuzzy
+#| msgid "gains %(numberOfGantt)s Gantt"
+msgid "%(playerName)s gains %(numberOfGantt)s Gantt"
+msgstr "获得 %(numberOfGantt)s 甘特点数"
+
+#: .\static\HC\JS\HChistory.js:347
+#, fuzzy
+#| msgid "places %(dealershipName)s but cannot make any sales"
+msgid "%(playerName)s places %(dealershipName)s but cannot make any sales"
+msgstr "放置 %(dealershipName)s 但不能进行任何销售"
+
+#: .\static\HC\JS\HChistory.js:348
+#, fuzzy
+#| msgid "places %(dealershipName)s but cannot make any sales"
+msgid "%(playerName)s uses %(dealershipName)s but cannot make any sales"
+msgstr "放置 %(dealershipName)s 但不能进行任何销售"
+
+#: .\static\HC\JS\HChistory.js:351
+#, fuzzy
+#| msgid "places %(dealershipName)s to sell:"
+msgid "%(playerName)s places %(dealershipName)s to sell:"
+msgstr "放置 %(dealershipName)s 来销售："
+
+#: .\static\HC\JS\HChistory.js:352
+#, fuzzy
+#| msgid "places %(dealershipName)s to sell:"
+msgid "%(playerName)s uses %(dealershipName)s to sell"
+msgstr "放置 %(dealershipName)s 来销售："
+
+#: .\static\HC\JS\HChistory.js:352
+msgid "(automatically)"
+msgstr ""
+
+#: .\static\HC\JS\HChistory.js:382
+msgid "%(carAmount)s Car for $%(eachSaleAmount)s"
+msgid_plural "%(carAmount)s Cars, each for $%(eachSaleAmount)s"
+msgstr[0] ""
+"%(carAmount)s 轿车 for $%(eachSaleAmount)s\n"
+"%(carAmount)s 轿车, 每个 for $%(eachSaleAmount)s"
+
+#: .\static\HC\JS\HChistory.js:397
+msgid "%(truckAmount)s Truck for $%(eachSaleAmount)s plus bonus $1"
+msgid_plural ""
+"%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1"
+msgstr[0] ""
+"%(truckAmount)s 卡车 for $%(eachSaleAmount)s 额外加 $1\n"
+"%(truckAmount)s 卡车, 每个 for $%(eachSaleAmount)s 额外加 $1"
+
+#: .\static\HC\JS\HChistory.js:412
+msgid "%(sportsAmount)s Sports Car for $%(eachSaleAmount)s plus bonus $2"
+msgid_plural ""
+"%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2"
+msgstr[0] ""
+"%(sportsAmount)s 跑车 for $%(eachSaleAmount)s 额外加 $2\n"
+"%(sportsAmount)s 跑车, 每个 for $%(eachSaleAmount)s 额外加 $2"
+
+#: .\static\HC\JS\HChistory.js:421
+msgid "Total Income:"
+msgstr "总收入："
+
+#: .\static\HC\JS\HChistory.js:427
+msgid "Sales Summary"
+msgstr "销售汇总"
+
+#: .\static\HC\JS\HChistory.js:428
+msgid "Total"
+msgstr "总计"
+
+#: .\static\HC\JS\HChistory.js:457
+msgid "Expectations Advance:"
+msgstr "期望提前："
+
+#: .\static\HC\JS\HChistory.js:458
+msgid "%(techTrackName)s has a new min value of %(minValue)s"
+msgstr "%(techTrackName)s 有一个新的最小值 %(minValue)s"
+
+#: .\static\HC\JS\HChistory.js:461
+msgid "Innovation Levels:"
+msgstr "创新等级："
+
+#: .\static\HC\JS\HChistory.js:463 .\static\HC\JS\HChistory.js:464
+#: .\static\HC\JS\HChistory.js:465
+msgid ""
+"%(techTrackName)s: %(innovationLevel)s - Furthest from Min Marker:  "
+"%(furtehstFromMin)s"
+msgstr ""
+"%(techTrackName)s: %(innovationLevel)s - 距离最小标记最远:  "
+"%(furtehstFromMin)s"
+
+#: .\static\HC\JS\HChistory.js:467
+msgid "New Tech Track Introduced:"
+msgstr "新科技轨道引进："
+
+#: .\static\HC\JS\HChistory.js:468
+msgid "Obsolesence Marker points:"
+msgstr "过时标记点："
+
+#: .\static\HC\JS\HChistory.js:468
+msgid "Up"
+msgstr "向上"
+
+#: .\static\HC\JS\HChistory.js:468
+msgid "Right"
+msgstr "对了"
+
+#: .\static\HC\JS\HChistory.js:494
+#, fuzzy
+#| msgid "plays a card"
+msgid "%(playerName)s plays a card"
+msgstr "打出一张卡牌"
+
+#: .\static\HC\JS\HChistory.js:505
+msgid "Game Ended by: Punch Clock"
+msgstr "游戏结束者：考勤钟"
+
+#: .\static\HC\JS\HChistory.js:506
+msgid "Game Ended by: Turn 7"
+msgstr "游戏结束于：第 7 回合"
+
+#: .\static\HC\JS\HChistory.js:507
+msgid "Game Ended by: King of the Hill"
+msgstr "游戏结束者：山丘之王"
+
+#: .\static\HC\JS\HChistory.js:509
+msgid "The winner is:"
+msgstr "获胜者是："
+
+#: .\static\HC\JS\HChistory.js:511
+msgid "Click here to see game summary stats"
+msgstr "点击此处查看游戏汇总数据"
+
+#: .\static\HC\JS\HChistory.js:517
+msgid "Start of turn %(turnNumber)s"
+msgstr "回合开始 %(turnNumber)s"
+
+#: .\static\HC\JS\HChistory.js:522
+msgid "Punch Clock decreases by: %(amount)s"
+msgstr "打卡时钟减少：%(amount)s"
+
+#: .\static\HC\JS\HChistory.js:581
+msgid "Neutral Cards:"
+msgstr "中立牌："
+
+#: .\static\HC\JS\HChistory.js:691
+msgid "Assembly Capacity Track"
+msgstr "装配容量轨道"
+
+#: .\static\HC\JS\HChistory.js:693
+msgid "Speed Tech"
+msgstr "速度科技"
+
+#: .\static\HC\JS\HChistory.js:694
+msgid "Range Tech"
+msgstr "续航里程科技"
+
+#: .\static\HC\JS\HChistory.js:695
+msgid "Design Tech"
+msgstr "设计科技"
+
+#: .\static\HC\JS\HChistory.js:696
+msgid "Reliability Tech"
+msgstr "可靠性科技"
+
+#: .\static\HC\JS\HChistory.js:697
+msgid "Safety Tech"
+msgstr "安全科技"
+
+#: .\static\HC\JS\HChistory.js:729
+msgid "Show full history"
+msgstr "展示所有历史记录"
+
+#: .\static\HC\JS\HCio.js:37
+msgid ""
+"Something went wrong. Please reload the page. If the problem persists, "
+"please contact the webmaster"
+msgstr ""
+
+#: .\static\HC\JS\HCio.js:158 .\static\HC\JS\HCio.js:323
+#: .\static\HC\JS\HCio.js:419 .\static\HC\JS\HCio.js:489
+#: .\static\HC\JS\HCio.js:527
+msgid ""
+"It appears you have an older version of the game. Please refresh the page"
+msgstr "看起来你有一个旧版本的游戏。请刷新页面"
+
+#: .\static\HC\JS\HCio.js:258 .\static\HC\JS\HCio.js:261
+msgid "Your factory has been saved"
+msgstr "已保存你的工厂"
+
+#: .\static\HC\JS\HCio.js:376
+msgid ""
+"Your factory has been saved. It will be verified again once you are the "
+"first player"
+msgstr "您的工厂已被保存。一旦你成为起始玩家，就会再次验证"
+
+#: .\static\HC\JS\HCio.js:654
+msgid "You cannot rewind a finished game"
+msgstr "你不能倒回已完成的游戏"
+
+#: .\static\HC\JS\HCio.js:686
+msgid "Game Rewound"
+msgstr "游戏倒回"
+
+#: .\static\HC\JS\HCio.js:705
+msgid "Could not rewind"
+msgstr "无法倒回"
+
+#: .\static\HC\JS\HCio.js:894
+msgid "Please tick a permission option first"
+msgstr "请首先勾选一个权限选项"
+
+#: .\static\HC\JS\HCio.js:933 .\static\HC\JS\HCio.js:979
+msgid "Permission Changed"
+msgstr "权限已更改"
+
+#: .\static\HC\JS\HCio.js:943
+#, fuzzy
+#| msgid "Please tick ths box first"
+msgid "Please tick to exclude from stats first"
+msgstr "请首先勾选这个方框"
+
+#: .\static\HC\JS\HCio.js:968
+msgid "Excluded from Stats"
+msgstr "从统计数据中排除"
+
+#: .\static\HC\JS\HCio.js:974
+msgid "Waiting for other players"
+msgstr "等待其他玩家"
+
+#: .\static\HC\JS\HCmain.js:127
+msgid ""
+"Please <a href='/register'>REGISTER</a> or <a href='/login'>LOGIN</a> to "
+"play a game"
+msgstr "请<a href='/register'>注册</a> or <a href='/login'>登入</a>来进行游戏"
+
+#: .\static\HC\JS\HCmain.js:183
+msgid ""
+"Player <b>%(playerToKickName)s</b> has used all the standard kickout time."
+msgstr ""
+
+#: .\static\HC\JS\HCmain.js:185
+msgid "Remaining Flex-Time:"
+msgstr ""
+
+#: .\static\HC\JS\HCmain.js:188
+msgid ""
+"For more information see <b><a href=\"/help/\" target=\"_blank\">Help</a></b>"
+msgstr ""
+
+#: .\static\HC\JS\HCmain.js:223
+msgid ""
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out <B>"
+"%(playerToKickName)s</b> press Confirm Kickout<BR/>The game will proceed to "
+"the next player/phase/turn<BR/><BR/>Otherwise you can allow <b>"
+"%(playerToKickName)s</b> more time - reload the page to initiate kickout "
+"again<BR/>"
+msgstr ""
+"玩家<b>%(playerToKickName)s</b> 已超时<BR/>被踢出<B>%(playerToKickName)s</b> "
+"按确认退出<BR/>游戏将进行到下一个玩家/阶段/回合<BR/><BR/>否则，您可以允许 <b>"
+"%(playerToKickName)s</b> 更多时间-重新加载页面以再次启动限位<BR/>"
+
+#: .\static\HC\JS\HCmain.js:232
+msgid "Not now - allow more time"
+msgstr "现在不行——留点时间"
+
+#: .\static\HC\JS\HCmain.js:237
+msgid "Confirm Kickout"
+msgstr "确认踢出"
+
+#: .\static\HC\JS\HCreference.js:18
+msgid "Speed"
+msgstr "速度"
+
+#: .\static\HC\JS\HCreference.js:18
+msgid "Range"
+msgstr "续航里程"
+
+#: .\static\HC\JS\HCreference.js:18
+msgid "Design"
+msgstr "设计"
+
+#: .\static\HC\JS\HCreference.js:18
+msgid "Reliability"
+msgstr "可靠性"
+
+#: .\static\HC\JS\HCreference.js:18
+msgid "Safety"
+msgstr "安全"
+
+#: .\static\HC\JS\HCreference.js:263
+msgid "Factory Expansion"
+msgstr "工厂扩建"
+
+#: .\static\HC\JS\HCreference.js:264
+msgid "Car Mainline"
+msgstr "轿车主线"
+
+#: .\static\HC\JS\HCreference.js:265
+msgid "Truck Mainline"
+msgstr "卡车主线"
+
+#: .\static\HC\JS\HCreference.js:266
+msgid "Sports Mainline"
+msgstr "跑车主线"
+
+#: .\static\HC\JS\HCreference.js:267
+msgid "Research Department"
+msgstr "研究部"
+
+#: .\static\HC\JS\HCreference.js:268
+msgid "Planning Department"
+msgstr "规划部"
+
+#: .\static\HC\JS\HCreference.js:269
+msgid "Chassis"
+msgstr "底盘"
+
+#: .\static\HC\JS\HCreference.js:270
+msgid "Body"
+msgstr "车身"
+
+#: .\static\HC\JS\HCreference.js:271
+msgid "Radiator"
+msgstr "散热器"
+
+#: .\static\HC\JS\HCreference.js:272
+msgid "Door"
+msgstr "车门"
+
+#: .\static\HC\JS\HCreference.js:273
+msgid "Bumper"
+msgstr "保险杠"
+
+#: .\static\HC\JS\HCreference.js:274
+msgid "Dashboard"
+msgstr "仪表板"
+
+#: .\static\HC\JS\HCreference.js:275
+msgid "Paint"
+msgstr "油漆"
+
+#: .\static\HC\JS\HCreference.js:276
+msgid "Battery"
+msgstr "电池"
+
+#: .\static\HC\JS\HCreference.js:277
+msgid "Engine"
+msgstr "引擎"
+
+#: .\static\HC\JS\HCreference.js:278
+msgid "Gears"
+msgstr "齿轮"
+
+#: .\static\HC\JS\HCreference.js:279
+msgid "Fuel Tank"
+msgstr "油箱"
+
+#: .\static\HC\JS\HCreference.js:280
+msgid "Steering Wheel"
+msgstr "方向盘"
+
+#: .\static\HC\JS\HCreference.js:281
+msgid "Brake"
+msgstr "刹车"
+
+#: .\static\HC\JS\HCreference.js:282
+msgid "Tire"
+msgstr "轮胎"
+
+#: .\static\HC\JS\HCreference.js:283
+msgid "Headlights"
+msgstr "头灯"
+
+#: .\static\HC\JS\HCreference.js:284
+msgid "Windshield"
+msgstr "挡风玻璃"
+
+#: .\static\HC\JS\HCreference.js:285
+msgid "Claxon"
+msgstr "喇叭"
+
+#: .\static\HC\JS\HCreference.js:286
+msgid "Spec (Design A)"
+msgstr "规格（设计 A）"
+
+#: .\static\HC\JS\HCreference.js:287
+msgid "Spec (Design B)"
+msgstr "规格（设计 B）"
+
+#: .\static\HC\JS\HCreference.js:288
+msgid "Spec (Design C)"
+msgstr "规格（设计 C）"
+
+#: .\static\HC\JS\HCreference.js:289
+msgid "Spec (Design D)"
+msgstr "规格（设计 D）"
+
+#: .\static\HC\JS\HCreference.js:290
+msgid "Spec (Reliability A)"
+msgstr "规格（可靠性 A）"
+
+#: .\static\HC\JS\HCreference.js:291
+msgid "Spec (Reliability B)"
+msgstr "规格（可靠性 B）"
+
+#: .\static\HC\JS\HCreference.js:292
+msgid "Spec (Reliability C)"
+msgstr "规格（可靠性 C）"
+
+#: .\static\HC\JS\HCreference.js:293
+msgid "Spec (Speed B)"
+msgstr "规格（速度 B）"
+
+#: .\static\HC\JS\HCreference.js:294
+msgid "Spec (Speed C)"
+msgstr "规格（速度 C）"
+
+#: .\static\HC\JS\HCreference.js:295
+msgid "Spec (Speed D)"
+msgstr "规格（速度 D）"
+
+#: .\static\HC\JS\HCreference.js:296
+msgid "Spec (Safety A)"
+msgstr "规格（安全 A）"
+
+#: .\static\HC\JS\HCreference.js:297
+msgid "Spec (Safety B)"
+msgstr "规格（安全 B）"
+
+#: .\static\HC\JS\HCreference.js:298
+msgid "Spec (Safety D)"
+msgstr "规格（安全 D）"
+
+#: .\static\HC\JS\HCreference.js:299
+msgid "Spec (Range A)"
+msgstr "规格（续航里程 A）"
+
+#: .\static\HC\JS\HCreference.js:300
+msgid "Spec (Range B)"
+msgstr "规格（续航里程 B）"
+
+#: .\static\HC\JS\HCreference.js:301
+msgid "Spec (Range D)"
+msgstr "规格（续航里程 D）"
+
+#: .\static\HC\JS\HCreference.js:323 .\static\HC\JS\HCreference.js:324
+#: .\static\HC\JS\HCreference.js:325 .\static\HC\JS\HCreference.js:326
+#: .\static\HC\JS\HCreference.js:327
+msgid "Marketing Deparment"
+msgstr "市场部"
+
+#: .\static\HC\JS\HCreference.js:719
+msgid "No connection to loading bay"
+msgstr "没有连接到装卸区"
+
+#: .\static\HC\JS\HCreference.js:720
+msgid "Not Adjacent to Dealership"
+msgstr "与经销商不相邻"
+
+#: .\static\HC\JS\HCreference.js:721
+msgid "Not Adjacent to Mainline"
+msgstr "与主线不相邻"
+
+#: .\static\HC\JS\HCreference.js:722
+msgid "Duplicate Tech in Connection"
+msgstr "连接中的重复技术站"
+
+#: .\static\HC\JS\HCreference.js:723
+msgid "No Spec Indicator Attached"
+msgstr "没有附加规格指标"
+
+#: .\static\HC\JS\HCreference.js:724
+msgid "No connection to Mainline"
+msgstr "没有连接到主线"
+
+#: .\static\HC\JS\HCreference.js:725
+msgid "Unknown"
+msgstr "未知"
+
+#: .\static\HC\JS\HCreference.js:726
+msgid "You must place One Research Department and One Planning Department"
+msgstr "必须设置1个研究部和1个规划部"
+
+#: .\static\HC\JS\HCreference.js:736
+msgid "No Dealerships"
+msgstr "没有经销商"
+
+#: .\static\HC\JS\HCreference.js:736
+msgid "No stock"
+msgstr "无库存"
+
+#: .\static\HC\JS\HCreference.js:736
+msgid "No Min Spec Dealerships"
+msgstr "没有满足最低规格的经销商"
+
+#: .\static\HC\JS\HCreference.js:736
+msgid "No more sales possible"
+msgstr "不可能再销售了"
+
+#: .\static\HC\JS\HCreference.js:736
+msgid "Bot player"
+msgstr "机器人玩家"
+
+#: .\static\HC\JS\HCreference.js:736
+msgid "Final sale processed automatically"
+msgstr ""
+
+#: .\static\HC\JS\HCreference.js:753
+msgid "Factory Setup"
+msgstr "工厂设置"
+
+#: .\static\HC\JS\HCreference.js:754
+msgid "Research"
+msgstr "研究"
+
+#: .\static\HC\JS\HCreference.js:755
+msgid "Set Focus"
+msgstr "设置焦点"
+
+#: .\static\HC\JS\HCreference.js:756
+msgid "Build Factory"
+msgstr "建造工厂"
+
+#: .\static\HC\JS\HCreference.js:757
+msgid "Print Sales Brochures"
+msgstr "打印销售手册"
+
+#: .\static\HC\JS\HCreference.js:758
+msgid "Sell"
+msgstr "出售"
+
+#: .\static\HC\JS\HCreference.js:759
+msgid "Game End"
+msgstr "游戏结束"
+
+#: .\static\HC\JS\HCreference.js:760
+msgid "Increase Expectations"
+msgstr "增加期望值"
+
+#: .\static\HC\JS\HCreference.js:761
+msgid "Grow Demands"
+msgstr "增长需求"
+
+#: .\static\HC\JS\HCreference.js:773
+msgid ""
+"B - Brake\n"
+"2 x 2"
+msgstr ""
+"B - 刹车\n"
+"2 x 2"
+
+#: .\static\HC\JS\HCreference.js:774
+msgid ""
+"D - Windshield\n"
+"4 x 2"
+msgstr ""
+"D - 挡风玻璃\n"
+"4 x 2"
+
+#: .\static\HC\JS\HCreference.js:775
+msgid ""
+"B - Steering Wheel\n"
+"3 x 3\n"
+"Also Design 6"
+msgstr ""
+"B - 方向盘\n"
+"3 x 3\n"
+"也在设计6级"
+
+#: .\static\HC\JS\HCreference.js:776
+msgid ""
+"A - Bumper\n"
+"4 x 1\n"
+"Also Reliability 4"
+msgstr ""
+"A - 保险杠\n"
+"4 x 1\n"
+"也在可靠性4级"
+
+#: .\static\HC\JS\HCreference.js:777
+msgid ""
+"D - Headlights\n"
+"2 x 3\n"
+"Also Design 3"
+msgstr ""
+"D - 头灯\n"
+"2 x 3\n"
+"也在设计3级"
+
+#: .\static\HC\JS\HCreference.js:778
+msgid ""
+"D - Tire\n"
+"3 x 3\n"
+"Also Range 3 Speed 4"
+msgstr ""
+"D - 轮胎\n"
+"3 x 3\n"
+"也在续航里程3级和速度4级"
+
+#: .\static\HC\JS\HCreference.js:781
+msgid ""
+"C - Battery\n"
+"2 x 2"
+msgstr ""
+"C - 电池\n"
+"2 x 2"
+
+#: .\static\HC\JS\HCreference.js:782
+msgid ""
+"A - Chassis\n"
+"3 x 4\n"
+"Also Reliability 6"
+msgstr ""
+"A - 底盘\n"
+"3 x 4\n"
+"也在可靠性6级"
+
+#: .\static\HC\JS\HCreference.js:783
+msgid ""
+"A - Body\n"
+"3 x 3\n"
+"Also Design 5"
+msgstr ""
+"A - 车身\n"
+"3 x 3\n"
+"也在设计5级"
+
+#: .\static\HC\JS\HCreference.js:784
+msgid ""
+"A - Bumper\n"
+"4 x 1\n"
+"Also Safety 4"
+msgstr ""
+"A - 保险杠\n"
+"4 x 1\n"
+"也在安全4级"
+
+#: .\static\HC\JS\HCreference.js:785
+msgid ""
+"B - Engine\n"
+"4 x 4\n"
+"Also Speed 1 Range 1"
+msgstr ""
+"B - 引擎\n"
+"4 x 4\n"
+"也在速度1级和续航里程1级"
+
+#: .\static\HC\JS\HCreference.js:786
+msgid ""
+"A - Chassis\n"
+"3 x 4\n"
+"Also Reliability 2"
+msgstr ""
+"A - 底盘\n"
+"3 x 4\n"
+"也在可靠性2级"
+
+#: .\static\HC\JS\HCreference.js:789
+msgid ""
+"B - Engine\n"
+"4 x 4\n"
+"Also Speed 1 Reliability 5"
+msgstr ""
+"B - 引擎\n"
+"4 x 4\n"
+"也在速度1级和可靠性5级"
+
+#: .\static\HC\JS\HCreference.js:790
+msgid ""
+"A - Radiator\n"
+"2 x 3\n"
+"Also Range 5"
+msgstr ""
+"A - 散热器\n"
+"2 x 3\n"
+"也在续航里程5级"
+
+#: .\static\HC\JS\HCreference.js:791
+msgid ""
+"D - Tire\n"
+"3 x 3\n"
+"Also Speed 4 Safety 6"
+msgstr ""
+"D - 轮胎\n"
+"3 x 3\n"
+"也在速度4级和安全6级"
+
+#: .\static\HC\JS\HCreference.js:792
+msgid ""
+"B - Fuel Tank\n"
+"4 x 2\n"
+"Also Speed 5"
+msgstr ""
+"B - 油箱\n"
+"4 x 2\n"
+"也在速度5级"
+
+#: .\static\HC\JS\HCreference.js:793
+msgid ""
+"A - Radiator\n"
+"2 x 3\n"
+"Also Range 2"
+msgstr ""
+"A - 散热器\n"
+"2 x 3\n"
+"也在续航里程2级"
+
+#: .\static\HC\JS\HCreference.js:794
+msgid ""
+"B - Gears\n"
+"3 x 4\n"
+"Also Speed 3"
+msgstr ""
+"B - 齿轮\n"
+"3 x 4\n"
+"也在速度3级"
+
+#: .\static\HC\JS\HCreference.js:797
+msgid ""
+"B - Engine\n"
+"4 x 4\n"
+"Also Range 1 Reliability 5"
+msgstr ""
+"B - 引擎\n"
+"4 x 4\n"
+"也在续航里程1级和可靠性5级"
+
+#: .\static\HC\JS\HCreference.js:798
+msgid ""
+"D - Claxon\n"
+"2 x 2"
+msgstr ""
+"D - 喇叭\n"
+"2 x 2"
+
+#: .\static\HC\JS\HCreference.js:799
+msgid ""
+"B - Gears\n"
+"3 x 4\n"
+"Also Range 6"
+msgstr ""
+"B - 齿轮\n"
+"3 x 4\n"
+"也在续航里程6级"
+
+#: .\static\HC\JS\HCreference.js:800
+msgid ""
+"D - Tire\n"
+"3 x 3\n"
+"Also Range 3 Safety 6"
+msgstr ""
+"D - 轮胎\n"
+"3 x 3\n"
+"也在续航里程3级和安全6级"
+
+#: .\static\HC\JS\HCreference.js:801
+msgid ""
+"B - Fuel Tank\n"
+"4 x 2\n"
+"Also Range 4"
+msgstr ""
+"B - 油箱\n"
+"4 x 2\n"
+"也在续航里程4级"
+
+#: .\static\HC\JS\HCreference.js:802
+msgid ""
+"C - Dashboard\n"
+"4 x 2\n"
+"Also Design 4"
+msgstr ""
+"C - 仪表板\n"
+"4 x 2\n"
+"也在设计4级"
+
+#: .\static\HC\JS\HCreference.js:805
+msgid ""
+"C - Paint\n"
+"2 x 3"
+msgstr ""
+"C - 油漆\n"
+"2 x 3"
+
+#: .\static\HC\JS\HCreference.js:806
+msgid ""
+"A - Door\n"
+"2 x 2"
+msgstr ""
+"A - 车门\n"
+"2 x 2"
+
+#: .\static\HC\JS\HCreference.js:807
+msgid ""
+"D - Headlights\n"
+"2 x 3\n"
+"Also Safety 5"
+msgstr ""
+"D - 头灯\n"
+"2 x 3\n"
+"也在安全5级"
+
+#: .\static\HC\JS\HCreference.js:808
+msgid ""
+"C - Dashboard\n"
+"4 x 2\n"
+"Also Speed 6"
+msgstr ""
+"C - 仪表板\n"
+"4 x 2\n"
+"也在速度6级"
+
+#: .\static\HC\JS\HCreference.js:809
+msgid ""
+"A - Body\n"
+"3 x 3\n"
+"Also Reliability 3"
+msgstr ""
+"A - 车身\n"
+"3 x 3\n"
+"也在可靠性3级"
+
+#: .\static\HC\JS\HCreference.js:810
+msgid ""
+"B - Steering Wheel\n"
+"3 x 3\n"
+"Also Safety 3"
+msgstr ""
+"B - 方向盘\n"
+"3 x 3\n"
+"也在安全3级"
+
+#: .\static\HC\JS\HCview.js:97
+msgid "Game ended by Punch Clock"
+msgstr "游戏因考勤钟而触发结束"
+
+#: .\static\HC\JS\HCview.js:98
+msgid "Game ended by Factory Expansions"
+msgstr "游戏因工厂扩建而结束"
+
+#: .\static\HC\JS\HCview.js:99
+msgid "Game ended by King of the Hill"
+msgstr "游戏因山丘之王而结束"
+
+#: .\static\HC\JS\HCview.js:159
+msgid "View Market Board"
+msgstr "查看市场版图"
+
+#: .\static\HC\JS\HCview.js:185
+msgid "Most Gantt"
+msgstr "最多甘特点数"
+
+#: .\static\HC\JS\HCview.js:187
+msgid "Winner"
+msgstr "胜利者"
+
+#: .\static\HC\JS\HCview.js:188 .\static\HC\JS\HCview.js:244
+msgid "Engineering"
+msgstr "工程"
+
+#: .\static\HC\JS\HCview.js:243
+msgid "Least Gantt"
+msgstr "最少甘特点数"
+
+#: .\static\HC\JS\HCview.js:245
+msgid "Stuck in Traffic"
+msgstr "遭遇交通阻塞"
+
+#: .\static\HC\JS\HCview.js:846 .\static\HC\JS\HCview.js:865
+#: .\static\HC\JS\HCview.js:866 .\static\HC\JS\HCview.js:1312
+#: .\static\HC\JS\HCview.js:1313
+msgid "Hide Pieces"
+msgstr "隐藏组件"
+
+#: .\static\HC\JS\HCview.js:865 .\static\HC\JS\HCview.js:1293
+#: .\static\HC\JS\HCview.js:1312
+msgid "Show Pieces"
+msgstr "展示组件"
+
+#: .\static\HC\JS\HCview.js:1017
+msgid "Phases"
+msgstr "阶段"
+
+#: .\static\HC\JS\HCview.js:1018 .\static\HC\JS\HCview.js:1020
+#: .\static\HC\JS\HCview.js:1025
+msgid "(E &#x2192; S)"
+msgstr "(工程 &#x2192; 销售)"
+
+#: .\static\HC\JS\HCview.js:1019
+msgid "(Most Gantt &#x2192; Least Gantt)"
+msgstr "(最多甘特点数 &#x2192; 最少甘特点数)"
+
+#: .\static\HC\JS\HCview.js:1022
+msgid "(S &#x2192; E)"
+msgstr "(销售 &#x2192; 工程)"
+
+#: .\static\HC\JS\HCview.js:1219
+msgid "Market Demand:"
+msgstr "市场需求:"
+
+#: .\static\HC\JS\HCview.js:1708
+msgid "Adding a new tech caused: %(componentName)s - %(componentError)s"
+msgstr ""
+
+#: .\static\HC\JS\HCview.js:1727
+#, fuzzy
+#| msgid "previous players already took this"
+msgid "Please remove: %(componentName)s - previous players already took this"
+msgstr "之前的玩家已经拿过这个"
+
+#: .\static\HC\JS\HCview.js:1828
+msgid "Enter Sandbox Mode"
+msgstr "进入沙盒模式"
+
+#: .\static\HC\JS\HCview.js:2003 .\static\HC\JS\HCview.js:3742
+msgid "MAINLINES"
+msgstr "主线"
+
+#: .\static\HC\JS\HCview.js:2007 .\static\HC\JS\HCview.js:3746
+msgid "A LINES"
+msgstr "A线"
+
+#: .\static\HC\JS\HCview.js:2011 .\static\HC\JS\HCview.js:3750
+msgid "B LINES"
+msgstr "B线"
+
+#: .\static\HC\JS\HCview.js:2015 .\static\HC\JS\HCview.js:3754
+msgid "C LINES"
+msgstr "C线"
+
+#: .\static\HC\JS\HCview.js:2019 .\static\HC\JS\HCview.js:3758
+msgid "D LINES"
+msgstr "D线"
+
+#: .\static\HC\JS\HCview.js:2023
+msgid "DEPARTMENTS"
+msgstr "部门"
+
+#: .\static\HC\JS\HCview.js:2027 .\static\HC\JS\HCview.js:3766
+msgid "DEALERSHIPS"
+msgstr "经销商"
+
+#: .\static\HC\JS\HCview.js:2187
+msgid "Niche Square exceeds Sepcs of Dealership"
+msgstr "利基市场方格超过了经销商的规格"
+
+#: .\static\HC\JS\HCview.js:2885
+msgid "Below Min Spec"
+msgstr ""
+
+#: .\static\HC\JS\HCview.js:2942
+#, fuzzy
+#| msgid "Remove Last Component"
+msgid "Nudge Component"
+msgstr "移除最后一个组件"
+
+#: .\static\HC\JS\HCview.js:3002
+msgid "Quick Spec Pick"
+msgstr "规格快捷挑选"
+
+#: .\static\HC\JS\HCview.js:3608
+msgid "Your bug report has been submitted"
+msgstr "您的错误报告已提交"
+
+#: .\static\HC\JS\HCview.js:3619
+#, fuzzy
+#| msgid ""
+#| "Welcome to Horseless Carriage Online!</b><BR/>If you have any "
+#| "suggestions, questions or comments, then please do contact the webmaster "
+#| "at <img src='/static/Lobby/email.png' width='400px' height='30px'>. "
+#| "Thanks!"
+msgid ""
+"Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any "
+"suggestions, questions or comments, then please do contact the webmaster at "
+"the email address in Contact (top right in the lobby). Thanks!"
+msgstr ""
+"欢迎来到Horseless Carriage线上游戏！</b><BR/>如果您有任何建议、问题或意见，那"
+"么请与网站管理员联系：<img src='/static/Lobby/email.png' width='400px' "
+"height='30px'> 。谢谢!"
+
+#: .\static\HC\JS\HCview.js:3762
+msgid "D'MENTS"
+msgstr "D的单位"
+
+#: .\static\HC\JS\HCview.js:3793
+msgid ""
+"The person having the visual colour:: %(visualColour)s has the original game "
+"cards in colour: %(originalColour)s"
+msgstr ""
+
+#: .\static\HC\JS\HCwebsocket.js:35
+msgid "Connected"
+msgstr "已连接"
+
+#: .\static\HC\JS\HCwebsocket.js:39 .\static\HC\JS\HCwebsocket.js:51
+msgid "Disconnected"
+msgstr "断开连接"
+
+#: .\static\HC\JS\HCwebsocket.js:44
+msgid "Error"
+msgstr "错误"
+
+#~ msgid "passes:"
+#~ msgstr "略过："
+
+#~ msgid "uses %(dealershipName)s but cannot make any sales"
+#~ msgstr "使用 %(dealershipName)s 但无法进行任何销售"
+
+#~ msgid "uses %(dealershipName)s to sell:"
+#~ msgstr "使用 %(dealershipName)s 来销售："
+
+#~ msgid "Adding a new tech caused:"
+#~ msgstr "添加一项新技术站导致："
+
+#~ msgid "Please remove"
+#~ msgstr "请移除"
+
+#~ msgid "The person having the visual colour:"
+#~ msgstr "具有色盲的人："
+
+#~ msgid "has the original game cards in colour:"
+#~ msgstr "原版游戏卡牌的颜色："
+
+#~ msgid "House %(houseNum)s sold %(burgSold)s burgers and %(beerSold)s beers"
+#~ msgstr "住宅 %(houseNum)s 售出 %(burgSold)s 汉堡和 %(beerSold)s 啤酒"

@@ -587,52 +587,52 @@ def SR_gamePaceString(gamePace):
     return gamePaceString
 
 
-def SR_getKickoutHTML(kickoutDuration):
-    HTML = ""
-    # less than a day kickouts
-    kickoutInDays = int(kickoutDuration / 100)
-    if kickoutDuration < 49:
-        if kickoutDuration == 5:
-            HTML = (
-                "<img class ='startingOption' src='/static/Lobby/Images/kickout5.svg' title='"
-                + gettext("Kickout after 5 Minutes")
-                + "'/>"
-            )
-        elif kickoutDuration == 10:
-            HTML = (
-                "<img class ='startingOption' src='/static/Lobby/Images/kickout10.svg' title='"
-                + gettext("Kickout after 10 Minutes")
-                + "'/>"
-            )
-        elif kickoutDuration == 20:
-            HTML = (
-                "<img class ='startingOption' src='/static/Lobby/Images/kickout20.svg' title='"
-                + gettext("Kickout after 20 Minutes")
-                + "'/>"
-            )
-
-    elif kickoutDuration == 50:
-        HTML = (
-            "<img class ='startingOption' src='/static/Lobby/Images/kickout50.svg' title='"
-            + gettext("Kickout after 12 Hours")
-            + "'/>"
-        )
-    elif kickoutDuration == 100:
-        HTML = (
-            "<img class ='startingOption' src='/static/Lobby/Images/kickout100.svg' title='"
-            + gettext("Kickout after 1 day")
-            + "'/>"
-        )
-    else:
-        kickoutTitle = gettext("Kickout after %(kickoutInDays)s days") % {"kickoutInDays": str(kickoutInDays)}
-        HTML = (
-            "<img class ='startingOption' src='/static/Lobby/Images/kickout"
-            + str(kickoutDuration)
-            + ".svg' title='"
-            + kickoutTitle
-            + "'/>"
-        )
-    return HTML
+#def SR_getKickoutHTML(kickoutDuration):
+#    HTML = ""
+#    # less than a day kickouts
+#    kickoutInDays = int(kickoutDuration / 100)
+#    if kickoutDuration < 49:
+#        if kickoutDuration == 5:
+#            HTML = (
+#                "<img class ='startingOption' src='/static/Lobby/Images/kickout5.svg' title='"
+#                + gettext("Kickout after 5 Minutes")
+#                + "'/>"
+#            )
+#        elif kickoutDuration == 10:
+#            HTML = (
+#                "<img class ='startingOption' src='/static/Lobby/Images/kickout10.svg' title='"
+#                + gettext("Kickout after 10 Minutes")
+#                + "'/>"
+#            )
+#        elif kickoutDuration == 20:
+#            HTML = (
+#                "<img class ='startingOption' src='/static/Lobby/Images/kickout20.svg' title='"
+#                + gettext("Kickout after 20 Minutes")
+#                + "'/>"
+#            )
+#
+#    elif kickoutDuration == 50:
+#        HTML = (
+#            "<img class ='startingOption' src='/static/Lobby/Images/kickout50.svg' title='"
+#            + gettext("Kickout after 12 Hours")
+#            + "'/>"
+#        )
+#    elif kickoutDuration == 100:
+#        HTML = (
+#            "<img class ='startingOption' src='/static/Lobby/Images/kickout100.svg' title='"
+#            + gettext("Kickout after 1 day")
+#            + "'/>"
+#        )
+#    else:
+#        kickoutTitle = gettext("Kickout after %(kickoutInDays)s days") % {"kickoutInDays": str(kickoutInDays)}
+#        HTML = (
+#            "<img class ='startingOption' src='/static/Lobby/Images/kickout"
+#            + str(kickoutDuration)
+#            + ".svg' title='"
+#            + kickoutTitle
+#            + "'/>"
+#        )
+#    return HTML
 
 
 def SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds):

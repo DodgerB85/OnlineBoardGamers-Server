@@ -44,7 +44,7 @@
         {% endif %}
         <span class="sqPaceSpan"><img class="sqSpeedometer" src="{% static "Lobby/Images/speedometer.svg" %}"
             alt="Game Pace" title="Game Pace"><BR />{{ game.pace|safe }}</span>
-        {{ game.kickoutHTML|safe }}
+        {% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}
       </div>
     </div>
     {% if game.startingMap or game.startingOptions %}

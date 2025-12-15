@@ -1,0 +1,347 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="iso8859-1">
+        <title>Food Chain Magnate</title>
+        <link href="{% static 'FCM/FCM.css' %}?v=20220706" rel="stylesheet">
+        <link rel="icon" type="image/png" href="{% static 'Lobby/favicon.png' %}" />
+    </head>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% csrf_token %}
+    <!--
+<br /><br />
+Enter game data <br />
+
+<textarea id="inputData" name="inputData" rows="4" cols="50"></textarea>
+    <br />
+    <input type="button"
+           onclick="decompressData()"
+           value="Decompress to Model.export">
+    <br />
+    <textarea id="outputData" name="outputData" rows="4" cols="50"></textarea>
+
+    <br /><br /><br />
+    Enter Json stringified model<br />
+    <textarea id="inputData2" name="inputData" rows="4" cols="50"></textarea>
+    <br />
+    <input type="button" onclick="compressData()" value="Compress to DB">
+    <br />
+    <textarea id="outputData2" name="outputData" rows="4" cols="50"></textarea>
+    -->
+    <br />
+    <br />
+    <br />
+    Enter DB data to unpack
+    <br />
+    <textarea id="inputData3" name="inputData3" rows="4" cols="50"></textarea>
+    <br />
+    <button name="button" id="button" onclick="unpackData();" value="before">Click Me!</button>
+    <ore id="decompressPre"></ore>
+    <br />
+    <br />
+    MOVE DATA AREA (from ID)
+    <br />
+    <input type="text"
+           id="moveDataInput"
+           name="moveDataInputName"
+           placeholder="game id">
+    <br>
+    <button name="button" id="button" onclick="getMoveDataForID();">Decode Move</button>
+    <br>
+    <div id="moveDataOutput"></div>
+    <br />
+    <br />
+    BUS CHAT AREA
+    <br />
+    <input type="text" id="BusChatDataInput">
+    <br>
+    <button id="buttonBusChat" onclick="buttonBusChat()">Decode Chat</button>
+    <br>
+    <textarea id="busChatDataRaw" rows="6" cols="150"></textarea>
+    <br />
+    <button id="buttonBusChat" onclick="buttonBusChatEncode()">Encode Chat</button>
+    <div id="busChatDataOutput"></div>
+    <br />
+    <br />
+    PAKO CHAT AREA
+    <br />
+    <input type="text" id="pakoChatDataInput">
+    <br>
+    <button id="pakoChatButton" onclick="buttonPakoChat()">Decode Chat</button>
+    <br>
+    <textarea id="pakoChatDataRaw" rows="6" cols="150"></textarea>
+    <br />
+    <button id="pakoChatButton2" onclick="buttonPakoChatEncode()">Encode Chat</button>
+    <div id="pakoChatDataOutput"></div>
+</html>
+<script type="text/javascript">
+    function buttonBusChat() {
+        var inputData = document.getElementById("BusChatDataInput").value;
+        var outputData = LZString.decompressFromEncodedURIComponent(inputData);
+        document.getElementById("busChatDataRaw").value = outputData;
+    }
+
+    function buttonBusChatEncode() {
+        var inputData = document.getElementById("busChatDataRaw").value;
+        var outputData = LZString.compressToEncodedURIComponent(inputData)
+        document.getElementById("busChatDataOutput").innerText = outputData;
+    }
+
+    function buttonPakoChat() {
+      /*  var inputData = document.getElementById("pakoChatDataInput").value;
+
+        let compressedData = Uint8Array.from(atob(inputData), (c) => c.charCodeAt(0))
+		// eslint-disable-next-line no-undef
+		let decompressedData = pako.ungzip(compressedData, { to: "string" })
+		var chatArray = JSON.parse(decompressedData)
+
+        document.getElementById("pakoChatDataRaw").value = decompressedData;*/
+
+          var inputData = document.getElementById("pakoChatDataInput").value;
+
+  try {
+    // 1. Decode Base64
+    const binaryString = atob(inputData);
+
+    // 2. Convert binary string to Uint8Array
+    const compressedData = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      compressedData[i] = binaryString.charCodeAt(i);
+    }
+
+    // 3. Ungzip
+    const decompressedData = pako.ungzip(compressedData, { to: 'string' });
+
+    // 4. Display in textarea
+    document.getElementById("pakoChatDataRaw").value = decompressedData;
+
+  } catch (error) {
+    console.error("Error during decoding:", error);
+    alert("Decoding error. Check the input data.");
+  }
+    }
+
+    function buttonPakoChatEncode() {
+        /*var inputData = document.getElementById("pakoChatDataInput").value;
+
+        
+        // Convert the JavaScript object to a JSON string
+        //const json_string = JSON.stringify(inputData);
+
+        // Compress the JSON string using gzip
+        const compressed_data = pako.gzip(inputData, { to: 'string' });
+
+        // Encode the compressed data to base64
+        const outputData = btoa(compressed_data);
+
+        document.getElementById("pakoChatDataOutput").innerText = outputData;*/
+
+        var inputData = document.getElementById("pakoChatDataRaw").value; // Get from RAW textarea
+
+  try {
+    // 1. Gzip Compress (input is a string)
+    const compressedData = pako.gzip(inputData);
+
+    // 2. Convert Uint8Array to binary string
+    let binaryString = '';
+    for (let i = 0; i < compressedData.length; i++) {
+      binaryString += String.fromCharCode(compressedData[i]);
+    }
+
+    // 3. Base64 Encode
+    const outputData = btoa(binaryString);
+
+    // 4. Display in pre element
+    document.getElementById("pakoChatDataOutput").textContent = outputData;
+
+  } catch (error) {
+    console.error("Error during encoding:", error);
+    alert("Encoding error. Check the input data or format.");
+  }
+    }
+
+    function decompressData() {
+        var inputData = document.getElementById("inputData").value;
+        //var outputData = decompressObjectFromDB(inputData);
+        var outputData = LZString.decompressFromEncodedURIComponent(inputData);
+        document.getElementById("outputData").value = outputData;
+    }
+    function compressData() {
+        var inputData = document.getElementById("inputData2").value;
+        //var outputData = decompressObjectFromDB(inputData);
+        var outputData = LZString.compressToEncodedURIComponent(inputData)
+        document.getElementById("outputData2").value = outputData;
+    }
+
+    var M;
+
+    function unpackData() {
+        //var inputData = document.getElementById("inputData").value;
+
+        var inputData = document.getElementById("inputData3").value;
+        var outputData = decompressObjectFromDB(inputData);
+
+        var M = Model.import(outputData)
+        delete M.map;
+        delete M.logs;
+        
+        //M.players[1].name = "vladdswrath"
+        //alert(M.gameflow.currentPlayer)
+
+        //M.gameflow.currentPlayer = 1;
+        //M.gameflow.currentPlayer
+        //alert(M.gameflow.currentPlayer)
+
+        //var outputData = compressObjectToDB(M.export());
+        //outputData = JSON.stringify(M)
+
+        //document.getElementById("decompressPre").innerHTML = outputData;
+        document.getElementById("decompressPre").innerHTML = (JSON.stringify(M, undefined, 4)).replace(/\n( *)/g, function (match, p1) {
+            return '<br />' + '&nbsp;'.repeat(p1.length);
+        });
+
+        /*document.getElementById("decompressPre").innerHTML = "";
+        for (var i = 0; i < M.length; i++) {
+            //if (i!=2)
+            document.getElementById("decompressPre").innerHTML += (JSON.stringify(M[i], undefined, 4)).replace(/\n( *)/g, function (match, p1) {
+                return '<br />' + '&nbsp;'.repeat(p1.length);
+            });
+        }*/
+        // var element = document.getElementById("decompressPre");
+        // var obj = JSON.parse(element.innerText);
+        //element.innerHTML = JSON.stringify(obj, undefined, 2);
+
+
+        /* var moveData = '[-1addg6-1555rrrj0g::]'; // stalled game
+         var moveData = '[-1n-1l7nhgd]';
+         //var moveData = '[-1ur-10::]'; 
+ 
+         /* PAYDAY move data is an array of 4 arrays
+  
+         */
+        // var decodedMove = Encoder.decodeObject(moveData);
+        /* //alert(JSON.stringify(decodedMove, null, 4))
+         document.getElementById("decompressPre").innerHTML = "<br /><b>BEACH: </b><br />";
+ 
+         for (var i = 0; i < decodedMove[0].length; i++) {
+             document.getElementById("decompressPre").innerHTML += Log.giveEmployeeSpan(decodedMove[0][i]);
+         }
+         document.getElementById("decompressPre").innerHTML += "<br /><br /><b>AT WORK: </b><br />";
+         for (var i = 0; i < decodedMove[1].length; i++) {
+             document.getElementById("decompressPre").innerHTML += Log.giveEmployeeSpan(decodedMove[1][i]);
+         }*/
+    }
+
+
+
+    // get CSRF for javascript
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function getMoveDataForID() {
+        var gameID = document.getElementById("moveDataInput").value;
+
+        var csrftoken = getCookie('csrftoken');
+
+        fetch('../gameAdminGetMoveData/', {
+
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'getMoveData',
+                gameID: gameID,
+            }),
+            headers: { "X-CSRFToken": csrftoken },
+        })
+            .then(response => response.json())
+            .then(result => {
+                document.getElementById("moveDataOutput").innerHTML = "";
+                for (let i = 0; i < result.allMoveData.length; i++) {
+                    if (result.allMoveData[i][0] != "") decodeMoveInput(result.allMoveData[i])
+                }
+            })
+            .catch(error => {
+                console.log('Error:', error);
+            });
+
+    }
+
+        async function decodeMoveInput(moveDataWithName) {
+
+        document.getElementById("moveDataOutput").innerHTML += "<br /><br />";
+        var moveData = moveDataWithName[0]
+        //var moveData = document.getElementById("moveDataInput").value;
+        //var decodedMove = decompressData(moveData);
+        var decodedMove = moveData
+        
+        //alert(JSON.stringify(decodedMove, null, 4))
+        document.getElementById("moveDataOutput").innerHTML += "<br /><b>" + moveDataWithName[1] + ":  BEACH: </b><br />";
+
+        for (var i = 0; i < decodedMove[0].length; i++) {
+            if (decodedMove[0][i] == null) document.getElementById("moveDataOutput").innerHTML += " =BLANK= ";
+            else document.getElementById("moveDataOutput").innerHTML += Log.giveEmployeeSpan(decodedMove[0][i]);
+        }
+        document.getElementById("moveDataOutput").innerHTML += "<br /><br /><b>" + moveDataWithName[1] + ":  AT WORK: </b><br />";
+        var freeSlots = 4;
+
+        for (var i = 0; i < decodedMove[1].length; i++) {
+            if (decodedMove[1][i] == null) document.getElementById("moveDataOutput").innerHTML += " =BLANK= ";
+            else document.getElementById("moveDataOutput").innerHTML += Log.giveEmployeeSpan(decodedMove[1][i]);
+            freeSlots--;
+            freeSlots += Rules.hierarchySlots(decodedMove[1][i]);
+        }
+        document.getElementById("moveDataOutput").innerHTML += " =FREE SLOTS: " + String(freeSlots) + " based on ceo 4= ";
+        document.getElementById("moveDataOutput").innerHTML += " AUTO-SELECT: " + String(decodedMove[2]) + " ";
+        
+    }
+
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    //global = {};
+</script>
+<script src="{% url 'javascript-catalog' %}"></script>
+<script src="{% static 'FCM/JS/lib/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'FCM/JS/lib/lodash.min.js' %}"></script>
+<script src="{% static 'FCM/JS/Roger.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/utils.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/reference.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/map.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/player.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/rules.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/model.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/view.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/controller.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/history.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/io.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/bot.js' %}?v=20220706"></script>
+<script src="{% static 'FCM/JS/websocket.js' %}?v=20220706"></script>
+<!--<script src="{% static 'FCM/JS/main.js' %}?v=20220706"></script>-->

@@ -1,0 +1,266 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="FCMhelpPage">
+      <h1>{% translate "China Expansion Help" %}</h1>
+      {% blocktranslate trimmed %}
+        These modules are from the Chinese kickstarter (Modian) release from publisher Yikeguang (一刻馆).
+        Splotter was unaware that these existed before I contacted them!
+        Therefore you could consider these modules as "semi-official" but unsanctioned by Splotter.
+        <br />
+        Games with these modules will therefore be excluded from the stats (except Urban Planning / Urban Planning Plus).
+        <br />
+        The rules also don't cover all possiblities.
+        Therefore, I have made a few judgment calls to tighten up the rules a bit.
+        In addition, as this content was to designed by Splotter, I'm not sure the playtesting/balancing was quite as thorough!
+      {% endblocktranslate %}
+      <div class="FCMhelpSection">
+        <h2>{% translate "Urban Planning" %}</h2>
+        <b><u>{% translate "Overview" %}</b></u>
+          <br />
+          {% blocktranslate trimmed %}
+            Random maps can have a huge amount of variance, producing isolated islands as well as large residential areas. This module allows players to influence map construction and thus the characteristics of the map to be used.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>Rules</u></b>
+          <ul>
+            <li>
+              {% blocktranslate trimmed %}
+                In turn order, each player may rotate the next tile to be placed, according to the sequence below. Note you can only rotate the next tile - you cannot select or change which tile that is.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                After all tiles have been placed, turn order will reset to the same order as when the game started.
+              {% endblocktranslate %}
+            </li>
+          </ul>
+          <img src="{% static 'FCM/Images/help_urbanPlanning.jpg' %}"
+               alt="Urban Planning Example"
+               width="730"
+               height="343" />
+          <h2>{% translate "Urban Planning Plus" %}</h2>
+          <b><u>{% translate "Overview" %}</b></u>
+            <br />
+            {% blocktranslate trimmed %}
+              People have asked me in the past about some kind of map tile drafting option. With the addition of the Urban Planning module, which only allows players to rotate the next tile, I decided to add this option as well.
+            {% endblocktranslate %}
+            <br />
+            <br />
+            <b><u>Rules</u></b>
+            <ul>
+              <li>
+                {% blocktranslate trimmed %}
+                  Same as Urban Planning, except you may now also choose which tile to place, as well as the rotation.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  For 6p games then the expansion tiles will be added regardless of whether New Districts has been selected or not.
+                {% endblocktranslate %}
+              </li>
+            </ul>
+            <h2>{% translate "Jazz Musicians" %}</h2>
+            <img class="helpEmployeeImg"
+                 src="{% static 'FCM/Images/e_jazz_musician.jpg' %}"
+                 alt="Jazz Musician"
+                 width="145"
+                 height="225" />
+            <br />
+            <b><u>{% translate "Overview" %}</b></u>
+              <br />
+              {% blocktranslate trimmed %}
+                Jazz originated in the United States in the late 19th and early 20th centuries. This moving music caused people to linger longer. Whenever you have such music in your restaurants, it will cause people to give more generous tips.
+              {% endblocktranslate %}
+              <br />
+              <br />
+              <b><u>Rules</u></b>
+              <ul>
+                <li>
+                  {% blocktranslate trimmed %}
+                    A Jazz Musician can be trained from a Waitress, and requires a salary. There are 6 Jazz Musicians in the game.
+                  {% endblocktranslate %}
+                </li>
+                <li>
+                  {% blocktranslate trimmed %}
+                    Each Jazz Musician will generate $15 in tips during the Dinnertime phase.
+                  {% endblocktranslate %}
+                </li>
+                <li>
+                  {% blocktranslate trimmed %}
+                    Jazz Musicians act as a reverse tie-breaker; ie the person with FEWEST musicians will win ties - so if you have any Jazz Musicians you will lose ties to anyone with fewer Jazz Musicians.
+                  {% endblocktranslate %}
+                </li>
+                To clarify, ties are broken in this order
+                <ul>
+                  <li>1) As always, the price adjusted for distance is the main factor in determining who wins a sale.</li>
+                  <li>2) Players who tie on price adjusted distance resolve ties in order of who has the best Movie Star.</li>
+                  <li>3) If no player has a Movie Star, ties are resolved in favour of whoever has the FEWEST Jazz Musicians.</li>
+                  <li>4) If there is still a tie, the player with the most waitresses makes the sale.</li>
+                  <li>5) Finally, ties are resolved in turn order.</li>
+                </ul>
+                <li>
+                  {% blocktranslate trimmed %}
+                    As always, employees need to actually be in your structure to count towards tie breakers.
+                  {% endblocktranslate %}
+                </li>
+              </ul>
+              <h2>{% translate "Delivery Drivers" %}</h2>
+              <img class="helpEmployeeImg"
+                   src="{% static 'FCM/Images/e_delivery_driver.jpg' %}"
+                   alt="Delivery Driver"
+                   width="145"
+                   height="225" />
+              <br />
+              <b><u>{% translate "Overview" %}</b></u>
+                <br />
+                {% blocktranslate trimmed %}
+                  Takeout! Takeout! Finally we can eat at home. Of course, the emergence of takeout has made the price war more intense.
+                {% endblocktranslate %}
+                <br />
+                <br />
+                <b><u>Rules</u></b>
+                <ul>
+                  <li>
+                    {% blocktranslate trimmed %}
+                      The Delivery Driver is a base level employee that can be directly hired, and requires a salary.
+                    {% endblocktranslate %}
+                  </li>
+                  <li>
+                    {% blocktranslate trimmed %}
+                      Note that it is not a 1x employee, but you may only ever have one Delivery Driver in your organisation.
+                    {% endblocktranslate %}
+                  </li>
+                  <li>
+                    {% blocktranslate trimmed %}
+                      If a residence has 2 or more demand tokens on it, then any restaurant with a working Delivery Driver will reduce the distance to 0.
+                    {% endblocktranslate %}
+                  </li>
+                  <li>
+                    {% blocktranslate trimmed %}
+                      If you have a Milestone that reduces distance, and it is more favourable to ignore the Delivery Driver, then the Delivery Driver won't be used. EG if you are on the same tile as a house, and have the Ketchup Milestone, your distance will still count as -1; you won't be penalised by having the distance increased to 0 if using a Delivery Driver. So any net positive distance will be reduced to 0.
+                    {% endblocktranslate %}
+                  </li>
+                </ul>
+                <h2>{% translate "Dumplings" %}</h2>
+                <img class="helpEmployeeImg"
+                     src="{% static 'FCM/Images/e_dumpling_cook.jpg' %}"
+                     alt="Dumpling Cook"
+                     width="145"
+                     height="225" />
+                <img class="helpEmployeeImg"
+                     src="{% static 'FCM/Images/e_dumpling_chef.jpg' %}"
+                     alt="Dumpling Chef"
+                     width="145"
+                     height="225" />
+                <br />
+                <b><u>{% translate "Overview" %}</b></u>
+                  <br />
+                  {% blocktranslate trimmed %}
+                    Dumplings are one of China's classic foods.
+                  {% endblocktranslate %}
+                  <br />
+                  <br />
+                  <b><u>Rules</u></b>
+                  <ul>
+                    <li>
+                      {% blocktranslate trimmed %}
+                        Marketing Dumplings: You cannot directly market dumplings. Instead, they are so tasty that ANY marketed item will also add demand for dumplings. Immediately after a marketing campaign has run, it will run again except the second time it will add Dumplings demand instead of its original item.
+                      {% endblocktranslate %}
+                    </li>
+                    <li>
+                      {% blocktranslate trimmed %}
+                        The dumpling marketing happens immediately. So if billboards are marketing item A and item B to the same house, the house will add demand for item A, then dumpling due billboard A, and then item B. This would normally cause the maximum demand to be reached, so the dumpling from advertising item B would only be added if the house has a garden.
+                      {% endblocktranslate %}
+                    </li>
+                    <li>
+                      {% blocktranslate trimmed %}
+                        Dumplings are produced by Dumpling Cooks and Dumpling Chefs. There are 6 cooks, each producing.3 dumplings. The chef Is a 1x employee, and will produce 8 dumplings.
+                      {% endblocktranslate %}
+                    </li>
+                    <li>
+                      {% blocktranslate trimmed %}
+                        There is a new Milestone for First Dumpling Sold. After Dinnertime, each player who has gained this milestone will choose a new action for their CEO. Their CEO will lose its original action (Hire 1) and replace it with one of the following:
+                        <ul>
+                          <li>2x Hire 1 Employee or $5 salary reduction (the same as a Recruiting Manager)</li>
+                          <li>Get 2 training points; you may train one employee by 2 levels (the same as a Coach)</li>
+                          <li>Reduce your base price by $3 (the same as a permanent Discount Manager.</li>
+                        </ul>
+                      {% endblocktranslate %}
+                    </li>
+                    <li>The new CEO action is permanent.</li>
+                  </ul>
+                  <h2>{% translate "Hawker Marketing" %}</h2>
+                  <img class="helpEmployeeImg"
+                       src="{% static 'FCM/Images/e_hawker_marketeer.jpg' %}"
+                       alt="Hawker Marketeer"
+                       width="145"
+                       height="225" />
+                  <br />
+                  <b><u>{% translate "Overview" %}</b></u>
+                    <br />
+                    {% blocktranslate trimmed %}
+                      Hawker trucks driving by, with their loud and engaging music, can't help but attract people's attention to their goods.
+                    {% endblocktranslate %}
+                    <br />
+                    <br />
+                    <b><u>Rules</u></b>
+                    <ul>
+                      <li>
+                        {% blocktranslate trimmed %}
+                          The Hawker Marketeer is a new marketing employee that can be trained from the Marketing Trainee. The Hawker Marketeer requires a salary. There are 6 in the game.
+                        {% endblocktranslate %}
+                      </li>
+                      <li>
+                        {% blocktranslate trimmed %}
+                          The Hawker Marketeer has a range of 2 and is played in the same way as a Cart Operator - you need to drive this marketeer out of a restaurant and along roads up to a range of 2. You can choose campaign number #21 #22 or #23, and a duration of 1, 2, or 3 turns.
+                        {% endblocktranslate %}
+                      </li>
+                      <li>
+                        {% blocktranslate trimmed %}
+                          When the marketing campaign activates, it will advertise to any residence directly connected to its route - connections through parks or gardens do not count.
+                        {% endblocktranslate %}
+                      </li>
+                      <li>
+                        {% blocktranslate trimmed %}
+                          This is the only time the precise orientation of new houses actually matters. Therefore, when using this module, the New Business Developer can place new houses with the garden at the bottom/left/top/right, rather than just horizontally or vertically.
+                        {% endblocktranslate %}
+                      </li>
+                    </ul>
+                  </div>
+                  <br />
+                  {% translate "For further help contact" %}
+                  <img id="contactEmailImg"
+                       src="{% static 'Lobby/email.png' %}"
+                       alt="Email Address"
+                       width="400"
+                       height="30">
+                </div>
+                <div class="container signin">
+                  <input class="homeButton"
+                         type="button"
+                         data-url="{% url 'index' %}"
+                         value="{% translate 'Home' %}" />
+                </div>
+                <script>
+  document.querySelector('.homeButton').addEventListener('click', function() {
+    window.location.href = this.getAttribute('data-url');
+  });
+                </script>
+              </div>
+            {% endblock %}

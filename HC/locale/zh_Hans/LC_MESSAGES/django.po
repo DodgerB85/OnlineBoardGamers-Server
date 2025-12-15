@@ -1,0 +1,778 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-07 02:27+0800\n"
+"PO-Revision-Date: 2023-10-07 20:03+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: .\models.py:30
+msgid "Open"
+msgstr ""
+
+#: .\models.py:31 .\models.py:260
+msgid "In Progress"
+msgstr ""
+
+#: .\models.py:32
+msgid "Finished"
+msgstr ""
+
+#: .\models.py:45
+msgid "Rounds"
+msgstr ""
+
+#: .\models.py:46
+msgid "Knockout"
+msgstr ""
+
+#: .\models.py:47
+#, fuzzy
+#| msgid "Live"
+msgid "Two Lives"
+msgstr "实时模式"
+
+#: .\models.py:170
+#, fuzzy
+#| msgid "Horseless Carriage Game Summary"
+msgid "Horseless Carriage - Tournament Game Started"
+msgstr "Horseless Carriage游戏总结"
+
+#: .\models.py:181
+#, python-format
+msgid ""
+"A Tournament Game of Horseless Carriage has started\n"
+"%(gameName)s - %(maxPlayers)s players"
+msgstr ""
+
+#: .\models.py:182 .\models.py:230 .\views.py:901
+msgid "Click here to play Horseless Carriage"
+msgstr "单击此处开始 Horseless Carriage"
+
+#: .\models.py:221
+#, fuzzy
+#| msgid "Horseless Carriage Game Summary"
+msgid "Horseless Carriage - Tournament Won"
+msgstr "Horseless Carriage游戏总结"
+
+#: .\models.py:229
+#, python-format
+msgid ""
+"You have won a Horseless Carriage tournament! \n"
+"%(tournamentName)s"
+msgstr ""
+
+#: .\models.py:258
+msgid "OPEN FOR SIGNUP"
+msgstr ""
+
+#: .\models.py:263
+msgid "1st:"
+msgstr ""
+
+#: .\models.py:269
+msgid "2nd:"
+msgstr ""
+
+#: .\models.py:275
+msgid "3rd:"
+msgstr ""
+
+#: .\models.py:314
+msgid "Points"
+msgstr ""
+
+#: .\models.py:335
+msgid "Round"
+msgstr ""
+
+#: .\models.py:339 .\templates\HC\HCtemplate.html:189
+msgid "Game"
+msgstr "游戏"
+
+#: .\models.py:340
+msgid "Winner"
+msgstr ""
+
+#: .\models.py:368
+msgid "BYES:"
+msgstr ""
+
+#: .\models.py:934
+#, fuzzy
+#| msgid "Give Permission"
+msgid "No Permission"
+msgstr "授予权限"
+
+#: .\models.py:937
+#, fuzzy
+#| msgid "Give Permission"
+msgid "Single Permission"
+msgstr "授予权限"
+
+#: .\models.py:940 .\templates\HC\HCtemplate.html:103
+msgid "Permanent Permission"
+msgstr "永久许可"
+
+#: .\templates\HC\HCgameSummary.html:19
+msgid "Horseless Carriage Game Summary"
+msgstr "Horseless Carriage游戏总结"
+
+#: .\templates\HC\HCgameSummary.html:31 .\templates\HC\HChelp.html:102
+#: .\templates\HC\HCtemplate.html:20
+msgid "Home"
+msgstr "首页"
+
+#: .\templates\HC\HChelp.html:13
+msgid "Rules"
+msgstr "规则"
+
+#: .\templates\HC\HChelp.html:14
+msgid ""
+"Horseless Carriage rules available <a href='https://boardgamegeek.com/"
+"filepage/251309/first-edition-english-rulebook' target='_blank'>here</a>"
+msgstr ""
+"Horseless Carriage规则在 <a href='https://boardgamegeek.com/filepage/251309/"
+"first-edition-english-rulebook' target='_blank'>这里</a>"
+
+#: .\templates\HC\HChelp.html:16
+msgid "Horseless Carriage Help"
+msgstr "Horseless Carriage帮助"
+
+#: .\templates\HC\HChelp.html:18
+msgid "Playing the Game"
+msgstr "进行游戏"
+
+#: .\templates\HC\HChelp.html:21
+#, fuzzy
+#| msgid ""
+#| "<LI>The active player has a yellow highlight</LI> <LI>Click on a player's "
+#| "name to view their factory - their name will get a green border to show "
+#| "you are looking at their factory. You can also click their name again as "
+#| "a shortcut to go back to the Market Board screen</LI> <LI>If the pieces "
+#| "are obscuring the Tech Track, click the \"Hide Pieces\" button, next to "
+#| "the Min Specs board</LI> <LI>Factory building can be done simultaneously."
+#| "<BR /> If you are not first in turn order, you can submit your factory "
+#| "and it will be verified in turn order.<BR /> In the lobby, you will show "
+#| "up under \"current players\" until your factory is verified<BR /> In this "
+#| "case the game won't have the green \"Your Move\" highlight until you need "
+#| "to make a move again.<BR /> If previous players use up the components, "
+#| "factory building will be re-enabled and you will need to remove those "
+#| "components.<BR /> To prevent losing your factory mid-build, the game "
+#| "won't update live during this phase. Check the lobby or refresh your "
+#| "game<br /> - you will also be sent a notification once you need to move, "
+#| "if you have enabled this in your profile. </LI> <LI>During factory "
+#| "building, a tech level summary is displayed. <BR /> Your techs have a bar "
+#| "with a green outline<BR /> Techs you have access to this turn (but have "
+#| "not researched yourself) have a bar with a yellow outline </LI>"
+msgid ""
+"<li>The active player has a yellow highlight</li> <li> Click on a player's "
+"name to view their factory - their name will get a green border to show you "
+"are looking at their factory. You can also click their name again as a "
+"shortcut to go back to the Market Board screen </li> <li>If the pieces are "
+"obscuring the Tech Track, click the \"Hide Pieces\" button, next to the Min "
+"Specs board</li> <li> Factory building can be done simultaneously. <br /> If "
+"you are not first in turn order, you can submit your factory and it will be "
+"verified in turn order. <br /> In the lobby, you will show up under "
+"\"current players\" until your factory is verified <br /> In this case the "
+"game won't have the green \"Your Move\" highlight until you need to make a "
+"move again. <br /> If previous players use up the components, factory "
+"building will be re-enabled and you will need to remove those components. "
+"<br /> To prevent losing your factory mid-build, the game won't update live "
+"during this phase. Check the lobby or refresh your game <br /> - you will "
+"also be sent a notification once you need to move, if you have enabled this "
+"in your profile. </li> <li> During factory building, a tech level summary is "
+"displayed. <br /> Your techs have a bar with a green outline <br /> Techs "
+"you have access to this turn (but have not researched yourself) have a bar "
+"with a yellow outline </li>"
+msgstr ""
+"<LI>当前玩家有一个黄色突出显示</LI><LI>点击玩家的名字可以查看他们的工厂-他们"
+"的名字会有一个绿色边框，显示你正在查看他们的厂。你也可以再次单击它们的名称作"
+"为返回市场版图屏幕的快捷方式</LI><LI>如果组件遮挡了技术轨道，请单击最小规格板"
+"旁边的“隐藏组件”按钮</LI><LI>工厂建设可以同时进行<BR/>如果你不是第一顺位玩"
+"家，您可以提交您的工厂，并将依次进行验证<BR/>在大厅中，您将显示在“当前玩"
+"家”下，直到您的工厂得到验证<BR/>在这种情况下，在您需要再次移动之前，游戏不会"
+"有绿色的“您的移动”高亮显示<BR/>如果以前的玩家用完了这些组件，工厂建设将重新启"
+"用，您需要移除这些组件<BR/>为了防止在构建中期丢失您的工厂，游戏在此阶段不会进"
+"行实时更新。检查大厅或刷新您的游戏<br/>-如果您在个人资料中启用了移动功能，您"
+"还将在需要移动时收到通知</LI><LI>在工厂建设期间，将显示科技级别摘要<BR/>您的"
+"科技是含有一个绿色轮廓线<BR/>您可以访问此回合的技术（但尚未自行研究）含有一个"
+"黄色轮廓线</LI>"
+
+#: .\templates\HC\HChelp.html:56
+msgid "How can I see which Market Windows have been placed?"
+msgstr "如何查看放置了哪些市场窗口？"
+
+#: .\templates\HC\HChelp.html:58
+#, fuzzy
+#| msgid ""
+#| "Any dealership with sales potential will be shown under the player names. "
+#| "Clicking on a dealership with a placed Market Window will show you the "
+#| "remaining squares it can sell to. If the Market Window has not been "
+#| "placed, then all eligible squares will be highlighted. <BR/> The Market "
+#| "Windows also have a name on them, in the top left, althought this can be "
+#| "obscured if other Market Windows are placed on top."
+msgid ""
+"Any dealership with sales potential will be shown under the player names. "
+"Clicking on a dealership with a placed Market Window will show you the "
+"remaining squares it can sell to. If the Market Window has not been placed, "
+"then all eligible squares will be highlighted. <br /> The Market Windows "
+"also have a name on them, in the top left, althought this can be obscured if "
+"other Market Windows are placed on top."
+msgstr ""
+"任何有销售潜力的经销商都将显示在玩家名称下。点击具有已放置市场窗口的经销商，"
+"将显示其可以出售的剩余方格。如果尚未放置市场窗口，则所有符合条件的广场都将突"
+"出显示<BR/>市场窗口的左上角也有一个名称，尽管如果其他市场窗口放在顶部，这可能"
+"会被掩盖。"
+
+#: .\templates\HC\HChelp.html:66
+msgid ""
+"I am second in Engineering Focus. Why can't I build techs from people with "
+"lower Engineering Focus?"
+msgstr ""
+"我是工程焦点顺位的第二名。为什么我不能从工程关注度较低的人那里建造技术站？"
+
+#: .\templates\HC\HChelp.html:68
+#, fuzzy
+#| msgid ""
+#| "From the rulebook: \"The player with the second highest engineering focus "
+#| "has access to every technology researched by at least two players; the "
+#| "third, to any researched by three others; and the fourth to any research "
+#| "done by 4 players already.\"<BR/> So in fact, you can build techs you "
+#| "haven't researched, but it must have been researched by at least 2 "
+#| "players. If there is a tech that has only been researched by one person, "
+#| "even if they are lower in engineering focus, then you will not have "
+#| "access to it."
+msgid ""
+"From the rulebook: \"The player with the second highest engineering focus "
+"has access to every technology researched by at least two players; the "
+"third, to any researched by three others; and the fourth to any research "
+"done by 4 players already.\" <br /> So in fact, you can build techs you "
+"haven't researched, but it must have been researched by at least 2 players. "
+"If there is a tech that has only been researched by one person, then you "
+"will not have access to it, even if they are lower in engineering focus."
+msgstr ""
+"根据规则手册：“工程焦点第二高的玩家可以使用至少二名玩家研究的每一项技术；第三"
+"名玩家可以使用其他三名玩家研究过的任何技术；第四名玩家可以访问已经由四名玩家"
+"进行过的任何研究。”。如果有一项技术只由一个人研究，即使他们的工程关注度较低，"
+"那么你也无法获得它。"
+
+#: .\templates\HC\HChelp.html:79
+msgid "Why do I have to have a set focus turn if there is only one slot left?"
+msgstr "如果只剩下一个顺位槽，为什么我必须进行焦点设置？"
+
+#: .\templates\HC\HChelp.html:81
+#, fuzzy
+#| msgid ""
+#| "You are probably missing a crucial point; you are now in the situation "
+#| "where if you were to go over 10 Gantt and there is only 1 clock left, "
+#| "then you can decide if the game ends or goes another round. Pretty "
+#| "important really! So I decided to leave the game as per the actual rules, "
+#| "rather thank try to make a skip. <BR/>Additionally, the factory building "
+#| "phase happens before Gantt are increased, so it's basically impossible to "
+#| "know if someone below 10 Gantt will end up above or below 10 after the "
+#| "end of the factory building phase. <BR/>Similarly, if someone is on 10 "
+#| "Gantt or higher, they might wish to spend them all right now in order to "
+#| "reset their Gantt, for example, if they only have 5 Planning Departments, "
+#| "and wish to have the opportunity to decrease the punchclock number in a "
+#| "later turn."
+msgid ""
+"You are probably missing a crucial point; you are now in the situation where "
+"if you were to go over 10 Gantt and there is only 1 clock left, then you can "
+"decide if the game ends or goes another round. Pretty important really! So I "
+"decided to leave the game as per the actual rules, rather than making a "
+"skip. <br /> Additionally, the factory building phase happens before Gantt "
+"are increased, so it's basically impossible to know if someone below 10 "
+"Gantt will end up above or below 10 after the end of the factory building "
+"phase. <br /> Similarly, if someone is on 10 Gantt or higher, they might "
+"wish to spend them all right now in order to reset their Gantt, for example, "
+"if they only have 5 Planning Departments, and wish to have the opportunity "
+"to decrease the punchclock number in a later turn."
+msgstr ""
+"你可能错过了一个关键点；你现在的处境是，如果你超过10甘特点数，只剩下1考勤钟，"
+"那么你可以决定游戏是当前回合结束还是下一回合奇数。真的很重要！所以我决定按照"
+"实际规则离开游戏，更确切地说，谢谢你试着略过。<BR/>此外，工厂建设阶段发生在甘"
+"特点数增加之前，因此基本上不可能知道甘特点数低于10的人在工厂建设阶段结束后是"
+"高于还是低于10<BR/>同样，如果有人的甘特点数为10或更高，他们可能希望现在就全部"
+"用完，以便重新设置甘特点数，例如，如果他们只有5个规划部门，并且希望有机会在以"
+"后的一回合中减少考勤钟时间。"
+
+#: .\templates\HC\HChelp.html:94
+msgid "For further help contact"
+msgstr "如需进一步帮助，请联系"
+
+#: .\templates\HC\HCtemplate.html:23
+msgid "Help"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:25
+msgid "Bug"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:28
+msgid "Chat"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:31
+msgid "Reserve"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:35
+msgid "Notes"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:41
+msgid "History"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:45
+msgid "Rewind"
+msgstr ""
+
+#: .\templates\HC\HCtemplate.html:62
+msgid "Connecting to server"
+msgstr "连接到服务器"
+
+#: .\templates\HC\HCtemplate.html:63
+msgid "Logged in as"
+msgstr "登录为"
+
+#: .\templates\HC\HCtemplate.html:64
+msgid "Time to next kickout"
+msgstr "到下一次踢出时间"
+
+#: .\templates\HC\HCtemplate.html:82
+msgid ""
+"You can give permission for the host to rewind the game back to the start of "
+"the restructuring phase. All players must give permission before the host is "
+"able to rewind the game."
+msgstr ""
+"您可以允许房主将游戏倒回到重组阶段的开始。所有玩家必须获得许可，房主才能倒回"
+"游戏。"
+
+#: .\templates\HC\HCtemplate.html:89
+msgid ""
+"Tournament games are a bit more competitive, so rewinds should not be "
+"expected"
+msgstr "锦标赛的竞争更激烈，所以不应该期待倒带"
+
+#: .\templates\HC\HCtemplate.html:100
+msgid "Permission for single rewind"
+msgstr "允许单次倒带"
+
+#: .\templates\HC\HCtemplate.html:106
+msgid "Give Permission"
+msgstr "授予权限"
+
+#: .\templates\HC\HCtemplate.html:108 .\templates\HC\HCtemplate.html:158
+msgid ""
+"Rewinding from the start of the sales phase will go to the very start of the "
+"factory building phase"
+msgstr "从销售阶段开始倒回，一直到工厂建设阶段开始"
+
+#: .\templates\HC\HCtemplate.html:115 .\templates\HC\HCtemplate.html:165
+msgid "Exclude game from stats"
+msgstr "本局游戏不计入统计数据"
+
+#: .\templates\HC\HCtemplate.html:116 .\templates\HC\HCtemplate.html:166
+msgid "Exclude From Stats"
+msgstr "本局游戏不计入统计数据"
+
+#: .\templates\HC\HCtemplate.html:119
+msgid "Excluded from Stats"
+msgstr "不计入统计数据"
+
+#: .\templates\HC\HCtemplate.html:121 .\templates\HC\HCtemplate.html:171
+msgid "Waiting for other players"
+msgstr "等待其他玩家"
+
+#: .\templates\HC\HCtemplate.html:125 .\templates\HC\HCtemplate.html:175
+msgid ""
+"If all non-bot players tick and confirm this option, this game won't count "
+"in any win/loss stats. You can use this if you simply wish to have a \"less "
+"competitive\" game, or you wish to exclude it for other reasons (EG multiple "
+"player kickouts)"
+msgstr ""
+"如果所有尚未退出的玩家都勾选并确认了此选项，则此局游戏不会计入任何胜利/失败统"
+"计数据。如果您希望拥有一个“竞争不那么激烈”的游戏，或者出于其他原因希望将其排"
+"除在外（例如多个玩家被踢出），可以使用此选项。"
+
+#: .\templates\HC\HCtemplate.html:139
+msgid ""
+"As the game host, you must wait for all players to give permission. They can "
+"allow you to rewind once, or as much as you like. Try asking in chat for "
+"permission if you wish to rewind. Current Permissions:"
+msgstr ""
+"作为游戏房主，您必须等待所有玩家给予许可。它们可以让你倒回一次，也可以随心所"
+"欲。如果您想倒回，请尝试在聊天中请求许可。当前权限："
+
+#: .\templates\HC\HCtemplate.html:148
+msgid "Reload the whole page to refresh permissions"
+msgstr "重新加载整个页面来刷新权限"
+
+#: .\templates\HC\HCtemplate.html:150
+msgid ""
+"Tournament games are a bit more competitive, so you should not feel "
+"obligated to accept a rewind request"
+msgstr "锦标赛更具竞争力，所以你不应该觉得有义务接受倒回请求"
+
+#: .\templates\HC\HCtemplate.html:154
+msgid "REWIND"
+msgstr "倒回"
+
+#: .\templates\HC\HCtemplate.html:156
+msgid "Please wait for all players to give permission"
+msgstr "请等待所有玩家给予许可"
+
+#: .\templates\HC\HCtemplate.html:191
+msgid "Turn"
+msgstr "回合"
+
+#: .\templates\HC\HCtemplate.html:192
+msgid "Phase"
+msgstr "阶段"
+
+#: .\templates\HC\HCtemplate.html:193
+msgid "Current player"
+msgstr "当前玩家"
+
+#: .\templates\HC\HCtemplate.html:202
+msgid "Send a message"
+msgstr "发送消息"
+
+#: .\templates\HC\HCtemplate.html:204
+msgid "Send"
+msgstr "发送"
+
+#: .\templates\HC\HCtemplate.html:211
+msgid "Oldest First"
+msgstr "最年长的优先"
+
+#: .\templates\HC\HCtemplate.html:217
+msgid "Newest First"
+msgstr "最年轻的优先"
+
+#: .\templates\HC\HCtemplate.html:229
+msgid "Bug Report"
+msgstr "错误报告"
+
+#: .\templates\HC\HCtemplate.html:231
+msgid ""
+"Please submit a bug report if you encounter any issues, giving as much "
+"detail as possbile.<BR/> The game data will be submitted along with your "
+"report. <BR> You can also report it on the OBG discord. Click <a href="
+"\"https://discord.gg/hCU7Fr77yV\" class=\"linkOther\" target=\"_blank"
+"\">Here</a> to join"
+msgstr ""
+"如果你遇到任何问题，请提交一份错误报告，尽可能多地提供细节<BR/>游戏数据将与您"
+"的报告一起提交<BR>您也可以就OBG discord进行报告。单击<a href=“https://"
+"discord.gg/hCU7Fr77yV“class=”linkOther“target=”_blank“>点击此处</a>加入"
+
+#: .\templates\HC\HCtemplate.html:240 .\templates\HC\HCtemplate.html:247
+msgid "Submit"
+msgstr "提交"
+
+#: .\templates\HC\HCtemplate.html:240
+msgid "Cancel"
+msgstr "取消"
+
+#: .\templates\HC\HCtemplate.html:244
+msgid "Personal game notes"
+msgstr "个人游戏笔记"
+
+#: .\templates\HC\HCtemplate.html:245
+msgid "Only you can see these notes"
+msgstr "只有你能看到这些笔记"
+
+#: .\templates\HC\HCtemplate.html:247
+msgid "Clear"
+msgstr "清除"
+
+#: .\templates\HC\HCtemplate.html:248
+msgid "Close"
+msgstr "关闭"
+
+#: .\templates\HC\HCtemplate.html:305
+msgid ""
+"Horseless Carriage is a board game by Jeroen Doumen and Joris Wiersinga, "
+"published by <a href='https://www.splottershop.com/'>Splotter Spellen</a>."
+msgstr ""
+"《Horseless Carriage》是Jeroen Doumen和Joris Wiersinga设计的桌面游戏，由<a "
+"href='https://www.splottershop.com/'>Splotter Spellen</a>出版。"
+
+#. Translators: This is an email
+#: .\templates\HC\yourTurnEmailFactory.html:5
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Hi %(user)s,\n"
+#| "\n"
+#| "It is your turn at Online Board Gamers - Horseless Carriage.\n"
+#| "\n"
+#| "Your factory needs building - you are now the current player.\n"
+#| "\n"
+#| "Game: %(gameName)s\n"
+#| "Turn/Phase: %(currentTurnString)s\n"
+#| "\n"
+#| "https://%(domain)s%(the_url)s\n"
+#| "\n"
+msgid ""
+"\n"
+"Hi %(user)s,\n"
+"\n"
+"It is your turn at Online Board Gamers - Horseless Carriage.\n"
+"\n"
+"Your factory needs building - you are now the current player.\n"
+"\n"
+"Game: %(gameName)s\n"
+"Turn/Phase: %(currentTurnString)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+"Notification preferences can be changed in your Profile\n"
+"\n"
+msgstr ""
+"\n"
+"你好 %(user)s,\n"
+"\n"
+"现在轮到你的回合，在Online Board Gamers - Horseless Carriage。\n"
+"\n"
+"游戏: %(gameName)s\n"
+"回合/阶段: %(currentTurnString)s\n"
+"\n"
+"https://%(domain)s%(the_url)s\n"
+"\n"
+
+#: .\views.py:45 .\views.py:75 .\views.py:630 .\views.py:844 .\views.py:1004
+#: .\views.py:1031
+msgid "Game does not exist"
+msgstr "游戏不存在"
+
+#: .\views.py:474
+msgid ""
+"<b>No rewind data. Rewind limit reached. Please play on to generate more "
+"rewind data </b>"
+msgstr "<b>没有倒回数据。已达到倒回限制。请继续进行游戏以生成更多倒回数据</b>"
+
+#: .\views.py:476
+msgid "<b>Permissions missing. Please reload the page and check again</b>"
+msgstr "<b>权限丢失。请重新加载页面并再次检查</b>"
+
+#: .\views.py:624
+msgid "Hello Fehologist!!!!"
+msgstr ""
+
+#: .\views.py:634
+msgid "The game is not Active"
+msgstr "游戏未激活"
+
+#: .\views.py:890
+msgid "It is your turn at Horseless Carriage - Factory Building"
+msgstr "轮到你的回合了，在Horseless Carriage - 建造工厂"
+
+#: .\views.py:900
+#, python-format
+msgid ""
+"Your turn at OnlineBoardGamers - Horseless Carriage\n"
+"Your factory needs building\n"
+"%(gameName)s - %(currentTurnString)s."
+msgstr ""
+"轮到你的回合，在OnlineBoardGamers-Horseless Carriage\n"
+"你的工厂需要修整！\n"
+"%(gameName)s - %(currentTurnString)s."
+
+#~ msgid ""
+#~ "Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have "
+#~ "any suggestions, questions or comments, then please do contact the "
+#~ "webmaster at the email address in Contact (top right in the lobby). "
+#~ "Thanks!"
+#~ msgstr ""
+#~ "欢迎来到Horseless Carriage线上游戏=-NEWLINE-===-NEWLINE-=如果您有任何建"
+#~ "议、问题或意见，请通过“联系”中的电子邮件地址（大厅右上角）与网站管理员联"
+#~ "系。谢谢！"
+
+#~ msgid "Factory Setup"
+#~ msgstr "工厂设置"
+
+#~ msgid "1 - Research"
+#~ msgstr "1 - 研究"
+
+#~ msgid "2 - Set Focus"
+#~ msgstr "2 - 设定焦点顺位"
+
+#~ msgid "3 - Build Factory"
+#~ msgstr "3 - 建造工厂"
+
+#~ msgid "4 - Print Sales Brochures"
+#~ msgstr "4 - 打印销售手册"
+
+#~ msgid "5 - Sell"
+#~ msgstr "5 - 出售"
+
+#~ msgid "6 - Game End"
+#~ msgstr "6 - 游戏结束"
+
+#~ msgid "7 - Increase Expectations"
+#~ msgstr "7 - 增加期望"
+
+#~ msgid "8 - Grow Demands"
+#~ msgstr "8 - 增长需求"
+
+#~ msgid "Blitz"
+#~ msgstr "闪电模式"
+
+#~ msgid "Live"
+#~ msgstr "实时模式"
+
+#~ msgid "Fast"
+#~ msgstr "快速模式"
+
+#~ msgid "Standard"
+#~ msgstr "标准模式"
+
+#~ msgid "Slow"
+#~ msgstr "缓慢模式"
+
+#~ msgid "Kickout after 5 Minutes"
+#~ msgstr "5 分钟后踢出"
+
+#~ msgid "Kickout after 10 Minutes"
+#~ msgstr "10分钟后踢出"
+
+#~ msgid "Kickout after 20 Minutes"
+#~ msgstr "20分钟后踢出"
+
+#~ msgid "Kickout after 12 Hours"
+#~ msgstr "12 小时后踢出"
+
+#~ msgid "Kickout after 1 day"
+#~ msgstr "1天后踢出"
+
+#, python-format
+#~ msgid "Kickout after %(kickoutInDays)s days"
+#~ msgstr "在 %(kickoutInDays)s 天后踢出"
+
+#~ msgid "HOME"
+#~ msgstr "首页"
+
+#~ msgid "HELP"
+#~ msgstr "帮助"
+
+#~ msgid "BUG"
+#~ msgstr "错误"
+
+#~ msgid "CHAT"
+#~ msgstr "聊天"
+
+#~ msgid "RESERVE"
+#~ msgstr "保留"
+
+#~ msgid "NOTES"
+#~ msgstr "注意事项"
+
+#~ msgid "HISTORY"
+#~ msgstr "历史"
+
+#, python-format
+#~ msgid ""
+#~ "\n"
+#~ "Hi %(user)s,\n"
+#~ "\n"
+#~ "It is your turn at Online Board Gamers - Horseless Carriage.\n"
+#~ "\n"
+#~ "Game: %(gameName)s\n"
+#~ "Turn/Phase: %(currentTurnString)s\n"
+#~ "\n"
+#~ "https://%(domain)s%(the_url)s\n"
+#~ "\n"
+#~ "Notification preferences can be changed in your Profile\n"
+#~ "\n"
+#~ msgstr ""
+#~ "\n"
+#~ "你好 %(user)s,\n"
+#~ "\n"
+#~ "现在轮到你的回合，在Online Board Gamers - Horseless Carriage。\n"
+#~ "\n"
+#~ "游戏: %(gameName)s\n"
+#~ "回合/阶段: %(currentTurnString)s\n"
+#~ "\n"
+#~ "https://%(domain)s%(the_url)s\n"
+#~ "\n"
+
+#~ msgid "It is your turn at Horseless Carriage"
+#~ msgstr "轮到你的回合，在Horseless Carriage游戏中"
+
+#, python-format
+#~ msgid ""
+#~ "Your turn at OnlineBoardGamers - Horseless Carriage\n"
+#~ "%(gameName)s - %(currentTurnString)s."
+#~ msgstr ""
+#~ "轮到你的回合，在OnlineBoardGamers-Horseless Carriage\n"
+#~ "%(gameName)s - %(currentTurnString)s."
+
+#, python-format
+#~ msgid ""
+#~ "\n"
+#~ "Hi %(user.username)s,\n"
+#~ "\n"
+#~ "It is your turn at Online Board Gamers - Horseless Carriage.\n"
+#~ "\n"
+#~ "Previous players have used up some components, so you need to fix up your "
+#~ "factory.\n"
+#~ "\n"
+#~ "Game: %(gameName)s\n"
+#~ "Turn/Phase: %(currentTurnString)s\n"
+#~ "\n"
+#~ "https://%(domain)s%(the_url)s\n"
+#~ "\n"
+#~ msgstr ""
+#~ "\n"
+#~ "你好 %(user.username)s,\n"
+#~ "\n"
+#~ "现在轮到你的回合，在Online Board Gamers - Horseless Carriage。\n"
+#~ "\n"
+#~ "之前的玩家已经用光了一些组件，所以你需要修整你的工厂。\n"
+#~ "\n"
+#~ "游戏: %(gameName)s\n"
+#~ "回合/阶段: %(currentTurnString)s\n"
+#~ "\n"
+#~ "https://%(domain)s%(the_url)s\n"
+#~ "\n"
+
+#, python-format
+#~ msgid ""
+#~ "Your turn at OnlineBoardGamers - Horseless Carriage\n"
+#~ "Your factory needs fixing!\n"
+#~ "%(gameName)s - %(currentTurnString)s.\n"
+#~ "[Click here to play Horseless Carriage](https://www.OnlineBoardGamers.com/"
+#~ "HC/%(gameOD)s/)"
+#~ msgstr ""
+#~ "轮到你的回合，在OnlineBoardGamers-Horseless Carriage\n"
+#~ "你的工厂需要修整！\n"
+#~ "%(gameName)s - %(currentTurnString)s.\n"
+#~ "[点击这里进行游戏Horseless Carriage](https://www.OnlineBoardGamers.com/HC/"
+#~ "%(gameOD)s/)"
+
+#, python-format
+#~ msgid ""
+#~ "Your turn at OnlineBoardGamers - Horseless Carriage\n"
+#~ "%(gameName)s - %(currentTurnString)s.\n"
+#~ "[Click here to play Horseless Carriage](https://www.OnlineBoardGamers.com/"
+#~ "HC/%(gameOD)s/)"
+#~ msgstr ""
+#~ "轮到你的回合，在OnlineBoardGamers-Horseless Carriage\n"
+#~ "%(gameName)s - %(currentTurnString)s.\n"
+#~ "[点击这里进行游戏Horseless Carriage](https://www.OnlineBoardGamers.com/HC/"
+#~ "%(gameOD)s/)"

@@ -1,0 +1,2641 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-07 20:12+0800\n"
+"PO-Revision-Date: 2023-10-07 20:23+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: .\static\FCM\JS\controller.js:39
+msgid "Resign"
+msgstr "投降"
+
+#: .\static\FCM\JS\controller.js:50
+msgid "Are you sure you want to resign?"
+msgstr "您确定要投降吗？"
+
+#: .\static\FCM\JS\controller.js:50
+msgid "Yes I want to resign"
+msgstr "是的，我想投降"
+
+#: .\static\FCM\JS\controller.js:50
+msgid "No, I want to keep playing"
+msgstr "不，我想继续"
+
+#: .\static\FCM\JS\controller.js:56 .\static\FCM\JS\controller.js:3800
+#: .\static\FCM\JS\controller.js:3813
+msgid "Reset the whole working day"
+msgstr "重置整个工作阶段"
+
+#: .\static\FCM\JS\controller.js:64 .\static\FCM\JS\main.js:374
+msgid "Reset"
+msgstr "重置"
+
+#: .\static\FCM\JS\controller.js:70
+msgid "Confirm"
+msgstr "确认"
+
+#: .\static\FCM\JS\controller.js:139
+msgid "There is no one at work. Are you sure you want to confirm?"
+msgstr "没有派遣任何员工去工作。您确定吗？"
+
+#: .\static\FCM\JS\controller.js:142
+msgid ""
+"You could send more employees to work. Are you sure you want to confirm?"
+msgstr "您可以派遣更多员工去工作。您确定吗？"
+
+#: .\static\FCM\JS\controller.js:156
+msgid ""
+"You have not used all your producers. Make sure you click on each one in "
+"order to produce. Continue anyway?"
+msgstr ""
+"您没有使用所有可以制作食物的员工，请确保按顺序点击每一个可以制作的员工以进行"
+"制作。仍要继续吗？"
+
+#: .\static\FCM\JS\controller.js:156
+msgid "Yes, continue anyway"
+msgstr "是的，继续"
+
+#: .\static\FCM\JS\controller.js:156
+msgid "No, restart production phase"
+msgstr "否，重置制作阶段"
+
+#: .\static\FCM\JS\controller.js:255
+msgid ""
+"<b>Expert Options</b>: If unsure leave on \"Choose Normally\"<BR/>Indicate "
+"your preference in turn order:"
+msgstr ""
+"<b>专家选项</b>：如果不确定，请保持“正常选择”。<BR/>选择您偏好的回合顺序："
+
+#: .\static\FCM\JS\controller.js:258
+msgid "Earliest possible"
+msgstr "尽可能先手"
+
+#: .\static\FCM\JS\controller.js:260 .\static\FCM\JS\controller.js:300
+#: .\static\FCM\JS\controller.js:307 .\static\FCM\JS\controller.js:315
+msgid "Choose normally"
+msgstr "正常选择"
+
+#: .\static\FCM\JS\controller.js:262
+msgid "Latest possible"
+msgstr "尽可能后手"
+
+#: .\static\FCM\JS\controller.js:294
+msgid "<b>Expert Options</b>: If unsure leave on \"Choose Normally\""
+msgstr "<b>专家选项</b>：如果不确定请选择“正常选择”"
+
+#: .\static\FCM\JS\controller.js:297
+msgid ""
+"You <b>do not have enough money currently</b> to pay your salary. Do you "
+"wish to autopay everyone if you have enough after the dinnertime phase?"
+msgstr ""
+"您<b>目前没有足够的资金</b>支付薪水。如果晚餐时间过后您有足够的资金，是否希望"
+"自动支付所有员工的薪水？"
+
+#: .\static\FCM\JS\controller.js:299
+msgid "Pay all salary if possible"
+msgstr "如果可能，支付所有薪水"
+
+#: .\static\FCM\JS\controller.js:304
+msgid ""
+"You have the <b>First Beer Sold Milestone</b> and <b>no Fridge</b>. Do you "
+"wish to autopay everyone with available food and then with money?"
+msgstr ""
+"您已经达成了<b>首个卖出啤酒里程碑</b>，且<b>没有冰箱</b>。您是否希望自动使用"
+"所有可用的食物支付薪水，然后再用现金支付剩余的薪水？"
+
+#: .\static\FCM\JS\controller.js:306
+msgid "Pay salary with as much food as possible and then money"
+msgstr "尽量先使用食物再使用现金"
+
+#: .\static\FCM\JS\controller.js:311
+msgid ""
+"You have a <b>Fridge</b>. Do you wish to automatically keep everything if "
+"you have less than 10 items?"
+msgstr "您有一个<b>冰箱</b>。您是否希望当物品少于10个的时候自动保留所有物品？"
+
+#: .\static\FCM\JS\controller.js:314
+msgid "Keep all items if less than 10"
+msgstr "如果少于 10个，则保留所有物品"
+
+#: .\static\FCM\JS\controller.js:338
+msgid "Yes"
+msgstr "是的"
+
+#: .\static\FCM\JS\controller.js:339
+msgid "No"
+msgstr "不"
+
+#: .\static\FCM\JS\controller.js:418
+#, fuzzy
+#| msgid "Select a road to add to the map"
+msgid "Choose a module to add to the game"
+msgstr "选择要添加到地图的道路"
+
+#: .\static\FCM\JS\controller.js:418
+msgid "Total Modules: 6 for 2p, 6 for 3p, 4 for 4p, 5 for 5p, 6 for 6p"
+msgstr ""
+
+#: .\static\FCM\JS\controller.js:422
+msgid "Add Module to Game and End Turn"
+msgstr ""
+
+#: .\static\FCM\JS\controller.js:440
+msgid ""
+"<b>Welcome to Food Chain Magnate Online!</b><BR/>If you have any "
+"suggestions, questions or comments, then please do contact the webmaster at "
+"<img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">. "
+"Thanks!"
+msgstr ""
+"<b>欢迎来到《快餐连锁大亨》在线版！</b><BR/>如果您有任何建议、问题或评论，请"
+"通过<img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">联系"
+"管理员。谢谢！"
+
+#: .\static\FCM\JS\controller.js:442
+msgid ""
+"Welcome to this practice game<BR/>If you wish to rewind your game, use the "
+"button in the top left<BR/>Each rewind will move the game back by one step"
+msgstr ""
+"欢迎来到练习模式的游戏<BR/>如果您希望使用回退功能，请使用左上角的按钮<BR/>每"
+"次使用都会将游戏回退一步"
+
+#: .\static\FCM\JS\controller.js:445
+msgid "Choose your restaurant direction, and then its location on the board"
+msgstr "选择您的餐厅方向，然后选择它在地图上的位置"
+
+#: .\static\FCM\JS\controller.js:446 .\static\FCM\JS\controller.js:513
+#: .\static\FCM\JS\controller.js:962
+msgid "Remember: you are using the <b>New Milestones</b>"
+msgstr "记住：您正在使用<b>新里程碑</b>"
+
+#: .\static\FCM\JS\controller.js:447 .\static\FCM\JS\controller.js:514
+#: .\static\FCM\JS\controller.js:963
+msgid "Remember: you are using the <b>Original Milestones</b>"
+msgstr "记住：您正在使用<b>基础里程碑</b>"
+
+#: .\static\FCM\JS\controller.js:469
+msgid "Delay placing your restaurant for one round"
+msgstr "延迟一轮放置您的餐厅"
+
+#: .\static\FCM\JS\controller.js:493
+msgid "Are you sure you want to delay placing your restaurant?"
+msgstr "您确定要延迟放置您的餐厅吗？"
+
+#: .\static\FCM\JS\controller.js:511
+#, fuzzy
+#| msgid "Choose your reserve card"
+msgid "To save time, you may choose your reserve card early"
+msgstr "选择您的储备卡"
+
+#: .\static\FCM\JS\controller.js:512
+msgid "Choose your reserve card"
+msgstr "选择您的储备卡"
+
+#: .\static\FCM\JS\controller.js:564
+msgid "Choose your employees to send to work"
+msgstr "选择您要派遣去工作的员工"
+
+#: .\static\FCM\JS\controller.js:741
+msgid "Return to the beach"
+msgstr "回到休假"
+
+#: .\static\FCM\JS\controller.js:744 .\static\FCM\JS\view.js:4087
+#: .\static\FCM\JS\view.js:4583 .\static\FCM\JS\view.js:4765
+msgid "Close"
+msgstr "关闭"
+
+#: .\static\FCM\JS\controller.js:870
+msgid "Choose your position in turn order:"
+msgstr "选择您的回合顺位："
+
+#: .\static\FCM\JS\controller.js:960
+msgid "After the first turn, you won't be asked to fire anyone"
+msgstr "第一回合后，您不会被询问是否解雇员工"
+
+#: .\static\FCM\JS\controller.js:961
+msgid ""
+"After the first turn, you won't be asked to fire anyone (as long as you "
+"don't hire a salaried level 0 employee)"
+msgstr "第一回合后，您不会被询问是否解雇员工（只要您不雇佣需要薪水的0级员工）"
+
+#: .\static\FCM\JS\controller.js:965
+msgid "You can recruit new employees"
+msgstr "您可以雇佣新员工"
+
+#: .\static\FCM\JS\controller.js:966
+msgid "Your Night Shift Manager allows each recruiting girl to work twice"
+msgstr "您的夜班经理允许每个人力资源专员工作两次"
+
+#: .\static\FCM\JS\controller.js:975
+msgid ""
+"At least one base employee is no longer available. Keep recruiting points "
+"for the training phase if you wish to train an employee directly"
+msgstr ""
+"至少有一名基础员工不再可用。如果您希望直接培训已不再可用的员工，请保留雇佣点"
+"数以进行雇佣后培训"
+
+#: .\static\FCM\JS\controller.js:987
+msgid "%(recruitingAmountLeft)s remaining point"
+msgid_plural "%(recruitingAmountLeft)s remaining points"
+msgstr[0] "还可以雇佣 %(recruitingAmountLeft)s 名员工"
+
+#: .\static\FCM\JS\controller.js:1067
+msgid "Your Night Shift Manager allows each trainer to work twice"
+msgstr "您的夜班经理允许每个培训讲师工作两次"
+
+#: .\static\FCM\JS\controller.js:1076
+msgid "You can train %(trainingAmountLeft)s employee"
+msgid_plural "You can train up to  %(trainingAmountLeft)s slots"
+msgstr[0] "您可以培训 %(trainingAmountLeft)s 名员工"
+
+#: .\static\FCM\JS\controller.js:1091
+msgid "You can train %(train2amount)s employee up to 2 levels. "
+msgid_plural "You can train up to %(train2amount)s employees up to 2 level. "
+msgstr[0] "您可以将 %(train2amount)s 名员工培训至多2个级别。 "
+
+#: .\static\FCM\JS\controller.js:1100
+msgid "You can train 1 employee up to 3 levels"
+msgstr "您可以培训 1 名员工至多 3 个级别"
+
+#: .\static\FCM\JS\controller.js:1110
+msgid "You have %(recruitingAmountLeft)s recruiting point remaining"
+msgid_plural "You have %(recruitingAmountLeft)s recruiting points remaining"
+msgstr[0] "您还可以雇佣 %(recruitingAmountLeft)s 名员工"
+
+#: .\static\FCM\JS\controller.js:1118
+msgid "Please choose an employee to train"
+msgstr "请选择要培训的员工"
+
+#: .\static\FCM\JS\controller.js:1121
+msgid ""
+"Each employee can only be trained once, so just select the final promotion"
+msgstr "每名员工只能被培训一次，所以只需要选择最终的晋升方案即可"
+
+#: .\static\FCM\JS\controller.js:1141
+msgid "Train from hiring"
+msgstr "从新雇佣的员工中培训"
+
+#: .\static\FCM\JS\controller.js:1148
+msgid "You have training capacity available, but no one to train"
+msgstr "您有可用的培训能力，但没有人可以培训"
+
+#: .\static\FCM\JS\controller.js:1154
+msgid "You can train staff from your working employees (preserving colour):"
+msgstr "您可以培训您正在工作的员工（保留职业颜色不变）："
+
+#: .\static\FCM\JS\controller.js:1205
+msgid "From:"
+msgstr "来自："
+
+#: .\static\FCM\JS\controller.js:1210
+msgid "To:"
+msgstr "至："
+
+#: .\static\FCM\JS\controller.js:1293
+msgid "Trained:"
+msgstr "培训："
+
+#: .\static\FCM\JS\controller.js:1318
+msgid ""
+"Training a Barista allows you to place/move a coffee shop with a range of 2 "
+"- Remaining: %(baristaCoffeeShops)s"
+msgstr ""
+"培训一名见习咖啡师将允许您放置/移动一个范围为2的咖啡厅——剩余："
+"%(baristaCoffeeShops)s 个"
+
+#: .\static\FCM\JS\controller.js:1319
+msgid ""
+"Training a Lead Barista from a Barista allows you to place/move a coffee "
+"shop with unlimited range - Remaining: %(leadBaristaCoffeeShopsFromB)s"
+msgstr ""
+"从一名咖啡师培训为一名首席咖啡师将允许您放置/移动一个咖啡厅（无距离限制）——剩"
+"余：%(leadBaristaCoffeeShopsFromB)s 个"
+
+#: .\static\FCM\JS\controller.js:1320
+msgid ""
+"Training a Lead Barista from a Trainee Barista allows you to <B>first place/"
+"move a coffee shop with range 2 (included above) and then another with "
+"unlimited range</b> - Remaining: %(leadBaristaCoffeeShopsFromTB)s"
+msgstr ""
+"从一名见习咖啡师培训为一名首席咖啡师将允许您<b>首先放置/移动一个范围为2（包括"
+"2）的咖啡厅，然后再放置/移动另一个无限范围的咖啡厅</b>——剩余："
+"%(leadBaristaCoffeeShopsFromTB)s 个"
+
+#: .\static\FCM\JS\controller.js:1323
+msgid ""
+"<b>Place a coffee shop with unlimited range</b><BR/>There can only be 1 "
+"coffee shop per tile, and it must be next to a road"
+msgstr ""
+"<b>放置一个咖啡厅（无距离限制）</b><BR/>每个板块只能有一个咖啡厅，并且必须靠"
+"近道路"
+
+#: .\static\FCM\JS\controller.js:1325
+msgid ""
+"<b>Place a coffee shop with range 2</b><BR/>There can only be 1 coffee shop "
+"per tile, and it must be next to a road"
+msgstr ""
+"<b>在距离2以内放置一个咖啡厅</b><BR/>每个板块只能有一个咖啡厅，并且必须靠近道"
+"路"
+
+#: .\static\FCM\JS\controller.js:1341
+msgid "No more Coffee Shops. Select a placed Coffee Shop to move it"
+msgstr "没有更多的咖啡厅了。选择一个已放置的咖啡厅进行移动"
+
+#: .\static\FCM\JS\controller.js:1345
+msgid "Skip Coffee Shop"
+msgstr "跳过放置咖啡厅"
+
+#: .\static\FCM\JS\controller.js:1420
+msgid "Select a marketeer to start a marketing campaign"
+msgstr "选择一名营销人员开始营销活动"
+
+#: .\static\FCM\JS\controller.js:1436 .\static\FCM\JS\controller.js:1564
+#: .\static\FCM\JS\controller.js:3207 .\static\FCM\JS\controller.js:3273
+msgid "Skip"
+msgstr "跳过"
+
+#: .\static\FCM\JS\controller.js:1475
+msgid "Choose a mailbox campaign for your 'First New Restaurant' milestone"
+msgstr "为您的“首个放置新餐厅”里程碑选择一个邮箱营销板块"
+
+#: .\static\FCM\JS\controller.js:1501
+msgid "There are no suitable marketing campaigns left"
+msgstr "没有合适的营销板块了"
+
+#: .\static\FCM\JS\controller.js:1502
+msgid ""
+"There are no available campaigns. EIther there is no space for it on the "
+"board, or no mailboxes left"
+msgstr ""
+"没有可用的营销板块。可能是因为版图上没有空间，或是没有多余的邮箱营销板块了"
+
+#: .\static\FCM\JS\controller.js:1503 .\static\FCM\JS\controller.js:3093
+#: .\static\FCM\JS\controller.js:3871 .\static\FCM\JS\controller.js:3923
+msgid "Never mind"
+msgstr "没关系"
+
+#: .\static\FCM\JS\controller.js:1526
+#, fuzzy
+#| msgid "First billboard"
+msgid "Place Giant Billboard"
+msgstr "首个广告牌"
+
+#: .\static\FCM\JS\controller.js:1529
+msgid "Choose a marketing campaign for the Night Shift Manager"
+msgstr "为夜班经理选择营销板块"
+
+#: .\static\FCM\JS\controller.js:1531
+msgid "Choose a marketing campaign"
+msgstr "选择营销板块"
+
+#: .\static\FCM\JS\controller.js:1532
+msgid ""
+"Your Night Shift Manager allows your Marketing Trainee to market twice. Your "
+"trainee will be attached to the longer of the 2 campaigns"
+msgstr ""
+"您的夜班经理使您的营销实习生能够进行两次市场营销。您的营销实习生将附属于这两"
+"次营销活动中持续时间更长的那一个"
+
+#: .\static\FCM\JS\controller.js:1565
+msgid "Skip the NSM marketing"
+msgstr "跳过夜班经理营销"
+
+#: .\static\FCM\JS\controller.js:1566
+#, fuzzy
+#| msgid "Place house or garden"
+msgid "Place Gourmet Guide"
+msgstr "放置房屋或花园"
+
+#: .\static\FCM\JS\controller.js:1584
+#, fuzzy
+#| msgid "Choose a mailbox campaign for your 'First New Restaurant' milestone"
+msgid "Choose a mailbox campaign for the Campaign Manager Milestone"
+msgstr "为您的“首个放置新餐厅”里程碑选择一个邮箱营销板块"
+
+#: .\static\FCM\JS\controller.js:1618
+msgid "Skip the Milestone Bonus"
+msgstr "跳过里程碑奖励"
+
+#: .\static\FCM\JS\controller.js:1997
+msgid ""
+"Place a Highway Ramp to connect to the Rural Area<BR/>You can place it side "
+"on or end on to any edge of the board, as long as it connects to at least "
+"one road"
+msgstr ""
+"放置一条高速公路匝道来连接到乡村地区。<BR/>您可以将其横放或竖放到版图的任何边"
+"缘，只要它连接至少一条道路"
+
+#: .\static\FCM\JS\controller.js:2003
+msgid "Skip Freeway Placement"
+msgstr ""
+
+#: .\static\FCM\JS\controller.js:2006
+#, fuzzy
+#| msgid "There are no more freeways left. Click the image to Continue"
+msgid "There are no more freeways left."
+msgstr "没有更多的高速公路匝道了"
+
+#: .\static\FCM\JS\controller.js:2147
+msgid "Select the Food / Drink producer"
+msgstr "选择食品/饮料制作者"
+
+#: .\static\FCM\JS\controller.js:2149
+msgid ""
+"Your Night Shift Manager allows each Errand Boy and Kitchen Trainee to work "
+"twice. They are displayed twice each below"
+msgstr "您的夜班经理可以让每个跑腿小弟和见习厨师工作两次。他们会在下面出现两次"
+
+#: .\static\FCM\JS\controller.js:2150
+msgid ""
+"Your Night Shift Manager allows each Barista Trainee, Errand Boy and Kitchen "
+"Trainee to work twice. They are displayed twice each below"
+msgstr ""
+"您的夜班经理让每个见习咖啡师、跑腿小弟和见习厨师工作两次。他们会在下面出现两"
+"次"
+
+#: .\static\FCM\JS\controller.js:2228
+msgid "Select Drink to produce"
+msgstr "选择要制作的饮料"
+
+#: .\static\FCM\JS\controller.js:2229
+msgid "Select Food item to produce"
+msgstr "选择要制作的食物"
+
+#: .\static\FCM\JS\controller.js:2301
+msgid "Stop and collect drinks"
+msgstr "停止收集饮料"
+
+#: .\static\FCM\JS\controller.js:2433
+msgid "You can build new houses and gardens"
+msgstr "您可以建造新的房子和花园"
+
+#: .\static\FCM\JS\controller.js:2638
+#, fuzzy
+#| msgid ""
+#| "Select a park to add to the map<BR/>The lobbyist has a range of 2 but can "
+#| "also place parks next to any road that is within a range of 2"
+msgid ""
+"You can build a new road or park<BR>The lobbyist has a range of 2 but can "
+"also build next to any road that is within a range of 2"
+msgstr ""
+"选择一个公园添加到地图上。<BR/>提案人的范围为2，但也可以将公园放置在距离2以内"
+"的任何道路旁"
+
+#: .\static\FCM\JS\controller.js:2644
+msgid "Unfortunately there are no more roads or parks available"
+msgstr "不幸的是，没有更多的道路或公园可用"
+
+#: .\static\FCM\JS\controller.js:2645
+msgid "Move to the next phase"
+msgstr "进入下一阶段"
+
+#: .\static\FCM\JS\controller.js:2988
+msgid ""
+"For the First Lobbyist Used milestone, you are allowed to add a new tile to "
+"the board"
+msgstr "由于首个使用提案人里程碑，您可以在游戏版图上添加一个新的板块"
+
+#: .\static\FCM\JS\controller.js:2989
+msgid ""
+"Choose the tile and rotation you would like, and then add it to a completely "
+"free map edge"
+msgstr "选择您想要的板块并旋转，然后将其添加到地图边缘"
+
+#: .\static\FCM\JS\controller.js:3087
+msgid "Skip the Lobbyist MIlestone Bonus"
+msgstr "跳过提案人里程碑奖励"
+
+#: .\static\FCM\JS\controller.js:3092
+msgid "No more tiles"
+msgstr "没有更多的板块"
+
+#: .\static\FCM\JS\controller.js:3194
+msgid "Select a Local or Regional manager"
+msgstr "选择区域或大区经理"
+
+#: .\static\FCM\JS\controller.js:3233
+#, fuzzy
+#| msgid "First restaurant"
+msgid "No more restaurants"
+msgstr "首个餐厅"
+
+#: .\static\FCM\JS\controller.js:3243
+msgid "Move an existing restaurant or place a new one"
+msgstr "移动现有餐厅或放置一个新餐厅"
+
+#: .\static\FCM\JS\controller.js:3245
+msgid "Move"
+msgstr "移动"
+
+#: .\static\FCM\JS\controller.js:3248
+msgid "Create"
+msgstr "创建"
+
+#: .\static\FCM\JS\controller.js:3281
+msgid "Choose a restaurant to move"
+msgstr "选择要移动的餐厅"
+
+#: .\static\FCM\JS\controller.js:3393
+msgid "You can fire any available employees"
+msgstr "您可以解雇任何可用员工"
+
+#: .\static\FCM\JS\controller.js:3397
+msgid "Marketing employees you can't fire:"
+msgstr "您不能解雇的营销人员："
+
+#: .\static\FCM\JS\controller.js:3410
+msgid ""
+"You will have to pay: $%(salaryAmount)s or %(itemsAmount)s resource tokens "
+"(or a mix of both)"
+msgstr "您需要支付：$%(salaryAmount)s 或 %(itemsAmount)s 个物品（或混合支付）"
+
+#: .\static\FCM\JS\controller.js:3414
+msgid "You will have to pay: $%(salaryAmount)s"
+msgstr "您必须支付：$%(salaryAmount)s"
+
+#: .\static\FCM\JS\controller.js:3422
+msgid ""
+"<p style='color:#f00'>You cannot afford to pay all of your employees! "
+"However, your <i>First Trainer Used</i> milestone allows you to keep "
+"everyone</p>If you wish, you <b>may</b> click on employees to fire them "
+"anyway"
+msgstr ""
+"<p style='color:#f00'>您无法支付所有员工的薪水！但是，您的<i>首个使用培训讲师"
+"</i>里程碑允许您保留所有员工</p>如果您愿意，您<b>可以</b>点击员工将他们解雇"
+
+#: .\static\FCM\JS\controller.js:3424
+msgid ""
+"<p style='color:#f00'>You cannot pay for all of your employees - You must "
+"fire employees until you can pay for the remainder"
+msgstr ""
+"<p style='color:#f00'>您无法支付所有员工的薪水 - 您必须解雇员工，直到您能够支"
+"付剩余员工的薪水"
+
+#: .\static\FCM\JS\controller.js:3444
+msgid "Ok, thank you very much"
+msgstr "好的，非常感谢"
+
+#: .\static\FCM\JS\controller.js:3447
+msgid "Choose payment type"
+msgstr "选择支付方式"
+
+#: .\static\FCM\JS\controller.js:3474
+msgid "You're Fired!"
+msgstr "你被解雇了！"
+
+#: .\static\FCM\JS\controller.js:3534
+msgid "You have to pay for %(employeesToPayFor)s employee."
+msgid_plural "You have to pay for %(employeesToPayFor)s employees."
+msgstr[0] "您需要支付 %(employeesToPayFor)s 位员工的薪水。"
+
+#: .\static\FCM\JS\controller.js:3544
+msgid "Choose the item you want to use:"
+msgid_plural "Choose the %(remainingEmployeesToPayFor)s items you want to use:"
+msgstr[0] "请选择 %(remainingEmployeesToPayFor)s 个您想用来支付的物品："
+
+#: .\static\FCM\JS\controller.js:3559
+msgid ""
+"You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> item"
+msgid_plural ""
+"You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> items"
+msgstr[0] ""
+"您正在使用 <b>$%(moneyUsed)s</b> 和 <b>%(itemsUsed)s </b> 个物品进行支付"
+
+#: .\static\FCM\JS\controller.js:3585
+msgid "Pay the rest with $$$"
+msgstr "用现金$$$支付剩下的薪水"
+
+#: .\static\FCM\JS\controller.js:3616
+msgid "You can store either Kimchi or other types of food/drink in a fridge"
+msgstr "您可以在冰箱里储存泡菜或其他类型的食物/饮料"
+
+#: .\static\FCM\JS\controller.js:3616
+msgid "Your items:"
+msgstr "您的物品："
+
+#: .\static\FCM\JS\controller.js:3625
+msgid "Store Kimchi"
+msgstr "存放泡菜"
+
+#: .\static\FCM\JS\controller.js:3625
+msgid "Store other items"
+msgstr "存放其他物品"
+
+#: .\static\FCM\JS\controller.js:3639
+msgid "You may keep up to 10 items. Choose the item you want to throw away"
+msgid_plural ""
+"You may keep up to 10 items. Choose the %(remainingItems)s items you want to "
+"throw away"
+msgstr[0] "您最多可以保留10个物品。请选择您想要丢弃的 %(remainingItems) 物品"
+
+#: .\static\FCM\JS\controller.js:3668
+msgid "You may keep all remaining items, or click on items to throw them away:"
+msgstr "您可以保留所有剩余的物品，或点击物品将它们扔掉："
+
+#: .\static\FCM\JS\controller.js:3784 .\static\FCM\JS\controller.js:3790
+#: .\static\FCM\JS\controller.js:3824
+msgid "You are about to confirm the whole Working day"
+msgstr "您即将确认整个工作日"
+
+#: .\static\FCM\JS\controller.js:3785
+msgid "WARNING: YOU HAVE NOT HIRED ANYONE"
+msgstr "警告：您还没有雇佣任何人"
+
+#: .\static\FCM\JS\controller.js:3798
+msgid ""
+"You have no salary to pay this turn. You can decide now to keep all of your "
+"employees in order to save time during the next phase"
+msgstr ""
+"这个阶段您没有薪资需要支付。您可以决定现在保留所有员工，以便在下一个阶段节省"
+"时间"
+
+#: .\static\FCM\JS\controller.js:3802 .\static\FCM\JS\controller.js:3815
+msgid "No thanks, I would like to play the payday phase"
+msgstr "不，谢谢，我想进入发放薪水阶段"
+
+#: .\static\FCM\JS\controller.js:3804
+msgid "Yes I won't fire anybody, please skip my payday phase"
+msgstr "是的，我不会解雇任何人，请跳过我的发放薪水阶段"
+
+#: .\static\FCM\JS\controller.js:3811
+msgid ""
+"You have <b>enough money</b> to keep all your employees. You can decide now "
+"to keep all of them in order to save time"
+msgstr ""
+"您有<b>足够的钱</b>来支付所有员工的薪水。您可以决定现在保留所有员工以节省时间"
+
+#: .\static\FCM\JS\controller.js:3817
+msgid "Yes I won't fire anybody, please auto-pay my salaries"
+msgstr "是的，我不会解雇任何人，请自动支付我员工的薪水"
+
+#: .\static\FCM\JS\controller.js:3870
+msgid "There is no space left for your pizza radio for house #%(houseNumber)s"
+msgstr "房屋 #%(houseNumber)s 周围没有空间放您的披萨广播了"
+
+#: .\static\FCM\JS\controller.js:3875
+msgid "Choose a space on the tile of house #%(houseNumber)s"
+msgstr "选择房屋 #%(houseNumber)s 板块上的一个空地"
+
+#: .\static\FCM\JS\controller.js:3913
+msgid ""
+"<b>The \"First Coffee Sold\" Milestone allows you to place a coffee shop "
+"with unlimited range </b><BR/>There can only be 1 coffee shop per tile, and "
+"it must be next to a road"
+msgstr ""
+"<b>“首个卖出咖啡”里程碑允许您放置一个咖啡厅（无距离限制）</b><BR/>每个板块上"
+"只能有1家咖啡厅，并且必须靠近道路"
+
+#: .\static\FCM\JS\controller.js:3919
+msgid "Skip Coffee Milestone"
+msgstr "跳过咖啡里程碑"
+
+#: .\static\FCM\JS\controller.js:3922
+msgid ""
+"No more Coffee Shops. The Milestone only allows you to place a coffee shop"
+msgstr "没有更多的咖啡厅了。该里程碑只允许您放置一个咖啡厅"
+
+#: .\static\FCM\JS\history.js:119 .\static\FCM\JS\history.js:276
+#: .\static\FCM\JS\history.js:298
+msgid "NE"
+msgstr "东北"
+
+#: .\static\FCM\JS\history.js:120 .\static\FCM\JS\history.js:277
+#: .\static\FCM\JS\history.js:299
+msgid "SE"
+msgstr "东南"
+
+#: .\static\FCM\JS\history.js:121 .\static\FCM\JS\history.js:278
+#: .\static\FCM\JS\history.js:300
+msgid "SW"
+msgstr "西南"
+
+#: .\static\FCM\JS\history.js:122 .\static\FCM\JS\history.js:279
+#: .\static\FCM\JS\history.js:301
+msgid "NW"
+msgstr "西北"
+
+#: .\static\FCM\JS\history.js:127
+msgid ""
+"%(playerName)s chooses their starting restaurant at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s) facing %(direction)s"
+msgstr ""
+"%(playerName)s 选择了他们的起始餐厅坐标为（%(Xcoord)s，%(Ycoord)s），面"
+"向%(direction)s"
+
+#: .\static\FCM\JS\history.js:132
+msgid "%(playerName)s chooses to delay their first restaurant"
+msgstr "%(playerName)s 选择延迟开设第一家餐厅"
+
+#: .\static\FCM\JS\history.js:136
+msgid "%(playerName)s chooses their reserve card"
+msgstr "%(playerName)s 选择了他们的储备卡。\\"
+
+#: .\static\FCM\JS\history.js:138
+msgid "%(playerName)s has to play %(position)s"
+msgstr "%(playerName)s 必须 %(position)s 行动"
+
+#: .\static\FCM\JS\history.js:139
+msgid "%(playerName)s chooses to play %(position)s"
+msgstr "%(playerName)s 选择 %(position)s 行动"
+
+#: .\static\FCM\JS\history.js:146
+msgid "(auto early)"
+msgstr "自动先手"
+
+#: .\static\FCM\JS\history.js:147
+msgid "(auto late)"
+msgstr "自动后手"
+
+#: .\static\FCM\JS\history.js:157
+msgid "%(playerName)s has no employees"
+msgstr "%(playerName)s 没有员工"
+
+#: .\static\FCM\JS\history.js:160
+msgid "%(playerName)s sends to work:"
+msgstr "%(playerName)s 派遣以下员工去工作:"
+
+#: .\static\FCM\JS\history.js:167
+msgid "%(playerName)s sends no one to work"
+msgstr "%(playerName)s 没有派遣员工去工作"
+
+#: .\static\FCM\JS\history.js:174
+msgid "%(playerName)s hires:"
+msgstr "%(playerName)s 雇佣了："
+
+#: .\static\FCM\JS\history.js:182
+msgid "%(playerName)s hires no one"
+msgstr "%(playerName)s 不雇佣任何人"
+
+#: .\static\FCM\JS\history.js:188
+msgid "%(playerName)s trains:"
+msgstr "%(playerName)s 培训："
+
+#: .\static\FCM\JS\history.js:193
+msgid "from hiring"
+msgstr "从雇佣"
+
+#: .\static\FCM\JS\history.js:195
+msgid "from"
+msgstr "从"
+
+#: .\static\FCM\JS\history.js:205
+msgid "%(playerName)s trains no one"
+msgstr "%(playerName)s 没有培训任何员工"
+
+#: .\static\FCM\JS\history.js:213 .\static\FCM\JS\history.js:256
+#: .\static\FCM\JS\history.js:266 .\static\FCM\JS\history.js:860
+#: .\static\FCM\JS\history.js:890
+msgid "vertically"
+msgstr "垂直"
+
+#: .\static\FCM\JS\history.js:214 .\static\FCM\JS\history.js:257
+#: .\static\FCM\JS\history.js:267 .\static\FCM\JS\history.js:861
+#: .\static\FCM\JS\history.js:891
+msgid "horizontally"
+msgstr "水平"
+
+#: .\static\FCM\JS\history.js:219
+msgid ""
+"%(player)s started marketing campaign #%(marketingCampaignNumber)s with "
+"%(employee)s, %(orientation)s at co-ordinates (%(Xcoord)s, %(Ycoord)s), "
+"advertising:"
+msgstr ""
+"%(player)s 开始了第 %(marketingCampaignNumber)s 号营销活动，员工为 "
+"%(employee)s，朝向 %(orientation)s，坐标为 (%(Xcoord)s, %(Ycoord)s)，营销内容"
+"为："
+
+#: .\static\FCM\JS\history.js:224
+msgid "eternally"
+msgstr "永远"
+
+#: .\static\FCM\JS\history.js:226
+msgid "for %(turnLength)s turns"
+msgstr "持续 %(turnLength)s 回合"
+
+#: .\static\FCM\JS\history.js:232
+msgid "%(player)s uses their team:"
+msgstr "%(player)s 使用他们的团队："
+
+#: .\static\FCM\JS\history.js:237
+msgid "to produce/collect:"
+msgstr "制作/收集："
+
+#: .\static\FCM\JS\history.js:259
+msgid ""
+"%(player)s builds house #%(houseNumber)s %(orientation)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s 在坐标 (%(Xcoord)s,%(Ycoord)s) 建造房屋 #%(houseNumber)s，朝向 "
+"%(orientation)s。"
+
+#: .\static\FCM\JS\history.js:269
+msgid ""
+"%(player)s builds a garden for house #%(houseNumber)s %(orientation)s at co-"
+"ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）为房屋 #%(houseNumber)s 建造了一个"
+"花园，朝向为 %(orientation)s。"
+
+#: .\static\FCM\JS\history.js:282
+msgid ""
+"%(player)s builds a new restaurant at co-ordinates (%(Xcoord)s, %(Ycoord)s) "
+"facing %(orientation)s, opening next turn"
+msgstr ""
+"%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）处开设了一家新的餐厅，面向 "
+"%(orientation)s，下一回合开业"
+
+#: .\static\FCM\JS\history.js:283
+msgid ""
+"%(player)s opens a new restaurant at co-ordinates (%(Xcoord)s, %(Ycoord)s) "
+"facing %(orientation)s"
+msgstr ""
+"%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）开了一家新餐厅，朝向 "
+"%(orientation)s"
+
+#: .\static\FCM\JS\history.js:304
+msgid ""
+"%(player)s moves a restaurant from co-ordinates (%(Xcoord)s, %(Ycoord)s) to "
+"co-ordinates (%(Xcoord2)s, %(Ycoord2)s) facing %(orientation)s"
+msgstr ""
+"%(player)s 将一家餐厅从坐标 (%(Xcoord)s, %(Ycoord)s) 移动到坐标 "
+"(%(Xcoord2)s, %(Ycoord2)s) 朝向 %(orientation)s"
+
+#: .\static\FCM\JS\history.js:310
+msgid ""
+"Dinner time: No sales occurred, either due to lack of demand or lack of items"
+msgstr "晚餐时间：没有销售，可能是由于缺乏需求或缺少物品"
+
+#: .\static\FCM\JS\history.js:313 .\static\FCM\JS\history.js:499
+msgid "Dinner time"
+msgstr "晚餐时间"
+
+#: .\static\FCM\JS\history.js:318
+msgid "House"
+msgstr "房屋"
+
+#: .\static\FCM\JS\history.js:319
+msgid "Apartment"
+msgstr "公寓"
+
+#: .\static\FCM\JS\history.js:320 .\static\FCM\JS\history.js:778
+msgid "Rural Area"
+msgstr "乡村地区"
+
+#: .\static\FCM\JS\history.js:329
+msgid ""
+"Houses required to travel over a roadworks marker this turn add +1 distance "
+"per roadworks"
+msgstr "本回合必须通过路障的顾客每经过一块路障就会增加1点距离"
+
+#: .\static\FCM\JS\history.js:332
+msgid "Players who can fulfill this demand:"
+msgstr "能满足此需求的玩家："
+
+#: .\static\FCM\JS\history.js:340
+msgid "distance"
+msgstr "距离"
+
+#: .\static\FCM\JS\history.js:340
+msgid "player"
+msgstr "玩家"
+
+#: .\static\FCM\JS\history.js:355
+msgid "Only %(player)s can fulfill these demands"
+msgstr "只有 %(player)s 可以满足这些需求"
+
+#: .\static\FCM\JS\history.js:357
+msgid "No one can fulfill these demands"
+msgstr "没有人能满足这些需求"
+
+#: .\static\FCM\JS\history.js:364
+msgid "House #%(houseNumber)s goes to %(player)s for $%(saleAmount)s"
+msgstr ""
+"房屋 #%(houseNumber)s 的顾客前往 %(player)s 餐厅就餐，消费了 $%(saleAmount)s"
+
+#: .\static\FCM\JS\history.js:367
+msgid "Apartment #%(apartmentNumber)s goes to %(player)s for $%(saleAmount)s"
+msgstr ""
+"公寓 #%(apartmentNumber)s 的顾客前往 %(player)s 餐厅就餐，消费了 $"
+"%(saleAmount)s"
+
+#: .\static\FCM\JS\history.js:370
+msgid "Rural Area goes to %(player)s for $%(saleAmount)s"
+msgstr "乡村地区的顾客前往 %(player)s 餐厅就餐，消费了 $%(saleAmount)s"
+
+#: .\static\FCM\JS\history.js:373 .\static\FCM\JS\history.js:424
+msgid "Base price"
+msgstr "基础价格"
+
+#: .\static\FCM\JS\history.js:373
+msgid "item"
+msgstr "个食物"
+
+#: .\static\FCM\JS\history.js:374 .\static\FCM\JS\history.js:425
+msgid "The base price is doubled, because the house has a garden."
+msgstr "基础价格翻倍，因为这栋房屋带花园。"
+
+#: .\static\FCM\JS\history.js:375 .\static\FCM\JS\history.js:427
+msgid "The base price is doubled, because the apartment is adjacent to a park."
+msgstr "基础价格翻倍，因为公寓毗邻公园。"
+
+#: .\static\FCM\JS\history.js:376 .\static\FCM\JS\history.js:428
+msgid "The base price is doubled, because the house is adjacent to a park."
+msgstr "基础价格翻倍，因为房屋毗邻公园。"
+
+#: .\static\FCM\JS\history.js:377 .\static\FCM\JS\history.js:430
+msgid ""
+"The base price is tripled, because the house is adjacent to a park and has a "
+"garden."
+msgstr "基础价格翻了三倍，因为它毗邻公园并带有花园。"
+
+#: .\static\FCM\JS\history.js:379
+msgid "The player has a bonus of $%(bonusAmount)s"
+msgstr "该玩家有 $%(bonusAmount)s 的奖励金"
+
+#: .\static\FCM\JS\history.js:392 .\static\FCM\JS\history.js:440
+msgid "A Fry Chef adds a bonus of $%(fryChefsBonus)s"
+msgid_plural "Fry Chefs add a bonus of $%(fryChefsBonus)s"
+msgstr[0] "一个炸薯条主厨增加了 $%(fryChefsBonus)s 的奖励"
+
+#: .\static\FCM\JS\history.js:399
+msgid "The Fry Chef bonus was already added to the coffee sale."
+msgstr "炸薯条主厨的奖励金将会显示在咖啡销售界面中."
+
+#: .\static\FCM\JS\history.js:413
+msgid "Coffee sales for house #%(houseNumber)s:"
+msgstr "房屋＃%(houseNumber)s 的咖啡销售情况："
+
+#: .\static\FCM\JS\history.js:414
+msgid "Coffee sales for apartment #%(apartmentNumber)s:"
+msgstr "公寓＃%(apartmentNumber)s 的咖啡销售情况："
+
+#: .\static\FCM\JS\history.js:415
+msgid "Coffee sales for Rural Area:"
+msgstr "乡村地区的咖啡销售情况："
+
+#: .\static\FCM\JS\history.js:424
+msgid "Total Income:"
+msgstr "总收入："
+
+#: .\static\FCM\JS\history.js:452
+msgid "No coffee sold"
+msgstr "没有销售咖啡"
+
+#: .\static\FCM\JS\history.js:459
+msgid "More Information"
+msgstr "更多信息"
+
+#: .\static\FCM\JS\history.js:476
+msgid "What are the highlighted restaurants / coffee shops?"
+msgstr "这里的高亮餐厅/咖啡厅表示什么？"
+
+#: .\static\FCM\JS\history.js:477
+msgid ""
+"Restaurants / coffee shops that are highlighted indicate where coffee was "
+"sold along the route taken by this house."
+msgstr ""
+"被高亮显示的餐厅/咖啡厅指示了沿着该房屋的顾客所走的路线出售咖啡的地点。"
+
+#: .\static\FCM\JS\history.js:479
+msgid "What are the highlighed road squares?"
+msgstr "高亮显示的道路方块是什么？"
+
+#: .\static\FCM\JS\history.js:480
+msgid ""
+"If there is only one valid coffee route from the house to the restaurant, it "
+"will be shown.<BR/>If there are multiple valid routes, the road squares "
+"common to all valid coffee routes will be shown."
+msgstr ""
+"如果从房屋到餐厅只有一条有效的咖啡路线，它将会被显示。<BR/>如果有多条有效的路"
+"线，则会显示所有有效咖啡路线共有的道路方块。"
+
+#: .\static\FCM\JS\history.js:482
+msgid "I'm still confused?"
+msgstr "我还是很困惑？"
+
+#: .\static\FCM\JS\history.js:483
+msgid ""
+"Don't worry; coffee can be quite complicated. Please read more help <a "
+"href='/FCM/coffeeHelp/' target='_blank'>here</a>."
+msgstr ""
+"不用担心，咖啡可能会很复杂。请在<a href='/FCM/coffeeHelp/' target='_blank'>这"
+"里</a>阅读更多帮助信息。"
+
+#: .\static\FCM\JS\history.js:504
+msgid "CFO bonus"
+msgstr "CFO 奖励"
+
+#: .\static\FCM\JS\history.js:504
+msgid "Total"
+msgstr "总计"
+
+#: .\static\FCM\JS\history.js:511
+msgid "Income"
+msgstr "收入"
+
+#: .\static\FCM\JS\history.js:528
+msgid "%(dollarAmount)s and %(itemsAmount)s item"
+msgid_plural "%(dollarAmount)s and %(itemsAmount)s items"
+msgstr[0] "%(dollarAmount)s 和 %(itemsAmount)s 个物品"
+
+#: .\static\FCM\JS\history.js:538
+msgid "Salaries"
+msgstr "薪水"
+
+#: .\static\FCM\JS\history.js:543
+msgid "No marketing campaigns"
+msgstr "没有营销活动"
+
+#: .\static\FCM\JS\history.js:545
+msgid "Marketing Campaigns"
+msgstr "市场营销活动"
+
+#: .\static\FCM\JS\history.js:549
+msgid "Normal Advertising Round"
+msgstr "通常营销阶段"
+
+#: .\static\FCM\JS\history.js:550
+msgid "Mass Marketeer Round %(round)s"
+msgstr "大众营销 第%(round)s轮"
+
+#: .\static\FCM\JS\history.js:581
+msgid "#%(campaignNumber)s put %(item)s on house %(affectedHouses)s"
+msgid_plural "#%(campaignNumber)s put %(item)s on houses %(affectedHouses)s"
+msgstr[0] ""
+"第 %(campaignNumber)s 号营销板块将 %(item)s 放在房屋 %(affectedHouses)s 上"
+
+#: .\static\FCM\JS\history.js:608
+msgid "#%(campaignNumber)s put 2x %(item)s on apartment %(affectedApartments)s"
+msgid_plural ""
+"#%(campaignNumber)s put 2x %(item)s on apartments %(affectedApartments)s"
+msgstr[0] ""
+"第 #%(campaignNumber)s 个营销板块 在公寓 %(affectedApartments)s 上投放了2倍"
+"的 %(item)s"
+
+#: .\static\FCM\JS\history.js:619
+msgid "#Giant Billboard put 2x %(item)s on the Rural Area"
+msgstr "#巨型广告牌在乡村地区上投放了2倍的 %(item)s"
+
+#: .\static\FCM\JS\history.js:622
+msgid "#%(campaignNumber)s was not able to market %(item)s"
+msgstr "#%(campaignNumber)s 无法将 %(item)s 进行营销"
+
+#: .\static\FCM\JS\history.js:633
+msgid "%(player)s received a new milestone:"
+msgstr "%(player)s 获得了一个新的里程碑："
+
+#: .\static\FCM\JS\history.js:638
+msgid "The reserve cards are:"
+msgstr "保留卡为："
+
+#: .\static\FCM\JS\history.js:664
+msgid "%(player)s fires no employees"
+msgstr "%(player)s 没有解雇任何员工"
+
+#: .\static\FCM\JS\history.js:668
+msgid "%(player)s fires:"
+msgstr "%(player)s 解雇："
+
+#: .\static\FCM\JS\history.js:680
+msgid "%(player)s discards the following resources:"
+msgstr "%(player)s 丢弃以下资源："
+
+#: .\static\FCM\JS\history.js:693
+msgid "%(player)s keeps all resources"
+msgstr "%(player)s 保留所有资源"
+
+#: .\static\FCM\JS\history.js:700 .\static\FCM\JS\history.js:703
+msgid "Start of turn %(turnNumber)s"
+msgstr "第 %(turnNumber)s 回合开始"
+
+#: .\static\FCM\JS\history.js:703
+msgid "Bank:"
+msgstr "银行储备金："
+
+#: .\static\FCM\JS\history.js:713
+#, fuzzy
+#| msgid "%(playerName)s chooses to play %(position)s"
+msgid "%(playerName)s chooses: %(moduleChoiceImg)s %(moduleChoice)s"
+msgstr "%(playerName)s 选择 %(position)s 行动"
+
+#: .\static\FCM\JS\history.js:724
+msgid "Game rewound to here by %(rewindingPlayer)s"
+msgstr "游戏被 %(rewindingPlayer)s 回退到此处"
+
+#: .\static\FCM\JS\history.js:730
+msgid "%(resignedPlayer)s Resigns"
+msgstr "%(resignedPlayer)s 投降"
+
+#: .\static\FCM\JS\history.js:735
+msgid "%(kickedPlayer)s was kicked out"
+msgstr "%(kickedPlayer)s 被踢出"
+
+#: .\static\FCM\JS\history.js:740
+msgid "Game Over"
+msgstr "游戏结束"
+
+#: .\static\FCM\JS\history.js:741
+msgid "The winner is: %(winner)s"
+msgstr "获胜者是：%(winner)s"
+
+#: .\static\FCM\JS\history.js:748
+msgid "The bank broke. Refill: $%(refillAmount)s"
+msgstr "银行破产了"
+
+#: .\static\FCM\JS\history.js:753
+msgid "Bankrupted!"
+msgstr "破产了！"
+
+#: .\static\FCM\JS\history.js:756
+msgid "All players went bankrupted! Game over"
+msgstr "所有玩家破产！游戏结束"
+
+#: .\static\FCM\JS\history.js:759
+msgid "Only one player left! Game over"
+msgstr "只剩下一名玩家了！游戏结束"
+
+#: .\static\FCM\JS\history.js:798
+msgid ""
+"earned $%(earnings)s for %(numberOfItems)s item on building %(building)s"
+msgid_plural ""
+"earned $%(earnings)s for %(numberOfItems)s items on building %(building)s"
+msgstr[0] ""
+"获得了 $%(earnings)s 的收入，因为在建筑物 %(buildings)s 上推销了 "
+"%(numberOfItems)s 个物品"
+
+#: .\static\FCM\JS\history.js:813
+msgid ""
+"earned $%(earnings)s for %(numberOfItems)s item on buildings %(buildings)s"
+msgid_plural ""
+"earned $%(earnings)s for %(numberOfItems)s items on buildings %(buildings)s"
+msgstr[0] ""
+"获得了 $%(earnings)s 的收益，因为在建筑物 %(buildings)s 上推销了 "
+"%(numberOfItems)s 个物品"
+
+#: .\static\FCM\JS\history.js:826
+msgid "Marketeers earnings"
+msgstr "营销人员收入"
+
+#: .\static\FCM\JS\history.js:839
+msgid ""
+"%(player)s starts radio campaign #%(radioNumber)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s) due to the First Pizza Sold milestone"
+msgstr ""
+"%(player)s 因首个销售披萨里程碑，在坐标(%(Xcoord)s, %(Ycoord)s) 处开始 "
+"#%(radioNumber)s 广播营销"
+
+#: .\static\FCM\JS\history.js:845
+msgid ""
+"$100 has been removed from the bank due to the First Discount Manager Used "
+"milestone"
+msgstr "由于首个使用促销经理里程碑，银行移除了$100"
+
+#: .\static\FCM\JS\history.js:857
+msgid "a 4 length park"
+msgstr "4格公园"
+
+#: .\static\FCM\JS\history.js:858
+msgid "a T shaped park"
+msgstr "T型公园"
+
+#: .\static\FCM\JS\history.js:859
+msgid "an L shaped park"
+msgstr "L型公园"
+
+#: .\static\FCM\JS\history.js:883
+msgid ""
+"%(player)s uses a lobbyist to place %(parkDetails)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s 使用提案人在坐标 (%(Xcoord)s, %(Ycoord)s) 处放置 %(parkDetails)s。"
+
+#: .\static\FCM\JS\history.js:887
+msgid "2 length road"
+msgstr "2格道路"
+
+#: .\static\FCM\JS\history.js:888
+msgid "4 length road"
+msgstr "4格道路"
+
+#: .\static\FCM\JS\history.js:889
+msgid "corner road"
+msgstr "拐角道路"
+
+#: .\static\FCM\JS\history.js:901
+msgid ""
+"%(player)s uses a lobbyist to place a %(roadDetails)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s 使用提案人在坐标 (%(Xcoord)s, %(Ycoord)s) 处修建了 "
+"%(roadDetails)s。"
+
+#: .\static\FCM\JS\history.js:911
+msgid ""
+"%(player)s builds a coffee shop at co-ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr "%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）处建造了一家咖啡厅。"
+
+#: .\static\FCM\JS\history.js:913
+msgid ""
+"%(player)s removes a coffee shop from co-ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr "%(player)s 从坐标（%(Xcoord)s，%(Ycoord)s）处拆除了一家咖啡厅。"
+
+#: .\static\FCM\JS\history.js:958 .\static\FCM\JS\view.js:375
+msgid "Hard Choices"
+msgstr ""
+
+#: .\static\FCM\JS\history.js:959 .\static\FCM\JS\view.js:376
+msgid "Ketchup Milestone"
+msgstr "已用里程碑"
+
+#: .\static\FCM\JS\history.js:960 .\static\FCM\JS\view.js:377
+#, fuzzy
+#| msgid "Setup - Reserve Cards"
+msgid "New Reserve Cards"
+msgstr "设置 - 储备卡"
+
+#: .\static\FCM\JS\history.js:961 .\static\FCM\JS\view.js:378
+#, fuzzy
+#| msgid "B-Movie Star"
+msgid "Movie Stars"
+msgstr "B-电影明星"
+
+#: .\static\FCM\JS\history.js:962 .\static\FCM\JS\view.js:379
+#, fuzzy
+#| msgid "Mass Marketeer"
+msgid "Mass Marketeers"
+msgstr "大众推销员"
+
+#: .\static\FCM\JS\history.js:963 .\static\FCM\JS\view.js:380
+#, fuzzy
+#| msgid "Gourmet Food Critic"
+msgid "Gourmet Food Critics"
+msgstr "美食评论家"
+
+#: .\static\FCM\JS\history.js:964 .\static\FCM\JS\view.js:381
+#, fuzzy
+#| msgid "Rural Marketeer"
+msgid "Rural Marketeers"
+msgstr "乡村推销员"
+
+#: .\static\FCM\JS\history.js:965 .\static\FCM\JS\view.js:382
+#, fuzzy
+#| msgid "Lobbyist"
+msgid "Lobbyists"
+msgstr "提案人"
+
+#: .\static\FCM\JS\history.js:966 .\static\FCM\JS\view.js:383
+#: .\static\FCM\JS\view.js:5742
+msgid "Night Shift Manager"
+msgstr "夜班经理"
+
+#: .\static\FCM\JS\history.js:967 .\static\FCM\JS\view.js:384
+msgid "Coffee"
+msgstr ""
+
+#: .\static\FCM\JS\history.js:968 .\static\FCM\JS\view.js:385
+#: .\static\FCM\JS\view.js:5727
+msgid "Fry Chef"
+msgstr "炸薯条主厨"
+
+#: .\static\FCM\JS\history.js:969 .\static\FCM\JS\view.js:386
+#, fuzzy
+#| msgid "Store Kimchi"
+msgid "Kimchi"
+msgstr "存放泡菜"
+
+#: .\static\FCM\JS\history.js:970 .\static\FCM\JS\view.js:387
+#, fuzzy
+#| msgid "Sushi Cook"
+msgid "Sushi"
+msgstr "寿司厨师"
+
+#: .\static\FCM\JS\history.js:971 .\static\FCM\JS\view.js:388
+#, fuzzy
+#| msgid "Noodle Cook"
+msgid "Noodles"
+msgstr "面条厨师"
+
+#: .\static\FCM\JS\history.js:1043
+msgid "Show all history"
+msgstr "显示所有历史"
+
+#: .\static\FCM\JS\history.js:1064
+msgid "first"
+msgstr "第一个"
+
+#: .\static\FCM\JS\history.js:1065
+msgid "second"
+msgstr "第二个"
+
+#: .\static\FCM\JS\history.js:1066
+msgid "third"
+msgstr "第三个"
+
+#: .\static\FCM\JS\history.js:1067
+msgid "fourth"
+msgstr "第四个"
+
+#: .\static\FCM\JS\history.js:1068
+msgid "fifth"
+msgstr "第五个"
+
+#: .\static\FCM\JS\history.js:1069
+msgid "sixth"
+msgstr "第六个"
+
+#: .\static\FCM\JS\io.js:225 .\static\FCM\JS\io.js:423
+#: .\static\FCM\JS\io.js:550 .\static\FCM\JS\io.js:613
+msgid ""
+"It appears you have an older version of the game. Please refresh the page"
+msgstr "看起来您使用的是游戏的旧版本，请刷新页面"
+
+#: .\static\FCM\JS\io.js:419 .\static\FCM\JS\io.js:556
+msgid ""
+"The game is no longer active; perhaps you have been removed for being "
+"inactive"
+msgstr "游戏不再处于活动状态；也许您因为长时间闲置已经被移除了"
+
+#: .\static\FCM\JS\io.js:634
+msgid ""
+"Something went wrong during kickout. Please submit a bug report so I can "
+"restart the game"
+msgstr "很抱歉，您遇到了踢出异常的问题。请提交错误报告，以便我重启游戏"
+
+#: .\static\FCM\JS\io.js:722
+msgid ""
+"Something went wrong. Please reload the page. If the problem persists, "
+"please contact the webmaster"
+msgstr "出现了一些问题，请重新加载页面。如果问题仍然存在，请联系网站管理员"
+
+#: .\static\FCM\JS\io.js:753
+msgid "You cannot rewind a finished game"
+msgstr "您不能回退已完成的游戏"
+
+#: .\static\FCM\JS\io.js:789
+msgid "Game Rewound"
+msgstr "游戏回退"
+
+#: .\static\FCM\JS\io.js:819
+msgid "Could not rewind"
+msgstr "无法回退"
+
+#: .\static\FCM\JS\io.js:1013
+msgid "Please tick a permission option first"
+msgstr "请先勾选一个权限选项"
+
+#: .\static\FCM\JS\io.js:1052 .\static\FCM\JS\io.js:1099
+msgid "Permission Changed"
+msgstr "权限已更改"
+
+#: .\static\FCM\JS\io.js:1062
+msgid "Please tick the box first"
+msgstr "请先勾选此框"
+
+#: .\static\FCM\JS\io.js:1093
+msgid "Excluded from Stats"
+msgstr "从统计数据中排除"
+
+#: .\static\FCM\JS\io.js:1097
+msgid "Waiting for other players"
+msgstr "等待其他玩家"
+
+#: .\static\FCM\JS\main.js:223
+msgid ""
+"Please <a href='/register'>REGISTER</a> or <a href='/login'>LOGIN</a> to "
+"play a game"
+msgstr "请<a href='/register'>注册</a>或<a href='/login'>登录</a>以开始游戏"
+
+#: .\static\FCM\JS\main.js:237
+msgid ""
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out "
+"<b>%(playerToKickName)s</b> press Confirm Kickout"
+msgstr ""
+"玩家 <b>%(playerToKickName)s</b> 超时<BR/>要踢出 <b>%(playerToKickName)s</b> "
+"请按确认踢出"
+
+#: .\static\FCM\JS\main.js:242
+msgid "All other players will be allowed to move again in this phase"
+msgstr "此阶段所有其他玩家将被允许再次行动"
+
+#: .\static\FCM\JS\main.js:243
+msgid "The game will proceed to the next player/phase/turn"
+msgstr "游戏将进行到下一个玩家/阶段/回合"
+
+#: .\static\FCM\JS\main.js:245
+msgid ""
+"Otherwise you can allow <b>%(playerToKickName)s</b> more time - reload the "
+"page to initiate kickout again<BR/>"
+msgstr ""
+"否则您可以给<b>%(playerToKickName)s</b>更多时间 - 重新加载页面以再次发起踢出"
+
+#: .\static\FCM\JS\main.js:250
+msgid "Not now - allow more time"
+msgstr "不是现在——再等一会"
+
+#: .\static\FCM\JS\main.js:251
+msgid "Confirm Kickout"
+msgstr "确认踢出"
+
+#: .\static\FCM\JS\main.js:366
+msgid "Bug Report"
+msgstr "错误报告"
+
+#: .\static\FCM\JS\main.js:366
+msgid ""
+"Please submit a bug report if you encounter any issues, giving as much "
+"detail as possbile"
+msgstr "请尽可能提供详细信息，如果您遇到任何问题，请提交错误报告"
+
+#: .\static\FCM\JS\main.js:367
+msgid "Is your bug to do with coffee?"
+msgstr "您的bug和咖啡有关吗？"
+
+#: .\static\FCM\JS\main.js:367
+msgid ""
+"Please first read the <a href='/FCM/coffeeHelp/' target='_blank'>coffee help "
+"page</a>."
+msgstr ""
+"请首先阅读<a href='/FCM/coffeeHelp/' target='_blank'>咖啡帮助页面</a>。"
+
+#: .\static\FCM\JS\main.js:368
+msgid ""
+"Please also make sure you fully understand the coffee rules and example in "
+"the official rules, found <a href='https://www.boardgamehelpers.com/"
+"FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf' "
+"target='_blank'>here</a>"
+msgstr ""
+"请确保您已经完全理解了官方规则中的咖啡规则和示例，您可以在<a href='https://"
+"www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web."
+"pdf' target='_blank'>这里</a>找到它们"
+
+#: .\static\FCM\JS\main.js:369
+msgid ""
+"If you still think there is a bug, please check carefully:<ul><li>Which "
+"players had coffee and how much</li><li>If you think a route has not been "
+"considered, could it sell the same amount of coffee as the route chosen?</"
+"li><li>Remmeber that any part of the coffee route that could have multiple "
+"paths each selling the same amount of coffee (even if it's to the same "
+"player) will be skipped</li></ul>"
+msgstr ""
+"如果您仍然认为存在错误，请仔细检查以下几点：<ul><li>哪些玩家拥有咖啡以及数量"
+"</li><li>如果您认为某条路径没有被考虑到，是否可以售出与所选路线相同数量的咖"
+"啡？</li><li>请记住，咖啡路线的任何部分，如果存在多条路径可以每条路径售出相同"
+"数量的咖啡（即使是卖给同一位玩家），都将被跳过</li></ul>"
+
+#: .\static\FCM\JS\main.js:370
+msgid "If you still think there is a problem, please submit a bug report"
+msgstr "如果您仍然认为有问题，请提交错误报告"
+
+#: .\static\FCM\JS\main.js:374
+msgid "Submit"
+msgstr "提交"
+
+#: .\static\FCM\JS\view.js:526
+msgid "Drafted Modules:"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:539
+#, fuzzy
+#| msgid "Available Roads:"
+msgid "Available Modules:"
+msgstr "可用道路："
+
+#: .\static\FCM\JS\view.js:566
+msgid "Selected Module:"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:573
+msgid "First to train / First to market good disappear after 2 turns"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:573
+#, fuzzy
+#| msgid "First to Hire 3 people in 1 turn"
+msgid "First to hire 3 disappears after 3 turns"
+msgstr "首个在一回合内雇佣3名员工"
+
+#: .\static\FCM\JS\view.js:574
+msgid ""
+"Milestone: The first time someone else sells<BR /> your demand, gain a "
+"permanent -1 to distance"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:575
+msgid "When the bank breaks, add $200 per player."
+msgstr ""
+
+#: .\static\FCM\JS\view.js:575
+msgid ""
+"The base price changes to whichever is <BR /> selected most, from $5, $10, "
+"or $20.<BR /> In a tie, $20 beats $10 and $5, and $5 beats $10"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:576
+msgid "Houses prioritise a restaurant with their demands + kimchi"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:577
+msgid "Noodles count as any demand item, but only if no one else can supply it"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:578
+msgid "Houses with gardens will try to replace all demand with Sushi"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:579
+msgid "Sell coffee along the route travelled by a house"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:580
+#, fuzzy
+#| msgid "Select a road to add to the map"
+msgid "Add new roads and parks to the map"
+msgstr "选择要添加到地图的道路"
+
+#: .\static\FCM\JS\view.js:581
+#, fuzzy
+#| msgid "Bonus: +$10 per sale"
+msgid "Adds $10 per total sale"
+msgstr "奖励：卖出每单+$10"
+
+#: .\static\FCM\JS\view.js:582
+msgid "Repeat marketing phase for each Mass Marketeer"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:583
+msgid "Markets to the Rural Area - accessed by freeway ramps"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:584
+#, fuzzy
+#| msgid "Market to all houses with a garden. Max duration 3"
+msgid "Markets to all houses with a garden"
+msgstr "向所有带花园的房屋进行推销，最大持续时长为3回合"
+
+#: .\static\FCM\JS\view.js:585
+msgid "Decide turn order and break ties"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:586
+msgid ""
+"Must be put in a management slot<BR /> All unsalaried employees work twice "
+"during 9-5"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:879
+msgid "Duration (turns):"
+msgstr "%(duration)s 个回合:"
+
+#: .\static\FCM\JS\view.js:1149
+#, fuzzy
+#| msgid "No more tiles"
+msgid "No More Roads"
+msgstr "没有更多的板块"
+
+#: .\static\FCM\JS\view.js:1180
+#, fuzzy
+#| msgid "No more tiles"
+msgid "No More Parks"
+msgstr "没有更多的板块"
+
+#: .\static\FCM\JS\view.js:1684
+#, fuzzy
+#| msgid "No more tiles"
+msgid "No More Houses"
+msgstr "没有更多的板块"
+
+#: .\static\FCM\JS\view.js:1713
+#, fuzzy
+#| msgid "No more tiles"
+msgid "No More Gardens"
+msgstr "没有更多的板块"
+
+#: .\static\FCM\JS\view.js:1777
+#, fuzzy
+#| msgid "Select a house for the garden"
+msgid "Choose a house to add a garden"
+msgstr "选择一所房子新建花园"
+
+#: .\static\FCM\JS\view.js:1799
+msgid "No suitable houses"
+msgstr ""
+
+#: .\static\FCM\JS\view.js:1844
+msgid "No Available Space"
+msgstr "没有可用空间"
+
+#: .\static\FCM\JS\view.js:2893 .\static\FCM\JS\view.js:3057
+msgid "No Active Gourmet Food Critics"
+msgstr "没有活跃的美食评论家"
+
+#: .\static\FCM\JS\view.js:3985
+msgid "Reserve cards:"
+msgstr "储备卡："
+
+#: .\static\FCM\JS\view.js:4036
+msgid "Marketeers:"
+msgstr "营销人员："
+
+#: .\static\FCM\JS\view.js:4068
+msgid "On the beach:"
+msgstr "休假中："
+
+#: .\static\FCM\JS\view.js:4076
+msgid "At work:"
+msgstr "工作中："
+
+#: .\static\FCM\JS\view.js:4199
+msgid "The winner is:"
+msgstr "获胜者是："
+
+#: .\static\FCM\JS\view.js:4201
+msgid "CONGRATULATIONS!"
+msgstr "恭喜！"
+
+#: .\static\FCM\JS\view.js:4203 .\static\FCM\JS\view.js:4207
+msgid "Fancy a <a href='/createFCMpage/%(gameID)s/'>rematch</a>?"
+msgstr "想要<a href='/createFCMpage/%(gameID)s/'>重赛</a>吗？"
+
+#: .\static\FCM\JS\view.js:4233
+msgid "Drive in"
+msgstr "免下车服务"
+
+#: .\static\FCM\JS\view.js:4518
+msgid "Your bug report has been submitted"
+msgstr "您的错误报告已提交"
+
+#: .\static\FCM\JS\view.js:4587
+msgid "More details"
+msgstr "更多细节"
+
+#: .\static\FCM\JS\view.js:4595
+msgid "Reserve"
+msgstr "可用"
+
+#: .\static\FCM\JS\view.js:4612
+msgid "Available marketing campaigns"
+msgstr "可用的营销活动"
+
+#: .\static\FCM\JS\view.js:4621
+msgid "Available freeways"
+msgstr "可用的高速公路"
+
+#: .\static\FCM\JS\view.js:4634
+msgid " (but the Milestone is no longer available)"
+msgstr " （但里程碑不再可用）"
+
+#: .\static\FCM\JS\view.js:4643
+msgid "Available houses & gardens:"
+msgstr "可用房屋及花园："
+
+#: .\static\FCM\JS\view.js:4667
+msgid "Available Parks:"
+msgstr "可用的公园："
+
+#: .\static\FCM\JS\view.js:4705
+msgid "Available Roads:"
+msgstr "可用道路："
+
+#: .\static\FCM\JS\view.js:4738
+msgid "Available Tiles for Lobbyist Milestone:"
+msgstr "可用于提案人里程碑的板块:"
+
+#: .\static\FCM\JS\view.js:4805 .\static\FCM\JS\view.js:4905
+msgid "Available Milestones:"
+msgstr "可用里程碑:"
+
+#: .\static\FCM\JS\view.js:4883 .\static\FCM\JS\view.js:4942
+msgid "Taken Milestones:"
+msgstr "已用里程碑:"
+
+#: .\static\FCM\JS\view.js:5051
+msgid "Employees:"
+msgstr "雇员:"
+
+#: .\static\FCM\JS\view.js:5325
+msgid "Total demand on board:"
+msgstr "总需求:"
+
+#: .\static\FCM\JS\view.js:5329
+msgid "No demand on board"
+msgstr "没有需求"
+
+#: .\static\FCM\JS\view.js:5449 .\static\FCM\JS\view.js:5452
+msgid "Stock"
+msgstr "拥有"
+
+#: .\static\FCM\JS\view.js:5452
+msgid "No resources"
+msgstr "空"
+
+#: .\static\FCM\JS\view.js:5504 .\static\FCM\JS\view.js:5536
+msgid "Prod"
+msgstr "制作"
+
+#: .\static\FCM\JS\view.js:5531
+msgid "None"
+msgstr "无"
+
+#: .\static\FCM\JS\view.js:5653
+msgid "First to Hire 3"
+msgstr "首个进行3雇佣"
+
+#: .\static\FCM\JS\view.js:5653
+msgid "First to Hire 3 people in 1 turn"
+msgstr "首个在一回合内雇佣3名员工"
+
+#: .\static\FCM\JS\view.js:5653
+msgid "+ 2 Management Trainees"
+msgstr "+2管培生"
+
+#: .\static\FCM\JS\view.js:5654
+msgid "First to throw away"
+msgstr "首个丢弃"
+
+#: .\static\FCM\JS\view.js:5654
+msgid "First to throw away food/drink"
+msgstr "首个丢弃食物/饮料"
+
+#: .\static\FCM\JS\view.js:5654
+msgid "Get a freezer that stores 10 items (food/drink or kimchi)"
+msgstr "获得一个可存放10个物品（食物/饮料或泡菜）的冰箱。"
+
+#: .\static\FCM\JS\view.js:5655 .\static\FCM\JS\view.js:5686
+msgid "First waitress"
+msgstr "首个服务员"
+
+#: .\static\FCM\JS\view.js:5655
+msgid "First waitress played"
+msgstr "首个打出服务员"
+
+#: .\static\FCM\JS\view.js:5655
+msgid "Each Waitress +$2 ($5 total)"
+msgstr "每个服务员+$2 (一共$5)"
+
+#: .\static\FCM\JS\view.js:5656
+msgid "First to have $20"
+msgstr "首个拥有$20"
+
+#: .\static\FCM\JS\view.js:5656
+msgid "May see bank reserve cards"
+msgstr "可以查看银行资金储备牌"
+
+#: .\static\FCM\JS\view.js:5657
+msgid "First to have $100"
+msgstr "首个拥有100美元"
+
+# It's ok, no error
+# (+50% cash earned) = (收入 +50% )
+#: .\static\FCM\JS\view.js:5657
+#, javascript-format
+msgid "Your CEO counts as CFO (+50% cash earned). May not have a CFO"
+msgstr "你的 CEO 可以当做 CFO使用 (+50% cash earned). 不能再持有CFO了"
+
+#: .\static\FCM\JS\view.js:5658
+msgid "First to lower prices"
+msgstr "首个降价"
+
+#: .\static\FCM\JS\view.js:5658
+msgid "First to lower price"
+msgstr "首个降低价格"
+
+#: .\static\FCM\JS\view.js:5658 .\static\FCM\JS\view.js:5705
+msgid "Price -$1"
+msgstr "售价 -$1"
+
+#: .\static\FCM\JS\view.js:5659
+msgid "First to train"
+msgstr "首个培训"
+
+#: .\static\FCM\JS\view.js:5659
+msgid "First to train someone"
+msgstr "首个培训员工"
+
+#: .\static\FCM\JS\view.js:5659
+msgid "$15 discount on salaries"
+msgstr "少支付$15薪水"
+
+#: .\static\FCM\JS\view.js:5660
+msgid "First burger produced"
+msgstr "首个制作汉堡"
+
+#: .\static\FCM\JS\view.js:5660
+msgid "+1 Burger Cook"
+msgstr "+1 汉堡厨师"
+
+#: .\static\FCM\JS\view.js:5661
+msgid "First pizza produced"
+msgstr "首个制作披萨"
+
+#: .\static\FCM\JS\view.js:5661
+msgid "+1 Pizza Cook"
+msgstr "+1 披萨厨师"
+
+#: .\static\FCM\JS\view.js:5662
+msgid "First errand boy"
+msgstr "首个跑腿伙计"
+
+#: .\static\FCM\JS\view.js:5662
+msgid "First errand boy played"
+msgstr "首个打出跑腿伙计"
+
+#: .\static\FCM\JS\view.js:5662
+msgid "All buyers get + 1 drink from each source"
+msgstr "所有饮料采购员工从每个来源处获取的饮料数量+1"
+
+#: .\static\FCM\JS\view.js:5663 .\static\FCM\JS\view.js:5687
+msgid "First cart operator"
+msgstr "首个手推车操作员"
+
+#: .\static\FCM\JS\view.js:5663
+msgid "First cart operator played"
+msgstr "首个使用手推车操作员"
+
+#: .\static\FCM\JS\view.js:5663
+msgid "Buyers get range +1"
+msgstr "所有饮料采购员工的移动距离+1"
+
+#: .\static\FCM\JS\view.js:5664
+msgid "First to pay $20 in salaries"
+msgstr "首个支付 $20 或更高薪水"
+
+#: .\static\FCM\JS\view.js:5664 .\static\FCM\JS\view.js:5684
+msgid "May use multiple trainers on the same person"
+msgstr "可用多个培训人员培训同一名员工"
+
+#: .\static\FCM\JS\view.js:5665
+msgid "First billboard"
+msgstr "首个广告牌"
+
+#: .\static\FCM\JS\view.js:5665
+msgid "First billboard placed"
+msgstr "首个放置广告牌"
+
+#: .\static\FCM\JS\view.js:5665
+msgid "No salaries for marketeers; Eternal marketing"
+msgstr "不用向营销人员发放薪水；进行永久营销"
+
+#: .\static\FCM\JS\view.js:5666
+msgid "First burger marketed"
+msgstr "首个推销汉堡"
+
+#: .\static\FCM\JS\view.js:5666
+msgid "+ $5 for every burger sold"
+msgstr "每售出一个汉堡 +$5"
+
+#: .\static\FCM\JS\view.js:5667
+msgid "First pizza marketed"
+msgstr "首个推销披萨"
+
+#: .\static\FCM\JS\view.js:5667
+msgid "+ $5 for every pizza sold"
+msgstr "每售出一个披萨 +$5"
+
+#: .\static\FCM\JS\view.js:5668
+msgid "First drink marketed"
+msgstr "首个推销饮料"
+
+#: .\static\FCM\JS\view.js:5668
+msgid "+ $5 for every drink sold"
+msgstr "每售出一瓶饮料 +$5"
+
+#: .\static\FCM\JS\view.js:5669
+msgid "First airplane"
+msgstr "首个飞机"
+
+#: .\static\FCM\JS\view.js:5669
+msgid "First airplane campaign"
+msgstr "首个飞机营销"
+
+#: .\static\FCM\JS\view.js:5669
+msgid "Count +2 open slots when determining order of play"
+msgstr "在决定回合顺位时，员工的工位数量+2"
+
+#: .\static\FCM\JS\view.js:5670
+msgid "First radio"
+msgstr "首个广播"
+
+#: .\static\FCM\JS\view.js:5670
+msgid "First radio campaign"
+msgstr "首个广播营销"
+
+#: .\static\FCM\JS\view.js:5670
+msgid "Your radios market 2 goods per turn instead of 1"
+msgstr "广播在每回合营销时可产生2份物品需求而非1份"
+
+#: .\static\FCM\JS\view.js:5671
+msgid "First marketeer"
+msgstr "首个营销人员"
+
+#: .\static\FCM\JS\view.js:5671
+msgid "First marketeer used"
+msgstr "首个使用营销人员"
+
+#: .\static\FCM\JS\view.js:5671
+msgid "Get $5 for every good your marketeers market. Distance -2"
+msgstr "你的营销人员推销的每件物品都使你获得$5。晚餐时间，距离-2"
+
+#: .\static\FCM\JS\view.js:5672
+msgid "First marketing trainee"
+msgstr "首个营销实习生"
+
+#: .\static\FCM\JS\view.js:5672
+msgid "First marketing trainee used"
+msgstr "首个使用营销实习生"
+
+#: .\static\FCM\JS\view.js:5672
+msgid "Get a free kitchen trainee and an errand boy"
+msgstr "免费获得见习厨房和跑腿伙计各1位"
+
+#: .\static\FCM\JS\view.js:5673
+msgid "First campaign manager"
+msgstr "首个营销经理"
+
+#: .\static\FCM\JS\view.js:5673
+msgid "First campaign manager used"
+msgstr "首个使用营销经理"
+
+#: .\static\FCM\JS\view.js:5673
+msgid ""
+"This turn, may place 1 marketing tile with same type, duration and range"
+msgstr "当回合可以再放置1个类型、持续时间和距离都相同的营销板块"
+
+#: .\static\FCM\JS\view.js:5674
+msgid "First brand manager"
+msgstr "首个品牌经理"
+
+#: .\static\FCM\JS\view.js:5674
+msgid "First brand manager used"
+msgstr "首个使用品牌经理"
+
+#: .\static\FCM\JS\view.js:5674
+msgid "This turn, may place 2 different goods on 1 plane"
+msgstr "当回合可以在1架飞机上放置2个不同的物品"
+
+#: .\static\FCM\JS\view.js:5675
+msgid "First brand director"
+msgstr "首个品牌总监"
+
+#: .\static\FCM\JS\view.js:5675
+msgid "First brand director used"
+msgstr "首个使用品牌总监"
+
+#: .\static\FCM\JS\view.js:5675
+msgid "Your radio is permanent"
+msgstr "你的广播永久有效"
+
+#: .\static\FCM\JS\view.js:5676
+msgid "First burger sold"
+msgstr "首个卖出汉堡"
+
+#: .\static\FCM\JS\view.js:5676
+msgid "Your CEO always has 4 slots (regardless of reserve cards)"
+msgstr "你的CEO总是拥有4个工位空格（格数不受银行资金储备卡的影响）"
+
+#: .\static\FCM\JS\view.js:5677
+msgid "First pizza sold"
+msgstr "首个卖出披萨"
+
+#: .\static\FCM\JS\view.js:5677
+msgid "Place radio (pizza, 2 turns) on tile of each house that bought pizza"
+msgstr "放置广播（披萨，2回合）到每个购买了披萨的房子所在的地图板块上"
+
+#: .\static\FCM\JS\view.js:5678
+msgid "First lemonade sold"
+msgstr "首个卖出柠檬水"
+
+#: .\static\FCM\JS\view.js:5678
+msgid "Any employee can be trained on the job, preserving color"
+msgstr "可对工作中的员工进行培训，但需保持其职业颜色不变"
+
+#: .\static\FCM\JS\view.js:5679
+msgid "First beer sold"
+msgstr "首个卖出啤酒"
+
+#: .\static\FCM\JS\view.js:5679
+msgid "May pay salary with food/drink"
+msgstr "可以用食物/饮料来支付薪水"
+
+#: .\static\FCM\JS\view.js:5680
+msgid "First coke sold"
+msgstr "首个卖出可乐"
+
+#: .\static\FCM\JS\view.js:5680
+msgid "Get a freezer that stores 10 items"
+msgstr "获得1台冰箱，可存放 10 件物品"
+
+#: .\static\FCM\JS\view.js:5681
+msgid "First recruiting girl"
+msgstr "首个人力资源专员"
+
+#: .\static\FCM\JS\view.js:5681
+msgid "First recruiting girl used"
+msgstr "首个使用人力资源专员"
+
+#: .\static\FCM\JS\view.js:5681
+msgid "Get a free executive vice president; pay no salary for him"
+msgstr "免费获得1位执行副总裁；无需为他支付薪水"
+
+#: .\static\FCM\JS\view.js:5682
+msgid "First trainer"
+msgstr "首个培训讲师"
+
+#: .\static\FCM\JS\view.js:5682
+msgid "First trainer used"
+msgstr "首个使用培训讲师"
+
+#: .\static\FCM\JS\view.js:5682
+msgid "Get a free trainer; no longer need to fire employees if broke"
+msgstr "免费获得1位培训讲师；你破产时无需解雇员工"
+
+#: .\static\FCM\JS\view.js:5683
+msgid "First discount manager"
+msgstr "首位促销经理"
+
+#: .\static\FCM\JS\view.js:5683
+msgid "First discount manager used"
+msgstr "首位使用促销经理"
+
+#: .\static\FCM\JS\view.js:5683
+msgid "Remove $100 from bank each round you discount by $3 or more"
+msgstr "每回合只要你降价不少于 $3，便从银行移除 $100"
+
+#: .\static\FCM\JS\view.js:5684
+msgid "First house"
+msgstr "首个房屋"
+
+#: .\static\FCM\JS\view.js:5684
+msgid "First house built"
+msgstr "首个放置房屋"
+
+#: .\static\FCM\JS\view.js:5685
+msgid "First restaurant"
+msgstr "首个餐厅"
+
+#: .\static\FCM\JS\view.js:5685
+msgid "First new restaurant"
+msgstr "首个放置新餐厅"
+
+#: .\static\FCM\JS\view.js:5685
+msgid "Place a permanent mailbox in restaurant area"
+msgstr "可以放置1个永久邮箱到新餐厅所在的街区中"
+
+#: .\static\FCM\JS\view.js:5686
+msgid "First waitress used"
+msgstr "首个使用服务员"
+
+#: .\static\FCM\JS\view.js:5686
+msgid "Your salaries are $3 each"
+msgstr "你的员工薪水变为每人$3"
+
+#: .\static\FCM\JS\view.js:5687
+msgid "First cart operator used"
+msgstr "首个使用手推车操作员"
+
+#: .\static\FCM\JS\view.js:5687
+msgid "Double the amount of drinks hauled by cart/truck/zeppelin"
+msgstr "手推车/火车/飞艇进货时获得的饮料数量加倍"
+
+#: .\static\FCM\JS\view.js:5688
+msgid "First rural marketeer"
+msgstr "首个农村推销员"
+
+#: .\static\FCM\JS\view.js:5688
+msgid "First rural marketeer used"
+msgstr "首个使用农村推销员"
+
+#: .\static\FCM\JS\view.js:5688
+msgid "Place highway offramp"
+msgstr "可以放置1个高速公路匝道"
+
+#: .\static\FCM\JS\view.js:5689
+msgid "First coffee sold"
+msgstr "首个卖出咖啡"
+
+#: .\static\FCM\JS\view.js:5689
+msgid "Build one coffee shop in the next clean up phase"
+msgstr "在当回合清理阶段建造1个咖啡厅"
+
+#: .\static\FCM\JS\view.js:5690
+msgid "Someone sells your demand"
+msgstr "首个遭遇抢单"
+
+#: .\static\FCM\JS\view.js:5690
+msgid "Distance -1"
+msgstr "晚餐时间，距离-1"
+
+#: .\static\FCM\JS\view.js:5691
+msgid "First lobbyist"
+msgstr "首个提案人"
+
+#: .\static\FCM\JS\view.js:5691
+msgid "First lobbyist used"
+msgstr "首个使用提案人"
+
+#: .\static\FCM\JS\view.js:5691
+msgid "Add tile to city"
+msgstr "可以向城市增加1个地图板块"
+
+#: .\static\FCM\JS\view.js:5695
+msgid "Waitress"
+msgstr "服务员"
+
+#: .\static\FCM\JS\view.js:5695
+msgid "Get $3 cash. Win ties against restaurant with fewer waitresses"
+msgstr "获得$3收入。若选择快餐店时出现平局，则服务员多的一方获胜"
+
+#: .\static\FCM\JS\view.js:5696
+msgid "New Business Developer"
+msgstr "新业务拓展经理"
+
+#: .\static\FCM\JS\view.js:5696
+msgid "Place house or garden"
+msgstr "放置房屋或花园"
+
+#: .\static\FCM\JS\view.js:5697
+msgid "Local Manager"
+msgstr "区域经理"
+
+#: .\static\FCM\JS\view.js:5697
+msgid "Place new restaurant, \"COMING SOON\". Drive-in available"
+msgstr "放置新的快餐店，即将开业。可使用免下车服务"
+
+#: .\static\FCM\JS\view.js:5698
+msgid "Regional Manager"
+msgstr "大区经理"
+
+#: .\static\FCM\JS\view.js:5698
+msgid "Place or move restaurant, opens immediately. Drive-in available"
+msgstr "放置或移动餐厅，立即开业。可使用免下车服务"
+
+#: .\static\FCM\JS\view.js:5699
+msgid "CFO"
+msgstr "首席财务官"
+
+#: .\static\FCM\JS\view.js:5699
+msgid "Add +50% to cash earned this round"
+msgstr "本回合收入增加50%"
+
+#: .\static\FCM\JS\view.js:5700
+msgid "Management Trainee"
+msgstr "管理培训生"
+
+#: .\static\FCM\JS\view.js:5700
+msgid "2 slots"
+msgstr "2 格"
+
+#: .\static\FCM\JS\view.js:5701
+msgid "Junior Vice President"
+msgstr "总经理助理"
+
+#: .\static\FCM\JS\view.js:5701
+msgid "3 slots"
+msgstr "3 格"
+
+#: .\static\FCM\JS\view.js:5702
+msgid "Vice President"
+msgstr "副总裁"
+
+#: .\static\FCM\JS\view.js:5702
+msgid "4 slots"
+msgstr "4 格"
+
+#: .\static\FCM\JS\view.js:5703
+msgid "Senior Vice President"
+msgstr "高级副总裁"
+
+#: .\static\FCM\JS\view.js:5703
+msgid "5 slots"
+msgstr "5 格"
+
+#: .\static\FCM\JS\view.js:5704
+msgid "Executive Vice President"
+msgstr "执行副总裁"
+
+#: .\static\FCM\JS\view.js:5704
+msgid "10 slots"
+msgstr "10 格"
+
+#: .\static\FCM\JS\view.js:5705
+msgid "Pricing Manager"
+msgstr "定价经理"
+
+#: .\static\FCM\JS\view.js:5706
+msgid "Luxuries Manager"
+msgstr "奢侈品经理"
+
+#: .\static\FCM\JS\view.js:5706
+msgid "Price +$10"
+msgstr "售价 +$10"
+
+#: .\static\FCM\JS\view.js:5707
+msgid "Discount Manager"
+msgstr "折扣经理"
+
+#: .\static\FCM\JS\view.js:5707
+msgid "Price -$3"
+msgstr "售价 -$3"
+
+#: .\static\FCM\JS\view.js:5708
+msgid "Recruiting Girl"
+msgstr "人力资源专员"
+
+#: .\static\FCM\JS\view.js:5708
+msgid "Hire 1 person"
+msgstr "雇佣1名员工"
+
+#: .\static\FCM\JS\view.js:5709
+msgid "Recruiting Manager"
+msgstr "人力资源经理"
+
+#: .\static\FCM\JS\view.js:5709
+msgid "2x Hire 1 person or $5 less salary"
+msgstr "2x：雇用1名员工或少支付$5薪水"
+
+#: .\static\FCM\JS\view.js:5710
+msgid "HR Director"
+msgstr "人力资源总监"
+
+#: .\static\FCM\JS\view.js:5710
+msgid "4x Hire 1 person or $5 less salary"
+msgstr "4x：雇用1名员工或少支付$5薪水"
+
+#: .\static\FCM\JS\view.js:5711
+msgid "Trainer"
+msgstr "培训讲师"
+
+#: .\static\FCM\JS\view.js:5711
+msgid "Train 1 person"
+msgstr "培训1名员工"
+
+#: .\static\FCM\JS\view.js:5712
+msgid "Coach"
+msgstr "培训指导员"
+
+#: .\static\FCM\JS\view.js:5712
+msgid "2 training slots. May train the same person two steps"
+msgstr "2个培训次数，可培训同一员工至多2个级别"
+
+#: .\static\FCM\JS\view.js:5713
+msgid "Guru"
+msgstr "培训专家"
+
+#: .\static\FCM\JS\view.js:5713
+msgid "3 training slots. May train the same person up to three steps"
+msgstr "3个培训次数，可培训同一员工至多3个级别"
+
+#: .\static\FCM\JS\view.js:5714
+msgid "Errand Boy"
+msgstr "跑腿伙计"
+
+#: .\static\FCM\JS\view.js:5714
+msgid "Get 1 drink of any type"
+msgstr "获得 1 瓶任意类型的饮料"
+
+#: .\static\FCM\JS\view.js:5715
+msgid "Cart Operator"
+msgstr "手推车操作员"
+
+#: .\static\FCM\JS\view.js:5715
+msgid "Get 2 drinks from each source on route"
+msgstr "从路上的每个来源处获得 2 瓶饮料"
+
+#: .\static\FCM\JS\view.js:5716
+msgid "Truck Driver"
+msgstr "货车驾驶员"
+
+#: .\static\FCM\JS\view.js:5716
+msgid "Get 3 drinks from each source on route"
+msgstr "从路上的每个来源处获得 3 瓶饮料"
+
+#: .\static\FCM\JS\view.js:5717
+msgid "Zeppelin Pilot"
+msgstr "飞艇驾驶员"
+
+#: .\static\FCM\JS\view.js:5717
+msgid "Get 2 drinks from each source on route, ignore roads"
+msgstr "从路上的每个来源处获得 2 瓶饮料，无视道路"
+
+#: .\static\FCM\JS\view.js:5718
+msgid "Marketing Trainee"
+msgstr "营销实习生"
+
+#: .\static\FCM\JS\view.js:5718
+msgid "Place billboard, max duration 2"
+msgstr "放置广告牌，最大持续时长为 2 回合"
+
+#: .\static\FCM\JS\view.js:5719
+msgid "Campaign Manager"
+msgstr "营销经理"
+
+#: .\static\FCM\JS\view.js:5719
+msgid "Place mailbox or lower, max duration 3"
+msgstr "放置邮箱或更低级的营销板块，最大持续时长 3 回合"
+
+#: .\static\FCM\JS\view.js:5720
+msgid "Brand Manager"
+msgstr "品牌经理"
+
+#: .\static\FCM\JS\view.js:5720
+msgid "Place airplane or lower, max duration 4"
+msgstr "放置飞机或更低级的营销板块，最大持续时长 4 回合"
+
+#: .\static\FCM\JS\view.js:5721
+msgid "Brand Director"
+msgstr "品牌总监"
+
+#: .\static\FCM\JS\view.js:5721
+msgid "Place radio or lower, max duration 5"
+msgstr "放置广播或更低级的营销板块，最大持续时长 5 回合"
+
+#: .\static\FCM\JS\view.js:5722
+msgid "Kitchen Trainee"
+msgstr "见习厨师"
+
+#: .\static\FCM\JS\view.js:5722
+msgid "Produce 1 burger or 1 pizza"
+msgstr "制作1个汉堡或1个披萨"
+
+#: .\static\FCM\JS\view.js:5723
+msgid "Burger Cook"
+msgstr "汉堡厨师"
+
+#: .\static\FCM\JS\view.js:5723
+msgid "Produce 3 burgers"
+msgstr "制作3个汉堡"
+
+#: .\static\FCM\JS\view.js:5724
+msgid "Burger Chef"
+msgstr "汉堡主厨"
+
+#: .\static\FCM\JS\view.js:5724
+msgid "Produce 8 burgers"
+msgstr "制作8个汉堡"
+
+#: .\static\FCM\JS\view.js:5725
+msgid "Pizza Cook"
+msgstr "披萨厨师"
+
+#: .\static\FCM\JS\view.js:5725
+msgid "Produce 3 pizzas"
+msgstr "制作3个披萨"
+
+#: .\static\FCM\JS\view.js:5726
+msgid "Pizza Chef"
+msgstr "比萨主厨"
+
+#: .\static\FCM\JS\view.js:5726
+msgid "Produce 8 pizzas"
+msgstr "制作8个披萨"
+
+#: .\static\FCM\JS\view.js:5727
+msgid "Bonus: +$10 per sale"
+msgstr "奖励：卖出每单+$10"
+
+#: .\static\FCM\JS\view.js:5728
+msgid "Kimchi Master"
+msgstr "泡菜大师"
+
+#: .\static\FCM\JS\view.js:5728
+msgid "Produce 1 kimchi at end of cleanup phase"
+msgstr "在清理阶段结束时制作 1 份泡菜"
+
+#: .\static\FCM\JS\view.js:5729
+msgid "Noodle Cook"
+msgstr "面条厨师"
+
+#: .\static\FCM\JS\view.js:5729
+msgid "Produce 6 noodles"
+msgstr "制作6个面条"
+
+#: .\static\FCM\JS\view.js:5730
+msgid "Noodle Chef"
+msgstr "面条主厨"
+
+#: .\static\FCM\JS\view.js:5730
+msgid "Produce 16 noodles"
+msgstr "制作16个面条"
+
+#: .\static\FCM\JS\view.js:5731
+msgid "Sushi Cook"
+msgstr "寿司厨师"
+
+#: .\static\FCM\JS\view.js:5731
+msgid "Produce 2 sushi"
+msgstr "制作2个寿司"
+
+#: .\static\FCM\JS\view.js:5732
+msgid "Sushi Chef"
+msgstr "寿司主厨"
+
+#: .\static\FCM\JS\view.js:5732
+msgid "Produce 5 sushi"
+msgstr "制作5个寿司"
+
+#: .\static\FCM\JS\view.js:5733
+msgid "Barista Trainee"
+msgstr "见习咖啡师"
+
+#: .\static\FCM\JS\view.js:5733
+msgid "Produce 1 coffee"
+msgstr "制作1杯咖啡"
+
+#: .\static\FCM\JS\view.js:5734
+msgid "Barista"
+msgstr "咖啡师"
+
+#: .\static\FCM\JS\view.js:5734
+msgid "Produce 2 coffee"
+msgstr "制作2杯咖啡"
+
+#: .\static\FCM\JS\view.js:5735
+msgid "Lead Barista"
+msgstr "首席咖啡师"
+
+#: .\static\FCM\JS\view.js:5735
+msgid "Produce 5 coffee"
+msgstr "制作5杯咖啡"
+
+#: .\static\FCM\JS\view.js:5736
+msgid "B-Movie Star"
+msgstr "B-电影明星"
+
+#: .\static\FCM\JS\view.js:5736
+msgid "Win all ties; first choice in turn order"
+msgstr "赢得所有平局; 优先挑选回合顺序"
+
+#: .\static\FCM\JS\view.js:5737
+msgid "C-Movie Star"
+msgstr "C-电影明星"
+
+#: .\static\FCM\JS\view.js:5737
+msgid "Win all ties; first choice in turn order (unless B at work)"
+msgstr "赢得所有平局; 优先挑选回合顺序（在B-电影明星工作之后）"
+
+#: .\static\FCM\JS\view.js:5738
+msgid "D-Movie Star"
+msgstr "D-电影明星"
+
+#: .\static\FCM\JS\view.js:5738
+msgid "Win all ties; first choice in turn order (unless B or C at work)"
+msgstr "赢得所有平局; 优先挑选回合顺序（在B和C电影明星工作之后）"
+
+#: .\static\FCM\JS\view.js:5739
+msgid "Gourmet Food Critic"
+msgstr "美食评论家"
+
+#: .\static\FCM\JS\view.js:5739
+msgid "Market to all houses with a garden. Max duration 3"
+msgstr "向所有带花园的房屋进行推销，最大持续时长为3回合"
+
+#: .\static\FCM\JS\view.js:5740
+msgid "Lobbyist"
+msgstr "提案人"
+
+#: .\static\FCM\JS\view.js:5740
+msgid "Place 1 road or park"
+msgstr "放置1条道路或1个公园"
+
+#: .\static\FCM\JS\view.js:5741
+msgid "Mass Marketeer"
+msgstr "大众推销员"
+
+#: .\static\FCM\JS\view.js:5741
+msgid ""
+"Play an extra marketing phase this turn. Do not remove an extra duration "
+"token"
+msgstr "本回合额外进行一次营销阶段。不用额外移除持续时长标记"
+
+#: .\static\FCM\JS\view.js:5742
+msgid "All employees who don't require a salary work twice"
+msgstr "你所有无需支付薪水的员工全都工作两次"
+
+#: .\static\FCM\JS\view.js:5743
+msgid "Rural Marketeer"
+msgstr "乡村推销员"
+
+#: .\static\FCM\JS\view.js:5743
+msgid "Place a giant billboard next to the rural area tile"
+msgstr "在乡村地区板块旁放置一个巨型广告牌"
+
+#: .\static\FCM\JS\view.js:5748 .\static\FCM\JS\view.js:5749
+msgid "Setup - Restaurants"
+msgstr "设置 - 餐厅"
+
+#: .\static\FCM\JS\view.js:5750
+msgid "Setup - Reserve Cards"
+msgstr "设置 - 储备卡"
+
+#: .\static\FCM\JS\view.js:5751
+msgid "1 - Restructuring"
+msgstr "1 - 重组结构"
+
+#: .\static\FCM\JS\view.js:5752
+msgid "2 - Order of Business"
+msgstr "2 - 商业秩序"
+
+#: .\static\FCM\JS\view.js:5753
+msgid "3 - Working 9:00-5:00"
+msgstr "3 - 工作时间 9:00-5:00"
+
+#: .\static\FCM\JS\view.js:5754
+msgid "4 - Dinnertime"
+msgstr "4 - 晚餐时间"
+
+#: .\static\FCM\JS\view.js:5755
+msgid "5 - Payday"
+msgstr "5 - 发放薪水"
+
+#: .\static\FCM\JS\view.js:5756
+msgid "6 - Marketing Campaigns"
+msgstr "6 - 营销活动"
+
+#: .\static\FCM\JS\view.js:5757
+msgid "7 - Clean up"
+msgstr "7 - 清理现场"
+
+#: .\static\FCM\JS\view.js:5758
+msgid "Game End"
+msgstr "游戏结束"
+
+#: .\static\FCM\JS\view.js:5759
+msgid "4 - Pizza Milestone"
+msgstr "4 - 披萨里程碑"
+
+#: .\static\FCM\JS\view.js:5760
+msgid "7 - Coffee Selling Milestone"
+msgstr "7 - 咖啡里程碑"
+
+#: .\static\FCM\JS\websocket.js:32
+msgid "Connected"
+msgstr "已连接"
+
+#: .\static\FCM\JS\websocket.js:36 .\static\FCM\JS\websocket.js:46
+msgid "Disconnected"
+msgstr "断开连接"
+
+#: .\static\FCM\JS\websocket.js:40
+msgid "Error"
+msgstr "错误"
+
+#~ msgid ""
+#~ "Choose the first item to advertise, or choose to only advertise a single "
+#~ "item"
+#~ msgstr "选择首个营销的物品，或选择只营销单个物品"
+
+#~ msgid "Choose an item to advertise"
+#~ msgstr "选择要营销的物品"
+
+#~ msgid "Only Market One Item"
+#~ msgstr "只营销一个物品"
+
+#~ msgid "Choose the duration"
+#~ msgstr "选择时长"
+
+#~ msgid "Infinite duration"
+#~ msgstr "无限期"
+
+#~ msgid "Choose a direction"
+#~ msgstr "选择一个方向"
+
+#~ msgid ""
+#~ "NOTE: The NSM will be attached to your first campaign as they must have "
+#~ "the shorter duration"
+#~ msgstr ""
+#~ "注意：夜班经理将附加到您的首个营销活动中，因此他们必须拥有较短的持续时间"
+
+#~ msgid "Top / bottom of map"
+#~ msgstr "地图的顶部/底部"
+
+#~ msgid "Left / Right of map"
+#~ msgstr "地图的左边/右边"
+
+#~ msgid "Don't place a ramp"
+#~ msgstr "不放置匝道"
+
+#~ msgid "You can build a new road or park"
+#~ msgstr "您可以建造一个新的道路或公园"
+
+#~ msgid "Select a park shape"
+#~ msgstr "选择公园形状"
+
+#~ msgid "Choose your restaurant direction"
+#~ msgstr "选择您的餐厅方向"
+
+#~ msgid "Remember: you are using the <B>New Milestones"
+#~ msgstr "记住：您正在使用<B>新里程碑"
+
+#~ msgid "End of the Game"
+#~ msgstr "游戏结束"

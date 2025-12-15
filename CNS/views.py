@@ -25,14 +25,15 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .models import CNS_Game
 from Lobby.models import User  # , Profile
-#from FCM.models import FCM_Game
-#from HC.models import HC_Game
-#from Bus.models import Bus_Game
-#from TGZ.models import TGZ_Game
-#from AQY.models import AQY_Game
-#from IND.models import IND_Game
-#from KFW.models import KFW_Game
-#from WEB.models import WEB_Game
+from FCM.models import FCM_Game
+from HC.models import HC_Game
+from Bus.models import Bus_Game
+from TGZ.models import TGZ_Game
+from AQY.models import AQY_Game
+from IND.models import IND_Game
+from KFW.models import KFW_Game
+from WEB.models import WEB_Game
+from RNB.models import RNB_Game
 
 # Create your views here.
 def index(request):
@@ -116,7 +117,7 @@ def createCNSgame(request):
                     display_name = f"{shadow_names[i-1]}"
                 shadow_players.append(display_name)
 
-            #newGame.rewindConsent = "2" * (_maxPlayers - 1)
+            newGame.rewindConsent = "2" * (_maxPlayers - 1)
             newGame.player0notes = json.dumps(shadow_players)
             newGame.startGame(request)
         else:
@@ -200,9 +201,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     latestUpdate = currentGame.latestUpdate
 
     ## Get the next URL
-    game_models = [#FCM_Game, HC_Game, Bus_Game, TGZ_Game, 
-                   CNS_Game]
-                   #, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
+    game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
     currentGamesList = list(
         chain(
             *[
