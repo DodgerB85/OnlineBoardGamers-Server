@@ -233,7 +233,7 @@ function getFlexiKickoutTImerText() {
 		<template v-if="personal.canPlay()">
 			<!-- TURN 1 INFO -->
 			<template v-if="store.gameflow.turn === 1 && !store.topMenuViews.showReplay">
-				<h2>Welcome to Cannes</h2>
+				<h2>Welcome to Cannes!</h2>
 				<b>
 					NOTE: To see the entire play area, including any table / table junk,
 					<br />

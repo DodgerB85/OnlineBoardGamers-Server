@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from itertools import chain
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.conf import settings
 
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render  # , redirect
@@ -527,6 +528,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         "replayStep": replayStep,
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "latestUpdateLiteral": currentGame.latestUpdate,
+        "settingsDEBUG": settings.DEBUG,
     }
 
     if not request.user.is_authenticated:
