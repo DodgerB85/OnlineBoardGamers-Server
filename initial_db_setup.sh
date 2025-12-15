@@ -1,43 +1,49 @@
 #!/bin/bash
 
-LOCK_FILE="/app/.setup_complete"
-
-# Check if setup has already run
-if [ -f "$LOCK_FILE" ]; then
-    echo "Setup already completed. Starting server immediately."
-    exec python manage.py runserver 0.0.0.0:8000
-fi
-
-# --- If lock file is NOT present, run the setup commands ---
-
-# Wait for DB to be ready
-until python manage.py dbshell <<EOF
+# Define a function to wait for the database
+wait_for_db() {
+  until python manage.py dbshell <<EOF
 exit
 EOF
-do
-  echo "Waiting for database connection..."
-  sleep 2
-done
-echo "Database ready."
+  do
+    echo "Waiting for database connection..."
+    sleep 2
+  done
+  echo "Database ready."
+}
 
-# --- 2. Run Migrations (removed --noinput) ---
-echo "Running migrations..."
+# --- Main Logic ---
+wait_for_db
+
+# Try to sync the auth content types table (a prerequisite for counting users)
+python manage.py makemigrations
 python manage.py migrate
 
-# --- 3. Create Superuser (this should work now that DB is fully ready) ---
-echo "Creating superuser (if it doesn't exist)..."
-python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
+# Get the raw user count using a robust Python one-liner
+USER_COUNT=$(python manage.py shell --command="from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.count());" | tail -n 1)
+echo "Current user count: $USER_COUNT"
 
-# --- 4. Load default users ---
-echo "Adding default users via data migration..."
-# Ensure you have your initial_users.json file created correctly
-python manage.py loaddata initial_users.json
+# Check if the count is greater than 10
+if [ "$USER_COUNT" -gt 10 ]; then
+    echo "More than 10 users already exist. Skipping initial setup."
+else
+    echo "Fewer than 10 users found. Running initial setup (migrations, users, etc)..."
+    
+    # Run Full Migrations (Fix 3 must be applied locally first)
+    echo "Running migrations..."
+    python manage.py migrate --no-input
 
-#echo "Setup complete. Starting server..."
-# Now start the main application server
-#python manage.py runserver 0.0.0.0:8000
+    # Create Superuser (non-interactive, using env variables)
+    echo "Creating superuser (if it doesn't exist)..."
+    python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
 
-# --- Create the lock file and start the server ---
-touch "$LOCK_FILE"
-echo "Setup complete. Starting server..."
+    # Load default users
+    # echo "Adding default users via data migration..."
+    # python manage.py loaddata initial_users.json
+
+    echo "Initial setup commands complete."
+fi
+
+# --- Start the main server process regardless of setup outcome ---
+echo "Setup checks complete. Starting server..."
 exec python manage.py runserver 0.0.0.0:8000

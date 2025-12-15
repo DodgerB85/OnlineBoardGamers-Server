@@ -9,8 +9,8 @@ import base64
 import gzip
 from dal import autocomplete
 
-from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+#from telegram import Update
+#from telegram.ext import Application, CommandHandler, ContextTypes
 import asyncio
 from decouple import config
 
@@ -134,23 +134,23 @@ logger = logging.getLogger(__name__)
 
 
 # /start command handler
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logger.debug("Received /start command")
-    if update.message:
-        await update.message.reply_text("Hello! Welcome to OnlineBoardGamers bot. Type /help for more info.")
-    else:
-        logger.warning("No message in /start update")
-
-
-# /help command handler
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logger.debug("Received /help command")
-    if update.message:
-        await update.message.reply_text(
-            "This is the help message for OnlineBoardGamers! Visit https://OnlineBoardGamers.com for more."
-        )
-    else:
-        logger.warning("No message in /help update")
+#async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#    logger.debug("Received /start command")
+#    if update.message:
+#        await update.message.reply_text("Hello! Welcome to OnlineBoardGamers bot. Type /help for more info.")
+#    else:
+#        logger.warning("No message in /start update")
+#
+#
+## /help command handler
+#async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#    logger.debug("Received /help command")
+#    if update.message:
+#        await update.message.reply_text(
+#            "This is the help message for OnlineBoardGamers! Visit https://OnlineBoardGamers.com for more."
+#        )
+#    else:
+#        logger.warning("No message in /help update")
 
 
 # Add handlers
