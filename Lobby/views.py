@@ -1033,7 +1033,7 @@ def index(request):
             "allPlayers", 
             "missingPlayers", 
             "invitedPlayers"
-        )
+        ).distinct()
         all_user_games.extend(list(base_query))
 
     all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
@@ -1079,6 +1079,7 @@ def index(request):
                     current_chat = True
             elif game.gameStatus in ["WAITING", "AVAILABLE", "PRIVATE"]:
                 waiting_games.append(serialized)
+                print("ADDING INVITATION GAME:", serialized["game"], serialized["gameID"])
             elif game.gameStatus == "FINISHED" and len(finished_games) < 10:
                 finished_games.append(serialized)
                 if serialized.get("chatNotification", False):
@@ -1089,6 +1090,7 @@ def index(request):
 
         elif not is_involved and is_invited and game.gameStatus in ["WAITING", "PRIVATE"]:
             invitations_games.append(serialized)
+            
 
     if show_timestamps:
         elapsed_serialization = time.time() - serialization_start_time
