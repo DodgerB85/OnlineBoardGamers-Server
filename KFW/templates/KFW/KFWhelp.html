@@ -1,0 +1,408 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="KFWhelpPage">
+      <h1>{% translate "Rules" %}</h1>
+      {% blocktranslate %}
+        Keyflower Rules Available <a class='linkOther' href='https://fgbradleys.com/wp-content/uploads/rules/Keyflower%20-%20rules.pdf?srsltid=AfmBOop3dONhZoXgiTeHUqHDAex0gC7guoM19D3yA91RXA1Txe2VfQbf' target='_blank' downlod>here</a>
+        <br />
+        Keyflower the Merchants Rules Available <a class='linkOther' href='https://store.pakufuda.com/wp-content/uploads/2022/08/Keyflower_Merchants_Pravyla-anhliyskoiu.pdf?srsltid=AfmBOoqdQ5gNb_S1UiibHd5OppCC1BSVMJCRFmvAgvX9vIQYOEcldCZX' target='_blank' downlod>here</a>
+        <br />
+        Promo Tile Rules Available <a class='linkOther' href='https://boardgamegeek.com/boardgame/122515/keyflower/expansions' target='_blank' downlod>here</a>
+        {% endblocktranslate %}
+      <h1>{% translate "Keyflower Help" %}</h1>
+      <h3>
+        <b><u>{% translate "Playing the Game" %}</u></b>
+      </h3>
+      <div class="maxWidthContainerDiv">
+        <div class="leftTextAlignDiv">
+          <div class="imageWithTextDiv">
+            <img src="{% static 'KFW/images/icon-box.svg' %}"
+                 alt="Reserve"
+                 width="50"
+                 height="50"
+                 class="topMenuIconForHelp imageWithTextIconImg">
+            {% blocktranslate trimmed %}
+              You can view unused / possible upcoming season tiles in the Reserve.
+              <br />
+              You can also view each players remaining flex time.
+            {% endblocktranslate %}
+          </div>
+          <div class="imageWithTextDiv">
+            <img src="{% static 'KFW/images/icon-rewind.svg' %}"
+                 alt="Reserve"
+                 width="50"
+                 height="50"
+                 class="topMenuIconForHelp imageWithTextIconImg">
+            {% blocktranslate trimmed %}
+              Any player can rewind the game at any time.
+              <br />
+              If rewinding the game would "undo" revealing any hidden information, you will be informed
+              before you rewind, and if you continue to rewind it will be recoded in the History.
+            {% endblocktranslate %}
+          </div>
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWmeepleHighlight.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <p>
+              {% blocktranslate trimmed %}
+                At the start of your turn, any workers used for bidding/actions since your last turn will have a highlight
+                so you can easily see what moves other players have made.
+              {% endblocktranslate %}
+            </p>
+          </div>
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWvillageExpansion.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <p>
+              {% blocktranslate trimmed %}
+                During village expansion, edges with roads on will have an additional icon so you can clearly
+                see where the roads are in your village.
+                If you place a tile that could interfere with a chain of boats coming from your home tile,
+                the tile will display a Caution icon.
+              {% endblocktranslate %}
+            </p>
+          </div>
+        </div>
+      </div>
+      <h3>
+        <b><u>{% translate "Hidden Information" %}</u></b>
+      </h3>
+      <div class="maxWidthContainerDiv">
+        <div class="leftTextAlignDiv">
+          {% blocktranslate trimmed %}
+            During a game of Keyflower, players will have a number of hidden workers and skill tiles.
+            The exact type of these items could be known at some point, eg if a player receives a green worker,
+            or when a player collects resources from a boat.
+            In a practice game, you play as all players, so there is no hidden information - all players'
+            items are always displayed.
+            In a normal game, there are 3 options for displaying this hidden information,
+            chosen when the game was created.
+          {% endblocktranslate %}
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWinfoHigh.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <p>
+              {% blocktranslate trimmed %}
+                <b><u>High Knowledge Level:</u></b>You will be shown the most detailed information that you could
+                get from analysing the history.
+                For example, you know each player starts with 8 hidden workers.
+                Later, if a player received 3 blue workers from a boat, and then bids with 2 blue workers,
+                you would know that they have at least 1 more blue worker available to use
+                (plus any blue workers from their "hidden" collection).<br/>
+                With "High-" any "Known" workers just before a boat is picked will be moved to "Unknown" workers
+              {% endblocktranslate %}
+            </p>
+          </div>
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWinfoMed.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <p>
+              {% blocktranslate trimmed %}
+                <b><u>Medium Knowledge Level:</u></b>This uses a more “gut feeling” approach.
+                You won't be told how many hidden items a player has.
+                When you do know for certain that a player has received certain items, eg 1 blue 2 red and 3 yellow workers from a boat,
+                then this information will be displayed by showing the relative amount of each colour that you know a player has.
+                So the yellow worker will be filled in the most, red about half, and blue the least.<br/>
+                With "Medium+" the white worker will show the total workers a player has (instead of "?")
+              {% endblocktranslate %}
+            </p>
+          </div>
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWinfoLow.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <div>
+              {% blocktranslate trimmed %}
+                <b><u>Low Knowledge Level:</u></b>This provides you with the least information - you will need to rely on gut and intuition.
+                During the game, the history will only be displayed up to your last 2 turns.
+                You will not be given any information by the game as to how many of each item other players may have.
+              {% endblocktranslate %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3>
+        <b><u>{% translate "Gameplay by Phase" %}</u></b>
+      </h3>
+      <div class="maxWidthContainerDiv">
+        <div class="leftTextAlignDiv">
+          {% blocktranslate trimmed %}
+            <b>Bidding & Actions:</b> You can add workers directly from your supply, or from a tile where you are outbid.
+            Alternatively, you can use the popup which will show you all possible workers you could pick - either from your supply,
+            or where you are outbid.
+            If a tile action would result in you revealing some hidden information, then this action will be carried out after you have ended your turn. The result will be displayed on screen, and visible to (only) you in History.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Boat Resource Collection:</b> After you have collected your boat resources,
+            you may immediately move on to expanding your village, if you have tiles to add.
+            This allows you to build your village without having to wait for all the other players
+            to choose a boat - which generally would have no effect on your village expansion anyway.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Village Expansion:</b>
+            Village Expansion is played simultaneously. You can rotate a tile before placing it, click on it to place
+            it anywhere in your village (even if it would currently be illegal), and then continue to rotate it in place.
+            Click any placed village tile it pick it up again.
+            <br />
+            You cannot end your turn until you have made a legal village.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Winter Boat Collection:</b> This phase is played simultaneously by all players.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Final Scoring:</b> Final scoring is played simultaneously.
+            During final scoring, any resources that are scoring “on the tile” will be left in place,
+            and the rest gathered on your home tile to allocate as you wish.
+            You can always click a resource that has been left on a different tile to move it to your
+            home tile and allocate it to score elsewhere.
+          {% endblocktranslate %}
+        </div>
+      </div>
+      <h3>
+        <b><u>{% translate "Included Promo Tiles" %}</u></b>
+      </h3>
+      <!-- SPRING -->
+      <div class="hexHelpDiv">
+        Storyteller
+        <svg class="hexHelpSVG"
+             viewBox="-420 -348 840 696"
+             xmlns="http://www.w3.org/2000/svg">
+          <defs><pattern id="t_p_spring_1a.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+          <image height="1"
+                 width="1"
+                 preserveAspectRatio="none"
+                 xlink:href="{% static 'KFW/images/tiles/t_p_spring_1a.jpg' %}">
+        </image>
+        </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_spring_1a.jpg)"></polygon>
+      </svg>
+    </div>
+    <!-- SUMMER -->
+    <div class="hexHelpDiv">
+      Jeweller
+      <svg class="hexHelpSVG"
+           viewBox="-420 -348 840 696"
+           xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="t_p_summer_1a.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+        <image height="1"
+               width="1"
+               preserveAspectRatio="none"
+               xlink:href="{% static 'KFW/images/tiles/t_p_summer_1a.jpg' %}">
+      </image>
+      </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_summer_1a.jpg)"></polygon>
+    </svg>
+  </div>
+  <div class="hexHelpDiv">
+    Sorcerer
+    <svg class="hexHelpSVG"
+         viewBox="-420 -348 840 696"
+         xmlns="http://www.w3.org/2000/svg">
+      <defs><pattern id="t_p_summer_2a.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+      <image height="1"
+             width="1"
+             preserveAspectRatio="none"
+             xlink:href="{% static 'KFW/images/tiles/t_p_summer_2a.jpg' %}">
+    </image>
+    </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_summer_2a.jpg)"></polygon>
+  </svg>
+</div>
+<div class="hexHelpDiv">
+  Developer
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_summer_3a.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_summer_3a.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_summer_3a.jpg)"></polygon>
+</svg>
+</div>
+<div class="hexHelpDiv">
+  Boat 7a
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_summer_4a.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_summer_4a.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_summer_4a.jpg)"></polygon>
+</svg>
+</div>
+<div class="hexHelpDiv">
+  Boat 7b
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_summer_4b.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_summer_4b.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_summer_4b.jpg)"></polygon>
+</svg>
+</div>
+<!-- AUTUMN -->
+<div class="hexHelpDiv">
+  Talton Lodge
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_autumn_1a.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_autumn_1a.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_autumn_1a.jpg)"></polygon>
+</svg>
+</div>
+<!-- WINTER -->
+<div class="hexHelpDiv">
+  Emporium<br/>
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_winter_1.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_winter_1.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_winter_1.jpg)"></polygon>
+</svg>
+</div>
+<div class="hexHelpDiv">
+  Monument
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_winter_2.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_winter_2.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_winter_2.jpg)"></polygon>
+</svg>
+</div>
+<div class="hexHelpDiv">
+  Beekeeper
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_winter_3.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_winter_3.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_winter_3.jpg)"></polygon>
+</svg>
+</div>
+<div class="hexHelpDiv">
+  Glade
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_winter_4.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_winter_4.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_winter_4.jpg)"></polygon>
+</svg>
+</div>
+<div class="hexHelpDiv">
+  Glade in Winter
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_winter_5.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_winter_5.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_winter_5.jpg)"></polygon>
+</svg>
+</div>
+<div class="hexHelpDiv">
+  Keyside
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_winter_7.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_winter_7.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_winter_7.jpg)"></polygon>
+</svg>
+</div>
+<div class="hexHelpDiv">
+  Delivery Man
+  <svg class="hexHelpSVG"
+       viewBox="-420 -348 840 696"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="t_p_winter_6.jpg" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+    <image height="1"
+           width="1"
+           preserveAspectRatio="none"
+           xlink:href="{% static 'KFW/images/tiles/t_p_winter_6.jpg' %}">
+  </image>
+  </pattern></defs><polygon class="hexHelpPolygon" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" fill="url(#t_p_winter_6.jpg)"></polygon>
+</svg>
+</div>
+<div class="maxWidthContainerDiv">
+  <div class="leftTextAlignDiv"></div>
+</div>
+{% translate "For further help contact" %}
+<img id="contactEmailImg"
+     src="{% static 'Lobby/email.png' %}"
+     alt="Email Address"
+     width="400"
+     height="30">
+</div>
+{% include 'Lobby/common/homeButton.html' %}
+</div>
+{% endblock %}

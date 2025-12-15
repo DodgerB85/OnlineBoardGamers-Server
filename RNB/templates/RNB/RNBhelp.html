@@ -1,0 +1,308 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="RNBhelpPage">
+      <h1>{% translate "Rules" %}</h1>
+      {% blocktranslate %}
+        Roads & Boats Rules Available <a class='linkOther' href='https://www.splotter.nl/downloads/RB3Erules.pdf' target='_blank' download>here</a>
+        <br />
+        &c Rules Available <a class="linkOther" href="/static/RNB/help/&C_Rules.pdf" target="_blank" download>here</a>
+        <br />
+        Player Aid Available <a class='linkOther' href='/static/RNB/help/RnB_Player_AId.jpg' target='_blank' downlod>here</a>
+        {% endblocktranslate %}
+      <h1>{% translate "Roads & Boats Help" %}</h1>
+      <h3>
+        <b><u>{% translate "Playing the Game" %}</u></b>
+      </h3>
+      {% blocktranslate trimmed %}
+        Roads & Boats has a lot of complex interactions with the goods and transporters.
+        For example, you may wish to pick up a good and ferry it, in order to drop it on one side of a river or another.
+        If your raft is full, but you wanted to ferry a good to the other side of the river,
+        then you could deposit a good, pick up the good you wish to ferry, drop it, and then pick up the original good.
+        To remove the need for lots of pointless and tedious interactions, certain shortcuts have been added to smoothen the user experience.
+        In the example above, the game will allow you to select the resource you wish to ferry,
+        and immediately drop it on the other side of the river, even if the raft is full.
+        Such shortcuts are given in each of the phase sections below.
+      {% endblocktranslate %}
+      <!--<div class="maxWidthContainerDiv">
+        <div class="leftTextAlignDiv">
+          <div class="imageWithTextDiv">
+            <img src="{% static 'KFW/images/icon-box.svg' %}" alt="Reserve" width="50" height="50" class="topMenuIconForHelp imageWithTextIconImg">
+            {% blocktranslate trimmed %}
+              Temp
+            {% endblocktranslate %}
+                                  </div>
+                                  <div class="imageWithTextDiv">
+                                    <img src="{% static 'KFW/images/icon-rewind.svg' %}"
+                                         alt="Reserve"
+                                         width="50"
+                                         height="50"
+                                         class="topMenuIconForHelp imageWithTextIconImg">
+                                    {% blocktranslate trimmed %}
+                                      Any player can rewind the game at any time.
+                                      <br />
+                                      If rewinding the game would "undo" revealing any hidden information, you will be informed
+                                      before you rewind, and if you continue to rewind it will be recoded in the History.
+                                    {% endblocktranslate %}
+                      </div>
+                      <div class="imageWithTextDiv">
+                        <img src="{% static 'Lobby/Images/help/KFWmeepleHighlight.jpg' %}"
+                             alt="Info High"
+                             width="150"
+                             height="228">
+                        <p>
+                          {% blocktranslate trimmed %}
+                            At the start of your turn, any workers used for bidding/actions since your last turn will have a highlight
+                            so you can easily see what moves other players have made.
+                          {% endblocktranslate %}
+            </p>
+          </div>
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWvillageExpansion.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <p>
+              {% blocktranslate trimmed %}
+                During village expansion, edges with roads on will have an additional icon so you can clearly
+                see where the roads are in your village.
+                If you place a tile that could interfere with a chain of boats coming from your home tile,
+                the tile will display a Caution icon.
+              {% endblocktranslate %}
+            </p>
+          </div>
+        </div>
+      </div>
+      <h3>
+        <b><u>{% translate "Hidden Information" %}</u></b>
+      </h3>
+      <div class="maxWidthContainerDiv">
+        <div class="leftTextAlignDiv">
+          {% blocktranslate trimmed %}
+            During a game of Keyflower, players will have a number of hidden workers and skill tiles.
+            The exact type of these items could be known at some point, eg if a player receives a green worker,
+            or when a player collects resources from a boat.
+            In a practice game, you play as all players, so there is no hidden information - all players'
+            items are always displayed.
+            In a normal game, there are 3 options for displaying this hidden information,
+            chosen when the game was created.
+          {% endblocktranslate %}
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWinfoHigh.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <p>
+              {% blocktranslate trimmed %}
+                <b><u>High Knowledge Level:</u></b>You will be shown the most detailed information that you could
+                get from analysing the history.
+                For example, you know each player starts with 8 hidden workers.
+                Later, if a player received 3 blue workers from a boat, and then bids with 2 blue workers,
+                you would know that they have at least 1 more blue worker available to use
+                (plus any blue workers from their "hidden" collection).<br />
+                With "High-" any "Known" workers just before a boat is picked will be moved to "Unknown" workers
+              {% endblocktranslate %}
+            </p>
+          </div>
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWinfoMed.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <p>
+              {% blocktranslate trimmed %}
+                <b><u>Medium Knowledge Level:</u></b>This uses a more “gut feeling” approach.
+                You won't be told how many hidden items a player has.
+                When you do know for certain that a player has received certain items, eg 1 blue 2 red and 3 yellow workers from a boat,
+                then this information will be displayed by showing the relative amount of each colour that you know a player has.
+                So the yellow worker will be filled in the most, red about half, and blue the least.<br />
+                With "Medium+" the white worker will show the total workers a player has (instead of "?")
+              {% endblocktranslate %}
+            </p>
+          </div>
+          <div class="imageWithTextDiv">
+            <img src="{% static 'Lobby/Images/help/KFWinfoLow.jpg' %}"
+                 alt="Info High"
+                 width="150"
+                 height="228">
+            <div>
+              {% blocktranslate trimmed %}
+                <b><u>Low Knowledge Level:</u></b>This provides you with the least information - you will need to rely on gut and intuition.
+                During the game, the history will only be displayed up to your last 2 turns.
+                You will not be given any information by the game as to how many of each item other players may have.
+              {% endblocktranslate %}
+            </div>
+          </div>
+        </div>
+      </div>-->
+<h3>
+  <b><u>{% translate "Gameplay by Phase" %}</u></b>
+</h3>
+<div class="maxWidthContainerDiv">
+  <div class="leftTextAlignDiv">
+    {% blocktranslate trimmed %}
+      <b>All Phases:</b> The only thing you really own on the map are your transporters!
+      Therefore, interacting with the map is almost always driven through your transporters.
+      You will start by selecting a transporter, and then interacting with other items using that transporter.
+    {% endblocktranslate %}
+    <br />
+    <img src="{% static 'RNB/help/transporterSelectHelp.jpg' %}"
+         alt="Transporter Help"
+         width="657"
+         height="440">
+    <br />
+    {% blocktranslate trimmed %}
+      You can select a transporter directly on the map.
+      You can also select it by clicking on a tile, and then clicking on the transporter in the Zoom Tile.
+      If the tile is so crowded that you still cannot select it in the Zoom Tile, then each area of the tile is listed underneath,
+      and will always display all items. So alternatively you will always be able to select an item in this Zoom Area.
+      <br />
+      Once a transporter is selected, you can interact with goods/buildings either directly on the map,
+      or using the big tile in the Zoom Panel or the area beneath that.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    {% blocktranslate trimmed %}
+      <b>Movement Phase:</b> Select a transporter.
+      You can then click goods to load them, or click goods on the transporter to unload them.
+      When you click a transporter, the tile areas you can move to will automatically be highlighted.
+      If you are unable to move a transporter, check the Zoom Area to find the reason.
+      You will either have no moves remaining, or you will have picked up a good that has itself already moved.
+      <br />
+      <br />
+      <b>Movement Phase Shortcuts: </b>
+      <ul>
+        <li>When dropping a good, if there is only 1 location to drop it, it will be automatically dropped there.</li>
+        <li>
+          When dropping a good, if there is more than 1 possible location,
+          or if there is a water transporter present that could perform a ferry,
+          you will be shown all possible options for the final destination of the good.
+        </li>
+        <li>
+          Similarly when picking up a good, if the good could be ferried to your location for pickup,
+          it will be highlighted to allow you to pick it up directly.
+        </li>
+        <li>
+          You can only unload a transporter at the start of the Movement Phase.
+          However, the game will allow you to drop a transporter that has been picked up but not moved,
+          as that is the equivalent of just “undoing” the action.
+        </li>
+        <li>
+          Geese cannot be following any of your transporters at the end of your movement phase - they must be on a tile.
+          If any geese followers have only one possible location to be dropped, they will be dropped there automatically.
+          If any geese are following a water transporter on a sea tile, then they cannot be dropped, and you will not be able to end your turn.
+        </li>
+      </ul>
+    {% endblocktranslate %}
+    {% blocktranslate trimmed %}
+      <b>Building Phase:</b>
+      Select a transporter.
+      <br />
+      If you are able to build any walls, then your options will be highlighted.
+      <br />
+      If you are able to demolish any walls, then those walls will be highlighted.
+      <br />
+      If you are able to build any bridges, then your options will be highlighted.
+      <br />
+      If you are able to build any roads, then the tile areas that you can build you road TO will be highlighted (obviously the road must come from the tile area where the selected transporter is).
+      <br />
+      If you are able to build any buildings……. Uhhh, then at the moment you just get buttons above the map with your options. Not ideal, but it works.
+      <br />
+      <br />
+      <b>Building Phase Shortcuts:</b>
+      <ul>
+        <li>
+          If you have multiple transporters on a tile, eg a donkey and raft,
+          then all possible options for building a road/wall will be highlighted,
+          if it could be reached by any of your transporters on that tile.
+        </li>
+        <li>
+          When you build anything, goods will automatically be used in the following priority order:
+          <ul>
+            <li>Goods on the tile</li>
+            <li>Goods on the selected transporter (if any)</li>
+            <li>Goods on any of your transporters</li>
+          </ul>
+          This saves you the hassle of having to deposit every good on to the same tile area before performing your build action.
+        </li>
+        <li>The same resource pickup/drop/ferry shortcuts as in the Movement phase also apply here.</li>
+      </ul>
+    {% endblocktranslate %}
+    {% blocktranslate trimmed %}
+      <b>Wonder Phase:</b> Goods on your home tile will be highlighted.
+      When you have selected enough to produce the next wonder brick, it will be automatically added to the wonder.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    {% blocktranslate trimmed %}
+      <b>Production Phase:</b>
+      Primary producers all produce automatically at the start of the phase.
+      <br />
+      In addition, secondary producers with no transporters present will also automatically produce, if they are able to do so.
+      <br />
+      At the end of the phase, all remaining secondary producers will produce if they have remaining capacity and suitable input goods.
+      <br />
+      You can select a transporter to pickup/drop/ferry goods, or interact with any buildings.
+      <br />
+      If a tile has any of your transporters present along with a building that is able to produce, it will be also highlighted so you can activate it directly.
+      <br />
+      A building will place its output onto the tile in the same area as the building.
+      <br />
+      If a building is not highlighted then check the Zoom Area to find out why.
+      <br />
+      <br />
+      <b>Production Phase Shortcuts:</b>
+      <ul>
+        <li>
+          When you select a secondary building, it will automatically use input goods in the following priority order:
+          <ul>
+            <li>Goods on the tile</li>
+            <li>Goods on the selected transporter (if any)</li>
+            <li>Goods on any of your transporters</li>
+          </ul>
+          This saves you the hassle of having to deposit every good on to the same tile area before performing your build action.
+        </li>
+        <li>When converting a donkey into a wagon, any goods on the donkey will automatically transfer to the wagon.</li>
+        <li>New water transporters with only 1 valid location to start will automatically be placed in that location.</li>
+        <li>The same resource pickup/drop/ferry shortcuts as in the Movement phase also apply here.</li>
+      </ul>
+    {% endblocktranslate %}
+  </div>
+</div>
+<div class="maxWidthContainerDiv">
+  <div class="leftTextAlignDiv"></div>
+</div>
+{% translate "For further help contact" %}
+<img id="contactEmailImg"
+     src="{% static 'Lobby/email.png' %}"
+     alt="Email Address"
+     width="400"
+     height="30">
+</div>
+<div class="container signin">
+  <input class="homeButton"
+         type="button"
+         data-url="{% url 'index' %}"
+         value="{% translate 'Home' %}" />
+</div>
+<script>
+  document.querySelector('.homeButton').addEventListener('click', function() {
+    window.location.href = this.getAttribute('data-url');
+  });
+</script>
+</div>
+{% endblock %}

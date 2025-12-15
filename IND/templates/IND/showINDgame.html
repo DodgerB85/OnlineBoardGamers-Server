@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="title" content="Online Board Gamers - Indonesia">
+    <meta name="description"
+          content="Play Splotter's Indonesia Online for free with others, or solo!">
+    <meta name="keywords"
+          content="Indonesia,Online,Play,Board,Game,Games,Gamers">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="200 days">
+    <meta name="author" content="Online Board Gamers">
+
+    <link rel="icon" type="image/png" href="{% static 'IND/images/ind_icon.png' %}" />
+    <title>OBG - {{ gameName }}</title>
+    <style>
+    body {
+      margin: 0px !important;
+      background-color: #d4eafd;
+      font-family: Arial, sans-serif;
+
+    }
+
+    #loadingText {
+      transform: translate(-50%, 0%);
+      position: absolute;
+      font-size: 40px;
+      margin-top: 20px;
+      left: 50%;
+      white-space: nowrap;
+    }
+
+    #shipLoadingImg {
+        /* animation properties */
+        animation-name: my-animation;
+        animation-duration: 2s;
+        animation-direction: alternate;
+        animation-iteration-count: 1;
+        /*animation-timing-function: linear;*/
+        animation-timing-function: ease-in-out;
+        animation-fill-mode: forwards;
+
+        /* other properties */
+        width: 300px;
+        position: absolute;
+        top: 50%;
+        left: 20%;
+        transform: translate(-50%, -50%);
+      }
+
+      @keyframes my-animation {
+        0% {
+          left: 10%;
+          top: 50%;
+        }
+        20% {
+          top: 55%;
+        }
+
+        40% {
+          top: 50%;
+        }
+
+        60% {
+          top: 55%;
+        }
+
+        80% {
+          top: 50%;
+        }
+
+        100% {
+          left: 70%;
+          top: 50%;
+        }
+      }
+
+
+
+      .seaWaves {
+  --size: 50px;
+  --p: 25px;
+  --R: 55.9px /*sqrt(var(--size)*var(--size) + var(--p)*var(--p))*/;
+  
+  height: 200px;
+  margin: 5px;
+  position: absolute;
+  top: 65%;
+  width: 100%;
+  transform: translateY(-50%);
+  
+  background:
+    radial-gradient(var(--R) at 50% calc(var(--size) + var(--p)),blue 99%,#0000 101%) calc(50% - 2*var(--size)) 0/calc(4*var(--size)) 100% no-repeat,
+    radial-gradient(var(--R) at 50% calc(-1*var(--p)),#0000 99%,red 101%) 50% var(--size)/calc(4*var(--size)) 100% no-repeat;
+
+  -webkit-mask:
+    radial-gradient(var(--R) at 50% calc(var(--size) + var(--p)),blue 99%,#0000 101%) calc(50% - 2*var(--size)) 0/calc(4*var(--size)) 100%,
+    radial-gradient(var(--R) at 50% calc(-1*var(--p)),#0000 99%,red 101%) 50% var(--size)/calc(4*var(--size)) 100% repeat-x;
+  background:linear-gradient(90deg,darkblue,lightblue);  
+  border: none;
+}
+
+
+
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if debug %}
+      <script type="module" src="http://localhost:3024/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3024/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'IND/INDvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module"
+              crossorigin=""
+              src="{% static 'IND/INDvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>Please enable Javascript to continue.</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">Indonesia is loading........</div>
+      <div>
+        <img id="shipLoadingImg" src="{% static 'IND/images/ind_icon.png' %}" />
+        <div class="seaWaves"></div>
+      </div>
+    </div>
+  </body>
+  <script>
+  var initData = {};
+  
+  ///////////////////////
+  initData.gameID = {{ gameID }};
+  initData.gameName = "{{ gameName }}";
+  initData.gameData = '{{ gameData|safe }}';
+  initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+  initData.myZoomLevel = {{ myZoomLevel }};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+  initData.startingOptions = {{startingOptions}};
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  initData.currentPlayers = '{{ currentPlayers }}'
+  initData.preferredINDoptions = {{ preferredINDoptions }};
+  initData.deleteVotesData = {{ deleteVotesData | safe }};
+  initData.pov = {{ pov }};
+  initData.preMoves = "{{ preMoves }}";
+  initData.sideData = "{{ sideData|safe }}";
+
+  {% if finishedGame %}
+  initData.finishedGame = true
+  {% endif %}
+
+  {% if spoilerFree %}
+  initData.spoilerFree = true;
+  initData.replayStep = {{replayStep}}-1;
+  {% endif %}
+
+  ///////////////////////
+  {% if user.is_authenticated %}
+  initData.name = '{{ name }}';
+  initData.chatData = "{{ chatData }}";
+  initData.latestUpdate = {{ latestUpdateLiteral }};
+  initData.nextURL = '{{ nextURL }}';
+  {% if chatNotification %}
+  initData.chatNotification = true;
+  {% endif %}
+  {% endif %}
+
+  ///////////////////////
+  {% if involvedPlayer %}
+  {% if isHost %}
+  initData.host = true;
+  {% endif %}
+
+  initData.statsExcludedGame = {{ statsExcludedGame|lower }};
+
+  
+  initData.secondsToNextKickout = {{ secondsToNextKickout }};
+  {% if kickoutRequired > 0 and not myMove %}
+  initData.kickoutRequired = {{kickoutRequired}};
+  {% endif %}
+  initData.notes = '{{ notes | safe }}';
+  initData.yourTurnAudioType = {{ yourTurnAudioType }};
+
+  /////////////////////
+  {% if not gameData %}
+  {% if displayNames %}
+  initData.displayNames = {{ displayNames | safe }};
+  {% endif %}
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  {% endif %}
+  {% endif %}
+  </script>
+</html>

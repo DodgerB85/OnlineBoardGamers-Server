@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svg5961"
+   viewBox="0 0 599.82 587.52"
+   version="1.1"
+   sodipodi:docname="boat_warn.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.3837826"
+     inkscape:cx="299.9026"
+     inkscape:cy="314.71707"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5961" />
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-58.299 -62.381)"
+     style="stroke-width:100.1;stroke-dasharray:none">
+    <path
+       id="path6715-4-9-2"
+       style="stroke-linejoin:round;stroke:#ffa800;stroke-linecap:round;stroke-width:158.18153675;fill:none;fill-opacity:1;stroke-opacity:1;stroke-dasharray:none"
+       transform="matrix(-.31634 .54815 -.54792 -.31648 701.3 304.69)"
+       d="m823.84 632.91h-835.52l417.76-723.57z" />
+    <path
+       style="fill:none;stroke:#4d57cc;stroke-width:80;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="M 172.14989,545.52301 C 374.74096,275.71419 389.43534,717.39924 534.75001,478.82578"
+       id="path3"
+       sodipodi:nodetypes="cc" />
+  </g>
+  <path
+     style="fill:none;stroke:#4d57cc;stroke-width:80.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+     d="M 112.56867,350.10961 C 315.15974,80.30079 329.85412,521.98584 475.16879,283.41238"
+     id="path3-2"
+     sodipodi:nodetypes="cc" />
+</svg>

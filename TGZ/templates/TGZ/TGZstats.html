@@ -1,0 +1,889 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <script src="{% static 'TGZ/TGZstats.js' %}?v=20220706"></script>
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/stats.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="TGZstatsPage">
+      <a class="linkOther" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
+      <br />
+      <br />
+      Data Generated: {{ timeString }}
+      <br />
+      <br />
+      <b>Note: Any game with a resigned/kicked player is not considered for these stats</b>
+      <br />
+      <br />
+      <b>Note:</b> These are stats of what happened historically.
+      <br />
+      They give an interesting insight into what has happened in previous games.
+      <br />
+      Be aware that part of the genius of Splotter games is that the winner will
+      <br />
+      almost always be the player who can read and respond to the current game state in the best way tactically.
+      <br />
+      Therefore, you should not use these stats to drive your strategy, but see them as
+      <br />
+      an interesting indication of how the game is being played.
+      <br />
+      <b>Click a green/red/grey section of the bar chart to view those games
+        <br />
+      Click an entry in the table to view those games</b>
+      <br />
+      <div class="tab">
+        <button class="tablinks" id="originalgodstab">{% translate "Original gods" %}</button>
+        <button class="tablinks" id="schismgodstab">{% translate "Schism gods" %}</button>
+      </div>
+      <div class="tab">
+        <button class="tablinks" id="players2tab">{% translate "2 Player" %}</button>
+        <button class="tablinks" id="players3tab">{% translate "3 Player" %}</button>
+        <button class="tablinks" id="players4tab">{% translate "4 Player" %}</button>
+        <button class="tablinks" id="players45tab">{% translate "4p Tournament" %}</button>
+        <button class="tablinks" id="players5tab">{% translate "5 Player" %}</button>
+      </div>
+      {% for playerCount, row in all_data.items %}
+        <div class="statsDiv" id="players{{ playerCount }}">
+          <br />
+          Total OG Games: {{ row.finishedGamesCount }}
+          <br />
+          <br />
+          <canvas class="bar_canvas"
+                  id="bar-chartplayers{{ playerCount }}"
+                  width="1000"></canvas>
+          <script>
+var bar_ctx = document.getElementById('bar-chartplayers{{ playerCount }}').getContext('2d');
+
+// Modify the datasets based on god_name
+var datasets = [{
+    label: 'Picked and Won',
+    data: [{% for god_name, god_data in row.god_stats.items %}{{ god_data.bar_chart_data.0 }},{% endfor %}],
+    backgroundColor: 'green',
+    gameIdsKey: 'won_game_ids'
+  }, {
+    label: 'Picked and Lost',
+    data: [{% for god_name, god_data in row.god_stats.items %}{{ god_data.bar_chart_data.1 }},{% endfor %}],
+    backgroundColor: 'red',
+    gameIdsKey: 'picked_game_ids'
+  }];
+
+// Add "Not Picked" dataset, but set data to 0 for the "None" god
+var notPickedData = [{% for god_name, god_data in row.god_stats.items %}{% if god_name == 'None' %}0{% else %}{{ god_data.bar_chart_data.2 }}{% endif %},{% endfor %}];
+
+datasets.push({
+    label: 'Not Picked',
+    data: notPickedData,
+    backgroundColor: 'grey',
+    gameIdsKey: 'available_game_ids'
+});
+
+var bar_chart = new Chart(bar_ctx, {
+  type: 'bar',
+  data: {
+    labels: [{% for god_name, god_data in row.god_stats.items %}"{{ god_name }}",{% endfor %}],
+    datasets: datasets
+  },
+  options: {
+    responsive: false,
+    legend: {
+      display: true
+    },
+    title: {
+      display: true,
+      text: 'Available / Picked / Won gods',
+      fontSize: 40
+    },
+    scales: {
+      yAxes: [{
+        stacked: true,
+        ticks: {
+          beginAtZero: true
+        }
+      }],
+      xAxes: [{
+        stacked: true,
+        ticks: {
+          fontStyle: 'bold',
+          fontSize: 20
+        }
+      }]
+    },
+    onClick: function(evt, item) {
+      if (item.length > 0) {
+        var clickedItem = item[0];
+        var clickedIndex = clickedItem._index;
+        var clickedGod = this.data.labels[clickedIndex];
+
+        var clickX = evt.offsetX;
+        var clickY = evt.offsetY;
+
+        var chart = this.chart;
+        var yScale = chart.scales['y-axis-0'];
+
+        var baseValue = 0;
+        var clickedSegmentLabel = null;
+        var gameIds = [];
+
+        for (var i = 0; i < this.data.datasets.length; i++) {
+          var dataset = this.data.datasets[i];
+          var dataValue = dataset.data[clickedIndex];
+          var segmentTop = yScale.getPixelForValue(baseValue + dataValue);
+          var segmentBottom = yScale.getPixelForValue(baseValue);
+
+          if (clickY >= segmentTop && clickY <= segmentBottom) {
+            clickedSegmentLabel = dataset.label;
+            break;
+          }
+          baseValue += dataValue;
+        }
+
+        if (clickedSegmentLabel === 'Picked and Won') {
+          gameIds = {{ row.god_stats|safe }}[clickedGod].won_game_ids || [];
+        } else if (clickedSegmentLabel === 'Picked and Lost') {
+          var pickedGameIds = {{ row.god_stats|safe }}[clickedGod].picked_game_ids || [];
+          var wonGameIds = {{ row.god_stats|safe }}[clickedGod].won_game_ids || [];
+
+          if (clickedGod === 'None') {
+            // For the "None" column, exclude IDs in wonGameIds from pickedGameIds
+            gameIds = pickedGameIds.filter(function(gameId) {
+              return !wonGameIds.includes(gameId);
+            });
+          } else {
+            // Otherwise, apply the slicing logic
+            /*if (pickedGameIds.length > wonGameIds.length) {
+              // Remove the first N elements from pickedGameIds, where N is the length of wonGameIds
+              gameIds = pickedGameIds.slice(wonGameIds.length);
+            } else {
+              gameIds = pickedGameIds; // Otherwise, just use the pickedGameIds as is
+            }*/
+           gameIds = pickedGameIds.filter(function(gameId) {
+                return !wonGameIds.includes(gameId);
+            });
+          }
+        } else if (clickedSegmentLabel === 'Not Picked') {
+          var availableGameIds = {{ row.god_stats|safe }}[clickedGod].available_game_ids || [];
+          var pickedGameIds = {{ row.god_stats|safe }}[clickedGod].picked_game_ids || [];
+          var wonGameIds = {{ row.god_stats|safe }}[clickedGod].won_game_ids || [];
+
+          // Exclude picked and won game IDs
+          gameIds = availableGameIds.filter(function(gameId) {
+            return !pickedGameIds.includes(gameId) && !wonGameIds.includes(gameId);
+          });
+        }
+
+        console.log('Clicked OG God:', clickedGod);
+        console.log('Clicked Segment:', clickedSegmentLabel);
+        console.log('Clicked Count:', gameIds.length);
+        console.log('Game IDs:', gameIds);
+
+        // Example: Call a function to open a page with the game IDs for this segment
+       openGameIdsPage(gameIds);
+      }
+    }
+  }
+});
+          </script>
+          <br />
+          {% translate "In this stats table, a 'picked' game includes both 'lost' and 'won'" %}
+          <br />
+          {% translate "Click a cell to see the games" %}
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "TGZ god" %}</th>
+              <th>{% translate "Available" %}</th>
+              <th>{% translate "Not Picked" %}</th>
+              <th>{% translate "Picked" %}</th>
+              <th>{% translate "Lost" %}</th>
+              <th>{% translate "Won" %}</th>
+              <th>{% translate "Picked When Available %" %}</th>
+              <th>{% translate "Won When Available %" %}</th>
+              <th>{% translate "Won When Picked %" %}</th>
+            </tr>
+            {% for god_name, god_data in row.god_stats.items %}
+              <tr>
+                <td>{{ god_name }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.available_game_ids }})">{{ god_data.available }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.not_chosen_game_ids }})">{{ god_data.not_chosen }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.picked_game_ids }})">{{ god_data.picked }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.lost_game_ids }})">{{ god_data.lost }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.won_game_ids }})">{{ god_data.won }}</td>
+                <td>{{ god_data.picked_percentage }} %</td>
+                <td>{{ god_data.won_percentage }} %</td>
+                <td>{{ god_data.won_when_picked_percentage }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+          <br />
+          <canvas class="bar_canvas"
+                  id="bar-chart-specplayers{{ playerCount }}"
+                  width="1000"></canvas>
+          <script>
+var bar_ctx = document.getElementById('bar-chart-specplayers{{playerCount}}').getContext('2d');
+
+// Modify the datasets based on spec_name
+var datasets = [{
+    label: 'Picked and Won',
+    data: [{% for spec_name, spec_data in row.spec_stats.items %}{{ spec_data.bar_chart_data.0 }},{% endfor %}],
+    backgroundColor: 'green',
+    gameIdsKey: 'won_game_ids'
+  }, {
+    label: 'Picked and Lost',
+    data: [{% for spec_name, spec_data in row.spec_stats.items %}{{ spec_data.bar_chart_data.1 }},{% endfor %}],
+    backgroundColor: 'red',
+    gameIdsKey: 'picked_game_ids'
+  }];
+
+// Add "Not Picked" dataset, but set data to 0 for the "None" spec
+var notPickedData = [{% for spec_name, spec_data in row.spec_stats.items %}{% if spec_name == 'None' %}0{% else %}{{ spec_data.bar_chart_data.2 }}{% endif %},{% endfor %}];
+
+datasets.push({
+    label: 'Not Picked',
+    data: notPickedData,
+    backgroundColor: 'grey',
+    gameIdsKey: 'available_game_ids'
+});
+
+var bar_chart = new Chart(bar_ctx, {
+  type: 'bar',
+  data: {
+    labels: [{% for spec_name, spec_data in row.spec_stats.items %}"{{ spec_name }}",{% endfor %}],
+    datasets: datasets
+  },
+  options: {
+    responsive: false,
+    legend: {
+      display: true
+    },
+    title: {
+      display: true,
+      text: 'Available / Picked / Won specialists',
+      fontSize: 40
+    },
+    subtitle: {
+      display: true,
+      text: 'Specialistsssssssssssssssss',
+      font: {
+        size: 16
+      }
+    },
+    scales: {
+      yAxes: [{
+        stacked: true,
+        ticks: {
+          beginAtZero: true
+        }
+      }],
+      xAxes: [{
+        stacked: true,
+        ticks: {
+          fontStyle: 'bold',
+          fontSize: 20
+        }
+      }]
+    },
+    onClick: function(evt, item) {
+      if (item.length > 0) {
+        var clickedItem = item[0];
+        var clickedIndex = clickedItem._index;
+        var clickedSpec = this.data.labels[clickedIndex];
+
+        var clickX = evt.offsetX;
+        var clickY = evt.offsetY;
+
+        var chart = this.chart;
+        var yScale = chart.scales['y-axis-0'];
+
+        var baseValue = 0;
+        var clickedSegmentLabel = null;
+        var gameIds = [];
+
+        for (var i = 0; i < this.data.datasets.length; i++) {
+          var dataset = this.data.datasets[i];
+          var dataValue = dataset.data[clickedIndex];
+          var segmentTop = yScale.getPixelForValue(baseValue + dataValue);
+          var segmentBottom = yScale.getPixelForValue(baseValue);
+
+          if (clickY >= segmentTop && clickY <= segmentBottom) {
+            clickedSegmentLabel = dataset.label;
+            break;
+          }
+          baseValue += dataValue;
+        }
+
+        if (clickedSegmentLabel === 'Picked and Won') {
+          gameIds = {{ row.spec_stats|safe }}[clickedSpec].won_game_ids || [];
+        } else if (clickedSegmentLabel === 'Picked and Lost') {
+          gameIds = {{ row.spec_stats|safe }}[clickedSpec].lost_game_ids || []; // Use picked_game_ids for "lost"
+        }
+        // "Not Picked" does nothing, so no else if block needed
+
+        console.log('Clicked OG Spec:', clickedSpec);
+        console.log('Clicked Segment:', clickedSegmentLabel);
+        console.log('Game Count:', gameIds.length);
+        console.log('Game IDs:', gameIds);
+
+        openGameIdsPage(gameIds);
+      }
+    }
+  }
+});
+          </script>
+          <span class="specNoteSpan">Note: Multiple players per game can lose with 0 specialists</span>
+          <br />
+          <br />
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "Specialist" %}</th>
+              <th>{% translate "Lost When Picked" %}</th>
+              <th>{% translate "Won When Picked" %}</th>
+              <th>{% translate "Lost %" %}</th>
+              <th>{% translate "Won %" %}</th>
+              <th>{% translate "Win to Loss when picked %" %}</th>
+            </tr>
+            {% for spec_name, spec_data in row.spec_stats.items %}
+              <tr onclick="openGameIdsPage({{ spec_data.won_game_ids }})">
+                <td>{{ spec_name }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ spec_data.lost_game_ids }})">{{ spec_data.lost }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ spec_data.won_game_ids }})">{{ spec_data.won }}</td>
+                <td>{{ spec_data.lost_percentage }} %</td>
+                <td>{{ spec_data.won_percentage }} %</td>
+                <td>{{ spec_data.win_loss_ratio }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+          {% if playerCount == 4 %}
+          
+              <canvas class="bar_canvas" id="seat_wins_4pT"  width="1000"></canvas>
+      <script>
+        var ctx = document.getElementById("seat_wins_4pT").getContext('2d');
+        
+        var data = {
+            labels: ["1st", "2nd", "3rd", "4th",],
+            datasets: [
+            {
+                    label: "Wins",
+                    borderColor: "blue",
+                    data: [
+                      {{ row.seat_wins.0.1 }},
+                      {{ row.seat_wins.1.1 }},
+                      {{ row.seat_wins.2.1 }},
+                      {{ row.seat_wins.3.1 }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+               
+               
+               
+            ]
+          };
+        
+            var oldMSchart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                  responsive: false,
+                maintainAspectRatio: true,
+                  title: {
+              display: true,
+              text: 'Win from starting position',
+              fontColor: 'black', // Set the color of the title
+              fontSize: 25, // Set the font size of the title
+              fontStyle: 'bold' // Set the font weight of the title to bold
+            },
+            legend: {
+                labels: {
+                    fontSize: 20, // Set the font size of the legend labels
+                    fontStyle: 'bold' // Set the font weight of the legend labels to bold
+                }
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontSize: 25, // Set the font size of the labels on the x-axis
+                        fontStyle: 'bold' // Set the font weight of the labels on the x-axis to bold
+                    }
+                }]
+            },
+                  elements: {
+                  point: {
+                    radius: 8, // Increase the size of the points
+                      hoverRadius: 10 // Increase the size of the points on hover
+                  }
+            }
+        }
+            });
+      </script> 
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "Starting Position" %}</th>
+              <th>{% translate "Wins" %}</th>
+            </tr>
+               {% for entry in row.seat_wins %}
+              <tr onclick="openGameIdsPage({{ entry.2 }})">
+            <td>{{ entry.0 }}</td>
+            <td>{{ entry.1 }}</td>
+        </tr>
+    {% endfor %}
+          </table>
+           {% elif playerCount == "45" %} 
+             <canvas class="bar_canvas" id="seat_wins_4p"  width="1000"></canvas>
+      <script>
+        var ctx = document.getElementById("seat_wins_4p").getContext('2d');
+        
+        var data = {
+            labels: ["1st", "2nd", "3rd", "4th",],
+            datasets: [
+            {
+                    label: "Wins",
+                    borderColor: "blue",
+                    data: [
+                      {{ row.seat_wins.0.1 }},
+                      {{ row.seat_wins.1.1 }},
+                      {{ row.seat_wins.2.1 }},
+                      {{ row.seat_wins.3.1 }},
+                    ],
+                    fill: false,
+                    pointStyle: 'cross',
+                    lineTension: 0
+                },
+               
+               
+               
+            ]
+          };
+        
+            var oldMSchart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                  responsive: false,
+                maintainAspectRatio: true,
+                  title: {
+              display: true,
+              text: 'Win from starting position',
+              fontColor: 'black', // Set the color of the title
+              fontSize: 25, // Set the font size of the title
+              fontStyle: 'bold' // Set the font weight of the title to bold
+            },
+            legend: {
+                labels: {
+                    fontSize: 20, // Set the font size of the legend labels
+                    fontStyle: 'bold' // Set the font weight of the legend labels to bold
+                }
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontSize: 25, // Set the font size of the labels on the x-axis
+                        fontStyle: 'bold' // Set the font weight of the labels on the x-axis to bold
+                    }
+                }]
+            },
+                  elements: {
+                  point: {
+                    radius: 8, // Increase the size of the points
+                      hoverRadius: 10 // Increase the size of the points on hover
+                  }
+            }
+        }
+            });
+      </script> 
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "Starting Position" %}</th>
+              <th>{% translate "Wins" %}</th>
+            </tr>
+               {% for entry in row.seat_wins %}
+              <tr onclick="openGameIdsPage({{ entry.2 }})">
+            <td>{{ entry.0 }}</td>
+            <td>{{ entry.1 }}</td>
+        </tr>
+    {% endfor %}
+          </table>
+           {% endif %}
+        </div>
+      {% endfor %}
+
+      <!-- SPLIT HERE TO REPAEAT INFO FOR SCHISM-->
+
+      <!-- SCHISM START SCHIDM END -->
+      {% for playerCount, row in all_data_schism.items %}
+        <div class="statsDiv_schism" id="schism_players{{ playerCount }}">
+          <br />
+          Total Schism Games: {{ row.finishedGamesCount }}
+          <br />
+          <br />
+          <canvas class="bar_canvas"
+                  id="schism_bar-chartplayers{{ playerCount }}"
+                  width="1000"></canvas>
+          <script>
+var bar_ctx = document.getElementById('schism_bar-chartplayers{{playerCount}}').getContext('2d');
+
+// Modify the datasets based on god_name
+var datasets = [{
+    label: 'Picked and Won',
+    data: [{% for god_name, god_data in row.god_stats.items %}{{ god_data.bar_chart_data.0 }},{% endfor %}],
+    backgroundColor: 'green',
+    gameIdsKey: 'won_game_ids'
+  }, {
+    label: 'Picked and Lost',
+    data: [{% for god_name, god_data in row.god_stats.items %}{{ god_data.bar_chart_data.1 }},{% endfor %}],
+    backgroundColor: 'red',
+    gameIdsKey: 'picked_game_ids'
+  }];
+
+// Add "Not Picked" dataset, but set data to 0 for the "None" god
+var notPickedData = [{% for god_name, god_data in row.god_stats.items %}{% if god_name == 'None' %}0{% else %}{{ god_data.bar_chart_data.2 }}{% endif %},{% endfor %}];
+
+datasets.push({
+    label: 'Not Picked',
+    data: notPickedData,
+    backgroundColor: 'grey',
+    gameIdsKey: 'available_game_ids'
+});
+
+var bar_chart = new Chart(bar_ctx, {
+  type: 'bar',
+  data: {
+    labels: [{% for god_name, god_data in row.god_stats.items %}"{{ god_name }}",{% endfor %}],
+    datasets: datasets
+  },
+  options: {
+    responsive: false,
+    legend: {
+      display: true
+    },
+    title: {
+      display: true,
+      text: 'Available / Picked / Won gods',
+      fontSize: 40
+    },
+    scales: {
+      yAxes: [{
+        stacked: true,
+        ticks: {
+          beginAtZero: true
+        }
+      }],
+      xAxes: [{
+        stacked: true,
+        ticks: {
+          fontStyle: 'bold',
+          fontSize: 20
+        }
+      }]
+    },
+    onClick: function(evt, item) {
+      if (item.length > 0) {
+        var clickedItem = item[0];
+        var clickedIndex = clickedItem._index;
+        var clickedSpec = this.data.labels[clickedIndex];
+
+        var clickX = evt.offsetX;
+        var clickY = evt.offsetY;
+
+        var chart = this.chart;
+        var yScale = chart.scales['y-axis-0'];
+
+        var baseValue = 0;
+        var clickedSegmentLabel = null;
+        var gameIds = [];
+
+        for (var i = 0; i < this.data.datasets.length; i++) {
+          var dataset = this.data.datasets[i];
+          var dataValue = dataset.data[clickedIndex];
+          var segmentTop = yScale.getPixelForValue(baseValue + dataValue);
+          var segmentBottom = yScale.getPixelForValue(baseValue);
+
+          if (clickY >= segmentTop && clickY <= segmentBottom) {
+            clickedSegmentLabel = dataset.label;
+            break;
+          }
+          baseValue += dataValue;
+        }
+
+        if (clickedSegmentLabel === 'Picked and Won') {
+          gameIds = {{ row.god_stats|safe }}[clickedSpec].won_game_ids || [];
+        } else if (clickedSegmentLabel === 'Picked and Lost') {
+          var pickedGameIds = {{ row.god_stats|safe }}[clickedSpec].picked_game_ids || [];
+          var wonGameIds = {{ row.god_stats|safe }}[clickedSpec].won_game_ids || [];
+
+          if (clickedSpec === 'None') {
+            // For the "None" column, exclude IDs in wonGameIds from pickedGameIds
+            gameIds = pickedGameIds.filter(function(gameId) {
+              return !wonGameIds.includes(gameId);
+            });
+          } else {
+            // Otherwise, apply the slicing logic
+            /*if (pickedGameIds.length > wonGameIds.length) {
+              // Remove the first N elements from pickedGameIds, where N is the length of wonGameIds
+              gameIds = pickedGameIds.slice(wonGameIds.length);
+            } else {
+              gameIds = pickedGameIds; // Otherwise, just use the pickedGameIds as is
+            }*/
+           gameIds = pickedGameIds.filter(function(gameId) {
+                return !wonGameIds.includes(gameId);
+            });
+          }
+        } else if (clickedSegmentLabel === 'Not Picked') {
+          var availableGameIds = {{ row.god_stats|safe }}[clickedSpec].available_game_ids || [];
+          var pickedGameIds = {{ row.god_stats|safe }}[clickedSpec].picked_game_ids || [];
+          var wonGameIds = {{ row.god_stats|safe }}[clickedSpec].won_game_ids || [];
+
+          // Exclude picked and won game IDs
+          gameIds = availableGameIds.filter(function(gameId) {
+            return !pickedGameIds.includes(gameId) && !wonGameIds.includes(gameId);
+          });
+        }
+
+        console.log('Clicked Schismm god:', clickedSpec);
+        console.log('Clicked Segment:', clickedSegmentLabel);
+        console.log('Game Count:', gameIds.length);
+        console.log('Game IDs:', gameIds);
+
+        openGameIdsPage(gameIds);
+      }
+    }
+  }
+});
+          </script>
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "TGZ god" %}</th>
+              <th>{% translate "Available" %}</th>
+              <th>{% translate "Not Picked" %}</th>
+              <th>{% translate "Picked" %}</th>
+              <th>{% translate "Lost" %}</th>
+              <th>{% translate "Won" %}</th>
+              <th>{% translate "Picked When Available %" %}</th>
+              <th>{% translate "Won When Available %" %}</th>
+              <th>{% translate "Won When Picked %" %}</th>
+            </tr>
+            {% for god_name, god_data in row.god_stats.items %}
+              <tr onclick="openGameIdsPage({{ god_data.won_game_ids }})">
+                <td>{{ god_name }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.available_game_ids }})">{{ god_data.available }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.not_chosen_game_ids }})">{{ god_data.not_chosen }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.picked_game_ids }})">{{ god_data.picked }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.lost_game_ids }})">{{ god_data.lost }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ god_data.won_game_ids }})">{{ god_data.won }}</td>
+                <td>{{ god_data.picked_percentage }} %</td>
+                <td>{{ god_data.won_percentage }} %</td>
+                <td>{{ god_data.won_when_picked_percentage }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+          <br />
+          <canvas class="bar_canvas"
+                  id="schism_bar-chart-specplayers{{ playerCount }}"
+                  width="1000"></canvas>
+          <script>
+var bar_ctx = document.getElementById('schism_bar-chart-specplayers{{playerCount}}').getContext('2d');
+
+// Modify the datasets based on spec_name
+var datasets = [{
+    label: 'Picked and Won',
+    data: [{% for spec_name, spec_data in row.spec_stats.items %}{{ spec_data.bar_chart_data.0 }},{% endfor %}],
+    backgroundColor: 'green',
+    gameIdsKey: 'won_game_ids'
+  }, {
+    label: 'Picked and Lost',
+    data: [{% for spec_name, spec_data in row.spec_stats.items %}{{ spec_data.bar_chart_data.1 }},{% endfor %}],
+    backgroundColor: 'red',
+    gameIdsKey: 'picked_game_ids'
+  }];
+
+// Add "Not Picked" dataset, but set data to 0 for the "None" spec
+var notPickedData = [{% for spec_name, spec_data in row.spec_stats.items %}{% if spec_name == 'None' %}0{% else %}{{ spec_data.bar_chart_data.2 }}{% endif %},{% endfor %}];
+
+datasets.push({
+    label: 'Not Picked',
+    data: notPickedData,
+    backgroundColor: 'grey',
+    gameIdsKey: 'available_game_ids'
+});
+
+var bar_chart = new Chart(bar_ctx, {
+  type: 'bar',
+  data: {
+    labels: [{% for spec_name, spec_data in row.spec_stats.items %}"{{ spec_name }}",{% endfor %}],
+    datasets: datasets
+  },
+  options: {
+    responsive: false,
+    legend: {
+      display: true
+    },
+    title: {
+      display: true,
+      text: 'Available / Picked / Won specialists',
+      fontSize: 40
+    },
+    subtitle: {
+      display: true,
+      text: 'Specialistsssssssssssssssss',
+      font: {
+        size: 16
+      }
+    },
+    scales: {
+      yAxes: [{
+        stacked: true,
+        ticks: {
+          beginAtZero: true
+        }
+      }],
+      xAxes: [{
+        stacked: true,
+        ticks: {
+          fontStyle: 'bold',
+          fontSize: 20
+        }
+      }]
+    },
+    onClick: function(evt, item) {
+      if (item.length > 0) {
+        var clickedItem = item[0];
+        var clickedIndex = clickedItem._index;
+        var clickedSpec = this.data.labels[clickedIndex];
+
+        var clickX = evt.offsetX;
+        var clickY = evt.offsetY;
+
+        var chart = this.chart;
+        var yScale = chart.scales['y-axis-0'];
+
+        var baseValue = 0;
+        var clickedSegmentLabel = null;
+        var gameIds = [];
+
+        for (var i = 0; i < this.data.datasets.length; i++) {
+          var dataset = this.data.datasets[i];
+          var dataValue = dataset.data[clickedIndex];
+          var segmentTop = yScale.getPixelForValue(baseValue + dataValue);
+          var segmentBottom = yScale.getPixelForValue(baseValue);
+
+          if (clickY >= segmentTop && clickY <= segmentBottom) {
+            clickedSegmentLabel = dataset.label;
+            break;
+          }
+          baseValue += dataValue;
+        }
+
+        if (clickedSegmentLabel === 'Picked and Won') {
+          gameIds = {{ row.spec_stats|safe }}[clickedSpec].won_game_ids || [];
+        } else if (clickedSegmentLabel === 'Picked and Lost') {
+          gameIds = {{ row.spec_stats|safe }}[clickedSpec].lost_game_ids || []; // Use picked_game_ids for "lost"
+        }
+        // "Not Picked" does nothing, so no else if block needed
+
+        console.log('Clicked Schism Spec:', clickedSpec);
+        console.log('Clicked Segment:', clickedSegmentLabel);
+        console.log('Game Count:', gameIds.length);
+        console.log('Game IDs:', gameIds);
+
+        openGameIdsPage(gameIds);
+      }
+    }
+  }
+});
+          </script>
+          <span class="specNoteSpan">Note: Multiple players per game can lose with 0 specialists</span>
+          <br />
+          <br />
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "Specialist" %}</th>
+              <th>{% translate "Lost When Picked" %}</th>
+              <th>{% translate "Won When Picked" %}</th>
+              <th>{% translate "Lost %" %}</th>
+              <th>{% translate "Won %" %}</th>
+              <th>{% translate "Win to Loss when picked %" %}</th>
+            </tr>
+            {% for spec_name, spec_data in row.spec_stats.items %}
+              <tr>
+                <td>{{ spec_name }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ spec_data.lost_game_ids }})">{{ spec_data.lost }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ spec_data.won_game_ids }})">{{ spec_data.won }}</td>
+                <td>{{ spec_data.lost_percentage }} %</td>
+                <td>{{ spec_data.won_percentage }} %</td>
+                <td>{{ spec_data.win_loss_ratio }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+        
+      {% endfor %}
+      <!-- SCHISM END SCHIDM END -->
+      <br />
+    </div>
+    <br />
+    <br />
+  </div>
+  {% include 'Lobby/common/homeButton.html' %}
+  <form id="gameIdsForm" method="post" action="/TGZ/TGZstatGames/">
+    {% csrf_token %}
+    <input type="hidden" id="gameIdsInput" name="game_ids">
+  </form>
+  <script>
+    function openGameIdsPage(gameIds) {
+        // Set the value of the hidden input field
+        if (gameIds.length === 0) {
+            alert("No game IDs");
+            return
+        }
+        document.getElementById('gameIdsInput').value = JSON.stringify(gameIds);
+
+        // Submit the form
+        document.getElementById('gameIdsForm').submit();
+    }
+    
+     // Add click event to the bar chart
+    //bar_chart.chart.options.onClick = function(e) {
+    //  console.log(e);
+    //  console.log(this);
+    //}
+  </script>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
+        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="INDhelpPage">
+      <h1>{% translate "Rules" %}</h1>
+      {% blocktrans trimmed %}
+      Indonesia Rules Available <a class="linkOther" href="https://tesera.ru/images/items/174714/indonesia_E.pdf" target="_blank" download>here</a>
+      {% endblocktrans %}
+      <h1>{% translate "Indonesia Help" %}</h1>
+      <h3>
+        <b><u>{% translate "Playing the Game" %}</u></b>
+      </h3>
+      You can view your Era cards in the "Cards" section
+      <img src="{% static 'IND/images/icon-hand-card.svg' %}"
+           width="38"
+           height="38"
+           class="topMenuIconForHelp"
+           alt="Box Icon" />
+      <br />
+      Change the map using the Settings icon. The maps all function identically - it is just a visual change
+      <img src="{% static 'IND/images/icon-cog.svg' %}"
+           width="38"
+           height="38"
+           class="topMenuIconForHelp"
+           alt="Globe Icon" />
+      <br />
+      You can expand / collapse the Player Table using the button next to it
+      <img src="{% static 'Lobby/Images/help/IND_table_expand.jpg' %}"
+           width="225"
+           height="84"
+           id="expandTableImg"
+           alt="Expand Table" />
+      <br />
+      <br />
+      Don't forget to set your
+      <a class="linkOther" href="/profileIND" target="_blank">Indonesia Preferences</a>!
+      <br />
+      <br />
+      <img src="{% static 'IND/images/icon-rewind.svg' %}"
+           width="38"
+           height="38"
+           class="topMenuIconForHelp"
+           alt="Rewind Icon" />
+      <b>{% translate "Rewind" %}</b>
+      {% blocktranslate trimmed %}
+        is available to all players at all times. It should generally only be used to immediately correct a mistake after
+        submitting your move.
+      {% endblocktranslate %}
+      <br />
+      <br />
+      <img src="{% static 'IND/images/icon-replay.svg' %}"
+           width="38"
+           height="38"
+           class="topMenuIconForHelp"
+           alt="Rewind Icon" />
+      <b>{% translate "Replay" %}</b>
+      {% blocktranslate trimmed %}
+        does not alter the game state in any way. You can view all the moves made from the
+        start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
+        Once you exit replay mode, the game will return to the same state as when you entered replay mode.
+      {% endblocktranslate %}
+      <br />
+      <br />
+      <img src="{% static 'IND/images/so_hiddenMoney.svg' %}"
+           width="38"
+           height="38"
+           class="topMenuIconForHelp"
+           alt="Hidden Money" />
+      There is an option to play the game with hidden money.
+      <br />
+      With this option selected, you will not be able to view a replay mid-game, and the history will obscure the earnings  of other players.
+      <h3>
+        <b><u>{% translate "Gameplay by Phase" %}</u></b>
+      </h3>
+      <div class="maxWidthContainerDiv">
+        <div class="leftTextAlignDiv">
+          {% blocktranslate trimmed %}
+            <b>New Era:</b> Cards will automatically be discarded if there is no valid territory to place a city.
+            They will also be discarded if there are no more size 1 cities available (very rare).
+            You can check the history if you are unsure why you turn was skipped.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Turn order:</b> Remeber - you only get 1 chance to bid.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Mergers:</b>
+            In order to propose a merger, you require a high enough merger tech,
+            a free slot (or to own one of the merging companies), and enough money to start the bidding.
+            If you cannot propose any mergers your turn will be skipped - you can check in the history for the reason.
+            During your turn to propose a merger, you can click on ANY slot to see why it is not available to merge;
+            either before or after you have selected the first slot.
+            When placing any bid, you can select the amount you want to bid right now, plus a maximum bid,
+            along with whether or not to pass when your maximum bid has been exceeded.
+            If you have placed a maximum bid, you will automatically bid in the smallest increment possible,
+            up to your maximum bid.
+            Your maximum bid must of course be at least 2 increments higher than your immediate bid
+            - otherwise there is no chance of you ever bidding that amount.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Acquisitions:</b> Click on a company deed on the map to acquire that company.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>R & D:</b> You may either click on the highlighted “R&D” area of the main map, or use the dropdown selector to choose your research.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Operations:</b> You may select a slot to operate either by using the Player Table,
+            or by clicking on a production marker / ship on the map.
+            When operating a land company, remember you MUST ship the maximum possible goods.
+            If you get into a situation where you can no longer ship the maximum possible goods,
+            you will need to restart your turn and ship differently.
+            <br />
+            For example, if you have shipping chain 1 that can deliver to cities A and B,
+            and shipping chain 2 that can only deliver to city B, then the most shipments
+            can be done by using chain 1 for city A and chain 2 for city B, for a total of 2 deliveries.
+            However, if you use chain 1 to deliver to city B, then you will be unable to ship any more goods.
+            Thus because the maximum possible deliveries is 2, you will need to restart your turn.
+            <br />
+            If you only have un-operated shipping companies that cannot expand, your turn will be skipped and one of those
+            companies will be operated at random.
+            <br />
+            <b>Auto Shipping:</b>You can always Auto-Ship, which will provide you the cheapest possible way to ship the maximum possible number of goods.
+            <br />
+            You can click the "Show Destination Cities" button to show where the goods will be delivered.
+            <br id="navShipPlayerPreference" />
+            You can recalculate the auto-shipping options, as sometimes there are multiple cheapest options;
+            for example, if you could use 1 opponent's ship to ship to city A or city B,
+            then both routes would have the same cost.
+            Similarly, using 1 of your own ships to ship to city A has the same cost as using 4 of your ships to ship to city B.
+            Sometimes you may wish ship the most possible goods, but not at the lowest cost; perhaps to grow a particular city.
+            You can always achieve this by shipping the goods manually.
+            <br />
+            <b>Manual Shipping:</b> You click on a production marker, then a series of ships, and finally a city in order to
+            deliver goods manually.
+            <br />
+            You may also ship using one row of the auto-ship table at a time, using the "Copy" button.
+            <br />
+            You can also ship a good manually, using the above method, and then the auto-ship table will automatically update
+            to show the cheapest way to ship the remaining goods.
+            <br />
+            <b>Expert option - player selection:</b> This option only affects games with 3 or more
+            players. It allows you to try to affect your relative net income compared to another player.
+            <br />
+            For example, if you as player A have the option to ship with player B at a cost of 10 (which would result in player B gaining
+            a net +20 against you [-10 for you, +10 for them, is net +20]), and also the option to ship with player C at a cost of 15,
+            then de-selecting player B will result in player C being favoured, even though the overall cost to you is slightly higher.
+            <br />
+            You can use this option to try to prevent your money going to a particular player, even if it means gaining less money overall.
+            <br />
+            Note: In the above exmple, if C had cost 20 instead, then the algorithm would randomly pick between player B and C, because your relative
+            change to player B would be -20 (either player B gains 10 and you pay 10, or else you pay player C 20).
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>City Growth:</b> If multiple cities are able to grow, and there are not enough city markers to grow all of them, then
+            the first player in turn order will be asked to choose which cities should upgrade.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b>Visual Guide</b>
+          <br />
+          <img src="{% static 'Lobby/Images/help/ind_help_gfx.jpg' %}"
+               width="1300"
+               height="978"
+               id="ind_help_gfx"
+               alt="Ind help" />
+        </div>
+      </div>
+      {% translate "For further help contact" %}
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30">
+    </div>
+    {% include 'Lobby/common/homeButton.html' %}
+  </div>
+{% endblock %}
