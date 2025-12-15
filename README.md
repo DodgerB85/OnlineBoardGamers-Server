@@ -9,11 +9,12 @@ If you get stuck, paste the error into AI and it should help you on to the next 
 Now browse http://localhost:8000/ and check there are no errors
 You should be able to browsr around the logged-out pages, eg about, help, etc.
 
-3) Create superuser: python manage.py createsuperuser (use "admin" for the superuser)
-4) Restart the server, and create a normal user (Eg "Joey") using the "Register New Account" link
-5) Now test your admin access; go to http://localhost:8000/admin/ and login with your superuser. Find the user Joey and tick them active in the User DB. Also tick Email Confirmed in their profile.
-6) Back on the website, login with Joey to check it is working.
-7) Before creating a game, user the admin panel to create users "SHADOW" through to "SHADOW_5"
-8) On the website, create a 2-player Cannes game. It should display in the lobby. Join the game as another user.
-9) Now try opening the game of Cannes - if everything works, you've made it! :)
+3) Exit back to the command prompt. Confirm containers are running using: docker compose up -d
+4) Create superuser - this needs to be run inside the container: docker exec -it onlineboardgamers-server-obs-1 python manage.py createsuperuser (use "admin" for the superuser)
+5) Go back to the website, and create a normal user (Eg "Joey") using the "Register New Account" link
+6) Now test your admin access; go to http://localhost:8000/admin/ and login with your superuser. Find the user Joey and tick them active in the User DB. Also tick Email Confirmed in their profile.
+7) Back on the website, login with Joey to check it is working.
+8) Before creating a game, user the admin panel to create users "SHADOW" through to "SHADOW_5"
+9) On the website, create a 2-player Cannes game. It should display in the lobby. Join the game as another user.
+10) Now try opening the game of Cannes - if everything works, you've made it! :)
 
