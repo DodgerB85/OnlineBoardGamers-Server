@@ -27,13 +27,13 @@ import random
 # from django.contrib.auth import get_user_model
 # User = get_user_model()
 
-#from .common import create_fcm_game
+# from .common import create_fcm_game
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
     SF_kickoutRequired,
     SF_M_ProcessTournamentEndGame,
-    SF_M_ProcessMiniTournamentEndGame
+    SF_M_ProcessMiniTournamentEndGame,
 )
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
@@ -49,10 +49,13 @@ from Lobby.sharedFunctions.sharedRefs import (
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_sendEndGameNotification,
     SN_M_sendGameStartNotification,
-    #SN_M_T_sendTournamentGameStartNotification,
+    # SN_M_T_sendTournamentGameStartNotification,
 )
 
-from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage, SN_sendNextTurnNotification
+from Lobby.sharedFunctions.sharedNotifications import (
+    SN_sendAdminErrorMessage,
+    SN_sendNextTurnNotification,
+)
 
 from Lobby.models import User, Mini_Tournaments  # , Profile
 
@@ -108,70 +111,69 @@ class FCM_Tournament(models.Model):
     tournamentProgressionData = models.TextField(blank=True)
     tournamentSideData = models.TextField(blank=True)
     tournamentPointsData = models.TextField(blank=True)
-    
+
     def __str__(self):
         # Use currentPlayers if available, otherwise fall back to gameName and status
         return f"{getattr(self, 'id')}: {self.tournamentName} : {self.tournamentStatus}: {self.maxTournamentPlayers} players"
-
 
     def isSignedUp(self, loggedInUser=None):
         if loggedInUser in self.startingPlayers.all():
             return True
         return False
 
-#    def createTournamentGame(self, request, _roundNumberString, _currentPlayersUsernames):
-#        return
-#        new_game = create_fcm_game(request, True, self, _roundNumberString, _currentPlayersUsernames)
-#        return new_game
-#        
-#        gameName = "[" + self.tournamentName + "]" + " " + _roundNumberString
-#
-#        playerSeatOffset = random.randint(1000, 32767)
-#
-#        # _startingOptions = request.POST["startingOptions"]
-#        created = SR_getTimeNow()
-#        pace = 30
-#        creator = User.objects.get(username="admin")
-#
-#        newGame = FCM_Game(
-#            gameName=gameName,
-#            creator=creator,
-#            gamePace=pace,
-#            turn=0,
-#            phase=0,
-#            created=created,
-#            latestUpdate=created,
-#            seatOffset=playerSeatOffset,
-#            startingOptions=self.startingOptions,
-#            maxPlayers=self.maxGamePlayers,
-#            gameStatus="ACTIVE",
-#        )
-#        newGame.save()
-#
-#        for i in range(self.maxGamePlayers):
-#            if i < len(_currentPlayersUsernames) and _currentPlayersUsernames[i] != "":
-#                newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[i]))
-#                SN_M_T_sendTournamentGameStartNotification(
-#                    request,
-#                    "FCM",
-#                    _currentPlayersUsernames[i],
-#                    self.maxGamePlayers,
-#                    newGame.gameName,
-#                    newGame.currentTurnString(),
-#                    getattr(newGame, "id"),
-#                    False,
-#                )
-#
-#        newGame.kickoutDuration = 100
-#        newGame.zoomLevels = "200" * self.maxGamePlayers
-#        newGame.notificationSuppression = "0" * self.maxGamePlayers
-#        newGame.relatedTournament = self
-#        newGame.host = newGame.allPlayers.all().order_by("?").first()
-#        newGame.setupRewindConsent()
-#
-#        newGame.save()
-#        newGame.startGame(request)
-#        return getattr(newGame, "id")
+    #    def createTournamentGame(self, request, _roundNumberString, _currentPlayersUsernames):
+    #        return
+    #        new_game = create_fcm_game(request, True, self, _roundNumberString, _currentPlayersUsernames)
+    #        return new_game
+    #
+    #        gameName = "[" + self.tournamentName + "]" + " " + _roundNumberString
+    #
+    #        playerSeatOffset = random.randint(1000, 32767)
+    #
+    #        # _startingOptions = request.POST["startingOptions"]
+    #        created = SR_getTimeNow()
+    #        pace = 30
+    #        creator = User.objects.get(username="admin")
+    #
+    #        newGame = FCM_Game(
+    #            gameName=gameName,
+    #            creator=creator,
+    #            gamePace=pace,
+    #            turn=0,
+    #            phase=0,
+    #            created=created,
+    #            latestUpdate=created,
+    #            seatOffset=playerSeatOffset,
+    #            startingOptions=self.startingOptions,
+    #            maxPlayers=self.maxGamePlayers,
+    #            gameStatus="ACTIVE",
+    #        )
+    #        newGame.save()
+    #
+    #        for i in range(self.maxGamePlayers):
+    #            if i < len(_currentPlayersUsernames) and _currentPlayersUsernames[i] != "":
+    #                newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[i]))
+    #                SN_M_T_sendTournamentGameStartNotification(
+    #                    request,
+    #                    "FCM",
+    #                    _currentPlayersUsernames[i],
+    #                    self.maxGamePlayers,
+    #                    newGame.gameName,
+    #                    newGame.currentTurnString(),
+    #                    getattr(newGame, "id"),
+    #                    False,
+    #                )
+    #
+    #        newGame.kickoutDuration = 100
+    #        newGame.zoomLevels = "200" * self.maxGamePlayers
+    #        newGame.notificationSuppression = "0" * self.maxGamePlayers
+    #        newGame.relatedTournament = self
+    #        newGame.host = newGame.allPlayers.all().order_by("?").first()
+    #        newGame.setupRewindConsent()
+    #
+    #        newGame.save()
+    #        newGame.startGame(request)
+    #        return getattr(newGame, "id")
 
     def getByedPlayersList(self):
         byedPlayerList = []
@@ -182,7 +184,7 @@ class FCM_Tournament(models.Model):
                     byedPlayerList.extend(row)
 
         return byedPlayerList
-    
+
     def get_tournamentType_display(self):
         return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
 
@@ -208,51 +210,79 @@ class FCM_Tournament(models.Model):
     def getRoundsHTML(self):
         # Only for IP or FN tournaments
         roundsHTML = SR_getTournamentRoundsHTML(
-            self.tournamentType, self.maxGamePlayers, self.tournamentProgressionData, self.tournamentPointsData, "FCM", self
+            self.tournamentType,
+            self.maxGamePlayers,
+            self.tournamentProgressionData,
+            self.tournamentPointsData,
+            "FCM",
+            self,
         )
         return roundsHTML
 
+
 class FCM_Game(models.Model):
     # custom_primary_key = models.CharField(max_length=6, editable=False, unique=True)
-    gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
-    gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    gameName = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
+    gameDescription = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
     gameStatus = models.CharField(
         max_length=9,
         choices=SR_GAME_STATUS_CHOICES,
         default="AVAILABLE",
-        db_index=True, 
+        db_index=True,
     )
     latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
     startingOptions = models.CharField(max_length=80, blank=True)
     startingMap = models.CharField(max_length=190, blank=True)
-    allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="allPlayersRelName")
-    missingPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="missingPlayersRelName", blank=True)
+    allPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="allPlayersRelName"
+    )
+    missingPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="missingPlayersRelName", blank=True
+    )
 
     currentPlayers = models.CharField(max_length=100, blank=True)
     seatOffset = models.PositiveSmallIntegerField(blank=False, default=0)
     maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
 
     winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="game_winner_relName", blank=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="game_winner_relName",
+        blank=True,
     )
 
     turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
     phase = models.PositiveSmallIntegerField(null=False, blank=False, default=9)
 
-    kickoutDuration = models.PositiveSmallIntegerField(null=False, blank=False, default=200)
+    kickoutDuration = models.PositiveSmallIntegerField(
+        null=False, blank=False, default=200
+    )
     gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
 
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="game_creator_relName"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="game_creator_relName",
     )
     host = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="game_host_relName"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="game_host_relName",
     )
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
     zoomLevels = models.CharField(max_length=30, blank=True)
-    notificationSuppression = models.CharField(max_length=30, blank=False, default="000000")
+    notificationSuppression = models.CharField(
+        max_length=30, blank=False, default="000000"
+    )
 
     rewindConsent = models.CharField(max_length=10, blank=True)
     statsExcludeConsent = models.CharField(max_length=10, blank=False, default="00")
@@ -261,10 +291,16 @@ class FCM_Game(models.Model):
 
     playersMoveData = models.TextField(blank=True)
 
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="kickedPlayersRelName", blank=True)
-    invitedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="invitedPlayersRelName", blank=True)
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="kickedPlayersRelName", blank=True
+    )
+    invitedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="invitedPlayersRelName", blank=True
+    )
     playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="playersWithChatNotificationName", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="playersWithChatNotificationName",
+        blank=True,
     )
 
     player0notes = models.TextField(blank=True)
@@ -280,26 +316,38 @@ class FCM_Game(models.Model):
     # preMoveData = models.TextField(blank=True)
 
     relatedTournament = models.ForeignKey(
-        FCM_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="tournament_relName"
+        FCM_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tournament_relName",
     )
-    
+
     relatedMiniTournament = models.ForeignKey(
-        Mini_Tournaments, on_delete=models.SET_NULL, null=True, blank=True, related_name="minitournamentFCM_relName"
+        Mini_Tournaments,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="minitournamentFCM_relName",
     )
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
 
     kickoutFlexiData = models.TextField(blank=True)
-    
+
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
-#    def __str__(self):
-#        allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
-#        return f"{getattr(self, 'id')}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"
+    #    def __str__(self):
+    #        allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
+    #        return f"{getattr(self, 'id')}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"
 
     def __str__(self):
         # Use currentPlayers if available, otherwise fall back to gameName and status
-        players = self.currentPlayers if self.currentPlayers else f"{self.allPlayers.count()} players"
+        players = (
+            self.currentPlayers
+            if self.currentPlayers
+            else f"{self.allPlayers.count()} players"
+        )
         return f"Game {getattr(self, 'id')}: {self.getGameName()} : {players} : {self.gameStatus} : {self.currentTurnString()}"
 
     def currentTurnString(self):
@@ -316,12 +364,22 @@ class FCM_Game(models.Model):
         return _gameName
 
     def isMyMove(self, loggedInPlayerUsername="ADFSADASDASDASDASADADA"):
-        allowed_players = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        allowed_players = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
 
         if not self.currentPlayers or self.currentPlayers == "":
             return True
 
-        if loggedInPlayerUsername in self.currentPlayers or self.currentPlayers in allowed_players:
+        if (
+            loggedInPlayerUsername in self.currentPlayers
+            or self.currentPlayers in allowed_players
+        ):
             return True
 
         return False
@@ -332,7 +390,14 @@ class FCM_Game(models.Model):
             return False
 
         # Use a set for faster membership testing
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
         return (
             not self.currentPlayers
             or loggedInPlayerUsername in self.currentPlayers
@@ -351,14 +416,14 @@ class FCM_Game(models.Model):
     def kickoutRequired(self):
         # USE the prefetched allPlayers list instead of .values_list()
         all_player_usernames = [p.username for p in self.allPlayers.all()]
-        
-        # Also ensure getCurrentPlayersArray() doesn't hit the DB. 
+
+        # Also ensure getCurrentPlayersArray() doesn't hit the DB.
         # If it does, extract the username from self.currentPlayers string directly.
-        current_username = self.getCurrentPlayersArray()[0] 
+        current_username = self.getCurrentPlayersArray()[0]
 
         return SF_kickoutRequired(
             self.gameStatus,
-            all_player_usernames, # Pass the Python list, not a QuerySet
+            all_player_usernames,  # Pass the Python list, not a QuerySet
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
@@ -369,9 +434,11 @@ class FCM_Game(models.Model):
         # USE len() instead of .count() to use the prefetch cache
         all_players_list = list(self.allPlayers.all())
         all_players_count = len(all_players_list)
-        
+
         remainingPlayersInt = self.maxPlayers - all_players_count
-        remainingPlayers = "".join([str(all_players_count + i + 1) for i in range(remainingPlayersInt)])
+        remainingPlayers = "".join(
+            [str(all_players_count + i + 1) for i in range(remainingPlayersInt)]
+        )
 
         # Use select_related('winner') in the view to make this 0 hits
         winner = self.winner.username if self.winner else ""
@@ -384,15 +451,22 @@ class FCM_Game(models.Model):
         if self.gameStatus in ["WAITING", "AVAILABLE", "ACTIVE", "PRIVATE"]:
             now = int(time.time())
             # Use simple math; avoid repeated int() casts if possible
-            elapsedTotalSeconds = now - (int(self.created) // 1000 if self.gameStatus != "ACTIVE" else int(self.latestUpdate) // 1000)
-            
+            elapsedTotalSeconds = now - (
+                int(self.created) // 1000
+                if self.gameStatus != "ACTIVE"
+                else int(self.latestUpdate) // 1000
+            )
+
             days, rem = divmod(elapsedTotalSeconds, 86400)
             hours, rem = divmod(rem, 3600)
             mins, secs = divmod(rem, 60)
 
-            if days > 0: latestUpdateElapsedTimeString += f"{days}d"
-            if hours > 0: latestUpdateElapsedTimeString += f" {hours}h"
-            if mins > 0: latestUpdateElapsedTimeString += f" {mins}m"
+            if days > 0:
+                latestUpdateElapsedTimeString += f"{days}d"
+            if hours > 0:
+                latestUpdateElapsedTimeString += f" {hours}h"
+            if mins > 0:
+                latestUpdateElapsedTimeString += f" {mins}m"
             latestUpdateElapsedTimeString += f" {secs}s"
 
         # !!! WARNING: isMyMove probably has queries. Check its code!
@@ -401,17 +475,20 @@ class FCM_Game(models.Model):
         # Efficiency: use the prefetched lists already in memory
         missing_players_ids = {p.id for p in self.missingPlayers.all()}
         chat_notify_ids = {p.id for p in self.playersWithChatNotification.all()}
-        
+
         involvedPlayer = False
         chatNotification = False
         if loggedInUser:
-            involvedPlayer = (loggedInUser in all_players_list and loggedInUser.id not in missing_players_ids)
-            chatNotification = (loggedInUser.id in chat_notify_ids)
+            involvedPlayer = (
+                loggedInUser in all_players_list
+                and loggedInUser.id not in missing_players_ids
+            )
+            chatNotification = loggedInUser.id in chat_notify_ids
 
         # Pace and Options (0 hits if these are just CharFields/TextFields)
         gamePaceString = SR_gamePaceString(self.gamePace)
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(self.startingOptions)
-        kickoutRequiredNum = self.kickoutRequired() # Inspect this for queries!
+        kickoutRequiredNum = self.kickoutRequired()  # Inspect this for queries!
 
         # Check for Shadow/AI without hitting the DB
         all_usernames = {u.username for u in all_players_list}
@@ -500,7 +577,9 @@ class FCM_Game(models.Model):
                     moduleRange.append(startingOptions[i])
             for i in range(len(moduleRange)):
                 moduleRange[i] = int(moduleRange[i][-2:])
-            numberOfModulesToPick = random.randrange(moduleRange[0], moduleRange[1] + 1, 1)
+            numberOfModulesToPick = random.randrange(
+                moduleRange[0], moduleRange[1] + 1, 1
+            )
             for i in range(numberOfModulesToPick):
                 currentIndex = random.randrange(0, len(availableModules), 1)
                 selectedModules.append(str(availableModules.pop(currentIndex)))
@@ -511,7 +590,9 @@ class FCM_Game(models.Model):
                 chosenDistOption = distOptions[currentIndex]
                 if chosenDistOption != "":
                     selectedModules.append(chosenDistOption)
-            self.startingOptions = self.startingOptions + "," + (",".join(selectedModules))
+            self.startingOptions = (
+                self.startingOptions + "," + (",".join(selectedModules))
+            )
 
         self.gameStatus = "ACTIVE"
         _currentPlayers = ""
@@ -525,40 +606,57 @@ class FCM_Game(models.Model):
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
             player_usernames = [p.username for p in self.allPlayers.all()]
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
-            
-            playerListToNotify = list(self.allPlayers.all().values_list("username", flat=True))
+
+            playerListToNotify = list(
+                self.allPlayers.all().values_list("username", flat=True)
+            )
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(request, "FCM", playerListToNotify, getattr(self, "id"), self)
-
-
+            SN_M_sendGameStartNotification(
+                request, "FCM", playerListToNotify, getattr(self, "id"), self
+            )
 
     # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
     def getAllPlayersOrderedySeat(self, withoutBots=False, useNewCode=True):
         if useNewCode:
+            all_players_list = list(self.allPlayers.all())
+            # playerList = [
+            #    username
+            #    for username in self.allPlayers.all().values_list("username", flat=True)
+            #    if username != "FCMtourneyAdmin"
+            # ]
             playerList = [
-                username
-                for username in self.allPlayers.all().values_list("username", flat=True)
-                if username != "FCMtourneyAdmin"
+                p.username
+                for p in all_players_list
+                if p.username != "FCMtourneyAdmin"
             ]
             random.Random(self.seatOffset).shuffle(playerList)
             if withoutBots:
                 return playerList
 
-            missingPlayerList = list(self.missingPlayers.all().values_list("username", flat=True))
+            #missingPlayerList = list(
+            #    self.missingPlayers.all().values_list("username", flat=True)
+            #)
+            missing_players_usernames = [p.username for p in self.missingPlayers.all()]
             # REPLACE WITH KICKOUTS
             for count, player in enumerate(playerList):
-                if player in missingPlayerList:
+                if player in missing_players_usernames:
                     playerList[count] = "FcmBot"  # + str(count)
             return playerList
 
         ############ OLD CODE -- NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
         else:
             playerString = ",".join(
-                [player.username for player in self.allPlayers.all() if player.username != "FCMtourneyAdmin"]
+                [
+                    player.username
+                    for player in self.allPlayers.all()
+                    if player.username != "FCMtourneyAdmin"
+                ]
             )
             playerList = playerString.split(",")
             if self.seatOffset > 0:
@@ -567,7 +665,9 @@ class FCM_Game(models.Model):
             if withoutBots:
                 return playerList
 
-            missingPlayerString = ",".join([player.username for player in self.missingPlayers.all()])
+            missingPlayerString = ",".join(
+                [player.username for player in self.missingPlayers.all()]
+            )
             missingPlayerList = missingPlayerString.split(",")
 
             # REPLACE WITH KICKOUTS
@@ -608,12 +708,20 @@ class FCM_Game(models.Model):
         except (json.JSONDecodeError, ValueError):
             # Scaffold default structure
             allPlayers = self.getAllPlayersOrderedySeat(True, True)
-            missing_players = set(self.missingPlayers.values_list("username", flat=True))
+            missing_players = set(
+                self.missingPlayers.values_list("username", flat=True)
+            )
             # In a tournament, don't remove missing players, as FCMtA plays for them
             if self.relatedTournament:
                 missing_players = {}
             return [
-                [playerName, [-1] if playerName not in missing_players else [-99], "", []] for playerName in allPlayers
+                [
+                    playerName,
+                    [-1] if playerName not in missing_players else [-99],
+                    "",
+                    [],
+                ]
+                for playerName in allPlayers
             ]
 
     def getCurrentSimulPlayersV2(self):
@@ -630,11 +738,15 @@ class FCM_Game(models.Model):
 
         # Remove missing players
         missing_players = set(self.missingPlayers.values_list("username", flat=True))
-        current_players = [username for username in current_players if username not in missing_players]
+        current_players = [
+            username for username in current_players if username not in missing_players
+        ]
 
         # Remove players with move data in a single pass using a list comprehension
         current_players_str = ",".join(
-            username for username in current_players if not self.hasValidActualMoveData(username)
+            username
+            for username in current_players
+            if not self.hasValidActualMoveData(username)
         )
 
         return current_players_str
@@ -655,7 +767,12 @@ class FCM_Game(models.Model):
             return False
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name), -1
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
         )
         if arrIdx == -1:
             return False  # Player's move data not found
@@ -677,13 +794,22 @@ class FCM_Game(models.Model):
             return False
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name), -1
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
         )
         if arrIdx == -1:
             return False  # Player's move data not found
         playerMoveArr = playersMoveDataArr[arrIdx]
         # If no phase/wrong phase / empty data is set, then there's no move Data
-        if playerMoveArr[1] == [-1] or 9 not in playerMoveArr[1] or playerMoveArr[3] == []:
+        if (
+            playerMoveArr[1] == [-1]
+            or 9 not in playerMoveArr[1]
+            or playerMoveArr[3] == []
+        ):
             return False
         if (
             len(playerMoveArr) >= 4
@@ -759,13 +885,23 @@ class FCM_Game(models.Model):
                 user.username = name  # Set the desired username
                 request.user = user
                 # Mock the site
-                site = Site.objects.get_current()  # Or create a mock Site object if needed
+                site = (
+                    Site.objects.get_current()
+                )  # Or create a mock Site object if needed
                 request.site = site  # Attach the site to the request
-                SN_sendNextTurnNotification(request, "FCM", [name], getattr(self, "id"), self.getGameName(), self, "0")
+                SN_sendNextTurnNotification(
+                    request,
+                    "FCM",
+                    [name],
+                    getattr(self, "id"),
+                    self.getGameName(),
+                    self,
+                    "0",
+                )
                 return False
 
             return True
-        
+
         if phase == 4:
             moveData = moveArr[3]
             # Make sure it's an array, Make sure it has a length of 3, Make sure the first element is an array, second element is an array, and third element is a single int of 0,1,2
@@ -776,15 +912,15 @@ class FCM_Game(models.Model):
                 validData = False
             if not isinstance(moveData[2], int) or moveData[2] not in [0, 1, 2]:
                 validData = False
-            
+
             if not validData:
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase3.4 - GameID: {getattr(self, 'id')} - self.phase: {self.phase} - input phase: {phase} -- moveArr: {moveArr}"
                 SN_sendAdminErrorMessage("", message)
                 return False
-            
+
             if moveData[2] == 1 or moveData[2] == 2:
                 return True
-            
+
             return False
 
         # Now phase is 7 or 9, AND there is move data
@@ -802,7 +938,9 @@ class FCM_Game(models.Model):
                 SN_sendAdminErrorMessage("", message)
                 return False
             # First arr must be an arr then an arr
-            if not isinstance(moveData[0][0], list) or not isinstance(moveData[0][1], list):
+            if not isinstance(moveData[0][0], list) or not isinstance(
+                moveData[0][1], list
+            ):
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase6 - GameID: {getattr(self, 'id')} - self.phase: {self.phase} - input phase: {phase} -- moveArr: {moveArr}"
                 SN_sendAdminErrorMessage("", message)
                 return False
@@ -833,10 +971,20 @@ class FCM_Game(models.Model):
     def insertPlayerMoveData(self, name, phasesArr, moveArr):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name), -1
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
         )
 
-        playersMoveDataArr[arrIdx] = [name, phasesArr, str(int(time.time()) * 1000), moveArr]
+        playersMoveDataArr[arrIdx] = [
+            name,
+            phasesArr,
+            str(int(time.time()) * 1000),
+            moveArr,
+        ]
 
         self.playersMoveData = json.dumps(playersMoveDataArr)
 
@@ -845,18 +993,37 @@ class FCM_Game(models.Model):
     def getCompressedMoveArr(self, name, forceReturnForPresetCleanup=False):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name), -1
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
         )
         # Only return the move if it is valid for current phase OR has a preset-clenaup
-        if self.isThisValidActualMoveArrForPhase(self.phase, playersMoveDataArr[arrIdx]) or forceReturnForPresetCleanup:
+        if (
+            self.isThisValidActualMoveArrForPhase(
+                self.phase, playersMoveDataArr[arrIdx]
+            )
+            or forceReturnForPresetCleanup
+        ):
             return base64.b64encode(
-                gzip.compress(json.dumps(playersMoveDataArr[arrIdx], separators=(",", ":")).encode("utf-8"))
+                gzip.compress(
+                    json.dumps(
+                        playersMoveDataArr[arrIdx], separators=(",", ":")
+                    ).encode("utf-8")
+                )
             ).decode("utf-8")
 
     def deleteSinglePlayersMove(self, name):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name), -1
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
         )
         playersMoveDataArr[arrIdx] = [name, [-1], "", []]
         self.playersMoveData = json.dumps(playersMoveDataArr)
@@ -889,7 +1056,11 @@ class FCM_Game(models.Model):
         jsonResponse = {
             "allPlayersMoved": True,
             "moveData": base64.b64encode(
-                gzip.compress(json.dumps(playersMoveDataArr, separators=(",", ":")).encode("utf-8"))
+                gzip.compress(
+                    json.dumps(playersMoveDataArr, separators=(",", ":")).encode(
+                        "utf-8"
+                    )
+                )
             ).decode("utf-8"),
         }
         # Don't clear moves at end of payday to preserve fridge data
@@ -1181,7 +1352,9 @@ class FCM_Game(models.Model):
         missing_players = set(self.missingPlayers.values_list("username", flat=True))
         if self.relatedTournament:
             missing_players = {}
-        _currentPlayers = [username for username in _currentPlayers if username not in missing_players]
+        _currentPlayers = [
+            username for username in _currentPlayers if username not in missing_players
+        ]
 
         # If any play has a move, then remove them
         playersToRemove = []
@@ -1306,7 +1479,10 @@ class FCM_Game(models.Model):
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
             possibleHost = (
-                self.allPlayers.all().filter(~Q(missingPlayersRelName=getattr(self, "id"))).order_by("?").first()
+                self.allPlayers.all()
+                .filter(~Q(missingPlayersRelName=getattr(self, "id")))
+                .order_by("?")
+                .first()
             )
             self.host = possibleHost
             self.save()
@@ -1317,7 +1493,9 @@ class FCM_Game(models.Model):
             self.statsExcludeConsent = "0" * self.maxPlayers
         seatToChange = self.seatPosition(_username, True)
         self.statsExcludeConsent = (
-            self.statsExcludeConsent[:seatToChange] + "1" + self.statsExcludeConsent[seatToChange + 1 :]
+            self.statsExcludeConsent[:seatToChange]
+            + "1"
+            + self.statsExcludeConsent[seatToChange + 1 :]
         )
         # CHECK TOTAL CONSENT
         totalConsent = 0
@@ -1337,7 +1515,9 @@ class FCM_Game(models.Model):
             if row[0] == "BYEPLAYERS":
                 finishedGames += 1
             else:
-                game = FCM_Game.objects.get(id=row[self.relatedTournament.maxGamePlayers])
+                game = FCM_Game.objects.get(
+                    id=row[self.relatedTournament.maxGamePlayers]
+                )
                 if game.gameStatus == "FINISHED":
                     finishedGames += 1
         if finishedGames == len(tournamentProgressionDataArray[-1]):
@@ -1365,7 +1545,9 @@ class FCM_Game(models.Model):
         if self.relatedTournament:
             SF_M_ProcessTournamentEndGame(request, "FCM", self, [_winner])
         elif self.relatedMiniTournament:
-            SF_M_ProcessMiniTournamentEndGame(request, self.relatedMiniTournament, self, [_winner], finalPositions)
+            SF_M_ProcessMiniTournamentEndGame(
+                request, self.relatedMiniTournament, self, [_winner], finalPositions
+            )
 
     def getGameCode(self):
         return "FCM"
@@ -1379,32 +1561,39 @@ class FCM_Game(models.Model):
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
         return self.deleteGameVotes
-    
+
     def addDeleteVote(self, playerName):
         """Records the vote of a player."""
         # Double check player is in the game
         if playerName not in [p.username for p in self.allPlayers.all()]:
             return False  # Player not in the game
-        
+
         # Ensure deleteGameVotes is a dictionary
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # If the playerName isn't found, wipe the votes and make sure all players are added
         if playerName not in self.deleteGameVotes:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # Add the vote
         self.deleteGameVotes[playerName] = True
         self.save()
         return True
+
 
 # class FCM_Chat(models.Model):
 #    welcomeChat = '{"name":"WelcomeBot","timestamp":' + str(int(time.time(

@@ -1185,24 +1185,25 @@ def index(request):
     if not request.user.is_authenticated:
         return render(request, "Lobby/index.html")
     
-    start_time = time.time()
+    #start_time = time.time()
     user = request.user
     user_id = user.id
-    show_timestamps = user.username in ["admin", "DodgerB"]
-    
+    #show_timestamps = user.username in ["admin", "DodgerB"]
+    #
+    #def print_timestamp(label):
+    #    if show_timestamps:
+    #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
+
     list_type = request.session.pop("listType", "current")
     tournament_models = {"FCM": FCM_Tournament, "HC": HC_Tournament, "Bus": Bus_Tournament, "AQY": AQY_Tournament, "IND": IND_Tournament}
 
-    def print_timestamp(label):
-        if show_timestamps:
-            print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
 
     # --- Step 1: Optimized Blacklist (2 Queries total) ---
     profile = Profile.objects.prefetch_related("blacklistedPlayers").get(user=user)
     blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
     # Fetch who blocked the current user ONCE
     blocked_by_user_ids = set(Profile.objects.filter(blacklistedPlayers=user).values_list("user_id", flat=True))
-    print_timestamp("Step 1: Blacklists fetched")
+    #print_timestamp("Step 1: Blacklists fetched")
     
     # --- Step 2: Deep Prefetching (Essential for Step 3) ---
     all_user_games = []
@@ -1228,7 +1229,7 @@ def index(request):
         all_user_games.extend(list(base_query))
 
     all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
-    print_timestamp("Step 2: Game queries complete")
+    #print_timestamp("Step 2: Game queries complete")
     
     # --- Step 3: Categorize (Target: 0 new queries) ---
     available_games, current_games, waiting_games, invitations_games, finished_games = [], [], [], [], []
@@ -1280,14 +1281,14 @@ def index(request):
         elif is_invited and status in ["WAITING", "PRIVATE"]:
             invitations_games.append(serialized)
 
-    print_timestamp("Step 3: Categorization complete")
+    #print_timestamp("Step 3: Categorization complete")
 
     # --- Step 4: Mini Tournaments (Use select_related to save hits) ---
     # Combine these or use more prefetching if serialize() hits related objects
     available_MT = [item.serialize() for item in Mini_Tournaments.objects.filter(tournamentStatus="OP").order_by("-created")]
     current_MT = [item.serialize() for item in Mini_Tournaments.objects.filter(tournamentStatus="IP", startingPlayers=user)]
     # ... (Keep other MT fetches similar)
-    print_timestamp("Step 4: MT fetched")
+    #print_timestamp("Step 4: MT fetched")
 
     # --- Step 5: Caching Tournament Availability ---
     cache_key = f"lobby_tours_check"
@@ -1298,7 +1299,7 @@ def index(request):
         available_tournaments = list(set(available_tournaments + main_tours))
         cache.set(cache_key, available_tournaments, 60) # Cache for 1 minute
 
-    print_timestamp("Final prep complete")
+    #print_timestamp("Final prep complete")
 
     return render(request, "Lobby/lobby.html", {
         "availableGamesList": available_games,
