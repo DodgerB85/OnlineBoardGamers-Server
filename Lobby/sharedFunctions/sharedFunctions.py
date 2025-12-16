@@ -312,67 +312,6 @@ def SF_kickoutRequired(gameStatus, allPlayers, latestUpdate, kickoutDuration, ki
     # ("no check")
     return 0
 
-
-# def SF_getNextURL(currentGamesList, username, game_id):
-#    # Sort the games by latestUpdate in descending order
-#    currentGamesList.sort(key=lambda instance: instance.latestUpdate, reverse=True)
-#
-#    # Filter currentGamesList based on isMyMove function and retrieve the next game URL
-#    nextURL = "/"
-#    filteredGamesList = []
-#    for game in currentGamesList:
-#        if game.isMyMove(username):
-#            filteredGamesList.append(game)
-#            if len(filteredGamesList) >= 2:
-#                game0 = filteredGamesList[0].serialize()
-#                game1 = filteredGamesList[1].serialize()
-#                nextID = game0["gameID"]
-#                nextGame = game0["game"]
-#                if game_id == nextID:
-#                    nextID = game1["gameID"]
-#                    nextGame = game1["game"]
-#                nextURL = f"/{nextGame}/{nextID}/"
-#                break
-#    return nextURL
-
-
-def SF_getNextURL(currentGamesList, username, game_id):
-    # Sort the games by latestUpdate in descending order
-    currentGamesList.sort(key=lambda instance: instance.latestUpdate, reverse=True)
-
-    # Filter currentGamesList based on isMyMove function
-    filteredGamesList = [game for game in currentGamesList if game.quickIsMyMove(username)]
-
-    # Handle cases when there are no filtered games
-    if not filteredGamesList:
-        return "/"
-    if len(filteredGamesList) == 1:
-        nextGame = filteredGamesList[0]#.serialize()
-        nextID = nextGame.id
-        if nextID == game_id:
-            return "/"
-        else:
-            nextGameCode = nextGame.getGameCode()
-            return f"/{nextGameCode}/{nextID}/"
-
-    # Get the index of the game with the specified game_id
-    index = next((i for i, game in enumerate(filteredGamesList) if game.id == game_id), None)
-
-    # Determine the next game details based on the index
-    if index is None or index >= len(filteredGamesList) - 1:
-        nextGame = filteredGamesList[0]#.serialize()
-    else:
-        nextGame = filteredGamesList[index + 1]#.serialize()
-
-    # Construct the nextURL using the next game details
-    #nextID = nextGame["gameID"]
-    nextID = nextGame.id
-    nextGameCode = nextGame.getGameCode()
-    nextURL = f"/{nextGameCode}/{nextID}/"
-
-    return nextURL
-
-
 def SF_getSecondsToNextKickout(latestUpdate, kickoutDuration):
     startPeriodinSeconds = int(latestUpdate) / 1000
     durationPeriodInSeconds = 9999999

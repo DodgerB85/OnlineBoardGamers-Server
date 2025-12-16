@@ -117,7 +117,7 @@
   initData.name = '{{ name }}';
   initData.chatData = "{{ chatData }}";
 
-  initData.nextURL = '{{ nextURL }}';
+  initData.nextURL = '{{ nextURL|safe }}';
   {% if TGZminimalText %}
   initData.TGZminimalText = true;
   {% endif %}
