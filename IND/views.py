@@ -32,7 +32,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .models import IND_Game
-from Lobby.models import User  # , Profile
+from Lobby.models import User, Profile
 from FCM.models import FCM_Game
 from HC.models import HC_Game
 from Bus.models import Bus_Game
@@ -209,13 +209,31 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     # return render(request, "IND/showINDgame.html")
     try:
-        currentGame = IND_Game.objects.get(id=game_id)
+        currentGame = IND_Game.objects.select_related(
+            "host", "relatedTournament", "creator"
+        ).prefetch_related(
+            "allPlayers", 
+            "missingPlayers", 
+            "playersWithChatNotification"
+        ).get(id=game_id)
     except IND_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
+
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    userObj = request.user
+    username = userObj.username
+    
+    start_time = time.time()
+    show_timestamps = username in ["admin", "DodgerB"]
+    
+    #def print_timestamp(label):
+    #    if show_timestamps:
+    #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
 
     # No2 it is a proper started game, so set up for not logged in
     gameID = getattr(currentGame, "id")
@@ -249,11 +267,24 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "settingsDEBUG": settings.DEBUG,
     }
 
+    #print_timestamp("returnData 1")
+
     if not request.user.is_authenticated:
         return render(request, "IND/showINDgame.html", returnData)
 
     # Now you are logged in
-    name = request.user.username
+    user_id = userObj.id
+    
+    user_profile = Profile.objects.get(user=userObj) 
+    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
+    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+
+    is_in_all = user_id in all_player_ids
+    is_missing = user_id in missing_player_ids
+    involvedPlayer = is_in_all and not is_missing
+    if username == "BotKickStarter":
+        involvedPlayer = True
+        
     chatData = currentGame.chatData
 
     latestUpdate = currentGame.latestUpdate
@@ -273,9 +304,11 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
 
+    #print_timestamp("nextURL")
+
     preferredINDoptions = (
-        json.loads(request.user.profile.preferredINDoptions)
-        if request.user.profile.preferredINDoptions != ""
+        json.loads(user_profile.preferredINDoptions)
+        if user_profile.preferredINDoptions != ""
         else [-1, 0, 0, 1, 1, 1]
     )
 
@@ -287,14 +320,14 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
     ## Get Chat notification
     chatNotification = False
-    if request.user in currentGame.playersWithChatNotification.all():
+    if user_id in chat_notify_ids:
         chatNotification = True
         currentGame.playersWithChatNotification.remove(request.user)
         currentGame.save()
 
     returnData.update(
         {
-            "name": name,
+            "name": username,
             "chatData": chatData,
             "latestUpdateLiteral": latestUpdate,
             "nextURL": nextURL,
@@ -304,43 +337,42 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         }
     )
 
-    involvedPlayer = (
-        request.user in currentGame.allPlayers.all() and request.user not in currentGame.missingPlayers.all()
-    )
-    if request.user.username == "BotKickStarter":
-        involvedPlayer = True
+    #print_timestamp("returnData 2")
 
     if not involvedPlayer:
         return render(request, "IND/showINDgame.html", returnData)
 
-    pov = currentGame.seatPosition(request.user.username)
+    pov = currentGame.seatPosition(username)
     if request.user.username == "BotKickStarter":
         pov = -1
     secondsToNextKickout = currentGame.getSecondsToNextKickout()
 
     kickoutRequired = currentGame.kickoutRequired()
 
-    myMove = currentGame.isMyMove(request.user.username)
+    myMove = currentGame.isMyMove(username)
 
     ## Get the Notes for the user
-    seat_position = currentGame.seatPosition(request.user.username)
-    notes_dict = {
-        0: currentGame.player0notes,
-        1: currentGame.player1notes,
-        2: currentGame.player2notes,
-        3: currentGame.player3notes,
-        4: currentGame.player4notes,
-    }
-    notes = notes_dict.get(seat_position, "")
+    notes_mapping = {
+            0: currentGame.player0notes,
+            1: currentGame.player1notes,
+            2: currentGame.player2notes,
+            3: currentGame.player3notes,
+            4: currentGame.player4notes,
+        }
+    notes = notes_mapping.get(pov, "")
 
-    liveNotification = request.user.profile.liveNotification
+    #print_timestamp("notes")
+
+    liveNotification = user_profile.liveNotification
     myZoomLevel = 100
     if pov >= 0:
         myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
     isHost = False
-    if currentGame.host == request.user:
+    if currentGame.host == userObj:
         isHost = True
+
+    #print_timestamp("returnData 3")
 
     ## Involved Player
     returnData.update(

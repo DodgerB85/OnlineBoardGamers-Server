@@ -207,9 +207,10 @@ class TGZ_Game(models.Model):
 
     def kickoutRequired(self):
         # return True
+        all_player_usernames = [p.username for p in self.allPlayers.all()]
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            all_player_usernames,
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
@@ -327,29 +328,42 @@ class TGZ_Game(models.Model):
 
     # takes in a USERNAME
     def seatPosition(self, name, withoutBots=False):
-        # If not a player, return -1
-        if name not in self.allPlayers.all().values_list("username", flat=True):
-            return -1
-
+        # 1. Get the list (this now uses the prefetched cache we optimized earlier)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        
+        # 2. Try to find the index directly in the Python list
         try:
             return playerList.index(name)
-        except Exception:
+        except (ValueError, TypeError):
+            # ValueError occurs if the name is not in the list
             return -1
 
+
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        playerList = list(self.allPlayers.exclude(username="TGZtourneyAdmin").values_list("username", flat=True))
+        # 1. Access the prefetched cache (0 hits)
+        all_players_prefetched = list(self.allPlayers.all())
+        
+        # 2. Filter out Admin in Python memory
+        playerList = [
+            p.username for p in all_players_prefetched 
+            if p.username != "TGZtourneyAdmin"
+        ]
+        
+        # 3. Shuffle using the seed
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
         if withoutBots:
             return playerList
 
-        missingPlayerList = self.missingPlayers.all().values_list("username")
+        # 4. Use prefetched missingPlayers cache (0 hits)
+        # Convert to a set of usernames for faster lookup
+        missing_usernames = {p.username for p in self.missingPlayers.all()}
 
-        # REPLACE WITH KICKOUTS
+        # 5. Replace with Bots in Python memory
         for count, player in enumerate(playerList):
-            if player in missingPlayerList:
-                playerList[count] = "TgzBot" + str(count)
+            if player in missing_usernames:
+                playerList[count] = f"TgzBot{count}"
+                
         return playerList
 
     def startGame(self, request):

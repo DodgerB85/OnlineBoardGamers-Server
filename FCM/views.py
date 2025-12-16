@@ -596,9 +596,7 @@ def showGame(request, game_id):
             currentMove = currentGame.getCompressedMoveArr(request.user.username, True)
 
         #print_timestamp("Step 4.6: currentMove obtained")
-        
-        pov = currentGame.seatPosition(request.user.username) 
-        
+               
         # Mapping for notes
         notes_mapping = {
             0: currentGame.player0notes,
