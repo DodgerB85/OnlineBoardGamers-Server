@@ -25,7 +25,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 from .models import TGZ_Game
-from Lobby.models import User  # , Profile
+from Lobby.models import User, Profile
 from FCM.models import FCM_Game
 from HC.models import HC_Game
 from Bus.models import Bus_Game
@@ -502,13 +502,29 @@ def db_mutex(name, timeout=10):
 
 def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     try:
-        currentGame = TGZ_Game.objects.get(id=game_id)
+        currentGame = TGZ_Game.objects.select_related(
+            "host", "relatedMainTournament", "creator",
+        ).prefetch_related(
+            "allPlayers", 
+            "missingPlayers", 
+            "playersWithChatNotification"
+        ).get(id=game_id)
     except TGZ_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    userObj = request.user
+    username = userObj.username
+    
+    #start_time = time.time()
+    #show_timestamps = username in ["admin", "DodgerB"]
+    #def print_timestamp(label):
+    #    if show_timestamps:
+    #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
 
     # Noe it is a proper started game, so set up for not logged in
     gameID = getattr(currentGame, "id")
@@ -530,21 +546,29 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         "latestUpdateLiteral": currentGame.latestUpdate,
         "settingsDEBUG": settings.DEBUG,
     }
+    
+    #print_timestamp("After not logged in setup")
 
     if not request.user.is_authenticated:
         return render(request, "TGZ/showTGZgame.html", returnData)
 
     # Now you are logged in
-    name = request.user.username
-    chatData = currentGame.chatData
+    user_id = userObj.id
+    
+    user_profile = Profile.objects.get(user=userObj) 
+    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
+    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
 
-    involvedPlayer = False
-    if request.user in currentGame.allPlayers.all() and (request.user not in currentGame.missingPlayers.all()):
+    is_in_all = user_id in all_player_ids
+    is_missing = user_id in missing_player_ids
+    involvedPlayer = is_in_all and not is_missing
+    if username == "BotKickStarter":
         involvedPlayer = True
-    if request.user.username == "BotKickStarter":
+    if username == "TGZtourneyAdmin" and currentGame.relatedMainTournament is not None:
         involvedPlayer = True
-    if request.user.username == "TGZtourneyAdmin" and currentGame.externalTournamentGame:
-        involvedPlayer = True
+            
+    preferredTGZcolour = user_profile.preferredTGZcolour
+    chatData = currentGame.chatData
 
     ## Get the next URL
     game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
@@ -560,57 +584,59 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             ]
         )
     )
+    
+    #print_timestamp("After getting currentGamesList")
 
     nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
+    
+    #print_timestamp("After getting nextURL")
 
     chatNotification = False
-    if request.user in currentGame.playersWithChatNotification.all():
+    if user_id in chat_notify_ids:
         chatNotification = True
         currentGame.playersWithChatNotification.remove(request.user)
         currentGame.save()
 
     returnData.update(
         {
-            "name": name,
+            "name": username,
             "chatData": chatData,
             "nextURL": nextURL,
-            "TGZminimalText": request.user.profile.TGZminimalText,
+            "TGZminimalText": user_profile.TGZminimalText,
             "chatNotification": chatNotification,
         }
     )
 
     if not involvedPlayer:
         return render(request, "TGZ/showTGZgame.html", returnData)
+    
+    #print_timestamp("After not involvedPlayer")
 
-    pov = currentGame.seatPosition(request.user.username)
-    if request.user.username == "BotKickStarter":
+    pov = currentGame.seatPosition(username)
+    if username == "BotKickStarter":
         pov = 0
-    if request.user.username == "TGZtourneyAdmin" and currentGame.externalTournamentGame:
+    if username == "TGZtourneyAdmin" and currentGame.externalTournamentGame:
         pov = 0
     secondsToNextKickout = currentGame.getSecondsToNextKickout()
 
     kickoutRequired = currentGame.kickoutRequired()
 
-    myMove = currentGame.isMyMove(request.user.username)
+    myMove = currentGame.isMyMove(username)
 
     # Get the Notes for the user
-    notes = ""
-    if currentGame.seatPosition(request.user.username) == 0:
-        notes = currentGame.player0notes
-    if currentGame.seatPosition(request.user.username) == 1:
-        notes = currentGame.player1notes
-    if currentGame.seatPosition(request.user.username) == 2:
-        notes = currentGame.player2notes
-    if currentGame.seatPosition(request.user.username) == 3:
-        notes = currentGame.player3notes
-    if currentGame.seatPosition(request.user.username) == 4:
-        notes = currentGame.player4notes
+    notes_mapping = {
+            0: currentGame.player0notes,
+            1: currentGame.player1notes,
+            2: currentGame.player2notes,
+            3: currentGame.player3notes,
+            4: currentGame.player4notes,
+        }
+    notes = notes_mapping.get(pov, "")
 
-    liveNotification = request.user.profile.liveNotification
-    if currentGame.startingOptions == "":
-        startingOptions = []
-    else:
-        startingOptions = json.loads(currentGame.startingOptions)
+    #print_timestamp("After getting notes")
+
+    liveNotification = user_profile.liveNotification
+    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
     autoPass = "false"
@@ -630,6 +656,8 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     except:
         myStatsExcludeConsent = "0"
 
+    #print_timestamp("After getting myStatsExcludeConsent")
+
     # Involved Player
     returnData.update(
         {
@@ -642,7 +670,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             "notes": notes,
             "yourTurnAudioType": liveNotification,
             "startingOptions": startingOptions,
-            "preferredTGZcolour": request.user.profile.preferredTGZcolour,
+            "preferredTGZcolour": preferredTGZcolour,
             "autoPass": autoPass,
             "statsExcludedGame": currentGame.statsExcludedGame,
             "myStatsExcludeConsent": myStatsExcludeConsent,

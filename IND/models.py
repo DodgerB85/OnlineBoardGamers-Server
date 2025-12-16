@@ -57,7 +57,9 @@ class IND_Tournament(models.Model):
         settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_IND", blank=True
     )
     nextRoundPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="currentRoundPlayersRelName_IND", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="currentRoundPlayersRelName_IND",
+        blank=True,
     )
 
     maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
@@ -79,7 +81,9 @@ class IND_Tournament(models.Model):
             return True
         return False
 
-    def createTournamentGame(self, request, _roundNumberString, _currentPlayersUsernames):
+    def createTournamentGame(
+        self, request, _roundNumberString, _currentPlayersUsernames
+    ):
         gameName = f"[{self.tournamentName}] {_roundNumberString}"
         playerOrderSeed = random.randint(1000, 32767)
         pace = 30
@@ -168,21 +172,27 @@ class IND_Tournament(models.Model):
 
 
 class IND_Game(models.Model):
-    gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    gameName = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
-    gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    gameDescription = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
     gameStatus = models.CharField(
         max_length=9,
         choices=SR_GAME_STATUS_CHOICES,
         default="AVAILABLE",
-        db_index=True, 
+        db_index=True,
     )
 
     latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
     startingOptions = models.CharField(max_length=20, blank=True)
 
-    allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="INDallPlayersRelName")
+    allPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="INDallPlayersRelName"
+    )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDmissingPlayersRelName", blank=True
     )
@@ -202,7 +212,9 @@ class IND_Game(models.Model):
     turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
     phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
 
-    kickoutDuration = models.PositiveSmallIntegerField(null=False, blank=False, default=200)
+    kickoutDuration = models.PositiveSmallIntegerField(
+        null=False, blank=False, default=200
+    )
     gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
 
     creator = models.ForeignKey(
@@ -221,16 +233,22 @@ class IND_Game(models.Model):
     )
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([0, 0, 0, 0]))
+    zoomLevels = models.CharField(
+        max_length=30, blank=False, default=json.dumps([0, 0, 0, 0])
+    )
 
     # statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
 
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="INDkickedPlayersRelName", blank=True)
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="INDkickedPlayersRelName", blank=True
+    )
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDinvitedPlayersRelName", blank=True
     )
     playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="INDplayersWithChatNotificationName", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="INDplayersWithChatNotificationName",
+        blank=True,
     )
 
     chatData = models.TextField(blank=True)
@@ -247,7 +265,11 @@ class IND_Game(models.Model):
 
     tournamentGame = models.BooleanField(blank=False, default=False)
     relatedTournament = models.ForeignKey(
-        IND_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="tournament_relName_IND"
+        IND_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tournament_relName_IND",
     )
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
@@ -317,7 +339,14 @@ class IND_Game(models.Model):
             return False
 
         # Use a set for faster membership testing
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
         return (
             not self.currentPlayers
             or loggedInPlayerUsername in self.currentPlayers
@@ -335,9 +364,10 @@ class IND_Game(models.Model):
 
     def kickoutRequired(self):
         # return True
+        all_player_usernames = [p.username for p in self.allPlayers.all()]
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            all_player_usernames,
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
@@ -346,7 +376,9 @@ class IND_Game(models.Model):
 
     def serialize(self, loggedInUserObj=None):
         remainingPlayersInt = self.maxPlayers - self.allPlayers.count()
-        remainingPlayers = "".join(str(self.allPlayers.count() + i + 1) for i in range(remainingPlayersInt))
+        remainingPlayers = "".join(
+            str(self.allPlayers.count() + i + 1) for i in range(remainingPlayersInt)
+        )
         winner = self.winner.username if self.winner else ""
         createdString = self.created
         latestUpdateString = self.latestUpdate
@@ -360,15 +392,22 @@ class IND_Game(models.Model):
         ):
             elapsedTotalSeconds = (
                 int(time.time()) - int(self.created) // 1000
-                if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "PRIVATE"
+                if self.gameStatus == "WAITING"
+                or self.gameStatus == "AVAILABLE"
+                or self.gameStatus == "PRIVATE"
                 else int(time.time()) - int(self.latestUpdate) // 1000
             )
-            latestUpdateElapsedTimeString = SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
 
         myMove = loggedInUserObj is not None and self.isMyMove(loggedInUserObj.username)
 
         chatNotification = loggedInUserObj in self.playersWithChatNotification.all()
-        involvedPlayer = loggedInUserObj in self.allPlayers.all() and loggedInUserObj not in self.missingPlayers.all()
+        involvedPlayer = (
+            loggedInUserObj in self.allPlayers.all()
+            and loggedInUserObj not in self.missingPlayers.all()
+        )
 
         gamePaceString = SR_gamePaceString(self.gamePace)
 
@@ -423,45 +462,58 @@ class IND_Game(models.Model):
         }
 
     def isExperiencedGame(self):
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
 
         if 120 in startingOptionsListPrelim:
             return True
         return False
 
     def isLearningGame(self):
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
         if 110 in startingOptionsListPrelim:
             return True
         return False
 
     # takes in a USERNAME
     def seatPosition(self, _username, withoutBots=False):
-        # If not a player, return -1
-        if _username not in self.allPlayers.all().values_list("username", flat=True):
-            return -1
-
+        # 1. Get the list (This uses the prefetched cache if getAllPlayersOrderedySeat is optimized)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        
+        # 2. Use Python's 'index' to find the position. 
+        # This replaces the need for the .values_list() existence check.
         try:
             return playerList.index(_username)
-        except Exception as e:
-            print(e)
+        except (ValueError, TypeError):
+            # ValueError is raised if the username is not in the list
             return -1
 
     # NB withoutBots returns original players. with True it replaces with IndBot
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        playerList = list(self.allPlayers.all().values_list("username", flat=True))
+        # 1. Access the prefetched list in memory (0 hits)
+        all_players_prefetched = list(self.allPlayers.all())
+
+        # 2. Extract usernames in Python (0 hits)
+        playerList = [p.username for p in all_players_prefetched]
+
+        # 3. Shuffle using the existing seed (0 hits)
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
         if withoutBots:
             return playerList
 
-        missingPlayerList = self.missingPlayers.all().values_list("username")
+        # 4. Use prefetched missingPlayers cache (0 hits)
+        # Convert to a set for O(1) membership lookup speed
+        missing_usernames = {p.username for p in self.missingPlayers.all()}
 
-        # REPLACE WITH KICKOUTS
+        # 5. Replace missing players with Bots in Python (0 hits)
         for count, player in enumerate(playerList):
-            if player in missingPlayerList:
-                playerList[count] = "IndBot"  # + str(count)
+            if player in missing_usernames:
+                playerList[count] = "IndBot"
+
         return playerList
 
     def startGame(self, request, isTournamentGame=False):
@@ -477,16 +529,22 @@ class IND_Game(models.Model):
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
             player_usernames = [p.username for p in self.allPlayers.all()]
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
 
-            playerListToNotify = list(self.allPlayers.all().values_list("username", flat=True))
+            playerListToNotify = list(
+                self.allPlayers.all().values_list("username", flat=True)
+            )
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
             # The tournament sends out game start notifications
             if not isTournamentGame:
-                SN_M_sendGameStartNotification(request, "IND", playerListToNotify, getattr(self, "id"), self)
+                SN_M_sendGameStartNotification(
+                    request, "IND", playerListToNotify, getattr(self, "id"), self
+                )
 
     def getCurrentPlayersArray(self):
         _currentPlayersArray = []
@@ -499,7 +557,10 @@ class IND_Game(models.Model):
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
             possibleHost = (
-                self.allPlayers.all().filter(~Q(missingPlayersRelName=getattr(self, "id"))).order_by("?").first()
+                self.allPlayers.all()
+                .filter(~Q(missingPlayersRelName=getattr(self, "id")))
+                .order_by("?")
+                .first()
             )
             self.host = possibleHost
 
@@ -530,10 +591,20 @@ class IND_Game(models.Model):
     def insertPlayerPreMoveData(self, name, phasesArr, moveArr):
         playersPreMoveDataArr = self.getOrScaffoldAllPreMoveData()
         arrIdx = next(
-            (i for i, sub_arr in enumerate(playersPreMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name), -1
+            (
+                i
+                for i, sub_arr in enumerate(playersPreMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
         )
 
-        playersPreMoveDataArr[arrIdx] = [name, phasesArr, str(int(time.time()) * 1000), moveArr]
+        playersPreMoveDataArr[arrIdx] = [
+            name,
+            phasesArr,
+            str(int(time.time()) * 1000),
+            moveArr,
+        ]
 
         self.playersPreMoveData = json.dumps(playersPreMoveDataArr)
 
@@ -546,14 +617,19 @@ class IND_Game(models.Model):
                 entry[1] = [-1]
                 entry[2] = ""
                 entry[3] = []
-        return base64.b64encode(gzip.compress(json.dumps(allData, separators=(",", ":")).encode("utf-8"))).decode(
-            "utf-8"
-        )
+        return base64.b64encode(
+            gzip.compress(json.dumps(allData, separators=(",", ":")).encode("utf-8"))
+        ).decode("utf-8")
 
     def getCompressedPreMoveArr(self, name):
         playersPreMoveDataArr = self.getOrScaffoldAllPreMoveData()
         arrIdx = next(
-            (i for i, sub_arr in enumerate(playersPreMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name), -1
+            (
+                i
+                for i, sub_arr in enumerate(playersPreMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
         )
         # Only return the move if it is valid for current phase OR has a preset-clenaup
         playerMoveDataArr = playersPreMoveDataArr[arrIdx]
@@ -570,13 +646,20 @@ class IND_Game(models.Model):
             playerMoveDataArr[3] = []
             return ""
         return base64.b64encode(
-            gzip.compress(json.dumps(playerMoveDataArr, separators=(",", ":")).encode("utf-8"))
+            gzip.compress(
+                json.dumps(playerMoveDataArr, separators=(",", ":")).encode("utf-8")
+            )
         ).decode("utf-8")
 
     def deleteSinglePlayersPreMove(self, name):
         playersPreMoveDataArr = self.getOrScaffoldAllPreMoveData()
         arrIdx = next(
-            (i for i, sub_arr in enumerate(playersPreMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name), -1
+            (
+                i
+                for i, sub_arr in enumerate(playersPreMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
         )
         playersPreMoveDataArr[arrIdx] = [name, [-1], "", []]
         self.playersMoveData = json.dumps(playersPreMoveDataArr)
@@ -593,15 +676,11 @@ class IND_Game(models.Model):
     #########################################################
 
     def getDeleteVotesData(self):
+        player_usernames = [p.username for p in self.allPlayers.all()]
         if self.gameStatus == "FINISHED":
-            deleteGameVotes = {}
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            deleteGameVotes.update({username: False for username in player_usernames})
-            return deleteGameVotes
+            return {username: False for username in player_usernames}
         if self.deleteGameVotes is None:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes = {username: False for username in player_usernames}
             self.save()
         return self.deleteGameVotes
 
@@ -615,13 +694,17 @@ class IND_Game(models.Model):
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # If the playerName isn't found, wipe the votes and make sure all players are added
         if playerName not in self.deleteGameVotes:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # Add the vote
         self.deleteGameVotes[playerName] = True
