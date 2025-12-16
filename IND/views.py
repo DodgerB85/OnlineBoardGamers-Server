@@ -32,15 +32,6 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .models import IND_Game
 from Lobby.models import User, Profile
-from FCM.models import FCM_Game
-from HC.models import HC_Game
-from Bus.models import Bus_Game
-from TGZ.models import TGZ_Game
-from CNS.models import CNS_Game
-from AQY.models import AQY_Game
-from KFW.models import KFW_Game
-from WEB.models import WEB_Game
-from RNB.models import RNB_Game
 
 INDsuperUsers = ["BotKickStarter"]
 
