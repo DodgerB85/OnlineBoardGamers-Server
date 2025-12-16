@@ -111,14 +111,14 @@ class CNS_Game(models.Model):
 
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
-        return f"{self.id}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"
+        return f"{getattr(self, 'id')}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"
 
     def getGameName(self):
         _gameName = ""
         if self.gameName != "":
             _gameName = self.gameName
         else:
-            _gameName = f"[{self.creator.username}'s Game]"
+            _gameName = f"[{getattr(self.creator, 'username')}'s Game]"
         if self.gameStatus == "PRIVATE":
             _gameName += "[Private Game]"
         return _gameName
@@ -237,10 +237,10 @@ class CNS_Game(models.Model):
         )
 
         return {
-            "gameID": self.id,
+            "gameID": getattr(self, "id"),
             "gameName": self.getGameName(),
             "gameDescription": self.gameDescription,
-            "creator": self.creator.username,
+            "creator": getattr(self.creator, "username"),
             "created": createdString,
             "allPlayers": [user.username for user in self.allPlayers.all()],
             "invitedPlayers": [user.username for user in self.invitedPlayers.all()],
@@ -318,7 +318,7 @@ class CNS_Game(models.Model):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(request, "CNS", playerListToNotify, self.id, self)
+            SN_M_sendGameStartNotification(request, "CNS", playerListToNotify, getattr(self, "id"), self)
 
     def getCurrentPlayersArray(self):
         _currentPlayersArray = []
@@ -330,7 +330,7 @@ class CNS_Game(models.Model):
 
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
-            possibleHost = self.allPlayers.all().filter(~Q(missingPlayersRelName=self.id)).order_by("?").first()
+            possibleHost = self.allPlayers.all().filter(~Q(missingPlayersRelName=getattr(self, "id"))).order_by("?").first()
             self.host = possibleHost
 
     def enableStatsExclude(self, _username):

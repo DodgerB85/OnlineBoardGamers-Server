@@ -638,7 +638,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         myStatsExcludeConsent = "0"
 
     #print_timestamp("After getting myStatsExcludeConsent")
-    print(f"Databasehits: {len(connection.queries)}")
 
     # Involved Player
     returnData.update(
