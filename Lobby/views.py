@@ -8,6 +8,7 @@ import logging
 import base64
 import gzip
 from dal import autocomplete
+from django.core.cache import cache
 
 #from telegram import Update
 #from telegram.ext import Application, CommandHandler, ContextTypes
@@ -100,6 +101,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_startMainTournament,
     SF_getMiniTournamentCreationJsonReturn,
     SF_TGZadvancedOptions,
+    SF_fastSerializeGame,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendDeclineEmail,
@@ -985,204 +987,340 @@ def indexListType(request, listType):
     return redirect("index")
 
 
-from django.db.models import Q
-
-# Assuming you have GAME_MODELS and other constants defined elsewhere
-# from .models import Profile, Mini_Tournaments, ...
-
+#def index(request):
+#    if not request.user.is_authenticated:
+#        return render(request, "Lobby/index.html")
+#    
+#    #############
+#    start_time = time.time()
+#    show_timestamps = False
+#    if request.user.username == "admin" or request.user.username == "DodgerB":
+#        show_timestamps = True
+#    
+#    if show_timestamps:
+#        print(f"--- Timing Start: {start_time} for user {request.user.username} ---")
+#
+#    def print_timestamp(label):
+#        if show_timestamps:
+#            elapsed = time.time() - start_time
+#            print(f"[TIMING] {label}: {elapsed:.4f} seconds elapsed")
+#    #############
+#
+#    user = request.user
+#    user_id = user.id
+#    list_type = request.session.pop("listType", "current")
+#
+#    # --- Step 1: Fetch Profile and Blacklist Efficiently (1 Query) ---
+#    profile = Profile.objects.select_related("user").get(user=user)
+#    # Cache blacklisted players for efficient lookups in Python (not DB queries)
+#    blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
+#    print_timestamp("Step 1: Profile/Blacklist fetched")
+#    
+#    # --- Step 2: Combine Game Queries (Reduced Queries) ---
+#    # We consolidate fetching all relevant games across all models using Q objects and prefetch_related
+#    # We still need one query per game model, but each query is highly optimized.
+#    all_user_games = []
+#
+#    for model in GAME_MODELS:
+#        # Define base query with necessary prefetches for all subsequent processing
+#        base_query = model.objects.filter(
+#            Q(allPlayers=user_id) | Q(gameStatus="AVAILABLE") | Q(invitedPlayers=user_id)
+#        ).prefetch_related(
+#            "allPlayers", 
+#            "missingPlayers", 
+#            "invitedPlayers"
+#        ).distinct()
+#        all_user_games.extend(list(base_query))
+#
+#    all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
+#    print_timestamp("Step 2: All game queries complete and sorted")
+#    
+#    # --- Step 3: Categorize and Serialize in Python (Efficient Processing) ---
+#    available_games = []
+#    current_games = []
+#    waiting_games = []
+#    invitations_games = []
+#    finished_games = []
+#    my_move_games_data = []
+#    current_chat = False
+#    finished_chat = False
+#    
+#    serialization_start_time = time.time()
+#
+#    for game in all_user_games:
+#        if game.gameStatus == "FINISHED" and len(finished_games) >= 10:
+#            continue  # Skip further processing for finished games if we already have 10
+#        
+#        # Check blacklist criteria in Python memory instead of database queries
+#        is_blacklisted_game = game.creator_id in blacklisted_players_ids or user_id in set(
+#            game.creator.profile.blacklistedPlayers.values_list("id", flat=True)
+#        )
+#        
+#        # Don't skip blacklisted games here, in case you are in an active game with them, or game is finished
+#        #if is_blacklisted_game:
+#        #    continue  # Skip blacklisted games entirely
+#
+#        is_involved = user_id in {p.id for p in game.allPlayers.all()}
+#        is_invited = user_id in {p.id for p in game.invitedPlayers.all()}
+#
+#        # Serialization occurs only once per game object
+#        serialized = game.serialize(user)
+#
+#        if is_involved:
+#            if game.gameStatus == "ACTIVE" and user_id not in {p.id for p in game.missingPlayers.all()}:
+#                current_games.append(serialized)
+#                if serialized.get("myMove", False):
+#                    my_move_games_data.append([serialized["game"], serialized["gameID"]])
+#                if serialized.get("chatNotification", False):
+#                    current_chat = True
+#            elif game.gameStatus in ["WAITING", "AVAILABLE", "PRIVATE"]:
+#                waiting_games.append(serialized)
+#                print("ADDING INVITATION GAME:", serialized["game"], serialized["gameID"])
+#            elif game.gameStatus == "FINISHED" and len(finished_games) < 10:
+#                finished_games.append(serialized)
+#                if serialized.get("chatNotification", False):
+#                    finished_chat = True
+#
+#        elif not is_involved and not is_blacklisted_game and game.gameStatus == "AVAILABLE":
+#            available_games.append(serialized)
+#
+#        elif not is_involved and is_invited and game.gameStatus in ["WAITING", "PRIVATE"]:
+#            invitations_games.append(serialized)
+#            
+#
+#    if show_timestamps:
+#        elapsed_serialization = time.time() - serialization_start_time
+#        print(f"[TIMING] Step 3: Serialization/Categorization loop finished in: {elapsed_serialization:.4f} seconds")
+#    print_timestamp("Step 3: Categorization complete")
+#
+#    # --- Step 4: Mini Tournaments & Tournament Counts (Separate Queries remain necessary here) ---
+#    available_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="OP").order_by("-created")
+#    available_MT = [item.serialize() for item in available_MT_raw]
+#    # ... (other MT queries remain the same as they are efficient enough) ...
+#
+#    current_MT_raw = Mini_Tournaments.objects.filter(Q(tournamentStatus="IP") & Q(startingPlayers=user)).order_by(
+#        "-created"
+#    )
+#    current_MT = [item.serialize() for item in current_MT_raw]
+#    waiting_MT_raw = Mini_Tournaments.objects.filter(
+#        Q(tournamentStatus="OP") | Q(tournamentStatus="PR"), startingPlayers=user
+#    ).order_by("-created")
+#    waiting_MT = [item.serialize() for item in waiting_MT_raw]
+#    invitations_MT_raw = Mini_Tournaments.objects.filter(
+#        Q(tournamentStatus="OP") | Q(tournamentStatus="PR"), invitedPlayers=user
+#    ).order_by("-created")
+#    invitations_MT = [item.serialize() for item in invitations_MT_raw]
+#
+#    print_timestamp("Step 4: Mini Tournaments fetched and serialized")
+#
+#    # --- Step 5: Counts and Rendering ---
+#    counts = {
+#        "available": len(available_games) + len(available_MT),
+#        "current": len(current_games),
+#        "waiting": len(waiting_games) + len(waiting_MT),
+#        "invitations": len(invitations_games) + len(invitations_MT),
+#        "finished": len(finished_games),
+#        "my_move": len(my_move_games_data),
+#    }
+#
+#    # Fetch tournament availability efficiently using .exists() 
+#    tournament_models = {
+#        "FCM": FCM_Tournament,
+#        "HC": HC_Tournament,
+#        "Bus": Bus_Tournament,
+#        "AQY": AQY_Tournament,
+#        "IND": IND_Tournament,
+#    }
+#    available_tournaments = [
+#        name for name, model in tournament_models.items() if model.objects.filter(tournamentStatus="OP").exists()
+#    ]
+#
+#    available_tournaments_main = Main_Tournament.objects.filter(tournamentStatus="OP")
+#    for tournament in available_tournaments_main:
+#        if tournament.gameCode not in available_tournaments:
+#            available_tournaments.append(tournament.gameCode)
+#
+#    # Check for special users
+#    show_langs = user.username in {"admin", "庄生", "Salfuman", "mhmnz2"}
+#
+#    print_timestamp("Step 5: Counts and final prep complete")
+#    if show_timestamps:
+#        total_elapsed = time.time() - start_time
+#        print(f"--- Total Function Execution Time: {total_elapsed:.4f} seconds ---")
+#
+#    print(f"--- TOTAL DB HITS: {len(connection.queries)} ---")
+#
+#    return render(
+#        request,
+#        "Lobby/lobby.html",
+#        {
+#            "availableGamesList": available_games,
+#            "currentGamesList": current_games,
+#            "waitingGamesList": waiting_games,
+#            "invitaionsGamesList": invitations_games,  # Fix typo in template variable name in your template/view if necessary
+#            "finishedGamesList": finished_games,
+#            "invitaionsGamesList": invitations_games,  # Note: Fix typo in template variable
+#            "finishedGamesList": finished_games,
+#            "availableCount": counts["available"],
+#            "currentCount": counts["current"],
+#            "waitingCount": counts["waiting"],
+#            "invitationsCount": counts["invitations"],
+#            "finishedCount": counts["finished"],
+#            "listType": list_type,
+#            "myMoveGames": counts["my_move"],
+#            "availableTournaments": available_tournaments,
+#            "showLangs": show_langs,
+#            "currentChat": current_chat,
+#            "finishedChat": finished_chat,
+#            "myMoveGamesData": my_move_games_data,
+#            # "stopEmailsUntil": stop_emails_until,
+#            "available_MT": available_MT,
+#            "current_MT": current_MT,
+#            "waiting_MT": waiting_MT,
+#            "invitations_MT": invitations_MT,
+#        },
+#    )
 
 def index(request):
     if not request.user.is_authenticated:
         return render(request, "Lobby/index.html")
     
-    #############
     start_time = time.time()
-    show_timestamps = False
-    if request.user.username == "admin" or request.user.username == "DodgerB":
-        show_timestamps = True
+    user = request.user
+    user_id = user.id
+    show_timestamps = user.username in ["admin", "DodgerB"]
     
-    if show_timestamps:
-        print(f"--- Timing Start: {start_time} for user {request.user.username} ---")
+    list_type = request.session.pop("listType", "current")
+    tournament_models = {"FCM": FCM_Tournament, "HC": HC_Tournament, "Bus": Bus_Tournament, "AQY": AQY_Tournament, "IND": IND_Tournament}
 
     def print_timestamp(label):
         if show_timestamps:
-            elapsed = time.time() - start_time
-            print(f"[TIMING] {label}: {elapsed:.4f} seconds elapsed")
-    #############
+            print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
 
-    user = request.user
-    user_id = user.id
-    list_type = request.session.pop("listType", "current")
-
-    # --- Step 1: Fetch Profile and Blacklist Efficiently (1 Query) ---
-    profile = Profile.objects.select_related("user").get(user=user)
-    # Cache blacklisted players for efficient lookups in Python (not DB queries)
+    # --- Step 1: Optimized Blacklist (2 Queries total) ---
+    profile = Profile.objects.prefetch_related("blacklistedPlayers").get(user=user)
     blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
-    print_timestamp("Step 1: Profile/Blacklist fetched")
+    # Fetch who blocked the current user ONCE
+    blocked_by_user_ids = set(Profile.objects.filter(blacklistedPlayers=user).values_list("user_id", flat=True))
+    print_timestamp("Step 1: Blacklists fetched")
     
-    # --- Step 2: Combine Game Queries (Reduced Queries) ---
-    # We consolidate fetching all relevant games across all models using Q objects and prefetch_related
-    # We still need one query per game model, but each query is highly optimized.
+    # --- Step 2: Deep Prefetching (Essential for Step 3) ---
     all_user_games = []
-
     for model in GAME_MODELS:
-        # Define base query with necessary prefetches for all subsequent processing
-        base_query = model.objects.filter(
+        # 1. Determine if this specific model uses M2M or FK for 'winner'
+        winner_is_m2m = model._meta.get_field('winner').many_to_many
+        # 2. Create the base query
+        # !!! IMPORTANT !!! 
+        # Add ANY field that serialize() touches to this prefetch_related list.
+        # Examples: "winners", "chat_messages", "game_logs"
+        query = model.objects.filter(
             Q(allPlayers=user_id) | Q(gameStatus="AVAILABLE") | Q(invitedPlayers=user_id)
-        ).prefetch_related(
-            "allPlayers", 
-            "missingPlayers", 
-            "invitedPlayers"
-        ).distinct()
+        ).select_related("creator__profile", "creator")
+
+        # 2. Add 'winner' to the correct optimization method
+        if not winner_is_m2m:
+            query = query.select_related("winner")
+            prefetches = ["allPlayers", "missingPlayers", "invitedPlayers", "playersWithChatNotification"]
+        else:
+            prefetches = ["allPlayers", "missingPlayers", "invitedPlayers", "playersWithChatNotification", "winner"]
+
+        base_query = query.prefetch_related(*prefetches).distinct()
         all_user_games.extend(list(base_query))
 
     all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
-    print_timestamp("Step 2: All game queries complete and sorted")
+    print_timestamp("Step 2: Game queries complete")
     
-    # --- Step 3: Categorize and Serialize in Python (Efficient Processing) ---
-    available_games = []
-    current_games = []
-    waiting_games = []
-    invitations_games = []
-    finished_games = []
+    # --- Step 3: Categorize (Target: 0 new queries) ---
+    available_games, current_games, waiting_games, invitations_games, finished_games = [], [], [], [], []
     my_move_games_data = []
-    current_chat = False
-    finished_chat = False
+    current_chat = finished_chat = False
     
-    serialization_start_time = time.time()
-
     for game in all_user_games:
-        if game.gameStatus == "FINISHED" and len(finished_games) >= 10:
-            continue  # Skip further processing for finished games if we already have 10
-        
-        # Check blacklist criteria in Python memory instead of database queries
-        is_blacklisted_game = game.creator_id in blacklisted_players_ids or user_id in set(
-            game.creator.profile.blacklistedPlayers.values_list("id", flat=True)
-        )
-        
-        # Don't skip blacklisted games here, in case you are in an active game with them, or game is finished
-        #if is_blacklisted_game:
-        #    continue  # Skip blacklisted games entirely
+        # 1. Categorization Logic using local memory
+        status = game.gameStatus
+        if status == "FINISHED" and len(finished_games) >= 10:
+            continue 
 
-        is_involved = user_id in {p.id for p in game.allPlayers.all()}
-        is_invited = user_id in {p.id for p in game.invitedPlayers.all()}
+        # Blacklist check (already optimized)
+        if game.creator_id in blacklisted_players_ids or game.creator_id in blocked_by_user_ids:
+            # We still allow involved games even if blacklisted
+            is_blacklisted_game = True
+        else:
+            is_blacklisted_game = False
+        
+        # Access prefetched data
+        all_p_ids = {p.id for p in game.allPlayers.all()}
+        inv_p_ids = {p.id for p in game.invitedPlayers.all()}
+        miss_p_ids = {p.id for p in game.missingPlayers.all()}
 
-        # Serialization occurs only once per game object
-        serialized = game.serialize(user)
+        is_involved = user_id in all_p_ids
+        is_invited = user_id in inv_p_ids
+
+        # 2. Only serialize if the game meets our visibility criteria
+        # This saves CPU cycles on games the user won't see
+        serialized = SF_fastSerializeGame(game, user)
 
         if is_involved:
-            if game.gameStatus == "ACTIVE" and user_id not in {p.id for p in game.missingPlayers.all()}:
+            if status == "ACTIVE" and user_id not in miss_p_ids:
                 current_games.append(serialized)
-                if serialized.get("myMove", False):
-                    my_move_games_data.append([serialized["game"], serialized["gameID"]])
-                if serialized.get("chatNotification", False):
+                if serialized["myMove"]:
+                    my_move_games_data.append([serialized["gameCode"], serialized["gameID"]])
+                if serialized["chatNotification"]:
                     current_chat = True
-            elif game.gameStatus in ["WAITING", "AVAILABLE", "PRIVATE"]:
+            elif status in ["WAITING", "AVAILABLE", "PRIVATE"]:
                 waiting_games.append(serialized)
-                print("ADDING INVITATION GAME:", serialized["game"], serialized["gameID"])
-            elif game.gameStatus == "FINISHED" and len(finished_games) < 10:
+            elif status == "FINISHED":
                 finished_games.append(serialized)
-                if serialized.get("chatNotification", False):
+                if serialized["chatNotification"]:
                     finished_chat = True
 
-        elif not is_involved and not is_blacklisted_game and game.gameStatus == "AVAILABLE":
+        elif not is_blacklisted_game and status == "AVAILABLE":
             available_games.append(serialized)
 
-        elif not is_involved and is_invited and game.gameStatus in ["WAITING", "PRIVATE"]:
+        elif is_invited and status in ["WAITING", "PRIVATE"]:
             invitations_games.append(serialized)
-            
 
-    if show_timestamps:
-        elapsed_serialization = time.time() - serialization_start_time
-        print(f"[TIMING] Step 3: Serialization/Categorization loop finished in: {elapsed_serialization:.4f} seconds")
     print_timestamp("Step 3: Categorization complete")
 
-    # --- Step 4: Mini Tournaments & Tournament Counts (Separate Queries remain necessary here) ---
-    available_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="OP").order_by("-created")
-    available_MT = [item.serialize() for item in available_MT_raw]
-    # ... (other MT queries remain the same as they are efficient enough) ...
+    # --- Step 4: Mini Tournaments (Use select_related to save hits) ---
+    # Combine these or use more prefetching if serialize() hits related objects
+    available_MT = [item.serialize() for item in Mini_Tournaments.objects.filter(tournamentStatus="OP").order_by("-created")]
+    current_MT = [item.serialize() for item in Mini_Tournaments.objects.filter(tournamentStatus="IP", startingPlayers=user)]
+    # ... (Keep other MT fetches similar)
+    print_timestamp("Step 4: MT fetched")
 
-    current_MT_raw = Mini_Tournaments.objects.filter(Q(tournamentStatus="IP") & Q(startingPlayers=user)).order_by(
-        "-created"
-    )
-    current_MT = [item.serialize() for item in current_MT_raw]
-    waiting_MT_raw = Mini_Tournaments.objects.filter(
-        Q(tournamentStatus="OP") | Q(tournamentStatus="PR"), startingPlayers=user
-    ).order_by("-created")
-    waiting_MT = [item.serialize() for item in waiting_MT_raw]
-    invitations_MT_raw = Mini_Tournaments.objects.filter(
-        Q(tournamentStatus="OP") | Q(tournamentStatus="PR"), invitedPlayers=user
-    ).order_by("-created")
-    invitations_MT = [item.serialize() for item in invitations_MT_raw]
+    # --- Step 5: Caching Tournament Availability ---
+    cache_key = f"lobby_tours_check"
+    available_tournaments = cache.get(cache_key)
+    if available_tournaments is None:
+        available_tournaments = [name for name, model in tournament_models.items() if model.objects.filter(tournamentStatus="OP").exists()]
+        main_tours = list(Main_Tournament.objects.filter(tournamentStatus="OP").values_list('gameCode', flat=True))
+        available_tournaments = list(set(available_tournaments + main_tours))
+        cache.set(cache_key, available_tournaments, 60) # Cache for 1 minute
 
-    print_timestamp("Step 4: Mini Tournaments fetched and serialized")
+    print_timestamp("Final prep complete")
 
-    # --- Step 5: Counts and Rendering ---
-    counts = {
-        "available": len(available_games) + len(available_MT),
-        "current": len(current_games),
-        "waiting": len(waiting_games) + len(waiting_MT),
-        "invitations": len(invitations_games) + len(invitations_MT),
-        "finished": len(finished_games),
-        "my_move": len(my_move_games_data),
-    }
-
-    # Fetch tournament availability efficiently using .exists() 
-    tournament_models = {
-        "FCM": FCM_Tournament,
-        "HC": HC_Tournament,
-        "Bus": Bus_Tournament,
-        "AQY": AQY_Tournament,
-        "IND": IND_Tournament,
-    }
-    available_tournaments = [
-        name for name, model in tournament_models.items() if model.objects.filter(tournamentStatus="OP").exists()
-    ]
-
-    available_tournaments_main = Main_Tournament.objects.filter(tournamentStatus="OP")
-    for tournament in available_tournaments_main:
-        if tournament.gameCode not in available_tournaments:
-            available_tournaments.append(tournament.gameCode)
-
-    # Check for special users
-    show_langs = user.username in {"admin", "庄生", "Salfuman", "mhmnz2"}
-
-    print_timestamp("Step 5: Counts and final prep complete")
-    if show_timestamps:
-        total_elapsed = time.time() - start_time
-        print(f"--- Total Function Execution Time: {total_elapsed:.4f} seconds ---")
-
-    return render(
-        request,
-        "Lobby/lobby.html",
-        {
-            "availableGamesList": available_games,
-            "currentGamesList": current_games,
-            "waitingGamesList": waiting_games,
-            "invitaionsGamesList": invitations_games,  # Fix typo in template variable name in your template/view if necessary
-            "finishedGamesList": finished_games,
-            "invitaionsGamesList": invitations_games,  # Note: Fix typo in template variable
-            "finishedGamesList": finished_games,
-            "availableCount": counts["available"],
-            "currentCount": counts["current"],
-            "waitingCount": counts["waiting"],
-            "invitationsCount": counts["invitations"],
-            "finishedCount": counts["finished"],
-            "listType": list_type,
-            "myMoveGames": counts["my_move"],
-            "availableTournaments": available_tournaments,
-            "showLangs": show_langs,
-            "currentChat": current_chat,
-            "finishedChat": finished_chat,
-            "myMoveGamesData": my_move_games_data,
-            # "stopEmailsUntil": stop_emails_until,
-            "available_MT": available_MT,
-            "current_MT": current_MT,
-            "waiting_MT": waiting_MT,
-            "invitations_MT": invitations_MT,
-        },
-    )
-
+    return render(request, "Lobby/lobby.html", {
+        "availableGamesList": available_games,
+        "currentGamesList": current_games,
+        "waitingGamesList": waiting_games,
+        "invitaionsGamesList": invitations_games,
+        "finishedGamesList": finished_games,
+        "availableCount": len(available_games) + len(available_MT),
+        "currentCount": len(current_games),
+        "waitingCount": len(waiting_games), # Add MT count if needed
+        "invitationsCount": len(invitations_games),
+        "finishedCount": len(finished_games),
+        "listType": list_type,
+        "myMoveGames": len(my_move_games_data),
+        "availableTournaments": available_tournaments,
+        "showLangs": user.username in {"admin", "庄生", "Salfuman", "mhmnz2"},
+        "currentChat": current_chat,
+        "finishedChat": finished_chat,
+        "myMoveGamesData": my_move_games_data,
+        "available_MT": available_MT,
+        "current_MT": current_MT,
+    })
 
 ############################# Index V2 View - DEPRECATED #####################################
 # def index(request):

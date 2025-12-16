@@ -12,17 +12,17 @@
         {{ game.gameName }}{% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}
     </div>
     <div class="createdDiv">Creator: {{ game.creator }} - {{ game.latestUpdateElapsedTimeString }}</div>
-    <div class="boxPlayersContainer bgImg{{game.game}}" id="{{ game.game }}gamesRow{{ game.gameID }}">
+    <div class="boxPlayersContainer bgImg{{game.game}}" id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
       <!--<div class="sqBoxCoverDiv">
-        {% if game.game == 'FCM' %}
+        {% if game.gameCode == 'FCM' %}
         <img src="{% static "FCM/Images/fcm-box.jpg" %}" alt="FCM game" title="FCM Game">
         {% endif %}
-        {% if game.game == 'HC' %}
+        {% if game.gameCode == 'HC' %}
         <img src="{% static "HC/Images/hc-box.jpg" %}" alt="HC game" title="HC Game">
         {% endif %}
-        {% if game.game == 'Bus' %}
+        {% if game.gameCode == 'Bus' %}
         <img src="{% static "Bus/images/bus_icon.png" %}" alt="Bus game" title="Bus Game">{% endif %}
-        {% if game.game == 'TGZ' %}
+        {% if game.gameCode == 'TGZ' %}
         <img src="{% static "TGZ/images/tgz_icon.png" %}" alt="TGZ game" title="TGZ Game">
         {% endif %}
       </div>-->
@@ -47,11 +47,11 @@
         {% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}
       </div>
     </div>
-    {% if game.startingMap or game.startingOptions %}
+    {% if game.startingMap or game.startingOptionsHTML %}
     <div class="startingOptionsDiv">
       {% if game.startingMap %} <img class="startingOption startingMap" alt="Map" width="50" height="50"
         src="{% static "Lobby/Images/createMap.jpg" %}" title="Custom Map - Click to View"
-        data-map="{{game.startingMap}}"> {% endif %}{{ game.startingOptions|safe }}
+        data-map="{{game.startingMap}}"> {% endif %}{{ game.startingOptionsHTML|safe }}
     </div>
     {% endif %}
   </div>

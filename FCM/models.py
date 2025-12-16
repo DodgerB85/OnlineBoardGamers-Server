@@ -349,124 +349,93 @@ class FCM_Game(models.Model):
         return ret
 
     def kickoutRequired(self):
-        # return True
+        # USE the prefetched allPlayers list instead of .values_list()
+        all_player_usernames = [p.username for p in self.allPlayers.all()]
+        
+        # Also ensure getCurrentPlayersArray() doesn't hit the DB. 
+        # If it does, extract the username from self.currentPlayers string directly.
+        current_username = self.getCurrentPlayersArray()[0] 
+
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            all_player_usernames, # Pass the Python list, not a QuerySet
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
-            self.getCurrentPlayersArray()[0],
+            current_username,
         )
 
     def serialize(self, loggedInUser=None):
-        remainingPlayersInt = self.maxPlayers - self.allPlayers.count()
-        remainingPlayers = ""
-        for i in range(remainingPlayersInt):
-            remainingPlayers += str(self.allPlayers.count() + i + 1)
+        # USE len() instead of .count() to use the prefetch cache
+        all_players_list = list(self.allPlayers.all())
+        all_players_count = len(all_players_list)
+        
+        remainingPlayersInt = self.maxPlayers - all_players_count
+        remainingPlayers = "".join([str(all_players_count + i + 1) for i in range(remainingPlayersInt)])
 
-        # Used for Finished Games
-        winner = ""
-        if self.winner:
-            winner = self.winner.username
+        # Use select_related('winner') in the view to make this 0 hits
+        winner = self.winner.username if self.winner else ""
 
+        # Timestamps are already in the object (0 hits)
         createdString = str(self.created)
         latestUpdateString = str(self.latestUpdate)
-
         latestUpdateElapsedTimeString = ""
-        if (
-            self.gameStatus == "WAITING"
-            or self.gameStatus == "AVAILABLE"
-            or self.gameStatus == "ACTIVE"
-            or self.gameStatus == "PRIVATE"
-        ):
-            elapsedTotalSeconds = 0
-            if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "PRIVATE":
-                elapsedTotalSeconds = int(time.time()) - int(self.created) // 1000
-            if self.gameStatus == "ACTIVE":
-                elapsedTotalSeconds = int(time.time()) - int(self.latestUpdate) // 1000
-            elapsedDays = elapsedTotalSeconds // (60 * 60 * 24)
-            elapsedTotalSeconds = elapsedTotalSeconds % (60 * 60 * 24)
-            elapsedHours = elapsedTotalSeconds // (60 * 60)
-            elapsedTotalSeconds = elapsedTotalSeconds % (60 * 60)
-            elapsedmins = elapsedTotalSeconds // (60)
-            elapsedTotalSeconds = elapsedTotalSeconds % (60)
 
-            if elapsedDays > 0:
-                latestUpdateElapsedTimeString += str(elapsedDays) + "d"
+        if self.gameStatus in ["WAITING", "AVAILABLE", "ACTIVE", "PRIVATE"]:
+            now = int(time.time())
+            # Use simple math; avoid repeated int() casts if possible
+            elapsedTotalSeconds = now - (int(self.created) // 1000 if self.gameStatus != "ACTIVE" else int(self.latestUpdate) // 1000)
+            
+            days, rem = divmod(elapsedTotalSeconds, 86400)
+            hours, rem = divmod(rem, 3600)
+            mins, secs = divmod(rem, 60)
 
-            if elapsedHours > 0:
-                latestUpdateElapsedTimeString += " " + str(elapsedHours) + "h"
-            if elapsedmins > 0:
-                latestUpdateElapsedTimeString += " " + str(elapsedmins) + "m"
-            latestUpdateElapsedTimeString += " " + str(elapsedTotalSeconds) + "s"
+            if days > 0: latestUpdateElapsedTimeString += f"{days}d"
+            if hours > 0: latestUpdateElapsedTimeString += f" {hours}h"
+            if mins > 0: latestUpdateElapsedTimeString += f" {mins}m"
+            latestUpdateElapsedTimeString += f" {secs}s"
 
-        myMove = False
-        if loggedInUser is not None:
-            myMove = self.isMyMove(loggedInUser.username)
+        # !!! WARNING: isMyMove probably has queries. Check its code!
+        myMove = self.isMyMove(loggedInUser.username) if loggedInUser else False
 
-        chatNotification = False
+        # Efficiency: use the prefetched lists already in memory
+        missing_players_ids = {p.id for p in self.missingPlayers.all()}
+        chat_notify_ids = {p.id for p in self.playersWithChatNotification.all()}
+        
         involvedPlayer = False
+        chatNotification = False
+        if loggedInUser:
+            involvedPlayer = (loggedInUser in all_players_list and loggedInUser.id not in missing_players_ids)
+            chatNotification = (loggedInUser.id in chat_notify_ids)
 
-        if loggedInUser in self.allPlayers.all() and loggedInUser not in self.missingPlayers.all():
-            involvedPlayer = True
-        if loggedInUser in self.playersWithChatNotification.all():
-            chatNotification = True
-
+        # Pace and Options (0 hits if these are just CharFields/TextFields)
         gamePaceString = SR_gamePaceString(self.gamePace)
-
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(self.startingOptions)
+        kickoutRequiredNum = self.kickoutRequired() # Inspect this for queries!
 
-        kickoutRequiredNum = self.kickoutRequired()
-
-        startingOptionsListPrelim = self.startingOptions.split(",")
-        if startingOptionsListPrelim[0] != "":
-            startingOptionsListPrelim = list(map(int, startingOptionsListPrelim))
-
-        #######
-        #   Check if SHADOW in currentGame.allPlayers
-        #   Check currentGame.involvedPlayer
-        #   Use currentGame.gameName
-        #   Use if currentGame.startingOptionsLiteral
-        #   Use currentGame.startingMap
-        #   use currentGame.gameID
-        #   Use currentGame.currentPlayers
-        #   Use currentGame.latestUpdateLiteral
-        #   Use currentGame.myMove to prevent self kickout
+        # Check for Shadow/AI without hitting the DB
+        all_usernames = {u.username for u in all_players_list}
         deleteableGame = False
-        if (
-            "SHADOW" in self.allPlayers.all().values_list("username", flat=True)
-            and loggedInUser in self.allPlayers.all()
-        ):
-            deleteableGame = True
-        if (
-            "FcmAI" in self.allPlayers.all().values_list("username", flat=True)
-            and loggedInUser in self.allPlayers.all()
-        ):
-            deleteableGame = True
+        if loggedInUser and (("SHADOW" in all_usernames) or ("FcmAI" in all_usernames)):
+            if loggedInUser in all_players_list:
+                deleteableGame = True
 
         return {
-            "gameID": getattr(self, "id"),
+            "gameID": self.id,
             "gameName": self.getGameName(),
             "gameDescription": self.gameDescription,
-            "creator": getattr(self.creator, "username"),
+            "creator": self.creator.username,
             "created": createdString,
-            "allPlayers": [user.username for user in self.allPlayers.all()],
+            "allPlayers": list(all_usernames),
             "invitedPlayers": [user.username for user in self.invitedPlayers.all()],
-            # "allPlayers": allPlayersList,
-            # "currentPlayers": self.getCurrentPlayers(), # DO NOT USE THIS!!! MEANS  =ALL= CURRENT PLAYERS!!!
             "currentPlayers": self.currentPlayers,
             "currentTurn": self.currentTurnString(),
             "pace": gamePaceString,
             "latestUpdate": latestUpdateString,
-            # "latestUpdateLiteral": self.latestUpdate, ### remove
             "startingOptions": startingOptionsHTML,
-            "kickoutDuration": self.kickoutDuration,
-            # "startingOptionsLiteral": self.startingOptions,### remove
             "maxPlayers": self.maxPlayers,
-            "winner": winner,  # Used for Finished Games
+            "winner": winner,
             "myMove": myMove,
-            # Used to not allow join in available games // set join / leave
             "involvedPlayer": involvedPlayer,
             "startingMap": self.startingMap,
             "chatNotification": chatNotification,

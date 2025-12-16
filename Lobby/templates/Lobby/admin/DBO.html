@@ -60,56 +60,56 @@
         {% for game in gamesList %}
         <tr
           class="clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %} kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
-          id="{{ game.game }}gamesRow{{ game.gameID }}">
+          id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
           <td class="nameTDcurrent tdWithBox" id="td1">{% if game.chatNotification %}<img class="startingOption" alt="Str Opt" width="50" height="50"
               src="{% static "Lobby/Images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
 
-            {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.game %}
+            {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
 
             <a target="_blank" 
-            {% if game.game == "FCM" %}
+            {% if game.gameCode == "FCM" %}
             href="{% url 'FCM:showFCMgame' game_id=game.gameID %}" 
-{% elif game.game == "HC" %}
+{% elif game.gameCode == "HC" %}
 href="{% url 'HC:showHCgame' game_id=game.gameID %}" 
-{% elif game.game == "Bus" %}
+{% elif game.gameCode == "Bus" %}
 href="{% url 'Bus:showBusGame' game_id=game.gameID %}" 
-{% elif game.game == "TGZ" %}
+{% elif game.gameCode == "TGZ" %}
 href="{% url 'TGZ:showTGZgame' game_id=game.gameID %}" 
-{% elif game.game == "CNS" %}
+{% elif game.gameCode == "CNS" %}
 href="{% url 'CNS:showCNSgame' game_id=game.gameID %}" 
-{% elif game.game == "AQY" %}
+{% elif game.gameCode == "AQY" %}
 href="{% url 'AQY:showAQYgame' game_id=game.gameID %}" 
-{% elif game.game == "IND" %}
+{% elif game.gameCode == "IND" %}
 href="{% url 'IND:showINDgame' game_id=game.gameID %}" 
-{% elif game.game == "KFW" %}
+{% elif game.gameCode == "KFW" %}
 href="{% url 'KFW:showKFWgame' game_id=game.gameID %}"
-{% elif game.game == "WEB" %}
+{% elif game.gameCode == "WEB" %}
 href="{% url 'WEB:showWEBgame' game_id=game.gameID %}"
 {% endif %}
             >
             {{ game.gameName }} ID: {{game.gameID }} {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i> {% endif %} i={{ forloop.counter }}</a>
-            {% if game.startingMap and game.game == "FCM" %} 
+            {% if game.startingMap and game.gameCode == "FCM" %} 
             <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMap.jpg" %}" 
             title="Click to View Map"
               data-map="{{game.startingMap}}" data-game="FCM"> 
               {% endif %}
-              {% if game.startingMap and game.game == "TGZ" %} 
+              {% if game.startingMap and game.gameCode == "TGZ" %} 
               <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapTGZ.jpg" %}" 
               title="Click to View Map"
                 data-map="{{game.startingMap}}" data-game="TGZ"> 
                 {% endif %}
-            {{ game.startingOptions|safe }}
+            {{ game.startingOptionsHTML|safe }}
           </td>
 
           <td>
             {% if game.deleteableGame %}
-            <div id="{{ game.game }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
+            <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
               {% blocktranslate trimmed %}
               Delete <BR /> Practice<BR /> Game
               {% endblocktranslate %}
             </div>
             {% else  %}
-            <div id="{{ game.game }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
+            <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
               {% blocktranslate trimmed %}
               Delete <BR /> NORMAL 
               {% endblocktranslate %}
