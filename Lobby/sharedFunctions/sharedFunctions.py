@@ -34,6 +34,9 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_isThisMultiiWinnersGame,
     SR_getPointsForPosition,
     getCleanedAndSortedRoundData,
+    SR_currentTurnString,
+    SR_getFCMstartingOptionsHTML,
+    SR_gamePaceString,
 )
 from Lobby.sharedFunctions.tournyGenerator import multiGamePlayers4p, multiGamePlayersRound2
 
@@ -94,6 +97,108 @@ def SF_getMiniTournamentCreationJsonReturn(MT_ID):
         + "</button>"
     )
 
+def SF_fastSerializeGame(game, user):
+    """
+    Zero-query serialization for any game model.
+    Dynamically identifies game type (FCM, TGZ, etc.)
+    """
+    # --- 1. Identify Game Type ---
+    # Using app_label (e.g., 'FCM', 'TGZ') is usually the cleanest for your setup.
+    # Alternatively, use game.__class__.__name__ or game._meta.model_name
+    game_code = game._meta.app_label
+    # 1. Access prefetched sets once
+    all_players = list(game.allPlayers.all())
+    all_usernames = [u.username for u in all_players]
+    invited_usernames = [u.username for u in game.invitedPlayers.all()]
+    all_ids = {u.id for u in all_players}
+    missing_ids = {u.id for u in game.missingPlayers.all()}
+    chat_notify_ids = {u.id for u in game.playersWithChatNotification.all()}
+    
+    # 2. Winner Logic (Handles both FK and M2M)
+    winner_str = ""
+    if game.winner:
+        if hasattr(game.winner, 'all'): # M2M
+            winner_str = ", ".join([u.username for u in game.winner.all()])
+        else: # ForeignKey
+            winner_str = game.winner.username
+
+    # 3. Timing Calculation
+    now = int(time.time())
+    # Note: latestUpdate and created should be stored in milliseconds based on your code
+    ref_time = int(game.latestUpdate) // 1000 if game.gameStatus == "ACTIVE" else int(game.created) // 1000
+    elapsed = max(0, now - ref_time)
+    
+    d, rem = divmod(elapsed, 86400)
+    h, rem = divmod(rem, 3600)
+    m, s = divmod(rem, 60)
+    elapsed_str = f"{f'{d}d ' if d else ''}{f'{h}h ' if h else ''}{f'{m}m ' if m else ''}{s}s"
+
+    # 4. MyMove & Involved Logic
+    is_my_move = False
+    if user:
+        # Use quickIsMyMove logic: check if user.username is in the currentPlayers string
+        is_my_move = (not game.currentPlayers or user.username in game.currentPlayers or 
+                      any(s in game.currentPlayers for s in ["SHADOW", "FcmAI"]))
+    
+    is_involved = user.id in all_ids and user.id not in missing_ids
+
+    # 5. Shadow/Delete Logic
+    shadow_names = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+    is_deleteable = any(name in all_usernames for name in shadow_names) and (user.id in all_ids if user else False)
+
+    creator = game.creator.username 
+    gameName = getattr(game, 'gameName', 'Unknown Game')
+    if gameName == "":
+        gameName = f"[{creator}'s Game]"
+
+    startingOptions = []
+    if game_code == "FCM" or game_code == "HC" or game_code == "Bus":
+        startingOptions = game.startingOptions.split(",")
+    else:
+        startingOptions = json.loads(game.startingOptions) if game.startingOptions else []
+
+    isLearningGame = False
+    isExperiencedGame = False
+    if "110" in startingOptions:
+        isLearningGame = True
+    if "120" in startingOptions:
+        isExperiencedGame = True
+    
+    startingOptionsHTML = ""
+    if game_code == "FCM":
+        startingOptionsHTML = SR_getFCMstartingOptionsHTML(game.startingOptions)
+
+    return {
+        "gameID": game.id,
+        "gameName": gameName,
+        "gameDescription": game.gameDescription,
+        "creator": creator,
+        "allPlayers": all_usernames,
+        "invitedPlayers": invited_usernames,
+        "winner": winner_str,
+        "myMove": is_my_move,
+        "involvedPlayer": is_involved,
+        "chatNotification": user.id in chat_notify_ids if user else False,
+        "latestUpdateElapsedTimeString": elapsed_str,
+        "deleteableGame": is_deleteable,
+        "gameStatus": game.gameStatus,
+        "gameCode": game_code,
+        "currentTurn": SR_currentTurnString(game_code, game.turn, game.phase),
+        "kickoutDuration": game.kickoutDuration,
+        "created": game.created,
+        "learningGame": isLearningGame,
+        "experiencedGame": isExperiencedGame,
+        "maxPlayers": game.maxPlayers,
+        "startingOptionsHTML": startingOptionsHTML,
+        "pace": SR_gamePaceString(game.gamePace),
+        "startingMap": game.startingMap if hasattr(game, 'startingMap') else "",
+        "latestUpdate": game.latestUpdate,
+        "currentPlayers": game.currentPlayers, 
+
+    }
+            #"currentPlayers": self.currentPlayers,
+            #"kickoutRequiredNum": kickoutRequiredNum,
+            #"remainingPlayers": remainingPlayers,
 
 def SF_updateFlexiTime(kickoutFlexiData, latestUpdate, now, currentUsername, kickoutDuration):
     secondsSinceUpdate = int((now - int(latestUpdate)) / 1000)
@@ -206,67 +311,6 @@ def SF_kickoutRequired(gameStatus, allPlayers, latestUpdate, kickoutDuration, ki
 
     # ("no check")
     return 0
-
-
-# def SF_getNextURL(currentGamesList, username, game_id):
-#    # Sort the games by latestUpdate in descending order
-#    currentGamesList.sort(key=lambda instance: instance.latestUpdate, reverse=True)
-#
-#    # Filter currentGamesList based on isMyMove function and retrieve the next game URL
-#    nextURL = "/"
-#    filteredGamesList = []
-#    for game in currentGamesList:
-#        if game.isMyMove(username):
-#            filteredGamesList.append(game)
-#            if len(filteredGamesList) >= 2:
-#                game0 = filteredGamesList[0].serialize()
-#                game1 = filteredGamesList[1].serialize()
-#                nextID = game0["gameID"]
-#                nextGame = game0["game"]
-#                if game_id == nextID:
-#                    nextID = game1["gameID"]
-#                    nextGame = game1["game"]
-#                nextURL = f"/{nextGame}/{nextID}/"
-#                break
-#    return nextURL
-
-
-def SF_getNextURL(currentGamesList, username, game_id):
-    # Sort the games by latestUpdate in descending order
-    currentGamesList.sort(key=lambda instance: instance.latestUpdate, reverse=True)
-
-    # Filter currentGamesList based on isMyMove function
-    filteredGamesList = [game for game in currentGamesList if game.quickIsMyMove(username)]
-
-    # Handle cases when there are no filtered games
-    if not filteredGamesList:
-        return "/"
-    if len(filteredGamesList) == 1:
-        nextGame = filteredGamesList[0]#.serialize()
-        nextID = nextGame.id
-        if nextID == game_id:
-            return "/"
-        else:
-            nextGameCode = nextGame.getGameCode()
-            return f"/{nextGameCode}/{nextID}/"
-
-    # Get the index of the game with the specified game_id
-    index = next((i for i, game in enumerate(filteredGamesList) if game.id == game_id), None)
-
-    # Determine the next game details based on the index
-    if index is None or index >= len(filteredGamesList) - 1:
-        nextGame = filteredGamesList[0]#.serialize()
-    else:
-        nextGame = filteredGamesList[index + 1]#.serialize()
-
-    # Construct the nextURL using the next game details
-    #nextID = nextGame["gameID"]
-    nextID = nextGame.id
-    nextGameCode = nextGame.getGameCode()
-    nextURL = f"/{nextGameCode}/{nextID}/"
-
-    return nextURL
-
 
 def SF_getSecondsToNextKickout(latestUpdate, kickoutDuration):
     startPeriodinSeconds = int(latestUpdate) / 1000

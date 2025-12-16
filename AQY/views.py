@@ -20,7 +20,7 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction, connection
 from django.db.models import Q
 
-from Lobby.sharedFunctions.sharedFunctions import SF_getNextURL, SF_getGameCreationJsonReturn, SF_updateFlexiTime
+from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn, SF_updateFlexiTime
 from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications, SN_sendNextTurnNotification, SN_sendBugReportEmail, SN_sendAdminErrorMessage
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
@@ -231,21 +231,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     latestUpdate = currentGame.latestUpdate
 
     ## Get the next URL
-    game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
-    currentGamesList = list(
-        chain(
-            *[
-                model.objects.filter(
-                    Q(allPlayers=request.user),
-                    Q(gameStatus="ACTIVE"),
-                    ~Q(missingPlayers=request.user),
-                )
-                for model in game_models
-            ]
-        )
-    )
-
-    nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
+    nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
 
     preferredAQYoptions = json.loads(request.user.profile.preferredAQYoptions) if request.user.profile.preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0]
 

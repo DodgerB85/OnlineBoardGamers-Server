@@ -41,9 +41,15 @@ if not DEBUG:
     CSRF_TRUSTED_ORIGINS = []
     USE_X_FORWARDED_HOST = False
 
-    SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Or cached_db, or file, etc.
-    SESSION_COOKIE_SECURE = True  # Only send the session cookie over HTTPS in production
-    SESSION_COOKIE_HTTPONLY = True  # Prevents JavaScript from accessing the session cookie
+    SESSION_ENGINE = (
+        "django.contrib.sessions.backends.db"  # Or cached_db, or file, etc.
+    )
+    SESSION_COOKIE_SECURE = (
+        True  # Only send the session cookie over HTTPS in production
+    )
+    SESSION_COOKIE_HTTPONLY = (
+        True  # Prevents JavaScript from accessing the session cookie
+    )
     SESSION_COOKIE_SAMESITE = "Lax"  # Or 'Strict', depending on your needs
 
     SECURE_HSTS_SECONDS = 60
@@ -69,12 +75,8 @@ else:
     EMAIL_HOST_PASSWORD = config("OBG_EMAIL_APP_PWD")
 
 
-EMAIL_HOST_USER_TURN = [
-
-]
-EMAIL_HOST_PASSWORD_TURN = [
-
-]
+EMAIL_HOST_USER_TURN = []
+EMAIL_HOST_PASSWORD_TURN = []
 
 # Application definition
 
@@ -110,13 +112,13 @@ INSTALLED_APPS = [
     "WEB",
     "RNB",
     "statici18n",
-    'i18n',
+    "i18n",
 ]
 
 APPEND_SLASH = True
 
 MIDDLEWARE = [
-    'Lobby.middleware.ForceTrailingSlashMiddleware', 
+    "Lobby.middleware.ForceTrailingSlashMiddleware",
     # This MUST come first
     "django.middleware.security.SecurityMiddleware",
     # This must come before Authentication and CsrfView
@@ -277,7 +279,9 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = []
 
 # Output folder for collectstatic (separate from source!)
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # → /home/OnlineGaming/.virtualenvs/OnlineGaming/staticfiles/
+STATIC_ROOT = os.path.join(
+    BASE_DIR, "staticfiles"
+)  # → /home/OnlineGaming/.virtualenvs/OnlineGaming/staticfiles/
 
 STORAGES = {
     "default": {
@@ -338,6 +342,9 @@ LOGGING = {
         },
     },
     "loggers": {
+        #"django.db.backends": {
+        #    "level": "DEBUG",
+        #},
         "Lobby.views": {
             "handlers": ["file", "console"],
             "level": "DEBUG",
@@ -363,5 +370,8 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": False,
         },
+    },
+    "root": {
+        "handlers": ["console"],
     },
 }

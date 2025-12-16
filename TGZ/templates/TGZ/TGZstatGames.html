@@ -31,11 +31,11 @@
           </thead>
           {% for game in finishedGamesList %}
             <tr class="clickableGameRow"
-                id="{{ game.game }}gamesRow{{ game.gameID }}"
-                onclick="window.location.href='/{{ game.game }}/{{ game.gameID }}/';">
+                id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
+                onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/';">
               <td class="nameTDcurrent tdWithBox">
-                {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.game %}
-                <a href="/{{ game.game }}/{{ game.gameID }}">{{ game.gameName }}</a>
+                {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
+                <a href="/{{ game.gameCode }}/{{ game.gameID }}">{{ game.gameName }}</a>
                 {{ game.startingOptions|safe }}
               </td>
               <td>{{ game.maxPlayers }}</td>

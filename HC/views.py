@@ -35,7 +35,7 @@ from KFW.models import KFW_Game
 from WEB.models import WEB_Game
 from RNB.models import RNB_Game
 
-from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime, SF_getNextURL, SF_getGameCreationJsonReturn
+from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime, SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications, SN_sendBugReportEmail, SN_sendNextTurnNotification
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
@@ -60,7 +60,7 @@ def HCgameSummary(request, game_id):
         {
             # "now": now,
             "gameData": currentGame.gameData,
-            "gameID": currentGame.id,
+            "gameID": getattr(currentGame, "id"),
         },
     )
 
@@ -248,7 +248,7 @@ def createHCgame(request):
 
     newGame.kickoutDuration = request.POST["kickoutDuration"]
 
-    newGame.zoomLevels = "200" * _maxPlayers
+    #newGame.zoomLevels = "200" * _maxPlayers
     newGame.statsExcludeConsent = "0" * _maxPlayers
     if "trainingGame" in request.POST:
         newGame.statsExcludeConsent = "1" * _maxPlayers
@@ -263,7 +263,7 @@ def createHCgame(request):
         messages.success(request, (gettext("Your Practice game has started")))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
     else:
-        messages.success(request, (SF_getGameCreationJsonReturn("HC", newGame.id)))
+        messages.success(request, (SF_getGameCreationJsonReturn("HC", getattr(newGame, "id"))))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
@@ -709,8 +709,7 @@ def _processHCturn(request):
             )
 
         # ELSE if there is not any current move data
-        if len(currentRewindDataArray) > 0:
-            loadData = currentRewindDataArray.pop()
+        loadData = currentRewindDataArray.pop() if len(currentRewindDataArray) > 0 else ""
 
         while loadData == currentGame.gameData and len(currentRewindDataArray) > 0:
             loadData = currentRewindDataArray.pop()
@@ -842,6 +841,17 @@ def showHCgame(request, game_id):
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
+    user = request.user
+    user_id = user.id
+
+    start_time = time.time()
+    show_timestamps = user.username in ["admin", "DodgerB"]
+    def print_timestamp(label):
+        if show_timestamps:
+            print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
+
+
+
     KickoutFlexiDataArray = []
     if currentGame.kickoutFlexiData:
         KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
@@ -892,21 +902,7 @@ def showHCgame(request, game_id):
                 currentGame.save()
 
         ## Get the next URL
-        game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
-        currentGamesList = list(
-            chain(
-                *[
-                    model.objects.filter(
-                        Q(allPlayers=request.user),
-                        Q(gameStatus="ACTIVE"),
-                        ~Q(missingPlayers=request.user),
-                    )
-                    for model in game_models
-                ]
-            )
-        )
-
-        nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
+        nextURL = f"/nextGame?current_id={game_id}&current_code={currentGame.getGameCode()}"
 
         if request.user in currentGame.allPlayers.all() and (request.user not in currentGame.missingPlayers.all()):
             involvedPlayer = True
@@ -1227,8 +1223,6 @@ def notes(request):
         currentGame.player3notes = jsonData["note"]
     if currentGame.seatPosition(request.user.username) == 4:
         currentGame.player4notes = jsonData["note"]
-    if currentGame.seatPosition(request.user.username) == 5:
-        currentGame.player5notes = jsonData["note"]
     currentGame.save()
 
     return JsonResponse({"notePosted": True})

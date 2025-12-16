@@ -1,15 +1,15 @@
 {% load static i18n %}
 
 <tr class="gameRow {% if not game.involvedPlayer %}otherWaitingGame{% endif %} {% if game.learningGame %}learningGame{% endif %}"
-id="{{ game.game }}gamesRow{{ game.gameID }}">
+id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
 {% if game.involvedPlayer %}
 <td>
   <div class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</div>
-  <button class="copyGameLinkButtonInTable" onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.game }}{{ game.gameID }}/', event); event.preventDefault();">{% translate "Copy Link" %}</button></td>
+  <button class="copyGameLinkButtonInTable" onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.gameCode }}{{ game.gameID }}/', event); event.preventDefault();">{% translate "Copy Link" %}</button></td>
 {% else %}
 <td>
   <div class="buttonDiv Join availableLink">{% translate "Join" %}</div>
-  <button class="copyGameLinkButtonInTable" onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.game }}{{ game.gameID }}/', event); event.preventDefault();">{% translate "Copy Link" %}</button></td>
+  <button class="copyGameLinkButtonInTable" onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.gameCode }}{{ game.gameID }}/', event); event.preventDefault();">{% translate "Copy Link" %}</button></td>
 {% endif %}
 
 <td class="tdWithBox">
@@ -28,7 +28,7 @@ id="{{ game.game }}gamesRow{{ game.gameID }}">
     <span class="learningGameSpan">[Experienced Game]</span>
     {% endif %}
 
-    {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.game %}
+    {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
 
     {{ game.gameName }}{% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}</td>
 <td><a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></td>
@@ -47,20 +47,20 @@ id="{{ game.game }}gamesRow{{ game.gameID }}">
     {{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
 <td><span class="timeToConvertSpan">{{ game.created }}</span><BR />{{ game.latestUpdateElapsedTimeString }}</td>
 <td class="availGamesStartingOptionsTD">
-  {% if game.startingMap and game.game == "FCM" %} 
+  {% if game.startingMap and game.gameCode == "FCM" %} 
   <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMap.jpg" %}" 
   title="Custom Map - Click to View"
     data-map="{{game.startingMap}}" data-game="FCM"> 
     {% endif %}
-    {% if game.startingMap and game.game == "TGZ" %} 
+    {% if game.startingMap and game.gameCode == "TGZ" %} 
     <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapTGZ.jpg" %}" 
     title="Custom Map - Click to View"
       data-map="{{game.startingMap}}" data-game="TGZ"> 
       {% endif %}
-      {% if game.startingMap and game.game == "AQY" %} 
+      {% if game.startingMap and game.gameCode == "AQY" %} 
       <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapAQY.jpg" %}" 
       title="Custom Map - Click to View"
         data-map="{{game.startingMap}}" data-game="AQY"> 
         {% endif %}
-    {{ game.startingOptions|safe }}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}</td>
+    {{ game.startingOptionsHTML|safe }}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}</td>
 </tr>

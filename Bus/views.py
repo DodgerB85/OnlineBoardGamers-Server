@@ -33,7 +33,7 @@ from KFW.models import KFW_Game
 from WEB.models import WEB_Game
 from RNB.models import RNB_Game
 
-from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime, SF_getNextURL, SF_getGameCreationJsonReturn
+from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime, SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications, SN_sendNextTurnNotification, SN_sendBugReportEmail, SN_sendAdminErrorMessage
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
@@ -261,21 +261,7 @@ def showBusGame(request, game_id):
         involvedPlayer = True
 
     ## Get the next URL
-    game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
-    currentGamesList = list(
-        chain(
-            *[
-                model.objects.filter(
-                    Q(allPlayers=request.user),
-                    Q(gameStatus="ACTIVE"),
-                    ~Q(missingPlayers=request.user),
-                )
-                for model in game_models
-            ]
-        )
-    )
-
-    nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
+    nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
 
     returnData.update({"name": name, "chatData": chatData, "preferredBusBoard": request.user.profile.preferredBusBoard, "nextURL": nextURL})
 
