@@ -97,7 +97,7 @@
     initData.name = '{{ name }}'; 
     initData.chatData = "{{ chatData }}";
     initData.preferredBusBoard = {{ preferredBusBoard }};
-    initData.nextURL = '{{ nextURL }}';
+    initData.nextURL = '{{ nextURL|safe }}';
     {% endif %}
 
     ///////////////////////

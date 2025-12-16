@@ -42,7 +42,6 @@ from django.utils.translation import gettext  # , get_language
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
     SF_getGameCreationJsonReturn,
-    SF_getNextURL,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML  # , SR_getTimeNow
 from Lobby.sharedFunctions.sharedNotifications import (
@@ -420,13 +419,31 @@ def createFCMgame(request):
 
 def showGame(request, game_id):
     try:
-        currentGame = FCM_Game.objects.get(id=game_id)
+        currentGame = FCM_Game.objects.select_related(
+            "host", "relatedTournament"
+        ).prefetch_related(
+            "allPlayers", 
+            "missingPlayers", 
+            "playersWithChatNotification"
+        ).get(id=game_id)
     except FCM_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
+
+    #start_time = time.time()
+    user = request.user
+    user_id = user.id
+    #show_timestamps = user.username in ["admin", "DodgerB"]
+    
+    #def print_timestamp(label):
+    #    if show_timestamps:
+    #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
+
 
     finishedGame = False
     if currentGame.gameStatus == "FINISHED":
@@ -446,6 +463,8 @@ def showGame(request, game_id):
     KickoutFlexiDataArray = []
     if currentGame.kickoutFlexiData:
         KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
+
+    #print_timestamp("Step 1: initial setup done")
 
     # If not logged in, return now
     if not request.user.is_authenticated:
@@ -474,19 +493,25 @@ def showGame(request, game_id):
         )
 
     # If person is logged in, may or may not be in game
+    user_profile = Profile.objects.get(user=request.user) 
+    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
+    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+
+    is_in_all = user_id in all_player_ids
+    is_missing = user_id in missing_player_ids
+    involvedPlayer = is_in_all and not is_missing
+    if request.user.username in FCMsuperUsers:
+        involvedPlayer = True
+    
     tournamentGame = False
-    highContrastBoardItems = request.user.profile.highContrastBoardItems
+    highContrastBoardItems = user_profile.highContrastBoardItems
+    showAssistance = "true" if user_profile.showAssistance else "false"
     now = int(time.time()) * 1000
 
     chatData = currentGame.chatData
     if not USE_NEW_CODE:
         c = bytes(chatData, "utf-8")
         chatData = c.decode("unicode-escape")
-
-    if request.user.profile.showAssistance:
-        showAssistance = "true"
-    else:
-        showAssistance = "false"
 
     currentMove = ""
     currentNotes = ""
@@ -496,7 +521,6 @@ def showGame(request, game_id):
     kickoutRequired = 0
     chatNotification = False
 
-    involvedPlayer = False
     myMove = False
     myZoomLevel = 200
     myStatsExcludeConsent = 0
@@ -511,51 +535,17 @@ def showGame(request, game_id):
     displayNames = ""
 
     # Do Chat notification separately, as could be kicked out, and so not involoved
-    if request.user in currentGame.allPlayers.all():
-        # Remove from chat notification and auto-open chat
-        if request.user in currentGame.playersWithChatNotification.all():
-            chatNotification = True
-            currentGame.playersWithChatNotification.remove(request.user)
-            currentGame.save()
+    if is_in_all and user_id in chat_notify_ids:
+        chatNotification = True
+        currentGame.playersWithChatNotification.remove(request.user)
+        currentGame.save()
+
+    #print_timestamp("Step 2: Before nextURL")
 
     ## Get the next URL
-    start_time = time.time()
-    show_timestamps = False
-    if request.user.username == "admin" or request.user.username == "DodgerB":
-        show_timestamps = True
-    if show_timestamps:
-        print(f"--- Timing Start: {start_time} for user {request.user.username} ---")
-
-    def print_timestamp(label):
-        if show_timestamps:
-            elapsed = time.time() - start_time
-            print(f"[TIMING-NEXT-URL] {label}: {elapsed:.4f} seconds elapsed")
-
-    ## Get the next URL
-    game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
-    currentGamesList = list(
-        chain(
-            *[
-                model.objects.filter(
-                    Q(allPlayers=request.user),
-                    Q(gameStatus="ACTIVE"),
-                    ~Q(missingPlayers=request.user),
-                )
-                for model in game_models
-            ]
-        )
-    )
+    nextURL = f"/nextGame?current_id={game_id}&current_code={currentGame.getGameCode()}"
     
-    print_timestamp("Step 1: gamesList obtained")
-
-    nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
-    
-    print_timestamp("Step 2: nextURL obtained")
-
-    if request.user in currentGame.allPlayers.all() and request.user not in currentGame.missingPlayers.all():
-        involvedPlayer = True
-    if request.user.username in FCMsuperUsers:
-        involvedPlayer = True
+    #print_timestamp("Step 4: nextURL obtained")
 
     # If person is logged in and in the game
     if involvedPlayer:
@@ -572,13 +562,15 @@ def showGame(request, game_id):
             rewindHostPossible = True
             rewindHostHTML = currentGame.getRewindHostHTML()
 
+        #print_timestamp("Step 4.5: Involved player")
+
         pov = currentGame.seatPosition(request.user.username)
         if request.user.username in FCMsuperUsers:
             involvedPlayer = True
         currentRewindConsent = currentGame.getCurrentRewindConsent(request.user.username)
 
-        preferredRestaurantColour = request.user.profile.preferredRestaurantColour
-        liveNotification = request.user.profile.liveNotification
+        preferredRestaurantColour = user_profile.preferredRestaurantColour
+        liveNotification = user_profile.liveNotification
 
         currentMove = ""
         if currentGame.hasValidActualMoveData(request.user.username) or currentGame.hasValidActualCleanupPreset(
@@ -586,21 +578,23 @@ def showGame(request, game_id):
         ):
             currentMove = currentGame.getCompressedMoveArr(request.user.username, True)
 
-        # Get the Notes for the user
-        if currentGame.seatPosition(request.user.username) == 0:
-            currentNotes = currentGame.player0notes
-        if currentGame.seatPosition(request.user.username) == 1:
-            currentNotes = currentGame.player1notes
-        if currentGame.seatPosition(request.user.username) == 2:
-            currentNotes = currentGame.player2notes
-        if currentGame.seatPosition(request.user.username) == 3:
-            currentNotes = currentGame.player3notes
-        if currentGame.seatPosition(request.user.username) == 4:
-            currentNotes = currentGame.player4notes
-        if currentGame.seatPosition(request.user.username) == 5:
-            currentNotes = currentGame.player5notes
+        #print_timestamp("Step 4.6: currentMove obtained")
+               
+        # Mapping for notes
+        notes_mapping = {
+            0: currentGame.player0notes,
+            1: currentGame.player1notes,
+            2: currentGame.player2notes,
+            3: currentGame.player3notes,
+            4: currentGame.player4notes,
+            5: currentGame.player5notes,
+        }
+        currentNotes = notes_mapping.get(pov, "")
+
         # Check for kickout
         kickoutRequired = currentGame.kickoutRequired()
+
+        #print_timestamp("Step 4.7: currentNotes obtained")
 
         allPlayerListBySeat = currentGame.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
         myMove = currentGame.isMyMove(request.user.username)
@@ -616,6 +610,8 @@ def showGame(request, game_id):
             currentNotes = ""
             currentGame.player0notes = ""
             currentGame.save()
+
+    #print_timestamp("Step 5: involvedPlayer processing done")
 
     #######
     #   Check if SHADOW in currentGame.allPlayers

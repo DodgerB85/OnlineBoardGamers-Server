@@ -39,7 +39,7 @@
             src="{% static 'FCM/Images/stop-sign.svg' %}"><span>{% translate "Bug" %}</span></span>
 
                         <!-- IF LOGGED IN -->
-                        <a href="{{ nextURL }}">
+                        <a href="{{ nextURL|safe }}">
                           <span class="topMenuItem" id="menuButtonNext"><img
                             src="{% static 'HC/Images/icon-nextGame.svg' %}" />
                         <span>Next </span></span></a>
@@ -328,7 +328,7 @@
 
     global.liveWS = true;
     global.name = '{{ name }}';
-    global.nextURL = '{{ nextURL }}';
+    global.nextURL = '{{ nextURL|safe }}';
 
     {% endif %}
 
