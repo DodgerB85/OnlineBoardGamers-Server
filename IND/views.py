@@ -227,8 +227,8 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     userObj = request.user
     username = userObj.username
     
-    start_time = time.time()
-    show_timestamps = username in ["admin", "DodgerB"]
+    #start_time = time.time()
+    #show_timestamps = username in ["admin", "DodgerB"]
     
     #def print_timestamp(label):
     #    if show_timestamps:

@@ -25,7 +25,7 @@ from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .models import AQY_Game
-from Lobby.models import User#, Profile
+from Lobby.models import User, Profile
 from FCM.models import FCM_Game
 from HC.models import HC_Game
 from Bus.models import Bus_Game
@@ -185,13 +185,24 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     #    return redirect('index')
 
     try:
-        currentGame = AQY_Game.objects.get(id=game_id)
+        currentGame = AQY_Game.objects.select_related(
+            "host", "relatedTournament", "creator"
+        ).prefetch_related(
+            "allPlayers", 
+            "missingPlayers", 
+            "playersWithChatNotification"
+        ).get(id=game_id)
     except AQY_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
+
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    userObj = request.user
+    username = userObj.username
 
     # No2 it is a proper started game, so set up for not logged in
     gameID = currentGame.id
@@ -225,7 +236,18 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "AQY/showAQYgame.html", returnData)
 
     # Now you are logged in
-    name = request.user.username
+    user_id = userObj.id
+    
+    user_profile = Profile.objects.get(user=userObj) 
+    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
+    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+
+    is_in_all = user_id in all_player_ids
+    is_missing = user_id in missing_player_ids
+    involvedPlayer = is_in_all and not is_missing
+    if username == "BotKickStarter":
+        involvedPlayer = True
+        
     chatData = currentGame.chatData
 
     latestUpdate = currentGame.latestUpdate
@@ -233,7 +255,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ## Get the next URL
     nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
 
-    preferredAQYoptions = json.loads(request.user.profile.preferredAQYoptions) if request.user.profile.preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0]
+    preferredAQYoptions = json.loads(user_profile.preferredAQYoptions) if user_profile.preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0]
 
     # preferredAQYoptions
     # colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes,showPollutionUnderRes, housesInNumberOrder
@@ -241,14 +263,14 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
     ## Get Chat notification
     chatNotification = False
-    if request.user in currentGame.playersWithChatNotification.all():
+    if user_id in chat_notify_ids:
         chatNotification = True
         currentGame.playersWithChatNotification.remove(request.user)
         currentGame.save()
 
     returnData.update(
         {
-            "name": name,
+            "name": username,
             "chatData": chatData,
             "latestUpdateLiteral": latestUpdate,
             "nextURL": nextURL,
@@ -257,36 +279,31 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         }
     )
 
-    involvedPlayer = request.user in currentGame.allPlayers.all() and request.user not in currentGame.missingPlayers.all()
-    if request.user.username == "BotKickStarter":
-        involvedPlayer = True
-
     if not involvedPlayer:
         return render(request, "AQY/showAQYgame.html", returnData)
 
-    pov = currentGame.seatPosition(request.user.username)
+    pov = currentGame.seatPosition(username)
     if request.user.username == "BotKickStarter":
-        pov = 0
+        pov = -1
     secondsToNextKickout = currentGame.getSecondsToNextKickout()
 
     kickoutRequired = currentGame.kickoutRequired()
 
-    myMove = currentGame.isMyMove(request.user.username)
+    myMove = currentGame.isMyMove(username)
 
     ## Get the Notes for the user
-    seat_position = currentGame.seatPosition(request.user.username)
-    notes_dict = {
-        0: currentGame.player0notes,
-        1: currentGame.player1notes,
-        2: currentGame.player2notes,
-        3: currentGame.player3notes,
-    }
-    notes = notes_dict.get(seat_position, "")
+    notes_mapping = {
+            0: currentGame.player0notes,
+            1: currentGame.player1notes,
+            2: currentGame.player2notes,
+            3: currentGame.player3notes,
+        }
+    notes = notes_mapping.get(pov, "")
 
-    liveNotification = request.user.profile.liveNotification
+    liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
-    move = currentGame.getMoveData(request.user.username)
+    move = currentGame.getMoveData(username)
     trade = currentGame.playerTradeData
 
     ## Involved Player
@@ -309,8 +326,8 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     ## pre move
     if currentGame.phase == 4 or currentGame.phase == 5 or currentGame.phase == 6 or currentGame.phase == 7 or currentGame.phase == 8 or currentGame.phase == 9:
-        if currentGame.getMoveDataTime(request.user.username) == "PRE_MOVE":
-            returnData.update({"preMove": currentGame.getMoveData(request.user.username)})
+        if currentGame.getMoveDataTime(username) == "PRE_MOVE":
+            returnData.update({"preMove": currentGame.getMoveData(username)})
 
     # TODO: also send any current player pre moves in case action failed.
 
@@ -333,7 +350,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
                 # "allPlayerListBySeat": allPlayerListBySeat,
             }
         )
-
+        
     return render(request, "AQY/showAQYgame.html", returnData)
 
 
