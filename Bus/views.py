@@ -23,15 +23,6 @@ from django.db.models import Q
 
 from .models import Bus_Game
 from Lobby.models import User, Profile
-from FCM.models import FCM_Game
-from HC.models import HC_Game
-from TGZ.models import TGZ_Game
-from CNS.models import CNS_Game
-from AQY.models import AQY_Game
-from IND.models import IND_Game
-from KFW.models import KFW_Game
-from WEB.models import WEB_Game
-from RNB.models import RNB_Game
 
 from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime, SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications, SN_sendNextTurnNotification, SN_sendBugReportEmail, SN_sendAdminErrorMessage

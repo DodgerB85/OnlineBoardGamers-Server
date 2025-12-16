@@ -35,7 +35,6 @@ from Lobby.models import User, Profile
 
 INDsuperUsers = ["BotKickStarter"]
 
-
 def index(request):
     return HttpResponse("Hello, world. You're at IND")
 
