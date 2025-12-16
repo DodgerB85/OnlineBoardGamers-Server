@@ -811,15 +811,32 @@ def csrf_failure(request, reason=""):
 
 @login_required
 def stats(request):
-    totalUsers = User.objects.all().count()
-    date_from = datetime.datetime.now() - datetime.timedelta(hours=24)
-    date_from = timezone.now() - timezone.timedelta(hours=24)
+    # Try to get data from cache first
+    stats_data = cache.get('global_stats')
+    if not stats_data:
+        # These 2 queries only run once every 5 minutes
+        date_from = timezone.now() - timezone.timedelta(hours=24)
+        
+        stats_data = {
+            'totalUsers': User.objects.count(),
+            'userActivity': UserVisit.objects.filter(
+                timestamp__gte=date_from
+            ).aggregate(total=Count('user_id', distinct=True))['total']
+        }
+        cache.set('global_stats', stats_data, 300) # Cache for 300 seconds
+    
+    #totalUsers = User.objects.all().count()
+    #date_from = datetime.datetime.now() - datetime.timedelta(hours=24)
+    #date_from = timezone.now() - timezone.timedelta(hours=24)
 
-    userActvitiy = (
-        UserVisit.objects.filter(timestamp__gte=date_from).values_list("user_id", flat=True).distinct().count()
-    )
+    #userActvitiy = (
+        #UserVisit.objects.filter(timestamp__gte=date_from).values_list("user_id", flat=True).distinct().count()
+    #    UserVisit.objects.filter(timestamp__gte=date_from).aggregate(total=Count('user_id', distinct=True))['total']
+    #)
     # userActvitiy += 10
-
+    # Unpack cached data
+    totalUsers = stats_data['totalUsers']
+    userActvitiy = stats_data['userActivity']
     # Initialize counts and lists
     game_counts = []
     finished_game_counts = []
@@ -830,22 +847,30 @@ def stats(request):
     active_query = Q(gameStatus="ACTIVE") & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
     finished_query = Q(gameStatus="FINISHED") & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
 
+
     # Loop through GAME_MODELS once to gather counts and latest games
     for game_model in GAME_MODELS:
+        #### NOTE - DO NOT USE PRE-FETCHES FOR THIS FUNCTION
+        # To get the latest 10 games, we need to load 10x game models. But we only want to serialise the latest 10
+        # So it's actually less hits just to get the latest 10 games for each model without prefetch (~150 hits)
+        # Get counts (1 hit per model)
+        active_count = game_model.objects.filter(active_query).count()
+        finished_count = game_model.objects.filter(finished_query).count()
         active_games = game_model.objects.filter(active_query).annotate(count=Count("id"))
         finished_games = game_model.objects.filter(finished_query).annotate(count=Count("id"))
 
         # Count active games
-        active_count = active_games.aggregate(Sum("count"))["count__sum"] if active_games else 0
+        #active_count = active_games.aggregate(Sum("count"))["count__sum"] if active_games else 0
         game_counts.append(active_count)
 
         # Count finished games
-        finished_count = finished_games.aggregate(Sum("count"))["count__sum"] if finished_games else 0
+        #finished_count = finished_games.aggregate(Sum("count"))["count__sum"] if finished_games else 0
         finished_game_counts.append(finished_count)
 
         # Get latest 10 games
         latestGames.extend(active_games.order_by("-latestUpdate")[:10])
         latestGamesFinished.extend(finished_games.order_by("-latestUpdate")[:10])
+        
 
     # Calculate grand totals
     totalGames = sum(game_counts)
@@ -860,9 +885,12 @@ def stats(request):
     tenGamesList = latestGames[:10]
     tenGamesListFininshed = latestGamesFinished[:10]
 
+
+
     # Serialize the games into JSON
-    tenGamesJSON = [game.serialize(request.user) for game in tenGamesList]
-    tenGamesFinishedJSON = [game.serialize(request.user) for game in tenGamesListFininshed]
+    tenGamesJSON = [SF_fastSerializeGame(game, request.user) for game in tenGamesList]
+    tenGamesFinishedJSON = [SF_fastSerializeGame(game, request.user) for game in tenGamesListFininshed] 
+
 
     # Fair Play
     f = open("./Lobby/stats/fairPlayArr_E.json")
@@ -931,6 +959,7 @@ def stats(request):
     f.close()
 
     games = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
+    
 
     return render(
         request,
@@ -2508,14 +2537,14 @@ def activate(request, uidb64, token):
 
 def playerInfo(request, usernameToProfile):
     try:
-        userToProfile = get_object_or_404(User, username=usernameToProfile)
-    except Http404:
+        userToProfile = User.objects.select_related("profile").get(username=usernameToProfile)
+    except User.DoesNotExist:
         messages.error(request, gettext("Player does not exist"))
         return render(request, "Lobby/playerInfo.html")
 
-    profileOfUser = Profile.objects.get(user=userToProfile)
+    profileOfUser = getattr(userToProfile, "profile")  # userToProfile.profile
     FCMtournamentTrophies = json.loads(profileOfUser.FCMtournamentTrophies)
-    usernameToProfileID = getattr(userToProfile, "id")  # userToProfile.id
+    #usernameToProfileID = getattr(userToProfile, "id")  # userToProfile.id
 
     trophyHTML = ""
     trophyDetailHTML = ""
@@ -2558,144 +2587,271 @@ def playerInfo(request, usernameToProfile):
                     if amount != 0:
                         colour = ["gold", "silver", "bronze"][trophy_colour]
                         trophyDetailHTML += f'<div class="trophyHolderSummaryDiv"><img class="trophyIMGsummary" src="/static/Lobby/Images/trophy_{colour}.png"><div class="trophyNumberSummaryDiv">{amount}</div></div>'
-        # Stats and games
-    minus1year = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp() * 1000)
-    activeJointGamesListJson = []
-    finishedJointGamesListJson = []
-    activeOtherGamesList = []
-    finishedOtherGamesList = []
-    jointWinPercentage = 0
-    jointWinTotal = 0
-    total_finished_games = 0
-    total_wins = 0
+
+#    # Stats and games
+#    minus1year = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp() * 1000)
+#    activeJointGamesListJson = []
+#    finishedJointGamesListJson = []
+#    activeOtherGamesList = []
+#    finishedOtherGamesList = []
+#    jointWinPercentage = 0
+#    jointWinTotal = 0
+#    total_finished_games = 0
+#    total_wins = 0
+#    jointGameStats = []
+#
+#    if request.user.username != usernameToProfile:
+#        activeJointGamesList = []
+#        finishedJointGamesList = []
+#        activeOtherGamesList = []
+#        finishedOtherGamesList = []
+#
+#        for game_name, game_model in GAME_NAMES_MODELS.items():
+#            active_joint_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE").filter(
+#                allPlayers=request.user.id
+#            )
+#            finished_joint_games = game_model.objects.filter(
+#                allPlayers=usernameToProfileID, gameStatus="FINISHED"
+#            ).filter(allPlayers=request.user.id)
+#            active_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE").exclude(
+#                allPlayers=request.user.id
+#            )
+#            finished_other_games = game_model.objects.filter(
+#                allPlayers=usernameToProfileID, gameStatus="FINISHED"
+#            ).exclude(allPlayers=request.user.id)
+#
+#            activeJointGamesList.extend(active_joint_games)
+#            finishedJointGamesList.extend(finished_joint_games)
+#            activeOtherGamesList.extend(active_other_games)
+#            finishedOtherGamesList.extend(finished_other_games)
+#
+#            singleGameWonCount = 0
+#
+#            for game in finished_joint_games:
+#                if hasattr(game.winner, "all"):  # Check if winner is a ManyToManyField
+#                    for winner in game.winner.all():
+#                        if winner.id == request.user.id:
+#                            singleGameWonCount += 1
+#                else:
+#                    singleGameWonCount += game.winner.id == request.user.id
+#
+#            singleGameFinishedCount = finished_joint_games.count()
+#
+#            total_finished_games += singleGameFinishedCount
+#            total_wins += singleGameWonCount
+#
+#            singleGameWonPercent = (
+#                str(round((singleGameWonCount / singleGameFinishedCount) * 100)) if singleGameFinishedCount > 0 else "0"
+#            )
+#
+#            if singleGameFinishedCount > 0:
+#                jointGameStats.append([game_name, singleGameWonCount, singleGameFinishedCount, singleGameWonPercent])
+#
+#        jointWinTotal = str(total_wins)
+#        jointWinPercentage = str(round((total_wins / total_finished_games) * 100)) if total_finished_games > 0 else "0"
+#
+#        activeJointGamesList = sorted(activeJointGamesList, key=lambda game: game.latestUpdate, reverse=True)
+#        finishedJointGamesList = sorted(finishedJointGamesList, key=lambda game: game.latestUpdate, reverse=True)
+#        activeOtherGamesList = sorted(activeOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
+#        finishedOtherGamesList = sorted(finishedOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
+#
+#        activeJointGamesListJson = [SF_fastSerializeGame(game, request.user) for game in activeJointGamesList]  # [game.serialize(request.user) for game in activeJointGamesList]
+#        finishedJointGamesListJson = [SF_fastSerializeGame(game, request.user) for game in finishedJointGamesList]  # [game.serialize(request.user) for game in finishedJointGamesList]
+#        activeOtherGamesListJson = [SF_fastSerializeGame(game, request.user) for game in activeOtherGamesList]  # [game.serialize(request.user) for game in activeOtherGamesList]
+#        finishedOtherGamesListJson = [SF_fastSerializeGame(game, request.user) for game in finishedOtherGamesList]  # [game.serialize(request.user) for game in finishedOtherGamesList]
+#    else:
+#        for game_name, game_model in GAME_NAMES_MODELS.items():
+#            active_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE")
+#            finished_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="FINISHED")
+#
+#            activeOtherGamesList.extend(active_other_games)
+#            finishedOtherGamesList.extend(finished_other_games)
+#
+#        activeOtherGamesList = sorted(activeOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
+#        finishedOtherGamesList = sorted(finishedOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
+#
+#        activeOtherGamesListJson = [SF_fastSerializeGame(game, request.user) for game in activeOtherGamesList]  # [game.serialize(request.user) for game in activeOtherGamesList]
+#        finishedOtherGamesListJson = [SF_fastSerializeGame(game, request.user) for game in finishedOtherGamesList]  # [game.serialize(request.user) for game in finishedOtherGamesList]
+#
+#    finishedGamesLastYear = 0
+#    kickedOutGamesLastYear = 0
+#    fairPlayLastYear = 100
+#
+#    allGamesArr = []
+#
+#    for game_name, game_model in GAME_NAMES_MODELS.items():
+#        gameArr = []
+#
+#        finishedGames = game_model.objects.filter(
+#            Q(gameStatus="FINISHED"),
+#            ~Q(allPlayers__username="SHADOW"),
+#            Q(allPlayers=userToProfile),
+#        )
+#
+#        finishedGames_last_year = finishedGames.filter(Q(latestUpdate__gte=minus1year))
+#
+#        kickedOutGames = finishedGames_last_year.filter(Q(kickedPlayers=userToProfile))
+#
+#        finishedGamesLastYear += finishedGames_last_year.count()
+#        kickedOutGamesLastYear += kickedOutGames.count()
+#
+#        for player_count in range(2, 7):
+#            relevantFinishedGames = finishedGames.filter(Q(maxPlayers=player_count))  # ~Q(statsExcludedGame=True)
+#            relevantFinishedGamesTotal = relevantFinishedGames.count()
+#            relevantFinishedGamesWon = relevantFinishedGames.filter(Q(winner=getattr(userToProfile, "id"))).count()
+#
+#            try:
+#                winPercentage = relevantFinishedGamesWon / relevantFinishedGamesTotal
+#                winPercentage = int(winPercentage * 100)
+#            except ZeroDivisionError:
+#                winPercentage = 0
+#
+#            gameArr.extend([relevantFinishedGamesTotal, relevantFinishedGamesWon, winPercentage])
+#
+#        allFinishedGames = finishedGames  # .filter(~Q(statsExcludedGame=True))
+#        allFinishedGamesWon = allFinishedGames.filter(Q(winner=getattr(userToProfile, "id"))).count()
+#        allFinishedGamesTotal = allFinishedGames.count()
+#
+#        try:
+#            allWinPercentage = allFinishedGamesWon / allFinishedGamesTotal
+#            allWinPercentage = int(allWinPercentage * 100)
+#        except ZeroDivisionError:
+#            allWinPercentage = 0
+#
+#        gameArr.extend([allFinishedGamesTotal, allFinishedGamesWon, allWinPercentage])
+#
+#        allGamesArr.append(gameArr)
+#
+#    if kickedOutGamesLastYear > 0:
+#        kickedOutGamesLastYear -= 1
+#    if finishedGamesLastYear > 0:
+#        fairPlayLastYear = int((finishedGamesLastYear - kickedOutGamesLastYear) / finishedGamesLastYear * 100)
+#
+
+    #profileOfUser = userToProfile.profile
+    target_id = getattr(userToProfile, "id")
+    req_user_id = request.user.id
+    is_self = (request.user.username == usernameToProfile)
+
+    # Containers
+    activeJoint, finishedJoint, activeOther, finishedOther = [], [], [], []
+    total_finished_joint = 0
+    total_wins_joint = 0
     jointGameStats = []
-
-    if request.user.username != usernameToProfile:
-        activeJointGamesList = []
-        finishedJointGamesList = []
-        activeOtherGamesList = []
-        finishedOtherGamesList = []
-
-        for game_name, game_model in GAME_NAMES_MODELS.items():
-            active_joint_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE").filter(
-                allPlayers=request.user.id
-            )
-            finished_joint_games = game_model.objects.filter(
-                allPlayers=usernameToProfileID, gameStatus="FINISHED"
-            ).filter(allPlayers=request.user.id)
-            active_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE").exclude(
-                allPlayers=request.user.id
-            )
-            finished_other_games = game_model.objects.filter(
-                allPlayers=usernameToProfileID, gameStatus="FINISHED"
-            ).exclude(allPlayers=request.user.id)
-
-            activeJointGamesList.extend(active_joint_games)
-            finishedJointGamesList.extend(finished_joint_games)
-            activeOtherGamesList.extend(active_other_games)
-            finishedOtherGamesList.extend(finished_other_games)
-
-            singleGameWonCount = 0
-
-            for game in finished_joint_games:
-                if hasattr(game.winner, "all"):  # Check if winner is a ManyToManyField
-                    for winner in game.winner.all():
-                        if winner.id == request.user.id:
-                            singleGameWonCount += 1
-                else:
-                    singleGameWonCount += game.winner.id == request.user.id
-
-            singleGameFinishedCount = finished_joint_games.count()
-
-            total_finished_games += singleGameFinishedCount
-            total_wins += singleGameWonCount
-
-            singleGameWonPercent = (
-                str(round((singleGameWonCount / singleGameFinishedCount) * 100)) if singleGameFinishedCount > 0 else "0"
-            )
-
-            if singleGameFinishedCount > 0:
-                jointGameStats.append([game_name, singleGameWonCount, singleGameFinishedCount, singleGameWonPercent])
-
-        jointWinTotal = str(total_wins)
-        jointWinPercentage = str(round((total_wins / total_finished_games) * 100)) if total_finished_games > 0 else "0"
-
-        activeJointGamesList = sorted(activeJointGamesList, key=lambda game: game.latestUpdate, reverse=True)
-        finishedJointGamesList = sorted(finishedJointGamesList, key=lambda game: game.latestUpdate, reverse=True)
-        activeOtherGamesList = sorted(activeOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
-        finishedOtherGamesList = sorted(finishedOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
-
-        activeJointGamesListJson = [game.serialize(request.user) for game in activeJointGamesList]
-        finishedJointGamesListJson = [game.serialize(request.user) for game in finishedJointGamesList]
-        activeOtherGamesListJson = [game.serialize(request.user) for game in activeOtherGamesList]
-        finishedOtherGamesListJson = [game.serialize(request.user) for game in finishedOtherGamesList]
-    else:
-        for game_name, game_model in GAME_NAMES_MODELS.items():
-            active_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="ACTIVE")
-            finished_other_games = game_model.objects.filter(allPlayers=usernameToProfileID, gameStatus="FINISHED")
-
-            activeOtherGamesList.extend(active_other_games)
-            finishedOtherGamesList.extend(finished_other_games)
-
-        activeOtherGamesList = sorted(activeOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
-        finishedOtherGamesList = sorted(finishedOtherGamesList, key=lambda game: game.latestUpdate, reverse=True)
-
-        activeOtherGamesListJson = [game.serialize(request.user) for game in activeOtherGamesList]
-        finishedOtherGamesListJson = [game.serialize(request.user) for game in finishedOtherGamesList]
-
+    allGamesArr = []
+    
     finishedGamesLastYear = 0
     kickedOutGamesLastYear = 0
-    fairPlayLastYear = 100
+    minus1year = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp() * 1000)
 
-    allGamesArr = []
-
+    # THE MASTER LOOP: One model at a time
     for game_name, game_model in GAME_NAMES_MODELS.items():
+        # Check if winner is FK or M2M to optimize JOINs
+        winner_field = game_model._meta.get_field('winner')
+        is_winner_m2m = winner_field.many_to_many
+        
+        # Start the query
+        query = game_model.objects.filter(allPlayers=target_id)
+        
+        # Use select_related for ForeignKeys (0 hits)
+        # Use prefetch_related for ManyToMany (1 hit per field)
+        if not is_winner_m2m:
+            query = query.select_related("winner")
+            prefetches = ["allPlayers", "missingPlayers", "kickedPlayers"]
+        else:
+            prefetches = ["allPlayers", "missingPlayers", "kickedPlayers", "winner"]
+            
+        all_games = list(query.prefetch_related(*prefetches).distinct())
+
+        # Model-specific counters for the stats table
+        model_joint_finished = 0
+        model_joint_wins = 0
+        
+        # Stats by player count: {player_count: [total, won]}
+        stats_by_size = {i: [0, 0] for i in range(2, 7)}
+        model_total_finished = 0
+        model_total_won = 0
+
+        for game in all_games:
+            status = game.gameStatus
+            # Optimization: Use sets for membership checks
+            all_p_ids = {p.id for p in game.allPlayers.all()}
+            is_joint = req_user_id in all_p_ids
+            
+            # --- Win Calculation (0 Hits because of prefetch) ---
+            winner_ids = []
+            if game.winner:
+                if hasattr(game.winner, "all"): winner_ids = [w.id for w in game.winner.all()]
+                else: winner_ids = [game.winner.id]
+
+            if status == "FINISHED":
+                # General Stats Logic
+                # Exclude SHADOW from general win stats as per your original Q
+                has_shadow = any(p.username == "SHADOW" for p in game.allPlayers.all())
+                
+                if not has_shadow:
+                    model_total_finished += 1
+                    if target_id in winner_ids:
+                        model_total_won += 1
+                    
+                    # Group by maxPlayers (2-6)
+                    if 2 <= game.maxPlayers <= 6:
+                        stats_by_size[game.maxPlayers][0] += 1
+                        if target_id in winner_ids:
+                            stats_by_size[game.maxPlayers][1] += 1
+
+                # Joint Stats Logic
+                if not is_self and is_joint:
+                    model_joint_finished += 1
+                    if req_user_id in winner_ids:
+                        model_joint_wins += 1
+
+                # Fair Play Logic (Last Year)
+                if int(game.latestUpdate) >= minus1year:
+                    finishedGamesLastYear += 1
+                    if any(p.id == target_id for p in game.kickedPlayers.all()):
+                        kickedOutGamesLastYear += 1
+
+            # --- Categorization for Lists ---
+            if not is_self:
+                if is_joint:
+                    if status == "ACTIVE": activeJoint.append(game)
+                    else: finishedJoint.append(game)
+                else:
+                    if status == "ACTIVE": activeOther.append(game)
+                    else: finishedOther.append(game)
+            else:
+                if status == "ACTIVE": activeOther.append(game)
+                else: finishedOther.append(game)
+
+        # Step 2: Post-Model Processing (Joint)
+        if not is_self and model_joint_finished > 0:
+            win_pct = str(round((model_joint_wins / model_joint_finished) * 100))
+            jointGameStats.append([game_name, model_joint_wins, model_joint_finished, win_pct])
+            total_finished_joint += model_joint_finished
+            total_wins_joint += model_joint_wins
+
+        # Step 3: Post-Model Processing (General Stats Table)
         gameArr = []
-
-        finishedGames = game_model.objects.filter(
-            Q(gameStatus="FINISHED"),
-            ~Q(allPlayers__username="SHADOW"),
-            Q(allPlayers=userToProfile),
-        )
-
-        finishedGames_last_year = finishedGames.filter(Q(latestUpdate__gte=minus1year))
-
-        kickedOutGames = finishedGames_last_year.filter(Q(kickedPlayers=userToProfile))
-
-        finishedGamesLastYear += finishedGames_last_year.count()
-        kickedOutGamesLastYear += kickedOutGames.count()
-
-        for player_count in range(2, 7):
-            relevantFinishedGames = finishedGames.filter(Q(maxPlayers=player_count))  # ~Q(statsExcludedGame=True)
-            relevantFinishedGamesTotal = relevantFinishedGames.count()
-            relevantFinishedGamesWon = relevantFinishedGames.filter(Q(winner=getattr(userToProfile, "id"))).count()
-
-            try:
-                winPercentage = relevantFinishedGamesWon / relevantFinishedGamesTotal
-                winPercentage = int(winPercentage * 100)
-            except ZeroDivisionError:
-                winPercentage = 0
-
-            gameArr.extend([relevantFinishedGamesTotal, relevantFinishedGamesWon, winPercentage])
-
-        allFinishedGames = finishedGames  # .filter(~Q(statsExcludedGame=True))
-        allFinishedGamesWon = allFinishedGames.filter(Q(winner=getattr(userToProfile, "id"))).count()
-        allFinishedGamesTotal = allFinishedGames.count()
-
-        try:
-            allWinPercentage = allFinishedGamesWon / allFinishedGamesTotal
-            allWinPercentage = int(allWinPercentage * 100)
-        except ZeroDivisionError:
-            allWinPercentage = 0
-
-        gameArr.extend([allFinishedGamesTotal, allFinishedGamesWon, allWinPercentage])
-
+        for i in range(2, 7):
+            total, won = stats_by_size[i]
+            pct = int((won / total * 100)) if total > 0 else 0
+            gameArr.extend([total, won, pct])
+        
+        all_pct = int((model_total_won / model_total_finished * 100)) if model_total_finished > 0 else 0
+        gameArr.extend([model_total_finished, model_total_won, all_pct])
         allGamesArr.append(gameArr)
+        post_loop_hits = len(connection.queries)      
 
-    if kickedOutGamesLastYear > 0:
-        kickedOutGamesLastYear -= 1
+    # Final calculations
+    jointWinTotal = str(total_wins_joint)
+    jointWinPercentage = str(round((total_wins_joint / total_finished_joint) * 100)) if total_finished_joint > 0 else "0"
+    
+    fairPlayLastYear = 100
     if finishedGamesLastYear > 0:
-        fairPlayLastYear = int((finishedGamesLastYear - kickedOutGamesLastYear) / finishedGamesLastYear * 100)
+        # Subtract 1 from kickouts as per your logic
+        adj_kicked = max(0, kickedOutGamesLastYear - 1)
+        fairPlayLastYear = int((finishedGamesLastYear - adj_kicked) / finishedGamesLastYear * 100)
 
     return render(
         request,
@@ -2703,10 +2859,10 @@ def playerInfo(request, usernameToProfile):
         {
             "trophyHTML": trophyHTML,
             "trophyDetailHTML": trophyDetailHTML,
-            "activeJointGames": activeJointGamesListJson,
-            "activeOtherGames": activeOtherGamesListJson,
-            "finishedJointGames": finishedJointGamesListJson,
-            "finishedOtherGames": finishedOtherGamesListJson,
+            "activeJointGames": [SF_fastSerializeGame(g, request.user) for g in sorted(activeJoint, key=lambda x: x.latestUpdate, reverse=True)],
+            "activeOtherGames": [SF_fastSerializeGame(g, request.user) for g in sorted(activeOther, key=lambda x: x.latestUpdate, reverse=True)],
+            "finishedJointGames": [SF_fastSerializeGame(g, request.user) for g in sorted(finishedJoint, key=lambda x: x.latestUpdate, reverse=True)],
+            "finishedOtherGames": [SF_fastSerializeGame(g, request.user) for g in sorted(finishedOther, key=lambda x: x.latestUpdate, reverse=True)],
             "usernameToProfile": usernameToProfile,
             "kickedOutGamesLastYear": kickedOutGamesLastYear,
             "fairPlayLastYear": fairPlayLastYear,
