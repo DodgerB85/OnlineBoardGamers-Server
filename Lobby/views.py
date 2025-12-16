@@ -3913,9 +3913,75 @@ def setStopEmails(request):
     return JsonResponse({"result": stopEmailsUntil}, safe=False)
 
 
+#@login_required
+#def dataCheck(request):
+#    # start_time = time.perf_counter()
+#    if request.method != "POST":
+#        return JsonResponse({"error": "POST request required."}, status=400)
+#
+#    try:
+#        jsonData = json.loads(request.body)
+#    except json.JSONDecodeError:
+#        return JsonResponse({"error": "Invalid JSON data."}, status=400)
+#
+#    available_count = 0
+#    invitations_count = 0
+#    my_move_count = 0
+#
+#    for model in GAME_MODELS:
+#        # Optimized queries to fetch counts directly
+#        # available_count += model.objects.filter(gameStatus="AVAILABLE").count()
+#        # invitations_count += model.objects.filter(gameStatus="WAITING", invitedPlayers=request.user).count()
+#
+#        available_count += model.objects.filter(gameStatus="AVAILABLE").aggregate(count=Count("id"))["count"]
+#        invitations_count += model.objects.filter(gameStatus="WAITING", invitedPlayers=request.user).aggregate(
+#            count=Count("id")
+#        )["count"]
+#
+#        # Fetch only active games where the user is not missing
+#        # current_games = model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE").exclude(
+#        #    missingPlayers=request.user
+#        # )
+#        current_games = (
+#            model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE")
+#            .exclude(missingPlayers=request.user)
+#            .only("id")
+#        )  # Fetch minimal fields needed for serialization
+#
+#        my_move_count += sum(1 for game in current_games.iterator() if game.quickIsMyMove(request.user.username))
+#
+#        # Serialize and count 'myMove' efficiently
+#        # for game in current_games:
+#        #    game_data = game.serialize(request.user)  # Assuming serialize method exists
+#        #    if game_data.get("myMove", False):
+#        #        my_move_count += 1
+#
+#    # print(f"Time taken: {time.perf_counter() - start_time}")
+#
+#    # Add in the MT
+#    available_count += Mini_Tournaments.objects.filter(tournamentStatus="OP").count()
+#
+#    print(f"total DB uses in dataCheck: {len(connection.queries)}")
+#
+#    if (
+#        my_move_count != jsonData.get("myMoveCount", 0)
+#        or available_count != jsonData.get("availableCount", 0)
+#        or invitations_count != jsonData.get("invitationsCount", 0)
+#    ):
+#
+#        return JsonResponse(
+#            {
+#                "latest": False,
+#                "availableCount": available_count,
+#                "invitationsCount": invitations_count,
+#                "myMoveCount": my_move_count,
+#            }
+#        )
+#
+#    return JsonResponse({"latest": True}, safe=False)
+
 @login_required
 def dataCheck(request):
-    # start_time = time.perf_counter()
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -3924,59 +3990,48 @@ def dataCheck(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON data."}, status=400)
 
-    available_count = 0
-    invitations_count = 0
-    my_move_count = 0
-
+    # 1. Check Available Count First (Lightest Queries)
+    available_count = Mini_Tournaments.objects.filter(tournamentStatus="OP").count()
     for model in GAME_MODELS:
-        # Optimized queries to fetch counts directly
-        # available_count += model.objects.filter(gameStatus="AVAILABLE").count()
-        # invitations_count += model.objects.filter(gameStatus="WAITING", invitedPlayers=request.user).count()
+        available_count += model.objects.filter(gameStatus="AVAILABLE").count()
+    
+    if available_count != jsonData.get("availableCount", 0):
+        return JsonResponse({"latest": False})
 
-        available_count += model.objects.filter(gameStatus="AVAILABLE").aggregate(count=Count("id"))["count"]
-        invitations_count += model.objects.filter(gameStatus="WAITING", invitedPlayers=request.user).aggregate(
-            count=Count("id")
-        )["count"]
+    # 2. Check Invitations Count (Medium Queries)
+    invitations_count = 0
+    for model in GAME_MODELS:
+        invitations_count += model.objects.filter(
+            gameStatus="WAITING", 
+            invitedPlayers=request.user
+        ).count()
+        
+    if invitations_count != jsonData.get("invitationsCount", 0):
+        return JsonResponse({"latest": False})
 
-        # Fetch only active games where the user is not missing
-        # current_games = model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE").exclude(
-        #    missingPlayers=request.user
-        # )
-        current_games = (
-            model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE")
-            .exclude(missingPlayers=request.user)
-            .only("id")
-        )  # Fetch minimal fields needed for serialization
+    # 3. Check My Move Count (Heaviest Logic)
+    # Check cache first to stay at 0 hits for this section
+    user_name = request.user.username
+    cached_active = cache.get(f"active_games_{request.user.id}")
+    
+    my_move_count = 0
+    for model in GAME_MODELS:
+        if cached_active:
+            # 0 DB HITS: Filter memory
+            my_move_count += sum(1 for g in cached_active 
+                                 if g._meta.model == model and g.quickIsMyMove(user_name))
+        else:
+            # Fallback 1 hit per model
+            active_games = model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE")\
+                                        .exclude(missingPlayers=request.user)\
+                                        .only("id", "currentPlayers")
+            my_move_count += sum(1 for g in active_games if g.quickIsMyMove(user_name))
 
-        my_move_count += sum(1 for game in current_games.iterator() if game.quickIsMyMove(request.user.username))
-
-        # Serialize and count 'myMove' efficiently
-        # for game in current_games:
-        #    game_data = game.serialize(request.user)  # Assuming serialize method exists
-        #    if game_data.get("myMove", False):
-        #        my_move_count += 1
-
-    # print(f"Time taken: {time.perf_counter() - start_time}")
-
-    # Add in the MT
-    available_count += Mini_Tournaments.objects.filter(tournamentStatus="OP").count()
-
-    if (
-        my_move_count != jsonData.get("myMoveCount", 0)
-        or available_count != jsonData.get("availableCount", 0)
-        or invitations_count != jsonData.get("invitationsCount", 0)
-    ):
-
-        return JsonResponse(
-            {
-                "latest": False,
-                "availableCount": available_count,
-                "invitationsCount": invitations_count,
-                "myMoveCount": my_move_count,
-            }
-        )
-
-    return JsonResponse({"latest": True}, safe=False)
+    if my_move_count != jsonData.get("myMoveCount", 0):
+        return JsonResponse({"latest": False})
+    print(f"total DB uses in dataCheck: {len(connection.queries)}")
+    # If all checks pass
+    return JsonResponse({"latest": True})
 
 
 @login_required()
