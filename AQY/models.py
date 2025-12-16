@@ -317,14 +317,25 @@ class AQY_Game(models.Model):
         return ret
 
     def kickoutRequired(self):
-        # return True
+        # 1. Use a list comprehension to stay in Python memory (0 Hits)
+        # This uses the data already loaded by prefetch_related('allPlayers')
+        all_player_usernames = [p.username for p in self.allPlayers.all()]
+        
+        # 2. Get the current players array
+        # Ensure this method uses self.currentPlayers (the string field) 
+        # instead of doing a new DB query
+        current_players = self.getCurrentPlayersArray()
+        
+        # Safety check for empty arrays
+        current_username = current_players[0] if current_players else ""
+
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            all_player_usernames,
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
-            self.getCurrentPlayersArray()[0],
+            current_username,
         )
 
     def serialize(self, loggedInUserObj=None):
