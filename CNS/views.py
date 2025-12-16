@@ -25,16 +25,7 @@ from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow  
 
 from .models import CNS_Game
-from Lobby.models import User  # , Profile
-from FCM.models import FCM_Game
-from HC.models import HC_Game
-from Bus.models import Bus_Game
-from TGZ.models import TGZ_Game
-from AQY.models import AQY_Game
-from IND.models import IND_Game
-from KFW.models import KFW_Game
-from WEB.models import WEB_Game
-from RNB.models import RNB_Game
+from Lobby.models import User, Profile
 
 # Create your views here.
 def index(request):
@@ -118,7 +109,7 @@ def createCNSgame(request):
                     display_name = f"{shadow_names[i-1]}"
                 shadow_players.append(display_name)
 
-            newGame.rewindConsent = "2" * (_maxPlayers - 1)
+            #newGame.rewindConsent = "2" * (_maxPlayers - 1)
             newGame.player0notes = json.dumps(shadow_players)
             newGame.startGame(request)
         else:
@@ -157,19 +148,30 @@ def createCNSgame(request):
         messages.success(request, gettext("Your Practice game has started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
     else:
-        messages.success(request, (SF_getGameCreationJsonReturn("CNS", newGame.id)))
+        messages.success(request, (SF_getGameCreationJsonReturn("CNS", getattr(newGame, "id"))))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
 def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     try:
-        currentGame = CNS_Game.objects.get(id=game_id)
+        currentGame = CNS_Game.objects.select_related(
+            "host", "creator"
+        ).prefetch_related(
+            "allPlayers", 
+            "missingPlayers", 
+            "playersWithChatNotification"
+        ).get(id=game_id)
     except CNS_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
+
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    userObj = request.user
+    username = userObj.username
 
     # Noe it is a proper started game, so set up for not logged in
     gameID = currentGame.id
@@ -197,7 +199,19 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         return render(request, "CNS/showCNSgame.html", returnData)
 
     # Now you are logged in
-    name = request.user.username
+    user_id = userObj.id
+    
+    user_profile = Profile.objects.get(user=userObj) 
+    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
+    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+
+    is_in_all = user_id in all_player_ids
+    is_missing = user_id in missing_player_ids
+    involvedPlayer = is_in_all and not is_missing
+    if username == "BotKickStarter":
+        involvedPlayer = True
+        
+        
     chatData = currentGame.chatData
 
     latestUpdate = currentGame.latestUpdate
@@ -207,31 +221,27 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
 
     returnData.update(
         {
-            "name": name,
+            "name": username,
             "chatData": chatData,
             "latestUpdateLiteral": latestUpdate,
             "nextURL": nextURL,
         }
     )
 
-    involvedPlayer = request.user in currentGame.allPlayers.all() and request.user not in currentGame.missingPlayers.all()
-    if request.user.username == "BotKickStarter":
-        involvedPlayer = True
-
     if not involvedPlayer:
         return render(request, "CNS/showCNSgame.html", returnData)
 
-    pov = currentGame.seatPosition(request.user.username)
+    pov = currentGame.seatPosition(username)
     if request.user.username == "BotKickStarter":
-        pov = 0
+        pov = -1
     secondsToNextKickout = currentGame.getSecondsToNextKickout()
 
     kickoutRequired = currentGame.kickoutRequired()
 
-    myMove = currentGame.isMyMove(request.user.username)
+    myMove = currentGame.isMyMove(username)
 
     # Get the Notes for the user
-    seat_position = currentGame.seatPosition(request.user.username)
+    seat_position = currentGame.seatPosition(username)
     notes_dict = {
         0: currentGame.player0notes,
         1: currentGame.player1notes,
@@ -242,15 +252,15 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
 
     # Get Chat notification
     chatNotification = False
-    if request.user in currentGame.playersWithChatNotification.all():
+    if user_id in chat_notify_ids:
         chatNotification = True
         currentGame.playersWithChatNotification.remove(request.user)
-        # currentGame.save()
+        currentGame.save()
 
-    liveNotification = request.user.profile.liveNotification
+    liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
-    preferredCNScolour = request.user.profile.preferredCNScolour if request.user.profile.preferredCNScolour is not None else -1
+    preferredCNScolour = user_profile.preferredCNScolour if user_profile.preferredCNScolour is not None else -1
 
     # Involved Player
     returnData.update(
@@ -287,7 +297,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
                 "allPlayerListBySeat": allPlayerListBySeat,
             }
         )
-
+        
     return render(request, "CNS/showCNSgame.html", returnData)
 
 
@@ -323,6 +333,7 @@ def processCNSturn(request):
     with db_mutex("processTurn_" + str(gameID)):
         return _processCNSturn(request)
 
+    
 
 @login_required()
 def _processCNSturn(request):
@@ -445,6 +456,7 @@ def _processCNSturn(request):
         if len(currentRewindDataArray) == 0:
             return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
 
+        loadData = ""
         if len(currentRewindDataArray) > 0:
             loadData = currentRewindDataArray.pop()
 
@@ -529,6 +541,8 @@ def _processCNSturn(request):
             },
             safe=False,
         )
+        
+    return HttpResponse(status=204)  # No Content
 
 
 @login_required()
@@ -603,7 +617,7 @@ def _sendChatMessage(request):
         currentGame = CNS_Game.objects.get(id=game_id)
 
         currentChatData = []
-        base64_data = currentGame.chatData if currentGame.chatData else []
+        base64_data = currentGame.chatData if currentGame.chatData else ""
         if len(base64_data) > 0:
             compressed_data = base64.b64decode(base64_data)
             unzipped = gzip.decompress(compressed_data).decode("utf-8")
@@ -630,6 +644,7 @@ def _sendChatMessage(request):
 
         return JsonResponse({"chatData": compressedChatData})
 
+    return HttpResponse(status=204)  # No Content
 
 @login_required
 def CNSdata(request, dataType):
@@ -674,6 +689,7 @@ def CNSdata(request, dataType):
             "latestUpdate": currentGame.latestUpdate
             })
 
+    return HttpResponse(status=204)  # No Content
 
 @login_required
 def changeCNSzoom(request):
@@ -703,6 +719,7 @@ def changeCNSzoom(request):
             }
         )
 
+    return HttpResponse(status=204)  # No Content
 
 @login_required
 def processStatsExcludeConsent(request):

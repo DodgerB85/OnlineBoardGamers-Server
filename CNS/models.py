@@ -25,6 +25,8 @@ from Lobby.sharedFunctions.sharedNotifications import SN_M_sendEndGameNotificati
 
 
 class CNS_Game(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
+    
     gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
 
     gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
@@ -111,14 +113,14 @@ class CNS_Game(models.Model):
 
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
-        return f"{self.id}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"
+        return f"{getattr(self, 'id')}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"
 
     def getGameName(self):
         _gameName = ""
         if self.gameName != "":
             _gameName = self.gameName
         else:
-            _gameName = f"[{self.creator.username}'s Game]"
+            _gameName = f"[{getattr(self.creator, 'username')}'s Game]"
         if self.gameStatus == "PRIVATE":
             _gameName += "[Private Game]"
         return _gameName
@@ -177,14 +179,22 @@ class CNS_Game(models.Model):
         return ret
 
     def kickoutRequired(self):
-        # return True
+        # 1. Use a list comprehension to utilize the prefetch cache (0 Hits)
+        all_player_usernames = [p.username for p in self.allPlayers.all()]
+        
+        # 2. Get the current players using your optimized string-split method
+        current_players = self.getCurrentPlayersArray()
+        
+        # 3. Safety check: Ensure there is at least one current player to avoid IndexError
+        current_username = current_players[0] if current_players else ""
+
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            all_player_usernames,
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
-            self.getCurrentPlayersArray()[0],
+            current_username,
         )
 
     def serialize(self, loggedInUserObj=None):
@@ -237,10 +247,10 @@ class CNS_Game(models.Model):
         )
 
         return {
-            "gameID": self.id,
+            "gameID": getattr(self, "id"),
             "gameName": self.getGameName(),
             "gameDescription": self.gameDescription,
-            "creator": self.creator.username,
+            "creator": getattr(self.creator, "username"),
             "created": createdString,
             "allPlayers": [user.username for user in self.allPlayers.all()],
             "invitedPlayers": [user.username for user in self.invitedPlayers.all()],
@@ -280,29 +290,40 @@ class CNS_Game(models.Model):
 
     # takes in a USERNAME
     def seatPosition(self, _username, withoutBots=False):
-        # If not a player, return -1
-        if _username not in self.allPlayers.all().values_list("username", flat=True):
-            return -1
-
+        # 1. Get the list (0 hits if using prefetched .all() logic)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        
+        # 2. Use Python's index to find the position. 
+        # This replaces the need for the redundant .values_list() query.
         try:
             return playerList.index(_username)
-        except Exception:
+        except (ValueError, TypeError):
+            # ValueError is raised by .index() if the username is not in the list
             return -1
 
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        playerList = list(self.allPlayers.all().values_list("username", flat=True))
+        # 1. Access the prefetched list (0 hits if prefetched in view)
+        all_players_prefetched = list(self.allPlayers.all())
+        
+        # 2. Extract usernames in Python (0 hits)
+        playerList = [p.username for p in all_players_prefetched]
+        
+        # 3. Shuffle using your existing seed (0 hits)
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
         if withoutBots:
             return playerList
 
-        missingPlayerList = self.missingPlayers.all().values_list("username")
+        # 4. Use prefetched missingPlayers cache (0 hits)
+        # Convert to a set for O(1) membership lookup speed
+        missing_usernames = {p.username for p in self.missingPlayers.all()}
 
-        # REPLACE WITH KICKOUTS
+        # 5. Replace missing players with Bots in Python (0 hits)
         for count, player in enumerate(playerList):
-            if player in missingPlayerList:
-                playerList[count] = "CnsBot" + str(count)
+            if player in missing_usernames:
+                # Using f-string for slightly better performance/readability
+                playerList[count] = f"CnsBot{count}"
+                
         return playerList
 
     def startGame(self, request):
@@ -318,7 +339,7 @@ class CNS_Game(models.Model):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(request, "CNS", playerListToNotify, self.id, self)
+            SN_M_sendGameStartNotification(request, "CNS", playerListToNotify, getattr(self, "id"), self)
 
     def getCurrentPlayersArray(self):
         _currentPlayersArray = []
@@ -330,7 +351,7 @@ class CNS_Game(models.Model):
 
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
-            possibleHost = self.allPlayers.all().filter(~Q(missingPlayersRelName=self.id)).order_by("?").first()
+            possibleHost = self.allPlayers.all().filter(~Q(missingPlayersRelName=getattr(self, "id"))).order_by("?").first()
             self.host = possibleHost
 
     def enableStatsExclude(self, _username):

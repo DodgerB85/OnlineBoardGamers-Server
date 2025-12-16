@@ -317,14 +317,25 @@ class AQY_Game(models.Model):
         return ret
 
     def kickoutRequired(self):
-        # return True
+        # 1. Use a list comprehension to stay in Python memory (0 Hits)
+        # This uses the data already loaded by prefetch_related('allPlayers')
+        all_player_usernames = [p.username for p in self.allPlayers.all()]
+        
+        # 2. Get the current players array
+        # Ensure this method uses self.currentPlayers (the string field) 
+        # instead of doing a new DB query
+        current_players = self.getCurrentPlayersArray()
+        
+        # Safety check for empty arrays
+        current_username = current_players[0] if current_players else ""
+
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            all_player_usernames,
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
-            self.getCurrentPlayersArray()[0],
+            current_username,
         )
 
     def serialize(self, loggedInUserObj=None):
@@ -409,30 +420,37 @@ class AQY_Game(models.Model):
 
     # takes in a USERNAME
     def seatPosition(self, _username, withoutBots=False):
-        # If not a player, return -1
-        if _username not in self.allPlayers.all().values_list("username", flat=True):
-            return -1
-
+        # 1. Get the list (This is 0 hits if getAllPlayersOrderedySeat uses .all())
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        
+        # 2. Use Python's index to find the position. 
+        # This replaces the need for the redundant .values_list() query.
         try:
             return playerList.index(_username)
-        except Exception:
+        except (ValueError, TypeError):
+            # ValueError is raised if the username is not in the list
             return -1
 
     # NB withoutBots returns original players. with True it replaces with AqyBot
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        playerList = list(self.allPlayers.all().values_list("username", flat=True))
+        # 1. Access the prefetched list in memory (0 hits if prefetched in view)
+        all_players_prefetched = list(self.allPlayers.all())
+        
+        # 2. Extract usernames in Python (0 hits)
+        playerList = [p.username for p in all_players_prefetched]
+        
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
         if withoutBots:
             return playerList
 
-        missingPlayerList = self.missingPlayers.all().values_list("username")
+        missing_usernames = {p.username for p in self.missingPlayers.all()}
 
         # REPLACE WITH KICKOUTS
         for count, player in enumerate(playerList):
-            if player in missingPlayerList:
-                playerList[count] = "AqyBot"  # + str(count)
+            if player in missing_usernames:
+                playerList[count] = "AqyBot"
+            
         return playerList
 
     def startGame(self, request, isTournamentGame=False):
@@ -498,8 +516,14 @@ class AQY_Game(models.Model):
         return bool(player_move != "" and player_time == "MID_PHASE")
 
     def getCurrentPlayers(self):
+        # 1. Use the prefetched cache (0 hits if allPlayers is prefetched)
+        # Convert to a list once to ensure we stay in memory
+        all_players_list = self.allPlayers.all()
+        
         _currentPlayers = []
-        for user in self.allPlayers.all():
+        for user in all_players_list:
+            # 2. Check move status in memory
+            # WARNING: Ensure hasMoveEndData() uses local fields/JSON, not DB lookups
             if self.hasMoveEndData(user.username):
                 pass
             elif user.username != "AqyBot":
