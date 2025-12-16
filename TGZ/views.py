@@ -39,7 +39,6 @@ from RNB.models import RNB_Game
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_TGZadvancedOptions,
     SF_getGameCreationJsonReturn,
-    SF_getNextURL,
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
@@ -571,26 +570,8 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     chatData = currentGame.chatData
 
     ## Get the next URL
-    game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
-    currentGamesList = list(
-        chain(
-            *[
-                model.objects.filter(
-                    Q(allPlayers=request.user),
-                    Q(gameStatus="ACTIVE"),
-                    ~Q(missingPlayers=request.user),
-                )
-                for model in game_models
-            ]
-        )
-    )
+    nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}/"
     
-    #print_timestamp("After getting currentGamesList")
-
-    nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
-    
-    #print_timestamp("After getting nextURL")
-
     chatNotification = False
     if user_id in chat_notify_ids:
         chatNotification = True
@@ -657,6 +638,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         myStatsExcludeConsent = "0"
 
     #print_timestamp("After getting myStatsExcludeConsent")
+    print(f"Databasehits: {len(connection.queries)}")
 
     # Involved Player
     returnData.update(

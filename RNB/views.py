@@ -63,19 +63,6 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     chatData = currentGame.chatData
 
     latestUpdate = currentGame.latestUpdate
-
-    ## Get the next URL
-    game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, IND_Game]
-    currentGamesList = list(chain(*[
-        model.objects.filter(
-            Q(allPlayers=request.user),
-            Q(gameStatus="ACTIVE"),
-            ~Q(missingPlayers=request.user)
-        )
-        for model in game_models
-    ]))
-
-    nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
     
     preferredINDoptions = json.loads(request.user.profile.preferredINDoptions) if request.user.profile.preferredINDoptions != "" else [-1,1,0,0,1,1,0]
 

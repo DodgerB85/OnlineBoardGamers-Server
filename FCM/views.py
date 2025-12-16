@@ -42,7 +42,6 @@ from django.utils.translation import gettext  # , get_language
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
     SF_getGameCreationJsonReturn,
-    SF_getNextURL,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML  # , SR_getTimeNow
 from Lobby.sharedFunctions.sharedNotifications import (
@@ -544,23 +543,7 @@ def showGame(request, game_id):
     #print_timestamp("Step 2: Before nextURL")
 
     ## Get the next URL
-    game_models = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game, AQY_Game, IND_Game, KFW_Game, WEB_Game, RNB_Game]
-    currentGamesList = list(
-        chain(
-            *[
-                model.objects.filter(
-                    Q(allPlayers=request.user),
-                    Q(gameStatus="ACTIVE"),
-                    ~Q(missingPlayers=request.user),
-                )
-                for model in game_models
-            ]
-        )
-    )
-    
-    #print_timestamp("Step 3: nextURL gamesList obtained")
-
-    nextURL = SF_getNextURL(currentGamesList, request.user.username, game_id)
+    nextURL = f"/nextGame?current_id={game_id}&current_code={currentGame.getGameCode()}"
     
     #print_timestamp("Step 4: nextURL obtained")
 

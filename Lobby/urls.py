@@ -126,6 +126,8 @@ urlpatterns = [
     path("TG_webhook/", views.TG_webhook, name="TG_webhook"),
     path("addTGid/<int:TGid>", views.addTGid, name="addTGid"),
     
+    path('nextGame', views.next_game_redirect, name='next_game'),
+    
     #path("gamesList/<str:listType>", views.gamesList, name="gamesList"),
     path("join/<str:joinGameLink>/", views.joinGameLink, name="joinGameLink"),
     path("autoCompleteUsername/", views.autoCompleteUsername,

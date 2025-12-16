@@ -86,6 +86,7 @@ from AQY.models import AQY_Game, AQY_Tournament
 from IND.models import IND_Game, IND_Tournament
 from KFW.models import KFW_Game
 from WEB.models import WEB_Game
+from RNB.models import RNB_Game
 
 # from RNB.models import RNB_Game  # , HC_Tournament
 
@@ -663,7 +664,7 @@ def contact(request):
 
 
 def handler404(request, exception):
-    if not request.path.endswith("/"):
+    if not request.path.endswith("/") and not request.path.startswith("/nextGame"):
         print("Adding trailing slash to 404 URL: " + request.path)
         return HttpResponsePermanentRedirect(request.path + "/")
     data = exception.args
@@ -746,6 +747,58 @@ def handler500(request, exception=None, *_, **_k):
         },
     )
 
+@login_required
+def next_game_redirect(request):
+    # 1. Get current context from Vue query params
+    try:
+        current_game_id = int(request.GET.get('current_id'))
+        current_game_code = request.GET.get('current_code') # e.g., 'FCM'
+    except (TypeError, ValueError):
+        return redirect("/")
+        
+    print(f"current_game_id: {current_game_id} and current_game_code: {current_game_code}")
+    currentGamesList = list(
+        chain(
+            *[
+                model.objects.filter(
+                    Q(allPlayers=request.user),
+                    Q(gameStatus="ACTIVE"),
+                    ~Q(missingPlayers=request.user),
+                )
+                for model in GAME_MODELS
+            ]
+        )
+    )
+    currentGamesList.sort(key=lambda instance: instance.latestUpdate, reverse=True)
+
+    # Filter currentGamesList based on isMyMove function
+    filteredGamesList = [game for game in currentGamesList if game.quickIsMyMove(request.user.username)]
+
+    # Handle cases when there are no filtered games
+    if not filteredGamesList:
+        return redirect("/")
+    if len(filteredGamesList) == 1:
+        nextGame = filteredGamesList[0]#.serialize()
+        nextID = nextGame.id
+        if nextID == current_game_id:
+            return redirect("/")
+        else:
+            nextGameCode = nextGame.getGameCode()
+            return redirect(f"/{nextGame.getGameCode()}/{nextGame.id}/")
+
+    # Get the index of the game with the specified game_id
+    index = next((i for i, game in enumerate(filteredGamesList) if game.id == current_game_id and game.getGameCode() == current_game_code), None)
+
+    # Determine the next game details based on the index
+    if index is None or index >= len(filteredGamesList) - 1:
+        nextGame = filteredGamesList[0]#.serialize()
+    else:
+        nextGame = filteredGamesList[index + 1]#.serialize()
+
+    # Construct the nextURL using the next game details
+    #nextID = nextGame["gameID"]
+    return redirect(f"/{nextGame.getGameCode()}/{nextGame.id}/")
+    
 
 def password_reset_request(request):
     if request.method == "POST":

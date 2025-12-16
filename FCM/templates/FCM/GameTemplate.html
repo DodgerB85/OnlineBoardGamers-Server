@@ -32,7 +32,7 @@
               </span></a>
 
               {% if user.is_authenticated %}
-              <a href="{{ nextURL }}">
+              <a href="{{ nextURL|safe }}">
                 <span class="topMenuItem" id="menuButtonNext">
                   <img src="{% static 'FCM/Images/icon-nextGame.svg' %}" />
                   <span>Next</span></span></a>
@@ -531,7 +531,7 @@
 
 
     {% if nextURL %}
-    global.nextURL = "{{ nextURL }}";
+    global.nextURL = "{{ nextURL|safe }}";
     {% endif %}
 
     {% if chatNotification %}

@@ -208,7 +208,7 @@
     initData.name = '{{ name }}';
     initData.chatData = "{{ chatData }}";
     initData.latestUpdate = {{ latestUpdateLiteral }};
-    initData.nextURL = '{{ nextURL }}';
+    initData.nextURL = '{{ nextURL|safe }}';
     {% endif %}
   
     ///////////////////////
