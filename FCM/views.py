@@ -55,17 +55,6 @@ from .common import create_fcm_game
 
 from Lobby.models import User, Profile
 from .models import FCM_Game
-from HC.models import HC_Game
-from Bus.models import Bus_Game
-from TGZ.models import TGZ_Game
-from CNS.models import CNS_Game
-from AQY.models import AQY_Game
-from IND.models import IND_Game
-from KFW.models import KFW_Game
-from WEB.models import WEB_Game
-from RNB.models import RNB_Game
-
-# GAME_MODELS = [FCM_Game, HC_Game, Bus_Game, TGZ_Game, CNS_Game]
 
 # import requests  # Keep this to broadcase on WSS when it is uncommented
 FCMsuperUsers = ["BotKickStarter"]
