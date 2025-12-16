@@ -4012,24 +4012,16 @@ def dataCheck(request):
     # 3. Check My Move Count (Heaviest Logic)
     # Check cache first to stay at 0 hits for this section
     user_name = request.user.username
-    cached_active = cache.get(f"active_games_{request.user.id}")
     
     my_move_count = 0
     for model in GAME_MODELS:
-        if cached_active:
-            # 0 DB HITS: Filter memory
-            my_move_count += sum(1 for g in cached_active 
-                                 if g._meta.model == model and g.quickIsMyMove(user_name))
-        else:
-            # Fallback 1 hit per model
-            active_games = model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE")\
-                                        .exclude(missingPlayers=request.user)\
-                                        .only("id", "currentPlayers")
-            my_move_count += sum(1 for g in active_games if g.quickIsMyMove(user_name))
+        active_games = model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE")\
+                                    .exclude(missingPlayers=request.user)\
+                                    .only("id", "currentPlayers")
+        my_move_count += sum(1 for g in active_games if g.quickIsMyMove(user_name))
 
     if my_move_count != jsonData.get("myMoveCount", 0):
         return JsonResponse({"latest": False})
-    print(f"total DB uses in dataCheck: {len(connection.queries)}")
     # If all checks pass
     return JsonResponse({"latest": True})
 

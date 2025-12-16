@@ -498,10 +498,10 @@ class FCM_Game(models.Model):
                 deleteableGame = True
 
         return {
-            "gameID": self.id,
+            "gameID": getattr(self, "id", None),
             "gameName": self.getGameName(),
             "gameDescription": self.gameDescription,
-            "creator": self.creator.username,
+            "creator": getattr(self.creator, "username", None),
             "created": createdString,
             "allPlayers": list(all_usernames),
             "invitedPlayers": [user.username for user in self.invitedPlayers.all()],

@@ -26,15 +26,6 @@ from django.db.models import Q
 
 from .models import TGZ_Game
 from Lobby.models import User, Profile
-from FCM.models import FCM_Game
-from HC.models import HC_Game
-from Bus.models import Bus_Game
-from CNS.models import CNS_Game
-from AQY.models import AQY_Game
-from IND.models import IND_Game
-from KFW.models import KFW_Game
-from WEB.models import WEB_Game
-from RNB.models import RNB_Game
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_TGZadvancedOptions,
@@ -638,7 +629,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         myStatsExcludeConsent = "0"
 
     #print_timestamp("After getting myStatsExcludeConsent")
-    print(f"Databasehits: {len(connection.queries)}")
 
     # Involved Player
     returnData.update(
