@@ -4,7 +4,6 @@ import base64
 import gzip
 import copy
 
-from itertools import chain
 from contextlib import contextmanager
 
 from django.contrib import messages

@@ -3,7 +3,6 @@ import time
 import base64
 import gzip
 
-from itertools import chain
 from contextlib import contextmanager
 
 from django.contrib import messages
@@ -31,9 +30,9 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 
 from .models import KFW_Game
-from Lobby.models import User  # , Profile
+from Lobby.models import User, Profile
 
-KFWsuperUsers = ["BotKickStarter"]
+KFW_SUPER_USERS = ["BotKickStarter"]
 
 def index(request):
     return HttpResponse("Hello, world. You're at KFW")
@@ -197,7 +196,13 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     #    return HttpResponseRedirect(reverse("index"))
 
     try:
-        currentGame = KFW_Game.objects.get(id=game_id)
+        currentGame = KFW_Game.objects.select_related(
+            "host", "creator"
+        ).prefetch_related(
+            "allPlayers", 
+            "missingPlayers", 
+            "playersWithChatNotification"
+        ).get(id=game_id)
     except KFW_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -205,7 +210,12 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
-    gameID = getattr(currentGame, "id")
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    userObj = request.user
+    username = userObj.username
+
+    gameID = currentGame.id
     gameName = currentGame.getGameName()
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
@@ -248,7 +258,18 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "KFW/showKFWgame.html", returnData)
 
     # Now you are logged in
-    name = request.user.username
+    user_id = userObj.id
+    
+    user_profile = Profile.objects.get(user=userObj) 
+    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
+    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+
+    is_in_all = user_id in all_player_ids
+    is_missing = user_id in missing_player_ids
+    involvedPlayer = is_in_all and not is_missing
+    if username in KFW_SUPER_USERS:
+        involvedPlayer = True
+    
     chatData = currentGame.chatData
 
     latestUpdate = currentGame.latestUpdate
@@ -266,7 +287,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
     ## Get Chat notification
     chatNotification = False
-    if request.user in currentGame.playersWithChatNotification.all():
+    if user_id in chat_notify_ids:
         chatNotification = True
         currentGame.playersWithChatNotification.remove(request.user)
         currentGame.save()
@@ -275,7 +296,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     returnData.update(
         {
-            "name": name,
+            "name": username,
             "chatData": chatData,
             "latestUpdateLiteral": latestUpdate,
             "nextURL": nextURL,
@@ -284,18 +305,12 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         }
     )
 
-    involvedPlayer = (
-        request.user in currentGame.allPlayers.all() and request.user not in currentGame.missingPlayers.all()
-    )
-    if request.user.username == "BotKickStarter":
-        involvedPlayer = True
-
     if not involvedPlayer:
         return render(request, "KFW/showKFWgame.html", returnData)
 
     pov = currentGame.seatPosition(request.user.username)
-    if request.user.username == "BotKickStarter":
-        pov = 0
+    if username in KFW_SUPER_USERS:
+        pov = -1
     secondsToNextKickout = currentGame.getSecondsToNextKickout()
 
     kickoutRequired = currentGame.kickoutRequired()
@@ -310,10 +325,11 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         2: currentGame.player2notes,
         3: currentGame.player3notes,
         4: currentGame.player4notes,
+        5: currentGame.player5notes,
     }
     notes = notes_dict.get(seat_position, "")
 
-    liveNotification = request.user.profile.liveNotification
+    liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
     ## Involved Player
@@ -321,7 +337,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData["move"] = currentGame.getMoveData(request.user.username)
 
     preferredKFWoptions = (
-        json.loads(request.user.profile.preferredKFWoptions) if request.user.profile.preferredKFWoptions != "" else [-1]
+        json.loads(user_profile.preferredKFWoptions) if user_profile.preferredKFWoptions != "" else [-1]
     )
 
     returnData.update(
@@ -517,14 +533,13 @@ def _processKFWturn(request):
         # If it is boat collection phase, and there is a submitted village, then that player has no pending tiles
         if currentGame.phase == 1 or currentGame.phase == 2 and not currentGame.isTrainingGame():
             if jsonData["IPM"] != "":
-                if request.user.username not in KFWsuperUsers:
+                if request.user.username not in KFW_SUPER_USERS:
                     currentGame.updateSingleMove(request.user.username, jsonData["IPM"])
                 else:
                     currentGame.updateSingleMove(jsonData["BKSN"], jsonData["IPM"])
             # If you are saving INTO village expansion, check if the phase is complete
             if jsonData["phase"] == 2:
                 currentGame.currentPlayers = currentGame.getCurrentSimulPlayers()
-            print(f"currentPlayers: {currentGame.currentPlayers}")
             # If there are no players, return the simul moves to move the game on
             if currentGame.currentPlayers == "":
                 currentGame.save()
@@ -654,14 +669,14 @@ def _processKFWturn(request):
         # currentGame.turn = jsonData["turn"]
         # currentGame.phase = jsonData["phase"]
 
-        if request.user.username not in KFWsuperUsers:
+        if request.user.username not in KFW_SUPER_USERS:
             currentGame.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
             currentGame.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
 
         currentGame.currentPlayers = currentGame.getCurrentPlayers()
 
-        if request.user.username in KFWsuperUsers:
+        if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(
                 currentGame.kickoutFlexiData,
                 currentGame.latestUpdate,
@@ -708,7 +723,7 @@ def _processKFWturn(request):
         currentGame.phase = jsonData["phase"]
 
         # If you're not a super user, and it's not a practice game, then save accoriding to your login
-        if request.user.username not in KFWsuperUsers and 102 not in json.loads(currentGame.startingOptions):
+        if request.user.username not in KFW_SUPER_USERS and 102 not in json.loads(currentGame.startingOptions):
             currentGame.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
             # Otherwise, save according to the name sent by the game
@@ -716,7 +731,7 @@ def _processKFWturn(request):
 
         currentGame.currentPlayers = currentGame.getCurrentPlayers()
 
-        if request.user.username in KFWsuperUsers:
+        if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(
                 currentGame.kickoutFlexiData,
                 currentGame.latestUpdate,
