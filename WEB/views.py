@@ -3,7 +3,6 @@ import time
 import base64
 import gzip
 
-from itertools import chain
 from contextlib import contextmanager
 
 from django.contrib import messages
@@ -303,6 +302,8 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             # "myStatsExcludeConsent": int(currentGame.statsExcludeConsent[pov : pov + 1]),
         }
     )
+    
+    print(f"DB hits: {len(connection.queries)}")
 
     ### NEW GAME
     if currentGame.gameData == "":

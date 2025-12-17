@@ -459,9 +459,10 @@ class Bus_Game(models.Model):
 
     def kickoutRequired(self):
         # return True
+        all_player_usernames = [p.username for p in self.allPlayers.all()]
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            all_player_usernames,
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
@@ -591,29 +592,32 @@ class Bus_Game(models.Model):
 
     # takes in a USERNAME
     def seatPosition(self, name, withoutBots=False):
-        # If not a player, return -1
-        if name not in self.allPlayers.all().values_list("username", flat=True):
-            return -1
-
+        # 1. Get the list of players (this already uses the prefetch cache)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        
+        # 2. Use 'index' to find the position. 
+        # If the name isn't in the list, it will raise a ValueError.
         try:
             return playerList.index(name)
         except ValueError:
             return -1
-
+   
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        playerList = list(self.allPlayers.all().values_list("username", flat=True))
+        # Use list comprehension on .all() to access the prefetch cache
+        playerList = [p.username for p in self.allPlayers.all()]
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
         if withoutBots:
             return playerList
 
-        missingPlayerList = self.missingPlayers.all().values_list("username")
+        # Access prefetched missingPlayers usernames in memory
+        missingPlayerUsernames = {p.username for p in self.missingPlayers.all()}
 
-        # REPLACE WITH KICKOUTS
+        # Use a set for missingPlayerUsernames for O(1) lookup speed
         for count, player in enumerate(playerList):
-            if player in missingPlayerList:
+            if player in missingPlayerUsernames:
                 playerList[count] = "BusBot" + str(count)
+                
         return playerList
 
     def startGame(self, request):
@@ -712,17 +716,17 @@ class Bus_Game(models.Model):
         return "Bus"
 
     def getDeleteVotesData(self):
+        player_usernames = [p.username for p in self.allPlayers.all()]
+
         if self.gameStatus == "FINISHED":
-            deleteGameVotes = {}
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            deleteGameVotes.update({username: False for username in player_usernames})
-            return deleteGameVotes
+            return {username: False for username in player_usernames}
+
         if self.deleteGameVotes is None:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes = {username: False for username in player_usernames}
             self.save()
+            
         return self.deleteGameVotes
+
     
     def addDeleteVote(self, playerName):
         """Records the vote of a player."""

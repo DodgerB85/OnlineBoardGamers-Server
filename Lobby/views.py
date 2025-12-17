@@ -756,7 +756,6 @@ def next_game_redirect(request):
     except (TypeError, ValueError):
         return redirect("/")
         
-    print(f"current_game_id: {current_game_id} and current_game_code: {current_game_code}")
     currentGamesList = list(
         chain(
             *[
@@ -4418,7 +4417,7 @@ def db_mutex(name, timeout=10):
             yield  # Execute the code within the 'with' block
         else:
             # time out or can't open?
-            print("ERROR-FCM: Not running, %s mutex not available" % (mutex_name))
+            print("ERROR: Not running, %s mutex not available" % (mutex_name))
             return  # Important: Exit the context manager if the lock wasn't acquired
     finally:
         # Ensure the lock is ALWAYS released, even if there's an exception
@@ -4427,7 +4426,7 @@ def db_mutex(name, timeout=10):
                 cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
                 cursor.fetchall()
             except Exception as e:
-                print(f"ERROR-FCM: Failed to release lock {mutex_name}: {e}")  # Log error
+                print(f"ERROR: Failed to release lock {mutex_name}: {e}")  # Log error
 
 
 @login_required()

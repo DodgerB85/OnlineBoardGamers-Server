@@ -9,7 +9,6 @@ import base64
 import gzip
 
 # from random import seed
-from itertools import chain
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -417,13 +416,13 @@ def showGame(request, game_id):
         ).get(id=game_id)
     except FCM_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
     
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
     #start_time = time.time()
     user = request.user
     user_id = user.id

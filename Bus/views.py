@@ -1,19 +1,21 @@
 import json
 import time
 import lzstring
-#import requests
+
+# import requests
 
 from contextlib import contextmanager
-from itertools import chain
 from django.conf import settings
 
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
-#from django.contrib.sites.shortcuts import get_current_site
-#from django.template.loader import render_to_string
-from django.utils.translation import gettext#, get_language
-#from django.utils import translation
+
+# from django.contrib.sites.shortcuts import get_current_site
+# from django.template.loader import render_to_string
+from django.utils.translation import gettext  # , get_language
+
+# from django.utils import translation
 
 from django.urls import reverse
 from django.contrib import messages
@@ -24,9 +26,18 @@ from django.db.models import Q
 from .models import Bus_Game
 from Lobby.models import User, Profile
 
-from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime, SF_getGameCreationJsonReturn
-from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications, SN_sendNextTurnNotification, SN_sendBugReportEmail, SN_sendAdminErrorMessage
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_updateFlexiTime,
+    SF_getGameCreationJsonReturn,
+)
+from Lobby.sharedFunctions.sharedNotifications import (
+    SN_sendInviteNotifications,
+    SN_sendNextTurnNotification,
+    SN_sendBugReportEmail,
+    SN_sendAdminErrorMessage,
+)
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
+
 
 def index(request):
     return HttpResponse("Hello Geeks")
@@ -34,6 +45,7 @@ def index(request):
 
 def BusHelp(request):
     return render(request, "Bus/BusHelp.html")
+
 
 @login_required()
 def createBusGame(request):
@@ -49,7 +61,9 @@ def createBusGame(request):
             request.POST.get("player4"),
             request.POST.get("player5"),
         ]:
-            messages.error(request, gettext("You cannot add yourself as another player"))
+            messages.error(
+                request, gettext("You cannot add yourself as another player")
+            )
             return HttpResponseRedirect(reverse("createBusPage"))
 
         # CHECK APPROPRIATE NUMBER OF ENTERED USERS ARE REAL AND UNIQUE
@@ -193,26 +207,46 @@ def createBusGame(request):
         newGame.statsExcludedGame = True
 
     if "privateGame" in request.POST:
-            newGame.gameStatus = "PRIVATE"
+        newGame.gameStatus = "PRIVATE"
 
     newGame.save()
 
     if "trainingGame" in request.POST:
         messages.success(request, (gettext("Your Practice game has started")))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
+        return HttpResponseRedirect(
+            reverse("indexListType", kwargs={"listType": "current"})
+        )
     else:
         messages.success(request, (SF_getGameCreationJsonReturn("Bus", newGame.id)))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+        return HttpResponseRedirect(
+            reverse("indexListType", kwargs={"listType": "waiting"})
+        )
+
 
 def showBusGame(request, game_id):
     try:
-        currentGame = Bus_Game.objects.get(id=game_id)
+        currentGame = (
+            Bus_Game.objects.select_related(
+                "host",
+                "relatedTournament",
+                "creator",
+            )
+            .prefetch_related(
+                "allPlayers", "missingPlayers", "playersWithChatNotification"
+            )
+            .get(id=game_id)
+        )
     except Bus_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
+
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    userObj = request.user
+    username = userObj.username
 
     # Noe it is a proper started game, so set up for not logged in
     gameID = currentGame.id
@@ -242,26 +276,46 @@ def showBusGame(request, game_id):
         return render(request, "Bus/showBusGame.html", returnData)
 
     # Now you are logged in
-    name = request.user.username
-    chatData = currentGame.chatData
+    user_id = userObj.id
 
-    involvedPlayer = False
-    if request.user in currentGame.allPlayers.all() and (request.user not in currentGame.missingPlayers.all()):
+    user_profile = Profile.objects.get(user=userObj)
+    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
+    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+
+    is_in_all = user_id in all_player_ids
+    is_missing = user_id in missing_player_ids
+    involvedPlayer = is_in_all and not is_missing
+    if username == "BotKickStarter":
         involvedPlayer = True
-    if request.user.username == "BotKickStarter":
-        involvedPlayer = True
+
+    chatData = currentGame.chatData
 
     ## Get the next URL
     nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
 
-    returnData.update({"name": name, "chatData": chatData, "preferredBusBoard": request.user.profile.preferredBusBoard, "nextURL": nextURL})
+    # Get Chat notification
+    chatNotification = False
+    if userObj in currentGame.playersWithChatNotification.all():
+        chatNotification = True
+        currentGame.playersWithChatNotification.remove(userObj)
+        currentGame.save()
+
+    returnData.update(
+        {
+            "name": username,
+            "chatData": chatData,
+            "preferredBusBoard": user_profile.preferredBusBoard,
+            "nextURL": nextURL,
+            "chatNotification": chatNotification,
+        }
+    )
 
     if not involvedPlayer:
         return render(request, "Bus/showBusGame.html", returnData)
 
     pov = currentGame.seatPosition(request.user.username)
     if request.user.username == "BotKickStarter":
-        pov = 0
+        pov = -1
     latestUpdate = currentGame.latestUpdate
     secondsToNextKickout = currentGame.getSecondsToNextKickout()
 
@@ -270,27 +324,17 @@ def showBusGame(request, game_id):
     myMove = currentGame.isMyMove(request.user.username)
 
     # Get the Notes for the user
-    notes = ""
-    if currentGame.seatPosition(request.user.username) == 0:
-        notes = currentGame.player0notes
-    if currentGame.seatPosition(request.user.username) == 1:
-        notes = currentGame.player1notes
-    if currentGame.seatPosition(request.user.username) == 2:
-        notes = currentGame.player2notes
-    if currentGame.seatPosition(request.user.username) == 3:
-        notes = currentGame.player3notes
-    if currentGame.seatPosition(request.user.username) == 4:
-        notes = currentGame.player4notes
+    notes_mapping = {
+            0: currentGame.player0notes,
+            1: currentGame.player1notes,
+            2: currentGame.player2notes,
+            3: currentGame.player3notes,
+            4: currentGame.player4notes,
+        }
+    notes = notes_mapping.get(pov, "")
 
-    # Get Chat notification
-    chatNotification = False
-    if request.user in currentGame.playersWithChatNotification.all():
-        chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+    liveNotification = user_profile.liveNotification
 
-    liveNotification = request.user.profile.liveNotification
-    
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
     # Involved Player
@@ -306,7 +350,7 @@ def showBusGame(request, game_id):
             "notes": notes,
             "chatNotification": chatNotification,
             "yourTurnAudioType": liveNotification,
-            "preferredBusColour": request.user.profile.preferredBusColour,
+            "preferredBusColour": user_profile.preferredBusColour,
         }
     )
 
@@ -373,11 +417,13 @@ def busData(request, dataType):
 
     if dataType == 2:
         # Send game data
-        return JsonResponse({
-            "gameData": currentGame.gameData, 
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-            "latestUpdate": currentGame.latestUpdate
-            })
+        return JsonResponse(
+            {
+                "gameData": currentGame.gameData,
+                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "latestUpdate": currentGame.latestUpdate,
+            }
+        )
     if dataType == 3:
         # Remove user from notifications
         currentGame.playersWithChatNotification.remove(request.user)
@@ -391,6 +437,7 @@ def busData(request, dataType):
         )
 
     return HttpResponse(status=204)  # No Content
+
 
 @contextmanager
 def db_mutex(name, timeout=10):
@@ -426,6 +473,7 @@ def sendChatMessage(request):
 
     return HttpResponse(status=204)  # No Content
 
+
 @login_required()
 def _sendChatMessage(request):
     if request.method != "POST":
@@ -438,17 +486,21 @@ def _sendChatMessage(request):
         currentGame.playersWithChatNotification.remove(request.user)
 
         LZS = lzstring.LZString()
-        chat_data = currentGame.chatData or ""  # Ensure chat_data is at least an empty string
+        chat_data = (
+            currentGame.chatData or ""
+        )  # Ensure chat_data is at least an empty string
         decompressed_data = LZS.decompressFromEncodedURIComponent(chat_data)
         currentChatData = json.loads(decompressed_data) if decompressed_data else []
-        
-        #if currentGame.chatData != "":
+
+        # if currentGame.chatData != "":
         #    currentChatData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.chatData)) if currentGame.chatData else []
-        
+
         currentChatData.insert(0, jsonData["newEntry"])
 
         # save chat data.
-        compressedChatData = LZS.compressToEncodedURIComponent(json.dumps(currentChatData))
+        compressedChatData = LZS.compressToEncodedURIComponent(
+            json.dumps(currentChatData)
+        )
 
         currentGame.chatData = compressedChatData
 
@@ -460,6 +512,7 @@ def _sendChatMessage(request):
         return JsonResponse({"chatData": compressedChatData})
 
     return HttpResponse(status=204)  # No Content
+
 
 @login_required()
 def processBusTurn(request):
@@ -488,16 +541,22 @@ def _processBusTurn(request):
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
-            turn = jsonData.get('turn', 'N/A')  # Get the value for 'turn' or 'N/A' if not present
-            phase = jsonData.get('phase', 'N/A')  # Get the value for 'phase' or 'N/A' if not present
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
+            jsonData["latestUpdate"]
+        ) != str(currentGame.latestUpdate):
+            turn = jsonData.get(
+                "turn", "N/A"
+            )  # Get the value for 'turn' or 'N/A' if not present
+            phase = jsonData.get(
+                "phase", "N/A"
+            )  # Get the value for 'phase' or 'N/A' if not present
             gameID = jsonData["gameID"]
             latestUpdate = jsonData["latestUpdate"]
             message = (
                 f"SYNC ERROR IN: Bus save - gameID: {gameID} - User: {request.user.username} - JSON_LU: {latestUpdate} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
-            )            
+            )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
@@ -506,9 +565,21 @@ def _processBusTurn(request):
         currentGame.phase = jsonData["phase"]
 
         if "checkName" in jsonData:
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(currentGame.kickoutFlexiData, currentGame.latestUpdate, int(time.time()) * 1000, jsonData["checkName"], currentGame.kickoutDuration)
+            currentGame.kickoutFlexiData = SF_updateFlexiTime(
+                currentGame.kickoutFlexiData,
+                currentGame.latestUpdate,
+                int(time.time()) * 1000,
+                jsonData["checkName"],
+                currentGame.kickoutDuration,
+            )
         else:
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(currentGame.kickoutFlexiData, currentGame.latestUpdate, int(time.time()) * 1000, request.user.username, currentGame.kickoutDuration)
+            currentGame.kickoutFlexiData = SF_updateFlexiTime(
+                currentGame.kickoutFlexiData,
+                currentGame.latestUpdate,
+                int(time.time()) * 1000,
+                request.user.username,
+                currentGame.kickoutDuration,
+            )
 
         oldVer = currentGame.latestUpdate
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -520,17 +591,35 @@ def _processBusTurn(request):
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            currentGame.endGame(request, jsonData["winner"], jsonData["finalPositions"], jsonData["gameID"])
+            currentGame.endGame(
+                request,
+                jsonData["winner"],
+                jsonData["finalPositions"],
+                jsonData["gameID"],
+            )
 
         else:
             # Send Notifications
-            if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "HcBot" and not jsonData["status"] == "FINISHED" and currentGame.startingOptions != "102":
+            if (
+                jsonData["nextPlayer"] != ""
+                and jsonData["nextPlayer"] != "HcBot"
+                and not jsonData["status"] == "FINISHED"
+                and currentGame.startingOptions != "102"
+            ):
                 playerListToNotify = jsonData["nextPlayer"].split(",")
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
 
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(request, "Bus", playerListToNotify, jsonData["gameID"], currentGame.getGameName(), currentGame, oldVer)
+                    SN_sendNextTurnNotification(
+                        request,
+                        "Bus",
+                        playerListToNotify,
+                        jsonData["gameID"],
+                        currentGame.getGameName(),
+                        currentGame,
+                        oldVer,
+                    )
 
         ################ REWIND EVERY SAVE #######################
 
@@ -542,7 +631,10 @@ def _processBusTurn(request):
 
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
-                if len(currentRewindData) == 0 or (currentRewindData[-1] != currentGame.rewindTempData and jsonData["data"] != currentGame.rewindTempData):
+                if len(currentRewindData) == 0 or (
+                    currentRewindData[-1] != currentGame.rewindTempData
+                    and jsonData["data"] != currentGame.rewindTempData
+                ):
                     # add to RWdata and RWdata[]
                     currentRewindData.append(currentGame.rewindTempData)
                 currentGame.rewindTempData = ""
@@ -552,7 +644,10 @@ def _processBusTurn(request):
                 currentRewindData.append(jsonData["data"])
             else:
                 # else check last one isn't same as cufrent, and if not then add
-                if len(currentRewindData) == 0 or currentRewindData[-1] != jsonData["data"]:
+                if (
+                    len(currentRewindData) == 0
+                    or currentRewindData[-1] != jsonData["data"]
+                ):
                     currentRewindData.append(jsonData["data"])
                     # Limit to 20 rewind points by removing oldest
                     while len(currentRewindData) > 20:
@@ -590,12 +685,21 @@ def _processBusTurn(request):
         )
 
     elif jsonData["action"] == "loadRewind":
-        currentRewindDataArray = json.loads(currentGame.rewindData) if currentGame.rewindData else []
+        currentRewindDataArray = (
+            json.loads(currentGame.rewindData) if currentGame.rewindData else []
+        )
         if len(currentRewindDataArray) == 0:
-            return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
+            return JsonResponse(
+                {
+                    "errorMessage": gettext(
+                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
+                    )
+                },
+                safe=False,
+            )
 
         loadData = currentGame.gameData
-        
+
         # ELSE if there is not any current move data
         if len(currentRewindDataArray) > 0:
             loadData = currentRewindDataArray.pop()
@@ -636,12 +740,24 @@ def _processBusTurn(request):
         currentGame.save()
 
         # Send Notifications
-        if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "HcBot" and currentGame.startingOptions != "102":
+        if (
+            jsonData["nextPlayer"] != ""
+            and jsonData["nextPlayer"] != "HcBot"
+            and currentGame.startingOptions != "102"
+        ):
             playerListToNotify = jsonData["nextPlayer"].split(",")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(request, "Bus", playerListToNotify, jsonData["gameID"], currentGame.getGameName(), currentGame, currentGame.latestUpdate)
+                SN_sendNextTurnNotification(
+                    request,
+                    "Bus",
+                    playerListToNotify,
+                    jsonData["gameID"],
+                    currentGame.getGameName(),
+                    currentGame,
+                    currentGame.latestUpdate,
+                )
 
         return JsonResponse(
             {
@@ -652,14 +768,18 @@ def _processBusTurn(request):
         )
 
     elif jsonData["action"] == "saveGameDataAfterKickout":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
-            turn = jsonData.get('turn', 'N/A')  
-            phase = jsonData.get('phase', 'N/A') 
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
+            jsonData["latestUpdate"]
+        ) != str(
+            currentGame.latestUpdate
+        ):  # and not jsonData["ignoreSync"]:
+            turn = jsonData.get("turn", "N/A")
+            phase = jsonData.get("phase", "N/A")
             message = (
                 f"SYNC ERROR IN: Bus saveGameDataAfterKickout - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
-            )            
+            )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
@@ -686,6 +806,7 @@ def _processBusTurn(request):
 
     return HttpResponse(status=204)  # No Content
 
+
 @login_required
 def changeBusViewport(request):
     if request.method != "PUT":
@@ -699,7 +820,12 @@ def changeBusViewport(request):
             profile.preferredBusBoard = jsonData["boardNumber"]
             profile.save()
         except Exception as e:
-            print("**************************************************** CHANGE BUS BOARD ERROR:  " + str(e) + "    " + request.user.username)
+            print(
+                "**************************************************** CHANGE BUS BOARD ERROR:  "
+                + str(e)
+                + "    "
+                + request.user.username
+            )
         return JsonResponse(
             {
                 "response": "ok",
@@ -727,6 +853,7 @@ def changeBusViewport(request):
 
     return HttpResponse(status=204)  # No Content
 
+
 @login_required()
 def bugEntry(request):
     if request.method != "POST":
@@ -744,9 +871,12 @@ def bugEntry(request):
     bugDescription = jsonData["description"]
 
     # email data to myself
-    SN_sendBugReportEmail(request, "Bus", gameID, gameData, bugDescription, currentGame.rewindData, "")
+    SN_sendBugReportEmail(
+        request, "Bus", gameID, gameData, bugDescription, currentGame.rewindData, ""
+    )
 
     return JsonResponse({"bugEntrySuccess": True})
+
 
 @login_required()
 def voteToDelete(request):
@@ -787,13 +917,16 @@ def _voteToDelete(request):
         if all_voted:
             # Delete the game
             currentGame.delete()
-             # Add a success message
+            # Add a success message
             messages.success(request, gettext("Game successfully deleted"))
             # Redirect to the index page
-            return JsonResponse({
-                "voteChanged": True, 
-                "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
-                "redirect_url": reverse("index")})
+            return JsonResponse(
+                {
+                    "voteChanged": True,
+                    "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                    "redirect_url": reverse("index"),
+                }
+            )
 
         return JsonResponse(
             {
@@ -802,5 +935,5 @@ def _voteToDelete(request):
             },
             safe=False,
         )
-    
+
     return JsonResponse({"voteChanged": False})
