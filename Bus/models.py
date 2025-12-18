@@ -41,7 +41,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 
 
 class Bus_Tournament(models.Model):
-    #id = models.AutoField(primary_key=True)  # Explicitly define the id field
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
 
     tournamentName = models.CharField(max_length=120)
 
