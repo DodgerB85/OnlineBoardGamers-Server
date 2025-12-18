@@ -5,7 +5,6 @@ import time
 import base64
 import gzip
 
-from itertools import chain
 from contextlib import contextmanager
 
 from django.contrib import messages

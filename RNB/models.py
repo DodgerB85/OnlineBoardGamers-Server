@@ -17,6 +17,7 @@ from Lobby.sharedFunctions.sharedRefs import *
 
 
 class RNB_Game(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
 
     gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")

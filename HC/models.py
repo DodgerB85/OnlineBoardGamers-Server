@@ -38,6 +38,7 @@ from django.utils.translation import gettext  # , gettext_lazy
 
 
 class HC_Tournament(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     tournamentName = models.CharField(max_length=120)
 
     tournamentStatus = models.CharField(
@@ -217,7 +218,7 @@ class HC_Tournament(models.Model):
             roundsHTML += "<th>" + gettext("Game") + "</th>"
             roundsHTML += "<th>" + gettext("Winner") + "</th>"
             roundsHTML += "</tr>"
-
+            j=0
             for row in TPDA[i]:
                 if row[0] != "BYEPLAYERS":
                     roundsHTML += '<tr class="clickableGameRow HC" id="gamesRow' + str(row[self.maxGamePlayers]) + '">'
@@ -254,6 +255,7 @@ class HC_Tournament(models.Model):
 
 
 class HC_Game(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     # custom_primary_key = models.CharField(max_length=6, editable=False, unique=True)
     gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
     gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
@@ -353,7 +355,7 @@ class HC_Game(models.Model):
         if self.gameName != "":
             _gameName = self.gameName
         else:
-            _gameName = f"[{self.creator.username}'s Game]"
+            _gameName = f"[{getattr(self.creator, 'username')}'s Game]"
         if self.gameStatus == "PRIVATE":
             _gameName += "[Private Game]"
         return _gameName
@@ -418,70 +420,112 @@ class HC_Game(models.Model):
 
     def getMoveResponse(self, action):
         readyAllPlayers = []
-        if self.player0currentMoveData == "" or self.player0currentMoveTime[:6] == "NODATA":
-            readyAllPlayers.append(False)
-        else:
-            readyAllPlayers.append(True)
-        if self.player1currentMoveData == "" or self.player1currentMoveTime[:6] == "NODATA":
-            readyAllPlayers.append(False)
-        else:
-            readyAllPlayers.append(True)
-        if self.player2currentMoveData == "" or self.player2currentMoveTime[:6] == "NODATA":
-            readyAllPlayers.append(False)
-        else:
-            readyAllPlayers.append(True)
-        if self.player3currentMoveData == "" or self.player3currentMoveTime[:6] == "NODATA":
-            readyAllPlayers.append(False)
-        else:
-            readyAllPlayers.append(True)
-        if self.player4currentMoveData == "" or self.player4currentMoveTime[:6] == "NODATA":
-            readyAllPlayers.append(False)
-        else:
-            readyAllPlayers.append(True)
+        current_time_ms = int(time.time() * 1000)
+
+        # 1. Determine which players are ready
+        for i in range(5):
+            data = getattr(self, f"player{i}currentMoveData")
+            # Fix: Cast to str to prevent slicing error if field is an int/None
+            move_time_str = str(getattr(self, f"player{i}currentMoveTime"))
+            
+            is_ready = data != "" and move_time_str[:6] != "NODATA"
+            readyAllPlayers.append(is_ready)
 
         readyPlayers = readyAllPlayers[: self.maxPlayers]
 
-        # NB Turn 0 inserts data for the bot
+        # NB Turn 0 logic placeholder
         readyWithBots = False
-        # readyCount = sum(readyPlayers)
-        # nbBots = self.missingPlayers.count()
-        # if readyCount + nbBots == self.maxPlayers:
-        #    readyWithBots = True
 
         if all(readyPlayers) or readyWithBots:
-            if self.player0currentMoveTime == "":
-                self.player0currentMoveTime = int(time.time()) * 1000
-                self.player0currentMoveData = "::"
-            if self.player1currentMoveTime == "":
-                self.player1currentMoveTime = int(time.time()) * 1000
-                self.player1currentMoveData = "::"
-            if self.player2currentMoveTime == "":
-                self.player2currentMoveTime = int(time.time()) * 1000
-                self.player2currentMoveData = "::"
-            if self.player3currentMoveTime == "":
-                self.player3currentMoveTime = int(time.time()) * 1000
-                self.player3currentMoveData = "::"
-            if self.player4currentMoveTime == "":
-                self.player4currentMoveTime = int(time.time()) * 1000
-                self.player4currentMoveData = "::"
-
             jsonResponse = []
 
-            jsonResponse.append({"date": int(self.player0currentMoveTime), "content": self.player0currentMoveData})
-            jsonResponse.append({"date": int(self.player1currentMoveTime), "content": self.player1currentMoveData})
-            if self.maxPlayers >= 3:
-                jsonResponse.append({"date": int(self.player2currentMoveTime), "content": self.player2currentMoveData})
-            if self.maxPlayers >= 4:
-                jsonResponse.append({"date": int(self.player3currentMoveTime), "content": self.player3currentMoveData})
-            if self.maxPlayers >= 5:
-                jsonResponse.append({"date": int(self.player4currentMoveTime), "content": self.player4currentMoveData})
+            # 2. Fill empty timestamps and build response
+            for i in range(self.maxPlayers):
+                move_time = getattr(self, f"player{i}currentMoveTime")
+                
+                # If timestamp is empty string, initialize it
+                if move_time == "":
+                    move_time = current_time_ms
+                    setattr(self, f"player{i}currentMoveTime", move_time)
+                    setattr(self, f"player{i}currentMoveData", "::")
+                
+                # Build the response list
+                jsonResponse.append({
+                    "date": int(move_time), 
+                    "content": getattr(self, f"player{i}currentMoveData")
+                })
+                
+            return jsonResponse
 
-            # self.clearAllMoveData()
+        return False
 
-        else:
-            jsonResponse = False
 
-        return jsonResponse
+#    def getMoveResponse(self, action):
+#        readyAllPlayers = []
+#        if self.player0currentMoveData == "" or self.player0currentMoveTime[:6] == "NODATA":
+#            readyAllPlayers.append(False)
+#        else:
+#            readyAllPlayers.append(True)
+#        if self.player1currentMoveData == "" or self.player1currentMoveTime[:6] == "NODATA":
+#            readyAllPlayers.append(False)
+#        else:
+#            readyAllPlayers.append(True)
+#        if self.player2currentMoveData == "" or self.player2currentMoveTime[:6] == "NODATA":
+#            readyAllPlayers.append(False)
+#        else:
+#            readyAllPlayers.append(True)
+#        if self.player3currentMoveData == "" or self.player3currentMoveTime[:6] == "NODATA":
+#            readyAllPlayers.append(False)
+#        else:
+#            readyAllPlayers.append(True)
+#        if self.player4currentMoveData == "" or self.player4currentMoveTime[:6] == "NODATA":
+#            readyAllPlayers.append(False)
+#        else:
+#            readyAllPlayers.append(True)
+#
+#        readyPlayers = readyAllPlayers[: self.maxPlayers]
+#
+#        # NB Turn 0 inserts data for the bot
+#        readyWithBots = False
+#        # readyCount = sum(readyPlayers)
+#        # nbBots = self.missingPlayers.count()
+#        # if readyCount + nbBots == self.maxPlayers:
+#        #    readyWithBots = True
+#
+#        if all(readyPlayers) or readyWithBots:
+#            if self.player0currentMoveTime == "":
+#                self.player0currentMoveTime = int(time.time()) * 1000
+#                self.player0currentMoveData = "::"
+#            if self.player1currentMoveTime == "":
+#                self.player1currentMoveTime = int(time.time()) * 1000
+#                self.player1currentMoveData = "::"
+#            if self.player2currentMoveTime == "":
+#                self.player2currentMoveTime = int(time.time()) * 1000
+#                self.player2currentMoveData = "::"
+#            if self.player3currentMoveTime == "":
+#                self.player3currentMoveTime = int(time.time()) * 1000
+#                self.player3currentMoveData = "::"
+#            if self.player4currentMoveTime == "":
+#                self.player4currentMoveTime = int(time.time()) * 1000
+#                self.player4currentMoveData = "::"
+#
+#            jsonResponse = []
+#
+#            jsonResponse.append({"date": int(self.player0currentMoveTime), "content": self.player0currentMoveData})
+#            jsonResponse.append({"date": int(self.player1currentMoveTime), "content": self.player1currentMoveData})
+#            if self.maxPlayers >= 3:
+#                jsonResponse.append({"date": int(self.player2currentMoveTime), "content": self.player2currentMoveData})
+#            if self.maxPlayers >= 4:
+#                jsonResponse.append({"date": int(self.player3currentMoveTime), "content": self.player3currentMoveData})
+#            if self.maxPlayers >= 5:
+#                jsonResponse.append({"date": int(self.player4currentMoveTime), "content": self.player4currentMoveData})
+#
+#            # self.clearAllMoveData()
+#
+#        else:
+#            jsonResponse = False
+#
+#        return jsonResponse
 
     def currentTurnString(self):
         return SR_currentTurnString("HC", self.turn, self.phase)
@@ -563,7 +607,7 @@ class HC_Game(models.Model):
             rewindConsentString = ""
             for i in range(self.maxPlayers):
                 rewindConsentString += "0"
-            hostSeat = self.seatPosition(self.host.username)
+            hostSeat = self.seatPosition(getattr(self.host, "username"))
             rewindConsentList = list(rewindConsentString)
             rewindConsentList[hostSeat] = "2"
             rewindConsentString = "".join(rewindConsentList)
@@ -584,6 +628,7 @@ class HC_Game(models.Model):
         latestUpdateString = str(self.latestUpdate)
 
         latestUpdateElapsedTimeString = ""
+        elapsedTotalSeconds = 0
         if (
             self.gameStatus == "WAITING"
             or self.gameStatus == "AVAILABLE"
@@ -659,7 +704,7 @@ class HC_Game(models.Model):
             "gameID": self.id,
             "gameName": self.getGameName(),
             "gameDescription": self.gameDescription,
-            "creator": self.creator.username,
+            "creator": getattr(self.creator, "username"),
             "created": createdString,
             "allPlayers": [user.username for user in self.allPlayers.all()],
             "invitedPlayers": [user.username for user in self.invitedPlayers.all()],
@@ -724,21 +769,25 @@ class HC_Game(models.Model):
             SN_M_sendGameStartNotification(request, "HC", playerListToNotify, self.id, self)
 
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        playerString = ",".join([player.username for player in self.allPlayers.all()])
-        playerList = playerString.split(",")
+        # Use prefetched cache; avoid .values_list() to prevent new SQL queries
+        playerList = [p.username for p in self.allPlayers.all()]
+
+        # Efficiently handle rotation (seatOffset)
         if self.seatOffset > 0:
-            for i in range(self.seatOffset):
-                playerList.append(playerList.pop(0))
+            offset = self.seatOffset % len(playerList) if playerList else 0
+            playerList = playerList[offset:] + playerList[:offset]
+
         if withoutBots:
             return playerList
 
-        missingPlayerString = ",".join([player.username for player in self.missingPlayers.all()])
-        missingPlayerList = missingPlayerString.split(",")
+        # Use a set for O(1) lookup speed for missing players
+        missingPlayerNames = {p.username for p in self.missingPlayers.all()}
 
-        # REPLACE WITH KICKOUTS
+        # Replace missing players with Bots
         for count, player in enumerate(playerList):
-            if player in missingPlayerList:
-                playerList[count] = "HcBot" + str(count)
+            if player in missingPlayerNames:
+                playerList[count] = f"HcBot{count}"
+                
         return playerList
 
     # takes in a USERNAME
@@ -822,31 +871,38 @@ class HC_Game(models.Model):
 
     def hasMoveData(self, name):
         seat = self.seatPosition(name)
-        if seat == 0 and self.player0currentMoveTime[:6] != "NODATA":
-            return self.player0currentMoveData
-        if seat == 1 and self.player1currentMoveTime[:6] != "NODATA":
-            return self.player1currentMoveData
-        if seat == 2 and self.player2currentMoveTime[:6] != "NODATA":
-            return self.player2currentMoveData
-        if seat == 3 and self.player3currentMoveTime[:6] != "NODATA":
-            return self.player3currentMoveData
-        if seat == 4 and self.player4currentMoveTime[:6] != "NODATA":
-            return self.player4currentMoveData
+        
+        # Ensure seat is valid (seatPosition returns -1 if not found)
+        if 0 <= seat <= 4:
+            # Dynamically get the field names
+            time_field = f"player{seat}currentMoveTime"
+            data_field = f"player{seat}currentMoveData"
+            
+            # Get values from self
+            move_time = getattr(self, time_field)
+            move_data = getattr(self, data_field)
+
+            # Fix: Cast move_time to string to prevent "int" slice error
+            # and check if it starts with "NODATA"
+            if str(move_time)[:6] != "NODATA":
+                return move_data
 
         return ""
 
     def hasTemporaryMoveData(self, name):
         seat = self.seatPosition(name)
-        if seat == 0 and self.player0currentMoveTime[:6] == "NODATA":
-            return [self.player0currentMoveTime, self.player0currentMoveData]
-        if seat == 1 and self.player1currentMoveTime[:6] == "NODATA":
-            return [self.player1currentMoveTime, self.player1currentMoveData]
-        if seat == 2 and self.player2currentMoveTime[:6] == "NODATA":
-            return [self.player2currentMoveTime, self.player2currentMoveData]
-        if seat == 3 and self.player3currentMoveTime[:6] == "NODATA":
-            return [self.player3currentMoveTime, self.player3currentMoveData]
-        if seat == 4 and self.player4currentMoveTime[:6] == "NODATA":
-            return [self.player4currentMoveTime, self.player4currentMoveData]
+        
+        # Check if seat is within the valid range (0-4)
+        if 0 <= seat <= 4:
+            time_attr = f"player{seat}currentMoveTime"
+            data_attr = f"player{seat}currentMoveData"
+            
+            move_time = getattr(self, time_attr)
+            move_data = getattr(self, data_attr)
+
+            # Cast to str to ensure slicing [:6] doesn't fail on int or None types
+            if str(move_time)[:6] == "NODATA":
+                return [move_time, move_data]
 
         return ""
 
@@ -882,7 +938,7 @@ class HC_Game(models.Model):
         for consent in rewindConsentList:
             if consent == "0":
                 possible = False
-        return possible
+        return possible   
 
     def getRewindHostHTML(self):
         if self.rewindConsent == "":
@@ -895,7 +951,7 @@ class HC_Game(models.Model):
             if player == "HcBot":
                 # player = "HcBot" + player[-1]
                 player = "HcBot" + str(index)
-            if player != self.host.username:
+            if player != getattr(self.host, "username"):
                 if rewindConsentList[index] == "0":
                     rewindHTML += (
                         "<span style='background-color:red'>"
