@@ -12,11 +12,15 @@ media
 env/
 venv/
 ENV/
+siteUtils/
 env.bak/
 venv.bak/
 local_settings.py
 docker-compose.override.yml
 node_modules
+
+# Exclude generated stats
+*stats/
 
 # Exclude the entire 'Private' directory in the project root
 /Private/
