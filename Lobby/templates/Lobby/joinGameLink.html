@@ -4,8 +4,8 @@
   <meta name="description" content="{{availableGamesList.0.gameName}} - {{availableGamesList.0.gameDescription}}">
 {% endblock %}
 {% block canonical %}
-<link rel="canonical" href="https://www.onlineboardgamers.com/join/{{gameType}}{{gameID}}">
-<meta property="og:url" content="https://www.onlineboardgamers.com/join/{{gameType}}{{gameID}}/" />
+<link rel="canonical" href="https://www.onlineboardgamers.com/join/{{gameCode}}{{gameID}}">
+<meta property="og:url" content="https://www.onlineboardgamers.com/join/{{gameCode}}{{gameID}}/" />
 <meta property="og:type" content="Online Board Gamers" />
 <meta property="og:title" content="Online Board Gamers" />
 <meta property="og:image" content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
@@ -74,8 +74,8 @@
                   <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
                 </tr>
               </thead>
-              {% for game in availableGamesList %}
-                {% include 'Lobby/gameDisplay/availableGameRow.html' with game=game %}
+              {% for gameEntry in availableGamesList %}
+                {% include 'Lobby/gameDisplay/availableGameRow.html' with game=gameEntry %}
               {% endfor %}
             </table>
           </div>
