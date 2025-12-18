@@ -3105,30 +3105,33 @@ def joinGameLink(request, joinGameLink):
 
 @login_required
 def joinGame(request, gameType):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid Request"}, status=400)
+    
+    # This is redundant with @login_required, but it's here just to be explicit
     if not request.user.is_authenticated:
         messages.error(request, (gettext("You must be logged in to join a game")))
         return HttpResponseRedirect(reverse("index"))
-    # Joining a game must be via POST
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid Request"}, status=400)
 
     jsonData = json.loads(request.body)
-
     gameModel = GAME_NAMES_MODELS.get(gameType)
-
-    currentGame = None
-    if gameModel:
-        try:
-            currentGame = gameModel.objects.get(id=jsonData["gameID"])
-        except gameModel.DoesNotExist:
-            messages.error(request, (gettext("Sorry, the game no longer exists")))
-            return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
+    
+    # This just removes linting errors
+    if not gameModel:
+        return JsonResponse({"error": "Invalid Model"}, status=400)
+    
+    try:
+        currentGame = gameModel.objects.prefetch_related("allPlayers").get(id=jsonData["gameID"])
+    except gameModel.DoesNotExist:
+        messages.error(request, (gettext("Sorry, the game no longer exists")))
+        return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
 
     action = jsonData.get("action", "")
+    current_players_list = list(currentGame.allPlayers.all())
 
     # Delete Training Game // Can never really fail
     if currentGame and action == "deleteTrgGame":
-        if request.user in currentGame.allPlayers.all():
+        if request.user in current_players_list:
             currentGame.delete()
             messages.success(request, ("Game Deleted"))
             return JsonResponse(["Ok"], safe=False)
@@ -3137,22 +3140,25 @@ def joinGame(request, gameType):
             return JsonResponse(["Error"], safe=False)
 
     # Leave your own waiting game -- they are already AVAILABLE
-    elif currentGame and action == "vacate":
+    elif action == "vacate":
         if currentGame.gameStatus == "ACTIVE":
             messages.error(request, (gettext("The game has already started")))
         else:
             currentGame.allPlayers.remove(request.user)
-            currentGame.save()
-            if currentGame.allPlayers.count() == 0:
+            # Using len() on the prefetched list minus the one we removed
+            if len(current_players_list) <= 1:
                 currentGame.delete()
                 messages.success(request, (gettext("You have left the game - it has been deleted")))
             else:
+                currentGame.save()
                 messages.success(request, (gettext("You have left the game - it is available for players to join")))
+        
+        print(f"DB hits: {len(connection.queries)}")
+        
         return JsonResponse(["AVAILABLE"], safe=False)
 
     elif currentGame and action == "decline":
         currentGame.invitedPlayers.remove(request.user)
-        currentGame.save()
         if currentGame.invitedPlayers.count() == 0:
             if currentGame.gameStatus == "WAITING":
                 messages.success(
@@ -3161,7 +3167,6 @@ def joinGame(request, gameType):
                 currentGame.gameStatus = "AVAILABLE"
             elif currentGame.gameStatus == "PRIVATE":
                 messages.success(request, (gettext("You have declined the invitation")))
-            currentGame.save()
         else:
             messages.success(
                 request,
@@ -3171,11 +3176,12 @@ def joinGame(request, gameType):
         # Send an email to the creator, telling them who has declined and why
         reason = jsonData.get("reason", "None Given")
         SN_sendDeclineEmail(request, request.user, gameType, currentGame, reason)
-
+        currentGame.save()
         return JsonResponse(["AVAILABLE"], safe=False)
     # Else must be join?
     else:
         response = checkJoinGame(request, gameType, jsonData["gameID"])
+        print(f"DB hits: {len(connection.queries)}")
         return response
 
 
@@ -3205,7 +3211,9 @@ def checkJoinGame(request, gameType, gameID):
         return
     # CHECK GAME EXISTS
     try:
-        currentGame = gameModel.objects.get(id=gameID)
+        currentGame = gameModel.objects.prefetch_related(
+            'invitedPlayers', 'allPlayers', 'creator__profile__blacklistedPlayers'
+        ).get(id=gameID)
     except gameModel.DoesNotExist:
         messages.error(request, (gettext("Sorry, the game does not exist")))
         if ajaxReturn:
@@ -3225,12 +3233,15 @@ def checkJoinGame(request, gameType, gameID):
         messages.error(request, (gettext("Sorry, the game has already finished")))
         errorFound = True
 
+    # Use in-memory checks for prefetched sets (no .all() or .filter())
+    all_players_list = list(currentGame.allPlayers.all())
+    invited_players_list = list(currentGame.invitedPlayers.all())
+
     # Check that if the game is WAITING, you are in the invites, OR there is a blank space
     if (
         currentGame.gameStatus == "WAITING"
-        and request.user not in currentGame.invitedPlayers.all()
-        and (currentGame.invitedPlayers.count() + currentGame.allPlayers.count()) >= currentGame.maxPlayers
-    ):
+        and request.user not in invited_players_list and
+        (len(invited_players_list) + len(all_players_list)) >= currentGame.maxPlayers):
         messages.error(
             request,
             (
@@ -3242,7 +3253,7 @@ def checkJoinGame(request, gameType, gameID):
         errorFound = True
 
     # Check you are not already involved
-    if request.user in currentGame.allPlayers.all():
+    if request.user in all_players_list:
         messages.success(request, (gettext("You have already joined this game")))
         errorFound = True
 
@@ -3265,13 +3276,16 @@ def checkJoinGame(request, gameType, gameID):
 
     # CHECK EXPERIENCE LEVEL HERE
     if currentGame.isExperiencedGame():
-        shadowUser = User.objects.get(username="SHADOW")
-        model_games_involved = gameModel.objects.filter(
-            Q(allPlayers=request.user, gameStatus="FINISHED") & ~Q(allPlayers=shadowUser)
-        )
-        exp = model_games_involved.count()
-        required_exp = SF_getRequiredExp(gameType)
-        if exp < required_exp:
+        # Optimization: Fetch SHADOW once
+        shadow_user = User.objects.get(username="SHADOW")
+        
+        # 1 Hit: Count finished games for current model
+        exp = gameModel.objects.filter(
+            allPlayers=request.user, 
+            gameStatus="FINISHED"
+        ).exclude(allPlayers=shadow_user).count()
+        
+        if exp < SF_getRequiredExp(gameType):
             ##### SEND DISCORD ALERT
             try:
                 message = "==== NEW USER JOINING EXP GAME\n"
@@ -3300,8 +3314,10 @@ def checkJoinGame(request, gameType, gameID):
             if ajaxReturn:
                 return JsonResponse({"listToShow": "AVAILABLE", "show_div": True})
             return
+        
         # Now check the fair play rating
         minus1year = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp() * 1000)
+        
         finishedGamesLastYear = 0
         kickedOutGamesLastYear = 0
         fairPlayLastYear = 100
@@ -3357,11 +3373,11 @@ def checkJoinGame(request, gameType, gameID):
     currentGame.allPlayers.add(_newPlayer)
     currentGame.latestUpdate = _latestUpdate
     currentGame.invitedPlayers.remove(request.user)
-    currentGame.save()
 
-    if currentGame.allPlayers.count() == currentGame.maxPlayers:
+    current_player_count = len(all_players_list) + 1 
+    
+    if current_player_count == currentGame.maxPlayers:
         currentGame.startGame(request)
-        currentGame.save()
         messages.success(request, (gettext("You have joined the game and the game has started")))
         request.session["listType"] = "ACTIVE"
         response = JsonResponse({"listToShow": "ACTIVE"}, safe=False)
@@ -3371,12 +3387,13 @@ def checkJoinGame(request, gameType, gameID):
 
     # If all < MAX and no more invites
     if (
-        currentGame.allPlayers.count() != currentGame.maxPlayers
-        and currentGame.invitedPlayers.count() == 0
+        current_player_count != currentGame.maxPlayers
+        and len(invited_players_list) - 1 == 0
         and currentGame.gameStatus != "PRIVATE"
     ):
         currentGame.gameStatus = "AVAILABLE"
-        currentGame.save()
+    
+    currentGame.save()
 
     return response
 
