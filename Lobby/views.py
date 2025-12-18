@@ -947,6 +947,7 @@ def stats(request):
     # Fair Play
     f = open("./Lobby/stats/fairPlayArr_E.json")
     fairPlayArr = json.load(f)
+    print(fairPlayArr)
     f.close()
 
     ## Totals

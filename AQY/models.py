@@ -142,7 +142,7 @@ class AQY_Game(models.Model):
         db_index=True, 
     )
 
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
+    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
     startingOptions = models.CharField(max_length=20, blank=True)
     startingMap = models.CharField(max_length=80, blank=True)
 
