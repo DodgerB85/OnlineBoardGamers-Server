@@ -215,6 +215,13 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
 
     latestUpdate = currentGame.latestUpdate
 
+    # Get Chat notification
+    chatNotification = False
+    if user_id in chat_notify_ids:
+        chatNotification = True
+        currentGame.playersWithChatNotification.remove(request.user)
+        currentGame.save()
+
     ## Get the next URL
     nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
 
@@ -249,12 +256,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     }
     notes = notes_dict.get(seat_position, "")
 
-    # Get Chat notification
-    chatNotification = False
-    if user_id in chat_notify_ids:
-        chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+
 
     liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]

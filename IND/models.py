@@ -38,6 +38,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 
 class IND_Tournament(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     tournamentName = models.CharField(max_length=120)
 
     tournamentStatus = models.CharField(
@@ -172,6 +173,7 @@ class IND_Tournament(models.Model):
 
 
 class IND_Game(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     gameName = models.CharField(
         max_length=120, blank=True, db_collation="utf8mb4_general_ci"
     )

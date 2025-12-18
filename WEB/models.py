@@ -36,6 +36,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 
 class WEB_Game(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
 
     gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
@@ -221,9 +222,10 @@ class WEB_Game(models.Model):
 
     def kickoutRequired(self):
         # return True
+        all_player_usernames = [p.username for p in self.allPlayers.all()]
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            all_player_usernames,
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
@@ -326,35 +328,44 @@ class WEB_Game(models.Model):
 
     # takes in a USERNAME
     def seatPosition(self, _username, withoutBots=False):
-        # If not a player, return -1
-        if _username not in self.allPlayers.all().values_list("username", flat=True):
-            return -1
-
+        # 1. Get the list (this uses your optimized prefetched logic)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
+
+        # 2. Use 'index' directly; if the user isn't in the list, 
+        # it will raise a ValueError which we catch to return -1.
         try:
             return playerList.index(_username)
-        except Exception as e:
-            print(e)
+        except ValueError:
+            # This handles both: not a player OR user is currently replaced by "WebBot"
             return -1
 
     # NB withoutBots returns original players. with True it replaces with WebBot
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        playerList = list(
-            self.allPlayers.all().order_by("username").values_list("username", flat=True)
-        )  # order by username
+        # 1. Access the prefetched list (0 hits if prefetched in view)
+        all_players_prefetched = list(self.allPlayers.all())
+        
+        # 2. Extract usernames in Python (0 hits)
+        playerList = [p.username for p in all_players_prefetched]
+        
+        # 3. Shuffle using your existing seed (0 hits)
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
         if withoutBots:
             return playerList
 
-        missingPlayerList = self.missingPlayers.all().values_list("username")
+        # 4. Use prefetched missingPlayers cache (0 hits)
+        # Convert to a set for O(1) membership lookup speed
+        missing_usernames = {p.username for p in self.missingPlayers.all()}
 
-        # REPLACE WITH KICKOUTS
+        # 5. Replace missing players with Bots in Python (0 hits)
         for count, player in enumerate(playerList):
-            if player in missingPlayerList:
-                playerList[count] = "WebBot"  # + str(count)
+            if player in missing_usernames:
+                # Using f-string for slightly better performance/readability
+                playerList[count] = f"WebBot{count}"
+                
         return playerList
-
+    
+    
     def startGame(self, request, isTournamentGame=False):
         self.gameStatus = "ACTIVE"
         self.playerOrderSeed = random.randint(1000, 32767)
@@ -414,15 +425,14 @@ class WEB_Game(models.Model):
 
     def getDeleteVotesData(self):
         if self.gameStatus == "FINISHED":
-            deleteGameVotes = {}
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            deleteGameVotes.update({username: False for username in player_usernames})
-            return deleteGameVotes
+            # Access .all() directly to use the prefetched cache
+            return {p.username: False for p in self.allPlayers.all()}
+
         if self.deleteGameVotes is None:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
-            self.save()
+            # Accessing .all() here uses the cache; no DB hit
+            self.deleteGameVotes = {p.username: False for p in self.allPlayers.all()}
+            self.save() # Note: This .save() will still hit the DB to persist the change
+            
         return self.deleteGameVotes
     
     def addDeleteVote(self, playerName):

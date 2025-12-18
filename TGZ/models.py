@@ -40,6 +40,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 
 class TGZ_Game(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
 
     # db_collation='utf8mb4_general_ci'  # Specify the appropriate collation
