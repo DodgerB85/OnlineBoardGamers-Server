@@ -38,6 +38,6 @@
         {{ game.startingOptionsHTML|safe }}</td>
     <td>
       <div class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</div>
-      <button class="copyGameLinkButtonInTable" onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.game}}{{ game.gameID }}/', event)">{% translate "Copy Link" %}</button>
+      <button class="copyGameLinkButtonInTable" onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.gameCode}}{{ game.gameID }}/', event)">{% translate "Copy Link" %}</button>
     </td>
   </tr>
