@@ -3052,16 +3052,16 @@ def joinGameLink(request, joinGameLink):
     #    messages.error(request, (gettext("You must be logged in to join a game")))
     #    return render(request, "Lobby/index.html")
 
-    letters = None
+    gameCode = None
     numbers = None
 
     match = re.match(r"([A-Za-z]{2,3})(\d+)$", joinGameLink)
 
-    # CHCEK FOR LETTERS/NUMBERS
+    # CHCEK FOR gameCode/NUMBERS
     if match:
-        letters = match.group(1)
-        if letters != "Bus":
-            letters = letters.upper()
+        gameCode = match.group(1)
+        if gameCode != "Bus":
+            letters = gameCode.upper()
         numbers = int(match.group(2))
     else:
         messages.error(request, (gettext("Invalid Game Join Link")))
@@ -3076,7 +3076,7 @@ def joinGameLink(request, joinGameLink):
     # So with a valid letter / number combo, show a join link page
     # First, find a serialise the game.
     # Select the correct model
-    gameModel = GAME_NAMES_MODELS.get(letters)
+    gameModel = GAME_NAMES_MODELS.get(gameCode)
     if gameModel is None:
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
@@ -3093,12 +3093,13 @@ def joinGameLink(request, joinGameLink):
     availableGamesList = [availableGame]
 
     # Serialize the game objects using Django's serializer
-    availableGamesListJson = [game.serialize(request.user) for game in availableGamesList]
+    #availableGamesListJson = [game.serialize(request.user) for game in availableGamesList]
+    availableGamesListJson = [SF_fastSerializeGame(availableGame, request.user)]
 
     return render(
         request,
         "Lobby/joinGameLink.html",
-        {"availableGamesList": availableGamesListJson, "gameType": letters, "gameID": numbers},
+        {"availableGamesList": availableGamesListJson, "gameCode": gameCode, "gameID": numbers},
     )
 
 
