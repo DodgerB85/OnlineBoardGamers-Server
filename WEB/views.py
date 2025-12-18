@@ -563,8 +563,7 @@ def _processWEBturn(request):
         currentGame.save()
 
         # time.sleep(10)
-        print(f"DB hits {len(connection.queries)}")
-
+        
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
             "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
