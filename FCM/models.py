@@ -77,6 +77,7 @@ USE_NEW_CODE = False
 
 
 class FCM_Tournament(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     # custom_primary_key = models.CharField(max_length=6, editable=False, unique=True)
     tournamentName = models.CharField(max_length=120)
     # tournamentStatus = models.CharField(max_length=30)
@@ -221,6 +222,7 @@ class FCM_Tournament(models.Model):
 
 
 class FCM_Game(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     # custom_primary_key = models.CharField(max_length=6, editable=False, unique=True)
     gameName = models.CharField(
         max_length=120, blank=True, db_collation="utf8mb4_general_ci"

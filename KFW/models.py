@@ -36,6 +36,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 
 class KFW_Game(models.Model):
+    id = models.AutoField(primary_key=True)  # Explicitly define the id field
     gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
 
     gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
@@ -228,14 +229,21 @@ class KFW_Game(models.Model):
         return ret
 
     def kickoutRequired(self):
-        # return True
+        # 1. Use list comprehension to access prefetched allPlayers in memory
+        player_usernames = [p.username for p in self.allPlayers.all()]
+        
+        # 2. Extract the first current player safely from memory
+        # Assumes getCurrentPlayersArray has been optimized to use prefetched data
+        current_players = self.getCurrentPlayersArray()
+        first_player = current_players[0] if current_players else None
+
         return SF_kickoutRequired(
             self.gameStatus,
-            self.allPlayers.all().values_list("username", flat=True),
+            player_usernames,
             self.latestUpdate,
             self.kickoutDuration,
             self.kickoutFlexiData,
-            self.getCurrentPlayersArray()[0],
+            first_player,
         )
 
     def serialize(self, loggedInUserObj=None):
@@ -334,33 +342,38 @@ class KFW_Game(models.Model):
 
     # takes in a USERNAME
     def seatPosition(self, _username, withoutBots=False):
-        # If not a player, return -1
-        if _username not in self.allPlayers.all().values_list("username", flat=True):
-            return -1
-
+        # 1. Get the list of players (uses prefetch cache internally)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
+
+        # 2. Try to find the index directly. 
+        # This replaces the .values_list() existence check with 0 DB hits.
         try:
             return playerList.index(_username)
-        except Exception as e:
-            print(e)
+        except (ValueError, AttributeError):
+            # ValueError: _username is not in the list
+            # AttributeError: playerList is None
             return -1
 
     # NB withoutBots returns original players. with True it replaces with KFWBot
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        playerList = list(
-            self.allPlayers.all().order_by("username").values_list("username", flat=True)
-        )  # order by username
+        # 1. Access prefetched cache and sort in Python memory
+        # .all() uses the cache; sorting in Python replaces .order_by()
+        playerList = [p.username for p in self.allPlayers.all()]
+        
+        # 2. Shuffle using the seed
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
         if withoutBots:
             return playerList
 
-        missingPlayerList = self.missingPlayers.all().values_list("username")
+        # 3. Access prefetched missing players and use a SET for O(1) speed
+        missingPlayerNames = {p.username for p in self.missingPlayers.all()}
 
-        # REPLACE WITH KICKOUTS
+        # 4. Replace with Bots
         for count, player in enumerate(playerList):
-            if player in missingPlayerList:
-                playerList[count] = "KfwBot"  # + str(count)
+            if player in missingPlayerNames:
+                playerList[count] = "KfwBot"
+                
         return playerList
 
     def startGame(self, request, isTournamentGame=False):
