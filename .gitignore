@@ -41,4 +41,4 @@ vuePPF/
 
 # Ignore any directory that contains the word 'vuedist' anywhere (*vuedist*)
 *vuedist*/
-*migration*/
+#*migration*/ # NO! Migrations should be part of git. Run MM & M on dev, and just M on live
