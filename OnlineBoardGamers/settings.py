@@ -137,7 +137,8 @@ MIDDLEWARE = [
 if DEBUG or LOCAL_USER:
     ROOT_URLCONF = "OnlineBoardGamers.urls"
 else:
-    ROOT_URLCONF = "OnlineGaming.urls"
+    #OnlineGaming
+    ROOT_URLCONF = "OnlineBoardGamers.urls"
 
 TEMPLATES = [
     {
@@ -156,11 +157,7 @@ TEMPLATES = [
     },
 ]
 
-if DEBUG or LOCAL_USER:
-    INTERNAL_IPS = ["127.0.0.1"]
-    WSGI_APPLICATION = "OnlineBoardGamers.wsgi.application"
-else:
-    WSGI_APPLICATION = "OnlineGaming.wsgi.application"
+WSGI_APPLICATION = "OnlineBoardGamers.wsgi.application"
 
 
 # Database
