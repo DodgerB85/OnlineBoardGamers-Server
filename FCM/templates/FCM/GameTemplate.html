@@ -562,6 +562,9 @@
             <script src="{% static 'FCM/JS/lib/jquery-2.1.4.min.js' %}"></script>
             <script src="{% static 'FCM/JS/lib/lodash.min.js' %}"></script>
             {% if USE_NEW_CODE %}
+            {% if settingsDebug %}
+            <script src="{% static 'FCM/JS/FCMmain.js' %}"></script>
+            {% else %}
             <script src="{% static 'FCM/JS/Roger.js' %}"></script>
             <script src="{% static 'FCM/JS/utils.js' %}"></script>
             <script src="{% static 'FCM/JS/reference.js' %}"></script>
@@ -579,6 +582,7 @@
             <script src="{% static 'FCM/JS/websocket.js' %}"></script>
             <script src="{% static 'FCM/JS/test.js' %}"></script>
             <script src="{% static 'FCM/JS/main.js' %}"></script>
+            {% endif %}
             {% else %}
             <script src="{% static 'FCM/JS/FCMmainOLD.js' %}"></script>
             {% endif %}
