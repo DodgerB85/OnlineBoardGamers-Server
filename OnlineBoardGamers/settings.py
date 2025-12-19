@@ -134,11 +134,8 @@ MIDDLEWARE = [
     "user_visit.middleware.UserVisitMiddleware",
 ]
 
-if DEBUG or LOCAL_USER:
-    ROOT_URLCONF = "OnlineBoardGamers.urls"
-else:
-    #OnlineGaming
-    ROOT_URLCONF = "OnlineBoardGamers.urls"
+ROOT_URLCONF = "OnlineBoardGamers.urls"
+
 
 TEMPLATES = [
     {
