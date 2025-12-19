@@ -22,7 +22,6 @@ services:
       - "8000:8000"
     links:
       - db
-    #  - cns
     environment:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@example.com
@@ -30,8 +29,6 @@ services:
 
     env_file:
       - .env
-
-    command: ["sh", "./initial_db_setup.sh"]
 
   cns:
     build:
