@@ -277,17 +277,15 @@ STATIC_ROOT = os.path.join(
     BASE_DIR, "staticfiles"
 )  # → /home/OnlineGaming/.virtualenvs/OnlineGaming/staticfiles/
 
-
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",  # For media files
     },
     "staticfiles": {
-        # Update this line (assuming custom_storage.py is in your root)
-        #"BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
-        "BACKEND": "custom_storage.SafeManifestStaticFilesStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
     },
 }
+
 
 
 # Keep i18n if needed
