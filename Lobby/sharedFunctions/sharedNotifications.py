@@ -1254,7 +1254,8 @@ def SN_sendReminderExpiredEmail(playerName, game, gameID, gameName):
     activate(originalLang)
 
 
-def SN_send24HourTimedOutReminderEmail(username, allPlayerMyMoveGamesList):
+def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGamesList):
+    username = user_obj.username
     originalLang = get_language()
     try:
         user = User.objects.get(username=username)
@@ -1266,10 +1267,10 @@ def SN_send24HourTimedOutReminderEmail(username, allPlayerMyMoveGamesList):
         return
 
     try:
-        profile = Profile.objects.get(user=user)
+        #profile = Profile.objects.get(user=user)
         # currentGame = Bus_Game.objects.get(id=gameID)
 
-        activate(profile.profileLanguage)
+        activate(profile_obj.profileLanguage)
 
         # Prepare game details for the email
         games_info = []
@@ -1282,7 +1283,7 @@ def SN_send24HourTimedOutReminderEmail(username, allPlayerMyMoveGamesList):
             games_info.append(game_info)
 
         # SEND EMAIL
-        if shouldSendEmail("24hrReminder", username, profile, None, 0):
+        if shouldSendEmail("24hrReminder", username, profile_obj, None, 0):
             subject = gettext("It is Your Turn at OnlineBoardGamers.com")
             message = render_to_string(
                 "Lobby/email/gameReminder24HrsExpiredEmail.html",
@@ -1304,8 +1305,8 @@ def SN_send24HourTimedOutReminderEmail(username, allPlayerMyMoveGamesList):
         urlText = gettext("Click here to play")
         # SEND WEBHOOKS
         urlRaw = "https://www.OnlineBoardGamers.com/"
-        if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
-            SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+        if profile_obj.webhooks != "" and profile_obj.webhooks is not None and profile_obj.webhooks != "[]":
+            SN_sendWebhooks(profile_obj, messageText, urlText, urlRaw)
 
     except Exception as e:
         print(username + " Error. SN_send24HourTimedOutReminderEmail. Notifying " + username)
