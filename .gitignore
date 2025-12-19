@@ -18,6 +18,7 @@ venv.bak/
 local_settings.py
 docker-compose.override.yml
 node_modules
+emailCounter.txt
 
 # Exclude generated stats
 *stats/
@@ -39,6 +40,9 @@ vueRNB/
 vueWEB/
 vuePPF/
 
+staticfiles/
+
 # Ignore any directory that contains the word 'vuedist' anywhere (*vuedist*)
 *vuedist*/
+**/*stats/
 #*migration*/ # NO! Migrations should be part of git. Run MM & M on dev, and just M on live
