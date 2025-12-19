@@ -11,6 +11,7 @@ import gzip
 # from random import seed
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.conf import settings
 
 from django.shortcuts import render  # , redirect
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
@@ -476,7 +477,8 @@ def showGame(request, game_id):
                 "startingMap": currentGame.startingMap,
                 "pov": -99,
                 "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
-                "preferredColour": -1
+                "preferredColour": -1,
+                "settingsDebug": settings.DEBUG,
             },
         )
 
@@ -657,6 +659,7 @@ def showGame(request, game_id):
             "startingOptionsLiteral": currentGame.startingOptions,
             "startingMap": currentGame.startingMap,
             "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+            "settingsDebug": settings.DEBUG,
         },
     )
 
