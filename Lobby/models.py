@@ -329,3 +329,91 @@ class Mini_Tournaments(models.Model):
         }
 
 
+class QueryableGame(models.Model):
+    game = models.CharField(max_length=255)
+    id = models.PositiveIntegerField()
+
+    pk = models.CompositePrimaryKey("game", "id")
+
+    gameName = models.CharField(max_length=255)
+    gameDescription = models.CharField(max_length=255)
+    gameStatus = models.CharField(max_length=255)
+
+    latestUpdate = models.CharField(max_length=255)
+    startingOptions = models.CharField(max_length=255)
+    currentPlayers = models.CharField(max_length=255)
+    maxPlayers = models.PositiveIntegerField()
+
+    turn = models.PositiveIntegerField()
+    phase = models.PositiveIntegerField()
+    kickoutDuration = models.PositiveIntegerField()
+    gamePace = models.PositiveIntegerField()
+
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.deletion.DO_NOTHING, null=True
+    )
+    created = models.DateField()
+
+    class Meta:
+        db_table = "Lobby_all_games"
+        managed = False
+
+class QueryableGameWinners(models.Model):
+    pk = models.CompositePrimaryKey("game", "id", "winner_id")
+    game = models.CharField(max_length=255)
+    game_id = models.PositiveIntegerField(db_column="id")
+
+    winner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.deletion.DO_NOTHING, related_name="winners"
+    )
+    queryable_game = models.ForeignObject(
+        QueryableGame,
+        on_delete=models.deletion.DO_NOTHING,
+        from_fields=("game", "game_id"),
+        to_fields=("game", "id"),
+        related_name="winners"
+    )
+
+    class Meta:
+        db_table = "Lobby_all_games_winners"
+        managed = False
+
+class QueryableGameInvitedPlayers(models.Model):
+    pk = models.CompositePrimaryKey("game", "id", "invited_player")
+    game = models.CharField(max_length=255)
+    id = models.PositiveIntegerField()
+
+    invited_player = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.deletion.DO_NOTHING, db_column="user_id"
+    )
+    queryable_game = models.ForeignObject(
+        QueryableGame,
+        on_delete=models.deletion.DO_NOTHING,
+        from_fields=("game", "id"),
+        to_fields=("game", "id"),
+        related_name="invited_players"
+    )
+
+    class Meta:
+        db_table = "Lobby_all_games_invited_players"
+        managed = False
+
+class QueryableGameAllPlayers(models.Model):
+    pk = models.CompositePrimaryKey("game", "id", "player_id")
+    game = models.CharField(max_length=255)
+    id = models.PositiveIntegerField()
+
+    player = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.deletion.DO_NOTHING, db_column="user_id"
+    )
+    queryable_game = models.ForeignObject(
+        QueryableGame,
+        on_delete=models.deletion.DO_NOTHING,
+        from_fields=("game", "id"),
+        to_fields=("game", "id"),
+        related_name="all_players"
+    )
+
+    class Meta:
+        db_table = "Lobby_all_games_all_players"
+        managed = False
