@@ -1,3 +1,12 @@
+## License
+This project is licensed under a custom **Source Available** license. 
+- ✅ **Private Use:** Permitted.
+- ✅ **Contributions:** Welcome via Pull Requests.
+- ❌ **Commercial Use:** Prohibited without permission.
+- ❌ **Public Hosting:** Prohibited without permission.
+
+See the [LICENSE](LICENSE) file for the full legal text.
+
 I find it quite frustrating when I want to try out a project, only to find out it requires an obfuscated ton of setup, including setting up weird paid AWS services and pushing to remote server.
 On the plus side, this project is totally free, and WILL run fine on your home computer.
 On the down side, it does involve multiple steps, but each is quite small and easy, and should be easy to do if you are familiar with these tools.
