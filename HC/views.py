@@ -19,7 +19,7 @@ from django.db.models import Q
 from contextlib import contextmanager
 
 from django.db import connection
-# from django.conf import settings
+from django.conf import settings
 
 from Lobby.models import User, Profile
 from .models import HC_Game
@@ -1006,6 +1006,7 @@ def showHCgame(request, game_id):
                 "nextURL": nextURL,
                 "KickoutFlexiDataArray": KickoutFlexiDataArray,
                 "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                "settingsDebug": settings.DEBUG,
             },
         )
 
@@ -1036,6 +1037,7 @@ def showHCgame(request, game_id):
             "preferredColour": preferredColour,
             "KickoutFlexiDataArray": KickoutFlexiDataArray,
             "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+            "settingsDebug": settings.DEBUG,
         },
     )
 

@@ -433,31 +433,35 @@ global.displayNames = "{{ displayNames }}";
   <script src="{% static 'HC/JS/lib/jquery-2.1.4.min.js' %}"></script>
   <script src="{% static 'HC/JS/lib/lodash.min.js' %}"></script>
 
-  <script src="{% static 'HC/JS/Roger.js' %}"></script>
-  <script src="{% static 'HC/JS/HCutils.js' %}"></script>
+  {% if settingsDebug %}
+  <script src="/static/HC/JSRoger.js"></script>
+  <script src="/static/HC/JSHCutils.js"></script>
 
-  <script src="{% static 'HC/JS/HCreference.js' %}"></script>
-  <script src="{% static 'HC/JS/HCplayer.js' %}"></script>
-  <script src="{% static 'HC/JS/HCrules.js' %}"></script>
+  <script src="/static/HC/JSHCreference.js"></script>
+  <script src="/static/HC/JSHCplayer.js"></script>
+  <script src="/static/HC/JSHCrules.js"></script>
 
-  <script src="{% static 'HC/JS/HCfactory.js' %}"></script>
+  <script src="/static/HC/JSHCfactory.js"></script>
 
-  <script src="{% static 'HC/JS/HCmodel.js' %}"></script>
+  <script src="/static/HC/JSHCmodel.js"></script>
 
-  <script src="{% static 'HC/JS/HCview.js' %}"></script>
+  <script src="/static/HC/JSHCview.js"></script>
 
-  <script src="{% static 'HC/JS/HCcontroller.js' %}"></script>
-  <script src="{% static 'HC/JS/HChistory.js' %}"></script>
-
-
-  <script src="{% static 'HC/JS/HCio.js' %}"></script>
-  <script src="{% static 'HC/JS/HCbot.js' %}"></script>
-
-  <script src="{% static 'HC/JS/HCwebsocket.js' %}"></script>
+  <script src="/static/HC/JSHCcontroller.js"></script>
+  <script src="/static/HC/JSHChistory.js"></script>
 
 
-  <script src="{% static 'HC/JS/HCmain.js' %}"></script>
-  <script src="{% static 'HC/JS/HCtest.js' %}"></script>
+  <script src="/static/HC/JSHCio.js"></script>
+  <script src="/static/HC/JSHCbot.js"></script>
+
+  <script src="/static/HC/JSHCwebsocket.js"></script>
+
+
+  <script src="/static/HC/JSHCmain.js"></script>
+  <script src="/static/HC/JSHCtest.js"></script>
+  {% else %}
+  <script src="/static/HC/JSHCmain.js"></script>
+  {% endif %}
 </body>
 
 </html>
