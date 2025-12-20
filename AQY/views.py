@@ -220,6 +220,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
         "settingsDebug": settings.DEBUG,
+        #"settingsDebug": False,
     }
 
     if not request.user.is_authenticated:
