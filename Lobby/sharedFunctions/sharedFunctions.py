@@ -139,6 +139,10 @@ def SF_fastSerializeGame(game, user):
         # Use quickIsMyMove logic: check if user.username is in the currentPlayers string
         is_my_move = (not game.currentPlayers or user.username in game.currentPlayers or 
                       any(s in game.currentPlayers for s in ["SHADOW", "FcmAI"]))
+        
+        # For HC, if it is factory phase, AND you have submitted your move, set it back to false
+        if game_code == "HC" and is_my_move and game.phase == 3 and game.hasMoveData(user.username) != "":
+            is_my_move = False
     
     is_involved = user.id in all_ids and user.id not in missing_ids
 
@@ -194,6 +198,7 @@ def SF_fastSerializeGame(game, user):
         "startingMap": game.startingMap if hasattr(game, 'startingMap') else "",
         "latestUpdate": game.latestUpdate,
         "currentPlayers": game.currentPlayers, 
+        "kickoutRequiredNum": game.kickoutRequired()
 
     }
             #"currentPlayers": self.currentPlayers,
