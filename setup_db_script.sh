@@ -28,7 +28,7 @@ if [ "$USER_COUNT" -gt 10 ]; then
     echo "More than 10 users already exist. Skipping initial setup."
 else
     echo "Fewer than 10 users found. Running initial setup (migrations, users, etc)..."
-    
+
     # Run Full Migrations (Fix 3 must be applied locally first)
     #echo "Running migrations..."
     #python manage.py migrate --no-input
@@ -43,7 +43,3 @@ else
 
     echo "Initial setup commands complete."
 fi
-
-# --- Start the main server process regardless of setup outcome ---
-echo "Setup checks complete. Starting server..."
-exec python manage.py runserver 0.0.0.0:8000
