@@ -359,8 +359,6 @@ class QueryableGame(models.Model):
         managed = False
 
 class QueryableGameWinners(models.Model):
-    #pk = models.CompositePrimaryKey("game", "id", "winner_id")
-    # Fix: Use the field name 'game_id', not the column name 'id'
     pk = models.CompositePrimaryKey("game", "game_id", "winner_id")
     
     game = models.CharField(max_length=255)
