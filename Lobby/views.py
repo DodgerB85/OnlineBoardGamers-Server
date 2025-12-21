@@ -76,7 +76,8 @@ from django.conf import settings
 from .tokens import account_activation_token
 from .forms import NewUserForm, UpdateProfileForm, PasswordChangeCustomForm, PasswordResetFormCustom, changelogForm
 
-from .models import Profile, changelog, Mini_Tournaments, Main_Tournament
+from .models import Profile, changelog, Mini_Tournaments, Main_Tournament, QueryableGameAllPlayers
+
 from FCM.models import FCM_Game, FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
 from Bus.models import Bus_Game, Bus_Tournament
@@ -326,6 +327,11 @@ def indexSpecialRedirect(request):
     #'looogic',
     #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
     # print("******************************************************************************************************** TGZ ACCESS: =================================================:  " + request.user.username)
+    #print(f"Db htis: {len(connection.queries)}")
+    #qs = QueryableGameAllPlayers.objects.filter(player_id=1, game="FCM").select_related("queryable_game")[:10]
+    #results = list(qs) 
+    #print(f"Db htis: {len(connection.queries)}")
+    
     ALLOWED_USERS = ["admin", "DodgerB", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil"]
     if request.user.username not in ALLOWED_USERS:
         return redirect("index")
