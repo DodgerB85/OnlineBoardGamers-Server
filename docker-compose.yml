@@ -36,7 +36,7 @@ services:
     working_dir: /app
     volumes:
       # Mount the vue source code here
-      - ./CNS/vueCNS:/app
+      - ./CNS/vueCNS/src:/app/src
     ports:
       # Expose the Vite dev server port
       - "3012:3012"
