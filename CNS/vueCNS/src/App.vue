@@ -289,7 +289,7 @@ document.addEventListener('keyup', function (event) {
               </div>
 
               <div v-if="store.topMenuViews.showLoader" id="fLoadingBar">
-                <img src="@static/CNS/images/loading-bar-black.gif" />
+                <img :src="view.getImage('loading-bar-black')" />
               </div>
 
               <ActionArea />

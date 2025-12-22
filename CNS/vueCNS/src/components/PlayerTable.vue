@@ -110,13 +110,13 @@ function getPlayerIndexOrderForTable() {
                   <div class="newHexRotateDiv leftRotatePos"
                     v-if="rf.HEX_PARTY_ROTATABLE.includes(res) && store.context.hexRefBeingAdded === res">
                     <img class="rot_img rot_img_enabled" @click="rotateNewHexTile(-1)"
-                      src="@static/CNS/images/rot_anticlockwise.svg" />
+                      :src="view.getImage('rot_anticlockwise')" />
                   </div>
 
                   <div class="newHexRotateDiv rightRotatePos"
                     v-if="rf.HEX_PARTY_ROTATABLE.includes(res) && store.context.hexRefBeingAdded === res">
                     <img class="rot_img rot_img_enabled" @click="rotateNewHexTile(1)"
-                      src="@static/CNS/images/rot_clockwise.svg" />
+                      :src="view.getImage('rot_clockwise')" />
                   </div>
 
                 </div>
