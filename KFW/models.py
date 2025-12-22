@@ -357,8 +357,14 @@ class KFW_Game(models.Model):
     # NB withoutBots returns original players. with True it replaces with KFWBot
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # 1. Access prefetched cache and sort in Python memory
+        #playerList = list(
+        #    self.allPlayers.all().order_by("username").values_list("username", flat=True)
+        #)
         # .all() uses the cache; sorting in Python replaces .order_by()
-        playerList = [p.username for p in self.allPlayers.all()]
+        # Sort in memory to avoid hitting the DB again
+        playerList = sorted([p.username for p in self.allPlayers.all()])
+        
+        
         
         # 2. Shuffle using the seed
         random.Random(self.playerOrderSeed).shuffle(playerList)
