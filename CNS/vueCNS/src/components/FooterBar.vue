@@ -5,13 +5,14 @@
  * 
  * 
  */
+import * as view from '../js/CNSview'
 
 </script>
 
 <template>
   <div id="footer">
     <div class="content">
-      <img src="@static/CNS/images/CNSbox.jpg" class="cover" />
+      <img :src="view.getImage('CNSbox')" class="cover" />
       <p>
         Cannes is a board game by Jeroen Doumen and Joris Wiersinga, published by <a target='_blank'
           href='https://www.splottershop.com/'>Splotter Spellen</a>.

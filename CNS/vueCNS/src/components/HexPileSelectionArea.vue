@@ -333,7 +333,7 @@ function clickedCigar() {
             rf.HEX_PARTY_ROTATABLE.includes(hexRef) && store.context.hexRefBeingAdded === hexRef
           "
         >
-          <img @click="rotateNewHexTile(-1)" src="@static/CNS/images/rot_anticlockwise.svg" />
+          <img @click="rotateNewHexTile(-1)" :src="view.getImage('rot_anticlockwise')" />
         </div>
         <div v-if="canStoreHex(hexRef)" class="newHexStoreDiv">
           <button @click="locStoreHex()" class="actionsLineButton">Store Tile</button>
@@ -344,7 +344,7 @@ function clickedCigar() {
             rf.HEX_PARTY_ROTATABLE.includes(hexRef) && store.context.hexRefBeingAdded === hexRef
           "
         >
-          <img @click="rotateNewHexTile(1)" src="@static/CNS/images/rot_clockwise.svg" />
+          <img @click="rotateNewHexTile(1)" :src="view.getImage('rot_clockwise')" />
         </div>
       </div>
 

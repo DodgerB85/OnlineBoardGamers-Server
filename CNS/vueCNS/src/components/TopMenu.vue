@@ -148,26 +148,26 @@ function toggleReserve() {
 		<div id="menu">
 			<a href="/">
 				<span class="topMenuItem">
-					<img src="@static/CNS/images/icon-house.svg" />
+					<img :src="view.getImage('icon-house')" />
 					<span>Home</span>
 				</span>
 			</a>
 
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat" @click="toggleChat">
-				<img src="@static/CNS/images/icon-chat.svg" />
+				<img :src="view.getImage('icon-chat')" />
 				<span>Chat</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]" id="menuButtonBug" @click="toggleBug">
-				<img src="@static/CNS/images/icon-stop.svg" />
+				<img :src="view.getImage('icon-stop')" />
 				<span>Bug</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" class="topMenuItem" id="menuButtonNext" @click="nextGame">
-				<img src="@static/CNS/images/icon-nextGame.svg" />
+				<img :src="view.getImage('icon-nextGame')" />
 				<span>Next</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
@@ -176,32 +176,32 @@ function toggleReserve() {
 
 			<a href="/CNS/help/" target="_blank">
 				<span class="topMenuItem">
-					<img src="@static/CNS/images/icon-rulebook.svg" />
+					<img :src="view.getImage('icon-rulebook')" />
 					<span>Rules</span>
 				</span>
 			</a>
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.topMenuViews.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
-				<img src="@static/CNS/images/icon-notebook.svg" />
+				<img :src="view.getImage('icon-notebook')" />
 				<span>Notes</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
-				<img src="@static/CNS/images/icon-box.svg" />
+				<img :src="view.getImage('icon-box')" />
 				<span>Reserve</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
-				<img src="@static/CNS/images/icon-scroll.svg" />
+				<img :src="view.getImage('icon-scroll')" />
 				<span>History</span>
 			</span>
 
 			<span class="topMenuItem" @click="toggleReplay()">
-				<img src="@static/CNS/images/icon-replay.svg" />
+				<img :src="view.getImage('icon-replay')" />
 				<span>Replay</span>
 			</span>
 
@@ -209,7 +209,7 @@ function toggleReserve() {
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]" @click="loadRewind()">
-				<img src="@static/CNS/images/icon-rewind.svg" />
+				<img :src="view.getImage('icon-rewind')" />
 				<span>Rewind</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
@@ -246,6 +246,7 @@ function toggleReserve() {
 		</div>
 	</div>
 </template>
+
 
 <style scoped>
 .zoomButton {
