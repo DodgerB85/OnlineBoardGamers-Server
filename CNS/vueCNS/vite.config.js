@@ -100,9 +100,9 @@ export default defineConfig(({ command, mode }) => ({
    base: command === 'serve' ? '/static/' : 'https://www.onlineboardgamers.com/static/CNS',
   build: {
     outDir: resolve('../static/CNS/CNSvuedist'),
+    manifest: false,
+		emptyOutDir: true,
     assetsDir: './assets',
-    manifest: true,
-    emptyOutDir: true,
     target: 'es2015',
     //minify: true,
     rollupOptions: {
