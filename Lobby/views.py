@@ -327,10 +327,10 @@ def indexSpecialRedirect(request):
     #'looogic',
     #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
     # print("******************************************************************************************************** TGZ ACCESS: =================================================:  " + request.user.username)
-    #print(f"Db htis: {len(connection.queries)}")
-    #qs = QueryableGameAllPlayers.objects.filter(player_id=1, game="FCM").select_related("queryable_game")[:10]
-    #results = list(qs) 
-    #print(f"Db htis: {len(connection.queries)}")
+    print(f"Db htis: {len(connection.queries)}")
+    qs = QueryableGameAllPlayers.objects.filter(player_id=1, game="FCM").select_related("queryable_game")[:10]
+    results = list(qs) 
+    print(f"Db htis: {len(connection.queries)}")
     
     ALLOWED_USERS = ["admin", "DodgerB", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil"]
     if request.user.username not in ALLOWED_USERS:
