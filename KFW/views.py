@@ -310,7 +310,8 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     pov = currentGame.seatPosition(request.user.username)
     if username in KFW_SUPER_USERS:
-        pov = -1
+        # Not sure this can handle -1
+        pov = 0
     secondsToNextKickout = currentGame.getSecondsToNextKickout()
 
     kickoutRequired = currentGame.kickoutRequired()

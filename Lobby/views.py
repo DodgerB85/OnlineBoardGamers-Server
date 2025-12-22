@@ -328,7 +328,7 @@ def indexSpecialRedirect(request):
     #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
     # print("******************************************************************************************************** TGZ ACCESS: =================================================:  " + request.user.username)
     print(f"Db htis: {len(connection.queries)}")
-    qs = QueryableGameAllPlayers.objects.filter(player_id=1).select_related("queryable_game")
+    qs = QueryableGameAllPlayers.objects.filter(player_id=1).select_related("queryable_game", "player")
     results = list(qs) 
     print(results)
     
