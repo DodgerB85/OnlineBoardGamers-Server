@@ -342,11 +342,11 @@ class WEB_Game(models.Model):
     # NB withoutBots returns original players. with True it replaces with WebBot
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # 1. Access the prefetched list (0 hits if prefetched in view)
-        all_players_prefetched = list(self.allPlayers.all())
+        #all_players_prefetched = list(self.allPlayers.all())
         
         # 2. Extract usernames in Python (0 hits)
-        playerList = [p.username for p in all_players_prefetched]
-        
+        #playerList = [p.username for p in all_players_prefetched]
+        playerList = sorted([p.username for p in self.allPlayers.all()])
         # 3. Shuffle using your existing seed (0 hits)
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
