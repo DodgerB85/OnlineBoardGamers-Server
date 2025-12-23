@@ -329,6 +329,7 @@ Enter game data <br />
     //global = {};
 </script>
 <script src="{% url 'javascript-catalog' %}"></script>
+{% if settingsDEBUG %}
 <script src="/static/FCM/JS/lib/jquery-2.1.4.min.js"></script>
 <script src="/static/FCM/JS/lib/lodash.min.js"></script>
 <script src="/static/FCM/JS/Roger.js"></script>
@@ -344,5 +345,7 @@ Enter game data <br />
 <script src="/static/FCM/JS/io.js"></script>
 <script src="/static/FCM/JS/bot.js"></script>
 <script src="/static/FCM/JS/websocket.js"></script>
+{% else %}
 <!-- Live server -->
 <script src="/static/FCM/JS/FCMmain.js"></script>
+{% endif %}
