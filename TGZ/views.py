@@ -31,6 +31,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_TGZadvancedOptions,
     SF_getGameCreationJsonReturn,
     SF_updateFlexiTime,
+    SF_fastSerializeGame,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_T_sendTournamentGameStartNotification,
@@ -1447,7 +1448,7 @@ def TGZstats(request):
     with open("./TGZ/TGZstats/TGZ_stats_schism.json", "r") as f_schism:
         data_schism = json.load(f_schism)
 
-    timeString_schism = data_schism["time_string"]
+    #timeString_schism = data_schism["time_string"]
 
     all_data_schism = {}
     for playerCount in [2, 3, 4, 4.5, 5]:
@@ -1481,6 +1482,8 @@ def TGZstatGames(request):
 
     # Get the game ids
     gameIDs = json.loads(request.POST["game_ids"])
+    
+    gameIDs.reverse()
 
     # Pagination settings
     page = request.POST.get("page", 1)  # Get the current page number from the request
@@ -1510,32 +1513,32 @@ def TGZstatGames(request):
         num_pages = paginator.num_pages
 
     # Filter the games for the current page ONLY
-    finishedGames = TGZ_Game.objects.filter(id__in=gameIDs_page)
+    finishedGames = TGZ_Game.objects.filter(id__in=gameIDs_page).order_by("-latestUpdate")
 
-    def serializeLocal(game):
-        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner
-
-        latestUpdateString = str(game.latestUpdate)
-
-        latestUpdateElapsedTimeString = ""  # You can calculate this if needed
-
-        # startingOptionsHTML = SR_getTGZstartingOptionsHTML(game.startingOptions)
-
-        return {
-            "gameID": game.id,
-            "gameName": game.getGameName(),
-            # "creator": game.creator.username,
-            "allPlayers": [user.username for user in game.allPlayers.all()],
-            "currentTurn": game.currentTurnString(),
-            "latestUpdate": latestUpdateString,
-            "startingOptions": "",
-            "maxPlayers": game.maxPlayers,
-            "winner": winner,  # Used for Finished Games
-            "game": "TGZ",
-        }
+#    def serializeLocal(game):
+#        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner
+#
+#        latestUpdateString = str(game.latestUpdate)
+#
+#        latestUpdateElapsedTimeString = ""  # You can calculate this if needed
+#
+#        # startingOptionsHTML = SR_getTGZstartingOptionsHTML(game.startingOptions)
+#
+#        return {
+#            "gameID": game.id,
+#            "gameName": game.getGameName(),
+#            # "creator": game.creator.username,
+#            "allPlayers": [user.username for user in game.allPlayers.all()],
+#            "currentTurn": game.currentTurnString(),
+#            "latestUpdate": latestUpdateString,
+#            "startingOptions": "",
+#            "maxPlayers": game.maxPlayers,
+#            "winner": winner,  # Used for Finished Games
+#            "game": "TGZ",
+#        }
 
     # Serialize ONLY the games for the current page
-    finishedGamesListJson = [serializeLocal(game) for game in finishedGames]
+    finishedGamesListJson = [SF_fastSerializeGame(game, request.user) for game in finishedGames]
 
     return render(
         request,

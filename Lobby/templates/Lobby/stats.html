@@ -29,14 +29,14 @@
     <h2>
       {% for game_count in game_counts %}
         {% if forloop.counter0 == 0 %}
-          <img src="{% static 'FCM/Images/burger_board.png' %}"
+          <img src="{% static 'FCM/images/burger_board.png' %}"
                alt="FCM game"
                title="FCM Game"
                class="gameCountIcon"
                width="40"
                height="40">
         {% elif forloop.counter0 == 1 %}
-          <img src="{% static 'HC/Images/icon_car.png' %}"
+          <img src="{% static 'HC/images/icon_car.png' %}"
                alt="HC game"
                title="HC Game"
                class="gameCountIcon"
@@ -99,14 +99,14 @@
     <h2>
       {% for game_count in finished_game_counts %}
         {% if forloop.counter0 == 0 %}
-          <img src="{% static 'FCM/Images/burger_board.png' %}"
+          <img src="{% static 'FCM/images/burger_board.png' %}"
                alt="FCM game"
                title="FCM Game"
                class="gameCountIcon"
                width="40"
                height="40">
         {% elif forloop.counter0 == 1 %}
-          <img src="{% static 'HC/Images/icon_car.png' %}"
+          <img src="{% static 'HC/images/icon_car.png' %}"
                alt="HC game"
                title="HC Game"
                class="gameCountIcon"
@@ -170,7 +170,7 @@
     <h1>{% translate "Top Players" %}</h1>
     <div class="tab">
       <button class="tablinks" id="FCM">
-        <img src="{% static 'FCM/Images/burger_board.png' %}"
+        <img src="{% static 'FCM/images/burger_board.png' %}"
              alt="FCM game"
              title="FCM Game"
              class="statsIMG"
@@ -178,7 +178,7 @@
              height="40">
       </button>
       <button class="tablinks" id="HC">
-        <img src="{% static 'HC/Images/icon_car.png' %}"
+        <img src="{% static 'HC/images/icon_car.png' %}"
              alt="HC game"
              title="HC Game"
              class="statsIMG"
