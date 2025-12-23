@@ -2628,8 +2628,8 @@ def playerInfo(request, usernameToProfile):
     # Game names and image URLs
     game_names = {1: "FCM", 2: "HC", 3: "Bus", 4: "TGZ", 5: "AQY", 6: "IND", 7: "KFW", 8: "WEB"}
     image_urls = {
-        1: "/static/FCM/Images/burger_board.png",
-        2: "/static/HC/Images/icon_car.png",
+        1: "/static/FCM/images/burger_board.png",
+        2: "/static/HC/images/icon_car.png",
         3: "/static/Bus/images/bus_icon.png",
         4: "/static/TGZ/images/tgz_icon.png",
         5: "/static/AQY/images/aqy_icon.png",
@@ -2643,9 +2643,9 @@ def playerInfo(request, usernameToProfile):
 
         medal_names = ["gold", "silver", "bronze"]
         medal_images = [
-            "/static/Lobby/Images/trophy_gold.png",
-            "/static/Lobby/Images/trophy_silver.png",
-            "/static/Lobby/Images/trophy_bronze.png",
+            "/static/Lobby/images/trophy_gold.png",
+            "/static/Lobby/images/trophy_silver.png",
+            "/static/Lobby/images/trophy_bronze.png",
         ]
 
         for total, medal_name, medal_image in zip(totals, medal_names, medal_images):
@@ -2662,7 +2662,7 @@ def playerInfo(request, usernameToProfile):
                 for trophy_colour, amount in enumerate(game):
                     if amount != 0:
                         colour = ["gold", "silver", "bronze"][trophy_colour]
-                        trophyDetailHTML += f'<div class="trophyHolderSummaryDiv"><img class="trophyIMGsummary" src="/static/Lobby/Images/trophy_{colour}.png"><div class="trophyNumberSummaryDiv">{amount}</div></div>'
+                        trophyDetailHTML += f'<div class="trophyHolderSummaryDiv"><img class="trophyIMGsummary" src="/static/Lobby/images/trophy_{colour}.png"><div class="trophyNumberSummaryDiv">{amount}</div></div>'
 
 #    # Stats and games
 #    minus1year = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp() * 1000)
