@@ -42,6 +42,7 @@ from django.utils.translation import gettext  # , get_language
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
     SF_getGameCreationJsonReturn,
+    SF_fastSerializeGame,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML  # , SR_getTimeNow
 from Lobby.sharedFunctions.sharedNotifications import (
@@ -101,6 +102,8 @@ def FCMstatGames(request):
 
     # Get the game ids
     gameIDs = json.loads(request.POST["game_ids"])
+    
+    gameIDs.reverse()
 
     # Pagination settings
     page = request.POST.get("page", 1)  # Get the current page number from the request
@@ -123,30 +126,30 @@ def FCMstatGames(request):
         page = Paginator(gameIDs, items_per_page).num_pages
 
     # Filter the games for the current page ONLY
-    finishedGames = FCM_Game.objects.filter(id__in=gameIDs_page)
+    finishedGames = FCM_Game.objects.filter(id__in=gameIDs_page).order_by("-latestUpdate")
 
-    def serializeLocal(game):
-        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner
-
-        latestUpdateString = str(game.latestUpdate)
-
-        startingOptionsHTML = SR_getFCMstartingOptionsHTML(game.startingOptions)
-
-        return {
-            "gameID": game.id,
-            "gameName": game.getGameName(),
-            "creator": game.creator.username,
-            "allPlayers": [user.username for user in game.allPlayers.all()],
-            "currentTurn": game.currentTurnString(),
-            "latestUpdate": latestUpdateString,
-            "startingOptions": startingOptionsHTML,
-            "maxPlayers": game.maxPlayers,
-            "winner": winner,  # Used for Finished Games
-            "game": "FCM",
-        }
-
+#    def serializeLocal(game):
+#        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner
+#
+#        latestUpdateString = str(game.latestUpdate)
+#
+#        startingOptionsHTML = SR_getFCMstartingOptionsHTML(game.startingOptions)
+#
+#        return {
+#            "gameID": game.id,
+#            "gameName": game.getGameName(),
+#            "creator": game.creator.username,
+#            "allPlayers": [user.username for user in game.allPlayers.all()],
+#            "currentTurn": game.currentTurnString(),
+#            "latestUpdate": latestUpdateString,
+#            "startingOptions": startingOptionsHTML,
+#            "maxPlayers": game.maxPlayers,
+#            "winner": winner,  # Used for Finished Games
+#            "game": "FCM",
+#        }
+#
     # Serialize ONLY the games for the current page
-    finishedGamesListJson = [serializeLocal(game) for game in finishedGames]
+    finishedGamesListJson = [SF_fastSerializeGame(game, request.user) for game in finishedGames]
 
     return render(
         request,
@@ -1981,7 +1984,7 @@ def processStatsExcludeConsent(request):
 def gameAdmin(request):
     if request.user.username != "admin" and request.user.username != "DodgerB":
         return JsonResponse({"error": "Wrong request."}, status=400)
-    return render(request, "FCM/gameAdmin.html", {"gameID": 21})
+    return render(request, "FCM/gameAdmin.html", {"gameID": 21, "settingsDEBUG": settings.DEBUG})
 
 
 @login_required()

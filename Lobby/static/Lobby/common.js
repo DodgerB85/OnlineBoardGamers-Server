@@ -1,5 +1,3 @@
-// No text
-
 document.addEventListener('DOMContentLoaded', function () {
   var i = 0;
 

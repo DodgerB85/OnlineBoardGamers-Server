@@ -4,6 +4,7 @@
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
         rel="stylesheet">
+  <script src="{% static 'Lobby/common.js' %}"></script>
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -30,42 +31,7 @@
             </tr>
           </thead>
           {% for game in finishedGamesList %}
-            <tr class="clickableGameRow"
-                id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
-                onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/';">
-              <td class="nameTDcurrent tdWithBox">
-                {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
-                <a href="/{{ game.gameCode }}/{{ game.gameID }}">{{ game.gameName }}</a>
-                {{ game.startingOptionsHTML|safe }}
-              </td>
-              <td>{{ game.maxPlayers }}</td>
-              <td>
-                {% for player in game.allPlayers %}
-                  <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
-                  {% if not forloop.last %},{% endif %}
-                {% endfor %}
-              </td>
-              <td>
-                {% if game.deleteableGame %}
-                  <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}"
-                       class="deleteTrainingGame">
-                    {% blocktranslate trimmed %}
-                      Delete
-                      <br />
-                      Practice
-                      <br />
-                      Game
-                    {% endblocktranslate %}
-                  </div>
-                {% else %}
-                  <span class="timeToConvertSpan">{{ game.created }}</span>
-                {% endif %}
-              </td>
-              <td>
-                <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
-              </td>
-              <td>{{ game.winner }}</td>
-            </tr>
+            {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
           {% endfor %}
         </table>
       </div>
