@@ -1064,11 +1064,11 @@ a {
 }
 
 .bgImgFCM:before {
-	background-image: url("/static/FCM/Images/burger_board.png");
+	background-image: url("/static/FCM/images/burger_board.png");
 }
 
 .bgImgHC:before {
-	background-image: url("/static/HC/Images/icon_car.png");
+	background-image: url("/static/HC/images/icon_car.png");
 }
 
 .bgImgBus:before {

@@ -48,17 +48,17 @@ id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
 <td><span class="timeToConvertSpan">{{ game.created }}</span><BR />{{ game.latestUpdateElapsedTimeString }}</td>
 <td class="availGamesStartingOptionsTD">
   {% if game.startingMap and game.gameCode == "FCM" %} 
-  <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMap.jpg" %}" 
+  <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMap.jpg" %}" 
   title="Custom Map - Click to View"
     data-map="{{game.startingMap}}" data-game="FCM"> 
     {% endif %}
     {% if game.startingMap and game.gameCode == "TGZ" %} 
-    <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapTGZ.jpg" %}" 
+    <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapTGZ.jpg" %}" 
     title="Custom Map - Click to View"
       data-map="{{game.startingMap}}" data-game="TGZ"> 
       {% endif %}
       {% if game.startingMap and game.gameCode == "AQY" %} 
-      <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapAQY.jpg" %}" 
+      <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapAQY.jpg" %}" 
       title="Custom Map - Click to View"
         data-map="{{game.startingMap}}" data-game="AQY"> 
         {% endif %}
