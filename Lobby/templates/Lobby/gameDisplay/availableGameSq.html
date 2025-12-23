@@ -15,10 +15,10 @@
     <div class="boxPlayersContainer bgImg{{game.game}}" id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
       <!--<div class="sqBoxCoverDiv">
         {% if game.gameCode == 'FCM' %}
-        <img src="{% static "FCM/Images/fcm-box.jpg" %}" alt="FCM game" title="FCM Game">
+        <img src="{% static "FCM/images/fcm-box.jpg" %}" alt="FCM game" title="FCM Game">
         {% endif %}
         {% if game.gameCode == 'HC' %}
-        <img src="{% static "HC/Images/hc-box.jpg" %}" alt="HC game" title="HC Game">
+        <img src="{% static "HC/images/hc-box.jpg" %}" alt="HC game" title="HC Game">
         {% endif %}
         {% if game.gameCode == 'Bus' %}
         <img src="{% static "Bus/images/bus_icon.png" %}" alt="Bus game" title="Bus Game">{% endif %}
@@ -42,7 +42,7 @@
         {% else %}
         <div class="buttonDiv Join availableLink">{% translate "Join" %}</div>
         {% endif %}
-        <span class="sqPaceSpan"><img class="sqSpeedometer" src="{% static "Lobby/Images/speedometer.svg" %}"
+        <span class="sqPaceSpan"><img class="sqSpeedometer" src="{% static "Lobby/images/speedometer.svg" %}"
             alt="Game Pace" title="Game Pace"><BR />{{ game.pace|safe }}</span>
         {% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}
       </div>
@@ -50,7 +50,7 @@
     {% if game.startingMap or game.startingOptionsHTML %}
     <div class="startingOptionsDiv">
       {% if game.startingMap %} <img class="startingOption startingMap" alt="Map" width="50" height="50"
-        src="{% static "Lobby/Images/createMap.jpg" %}" title="Custom Map - Click to View"
+        src="{% static "Lobby/images/createMap.jpg" %}" title="Custom Map - Click to View"
         data-map="{{game.startingMap}}"> {% endif %}{{ game.startingOptionsHTML|safe }}
     </div>
     {% endif %}

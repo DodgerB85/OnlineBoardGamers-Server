@@ -20,7 +20,7 @@
             </div>
         {% endif %}
         <h1>{% translate "Thank you" %}</h1>
-        {% static 'Lobby/Images/emailDonate.png' as the_url %}
+        {% static 'Lobby/images/emailDonate.png' as the_url %}
         <h2>
             {% blocktranslate trimmed %}
                 Thank you for taking the time to look at the donation page. All support is gratefully received, and will go towards
@@ -47,7 +47,7 @@
                 <input type="hidden" name="hosted_button_id" value="SMKSLMCJHWZ8G" />
                 <input id="donateButton"
                        type="image"
-                       src="{% static 'Lobby/Images/paypalButton.png' %}"
+                       src="{% static 'Lobby/images/paypalButton.png' %}"
                        border="0"
                        name="submit"
                        title="PayPal - The safer, easier way to pay online!"
@@ -84,7 +84,7 @@
                class="patreon-button" target="_blank">Support me on Patreon</a>
         </div>
         <!-- <h2>{% translate "If you are having trouble in China/Asia, you can donate via AliPay" %}</h2>
-    <img alt="" border="0" src="{% static 'Lobby/Images/alipayQR.jpg' %}" width="200px" height="200px"><br />
+    <img alt="" border="0" src="{% static 'Lobby/images/alipayQR.jpg' %}" width="200px" height="200px"><br />
 <a href="https://qr.alipay.hk/2810040101cptpemzwqry9dz6e">{% translate "Pay Link (for devices with AliPay app installed)" %}</a>-->
         <hr>
         <br />

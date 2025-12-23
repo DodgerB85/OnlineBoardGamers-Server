@@ -62,7 +62,7 @@
           class="clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %} kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
           id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
           <td class="nameTDcurrent tdWithBox" id="td1">{% if game.chatNotification %}<img class="startingOption" alt="Str Opt" width="50" height="50"
-              src="{% static "Lobby/Images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
+              src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
 
             {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
 
@@ -89,12 +89,12 @@ href="{% url 'WEB:showWEBgame' game_id=game.gameID %}"
             >
             {{ game.gameName }} ID: {{game.gameID }} {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i> {% endif %} i={{ forloop.counter }}</a>
             {% if game.startingMap and game.gameCode == "FCM" %} 
-            <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMap.jpg" %}" 
+            <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMap.jpg" %}" 
             title="Click to View Map"
               data-map="{{game.startingMap}}" data-game="FCM"> 
               {% endif %}
               {% if game.startingMap and game.gameCode == "TGZ" %} 
-              <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/Images/createMapTGZ.jpg" %}" 
+              <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapTGZ.jpg" %}" 
               title="Click to View Map"
                 data-map="{{game.startingMap}}" data-game="TGZ"> 
                 {% endif %}

@@ -6,7 +6,7 @@
   <head>
     <meta charset="iso8859-1">
     <link href="{% static 'FCM/FCM.css' %}" rel="stylesheet">
-    <link rel="icon" type="image/png" href="{% static 'FCM/Images/fcm_icon.png' %}" />
+    <link rel="icon" type="image/png" href="{% static 'FCM/images/fcm_icon.png' %}" />
 
     <meta name="title" content="Online Board Gamers - Food Chain Magnate">
     <meta name="description"
@@ -27,14 +27,14 @@
 
             <a href="{% url 'index' %}">
               <span class="topMenuItem" data-type="0">
-                <img src="{% static 'FCM/Images/house.svg' %}" />
+                <img src="{% static 'FCM/images/house.svg' %}" />
                 <span>{% translate "Home" %}</span>
               </span></a>
 
               {% if user.is_authenticated %}
               <a href="{{ nextURL|safe }}">
                 <span class="topMenuItem" id="menuButtonNext">
-                  <img src="{% static 'FCM/Images/icon-nextGame.svg' %}" />
+                  <img src="{% static 'FCM/images/icon-nextGame.svg' %}" />
                   <span>Next</span></span></a>
               {% else %}
               <span class="topMenuBlank"></span>
@@ -43,12 +43,12 @@
                   <div  class="menuDivider"></div>
 
               <a href="{% url 'FCM:FCMhelp' %}" target="_blank"><span class="topMenuItem" data-type="1">
-                <img src="{% static 'FCM/Images/icon-rulebook.svg' %}" />
+                <img src="{% static 'FCM/images/icon-rulebook.svg' %}" />
                 <span>{% translate "Rules" %}</span>
               </span></a>
 
               <span class="topMenuItem" data-type="7" id="reserveMenuButton">
-                <img src="{% static 'FCM/Images/cardboard-box.svg' %}" />
+                <img src="{% static 'FCM/images/cardboard-box.svg' %}" />
                 <span>{% translate "Reserve" %}</span>
               </span>
 
@@ -56,15 +56,15 @@
 
               {% if 'SHADOW' in allPlayerListBySeat and involvedPlayer and not finishedGame %}
               <span class="topMenuItem" data-type="10">
-                <img src="{% static 'FCM/Images/rewind.svg' %}" />
+                <img src="{% static 'FCM/images/rewind.svg' %}" />
                 <span>{% translate "Rewind" %}</span>
               </span>
               <!--<span class="topMenuItem" data-type="10"><img
-                src="{% static 'FCM/Images/rewind.svg' %}"><span>{% translate "Rewind" %}</span></span>-->
+                src="{% static 'FCM/images/rewind.svg' %}"><span>{% translate "Rewind" %}</span></span>-->
                 {% elif involvedPlayer %}
                 <span class="topMenuItem" data-type="999" id="assistanceMenuButton222">
                   <img id="assistIcon222"
-                  src="{% static 'FCM/Images/assistance.svg' %}">
+                  src="{% static 'FCM/images/assistance.svg' %}">
                   <span>{% translate "Aid" %}</span>
                 </span>
               {% else %}
@@ -74,7 +74,7 @@
               <br/>
               {% if user.is_authenticated %}
                 <span class="topMenuItem" data-type="5" id="menuButtonChat">
-                  <img src="{% static 'FCM/Images/talk.svg' %}" />
+                  <img src="{% static 'FCM/images/talk.svg' %}" />
                   <span>{% translate "Chat" %}</span>
                 </span>
                 {% else %}
@@ -83,7 +83,7 @@
 
                 {% if involvedPlayer %}
                 <span class="topMenuItem" data-type="2" id="menuButtonBug">
-                  <img src="{% static 'FCM/Images/stop-sign.svg' %}" />
+                  <img src="{% static 'FCM/images/stop-sign.svg' %}" />
                   <span>{% translate "Bug" %}</span>
                 </span>
                 {% else %}
@@ -94,7 +94,7 @@
 
                 {% if involvedPlayer %}
                 <span class="topMenuItem" data-type="3" id="menuButtonNotes">
-                  <img src="{% static 'FCM/Images/notebook.svg' %}" />
+                  <img src="{% static 'FCM/images/notebook.svg' %}" />
                   <span>{% translate "Notes" %}</span>
                 </span>
                 {% else %}
@@ -102,7 +102,7 @@
                 {% endif %}
 
                 <span class="topMenuItem" data-type="4" id="menuButtonHistory">
-                  <img src="{% static 'FCM/Images/scroll-unfurled.svg' %}" />
+                  <img src="{% static 'FCM/images/scroll-unfurled.svg' %}" />
                   <span>{% translate "History" %}</span>
                 </span>
 
@@ -110,12 +110,12 @@
 
 
                 <span class="topMenuItem" data-type="9" id="replayMenuButton">
-                  <img id="replayIcon" src="{% static 'FCM/Images/replay.svg' %}" />
+                  <img id="replayIcon" src="{% static 'FCM/images/replay.svg' %}" />
                   <span>{% translate "Replay" %}</span>
                 </span>
 
                <!-- <span class="topMenuItem" data-type="999" id="assistanceMenuButton"><img id="assistIcon"
-                  src="{% static 'FCM/Images/assistance.svg' %}">
+                  src="{% static 'FCM/images/assistance.svg' %}">
                   <span>{% translate "Aid" %}</span>
                 </span>-->
 
@@ -156,7 +156,7 @@
                          {% endblocktranslate %}
                          <br/>
                          <span class="topMenuItem" id="hostRewindIcon" data-type="11">
-                          <img src="{% static 'FCM/Images/rewind.svg' %}" />
+                          <img src="{% static 'FCM/images/rewind.svg' %}" />
                           <span>{% translate "REWIND" %}</span></span>
                           <!--<br/><b>Removed due abuse<br/>
                           Will return in altered form
@@ -245,7 +245,7 @@
                           {% endblocktranslate %}
                           <br/>
                           <br/><span class="topMenuItem" id="hostRewindIcon" data-type="11">
-                          <img src="{% static 'FCM/Images/rewind.svg' %}" />
+                          <img src="{% static 'FCM/images/rewind.svg' %}" />
                           <span>{% translate "REWIND" %}</span></span>
                           <!--<br/><b>Removed due abuse<br/>
                             Will return in altered form
@@ -274,7 +274,7 @@
                         {% endif %}
                         {% if rewindHostPossible %}
                           <span class="topMenuItem" id="hostRewindIcon" data-type="10">
-                            <img src="{% static 'FCM/Images/rewind.svg' %}" />
+                            <img src="{% static 'FCM/images/rewind.svg' %}" />
                             <span>{% translate "REWIND" %}</span></span>
                           {% else %}
                             <br />
@@ -383,11 +383,11 @@
                   <div id="actions"></div>
                   <div id="replayArea"></div>
                   <div id="loader">
-                    <img src="{% static 'FCM/Images/loading-bar-black.gif' %}" />
+                    <img src="{% static 'FCM/images/loading-bar-black.gif' %}" />
                   </div>
                   <div id="gameSavingBar">
                     Saving Game.... Please Wait....<br/>
-                    <img src="{% static 'FCM/Images/loading-bar-black.gif' %}" />
+                    <img src="{% static 'FCM/images/loading-bar-black.gif' %}" />
                   </div>
                   <div class="row">
                     <!-- <div id="boardContainer">-->

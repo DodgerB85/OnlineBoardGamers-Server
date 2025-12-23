@@ -594,39 +594,39 @@ def SR_gamePaceString(gamePace):
 #    if kickoutDuration < 49:
 #        if kickoutDuration == 5:
 #            HTML = (
-#                "<img class ='startingOption' src='/static/Lobby/Images/kickout5.svg' title='"
+#                "<img class ='startingOption' src='/static/Lobby/images/kickout5.svg' title='"
 #                + gettext("Kickout after 5 Minutes")
 #                + "'/>"
 #            )
 #        elif kickoutDuration == 10:
 #            HTML = (
-#                "<img class ='startingOption' src='/static/Lobby/Images/kickout10.svg' title='"
+#                "<img class ='startingOption' src='/static/Lobby/images/kickout10.svg' title='"
 #                + gettext("Kickout after 10 Minutes")
 #                + "'/>"
 #            )
 #        elif kickoutDuration == 20:
 #            HTML = (
-#                "<img class ='startingOption' src='/static/Lobby/Images/kickout20.svg' title='"
+#                "<img class ='startingOption' src='/static/Lobby/images/kickout20.svg' title='"
 #                + gettext("Kickout after 20 Minutes")
 #                + "'/>"
 #            )
 #
 #    elif kickoutDuration == 50:
 #        HTML = (
-#            "<img class ='startingOption' src='/static/Lobby/Images/kickout50.svg' title='"
+#            "<img class ='startingOption' src='/static/Lobby/images/kickout50.svg' title='"
 #            + gettext("Kickout after 12 Hours")
 #            + "'/>"
 #        )
 #    elif kickoutDuration == 100:
 #        HTML = (
-#            "<img class ='startingOption' src='/static/Lobby/Images/kickout100.svg' title='"
+#            "<img class ='startingOption' src='/static/Lobby/images/kickout100.svg' title='"
 #            + gettext("Kickout after 1 day")
 #            + "'/>"
 #        )
 #    else:
 #        kickoutTitle = gettext("Kickout after %(kickoutInDays)s days") % {"kickoutInDays": str(kickoutInDays)}
 #        HTML = (
-#            "<img class ='startingOption' src='/static/Lobby/Images/kickout"
+#            "<img class ='startingOption' src='/static/Lobby/images/kickout"
 #            + str(kickoutDuration)
 #            + ".svg' title='"
 #            + kickoutTitle
@@ -744,181 +744,181 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
     for option in startingOptionsList:
         # if option == 5:
         #    #usedOptions += 1
-        #    startingOptionsHTML += "<img class ='startingOption' src='/static/FCM/Images/so_surrender.svg' title='Allow Surrender'>"
+        #    startingOptionsHTML += "<img class ='startingOption' src='/static/FCM/images/so_surrender.svg' title='Allow Surrender'>"
         if option == 1:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_shortGame.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_shortGame.svg' title='"
                 + gettext("Short Game")
                 + "'>"
             )
         if option == 2:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_noMS.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_noMS.svg' title='"
                 + gettext("No Milestones")
                 + "'>"
             )
         if option == 3:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_noCEO.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_noCEO.svg' title='"
                 + gettext("No CFO Milestone")
                 + "'>"
             )
         if option == 6:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_noRadio.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_noRadio.svg' title='"
                 + gettext("No Radio Milestone")
                 + "'>"
             )
         if option == 8:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/hardchoices2.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/hardchoices2.jpg' title='"
                 + gettext("Hard Choices")
                 + "'>"
             )
         if option == 21:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_newMS.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_newMS.svg' title='"
                 + gettext("New Milestones")
                 + "'>"
             )
         if option == 20:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_ketchupMS.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_ketchupMS.svg' title='"
                 + gettext("Ketchup Milestone")
                 + "'>"
             )
         if option == 23:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_reservePrice.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_reservePrice.jpg' title='"
                 + gettext("New Reserve Cards")
                 + "'>"
             )
         if option == 14:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_movieStars.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_movieStars.svg' title='"
                 + gettext("Movie Stars")
                 + "'>"
             )
         if option == 15:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_massMarketeers.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_massMarketeers.jpg' title='"
                 + gettext("Mass Marketeers")
                 + "'>"
             )
         if option == 13:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_GFC.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_GFC.jpg' title='"
                 + gettext("Gourmet Food Critics")
                 + "'>"
             )
         if option == 17:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_rural.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_rural.jpg' title='"
                 + gettext("Rural Marketeers")
                 + "'>"
             )
         if option == 18:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/map23.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/map23.jpg' title='"
                 + gettext("New Districts")
                 + "'>"
             )
         if option == 22:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_lobbyists.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_lobbyists.jpg' title='"
                 + gettext("Lobbyists")
                 + "'>"
             )
         if option == 16:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_nightShift.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_nightShift.jpg' title='"
                 + gettext("Night Shift Manager")
                 + "'>"
             )
         if option == 19:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_coffee.svg' title='" + gettext("Coffee") + "'>"
+                "<img class ='startingOption' src='/static/FCM/images/so_coffee.svg' title='" + gettext("Coffee") + "'>"
             )
         if option == 9:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_fryChef.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_fryChef.svg' title='"
                 + gettext("Fry Chef")
                 + "'>"
             )
         if option == 10:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_kimchi.svg' title='" + gettext("Kimchi") + "'>"
+                "<img class ='startingOption' src='/static/FCM/images/so_kimchi.svg' title='" + gettext("Kimchi") + "'>"
             )
         if option == 11:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_sushi.svg' title='" + gettext("Sushi") + "'>"
+                "<img class ='startingOption' src='/static/FCM/images/so_sushi.svg' title='" + gettext("Sushi") + "'>"
             )
         if option == 12:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_noodles.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_noodles.svg' title='"
                 + gettext("Noodles")
                 + "'>"
             )
         if option == 40:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_urbanPlanning.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_urbanPlanning.svg' title='"
                 + gettext("Urban Planning")
                 + "'>"
             )
         if option == 41:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_urbanPlanningPlus.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_urbanPlanningPlus.svg' title='"
                 + gettext("Urban Planning Plus")
                 + "'>"
             )
         if option == 42:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_jazz.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_jazz.svg' title='"
                 + gettext("Jazz Musicians")
                 + "'>"
             )
         if option == 43:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_dumplings.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_dumplings.svg' title='"
                 + gettext("Dumplings")
                 + "'>"
             )
         if option == 44:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_delivery.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_delivery.svg' title='"
                 + gettext("Delivery Drivers")
                 + "'>"
             )
         if option == 45:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_hawkers.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_hawkers.svg' title='"
                 + gettext("Hawker Marketeers")
                 + "'>"
             )
         if option == 101:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_strict.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_strict.svg' title='"
                 + gettext("Turn Order Payday/Fridge")
                 + "'>"
             )
@@ -933,7 +933,7 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
                 moduleRange = ["??", "??"]
             # for i in range(len(moduleRange)): moduleRange[i] = int(moduleRange[i][-2:])
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_randomMods.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_randomMods.svg' title='"
                 + moduleRange[0]
                 + " - "
                 + moduleRange[1]
@@ -944,7 +944,7 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
         if option == 300:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_draftMods.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_draftMods.jpg' title='"
                 + gettext("Draft Modules")
                 + "'>"
             )
@@ -952,7 +952,7 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
         if option == 999:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_skip.jpg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_skip.jpg' title='"
                 + gettext("Skip Module")
                 + "'>"
             )
@@ -960,21 +960,21 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
         if option == 103:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/Images/so_sandbox.svg' title='"
+                "<img class ='startingOption' src='/static/FCM/images/so_sandbox.svg' title='"
                 + gettext("Sandbox Mode")
                 + "'>"
             )
         if option == 110:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         if option == 120:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1067,13 +1067,13 @@ def SR_getTGZstartingOptionsHTML(startingOptions):
         retHTML += "</div></div>"
     if 110 in locStartingOptions:
         retHTML += (
-            "<img class ='startingOption' src='/static/Lobby/Images/so_learningGame.svg' title='"
+            "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
             + gettext("Learning Game")
             + "'>"
         )
     elif 120 in locStartingOptions:
         retHTML += (
-            "<img class ='startingOption' src='/static/Lobby/Images/so_experiencedGame.svg' title='"
+            "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
             + gettext("Experienced Game")
             + "'>"
         )
@@ -1216,13 +1216,13 @@ def SR_getCNSstartingOptionsHTML(startingOptions):
             )
         elif option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1240,13 +1240,13 @@ def SR_getBUSstartingOptionsHTML(startingOptions):
     for option in startingList:
         if option == "110":
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == "120":
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1264,13 +1264,13 @@ def SR_getHCstartingOptionsHTML(startingOptions):
     for option in startingList:
         if option == "110":
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == "120":
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1288,13 +1288,13 @@ def SR_getAQYstartingOptionsHTML(startingOptions):
     for option in startingList:
         if option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1324,13 +1324,13 @@ def SR_getINDstartingOptionsHTML(startingOptions):
             )
         elif option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1391,13 +1391,13 @@ def SR_getKFWstartingOptionsHTML(startingOptions):
             )
         if option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/Images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )

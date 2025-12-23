@@ -27,8 +27,8 @@ emailCounter.txt
 /Private/
 
 # Exclude specific static directories
-/FCM/static/FCM/
-/HC/static/HC/
+/FCM/static/FCM/JS/
+/HC/static/HC/JS/
 
 # Exclude any folder found anywhere in subdirectories
 vueTGZ/

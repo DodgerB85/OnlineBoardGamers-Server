@@ -7,7 +7,7 @@
 <head>
   <meta charset="iso8859-1">
   <link href="{% static 'HC/HC.css' %}" rel="stylesheet">
-  <link rel="icon" type="image/png" href="{% static 'HC/Images/hc_icon.png' %}" />
+  <link rel="icon" type="image/png" href="{% static 'HC/images/hc_icon.png' %}" />
 
   <meta name="title" content="Online Board Gamers - Horseless Carriage">
   <meta name="description"
@@ -28,49 +28,49 @@
       <div id="menu">
 
         <a href="{% url 'index' %}">
-          <span class="topMenuItem" data-type="0"><img src="{% static 'FCM/Images/house.svg' %}">
+          <span class="topMenuItem" data-type="0"><img src="{% static 'FCM/images/house.svg' %}">
             <span>{% translate "Home" %}</span>
           </span></a>
 
-          <span class="topMenuItem" data-type="5" id="menuButtonChat"><img src="{% static 'FCM/Images/talk.svg' %}">
+          <span class="topMenuItem" data-type="5" id="menuButtonChat"><img src="{% static 'FCM/images/talk.svg' %}">
             <span>{% translate "Chat" %}</span></span>
 
         <span class="topMenuItem" data-type="2" id="menuButtonBug"><img
-            src="{% static 'FCM/Images/stop-sign.svg' %}"><span>{% translate "Bug" %}</span></span>
+            src="{% static 'FCM/images/stop-sign.svg' %}"><span>{% translate "Bug" %}</span></span>
 
                         <!-- IF LOGGED IN -->
                         <a href="{{ nextURL|safe }}">
                           <span class="topMenuItem" id="menuButtonNext"><img
-                            src="{% static 'HC/Images/icon-nextGame.svg' %}" />
+                            src="{% static 'HC/images/icon-nextGame.svg' %}" />
                         <span>Next </span></span></a>
 
                         <div class="menuDivider"></div>
 
                         <a href="{% url 'HC:HChelp' %}" target="_blank"><span class="topMenuItem" data-type="1"><img
-                          src="{% static 'HC/Images/icon-rulebook.svg' %}"><span>{% translate "Rules" %}</span></span></a>
+                          src="{% static 'HC/images/icon-rulebook.svg' %}"><span>{% translate "Rules" %}</span></span></a>
 
                           {% if involvedPlayer %}
-                          <span class="topMenuItem" data-type="3" id="menuButtonNotes"><img src="{% static 'FCM/Images/notebook.svg' %}">
+                          <span class="topMenuItem" data-type="3" id="menuButtonNotes"><img src="{% static 'FCM/images/notebook.svg' %}">
                             <span>{% translate "Notes" %}</span></span> 
                           {% endif %}
 
             <span class="topMenuItem" data-type="7" id="reserveMenuButton"><img
-              src="{% static 'FCM/Images/cardboard-box.svg' %}"><span>{% translate "Reserve" %}</span></span>
+              src="{% static 'FCM/images/cardboard-box.svg' %}"><span>{% translate "Reserve" %}</span></span>
 
               <div class="menuDivider"></div>
 
         <span class="topMenuItem" data-type="4" id="menuButtonHistory"><img
-            src="{% static 'FCM/Images/scroll-unfurled.svg' %}"><span>{% translate "History" %}</span></span>
+            src="{% static 'FCM/images/scroll-unfurled.svg' %}"><span>{% translate "History" %}</span></span>
           
             <div class="menuDivider"></div>
 
             {% if involvedPlayer %}
             <span class="topMenuItem" data-type="10"><img
-              src="{% static 'FCM/Images/rewind.svg' %}"><span>{% translate "Rewind" %}</span></span>
+              src="{% static 'FCM/images/rewind.svg' %}"><span>{% translate "Rewind" %}</span></span>
               {% endif %}
 
         <!--<span class="topMenuItem" data-type="9" id="assistanceMenuButton"><img id="assistIcon"
-            src="{% static 'FCM/Images/assistance.svg' %}"><span>AID</span></span>-->
+            src="{% static 'FCM/images/assistance.svg' %}"><span>AID</span></span>-->
 
       </div>
 
@@ -164,7 +164,7 @@
           {% endif %}
 
           {% if rewindHostPossible %}<span class="topMenuItem" id="hostRewindIcon" data-type="99"><img
-              src="{% static 'FCM/Images/rewind.svg' %}"><span>{% translate "REWIND" %}</span></span>
+              src="{% static 'FCM/images/rewind.svg' %}"><span>{% translate "REWIND" %}</span></span>
           {% else %}
           <BR />{% translate "Please wait for all players to give permission" %}
           {% endif %}
@@ -259,7 +259,7 @@
       <div id="playerLineDiv"></div>
 
       <div id="actions"></div>
-      <div id="loader"><img src="{% static 'FCM/Images/loading-bar-black.gif' %}" /></div>
+      <div id="loader"><img src="{% static 'FCM/images/loading-bar-black.gif' %}" /></div>
 
       <div id="SSD"></div>
 
@@ -302,7 +302,7 @@
   <div id="footer">
     
     <div class="content">
-      <img src="/static/HC/Images/hc-box.jpg" class="cover" />
+      <img src="/static/HC/images/hc-box.jpg" class="cover" />
       <p>
         {% translate "Horseless Carriage is a board game by Jeroen Doumen and Joris Wiersinga, published by <a href='https://www.splottershop.com/'>Splotter Spellen</a>." %}
       </p>

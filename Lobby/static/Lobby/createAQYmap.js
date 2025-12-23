@@ -463,26 +463,26 @@ function renderBoard(playerCount) {
 function changePlayerNumberGraphics(playerNumber) {
 	switch (playerCount) {
 		case 2:
-			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/Images/playerNone.png"))
-			document.getElementById("2player").src = "/static/Lobby/Images/player.png"
+			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/images/playerNone.png"))
+			document.getElementById("2player").src = "/static/Lobby/images/player.png"
 			break
 		case 3:
-			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/Images/playerNone.png"))
-			document.getElementById("2player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("3player").src = "/static/Lobby/Images/player.png"
+			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/images/playerNone.png"))
+			document.getElementById("2player").src = "/static/Lobby/images/player.png"
+			document.getElementById("3player").src = "/static/Lobby/images/player.png"
 			break
 		case 4:
-			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/Images/playerNone.png"))
-			document.getElementById("2player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("3player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("4player").src = "/static/Lobby/Images/player.png"
+			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/images/playerNone.png"))
+			document.getElementById("2player").src = "/static/Lobby/images/player.png"
+			document.getElementById("3player").src = "/static/Lobby/images/player.png"
+			document.getElementById("4player").src = "/static/Lobby/images/player.png"
 			break
 		case 5:
-			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/Images/playerNone.png"))
-			document.getElementById("2player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("3player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("4player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("5player").src = "/static/Lobby/Images/player.png"
+			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/images/playerNone.png"))
+			document.getElementById("2player").src = "/static/Lobby/images/player.png"
+			document.getElementById("3player").src = "/static/Lobby/images/player.png"
+			document.getElementById("4player").src = "/static/Lobby/images/player.png"
+			document.getElementById("5player").src = "/static/Lobby/images/player.png"
 			break
 	}
 }
@@ -491,8 +491,8 @@ function changePlayerNumber() {
 	playerCount = parseInt(this.id.slice(0, 1))
 	switch (playerCount) {
 		case 2:
-			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/Images/playerNone.png"))
-			document.getElementById("2player").src = "/static/Lobby/Images/player.png"
+			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/images/playerNone.png"))
+			document.getElementById("2player").src = "/static/Lobby/images/player.png"
 			boardTiles = [
 				[-1, 0],
 				[-1, 0],
@@ -501,9 +501,9 @@ function changePlayerNumber() {
 			]
 			break
 		case 3:
-			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/Images/playerNone.png"))
-			document.getElementById("2player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("3player").src = "/static/Lobby/Images/player.png"
+			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/images/playerNone.png"))
+			document.getElementById("2player").src = "/static/Lobby/images/player.png"
+			document.getElementById("3player").src = "/static/Lobby/images/player.png"
 			boardTiles = [
 				[-1, 0],
 				[-1, 0],
@@ -514,10 +514,10 @@ function changePlayerNumber() {
 			]
 			break
 		case 4:
-			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/Images/playerNone.png"))
-			document.getElementById("2player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("3player").src = "/static/Lobby/Images/player.png"
-			document.getElementById("4player").src = "/static/Lobby/Images/player.png"
+			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/images/playerNone.png"))
+			document.getElementById("2player").src = "/static/Lobby/images/player.png"
+			document.getElementById("3player").src = "/static/Lobby/images/player.png"
+			document.getElementById("4player").src = "/static/Lobby/images/player.png"
 			boardTiles = [
 				[-1, 0],
 				[-1, 0],
