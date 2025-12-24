@@ -1,50 +1,41 @@
-{% extends "Lobby/layout.html" %}
-
-{% load static %}
-{% load i18n %}
-{% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-{% endblock %}
-{% block body %}
-
+{% extends "Lobby/layout.html" %} {% load static %} {% load i18n %} {% block head %}
+<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+{% endblock %} {% block body %}
 
 <div class="container" id="HCgameSummaryPage">
-  {% if messages %}
-  <div class="messages">
-    {% for message in messages %}
-    <div {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
+	{% if messages %}
+	<div class="messages">
+		{% for message in messages %}
+		<div {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</div>
+		{% endfor %}
+	</div>
+	{% endif %}
 
-  <h1>{% translate "Horseless Carriage Game Summary" %}</h1>
-  <a class="linkOther" href='/HC/{{gameID}}/'>Back to Game</a><BR/><BR/>
-  
-  <!--<B>NOTE: GAMES CREATED BEFORE 11 MARCH MIGHT HAVE MISSING OR INCOMPLETE INFORMATION</B><BR/><BR/>-->
+	<h1>{% translate "Horseless Carriage Game Summary" %}</h1>
+	<a class="linkOther" href="/HC/{{gameID}}/">Back to Game</a>
+	<br />
+	<br />
 
-  <div class="centeredDiv">
-    <canvas id="gameMoneySummary" class="HCsummaryGraph"></canvas>
-    <canvas id="gameIncomeSummary" class="HCsummaryGraph"></canvas>
-  </div>
+	<!--<B>NOTE: GAMES CREATED BEFORE 11 MARCH MIGHT HAVE MISSING OR INCOMPLETE INFORMATION</B><BR/><BR/>-->
 
+	<div class="centeredDiv">
+		<canvas id="gameMoneySummary" class="HCsummaryGraph"></canvas>
+		<canvas id="gameIncomeSummary" class="HCsummaryGraph"></canvas>
+	</div>
 
-  {% include 'Lobby/common/homeButton.html' %}
-
+	{% include 'Lobby/common/homeButton.html' %}
 </div>
 
 <script>
-  var global = {};
+	var global = {};
 
-  global.gameName = '{{ gameName }}';
+	global.gameName = '{{ gameName }}';
 
-  {% if gameData %}
-  global.load = '{{ gameData|safe }}';
-  {% endif %}
+	{% if gameData %}
+	global.load = '{{ gameData|safe }}';
+	{% endif %}
 
-  global.HCgameSummary = true;
-
-
+	global.HCgameSummary = true;
 </script>
 <script src="{% url 'javascript-catalog' %}"></script>
 
@@ -53,37 +44,23 @@
 <script src="{% static 'HC/JS/lib/jquery-2.1.4.min.js' %}"></script>
 <script src="{% static 'HC/JS/lib/lodash.min.js' %}"></script>
 
+<script src="{% static 'HC/HCgameSummary.js' %}"></script>
 
-
-<script src="{% static 'HC/HCgameSummary.js' %}?v=20220706"></script>
-
-
-
-<script src="{% static 'HC/JS/Roger.js' %}?v=20220706"></script>
-<script src="{% static 'HC/JS/HCutils.js' %}?v=20220706"></script>
-
-<script src="{% static 'HC/JS/HCreference.js' %}?v=20220706"></script>
-<script src="{% static 'HC/JS/HCplayer.js' %}?v=20220706"></script>
-<script src="{% static 'HC/JS/HCrules.js' %}?v=20220706"></script>
-
-<script src="{% static 'HC/JS/HCfactory.js' %}"></script>
-
-<script src="{% static 'HC/JS/HCmodel.js' %}?v=20220706"></script>
-
-<script src="{% static 'HC/JS/HCview.js' %}"></script>
-
-<script src="{% static 'HC/JS/HCcontroller.js' %}?v=20220706"></script>
-<script src="{% static 'HC/JS/HChistory.js' %}?v=20220706"></script>
-
-
-<script src="{% static 'HC/JS/HCio.js' %}?v=20220706"></script>
-<script src="{% static 'HC/JS/HCbot.js' %}?v=20220706"></script>
-
-<script src="{% static 'HC/JS/HCwebsocket.js' %}?v=20220706"></script>
-
-
-<script src="{% static 'HC/JS/HCmain.js' %}?v=20220706"></script>
-
-
-
-{% endblock %}
+{% if settingsDEBUG %}
+<script src="/static/HC/JS/Roger.js"></script>
+<script src="/static/HC/JS/HCutils.js"></script>
+<script src="/static/HC/JS/HCreference.js"></script>
+<script src="/static/HC/JS/HCplayer.js"></script>
+<script src="/static/HC/JS/HCrules.js"></script>
+<script src="/static/HC/JS/HCfactory.js"></script>
+<script src="/static/HC/JS/HCmodel.js"></script>
+<script src="/static/HC/JS/HCview.js"></script>
+<script src="/static/HC/JS/HCcontroller.js"></script>
+<script src="/static/HC/JS/HChistory.js"></script>
+<script src="/static/HC/JS/HCio.js"></script>
+<script src="/static/HC/JS/HCbot.js"></script>
+<script src="/static/HC/JS/HCwebsocket.js"></script>
+<script src="/static/HC/JS/HCmain.js"></script>
+{% else %}
+<script src="{% static 'HC/JS/HCmain.js"></script>
+{% endif %} {% endblock %}

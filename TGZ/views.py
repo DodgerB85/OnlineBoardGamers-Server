@@ -1512,8 +1512,8 @@ def TGZstatGames(request):
         page = paginator.num_pages
         num_pages = paginator.num_pages
 
-    # Filter the games for the current page ONLY
-    finishedGames = TGZ_Game.objects.filter(id__in=gameIDs_page).order_by("-latestUpdate")
+    # Filter the games for the current page ONLY   
+    finishedGames = TGZ_Game.objects.filter(id__in=gameIDs_page).order_by("-latestUpdate").select_related("creator__profile", "creator", "winner").prefetch_related("allPlayers", "missingPlayers", "invitedPlayers", "playersWithChatNotification")
 
 #    def serializeLocal(game):
 #        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner
