@@ -76,6 +76,9 @@ class FCM_GameAdmin(admin.ModelAdmin):
         "relatedTournament",
         "relatedMiniTournament",
     ]
+    
+    # FIX 2: Speed up pagination by disabling the "total count" if the table is huge
+    show_full_result_count = False 
 
     def get_queryset(self, request):
         # 1. Essential joins for EVERY view
@@ -188,11 +191,6 @@ class FCM_GameAdmin(admin.ModelAdmin):
         "relatedMiniTournament",
     )
     search_fields = ("gameName", "creator__username")
-
-    # list_select_related = ('creator', 'host', 'winner', 'relatedTournament', 'relatedMiniTournament')
-    # list_prefetch_related = (
-    #    'allPlayers', 'missingPlayers', 'kickedPlayers', 'invitedPlayers', 'playersWithChatNotification'
-    # )
 
     # 4. Fieldsets for a cleaner UI
     fieldsets = (

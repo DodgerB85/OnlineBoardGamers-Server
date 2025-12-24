@@ -354,16 +354,13 @@ class FCM_Game(models.Model):
 
     def currentTurnString(self):
         return SR_currentTurnString("FCM", self.turn, self.phase)
-
+   
     def getGameName(self):
-        _gameName = ""
-        if self.gameName != "":
-            _gameName = self.gameName
-        else:
-            _gameName = f"[{getattr(self.creator, 'username')}'s Game]"
+        # Use fields already on the model. DO NOT call .all() or .count() here.
+        name = self.gameName or f"{getattr(self.creator, 'username', 'Unknown')}'s Game"
         if self.gameStatus == "PRIVATE":
-            _gameName += "[Private Game]"
-        return _gameName
+            name += " [Private]"
+        return name
 
     def isMyMove(self, loggedInPlayerUsername="ADFSADASDASDASDASADADA"):
         allowed_players = {
