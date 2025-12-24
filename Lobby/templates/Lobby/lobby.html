@@ -218,8 +218,7 @@
 			<span class="noGamesSpan">
 				<h2>{% translate "No Current Games" %}</h2>
 			</span>
-			{% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %} {% if current_MT %}
-			<br />
+			{% endif %} {% if current_MT %}
 			Current Mini Tournaments
 			<div class="tableOnlyDiv">
 				<table class="gamesTable">
@@ -237,8 +236,10 @@
 					{% for Mini_Tournament in current_MT %} {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %} {% endfor %}
 				</table>
 			</div>
-			{% endif %} {% else %}
+			{% endif %} {% else %}<h2>{% translate "No Current Games or Mini Tournaments" %}</h2>
+      {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %} {% if current_MT %}
 			<br />
+      {% endif %}
 			<b><u>{% translate "Colour Guide" %}</u></b>
 			<div class="colourGuideDiv">
 				<span class="myMove">{% translate "It is your move" %}</span>
@@ -255,7 +256,6 @@
 				<br />
 				<!--<span class="optionHelp kickoutRequired">If you wish to allow your opponent more time, don't enter the game yet</span>-->
 			</div>
-			{% endif %}
 		</div>
 
 		<!-- WAITING GAMES -->
