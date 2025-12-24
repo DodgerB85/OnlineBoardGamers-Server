@@ -1,578 +1,408 @@
-{% extends "Lobby/layout.html" %}
-{% load static i18n %}
-{% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-{% endblock %}
-{% block body %}
-  <script src="{% static "Lobby/Lobby.js" %}?v=20220706"></script>
-  <script src="{% static 'Lobby/common.js' %}"></script>
-  <div class="container" id="lobbyPage">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    {% if availableTournaments|length > 0 %}
-      <span class="availableTournamentsSpan">
-        {% for game in availableTournaments %}
-          {% if game == "FCM" %}
-            <img src="{% static "FCM/images/burger_board.png" %}"
-                 alt="FCM game"
-                 width="40"
-                 height="40"
-                 title="FCM Game"
-                 class="statsIMG">
-          {% elif game == "HC" %}
-            <img src="{% static "HC/images/icon_car.png" %}"
-                 alt="HC game"
-                 width="50"
-                 height="40"
-                 title="HC Game"
-                 class="statsIMG">
-          {% elif game == "Bus" %}
-            <img src="{% static "Bus/images/bus_icon.png" %}"
-                 alt="Bus game"
-                 width="40"
-                 height="40"
-                 title="Bus Game"
-                 class="statsIMG">
-          {% elif game == "TGZ" %}
-            <img src="{% static "TGZ/images/tgz_icon.png" %}"
-                 alt="TGZ game"
-                 width="40"
-                 height="40"
-                 title="TGZ Game"
-                 class="statsIMG">
-          {% elif game == "AQY" %}
-            <img src="{% static "AQY/images/aqy_icon.png" %}"
-                 alt="AQY game"
-                 width="40"
-                 height="40"
-                 title="AQY Game"
-                 class="statsIMG">
-          {% elif game == "IND" %}
-            <img src="{% static "IND/images/ind_icon.png" %}"
-                 alt="IND game"
-                 width="40"
-                 height="40"
-                 title="IND Game"
-                 class="statsIMG">
-          {% endif %}
-        {% endfor %}
-        {% url "AllTournaments" as the_url %}
-        {% blocktranslate trimmed %}
-          Tournament open for signup! See <a class="linkOther" href="{{ the_url }}">Tournaments</a>
-        {% endblocktranslate %}
-      </span>
-      <br />
-    {% endif %}
-    <!--<span class="newsSpan">
+{% extends "Lobby/layout.html" %} {% load static i18n %} {% block head %}
+<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet" />
+{% endblock %} {% block body %}
+<script src="{% static 'Lobby/Lobby.js' %}"></script>
+<script src="{% static 'Lobby/common.js' %}"></script>
+<div class="container" id="lobbyPage">
+	{% if messages %}
+	<div class="messages">
+		{% for message in messages %}
+		<div {% if message.tags %}class="{{ message.tags }}" {% endif %}>{{ message }}</div>
+		{% endfor %}
+	</div>
+	{% endif %} {% if availableTournaments|length > 0 %}
+	<span class="availableTournamentsSpan">
+		{% for game in availableTournaments %} {% if game == "FCM" %}
+		<img src="{% static 'FCM/images/burger_board.png' %}" alt="FCM game" width="40" height="40" title="FCM Game" class="statsIMG" />
+		{% elif game == "HC" %}
+		<img src="{% static 'HC/images/icon_car.png' %}" alt="HC game" width="50" height="40" title="HC Game" class="statsIMG" />
+		{% elif game == "Bus" %}
+		<img src="{% static 'Bus/images/bus_icon.png' %}" alt="Bus game" width="40" height="40" title="Bus Game" class="statsIMG" />
+		{% elif game == "TGZ" %}
+		<img src="{% static 'TGZ/images/tgz_icon.png' %}" alt="TGZ game" width="40" height="40" title="TGZ Game" class="statsIMG" />
+		{% elif game == "AQY" %}
+		<img src="{% static 'AQY/images/aqy_icon.png' %}" alt="AQY game" width="40" height="40" title="AQY Game" class="statsIMG" />
+		{% elif game == "IND" %}
+		<img src="{% static 'IND/images/ind_icon.png' %}" alt="IND game" width="40" height="40" title="IND Game" class="statsIMG" />
+		{% endif %} {% endfor %} {% url "AllTournaments" as the_url %} {% blocktranslate trimmed %} Tournament open for signup! See
+		<a class="linkOther" href="{{ the_url }}">Tournaments</a>
+		{% endblocktranslate %}
+	</span>
+	<br />
+	{% endif %}
+	<!--<span class="newsSpan">
       {% blocktranslate trimmed %}
         OBG discord! Click <a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a> to
         join!
       {% endblocktranslate %}
               <br />
             </span>-->
-    <!--<span class="newsSpan"><a href="https://splottercon.com/" target="_blank">Splotter Con</a> Finishes with a great TGZ match!</span>-->
-    <!--<span class="newsSpan"><a href="https://www.onlineboardgamers.com/TGZ/1894/spoilerFree" target="_blank">Click here to go to the start of the replay</a>! <a href="https://group.doubletree.com/48x0hz" target="_blank">Discounted Hotel Rooms</a>!</span>-->
-    <!--<span class="newsSpan">Splotter Con (Pitts, USA, 29 Aug - 2 Sep ) <a href="https://tabletop.events/conventions/splotter-con-2025" target="_blank">Last few badges left!</a>!  <a href="https://splottercon.com/" target="_blank">Main Splotter Con Site</a> </span>-->
-    <!--<span class="newsSpan"><a href="https://splottercon.com/" target="_blank">Splotter Con 2024</a> Update! Free pass contest now open - subscribe to either the <a href="https://twitter.com/SplotterCon" target="_blank"><strong>Twitter</strong></a> or <a href="https://bsky.app/profile/splottercon.bsky.social" target="_blank"><strong>bsky</strong></a> feed </span>-->
-    <!--<span class="newsSpan">External TGZ tournament available! <a href="https://boardgamegeek.com/thread/3144834/tgz-tournament-announcements" target="_blank">Signup Here</a> </span>-->
-    <!--<span class="newsSpan">Splotter Con (30 Aug - 2 Sep ) <a href="https://tabletop.events/conventions/splotter-con-2024" target="_blank">Badges on Sale</a>! Last 4 (or less!) badges left! <a href="https://splottercon.com/" target="_blank">Main Splotter Con Site</a> </span>-->
-    <!--<span class="newsSpan">Keyflower is coming! </span><br />-->
-    <!--<span class="newsSpan">Keyflower is coming! Set your colour preference in your <a class="linkOther" target="_self" href="{% url 'profile' %}">Profile</a> </span><br />-->
-    <!--<span class="newsSpan">Keyflower is coming! Help page available <a class="linkOther" target="_self" href="{% url 'KFW:KFWhelp' %}">Here!</a> </span><br />-->
-    <!--<span class="newsSpan">Keyflower is <a href="{% url 'newGamesPage' %}" id="createNewGamesLink">Here</a>!</span><br />-->
-    <!--span class="newsSpan">Please check updated email settings in your <a class="linkOther" target="_self" href="{% url 'profile' %}">Profile</a> </span>-->
-    <!--<span class="newsSpan">HC tournament started prematurely - I've canceled the games and reopend signup. <br />Tournament starts 7th April!</span>-->
-    <!--<span class="newsSpan">UPDATE TO FCM SIMULTANEOUS TURN CODE - Simultaneous turns in progress have been reset</span>-->
-    <!--<span class="newsSpan">Mini Tournaments now Available! <a class="linkOther size25text" href="{% url 'newMiniTournaments' %}">{% translate "Click here to create a Mini Tournament" %}</a></span>-->
-    <!--<span class="newsSpan">Congratulations radio414! Winner of the <a href="https://splottercon.com/" target="_blank">Splotter Con</a> tournament! <a target="_self" href="/Bus/1616/">Click here to replay the final</a>! </span>
+	<!--<span class="newsSpan"><a href="https://splottercon.com/" target="_blank">Splotter Con</a> Finishes with a great TGZ match!</span>-->
+	<!--<span class="newsSpan"><a href="https://www.onlineboardgamers.com/TGZ/1894/spoilerFree" target="_blank">Click here to go to the start of the replay</a>! <a href="https://group.doubletree.com/48x0hz" target="_blank">Discounted Hotel Rooms</a>!</span>-->
+	<!--<span class="newsSpan">Splotter Con (Pitts, USA, 29 Aug - 2 Sep ) <a href="https://tabletop.events/conventions/splotter-con-2025" target="_blank">Last few badges left!</a>!  <a href="https://splottercon.com/" target="_blank">Main Splotter Con Site</a> </span>-->
+	<!--<span class="newsSpan"><a href="https://splottercon.com/" target="_blank">Splotter Con 2024</a> Update! Free pass contest now open - subscribe to either the <a href="https://twitter.com/SplotterCon" target="_blank"><strong>Twitter</strong></a> or <a href="https://bsky.app/profile/splottercon.bsky.social" target="_blank"><strong>bsky</strong></a> feed </span>-->
+	<!--<span class="newsSpan">External TGZ tournament available! <a href="https://boardgamegeek.com/thread/3144834/tgz-tournament-announcements" target="_blank">Signup Here</a> </span>-->
+	<!--<span class="newsSpan">Splotter Con (30 Aug - 2 Sep ) <a href="https://tabletop.events/conventions/splotter-con-2024" target="_blank">Badges on Sale</a>! Last 4 (or less!) badges left! <a href="https://splottercon.com/" target="_blank">Main Splotter Con Site</a> </span>-->
+	<!--<span class="newsSpan">Keyflower is coming! </span><br />-->
+	<!--<span class="newsSpan">Keyflower is coming! Set your colour preference in your <a class="linkOther" target="_self" href="{% url 'profile' %}">Profile</a> </span><br />-->
+	<!--<span class="newsSpan">Keyflower is coming! Help page available <a class="linkOther" target="_self" href="{% url 'KFW:KFWhelp' %}">Here!</a> </span><br />-->
+	<!--<span class="newsSpan">Keyflower is <a href="{% url 'newGamesPage' %}" id="createNewGamesLink">Here</a>!</span><br />-->
+	<!--span class="newsSpan">Please check updated email settings in your <a class="linkOther" target="_self" href="{% url 'profile' %}">Profile</a> </span>-->
+	<!--<span class="newsSpan">HC tournament started prematurely - I've canceled the games and reopend signup. <br />Tournament starts 7th April!</span>-->
+	<!--<span class="newsSpan">UPDATE TO FCM SIMULTANEOUS TURN CODE - Simultaneous turns in progress have been reset</span>-->
+	<!--<span class="newsSpan">Mini Tournaments now Available! <a class="linkOther size25text" href="{% url 'newMiniTournaments' %}">{% translate "Click here to create a Mini Tournament" %}</a></span>-->
+	<!--<span class="newsSpan">Congratulations radio414! Winner of the <a href="https://splottercon.com/" target="_blank">Splotter Con</a> tournament! <a target="_self" href="/Bus/1616/">Click here to replay the final</a>! </span>
     <br />-->
-    <!--<span class="newsSpan">Set your Indonesia Preferences in your <a href="{% url 'profileIND' %}" id="createNewGamesLink">Profile</a>!</span>-->
-    <!--<button id="stopEmailsButton" class="openAllMyMoveGamesButton">Set in js</button>-->
-    <a href="{% url 'newGamesPage' %}" id="createNewGamesLink">
-      <div class="createNewGamesDiv">
-        <img class="newGameMiniImg"
-             src="{% static "CNS/images/CNSbox.jpg" %}"
-             alt="CNS" />
-        <img class="newGameMiniImg"
-             src="{% static "Bus/images/bus-box.jpg" %}"
-             alt="Bus" />
-        <img class="newGameMiniImg"
-             src="{% static "AQY/images/AQYbox.jpg" %}"
-             alt="Antiquity" />
-        <img class="newGameMiniImg"
-             src="{% static "IND/images/INDbox.jpg" %}"
-             alt="Indonesia" />
-        <img class="newGameMiniImg"
-             src="{% static "TGZ/images/TGZ_box.jpg" %}"
-             alt="TGZ" />
-        <img class="newGameMiniImg"
-             src="{% static "HC/images/hc-box.jpg" %}"
-             alt="Horseless Carriage" />
-        <img class="newGameMiniImg"
-             src="{% static "FCM/images/fcm-box.jpg" %}"
-             alt="Food Chain Magnate" />
-        <img class="newGameMiniImg"
-             src="{% static "FCM/images/fcm-box2.jpg" %}"
-             alt="Food Chain Magnate" />
-        Create New Game
-        <img class="createNewGamesArrow"
-             src="{% static "Lobby/images/newGameArrow.svg" %}"
-             alt="Create new Game"
-             width="100"
-             height="50" />
-      </div>
-    </a>
-    <br />
-    <div class="tab">
-      <button class="tablinks" id="available">
-        <span id="availableTextBig">{% translate "Available Games" %}&nbsp;({{ availableCount }})</span>
-        <span id="availableTextSmall">{% translate "Available" %}&nbsp;({{ availableCount }})</span>
-      </button>
-      <button class="tablinks" id="current">
-        {% if currentChat %}
-          <img class="tabChatIcon"
-               alt="Str Opt"
-               width="50"
-               height="50"
-               src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
-               title="New Chat Message">
-        {% endif %}
-        <span id="currentTextBig">{% translate "Current Games" %}</span>
-        <span id="currentTextSmall">{% translate "Current" %}</span>
-        (<span id="currentCount">{{ currentCount }}</span>)
-      </button>
-      <button class="tablinks" id="waiting">
-        <span id="waitingTextBig">{% translate "Waiting Games" %}&nbsp;({{ waitingCount }})</span>
-        <span id="waitingTextSmall">{% translate "Waiting" %}&nbsp;({{ waitingCount }})</span>
-      </button>
-      <button class="tablinks" id="invitations">
-        <span id="invitationsTextBig">{% translate "Invitations" %}&nbsp;({{ invitationsCount }})</span>
-        <span id="invitationsTextSmall">{% translate "Invitations" %}&nbsp;({{ invitationsCount }})</span>
-      </button>
-      <button class="tablinks" id="finished">
-        {% if finishedChat %}
-          <img class="tabChatIcon"
-               alt="Str Opt"
-               width="50"
-               height="50"
-               src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
-               title="New Chat Message">
-        {% endif %}
-        <span id="finishedTextBig">{% translate "Finished Games" %}</span>
-        <span id="finishedTextSmall">{% translate "Finished" %}</span>
-        (<span id="finishedCount">{{ finishedCount }}</span>)
-      </button>
-    </div>
-    <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
-      {% csrf_token %}
-      <input type="hidden" id="mapData" name="mapData" value="">
-    </form>
-    <form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
-      {% csrf_token %}
-      <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
-    </form>
-    <form id="openInMapEditorFormAQY" action="/AQYmapEditor/" method="post">
-      {% csrf_token %}
-      <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="">
-    </form>
-    <!----------------------------------------------------------------->
-    <div class="allSqGamesContainerDiv">
-      <!--  Available Games Squares -->
-      <div id="availableGamesListSquares">
-        {% if availableGamesList %}
-          {% for game in availableGamesList %}
-            {% include 'Lobby/gameDisplay/availableGameSq.html' with game=game %}
-          {% endfor %}
-        {% else %}
-          <span class="noGamesSpan">
-            <br />
-            {% translate "No Available Games" %}
-            <br />
-            <br />
-          </span>
-          {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
-        {% endif %}
-        <span>
-          {% url "lobbyHelp" as the_url %}
-          {% blocktranslate trimmed %}
-            For icon explanations see <a class="linkOther" href="{{ the_url }}">Help</a>
-          {% endblocktranslate %}
-        </span>
-      </div>
-    </div>
-    <div id="learningGameConfirmDiv">
-      <b>Note:</b> The creator has requested a Learning Game.
-      <br />
-      You will be expected to help / teach the other player.
-      <br />
-      This game will be excluded from stats.
-      <br />
-      <br />
-      Are you sure you want to join?
-      <br />
-      <div id="learningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</div>
-      <div id="learningCancel"
-           class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
-    </div>
-    <div class="largeTableContainer">
-      <!-- AVAILABLE GAMES TABLE  -->
-      <div id="availableGamesListView">
-        {% if availableGamesList or available_MT %}
-          {% if availableGamesList %}
-            <div class="tableOnlyDiv">
-              <table class="gamesTable">
-                <thead>
-                  <tr class="headingRow">
-                    <td class="joinHeader"></td>
-                    <td class="nameHeaderAvailable">{% translate "Name" %}</td>
-                    <td class="creatorHeader">{% translate "Creator" %}</td>
-                    <td class="playersHeader">{% translate "Players" %}</td>
-                    <td class="speedHeader">{% translate "Speed" %}</td>
-                    <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                    <td class="createdHeader">{% translate "Created" %}</td>
-                    <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
-                  </tr>
-                </thead>
-                {% for game in availableGamesList %}
-                  {% include 'Lobby/gameDisplay/availableGameRow.html' with game=game %}
-                {% endfor %}
-              </table>
-            </div>
-          {% else %}
-            <span class="noGamesSpan">
-              <h1>{% translate "No Available Games" %}</h1>
-            </span>
-          {% endif %}
-          {% if available_MT %}
-            Available Mini Tournaments
-            <div class="tableOnlyDiv">
-              <table class="gamesTable">
-                <thead>
-                  <tr class="headingRow">
-                    <th>{% translate "Game" %}</th>
-                    <th class="nameHeaderAvailable">{% translate "Name" %}</th>
-                    <th>{% translate "Total Players" %}</th>
-                    <th>{% translate "Players per Game" %}</th>
-                    <th>{% translate "Format" %}</th>
-                    <th>{% translate "Starting Options" %}</th>
-                    <th>{% translate "Created" %}</th>
-                  </tr>
-                </thead>
-                {% for Mini_Tournament in available_MT %}
-                  {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
-                {% endfor %}
-              </table>
-            </div>
-          {% else %}
-            <span class="noGamesSpan">
-              <h1>{% translate "No Available Mini Tournaments" %}</h1>
-            </span>
-          {% endif %}
-        {% else %}
-          <span class="noGamesSpan">
-            <h1>{% translate "No Available Games or Mini Tournaments" %}</h1>
-          </span>
-          <a href="{% url 'newGamesPage' %}" id="createNewGamesLink">
-            <div class="createNewGamesDiv">
-              <img class="newGameMiniImg"
-                   src="{% static "CNS/images/CNSbox.jpg" %}"
-                   alt="CNS" />
-              <img class="newGameMiniImg"
-                   src="{% static "Bus/images/bus-box.jpg" %}"
-                   alt="Bus" />
-              <img class="newGameMiniImg"
-                   src="{% static "AQY/images/AQYbox.jpg" %}"
-                   alt="Antiquity" />
-              <img class="newGameMiniImg"
-                   src="{% static "IND/images/INDbox.jpg" %}"
-                   alt="Indonesia" />
-              <img class="newGameMiniImg"
-                   src="{% static "TGZ/images/TGZ_box.jpg" %}"
-                   alt="TGZ" />
-              <img class="newGameMiniImg"
-                   src="{% static "HC/images/hc-box.jpg" %}"
-                   alt="Horseless Carriage" />
-              <img class="newGameMiniImg"
-                   src="{% static "FCM/images/fcm-box.jpg" %}"
-                   alt="Food Chain Magnate" />
-              <img class="newGameMiniImg"
-                   src="{% static "FCM/images/fcm-box2.jpg" %}"
-                   alt="Food Chain Magnate" />
-              Create New Game
-              <img class="createNewGamesArrow"
-                   src="{% static "Lobby/images/newGameArrow.svg" %}"
-                   alt="Create new Game"
-                   width="100"
-                   height="50" />
-            </div>
-          </a>
-        {% endif %}
-        {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
-        {% url "lobbyHelp" as the_url %}
-        {% blocktranslate trimmed %}
-          For icon explanations see <a class="linkOther" href="{{ the_url }}">Help</a>
-        {% endblocktranslate %}
-      </div>
-      <!-- CURRENT GAMES -->
-      <div id="currentGamesListView">
-        {% if currentGamesList %}
-          <div class="tableOnlyDiv">
-            <table class="gamesTable">
-              <thead>
-                <tr class="headingRow">
-                  <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-                  <td class="creatorHeader">{% translate "Creator" %}</td>
-                  <td class="playersHeader">{% translate "Players" %}</td>
-                  <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                  <td class="curretnTurnHeader">{% translate "Current Turn" %}</td>
-                  <!--<td class="createdHeader">Created</td>-->
-                  <td class="speedHeader">{% translate "Speed" %}</td>
-                  <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
-                </tr>
-              </thead>
-              {% for game in currentGamesList %}
-                {% if game.myMove %}
-                  {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
-                {% endif %}
-              {% endfor %}
-              {% for game in currentGamesList %}
-                {% if not game.myMove %}
-                  {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
-                {% endif %}
-              {% endfor %}
-            </table>
-            {% if myMoveGamesData|length > 0 %}
-              <button id="openAllMyMoveGamesButton" class="openAllMyMoveGamesButton">
-                {% translate "Open All Games (My Turn)" %}
-              </button>
-            {% endif %}
-          </div>
-        {% else %}
-          <span class="noGamesSpan">
-            <h2>{% translate "No Current Games" %}</h2>
-          </span>
-          {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
-        {% endif %}
-        {% if current_MT %}
-          <br />
-          Current Mini Tournaments
-          <div class="tableOnlyDiv">
-            <table class="gamesTable">
-              <thead>
-                <tr class="headingRow">
-                  <th>{% translate "Game" %}</th>
-                  <th class="nameHeaderAvailable">{% translate "Name" %}</th>
-                  <th>{% translate "Total Players" %}</th>
-                  <th>{% translate "Players per Game" %}</th>
-                  <th>{% translate "Format" %}</th>
-                  <th>{% translate "Starting Options" %}</th>
-                  <th>{% translate "Created" %}</th>
-                </tr>
-              </thead>
-              {% for Mini_Tournament in current_MT %}
-                {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
-              {% endfor %}
-            </table>
-          </div>
-        {% endif %}
-        <br />
-        <b><u> {% translate "Colour Guide" %}</b></u>
-          <div class="colourGuideDiv">
-            <span class="myMove">{% translate "It is your move" %}</span>
-            <br />
-            {% translate "Waiting for other players to move" %}
-            <br />
-            <span class="myMove kickoutRequired1">{% translate "Need to move - using Flexi-Time" %}</span>
-            <br />
-            <span class="myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
-            <br />
-            <span class="kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
-            <br />
-            <span class="kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
-            <br />
-            <!--<span class="optionHelp kickoutRequired">If you wish to allow your opponent more time, don't enter the game yet</span>-->
-          </div>
-        </div>
-        <!-- WAITING GAMES -->
-        <div id="waitingGamesListView">
-          {% if waitingGamesList or waiting_MT %}
-            {% if waitingGamesList %}
-              <div class="tableOnlyDiv">
-                <table class="gamesTable">
-                  <thead>
-                    <tr class="headingRow">
-                      <td class="nameHeader">{% translate "Name" %}</td>
-                      <td class="creatorHeader">{% translate "Creator" %}</td>
-                      <td class="playersHeader">{% translate "Players" %}</td>
-                      <td class="speedHeader">{% translate "Speed" %}</td>
-                      <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                      <td class="currentPlayersHeader">{% translate "Invited Players" %}</td>
-                      <td class="createdHeader">{% translate "Created" %}</td>
-                      <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
-                      <td class="cancelHeader"></td>
-                    </tr>
-                  </thead>
-                  {% for game in waitingGamesList %}
-                    {% include 'Lobby/gameDisplay/waitingGameRow.html' with game=game %}
-                  {% endfor %}
-                </table>
-              </div>
-            {% endif %}
-            {% if waiting_MT %}
-              <br />
-              Waiting Mini Tournaments
-              <div class="tableOnlyDiv">
-                <table class="gamesTable">
-                  <thead>
-                    <tr class="headingRow">
-                      <th>{% translate "Game" %}</th>
-                      <th class="nameHeaderAvailable">{% translate "Name" %}</th>
-                      <th>{% translate "Total Players" %}</th>
-                      <th>{% translate "Players per Game" %}</th>
-                      <th>{% translate "Format" %}</th>
-                      <th>{% translate "Starting Options" %}</th>
-                      <th>{% translate "Created" %}</th>
-                    </tr>
-                  </thead>
-                  {% for Mini_Tournament in waiting_MT %}
-                    {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
-                  {% endfor %}
-                </table>
-              </div>
-            {% endif %}
-          {% else %}
-            <span class="noGamesSpan">
-              <h2>{% translate "No Waiting Games" %}</h2>
-            </span>
-            {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
-          {% endif %}
-        </div>
-        <!-- INVITATIONS GAMES -->
-        <div id="invitationGamesListView">
-          {% if invitaionsGamesList or invitations_MT %}
-            {% if invitaionsGamesList %}
-              <div class="tableOnlyDiv">
-                <table class="gamesTable">
-                  <thead>
-                    <tr class="headingRow">
-                      <td class="joinHeader"></td>
-                      <td class="nameHeader">{% translate "Name" %}</td>
-                      <td class="creatorHeader">{% translate "Creator" %}</td>
-                      <td class="playersHeader">{% translate "Players" %}</td>
-                      <td class="speedHeader">{% translate "Speed" %}</td>
-                      <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                      <td class="currentPlayersHeader">{% translate "Invited Players" %}</td>
-                      <td class="createdHeader">{% translate "Created" %}</td>
-                      <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
-                      <td class="cancelHeader"></td>
-                    </tr>
-                  </thead>
-                  {% for game in invitaionsGamesList %}
-                    {% include 'Lobby/gameDisplay/invitationGameRow.html' with game=game %}
-                  {% endfor %}
-                </table>
-              </div>
-            {% endif %}
-            {% if invitations_MT %}
-              <br />
-              Invited Mini Tournaments
-              <div class="tableOnlyDiv">
-                <table class="gamesTable">
-                  <thead>
-                    <tr class="headingRow">
-                      <th>{% translate "Game" %}</th>
-                      <th class="nameHeaderAvailable">{% translate "Name" %}</th>
-                      <th>{% translate "Total Players" %}</th>
-                      <th>{% translate "Players per Game" %}</th>
-                      <th>{% translate "Format" %}</th>
-                      <th>{% translate "Starting Options" %}</th>
-                      <th>{% translate "Created" %}</th>
-                    </tr>
-                  </thead>
-                  {% for Mini_Tournament in invitations_MT %}
-                    {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
-                  {% endfor %}
-                </table>
-              </div>
-            {% endif %}
-          {% else %}
-            <span class="noGamesSpan">
-              <h2>{% translate "No Invitations" %}</h2>
-            </span>
-            {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
-          {% endif %}
-        </div>
-        <!-- FINIHED GAMES -->
-        <div id="finishedGamesListView">
-          {% if finishedGamesList %}
-            <div class="tableOnlyDiv">
-              <table class="gamesTable">
-                <thead>
-                  <tr class="headingRow">
-                    <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-                    <td class="playersHeader">{% translate "Players" %}</td>
-                    <td class="currentPlayersHeader">{% translate "All Players" %}</td>
-                    <td class="createdHeader">{% translate "Created" %}</td>
-                    <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
-                    <td class="winnerHeader">{% translate "Winner" %}</td>
-                  </tr>
-                </thead>
-                {% for game in finishedGamesList %}
-                  {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
-                {% endfor %}
-              </table>
-            </div>
-            <br />
-            {% url "playerInfo" user.username as the_url %}
-            {% blocktranslate trimmed %}
-              Check your <a href="{{ the_url }}">Game Profile</a> to see all of your
-              finished games
-            {% endblocktranslate %}
-            <br />
-            <br />
-          {% else %}
-            <span class="noGamesSpan">
-              <h2>{% translate "No Finished Games" %}</h2>
-            </span>
-            {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
-          {% endif %}
-        </div>
-      </div>
-      {% include 'Lobby/donate/donateBanner.html' %}
-      {% include 'Lobby/splotterconSponsor.html' %}
-    </div>
-    {% block script %}
-      <script>
-  var global = {};
-  {% if listType %}
-  global.listType = "{{ listType }}";
-  {% else %}
-  global.listType = "current";
-  {% endif %}
-  {% if stopEmailsUntil %}
-  global.stopEmailsUntil = {{ stopEmailsUntil }};
-  {% else %}
-  global.stopEmailsUntil = null;
-  {% endif %}
-  
-  global.currentCount = {{ currentCount }};
-  global.finishedCount = {{ finishedCount }};
-  global.myMoveCount = {{myMoveGames}};
-  global.availableCount = {{availableCount}};
-  global.invitationsCount = {{invitationsCount}};
-  global.myMoveGamesData = {{myMoveGamesData|safe}};
+	<!--<span class="newsSpan">Set your Indonesia Preferences in your <a href="{% url 'profileIND' %}" id="createNewGamesLink">Profile</a>!</span>-->
+	<!--<button id="stopEmailsButton" class="openAllMyMoveGamesButton">Set in js</button>-->
+	<a href="{% url 'newGamesPage' %}" id="createNewGamesLink">
+		<div class="createNewGamesDiv"><img class="newGameMiniImg" src="{% static "CNS/images/CNSbox.jpg" %}" alt="CNS" /> <img class="newGameMiniImg" src="{% static "Bus/images/bus-box.jpg" %}" alt="Bus" /> <img class="newGameMiniImg" src="{% static "AQY/images/AQYbox.jpg" %}" alt="Antiquity" /> <img class="newGameMiniImg" src="{% static "IND/images/INDbox.jpg" %}" alt="Indonesia" /> <img class="newGameMiniImg" src="{% static "TGZ/images/TGZ_box.jpg" %}" alt="TGZ" /> <img class="newGameMiniImg" src="{% static "HC/images/hc-box.jpg" %}" alt="Horseless Carriage" /> <img class="newGameMiniImg" src="{% static "FCM/images/fcm-box.jpg" %}" alt="Food Chain Magnate" /> <img class="newGameMiniImg" src="{% static "FCM/images/fcm-box2.jpg" %}" alt="Food Chain Magnate" /> Create New Game <img class="createNewGamesArrow" src="{% static "Lobby/images/newGameArrow.svg" %}" alt="Create new Game" width="100" height="50" /></div>
+	</a>
+	<br />
+	<div class="tab">
+		<button class="tablinks" id="available">
+			<span id="availableTextBig">{% translate "Available Games" %}&nbsp;({{ availableCount }})</span>
+			<span id="availableTextSmall">{% translate "Available" %}&nbsp;({{ availableCount }})</span>
+		</button>
+		<button class="tablinks" id="current">
+			{% if currentChat %} <img class="tabChatIcon" alt="Str Opt" width="50" height="50" src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="New Chat Message"> {% endif %}
+			<span id="currentTextBig">{% translate "Current Games" %}</span>
+			<span id="currentTextSmall">{% translate "Current" %}</span>
+			(
+			<span id="currentCount">{{ currentCount }}</span>
+			)
+		</button>
+		<button class="tablinks" id="waiting">
+			<span id="waitingTextBig">{% translate "Waiting Games" %}&nbsp;({{ waitingCount }})</span>
+			<span id="waitingTextSmall">{% translate "Waiting" %}&nbsp;({{ waitingCount }})</span>
+		</button>
+		<button class="tablinks" id="invitations">
+			<span id="invitationsTextBig">{% translate "Invitations" %}&nbsp;({{ invitationsCount }})</span>
+			<span id="invitationsTextSmall">{% translate "Invitations" %}&nbsp;({{ invitationsCount }})</span>
+		</button>
+		<button class="tablinks" id="finished">
+			{% if finishedChat %} <img class="tabChatIcon" alt="Str Opt" width="50" height="50" src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="New Chat Message"> {% endif %}
+			<span id="finishedTextBig">{% translate "Finished Games" %}</span>
+			<span id="finishedTextSmall">{% translate "Finished" %}</span>
+			(
+			<span id="finishedCount">{{ finishedCount }}</span>
+			)
+		</button>
+	</div>
+	<form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
+		{% csrf_token %}
+		<input type="hidden" id="mapData" name="mapData" value="" />
+	</form>
+	<form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
+		{% csrf_token %}
+		<input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="" />
+	</form>
+	<form id="openInMapEditorFormAQY" action="/AQYmapEditor/" method="post">
+		{% csrf_token %}
+		<input type="hidden" id="mapDataAQY" name="mapDataAQY" value="" />
+	</form>
+	<!----------------------------------------------------------------->
+	<div class="allSqGamesContainerDiv">
+		<!--  Available Games Squares -->
+		<div id="availableGamesListSquares">
+			{% if availableGamesList %} {% for game in availableGamesList %} {% include 'Lobby/gameDisplay/availableGameSq.html' with game=game %} {% endfor %} {% else %}
+			<span class="noGamesSpan">
+				<br />
+				{% translate "No Available Games" %}
+				<br />
+				<br />
+			</span>
+			{% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %}
+			<span>
+				{% url "lobbyHelp" as the_url %} {% blocktranslate trimmed %} For icon explanations see
+				<a class="linkOther" href="{{ the_url }}">Help</a>
+				{% endblocktranslate %}
+			</span>
+		</div>
+	</div>
+	<div id="learningGameConfirmDiv">
+		<b>Note:</b>
+		The creator has requested a Learning Game.
+		<br />
+		You will be expected to help / teach the other player.
+		<br />
+		This game will be excluded from stats.
+		<br />
+		<br />
+		Are you sure you want to join?
+		<br />
+		<div id="learningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</div>
+		<div id="learningCancel" class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
+	</div>
+	<div class="largeTableContainer">
+		<!-- AVAILABLE GAMES TABLE  -->
+		<div id="availableGamesListView">
+			{% if availableGamesList or available_MT %} {% if availableGamesList %}
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<td class="joinHeader"></td>
+							<td class="nameHeaderAvailable">{% translate "Name" %}</td>
+							<td class="creatorHeader">{% translate "Creator" %}</td>
+							<td class="playersHeader">{% translate "Players" %}</td>
+							<td class="speedHeader">{% translate "Speed" %}</td>
+							<td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+							<td class="createdHeader">{% translate "Created" %}</td>
+							<td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
+						</tr>
+					</thead>
+					{% for game in availableGamesList %} {% include 'Lobby/gameDisplay/availableGameRow.html' with game=game %} {% endfor %}
+				</table>
+			</div>
+			{% else %}
+			<span class="noGamesSpan">
+				<h1>{% translate "No Available Games" %}</h1>
+			</span>
+			{% endif %} {% if available_MT %} Available Mini Tournaments
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<th>{% translate "Game" %}</th>
+							<th class="nameHeaderAvailable">{% translate "Name" %}</th>
+							<th>{% translate "Total Players" %}</th>
+							<th>{% translate "Players per Game" %}</th>
+							<th>{% translate "Format" %}</th>
+							<th>{% translate "Starting Options" %}</th>
+							<th>{% translate "Created" %}</th>
+						</tr>
+					</thead>
+					{% for Mini_Tournament in available_MT %} {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %} {% endfor %}
+				</table>
+			</div>
+			{% else %}
+			<span class="noGamesSpan">
+				<h1>{% translate "No Available Mini Tournaments" %}</h1>
+			</span>
+			{% endif %} {% else %}
+			<span class="noGamesSpan">
+				<h1>{% translate "No Available Games or Mini Tournaments" %}</h1>
+			</span>
+			<a href="{% url 'newGamesPage' %}" id="createNewGamesLink">
+				<div class="createNewGamesDiv"><img class="newGameMiniImg" src="{% static "CNS/images/CNSbox.jpg" %}" alt="CNS" /> <img class="newGameMiniImg" src="{% static "Bus/images/bus-box.jpg" %}" alt="Bus" /> <img class="newGameMiniImg" src="{% static "AQY/images/AQYbox.jpg" %}" alt="Antiquity" /> <img class="newGameMiniImg" src="{% static "IND/images/INDbox.jpg" %}" alt="Indonesia" /> <img class="newGameMiniImg" src="{% static "TGZ/images/TGZ_box.jpg" %}" alt="TGZ" /> <img class="newGameMiniImg" src="{% static "HC/images/hc-box.jpg" %}" alt="Horseless Carriage" /> <img class="newGameMiniImg" src="{% static "FCM/images/fcm-box.jpg" %}" alt="Food Chain Magnate" /> <img class="newGameMiniImg" src="{% static "FCM/images/fcm-box2.jpg" %}" alt="Food Chain Magnate" /> Create New Game <img class="createNewGamesArrow" src="{% static "Lobby/images/newGameArrow.svg" %}" alt="Create new Game" width="100" height="50" /></div>
+			</a>
+			{% endif %} {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% url "lobbyHelp" as the_url %} {% blocktranslate trimmed %} For icon explanations see
+			<a class="linkOther" href="{{ the_url }}">Help</a>
+			{% endblocktranslate %}
+		</div>
+		<!-- CURRENT GAMES -->
+		<div id="currentGamesListView">
+			{% if currentGamesList or current_MT %} {% if currentGamesList %}
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<td class="nameHeaderCurrent">{% translate "Name" %}</td>
+							<td class="creatorHeader">{% translate "Creator" %}</td>
+							<td class="playersHeader">{% translate "Players" %}</td>
+							<td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+							<td class="currentTurnHeader">{% translate "Current Turn" %}</td>
+							<!--<td class="createdHeader">Created</td>-->
+							<td class="speedHeader">{% translate "Speed" %}</td>
+							<td class="lastActivityHeader">{% translate "Last Turn" %}</td>
+						</tr>
+					</thead>
+					{% for game in currentGamesList %} {% if game.myMove %} {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %} {% endif %} {% endfor %} {% for game in currentGamesList %} {% if not game.myMove %} {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %} {% endif %} {% endfor %}
+				</table>
+				{% if myMoveGamesData|length > 0 %}
+				<button id="openAllMyMoveGamesButton" class="openAllMyMoveGamesButton">{% translate "Open All Games (My Turn)" %}</button>
+				{% endif %}
+			</div>
+			{% else %}
+			<span class="noGamesSpan">
+				<h2>{% translate "No Current Games" %}</h2>
+			</span>
+			{% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %} {% if current_MT %}
+			<br />
+			Current Mini Tournaments
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<th>{% translate "Game" %}</th>
+							<th class="nameHeaderAvailable">{% translate "Name" %}</th>
+							<th>{% translate "Total Players" %}</th>
+							<th>{% translate "Players per Game" %}</th>
+							<th>{% translate "Format" %}</th>
+							<th>{% translate "Starting Options" %}</th>
+							<th>{% translate "Created" %}</th>
+						</tr>
+					</thead>
+					{% for Mini_Tournament in current_MT %} {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %} {% endfor %}
+				</table>
+			</div>
+			{% endif %} {% else %}
+			<br />
+			<b><u>{% translate "Colour Guide" %}</u></b>
+			<div class="colourGuideDiv">
+				<span class="myMove">{% translate "It is your move" %}</span>
+				<br />
+				{% translate "Waiting for other players to move" %}
+				<br />
+				<span class="myMove kickoutRequired1">{% translate "Need to move - using Flexi-Time" %}</span>
+				<br />
+				<span class="myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
+				<br />
+				<span class="kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
+				<br />
+				<span class="kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
+				<br />
+				<!--<span class="optionHelp kickoutRequired">If you wish to allow your opponent more time, don't enter the game yet</span>-->
+			</div>
+			{% endif %}
+		</div>
 
+		<!-- WAITING GAMES -->
+		<div id="waitingGamesListView">
+			{% if waitingGamesList or waiting_MT %} {% if waitingGamesList %}
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<td class="nameHeader">{% translate "Name" %}</td>
+							<td class="creatorHeader">{% translate "Creator" %}</td>
+							<td class="playersHeader">{% translate "Players" %}</td>
+							<td class="speedHeader">{% translate "Speed" %}</td>
+							<td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+							<td class="currentPlayersHeader">{% translate "Invited Players" %}</td>
+							<td class="createdHeader">{% translate "Created" %}</td>
+							<td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
+							<td class="cancelHeader"></td>
+						</tr>
+					</thead>
+					{% for game in waitingGamesList %} {% include 'Lobby/gameDisplay/waitingGameRow.html' with game=game %} {% endfor %}
+				</table>
+			</div>
+			{% endif %} {% if waiting_MT %}
+			<br />
+			Waiting Mini Tournaments
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<th>{% translate "Game" %}</th>
+							<th class="nameHeaderAvailable">{% translate "Name" %}</th>
+							<th>{% translate "Total Players" %}</th>
+							<th>{% translate "Players per Game" %}</th>
+							<th>{% translate "Format" %}</th>
+							<th>{% translate "Starting Options" %}</th>
+							<th>{% translate "Created" %}</th>
+						</tr>
+					</thead>
+					{% for Mini_Tournament in waiting_MT %} {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %} {% endfor %}
+				</table>
+			</div>
+			{% endif %} {% else %}
+			<span class="noGamesSpan">
+				<h2>{% translate "No Waiting Games" %}</h2>
+			</span>
+			{% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %}
+		</div>
+		<!-- INVITATIONS GAMES -->
+		<div id="invitationGamesListView">
+			{% if invitaionsGamesList or invitations_MT %} {% if invitaionsGamesList %}
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<td class="joinHeader"></td>
+							<td class="nameHeader">{% translate "Name" %}</td>
+							<td class="creatorHeader">{% translate "Creator" %}</td>
+							<td class="playersHeader">{% translate "Players" %}</td>
+							<td class="speedHeader">{% translate "Speed" %}</td>
+							<td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+							<td class="currentPlayersHeader">{% translate "Invited Players" %}</td>
+							<td class="createdHeader">{% translate "Created" %}</td>
+							<td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
+							<td class="cancelHeader"></td>
+						</tr>
+					</thead>
+					{% for game in invitaionsGamesList %} {% include 'Lobby/gameDisplay/invitationGameRow.html' with game=game %} {% endfor %}
+				</table>
+			</div>
+			{% endif %} {% if invitations_MT %}
+			<br />
+			Invited Mini Tournaments
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<th>{% translate "Game" %}</th>
+							<th class="nameHeaderAvailable">{% translate "Name" %}</th>
+							<th>{% translate "Total Players" %}</th>
+							<th>{% translate "Players per Game" %}</th>
+							<th>{% translate "Format" %}</th>
+							<th>{% translate "Starting Options" %}</th>
+							<th>{% translate "Created" %}</th>
+						</tr>
+					</thead>
+					{% for Mini_Tournament in invitations_MT %} {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %} {% endfor %}
+				</table>
+			</div>
+			{% endif %} {% else %}
+			<span class="noGamesSpan">
+				<h2>{% translate "No Invitations" %}</h2>
+			</span>
+			{% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %}
+		</div>
+		<!-- FINIHED GAMES -->
+		<div id="finishedGamesListView">
+			{% if finishedGamesList %}
+			<div class="tableOnlyDiv">
+				<table class="gamesTable">
+					<thead>
+						<tr class="headingRow">
+							<td class="nameHeaderCurrent">{% translate "Name" %}</td>
+							<td class="playersHeader">{% translate "Players" %}</td>
+							<td class="currentPlayersHeader">{% translate "All Players" %}</td>
+							<td class="createdHeader">{% translate "Created" %}</td>
+							<td class="lastActivityHeader">{% translate "Last Activity" %}</td>
+							<td class="winnerHeader">{% translate "Winner" %}</td>
+						</tr>
+					</thead>
+					{% for game in finishedGamesList %} {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %} {% endfor %}
+				</table>
+			</div>
+			<br />
+			{% url "playerInfo" user.username as the_url %} {% blocktranslate trimmed %} Check your
+			<a href="{{ the_url }}">Game Profile</a>
+			to see all of your finished games {% endblocktranslate %}
+			<br />
+			<br />
+			{% else %}
+			<span class="noGamesSpan">
+				<h2>{% translate "No Finished Games" %}</h2>
+			</span>
+			{% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %}
+		</div>
+	</div>
+	{% include 'Lobby/donate/donateBanner.html' %} {% include 'Lobby/splotterconSponsor.html' %}
+</div>
+{% block script %}
+<script>
+	var global = {};
+	{% if listType %}
+	global.listType = "{{ listType }}";
+	{% else %}
+	global.listType = "current";
+	{% endif %}
+	{% if stopEmailsUntil %}
+	global.stopEmailsUntil = {{ stopEmailsUntil }};
+	{% else %}
+	global.stopEmailsUntil = null;
+	{% endif %}
 
-  
-
-
-
-      </script>
-    {% endblock %}
-  {% endblock %}
+	global.currentCount = {{ currentCount }};
+	global.finishedCount = {{ finishedCount }};
+	global.myMoveCount = {{myMoveGames}};
+	global.availableCount = {{availableCount}};
+	global.invitationsCount = {{invitationsCount}};
+	global.myMoveGamesData = {{myMoveGamesData|safe}};
+</script>
+{% endblock %} {% endblock %}
