@@ -4,9 +4,7 @@ from .models import FCM_Game, FCM_Tournament
 from django.contrib.admin import display
 from django.contrib.auth import get_user_model
 from django import forms
-from dal import autocomplete
-import logging
-import time
+
 
 from django.utils.html import format_html
 from django.urls import reverse
@@ -25,44 +23,15 @@ from django.urls import reverse
 #    return super(FCM_GameAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
 
-class FCM_GameForm(forms.ModelForm):
-    class Meta:
-        model = FCM_Game
-        fields = "__all__"
-        widgets = {
-            "chatData": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "playersMoveData": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "gameData": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "rewindData": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "rewindTempData": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "kickoutFlexiData": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "player0notes": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "player1notes": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "player2notes": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "player3notes": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "player4notes": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "player5notes": forms.Textarea(attrs={"rows": 4, "cols": 50}),
-            "allPlayers": autocomplete.ModelSelect2Multiple(url="user-autocomplete"),
-            "missingPlayers": autocomplete.ModelSelect2Multiple(
-                url="user-autocomplete"
-            ),
-            "kickedPlayers": autocomplete.ModelSelect2Multiple(url="user-autocomplete"),
-            "invitedPlayers": autocomplete.ModelSelect2Multiple(
-                url="user-autocomplete"
-            ),
-            "playersWithChatNotification": autocomplete.ModelSelect2Multiple(
-                url="user-autocomplete"
-            ),
-        }
+
 
 
 @admin.register(FCM_Game)
 class FCM_GameAdmin(admin.ModelAdmin):
-    form = FCM_GameForm
     save_on_top = True
     save_as = True
     list_per_page = 100
-
+    
     # 1. Performance: Use native autocomplete for all User relations
     autocomplete_fields = [
         "creator",
@@ -76,6 +45,23 @@ class FCM_GameAdmin(admin.ModelAdmin):
         "relatedTournament",
         "relatedMiniTournament",
     ]
+
+    # Map your Textareas here without needing a separate Form class
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        
+        # Check if formfield is not None and if it's one of your target fields
+        if formfield and db_field.name in [
+            'chatData', 'playersMoveData', 'gameData', 'rewindData', 
+            'rewindTempData', 'kickoutFlexiData', 'player0notes', 
+            'player1notes', 'player2notes', 'player3notes', 
+            'player4notes', 'player5notes'
+        ]:
+            formfield.widget = forms.Textarea(attrs={'rows': 4, 'cols': 50})
+            
+        return formfield
+
+
     
     # FIX 2: Speed up pagination by disabling the "total count" if the table is huge
     show_full_result_count = False 
@@ -288,17 +274,6 @@ class FCM_GameAdmin(admin.ModelAdmin):
             },
         ),
     )
-
-    # def formfield_for_manytomany(self, db_field, request, **kwargs):
-    #    if db_field.name in ['allPlayers', 'missingPlayers', 'kickedPlayers', 'invitedPlayers', 'playersWithChatNotification']:
-    #        User = get_user_model()
-    #        # Allow all users to be selectable
-    #        kwargs["queryset"] = User.objects.all()
-    #        # Optional: Add filtering if needed, e.g., only active users
-    #        # kwargs["queryset"] = User.objects.filter(is_active=True)
-    #    result = super().formfield_for_manytomany(db_field, request, **kwargs)
-    #    return result
-
 
 @admin.register(FCM_Tournament)
 class FCM_TournamentAdmin(admin.ModelAdmin):

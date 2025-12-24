@@ -164,7 +164,6 @@ urlpatterns = [
     path("sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"),
     path("reloadMainTchatData/", views.reloadMainTchatData, name="reloadMainTchatData"),
     
-    path('user-autocomplete/', views.UserAutocomplete.as_view(), name='user-autocomplete'),
 
     # Icons
     re_path(r'^apple-touch-icon\.png$', RedirectView.as_view(url='/static/Lobby/favicon.png')),

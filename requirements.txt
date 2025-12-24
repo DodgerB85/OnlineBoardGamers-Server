@@ -3,7 +3,6 @@ certifi==2025.11.12
 charset-normalizer==3.4.4
 config==0.5.1
 Django==5.2.9
-django-autocomplete-light==3.12.1
 django-user-visit==2.1
 idna==3.11
 mysqlclient==2.2.7

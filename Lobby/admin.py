@@ -23,6 +23,7 @@ class Main_TournamentAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
     filter_horizontal = ('startingPlayers', 'nextRoundPlayers')
+    search_fields = ['tournamentName'] 
     
 class Mini_TournamentsAdmin(admin.ModelAdmin):
     save_on_top = True
