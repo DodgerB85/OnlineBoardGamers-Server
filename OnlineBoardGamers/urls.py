@@ -82,6 +82,12 @@ urlpatterns += i18n_patterns(
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICI18N_ROOT)
 
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ]
+
 handler403 = 'Lobby.views.csrf_failure'
 handler404 = 'Lobby.views.handler404'
 handler500 = 'Lobby.views.handler500'

@@ -371,3 +371,14 @@ LOGGING = {
         "handlers": ["console"],
     },
 }
+
+
+if DEBUG:
+    # Add to installed apps
+    INSTALLED_APPS += ['debug_toolbar']
+    
+    # Add to middleware (must be near the top, but after GZipMiddleware)
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    
+    # Required for the toolbar to show on localhost
+    INTERNAL_IPS = ['127.0.0.1']
