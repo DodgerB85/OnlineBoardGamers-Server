@@ -29,6 +29,7 @@ class Mini_TournamentsAdmin(admin.ModelAdmin):
     save_as = True
     filter_horizontal = ('startingPlayers', 'nextRoundPlayers')
     autocomplete_fields = ('creator',) 
+    search_fields = ['tournamentName'] 
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Profile, ProfileAdmin)
