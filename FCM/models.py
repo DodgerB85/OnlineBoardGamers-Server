@@ -350,7 +350,7 @@ class FCM_Game(models.Model):
             if self.currentPlayers
             else f"{self.allPlayers.count()} players"
         )
-        return f"Game {getattr(self, 'id')}: {self.getGameName()} : {players} : {self.gameStatus} : {self.currentTurnString()}"
+        return f"Game {getattr(self, 'id')}: {self.getGameName()} : {players} : {self.gameStatus} : {self.turn}:{self.phase} - {self.currentTurnString()}"
 
     def currentTurnString(self):
         return SR_currentTurnString("FCM", self.turn, self.phase)
