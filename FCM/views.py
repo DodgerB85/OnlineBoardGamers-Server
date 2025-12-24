@@ -126,7 +126,8 @@ def FCMstatGames(request):
         page = Paginator(gameIDs, items_per_page).num_pages
 
     # Filter the games for the current page ONLY
-    finishedGames = FCM_Game.objects.filter(id__in=gameIDs_page).order_by("-latestUpdate")
+    finishedGames = FCM_Game.objects.filter(id__in=gameIDs_page).order_by("-latestUpdate").select_related("creator__profile", "creator", "winner").prefetch_related("allPlayers", "missingPlayers", "invitedPlayers", "playersWithChatNotification")
+
 
 #    def serializeLocal(game):
 #        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner

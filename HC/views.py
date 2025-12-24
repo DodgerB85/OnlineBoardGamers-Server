@@ -48,6 +48,7 @@ def HCgameSummary(request, game_id):
         "HC/HCgameSummary.html",
         {
             # "now": now,
+            "settingsDEBUG": settings.DEBUG,
             "gameData": currentGame.gameData,
             "gameID": getattr(currentGame, "id"),
         },
