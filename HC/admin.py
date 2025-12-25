@@ -7,12 +7,13 @@ from django.utils.html import format_html
 
 from .models import HC_Game, HC_Tournament
 
+
 @admin.register(HC_Game)
 class HC_GameAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
     list_per_page = 100
-    
+
     # 1. Performance: Use native autocomplete for all User relations
     autocomplete_fields = [
         "creator",
@@ -24,28 +25,32 @@ class HC_GameAdmin(admin.ModelAdmin):
         "invitedPlayers",
         "playersWithChatNotification",
         "relatedTournament",
-        #"relatedMiniTournament",
+        # "relatedMiniTournament",
     ]
 
     # Map your Textareas here without needing a separate Form class
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        
+
         # Check if formfield is not None and if it's one of your target fields
         if formfield and db_field.name in [
-            'chatData',  'gameData', 'rewindData', 
-            'rewindTempData', 'kickoutFlexiData', 'player0notes', 
-            'player1notes', 'player2notes', 'player3notes', 
-            'player4notes'
+            "chatData",
+            "gameData",
+            "rewindData",
+            "rewindTempData",
+            "kickoutFlexiData",
+            "player0notes",
+            "player1notes",
+            "player2notes",
+            "player3notes",
+            "player4notes",
         ]:
-            formfield.widget = forms.Textarea(attrs={'rows': 4, 'cols': 50})
-            
+            formfield.widget = forms.Textarea(attrs={"rows": 4, "cols": 50})
+
         return formfield
 
-
-    
     # FIX 2: Speed up pagination by disabling the "total count" if the table is huge
-    show_full_result_count = False 
+    show_full_result_count = False
 
     def get_queryset(self, request):
         # 1. Essential joins for EVERY view
@@ -57,7 +62,7 @@ class HC_GameAdmin(admin.ModelAdmin):
                 "host",
                 "winner",
                 "relatedTournament",
-                #"relatedMiniTournament",
+                # "relatedMiniTournament",
             )
         )
 
@@ -136,7 +141,7 @@ class HC_GameAdmin(admin.ModelAdmin):
             return getattr(
                 obj.relatedTournament, "tournamentName", str(obj.relatedTournament)
             )
-        #if obj.relatedMiniTournament:
+        # if obj.relatedMiniTournament:
         #    return f"Mini: {getattr(obj.relatedMiniTournament, 'tournamentName', 'Unknown')}"
         return "-"
 
@@ -152,7 +157,7 @@ class HC_GameAdmin(admin.ModelAdmin):
         "gameStatus",
         "maxPlayers",
         "relatedTournament",
-        #"relatedMiniTournament",
+        # "relatedMiniTournament",
     )
     search_fields = ("gameName", "creator__username")
 
@@ -193,7 +198,7 @@ class HC_GameAdmin(admin.ModelAdmin):
                     "rewindConsent",
                     "statsExcludeConsent",
                     "statsExcludedGame",
-                )
+                ),
             },
         ),
         (
@@ -226,7 +231,7 @@ class HC_GameAdmin(admin.ModelAdmin):
                 ),
             },
         ),
-                (
+        (
             "Move Data",
             {
                 "classes": ("collapse",),
@@ -241,10 +246,9 @@ class HC_GameAdmin(admin.ModelAdmin):
                     "player3currentMoveData",
                     "player4currentMoveTime",
                     "player4currentMoveData",
-
                 ),
             },
-        ), 
+        ),
         (
             "Player Notes",
             {
@@ -262,18 +266,17 @@ class HC_GameAdmin(admin.ModelAdmin):
             "Linked Tournament",
             {
                 "classes": ("collapse",),
-                "fields": ("relatedTournament", ), #"relatedMiniTournament"),
+                "fields": ("relatedTournament",),  # "relatedMiniTournament"),
             },
         ),
     )
 
 
-
 class HC_TournamentAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
-    filter_horizontal = ('startingPlayers', 'nextRoundPlayers')
+    filter_horizontal = ("startingPlayers", "nextRoundPlayers")
     search_fields = ["tournamentName"]
-    
-admin.site.register(HC_Tournament, HC_TournamentAdmin)
 
+
+admin.site.register(HC_Tournament, HC_TournamentAdmin)

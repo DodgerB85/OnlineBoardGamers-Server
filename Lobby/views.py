@@ -11,7 +11,6 @@ from django.core.cache import cache
 
 # from telegram import Update
 # from telegram.ext import Application, CommandHandler, ContextTypes
-import asyncio
 from decouple import config
 
 # import hashlib
