@@ -12,7 +12,7 @@
         {{ game.gameName }}{% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}
     </div>
     <div class="createdDiv">Creator: {{ game.creator }} - {{ game.latestUpdateElapsedTimeString }}</div>
-    <div class="boxPlayersContainer bgImg{{game.game}}" id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
+    <div class="boxPlayersContainer bgImg{{game.gameCode}}" id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
       <!--<div class="sqBoxCoverDiv">
         {% if game.gameCode == 'FCM' %}
         <img src="{% static "FCM/images/fcm-box.jpg" %}" alt="FCM game" title="FCM Game">
