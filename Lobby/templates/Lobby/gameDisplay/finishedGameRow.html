@@ -8,7 +8,7 @@
 
         {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
 
-        <a href="/{{game.game}}/{{game.gameID}}">{{ game.gameName }}</a>
+        <a href="/{{game.gameCode}}/{{game.gameID}}">{{ game.gameName }}</a>
         {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}
       {% if game.startingMap and game.gameCode == "FCM" %} 
       <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMap.jpg" %}" 
