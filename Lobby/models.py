@@ -330,10 +330,10 @@ class Mini_Tournaments(models.Model):
 
 
 class QueryableGame(models.Model):
-    game = models.CharField(max_length=255)
+    gameCode = models.CharField(max_length=255, db_column="gameCode")
     id = models.PositiveIntegerField()
 
-    pk = models.CompositePrimaryKey("game", "id")
+    pk = models.CompositePrimaryKey("gameCode", "id")
 
     gameName = models.CharField(max_length=255)
     gameDescription = models.CharField(max_length=255)
@@ -341,6 +341,7 @@ class QueryableGame(models.Model):
 
     latestUpdate = models.CharField(max_length=255)
     startingOptions = models.CharField(max_length=255)
+    startingMap = models.CharField(max_length=255, null=True, blank=True)
     currentPlayers = models.CharField(max_length=255)
     maxPlayers = models.PositiveIntegerField()
 
@@ -359,9 +360,9 @@ class QueryableGame(models.Model):
         managed = False
 
 class QueryableGameWinners(models.Model):
-    pk = models.CompositePrimaryKey("game", "game_id", "winner_id")
-    
-    game = models.CharField(max_length=255)
+    pk = models.CompositePrimaryKey("gameCode", "game_id", "winner_id")
+
+    gameCode = models.CharField(max_length=255, db_column="gameCode")
     game_id = models.PositiveIntegerField(db_column="id")
 
     winner = models.ForeignKey(
@@ -370,8 +371,8 @@ class QueryableGameWinners(models.Model):
     queryable_game = models.ForeignObject(
         QueryableGame,
         on_delete=models.deletion.DO_NOTHING,
-        from_fields=("game", "game_id"),
-        to_fields=("game", "id"),
+        from_fields=("gameCode", "game_id"),
+        to_fields=("gameCode", "id"),
         related_name="winners"
     )
 
@@ -380,8 +381,8 @@ class QueryableGameWinners(models.Model):
         managed = False
 
 class QueryableGameInvitedPlayers(models.Model):
-    pk = models.CompositePrimaryKey("game", "id", "invited_player")
-    game = models.CharField(max_length=255)
+    pk = models.CompositePrimaryKey("gameCode", "id", "invited_player")
+    gameCode = models.CharField(max_length=255, db_column="gameCode")
     id = models.PositiveIntegerField()
 
     invited_player = models.ForeignKey(
@@ -390,8 +391,8 @@ class QueryableGameInvitedPlayers(models.Model):
     queryable_game = models.ForeignObject(
         QueryableGame,
         on_delete=models.deletion.DO_NOTHING,
-        from_fields=("game", "id"),
-        to_fields=("game", "id"),
+        from_fields=("gameCode", "id"),
+        to_fields=("gameCode", "id"),
         related_name="invited_players"
     )
 
@@ -400,9 +401,10 @@ class QueryableGameInvitedPlayers(models.Model):
         managed = False
 
 class QueryableGameAllPlayers(models.Model):
-    pk = models.CompositePrimaryKey("game", "id", "player_id")
-    game = models.CharField(max_length=255)
+    pk = models.CompositePrimaryKey("gameCode", "id", "player_id")
+    gameCode = models.CharField(max_length=255, db_column="gameCode")
     id = models.PositiveIntegerField()
+    hasChatNotification = models.BooleanField()
 
     player = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.deletion.DO_NOTHING, db_column="user_id"
@@ -410,8 +412,8 @@ class QueryableGameAllPlayers(models.Model):
     queryable_game = models.ForeignObject(
         QueryableGame,
         on_delete=models.deletion.DO_NOTHING,
-        from_fields=("game", "id"),
-        to_fields=("game", "id"),
+        from_fields=("gameCode", "id"),
+        to_fields=("gameCode", "id"),
         related_name="all_players"
     )
 
