@@ -110,6 +110,7 @@ function loadRewind() {
 			store.topMenuViews.rewindErrorText = "Please exit Replay to Rewind"
 			return
 		}
+		if (store.topMenuViews.performingRewind) return
 		store.topMenuViews.performingRewind = true
 		setTimeout(function () {
 			IO.loadRewind()

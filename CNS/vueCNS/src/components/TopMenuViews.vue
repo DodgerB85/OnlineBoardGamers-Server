@@ -74,6 +74,7 @@ function clearNotes() {
 }
 
 function loadRewind() {
+	if (store.topMenuViews.performingRewind) return
 	store.topMenuViews.performingRewind = true
 	setTimeout(function () {
 		store.topMenuViews.showRewindPanel = false
