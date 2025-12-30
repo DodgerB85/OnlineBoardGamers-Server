@@ -359,6 +359,11 @@ class QueryableGame(models.Model):
         db_table = "Lobby_all_games"
         managed = False
 
+    @property
+    def deleteable_game(self):
+        return ("SHADOW" in self.allPlayers.all().values_list("username", flat=True)
+                or "FcmAI" in self.allPlayers.all().values_list("username", flat=True))
+
 class QueryableGameWinners(models.Model):
     pk = models.CompositePrimaryKey("gameCode", "game_id", "winner_id")
 
