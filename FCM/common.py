@@ -270,7 +270,7 @@ def create_fcm_game(request, is_tournament=False, is_mini_tournament=False, tour
         for player in invited_players:
             new_game.invitedPlayers.add(player)
 
-        if "trainingGame" in request.POST:
+        if "trainingGame" in request.POST or is_mini_tournament or is_tournament:
             new_game.startGame(request)
 
         new_game.save()
