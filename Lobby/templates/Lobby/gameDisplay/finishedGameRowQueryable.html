@@ -1,0 +1,56 @@
+{% load static i18n %}
+
+<tr class="clickableGameRow" id="{{ game.gameCode }}gamesRow{{ game.id }}" onclick="window.location.href='/{{game.gameCode}}/{{game.id}}/';">
+    <td class="nameTDcurrent tdWithBox">
+        {% if game_player.chatNotification %}
+            <img class="startingOption" alt="Str Opt" width="50" height="50" src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
+                 title="New Chat Message">
+        {% endif %}
+
+        {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
+
+        <a href="/{{game.gameCode}}/{{game.id}}">{{ game.gameName }}</a>
+        {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}
+      {% if game.startingMap and game.gameCode == "FCM" %}
+      <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMap.jpg" %}"
+      title="Click to View Map"
+        data-map="{{game.startingMap}}" data-game="FCM">
+        {% endif %}
+        {% if game.startingMap and game.gameCode == "TGZ" %}
+        <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapTGZ.jpg" %}"
+        title="Click to View Map"
+          data-map="{{game.startingMap}}" data-game="TGZ">
+          {% endif %}
+          {% if game.startingMap and game.gameCode == "AQY" %}
+          <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">
+        {% endif %}
+      {% comment %}
+        TODO implement this
+        {{ game.startingOptionsHTML|safe }}
+      {% endcomment %}
+    </td>
+    <td>{{ game.maxPlayers }}</td>
+    <td>
+      {% for player in game.all_players.all %}
+        <a href="{% url 'playerInfo' usernameToProfile=player.player.username %}">
+         {{ player.player.username }}</a>{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </td>
+    <td>
+      {% if game.deleteableGame %}
+      <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
+        {% blocktranslate trimmed %}
+        Delete <BR /> Practice<BR /> Game
+        {% endblocktranslate %}
+      </div>
+      {% else %}
+        <span class="timeToConvertSpan">{{ game.created }}</span>
+      {% endif %}
+    </td>
+    <td><span class="timeToConvertSpan">{{ game.latestUpdate }}</span></td>
+    <td>
+      {% for winner in game.winners.all %}
+        <a href="{% url 'playerInfo' usernameToProfile=winner.winner.username %}">{{ winner.winner.username }}</a>{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </td>
+  </tr>
