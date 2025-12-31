@@ -366,7 +366,9 @@
 							<td class="winnerHeader">{% translate "Winner" %}</td>
 						</tr>
 					</thead>
-					{% for game in finishedGamesList %} {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %} {% endfor %}
+					{% for game in finishedGamesList %}
+                                          {% include 'Lobby/gameDisplay/finishedGameRowQueryable.html' with game_player=game game=game.queryable_game %}
+                                        <% endfor %}
 				</table>
 			</div>
 			<br />
@@ -404,5 +406,6 @@
 	global.availableCount = {{availableCount}};
 	global.invitationsCount = {{invitationsCount}};
 	global.myMoveGamesData = {{myMoveGamesData|safe}};
+
 </script>
 {% endblock %} {% endblock %}
