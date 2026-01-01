@@ -3,33 +3,22 @@ const pluginJs = require("@eslint/js");
 const pluginVue = require("eslint-plugin-vue");
 
 module.exports = [
-  { languageOptions: { globals: globals.browser } },
+  // 1. Base JS Recommended
   pluginJs.configs.recommended,
+
+  // 2. Vue Essential (ensure this doesn't accidentally "overwrite" the JS rules)
   ...pluginVue.configs["flat/essential"],
-   //...pluginVue.configs["vue3-recommended"].rules,
+
+  // 3. Application logic for all files
+  { 
+    files: ["**/*.js", "**/*.vue"], 
+    languageOptions: { 
+      globals: globals.browser,
+      ecmaVersion: "latest",
+      sourceType: "module",
+    },
+    rules: {
+      "no-dupe-else-if": "error", // Force this rule on
+    }
+  },
 ];
-
- /*const globals = require("globals");
- const pluginJs = require("@eslint/js");
- const pluginVue = require("eslint-plugin-vue");
-
- module.exports = [
-   {
-     languageOptions: {
-       globals: {
-         ...globals.browser,
-         //...globals.node, // Add Node.js globals if needed
-       },
-       sourceType: 'module', // If you're using ES modules
-     },
-   },
-   {
-     plugins: {
-       vue: pluginVue,
-     },
-     rules: {
-       ...pluginJs.configs.recommended.rules,
-       ...pluginVue.configs["vue3-recommended"], // Try this
-     },
-   },
- ];*/
