@@ -96,8 +96,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.sitemaps",
-    "dal",
-    "dal_select2",
     "FCM",
     "Lobby",
     "user_visit",

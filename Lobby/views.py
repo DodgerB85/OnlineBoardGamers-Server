@@ -1636,10 +1636,10 @@ def index(request):
 
     print_timestamp("Final prep complete")
 
-    finished_games = QueryableGameAllPlayers.objects.filter(
-        Q(player_id=user_id) &
-        Q(queryable_game__gameStatus="FINISHED")
-        ).prefetch_related("queryable_game__winners__winner").prefetch_related("queryable_game__all_players__player").order_by("-queryable_game__latestUpdate")[:10]
+    #finished_games = QueryableGameAllPlayers.objects.filter(
+    #    Q(player_id=user_id) &
+    #    Q(queryable_game__gameStatus="FINISHED")
+    #    ).prefetch_related("queryable_game__winners__winner").prefetch_related("queryable_game__all_players__player").order_by("-queryable_game__latestUpdate")[:10]
 
     return render(
         request,
