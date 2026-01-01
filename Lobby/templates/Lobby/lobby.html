@@ -218,8 +218,7 @@
 			<span class="noGamesSpan">
 				<h2>{% translate "No Current Games" %}</h2>
 			</span>
-			{% endif %} {% if current_MT %}
-			Current Mini Tournaments
+			{% endif %} {% if current_MT %} Current Mini Tournaments
 			<div class="tableOnlyDiv">
 				<table class="gamesTable">
 					<thead>
@@ -236,10 +235,11 @@
 					{% for Mini_Tournament in current_MT %} {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %} {% endfor %}
 				</table>
 			</div>
-			{% endif %} {% else %}<h2>{% translate "No Current Games or Mini Tournaments" %}</h2>
-      {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %} {% if current_MT %}
+			{% endif %} {% else %}
+			<h2>{% translate "No Current Games or Mini Tournaments" %}</h2>
+			{% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %} {% endif %} {% if current_MT %}
 			<br />
-      {% endif %}
+			{% endif %}
 			<b><u>{% translate "Colour Guide" %}</u></b>
 			<div class="colourGuideDiv">
 				<span class="myMove">{% translate "It is your move" %}</span>
@@ -366,9 +366,7 @@
 							<td class="winnerHeader">{% translate "Winner" %}</td>
 						</tr>
 					</thead>
-					{% for game in finishedGamesList %}
-                                          {% include 'Lobby/gameDisplay/finishedGameRowQueryable.html' with game_player=game game=game.queryable_game %}
-                                        <% endfor %}
+					{% for game in finishedGamesList %} {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %} {% endfor %}
 				</table>
 			</div>
 			<br />
@@ -406,6 +404,5 @@
 	global.availableCount = {{availableCount}};
 	global.invitationsCount = {{invitationsCount}};
 	global.myMoveGamesData = {{myMoveGamesData|safe}};
-
 </script>
 {% endblock %} {% endblock %}

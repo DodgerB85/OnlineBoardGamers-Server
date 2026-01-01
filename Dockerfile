@@ -15,6 +15,8 @@ WORKDIR /app
 # Install dependencies
 COPY requirements.txt /app/
 RUN pip install -r requirements.txt
+COPY requirements-dev.txt /app/
+RUN pip install -r requirements-dev.txt
 
 # Copy the project code into the container
 COPY . /app/
