@@ -164,7 +164,7 @@ STATICFILES_FINDERS = (
 # Enable compression for production (even if DEBUG is False)
 COMPRESS_ENABLED = True
 COMPRESS_JS_FILTERS = ["compressor.filters.jsmin.JSMinFilter"]
-
+COMPRESS_OFFLINE = True
 # END JS Minifier settings
 
 # Database
