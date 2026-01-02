@@ -19,6 +19,7 @@ local_settings.py
 docker-compose.override.yml
 node_modules
 emailCounter.txt
+a.bat
 
 # Exclude generated stats
 *stats/
