@@ -235,6 +235,7 @@
   <div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>
   {% include 'Lobby/common/homeButton.html' %}
   {% block script %}
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     <script>
     var global = {}
     global.MT_CreationTimestamp = {{ MT_CreationTimestamp }};
