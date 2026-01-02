@@ -1,130 +1,181 @@
 {% extends "Lobby/layout.html" %}
-
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-<link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-
-<div class="container">
-
-  {% if messages %}
-  <div class="messages">
-    {% for message in messages %}
-    <div{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-<div id="playerNumberArea">
-  <img class="playerCountFixed" src="{% static 'Lobby/images/player.png' %}" id="1player">
-  <img class="playerCount" src="{% static 'Lobby/images/player.png' %}" id="2player">
-  <img class="playerCount" src="{% static 'Lobby/images/playerNone.png' %}" id="3player">
-  <img class="playerCount" src="{% static 'Lobby/images/playerNone.png' %}" id="4player">
-  <img class="playerCount" src="{% static 'Lobby/images/playerNone.png' %}" id="5player">
-  <img class="playerCount" src="{% static 'Lobby/images/playerNone.png' %}" id="6player">
-</div>
-<div id="topButtons">
-
-  <form id="mapSubmit" action="/createFCMpage/" method="post">
-    {% csrf_token %}
-    <input type="hidden" id="mapData" name="mapData" value="">
-    <input type="button" onclick="createGameWithMap()" value="{% translate " Create a game with this map" %}">
-  </form>
-</div>
-
-<div class="BGHrow">
-  <div class="BGHdiv">
-    <span class="BGHoptionMainTitle">
-      {% translate "Generate a map using <a class='linkOther' href='https://boardgamehelpers.com/FoodChainMagnate/' target='_blank'>BoardGameHelpers</a>" %}
-    </span>
-    <br />
-    <div id="BGHerrorDiv"><span id="BGHerrorSpan">Error Generating Map</span><br/></div>
-    <div class="BGHoptionsDiv">
-      <span class="BGHoptionTitle"><b>{% translate "Map Type" %}</b></span><br />
-      <input type="radio" class="myCheckbox" id="BGHmapType1" name="BGH_map_type" value="1">
-      <label for="BGHmapType1"> {% translate "Random" %} </label><br />
-      <input type="radio" class="myCheckbox" id="BGHmapType2" name="BGH_map_type" value="2" checked>
-      <label for="BGHmapType2"> {% translate "Balanced" %} </label><BR />
-      <input type="radio" class="myCheckbox" id="BGHmapType3" name="BGH_map_type" value="3">
-      <label for="BGHmapType3"> {% translate "Interesting" %} </label><BR />
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="playerNumberArea">
+      <img class="playerCountFixed"
+           src="{% static 'Lobby/images/player.png' %}"
+           id="1player">
+      <img class="playerCount"
+           src="{% static 'Lobby/images/player.png' %}"
+           id="2player">
+      <img class="playerCount"
+           src="{% static 'Lobby/images/playerNone.png' %}"
+           id="3player">
+      <img class="playerCount"
+           src="{% static 'Lobby/images/playerNone.png' %}"
+           id="4player">
+      <img class="playerCount"
+           src="{% static 'Lobby/images/playerNone.png' %}"
+           id="5player">
+      <img class="playerCount"
+           src="{% static 'Lobby/images/playerNone.png' %}"
+           id="6player">
     </div>
-
-    <div class="BGHoptionsDiv">
-      <span class="BGHoptionTitle"><b>{% translate "Tile Options" %}</b></span><br />
-      <input type="checkbox" class="myCheckbox individualOpt" id="BGH_expTiles" name="BGH_expTiles" value="1">
-      <label for="BGH_expTiles"> {% translate "Use Normal Expansion Tiles" %} </label><BR />
-
-      <input type="checkbox" class="myCheckbox individualOpt" id="BGH_apartmentTiles" name="BGH_apartmentTiles"
-        value="1">
-      <label for="BGH_apartmentTiles"> {% translate "Use Apartment Tiles" %} </label><BR />
-
-      <input type="checkbox" class="myCheckbox individualOpt" id="BGH_parkTile" name="BGH_parkTile" value="1">
-      <label for="BGH_parkTile"> {% translate "Use Park Tile" %} </label><BR />
+    <div id="topButtons">
+      <form id="mapSubmit" action="/createFCMpage/" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="mapData" name="mapData" value="">
+        <input type="button"
+               onclick="createGameWithMap()"
+               value="{% translate " Create a game with this map" %}">
+      </form>
     </div>
-    <br />
-    <button id="BGHgenerateButton" onclick="generateBGHmap()">Generate Map</button><div id="BGHspinnerDiv">
-      <img src="{% static 'Lobby/images/spinner.gif' %}" id="BGHspinnerImg">
+    <div class="BGHrow">
+      <div class="BGHdiv">
+        <span class="BGHoptionMainTitle">
+          {% translate "Generate a map using <a class='linkOther'
+    href='https://boardgamehelpers.com/FoodChainMagnate/'
+    target='_blank'>BoardGameHelpers</a>" %}
+        </span>
+        <br />
+        <div id="BGHerrorDiv">
+          <span id="BGHerrorSpan">Error Generating Map</span>
+          <br />
+        </div>
+        <div class="BGHoptionsDiv">
+          <span class="BGHoptionTitle"><b>{% translate "Map Type" %}</b></span>
+          <br />
+          <input type="radio"
+                 class="myCheckbox"
+                 id="BGHmapType1"
+                 name="BGH_map_type"
+                 value="1">
+          <label for="BGHmapType1">{% translate "Random" %}</label>
+          <br />
+          <input type="radio"
+                 class="myCheckbox"
+                 id="BGHmapType2"
+                 name="BGH_map_type"
+                 value="2"
+                 checked>
+          <label for="BGHmapType2">{% translate "Balanced" %}</label>
+          <br />
+          <input type="radio"
+                 class="myCheckbox"
+                 id="BGHmapType3"
+                 name="BGH_map_type"
+                 value="3">
+          <label for="BGHmapType3">{% translate "Interesting" %}</label>
+          <br />
+        </div>
+        <div class="BGHoptionsDiv">
+          <span class="BGHoptionTitle"><b>{% translate "Tile Options" %}</b></span>
+          <br />
+          <input type="checkbox"
+                 class="myCheckbox individualOpt"
+                 id="BGH_expTiles"
+                 name="BGH_expTiles"
+                 value="1">
+          <label for="BGH_expTiles">{% translate "Use Normal Expansion Tiles" %}</label>
+          <br />
+          <input type="checkbox"
+                 class="myCheckbox individualOpt"
+                 id="BGH_apartmentTiles"
+                 name="BGH_apartmentTiles"
+                 value="1">
+          <label for="BGH_apartmentTiles">{% translate "Use Apartment Tiles" %}</label>
+          <br />
+          <input type="checkbox"
+                 class="myCheckbox individualOpt"
+                 id="BGH_parkTile"
+                 name="BGH_parkTile"
+                 value="1">
+          <label for="BGH_parkTile">{% translate "Use Park Tile" %}</label>
+          <br />
+        </div>
+        <br />
+        <button id="BGHgenerateButton" onclick="generateBGHmap()">Generate Map</button>
+        <div id="BGHspinnerDiv">
+          <img src="{% static 'Lobby/images/spinner.gif' %}" id="BGHspinnerImg">
+        </div>
+      </div>
+      <div class="BGHdiv" id="BGHstatsContainer">
+        <span class="BGHoptionMainTitle">Stats</span>
+        <br />
+        <div class="BGHstatsDiv">
+          <img class="BGH_drinkSpot"
+               src="{% static 'Lobby/images/BGH_lemonadeSpot.jpg' %}"
+               alt="No. Lemonades: " />
+          <span id="BGH_lemonadeSpots" class="drinkSpotsSpan"></span>
+          <br />
+          <img class="BGH_drinkSpot"
+               src="{% static 'Lobby/images/BGH_cokeSpot.jpg' %}"
+               alt="No. Cokes: " />
+          <span id="BGH_coksSpots" class="drinkSpotsSpan"></span>
+          <br />
+          <img class="BGH_drinkSpot"
+               src="{% static 'Lobby/images/BGH_beerSpot.jpg' %}"
+               alt="No. Beers: " />
+          <span id="BGH_beerSpots" class="drinkSpotsSpan"></span>
+          <br />
+        </div>
+        <div class="BGHstatsDiv">
+          Houses: <span id="nbHouses"></span>
+          <br />
+          Disconnected Paths: <span id="nbPathSystems"></span>
+          <br />
+          Neighbourhoods: <span id="nbNeighbourhoods"></span>
+        </div>
+      </div>
+      <div class="BGHdiv" id="BGHBalanceDiv">
+        <span class="BGHoptionMainTitle">Balance Issues</span>
+        <br />
+        <ul id="balanceIssuesUL">
+        </ul>
+        <b>{% translate "Note: No map is 100% balanced!" %}</b>
+      </div>
     </div>
-
-  </div>
-
-  <div class="BGHdiv" id="BGHstatsContainer">
-    <span class="BGHoptionMainTitle">
-      Stats
-    </span><br />
-    <div class="BGHstatsDiv">
-      <img class="BGH_drinkSpot" src="{% static 'Lobby/images/BGH_lemonadeSpot.jpg' %}" alt="No. Lemonades: " /><span
-        id="BGH_lemonadeSpots" class="drinkSpotsSpan"></span><br />
-      <img class="BGH_drinkSpot" src="{% static 'Lobby/images/BGH_cokeSpot.jpg' %}" alt="No. Cokes: " /><span
-        id="BGH_coksSpots" class="drinkSpotsSpan"></span><br />
-      <img class="BGH_drinkSpot" src="{% static 'Lobby/images/BGH_beerSpot.jpg' %}" alt="No. Beers: " /><span
-        id="BGH_beerSpots" class="drinkSpotsSpan"></span><br />
+    <a class="linkOther"
+       href='https://www.boardgamehelpers.com/Articles/Food_Chain_Magnate_Map_Balancing_Statistics'
+       target='_blank'>How are maps balanced?
+    What do the stats mean?</a>
+    <h1>{% translate "Drag and drop tiles - then click on tiles to rotate" %}</h1>
+    <div id="availableMapTiles"></div>
+    <div id="topButtons">
+      <input type="button"
+             onclick="fillMap(true)"
+             value="{% translate " Complete map with random tiles" %}">
+      <input type="button"
+             onclick="fillMap(false)"
+             value="{% translate "Complete map with random base game tiles only" %}">
+      <input type="button"
+             onclick="shuffleCurrentBoard()"
+             value="{% translate " Shuffle the current board" %}">
+      <input type="button"
+             onclick="clearMap()"
+             value="{% translate " Clear map" %}">
     </div>
-    <div class="BGHstatsDiv">
-      Houses: <span id="nbHouses"></span><br />
-      Disconnected Paths: <span id="nbPathSystems"></span><br />
-      Neighbourhoods: <span id="nbNeighbourhoods"></span>
+    <span id="BGHnameSpan"></span>
+    <div id="boardArea">
+      <div id="board"></div>
     </div>
-  </div>
-
-  <div class="BGHdiv" id="BGHBalanceDiv">
-    <span class="BGHoptionMainTitle">
-      Balance Issues
-    </span><br />
-    <ul id="balanceIssuesUL">
-    </ul>
-    <b>{% translate "Note: No map is 100% balanced!" %}</b>
-  </div>
-</div>
-<a class="linkOther" href='https://www.boardgamehelpers.com/Articles/Food_Chain_Magnate_Map_Balancing_Statistics' target='_blank'>How are maps balanced?
-What do the stats mean?</a>
-
-<h1>{% translate "Drag and drop tiles - then click on tiles to rotate" %}</h1>
-
-<div id="availableMapTiles"></div>
-<div id="topButtons">
-
-  <input type="button" onclick="fillMap(true)" value="{% translate " Complete map with random tiles" %}">
-  <input type="button" onclick="fillMap(false)" 
-  value="{% translate "Complete map with random base game tiles only" %}">
-  <input type="button" onclick="shuffleCurrentBoard()" value="{% translate " Shuffle the current board" %}">
-  <input type="button" onclick="clearMap()" value="{% translate " Clear map" %}">
-
-</div>
-<span id="BGHnameSpan"></span>
-<div id="boardArea">
-  <div id="board"></div>
-</div>
-
-{% block script %}
-<script src="{% static 'Lobby/createFCMmap.js' %}"></script>
-
-<script>
-
+    {% block script %}
+      {% compress js %}
+        <script src="{% static 'Lobby/createFCMmap.js' %}"></script>
+      {% endcompress %}
+      <script>
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll(".playerCount").forEach((element) => element.addEventListener('click', changePlayerNumber));
     init();
@@ -144,9 +195,6 @@ What do the stats mean?</a>
    {% else %}
    global.listType = "current";
    {% endif %}*/
-</script>
-
-
-{% endblock %}
-
-{% endblock %}
+      </script>
+    {% endblock %}
+  {% endblock %}

@@ -1,8 +1,8 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-<link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -15,10 +15,11 @@
     {% endif %}
     <div id="HChelpPage">
       <h1>{% translate "Rules" %}</h1>
-      {% translate "Horseless Carriage rules available <a href='https://boardgamegeek.com/filepage/251309/first-edition-english-rulebook' target='_blank'>here</a>" %}
+      {% translate "Horseless Carriage rules available <a href='https://boardgamegeek.com/filepage/251309/first-edition-english-rulebook'
+    target='_blank'>here</a>" %}
       <br />
       {% translate "How to play guide example <a href='https://www.youtube.com/watch?v=It25avQY23A' target='_blank'>here</a>" %}
-      <br/>
+      <br />
       <h1>{% translate "Horseless Carriage Help" %}</h1>
       <div class="HChelpSection">
         <b><u>{% translate "Playing the Game" %}</u></b>
@@ -98,7 +99,11 @@
         <!--required for formatting -->
       </div>
       {% translate "For further help contact" %}
-      <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width=400 height=30>
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30">
     </div>
   </div>
   {% include 'Lobby/common/homeButton.html' %}

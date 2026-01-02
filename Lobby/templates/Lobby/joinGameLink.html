@@ -1,24 +1,29 @@
 {% extends "Lobby/layout.html" %}
-{% load static i18n %}
+{% load static i18n compress %}
 {% block description %}
-  <meta name="description" content="{{availableGamesList.0.gameName}} - {{availableGamesList.0.gameDescription}}">
+  <meta name="description"
+        content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}">
 {% endblock %}
 {% block canonical %}
-<link rel="canonical" href="https://www.onlineboardgamers.com/join/{{gameCode}}{{gameID}}">
-<meta property="og:url" content="https://www.onlineboardgamers.com/join/{{gameCode}}{{gameID}}/" />
-<meta property="og:type" content="Online Board Gamers" />
-<meta property="og:title" content="Online Board Gamers" />
-<meta property="og:image" content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
-<meta property="og:description" content="{{availableGamesList.0.gameName}} - {{availableGamesList.0.gameDescription}}" />
-
+  <link rel="canonical"
+        href="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}">
+  <meta property="og:url"
+        content="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}/" />
+  <meta property="og:type" content="Online Board Gamers" />
+  <meta property="og:title" content="Online Board Gamers" />
+  <meta property="og:image"
+        content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
+  <meta property="og:description"
+        content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
 {% endblock %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  <script src="{% static "Lobby/Lobby.js" %}?v=20220706"></script>
-  <script src="{% static 'Lobby/common.js' %}"></script>
+  {% compress js %}
+    <script src="{% static 'Lobby/Lobby.js' %}"></script>
+    <script src="{% static 'Lobby/common.js' %}"></script>
+  {% endcompress %}
   <div class="container" id="lobbyPage">
     {% if messages %}
       <div class="messages">
@@ -27,7 +32,6 @@
         {% endfor %}
       </div>
     {% endif %}
-
     <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
       {% csrf_token %}
       <input type="hidden" id="mapData" name="mapData" value="">
@@ -88,17 +92,16 @@
           For icon explanations see <a class="linkOther" href="{{ the_url }}">Help</a>
         {% endblocktranslate %}
       </div>
-     
-      </div>
-      {% include 'Lobby/donate/donateBanner.html' %}
-      {% include 'Lobby/splotterconSponsor.html' %}
     </div>
-    {% block script %}
-      <script>
+    {% include 'Lobby/donate/donateBanner.html' %}
+    {% include 'Lobby/splotterconSponsor.html' %}
+  </div>
+  {% block script %}
+    <script>
   var global = {};
   global.joinGameLink = true
 
 
-      </script>
-    {% endblock %}
+    </script>
   {% endblock %}
+{% endblock %}

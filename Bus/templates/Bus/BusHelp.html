@@ -2,8 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-<link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -19,8 +19,7 @@
       {% translate "Bus rules available <a href='/static/Bus/Bus_Rules.pdf' target='_blank'>here</a>" %}
       <br />
       {% translate "How to play guide example <a href='https://www.youtube.com/watch?v=CKW0tYoIU_k' target='_blank'>here</a>" %}
-      <br/>
-
+      <br />
       <h1>{% translate "Bus Help" %}</h1>
       <div class="BusHelpSection">
         <b><u>{% translate "Playing the Game" %}</u></b>
@@ -91,7 +90,11 @@
       <br />
       <br />
       {% translate "For further help contact" %}
-      <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width=400 height=30>
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30">
     </div>
   </div>
   {% include 'Lobby/common/homeButton.html' %}

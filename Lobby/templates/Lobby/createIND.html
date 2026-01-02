@@ -2,10 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230"
-          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
@@ -18,7 +16,6 @@
                 {% endfor %}
             </div>
         {% endif %}
-
         <div id="allOptions">
             <span class="topOfNewGameSpan">{% translate "New to Indonesia? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
             <form id="INDnewGameForm"
@@ -63,9 +60,9 @@
                                     <option value="50">{% translate "Casual: Just take your time" %}</option>
                                 </select>
                                 <br />
-                                <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span><br/>
+                                <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span>
+                                <br />
                                 <span class="optionHelp">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</span>
-
                             </div>
                         </div>
                         <div class="singleChoiceDiv">
@@ -92,7 +89,9 @@
                                 <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none;">
+                        <div class="singleChoiceWithTextDiv"
+                             id="selPlayer3"
+                             style="display: none">
                             <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -104,7 +103,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv" id="selPlayer4" style="display: none;">
+                        <div class="singleChoiceWithTextDiv"
+                             id="selPlayer4"
+                             style="display: none">
                             <label class="choiceLabelText" for="player4">{% translate "Player 4" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -116,7 +117,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv" id="selPlayer5" style="display: none;">
+                        <div class="singleChoiceWithTextDiv"
+                             id="selPlayer5"
+                             style="display: none">
                             <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -162,17 +165,15 @@
                         </span>
                         <br />
                         <input type="checkbox"
-                        onchange="validateOptions(this.id)"
-                        class="myCheckbox"
-                        id="privateGame"
-                        name="privateGame"
-                        value="1">
-                 <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
-                 <br />
-                 <span class="inlineHelp">
-                     {% translate "Players can only join with invite or link" %}
-                 </span>
-                 <br/>
+                               onchange="validateOptions(this.id)"
+                               class="myCheckbox"
+                               id="privateGame"
+                               name="privateGame"
+                               value="1">
+                        <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
+                        <br />
+                        <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
+                        <br />
                         <input type="checkbox"
                                onchange="validateOptions(this.id)"
                                class="myCheckbox"
@@ -194,7 +195,8 @@
                                class="myCheckbox"
                                id="experiencedGame"
                                name="experiencedGame"
-                               value="120" disabled>
+                               value="120"
+                               disabled>
                         <label for="experiencedGame" class="checkboxLabel">{% translate "Experienced Game" %}</label>
                         <br />
                         <span class="inlineHelp">
@@ -203,7 +205,8 @@
                                 Minmum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
                             {% endblocktranslate %}
                             {% if not experienced %}
-                            <br /> <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
+                                <br />
+                                <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
                             {% endif %}
                         </span>
                         <br />
@@ -220,32 +223,32 @@
                         <br />
                         <span class="inlineHelp">
                             {% blocktranslate trimmed %}
-                                CAUTION: Money can be recalculated using the history at any point. 
+                                CAUTION: Money can be recalculated using the history at any point.
                                 Only use this options if playing with friends and you have already
                                 agreed to keep money hidden.
                             {% endblocktranslate %}
                         </span>
-                        <br/>
+                        <br />
                         <input type="checkbox"
-                        onchange="validateGameOptions(this.id)"
-                        class="myCheckbox"
-                        id="useAegeanMap"
-                        name="useAegeanMap"
-                        value="2">
-                 <label for="useAegeanMap" class="checkboxLabel">{% translate "Use Aegean Map" %}</label>
-                 <br />
-                 <span class="inlineHelp">
-                     {% blocktranslate trimmed %}
-                        Play on the fan-made Aegean map!<br/>
-                        Game will be excluded from stats
-                     {% endblocktranslate %}
-                 </span>
-                 <img src="{% static 'Lobby/images/INDprofile/AG_map_icon.jpg' %}"
-                 width="300"
-                 height="197"
-                 alt="Aegean Map" />
-                 <br/>
-                        
+                               onchange="validateGameOptions(this.id)"
+                               class="myCheckbox"
+                               id="useAegeanMap"
+                               name="useAegeanMap"
+                               value="2">
+                        <label for="useAegeanMap" class="checkboxLabel">{% translate "Use Aegean Map" %}</label>
+                        <br />
+                        <span class="inlineHelp">
+                            {% blocktranslate trimmed %}
+                                Play on the fan-made Aegean map!
+                                <br />
+                                Game will be excluded from stats
+                            {% endblocktranslate %}
+                        </span>
+                        <img src="{% static 'Lobby/images/INDprofile/AG_map_icon.jpg' %}"
+                             width="300"
+                             height="197"
+                             alt="Aegean Map" />
+                        <br />
                     </fieldset>
                 </div>
                 <br />

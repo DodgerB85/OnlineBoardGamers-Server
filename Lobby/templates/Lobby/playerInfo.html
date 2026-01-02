@@ -2,12 +2,11 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/stats.css' %}?v=20230230" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-    <script src="{% static 'Lobby/playerInfo.js' %}?v=20220706"></script>
+    <script src="{% static 'Lobby/playerInfo.js' %}"></script>
     <script src="{% static 'Lobby/common.js' %}"></script>
     <div class="container">
         {% if messages %}

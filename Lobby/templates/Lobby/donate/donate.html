@@ -2,10 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/donate.css' %}?v=20230230"
-          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/donate.css' %}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Quicksand:400,700"
           rel="stylesheet"
           type="text/css" />
@@ -41,8 +39,9 @@
             {% endblocktranslate %}
         </h2>
         <div class="donateButtonDiv">
-            <span class="donateTitleSpan">Paypal</span><br/>
-                                   <!--src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif"-->
+            <span class="donateTitleSpan">Paypal</span>
+            <br />
+            <!--src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif"-->
             <form action="https://www.paypal.com/donate" method="post" target="_top">
                 <input type="hidden" name="hosted_button_id" value="SMKSLMCJHWZ8G" />
                 <input id="donateButton"
@@ -60,8 +59,8 @@
             </form>
         </div>
         <div class="donateButtonDiv2">
-            <span class="donateTitleSpan">Ko-fi (works in China)</span><br/>
-
+            <span class="donateTitleSpan">Ko-fi (works in China)</span>
+            <br />
             <div class="kofi-btn-container">
                 <a href="https://ko-fi.com/Q5Q3ZVWMJ"
                    title="Support me on ko-fi.com"
@@ -78,10 +77,11 @@
             </div>
         </div>
         <div class="donateButtonDiv">
-            <span class="donateTitleSpan">Patreon</span><br/>
-
+            <span class="donateTitleSpan">Patreon</span>
+            <br />
             <a href="https://www.patreon.com/c/OnlineBoardGamers"
-               class="patreon-button" target="_blank">Support me on Patreon</a>
+               class="patreon-button"
+               target="_blank">Support me on Patreon</a>
         </div>
         <!-- <h2>{% translate "If you are having trouble in China/Asia, you can donate via AliPay" %}</h2>
     <img alt="" border="0" src="{% static 'Lobby/images/alipayQR.jpg' %}" width="200px" height="200px"><br />

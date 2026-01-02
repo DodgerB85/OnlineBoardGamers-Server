@@ -1,217 +1,213 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230"
-        rel="stylesheet">
+       <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+       <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  <svg id="patternsSVG">
-    <pattern id="tile--1" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-    <image height="1"
-           width="1"
-           preserveAspectRatio="none"
-           xlink:href="{% static 'AQY/images/mapEditor/tile_back.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-0" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-    <image height="1"
-           width="1"
-           preserveAspectRatio="none"
-           xlink:href="{% static 'AQY/images/tile_0.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-1" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_1.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-2" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_2.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-3" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_3.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-4" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_4.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-5" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_5.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-6" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_6.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-7" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_7.jpg' %}">
-  </image>
-  </pattern>
-
-  <pattern id="tile-10" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-    <image height="1"
-           width="1"
-           preserveAspectRatio="none"
-           xlink:href="{% static 'AQY/images/tile_0M.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-11" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_1M.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-12" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_2M.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-13" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_3M.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-14" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_4M.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-15" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_5M.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-16" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_6M.jpg' %}">
-  </image>
-  </pattern>
-  <pattern id="tile-17" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-  <image height="1"
-         width="1"
-         preserveAspectRatio="none"
-         xlink:href="{% static 'AQY/images/tile_7M.jpg' %}">
-  </image>
-  </pattern>
+       <svg id="patternsSVG">
+              <pattern id="tile--1" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+              <image height="1"
+                     width="1"
+                     preserveAspectRatio="none"
+                     xlink:href="{% static 'AQY/images/mapEditor/tile_back.jpg' %}">
+       </image>
+       </pattern>
+       <pattern id="tile-0" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+       <image height="1"
+              width="1"
+              preserveAspectRatio="none"
+              xlink:href="{% static 'AQY/images/tile_0.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-1" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_1.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-2" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_2.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-3" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_3.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-4" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_4.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-5" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_5.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-6" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_6.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-7" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_7.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-10" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_0M.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-11" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_1M.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-12" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_2M.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-13" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_3M.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-14" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_4M.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-15" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_5M.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-16" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_6M.jpg' %}">
+</image>
+</pattern>
+<pattern id="tile-17" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+<image height="1"
+       width="1"
+       preserveAspectRatio="none"
+       xlink:href="{% static 'AQY/images/tile_7M.jpg' %}">
+</image>
+</pattern>
 </svg>
 <div class="container">
-  {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-        <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-  <div id="playerNumberArea">
-    <img class="playerCountFixed"
-         src="{% static 'Lobby/images/player.png' %}"
-         id="1player"
-         alt="1 player"
-         width="50px"
-         height="50px">
-    <img class="playerCount"
-         src="{% static 'Lobby/images/player.png' %}"
-         id="2player"
-         alt="2 players"
-         width="50px"
-         height="50px">
-    <img class="playerCount"
-         src="{% static 'Lobby/images/playerNone.png' %}"
-         id="3player"
-         alt="3 players"
-         width="50px"
-         height="50px">
-    <img class="playerCount"
-         src="{% static 'Lobby/images/playerNone.png' %}"
-         id="4player"
-         alt="4 players"
-         width="50px"
-         height="50px">
-  </div>
-  <div id="topButtons">
-    <form id="mapSubmit" action="/createAQYpage/" method="post">
-      {% csrf_token %}
-      <input type="hidden" id="mapData" name="mapData" value="">
-      <input type="button"
-             class="actionsLineButton"
-             onclick="createGameWithMap()"
-             value="{% translate " Create a game with this map" %}">
-    </form>
-  </div>
-  <h1>{% translate "Drag and drop tiles - then click on tiles to rotate" %}</h1>
-  <b>{% translate "Antiquity had a print run with the tiles mirrored. Therefore you have the option to mirror the tiles." %}</b>
-  <br />
-  <b>{% translate "Antiquity comes with a duplicate set of 4 doubled sided tiles. So in order to be able to build the map using the contents of one game, at most 2 tiles should be used from each of the boxes below (mirrored or normal)." %} </b>
- 
-  <div id="mirrorCheckboxDiv">
-    <input type="checkbox"
-           onchange="renderAvailableTiles()"
-           class="myCheckbox"
-           id="useMirrors"
-           name="useMirrors"
-           value="true">
-    <label for="useMirrors">{% translate "Use Mirrored Tiles" %}</label>
-  </div>
-  <div id="availableMapTiles"></div>
-
- <div id="topButtons">
-    <input type="button"
-           class="actionsLineButton"
-           onclick="fillMap()"
-           value="{% translate " Complete map with random tiles" %}">
-    <input type="button"
-           class="actionsLineButton"
-           onclick="shuffleCurrentBoard()"
-           value="{% translate " Shuffle the current board" %}">
-    <input type="button"
-           class="actionsLineButton"
-           onclick="clearMap()"
-           value="{% translate " Clear map" %}">
-  </div>
-  <span id="invalidMapCautionSpanAQY">Caution: You cannot make this map from a single physical game</span>
-  <div id="boardAreaAQY">
-    <div id="boardAQYcanvas"></div>
-  </div>
+       {% if messages %}
+              <div class="messages">
+                     {% for message in messages %}
+                            <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                     {% endfor %}
+              </div>
+       {% endif %}
+       <div id="playerNumberArea">
+              <img class="playerCountFixed"
+                   src="{% static 'Lobby/images/player.png' %}"
+                   id="1player"
+                   alt="1 player"
+                   width="50px"
+                   height="50px">
+              <img class="playerCount"
+                   src="{% static 'Lobby/images/player.png' %}"
+                   id="2player"
+                   alt="2 players"
+                   width="50px"
+                   height="50px">
+              <img class="playerCount"
+                   src="{% static 'Lobby/images/playerNone.png' %}"
+                   id="3player"
+                   alt="3 players"
+                   width="50px"
+                   height="50px">
+              <img class="playerCount"
+                   src="{% static 'Lobby/images/playerNone.png' %}"
+                   id="4player"
+                   alt="4 players"
+                   width="50px"
+                   height="50px">
+       </div>
+       <div id="topButtons">
+              <form id="mapSubmit" action="/createAQYpage/" method="post">
+                     {% csrf_token %}
+                     <input type="hidden" id="mapData" name="mapData" value="">
+                     <input type="button"
+                            class="actionsLineButton"
+                            onclick="createGameWithMap()"
+                            value="{% translate " Create a game with this map" %}">
+              </form>
+       </div>
+       <h1>{% translate "Drag and drop tiles - then click on tiles to rotate" %}</h1>
+       <b>{% translate "Antiquity had a print run with the tiles mirrored. Therefore you have the option to mirror the tiles." %}</b>
+       <br />
+       <b>{% translate "Antiquity comes with a duplicate set of 4 doubled sided tiles. So in order to be able to build the map using the contents of one game, at most 2 tiles should be used from each of the boxes below (mirrored or normal)." %} </b>
+       <div id="mirrorCheckboxDiv">
+              <input type="checkbox"
+                     onchange="renderAvailableTiles()"
+                     class="myCheckbox"
+                     id="useMirrors"
+                     name="useMirrors"
+                     value="true">
+              <label for="useMirrors">{% translate "Use Mirrored Tiles" %}</label>
+       </div>
+       <div id="availableMapTiles"></div>
+       <div id="topButtons">
+              <input type="button"
+                     class="actionsLineButton"
+                     onclick="fillMap()"
+                     value="{% translate " Complete map with random tiles" %}">
+              <input type="button"
+                     class="actionsLineButton"
+                     onclick="shuffleCurrentBoard()"
+                     value="{% translate " Shuffle the current board" %}">
+              <input type="button"
+                     class="actionsLineButton"
+                     onclick="clearMap()"
+                     value="{% translate " Clear map" %}">
+       </div>
+       <span id="invalidMapCautionSpanAQY">Caution: You cannot make this map from a single physical game</span>
+       <div id="boardAreaAQY">
+              <div id="boardAQYcanvas"></div>
+       </div>
 </div>
 {% block script %}
-  <script src="{% static 'Lobby/createAQYmap.js' %}"></script>
-  <script>
+       {% compress js %}
+              <script src="{% static 'Lobby/createAQYmap.js' %}"></script>
+       {% endcompress %}
+       <script>
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll(".playerCount").forEach((element) => element.addEventListener('click', changePlayerNumber));
     init();
@@ -220,6 +216,6 @@
   {% if mapData %}
   boardTiles = {{ mapData }}
   {% endif %}
-  </script>
+       </script>
 {% endblock %}
 {% endblock %}

@@ -1,14 +1,13 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/tournaments.css' %}?v=20230230"
-        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  <script src="{% static 'Lobby/Main_Tournament.js' %}?v=20220706"></script>
+  {% compress js %}
+    <script src="{% static 'Lobby/Main_Tournament.js' %}"></script>
+  {% endcompress %}
   <div class="container containerFlex">
     <div id="wholeMTchat">
       <div id="MTchatBox">
@@ -233,25 +232,25 @@
                         <td class="IPpointsTD">{{ playerEntry.1 }}</td>
                         <td class="IPpointsTD">{{ playerEntry.2 }}</td>
                         {% if playerEntry.3 %}
-                            <td class="IPpointsTD">
-                              <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}">{{ playerEntry.3.0 }}</a>
-                            </td>
-                          {% endif %}
-                          {% if playerEntry.4 %}
-                            <td class="IPpointsTD">
-                              <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}">{{ playerEntry.4.0 }}</a>
-                            </td>
-                          {% endif %}
-                          {% if playerEntry.5 %}
-                            <td class="IPpointsTD">
-                              <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}">{{ playerEntry.5.0 }}</a>
-                            </td>
-                          {% endif %}
-                          {% if playerEntry.6 %}
-                            <td class="IPpointsTD">
-                              <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}">{{ playerEntry.6.0 }}</a>
-                            </td>
-                          {% endif %}
+                          <td class="IPpointsTD">
+                            <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}">{{ playerEntry.3.0 }}</a>
+                          </td>
+                        {% endif %}
+                        {% if playerEntry.4 %}
+                          <td class="IPpointsTD">
+                            <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}">{{ playerEntry.4.0 }}</a>
+                          </td>
+                        {% endif %}
+                        {% if playerEntry.5 %}
+                          <td class="IPpointsTD">
+                            <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}">{{ playerEntry.5.0 }}</a>
+                          </td>
+                        {% endif %}
+                        {% if playerEntry.6 %}
+                          <td class="IPpointsTD">
+                            <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}">{{ playerEntry.6.0 }}</a>
+                          </td>
+                        {% endif %}
                       </tr>
                     {% endfor %}
                   </table>

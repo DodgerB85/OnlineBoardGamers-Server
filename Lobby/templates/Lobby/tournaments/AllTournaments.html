@@ -1,13 +1,13 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  <script src="{% static 'Lobby/AllTournaments.js' %}"></script>
-  <script src="{% static 'Lobby/common.js' %}"></script>
+  {% compress js %}
+    <script src="{% static 'Lobby/AllTournaments.js' %}"></script>
+    <script src="{% static 'Lobby/common.js' %}"></script>
+  {% endcompress %}
   <div class="container">
     {% if messages %}
       <div class="messages">
@@ -76,7 +76,7 @@ If anything does happen then I will keep the tournament going if at all possible
                 {% elif tourny.gameCode == 'TGZ' %}
                   {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
                 {% elif tourny.gameCode == 'AQY' %}
-                 {% include 'Lobby/gameDisplay/gameIcons.html' with game="AQY" %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="AQY" %}
                 {% elif tourny.gameCode == 'IND' %}
                   {% include 'Lobby/gameDisplay/gameIcons.html' with game="IND" %}
                 {% endif %}

@@ -2,10 +2,10 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-    <script src="{% static 'Lobby/playerInfo.js' %}?v=20220706"></script>
+    <script src="{% static 'Lobby/playerInfo.js' %}"></script>
     <div class="container">
         {% if messages %}
             <div class="messages">
@@ -16,11 +16,10 @@
         {% endif %}
         <h1>{{ gameName }}</h1>
         <h2>{{ gameDescription }}</h2>
-
-            The game will use the following customisations:<br/>
-            <br/>
-            {{godsVRhtml|safe}}
-
-       {% include 'Lobby/common/homeButton.html' %}
+        The game will use the following customisations:
+        <br />
+        <br />
+        {{ godsVRhtml|safe }}
+        {% include 'Lobby/common/homeButton.html' %}
     </div>
 {% endblock %}

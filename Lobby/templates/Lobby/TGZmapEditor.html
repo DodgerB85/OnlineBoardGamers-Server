@@ -1,58 +1,64 @@
 {% extends "Lobby/layout.html" %}
-
 {% load static %}
 {% load i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-<link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-
-<div class="container">
-
-  {% if messages %}
-  <div class="messages">
-    {% for message in messages %}
-    <div{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-<div id="playerNumberArea">
-  <img class="playerCountFixed" src="{% static 'Lobby/Images/player.png' %}" id="1player">
-  <img class="playerCount" src="{% static 'Lobby/Images/player.png' %}" id="2player">
-  <img class="playerCount" src="{% static 'Lobby/Images/playerNone.png' %}" id="3player">
-  <img class="playerCount" src="{% static 'Lobby/Images/playerNone.png' %}" id="4player">
-  <img class="playerCount" src="{% static 'Lobby/Images/playerNone.png' %}" id="5player">
-</div>
-<div id="topButtons">
-
-  <form id="mapSubmit" action="/createTGZpage/" method="post">
-    {% csrf_token %}
-    <input type="hidden" id="mapData" name="mapData" value="">
-    <input type="button" onclick="createGameWithMap()" value="{% translate " Create a game with this map" %}">
-  </form>
-</div>
-
-<h1>{% translate "Drag and drop tiles - then click on tiles to rotate" %}</h1>
-
-<div id="availableMapTiles"></div>
-<div id="topButtons">
-
-  <input type="button" onclick="fillMap()" value="{% translate " Complete map with random tiles" %}">
-  <input type="button" onclick="shuffleCurrentBoard()" value="{% translate " Shuffle the current board" %}">
-  <input type="button" onclick="clearMap()" value="{% translate " Clear map" %}">
-
-</div>
-<div id="boardArea">
-  <div id="board"></div>
-</div>
-
-{% block script %}
-<script src="{% static 'Lobby/createTGZmap.js' %}"></script>
-
-<script>
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="playerNumberArea">
+      <img class="playerCountFixed"
+           src="{% static 'Lobby/Images/player.png' %}"
+           id="1player">
+      <img class="playerCount"
+           src="{% static 'Lobby/Images/player.png' %}"
+           id="2player">
+      <img class="playerCount"
+           src="{% static 'Lobby/Images/playerNone.png' %}"
+           id="3player">
+      <img class="playerCount"
+           src="{% static 'Lobby/Images/playerNone.png' %}"
+           id="4player">
+      <img class="playerCount"
+           src="{% static 'Lobby/Images/playerNone.png' %}"
+           id="5player">
+    </div>
+    <div id="topButtons">
+      <form id="mapSubmit" action="/createTGZpage/" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="mapData" name="mapData" value="">
+        <input type="button"
+               onclick="createGameWithMap()"
+               value="{% translate " Create a game with this map" %}">
+      </form>
+    </div>
+    <h1>{% translate "Drag and drop tiles - then click on tiles to rotate" %}</h1>
+    <div id="availableMapTiles"></div>
+    <div id="topButtons">
+      <input type="button"
+             onclick="fillMap()"
+             value="{% translate " Complete map with random tiles" %}">
+      <input type="button"
+             onclick="shuffleCurrentBoard()"
+             value="{% translate " Shuffle the current board" %}">
+      <input type="button"
+             onclick="clearMap()"
+             value="{% translate " Clear map" %}">
+    </div>
+    <div id="boardArea">
+      <div id="board"></div>
+    </div>
+    {% block script %}
+      <script src="{% static 'Lobby/createTGZmap.js' %}"></script>
+      <script>
 
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll(".playerCount").forEach((element) => element.addEventListener('click', changePlayerNumber));
@@ -62,8 +68,6 @@
   {% if mapData %}
   boardTiles = {{ mapData }}
   {% endif %}
-</script>
-
-{% endblock %}
-
-{% endblock %}
+      </script>
+    {% endblock %}
+  {% endblock %}

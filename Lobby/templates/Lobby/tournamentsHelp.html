@@ -2,9 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -77,9 +76,9 @@
           <br />
           <br />
           <b>Multi-Game</b> has everyyone playing 4 games in round 1. The top 14 progress into two groups of 7 players in round 2,
-          and the top 2 from each group play a single game in the final. Currently applies to 4 player only. 
-          <br/>
-          <br/>
+          and the top 2 from each group play a single game in the final. Currently applies to 4 player only.
+          <br />
+          <br />
           <b>Knockout</b> is simply the winner moves to the next round. This format will not be used in the regular schedule above, in order to get all players more games.
           <br />
           <br />

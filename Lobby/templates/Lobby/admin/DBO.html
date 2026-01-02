@@ -3,8 +3,8 @@
 <html>
   <head>
     <title>Game Search</title>
-    <script src="{% static 'Lobby/admin/DBO.js' %}?v=20220706"></script>
-    <link href="{% static 'Lobby/admin/DBO.css' %}?v=20230230" rel="stylesheet">
+    <script src="{% static 'Lobby/admin/DBO.js' %}"></script>
+    <link href="{% static 'Lobby/admin/DBO.css' %}" rel="stylesheet">
   </head>
   <body>
     <h1>Game Search</h1>
@@ -27,112 +27,123 @@
     <div id="results"></div>
     <br />
     {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-      <div {% if message.tags %} class="{{ message.tags }}" {% endif %}>
-        {{ message }}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
     {% endif %}
-    There are {{ totalGamesCount }} games.<br/>
-    There are {{ noramlGamesCount }} normal games.<br/>
-    There are {{pracGamesCount}} practice games.<br/>
-    [[ Total {{finishedGamesCount}}]] finished games<br/>
+    There are {{ totalGamesCount }} games.
+    <br />
+    There are {{ noramlGamesCount }} normal games.
+    <br />
+    There are {{ pracGamesCount }} practice games.
+    <br />
+    [[ Total {{ finishedGamesCount }}]] finished games
+    <br />
     <br />
     <br />
     <div id="currentGamesListView">
       {% if gamesList %}
-      <table class="gamesTable">
-        <thead>
-          <tr class="headingRow">
-            <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-            <td class="creatorHeader">{% translate "Creator" %}</td>
-            <td class="playersHeader">{% translate "Players" %}</td>
-            <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-            <td class="currentTurnHeader">{% translate "Current Turn" %}</td>
-            <!--<td class="createdHeader">Created</td>-->
-            <td class="speedHeader">{% translate "Speed" %}</td>
-            <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
-          </tr>
-        </thead>
-
-        {% for game in gamesList %}
-        <tr
-          class="clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %} kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
-          id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
-          <td class="nameTDcurrent tdWithBox" id="td1">{% if game.chatNotification %}<img class="startingOption" alt="Str Opt" width="50" height="50"
-              src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
-
-            {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
-
-            <a target="_blank" 
-            {% if game.gameCode == "FCM" %}
-            href="{% url 'FCM:showFCMgame' game_id=game.gameID %}" 
-{% elif game.gameCode == "HC" %}
-href="{% url 'HC:showHCgame' game_id=game.gameID %}" 
-{% elif game.gameCode == "Bus" %}
-href="{% url 'Bus:showBusGame' game_id=game.gameID %}" 
-{% elif game.gameCode == "TGZ" %}
-href="{% url 'TGZ:showTGZgame' game_id=game.gameID %}" 
-{% elif game.gameCode == "CNS" %}
-href="{% url 'CNS:showCNSgame' game_id=game.gameID %}" 
-{% elif game.gameCode == "AQY" %}
-href="{% url 'AQY:showAQYgame' game_id=game.gameID %}" 
-{% elif game.gameCode == "IND" %}
-href="{% url 'IND:showINDgame' game_id=game.gameID %}" 
-{% elif game.gameCode == "KFW" %}
-href="{% url 'KFW:showKFWgame' game_id=game.gameID %}"
-{% elif game.gameCode == "WEB" %}
-href="{% url 'WEB:showWEBgame' game_id=game.gameID %}"
-{% endif %}
-            >
-            {{ game.gameName }} ID: {{game.gameID }} {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i> {% endif %} i={{ forloop.counter }}</a>
-            {% if game.startingMap and game.gameCode == "FCM" %} 
-            <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMap.jpg" %}" 
-            title="Click to View Map"
-              data-map="{{game.startingMap}}" data-game="FCM"> 
-              {% endif %}
-              {% if game.startingMap and game.gameCode == "TGZ" %} 
-              <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapTGZ.jpg" %}" 
-              title="Click to View Map"
-                data-map="{{game.startingMap}}" data-game="TGZ"> 
+        <table class="gamesTable">
+          <thead>
+            <tr class="headingRow">
+              <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+              <td class="creatorHeader">{% translate "Creator" %}</td>
+              <td class="playersHeader">{% translate "Players" %}</td>
+              <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+              <td class="currentTurnHeader">{% translate "Current Turn" %}</td>
+              <!--<td class="createdHeader">Created</td>-->
+              <td class="speedHeader">{% translate "Speed" %}</td>
+              <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
+            </tr>
+          </thead>
+          {% for game in gamesList %}
+            <tr class="clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %} kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
+                id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
+              <td class="nameTDcurrent tdWithBox" id="td1">
+                {% if game.chatNotification %}
+                  <img class="startingOption"
+                       alt="Str Opt"
+                       width="50"
+                       height="50"
+                       src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
+                       title="New Chat Message">
                 {% endif %}
-            {{ game.startingOptionsHTML|safe }}
-          </td>
-
-          <td>
-            {% if game.deleteableGame %}
-            <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
-              {% blocktranslate trimmed %}
-              Delete <BR /> Practice<BR /> Game
-              {% endblocktranslate %}
-            </div>
-            {% else  %}
-            <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">
-              {% blocktranslate trimmed %}
-              Delete <BR /> NORMAL 
-              {% endblocktranslate %}
-            {% endif %}
-
-          </td>
-
-          <td>{% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">
-              {{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-
-          <td>{{ game.currentPlayers }}</td>
-          <td>{{ game.currentTurn }}</td>
-          <!--<td>{{ game.created }}</td>-->
-          <td>{{ game.pace|safe }}</td>
-          <td><span class="timeToConvertSpan">{{ game.latestUpdate }}</span>{% if 'SHADOW' not in game.allPlayers %}
-            {% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}<BR />{{ game.latestUpdateElapsedTimeString }}</td>
-        </tr>
-        {% endfor %}
-
-      </table>
-      {% else %}
-      No games found
-      {% endif %}
-         </div>
-  </body>
-</html>
+                {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
+                <a target="_blank"
+                   {% if game.gameCode == "FCM" %} href="{% url 'FCM:showFCMgame' game_id=game.gameID %}" {% elif game.gameCode == "HC" %} href="{% url 'HC:showHCgame' game_id=game.gameID %}" {% elif game.gameCode == "Bus" %} href="{% url 'Bus:showBusGame' game_id=game.gameID %}" {% elif game.gameCode == "TGZ" %} href="{% url 'TGZ:showTGZgame' game_id=game.gameID %}" {% elif game.gameCode == "CNS" %} href="{% url 'CNS:showCNSgame' game_id=game.gameID %}" {% elif game.gameCode == "AQY" %} href="{% url 'AQY:showAQYgame' game_id=game.gameID %}" {% elif game.gameCode == "IND" %} href="{% url 'IND:showINDgame' game_id=game.gameID %}" {% elif game.gameCode == "KFW" %} href="{% url 'KFW:showKFWgame' game_id=game.gameID %}" {% elif game.gameCode == "WEB" %} href="{% url 'WEB:showWEBgame' game_id=game.gameID %}" {% endif %}>
+                  {{ game.gameName }} ID: {{ game.gameID }}
+                  {% if game.gameDescription %}- <i>{{ game.gameDescription }}</i>{% endif %}
+                i={{ forloop.counter }}</a>
+                {% if game.startingMap and game.gameCode == "FCM" %}
+                  <img class="startingOption startingMap"
+                       alt="Map"
+                       width="50"
+                       height="50"
+                       src="{% static "Lobby/images/createMap.jpg" %}"
+                       title="Click to View Map"
+                       data-map="{{ game.startingMap }}"
+                       data-game="FCM">
+                {% endif %}
+                {% if game.startingMap and game.gameCode == "TGZ" %}
+                  <img class="startingOption startingMap"
+                       alt="Map"
+                       width="50"
+                       height="50"
+                       src="{% static "Lobby/images/createMapTGZ.jpg" %}"
+                       title="Click to View Map"
+                       data-map="{{ game.startingMap }}"
+                       data-game="TGZ">
+                {% endif %}
+                {{ game.startingOptionsHTML|safe }}
+              </td>
+              <td>
+                {% if game.deleteableGame %}
+                  <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}"
+                       class="deleteTrainingGame">
+                    {% blocktranslate trimmed %}
+                      Delete
+                      <br />
+                      Practice
+                      <br />
+                      Game
+                    {% endblocktranslate %}
+                  </div>
+                {% else %}
+                  <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}"
+                       class="deleteTrainingGame">
+                    {% blocktranslate trimmed %}
+                      Delete
+                      <br />
+                      NORMAL
+                    {% endblocktranslate %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% for player in game.allPlayers %}
+                    <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
+                    {% if not forloop.last %},{% endif %}
+                  {% endfor %}
+                </td>
+                <td>{{ game.currentPlayers }}</td>
+                <td>{{ game.currentTurn }}</td>
+                <!--<td>{{ game.created }}</td>-->
+                <td>{{ game.pace|safe }}</td>
+                <td>
+                  <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
+                  {% if 'SHADOW' not in game.allPlayers %}
+                    {% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}
+                  {% endif %}
+                  <br />
+                  {{ game.latestUpdateElapsedTimeString }}
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% else %}
+          No games found
+        {% endif %}
+      </div>
+    </body>
+  </html>

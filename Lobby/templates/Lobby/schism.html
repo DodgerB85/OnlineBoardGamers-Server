@@ -2,8 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/TGZT.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <script src="{% static 'Lobby/schism.js' %}"></script>
@@ -123,7 +123,10 @@
       </div>
       <form id="paginationForm" method="post" action="{% url 'schism' %}">
         {% csrf_token %}
-        <input type="hidden" id="pageInput" name="page" value="{{ finished_current_page }}">
+        <input type="hidden"
+               id="pageInput"
+               name="page"
+               value="{{ finished_current_page }}">
       </form>
       <script>
           function submitForm(pageNumber) {

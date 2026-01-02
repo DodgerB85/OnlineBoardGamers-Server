@@ -2,9 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -265,9 +264,10 @@
     </div>
     <h1>{% translate "Examples of Play" %}</h1>
     The following examples of play are from TGZ Tournament Games
-    <br/>
     <br />
-    2024 Autumn Final<br/>
+    <br />
+    2024 Autumn Final
+    <br />
     <iframe width="560"
             height="315"
             src="https://www.youtube.com/embed/BZ4WWGEYxnI"
@@ -275,7 +275,8 @@
             allowfullscreen></iframe>
     <br />
     <br />
-    2024 Autumn game A3<br/>
+    2024 Autumn game A3
+    <br />
     <iframe width="560"
             height="315"
             src="https://www.youtube.com/embed/pVSyeE_ib1o"
@@ -283,7 +284,8 @@
             allowfullscreen></iframe>
     <br />
     <br />
-    2024 Autumn game 20<br/>
+    2024 Autumn game 20
+    <br />
     <iframe width="560"
             height="315"
             src="https://www.youtube.com/embed/2onb2ZJJ7G4"
@@ -292,7 +294,7 @@
     <br />
     <br />
     For moe game analysis videos see <a href="https://www.youtube.com/@steveth-b2g" target="_blank">Steveth's YouTube Channel</a>
-    <br/>
+    <br />
     <br />
     {% translate "For further help contact" %}
     <img id="contactEmailImg"

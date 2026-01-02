@@ -8,7 +8,6 @@
           display: none;
         }
         </style>
-        
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-XVXK8Q50KN"></script>
         <script>
@@ -26,8 +25,8 @@
         </title>
         <meta name="title" content="Online Board Gamers">
         {% block description %}
-        <meta name="description"
-              content="Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!">
+            <meta name="description"
+                  content="Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!">
         {% endblock %}
         <meta name="keywords"
               content="Food,Chain,Magnate,Online,Play,Board,Game,Games,Gamers,Horseless,Carriage,Bus,Great,Zimbabwe,Cannes,Antiquity,Indonesia,Keyflower,Web">
@@ -37,8 +36,8 @@
         <meta name="revisit-after" content="2 days">
         <meta name="author" content="Online Board Gamers">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta property="og:image" content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
-
+        <meta property="og:image"
+              content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
         <!--<link rel="preload"
       href="/static/Lobby/Lobby.css"
       as="style"
@@ -54,11 +53,8 @@
               sizes="57x57 72x72 76x76 114x114 120x120 144x144 152x152"
               href="{% static 'Lobby/favicon.jpg' %}">
         <link rel="shortcut icon" href="{% static 'Lobby/favicon.ico' %}" />
-        {% block canonical %}
-        <link rel="canonical" href="https://www.onlineboardgamers.com/">
-        {% endblock %}
-        <link href="{% static 'Lobby/CSS/layout.css' %}?v=20230230"
-              rel="stylesheet">
+        {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com/">{% endblock %}
+        <link href="{% static 'Lobby/CSS/layout.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
     </head>
     <body>
@@ -96,9 +92,7 @@
                     <div id="langSelectLoggedIn">
                         {% get_current_language_bidi as LANGUAGE_BIDI %}
                         {% get_current_language as LANGUAGE_CODE %}
-                        <form
-                              action="{% url 'set_language_custom' %}"
-                              method="post">
+                        <form action="{% url 'set_language_custom' %}" method="post">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.path }}">
                             <select name="language" onchange="this.form.submit()">
@@ -124,7 +118,6 @@
                         <span class="bar"></span>
                     </div>
                 </div>
-
             {% else %}
                 <!-- Not logged in TOP BAR -->
                 <div id="loginForm">
@@ -142,7 +135,9 @@
                         <input type="submit" value="{% translate " Login" %}">
                     </form>
                     <a href="{% url 'index' %}">
-                        <img id="logoLoggedOut" width="800px" height="54px"
+                        <img id="logoLoggedOut"
+                             width="800px"
+                             height="54px"
                              src="{% static 'Lobby/images/Logo1.png' %}"
                              alt="Online Board Gamers">
                     </a>
@@ -165,9 +160,7 @@
                     <div id="langSelectLoggedOut">
                         {% get_current_language_bidi as LANGUAGE_BIDI %}
                         {% get_current_language as LANGUAGE_CODE %}
-                        <form
-                              action="{% url 'set_language_custom' %}"
-                              method="post">
+                        <form action="{% url 'set_language_custom' %}" method="post">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.path }}">
                             <select name="language" onchange="this.form.submit()">
@@ -241,23 +234,23 @@
                 </div>
             </div>
         {% endif %}
-            <div class="mainLayout">
-                {% block body %}{% endblock %}
+        <div class="mainLayout">
+            {% block body %}{% endblock %}
+        </div>
+        <div class="footer">
+            <div class="content">
+                <p>
+                    {% blocktranslate trimmed %}
+                        Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, and Indonesia are board games by Jeroen Doumen
+                        and Joris Wiersinga, published by
+                        <a href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>. Permission Provided.
+                    {% endblocktranslate %}
+                </p>
+                <p>
+                    Summary icons from <a href="https://game-icons.net/">game-icons.net</a>
+                </p>
             </div>
-            <div class="footer">
-                <div class="content">
-                    <p>
-                        {% blocktranslate trimmed %}
-                            Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, and Indonesia are board games by Jeroen Doumen
-                            and Joris Wiersinga, published by
-                            <a href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>. Permission Provided.
-                        {% endblocktranslate %}
-                    </p>
-                    <p>
-                        Summary icons from <a href="https://game-icons.net/">game-icons.net</a>
-                    </p>
-                </div>
-            </div>
+        </div>
     </body>
     <script>
     document.addEventListener('DOMContentLoaded', function () {

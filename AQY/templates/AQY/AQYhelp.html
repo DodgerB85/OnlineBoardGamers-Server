@@ -2,9 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -17,7 +16,10 @@
     {% endif %}
     <div id="AQYhelpPage">
       <h1>{% translate "Rules" %}</h1>
-      {% translate "Antiquity Rules Available <a class='linkOther' href='https://tesera.ru/images/items/188574/Antiquity_Rules.pdf' target='_blank' download>here</a>" %}
+      {% translate "Antiquity Rules Available <a class='linkOther'
+    href='https://tesera.ru/images/items/188574/Antiquity_Rules.pdf'
+    target='_blank'
+    download>here</a>" %}
       <h1>{% translate "Antiquity Help" %}</h1>
       <h3>
         <b><u>{% translate "Playing the Game" %}</u></b>
