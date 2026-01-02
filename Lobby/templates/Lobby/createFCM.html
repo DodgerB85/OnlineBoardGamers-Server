@@ -3,13 +3,12 @@
 {% load i18n %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
+          rel="stylesheet" />
     <link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230"
-          rel="stylesheet">
+          rel="stylesheet" />
 {% endblock %}
 {% block body %}
-    {{ request.user.id|json_script:"user_id" }}
-    {{ request.user.username|json_script:"username" }}
+    {{ request.user.id|json_script:"user_id" }} {{ request.user.username|json_script:"username" }}
     <div class="container">
         {% if messages %}
             <div class="messages">
@@ -21,7 +20,9 @@
         <!--<p><span style="font-size: 2em; background-color: yellow; color: darkred;">Want to play in person? Check out <a href="https://splottercon.com/" target="_blank">Splotter Con 2024</a>! Pittsburgh from Aug 30</span></p>
     -->
         <div id="FCMallOptions">
-            <span class="topOfNewGameSpan">{% translate "New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
+            <span class="topOfNewGameSpan">
+                {% translate 'New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see <a class="linkOther" href="/help/">Help</a>' %}
+            </span>
             {% if MT_Creation %}
                 <form autocomplete="off"
                       action="{% url 'createFCMminiTournament' %}"
@@ -33,7 +34,7 @@
                     {% endif %}
                     {% csrf_token %}
                     <div class="topOfNewGameOptionsDiv">
-                        <input type="hidden" id="mapData" name="mapData" value="{{ mapData }}">
+                        <input type="hidden" id="mapData" name="mapData" value="{{ mapData }}" />
                         {% if MT_Creation %}
                             <fieldset id="setupOptions" class="optionsGroupTop">
                                 <legend class="optionsHeader">{% translate "Mini Tournament Setup Options" %}</legend>
@@ -59,7 +60,7 @@
                                                id="tournamentDescription"
                                                class="textInput"
                                                placeholder="{% translate 'Optional, eg fast EST time zone' %}"
-                                               maxlength="100">
+                                               maxlength="100" />
                                     </div>
                                 </div>
                                 <span class="inlineHelp">{% translate "Optional, eg Time zone / style / etc" %}</span>
@@ -79,11 +80,11 @@
                                         <select name="playersPerGameMT"
                                                 id="playersPerGameMT"
                                                 onchange="validateOptions(this.id);">
-                                            <option value=2 selected="selected">2</option>
-                                            <option value=3>3</option>
-                                            <option value=4>4</option>
-                                            <option value=5>5</option>
-                                            <option value=6>6</option>
+                                            <option value="2" selected="selected">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
                                         </select>
                                     </div>
                                 </div>
@@ -105,7 +106,7 @@
                                        class="myCheckbox"
                                        id="privateTournament"
                                        name="privateTournament"
-                                       value="1">
+                                       value="1" />
                                 <label for="privateTournament" class="checkboxLabel">{% translate "Private Tournament" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "Players can only join through the link" %}</span>
@@ -176,7 +177,7 @@
                                                    class="textInput"
                                                    name="player2"
                                                    class="playerInput"
-                                                   autocomplete="off">
+                                                   autocomplete="off" />
                                         </div>
                                         <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
                                     </div>
@@ -190,7 +191,7 @@
                                                    class="textInput"
                                                    name="player3"
                                                    class="playerInput"
-                                                   autocomplete="off">
+                                                   autocomplete="off" />
                                         </div>
                                     </div>
                                 </div>
@@ -203,7 +204,7 @@
                                                    class="textInput"
                                                    name="player4"
                                                    class="playerInput"
-                                                   autocomplete="off">
+                                                   autocomplete="off" />
                                         </div>
                                     </div>
                                 </div>
@@ -216,7 +217,7 @@
                                                    class="textInput"
                                                    name="player5"
                                                    class="playerInput"
-                                                   autocomplete="off">
+                                                   autocomplete="off" />
                                         </div>
                                     </div>
                                 </div>
@@ -229,7 +230,7 @@
                                                    class="textInput"
                                                    name="player6"
                                                    class="playerInput"
-                                                   autocomplete="off">
+                                                   autocomplete="off" />
                                         </div>
                                     </div>
                                 </div>
@@ -257,14 +258,12 @@
                                     <span class="inlineHelp">{% translate "Change Playing Speed for different options" %}</span>
                                 </div>
                             {% endif %}
-                            <!--<input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="allowSurrender" name="allowSurrender" value="5">
-                <label for="allowSurrender"> Allow Surrender </label><br />-->
                             <input type="checkbox"
                                    onchange="validateOptions(this.id)"
                                    class="myCheckbox"
                                    id="strictPaydayFridge"
                                    name="strictPaydayFridge"
-                                   value="101">
+                                   value="101" />
                             <label for="strictPaydayFridge" class="checkboxLabel">{% translate "Use turn order for Payday and Fridge" %}</label>
                             <br />
                             <span class="inlineHelp">{% translate "Completed in turn order - not simultaneously" %}</span>
@@ -275,14 +274,14 @@
                                        class="myCheckbox"
                                        id="trainingGame"
                                        name="trainingGame"
-                                       value="102">
+                                       value="102" />
                                 <label for="trainingGame" class="checkboxLabel">{% translate "Practice Game" %}</label>
                                 <br />
                                 <span class="inlineHelp">
                                     {% url "lobbyHelp" as the_url %}
                                     {% blocktranslate trimmed %}
-                                        Play as up to 6 players on the same device.
-                                        See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                        Play as up to 6 players on the same device. See
+                                        <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
                                     {% endblocktranslate %}
                                 </span>
                                 <br />
@@ -291,7 +290,7 @@
                                        class="myCheckbox"
                                        id="privateGame"
                                        name="privateGame"
-                                       value="1">
+                                       value="1" />
                                 <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
@@ -301,14 +300,14 @@
                                        class="myCheckbox"
                                        id="learningGame"
                                        name="learningGame"
-                                       value="110">
+                                       value="110" />
                                 <label for="learningGame" class="checkboxLabel">{% translate " Request Learning Game" %}</label>
                                 <br />
                                 <span class="inlineHelp">
                                     {% url "lobbyHelp" as the_url %}
                                     {% blocktranslate trimmed %}
-                                        Request help to learn the game.
-                                        See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                        Request help to learn the game. See
+                                        <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
                                     {% endblocktranslate %}
                                     le game
                                 </span>
@@ -319,13 +318,14 @@
                                        id="experiencedGame"
                                        name="experiencedGame"
                                        value="120"
-                                       disabled>
+                                       disabled />
                                 <label for="experiencedGame" class="checkboxLabel">{% translate "Experienced Game" %}</label>
                                 <br />
                                 <span class="inlineHelp">
                                     {% url "lobbyHelp" as the_url %}
                                     {% blocktranslate trimmed %}
-                                        Minmum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                        Minmum Experience Level. See
+                                        <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
                                     {% endblocktranslate %}
                                     {% if not experienced %}
                                         <br />
@@ -339,18 +339,18 @@
                                    class="myCheckbox"
                                    id="allowRewind"
                                    name="allowRewind"
-                                   value="999">
+                                   value="999" />
                             <label for="allowRewind" class="checkboxLabel">{% translate "Auto-enable Rewind" %}</label>
                             <br />
                             <span class="inlineHelp">{% translate "Enable without requiring permissions from all players" %}</span>
                             <br />
-                            <div id="keepMapDiv" style="background-color: yellow;display: none;">
+                            <div id="keepMapDiv" style="background-color: yellow; display: none">
                                 <input type="checkbox"
                                        onchange="validateOptions(this.id)"
                                        class="myCheckbox"
                                        id="keepMap"
                                        name="keepMap"
-                                       value="">
+                                       value="" />
                                 <label for="keepMap" class="checkboxLabel">{% translate "Keep the same map" %}</label>
                                 <br />
                                 <!--<span class="inlineHelp">Untick to play with a random map</span><br />-->
@@ -364,7 +364,7 @@
                                        class="myCheckbox"
                                        id="enableAdvancedOptions"
                                        name="enableAdvancedOptions"
-                                       value="expert">
+                                       value="expert" />
                                 <label for="enableAdvancedOptions" class="checkboxLabel">{% translate "Enable Advanced Setup Options" %}</label>
                                 <br />
                                 <input type="checkbox"
@@ -373,7 +373,7 @@
                                        id="fcmAI"
                                        name="fcmAI"
                                        value="500"
-                                       disabled>
+                                       disabled />
                                 <label for="fcmAI" class="checkboxLabel">{% translate "AI v0.1. Vague intelligence. Very bad!" %}</label>
                                 <br />
                                 <input type="checkbox"
@@ -382,7 +382,7 @@
                                        id="randomModules"
                                        name="randomModules"
                                        value=""
-                                       disabled>
+                                       disabled />
                                 <label for="randomModules" class="checkboxLabel">{% translate "Use random modules" %}</label>
                                 <br />
                                 <!--<span class="inlineHelp">{% translate "Completed in turn order - not simultaneously" %}</span><br />-->
@@ -393,7 +393,7 @@
                                        id="random_originalMS"
                                        name="random_MS"
                                        value="201"
-                                       disabled>
+                                       disabled />
                                 <label for="random_originalMS" class="checkboxLabel">{% translate "Original MS" %}</label>
                                 <input type="radio"
                                        onchange="validateOptions(this.id)"
@@ -401,7 +401,7 @@
                                        id="random_newMS"
                                        name="random_MS"
                                        value="202"
-                                       disabled>
+                                       disabled />
                                 <label for="random_newMS" class="checkboxLabel">{% translate "New MS" %}</label>
                                 <br />
                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -454,7 +454,7 @@
                                        id="draftModules"
                                        name="draftModules"
                                        value=""
-                                       disabled>
+                                       disabled />
                                 <label for="draftModules" class="checkboxLabel">{% translate "Draft modules" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "Pick expansion modules at game start" %}</span>
@@ -466,7 +466,7 @@
                                        id="draft_originalMS"
                                        name="draft_MS"
                                        value="301"
-                                       disabled>
+                                       disabled />
                                 <label for="draft_originalMS" class="checkboxLabel">{% translate "Original MS" %}</label>
                                 <input type="radio"
                                        onchange="validateOptions(this.id)"
@@ -474,7 +474,7 @@
                                        id="draft_newMS"
                                        name="draft_MS"
                                        value="302"
-                                       disabled>
+                                       disabled />
                                 <label for="draft_newMS" class="checkboxLabel">{% translate "New MS" %}</label>
                                 <br />
                                 &nbsp;&nbsp;&nbsp;
@@ -484,7 +484,7 @@
                                        id="newDistrictsDraft"
                                        name="newDistrictsDraft"
                                        value="18"
-                                       disabled>
+                                       disabled />
                                 <label for="newDistrictsDraft" class="checkboxLabel">{% translate "Use New Districts" %}</label>
                                 <br />
                                 <!--<span class="optionHelp">
@@ -496,7 +496,7 @@
                                        id="newDistrictsAppDraft"
                                        name="newDistrictsAppDraft"
                                        value="181"
-                                       disabled>
+                                       disabled />
                                 <label for="newDistrictsAppDraft" class="optionHelp checkboxLabel">
                                     {% translate "Guarantee at least 1 Apartment" %}
                                 </label>
@@ -508,7 +508,7 @@
                                        id="newDistrictsParkDraft"
                                        name="newDistrictsParkDraft"
                                        value="183"
-                                       disabled>
+                                       disabled />
                                 <label for="newDistrictsParkDraft" class="optionHelp checkboxLabel">{% translate "Guarantee the Parks tile" %}</label>
                                 <br />
                             {% endif %}
@@ -522,7 +522,7 @@
                                                    id="playerToInviteMT"
                                                    class="textInput playerInput"
                                                    name="playerToInviteMT"
-                                                   autocomplete="off">
+                                                   autocomplete="off" />
                                         </div>
                                     </div>
                                 </div>
@@ -533,7 +533,7 @@
                                 <input type="hidden"
                                        id="invtedPlayersListMT"
                                        name="invtedPlayersListMT"
-                                       value="">
+                                       value="" />
                                 <span id="invitedPlayersSpanMT"></span>
                             {% endif %}
                         </fieldset>
@@ -557,13 +557,14 @@
                                            class="myCheckbox individualOpt"
                                            id="hardChoices"
                                            name="hardChoices"
-                                           value="8">
+                                           value="8" />
                                     <label for="hardChoices" class="checkboxLabel">{% translate "Hard Choices with Original Milestones" %}</label>
                                     <br />
                                     <span class="optionHelp">
                                         {% translate "First to train / First to market good disappear after 2 turns" %}
                                         <br />
-                                    {% translate "First to hire 3 disappears after 3 turns" %}</span>
+                                        {% translate "First to hire 3 disappears after 3 turns" %}
+                                    </span>
                                     <br />
                                     <b>{% translate "The following options are not normally used" %}</b>
                                     <br />
@@ -572,7 +573,7 @@
                                            class="myCheckbox individualOpt"
                                            id="short"
                                            name="short"
-                                           value="1">
+                                           value="1" />
                                     <label for="short" class="checkboxLabel">{% translate "Short Game" %}</label>
                                     <br />
                                     <span class="optionHelp">{% translate "No salaries, bank only breaks once, extra money" %}</span>
@@ -582,7 +583,7 @@
                                            class="myCheckbox individualOpt"
                                            id="noMilestones"
                                            name="noMilestones"
-                                           value="2">
+                                           value="2" />
                                     <label for="noMilestones" class="checkboxLabel">{% translate "Do not use milestones" %}</label>
                                     <br />
                                     <input type="checkbox"
@@ -590,7 +591,7 @@
                                            class="myCheckbox individualOpt"
                                            id="noCeoMilestone"
                                            name="noCeoMilestone"
-                                           value="3">
+                                           value="3" />
                                     <label for="noCeoMilestone" class="checkboxLabel">{% translate "No CFO Milestone" %}</label>
                                     <br />
                                     <input type="checkbox"
@@ -598,7 +599,7 @@
                                            class="myCheckbox individualOpt"
                                            id="noRadioMilestone"
                                            name="noRadioMilestone"
-                                           value="6">
+                                           value="6" />
                                     <label for="noRadioMilestone" class="checkboxLabel">{% translate "No Radio Milestone" %}</label>
                                     <br />
                                     <input type="checkbox"
@@ -606,9 +607,11 @@
                                            class="myCheckbox individualOpt"
                                            id="sandboxMode"
                                            name="sandboxMode"
-                                           value="103">
+                                           value="103" />
                                     <label for="sandboxMode" class="checkboxLabel">
-                                        {% translate "Sandbox Mode (See" %} <a href="{% url 'FCM:FCMhelp' %}" target="_blank">{% translate "Help" %}</a>)
+                                        {% translate "Sandbox Mode (See" %}
+                                        <a href="{% url 'FCM:FCMhelp' %}" target="_blank">{% translate "Help" %}</a>
+                                        )
                                     </label>
                                     <br />
                                 </fieldset>
@@ -619,7 +622,7 @@
                                            class="myCheckbox individualOpt"
                                            id="newMilestones"
                                            name="newMilestones"
-                                           value="21">
+                                           value="21" />
                                     <label for="newMilestones" class="checkboxLabel">{% translate "Use New Milestones" %}</label>
                                     <br />
                                     <input type="checkbox"
@@ -627,11 +630,13 @@
                                            class="myCheckbox individualOpt"
                                            id="ketchupMilestone"
                                            name="ketchupMilestone"
-                                           value="20">
+                                           value="20" />
                                     <label for="ketchupMilestone" class="checkboxLabel">{% translate "Use Ketchup Milestone" %}</label>
                                     <br />
                                     <span class="optionHelp">
-                                        {% translate "Milestone: The first time someone else sells<br /> your demand, gain a permanent -1 to distance" %}
+                                        {% translate "Milestone: The first time someone else sells
+                                        <br />
+                                        your demand, gain a permanent -1 to distance" %}
                                     </span>
                                     <br />
                                     <input type="checkbox"
@@ -639,12 +644,17 @@
                                            class="myCheckbox individualOpt"
                                            id="reservePrice"
                                            name="reservePrice"
-                                           value="23">
+                                           value="23" />
                                     <label for="reservePrice" class="checkboxLabel">{% translate "Use Price Changing Reserve Cards" %}</label>
                                     <br />
-                                    <span class="optionHelp">{% translate "When the bank breaks, add $200 per player." %}
+                                    <span class="optionHelp">
+                                        {% translate "When the bank breaks, add $200 per player." %}
                                         <br />
-                                        {% translate "The base price changes to whichever is <br /> selected most, from $5, $10, or $20.<br /> In a tie, $20 beats $10 and $5, and $5 beats $10" %}
+                                        {% translate "The base price changes to whichever is
+                                        <br />
+                                        selected most, from $5, $10, or $20.
+                                        <br />
+                                        In a tie, $20 beats $10 and $5, and $5 beats $10" %}
                                     </span>
                                     <br />
                                 </fieldset>
@@ -655,7 +665,7 @@
                                            class="myCheckbox individualOpt"
                                            id="newDistricts"
                                            name="newDistricts"
-                                           value="18">
+                                           value="18" />
                                     <label for="newDistricts" class="checkboxLabel">{% translate "Use New Districts" %}</label>
                                     <br />
                                     <span class="optionHelp">{% translate "Add new tiles to the pool to make the map" %}</span>
@@ -666,7 +676,7 @@
                                            class="myCheckbox individualOpt"
                                            id="newDistrictsApp"
                                            name="newDistrictsApp"
-                                           value="181">
+                                           value="181" />
                                     <label for="newDistrictsApp" class="optionHelp checkboxLabel">{% translate "Guarantee at least 1 Apartment" %}</label>
                                     <br />
                                     &nbsp;&nbsp;&nbsp;
@@ -675,7 +685,7 @@
                                            class="myCheckbox individualOpt"
                                            id="newDistrictsPark"
                                            name="newDistrictsPark"
-                                           value="183">
+                                           value="183" />
                                     <label for="newDistrictsPark" class="optionHelp checkboxLabel">{% translate "Guarantee the Parks tile" %}</label>
                                     <br />
                                     &nbsp;&nbsp;&nbsp;
@@ -684,7 +694,7 @@
                                            class="myCheckbox individualOpt"
                                            id="newDistrictsAll"
                                            name="newDistrictsAll"
-                                           value="182">
+                                           value="182" />
                                     <label for="newDistrictsAll" class="optionHelp checkboxLabel">
                                         {% translate "Use all 5 new tiles plus random others" %}
                                     </label>
@@ -694,7 +704,7 @@
                                            class="myCheckbox individualOpt"
                                            id="lobbyists"
                                            name="lobbyists"
-                                           value="22">
+                                           value="22" />
                                     <label for="lobbyists" class="checkboxLabel">{% translate "Use Lobbyists" %}</label>
                                     <br />
                                     <span class="optionHelp">{% translate "Add new roads and parks to the map" %}</span>
@@ -704,7 +714,7 @@
                                            class="myCheckbox individualOpt"
                                            id="coffee"
                                            name="coffee"
-                                           value="19">
+                                           value="19" />
                                     <label for="coffee" class="checkboxLabel">{% translate "Use Coffee" %}</label>
                                     <br />
                                     <span class="optionHelp">{% translate "Sell coffee along the route travelled by a house" %}</span>
@@ -717,7 +727,7 @@
                                            class="myCheckbox individualOpt"
                                            id="kimchi"
                                            name="kimchi"
-                                           value="10">
+                                           value="10" />
                                     <label for="kimchi" class="checkboxLabel">{% translate "Use Kimchi" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Houses prioritise a restaurant with their demands + kimchi" %}</span>
@@ -727,7 +737,7 @@
                                            class="myCheckbox individualOpt"
                                            id="sushi"
                                            name="sushi"
-                                           value="11">
+                                           value="11" />
                                     <label for="sushi" class="checkboxLabel">{% translate "Use Sushi" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Houses with gardens will try to replace all demand with Sushi" %}</span>
@@ -737,19 +747,17 @@
                                            class="myCheckbox individualOpt"
                                            id="noodles"
                                            name="noodles"
-                                           value="12">
+                                           value="12" />
                                     <label for="noodles" class="checkboxLabel">{% translate "Use Noodles" %}</label>
                                     <br />
-                                    <span class="inlineHelp">
-                                        {% translate "Noodles count as any demand item, but only if no one else can supply it" %}
-                                    </span>
+                                    <span class="inlineHelp">{% translate "Noodles count as any demand item, but only if no one else can supply it" %}</span>
                                     <br />
                                     <input type="checkbox"
                                            onchange="validateOptions(this.id)"
                                            class="myCheckbox individualOpt"
                                            id="fryChefs"
                                            name="fryChefs"
-                                           value="9">
+                                           value="9" />
                                     <label for="fryChefs" class="checkboxLabel">{% translate "Use Fry Chefs" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Adds $10 per total sale" %}</span>
@@ -762,7 +770,7 @@
                                            class="myCheckbox individualOpt"
                                            id="massMarketers"
                                            name="massMarketers"
-                                           value="15">
+                                           value="15" />
                                     <label for="massMarketers" class="checkboxLabel">{% translate "Use Mass Marketers" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Repeat marketing phase for each Mass Marketeer" %}</span>
@@ -772,7 +780,7 @@
                                            class="myCheckbox individualOpt"
                                            id="gourmet"
                                            name="gourmet"
-                                           value="13">
+                                           value="13" />
                                     <label for="gourmet" class="checkboxLabel">{% translate "Use Gourmet Food Critic" %}</label>
                                     <br />
                                     <span class="optionHelp">{% translate "Markets to all houses with a garden" %}</span>
@@ -782,7 +790,7 @@
                                            class="myCheckbox individualOpt"
                                            id="ruralMarketers"
                                            name="ruralMarketers"
-                                           value="17">
+                                           value="17" />
                                     <label for="ruralMarketers" class="checkboxLabel">{% translate "Use Rural Marketers" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Markets to the Rural Area - accessed by freeway ramps" %}</span>
@@ -795,7 +803,7 @@
                                            class="myCheckbox individualOpt"
                                            id="movieStars"
                                            name="movieStars"
-                                           value="14">
+                                           value="14" />
                                     <label for="movieStars" class="checkboxLabel purpleLabel">{% translate "Use Movie Stars" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Decide turn order and break ties" %}</span>
@@ -805,23 +813,28 @@
                                            class="myCheckbox individualOpt"
                                            id="nightShift"
                                            name="nightShift"
-                                           value="16">
+                                           value="16" />
                                     <label for="nightShift" id="nightShiftLabel" class="checkboxLabel">{% translate "Use Night Shift Managers" %}</label>
                                     <br />
                                     <span class="inlineHelp">
-                                        {% translate "Must be put in a management slot<br /> All unsalaried employees work twice during 9-5" %}
+                                        {% translate "Must be put in a management slot
+                                        <br />
+                                        All unsalaried employees work twice during 9-5" %}
                                     </span>
                                     <br />
                                 </fieldset>
                                 <fieldset id="CEoptions" class="optionsGroupModules">
-                                    <legend class="optionsHeader">{% translate "China Expansion Options (BETA)" %}</legend>
-                                    <a class="linkOther" href="{% url 'FCM:FCMchinaHelp' %}" target="_blank">{% translate "See Help" %}</a><br/>
+                                    <legend class="optionsHeader">{% translate "China Expansion Options" %}</legend>
+                                    <a class="linkOther size25text"
+                                       href="{% url 'FCM:FCMchinaHelp' %}"
+                                       target="_blank">{% translate "See Help" %}</a>
+                                    <br />
                                     <input type="checkbox"
                                            onchange="validateOptions(this.id)"
                                            class="myCheckbox individualOpt"
                                            id="urbanPlanning"
                                            name="urbanPlanning"
-                                           value="40">
+                                           value="40" />
                                     <label for="urbanPlanning" class="checkboxLabel">{% translate "Urban Planning" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Choose map tile rotation" %}</span>
@@ -831,7 +844,7 @@
                                            class="myCheckbox individualOpt"
                                            id="urbanPlanningPlus"
                                            name="urbanPlanningPlus"
-                                           value="41">
+                                           value="41" />
                                     <label for="urbanPlanningPlus" class="checkboxLabel">{% translate "Urban Planning Plus" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Choose map tile AND map tile rotation" %}</span>
@@ -841,17 +854,17 @@
                                            class="myCheckbox individualOpt"
                                            id="jazzMusicians"
                                            name="jazzMusicians"
-                                           value="42">
+                                           value="42" />
                                     <label for="jazzMusicians" class="checkboxLabel purpleLabel">{% translate "Use Jazz Musicians" %}</label>
                                     <br />
-                                    <span class="optionHelp">{% translate "+$15, breaks ties" %}</span>
+                                    <span class="optionHelp">{% translate "+$15, loses ties" %}</span>
                                     <br />
                                     <input type="checkbox"
                                            onchange="validateOptions(this.id)"
                                            class="myCheckbox individualOpt"
                                            id="dumplings"
                                            name="dumplings"
-                                           value="43">
+                                           value="43" />
                                     <label for="dumplings" class="checkboxLabel greenLabel">{% translate "Use Dumplings" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Marketing also markets dumplings" %}</span>
@@ -861,7 +874,7 @@
                                            class="myCheckbox individualOpt"
                                            id="deliveryDrivers"
                                            name="deliveryDrivers"
-                                           value="44">
+                                           value="44" />
                                     <label for="deliveryDrivers" class="checkboxLabel orangeLabel">{% translate "Use Delivery Drivers" %}</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "2+ demand has distance 0" %}</span>
@@ -871,9 +884,8 @@
                                            class="myCheckbox individualOpt222"
                                            id="hawkers"
                                            name="hawkers"
-                                           value="45" 
-                                           disabled>
-                                    <label for="hawkers" class="checkboxLabel blueLabel">{% translate "Use Hawker Marketeers" %} (Coming Soon)</label>
+                                           value="45" />
+                                    <label for="hawkers" class="checkboxLabel blueLabel">{% translate "Use Hawker Marketeers" %} (BETA)</label>
                                     <br />
                                     <span class="inlineHelp">{% translate "Drives along a road, affects directly connected houses" %}</span>
                                     <br />
@@ -890,7 +902,7 @@
                                        class="myCheckbox"
                                        id="s_coolOriginal"
                                        name="scenario"
-                                       value="Cool Original">
+                                       value="Cool Original" />
                                 <label for="s_coolOriginal" class="checkboxLabel">{% translate "Cool original" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "Play the base game" %}</span>
@@ -900,19 +912,17 @@
                                        class="myCheckbox"
                                        id="s_newMS"
                                        name="scenario"
-                                       value="New MS">
+                                       value="New MS" />
                                 <label for="s_newMS" class="checkboxLabel">{% translate "New milestones" %}</label>
                                 <br />
-                                <span class="inlineHelp">
-                                    {% translate "Use only the “New Milestones” module. This shakes the strategic space up quite a bit already!" %}
-                                </span>
+                                <span class="inlineHelp">{% translate "Use only the “New Milestones” module. This shakes the strategic space up quite a bit already!" %}</span>
                                 <br />
                                 <input type="radio"
                                        onchange="validateScenario(this.id)"
                                        class="myCheckbox"
                                        id="s_firstCoffee"
                                        name="scenario"
-                                       value="First Coffee">
+                                       value="First Coffee" />
                                 <label for="s_firstCoffee" class="checkboxLabel">{% translate "Your first cup of coffee" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "The “Coffee” module makes board positions even more important" %}</span>
@@ -922,18 +932,17 @@
                                        class="myCheckbox"
                                        id="s_koreanCity"
                                        name="scenario"
-                                       value="Korean City">
+                                       value="Korean City" />
                                 <label for="s_koreanCity" class="checkboxLabel">{% translate "Korean city" %}</label>
                                 <br />
-                                <span class="inlineHelp">
-                                {% translate "New districts (at least 1 apartment building tile in the city) + Kimchi" %} </span>
+                                <span class="inlineHelp">{% translate "New districts (at least 1 apartment building tile in the city) + Kimchi" %}</span>
                                 <br />
                                 <input type="radio"
                                        onchange="validateScenario(this.id)"
                                        class="myCheckbox"
                                        id="s_nightlife"
                                        name="scenario"
-                                       value="Nightlife">
+                                       value="Nightlife" />
                                 <label for="s_nightlife" class="checkboxLabel">{% translate "Nightlife" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "New milestones + Night shift managers" %}</span>
@@ -943,7 +952,7 @@
                                        class="myCheckbox"
                                        id="s_sustenance"
                                        name="scenario"
-                                       value="Sustenance">
+                                       value="Sustenance" />
                                 <label for="s_sustenance" class="checkboxLabel">{% translate "Sustenance" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "Coffee + Fry chefs" %}</span>
@@ -953,19 +962,17 @@
                                        class="myCheckbox"
                                        id="s_upmarketArea"
                                        name="scenario"
-                                       value="Upmarket Area">
+                                       value="Upmarket Area" />
                                 <label for="s_upmarketArea" class="checkboxLabel">{% translate "Upmarket Area" %}</label>
                                 <br />
-                                <span class="inlineHelp">
-                                    {% translate "New milestones + Park tile from new districts + Gourmet food critic + Sushi" %}
-                                </span>
+                                <span class="inlineHelp">{% translate "New milestones + Park tile from new districts + Gourmet food critic + Sushi" %}</span>
                                 <br />
                                 <input type="radio"
                                        onchange="validateScenario(this.id)"
                                        class="myCheckbox"
                                        id="s_cityBuilder"
                                        name="scenario"
-                                       value="City Builder">
+                                       value="City Builder" />
                                 <label for="s_cityBuilder" class="checkboxLabel">{% translate "City builder" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "Lobbyist + New districts + rural marketeers" %}</span>
@@ -975,7 +982,7 @@
                                        class="myCheckbox"
                                        id="s_asianFusion"
                                        name="scenario"
-                                       value="Asian Fusion">
+                                       value="Asian Fusion" />
                                 <label for="s_asianFusion" class="checkboxLabel">{% translate "Asian Fusion" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "Sushi + Kimchi + Noodles + Ketchup" %}</span>
@@ -985,7 +992,7 @@
                                        class="myCheckbox"
                                        id="s_firstMover"
                                        name="scenario"
-                                       value="First Mover">
+                                       value="First Mover" />
                                 <label for="s_firstMover" class="checkboxLabel">{% translate "First mover" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "Hard choices + Ketchup + Movie stars + Lobbyists + Reserve prices" %}</span>
@@ -995,19 +1002,17 @@
                                        class="myCheckbox"
                                        id="s_overtime"
                                        name="scenario"
-                                       value="Overtime">
+                                       value="Overtime" />
                                 <label for="s_overtime" class="checkboxLabel">{% translate "Overtime" %}</label>
                                 <br />
-                                <span class="inlineHelp">
-                                    {% translate "Night shift managers + Mass marketeers + Rural marketeers + New districts + Noodles + Reserve price" %}
-                                </span>
+                                <span class="inlineHelp">{% translate "Night shift managers + Mass marketeers + Rural marketeers + New districts + Noodles + Reserve price" %}</span>
                                 <br />
                                 <input type="radio"
                                        onchange="validateScenario(this.id)"
                                        class="myCheckbox"
                                        id="s_henriLo"
                                        name="scenario"
-                                       value="Henri Lo">
+                                       value="Henri Lo" />
                                 <label for="s_henriLo" class="checkboxLabel">{% translate "Henri Lo Menu" %}</label>
                                 <br />
                                 <span class="inlineHelp">{% translate "All modules!" %}</span>
@@ -1015,76 +1020,79 @@
                             </fieldset>
                         </div>
                     </div>
-                </div>
-                {% if MT_Creation %}
-                    <b>{% translate "You are creating a Mini Tournament<br />You will need to wait for the tournament to fill up before any games start" %}</b>
+                    {% if MT_Creation %}
+                        <b>
+                            {% translate "You are creating a Mini Tournament
+                            <br />
+                            You will need to wait for the tournament to fill up before any games start" %}
+                        </b>
+                        <input type="submit"
+                               class="registerbtn"
+                               value="{% translate "Create Food Chain Magnate Mini Tournament" %}">
+                    </form>
+                {% else %}
                     <input type="submit"
                            class="registerbtn"
-                           value="{% translate "Create Food Chain Magnate Mini Tournament" %}">
+                           value="{% translate "Create Food Chain Magnate Game" %}">
                 </form>
-            {% else %}
-                <input type="submit"
-                       class="registerbtn"
-                       value="{% translate "Create Food Chain Magnate Game" %}">
-            </form>
-        {% endif %}
+            {% endif %}
+        </div>
         {% include 'Lobby/donate/donateBanner.html' %}
         {% include 'Lobby/splotterconSponsor.html' %}
     </div>
     {% block script %}
         <script src="{% static 'Lobby/createFCMgame.js' %}"></script>
         <script>
-    var global = {};
-    global.player2normText = '{% translate "Leave blank to invite anybody" %}';
-    global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
-    {% if experienced %}
-    global.experienced = true;
-    {% else %}
-    global.experienced = false;
-    {% endif %}
+	    var global = {};
+	    global.player2normText = '{% translate "Leave blank to invite anybody" %}';
+	    global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
+	    {% if experienced %}
+	    global.experienced = true;
+	    {% else %}
+	    global.experienced = false;
+	    {% endif %}
 
-    {% if MT_Creation %}
-    global.MT_Creation = true;
-    {% else %}
-    global.MT_Creation = false;
-    {% endif %}
+	    {% if MT_Creation %}
+	    global.MT_Creation = true;
+	    {% else %}
+	    global.MT_Creation = false;
+	    {% endif %}
 
-    document.addEventListener('DOMContentLoaded', function () {
-        {% if MT_Creation %}
-        initGameCreation(false);
-        return
-        {% endif %}
+	    document.addEventListener('DOMContentLoaded', function () {
+	        {% if MT_Creation %}
+	        initGameCreation(false);
+	        return
+	        {% endif %}
 
-        {% if mapData %}
-        boardTiles = [{{ mapData }}];
-        setPlayersforMapData();
-        {% endif %}
+	        {% if mapData %}
+	        boardTiles = [{{ mapData }}];
+	        setPlayersforMapData();
+	        {% endif %}
 
-    {% if fillData %}
-    //alert("Filling Data")
-    var setupData = {};
-    setupData.gameName = "{{ gameName|safe }}";
-    setupData.gameDescription = "{{ gameDescription }}";
-    setupData.gamePace = {{ gamePace }};
-    setupData.kickoutDuration = "{{ kickoutDuration }}";
-    setupData.playerNumber = {{ playerNumber }};
-    setupData.playerNames = {{ playerNames | safe }};
-    {% if scenarioUsed %}
-    setupData.scenarioUsed = true;
-    setupData.scenarioName = "{{ scenarioName }}";
-    {% endif %}
-    setupData.startingOptions = "{{ startingOptions }}";
-    setupData.startingMap = "{{ startingMap }}";
+	    {% if fillData %}
+	    //alert("Filling Data")
+	    var setupData = {};
+	    setupData.gameName = "{{ gameName|safe }}";
+	    setupData.gameDescription = "{{ gameDescription }}";
+	    setupData.gamePace = {{ gamePace }};
+	    setupData.kickoutDuration = "{{ kickoutDuration }}";
+	    setupData.playerNumber = {{ playerNumber }};
+	    setupData.playerNames = {{ playerNames | safe }};
+	    {% if scenarioUsed %}
+	    setupData.scenarioUsed = true;
+	    setupData.scenarioName = "{{ scenarioName }}";
+	    {% endif %}
+	    setupData.startingOptions = "{{ startingOptions }}";
+	    setupData.startingMap = "{{ startingMap }}";
 
-    initGameCreation(true, setupData);
-    {% else %}
-    initGameCreation(false);
-    {% endif %}
+	    initGameCreation(true, setupData);
+	    {% else %}
+	    initGameCreation(false);
+	    {% endif %}
 
 
-        
-});
 
+	});
         </script>
-    {% endblock %}
-{% endblock %}
+    {% endblock script %}
+{% endblock body %}

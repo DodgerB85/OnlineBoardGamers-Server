@@ -1476,7 +1476,7 @@ body.noassistance #assistancePlayers {
 	/*margin: 2px;*/
 	margin: 0 auto;
 	margin-top: 5px;
-	height: 110px;
+	height: 98px;
 	padding: 3px;
 	z-index: 1;
 	/*display: inline-block;*/
@@ -1486,10 +1486,17 @@ body.noassistance #assistancePlayers {
 	/*position:absolute;
 	display:inline-block*/
 	float: left;
-	padding: 4px;
+	padding: 0px;
 	margin: 4px;
 	position: relative;
 	z-index: 1;
+	width: 114px;
+	border: 2px solid black;
+	height: 64px;
+}
+
+.hawkerCampaign:hover {
+	border: 2px solid lightgreen;
 }
 
 /* GFC */
@@ -1727,6 +1734,12 @@ span.milestone div.milestone_spacer {
 
 .fixedCampaign img.campaign.w2 {
 	width: 80px;
+}
+
+.fixedCampaign img.campaign.w3 {
+	width: 114px;
+	height: 64px;
+	box-sizing: border-box;
 }
 
 .fixedCampaign div.inner {
