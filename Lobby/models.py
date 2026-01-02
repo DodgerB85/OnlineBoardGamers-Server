@@ -116,7 +116,7 @@ def get_default_timestamp():
 
 class changelog(models.Model):
     update = models.CharField(max_length=120)
-    timestamp = models.CharField(max_length=30, blank=False, default=get_default_timestamp)
+    timestamp = models.CharField(max_length=30, blank=False, default=get_default_timestamp, db_index=True)
 
     def __str__(self):
         return f"{self.timestamp}: {self.update}"
