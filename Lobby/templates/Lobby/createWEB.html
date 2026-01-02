@@ -1,6 +1,5 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
@@ -91,9 +90,7 @@
                                 <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv"
-                             id="selPlayer3"
-                             style="display: none">
+                        <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none">
                             <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -226,25 +223,25 @@
                                 According to the rules, you cannot remove items already on the table.
                                 This simulates some items already on the table by blocking some tile spaces.
                             {% endblocktranslate %}
-                                        </span>
-                                        <br />
-                                        <input type="checkbox"
-                                               class="myCheckbox"
-                                               id="useExpansion"
-                                               name="useExpansion"
-                                               value="1">
-                                    <label for="useExpansion" class="checkboxLabel">{% translate "Use Expansion" %}</label>
-                                    <br />
-                                    <span class="inlineHelp">
-                                        {% blocktranslate trimmed %}
-                                            Allows storage of 1 tile
-                                            <br />
-                                            Alows you to pirate unfinished movies for € 4 M
-                                        {% endblocktranslate %}
-                                </span>
-                                <br />
-                        </fieldset>
-                    -->
+                                                                        </span>
+                                                                        <br />
+                                                                        <input type="checkbox"
+                                                                               class="myCheckbox"
+                                                                               id="useExpansion"
+                                                                               name="useExpansion"
+                                                                               value="1">
+                                                            <label for="useExpansion" class="checkboxLabel">{% translate "Use Expansion" %}</label>
+                                                            <br />
+                                                            <span class="inlineHelp">
+                                                                {% blocktranslate trimmed %}
+                                                                    Allows storage of 1 tile
+                                                                    <br />
+                                                                    Alows you to pirate unfinished movies for € 4 M
+                                                                {% endblocktranslate %}
+                                                </span>
+                                                <br />
+                                </fieldset>
+                            -->
 </div>
 <br />
 </div>
@@ -258,7 +255,9 @@
 {% include 'Lobby/splotterconSponsor.html' %}
 </div>
 {% block script %}
-    <script src="{% static 'Lobby/createWEB.js' %}"></script>
+    {% compress js %}
+        <script src="{% static 'Lobby/createWEB.js' %}"></script>
+    {% endcompress %}
     <script>
     var global = {};
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';

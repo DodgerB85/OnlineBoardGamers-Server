@@ -1,6 +1,5 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
@@ -57,9 +56,10 @@
       <div id="board"></div>
     </div>
     {% block script %}
-      <script src="{% static 'Lobby/createTGZmap.js' %}"></script>
+      {% compress js %}
+        <script src="{% static 'Lobby/createTGZmap.js' %}"></script>
+      {% endcompress %}
       <script>
-
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll(".playerCount").forEach((element) => element.addEventListener('click', changePlayerNumber));
     init();
