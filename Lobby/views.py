@@ -1024,16 +1024,17 @@ def stats(request):
     latestGamesFinished = []
 
     # Queries for both active and finished games
-    active_query = (
-        Q(gameStatus="ACTIVE")
-        & ~Q(allPlayers__username="SHADOW")
-        & ~Q(allPlayers__username="FcmAI")
-    )
-    finished_query = (
-        Q(gameStatus="FINISHED")
-        & ~Q(allPlayers__username="SHADOW")
-        & ~Q(allPlayers__username="FcmAI")
-    )
+    #active_query = (
+    #    Q(gameStatus="ACTIVE")
+    #    & ~Q(allPlayers__username="SHADOW")
+    #    & ~Q(allPlayers__username="FcmAI")
+    #)
+    #finished_query = (
+    #    Q(gameStatus="FINISHED")
+    #    & ~Q(allPlayers__username="SHADOW")
+    #    & ~Q(allPlayers__username="FcmAI")
+    #)
+    excluded_names = ["SHADOW", "FcmAI"]
 
     # Loop through GAME_MODELS once to gather counts and latest games
     for game_model in GAME_MODELS:
@@ -1041,26 +1042,59 @@ def stats(request):
         # To get the latest 10 games, we need to load 10x game models. But we only want to serialise the latest 10
         # So it's actually less hits just to get the latest 10 games for each model without prefetch (~150 hits)
         # Get counts (1 hit per model)
-        active_count = game_model.objects.filter(active_query).count()
-        finished_count = game_model.objects.filter(finished_query).count()
-        active_games = game_model.objects.filter(active_query).annotate(
-            count=Count("id")
+        model_name = game_model.__name__
+        
+        # Cache counts per model to avoid heavy COUNT(*) on every page load
+        counts_key = f"counts_{model_name}"
+        counts = cache.get(counts_key)
+        
+        if not counts:
+            counts = {
+                "active": game_model.objects.filter(gameStatus="ACTIVE")
+                          .exclude(allPlayers__username__in=excluded_names).count(),
+                "finished": game_model.objects.filter(gameStatus="FINISHED")
+                            .exclude(allPlayers__username__in=excluded_names).count()
+            }
+            cache.set(counts_key, counts, 60) # Cache counts for 60 seconds
+        
+        game_counts.append(counts["active"])
+        finished_game_counts.append(counts["finished"])
+        
+        #active_count = game_model.objects.filter(active_query).count()
+        #finished_count = game_model.objects.filter(finished_query).count()
+        #active_games = game_model.objects.filter(active_query).annotate(
+        #    count=Count("id")
+        #)
+        #finished_games = game_model.objects.filter(finished_query).annotate(
+        #    count=Count("id")
+        #)
+        
+        # Fetch latest games - REMOVED annotate() for speed
+        # We only fetch 10 per model, then slice the combined list to 10 at the end
+        latestGames.extend(
+            game_model.objects.filter(gameStatus="ACTIVE")
+            .exclude(allPlayers__username__in=excluded_names)
+            .order_by("-latestUpdate")[:10]
         )
-        finished_games = game_model.objects.filter(finished_query).annotate(
-            count=Count("id")
+        
+        latestGamesFinished.extend(
+            game_model.objects.filter(gameStatus="FINISHED")
+            .exclude(allPlayers__username__in=excluded_names)
+            .order_by("-latestUpdate")[:10]
         )
-
+        
         # Count active games
         # active_count = active_games.aggregate(Sum("count"))["count__sum"] if active_games else 0
-        game_counts.append(active_count)
+        #game_counts.append(active_count)
 
         # Count finished games
         # finished_count = finished_games.aggregate(Sum("count"))["count__sum"] if finished_games else 0
-        finished_game_counts.append(finished_count)
+        #finished_game_counts.append(finished_count)
 
         # Get latest 10 games
-        latestGames.extend(active_games.order_by("-latestUpdate")[:10])
-        latestGamesFinished.extend(finished_games.order_by("-latestUpdate")[:10])
+        #latestGames.extend(active_games.order_by("-latestUpdate")[:10])
+        #latestGamesFinished.extend(finished_games.order_by("-latestUpdate")[:10])
+
 
     # Calculate grand totals
     totalGames = sum(game_counts)
@@ -1081,72 +1115,102 @@ def stats(request):
         SF_fastSerializeGame(game, request.user) for game in tenGamesListFininshed
     ]
 
+    ## Fair Play
+    #f = open("./Lobby/stats/fairPlayArr_E.json")
+    #fairPlayArr = json.load(f)
+    #print(fairPlayArr)
+    #f.close()
+#
+    ### Totals
+    #f = open("./Lobby/stats/winArr_E.json")
+    #winArr = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win3mArr_E.json")
+    #win3mArr = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win1mArr_E.json")
+    #win1mArr = json.load(f)
+    #f.close()
+#
+    #f = open("./Lobby/stats/winArr2p_E.json")
+    #winArr2p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win3mArr2p_E.json")
+    #win3mArr2p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win1mArr2p_E.json")
+    #win1mArr2p = json.load(f)
+    #f.close()
+#
+    #f = open("./Lobby/stats/winArr3p_E.json")
+    #winArr3p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win3mArr3p_E.json")
+    #win3mArr3p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win1mArr3p_E.json")
+    #win1mArr3p = json.load(f)
+    #f.close()
+#
+    #f = open("./Lobby/stats/winArr4p_E.json")
+    #winArr4p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win3mArr4p_E.json")
+    #win3mArr4p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win1mArr4p_E.json")
+    #win1mArr4p = json.load(f)
+    #f.close()
+#
+    #f = open("./Lobby/stats/winArr5p_E.json")
+    #winArr5p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win3mArr5p_E.json")
+    #win3mArr5p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win1mArr5p_E.json")
+    #win1mArr5p = json.load(f)
+    #f.close()
+#
+    #f = open("./Lobby/stats/winArr6p_E.json")
+    #winArr6p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win3mArr6p_E.json")
+    #win3mArr6p = json.load(f)
+    #f.close()
+    #f = open("./Lobby/stats/win1mArr6p_E.json")
+    #win1mArr6p = json.load(f)
+    #f.close()
+    
+    # 4. JSON Data Loading (Optimized file reading)
+    def load_stat_json(path):
+        try:
+            with open(path, 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return []
+
+    base_path = "./Lobby/stats/"
+    
     # Fair Play
-    f = open("./Lobby/stats/fairPlayArr_E.json")
-    fairPlayArr = json.load(f)
-    print(fairPlayArr)
-    f.close()
+    fairPlayArr = load_stat_json(f"{base_path}fairPlayArr_E.json")
 
-    ## Totals
-    f = open("./Lobby/stats/winArr_E.json")
-    winArr = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win3mArr_E.json")
-    win3mArr = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win1mArr_E.json")
-    win1mArr = json.load(f)
-    f.close()
+    # Win Arrays (Batch loading)
+    win_data = {
+        "winArr": load_stat_json(f"{base_path}winArr_E.json"),
+        "win3mArr": load_stat_json(f"{base_path}win3mArr_E.json"),
+        "win1mArr": load_stat_json(f"{base_path}win1mArr_E.json"),
+    }
+    
+    # Player-specific Win Arrays
+    p_counts = [2, 3, 4, 5, 6]
+    p_stats = {}
+    for p in p_counts:
+        p_stats[f"winArr{p}p"] = load_stat_json(f"{base_path}winArr{p}p_E.json")
+        p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
+        p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
 
-    f = open("./Lobby/stats/winArr2p_E.json")
-    winArr2p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win3mArr2p_E.json")
-    win3mArr2p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win1mArr2p_E.json")
-    win1mArr2p = json.load(f)
-    f.close()
-
-    f = open("./Lobby/stats/winArr3p_E.json")
-    winArr3p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win3mArr3p_E.json")
-    win3mArr3p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win1mArr3p_E.json")
-    win1mArr3p = json.load(f)
-    f.close()
-
-    f = open("./Lobby/stats/winArr4p_E.json")
-    winArr4p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win3mArr4p_E.json")
-    win3mArr4p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win1mArr4p_E.json")
-    win1mArr4p = json.load(f)
-    f.close()
-
-    f = open("./Lobby/stats/winArr5p_E.json")
-    winArr5p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win3mArr5p_E.json")
-    win3mArr5p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win1mArr5p_E.json")
-    win1mArr5p = json.load(f)
-    f.close()
-
-    f = open("./Lobby/stats/winArr6p_E.json")
-    winArr6p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win3mArr6p_E.json")
-    win3mArr6p = json.load(f)
-    f.close()
-    f = open("./Lobby/stats/win1mArr6p_E.json")
-    win1mArr6p = json.load(f)
-    f.close()
+    
 
     games = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
 
@@ -1163,26 +1227,28 @@ def stats(request):
             "tenGamesFinished": tenGamesFinishedJSON,
             "userActvitiy": userActvitiy,
             "games": games,
-            "winArr": winArr,
-            "win3mArr": win3mArr,
-            "win1mArr": win1mArr,
-            "winArr2p": winArr2p,
-            "win3mArr2p": win3mArr2p,
-            "win1mArr2p": win1mArr2p,
-            "winArr3p": winArr3p,
-            "win3mArr3p": win3mArr3p,
-            "win1mArr3p": win1mArr3p,
-            "winArr4p": winArr4p,
-            "win3mArr4p": win3mArr4p,
-            "win1mArr4p": win1mArr4p,
-            "winArr5p": winArr5p,
-            "win3mArr5p": win3mArr5p,
-            "win1mArr5p": win1mArr5p,
-            "winArr6p": winArr6p,
-            "win3mArr6p": win3mArr6p,
-            "win1mArr6p": win1mArr6p,
+            #"winArr": winArr,
+            #"win3mArr": win3mArr,
+            #"win1mArr": win1mArr,
+            #"winArr2p": winArr2p,
+            #"win3mArr2p": win3mArr2p,
+            #"win1mArr2p": win1mArr2p,
+            #"winArr3p": winArr3p,
+            #"win3mArr3p": win3mArr3p,
+            #"win1mArr3p": win1mArr3p,
+            #"winArr4p": winArr4p,
+            #"win3mArr4p": win3mArr4p,
+            #"win1mArr4p": win1mArr4p,
+            #"winArr5p": winArr5p,
+            #"win3mArr5p": win3mArr5p,
+            #"win1mArr5p": win1mArr5p,
+            #"winArr6p": winArr6p,
+            #"win3mArr6p": win3mArr6p,
+            #"win1mArr6p": win1mArr6p,
             # Fair Play
             "fairPlayArr": fairPlayArr,
+            **win_data,
+            **p_stats
         },
     )
 
