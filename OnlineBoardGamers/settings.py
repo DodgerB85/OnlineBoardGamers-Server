@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.sitemaps",
+    "compressor",
     "FCM",
     "Lobby",
     "user_visit",
@@ -154,6 +155,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "OnlineBoardGamers.wsgi.application"
 
+# JS Minifier settings
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder', # Add this
+)
+# Enable compression for production (even if DEBUG is False)
+COMPRESS_ENABLED = True
+COMPRESS_JS_FILTERS = ["compressor.filters.jsmin.JSMinFilter"]
+
+# END JS Minifier settings
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -285,7 +297,6 @@ STORAGES = {
 }
 
 
-
 # Keep i18n if needed
 if DEBUG or LOCAL_USER:
     STATICI18N_ROOT = BASE_DIR / "i18n" / "static"
@@ -336,9 +347,9 @@ LOGGING = {
         },
     },
     "loggers": {
-        #"django.db.backends": {
+        # "django.db.backends": {
         #    "level": "DEBUG",
-        #},
+        # },
         "Lobby.views": {
             "handlers": ["file", "console"],
             "level": "DEBUG",
@@ -373,10 +384,10 @@ LOGGING = {
 
 if DEBUG:
     # Add to installed apps
-    INSTALLED_APPS += ['debug_toolbar']
-    
+    INSTALLED_APPS += ["debug_toolbar"]
+
     # Add to middleware (must be near the top, but after GZipMiddleware)
-    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
-    
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+
     # Required for the toolbar to show on localhost
-    INTERNAL_IPS = ['127.0.0.1']
+    INTERNAL_IPS = ["127.0.0.1"]
