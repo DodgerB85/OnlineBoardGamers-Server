@@ -2,9 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -18,7 +17,10 @@
     <div id="INDhelpPage">
       <h1>{% translate "Rules" %}</h1>
       {% blocktrans trimmed %}
-      Indonesia Rules Available <a class="linkOther" href="https://tesera.ru/images/items/174714/indonesia_E.pdf" target="_blank" download>here</a>
+        Indonesia Rules Available <a class="linkOther"
+    href="https://tesera.ru/images/items/174714/indonesia_E.pdf"
+    target="_blank"
+    download>here</a>
       {% endblocktrans %}
       <h1>{% translate "Indonesia Help" %}</h1>
       <h3>

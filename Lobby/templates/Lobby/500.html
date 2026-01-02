@@ -2,32 +2,38 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-
-<div class="container">
-
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <h1>{% translate "Sorry, the page you are requesting cannot be delivered" %}</h1>
+        <h2>{% translate "It appears to be a proper page, but the server is having trouble rendering it" %}</h2>
+        <h2>
+            {% translate "If you were doing something that worked before, or expected to work (such as clicking on a game) then there is a chance the website is being updated." %}
+            <br />
+            {% translate "Please wait 5 minutes and try again." %}
+            <br />
+            <br />
+            {% translate "If there is still a problem please email" %}
+            <img id="contactEmailImg"
+                 src="{% static 'Lobby/email.png' %}"
+                 alt="Email Address"
+                 width="400"
+                 height="30">
+        </h2>
+        <img src="{% static 'FCM/images/m_icon05.png' %}"
+             width="200"
+             height="200"
+             alt="Error">
+        <hr>
+        <br />
+        <a href="{% url 'index' %}">{% translate "Home" %}</a>
     </div>
-    {% endfor %}
-</div>
-{% endif %}
-<h1>{% translate "Sorry, the page you are requesting cannot be delivered" %}</h1>
-<h2>{% translate "It appears to be a proper page, but the server is having trouble rendering it" %}</h2>
-<h2>{% translate "If you were doing something that worked before, or expected to work (such as clicking on a game) then there is a chance the website is being updated." %} 
-    <BR/>{% translate "Please wait 5 minutes and try again." %}<BR/><BR/>
-    {% translate "If there is still a problem please email" %}   <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width=400 height=30>
-</h2>
-
-<img src="{% static 'FCM/images/m_icon05.png' %}" width="200" height="200" alt="Error">
-
-<HR><BR/>
-<a href="{% url 'index' %}">{% translate "Home" %}</a>
-
-</div>
-
 {% endblock %}

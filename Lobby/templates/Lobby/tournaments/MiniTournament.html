@@ -1,14 +1,13 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/tournaments.css' %}?v=20230230"
-        rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  <script src="{% static 'Lobby/Mini_Tournament.js' %}?v=20220706"></script>
+  {% compress js %}
+    <script src="{% static 'Lobby/Mini_Tournament.js' %}"></script>
+  {% endcompress %}
   <div class="container containerFlex">
     <div id="wholeMTchat">
       <div id="MTchatBox">
@@ -31,7 +30,11 @@
         </div>
       {% endif %}
       <h1>{{ tournament.tournamentName }}</h1>
-      {% if tournament.tournamentDescription %}<h3><i>{{ tournament.tournamentDescription }}</i></h3>{% endif %}
+      {% if tournament.tournamentDescription %}
+        <h3>
+          <i>{{ tournament.tournamentDescription }}</i>
+        </h3>
+      {% endif %}
       <h3>Creator: {{ creator }}</h3>
       {% if startingOptionsHTML != "" %}{{ startingOptionsHTML|safe }}{% endif %}
       <!-- OPEN MT -->
@@ -79,7 +82,6 @@
           <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}"
                 method="post">
             {% csrf_token %}
-            
             <div>
               <input type="checkbox"
                      id="understand_movement"
@@ -89,17 +91,17 @@
             </div>
             <input class="registerbtn"
                    type="submit"
-                   value="{% if isInvitedPlayer%}Accept Invite & Join Mini Tournament{% else %}{% translate "Join Mini Tournament" %}{% endif %}" />
+                   value="{% if isInvitedPlayer %}Accept Invite & Join Mini Tournament{% else %}{% translate "Join Mini Tournament" %}{% endif %}" />
           </form>
           {% if isInvitedPlayer %}
-          <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}"
-                method="post">
-            {% csrf_token %}
-            <input type="hidden" name="declineInvite" value="true">
-            <input class="declineButton"
-                   type="submit"
-                   value="{% translate "Decline Invite" %}" />
-          </form>
+            <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}"
+                  method="post">
+              {% csrf_token %}
+              <input type="hidden" name="declineInvite" value="true">
+              <input class="declineButton"
+                     type="submit"
+                     value="{% translate "Decline Invite" %}" />
+            </form>
           {% endif %}
         {% endif %}
         <!-- ////////////////////////////////////////////////////////////////// IP MT -->
@@ -107,26 +109,28 @@
         <div class="IPcontainer">
           <div class="IPleftColumn">
             {% if tournament.tournamentType == "PT" %}
-            <h2>Points</h2>
-            <table class="generalTable">
-              <tr>
-                <th>{% translate "Position" %}</th>
-                <th>{% translate "Points" %}</th>
-              </tr>
-              {% for entry in pointsValues.normal %}
+              <h2>Points</h2>
+              <table class="generalTable">
                 <tr>
-                  <td>{{ entry.0 }}</td>
-                  <td>{{ entry.1 }}</td>
+                  <th>{% translate "Position" %}</th>
+                  <th>{% translate "Points" %}</th>
                 </tr>
-              {% endfor %}
-              <tr>
-                <td colspan="2"><hr/></td>
-              </tr>
-              <tr>
-                <td>{% translate "Bye" %}</td>
-                <td>{{ pointsValues.bye }}</td>
-              </tr>
-            </table>
+                {% for entry in pointsValues.normal %}
+                  <tr>
+                    <td>{{ entry.0 }}</td>
+                    <td>{{ entry.1 }}</td>
+                  </tr>
+                {% endfor %}
+                <tr>
+                  <td colspan="2">
+                    <hr />
+                  </td>
+                </tr>
+                <tr>
+                  <td>{% translate "Bye" %}</td>
+                  <td>{{ pointsValues.bye }}</td>
+                </tr>
+              </table>
             {% endif %}
             <h2>{% translate "Players" %}</h2>
             <table class="generalTable">
@@ -229,7 +233,7 @@
     <br />
   </div>
   <div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>
- {% include 'Lobby/common/homeButton.html' %}
+  {% include 'Lobby/common/homeButton.html' %}
   {% block script %}
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     <script>

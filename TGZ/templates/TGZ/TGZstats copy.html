@@ -3,10 +3,9 @@
 {% load i18n %}
 {% block head %}
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-  <script src="{% static 'TGZ/TGZstats.js' %}?v=20220706"></script>
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/stats.css' %}?v=20230230" rel="stylesheet">
+  <script src="{% static 'TGZ/TGZstats.js' %}"></script>
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -219,7 +218,7 @@
         </div>
       {% endfor %}
       <!-- SCHISM START SCHISM START -->
-       {% for row in all_data_schism %}
+      {% for row in all_data_schism %}
         <div class="statsDiv_schism" id="schism_{{ row.0 }}">
           <br />
           Total Schism Games: {{ row.1 }}

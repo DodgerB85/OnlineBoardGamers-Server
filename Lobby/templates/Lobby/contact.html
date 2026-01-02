@@ -1,24 +1,24 @@
 {% extends "Lobby/layout.html" %}
-
 {% load static %}
 {% load i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
 {% endblock %}
-
 {% block body %}
-<div class="container" id="contactPage">
-
-<p><b>{% translate "For any questions / comments / suggestions, please contact" %}
-  <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width=400 height=30>
-</b></p>
-
-<p class="contactPtext">{% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
-</p>
-
-{% include 'Lobby/donate/donateBanner.html' %}
-
-</div>
-{% include 'Lobby/common/homeButton.html' %}
-
+  <div class="container" id="contactPage">
+    <p>
+      <b>{% translate "For any questions / comments / suggestions, please contact" %}
+        <img id="contactEmailImg"
+             src="{% static 'Lobby/email.png' %}"
+             alt="Email Address"
+             width="400"
+             height="30">
+      </b>
+    </p>
+    <p class="contactPtext">
+      {% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
+    </p>
+    {% include 'Lobby/donate/donateBanner.html' %}
+  </div>
+  {% include 'Lobby/common/homeButton.html' %}
 {% endblock %}

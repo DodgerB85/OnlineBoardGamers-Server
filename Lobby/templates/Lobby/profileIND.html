@@ -2,14 +2,12 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/profile.css' %}?v=20230230"
-          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
     <script src="{% url 'javascript-catalog' %}"></script>
-    <script src="{% static 'Lobby/Lobby.js' %}?v=20220706"></script>
+    <script src="{% static 'Lobby/Lobby.js' %}"></script>
     <div class="container formsPage">
         {% if messages %}
             <div class="messages">
@@ -20,7 +18,8 @@
         {% endif %}
         <!--<h1>Please click "Update Profile" to save changes</h1>-->
         <h1>Indonesia Settings</h1>
-        <b>Note: These settings are cosmetic and do not affect gameplay<br/>
+        <b>Note: These settings are cosmetic and do not affect gameplay
+            <br />
         Refresh any open games for these settings to take effect</b>
         <div class="profilePreferenceDiv">
             <form method="post">
@@ -411,9 +410,9 @@
                 <div class="favRestChoice">
                     <label for="shipIcon0">
                         <img src="{% static 'Lobby/images/INDprofile/shipsSimple.jpg' %}"
-                        width="448"
-                        height="152"
-                        alt="Simple Ships" />
+                             width="448"
+                             height="152"
+                             alt="Simple Ships" />
                     </label>
                     <br />
                     <b>Simple Ships</b>
@@ -427,9 +426,9 @@
                 <div class="favRestChoice">
                     <label for="shipIcon1">
                         <img src="{% static 'Lobby/images/INDprofile/shipsFancy.jpg' %}"
-                        width="448"
-                        height="152"
-                        alt="Fancy Ships" />
+                             width="448"
+                             height="152"
+                             alt="Fancy Ships" />
                     </label>
                     <br />
                     <b>Fancy Ships</b>
@@ -448,9 +447,9 @@
                 <div class="favRestChoice">
                     <label for="goodsIcon1">
                         <img src="{% static 'Lobby/images/INDprofile/icons1e.jpg' %}"
-                        width="187"
-                        height="152"
-                        alt="1st Edition" />
+                             width="187"
+                             height="152"
+                             alt="1st Edition" />
                     </label>
                     <br />
                     <b>1st Edition</b>
@@ -464,9 +463,9 @@
                 <div class="favRestChoice">
                     <label for="goodsIcon2">
                         <img src="{% static 'Lobby/images/INDprofile/icons2e.jpg' %}"
-                        width="187"
-                        height="152"
-                        alt="2nd Edition" />
+                             width="187"
+                             height="152"
+                             alt="2nd Edition" />
                     </label>
                     <br />
                     <b>2nd Edition</b>
@@ -485,9 +484,9 @@
                 <div class="favRestChoice">
                     <label for="indOutline0">
                         <img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon_outline.jpg' %}"
-                        width="230"
-                        height="152"
-                        alt="Solid Colour" />
+                             width="230"
+                             height="152"
+                             alt="Solid Colour" />
                     </label>
                     <br />
                     <b>Show Outline</b>
@@ -501,9 +500,9 @@
                 <div class="favRestChoice">
                     <label for="indOutline1">
                         <img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}"
-                        width="230"
-                        height="152"
-                        alt="Solid Colour" />
+                             width="230"
+                             height="152"
+                             alt="Solid Colour" />
                     </label>
                     <br />
                     <b>Hide Outline</b>

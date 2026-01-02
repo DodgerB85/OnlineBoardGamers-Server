@@ -2,13 +2,12 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-<link href="{% static 'Lobby/CSS/TGZT.css' %}?v=20230230" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-    <script src="{% static 'Lobby/TGZtournaments.js' %}?v=20220706"></script>
+    <script src="{% static 'Lobby/TGZtournaments.js' %}"></script>
     <script src="{% static 'Lobby/common.js' %}"></script>
-
     <div class="container">
         {% if messages %}
             <div class="messages">
@@ -21,29 +20,38 @@
             <h1>The Great Zimbabwe Tournaments</h1>
         </div>
         <h2>
-            The Great Zimbabwe Tournaments are run externally. 
-            <!--Please see <a class="linkOther" href="https://boardgamegeek.com/thread/3144834/tgz-tournament-announcements"
-    target="_blank">here</a> for more information.-->
+            The Great Zimbabwe Tournaments are run externally.
+            <!--Please see <a class="linkOther" href="https://boardgamegeek.com/thread/3144834/tgz-tournament-announcements" target="_blank">here</a> for more information.-->
         </h2>
-        <h2>Current tournament information can be found <a class="linkOther" href="https://boardgamegeek.com/thread/3521841/tgz-summer-2025-async-tournament-main-thread" target="_blank">here</a></h2>
-        <h2><a class="linkOther" href="{% url 'TGZtournamentFixedSummer25' %}">Summer 25 Tournament Link</a></h2>
-        <h2><a class="linkOther" href="{% url 'TGZtournamentFixedAutumn24' %}">Autumn 24 Tournament Link</a></h2>
-        <h2><a class="linkOther" href="{% url 'TGZtournamentFixedSpring24' %}">Spring 24 Tournament Link</a></h2>
+        <h2>
+            Current tournament information can be found <a class="linkOther"
+    href="https://boardgamegeek.com/thread/3521841/tgz-summer-2025-async-tournament-main-thread"
+    target="_blank">here</a>
+        </h2>
+        <h2>
+            <a class="linkOther" href="{% url 'TGZtournamentFixedSummer25' %}">Summer 25 Tournament Link</a>
+        </h2>
+        <h2>
+            <a class="linkOther" href="{% url 'TGZtournamentFixedAutumn24' %}">Autumn 24 Tournament Link</a>
+        </h2>
+        <h2>
+            <a class="linkOther" href="{% url 'TGZtournamentFixedSpring24' %}">Spring 24 Tournament Link</a>
+        </h2>
         {% if activeGames %}
             <h2>{% translate "Current Games - for Tournament Moderator info. Check a tournament link for tournament info" %}</h2>
             <div id="gamesListView">
                 <table class="gamesTable">
                     <thead>
-                      <tr class="headingRow">
-                        <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-                        <td class="creatorHeader">{% translate "Creator" %}</td>
-                        <td class="playersHeader">{% translate "Players" %}</td>
-                        <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                        <td class="currentTurnHeader">{% translate "Current Turn" %}</td>
-                        <!--<td class="createdHeader">Created</td>-->
-                        <td class="speedHeader">{% translate "Speed" %}</td>
-                        <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
-                      </tr>
+                        <tr class="headingRow">
+                            <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+                            <td class="creatorHeader">{% translate "Creator" %}</td>
+                            <td class="playersHeader">{% translate "Players" %}</td>
+                            <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+                            <td class="currentTurnHeader">{% translate "Current Turn" %}</td>
+                            <!--<td class="createdHeader">Created</td>-->
+                            <td class="speedHeader">{% translate "Speed" %}</td>
+                            <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
+                        </tr>
                     </thead>
                     {% for game in activeGames %}
                         {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
@@ -58,14 +66,14 @@
             <div id="gamesListView">
                 <table class="gamesTable">
                     <thead>
-                      <tr class="headingRow">
-                        <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-                        <td class="playersHeader">{% translate "Players" %}</td>
-                        <td class="currentPlayersHeader">{% translate "All Players" %}</td>
-                        <td class="createdHeader">{% translate "Created" %}</td>
-                        <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
-                        <td class="winnerHeader">{% translate "Winner" %}</td>
-                      </tr>
+                        <tr class="headingRow">
+                            <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+                            <td class="playersHeader">{% translate "Players" %}</td>
+                            <td class="currentPlayersHeader">{% translate "All Players" %}</td>
+                            <td class="createdHeader">{% translate "Created" %}</td>
+                            <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
+                            <td class="winnerHeader">{% translate "Winner" %}</td>
+                        </tr>
                     </thead>
                     {% for game in finishedGames %}
                         {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
@@ -76,5 +84,5 @@
             <h2>{% translate "No Finished Games" %}</h2>
         {% endif %}
         {% include 'Lobby/common/homeButton.html' %}
-</div>
+    </div>
 {% endblock %}

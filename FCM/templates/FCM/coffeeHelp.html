@@ -1,281 +1,336 @@
 {% extends "Lobby/layout.html" %}
-
 {% load static %}
 {% load i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-<link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-<div class="container">
-  {% if messages %}
-  <div class="messages">
-    {% for message in messages %}
-    <div{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-<div id="coffeeHelpPage">
-  <h1>{% translate "Coffee Help" %}</h1>
-
-  <div class="coffeeHelpSection">
-    <p>
-      {% blocktranslate trimmed %}
-      Finding the correct coffee route can be quite tricky! First of all, please read the coffee section of the
-      expansion
-      rules.<br/>
-      Make sure you fully understand the example and the reasons why each route was chosen. <br/>
-      The Ketchup Expansion rules are available <a
-        href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
-        target="_blank">here</a>.
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="coffeeHelpPage">
+      <h1>{% translate "Coffee Help" %}</h1>
+      <div class="coffeeHelpSection">
+        <p>
+          {% blocktranslate trimmed %}
+            Finding the correct coffee route can be quite tricky! First of all, please read the coffee section of the
+            expansion
+            rules.
+            <br />
+            Make sure you fully understand the example and the reasons why each route was chosen.
+            <br />
+            The Ketchup Expansion rules are available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
+    target="_blank">here</a>.
+          {% endblocktranslate %}
+        </p>
+      </div>
+      <h2>{% translate "What goes into finding a valid coffee route?" %}</h2>
+      <div class="coffeeHelpSection">
+        <ul>
+          {% blocktranslate trimmed %}
+            Remember the following:
+            <br />
+            <li>Players actually need to have coffee in stock for a sale to be considered</li>
+            <li>
+              A house can travel along any route to get to the winning restaurant, as long as the <b>tile distance</b> does
+              not go above the minimum required to get to the restaurant
+            </li>
+            <li>
+              If the route splits, the house will choose the route that sells the most coffee
+              <ul>
+                <li>
+                  For example, if the route splits and one route sells a coffee to players A and B, and the other route sells a
+                  coffee to player C only, then the path selling only to player C will be <b>completely ignored</b> because there
+                  is an alternative valid route that sells more coffee, and the house will take the route that sells the most
+                  possible coffee
+                </li>
+              </ul>
+            </li>
+            <li>
+              If the route splits and each possible split would sell the <b>same</b> amount of coffee, then
+              <b>no</b> coffee is sold along this split part of the route
+              <ul>
+                <li>
+                  This applies even if each path would sell the same amount of coffee to the same player. Why? Because that's
+                  what the designer has said!
+                  You can think of it as the house arguing about <i>which</i> of the coffee selling places is better,
+                  to the point where they end up skipping all of them, even if they belong to the same chain.
+                </li>
+              </li>
+              <li>
+                Consider the example above with one path selling to players A and B, and the other path only to player C.
+                What would happen if player B had no coffee? You would now be in the situation where one route woulf sell to player A
+                and the other route to player C. Both routes would now sell the same amount of coffe, and so now <b>both</b> routes are skipped.
+              </li>
+            {% endblocktranslate %}
+          </ul>
+        </ul>
+      </div>
+      <h2>
+        {% translate 'When I click "More Information" in the coffee section in "History", what exactly are the non-road highlights?' %}
+      </h2>
+      <div class="coffeeHelpSection">
+        {% blocktranslate trimmed %}
+          Restaurants / coffee shops that are highlighted indicate where coffee was actually sold along the route taken by
+          this
+          house.
+          <br />
+          Note that the squares highlighted correspond to where the restaurants / coffee shops were on this turn, not where
+          they
+          are now if they were moved later.
+          <br />
+          So if a non-road square has a highlight but does not contain a restaurant or coffee shop, then it must have been
+          moved
+          after this turn.
         {% endblocktranslate %}
-    </p>
-  </div>
-  <h2>{% translate "What goes into finding a valid coffee route?" %}</h2>
-  <div class="coffeeHelpSection">
-    <ul>
-      {% blocktranslate trimmed %}
-      Remember the following:<br/>
-        <li>Players actually need to have coffee in stock for a sale to be considered</li>
-
-      <li>A house can travel along any route to get to the winning restaurant, as long as the <b>tile distance</b> does
-        not go above the minimum required to get to the restaurant</li>
-      <li>If the route splits, the house will choose the route that sells the most coffee
-
-        <ul><li>For example, if the route splits and one route sells a coffee to players A and B, and the other route sells a
-          coffee to player C only, then the path selling only to player C will be <b>completely ignored</b> because there
-          is an alternative valid route that sells more coffee, and the house will take the route that sells the most
-          possible coffee</li></ul>
-
-      </li>
-      <li>If the route splits and each possible split would sell the <b>same</b> amount of coffee, then
-        <b>no</b> coffee is sold along this split part of the route
-     
-
-      <ul><li>This applies even if each path would sell the same amount of coffee to the same player. Why? Because that's
-        what the designer has said!
-        You can think of it as the house arguing about <i>which</i> of the coffee selling places is better, 
-        to the point where they end up skipping all of them, even if they belong to the same chain.</li>
-      </li>
-      <li>Consider the example above with one path selling to players A and B, and the other path only to player C.
-        What would happen if player B had no coffee? You would now be in the situation where one route woulf sell to player A
-        and the other route to player C. Both routes would now sell the same amount of coffe, and so now <b>both</b> routes are skipped.
-      </li>
+      </div>
+      <h2>
+        {% translate 'When I click "More Information" in the coffee section in "History", what exactly are the road highlights?' %}
+      </h2>
+      <div class="coffeeHelpSection">
+        {% blocktranslate trimmed %}
+          If there is only one valid coffee route from the house to the restaurant, it will be shown.
+          <br />
+          If there are multiple valid routes, the road squares common to all valid coffee routes will be shown.
+          <br />
+          This should help you to work out how the sales occurred.
+          Remember distance is only measured in map tiles, not road squares. So if the house could travel one tile right and
+          then one tile down,
+          OR one tile down and then one tile right,
+          AND both choices would sell the same amount of coffee (which would make both valid choices), then none of this
+          section will be highlighted.
+          If however only one of those routes sold coffee, then as both are the same distance, and the house will always
+          choose the route that sells the most coffee, then both the route and the location where the coffee sale occurred
+          should have a
+          highlight.
+          <br />
+          A route will go all round a tile, if possible, as long as it stays on the same tile and does not make a U-turn.
+          For example, if the route includes the triple lemonade tile from the expansion, or the tile with house 5 on it, then
+          the route will always include
+          all road squares on these tiles
+        {% endblocktranslate %}
+        <br />
+      </div>
+      <h2>{% translate "Please consider the following examples to understand better how Coffee Selling works" %}</h2>
+      <div class="coffeeHelpSection">
+        {% blocktranslate trimmed %}
+          In the following examples, the building with the lemonade makes a sale. Assume all players have 6 coffees.
+          <br />
+          Xango Blues (green colour) makes the sale, without a drive-thru. Can you work out which locations sell coffee?
+          <br />
+          In the answers, the locations that sell are circled in green, and the locations that don't sell in red.
+          <br />
+          Common road squares show the green highlight, and blue lines indicate where there is more than one possible path.
+        {% endblocktranslate %}
+      </div>
+      <div class="coffeeExampleContainer">
+        <h2>{% translate "Example 1" %}</h2>
+        <div class="coffeeExample">
+          <img class="coffeeExampleImg"
+               src="{% static 'Lobby/images/coffeeExample1.jpg' %}"
+               alt="Example 1"
+               width="480"
+               height="480">
+        </div>
+        <div class="coffeeExample">
+          <div class="flip-box">
+            <div class="flip-box-inner">
+              <div class="flip-box-front">
+                <img class="coffeeExampleImg"
+                     src="{% static 'Lobby/images/coffeeExampleQ.jpg' %}"
+                     alt="Example 1"
+                     width="480"
+                     height="480">
+              </div>
+              <div class="flip-box-back">
+                <img class="coffeeExampleImg"
+                     src="{% static 'Lobby/images/coffeeExample1Ans.jpg' %}"
+                     alt="Example 1"
+                     width="480"
+                     height="480">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2>{% translate "Answer 1" %}</h2>
+      <div class="coffeeHelpSectionFormat">
+        {% blocktranslate trimmed %}
+          One coffee is sold to Gluttony and one to Xango. The house can travel all the way around the triple lemonade square.
+          It can travel on squares it has already used, as long
+          as it is not making a U-turn. <b>Coffee selling locations don't have to be on the same tile as the route, they just
+          have to be
+          adjacent to the road.</b> House 10 could come out of the house from the bottom left square or top right square, so this
+          part of the route counts as "undecided", and no coffee sales would occur along here.
+        {% endblocktranslate %}
+      </div>
+      <div class="coffeeExampleContainer">
+        <h2>{% translate "Example 2" %}</h2>
+        <div class="coffeeExample">
+          <img class="coffeeExampleImg"
+               src="{% static 'Lobby/images/coffeeExample2.jpg' %}"
+               alt="Example 2"
+               width="480"
+               height="480">
+        </div>
+        <div class="coffeeExample">
+          <div class="flip-box">
+            <div class="flip-box-inner">
+              <div class="flip-box-front">
+                <img class="coffeeExampleImg"
+                     src="{% static 'Lobby/images/coffeeExampleQ.jpg' %}"
+                     alt="Example 2"
+                     width="480"
+                     height="480">
+              </div>
+              <div class="flip-box-back">
+                <img class="coffeeExampleImg"
+                     src="{% static 'Lobby/images/coffeeExample2Ans.jpg' %}"
+                     alt="Example 2"
+                     width="480"
+                     height="480">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2>{% translate "Answer 2" %}</h2>
+      <div class="coffeeHelpSectionFormat">
+        {% blocktranslate trimmed %}
+          Santa Maria sells 2 coffees.
+          House 12 will use any route that doesn't increase tile distance.
+          So they come out onto the road square next to the overpass and sell to Santa Maria.
+          The red circled coffee shops are on mutually exclusive valid routes, each of which would sell
+          one coffee. So both of these coffee shops will be skipped.
+          Note that <b>although there is no green highlighted road directly adjacent to the Santa Maria coffee shop in this
+          section,
+          BOTH (all) valid coffee routes must pass adjacent to it, no matter which route is taken, and so one sale will always
+        occur here as well.</b>
       {% endblocktranslate %}
-    </ul>
- 
-    </ul>
-  </div>
-  <h2>{% translate 'When I click "More Information" in the coffee section in "History", what exactly are the non-road highlights?' %}</h2>
-  <div class="coffeeHelpSection">
-    {% blocktranslate trimmed %}
-    Restaurants / coffee shops that are highlighted indicate where coffee was actually sold along the route taken by
-    this
-    house.<br/>
-    Note that the squares highlighted correspond to where the restaurants / coffee shops were on this turn, not where
-    they
-    are now if they were moved later.<br/>
-    So if a non-road square has a highlight but does not contain a restaurant or coffee shop, then it must have been
-    moved
-    after this turn.
-    {% endblocktranslate %}
-  </div>
-  <h2>{% translate 'When I click "More Information" in the coffee section in "History", what exactly are the road highlights?' %}</h2>
-  <div class="coffeeHelpSection">
+    </div>
+    <div class="coffeeExampleContainer">
+      <h2>{% translate "Example 3" %}</h2>
+      <div class="coffeeExample">
+        <img class="coffeeExampleImg"
+             src="{% static 'Lobby/images/coffeeExample3.jpg' %}"
+             alt="Example 3"
+             width="480"
+             height="480">
+      </div>
+      <div class="coffeeExample">
+        <div class="flip-box">
+          <div class="flip-box-inner">
+            <div class="flip-box-front">
+              <img class="coffeeExampleImg"
+                   src="{% static 'Lobby/images/coffeeExampleQ.jpg' %}"
+                   alt="Example 3"
+                   width="480"
+                   height="480">
+            </div>
+            <div class="flip-box-back">
+              <img class="coffeeExampleImg"
+                   src="{% static 'Lobby/images/coffeeExample3Ans.jpg' %}"
+                   alt="Example 3"
+                   width="480"
+                   height="480">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h2>{% translate "Answer 3" %}</h2>
+    <div class="coffeeHelpSectionFormat">
       {% blocktranslate trimmed %}
-    If there is only one valid coffee route from the house to the restaurant, it will be shown.<br/>
-    If there are multiple valid routes, the road squares common to all valid coffee routes will be shown. <br/>
-    This should help you to work out how the sales occurred.
-    Remember distance is only measured in map tiles, not road squares. So if the house could travel one tile right and
-    then one tile down,
-    OR one tile down and then one tile right,
-    AND both choices would sell the same amount of coffee (which would make both valid choices), then none of this
-    section will be highlighted.
-    If however only one of those routes sold coffee, then as both are the same distance, and the house will always
-    choose the route that sells the most coffee, then both the route and the location where the coffee sale occurred
-    should have a
-    highlight. <br/>
-    A route will go all round a tile, if possible, as long as it stays on the same tile and does not make a U-turn.
-    For example, if the route includes the triple lemonade tile from the expansion, or the tile with house 5 on it, then
-    the route will always include
-    all road squares on these tiles 
-    {% endblocktranslate %}
-    <br/>
-  </div>
-  <h2>{% translate "Please consider the following examples to understand better how Coffee Selling works" %}</h2>
-  <div class="coffeeHelpSection">
-    {% blocktranslate trimmed %}
-    In the following examples, the building with the lemonade makes a sale. Assume all players have 6 coffees. <br/>
-    Xango Blues (green colour) makes the sale, without a drive-thru. Can you work out which locations sell coffee?<br/>
-    In the answers, the locations that sell are circled in green, and the locations that don't sell in red.<br/>
-    Common road squares show the green highlight, and blue lines indicate where there is more than one possible path.
-    {% endblocktranslate %}
-  </div>
-
-  <div class="coffeeExampleContainer">
-    <h2>{% translate "Example 1" %}</h2>
-    <div class="coffeeExample">
-      <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExample1.jpg' %}" alt="Example 1" width=480 height=480>
+        One coffee is sold by Santa Maria from the middle right tile.
+        This one is a bit more complicated! Remember that the "winning distance" for the lemonade sale is 4.
+        So you can never cross more than 4 tile boundaries. Whichever routes you pick at the start, there are essentially
+        the higher route and lower route. The higher route would sell to Santa Maria twice and the
+        lower route to Xango twice. So all of these sales are skipped.
+        Interestingly, there are no road tiles highlighted anywhere near the green circled Santa Maria, but <b>every</b> valid route
+        does pass by it.
+        Remember that a valid route must try to sell as much coffee as possible.
+        So for the house to exit the centre tile to the bottom, it must first go all the way around the tile, passing by the
+        Santa Maria coffee shop, before exiting to the bottom.
+        If the house instead moves onto the right (onto the triple lemonade tile), then it will travel around the entire
+        tile before exiting to the bottom, thus also passing this Santa Maria coffee shop.
+        The same will happen if the house travels along the top and then down onto the triple lemonade tile.
+        So no matter which valid route the house chooses, it will <b>always</b> pass by one Santa Maria coffee shop, but never more
+        than 2 of the other 3 shops, and so these are all skipped.
+        <br />
+        <br />
+        Note that there are technically a lot more valid routes than are shown with the blue lines; for example you can exit the
+        apartment tile down onto the central tile from any of the 5 bottom road squares. But in all cases, the outcome is
+        the same.
+      {% endblocktranslate %}
     </div>
-
-    <div class="coffeeExample">
-      <div class="flip-box">
-        <div class="flip-box-inner">
-          <div class="flip-box-front">
-            <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExampleQ.jpg' %}" alt="Example 1" width=480 height=480>
-          </div>
-          <div class="flip-box-back">
-            <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExample1Ans.jpg' %}" alt="Example 1" width=480 height=480>
+    <div class="coffeeExampleContainer">
+      <h2>{% translate "Example 4" %}</h2>
+      <div class="coffeeExample">
+        <img class="coffeeExampleImg"
+             src="{% static 'Lobby/images/coffeeExample4.jpg' %}"
+             alt="Example 4"
+             width="480"
+             height="480">
+      </div>
+      <div class="coffeeExample">
+        <div class="flip-box">
+          <div class="flip-box-inner">
+            <div class="flip-box-front">
+              <img class="coffeeExampleImg"
+                   src="{% static 'Lobby/images/coffeeExampleQ.jpg' %}"
+                   alt="Example 4"
+                   width="480"
+                   height="480">
+            </div>
+            <div class="flip-box-back">
+              <img class="coffeeExampleImg"
+                   src="{% static 'Lobby/images/coffeeExample4Ans.jpg' %}"
+                   alt="Example 4"
+                   width="480"
+                   height="480">
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <h2>{% translate "Answer 1" %}</h2>
-  <div class="coffeeHelpSectionFormat">
-    {% blocktranslate trimmed %}
-    One coffee is sold to Gluttony and one to Xango. The house can travel all the way around the triple lemonade square.
-    It can travel on squares it has already used, as long
-    as it is not making a U-turn. <b>Coffee selling locations don't have to be on the same tile as the route, they just
-    have to be
-    adjacent to the road.</b> House 10 could come out of the house from the bottom left square or top right square, so this
-    part of the route counts as "undecided", and no coffee sales would occur along here.
-    {% endblocktranslate %}
-  </div>
-
-  <div class="coffeeExampleContainer">
-    <h2>{% translate "Example 2" %}</h2>
-    <div class="coffeeExample">
-      <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExample2.jpg' %}" alt="Example 2" width=480 height=480>
+    <h2>{% translate "Answer 4" %}</h2>
+    <div class="coffeeHelpSection">
+      {% blocktranslate trimmed %}
+        Siap Faji will sell one coffee. Although both blue routes would each sell one coffee
+        to Siap Faji, both locations are skipped, as per the designer's ruling. Think of it as the house arguing about which
+        of the locations is best (even though they belong to the same chain!) and so both locations are skipped.
+        Note that if you replaced the green beer location opposite Xango with a coffee shop, then all routes would now have to pass by
+        this location in order to be a valid route (because it wouldn't increase the tile distance), and so that location would also sell one coffee.
+      {% endblocktranslate %}
     </div>
-
-    <div class="coffeeExample">
-      <div class="flip-box">
-        <div class="flip-box-inner">
-          <div class="flip-box-front">
-            <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExampleQ.jpg' %}" alt="Example 2" width=480 height=480>
-          </div>
-          <div class="flip-box-back">
-            <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExample2Ans.jpg' %}" alt="Example 2" width=480 height=480>
-          </div>
-        </div>
-      </div>
+    <h2>{% translate "I disagree with something on this page?" %}</h2>
+    <div class="coffeeHelpSection">
+      {% blocktranslate trimmed %}
+        Coffee is complicated! I had to rewrite the algorithm several times as my understanding of the finer points of the rules changed as I went through development.
+        Any things I wasn't certain of I found clarifications from the game designer on Board Game Geek. I have had a big input from my playtester as well, ensuring
+        that the rules are strictly followed and any ambiguities from the rulebook follow the designer's rulings on BGG.
+        <br />
+        <br />
+        If you are unsure, I would strongly urge you to ask in the Board Game Geek forums about it, and if the answer is different to something on this page, please
+        contact me.
+      {% endblocktranslate %}
     </div>
   </div>
-
-  <h2>{% translate "Answer 2" %}</h2>
-  <div class="coffeeHelpSectionFormat">
-    {% blocktranslate trimmed %}
-    Santa Maria sells 2 coffees.
-    House 12 will use any route that doesn't increase tile distance.
-    So they come out onto the road square next to the overpass and sell to Santa Maria.
-    The red circled coffee shops are on mutually exclusive valid routes, each of which would sell
-    one coffee. So both of these coffee shops will be skipped.
-    Note that <b>although there is no green highlighted road directly adjacent to the Santa Maria coffee shop in this
-    section,
-    BOTH (all) valid coffee routes must pass adjacent to it, no matter which route is taken, and so one sale will always
-    occur here as well.</b>
-    {% endblocktranslate %}
-  </div>
-
-  <div class="coffeeExampleContainer">
-    <h2>{% translate "Example 3" %}</h2>
-    <div class="coffeeExample">
-      <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExample3.jpg' %}" alt="Example 3" width=480 height=480>
-    </div>
-
-    <div class="coffeeExample">
-      <div class="flip-box">
-        <div class="flip-box-inner">
-          <div class="flip-box-front">
-            <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExampleQ.jpg' %}" alt="Example 3" width=480 height=480>
-          </div>
-          <div class="flip-box-back">
-            <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExample3Ans.jpg' %}" alt="Example 3" width=480 height=480>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <h2>{% translate "Answer 3" %}</h2>
-  <div class="coffeeHelpSectionFormat">
-    {% blocktranslate trimmed %}
-    One coffee is sold by Santa Maria from the middle right tile.
-    This one is a bit more complicated! Remember that the "winning distance" for the lemonade sale is 4.
-    So you can never cross more than 4 tile boundaries. Whichever routes you pick at the start, there are essentially
-    the higher route and lower route. The higher route would sell to Santa Maria twice and the
-    lower route to Xango twice. So all of these sales are skipped.
-    Interestingly, there are no road tiles highlighted anywhere near the green circled Santa Maria, but <b>every</b> valid route
-    does pass by it.
-    Remember that a valid route must try to sell as much coffee as possible.
-    So for the house to exit the centre tile to the bottom, it must first go all the way around the tile, passing by the
-    Santa Maria coffee shop, before exiting to the bottom.
-    If the house instead moves onto the right (onto the triple lemonade tile), then it will travel around the entire
-    tile before exiting to the bottom, thus also passing this Santa Maria coffee shop.
-    The same will happen if the house travels along the top and then down onto the triple lemonade tile.
-    So no matter which valid route the house chooses, it will <b>always</b> pass by one Santa Maria coffee shop, but never more
-    than 2 of the other 3 shops, and so these are all skipped.
-    <br/><br/>
-    Note that there are technically a lot more valid routes than are shown with the blue lines; for example you can exit the
-    apartment tile down onto the central tile from any of the 5 bottom road squares. But in all cases, the outcome is
-    the same.
-    {% endblocktranslate %}
-  </div>
-
-  <div class="coffeeExampleContainer">
-    <h2>{% translate "Example 4" %}</h2>
-    <div class="coffeeExample">
-      <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExample4.jpg' %}" alt="Example 4" width=480 height=480>
-    </div>
-
-    <div class="coffeeExample">
-      <div class="flip-box">
-        <div class="flip-box-inner">
-          <div class="flip-box-front">
-            <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExampleQ.jpg' %}" alt="Example 4" width=480 height=480>
-          </div>
-          <div class="flip-box-back">
-            <img class="coffeeExampleImg" src="{% static 'Lobby/images/coffeeExample4Ans.jpg' %}" alt="Example 4" width=480 height=480>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <h2>{% translate "Answer 4" %}</h2>
-  <div class="coffeeHelpSection">
-    {% blocktranslate trimmed %}
-    Siap Faji will sell one coffee. Although both blue routes would each sell one coffee
-    to Siap Faji, both locations are skipped, as per the designer's ruling. Think of it as the house arguing about which
-    of the locations is best (even though they belong to the same chain!) and so both locations are skipped. 
-    Note that if you replaced the green beer location opposite Xango with a coffee shop, then all routes would now have to pass by 
-    this location in order to be a valid route (because it wouldn't increase the tile distance), and so that location would also sell one coffee.
-    {% endblocktranslate %} 
-  </div>
-
-  <h2>{% translate "I disagree with something on this page?" %}</h2>
-  <div class="coffeeHelpSection">
-    {% blocktranslate trimmed %}
-    Coffee is complicated! I had to rewrite the algorithm several times as my understanding of the finer points of the rules changed as I went through development. 
-    Any things I wasn't certain of I found clarifications from the game designer on Board Game Geek. I have had a big input from my playtester as well, ensuring
-    that the rules are strictly followed and any ambiguities from the rulebook follow the designer's rulings on BGG. <br/>
-      <br/>
-    If you are unsure, I would strongly urge you to ask in the Board Game Geek forums about it, and if the answer is different to something on this page, please
-    contact me. 
-    {% endblocktranslate %}
-  </div>
-
-</div>
-<br/>
-<br/>
-{% translate "For further help contact" %} <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width=400 height=30>
-
-{% include 'Lobby/common/homeButton.html' %}
-
+  <br />
+  <br />
+  {% translate "For further help contact" %}
+  <img id="contactEmailImg"
+       src="{% static 'Lobby/email.png' %}"
+       alt="Email Address"
+       width="400"
+       height="30">
+  {% include 'Lobby/common/homeButton.html' %}
 </div>
 <script>
 
@@ -306,6 +361,4 @@
    }*/
 
 </script>
-
-
 {% endblock %}

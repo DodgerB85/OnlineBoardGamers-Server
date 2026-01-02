@@ -2,12 +2,12 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-<link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230" rel="stylesheet">
-<link href="{% static 'Lobby/CSS/profile.css' %}?v=20230230" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
     <script src="{% url 'javascript-catalog' %}"></script>
-    <script src="{% static 'Lobby/Lobby.js' %}?v=20220706"></script>
+    <script src="{% static 'Lobby/Lobby.js' %}"></script>
     <div class="container formsPage">
         {% if messages %}
             <div class="messages">
@@ -233,7 +233,6 @@
                 </div>
                 <br />
                 <br />
-
                 <label class="preferenceTitle">{% translate "Keep Forest under Wood" %}</label>
                 <br />
                 <label class="preferenceExplanation">
@@ -274,7 +273,6 @@
                 </div>
                 <br />
                 <br />
-
                 <label class="preferenceTitle">{% translate "Show Pollution under Resource" %}</label>
                 <br />
                 <label class="preferenceExplanation">
@@ -315,12 +313,9 @@
                 </div>
                 <br />
                 <br />
-
                 <label class="preferenceTitle">{% translate "Set Housing Order" %}</label>
                 <br />
-                <label class="preferenceExplanation">
-                    {% translate "You can choose to have houses arranged by Cost or Number" %}
-                </label>
+                <label class="preferenceExplanation">{% translate "You can choose to have houses arranged by Cost or Number" %}</label>
                 <br />
                 <div class="favRestChoice">
                     <label for="aqyHouse0">
@@ -372,7 +367,6 @@
                 </div>
                 <br />
                 <br />
-               
                 <button type="submit" class="updateProfilebtn">{% translate "Update Antiquity Preferences" %}</button>
             </form>
         </div>

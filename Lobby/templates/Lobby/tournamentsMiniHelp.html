@@ -2,9 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   <div class="container">
@@ -18,7 +17,7 @@
     <div id="lobbyHelpPage">
       <h1>{% translate "Mini Tournaments" %}</h1>
       For Main Tournaments see <a href="{% url 'helpTournaments' %}" class="linkOther">Tournaments Help</a>
-      <br/>
+      <br />
       <br />
       <div class="lobbyHelpSection">
         Mini Tournaments function similarly to tournaments; please check the <a href="{% url 'helpTournaments' %}" class="linkOther">Tournaments Help Page</a>
@@ -99,6 +98,6 @@
            width="400"
            height="30">
     </div>
-   {% include 'Lobby/common/homeButton.html' %}
+    {% include 'Lobby/common/homeButton.html' %}
   </div>
 {% endblock %}

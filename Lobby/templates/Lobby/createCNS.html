@@ -2,10 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230"
-          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
@@ -65,9 +63,9 @@
                                     <option value="50">{% translate "Casual: Just take your time" %}</option>
                                 </select>
                                 <br />
-                                <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span><br/>
+                                <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span>
+                                <br />
                                 <span class="optionHelp">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</span>
-
                             </div>
                         </div>
                         <div class="singleChoiceDiv">
@@ -90,11 +88,12 @@
                                            class="textInput"
                                            autocomplete="off">
                                 </div>
-                                
                                 <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none;">
+                        <div class="singleChoiceWithTextDiv"
+                             id="selPlayer3"
+                             style="display: none">
                             <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -152,17 +151,15 @@
                         </span>
                         <br />
                         <input type="checkbox"
-                        onchange="validateOptions(this.id)"
-                        class="myCheckbox"
-                        id="privateGame"
-                        name="privateGame"
-                        value="1">
-                 <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
-                 <br />
-                 <span class="inlineHelp">
-                     {% translate "Players can only join with invite or link" %}
-                 </span>
-                 <br/>
+                               onchange="validateOptions(this.id)"
+                               class="myCheckbox"
+                               id="privateGame"
+                               name="privateGame"
+                               value="1">
+                        <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
+                        <br />
+                        <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
+                        <br />
                         <input type="checkbox"
                                onchange="validateOptions(this.id)"
                                class="myCheckbox"
@@ -184,7 +181,8 @@
                                class="myCheckbox"
                                id="experiencedGame"
                                name="experiencedGame"
-                               value="120" disabled>
+                               value="120"
+                               disabled>
                         <label for="experiencedGame" class="checkboxLabel">{% translate "Experienced Game" %}</label>
                         <br />
                         <span class="inlineHelp">
@@ -193,7 +191,8 @@
                                 Minmum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
                             {% endblocktranslate %}
                             {% if not experienced %}
-                            <br /> <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
+                                <br />
+                                <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
                             {% endif %}
                         </span>
                         <br />

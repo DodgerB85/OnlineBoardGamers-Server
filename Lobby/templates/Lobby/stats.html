@@ -2,12 +2,11 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-        rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/stats.css' %}?v=20230230" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  <script src="{% static 'Lobby/stats.js' %}?v=20220706"></script>
+  <script src="{% static 'Lobby/stats.js' %}"></script>
   <script src="{% static 'Lobby/common.js' %}"></script>
   <div class="container">
     {% if messages %}
@@ -233,7 +232,7 @@
              width="40"
              height="40">
       </button>
-            <button class="tablinks" id="WEB">
+      <button class="tablinks" id="WEB">
         <img src="{% static 'WEB/images/web_icon.png' %}"
              alt="WEB game"
              title="WEB Game"
@@ -1180,7 +1179,7 @@
     </div>
     <br />
     <br />
-   {% include 'Lobby/common/homeButton.html' %}
+    {% include 'Lobby/common/homeButton.html' %}
   </div>
   {% block script %}{% endblock %}
 {% endblock %}

@@ -5,7 +5,7 @@
     <head>
         <meta charset="iso8859-1">
         <title>Food Chain Magnate</title>
-        <link href="{% static 'FCM/FCM.css' %}?v=20220706" rel="stylesheet">
+        <link href="{% static 'FCM/FCM.css' %}" rel="stylesheet">
         <link rel="icon" type="image/png" href="{% static 'Lobby/favicon.png' %}" />
     </head>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
@@ -15,11 +15,11 @@
 Enter game data <br />
 
 <textarea id="inputData" name="inputData" rows="4" cols="50"></textarea>
-    <br />
-    <input type="button"
-           onclick="decompressData()"
-           value="Decompress to Model.export">
-    <br />
+        <br />
+        <input type="button"
+               onclick="decompressData()"
+               value="Decompress to Model.export">
+        <br />
     <textarea id="outputData" name="outputData" rows="4" cols="50"></textarea>
 
     <br /><br /><br />
@@ -30,51 +30,51 @@ Enter game data <br />
     <br />
     <textarea id="outputData2" name="outputData" rows="4" cols="50"></textarea>
     -->
-    <br />
-    <br />
-    <br />
-    Enter DB data to unpack
-    <br />
-    <textarea id="inputData3" name="inputData3" rows="4" cols="50"></textarea>
-    <br />
-    <button name="button" id="button" onclick="unpackData();" value="before">Click Me!</button>
-    <ore id="decompressPre"></ore>
-    <br />
-    <br />
-    MOVE DATA AREA (from ID)
-    <br />
-    <input type="text"
-           id="moveDataInput"
-           name="moveDataInputName"
-           placeholder="game id">
-    <br>
-    <button name="button" id="button" onclick="getMoveDataForID();">Decode Move</button>
-    <br>
-    <div id="moveDataOutput"></div>
-    <br />
-    <br />
-    BUS CHAT AREA
-    <br />
-    <input type="text" id="BusChatDataInput">
-    <br>
-    <button id="buttonBusChat" onclick="buttonBusChat()">Decode Chat</button>
-    <br>
-    <textarea id="busChatDataRaw" rows="6" cols="150"></textarea>
-    <br />
-    <button id="buttonBusChat" onclick="buttonBusChatEncode()">Encode Chat</button>
-    <div id="busChatDataOutput"></div>
-    <br />
-    <br />
-    PAKO CHAT AREA
-    <br />
-    <input type="text" id="pakoChatDataInput">
-    <br>
-    <button id="pakoChatButton" onclick="buttonPakoChat()">Decode Chat</button>
-    <br>
-    <textarea id="pakoChatDataRaw" rows="6" cols="150"></textarea>
-    <br />
-    <button id="pakoChatButton2" onclick="buttonPakoChatEncode()">Encode Chat</button>
-    <div id="pakoChatDataOutput"></div>
+<br />
+<br />
+<br />
+Enter DB data to unpack
+<br />
+<textarea id="inputData3" name="inputData3" rows="4" cols="50"></textarea>
+<br />
+<button name="button" id="button" onclick="unpackData();" value="before">Click Me!</button>
+<ore id="decompressPre"></ore>
+<br />
+<br />
+MOVE DATA AREA (from ID)
+<br />
+<input type="text"
+       id="moveDataInput"
+       name="moveDataInputName"
+       placeholder="game id">
+<br>
+<button name="button" id="button" onclick="getMoveDataForID();">Decode Move</button>
+<br>
+<div id="moveDataOutput"></div>
+<br />
+<br />
+BUS CHAT AREA
+<br />
+<input type="text" id="BusChatDataInput">
+<br>
+<button id="buttonBusChat" onclick="buttonBusChat()">Decode Chat</button>
+<br>
+<textarea id="busChatDataRaw" rows="6" cols="150"></textarea>
+<br />
+<button id="buttonBusChat" onclick="buttonBusChatEncode()">Encode Chat</button>
+<div id="busChatDataOutput"></div>
+<br />
+<br />
+PAKO CHAT AREA
+<br />
+<input type="text" id="pakoChatDataInput">
+<br>
+<button id="pakoChatButton" onclick="buttonPakoChat()">Decode Chat</button>
+<br>
+<textarea id="pakoChatDataRaw" rows="6" cols="150"></textarea>
+<br />
+<button id="pakoChatButton2" onclick="buttonPakoChatEncode()">Encode Chat</button>
+<div id="pakoChatDataOutput"></div>
 </html>
 <script type="text/javascript">
     function buttonBusChat() {
@@ -330,22 +330,22 @@ Enter game data <br />
 </script>
 <script src="{% url 'javascript-catalog' %}"></script>
 {% if settingsDEBUG %}
-<script src="/static/FCM/JS/lib/jquery-2.1.4.min.js"></script>
-<script src="/static/FCM/JS/lib/lodash.min.js"></script>
-<script src="/static/FCM/JS/Roger.js"></script>
-<script src="/static/FCM/JS/utils.js"></script>
-<script src="/static/FCM/JS/reference.js"></script>
-<script src="/static/FCM/JS/map.js"></script>
-<script src="/static/FCM/JS/player.js"></script>
-<script src="/static/FCM/JS/rules.js"></script>
-<script src="/static/FCM/JS/model.js"></script>
-<script src="/static/FCM/JS/view.js"></script>
-<script src="/static/FCM/JS/controller.js"></script>
-<script src="/static/FCM/JS/history.js"></script>
-<script src="/static/FCM/JS/io.js"></script>
-<script src="/static/FCM/JS/bot.js"></script>
-<script src="/static/FCM/JS/websocket.js"></script>
+    <script src="/static/FCM/JS/lib/jquery-2.1.4.min.js"></script>
+    <script src="/static/FCM/JS/lib/lodash.min.js"></script>
+    <script src="/static/FCM/JS/Roger.js"></script>
+    <script src="/static/FCM/JS/utils.js"></script>
+    <script src="/static/FCM/JS/reference.js"></script>
+    <script src="/static/FCM/JS/map.js"></script>
+    <script src="/static/FCM/JS/player.js"></script>
+    <script src="/static/FCM/JS/rules.js"></script>
+    <script src="/static/FCM/JS/model.js"></script>
+    <script src="/static/FCM/JS/view.js"></script>
+    <script src="/static/FCM/JS/controller.js"></script>
+    <script src="/static/FCM/JS/history.js"></script>
+    <script src="/static/FCM/JS/io.js"></script>
+    <script src="/static/FCM/JS/bot.js"></script>
+    <script src="/static/FCM/JS/websocket.js"></script>
 {% else %}
-<!-- Live server -->
-<script src="/static/FCM/JS/FCMmain.js"></script>
+    <!-- Live server -->
+    <script src="/static/FCM/JS/FCMmain.js"></script>
 {% endif %}

@@ -2,10 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230"
-          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
@@ -877,31 +875,24 @@
                     {% endif %}
                     <input type="submit"
                            class="registerbtn"
-                           {% if user.username == "TGZtourneyAdmin" %}
-                           value="{% translate "Create And Start The Great Zimbabwe Tournament Game" %}"
-                    {% elif MT_Creation %}
-                        value="{% translate "Create The Great Zimbabwe Mini Tournament" %}"
-                {% else %}
-                    value="{% translate "Create The Great Zimbabwe Game" %}"
+                           {% if user.username == "TGZtourneyAdmin" %} value="{% translate "Create And Start The Great Zimbabwe Tournament Game" %}" {% elif MT_Creation %} value="{% translate "Create The Great Zimbabwe Mini Tournament" %}" {% else %} value="{% translate "Create The Great Zimbabwe Game" %}" {% endif %} />
+                </div>
+                {% if user.username == "TGZtourneyAdmin" %}
+                    <p>
+                        <span style="font-size: 2em; background-color: yellow; color: darkred;">YOU ARE MAKING AN EXTERNAL TOURNAMENT GAME</span>
+                    </p>
                 {% endif %}
-                />
-            </div>
-            {% if user.username == "TGZtourneyAdmin" %}
-                <p>
-                    <span style="font-size: 2em; background-color: yellow; color: darkred;">YOU ARE MAKING AN EXTERNAL TOURNAMENT GAME</span>
-                </p>
-            {% endif %}
-            {% if MT_Creation %}
+                {% if MT_Creation %}
+                </form>
+            {% else %}
             </form>
-        {% else %}
-        </form>
-    {% endif %}
-    {% include 'Lobby/donate/donateBanner.html' %}
-    {% include 'Lobby/splotterconSponsor.html' %}
-</div>
-{% block script %}
-    <script src="{% static 'Lobby/createTGZgame.js' %}"></script>
-    <script>
+        {% endif %}
+        {% include 'Lobby/donate/donateBanner.html' %}
+        {% include 'Lobby/splotterconSponsor.html' %}
+    </div>
+    {% block script %}
+        <script src="{% static 'Lobby/createTGZgame.js' %}"></script>
+        <script>
     var global = {};
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';
     global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
@@ -954,6 +945,6 @@
 });
 
 
-    </script>
-{% endblock %}
+        </script>
+    {% endblock %}
 {% endblock %}

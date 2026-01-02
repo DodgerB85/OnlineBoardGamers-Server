@@ -2,10 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230"
-          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
@@ -224,13 +222,26 @@
                         <legend class="optionsHeader">{% translate "Game Options" %}</legend>
                         <span class="optionTitleSpan">{% translate "Hidden Knowledge Level" %}</span>
                         <br />
-                        <input type="radio" name="hiddenInfoLevel" id="hiddenInfoLevelHiPlus" value="9">
-                        <label for="hiddenInfoLevelHiPlus" class="checkboxLabel" >High+</label>
-                        <input type="radio" name="hiddenInfoLevel" id="hiddenInfoLevelHiMinus" value="6" checked>
-                        <label for="hiddenInfoLevelHiMinus" class="checkboxLabel" >High&#8722;</label>
-                        <input type="radio" name="hiddenInfoLevel" id="hiddenInfoLevelMedPlus" value="5">
+                        <input type="radio"
+                               name="hiddenInfoLevel"
+                               id="hiddenInfoLevelHiPlus"
+                               value="9">
+                        <label for="hiddenInfoLevelHiPlus" class="checkboxLabel">High+</label>
+                        <input type="radio"
+                               name="hiddenInfoLevel"
+                               id="hiddenInfoLevelHiMinus"
+                               value="6"
+                               checked>
+                        <label for="hiddenInfoLevelHiMinus" class="checkboxLabel">High&#8722;</label>
+                        <input type="radio"
+                               name="hiddenInfoLevel"
+                               id="hiddenInfoLevelMedPlus"
+                               value="5">
                         <label for="hiddenInfoLevelMedPlus" class="checkboxLabel">Med+</label>
-                        <input type="radio" name="hiddenInfoLevel" id="hiddenInfoLevelMedMinus" value="8">
+                        <input type="radio"
+                               name="hiddenInfoLevel"
+                               id="hiddenInfoLevelMedMinus"
+                               value="8">
                         <label for="hiddenInfoLevelMedMinus" class="checkboxLabel">Med&#8722;</label>
                         <input type="radio" name="hiddenInfoLevel" id="hiddenInfoLevelLow" value="7">
                         <label for="hiddenInfoLevelLow" class="checkboxLabel">Low</label>

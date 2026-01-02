@@ -2,10 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}?v=20230230"
-          rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/newGame.css' %}?v=20230230"
-          rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
@@ -65,9 +63,9 @@
                                     <option value="50">{% translate "Casual: Just take your time" %}</option>
                                 </select>
                                 <br />
-                                <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span><br/>
+                                <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span>
+                                <br />
                                 <span class="optionHelp">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</span>
-
                             </div>
                         </div>
                         <div class="singleChoiceDiv">
@@ -90,11 +88,12 @@
                                            class="textInput"
                                            autocomplete="off">
                                 </div>
-                                
                                 <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none;">
+                        <div class="singleChoiceWithTextDiv"
+                             id="selPlayer3"
+                             style="display: none">
                             <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -152,17 +151,15 @@
                         </span>
                         <br />
                         <input type="checkbox"
-                        onchange="validateOptions(this.id)"
-                        class="myCheckbox"
-                        id="privateGame"
-                        name="privateGame"
-                        value="1">
-                 <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
-                 <br />
-                 <span class="inlineHelp">
-                     {% translate "Players can only join with invite or link" %}
-                 </span>
-                 <br/>
+                               onchange="validateOptions(this.id)"
+                               class="myCheckbox"
+                               id="privateGame"
+                               name="privateGame"
+                               value="1">
+                        <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
+                        <br />
+                        <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
+                        <br />
                         <input type="checkbox"
                                onchange="validateOptions(this.id)"
                                class="myCheckbox"
@@ -184,7 +181,8 @@
                                class="myCheckbox"
                                id="experiencedGame"
                                name="experiencedGame"
-                               value="120" disabled>
+                               value="120"
+                               disabled>
                         <label for="experiencedGame" class="checkboxLabel">{% translate "Experienced Game" %}</label>
                         <br />
                         <span class="inlineHelp">
@@ -193,7 +191,8 @@
                                 Minmum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
                             {% endblocktranslate %}
                             {% if not experienced %}
-                            <br /> <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
+                                <br />
+                                <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
                             {% endif %}
                         </span>
                         <br />
@@ -201,59 +200,25 @@
                     <!--
                     <fieldset id="basicOptions" class="optionsGroupTop">
                         <legend class="optionsHeader">{% translate "Game Options" %}</legend>
-                        <input type="checkbox"
-                               onchange="validateGameOptions(this.id)"
-                               class="myCheckbox"
-                               id="limitTableSize"
-                               name="limitTableSize"
-                               value="102">
+                        <input type="checkbox" onchange="validateGameOptions(this.id)" class="myCheckbox" id="limitTableSize" name="limitTableSize" value="102">
                         <label for="limitTableSize" class="checkboxLabel">{% translate "Limit Table Size" %}</label>
                         <br />
-                        <input type="radio"
-                               name="tableSizeRadio"
-                               id="tableSizeRadio1"
-                               disabled
-                               value="10">
+                        <input type="radio" name="tableSizeRadio" id="tableSizeRadio1" disabled value="10">
                         <label for="tableSizeRadio1" class="checkboxLabel">Small</label>
-                        <input type="radio"
-                               name="tableSizeRadio"
-                               id="tableSizeRadio2"
-                               disabled
-                               value="11">
+                        <input type="radio" name="tableSizeRadio" id="tableSizeRadio2" disabled value="11">
                         <label for="tableSizeRadio2" class="checkboxLabel">Medium</label>
-                        <input type="radio"
-                               name="tableSizeRadio"
-                               id="tableSizeRadio3"
-                               disabled
-                               value="12">
+                        <input type="radio" name="tableSizeRadio" id="tableSizeRadio3" disabled value="12">
                         <label for="tableSizeRadio3 class="checkboxLabel">Large
                         </label>
                         <br />
-                        <input type="checkbox"
-                               onchange="validateGameOptions(this.id)"
-                               class="myCheckbox"
-                               id="addTableJunk"
-                               name="addTableJunk"
-                               value="102">
+                        <input type="checkbox" onchange="validateGameOptions(this.id)" class="myCheckbox" id="addTableJunk" name="addTableJunk" value="102">
                         <label for="addTableJunk" class="checkboxLabel">{% translate "Add Table Junk" %}</label>
                         <br />
-                        <input type="radio"
-                               name="tableJunkRadio"
-                               id="tableJunkRadio1"
-                               disabled
-                               value="20">
+                        <input type="radio" name="tableJunkRadio" id="tableJunkRadio1" disabled value="20">
                         <label for="tableJunkRadio1" class="checkboxLabel">Low</label>
-                        <input type="radio"
-                               name="tableJunkRadio"
-                               id="tableJunkRadio2"
-                               disabled
-                               value="21">
+                        <input type="radio" name="tableJunkRadio" id="tableJunkRadio2" disabled value="21">
                         <label for="tableJunkRadio2" class="checkboxLabel">Medium</label>
-                        <input type="radio"
-                               name="tableJunkRadio"
-                               id="tableJunkRadio3"
-                               disabled
-                               value="22">
+                        <input type="radio" name="tableJunkRadio" id="tableJunkRadio3" disabled value="22">
                         <label for="tableJunkRadio3" class="checkboxLabel">High</label>
                         <br />
                         <span class="inlineHelp">
@@ -261,40 +226,40 @@
                                 According to the rules, you cannot remove items already on the table.
                                 This simulates some items already on the table by blocking some tile spaces.
                             {% endblocktranslate %}
-                        </span>
-                        <br />
-                        <input type="checkbox"
-                               class="myCheckbox"
-                               id="useExpansion"
-                               name="useExpansion"
-                               value="1">
-                        <label for="useExpansion" class="checkboxLabel">{% translate "Use Expansion" %}</label>
-                        <br />
-                        <span class="inlineHelp">
-                            {% blocktranslate trimmed %}
-                                Allows storage of 1 tile
+                                        </span>
+                                        <br />
+                                        <input type="checkbox"
+                                               class="myCheckbox"
+                                               id="useExpansion"
+                                               name="useExpansion"
+                                               value="1">
+                                    <label for="useExpansion" class="checkboxLabel">{% translate "Use Expansion" %}</label>
+                                    <br />
+                                    <span class="inlineHelp">
+                                        {% blocktranslate trimmed %}
+                                            Allows storage of 1 tile
+                                            <br />
+                                            Alows you to pirate unfinished movies for € 4 M
+                                        {% endblocktranslate %}
+                                </span>
                                 <br />
-                                Alows you to pirate unfinished movies for € 4 M
-                            {% endblocktranslate %}
-                        </span>
-                        <br />
-                    </fieldset>
-                -->
-                </div>
-                <br />
-            </div>
-            <div>
-                <input type="submit"
-                       class="registerbtn"
-                       value="{% translate "Create Web Game" %}">
-            </div>
-        </form>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/splotterconSponsor.html' %}
-    </div>
-    {% block script %}
-        <script src="{% static 'Lobby/createWEB.js' %}"></script>
-        <script>
+                        </fieldset>
+                    -->
+</div>
+<br />
+</div>
+<div>
+    <input type="submit"
+           class="registerbtn"
+           value="{% translate "Create Web Game" %}">
+</div>
+</form>
+{% include 'Lobby/donate/donateBanner.html' %}
+{% include 'Lobby/splotterconSponsor.html' %}
+</div>
+{% block script %}
+    <script src="{% static 'Lobby/createWEB.js' %}"></script>
+    <script>
     var global = {};
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';
     global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
@@ -325,6 +290,6 @@
 });
 
 
-        </script>
-    {% endblock %}
+    </script>
+{% endblock %}
 {% endblock %}
