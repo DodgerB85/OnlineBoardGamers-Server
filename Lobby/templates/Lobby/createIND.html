@@ -1,6 +1,5 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
@@ -89,9 +88,7 @@
                                 <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv"
-                             id="selPlayer3"
-                             style="display: none">
+                        <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none">
                             <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -103,9 +100,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv"
-                             id="selPlayer4"
-                             style="display: none">
+                        <div class="singleChoiceWithTextDiv" id="selPlayer4" style="display: none">
                             <label class="choiceLabelText" for="player4">{% translate "Player 4" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -117,9 +112,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv"
-                             id="selPlayer5"
-                             style="display: none">
+                        <div class="singleChoiceWithTextDiv" id="selPlayer5" style="display: none">
                             <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -263,7 +256,9 @@
         {% include 'Lobby/splotterconSponsor.html' %}
     </div>
     {% block script %}
-        <script src="{% static 'Lobby/createIND.js' %}"></script>
+        {% compress js %}
+            <script src="{% static 'Lobby/createIND.js' %}"></script>
+        {% endcompress %}
         <script>
     var global = {};
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';

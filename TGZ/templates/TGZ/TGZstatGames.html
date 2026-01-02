@@ -1,9 +1,10 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
-    <script src="{% static 'Lobby/common.js' %}"></script>
+    {% compress js %}
+        <script src="{% static 'Lobby/common.js' %}"></script>
+    {% endcompress %}
 {% endblock %}
 {% block body %}
     <div class="container">

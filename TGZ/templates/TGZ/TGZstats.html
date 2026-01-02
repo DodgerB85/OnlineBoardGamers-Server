@@ -1,9 +1,10 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-  <script src="{% static 'TGZ/TGZstats.js' %}"></script>
+  {% compress js %}
+    <script src="{% static 'TGZ/TGZstats.js' %}"></script>
+  {% endcompress %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
 {% endblock %}

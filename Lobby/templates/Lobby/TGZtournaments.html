@@ -1,13 +1,14 @@
 {% extends "Lobby/layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n compress %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-    <script src="{% static 'Lobby/TGZtournaments.js' %}"></script>
-    <script src="{% static 'Lobby/common.js' %}"></script>
+    {% compress js %}
+        <script src="{% static 'Lobby/TGZtournaments.js' %}"></script>
+        <script src="{% static 'Lobby/common.js' %}"></script>
+    {% endcompress %}
     <div class="container">
         {% if messages %}
             <div class="messages">
