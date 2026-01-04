@@ -445,11 +445,11 @@ def SF_startTournament(request, tournament, gameCode):
     )
     if settings.DEBUG:
         requests.post(
-            f"https://discordapp.com/api/webhooks/{config.WEBHOOK_ADMIN_ERROR_MSG}",
+            f"https://discordapp.com/api/webhooks/{config("WEBHOOK_ADMIN_ERROR_MSG")}",
             data={"content": message},
         )
     else:
-        requests.post(f"https://discord.com/api/webhooks/{config.WEBHOOK_DISCORD_TOURNAMENTS}", data={"content": message})
+        requests.post(f"https://discord.com/api/webhooks/{config("WEBHOOK_DISCORD_TOURNAMENTS")}", data={"content": message})
 
 
 def SF_M_ProcessTournamentEndGame(request, _game, _currentGame, _winnerArray):
