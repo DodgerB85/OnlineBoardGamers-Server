@@ -1,3 +1,4 @@
+from cmath import phase
 import json
 import time
 
@@ -24,8 +25,16 @@ from django.conf import settings
 from Lobby.models import User, Profile
 from .models import HC_Game
 
-from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime, SF_getGameCreationJsonReturn
-from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications, SN_sendBugReportEmail, SN_sendNextTurnNotification
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_updateFlexiTime,
+    SF_getGameCreationJsonReturn,
+)
+from Lobby.sharedFunctions.sharedNotifications import (
+    SN_sendInviteNotifications,
+    SN_sendBugReportEmail,
+    SN_sendNextTurnNotification,
+    SN_sendAdminErrorMessage
+)
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from django.utils.translation import gettext, get_language
@@ -83,7 +92,9 @@ def createHCgame(request):
             request.POST.get("player4"),
             request.POST.get("player5"),
         ]:
-            messages.error(request, gettext("You cannot add yourself as another player"))
+            messages.error(
+                request, gettext("You cannot add yourself as another player")
+            )
             return HttpResponseRedirect(reverse("createHCpage"))
 
         # CHECK APPROPRIATE NUMBER OF ENTERED USERS ARE REAL AND UNIQUE
@@ -238,23 +249,29 @@ def createHCgame(request):
 
     newGame.kickoutDuration = request.POST["kickoutDuration"]
 
-    #newGame.zoomLevels = "200" * _maxPlayers
+    # newGame.zoomLevels = "200" * _maxPlayers
     newGame.statsExcludeConsent = "0" * _maxPlayers
     if "trainingGame" in request.POST:
         newGame.statsExcludeConsent = "1" * _maxPlayers
         newGame.statsExcludedGame = True
 
     if "privateGame" in request.POST:
-            newGame.gameStatus = "PRIVATE"
+        newGame.gameStatus = "PRIVATE"
 
     newGame.save()
 
     if "trainingGame" in request.POST:
         messages.success(request, (gettext("Your Practice game has started")))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
+        return HttpResponseRedirect(
+            reverse("indexListType", kwargs={"listType": "current"})
+        )
     else:
-        messages.success(request, (SF_getGameCreationJsonReturn("HC", getattr(newGame, "id"))))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+        messages.success(
+            request, (SF_getGameCreationJsonReturn("HC", getattr(newGame, "id")))
+        )
+        return HttpResponseRedirect(
+            reverse("indexListType", kwargs={"listType": "waiting"})
+        )
 
 
 def processHCturn(request):
@@ -275,14 +292,17 @@ def _processHCturn(request):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     jsonData = json.loads(request.body)
+    game_id = jsonData["gameID"]
 
     try:
-        currentGame = HC_Game.objects.get(id=jsonData["gameID"])
+        currentGame = HC_Game.objects.get(id=game_id)
     except HC_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if jsonData["action"] == "turn0move":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
+            jsonData["latestUpdate"]
+        ) != str(currentGame.latestUpdate):
             return JsonResponse({"syncError": True}, safe=False)
         # save move data
         nameToUse = request.user.username
@@ -296,11 +316,16 @@ def _processHCturn(request):
         currentGame.save()
 
         if not moveResponse:
-            return JsonResponse({"ready": False, "currentPlayers": currentGame.getCurrentPlayers()}, safe=False)
+            return JsonResponse(
+                {"ready": False, "currentPlayers": currentGame.getCurrentPlayers()},
+                safe=False,
+            )
         else:
             # open up the game data.
             x = lzstring.LZString()
-            raw_game_data = x.decompressFromEncodedURIComponent(currentGame.gameData or "{}")
+            raw_game_data = x.decompressFromEncodedURIComponent(
+                currentGame.gameData or "{}"
+            )
             # Fallback to "{}" if decompression returns None
             gameDataString = raw_game_data if raw_game_data is not None else "{}"
             rawModel = json.loads(gameDataString)
@@ -310,10 +335,14 @@ def _processHCturn(request):
                 # Fetch the attribute dynamically (player0currentMoveData, player1currentMoveData, etc.)
                 attr_name = f"player{i}currentMoveData"
                 move_data_raw = getattr(currentGame, attr_name, "")
-                
-                decompressed_move = x.decompressFromEncodedURIComponent(move_data_raw or "")
+
+                decompressed_move = x.decompressFromEncodedURIComponent(
+                    move_data_raw or ""
+                )
                 # Fallback to "{}" if decompression fails
-                rawModel[3][i][0] = json.loads(decompressed_move if decompressed_move is not None else "{}")
+                rawModel[3][i][0] = json.loads(
+                    decompressed_move if decompressed_move is not None else "{}"
+                )
 
             # subtract components
             # 0 = availComponents # 5 = dept_res 6 = dept_plan
@@ -354,12 +383,18 @@ def _processHCturn(request):
             safe=False,
         )
     elif jsonData["action"] == "saveFactoryWithoutEndingTurn":
-        currentGame.saveFactoryWithoutEndingTurn(request.user.username, jsonData["data"])
+        currentGame.saveFactoryWithoutEndingTurn(
+            request.user.username, jsonData["data"]
+        )
         return JsonResponse({"savedFac": True}, safe=False)
-    
-    elif jsonData["action"] == "saveFactoryMove":
-         # CANT CHECK FOR SYNC ERROR AS currentGame.latestUpdate GETS CHANGED WITHOUT UPDATING PLAYERS
 
+    elif jsonData["action"] == "saveFactoryMove":
+        # var FCIATT = player.factory.factoryComponenetIndexesAddedThisTurn
+        # var FCNATT = player.factory.factoryComponentNamesAddedThisTurn
+        # var FDBEdeco = decompressObjectFromDB(player.factory.factoryDataBeforeExpansion)
+        # ThisAC = players availableComponents
+
+        # CANT CHECK FOR SYNC ERROR AS currentGame.latestUpdate GETS CHANGED WITHOUT UPDATING PLAYERS
         # if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
         #    return JsonResponse({"syncError": True}, safe=False)
 
@@ -374,17 +409,18 @@ def _processHCturn(request):
         if name == "BotKickStarter":
             name = jsonData["BKSN"]
 
-        #incomingFactoryDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["data"]))
-        #DBgameDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.gameData))
-        #DBavailableComponents = DBgameDataRaw[0].copy()
-        #other = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["other"]))
-        
         # Use a fallback string if decompression returns None
-        incomingFactoryDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}")
-        DBgameDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]")
+        incomingFactoryDataRaw = json.loads(
+            LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}"
+        )
+        DBgameDataRaw = json.loads(
+            LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]"
+        )
         DBavailableComponents = DBgameDataRaw[0].copy() if DBgameDataRaw else []
-        other = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]")
-        
+        other = json.loads(
+            LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]"
+        )
+
         FDBE = other[0]
         FCIATT = other[1]
         FCNATT = other[2]
@@ -419,7 +455,9 @@ def _processHCturn(request):
                 # (DBavailableComponents)
                 # Get FacDataBeforeExp back out into that players name
                 # along with FCIATT
-                retRaw = LZS.compressToEncodedURIComponent(json.dumps([FDBE, FCIATT, DBavailableComponents]))
+                retRaw = LZS.compressToEncodedURIComponent(
+                    json.dumps([FDBE, FCIATT, DBavailableComponents])
+                )
                 return JsonResponse(
                     {
                         "invalid": True,
@@ -433,7 +471,9 @@ def _processHCturn(request):
         # Now it is valid for this time, so store the data
         dataToInsert = [FDBE, FCIATT, FCNATT, incomingFactoryDataRaw]
         # currentGame.updateSingleMove(request.user.username, LZS.compressToEncodedURIComponent(json.dumps(dataToInsert)))
-        currentGame.updateSingleMove(name, LZS.compressToEncodedURIComponent(json.dumps(dataToInsert)))
+        currentGame.updateSingleMove(
+            name, LZS.compressToEncodedURIComponent(json.dumps(dataToInsert))
+        )
 
         currentGame.save()
 
@@ -464,13 +504,25 @@ def _processHCturn(request):
         # while currentGame.hasMoveData(currentPlayerrsList[0])
         # limit the max to 5 times
 
-        for i in range(6):
+        for i in range(10):
+            if i == 9:
+                message = (
+                    f"************ Max 'i' hit in HC - gameID: {game_id} - User: {request.user.username}  "
+                    f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
+                    f"--- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                )  
+                SN_sendAdminErrorMessage(request, message)
             if len(currentPlayerrsList) == 0:
                 break
             # THIS WILL ALWAYS BE TRUE ONCE, AS NOW CURRENT PLAYER IS FIRST
             if currentGame.hasMoveData(currentPlayerrsList[0]):
-                #moveData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.getSingleMoveForName(currentPlayerrsList[0])))
-                moveData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.getSingleMoveForName(currentPlayerrsList[0]) or "") or "[]")
+                # moveData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.getSingleMoveForName(currentPlayerrsList[0])))
+                moveData = json.loads(
+                    LZS.decompressFromEncodedURIComponent(
+                        currentGame.getSingleMoveForName(currentPlayerrsList[0]) or ""
+                    )
+                    or "[]"
+                )
                 FDBE = moveData[0]
                 FCIATT = moveData[1]
                 FCNATT = moveData[2]
@@ -507,32 +559,69 @@ def _processHCturn(request):
                 # 3 = players           X = select player                       0 =fac
                 DBgameDataRaw[3][currentGame.seatPosition(currentPlayerrsList[0])][0][4]
 
-                DBgameDataRaw[15].append([currentGame.seatPosition(currentPlayerrsList[0]), 13, [len(FCNATT), len(DBgameDataRaw[3][currentGame.seatPosition(currentPlayerrsList[0])][0][4])]])
+                DBgameDataRaw[15].append(
+                    [
+                        currentGame.seatPosition(currentPlayerrsList[0]),
+                        13,
+                        [
+                            len(FCNATT),
+                            len(
+                                DBgameDataRaw[3][
+                                    currentGame.seatPosition(currentPlayerrsList[0])
+                                ][0][4]
+                            ),
+                        ],
+                    ]
+                )
                 # DBgameDataRaw[16].append((int(time.time())*1000 - (2*len(currentPlayerrsList)) )- DBgameDataRaw[15][0])
-                DBgameDataRaw[16].append(DBgameDataRaw[16][len(DBgameDataRaw[16]) - 1] + (15 - len(currentPlayerrsList)))
+                DBgameDataRaw[16].append(
+                    DBgameDataRaw[16][len(DBgameDataRaw[16]) - 1]
+                    + (15 - len(currentPlayerrsList))
+                )
 
                 # end the first players turn
                 currentPlayerrsList.pop(0)
-                while len(currentPlayerrsList) > 0 and currentPlayerrsList[0] == "HcBot":
+                while (
+                    len(currentPlayerrsList) > 0 and currentPlayerrsList[0] == "HcBot"
+                ):
                     currentPlayerrsList.pop(0)
 
             else:
+                # If not currentGame.hasMoveData(currentPlayerrsList[0]):
                 break
             # End if move data
         # End loop of 6
 
         # repack game and save
-        currentGame.gameData = LZS.compressToEncodedURIComponent(json.dumps(DBgameDataRaw))
+        currentGame.gameData = LZS.compressToEncodedURIComponent(
+            json.dumps(DBgameDataRaw)
+        )
         # remove name from current players
         currentGame.currentPlayers = ",".join(currentPlayerrsList)
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(currentGame.kickoutFlexiData, currentGame.latestUpdate, int(time.time()) * 1000, request.user.username, currentGame.kickoutDuration)
+        
+        if len(currentPlayerrsList) == 0:
+            message = (
+                f"************ No players left in HC after processing factory - gameID: {game_id} - User: {request.user.username}  "
+                f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
+                f"--- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+            )  
+            SN_sendAdminErrorMessage(request, message)
+            
+        currentGame.kickoutFlexiData = SF_updateFlexiTime(
+            currentGame.kickoutFlexiData,
+            currentGame.latestUpdate,
+            int(time.time()) * 1000,
+            request.user.username,
+            currentGame.kickoutDuration,
+        )
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         currentGame.save()
         if len(currentPlayerrsList) > 0:
-            # if currentGame.hasMoveData(currentPlayerrsList[0]):
-            sendFactoryAlertNotification(request, currentPlayerrsList[0], jsonData["gameID"])
+            sendFactoryAlertNotification(
+                request, currentPlayerrsList[0], jsonData["gameID"]
+            )
 
         return JsonResponse(
             {
@@ -544,10 +633,6 @@ def _processHCturn(request):
             safe=False,
         )
         # currentGame.currentPlayers is in CORRECT order, as it was updated from the Set Focus stage
-
-
-
-
 
     ######################################
     # if (currentPlayerrsList[0] == name and enoughComponents):
@@ -569,7 +654,9 @@ def _processHCturn(request):
 
     elif jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
+            jsonData["latestUpdate"]
+        ) != str(currentGame.latestUpdate):
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -587,7 +674,13 @@ def _processHCturn(request):
         # Use for rewind save check
         # elapsedTotalSeconds = int(time.time()) - int(currentGame.latestUpdate)//1000
 
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(currentGame.kickoutFlexiData, currentGame.latestUpdate, int(time.time()) * 1000, request.user.username, currentGame.kickoutDuration)
+        currentGame.kickoutFlexiData = SF_updateFlexiTime(
+            currentGame.kickoutFlexiData,
+            currentGame.latestUpdate,
+            int(time.time()) * 1000,
+            request.user.username,
+            currentGame.kickoutDuration,
+        )
 
         oldVer = currentGame.latestUpdate
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -598,16 +691,34 @@ def _processHCturn(request):
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            endGame(request, jsonData["winner"], jsonData["finalPositions"], jsonData["gameID"], currentGame)
+            endGame(
+                request,
+                jsonData["winner"],
+                jsonData["finalPositions"],
+                jsonData["gameID"],
+                currentGame,
+            )
         else:
             # Send Notifications
-            if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "HcBot" and not jsonData["status"] == "FINISHED":
+            if (
+                jsonData["nextPlayer"] != ""
+                and jsonData["nextPlayer"] != "HcBot"
+                and not jsonData["status"] == "FINISHED"
+            ):
                 playerListToNotify = jsonData["nextPlayer"].split(",")
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
 
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(request, "HC", playerListToNotify, jsonData["gameID"], currentGame.getGameName(), currentGame, oldVer)
+                    SN_sendNextTurnNotification(
+                        request,
+                        "HC",
+                        playerListToNotify,
+                        jsonData["gameID"],
+                        currentGame.getGameName(),
+                        currentGame,
+                        oldVer,
+                    )
 
         ################ REWIND EVERY SAVE #######################
 
@@ -617,9 +728,14 @@ def _processHCturn(request):
 
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
-                if currentRewindDataArray[-1] != currentGame.rewindTempData and jsonData["data"] != currentGame.rewindTempData:
+                if (
+                    currentRewindDataArray[-1] != currentGame.rewindTempData
+                    and jsonData["data"] != currentGame.rewindTempData
+                ):
                     # add to RWdata and RWdata[]
-                    currentRewindData = currentRewindData + "'SPLIT'" + currentGame.rewindTempData
+                    currentRewindData = (
+                        currentRewindData + "'SPLIT'" + currentGame.rewindTempData
+                    )
                     # currentRewindDataArray = currentRewindData.split("'SPLIT'")
                     currentRewindDataArray.append(currentGame.rewindTempData)
 
@@ -672,9 +788,26 @@ def _processHCturn(request):
     elif jsonData["action"] == "loadRewind":
         currentRewindData = currentGame.rewindData
         if len(currentRewindData) == 0:
-            return JsonResponse({"message": gettext("<b>No rewind data. Rewind limit reached. Please play on to generate more rewind data </b>")}, safe=False)
-        if not currentGame.getRewindHostPossible() and request.user.username != "BotKickStarter":
-            return JsonResponse({"message": gettext("<b>Permissions missing. Please reload the page and check again</b>")}, safe=False)
+            return JsonResponse(
+                {
+                    "message": gettext(
+                        "<b>No rewind data. Rewind limit reached. Please play on to generate more rewind data </b>"
+                    )
+                },
+                safe=False,
+            )
+        if (
+            not currentGame.getRewindHostPossible()
+            and request.user.username != "BotKickStarter"
+        ):
+            return JsonResponse(
+                {
+                    "message": gettext(
+                        "<b>Permissions missing. Please reload the page and check again</b>"
+                    )
+                },
+                safe=False,
+            )
 
         currentRewindDataArray = currentRewindData.split("'SPLIT'")
 
@@ -710,7 +843,9 @@ def _processHCturn(request):
             )
 
         # ELSE if there is not any current move data
-        loadData = currentRewindDataArray.pop() if len(currentRewindDataArray) > 0 else ""
+        loadData = (
+            currentRewindDataArray.pop() if len(currentRewindDataArray) > 0 else ""
+        )
 
         while loadData == currentGame.gameData and len(currentRewindDataArray) > 0:
             loadData = currentRewindDataArray.pop()
@@ -760,7 +895,15 @@ def _processHCturn(request):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(request, "HC", playerListToNotify, jsonData["gameID"], currentGame.getGameName(), currentGame, currentGame.latestUpdate)
+                SN_sendNextTurnNotification(
+                    request,
+                    "HC",
+                    playerListToNotify,
+                    jsonData["gameID"],
+                    currentGame.getGameName(),
+                    currentGame,
+                    currentGame.latestUpdate,
+                )
 
         return JsonResponse(
             {
@@ -771,7 +914,11 @@ def _processHCturn(request):
         )
 
     elif jsonData["action"] == "saveAfterKickout":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate) and not jsonData["ignoreSync"]:
+        if (
+            str(jsonData["latestUpdate"]) != "9999999999999"
+            and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate)
+            and not jsonData["ignoreSync"]
+        ):
             # print("Sync Error Kickout Save " + str(jsonData["gameID"]))
             return JsonResponse({"syncError": True}, safe=False)
 
@@ -798,16 +945,34 @@ def _processHCturn(request):
 
         if jsonData["status"] == "FINISHED":
             # endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["gameID"], currentGame)
-            endGame(request, jsonData["winner"], jsonData["finalPositions"], jsonData["gameID"], currentGame)
+            endGame(
+                request,
+                jsonData["winner"],
+                jsonData["finalPositions"],
+                jsonData["gameID"],
+                currentGame,
+            )
         else:
             # Send Notifications
-            if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "HcBot" and not jsonData["status"] == "FINISHED":
+            if (
+                jsonData["nextPlayer"] != ""
+                and jsonData["nextPlayer"] != "HcBot"
+                and not jsonData["status"] == "FINISHED"
+            ):
                 playerListToNotify = jsonData["nextPlayer"].split(",")
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
 
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(request, "HC", playerListToNotify, jsonData["gameID"], currentGame.getGameName(), currentGame, currentGame.latestUpdate)
+                    SN_sendNextTurnNotification(
+                        request,
+                        "HC",
+                        playerListToNotify,
+                        jsonData["gameID"],
+                        currentGame.getGameName(),
+                        currentGame,
+                        currentGame.latestUpdate,
+                    )
 
         return JsonResponse(
             {
@@ -820,6 +985,7 @@ def _processHCturn(request):
 
     return HttpResponse(status=204)  # No Content
 
+
 # def endGame(request, _winner, _finalScores, _gameID, currentGame):
 def endGame(request, _winner, _finalPositions, _gameID, currentGame):
     with db_mutex("endGame"):
@@ -829,21 +995,19 @@ def endGame(request, _winner, _finalPositions, _gameID, currentGame):
 @login_required
 def showHCgame(request, game_id):
     try:
-        currentGame = HC_Game.objects.select_related(
-            "host", "relatedTournament"
-        ).prefetch_related(
-            "allPlayers", 
-            "missingPlayers", 
-            "playersWithChatNotification"
-        ).get(id=game_id)
+        currentGame = (
+            HC_Game.objects.select_related("host", "relatedTournament")
+            .prefetch_related(
+                "allPlayers", "missingPlayers", "playersWithChatNotification"
+            )
+            .get(id=game_id)
+        )
     except HC_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
-
-
 
     KickoutFlexiDataArray = []
     if currentGame.kickoutFlexiData:
@@ -857,8 +1021,8 @@ def showHCgame(request, game_id):
         userObj = request.user
         username = userObj.username
         user_id = userObj.id
-        
-        user_profile = Profile.objects.get(user=userObj) 
+
+        user_profile = Profile.objects.get(user=userObj)
         missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
         chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
 
@@ -867,7 +1031,6 @@ def showHCgame(request, game_id):
         involvedPlayer = is_in_all and not is_missing
         if username == "BotKickStarter":
             involvedPlayer = True
-        
         now = int(time.time()) * 1000
         chatData = currentGame.chatData
 
@@ -907,11 +1070,16 @@ def showHCgame(request, game_id):
             currentGame.save()
 
         ## Get the next URL
-        nextURL = f"/nextGame?current_id={game_id}&current_code={currentGame.getGameCode()}"
+        nextURL = (
+            f"/nextGame?current_id={game_id}&current_code={currentGame.getGameCode()}"
+        )
         # If person is logged in and in the game
         if involvedPlayer:
             rewindPanelType = 1
-            if currentGame.host == request.user or request.user.username == "BotKickStarter":
+            if (
+                currentGame.host == request.user
+                or request.user.username == "BotKickStarter"
+            ):
                 rewindPanelType = 2
                 rewindHostPossible = currentGame.getRewindHostPossible()
                 if request.user.username == "BotKickStarter":
@@ -922,12 +1090,26 @@ def showHCgame(request, game_id):
             currentRewindConsent = currentGame.getCurrentRewindConsent(username)
 
             preferredHCcolour = user_profile.preferredHCcolour
-            liveNotification =  user_profile.liveNotification
+            liveNotification = user_profile.liveNotification
             if currentGame.hasMoveData(username):
-                currentMove = '{"phase": ' + str(currentGame.phase) + ',"turn": ' + str(currentGame.turn) + ',"content": "' + currentGame.hasMoveData(username) + '"}'
+                currentMove = (
+                    '{"phase": '
+                    + str(currentGame.phase)
+                    + ',"turn": '
+                    + str(currentGame.turn)
+                    + ',"content": "'
+                    + currentGame.hasMoveData(username)
+                    + '"}'
+                )
 
             if currentGame.hasTemporaryMoveData(username):
-                temporaryMove = '{"type": "' + currentGame.hasTemporaryMoveData(username)[0] + '","content": "' + currentGame.hasTemporaryMoveData(username)[1] + '"}'
+                temporaryMove = (
+                    '{"type": "'
+                    + currentGame.hasTemporaryMoveData(username)[0]
+                    + '","content": "'
+                    + currentGame.hasTemporaryMoveData(username)[1]
+                    + '"}'
+                )
 
             # Get the Notes for the user
             if currentGame.seatPosition(username) == 0:
@@ -1015,8 +1197,8 @@ def showHCgame(request, game_id):
 
     now = int(time.time()) * 1000
 
-    preferredColour = -1#user_profile.preferredHCcolour
-        
+    preferredColour = -1  # user_profile.preferredHCcolour
+
     return render(
         request,
         "HC/HCtemplate.html",
@@ -1061,7 +1243,9 @@ def bugEntry(request):
     bugDescription = jsonData["description"]
 
     # email data to myself
-    SN_sendBugReportEmail(request, "HC", gameID, gameData, bugDescription, currentGame.rewindData, "")
+    SN_sendBugReportEmail(
+        request, "HC", gameID, gameData, bugDescription, currentGame.rewindData, ""
+    )
 
     return JsonResponse({"bugEntrySuccess": True})
 
@@ -1104,44 +1288,61 @@ def sendFactoryAlertNotification(request, player, gameID):
         # SEND EMAIL
         if profile.sendEmailNotificationOnTurn:
             current_site = get_current_site(request)
-            subject = gettext("It is your turn at Horseless Carriage - Factory Building")
-            message = render_to_string("HC/yourTurnEmailFactory.html", {"user": user.username, "domain": current_site.domain, "gameID": gameID, "gameName": currentGame.getGameName(), "currentTurnString": currentGame.currentTurnString()})
+            subject = gettext(
+                "It is your turn at Horseless Carriage - Factory Building"
+            )
+            message = render_to_string(
+                "HC/yourTurnEmailFactory.html",
+                {
+                    "user": user.username,
+                    "domain": current_site.domain,
+                    "gameID": gameID,
+                    "gameName": currentGame.getGameName(),
+                    "currentTurnString": currentGame.currentTurnString(),
+                },
+            )
             user.email_user(subject, message)
 
         messageText = (
             user.username
             + ": "
-            + gettext("Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs building\n%(gameName)s - %(currentTurnString)s.") % {"gameName": currentGame.getGameName(), "currentTurnString": currentGame.currentTurnString()}
+            + gettext(
+                "Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs building\n%(gameName)s - %(currentTurnString)s."
+            )
+            % {
+                "gameName": currentGame.getGameName(),
+                "currentTurnString": currentGame.currentTurnString(),
+            }
         )
         urlText = gettext("Click here to play Horseless Carriage")
 
         # SEND DISCORD
-        #if profile.sendDiscordWebhookNotificationOnTurn:
+        # if profile.sendDiscordWebhookNotificationOnTurn:
         #    message = ""
         #    if len(profile.discordWebhookUserID) != 0:
         #        message += "<@" + profile.discordWebhookUserID + ">\n"
         #    message += messageText + "\n[" + urlText + "](https://www.OnlineBoardGamers.com/HC/" + str(currentGame.id) + "/)"
-#
+        #
         #    # message = ""
         #    # if  len(profile.discordWebhookUserID) != 0: message += "<@" + profile.discordWebhookUserID + ">\n"
         #    # message += user.username + ": "
         #    # message += gettext("Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs fixing!\n%(gameName)s - %(currentTurnString)s.\n[Click here to play Horseless Carriage](https://www.OnlineBoardGamers.com/HC/%(gameID)s/)") % {'gameName' : currentGame.gameName, 'currentTurnString' : currentGame.currentTurnString(), 'gameID' : str(currentGame.id)}
-#
+        #
         #    # message += "Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs fixing!\n" + currentGame.gameName + " - " + currentGame.currentTurnString() +  ".\n[Click here to play Horseless Carriage](https://www.OnlineBoardGamers.com/HC/" + str(currentGame.id) + "/)"
         #    # str(currentGame.turn) + "." + str(currentGame.phase) + \
         #    requests.post("" + profile.discordWebhookURL, data={"content": message})
-#
+        #
         ## SEND SLACK
-        #if profile.sendSlackWebhookNotificationOnTurn:
+        # if profile.sendSlackWebhookNotificationOnTurn:
         #    message = ""
         #    message += messageText + "\n<https://www.OnlineBoardGamers.com/HC/" + str(currentGame.id) + "/|" + urlText + ">"
-#
+        #
         #    # message = user.username + ": "
         #    # message += gettext("Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs fixing!\n%(gameName)s - %(currentTurnString)s.\n<https://www.OnlineBoardGamers.com/HC/%(gameID)s/|Click here to play Horseless Carriage>") % {'gameName' : currentGame.gameName, 'currentTurnString' : currentGame.currentTurnString(), 'gameID' : str(currentGame.id)}
-#
+        #
         #    # message += "Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs fixing!\n" + currentGame.gameName + " - " + currentGame.currentTurnString() + ".\n<https://www.OnlineBoardGamers.com/HC/" +str(currentGame.id) + "/|Click here to play Horseless Carriage>"
         #    # str(currentGame.turn) + "." + str(currentGame.phase) + \
-#
+        #
         #    payload = {"text": message}
         #    requests.post(profile.slackWebhookURL, json.dumps(payload))
 
@@ -1161,15 +1362,15 @@ def chat(request):
         currentGame = HC_Game.objects.get(id=jsonData["gameID"])
         currentGame.playersWithChatNotification.remove(request.user)
         currentGame.save()
-        
-        newChatData = currentGame.chatData or "" # Ensure it's a string
+
+        newChatData = currentGame.chatData or ""  # Ensure it's a string
 
         newMessage = re.search("{(.+?)}", newChatData)
-        
+
         # FIX: Check if the regex found a match
         if newMessage:
             msgToAdd = "{" + newMessage.group(1) + "}"
-            
+
             # Decode unicode escapes safely
             try:
                 c = bytes(msgToAdd, "utf-8")
@@ -1177,9 +1378,9 @@ def chat(request):
                 convertedDict = json.loads(msgToAdd)
             except (UnicodeDecodeError, json.JSONDecodeError):
                 return JsonResponse({"error": "Invalid chat format"}, status=500)
-            
+
             return JsonResponse(convertedDict, safe=False)
-        
+
         # Fallback if no JSON-like structure is found in chatData
         return JsonResponse({"error": "No messages found"}, status=404)
 
@@ -1202,7 +1403,15 @@ def chat(request):
         playerName = playerName.encode("unicode-escape").decode("ASCII")
 
         now = str(int(time.time()) * 1000)
-        newChatString = '{"name":"' + playerName + '","timestamp":' + str(now) + ',"message":"' + newMessage + '"},'
+        newChatString = (
+            '{"name":"'
+            + playerName
+            + '","timestamp":'
+            + str(now)
+            + ',"message":"'
+            + newMessage
+            + '"},'
+        )
         currentChatData = newChatString + currentChatData
         currentGame.chatData = currentChatData
         currentGame.save()
@@ -1210,6 +1419,7 @@ def chat(request):
         return JsonResponse({"chatEntry": True})
 
     return HttpResponse(status=204)  # No Content
+
 
 @login_required()
 def notes(request):
@@ -1278,6 +1488,7 @@ def processHCstatsExcludeConsent(request):
     currentGame.save()
     return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
 
+
 @login_required()
 def voteToDelete(request):
     if request.method != "POST":
@@ -1317,13 +1528,16 @@ def _voteToDelete(request):
         if all_voted:
             # Delete the game
             currentGame.delete()
-             # Add a success message
+            # Add a success message
             messages.success(request, gettext("Game successfully deleted"))
             # Redirect to the index page
-            return JsonResponse({
-                "voteChanged": True, 
-                "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
-                "redirect_url": reverse("index")})
+            return JsonResponse(
+                {
+                    "voteChanged": True,
+                    "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                    "redirect_url": reverse("index"),
+                }
+            )
 
         return JsonResponse(
             {
@@ -1332,5 +1546,5 @@ def _voteToDelete(request):
             },
             safe=False,
         )
-    
+
     return JsonResponse({"voteChanged": False})
