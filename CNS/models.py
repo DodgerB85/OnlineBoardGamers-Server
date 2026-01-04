@@ -6,13 +6,14 @@ from django.db import models
 from django.db.models import Q
 
 from django.conf import settings
-from decouple import config, Csv
-
-# from django.utils.translation import gettext
+from decouple import config
 
 from Lobby.models import User
 
-from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout, SF_kickoutRequired
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_getSecondsToNextKickout,
+    SF_kickoutRequired,
+)
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
     SR_currentTurnString,
@@ -21,27 +22,38 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
     SR_GAME_STATUS_CHOICES,
 )
-from Lobby.sharedFunctions.sharedNotifications import SN_M_sendEndGameNotification, SN_M_sendGameStartNotification
+from Lobby.sharedFunctions.sharedNotifications import (
+    SN_M_sendEndGameNotification,
+    SN_M_sendGameStartNotification,
+)
 
 
 class CNS_Game(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    
-    gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
 
-    gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    gameName = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
+
+    gameDescription = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
     gameStatus = models.CharField(
         max_length=9,
         choices=SR_GAME_STATUS_CHOICES,
         default="AVAILABLE",
-        db_index=True, 
+        db_index=True,
     )
 
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
+    latestUpdate = models.CharField(
+        max_length=15, blank=False, default=SR_getTimeNow, db_index=True
+    )
     startingOptions = models.CharField(max_length=20, blank=True)
 
-    allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="CNSallPlayersRelName")
+    allPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="CNSallPlayersRelName"
+    )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSmissingPlayersRelName", blank=True
     )
@@ -61,7 +73,9 @@ class CNS_Game(models.Model):
     turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
     phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
 
-    kickoutDuration = models.PositiveSmallIntegerField(null=False, blank=False, default=200)
+    kickoutDuration = models.PositiveSmallIntegerField(
+        null=False, blank=False, default=200
+    )
     gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
 
     creator = models.ForeignKey(
@@ -80,16 +94,22 @@ class CNS_Game(models.Model):
     )
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([24, 24, 24, 24]))
+    zoomLevels = models.CharField(
+        max_length=30, blank=False, default=json.dumps([24, 24, 24, 24])
+    )
 
     statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
 
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="CNSkickedPlayersRelName", blank=True)
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="CNSkickedPlayersRelName", blank=True
+    )
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSinvitedPlayersRelName", blank=True
     )
     playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="CNSplayersWithChatNotificationName", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="CNSplayersWithChatNotificationName",
+        blank=True,
     )
 
     chatData = models.TextField(blank=True)
@@ -133,7 +153,6 @@ class CNS_Game(models.Model):
         self.gameStatus = "FINISHED"
         self.winner = User.objects.get(username=_winner)
         self.save()
-        # self.clearAllMoveData()
 
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "CNS", _finalPositions, _gameID, self)
@@ -162,7 +181,14 @@ class CNS_Game(models.Model):
             return False
 
         # Use a set for faster membership testing
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
         return (
             not self.currentPlayers
             or loggedInPlayerUsername in self.currentPlayers
@@ -181,10 +207,10 @@ class CNS_Game(models.Model):
     def kickoutRequired(self):
         # 1. Use a list comprehension to utilize the prefetch cache (0 Hits)
         all_player_usernames = [p.username for p in self.allPlayers.all()]
-        
+
         # 2. Get the current players using your optimized string-split method
         current_players = self.getCurrentPlayersArray()
-        
+
         # 3. Safety check: Ensure there is at least one current player to avoid IndexError
         current_username = current_players[0] if current_players else ""
 
@@ -199,7 +225,9 @@ class CNS_Game(models.Model):
 
     def serialize(self, loggedInUserObj=None):
         remainingPlayersInt = self.maxPlayers - self.allPlayers.count()
-        remainingPlayers = "".join(str(self.allPlayers.count() + i + 1) for i in range(remainingPlayersInt))
+        remainingPlayers = "".join(
+            str(self.allPlayers.count() + i + 1) for i in range(remainingPlayersInt)
+        )
         winner = self.winner.username if self.winner else ""
 
         createdString = self.created
@@ -214,15 +242,22 @@ class CNS_Game(models.Model):
         ):
             elapsedTotalSeconds = (
                 int(time.time()) - int(self.created) // 1000
-                if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "PRIVATE"
+                if self.gameStatus == "WAITING"
+                or self.gameStatus == "AVAILABLE"
+                or self.gameStatus == "PRIVATE"
                 else int(time.time()) - int(self.latestUpdate) // 1000
             )
-            latestUpdateElapsedTimeString = SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
 
         myMove = loggedInUserObj is not None and self.isMyMove(loggedInUserObj.username)
 
         chatNotification = loggedInUserObj in self.playersWithChatNotification.all()
-        involvedPlayer = loggedInUserObj in self.allPlayers.all() and loggedInUserObj not in self.missingPlayers.all()
+        involvedPlayer = (
+            loggedInUserObj in self.allPlayers.all()
+            and loggedInUserObj not in self.missingPlayers.all()
+        )
 
         gamePaceString = SR_gamePaceString(self.gamePace)
 
@@ -277,13 +312,17 @@ class CNS_Game(models.Model):
         }
 
     def isExperiencedGame(self):
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
         if 120 in startingOptionsListPrelim:
             return True
         return False
 
     def isLearningGame(self):
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
         if 110 in startingOptionsListPrelim:
             return True
         return False
@@ -292,8 +331,8 @@ class CNS_Game(models.Model):
     def seatPosition(self, _username, withoutBots=False):
         # 1. Get the list (0 hits if using prefetched .all() logic)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        
-        # 2. Use Python's index to find the position. 
+
+        # 2. Use Python's index to find the position.
         # This replaces the need for the redundant .values_list() query.
         try:
             return playerList.index(_username)
@@ -304,10 +343,10 @@ class CNS_Game(models.Model):
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # 1. Access the prefetched list (0 hits if prefetched in view)
         all_players_prefetched = list(self.allPlayers.all())
-        
+
         # 2. Extract usernames in Python (0 hits)
         playerList = [p.username for p in all_players_prefetched]
-        
+
         # 3. Shuffle using your existing seed (0 hits)
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
@@ -322,8 +361,8 @@ class CNS_Game(models.Model):
         for count, player in enumerate(playerList):
             if player in missing_usernames:
                 # Using f-string for slightly better performance/readability
-                playerList[count] = f"CnsBot{count}"
-                
+                playerList[count] = f"CnsBot"  # {count}"
+
         return playerList
 
     def startGame(self, request):
@@ -335,11 +374,15 @@ class CNS_Game(models.Model):
         self.save()
 
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
-            playerListToNotify = list(self.allPlayers.all().values_list("username", flat=True))
+            playerListToNotify = list(
+                self.allPlayers.all().values_list("username", flat=True)
+            )
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(request, "CNS", playerListToNotify, getattr(self, "id"), self)
+            SN_M_sendGameStartNotification(
+                request, "CNS", playerListToNotify, getattr(self, "id"), self
+            )
 
     def getCurrentPlayersArray(self):
         _currentPlayersArray = []
@@ -351,13 +394,20 @@ class CNS_Game(models.Model):
 
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
-            possibleHost = self.allPlayers.all().filter(~Q(missingPlayersRelName=getattr(self, "id"))).order_by("?").first()
+            possibleHost = (
+                self.allPlayers.all()
+                .filter(~Q(missingPlayersRelName=getattr(self, "id")))
+                .order_by("?")
+                .first()
+            )
             self.host = possibleHost
 
     def enableStatsExclude(self, _username):
         seatToChange = self.seatPosition(_username, True)
         self.statsExcludeConsent = (
-            self.statsExcludeConsent[:seatToChange] + "1" + self.statsExcludeConsent[seatToChange + 1 :]
+            self.statsExcludeConsent[:seatToChange]
+            + "1"
+            + self.statsExcludeConsent[seatToChange + 1 :]
         )
         # CHECK TOTAL CONSENT
         totalConsent = 0

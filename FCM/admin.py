@@ -1,30 +1,10 @@
 from django.contrib import admin
 from django.conf import settings
 from .models import FCM_Game, FCM_Tournament
-from django.contrib.admin import display
-from django.contrib.auth import get_user_model
+#from django.contrib.admin import display
 from django import forms
 
-
 from django.utils.html import format_html
-from django.urls import reverse
-
-# Register your models here.
-# admin.site.register(FCM_Game)
-
-# class FCM_GameAdmin(admin.ModelAdmin):
-#    save_on_top = True
-#    save_as = True
-#    filter_horizontal = ('allPlayers', 'missingPlayers', 'kickedPlayers')
-
-# def formfield_for_manytomany(self, db_field, request, **kwargs):
-#    if db_field.name == "allPlayers":
-#        kwargs["queryset"] = FCM_Game.objects.filter(creator=request.user)
-#    return super(FCM_GameAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
-
-
-
-
 
 @admin.register(FCM_Game)
 class FCM_GameAdmin(admin.ModelAdmin):
@@ -282,5 +262,3 @@ class FCM_TournamentAdmin(admin.ModelAdmin):
     filter_horizontal = ("startingPlayers", "nextRoundPlayers")
     search_fields = ["tournamentName"]
 
-
-# ModelAdmin.save_on_top

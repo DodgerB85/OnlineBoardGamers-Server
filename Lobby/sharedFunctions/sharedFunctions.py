@@ -3,7 +3,7 @@ import itertools
 import gzip
 import base64
 from collections import defaultdict
-
+from decouple import config
 
 import requests
 import json
@@ -40,7 +40,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.tournyGenerator import multiGamePlayers4p, multiGamePlayersRound2
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1330516390935007242/Ot5dFmsUG3AQ8pyw83uWjj3pNzzqoKoJ8cVCe0V_oKXdNR8b4wrDANfrgMgKF8R4EaEL"
+
 
 
 def SF_getTimeNow():
@@ -445,11 +445,11 @@ def SF_startTournament(request, tournament, gameCode):
     )
     if settings.DEBUG:
         requests.post(
-            "https://discordapp.com/api/webhooks/1050061190140792893/8yVQEX_JRS4DqU6qeBe2zC29XNw2fPYUkrzjep4KIEahpkMaivAkLEQxi788K6e_oH0w",
+            f"https://discordapp.com/api/webhooks/{config.WEBHOOK_ADMIN_ERROR_MSG}",
             data={"content": message},
         )
     else:
-        requests.post(WEBHOOK_URL, data={"content": message})
+        requests.post(f"https://discord.com/api/webhooks/{config.WEBHOOK_DISCORD_TOURNAMENTS}", data={"content": message})
 
 
 def SF_M_ProcessTournamentEndGame(request, _game, _currentGame, _winnerArray):

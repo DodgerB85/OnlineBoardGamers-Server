@@ -13,10 +13,13 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_TYPE_CHOICES,
     SR_getTimeNow,
     SR_getTournamentWinnerHTML,
-    #SR_getTournamentRoundsHTML,
+    # SR_getTournamentRoundsHTML,
 )
 
-from .sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML, SR_getTGZstartingOptionsHTML
+from .sharedFunctions.sharedRefs import (
+    SR_getFCMstartingOptionsHTML,
+    SR_getTGZstartingOptionsHTML,
+)
 
 
 class User(AbstractUser):
@@ -27,40 +30,25 @@ class User(AbstractUser):
     def __str__(self):
         # field_names = [field.name for field in self._meta.fields]
         # return f"{self.username} : {field_names}"
-        # try:
-        #    profile = Profile.objects.get(user=self)
-        #    email_confirmed = profile.email_confirmed if profile else None
-        #    activeString = "" if self.is_active else " :A NOT AN ACTIVE USER"
-        #    profileString = "" if email_confirmed else " :PE UNCONFIRMED"
-        #    return f"{self.username} {activeString} {profileString}"
-        # except:
-        #    return f"{self.username} : NO PROFILE NO PROFILE NO PROFILE"
-
         activeString = "" if self.is_active else " :A NOT AN ACTIVE USER"
         return f"{self.username} {activeString}"
 
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    # bio = models.TextField(max_length=500, blank=True)
-    # location = models.CharField(max_length=30, blank=True)
-    # birth_date = models.DateField(null=True, blank=True)
     sendEmailNotificationOnTurn = models.BooleanField(default=True)
     emailNotifications = models.CharField(
-        blank=False, default=json.dumps([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], separators=(",", ":")), max_length=40
+        blank=False,
+        default=json.dumps([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], separators=(",", ":")),
+        max_length=40,
     )
     stopEmailsUntil = models.PositiveIntegerField(null=True, blank=True)
 
     webhooks = models.TextField(blank=True, null=True)
 
-    # sendDiscordWebhookNotificationOnTurn = models.BooleanField(default=False)
-    # discordWebhookURL = models.CharField(max_length=200, blank=True)
-    # discordWebhookUserID = models.CharField(max_length=50, blank=True)
-
-    # sendSlackWebhookNotificationOnTurn = models.BooleanField(default=False)
-    # slackWebhookURL = models.CharField(max_length=200, blank=True)
-
-    preferredRestaurantColour = models.SmallIntegerField(null=False, blank=False, default=-1)
+    preferredRestaurantColour = models.SmallIntegerField(
+        null=False, blank=False, default=-1
+    )
     highContrastBoardItems = models.BooleanField(default=False)
 
     preferredHCcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
@@ -71,7 +59,9 @@ class Profile(models.Model):
     preferredTGZcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
     TGZminimalText = models.BooleanField(blank=False, default=False)
 
-    preferredCNScolour = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
+    preferredCNScolour = models.PositiveSmallIntegerField(
+        null=True, blank=True, default=None
+    )
 
     preferredAQYoptions = models.CharField(max_length=30, blank=True)
     preferredINDoptions = models.CharField(max_length=30, blank=True)
@@ -81,14 +71,18 @@ class Profile(models.Model):
     # preferredRNBcolour = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
 
     FCMtournamentTrophies = models.CharField(
-        max_length=100, blank=False, default=json.dumps([[0, 0, 0, 0, 0]], separators=(",", ":"))
+        max_length=100,
+        blank=False,
+        default=json.dumps([[0, 0, 0, 0, 0]], separators=(",", ":")),
     )
 
     liveNotification = models.SmallIntegerField(null=True, blank=False, default=1)
     email_confirmed = models.BooleanField(default=False)
     showAssistance = models.BooleanField(default=True)
 
-    profileLanguage = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)
+    profileLanguage = models.CharField(
+        max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE
+    )
 
     blacklistedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="blacklistedPlayers_relName", blank=True
@@ -104,19 +98,18 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
         instance.profile.save()
 
-
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
-
 def get_default_timestamp():
     return str(int(time.time()) * 1000)
 
-
 class changelog(models.Model):
     update = models.CharField(max_length=120)
-    timestamp = models.CharField(max_length=30, blank=False, default=get_default_timestamp, db_index=True)
+    timestamp = models.CharField(
+        max_length=30, blank=False, default=get_default_timestamp, db_index=True
+    )
 
     def __str__(self):
         return f"{self.timestamp}: {self.update}"
@@ -127,6 +120,7 @@ class Main_Tournament(models.Model):
     MAIN_TOURNAMENT_GAME_CHOICES = [
         ("FCM", gettext_lazy("Food Chain Magnate")),
         ("HC", gettext_lazy("Horseless Carriage")),
+        ("Bus", gettext_lazy("Bus")),
         ("TGZ", gettext_lazy("The Great Zimbabwe")),
         ("CNS", gettext_lazy("Cannes")),
         ("AQY", gettext_lazy("Antiquity")),
@@ -141,7 +135,9 @@ class Main_Tournament(models.Model):
     )
 
     tournamentName = models.CharField(max_length=120)
-    tournamentDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    tournamentDescription = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
     tournamentStatus = models.CharField(
         max_length=2,
@@ -157,10 +153,14 @@ class Main_Tournament(models.Model):
 
     startingOptions = models.CharField(max_length=80, blank=True, default="")
     startingPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_MainT", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="startingPlayersRelName_MainT",
+        blank=True,
     )
     nextRoundPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="currentRoundPlayersRelName_MainT", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="currentRoundPlayersRelName_MainT",
+        blank=True,
     )
 
     maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
@@ -173,7 +173,7 @@ class Main_Tournament(models.Model):
     tournamentProgressionData = models.TextField(blank=True)
     tournamentSideData = models.TextField(blank=True)
     tournamentPointsData = models.TextField(blank=True)
-    
+
     chatData = models.TextField(blank=True)
 
     def __str__(self):
@@ -186,7 +186,13 @@ class Main_Tournament(models.Model):
 
     def getByedPlayersList(self):
         TPDA = json.loads(self.tournamentProgressionData)
-        return [player for round in TPDA for row in round if row[0] == "BYEPLAYERS" for player in row[1:]]
+        return [
+            player
+            for round in TPDA
+            for row in round
+            if row[0] == "BYEPLAYERS"
+            for player in row[1:]
+        ]
 
     def get_tournamentType_display(self):
         return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
@@ -209,7 +215,6 @@ class Main_Tournament(models.Model):
             "Main_Tournament_id": self.id,
             "tournamentName": self.tournamentName,
             "tournamentDescription": self.tournamentDescription,
-            # "tournamentStatus": self.get_tournamentStatus_display(),
             "tournamentType": self.get_tournamentType_display(),
             "maxTournamentPlayers": self.maxTournamentPlayers,
             "maxGamePlayers": self.maxGamePlayers,
@@ -219,7 +224,6 @@ class Main_Tournament(models.Model):
             "gameCode": self.gameCode,
             "tournamentID": self.id,
         }
-
 
 class Mini_Tournaments(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
@@ -241,7 +245,9 @@ class Mini_Tournaments(models.Model):
     )
 
     tournamentName = models.CharField(max_length=120)
-    tournamentDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    tournamentDescription = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
     tournamentStatus = models.CharField(
         max_length=2,
@@ -254,9 +260,12 @@ class Mini_Tournaments(models.Model):
         choices=SR_TOURNAMENT_TYPE_CHOICES,
         default="RR",
     )
-    
+
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="MT_creator_relName"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="MT_creator_relName",
     )
 
     startingOptions = models.CharField(max_length=80, blank=True, default="")
@@ -264,10 +273,12 @@ class Mini_Tournaments(models.Model):
         settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_MT", blank=True
     )
     nextRoundPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="currentRoundPlayersRelName_MT", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="currentRoundPlayersRelName_MT",
+        blank=True,
     )
     invitedPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="invitedPlayersRelName_MT", blank=True   
+        settings.AUTH_USER_MODEL, related_name="invitedPlayersRelName_MT", blank=True
     )
 
     maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
@@ -280,7 +291,7 @@ class Mini_Tournaments(models.Model):
     tournamentProgressionData = models.TextField(blank=True)
     tournamentSideData = models.TextField(blank=True)
     tournamentPointsData = models.TextField(blank=True)
-    
+
     chatData = models.TextField(blank=True)
 
     def __str__(self):
@@ -298,7 +309,13 @@ class Mini_Tournaments(models.Model):
 
     def getByedPlayersList(self):
         TPDA = json.loads(self.tournamentProgressionData)
-        return [player for round in TPDA for row in round if row[0] == "BYEPLAYERS" for player in row[1:]]
+        return [
+            player
+            for round in TPDA
+            for row in round
+            if row[0] == "BYEPLAYERS"
+            for player in row[1:]
+        ]
 
     def get_tournamentType_display(self):
         return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
@@ -318,7 +335,6 @@ class Mini_Tournaments(models.Model):
             "Mini_Tournament_id": self.id,
             "tournamentName": self.tournamentName,
             "tournamentDescription": self.tournamentDescription,
-            # "tournamentStatus": self.get_tournamentStatus_display(),
             "tournamentType": self.get_tournamentType_display(),
             "maxTournamentPlayers": self.maxTournamentPlayers,
             "maxGamePlayers": self.maxGamePlayers,
@@ -361,8 +377,10 @@ class QueryableGame(models.Model):
 
     @property
     def deleteable_game(self):
-        return ("SHADOW" in self.allPlayers.all().values_list("username", flat=True)
-                or "FcmAI" in self.allPlayers.all().values_list("username", flat=True))
+        return "SHADOW" in self.allPlayers.all().values_list(
+            "username", flat=True
+        ) or "FcmAI" in self.allPlayers.all().values_list("username", flat=True)
+
 
 class QueryableGameWinners(models.Model):
     pk = models.CompositePrimaryKey("gameCode", "game_id", "winner_id")
@@ -371,19 +389,22 @@ class QueryableGameWinners(models.Model):
     game_id = models.PositiveIntegerField(db_column="id")
 
     winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.deletion.DO_NOTHING, related_name="winners"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.deletion.DO_NOTHING,
+        related_name="winners",
     )
     queryable_game = models.ForeignObject(
         QueryableGame,
         on_delete=models.deletion.DO_NOTHING,
         from_fields=("gameCode", "game_id"),
         to_fields=("gameCode", "id"),
-        related_name="winners"
+        related_name="winners",
     )
 
     class Meta:
         db_table = "Lobby_all_games_winners"
         managed = False
+
 
 class QueryableGameInvitedPlayers(models.Model):
     pk = models.CompositePrimaryKey("gameCode", "id", "invited_player")
@@ -391,19 +412,22 @@ class QueryableGameInvitedPlayers(models.Model):
     id = models.PositiveIntegerField()
 
     invited_player = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.deletion.DO_NOTHING, db_column="user_id"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.deletion.DO_NOTHING,
+        db_column="user_id",
     )
     queryable_game = models.ForeignObject(
         QueryableGame,
         on_delete=models.deletion.DO_NOTHING,
         from_fields=("gameCode", "id"),
         to_fields=("gameCode", "id"),
-        related_name="invited_players"
+        related_name="invited_players",
     )
 
     class Meta:
         db_table = "Lobby_all_games_invited_players"
         managed = False
+
 
 class QueryableGameAllPlayers(models.Model):
     pk = models.CompositePrimaryKey("gameCode", "id", "player_id")
@@ -412,14 +436,16 @@ class QueryableGameAllPlayers(models.Model):
     hasChatNotification = models.BooleanField()
 
     player = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.deletion.DO_NOTHING, db_column="user_id"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.deletion.DO_NOTHING,
+        db_column="user_id",
     )
     queryable_game = models.ForeignObject(
         QueryableGame,
         on_delete=models.deletion.DO_NOTHING,
         from_fields=("gameCode", "id"),
         to_fields=("gameCode", "id"),
-        related_name="all_players"
+        related_name="all_players",
     )
 
     class Meta:
