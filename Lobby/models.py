@@ -98,12 +98,15 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
         instance.profile.save()
 
+
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
+
 def get_default_timestamp():
     return str(int(time.time()) * 1000)
+
 
 class changelog(models.Model):
     update = models.CharField(max_length=120)
@@ -113,6 +116,7 @@ class changelog(models.Model):
 
     def __str__(self):
         return f"{self.timestamp}: {self.update}"
+
 
 class Main_Tournament(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
@@ -224,6 +228,7 @@ class Main_Tournament(models.Model):
             "gameCode": self.gameCode,
             "tournamentID": self.id,
         }
+
 
 class Mini_Tournaments(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field

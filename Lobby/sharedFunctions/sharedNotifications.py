@@ -1260,10 +1260,10 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        print(f"Error: could not find user object in SN_send24HourTimedOutReminderEmail: {username}")
+        print(f"Error: could not find user object in SN_send24HourTimedOutReminderEmail: {username} <<2")
         return
     except Exception as e:
-        print(f"Error: could not find user object {username} in SN_send24HourTimedOutReminderEmail" + str(e))
+        print(f"Error: could not find user object {username} in SN_send24HourTimedOutReminderEmail {str(e)} <<3")
         return
 
     try:

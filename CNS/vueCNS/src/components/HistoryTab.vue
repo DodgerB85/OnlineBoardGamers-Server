@@ -1,11 +1,5 @@
 <script setup>
-//import { storeToRefs } from 'pinia'
-//import * as map from '../js/TGZmap'
-//import * as view from '../js/TGZview'
-//import * as model from '../js/TGZmodel'
 import HistoryEntry from './HistoryEntry.vue'
-
-//import * as IO from '../js/TGZ_IO'
 
 import { useModelStore } from "../stores/CNSstore.js";
 const store = useModelStore()
@@ -75,8 +69,6 @@ function historyToggle() {
   z-index: 9999;
   border: 2px solid black;
   background-color: #d4eafd;
-  /*overflow-y: scroll;
-	direction: rtl;*/
   overflow-y: scroll;
   text-align: center;
 }

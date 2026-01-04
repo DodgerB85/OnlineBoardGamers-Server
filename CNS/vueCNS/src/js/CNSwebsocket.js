@@ -15,16 +15,7 @@ export async function StartWebSocket() {
 
 	var ChannelNumber = personal.gameID
 
-	//wsUri = "wss://connect.websocket.in/v3/" + ChannelNumber + "?apiKey=2ZQHfdUt4iTQw3eXIFFS66zO6SV6kJk92oQAhtLP";
-	// var wsUri = "wss://socketsbay.com/wss/v2/" + String(ChannelNumber) + "/5c77d2bb57dcf99bd4bdea1584117526/";
-	//var wsUri = "wss://wss.s3.sitereview.io/ws/allFCMchannels/";
 	var wsUri = "wss://wss.s3.sitereview.io/ws/HomeCNSchannel" + String(ChannelNumber) + "/"
-
-	//wss://wss.s3.sitereview.io/ws/anythingyoulikehere/
-
-	// Alternate Jonny Server
-
-	// wss://wsserver.fly.dev/ws/yourchannelhere/
 
 	CNSwebSocket = new WebSocket(wsUri)
 

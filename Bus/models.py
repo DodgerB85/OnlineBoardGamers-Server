@@ -62,7 +62,9 @@ class Bus_Tournament(models.Model):
         settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_Bus", blank=True
     )
     nextRoundPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="currentRoundPlayersRelName_Bus", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="currentRoundPlayersRelName_Bus",
+        blank=True,
     )
 
     maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
@@ -84,7 +86,9 @@ class Bus_Tournament(models.Model):
             return True
         return False
 
-    def createTournamentGame(self, request, _roundNumberString, _currentPlayersUsernames):
+    def createTournamentGame(
+        self, request, _roundNumberString, _currentPlayersUsernames
+    ):
         gameName = "[" + self.tournamentName + "]" + " " + _roundNumberString
         playerOrderSeed = random.randint(1000, 32767)
         pace = 30
@@ -102,7 +106,9 @@ class Bus_Tournament(models.Model):
         newGame.save()
 
         if _currentPlayersUsernames[0] != "":
-            newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[0]))
+            newGame.allPlayers.add(
+                User.objects.get(username=_currentPlayersUsernames[0])
+            )
             SN_M_T_sendTournamentGameStartNotification(
                 request,
                 "Bus",
@@ -112,10 +118,12 @@ class Bus_Tournament(models.Model):
                 newGame.currentTurnString(),
                 newGame.id,
                 False,
-                "normalTournament"
+                "normalTournament",
             )
         if _currentPlayersUsernames[1] != "":
-            newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[1]))
+            newGame.allPlayers.add(
+                User.objects.get(username=_currentPlayersUsernames[1])
+            )
             SN_M_T_sendTournamentGameStartNotification(
                 request,
                 "Bus",
@@ -125,10 +133,12 @@ class Bus_Tournament(models.Model):
                 newGame.currentTurnString(),
                 newGame.id,
                 False,
-                "normalTournament"
+                "normalTournament",
             )
         if self.maxGamePlayers >= 3 and _currentPlayersUsernames[2] != "":
-            newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[2]))
+            newGame.allPlayers.add(
+                User.objects.get(username=_currentPlayersUsernames[2])
+            )
             SN_M_T_sendTournamentGameStartNotification(
                 request,
                 "Bus",
@@ -138,10 +148,12 @@ class Bus_Tournament(models.Model):
                 newGame.currentTurnString(),
                 newGame.id,
                 False,
-                "normalTournament"
+                "normalTournament",
             )
         if self.maxGamePlayers >= 4 and _currentPlayersUsernames[3] != "":
-            newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[3]))
+            newGame.allPlayers.add(
+                User.objects.get(username=_currentPlayersUsernames[3])
+            )
             SN_M_T_sendTournamentGameStartNotification(
                 request,
                 "Bus",
@@ -151,10 +163,12 @@ class Bus_Tournament(models.Model):
                 newGame.currentTurnString(),
                 newGame.id,
                 False,
-                "normalTournament"
+                "normalTournament",
             )
         if self.maxGamePlayers >= 5 and _currentPlayersUsernames[4] != "":
-            newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[4]))
+            newGame.allPlayers.add(
+                User.objects.get(username=_currentPlayersUsernames[4])
+            )
             SN_M_T_sendTournamentGameStartNotification(
                 request,
                 "Bus",
@@ -164,7 +178,7 @@ class Bus_Tournament(models.Model):
                 newGame.currentTurnString(),
                 newGame.id,
                 False,
-                "normalTournament"
+                "normalTournament",
             )
 
         newGame.kickoutDuration = 100
@@ -187,7 +201,7 @@ class Bus_Tournament(models.Model):
                     byedPlayerList.extend(row)
 
         return byedPlayerList
-    
+
     def get_tournamentType_display(self):
         return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
 
@@ -199,10 +213,10 @@ class Bus_Tournament(models.Model):
         startingOptionsHTML = "[None]"
 
         return {
-            "tournamentID": getattr(self, 'id'),
+            "tournamentID": getattr(self, "id"),
             "tournamentName": self.tournamentName,
             # "tournamentStatus": self.get_tournamentStatus_display(),
-             "tournamentType": self.get_tournamentType_display(),
+            "tournamentType": self.get_tournamentType_display(),
             "maxTournamentPlayers": self.maxTournamentPlayers,
             "maxGamePlayers": self.maxGamePlayers,
             "startingOptionsHTML": startingOptionsHTML,
@@ -214,7 +228,12 @@ class Bus_Tournament(models.Model):
     def getRoundsHTML(self):
         # Only for IP or FN tournaments
         roundsHTML = SR_getTournamentRoundsHTML(
-            self.tournamentType, self.maxGamePlayers, self.tournamentProgressionData, self.tournamentPointsData, "Bus", self
+            self.tournamentType,
+            self.maxGamePlayers,
+            self.tournamentProgressionData,
+            self.tournamentPointsData,
+            "Bus",
+            self,
         )
         return roundsHTML
 
@@ -295,20 +314,28 @@ class Bus_Tournament(models.Model):
 class Bus_Game(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
 
-    gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
-    gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    gameName = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
+    gameDescription = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
     gameStatus = models.CharField(
         max_length=9,
         choices=SR_GAME_STATUS_CHOICES,
         default="AVAILABLE",
-        db_index=True, 
+        db_index=True,
     )
 
-    latestUpdate = models.CharField(max_length=30, blank=False, default=SR_getTimeNow, db_index=True)
+    latestUpdate = models.CharField(
+        max_length=30, blank=False, default=SR_getTimeNow, db_index=True
+    )
     startingOptions = models.CharField(max_length=70, blank=True)
 
-    allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="BusAllPlayersRelName")
+    allPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="BusAllPlayersRelName"
+    )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="BusMissingPlayersRelName", blank=True
     )
@@ -328,28 +355,42 @@ class Bus_Game(models.Model):
     turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
     phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
 
-    kickoutDuration = models.PositiveSmallIntegerField(null=False, blank=False, default=200)
+    kickoutDuration = models.PositiveSmallIntegerField(
+        null=False, blank=False, default=200
+    )
     gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
 
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="BusGame_creator_relName"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="BusGame_creator_relName",
     )
     host = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="BusGame_host_relName"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="BusGame_host_relName",
     )
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([120, 120, 120, 120, 120]))
+    zoomLevels = models.CharField(
+        max_length=30, blank=False, default=json.dumps([120, 120, 120, 120, 120])
+    )
 
     rewindConsent = models.CharField(max_length=10, blank=False, default="00000")
     statsExcludeConsent = models.CharField(max_length=10, blank=False, default="00000")
 
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="BusKickedPlayersRelName", blank=True)
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="BusKickedPlayersRelName", blank=True
+    )
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="BusInvitedPlayersRelName", blank=True
     )
     playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="BusPlayersWithChatNotificationName", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="BusPlayersWithChatNotificationName",
+        blank=True,
     )
 
     chatData = models.TextField(blank=True)
@@ -366,13 +407,17 @@ class Bus_Game(models.Model):
 
     tournamentGame = models.BooleanField(blank=False, default=False)
     relatedTournament = models.ForeignKey(
-        Bus_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="tournament_relName_Bus"
+        Bus_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tournament_relName_Bus",
     )
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
 
     kickoutFlexiData = models.TextField(blank=True)
-    
+
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
@@ -431,18 +476,25 @@ class Bus_Game(models.Model):
             return True
         else:
             return False
-        
+
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         # Return False if no username is provided
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return False
-        
+
         # Use a set for faster membership testing
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
         return (
-            not self.currentPlayers or
-            loggedInPlayerUsername in self.currentPlayers or
-            self.currentPlayers in shadow_values
+            not self.currentPlayers
+            or loggedInPlayerUsername in self.currentPlayers
+            or self.currentPlayers in shadow_values
         )
 
     def getSecondsToNextKickout(self):
@@ -491,7 +543,11 @@ class Bus_Game(models.Model):
         ):
             elapsedTotalSeconds = int(time.time()) - int(self.created) // 1000
 
-            if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "PRIVATE":
+            if (
+                self.gameStatus == "WAITING"
+                or self.gameStatus == "AVAILABLE"
+                or self.gameStatus == "PRIVATE"
+            ):
                 elapsedTotalSeconds = int(time.time()) - int(self.created) // 1000
             if self.gameStatus == "ACTIVE":
                 elapsedTotalSeconds = int(time.time()) - int(self.latestUpdate) // 1000
@@ -518,7 +574,9 @@ class Bus_Game(models.Model):
         chatNotification = False
         involvedPlayer = False
 
-        if loggedInUser in self.allPlayers.all() and (loggedInUser not in self.missingPlayers.all()):
+        if loggedInUser in self.allPlayers.all() and (
+            loggedInUser not in self.missingPlayers.all()
+        ):
             involvedPlayer = True
 
         if loggedInUser in self.playersWithChatNotification.all():
@@ -594,14 +652,14 @@ class Bus_Game(models.Model):
     def seatPosition(self, name, withoutBots=False):
         # 1. Get the list of players (this already uses the prefetch cache)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        
-        # 2. Use 'index' to find the position. 
+
+        # 2. Use 'index' to find the position.
         # If the name isn't in the list, it will raise a ValueError.
         try:
             return playerList.index(name)
         except ValueError:
             return -1
-   
+
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # Use list comprehension on .all() to access the prefetch cache
         playerList = [p.username for p in self.allPlayers.all()]
@@ -617,7 +675,7 @@ class Bus_Game(models.Model):
         for count, player in enumerate(playerList):
             if player in missingPlayerUsernames:
                 playerList[count] = "BusBot" + str(count)
-                
+
         return playerList
 
     def startGame(self, request):
@@ -648,33 +706,49 @@ class Bus_Game(models.Model):
 
         # required to send correct start player notification
         self.save()
-        
+
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
             player_usernames = [p.username for p in self.allPlayers.all()]
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
 
         # The tournament sends out game start notifications
-        if self.relatedTournament is None and "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
-            playerListToNotify = list(self.allPlayers.all().values_list("username", flat=True))
+        if (
+            self.relatedTournament is None
+            and "SHADOW" not in self.allPlayers.all().values_list("username", flat=True)
+        ):
+            playerListToNotify = list(
+                self.allPlayers.all().values_list("username", flat=True)
+            )
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(request, "Bus", playerListToNotify, self.id, self)
+            SN_M_sendGameStartNotification(
+                request, "Bus", playerListToNotify, self.id, self
+            )
 
     # takes in a user object
 
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
-            possibleHost = self.allPlayers.all().filter(~Q(missingPlayersRelName=self.id)).order_by("?").first()
+            possibleHost = (
+                self.allPlayers.all()
+                .filter(~Q(missingPlayersRelName=self.id))
+                .order_by("?")
+                .first()
+            )
             self.host = possibleHost
 
     # takes in username
     def enableStatsExclude(self, _username):
         seatToChange = self.seatPosition(_username, True)
         self.statsExcludeConsent = (
-            self.statsExcludeConsent[:seatToChange] + "1" + self.statsExcludeConsent[seatToChange + 1 :]
+            self.statsExcludeConsent[:seatToChange]
+            + "1"
+            + self.statsExcludeConsent[seatToChange + 1 :]
         )
         # CHECK TOTAL CONSENT
         totalConsent = 0
@@ -724,27 +798,30 @@ class Bus_Game(models.Model):
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {username: False for username in player_usernames}
             self.save()
-            
+
         return self.deleteGameVotes
 
-    
     def addDeleteVote(self, playerName):
         """Records the vote of a player."""
         # Double check player is in the game
         if playerName not in [p.username for p in self.allPlayers.all()]:
             return False  # Player not in the game
-        
+
         # Ensure deleteGameVotes is a dictionary
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # If the playerName isn't found, wipe the votes and make sure all players are added
         if playerName not in self.deleteGameVotes:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # Add the vote
         self.deleteGameVotes[playerName] = True

@@ -24,7 +24,7 @@ function copyToClipboard() {
         "https://www.onlineboardgamers.com/CNS/" +
         String(personal.gameID) +
         "/replay/" +
-        String(store.replayStep + 1); 
+        String(store.replayStep + 1);
 
     const textarea = document.createElement("textarea");
     textarea.value = textToCopy;
@@ -69,9 +69,12 @@ function copyToClipboard() {
 
 <template>
     <template v-if="store.topMenuViews.showReplay">
-        <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="replay.performStep(-99)">|&lt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="replay.performStep(-9)">&lt;&lt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="replay.performStep(-1)">&lt;</button>
+        <button class="actionsLineButton" :disabled="store.replayStep === 0"
+            @click="replay.performStep(-99)">|&lt;</button>
+        <button class="actionsLineButton" :disabled="store.replayStep === 0"
+            @click="replay.performStep(-9)">&lt;&lt;</button>
+        <button class="actionsLineButton" :disabled="store.replayStep === 0"
+            @click="replay.performStep(-1)">&lt;</button>
         {{ store.replayStep + 1 }} / {{ store.replayData.length }}
         <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
             @click="replay.performStep(1)">&gt;</button>
@@ -146,7 +149,6 @@ function copyToClipboard() {
 
 .actionsLineButton {
     margin: 10px;
-    /*width: 100px;*/
     width: fit-content;
     border: 2px solid green;
     border-radius: 5px;

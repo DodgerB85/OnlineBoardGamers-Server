@@ -45,7 +45,6 @@ function canSelectPirateEntry(entry3) {
 </script>
 
 <template>
-<!--{{ entry[3] }}  --- LENGTH: {{ entry[3][0].length }}-->
   <!-- New Game -->
   <template v-if="entry[0] === rf.HIST_NEW_GAME">
     <div class="log separator mainEntry" :class="{ 'selectableHistory': store.topMenuViews.showReplay }"
@@ -72,7 +71,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+            store.players[entry[1]].displayName }} </span>
         Adds {{ (entry[3].length === 1) ? '1 Tile' : '2 Tiles' }}
         <div class="singleHexDiv" v-for="(singleAdd, idx) in entry[3]" :key="idx">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
@@ -95,7 +94,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+            store.players[entry[1]].displayName }} </span>
         Stores:
         <div class="singleHexDiv">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
@@ -117,7 +116,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+          store.players[entry[1]].displayName }} </span>
       {{ getHistLinkText(entry[3]) }}
     </div>
   </template>
@@ -132,14 +131,14 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+          store.players[entry[1]].displayName }} </span>
       Adds a Cigar
       <template v-if="entry[3].length > 2">
-      . New Resources: 
-      <template v-for="(res, idx) in entry[3][2]" :key="idx">
+        . New Resources:
+        <template v-for="(res, idx) in entry[3][2]" :key="idx">
           <img :src="view.getImage('res' + String(res))" class="stdResImg storedResImg" />
         </template>
-    </template>
+      </template>
     </div>
   </template>
 
@@ -155,7 +154,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+            store.players[entry[1]].displayName }} </span>
         Produces:
         <!-- FROM TILES -->
         <template v-for="(amount, index) in entry[3][0]" :key="index">
@@ -190,7 +189,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+          store.players[entry[1]].displayName }} </span>
       Converts:
       <!-- Only One Res Input -->
       <template
@@ -220,7 +219,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+          store.players[entry[1]].displayName }} </span>
       Increases Price:
       <img :src="view.getImage('res' + String(entry[3][0]))" class="movieImg" />
       <div class="rightArrow"></div>
@@ -239,18 +238,18 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+          store.players[entry[1]].displayName }} </span>
       Sells Movies to Cannes:<br>
       <template v-for="(amount, idx) in entry[3][0]" :key="idx">
         <div v-if="amount > 0" class="movieSalesDiv">
           <span class="bigFont">{{ amount }}x </span>
           <img :src="view.getImage('res' + String(idx + rf.RES_MOVIE_OFFET))" class="movieImg" />
           <span class="bigFont"> for € {{ entry[3][1][idx] + amount }} M, Total: € {{ amount * (entry[3][1][idx] +
-    amount) }} M</span>
+            amount) }} M</span>
         </div>
       </template>
       <div><span class="bigFont">Grand Total: € {{ entry[3][0][0] * (entry[3][1][0] + entry[3][0][0]) + entry[3][0][1] *
-    (entry[3][1][1] + entry[3][0][1]) + entry[3][0][2] * (entry[3][1][2] + entry[3][0][2]) }} M
+        (entry[3][1][1] + entry[3][0][1]) + entry[3][0][2] * (entry[3][1][2] + entry[3][0][2]) }} M
           <br />New Score: € {{ entry[3][2][0] }} M</span></div>
       New Prices:<br />
       <template v-for="(amount, idx) in entry[3][1]" :key="idx">
@@ -273,11 +272,11 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+          store.players[entry[1]].displayName }} </span>
       <!-- Multiple SALES, MOVE TO PARTY -->
       <template v-if="entry[3][0] === 0">
         Pirates
-        <img v-for="(res, idx) in  entry[3].slice(1, -1)" :key="idx" :src="view.getImage('res' + String(res))"
+        <img v-for="(res, idx) in entry[3].slice(1, -1)" :key="idx" :src="view.getImage('res' + String(res))"
           class="stdResImg" />
         <span v-if="entry[3].length % 2 === 1"><br />Ship moves to other party</span>
         <span v-else><br />Ship ends up in same party</span>
@@ -302,7 +301,7 @@ function canSelectPirateEntry(entry3) {
       <!-- Multiple SALES, END TURN -->
       <template v-if="entry[3][0] === 10">
         Pirates
-        <img v-for="(res, idx) in  entry[3].slice(1)" :key="idx" :src="view.getImage('res' + String(res))"
+        <img v-for="(res, idx) in entry[3].slice(1)" :key="idx" :src="view.getImage('res' + String(res))"
           class="stdResImg" />
         <br />Score: € {{ entry[3].slice(1).length * 4 }} M
       </template>
@@ -320,7 +319,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+            store.players[entry[1]].displayName }} </span>
         Moves the Pirates to
         <div class="singleHexDiv">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
@@ -344,7 +343,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-    store.players[entry[1]].displayName }} </span>
+            store.players[entry[1]].displayName }} </span>
         Stores:
         <template v-for="(res, idx) in entry[3]" :key="idx">
           <div v-if="res >= 20" class="singleHexDiv">
@@ -372,7 +371,7 @@ function canSelectPirateEntry(entry3) {
         <div v-for="(score, idx) in entry[3][1]" :key="idx" class="playerScoreSummaryDiv">
           <span class="mainEntryPlayerNewTurn"
             :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[idx].colour)">{{
-    store.players[idx].displayName }} € {{ score }} M</span>
+              store.players[idx].displayName }} € {{ score }} M</span>
         </div>
       </div>
     </div>
@@ -395,7 +394,7 @@ function canSelectPirateEntry(entry3) {
         <div class="playerScoreSummaryDiv">
           <span class="mainEntryPlayerNewTurn"
             :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0][0]].colour)">{{
-    store.players[entry[3][0][0]].displayName }} € {{ store.players[entry[3][0][0]].score }} M</span>
+              store.players[entry[3][0][0]].displayName }} € {{ store.players[entry[3][0][0]].score }} M</span>
         </div>
       </div>
     </div>

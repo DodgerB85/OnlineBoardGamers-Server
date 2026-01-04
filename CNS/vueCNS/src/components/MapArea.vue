@@ -34,37 +34,9 @@ function hexCenter(hex, raw, forRotationCenter) {
 }
 
 function hexClicked(hex) {
-  //alert(hex.hexRef)
   //console.log(hex)
   //console.log(`Invitation Edges: ${map.findInvitationEdges(hex.hexRef, hex.rotation)}`)
 }
-
-// Position a div over a hex to display an image in the correct px position
-/*function getImgDivPos(dim, hex) {
-  let centerPos = hexCenter(hex, true, false)
-
-  let factor = 0.19
-  // left
-  if (dim == 0)
-    return (
-      store.canvasSize / 2 +
-      ((centerPos[0] * 0.866 + centerPos[1] * 0.5) /*+ store.canvasSize/100*/ /*
-  factor *
-  store.canvasSize) /
-300 -
-store.refSize / 36
-)
-// top
-if (dim == 1)
-return (
-store.canvasSize / 2 +
-((-centerPos[0] * 0.5 + centerPos[1] * 0.866) /*+ store.canvasSize/100*/ /*
-  factor *
-  store.canvasSize) /
-300 -
-(store.refSize / 36) * rf.hexBigRatio
-)
-}*/
 
 function pirateShipPoints() {
   const pirateTile = store.hexes.find(item => item.hexRef === store.pirateShipRef);
@@ -131,7 +103,6 @@ function getStroke(link, player) {
     if (personal.getCorrectedColour(controller.currentPlayerObj().colour) === rf.YELLOW) return 'red'
     else return 'yellow'
   }
-  //return personal.getCorrectedColourHex(player.colour)
   return 'purple'
 }
 function getStrokeWidth(link) {
@@ -260,12 +231,12 @@ function addPirateToParty(partyNum) {
       <!-- Add Hexes -->
       <polygon :id="'hex' + tile.id" :key="tile.id" v-for="tile in store.hexes" @click="hexClicked(tile)"
         :points="map.getHexPoints(false)" :transform="'rotate(' +
-    tile.rotation * 60 +
-    ' ' +
-    hexCenter(tile.hex, false, true) +
-    ')' +
-    hexCenter(tile.hex, false)
-    " class="mapHexSVG" :fill="`url(#pattern${tile.hexRef})`"></polygon>
+          tile.rotation * 60 +
+          ' ' +
+          hexCenter(tile.hex, false, true) +
+          ')' +
+          hexCenter(tile.hex, false)
+          " class="mapHexSVG" :fill="`url(#pattern${tile.hexRef})`"></polygon>
 
       <!-- Add Junk Hex -->
       <polygon v-for="(junkData, idx) in store.tableJunk" :key="idx" :points="map.getHexPoints(false)"
@@ -277,15 +248,15 @@ function addPirateToParty(partyNum) {
         <polygon v-for="tile in store.context.placeableTiles" class="newHexOptionSVG" :key="tile.id"
           @click="localAddHexToMap(tile, store.context.hexRefBeingAdded, store.context.hexBeingAddedRotation)"
           :points="map.getHexPoints(false)" :transform="'rotate(' +
-    store.context.hexBeingAddedRotation * 60 +
-    ' ' +
-    hexCenter(tile, false, true) +
-    ')' +
-    hexCenter(tile, false)
-    " @mouseover="tile.isMouseOver = true" @mouseout="tile.isMouseOver = false"
+            store.context.hexBeingAddedRotation * 60 +
+            ' ' +
+            hexCenter(tile, false, true) +
+            ')' +
+            hexCenter(tile, false)
+            " @mouseover="tile.isMouseOver = true" @mouseout="tile.isMouseOver = false"
           :fill="getNewHexOptionFill(tile.isMouseOver)" :style="{
-    'stroke-width': store.refSize / 240 + 'px'
-  }"></polygon>
+            'stroke-width': store.refSize / 240 + 'px'
+          }"></polygon>
       </g>
 
       <!-- Add PZ highlight for Pirates -->
@@ -302,11 +273,11 @@ function addPirateToParty(partyNum) {
         <polygon :key="link.id" v-for="link in player.links" :points="map.getLinkSVGpoints(link, false)"
           @click="linkClicked(player, link)" @mouseover="link.isMouseOver = true" @mouseout="link.isMouseOver = false"
           :style="{
-    'stroke-width': getStrokeWidth(link) / 600 + 'px',
-    stroke: getStroke(link, player),
-    fill: personal.getCorrectedColourHex(player.colour),
-    cursor: (store.context.action == rf.ACT_REMOVE_LINK && store.context.removableLinks.includes(link)) ? 'pointer' : 'default'
-  }"></polygon>
+            'stroke-width': getStrokeWidth(link) / 600 + 'px',
+            stroke: getStroke(link, player),
+            fill: personal.getCorrectedColourHex(player.colour),
+            cursor: (store.context.action == rf.ACT_REMOVE_LINK && store.context.removableLinks.includes(link)) ? 'pointer' : 'default'
+          }"></polygon>
       </g>
 
       <!-- Add New Link Options -->
@@ -314,9 +285,9 @@ function addPirateToParty(partyNum) {
         <polygon :key="link.id" v-for="link in store.context.placeableLinks" :points="map.getLinkSVGpoints(link, false)"
           @click="model.addLink(controller.currentPlayerObj(), link)" @mouseover="link.isMouseOver = true"
           @mouseout="link.isMouseOver = false" class="newLink" :style="{
-    'stroke-width': store.refSize / 240 + 'px',
-    fill: personal.getCorrectedColourHex(controller.currentPlayerObj().colour)
-  }"></polygon>
+            'stroke-width': store.refSize / 240 + 'px',
+            fill: personal.getCorrectedColourHex(controller.currentPlayerObj().colour)
+          }"></polygon>
       </g>
 
       <!-- Add Cigars -->
@@ -329,8 +300,8 @@ function addPirateToParty(partyNum) {
           :points="map.getLinkSVGpoints(link, true, true)" @click="model.addCigar(link)"
           @mouseover="link.isMouseOver = true" @mouseout="link.isMouseOver = false"
           :fill="'url(' + getCigarPattern(link) + ')'" class="newCigar" :style="{
-    'stroke-width': store.refSize / 240 + 'px',
-  }"></polygon>
+            'stroke-width': store.refSize / 240 + 'px',
+          }"></polygon>
       </g>
 
       <!-- ADD PIRATE SHIP -->
@@ -343,11 +314,11 @@ function addPirateToParty(partyNum) {
     <!-- Add Hex Imgs -->
     <template v-if="store.debugVars.showHexImgs">
       <div v-for="(tile, index) in store.hexes" :key="index" class="hexTileDiv" :style="{
-    width: store.refSize / 18.7 + 'px',
-    height: (store.refSize / 18.7) * rf.hexBigRatio + 'px',
-    left: getImgDivPos(0, tile.hex) + 'px',
-    top: getImgDivPos(1, tile.hex) + 'px'
-  }">
+        width: store.refSize / 18.7 + 'px',
+        height: (store.refSize / 18.7) * rf.hexBigRatio + 'px',
+        left: getImgDivPos(0, tile.hex) + 'px',
+        top: getImgDivPos(1, tile.hex) + 'px'
+      }">
         <img class="hexIMG" :src="view.getImage('hex' + String(rf.HEX_PROD_MOVIE_SCIFI))"
           :alt="rf.HEX_PROD_MOVIE_SCIFI" />
       </div>
@@ -359,16 +330,6 @@ function addPirateToParty(partyNum) {
 </template>
 
 <style scoped>
-/*#pirateShipDiv {
-  position: absolute;
-  z-index: 100;
-}
-
-#pirateShipDiv img {
-  width: 100%;
-  height: 100%;
-}*/
-
 .newHexOptionSVG {
   stroke: black;
   fill-opacity: 0.5;
@@ -386,7 +347,6 @@ function addPirateToParty(partyNum) {
 
 .hexTileDiv {
   position: absolute;
-  /*background-color: red;*/
 }
 
 .hexTileDiv img {
@@ -396,10 +356,7 @@ function addPirateToParty(partyNum) {
 
 #hexDIV {
   position: relative;
-  /*float: left;*/
   padding: 0px;
-  /*border: 3px solid black;
-  border-radius: 25px;*/
   width: fit-content;
   margin: auto;
 
@@ -437,7 +394,6 @@ function addPirateToParty(partyNum) {
 
 polygon {
   pointer-events: visiblePainted;
-  /* fill: hsla(60, 12%, 95%, 0);*/
   stroke: black;
 }
 
@@ -455,7 +411,6 @@ polygon {
   cursor: pointer;
   fill-opacity: 1;
 }
-
 
 .newCigar {
   stroke: yellow !important;

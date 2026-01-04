@@ -8,12 +8,21 @@ from django.db import models
 from django.db.models import Q
 
 from django.conf import settings
+
 # from django.utils.translation import gettext, gettext_lazy
 
 from Lobby.models import User
 
-from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout, SF_kickoutRequired, SF_M_ProcessTournamentEndGame
-from Lobby.sharedFunctions.sharedNotifications import SN_M_T_sendTournamentGameStartNotification, SN_M_sendEndGameNotificationTieGame, SN_M_sendGameStartNotification
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_getSecondsToNextKickout,
+    SF_kickoutRequired,
+    SF_M_ProcessTournamentEndGame,
+)
+from Lobby.sharedFunctions.sharedNotifications import (
+    SN_M_T_sendTournamentGameStartNotification,
+    SN_M_sendEndGameNotificationTieGame,
+    SN_M_sendGameStartNotification,
+)
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
     SR_TOURNAMENT_TYPE_CHOICES,
@@ -45,8 +54,14 @@ class AQY_Tournament(models.Model):
     )
 
     startingOptions = models.CharField(max_length=20, blank=True, default="")
-    startingPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_AQY", blank=True)
-    nextRoundPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="currentRoundPlayersRelName_AQY", blank=True)
+    startingPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_AQY", blank=True
+    )
+    nextRoundPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="currentRoundPlayersRelName_AQY",
+        blank=True,
+    )
 
     maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
     maxGamePlayers = models.PositiveSmallIntegerField(blank=False)
@@ -67,13 +82,23 @@ class AQY_Tournament(models.Model):
             return True
         return False
 
-    def createTournamentGame(self, request, _roundNumberString, _currentPlayersUsernames):
+    def createTournamentGame(
+        self, request, _roundNumberString, _currentPlayersUsernames
+    ):
         gameName = f"[{self.tournamentName}] {_roundNumberString}"
         playerOrderSeed = random.randint(1000, 32767)
         pace = 30
         creator = User.objects.get(username="admin")
 
-        newGame = AQY_Game(gameName=gameName, creator=creator, gamePace=pace, playerOrderSeed=playerOrderSeed, startingOptions=self.startingOptions, maxPlayers=self.maxGamePlayers, gameStatus="ACTIVE")
+        newGame = AQY_Game(
+            gameName=gameName,
+            creator=creator,
+            gamePace=pace,
+            playerOrderSeed=playerOrderSeed,
+            startingOptions=self.startingOptions,
+            maxPlayers=self.maxGamePlayers,
+            gameStatus="ACTIVE",
+        )
 
         newGame.save()
 
@@ -81,7 +106,17 @@ class AQY_Tournament(models.Model):
             if _currentPlayersUsernames[i] != "":
                 player = User.objects.get(username=_currentPlayersUsernames[i])
                 newGame.allPlayers.add(player)
-                SN_M_T_sendTournamentGameStartNotification(request, "AQY", _currentPlayersUsernames[i], self.maxGamePlayers, newGame.gameName, newGame.currentTurnString(), newGame.id, False, "normalTournament")
+                SN_M_T_sendTournamentGameStartNotification(
+                    request,
+                    "AQY",
+                    _currentPlayersUsernames[i],
+                    self.maxGamePlayers,
+                    newGame.gameName,
+                    newGame.currentTurnString(),
+                    newGame.id,
+                    False,
+                    "normalTournament",
+                )
 
         newGame.kickoutDuration = 100
         newGame.relatedTournament = self
@@ -100,7 +135,7 @@ class AQY_Tournament(models.Model):
                 if row[0] == "BYEPLAYERS":
                     byedPlayerList.extend(row)
         return byedPlayerList
-    
+
     def get_tournamentType_display(self):
         return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
 
@@ -114,7 +149,7 @@ class AQY_Tournament(models.Model):
         return {
             "tournamentID": self.id,
             "tournamentName": self.tournamentName,
-            #"tournamentStatus": self.get_tournamentStatus_display(),
+            # "tournamentStatus": self.get_tournamentStatus_display(),
             "tournamentType": self.get_tournamentType_display(),
             "maxTournamentPlayers": self.maxTournamentPlayers,
             "maxGamePlayers": self.maxGamePlayers,
@@ -126,28 +161,46 @@ class AQY_Tournament(models.Model):
 
     def getRoundsHTML(self):
         # Only for IP or FN tournaments
-        roundsHTML = SR_getTournamentRoundsHTML(self.tournamentType, self.maxGamePlayers, self.tournamentProgressionData, self.tournamentPointsData, "AQY", self)
+        roundsHTML = SR_getTournamentRoundsHTML(
+            self.tournamentType,
+            self.maxGamePlayers,
+            self.tournamentProgressionData,
+            self.tournamentPointsData,
+            "AQY",
+            self,
+        )
         return roundsHTML
+
 
 class AQY_Game(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    gameName = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
-    gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
+    gameDescription = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
 
     gameStatus = models.CharField(
         max_length=9,
         choices=SR_GAME_STATUS_CHOICES,
         default="AVAILABLE",
-        db_index=True, 
+        db_index=True,
     )
 
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
+    latestUpdate = models.CharField(
+        max_length=15, blank=False, default=SR_getTimeNow, db_index=True
+    )
     startingOptions = models.CharField(max_length=20, blank=True)
     startingMap = models.CharField(max_length=80, blank=True)
 
-    allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="AQYallPlayersRelName")
-    missingPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="AQYmissingPlayersRelName", blank=True)
+    allPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="AQYallPlayersRelName"
+    )
+    missingPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="AQYmissingPlayersRelName", blank=True
+    )
     currentPlayers = models.CharField(max_length=100, blank=True)
 
     playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
@@ -155,12 +208,16 @@ class AQY_Game(models.Model):
 
     # winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
     #                           null=True, related_name='AQYgame_winner_relName', blank=True)
-    winner = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="AQYgame_winner_relName", blank=True)
+    winner = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="AQYgame_winner_relName", blank=True
+    )
 
     turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
     phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
 
-    kickoutDuration = models.PositiveSmallIntegerField(null=False, blank=False, default=200)
+    kickoutDuration = models.PositiveSmallIntegerField(
+        null=False, blank=False, default=200
+    )
     gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
 
     creator = models.ForeignKey(
@@ -179,7 +236,9 @@ class AQY_Game(models.Model):
     )
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([16, 16, 16, 16]))
+    zoomLevels = models.CharField(
+        max_length=30, blank=False, default=json.dumps([16, 16, 16, 16])
+    )
 
     statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
 
@@ -192,9 +251,17 @@ class AQY_Game(models.Model):
     player3currentMoveTime = models.CharField(max_length=15, blank=True)
     player3currentMoveData = models.TextField(blank=True)
 
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="AQYkickedPlayersRelName", blank=True)
-    invitedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="AQYinvitedPlayersRelName", blank=True)
-    playersWithChatNotification = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="AQYplayersWithChatNotificationName", blank=True)
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="AQYkickedPlayersRelName", blank=True
+    )
+    invitedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="AQYinvitedPlayersRelName", blank=True
+    )
+    playersWithChatNotification = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="AQYplayersWithChatNotificationName",
+        blank=True,
+    )
 
     chatData = models.TextField(blank=True)
 
@@ -208,7 +275,13 @@ class AQY_Game(models.Model):
     rewindTempData = models.TextField(blank=True)
 
     tournamentGame = models.BooleanField(blank=False, default=False)
-    relatedTournament = models.ForeignKey(AQY_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="tournament_relName_AQY")
+    relatedTournament = models.ForeignKey(
+        AQY_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tournament_relName_AQY",
+    )
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
 
@@ -226,7 +299,7 @@ class AQY_Game(models.Model):
         _gameName = ""
         if self.gameName != "":
             _gameName = self.gameName
-        else: 
+        else:
             _gameName = f"[{getattr(self.creator, 'username')}'s Game]"
         if self.gameStatus == "PRIVATE":
             _gameName += "[Private Game]"
@@ -273,7 +346,11 @@ class AQY_Game(models.Model):
                 finalResults.append([_finalPositions[i][j], text, i])
 
         # Create a new array to store names not present in _finalPositions
-        new_names = [name for name in names if name not in [item for sublist in _finalPositions for item in sublist]]
+        new_names = [
+            name
+            for name in names
+            if name not in [item for sublist in _finalPositions for item in sublist]
+        ]
 
         for name in new_names:
             finalResults.append([name, "Lost in Antiquity", 9])
@@ -290,21 +367,33 @@ class AQY_Game(models.Model):
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         if self.currentPlayers == "":
             return True
-        if (loggedInPlayerUsername in self.currentPlayers) or (self.currentPlayers == "SHADOW") or (self.currentPlayers == "SHADOW_2") or (self.currentPlayers == "SHADOW_3"):
+        if (
+            (loggedInPlayerUsername in self.currentPlayers)
+            or (self.currentPlayers == "SHADOW")
+            or (self.currentPlayers == "SHADOW_2")
+            or (self.currentPlayers == "SHADOW_3")
+        ):
             return True
         return False
-    
+
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         # Return False if no username is provided
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return False
-        
+
         # Use a set for faster membership testing
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
         return (
-            not self.currentPlayers or
-            loggedInPlayerUsername in self.currentPlayers or
-            self.currentPlayers in shadow_values
+            not self.currentPlayers
+            or loggedInPlayerUsername in self.currentPlayers
+            or self.currentPlayers in shadow_values
         )
 
     def getSecondsToNextKickout(self):
@@ -320,12 +409,12 @@ class AQY_Game(models.Model):
         # 1. Use a list comprehension to stay in Python memory (0 Hits)
         # This uses the data already loaded by prefetch_related('allPlayers')
         all_player_usernames = [p.username for p in self.allPlayers.all()]
-        
+
         # 2. Get the current players array
-        # Ensure this method uses self.currentPlayers (the string field) 
+        # Ensure this method uses self.currentPlayers (the string field)
         # instead of doing a new DB query
         current_players = self.getCurrentPlayersArray()
-        
+
         # Safety check for empty arrays
         current_username = current_players[0] if current_players else ""
 
@@ -340,20 +429,42 @@ class AQY_Game(models.Model):
 
     def serialize(self, loggedInUserObj=None):
         remainingPlayersInt = self.maxPlayers - self.allPlayers.count()
-        remainingPlayers = "".join(str(self.allPlayers.count() + i + 1) for i in range(remainingPlayersInt))
-        winner = ", ".join(list(self.winner.all().values_list("username", flat=True))) if self.winner.exists() else ""
+        remainingPlayers = "".join(
+            str(self.allPlayers.count() + i + 1) for i in range(remainingPlayersInt)
+        )
+        winner = (
+            ", ".join(list(self.winner.all().values_list("username", flat=True)))
+            if self.winner.exists()
+            else ""
+        )
         createdString = self.created
         latestUpdateString = self.latestUpdate
 
         latestUpdateElapsedTimeString = ""
-        if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "ACTIVE" or self.gameStatus == "PRIVATE":
-            elapsedTotalSeconds = int(time.time()) - int(self.created) // 1000 if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "PRIVATE" else int(time.time()) - int(self.latestUpdate) // 1000
-            latestUpdateElapsedTimeString = SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+        if (
+            self.gameStatus == "WAITING"
+            or self.gameStatus == "AVAILABLE"
+            or self.gameStatus == "ACTIVE"
+            or self.gameStatus == "PRIVATE"
+        ):
+            elapsedTotalSeconds = (
+                int(time.time()) - int(self.created) // 1000
+                if self.gameStatus == "WAITING"
+                or self.gameStatus == "AVAILABLE"
+                or self.gameStatus == "PRIVATE"
+                else int(time.time()) - int(self.latestUpdate) // 1000
+            )
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
 
         myMove = loggedInUserObj is not None and self.isMyMove(loggedInUserObj.username)
 
         chatNotification = loggedInUserObj in self.playersWithChatNotification.all()
-        involvedPlayer = loggedInUserObj in self.allPlayers.all() and loggedInUserObj not in self.missingPlayers.all()
+        involvedPlayer = (
+            loggedInUserObj in self.allPlayers.all()
+            and loggedInUserObj not in self.missingPlayers.all()
+        )
 
         gamePaceString = SR_gamePaceString(self.gamePace)
 
@@ -372,7 +483,10 @@ class AQY_Game(models.Model):
         #   Use currentGame.latestUpdateLiteral
         #   Use currentGame.myMove to prevent self kickout
 
-        deleteableGame = "SHADOW" in self.allPlayers.all().values_list("username", flat=True) and loggedInUserObj in self.allPlayers.all()
+        deleteableGame = (
+            "SHADOW" in self.allPlayers.all().values_list("username", flat=True)
+            and loggedInUserObj in self.allPlayers.all()
+        )
 
         return {
             "gameID": self.id,
@@ -406,14 +520,18 @@ class AQY_Game(models.Model):
         }
 
     def isExperiencedGame(self):
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
 
         if 120 in startingOptionsListPrelim:
             return True
         return False
 
     def isLearningGame(self):
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
         if 110 in startingOptionsListPrelim:
             return True
         return False
@@ -422,8 +540,8 @@ class AQY_Game(models.Model):
     def seatPosition(self, _username, withoutBots=False):
         # 1. Get the list (This is 0 hits if getAllPlayersOrderedySeat uses .all())
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        
-        # 2. Use Python's index to find the position. 
+
+        # 2. Use Python's index to find the position.
         # This replaces the need for the redundant .values_list() query.
         try:
             return playerList.index(_username)
@@ -435,10 +553,10 @@ class AQY_Game(models.Model):
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # 1. Access the prefetched list in memory (0 hits if prefetched in view)
         all_players_prefetched = list(self.allPlayers.all())
-        
+
         # 2. Extract usernames in Python (0 hits)
         playerList = [p.username for p in all_players_prefetched]
-        
+
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
         if withoutBots:
@@ -450,7 +568,7 @@ class AQY_Game(models.Model):
         for count, player in enumerate(playerList):
             if player in missing_usernames:
                 playerList[count] = "AqyBot"
-            
+
         return playerList
 
     def startGame(self, request, isTournamentGame=False):
@@ -464,16 +582,22 @@ class AQY_Game(models.Model):
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
             player_usernames = [p.username for p in self.allPlayers.all()]
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
-            
-            playerListToNotify = list(self.allPlayers.all().values_list("username", flat=True))
+
+            playerListToNotify = list(
+                self.allPlayers.all().values_list("username", flat=True)
+            )
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
             # The tournament sends out game start notifications
             if not isTournamentGame:
-                SN_M_sendGameStartNotification(request, "AQY", playerListToNotify, self.id, self)
+                SN_M_sendGameStartNotification(
+                    request, "AQY", playerListToNotify, self.id, self
+                )
 
     def hasMoveEndData(self, name):
         seat = self.seatPosition(name)
@@ -493,7 +617,11 @@ class AQY_Game(models.Model):
         player_move = player_moves.get(seat, "")
         player_time = player_moves_times.get(seat, "")
 
-        return bool(player_move != "" and player_time != "MID_PHASE" and player_time != "PRE_MOVE")
+        return bool(
+            player_move != ""
+            and player_time != "MID_PHASE"
+            and player_time != "PRE_MOVE"
+        )
 
     def hasMoveMidData(self, name):
         seat = self.seatPosition(name)
@@ -519,7 +647,7 @@ class AQY_Game(models.Model):
         # 1. Use the prefetched cache (0 hits if allPlayers is prefetched)
         # Convert to a list once to ensure we stay in memory
         all_players_list = self.allPlayers.all()
-        
+
         _currentPlayers = []
         for user in all_players_list:
             # 2. Check move status in memory
@@ -532,7 +660,9 @@ class AQY_Game(models.Model):
         return ", ".join(_currentPlayers)
 
     def getCurrentPlayersArray(self):
-        _currentPlayersArray = [player.strip() for player in self.currentPlayers.split(",")]
+        _currentPlayersArray = [
+            player.strip() for player in self.currentPlayers.split(",")
+        ]
         return _currentPlayersArray
 
     def getCurrentPlayersArrayForReminderEmail(self):
@@ -552,11 +682,15 @@ class AQY_Game(models.Model):
                 readyPlayers.append(False)
                 if not player_time:
                     player_time = int(time.time() * 1000)
-                jsonResponse.append({"timestamp": int(player_time), "content": player_data})
+                jsonResponse.append(
+                    {"timestamp": int(player_time), "content": player_data}
+                )
             else:
                 readyPlayers.append(True)
                 # if readyPlayers[i]:
-                jsonResponse.append({"timestamp": int(player_time), "content": player_data})
+                jsonResponse.append(
+                    {"timestamp": int(player_time), "content": player_data}
+                )
 
         readyWithBots = False
         readyCount = sum(readyPlayers)
@@ -584,12 +718,21 @@ class AQY_Game(models.Model):
 
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
-            possibleHost = self.allPlayers.all().filter(~Q(missingPlayersRelName=self.id)).order_by("?").first()
+            possibleHost = (
+                self.allPlayers.all()
+                .filter(~Q(missingPlayersRelName=self.id))
+                .order_by("?")
+                .first()
+            )
             self.host = possibleHost
 
     def enableStatsExclude(self, _username):
         seatToChange = self.seatPosition(_username, True)
-        self.statsExcludeConsent = self.statsExcludeConsent[:seatToChange] + "1" + self.statsExcludeConsent[seatToChange + 1 :]
+        self.statsExcludeConsent = (
+            self.statsExcludeConsent[:seatToChange]
+            + "1"
+            + self.statsExcludeConsent[seatToChange + 1 :]
+        )
         # CHECK TOTAL CONSENT
         totalConsent = 0
         for letter in self.statsExcludeConsent:
@@ -631,24 +774,47 @@ class AQY_Game(models.Model):
         }
         current_time_field, current_data_field = player_moves.get(seat, ("", ""))
 
-        current_data = getattr(self, current_data_field) if current_data_field is not None else ""
+        current_data = (
+            getattr(self, current_data_field) if current_data_field is not None else ""
+        )
 
         if (current_data == "" or current_data is None) and data[0] != -999:
             dataArray = []
             dataArray.append(newJsonEntry)
             setattr(self, current_time_field, "PRE_MOVE")
-            setattr(self, current_data_field, base64.b64encode(gzip.compress(json.dumps(dataArray).encode("utf-8"))).decode("utf-8"))
+            setattr(
+                self,
+                current_data_field,
+                base64.b64encode(
+                    gzip.compress(json.dumps(dataArray).encode("utf-8"))
+                ).decode("utf-8"),
+            )
             self.save()
             return
 
-        current_data = json.loads(gzip.decompress(bytearray(base64.b64decode(current_data))).decode("utf-8"))
+        current_data = json.loads(
+            gzip.decompress(bytearray(base64.b64decode(current_data))).decode("utf-8")
+        )
         # Find and delete existing pre-move
-        index_to_remove = next((index for index, entry in enumerate(current_data) if entry.get("phase") == phase), None)
+        index_to_remove = next(
+            (
+                index
+                for index, entry in enumerate(current_data)
+                if entry.get("phase") == phase
+            ),
+            None,
+        )
         if index_to_remove is not None:
             del current_data[index_to_remove]
         if data[0] != -999:
             current_data.append(newJsonEntry)
-        setattr(self, current_data_field, base64.b64encode(gzip.compress(json.dumps(current_data).encode("utf-8"))).decode("utf-8"))
+        setattr(
+            self,
+            current_data_field,
+            base64.b64encode(
+                gzip.compress(json.dumps(current_data).encode("utf-8"))
+            ).decode("utf-8"),
+        )
         self.save()
 
     def deleteAllPreMoves(self):
@@ -694,7 +860,11 @@ class AQY_Game(models.Model):
             return
 
         # Simply remove the entry from the trade list
-        playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(self.playerTradeData))).decode("utf-8"))
+        playerTradeData = json.loads(
+            gzip.decompress(bytearray(base64.b64decode(self.playerTradeData))).decode(
+                "utf-8"
+            )
+        )
 
         # Find and remove the entry from playerTradeData
         for subarray in playerTradeData["playerTrades"]:
@@ -702,35 +872,53 @@ class AQY_Game(models.Model):
                 playerTradeData["playerTrades"].remove(subarray)
 
         # Now convert to gzip
-        self.playerTradeData = base64.b64encode(gzip.compress(json.dumps(playerTradeData).encode("utf-8"))).decode("utf-8")
+        self.playerTradeData = base64.b64encode(
+            gzip.compress(json.dumps(playerTradeData).encode("utf-8"))
+        ).decode("utf-8")
 
     def markPromiseComplete(self, promise):
         # reversePromise = promise[:2][::-1] + promise[2:]
 
         if self.playerTradeData != "":
             # remove the entry from the player data promises
-            playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(self.playerTradeData))).decode("utf-8"))
+            playerTradeData = json.loads(
+                gzip.decompress(
+                    bytearray(base64.b64decode(self.playerTradeData))
+                ).decode("utf-8")
+            )
 
             # Find and remove the entry from playerTradeData
             for i, player in enumerate(playerTradeData["playerCityLockedData"]):
                 if len(player) > 0:
-                    playerData = json.loads(gzip.decompress(bytearray(base64.b64decode(player))).decode("utf-8"))
+                    playerData = json.loads(
+                        gzip.decompress(bytearray(base64.b64decode(player))).decode(
+                            "utf-8"
+                        )
+                    )
                     for playerPromise in playerData[8]:
                         if playerPromise == promise:
                             playerData[8].remove(promise)
-                    playerTradeData["playerCityLockedData"][i] = base64.b64encode(gzip.compress(json.dumps(playerData).encode("utf-8"))).decode("utf-8")
+                    playerTradeData["playerCityLockedData"][i] = base64.b64encode(
+                        gzip.compress(json.dumps(playerData).encode("utf-8"))
+                    ).decode("utf-8")
 
             # Now convert to gzip
-            self.playerTradeData = base64.b64encode(gzip.compress(json.dumps(playerTradeData).encode("utf-8"))).decode("utf-8")
+            self.playerTradeData = base64.b64encode(
+                gzip.compress(json.dumps(playerTradeData).encode("utf-8"))
+            ).decode("utf-8")
 
         # Now remove from main data
-        raw_data = json.loads(gzip.decompress(bytearray(base64.b64decode(self.gameData))).decode("utf-8"))
+        raw_data = json.loads(
+            gzip.decompress(bytearray(base64.b64decode(self.gameData))).decode("utf-8")
+        )
         for playerData in raw_data[1]:
             for playerPromise in playerData[9]:
                 if playerPromise == promise:
                     playerData[9].remove(promise)
 
-        self.gameData = base64.b64encode(gzip.compress(json.dumps(raw_data).encode("utf-8"))).decode("utf-8")
+        self.gameData = base64.b64encode(
+            gzip.compress(json.dumps(raw_data).encode("utf-8"))
+        ).decode("utf-8")
 
     def getGameCode(self):
         return "AQY"
@@ -744,27 +932,33 @@ class AQY_Game(models.Model):
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
         return self.deleteGameVotes
-    
+
     def addDeleteVote(self, playerName):
         """Records the vote of a player."""
         # Double check player is in the game
         if playerName not in [p.username for p in self.allPlayers.all()]:
             return False  # Player not in the game
-                
+
         # Ensure deleteGameVotes is a dictionary
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # If the playerName isn't found, wipe the votes and make sure all players are added
         if playerName not in self.deleteGameVotes:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # Add the vote
         self.deleteGameVotes[playerName] = True

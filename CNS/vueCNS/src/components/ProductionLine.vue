@@ -153,8 +153,7 @@ function enoughResForProd(prod) {
   </template>
 
   <template v-else-if="store.gameflow.phase === rf.PHASE_NETWORK">
-    <div id="productionLineDivNetwork"
-      v-if="store.context.availableProduction.length > 0">
+    <div id="productionLineDivNetwork" v-if="store.context.availableProduction.length > 0">
 
 
       <div class="productionRow">
@@ -194,6 +193,7 @@ function enoughResForProd(prod) {
 #productionLineDiv {
   width: 100%;
 }
+
 #productionLineDivNetwork {
   width: 100%;
   opacity: 0.5;

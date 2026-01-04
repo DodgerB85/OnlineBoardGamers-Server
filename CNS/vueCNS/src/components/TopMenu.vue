@@ -72,7 +72,6 @@ function toggleNotes() {
 function toggleChat() {
 	store.topMenuViews.showHistory = false
 	document.getElementById("boardContainer").classList.remove("slideRight")
-	//store.topMenuViews.showChat = !store.topMenuViews.showChat
 	if (store.topMenuViews.showChat) store.topMenuViews.showChat = false
 	else {
 		store.topMenuViews.showChat = true
@@ -123,7 +122,6 @@ function clickedLoggedInDiv() {
 		personal.pov++
 		if (personal.pov === store.players.length) personal.pov = 0
 		store.gameName = String(personal.pov) + "  :  " + store.players[personal.pov].name
-		// controller.startPlayerTurn()
 	}
 	personal.aidText = false
 }
@@ -154,13 +152,16 @@ function toggleReserve() {
 				</span>
 			</a>
 
-			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat" @click="toggleChat">
+			<span v-if="personal.name != undefined"
+				:class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat"
+				@click="toggleChat">
 				<img :src="view.getImage('icon-chat')" />
 				<span>Chat</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
-			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]" id="menuButtonBug" @click="toggleBug">
+			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]"
+				id="menuButtonBug" @click="toggleBug">
 				<img :src="view.getImage('icon-stop')" />
 				<span>Bug</span>
 			</span>
@@ -183,20 +184,24 @@ function toggleReserve() {
 			</a>
 
 			<!-- IF INVOLVED PLAYER-->
-			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.topMenuViews.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
+			<span v-if="personal.pov >= 0" class="topMenuItem"
+				:class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.topMenuViews.showNotes }]"
+				id="menuButtonNotes" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" />
 				<span>Notes</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
-			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
+			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showReserve }]"
+				id="menuButtonReserve" @click="toggleReserve">
 				<img :src="view.getImage('icon-box')" />
 				<span>Reserve</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
-			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
+			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]"
+				id="menuButtonHistory" @click="toggleHistory">
 				<img :src="view.getImage('icon-scroll')" />
 				<span>History</span>
 			</span>
@@ -209,7 +214,9 @@ function toggleReserve() {
 			<div class="menuDivider"></div>
 
 			<!-- IF INVOLVED PLAYER-->
-			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]" @click="loadRewind()">
+			<span v-if="personal.pov >= 0" id="menuButtonRewindPos"
+				:class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]"
+				@click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
 				<span>Rewind</span>
 			</span>
@@ -222,7 +229,8 @@ function toggleReserve() {
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br />
 
-				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
+				<template
+					v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 					<span id="kickoutTimerSpan">
 						Time to next kickout:
 						<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
@@ -232,7 +240,8 @@ function toggleReserve() {
 
 			<div id="zoomDiv">
 				<label id="zoomLabel">Zoom</label>
-				<input class="tableZoomButton" type="button" :value="store.topMenuViews.showWholeTable ? 'Map' : 'Table'" @click="tableZoom()" />
+				<input class="tableZoomButton" type="button"
+					:value="store.topMenuViews.showWholeTable ? 'Map' : 'Table'" @click="tableZoom()" />
 				<input class="zoomButton" type="button" value="+" @click="doZoom(1)" />
 				<input class="zoomButton" type="button" value="-" @click="doZoom(-1)" />
 			</div>
@@ -247,7 +256,6 @@ function toggleReserve() {
 		</div>
 	</div>
 </template>
-
 
 <style scoped>
 .zoomButton {

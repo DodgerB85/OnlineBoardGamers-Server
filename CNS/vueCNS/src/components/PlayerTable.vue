@@ -50,23 +50,13 @@ function getNewHexRotation(hexRef) {
 }
 
 function getPlayerIndexOrderForTable() {
-    /*if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-      // [playerIndex, name, score]
-      let resArr = store.history[store.history.length-1][3]
-      let orderArr = []
-      for (let i=0;i<resArr.length;i++) {
-        orderArr.push(resArr[i][0])
-      }
-      return orderArr
-    }*/
-    
-    return store.gameflow.fullTurnOrder
-  }
-  function canSelectStoredHex(idx) {
-    if (!personal.canPlay()) return false
-    if (model.hexActionsRemaining(idx)) return true
-    return false
-  }
+  return store.gameflow.fullTurnOrder
+}
+function canSelectStoredHex(idx) {
+  if (!personal.canPlay()) return false
+  if (model.hexActionsRemaining(idx)) return true
+  return false
+}
 
 </script>
 
@@ -85,12 +75,13 @@ function getPlayerIndexOrderForTable() {
       </thead>
       <tr v-for="(arrayIndex, idx) in getPlayerIndexOrderForTable()" :key="idx">
         <td :class="getActivePlayerClass(idx)">
-          <a><span :class="['playerInfoName', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[arrayIndex].colour)]">
+          <a><span
+              :class="['playerInfoName', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[arrayIndex].colour)]">
               {{ store.players[arrayIndex].displayName }} </span></a>
         </td>
         <td>€ {{ store.players[arrayIndex].score }} M</td>
         <td :class="{ hidden: !anyPlayerHasUnusedLinks() }"><span v-if="anyPlayerHasUnusedLinks()">{{ 5 -
-            store.players[arrayIndex].links.length }}</span></td>
+          store.players[arrayIndex].links.length }}</span></td>
         <td class="storedResTD">
           <div class="storedResDIV">
             <template
@@ -103,8 +94,9 @@ function getPlayerIndexOrderForTable() {
                   <svg class="singleHexSVG"
                     :class="{ 'selectableHexSVG': canSelectStoredHex(idx), 'lightGreen': store.context.hexRefBeingAdded === res }"
                     xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-                    <polygon @click="clickedStoredHex(idx, res)" points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
-                      :fill="`url(#pattern${res})`" :transform="`rotate(${getNewHexRotation(res) * 60} 0 0)`" />
+                    <polygon @click="clickedStoredHex(idx, res)"
+                      points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${res})`"
+                      :transform="`rotate(${getNewHexRotation(res) * 60} 0 0)`" />
                   </svg>
 
                   <div class="newHexRotateDiv leftRotatePos"
@@ -141,6 +133,7 @@ function getPlayerIndexOrderForTable() {
   align-items: center;
   position: relative;
 }
+
 .newHexRotateDiv {
   position: absolute;
   bottom: 0px;
@@ -192,7 +185,6 @@ function getPlayerIndexOrderForTable() {
 }
 
 .storedResImg {
-  /*display: inline-block;*/
   vertical-align: middle;
   max-height: 100%;
 
@@ -215,12 +207,11 @@ function getPlayerIndexOrderForTable() {
 
 #playerTable {
   border-collapse: collapse;
-  width: 600px;  
+  width: 600px;
 }
 
 #playerTable a:link {
   text-decoration: none;
-  /*color: darkblue;*/
   color: lightcyan;
 }
 
@@ -285,7 +276,7 @@ function getPlayerIndexOrderForTable() {
 .selectableHexSVG {
   width: 120px;
   stroke: black;
- 
+
 }
 
 .selectableHexSVG:hover {
