@@ -4,40 +4,31 @@ from django.contrib import admin
 from .models import User, Profile, changelog, Mini_Tournaments, Main_Tournament
 
 
-#class WebUser(User):
-
-#    class Meta:
-#        proxy = True
-#        verbose_name = "User"
-#        verbose_name_plural = "Users"
-
-
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    search_fields = ('email', 'username')
+    search_fields = ("email", "username")
 
+
+@admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    search_fields = ['user__username', 'email_confirmed']
-    #pass
-    
+    search_fields = ["user__username", "email_confirmed"]
+
+
+@admin.register(Main_Tournament)
 class Main_TournamentAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
-    filter_horizontal = ('startingPlayers', 'nextRoundPlayers')
-    search_fields = ['tournamentName'] 
-    
+    filter_horizontal = ("startingPlayers", "nextRoundPlayers")
+    search_fields = ["tournamentName"]
+
+
+@admin.register(Mini_Tournaments)
 class Mini_TournamentsAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
-    filter_horizontal = ('startingPlayers', 'nextRoundPlayers')
-    autocomplete_fields = ('creator',) 
-    search_fields = ['tournamentName'] 
+    filter_horizontal = ("startingPlayers", "nextRoundPlayers")
+    autocomplete_fields = ("creator",)
+    search_fields = ["tournamentName"]
 
-admin.site.register(User, UserAdmin)
-admin.site.register(Profile, ProfileAdmin)
+
 admin.site.register(changelog)
-admin.site.register(Main_Tournament, Main_TournamentAdmin)
-admin.site.register(Mini_Tournaments, Mini_TournamentsAdmin)
-
-
-
-#admin.site.register(WebUser, UserAdmin)

@@ -1,7 +1,6 @@
 import json
 import time
 
-# import lzstring
 import base64
 import gzip
 
@@ -19,12 +18,20 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction, connection
 from django.db.models import Q
 
-from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn, SF_updateFlexiTime
-from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications, SN_sendNextTurnNotification, SN_sendBugReportEmail
-from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow  
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_getGameCreationJsonReturn,
+    SF_updateFlexiTime,
+)
+from Lobby.sharedFunctions.sharedNotifications import (
+    SN_sendInviteNotifications,
+    SN_sendNextTurnNotification,
+    SN_sendBugReportEmail,
+)
+from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .models import CNS_Game
 from Lobby.models import User, Profile
+
 
 # Create your views here.
 def index(request):
@@ -40,10 +47,6 @@ def createCNSgame(request):
     # Creating a game must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
-    # if 'trainingGame' not in request.POST and request.user.username != "admin" and request.user.username != "DodgerB":
-    #    messages.error(request, gettext('Practice games only for now'))
-    #    return HttpResponseRedirect(reverse("createCNSpage"))
 
     players = ["player2", "player3", "player4"]
     usernames = []
@@ -84,7 +87,18 @@ def createCNSgame(request):
     _created = SR_getTimeNow()
 
     with transaction.atomic():
-        newGame = CNS_Game(gameDescription=_gameDescription, creator=request.user, host=request.user, gamePace=_pace, turn=1, phase=0, created=_created, latestUpdate=_created, maxPlayers=_maxPlayers, gameStatus="AVAILABLE")
+        newGame = CNS_Game(
+            gameDescription=_gameDescription,
+            creator=request.user,
+            host=request.user,
+            gamePace=_pace,
+            turn=1,
+            phase=0,
+            created=_created,
+            latestUpdate=_created,
+            maxPlayers=_maxPlayers,
+            gameStatus="AVAILABLE",
+        )
         newGame.save()
 
         _gameName = request.POST["gameName"]
@@ -108,7 +122,6 @@ def createCNSgame(request):
                     display_name = f"{shadow_names[i-1]}"
                 shadow_players.append(display_name)
 
-            #newGame.rewindConsent = "2" * (_maxPlayers - 1)
             newGame.player0notes = json.dumps(shadow_players)
             newGame.startGame(request)
         else:
@@ -121,7 +134,9 @@ def createCNSgame(request):
                     newGame.invitedPlayers.add(newPlayer)
                     usernamesToNotify.append(newPlayer.username)
 
-            SN_sendInviteNotifications(request, usernamesToNotify, newGame.getGameName(), _maxPlayers, "CNS")
+            SN_sendInviteNotifications(
+                request, usernamesToNotify, newGame.getGameName(), _maxPlayers, "CNS"
+            )
 
         newGame.kickoutDuration = request.POST["kickoutDuration"]
         zoomLevels = [24] * _maxPlayers
@@ -132,34 +147,39 @@ def createCNSgame(request):
             newGame.statsExcludeConsent = "1" * _maxPlayers
             newGame.statsExcludedGame = True
         elif "learningGame" in request.POST:
-            # newGame.rewindConsent = "2" * (_maxPlayers)
             newGame.statsExcludeConsent = "1" * _maxPlayers
             newGame.statsExcludedGame = True
 
         newGame.startingOptions = json.dumps(_startingOptions)
-        
+
         if "privateGame" in request.POST:
             newGame.gameStatus = "PRIVATE"
-        
+
         newGame.save()
 
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has started"))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
+        return HttpResponseRedirect(
+            reverse("indexListType", kwargs={"listType": "current"})
+        )
     else:
-        messages.success(request, (SF_getGameCreationJsonReturn("CNS", getattr(newGame, "id"))))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+        messages.success(
+            request, (SF_getGameCreationJsonReturn("CNS", getattr(newGame, "id")))
+        )
+        return HttpResponseRedirect(
+            reverse("indexListType", kwargs={"listType": "waiting"})
+        )
 
 
 def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     try:
-        currentGame = CNS_Game.objects.select_related(
-            "host", "creator"
-        ).prefetch_related(
-            "allPlayers", 
-            "missingPlayers", 
-            "playersWithChatNotification"
-        ).get(id=game_id)
+        currentGame = (
+            CNS_Game.objects.select_related("host", "creator")
+            .prefetch_related(
+                "allPlayers", "missingPlayers", "playersWithChatNotification"
+            )
+            .get(id=game_id)
+        )
     except CNS_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -177,8 +197,12 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     gameName = currentGame.getGameName()
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    KickoutFlexiDataArray = (
+        json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
+    )
+    startingOptions = (
+        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    )
 
     # Logged in but not involved
     returnData = {
@@ -199,8 +223,8 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
 
     # Now you are logged in
     user_id = userObj.id
-    
-    user_profile = Profile.objects.get(user=userObj) 
+
+    user_profile = Profile.objects.get(user=userObj)
     missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
     chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
 
@@ -209,8 +233,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     involvedPlayer = is_in_all and not is_missing
     if username == "BotKickStarter":
         involvedPlayer = True
-        
-        
+
     chatData = currentGame.chatData
 
     latestUpdate = currentGame.latestUpdate
@@ -256,12 +279,14 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     }
     notes = notes_dict.get(seat_position, "")
 
-
-
     liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
-    preferredCNScolour = user_profile.preferredCNScolour if user_profile.preferredCNScolour is not None else -1
+    preferredCNScolour = (
+        user_profile.preferredCNScolour
+        if user_profile.preferredCNScolour is not None
+        else -1
+    )
 
     # Involved Player
     returnData.update(
@@ -277,7 +302,9 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
             "yourTurnAudioType": liveNotification,
             "preferredCNScolour": preferredCNScolour,
             "statsExcludedGame": currentGame.statsExcludedGame,
-            "myStatsExcludeConsent": int(currentGame.statsExcludeConsent[pov : pov + 1]),
+            "myStatsExcludeConsent": int(
+                currentGame.statsExcludeConsent[pov : pov + 1]
+            ),
         }
     )
 
@@ -298,17 +325,12 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
                 "allPlayerListBySeat": allPlayerListBySeat,
             }
         )
-        
+
     return render(request, "CNS/showCNSgame.html", returnData)
 
 
 @contextmanager
 def db_mutex(name, timeout=10):
-    # if settings.DEBUG:
-    # if 1==2:
-    #    print('Not creating mutex ' + name)
-    #    yield
-    #    return
     mutex_name = "dbmutex_" + name
     cursor = connection.cursor()
     # timeout returns with error
@@ -334,7 +356,6 @@ def processCNSturn(request):
     with db_mutex("processTurn_" + str(gameID)):
         return _processCNSturn(request)
 
-    
 
 @login_required()
 def _processCNSturn(request):
@@ -353,7 +374,9 @@ def _processCNSturn(request):
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
+        if latest_update != "9999999999999" and latest_update != str(
+            currentGame.latestUpdate
+        ):
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -361,9 +384,21 @@ def _processCNSturn(request):
         currentGame.phase = jsonData["phase"]
 
         if "checkName" in jsonData:
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(currentGame.kickoutFlexiData, currentGame.latestUpdate, int(time.time()) * 1000, jsonData["checkName"], currentGame.kickoutDuration)
+            currentGame.kickoutFlexiData = SF_updateFlexiTime(
+                currentGame.kickoutFlexiData,
+                currentGame.latestUpdate,
+                int(time.time()) * 1000,
+                jsonData["checkName"],
+                currentGame.kickoutDuration,
+            )
         else:
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(currentGame.kickoutFlexiData, currentGame.latestUpdate, int(time.time()) * 1000, request.user.username, currentGame.kickoutDuration)
+            currentGame.kickoutFlexiData = SF_updateFlexiTime(
+                currentGame.kickoutFlexiData,
+                currentGame.latestUpdate,
+                int(time.time()) * 1000,
+                request.user.username,
+                currentGame.kickoutDuration,
+            )
 
         oldVer = currentGame.latestUpdate
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -375,19 +410,41 @@ def _processCNSturn(request):
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            currentGame.endGame(request, jsonData["winner"], jsonData["finalPositions"], jsonData["gameID"])
+            currentGame.endGame(
+                request,
+                jsonData["winner"],
+                jsonData["finalPositions"],
+                jsonData["gameID"],
+            )
 
         # Don't notify if auto-passing
         else:
             # Send Notifications
-            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-            if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "CnsBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
+            loadedStartingOptions = (
+                json.loads(currentGame.startingOptions)
+                if currentGame.startingOptions
+                else []
+            )
+            if (
+                jsonData["nextPlayer"] != ""
+                and jsonData["nextPlayer"] != "CnsBot"
+                and jsonData["status"] != "FINISHED"
+                and 102 not in loadedStartingOptions
+            ):
                 playerListToNotify = jsonData["nextPlayer"].split(",")
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
 
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(request, "CNS", playerListToNotify, currentGame.id, currentGame.getGameName(), currentGame, oldVer)
+                    SN_sendNextTurnNotification(
+                        request,
+                        "CNS",
+                        playerListToNotify,
+                        currentGame.id,
+                        currentGame.getGameName(),
+                        currentGame,
+                        oldVer,
+                    )
 
         ################ REWIND EVERY SAVE #######################
 
@@ -396,11 +453,13 @@ def _processCNSturn(request):
             # Need this as intially it is totally empty
             if currentGame.rewindData != "":
                 currentRewindData = json.loads(currentGame.rewindData)
-            # currentRewindDataArray = currentRewindData.split("'SPLIT'")
 
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
-                if len(currentRewindData) == 0 or (currentRewindData[-1] != currentGame.rewindTempData and jsonData["data"] != currentGame.rewindTempData):
+                if len(currentRewindData) == 0 or (
+                    currentRewindData[-1] != currentGame.rewindTempData
+                    and jsonData["data"] != currentGame.rewindTempData
+                ):
                     # add to RWdata and RWdata[]
                     currentRewindData.append(currentGame.rewindTempData)
                 currentGame.rewindTempData = ""
@@ -423,7 +482,10 @@ def _processCNSturn(request):
 
         currentGame.save()
 
-        response_data = {"latestUpdate": currentGame.latestUpdate, "secondsToNextKickout": currentGame.getSecondsToNextKickout()}
+        response_data = {
+            "latestUpdate": currentGame.latestUpdate,
+            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+        }
 
         return JsonResponse(response_data, safe=False)
 
@@ -440,22 +502,36 @@ def _processCNSturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                # "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                # "nextPlayer": currentGame.currentPlayers,
             },
             safe=False,
         )
 
     elif jsonData["action"] == "loadRewind":
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
+        if latest_update != "9999999999999" and latest_update != str(
+            currentGame.latestUpdate
+        ):
             return JsonResponse({"syncError": True}, safe=False)
 
         if len(currentGame.rewindData) == 0:
-            return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
+            return JsonResponse(
+                {
+                    "errorMessage": gettext(
+                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
+                    )
+                },
+                safe=False,
+            )
 
         currentRewindDataArray = json.loads(currentGame.rewindData)
         if len(currentRewindDataArray) == 0:
-            return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
+            return JsonResponse(
+                {
+                    "errorMessage": gettext(
+                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
+                    )
+                },
+                safe=False,
+            )
 
         loadData = ""
         if len(currentRewindDataArray) > 0:
@@ -468,18 +544,14 @@ def _processCNSturn(request):
         currentGame.rewindTempData = loadData
         currentGame.rewindData = json.dumps(currentRewindDataArray)
 
-        # currentGame.actionRewindAlterConsent()
-
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        # rewindHostPossible = currentGame.getRewindHostPossible()
         currentGame.save()
 
         return JsonResponse(
             {
                 "gameData": loadData,
-                # "rewindHostPossible": rewindHostPossible,
                 "latestUpdate": currentGame.latestUpdate,
                 "missingPlayers": currentGame.getMissingPlayersNamesArray(),
             },
@@ -499,13 +571,29 @@ def _processCNSturn(request):
         currentGame.save()
 
         # Send Notifications
-        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "CnsBot" and 102 not in loadedStartingOptions:
+        loadedStartingOptions = (
+            json.loads(currentGame.startingOptions)
+            if currentGame.startingOptions
+            else []
+        )
+        if (
+            jsonData["nextPlayer"] != ""
+            and jsonData["nextPlayer"] != "CnsBot"
+            and 102 not in loadedStartingOptions
+        ):
             playerListToNotify = jsonData["nextPlayer"].split(",")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(request, "CNS", playerListToNotify, currentGame.id, currentGame.getGameName(), currentGame, currentGame.latestUpdate)
+                SN_sendNextTurnNotification(
+                    request,
+                    "CNS",
+                    playerListToNotify,
+                    currentGame.id,
+                    currentGame.getGameName(),
+                    currentGame,
+                    currentGame.latestUpdate,
+                )
 
         return JsonResponse(
             {
@@ -516,8 +604,9 @@ def _processCNSturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
-            # print("Sync Error Kickout Save " + str(jsonData["gameID"]))
+        if latest_update != "9999999999999" and latest_update != str(
+            currentGame.latestUpdate
+        ):  # and not jsonData["ignoreSync"]:
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
@@ -525,9 +614,6 @@ def _processCNSturn(request):
         currentGame.kickedPlayers.add(_missingPlayer)
         currentGame.checkForHostChange(_missingPlayer)
         currentGame.enableStatsExclude(_missingPlayer.username)
-
-        # Clears data and saves record - DONT DELETE FAC MOVES
-        # currentGame.clearAllMoveData()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -538,11 +624,10 @@ def _processCNSturn(request):
             {
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                # "nextPlayer": jsonData["nextPlayer"],
             },
             safe=False,
         )
-        
+
     return HttpResponse(status=204)  # No Content
 
 
@@ -563,7 +648,9 @@ def bugEntry(request):
     bugDescription = jsonData["description"]
 
     # email data to myself
-    SN_sendBugReportEmail(request, "CNS", gameID, gameData, bugDescription, currentGame.rewindData, "")
+    SN_sendBugReportEmail(
+        request, "CNS", gameID, gameData, bugDescription, currentGame.rewindData, ""
+    )
 
     return JsonResponse({"bugEntrySuccess": True})
 
@@ -613,7 +700,6 @@ def _sendChatMessage(request):
     if jsonData["action"] == "sendChatMessage":
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
-        # LZS = lzstring.LZString()
 
         currentGame = CNS_Game.objects.get(id=game_id)
 
@@ -629,23 +715,18 @@ def _sendChatMessage(request):
         compressed_data = gzip.compress(json_string.encode("utf-8"))
         compressedChatData = base64.b64encode(compressed_data).decode("utf-8")
 
-        # currentChatData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.chatData)) if currentGame.chatData else []
-        # currentChatData.insert(0, new_entry)
-
-        # save chat data.
-        # compressedChatData2 = LZS.compressToEncodedURIComponent(
-        #        json.dumps(currentChatData))
-        #
-
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.playersWithChatNotification.set(currentGame.allPlayers.exclude(username=request.user.username))
+        currentGame.playersWithChatNotification.set(
+            currentGame.allPlayers.exclude(username=request.user.username)
+        )
         currentGame.save()
 
         return JsonResponse({"chatData": compressedChatData})
 
     return HttpResponse(status=204)  # No Content
+
 
 @login_required
 def CNSdata(request, dataType):
@@ -661,19 +742,19 @@ def CNSdata(request, dataType):
 
     if dataType == 1:
         # Send game data
-        return JsonResponse({"gameData": currentGame.gameData, 
-                             "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                             "latestUpdate": currentGame.latestUpdate
-                             })
+        return JsonResponse(
+            {
+                "gameData": currentGame.gameData,
+                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "latestUpdate": currentGame.latestUpdate,
+            }
+        )
     elif dataType == 2:
         # Remove user from notifications
         currentGame.playersWithChatNotification.remove(request.user)
         currentGame.save()
         return JsonResponse(
-            {
-                "chatData": currentGame.chatData
-                # }, safe=False)
-            },
+            {"chatData": currentGame.chatData},
             safe=True,
         )
     # Check for update comparison, and update or do nothing
@@ -683,14 +764,17 @@ def CNSdata(request, dataType):
         if gameUpdate == latestUpdate:
             return JsonResponse({"latest": True}, safe=False)
         # Else Send game data
-        return JsonResponse({
-            "latest": False, 
-            "gameData": currentGame.gameData, 
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-            "latestUpdate": currentGame.latestUpdate
-            })
+        return JsonResponse(
+            {
+                "latest": False,
+                "gameData": currentGame.gameData,
+                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "latestUpdate": currentGame.latestUpdate,
+            }
+        )
 
     return HttpResponse(status=204)  # No Content
+
 
 @login_required
 def changeCNSzoom(request):
@@ -721,6 +805,7 @@ def changeCNSzoom(request):
         )
 
     return HttpResponse(status=204)  # No Content
+
 
 @login_required
 def processStatsExcludeConsent(request):

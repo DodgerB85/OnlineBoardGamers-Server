@@ -6,8 +6,6 @@ import time
 import json
 import logging
 
-# from django.template.loader import render_to_string
-# from django.contrib.sites.shortcuts import get_current_site
 from unittest.mock import MagicMock
 from django.contrib.sites.models import Site
 
@@ -16,18 +14,12 @@ from django.db.models import Q
 from django.db import models
 from django.conf import settings
 
-# from django.db.models.signals import post_save
-# from django.dispatch import receiver
-
 from django.utils.translation import gettext, gettext_lazy
 
 # from django.utils import translation
 import random
 
-# from django.contrib.auth import get_user_model
 # User = get_user_model()
-
-# from .common import create_fcm_game
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -61,26 +53,12 @@ from Lobby.models import User, Mini_Tournaments  # , Profile
 
 logger = logging.getLogger(__name__)
 
-# from Lobby import createTournamentGame
-# import Lobby
-
-# from datetime import datetime
-# import tzlocal
-# from Lobby.models import User
-
-# ANY CHANGES YOU HAVE TO RUN DOUBLE MIGRATIONS
-# python manage.py makemigrations
-# python manage.py migrate
-# Any NEW models, consider adding to admin.py - need to IMPORT and REGISTER
-
 USE_NEW_CODE = False
 
 
 class FCM_Tournament(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    # custom_primary_key = models.CharField(max_length=6, editable=False, unique=True)
     tournamentName = models.CharField(max_length=120)
-    # tournamentStatus = models.CharField(max_length=30)
     tournamentStatus = models.CharField(
         max_length=2,
         choices=SR_TOURNAMENT_STATUS_CHOICES,
@@ -121,60 +99,6 @@ class FCM_Tournament(models.Model):
         if loggedInUser in self.startingPlayers.all():
             return True
         return False
-
-    #    def createTournamentGame(self, request, _roundNumberString, _currentPlayersUsernames):
-    #        return
-    #        new_game = create_fcm_game(request, True, self, _roundNumberString, _currentPlayersUsernames)
-    #        return new_game
-    #
-    #        gameName = "[" + self.tournamentName + "]" + " " + _roundNumberString
-    #
-    #        playerSeatOffset = random.randint(1000, 32767)
-    #
-    #        # _startingOptions = request.POST["startingOptions"]
-    #        created = SR_getTimeNow()
-    #        pace = 30
-    #        creator = User.objects.get(username="admin")
-    #
-    #        newGame = FCM_Game(
-    #            gameName=gameName,
-    #            creator=creator,
-    #            gamePace=pace,
-    #            turn=0,
-    #            phase=0,
-    #            created=created,
-    #            latestUpdate=created,
-    #            seatOffset=playerSeatOffset,
-    #            startingOptions=self.startingOptions,
-    #            maxPlayers=self.maxGamePlayers,
-    #            gameStatus="ACTIVE",
-    #        )
-    #        newGame.save()
-    #
-    #        for i in range(self.maxGamePlayers):
-    #            if i < len(_currentPlayersUsernames) and _currentPlayersUsernames[i] != "":
-    #                newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[i]))
-    #                SN_M_T_sendTournamentGameStartNotification(
-    #                    request,
-    #                    "FCM",
-    #                    _currentPlayersUsernames[i],
-    #                    self.maxGamePlayers,
-    #                    newGame.gameName,
-    #                    newGame.currentTurnString(),
-    #                    getattr(newGame, "id"),
-    #                    False,
-    #                )
-    #
-    #        newGame.kickoutDuration = 100
-    #        newGame.zoomLevels = "200" * self.maxGamePlayers
-    #        newGame.notificationSuppression = "0" * self.maxGamePlayers
-    #        newGame.relatedTournament = self
-    #        newGame.host = newGame.allPlayers.all().order_by("?").first()
-    #        newGame.setupRewindConsent()
-    #
-    #        newGame.save()
-    #        newGame.startGame(request)
-    #        return getattr(newGame, "id")
 
     def getByedPlayersList(self):
         byedPlayerList = []
@@ -223,7 +147,6 @@ class FCM_Tournament(models.Model):
 
 class FCM_Game(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    # custom_primary_key = models.CharField(max_length=6, editable=False, unique=True)
     gameName = models.CharField(
         max_length=120, blank=True, db_collation="utf8mb4_general_ci"
     )
@@ -237,7 +160,9 @@ class FCM_Game(models.Model):
         default="AVAILABLE",
         db_index=True,
     )
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
+    latestUpdate = models.CharField(
+        max_length=15, blank=False, default=SR_getTimeNow, db_index=True
+    )
     startingOptions = models.CharField(max_length=80, blank=True)
     startingMap = models.CharField(max_length=190, blank=True)
     allPlayers = models.ManyToManyField(
@@ -315,7 +240,6 @@ class FCM_Game(models.Model):
     gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
-    # preMoveData = models.TextField(blank=True)
 
     relatedTournament = models.ForeignKey(
         FCM_Tournament,
@@ -339,10 +263,6 @@ class FCM_Game(models.Model):
 
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
-    #    def __str__(self):
-    #        allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
-    #        return f"{getattr(self, 'id')}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"
-
     def __str__(self):
         # Use currentPlayers if available, otherwise fall back to gameName and status
         players = (
@@ -354,7 +274,7 @@ class FCM_Game(models.Model):
 
     def currentTurnString(self):
         return SR_currentTurnString("FCM", self.turn, self.phase)
-   
+
     def getGameName(self):
         # Use fields already on the model. DO NOT call .all() or .count() here.
         name = self.gameName or f"{getattr(self.creator, 'username', 'Unknown')}'s Game"
@@ -624,28 +544,18 @@ class FCM_Game(models.Model):
     def getAllPlayersOrderedySeat(self, withoutBots=False, useNewCode=True):
         if useNewCode:
             all_players_list = list(self.allPlayers.all())
-            # playerList = [
-            #    username
-            #    for username in self.allPlayers.all().values_list("username", flat=True)
-            #    if username != "FCMtourneyAdmin"
-            # ]
             playerList = [
-                p.username
-                for p in all_players_list
-                if p.username != "FCMtourneyAdmin"
+                p.username for p in all_players_list if p.username != "FCMtourneyAdmin"
             ]
             random.Random(self.seatOffset).shuffle(playerList)
             if withoutBots:
                 return playerList
 
-            #missingPlayerList = list(
-            #    self.missingPlayers.all().values_list("username", flat=True)
-            #)
             missing_players_usernames = [p.username for p in self.missingPlayers.all()]
             # REPLACE WITH KICKOUTS
             for count, player in enumerate(playerList):
                 if player in missing_players_usernames:
-                    playerList[count] = "FcmBot"  # + str(count)
+                    playerList[count] = "FcmBot"
             return playerList
 
         ############ OLD CODE -- NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
@@ -702,7 +612,6 @@ class FCM_Game(models.Model):
             data = json.loads(self.playersMoveData)
             if len(data) != self.maxPlayers:
                 raise ValueError("Invalid number of players")
-            # Validate structure further if needed
             return data
         except (json.JSONDecodeError, ValueError):
             # Scaffold default structure
@@ -877,28 +786,6 @@ class FCM_Game(models.Model):
                 SN_sendAdminErrorMessage("", message)
                 return False
 
-                # Send a message out
-                request = MagicMock()
-                # Mock the user
-                user = MagicMock(spec=User)
-                user.username = name  # Set the desired username
-                request.user = user
-                # Mock the site
-                site = (
-                    Site.objects.get_current()
-                )  # Or create a mock Site object if needed
-                request.site = site  # Attach the site to the request
-                SN_sendNextTurnNotification(
-                    request,
-                    "FCM",
-                    [name],
-                    getattr(self, "id"),
-                    self.getGameName(),
-                    self,
-                    "0",
-                )
-                return False
-
             return True
 
         if phase == 4:
@@ -955,16 +842,6 @@ class FCM_Game(models.Model):
             if phase == 9 and moveData[1][0] == -9:
                 return False
 
-            # if len(moveData[0][0]) == 0:#phase == 7 and
-            #    return False
-            # if phase == 7 and len(moveData[0][0]) > 0 and moveData[0][0][0] == -9:
-            #    return False
-            # if phase == 9 and len(moveData) < 2:
-            #    return False
-            # if phase == 9 and len(moveData[1]) == 0:
-            #    return False
-            # if phase == 9 and len(moveData[1]) > 0 and moveData[1][0] == -9:
-            #    return False
             return True
 
     def insertPlayerMoveData(self, name, phasesArr, moveArr):
@@ -1086,250 +963,6 @@ class FCM_Game(models.Model):
         self.currentPlayers = ",".join(playerList)
         self.save()
 
-    #    def updateWholeMoveData(self, name, dataString):
-    #        seat = self.seatPosition(name, True)
-    #        player_moves = {
-    #            0: [self.player0currentMoveTime, self.player0currentMoveData],
-    #            1: [self.player1currentMoveTime, self.player1currentMoveData],
-    #            2: [self.player2currentMoveTime, self.player2currentMoveData],
-    #            3: [self.player3currentMoveTime, self.player3currentMoveData],
-    #            4: [self.player4currentMoveTime, self.player4currentMoveData],
-    #            5: [self.player5currentMoveTime, self.player5currentMoveData],
-    #        }
-    #
-    #        player_moves[seat][0] = str(int(time.time()) * 1000)
-    #        player_moves[seat][1] = dataString
-    #
-    #        # Update the individual player move data
-    #        for seat, (move_time, move_data) in player_moves.items():
-    #            setattr(self, f"player{seat}currentMoveTime", move_time)
-    #            setattr(self, f"player{seat}currentMoveData", move_data)
-    #
-    #        self.save()
-
-    # Phase <=3 diverts to updatWholeMoveData
-    # Otherwise, a valid single premove for phase 7/9 the is compressed should be used
-    #    def updateSingleMove(self, name, data, deleteMove=False):
-    #        if self.phase <= 3:
-    #            self.updateWholeMoveData(name, data)
-    #            return
-    #        currentTime = str(int(time.time()) * 1000)
-    #        seat = self.seatPosition(name, True)
-    #
-    #        if deleteMove:
-    #            currentTime = ""
-    #            data = ""
-    #
-    #        player_moves = {
-    #            0: (self.player0currentMoveTime, self.player0currentMoveData),
-    #            1: (self.player1currentMoveTime, self.player1currentMoveData),
-    #            2: (self.player2currentMoveTime, self.player2currentMoveData),
-    #            3: (self.player3currentMoveTime, self.player3currentMoveData),
-    #            4: (self.player4currentMoveTime, self.player4currentMoveData),
-    #            5: (self.player5currentMoveTime, self.player5currentMoveData),
-    #        }
-    #
-    #        # if payday or cleanup, set the correct entry in the array
-    #        # Payday
-    #        if self.phase == 7:  # Payday is [firedEmployees], [resources Used]
-    #            preMoveData = json.loads(player_moves[seat][1]) if player_moves[seat][1] != "" else [[[-9], []], [-9]]
-    #            preMoveData[0] = json.loads(gzip.decompress(bytearray(base64.b64decode(data))).decode("utf-8"))
-    #            data = json.dumps(preMoveData, separators=(',', ':'))
-    #            player_moves[seat] = (currentTime, data)
-    #        elif self.phase == 9:
-    #            preMoveData = json.loads(player_moves[seat][1]) if player_moves[seat][1] != "" else [[[-9], []], [-9]]
-    #            preMoveData[1] = json.loads(gzip.decompress(bytearray(base64.b64decode(data))).decode("utf-8"))
-    #            data = json.dumps(preMoveData, separators=(',', ':'))
-    #            player_moves[seat] = (currentTime, data)
-    #
-    #        # Update the individual player move data
-    #        for seat, (move_time, move_data) in player_moves.items():
-    #            setattr(self, f"player{seat}currentMoveTime", move_time)
-    #            setattr(self, f"player{seat}currentMoveData", move_data)
-    #
-    #        self.save()
-
-    #    def getMoveData(self, name):
-    #        seat = self.seatPosition(name)
-    #        if seat == 0:
-    #            return self.player0currentMoveData
-    #        if seat == 1:
-    #            return self.player1currentMoveData
-    #        if seat == 2:
-    #            return self.player2currentMoveData
-    #        if seat == 3:
-    #            return self.player3currentMoveData
-    #        if seat == 4:
-    #            return self.player4currentMoveData
-    #        if seat == 5:
-    #            return self.player5currentMoveData
-    #        return ""
-
-    #    def hasMoveData(self, name):
-    #        players_data = {0: self.player0currentMoveData, 1: self.player1currentMoveData, 2: self.player2currentMoveData, 3: self.player3currentMoveData, 4: self.player4currentMoveData, 5: self.player5currentMoveData}
-    #        seat = self.seatPosition(name)
-    #        if seat == -1:
-    #            return False
-    #
-    #        moveDataRaw = players_data.get(seat, "")
-    #        #print(f"hasMoveData  name: {name}, seat: {seat}, moveDataRaw: {moveDataRaw}")
-    #        # If move data ever empty, then you dont have a move
-    #        if moveDataRaw == "":
-    #            return False
-    #        # If move data is not empty, then you have a res card if phase <=2 or structure if <= 3
-    #        if self.phase <= 3:
-    #            print(f"The current phase is: {self.phase}, and the move data is: {moveDataRaw}")
-    #            ###########################################
-    #            #   VERIFY RESTRUC / RESVER MOVE DATA
-    #            #
-    #            ###########################################
-    #            validData = True
-    #            if self.phase == 2:
-    #                decompressedMoveData = []
-    #                try:
-    #                    decompressedMoveData = json.loads(gzip.decompress(bytearray(base64.b64decode(moveDataRaw))).decode("utf-8"))
-    #                except:
-    #                    validData = False
-    #                # Make sure it's an array, Make sure it has a length of 1, Make sure the first element is a single int of 1,2,or 3
-    #                if validData:
-    #                    if not isinstance(decompressedMoveData, list) or len(decompressedMoveData) != 1 or decompressedMoveData[0] not in [1, 2, 3]:
-    #                        validData = False
-    #            if self.phase == 3:
-    #                decompressedMoveData = []
-    #                try:
-    #                    decompressedMoveData = json.loads(gzip.decompress(bytearray(base64.b64decode(moveDataRaw))).decode("utf-8"))
-    #                except:
-    #                    validData = False
-    #                # Make sure it's an array, Make sure it has a length of 3, Make sure the first element is an array, second element is an array, and third element is a single int of 0,1,2
-    #                if validData:
-    #                    if not isinstance(decompressedMoveData, list) or len(decompressedMoveData) != 3:
-    #                        validData = False
-    #                    if not isinstance(decompressedMoveData[0], list) or not isinstance(decompressedMoveData[1], list):
-    #                        validData = False
-    #                    if not isinstance(decompressedMoveData[2], int) or decompressedMoveData[2] not in [0, 1, 2]:
-    #                        validData = False
-    #            print(f"name: {name}, seat: {seat}, moveDataRaw: {moveDataRaw}, validData: {validData}")
-    #            # If the daya is not valid, delete it and return false
-    #            if not validData:
-    #                message = (
-    #                    f"BAD DATA FOUND IN FCM PHASE 2 OR 3 - GameID: {getattr(self, 'id')} - Name: {name} - Phase: {self.phase}  "
-    #                    f"- Turn: {self.turn} -- MoveTime: {getattr(self, f'player{seat}currentMoveTime')} -- MoveData: {moveDataRaw} "
-    #                )
-    #                SN_sendAdminErrorMessage("", message)
-    #                setattr(self, f"player{seat}currentMoveData", "")
-    #                setattr(self, f"player{seat}currentMoveTime", "")
-    #                # Readd to currentPlayers
-    #                if self.currentPlayers == "":
-    #                    self.currentPlayers = name
-    #                else:
-    #                    self.currentPlayers = self.currentPlayers + "," + name
-    #                self.save()
-    #                # Send a message out
-    #                request = MagicMock()
-    #                # Mock the user
-    #                user = MagicMock(spec=User)
-    #                user.username = name  # Set the desired username
-    #                request.user = user
-    #                # Mock the site
-    #                site = Site.objects.get_current()  # Or create a mock Site object if needed
-    #                request.site = site  # Attach the site to the request
-    #                SN_sendNextTurnNotification(request, "FCM", [name], getattr(self, 'id'), self.getGameName(), self, "0")
-    #                return False
-    #
-    #            return True
-    #        # Now phase is 7 or 9, AND there is move data
-    #        moveData = [[[-9],[]],[-9]]
-    #        try:
-    #            moveData = json.loads(moveDataRaw)
-    #        except Exception as e:
-    #            logger.warning(f"ERROR LOADING FCM MOVE DATA: id: {getattr(self, 'id')}, moveData: {moveDataRaw}, phase: {self.phase}, Reason: {e}")
-    #            ### TODO discord failed to load
-    #        if self.phase == 7 and len(moveData[0][0]) == 0:
-    #            return False
-    #        if self.phase == 7 and len(moveData[0][0]) > 0 and moveData[0][0][0] == -9:
-    #            return False
-    #        if self.phase == 9 and len(moveData) < 2:
-    #            return False
-    #        if self.phase == 9 and len(moveData[1]) == 0:
-    #            return False
-    #        if self.phase == 9 and len(moveData[1]) > 0 and moveData[1][0] == -9:
-    #            return False
-    #        return True
-
-    #    def getPaydayPreturns(self):
-    #        preTurnArray = []
-    #        player_moves = {
-    #            0: (self.player0currentMoveTime, self.player0currentMoveData),
-    #            1: (self.player1currentMoveTime, self.player1currentMoveData),
-    #            2: (self.player2currentMoveTime, self.player2currentMoveData),
-    #            3: (self.player3currentMoveTime, self.player3currentMoveData),
-    #            4: (self.player4currentMoveTime, self.player4currentMoveData),
-    #            5: (self.player5currentMoveTime, self.player5currentMoveData),
-    #        }
-    #        for playerIndex in range(self.maxPlayers):
-    #            content = player_moves[playerIndex][1]
-    #            if len(content) == 0 or content == "" or content == "[]":
-    #                    content = "[[[-9], []], [-9]]"
-    #            preTurnArray.append(json.loads(content))
-    #
-    #        return base64.b64encode(gzip.compress(json.dumps(preTurnArray, separators=(',', ':')).encode("utf-8"))).decode("utf-8")
-    #
-    #    def getFridgePreturns(self):
-    #        preTurnArray = []
-    #        player_moves = {
-    #            0: (self.player0currentMoveTime, self.player0currentMoveData),
-    #            1: (self.player1currentMoveTime, self.player1currentMoveData),
-    #            2: (self.player2currentMoveTime, self.player2currentMoveData),
-    #            3: (self.player3currentMoveTime, self.player3currentMoveData),
-    #            4: (self.player4currentMoveTime, self.player4currentMoveData),
-    #            5: (self.player5currentMoveTime, self.player5currentMoveData),
-    #        }
-    #        for playerIndex in range(self.maxPlayers):
-    #            content = player_moves[playerIndex][1]
-    #            if len(content) == 0 or content == "" or content == "[]":
-    #                    content = "[[[-9], []], [-9]]"
-    #            preTurnArray.append(json.loads(content))
-    #
-    #        return base64.b64encode(gzip.compress(json.dumps(preTurnArray, separators=(',', ':')).encode("utf-8"))).decode("utf-8")
-    #
-    # This is just checked to see if rewind should clear data, or rewind
-    #    def anyMoveData(self):
-    #        if self.phase not in [7, 9]:
-    #            # If not phase 7 or 9, any non-empty move data indicates a move.
-    #            if (self.player0currentMoveData != "" or
-    #                self.player1currentMoveData != "" or
-    #                self.player2currentMoveData != "" or
-    #                self.player3currentMoveData != "" or
-    #                self.player4currentMoveData != "" or
-    #                self.player5currentMoveData != ""):
-    #                return True
-    #            else:
-    #                return False # No move data in non-7/9 phase
-    #
-    #        # So now it must ba phase 7 or 9
-    #        for i in range(6):  # Iterate through players 0 to 5
-    #            move_data_attr = f"player{i}currentMoveData"
-    #            move_data = getattr(self, move_data_attr, "")  # Get attribute value safely
-    #
-    #            if move_data != "":
-    #                try:
-    #                    move_data_json = json.loads(move_data)
-    #                    if self.phase == 7:
-    #                        if isinstance(move_data_json, list) and len(move_data_json) > 0 and move_data_json[0][0][0] != -9 and move_data_json[0][0][0] != -8:
-    #                            return True  # Valid move data found
-    #                    if self.phase == 9:
-    #                        if isinstance(move_data_json, list) and len(move_data_json) > 0 and move_data_json[1][0] != -9 and move_data_json[1][0] != -8:
-    #                            return True  # Valid move data found
-    #                except (json.JSONDecodeError, TypeError, IndexError):
-    #                    # Handle cases where the data is not valid JSON or doesn't have the expected structure
-    #                    # Decide how to handle invalid data:
-    #                    # - Option 1: Treat as no move (return False later)
-    #                    # - Option 2: Treat as a move (return True immediately)
-    #                    # For now, I'm treating it as no move, but you might want to change this.
-    #                    pass # Treat as no move for now
-    #
-    #        return False  # No valid move data found in phase 7 or 9
-
     def getCurrentSimulPlayers(self):
         # ASSUME THAT self.currentPlayers IS THE LATEST JSON INCOMING
         # ASSUME THAT phase is the start of simul phase
@@ -1345,7 +978,6 @@ class FCM_Game(models.Model):
             return _currentPlayers
 
         # Get an array of possible player to move
-        # _currentPlayers = self.currentPlayers.split(",")
         _currentPlayers = [player.strip() for player in self.currentPlayers.split(",")]
         # Remove missing players
         missing_players = set(self.missingPlayers.values_list("username", flat=True))
@@ -1363,21 +995,6 @@ class FCM_Game(models.Model):
 
         for username in playersToRemove:
             _currentPlayers.remove(username)
-
-        # If it's reserve phase, remove anyone with move
-
-        ## Build the list of usernames efficiently
-        # for user in self.allPlayers.exclude(username="FCMtourneyAdmin"):
-        #    # Has move data correctly checks for flags for phases 7/9
-        #    if not self.hasMoveData(user.username):
-        #        if user.username not in missing_players:
-        #            _currentPlayers.append(user.username)
-        #
-        ## Check if FCMtourneyAdmin needs to be added
-        # if "FCMtourneyAdmin" in [player.username for player in self.allPlayers.all()]:
-        #    needs_to_move = any(getattr(self, f"player{seat_pos}currentMoveData", "") == "" for seat_pos, player in enumerate(self.getAllPlayersOrderedySeat(True, True)))
-        #    if needs_to_move:
-        #        _currentPlayers.append("FCMtourneyAdmin")
 
         # Join the list elements with ','
         _currentPlayers = ",".join(_currentPlayers)
@@ -1558,7 +1175,7 @@ class FCM_Game(models.Model):
             deleteGameVotes.update({username: False for username in player_usernames})
             return deleteGameVotes
         if self.deleteGameVotes is None:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
+            self.deleteGameVotes = {}
             player_usernames = [p.username for p in self.allPlayers.all()]
             self.deleteGameVotes.update(
                 {username: False for username in player_usernames}

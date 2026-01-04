@@ -477,7 +477,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
             )
 
             requests.post(
-                "https://discordapp.com/api/webhooks/1050061190140792893/8yVQEX_JRS4DqU6qeBe2zC29XNw2fPYUkrzjep4KIEahpkMaivAkLEQxi788K6e_oH0w",
+                f"https://discordapp.com/api/webhooks/{config.WEBHOOK_ADMIN_ERROR_MSG}",
                 data={"content": message},
             )
         elif username != request.user.username:  # and username not in USERNAMES_NOT_TO_NOTIFY

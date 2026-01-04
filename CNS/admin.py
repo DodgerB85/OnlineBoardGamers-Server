@@ -7,13 +7,12 @@ from django.utils.html import format_html
 from .models import CNS_Game
 
 
-
 @admin.register(CNS_Game)
 class CNS_GameAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
     list_per_page = 100
-    
+
     # 1. Performance: Use native autocomplete for all User relations
     autocomplete_fields = [
         "creator",
@@ -24,28 +23,32 @@ class CNS_GameAdmin(admin.ModelAdmin):
         "kickedPlayers",
         "invitedPlayers",
         "playersWithChatNotification",
-        #"relatedTournament",
-        #"relatedMiniTournament",
+        # "relatedTournament",
+        # "relatedMiniTournament",
     ]
 
     # Map your Textareas here without needing a separate Form class
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        
+
         # Check if formfield is not None and if it's one of your target fields
         if formfield and db_field.name in [
-            'chatData',  'gameData', 'rewindData', 
-            'rewindTempData', 'kickoutFlexiData', 'player0notes', 
-            'player1notes', 'player2notes', 'player3notes', 
+            "chatData",
+            "gameData",
+            "rewindData",
+            "rewindTempData",
+            "kickoutFlexiData",
+            "player0notes",
+            "player1notes",
+            "player2notes",
+            "player3notes",
         ]:
-            formfield.widget = forms.Textarea(attrs={'rows': 4, 'cols': 50})
-            
+            formfield.widget = forms.Textarea(attrs={"rows": 4, "cols": 50})
+
         return formfield
 
-
-    
     # FIX 2: Speed up pagination by disabling the "total count" if the table is huge
-    show_full_result_count = False 
+    show_full_result_count = False
 
     def get_queryset(self, request):
         # 1. Essential joins for EVERY view
@@ -56,8 +59,8 @@ class CNS_GameAdmin(admin.ModelAdmin):
                 "creator",
                 "host",
                 "winner",
-                #"relatedTournament",
-                #"relatedMiniTournament",
+                # "relatedTournament",
+                # "relatedMiniTournament",
             )
         )
 
@@ -130,12 +133,12 @@ class CNS_GameAdmin(admin.ModelAdmin):
 
     @admin.display(description="Tournament")
     def tournament_display(self, obj):
-        #if obj.relatedTournament:
+        # if obj.relatedTournament:
         #    # return obj.relatedTournament.tournamentName
         #    return getattr(
         #        obj.relatedTournament, "tournamentName", str(obj.relatedTournament)
         #    )
-        #if obj.relatedMiniTournament:
+        # if obj.relatedMiniTournament:
         #    return f"Mini: {getattr(obj.relatedMiniTournament, 'tournamentName', 'Unknown')}"
         return "-"
 
@@ -150,8 +153,8 @@ class CNS_GameAdmin(admin.ModelAdmin):
     list_filter = (
         "gameStatus",
         "maxPlayers",
-        #"relatedTournament",
-        #"relatedMiniTournament",
+        # "relatedTournament",
+        # "relatedMiniTournament",
     )
     search_fields = ("gameName", "creator__username")
 
@@ -192,7 +195,7 @@ class CNS_GameAdmin(admin.ModelAdmin):
                     "zoomLevels",
                     "statsExcludeConsent",
                     "statsExcludedGame",
-                )
+                ),
             },
         ),
         (
@@ -208,7 +211,7 @@ class CNS_GameAdmin(admin.ModelAdmin):
                     "kickedPlayers",
                     "invitedPlayers",
                     "playersWithChatNotification",
-                    #"deleteGameVotes",
+                    # "deleteGameVotes",
                 ),
             },
         ),
@@ -237,14 +240,14 @@ class CNS_GameAdmin(admin.ModelAdmin):
                 ),
             },
         ),
-        #(
+        # (
         #    "Linked Tournament",
         #    {
         #        "classes": ("collapse",),
         #        "fields": ("relatedTournament", ), #"relatedMiniTournament"),
         #    },
-        #),
+        # ),
     )
 
-#admin.site.register(HC_Tournament, FCM_TournamentAdmin)
 
+# admin.site.register(HC_Tournament, FCM_TournamentAdmin)
