@@ -217,7 +217,7 @@ function finishPirate() {
 
 function getHexOptionFill(idx) {
   if (rf.DEBUG_USERS.includes(personal.name)) return `url(#newHexPattern${idx})`
-  if (store.topMenuViews.showReplay && store.history[store.history.length-1][0] === rf.HIST_GAME_END) return `url(#newHexPattern${idx})`
+  if (store.topMenuViews.showReplay && store.history[store.history.length - 1][0] === rf.HIST_GAME_END) return `url(#newHexPattern${idx})`
   if (personal.canPlay()) return `url(#newHexPattern${idx})`
   return 'white'
 }
@@ -244,25 +244,15 @@ function clickedCigar() {
     <!-- Box Office-->
     <div id="boxOfficeDiv">
       <img id="boxOfficeImg" :src="view.getImage('boxOffice')" />
-      <img
-        v-for="(price, idx) in store.moviePrices"
-        :key="idx"
-        class="moviePriceImg"
-        :src="view.getImage('res' + String(idx + 7))"
-        :style="{
+      <img v-for="(price, idx) in store.moviePrices" :key="idx" class="moviePriceImg"
+        :src="view.getImage('res' + String(idx + 7))" :style="{
           left: getMoviePriceLeft(price, idx) + 'px',
           top: getMoviePriceTop(price, idx) + 'px'
-        }"
-      />
+        }" />
     </div>
     <div id="hexPiles">
       <div id="drawPile" class="pile">
-        <svg
-          @click="clickedDrawPile"
-          class="hexagonPile"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 100 100"
-        >
+        <svg @click="clickedDrawPile" class="hexagonPile" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
           <polygon points="50,5 95,25 95,75 50,95 5,75 5,25" fill="none" stroke="black" />
           <text x="50" y="65" text-anchor="middle">{{ store.hexDrawPile.length }}</text>
         </svg>
@@ -282,68 +272,40 @@ function clickedCigar() {
     <!-- 3 Available Hexes to Place -->
     <div id="hexOptionDiv">
       <transition name="fadeOut">
-        <div
-          class="errorPopup"
-          v-if="showErrorPopup"
-          :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }"
-        >
+        <div class="errorPopup" v-if="showErrorPopup"
+          :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
           Max Price 15
         </div>
       </transition>
 
       <div v-for="(hexRef, idx) in store.ongoingVars.drawnHexes" :key="idx" class="newSingleHexDiv">
-        <svg
-          class="newSingleHexagon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="-515 -515 1015 1015"
-        >
+        <svg class="newSingleHexagon" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
           <!-- Get patterns for all the hex images -->
           <defs>
-            <pattern
-              :id="'newHexPattern' + idx"
-              height="100%"
-              width="100%"
-              patternContentUnits="objectBoundingBox"
-            >
-              <image
-                height="1"
-                width="1"
-                preserveAspectRatio="none"
-                :xlink:href="view.getImage('hex' + hexRef)"
-              />
+            <pattern :id="'newHexPattern' + idx" height="100%" width="100%" patternContentUnits="objectBoundingBox">
+              <image height="1" width="1" preserveAspectRatio="none" :xlink:href="view.getImage('hex' + hexRef)" />
             </pattern>
           </defs>
 
-          <polygon
-            @click="clickedNewHexOption(hexRef)"
-            points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
-            :fill="getHexOptionFill(idx)"
-            :transform="`rotate(${getNewHexRotation(hexRef) * 60} 0 0)`"
-            stroke="black"
+          <polygon @click="clickedNewHexOption(hexRef)" points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+            :fill="getHexOptionFill(idx)" :transform="`rotate(${getNewHexRotation(hexRef) * 60} 0 0)`" stroke="black"
             :class="{
               lightGreen: store.context.hexRefBeingAdded === hexRef,
               selectableHex: isHexSelectable()
-            }"
-          />
+            }" />
         </svg>
 
-        <div
-          class="newHexRotateDiv leftRotatePos"
-          v-if="
-            rf.HEX_PARTY_ROTATABLE.includes(hexRef) && store.context.hexRefBeingAdded === hexRef
-          "
-        >
+        <div class="newHexRotateDiv leftRotatePos" v-if="
+          rf.HEX_PARTY_ROTATABLE.includes(hexRef) && store.context.hexRefBeingAdded === hexRef
+        ">
           <img @click="rotateNewHexTile(-1)" :src="view.getImage('rot_anticlockwise')" />
         </div>
         <div v-if="canStoreHex(hexRef)" class="newHexStoreDiv">
           <button @click="locStoreHex()" class="actionsLineButton">Store Tile</button>
         </div>
-        <div
-          class="newHexRotateDiv rightRotatePos"
-          v-if="
-            rf.HEX_PARTY_ROTATABLE.includes(hexRef) && store.context.hexRefBeingAdded === hexRef
-          "
-        >
+        <div class="newHexRotateDiv rightRotatePos" v-if="
+          rf.HEX_PARTY_ROTATABLE.includes(hexRef) && store.context.hexRefBeingAdded === hexRef
+        ">
           <img @click="rotateNewHexTile(1)" :src="view.getImage('rot_clockwise')" />
         </div>
       </div>
@@ -351,13 +313,8 @@ function clickedCigar() {
       <!-- FILM CRITIC -->
       <div v-if="store.context.action === rf.ACT_FILM_CRITIC" id="filmCriticDiv">
         Select a film to increase in value<br />
-        <img
-          v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]"
-          :key="idx"
-          :src="view.getImage('res' + String(res))"
-          class="movieResImg"
-          @click="clickedFilmCriticMovieImg(res)"
-        />
+        <img v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]" :key="idx"
+          :src="view.getImage('res' + String(res))" class="movieResImg" @click="clickedFilmCriticMovieImg(res)" />
       </div>
 
       <!-- SELL TO CANNES -->
@@ -365,14 +322,9 @@ function clickedCigar() {
         <div id="cannesSellingDiv">
           Sell Films to Cannes<br />
 
-          <div
-            v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]"
-            :key="idx"
-            @click="clickedMoveImgToSell(res)"
-            onselectstart="return false;"
-            class="cannesMovieResDiv"
-            :class="{ selectableRes: store.context.availableResources[res] > 0 }"
-          >
+          <div v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]" :key="idx"
+            @click="clickedMoveImgToSell(res)" onselectstart="return false;" class="cannesMovieResDiv"
+            :class="{ selectableRes: store.context.availableResources[res] > 0 }">
             <img :src="view.getImage('res' + String(res))" />
             <div class="singleResNumDivCns">{{ store.context.availableResources[res] }}</div>
           </div>
@@ -383,10 +335,7 @@ function clickedCigar() {
         </div>
         <div id="cannesSummaryDiv">
           Selling Summary<br />
-          <div
-            v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]"
-            :key="idx"
-          >
+          <div v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]" :key="idx">
             <img :src="view.getImage('res' + String(res))" class="movieSellSummaryImg" />
             x {{ store.context.sellingSummary[idx] }} : Total €
             {{ store.context.sellingSummary[idx] * store.moviePrices[idx] }} M
@@ -408,48 +357,26 @@ function clickedCigar() {
       <!-- PIRATE SALES -->
       <div v-if="store.context.action === rf.ACT_PIRATE" id="filmCriticDiv">
         Select a pre-release to pirate<br />
-        <span v-if="afterPirateResult() === 0"
-          >You are in both parties. You can pirate as much as you like<br />
-          The pirate ship will switch between parties after each sale<br
-        /></span>
-        <span v-else-if="afterPirateResult() === 1"
-          >You are not in the other party. You can pirate one movie<br />
-          After you pirate a movie, the pirate ship will move to the other party<br
-        /></span>
-        <span v-else-if="afterPirateResult() === 10"
-          >You are in all parties. You can pirate as much as you like<br />
+        <span v-if="afterPirateResult() === 0">You are in both parties. You can pirate as much as you like<br />
+          The pirate ship will switch between parties after each sale<br /></span>
+        <span v-else-if="afterPirateResult() === 1">You are not in the other party. You can pirate one movie<br />
+          After you pirate a movie, the pirate ship will move to the other party<br /></span>
+        <span v-else-if="afterPirateResult() === 10">You are in all parties. You can pirate as much as you like<br />
           The next player in turn order will select the final destination for the pirates
-          <br
-        /></span>
-        <span v-else-if="afterPirateResult() === 11"
-          >You are not in all parties. You can pirate one movie<br />
+          <br /></span>
+        <span v-else-if="afterPirateResult() === 11">You are not in all parties. You can pirate one movie<br />
           The next player in turn order will select the new destination for the pirates
-          <br
-        /></span>
+          <br /></span>
 
-        <div
-          v-for="(res, idx) in [rf.RES_SCRIPT, rf.RES_ACTRESS, rf.RES_SFX]"
-          :key="idx"
-          @click="clickedPirateRes(res)"
-          onselectstart="return false;"
-          class="resImgDiv"
-          :class="{ selectableRes: store.context.availableResources[res] > 0 }"
-        >
+        <div v-for="(res, idx) in [rf.RES_SCRIPT, rf.RES_ACTRESS, rf.RES_SFX]" :key="idx" @click="clickedPirateRes(res)"
+          onselectstart="return false;" class="resImgDiv"
+          :class="{ selectableRes: store.context.availableResources[res] > 0 }">
           <img :src="view.getImage('res' + String(res))" />
           <div class="singleResNumDivPirate">{{ store.context.availableResources[res] }}</div>
         </div>
 
-        <!-- <img v-for="(res, idx) in [rf.RES_SCRIPT, rf.RES_ACTRESS, rf.RES_SFX]" :key="idx"
-          :src="view.getImage('res' + String(res))" class="resImg"
-          :class="{ 'selectableRes': store.context.availableResources[res] > 0 }" @click="clickedPirateRes(res)" />
-       -->
-
         <br /><button @click="cancelPirate" class="actionsLineButton lessMargins">Cancel</button>
-        <button
-          @click="finishPirate"
-          v-if="store.context.pirateActionsUsed > 0"
-          class="actionsLineButton lessMargins"
-        >
+        <button @click="finishPirate" v-if="store.context.pirateActionsUsed > 0" class="actionsLineButton lessMargins">
           Finish Pirating
         </button>
       </div>
@@ -509,10 +436,12 @@ function clickedCigar() {
   position: relative;
   display: inline-block;
 }
+
 .resImgDiv img {
   width: 100%;
   height: 100%;
 }
+
 .singleResNumDivPirate {
   position: absolute;
   font-size: 30px;
@@ -535,10 +464,12 @@ function clickedCigar() {
   opacity: 0.3;
   position: relative;
 }
+
 .cannesMovieResDiv img {
   width: 100%;
   height: 100%;
 }
+
 .singleResNumDivCns {
   position: absolute;
   font-size: 60px;
@@ -662,8 +593,8 @@ function clickedCigar() {
   width: 30px;
   border: 2px solid black;
   transition-property: top, left;
-	transition-duration: 700ms;
-	transition-timing-function: ease;
+  transition-duration: 700ms;
+  transition-timing-function: ease;
 }
 
 #hexPiles {
@@ -692,6 +623,7 @@ function clickedCigar() {
   height: fit-content;
   transform: translate(-0%, 50%);
 }
+
 #remainingCigarsImg {
   width: 115px;
   height: 25px;

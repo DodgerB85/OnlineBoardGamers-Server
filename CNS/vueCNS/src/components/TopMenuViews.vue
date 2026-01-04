@@ -1,12 +1,8 @@
 <script setup>
-//import * as replay from '../BusReplay'
-//import * as constants from '../constants'
 import * as IO from "../js/CNS_IO"
 import * as view from "../js/CNSview"
 import * as rf from "../js/CNSreference"
 import * as funcs from "../js/CNSfuncs"
-
-//import HistoryEntry from './HistoryEntry.vue'
 
 import { ref } from "vue"
 
@@ -177,13 +173,6 @@ function combineHexRefs(input) {
 	return res
 }
 
-/*function removeValue(arr, value) {
-  const index = arr.indexOf(value)
-  if (index !== -1) {
-    arr.splice(index, 1)
-  }
-}*/
-
 function getRewindPanelLeft() {
 	return document.getElementById("menuButtonRewindPos").getBoundingClientRect().left + document.getElementById("menuButtonRewindPos").getBoundingClientRect().width / 2 - 200
 }
@@ -260,15 +249,13 @@ function getRewindPanelLeft() {
 
 	<!-- REWIND PANEL -->
 	<transition name="fade">
-		<div
-			id="rewindPanel"
-			v-if="store.topMenuViews.showRewindPanel"
-			:style="{
-				left: getRewindPanelLeft() + 'px',
-			}">
+		<div id="rewindPanel" v-if="store.topMenuViews.showRewindPanel" :style="{
+			left: getRewindPanelLeft() + 'px',
+		}">
 			Any player can rewind the game at any time.
 			<br />
-			Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other players.
+			Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other
+			players.
 			<br />
 			This will permanently alter the game - it will be rewound to the start of the previous player's turn.
 
@@ -292,13 +279,16 @@ function getRewindPanelLeft() {
 			<div v-for="(hexRefArr, idx) in getPossibleDrawHexRefs()" :key="idx" class="singleHexDiv">
 				<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
 					<defs>
-						<pattern :id="'discardSeenHexPattern' + String(hexRefArr[0])" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-							<image height="1" width="1" preserveAspectRatio="none" :xlink:href="view.getImage('hex' + String(hexRefArr[0]))" />
+						<pattern :id="'discardSeenHexPattern' + String(hexRefArr[0])" height="100%" width="100%"
+							patternContentUnits="objectBoundingBox">
+							<image height="1" width="1" preserveAspectRatio="none"
+								:xlink:href="view.getImage('hex' + String(hexRefArr[0]))" />
 						</pattern>
 
 						<filter id="whiteOutlineEffect" color-interpolation-filters="sRGB">
 							<feMorphology in="SourceAlpha" result="MORPH" operator="dilate" radius="20" />
-							<feColorMatrix in="MORPH" result="WHITENED" type="matrix" values="-1 0 0 0 1, 0 -1 0 0 1, 0 0 -1 0 1, 0 0 0 1 0" />
+							<feColorMatrix in="MORPH" result="WHITENED" type="matrix"
+								values="-1 0 0 0 1, 0 -1 0 0 1, 0 0 -1 0 1, 0 0 0 1 0" />
 							<feMerge>
 								<feMergeNode in="WHITENED" />
 								<feMergeNode in="SourceGraphic" />
@@ -306,8 +296,10 @@ function getRewindPanelLeft() {
 						</filter>
 					</defs>
 
-					<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#discardSeenHexPattern${hexRefArr[0]})`" stroke="black" />
-					<text v-if="hexRefArr.length > 1" x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="black" font-size="24" filter="url(#whiteOutlineEffect)">
+					<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+						:fill="`url(#discardSeenHexPattern${hexRefArr[0]})`" stroke="black" />
+					<text v-if="hexRefArr.length > 1" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+						fill="black" font-size="24" filter="url(#whiteOutlineEffect)">
 						{{ hexRefArr.length }}
 					</text>
 				</svg>
@@ -322,15 +314,21 @@ function getRewindPanelLeft() {
 				<div v-for="(hexRefArr, idx) in getDiscardedHexRefs().slice(0, -1)" :key="idx" class="singleHexDiv">
 					<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
 						<defs>
-							<pattern :id="'discardSeenHexPattern' + String(hexRefArr[0])" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-								<image height="1" width="1" preserveAspectRatio="none" :xlink:href="view.getImage('hex' + String(hexRefArr[0]))" />
+							<pattern :id="'discardSeenHexPattern' + String(hexRefArr[0])" height="100%" width="100%"
+								patternContentUnits="objectBoundingBox">
+								<image height="1" width="1" preserveAspectRatio="none"
+									:xlink:href="view.getImage('hex' + String(hexRefArr[0]))" />
 							</pattern>
-							<pattern v-for="(num, index) in rf.INITIAL_DRAW_PILE_4P" :key="index" :id="'pattern' + num" height="100%" width="100%" patternContentUnits="objectBoundingBox">
-								<image height="1" width="1" preserveAspectRatio="none" :xlink:href="view.getImage('hex' + String(num))" />
+							<pattern v-for="(num, index) in rf.INITIAL_DRAW_PILE_4P" :key="index" :id="'pattern' + num"
+								height="100%" width="100%" patternContentUnits="objectBoundingBox">
+								<image height="1" width="1" preserveAspectRatio="none"
+									:xlink:href="view.getImage('hex' + String(num))" />
 							</pattern>
 						</defs>
 
-						<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#discardSeenHexPattern${hexRefArr[0]})`" stroke="black" :class="{ lightGreen: store.context.hexRefBeingAdded === hexRefArr[0] }" />
+						<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+							:fill="`url(#discardSeenHexPattern${hexRefArr[0]})`" stroke="black"
+							:class="{ lightGreen: store.context.hexRefBeingAdded === hexRefArr[0] }" />
 					</svg>
 				</div>
 
@@ -354,7 +352,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_PEOPLE))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_PROD_CIGAR_A})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_PROD_CIGAR_A})`" stroke="black" />
 							</svg>
 						</div>
 						<img :src="view.getImage('cigar_u')" id="cigarImage" />
@@ -363,7 +362,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_CHIP))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_PROD_COMPUTER_A})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_PROD_COMPUTER_A})`" stroke="black" />
 							</svg>
 						</div>
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_COMPUTER))" />
@@ -372,7 +372,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_BEER))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_FILM_CRITIC})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_FILM_CRITIC})`" stroke="black" />
 							</svg>
 						</div>
 						<img :src="view.getImage('res' + String(rf.RES_FILM_CRITIC))" id="cigarImage" />
@@ -384,7 +385,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_PEOPLE))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_PROD_ACTRESS_A})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_PROD_ACTRESS_A})`" stroke="black" />
 							</svg>
 						</div>
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_ACTRESS))" />
@@ -394,7 +396,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_COMPUTER))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_PROD_SFX_A})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_PROD_SFX_A})`" stroke="black" />
 							</svg>
 						</div>
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_SFX))" />
@@ -404,7 +407,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_BEER))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_PROD_SCRIPT_A})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_PROD_SCRIPT_A})`" stroke="black" />
 							</svg>
 						</div>
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_SCRIPT))" />
@@ -416,7 +420,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_SFX))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_PROD_MOVIE_ACTION})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_PROD_MOVIE_ACTION})`" stroke="black" />
 							</svg>
 						</div>
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_MOVIE_ACTION))" />
@@ -426,7 +431,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_SCRIPT))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_PROD_MOVIE_GIRLIE})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_PROD_MOVIE_GIRLIE})`" stroke="black" />
 							</svg>
 						</div>
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_MOVIE_GIRLIE))" />
@@ -436,7 +442,8 @@ function getRewindPanelLeft() {
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_SCRIPT))" />
 						<div class="singleHexDiv">
 							<svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
-								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${rf.HEX_PROD_MOVIE_SCIFI})`" stroke="black" />
+								<polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500"
+									:fill="`url(#pattern${rf.HEX_PROD_MOVIE_SCIFI})`" stroke="black" />
 							</svg>
 						</div>
 						<img class="resImg" :src="view.getImage('res' + String(rf.RES_MOVIE_SCIFI))" />
@@ -447,7 +454,8 @@ function getRewindPanelLeft() {
 			<!-- FLEXI-TIMES -->
 			<div id="timesDiv">
 				Flexi-Times:
-				<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{ getFlexiTimeString(player.name) }}&nbsp;&nbsp;&nbsp;</span>
+				<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{
+					getFlexiTimeString(player.name) }}&nbsp;&nbsp;&nbsp;</span>
 				&nbsp;&nbsp;&nbsp;
 			</div>
 		</div>
@@ -461,6 +469,7 @@ function getRewindPanelLeft() {
 	justify-content: center;
 	align-items: center;
 }
+
 .resourceConversionCol {
 	display: flex;
 	flex-direction: column;
@@ -522,8 +531,6 @@ function getRewindPanelLeft() {
 
 #reserve {
 	border: 2px solid black;
-	/*margin-top: -4px;*/
-	/*margin-left: -10px;*/
 	background-color: lightblue;
 	min-width: 1000px;
 }
@@ -578,13 +585,11 @@ function getRewindPanelLeft() {
 
 #bugReport,
 #notesBox {
-	/*display: none;*/
 	text-align: center;
 	margin-bottom: 10px;
 }
 
 #wholeChat {
-	/*display: none;*/
 	position: absolute;
 	left: 2px;
 	top: 62px;

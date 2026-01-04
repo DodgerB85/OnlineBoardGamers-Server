@@ -6,9 +6,9 @@
  * Resource use / conversion should happen in the ProductionLine
  */
 
- import * as view from '../js/CNSview'
- import * as rf from '../js/CNSreference'
- import * as model from '../js/CNSmodel'
+import * as view from '../js/CNSview'
+import * as rf from '../js/CNSreference'
+import * as model from '../js/CNSmodel'
 
 
 import { useModelStore } from '../stores/CNSstore.js'
@@ -18,7 +18,7 @@ function clickedRes(index) {
   if (store.gameflow.phase !== rf.PHASE_STORE_RES) return
   store.context.availableResources[index]--
   let totalRes = store.context.availableResources.reduce((acc, curr) => acc + curr, 0);
-  if ((!store.useExpansion && totalRes <= 5) || totalRes <=3) {
+  if ((!store.useExpansion && totalRes <= 5) || totalRes <= 3) {
     model.storeResources()
     store.context.action = rf.ACT_CONFIRM_END_TURN
   }
@@ -28,34 +28,35 @@ function clickedRes(index) {
 
 <template>
   <template v-if="store.gameflow.phase === rf.PHASE_NETWORK">
-  <div id="ResourceAreaNetwork" v-if="store.context.availableResources.some(value => value !== 0)">
-    <div class="ARtextDiv">
-      New Resources<br />
-      INCLUDING Stored Resources:
-    </div>
-    <template v-for="(amount, index) in store.context.availableResources" :key="index">
-      <div v-if="amount !== 0" onselectstart="return false;" class="singleResDiv">
-        <img class="singleResImg" :src="view.getImage('res' + String(index))" />
-        <div class="singleResNumDiv">{{ amount }}</div>
+    <div id="ResourceAreaNetwork" v-if="store.context.availableResources.some(value => value !== 0)">
+      <div class="ARtextDiv">
+        New Resources<br />
+        INCLUDING Stored Resources:
       </div>
-    </template>
-  </div>
-  <div v-else-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" id="noResourceAreaNetwork">No New Resources</div>
+      <template v-for="(amount, index) in store.context.availableResources" :key="index">
+        <div v-if="amount !== 0" onselectstart="return false;" class="singleResDiv">
+          <img class="singleResImg" :src="view.getImage('res' + String(index))" />
+          <div class="singleResNumDiv">{{ amount }}</div>
+        </div>
+      </template>
+    </div>
+    <div v-else-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" id="noResourceAreaNetwork">No New Resources</div>
   </template>
 
   <template v-else>
     <div id="ResourceArea" v-if="store.context.availableResources.some(value => value !== 0)">
-    <div class="ARtextDiv">
-      Available<br />Resources:
-    </div>
-    <template v-for="(amount, index) in store.context.availableResources" :key="index">
-      <div v-if="amount !== 0" @click="clickedRes(index)" onselectstart="return false;" class="singleResDiv" :class="{'selectable' : store.gameflow.phase === rf.PHASE_STORE_RES}">
-        <img class="singleResImg" :src="view.getImage('res' + String(index))" />
-        <div class="singleResNumDiv">{{ amount }}</div>
+      <div class="ARtextDiv">
+        Available<br />Resources:
       </div>
-    </template>
-  </div>
-  <div v-else-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" id="noResourceArea">No Available Resources</div>
+      <template v-for="(amount, index) in store.context.availableResources" :key="index">
+        <div v-if="amount !== 0" @click="clickedRes(index)" onselectstart="return false;" class="singleResDiv"
+          :class="{ 'selectable': store.gameflow.phase === rf.PHASE_STORE_RES }">
+          <img class="singleResImg" :src="view.getImage('res' + String(index))" />
+          <div class="singleResNumDiv">{{ amount }}</div>
+        </div>
+      </template>
+    </div>
+    <div v-else-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" id="noResourceArea">No Available Resources</div>
   </template>
 </template>
 
@@ -64,6 +65,7 @@ function clickedRes(index) {
   width: 100%;
   height: 64px;
 }
+
 #ResourceAreaNetwork {
   width: 100%;
   height: 64px;
@@ -73,6 +75,7 @@ function clickedRes(index) {
 #noResourceArea {
   width: 100%;
 }
+
 #noResourceAreaNetwork {
   width: 100%;
   opacity: 0.5;
@@ -113,6 +116,7 @@ function clickedRes(index) {
 .selectable {
   cursor: pointer;
 }
+
 .selectable:hover {
   border-color: yellow;
 }

@@ -221,20 +221,8 @@ async function StartWebSocket() {
 	}
 
 	let ChannelNumber = global.MT_ID
-	//ChannelNumber = 255
 
-	//wsUri = "wss://connect.websocket.in/v3/" + ChannelNumber + "?apiKey=***REMOVED***";
-	//wsUri = "wss://socketsbay.com/wss/v2/10/5c77d2bb57dcf99bd4bdea1584117526/";
-	// let wsUri = "wss://socketsbay.com/wss/v2/" + String(ChannelNumber) + "/5c77d2bb57dcf99bd4bdea1584117526/";
-	//FCMwebSocket.close();
-	//let wsUri = "wss://wss.s3.sitereview.io/ws/allFCMchannels/";
 	let wsUri = "wss://wss.s3.sitereview.io/ws/HomeMThannel" + String(ChannelNumber) + "/"
-
-	//wss://wss.s3.sitereview.io/ws/anythingyoulikehere/
-
-	// Alternate Jonny Server
-
-	// wss://wsserver.fly.dev/ws/yourchannelhere/
 
 	MTwebSocket = new WebSocket(wsUri)
 

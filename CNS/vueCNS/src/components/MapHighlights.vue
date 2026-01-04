@@ -76,6 +76,7 @@ function shouldShowHighlights() {
 #wholeDiv {
   z-index: 150;
 }
+
 #areaSVG {
   margin: 0 auto;
   position: absolute;

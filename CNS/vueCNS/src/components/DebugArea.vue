@@ -21,9 +21,7 @@ const personal = usePersonalStore()
 
 function test1() {
   //hexlib.Layout.origin = new hexlib.Point(-300,0)
-  //map.calculateCanvasSize()
   //store.historyHelpers.hexesToHighlight.push({ hex: new hexlib.Hex(0, 1, -1) })
-  //store.context.placeableLinks.splice(0)
 
   /*store.tableUp = 1 // min 1
   store.tableDown = 1 // min 1
@@ -31,8 +29,6 @@ function test1() {
   store.tableRight = 2.5 // min 2.5
 
   map.createTable(10)*/
-  //model.endGame()
-  //alert(JSON.stringify(store.gameflow))
   //store.pirateShipRef = 31
   //console.log(funcs.shuffleArray([1,2,3,4,5]))
   alert(store.gameflow.phase)

@@ -325,12 +325,12 @@ def showBusGame(request, game_id):
 
     # Get the Notes for the user
     notes_mapping = {
-            0: currentGame.player0notes,
-            1: currentGame.player1notes,
-            2: currentGame.player2notes,
-            3: currentGame.player3notes,
-            4: currentGame.player4notes,
-        }
+        0: currentGame.player0notes,
+        1: currentGame.player1notes,
+        2: currentGame.player2notes,
+        3: currentGame.player3notes,
+        4: currentGame.player4notes,
+    }
     notes = notes_mapping.get(pov, "")
 
     liveNotification = user_profile.liveNotification
