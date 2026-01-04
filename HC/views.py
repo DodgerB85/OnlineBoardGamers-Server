@@ -429,13 +429,13 @@ def _processHCturn(request):
         # CHECK IF WE CAN ACCEPT THE AVAILABLE COMPONENTS FROM THE PLAYER
         # if the player's name is at idx 0 of currnet players in game AND in DB
         currentPlayers = currentGame.currentPlayers
-        currentPlayerrsList = currentPlayers.split(",")
-        while len(currentPlayerrsList) > 0 and currentPlayerrsList[0] == "HcBot":
-            currentPlayerrsList.pop(0)
+        currentPlayersList = currentPlayers.split(",")
+        while len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot":
+            currentPlayersList.pop(0)
 
         # IF YOU IN FIRST PLACE SERVER AND CLIENT, YOUR AC IS VALID, SO DON'T NEED TO CHECK
-        # if jsonData["idx"] == 0 and currentPlayerrsList[0] == request.user.username:
-        if jsonData["idx"] == 0 and currentPlayerrsList[0] == name:
+        # if jsonData["idx"] == 0 and currentPlayersList[0] == request.user.username:
+        if jsonData["idx"] == 0 and currentPlayersList[0] == name:
             # ("Accepting ThisAC")
             DBgameDataRaw[0] = ThisAC.copy()
             DBavailableComponents = DBgameDataRaw[0].copy()
@@ -479,14 +479,14 @@ def _processHCturn(request):
 
         # Now process as many factories as possible
         currentPlayers = currentGame.currentPlayers
-        currentPlayerrsList = currentPlayers.split(",")
-        while len(currentPlayerrsList) > 0 and currentPlayerrsList[0] == "HcBot":
-            currentPlayerrsList.pop(0)
+        currentPlayersList = currentPlayers.split(",")
+        while len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot":
+            currentPlayersList.pop(0)
 
         # There can never be data in front of you.
         # Either you are first in TO, so it will process.
         # Or second subs, as soon as first goes, everyone in a row goes.
-        if not currentGame.hasMoveData(currentPlayerrsList[0]):
+        if not currentGame.hasMoveData(currentPlayersList[0]):
             # ("Returning as not first player")
             return JsonResponse(
                 {
@@ -501,7 +501,7 @@ def _processHCturn(request):
         DBgameDataRaw[0] = DBavailableComponents.copy()
 
         # Change this to a WHILE
-        # while currentGame.hasMoveData(currentPlayerrsList[0])
+        # while currentGame.hasMoveData(currentPlayersList[0])
         # limit the max to 5 times
 
         for i in range(10):
@@ -512,14 +512,14 @@ def _processHCturn(request):
                     f"--- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
                 )  
                 SN_sendAdminErrorMessage(request, message)
-            if len(currentPlayerrsList) == 0:
+            if len(currentPlayersList) == 0:
                 break
             # THIS WILL ALWAYS BE TRUE ONCE, AS NOW CURRENT PLAYER IS FIRST
-            if currentGame.hasMoveData(currentPlayerrsList[0]):
-                # moveData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.getSingleMoveForName(currentPlayerrsList[0])))
+            if currentGame.hasMoveData(currentPlayersList[0]):
+                # moveData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.getSingleMoveForName(currentPlayersList[0])))
                 moveData = json.loads(
                     LZS.decompressFromEncodedURIComponent(
-                        currentGame.getSingleMoveForName(currentPlayerrsList[0]) or ""
+                        currentGame.getSingleMoveForName(currentPlayersList[0]) or ""
                     )
                     or "[]"
                 )
@@ -546,7 +546,7 @@ def _processHCturn(request):
                         DBgameDataRaw[0] = DBavailableComponents
                         break
 
-                seatPosition = currentGame.seatPosition(currentPlayerrsList[0])
+                seatPosition = currentGame.seatPosition(currentPlayersList[0])
                 # This is the current player. The factory is valid.
                 # So insert factory
                 DBgameDataRaw[3][seatPosition][0] = FAC_DATA_RAW
@@ -557,37 +557,37 @@ def _processHCturn(request):
                 # STORES PLACE IN factpryComponents ARRAY TO ALLOW HIGHLIGHTING LATER
                 # store the length of FCNATT, and subtract that from the length of facComp to get index. Or store current length
                 # 3 = players           X = select player                       0 =fac
-                DBgameDataRaw[3][currentGame.seatPosition(currentPlayerrsList[0])][0][4]
+                DBgameDataRaw[3][currentGame.seatPosition(currentPlayersList[0])][0][4]
 
                 DBgameDataRaw[15].append(
                     [
-                        currentGame.seatPosition(currentPlayerrsList[0]),
+                        currentGame.seatPosition(currentPlayersList[0]),
                         13,
                         [
                             len(FCNATT),
                             len(
                                 DBgameDataRaw[3][
-                                    currentGame.seatPosition(currentPlayerrsList[0])
+                                    currentGame.seatPosition(currentPlayersList[0])
                                 ][0][4]
                             ),
                         ],
                     ]
                 )
-                # DBgameDataRaw[16].append((int(time.time())*1000 - (2*len(currentPlayerrsList)) )- DBgameDataRaw[15][0])
+                # DBgameDataRaw[16].append((int(time.time())*1000 - (2*len(currentPlayersList)) )- DBgameDataRaw[15][0])
                 DBgameDataRaw[16].append(
                     DBgameDataRaw[16][len(DBgameDataRaw[16]) - 1]
-                    + (15 - len(currentPlayerrsList))
+                    + (15 - len(currentPlayersList))
                 )
 
                 # end the first players turn
-                currentPlayerrsList.pop(0)
+                currentPlayersList.pop(0)
                 while (
-                    len(currentPlayerrsList) > 0 and currentPlayerrsList[0] == "HcBot"
+                    len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot"
                 ):
-                    currentPlayerrsList.pop(0)
+                    currentPlayersList.pop(0)
 
             else:
-                # If not currentGame.hasMoveData(currentPlayerrsList[0]):
+                # If not currentGame.hasMoveData(currentPlayersList[0]):
                 break
             # End if move data
         # End loop of 6
@@ -597,15 +597,16 @@ def _processHCturn(request):
             json.dumps(DBgameDataRaw)
         )
         # remove name from current players
-        currentGame.currentPlayers = ",".join(currentPlayerrsList)
+        currentGame.currentPlayers = ",".join(currentPlayersList)
         
-        if len(currentPlayerrsList) == 0:
-            message = (
-                f"************ No players left in HC after processing factory - gameID: {game_id} - User: {request.user.username}  "
-                f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
-                f"--- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
-            )  
-            SN_sendAdminErrorMessage(request, message)
+        # It is ok for currentPlayersList to be 0 length here - then the JS should go to next phase
+        #if len(currentPlayersList) == 0:
+        #    message = (
+        #        f"************ No players left in HC after processing factory - gameID: {game_id} - User: {request.user.username}  "
+        #        f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
+        #        f"--- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+        #    )  
+        #    SN_sendAdminErrorMessage(request, message)
             
         currentGame.kickoutFlexiData = SF_updateFlexiTime(
             currentGame.kickoutFlexiData,
@@ -618,9 +619,9 @@ def _processHCturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         currentGame.save()
-        if len(currentPlayerrsList) > 0:
+        if len(currentPlayersList) > 0:
             sendFactoryAlertNotification(
-                request, currentPlayerrsList[0], jsonData["gameID"]
+                request, currentPlayersList[0], jsonData["gameID"]
             )
 
         return JsonResponse(
@@ -635,7 +636,7 @@ def _processHCturn(request):
         # currentGame.currentPlayers is in CORRECT order, as it was updated from the Set Focus stage
 
     ######################################
-    # if (currentPlayerrsList[0] == name and enoughComponents):
+    # if (currentPlayersList[0] == name and enoughComponents):
     #   seatPosition = currentGame.seatPosition(name)
     #    # This is the current player. The factory is valid.
     # 3#    # So insert factory
@@ -646,8 +647,8 @@ def _processHCturn(request):
     #   currentGame.gameData = LZS.compressToEncodedURIComponent(
     # 3       json.dumps(DBgameDataRaw))
     # remove name from current players
-    #   currentPlayerrsList.pop(0)
-    #   currentGame.currentPlayers = ','.join(currentPlayerrsList)
+    #   currentPlayersList.pop(0)
+    #   currentGame.currentPlayers = ','.join(currentPlayersList)
     #   currentGame.save()
     # Now check the next player to see if there is any data
     ##################################################
