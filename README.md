@@ -21,8 +21,12 @@ NOTE: iF you don't want to use docker / have issues with it / don't hace access 
 
 Now browse `http://localhost:8000/` and check there are no errors
 You should be able to browsr around the logged-out pages, eg about, help, etc.
+(Or you might get some sort of database error). 
 
 4) Exit back to the command prompt. Confirm containers are running using: `docker compose up -d`
+5) Run this intial DB setup inside the container using `docker-compose exec obs sh ./setup_db_script.sh`
+6) To fix "OfflineGenerationError" run `docker-compose exec obs python manage.py compress`
+7) To fix migrate errors saying a table doesn't exist, try migrating that specific table, eg `docker-compose exec obs python manage.py migrate WEB`
 
 The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). All the pre-built users have their password set to their username - however the hash will be incorrect so in practive you'll need to edit in a pasxword in the admin panel, although in practice you won't ever really need to login as any of these users anyway.
 
