@@ -14,7 +14,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     #                 #'looogic', 'Burmer',
     #                 #'pgh_gamer', , 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
     ##print("******************************************************************************************************** IND ACCESS: =================================================:  " + request.user.username)
-    ALLOWED_USERS = ['admin', 'DodgerB', 'durendal', 'Benkyo', 'vraid', 'JoshuaAcosta', "massibull", "phil"]
+    ALLOWED_USERS = ['admin', 'DodgerB', 'durendal', 'Benkyo', 'vraid', 'JoshuaAcosta', "massibull", "phil", "timmymayes"]
     
     if request.user.username not in ALLOWED_USERS:
         return redirect('index')
