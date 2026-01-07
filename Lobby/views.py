@@ -404,6 +404,7 @@ def indexSpecialRedirect(request):
         "JoshuaAcosta",
         "massibull",
         "phil",
+        
     ]
     if request.user.username not in ALLOWED_USERS:
         return redirect("index")
