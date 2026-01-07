@@ -25,7 +25,7 @@ export function phaseStr() {
 
 
 export function getImage(image) {
-  console.log('Path check:', import.meta.url);
+  //console.log('Path check:', import.meta.url);
 
   // Icons
 	if (image === "icon-house") return new URL(`../../../static/CNS/images/icon-house.svg`, import.meta.url).href

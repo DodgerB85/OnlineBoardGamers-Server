@@ -44,30 +44,30 @@
             {% blocktranslate trimmed %}
               Temp
             {% endblocktranslate %}
-                                      </div>
-                                      <div class="imageWithTextDiv">
-                                        <img src="{% static 'KFW/images/icon-rewind.svg' %}"
-                                             alt="Reserve"
-                                             width="50"
-                                             height="50"
-                                             class="topMenuIconForHelp imageWithTextIconImg">
-                                        {% blocktranslate trimmed %}
-                                          Any player can rewind the game at any time.
-                                          <br />
-                                          If rewinding the game would "undo" revealing any hidden information, you will be informed
-                                          before you rewind, and if you continue to rewind it will be recoded in the History.
-                                        {% endblocktranslate %}
-                        </div>
-                        <div class="imageWithTextDiv">
-                          <img src="{% static 'Lobby/images/help/KFWmeepleHighlight.jpg' %}"
-                               alt="Info High"
-                               width="150"
-                               height="228">
-                          <p>
-                            {% blocktranslate trimmed %}
-                              At the start of your turn, any workers used for bidding/actions since your last turn will have a highlight
-                              so you can easily see what moves other players have made.
-                            {% endblocktranslate %}
+                                              </div>
+                                              <div class="imageWithTextDiv">
+                                                <img src="{% static 'KFW/images/icon-rewind.svg' %}"
+                                                     alt="Reserve"
+                                                     width="50"
+                                                     height="50"
+                                                     class="topMenuIconForHelp imageWithTextIconImg">
+                                                {% blocktranslate trimmed %}
+                                                  Any player can rewind the game at any time.
+                                                  <br />
+                                                  If rewinding the game would "undo" revealing any hidden information, you will be informed
+                                                  before you rewind, and if you continue to rewind it will be recoded in the History.
+                                                {% endblocktranslate %}
+                            </div>
+                            <div class="imageWithTextDiv">
+                              <img src="{% static 'Lobby/images/help/KFWmeepleHighlight.jpg' %}"
+                                   alt="Info High"
+                                   width="150"
+                                   height="228">
+                              <p>
+                                {% blocktranslate trimmed %}
+                                  At the start of your turn, any workers used for bidding/actions since your last turn will have a highlight
+                                  so you can easily see what moves other players have made.
+                                {% endblocktranslate %}
             </p>
           </div>
           <div class="imageWithTextDiv">
@@ -274,6 +274,9 @@
             <li>Goods on any of your transporters</li>
           </ul>
           This saves you the hassle of having to deposit every good on to the same tile area before performing your build action.
+        </li>
+        <li>
+          For the Paper Mill and Coal Burner with 2 different possible input goods, the goods will be automatically selected for you if there is no choice to make
         </li>
         <li>When converting a donkey into a wagon, any goods on the donkey will automatically transfer to the wagon.</li>
         <li>New water transporters with only 1 valid location to start will automatically be placed in that location.</li>

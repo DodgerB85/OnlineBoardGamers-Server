@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import User, Profile, changelog, Mini_Tournaments, Main_Tournament
-
+from .modelProxies import FCMMiniTournament, TGZMiniTournament
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -30,5 +30,25 @@ class Mini_TournamentsAdmin(admin.ModelAdmin):
     autocomplete_fields = ("creator",)
     search_fields = ["tournamentName"]
 
+
+# The FCM specific link
+@admin.register(FCMMiniTournament)
+class FCMMiniTournamentAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        # Only show FCM games in this view
+        return super().get_queryset(request).filter(gameCode="FCM")
+    
+    # This moves it to the FCM section in the sidebar
+    class Meta:
+        app_label = 'FCM' 
+
+# The TGZ specific link
+@admin.register(TGZMiniTournament)
+class TGZMiniTournamentAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="TGZ")
+    
+    class Meta:
+        app_label = 'TGZ'
 
 admin.site.register(changelog)
