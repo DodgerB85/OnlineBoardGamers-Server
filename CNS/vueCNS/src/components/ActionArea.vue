@@ -325,6 +325,10 @@ function getFlexiKickoutTImerText() {
 					v-if="store.useExpansion && !controller.currentPlayerObj().storedResources.some((value) => value >= 20)">
 					<br />
 					Instead of placing a Tile, you may store a single Tile instead - it will take up 2 spaces
+					<template v-if="controller.currentPlayerObj().links.length === 0">
+						<br />
+						<span class="warningSpan">You must place a link before being able to store tiles</span>
+					</template>
 				</span>
 				<span v-if="store.context.realEstateAgentsInNetwork === 1">
 					<br />
@@ -445,7 +449,7 @@ function getFlexiKickoutTImerText() {
 				You have completed pirating movies and now the next player in turn order needs to move the pirates
 				<br />
 				<br />
-				<span class="pirateEndWarning">YOUR ACTIONS UP TO THIS POINT WILL BE SAVED - YOU WILL NOT BE ABLE TO
+				<span class="warningSpan">YOUR ACTIONS UP TO THIS POINT WILL BE SAVED - YOU WILL NOT BE ABLE TO
 					UNDO THEM
 					LATER</span>
 				<!--<br/>Your actions up to this point will be saved. You will not be able to undo them later.-->
@@ -471,7 +475,7 @@ function getFlexiKickoutTImerText() {
 	margin: 9px auto;
 }
 
-.pirateEndWarning {
+.warningSpan {
 	font-weight: 900;
 	color: darkgoldenrod;
 }
