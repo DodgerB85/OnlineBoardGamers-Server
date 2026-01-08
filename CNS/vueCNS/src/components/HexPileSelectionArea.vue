@@ -138,6 +138,8 @@ function cancelSales() {
 function canStoreHex(hexRef) {
   if (!store.useExpansion) return false
   if (store.context.hexRefBeingAdded !== hexRef) return false
+  // Need at least 1 link
+  if (controller.currentPlayerObj().links.length === 0) return false
   // Need at least 2 spaces
   if (controller.currentPlayerObj().storedResources.length >= 4) return false
   for (let i = 0; i < controller.currentPlayerObj().storedResources.length; i++) {
