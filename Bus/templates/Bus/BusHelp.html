@@ -16,9 +16,13 @@
     {% endif %}
     <div id="BusHelpPage">
       <h1>{% translate "Rules" %}</h1>
-      {% translate "Bus rules available <a href='/static/Bus/Bus_Rules.pdf' target='_blank'>here</a>" %}
+      {% blocktranslate trimmed %}
+        Bus rules available <a href="/static/Bus/Bus_Rules.pdf" target="_blank">here</a>
+      {% endblocktranslate %}
       <br />
-      {% translate "How to play guide example <a href='https://www.youtube.com/watch?v=CKW0tYoIU_k' target='_blank'>here</a>" %}
+      {% blocktranslate trimmed %}
+        How to play guide example <a href="https://www.youtube.com/watch?v=CKW0tYoIU_k" target="_blank">here</a>
+      {% endblocktranslate %}
       <br />
       <h1>{% translate "Bus Help" %}</h1>
       <div class="BusHelpSection">
