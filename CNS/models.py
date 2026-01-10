@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.conf import settings
 from decouple import config
 
-from Lobby.models import User
+from Lobby.models import User, AbstractGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -28,7 +28,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 
-class CNS_Game(models.Model):
+class CNS_Game(AbstractGame):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
 
     gameName = models.CharField(

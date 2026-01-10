@@ -350,6 +350,16 @@ class Mini_Tournaments(models.Model):
         }
 
 
+class AbstractGame(models.Model):
+    """
+    Abstract base model for all game types.
+    All game-specific models should inherit from this.
+    """
+    
+    class Meta:
+        abstract = True
+
+
 class QueryableGame(models.Model):
     gameCode = models.CharField(max_length=255, db_column="gameCode")
     id = models.PositiveIntegerField()

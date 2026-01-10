@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from django.db.models import Q
 
 
-from Lobby.models import User, Profile
+from Lobby.models import User, Profile, AbstractGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_M_ProcessTournamentEndGame,
@@ -254,7 +254,7 @@ class HC_Tournament(models.Model):
         return roundsHTML
 
 
-class HC_Game(models.Model):
+class HC_Game(AbstractGame):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
     # custom_primary_key = models.CharField(max_length=6, editable=False, unique=True)
     gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
