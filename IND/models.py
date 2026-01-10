@@ -11,7 +11,7 @@ from django.conf import settings
 
 # from django.utils.translation import gettext
 
-from Lobby.models import User
+from Lobby.models import User, AbstractGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -172,7 +172,7 @@ class IND_Tournament(models.Model):
         return roundsHTML
 
 
-class IND_Game(models.Model):
+class IND_Game(AbstractGame):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
     gameName = models.CharField(
         max_length=120, blank=True, db_collation="utf8mb4_general_ci"

@@ -15,7 +15,7 @@ from django.utils.translation import gettext  # , get_language
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.utils import translation
 
-from Lobby.models import User  # , Profile
+from Lobby.models import User, AbstractGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -311,7 +311,7 @@ class Bus_Tournament(models.Model):
 #
 
 
-class Bus_Game(models.Model):
+class Bus_Game(AbstractGame):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
 
     gameName = models.CharField(

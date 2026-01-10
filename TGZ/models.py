@@ -16,7 +16,7 @@ from django.utils.translation import gettext  # , get_language
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.utils import translation
 
-from Lobby.models import User, Mini_Tournaments, Main_Tournament  # , Profile
+from Lobby.models import User, Mini_Tournaments, Main_Tournament, AbstractGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -39,7 +39,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 
-class TGZ_Game(models.Model):
+class TGZ_Game(AbstractGame):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
     gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
 

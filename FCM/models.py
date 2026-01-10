@@ -49,7 +49,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
 )
 
-from Lobby.models import User, Mini_Tournaments  # , Profile
+from Lobby.models import User, Mini_Tournaments, AbstractGame
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +145,7 @@ class FCM_Tournament(models.Model):
         return roundsHTML
 
 
-class FCM_Game(models.Model):
+class FCM_Game(AbstractGame):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
     gameName = models.CharField(
         max_length=120, blank=True, db_collation="utf8mb4_general_ci"
