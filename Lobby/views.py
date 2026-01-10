@@ -1097,7 +1097,7 @@ def index(request):
     user = request.user
     user_id = user.id
     # show_timestamps = user.username in ["admin", "DodgerB"]
-    recent_cutoff = (timezone.now() - timedelta(days=10)).timestamp() * 1000
+    recent_cutoff = (timezone.now() - timedelta(days=15)).timestamp() * 1000
 
     start_time = time.time()
 
@@ -1157,8 +1157,17 @@ def index(request):
 
         # 2. Defer huge fields that are NOT needed for the lobby listing
         # This is the single biggest "win" for memory and speed
+        #query = query.defer(
+        #    "gameData", "rewindData", "rewindTempData", "chatData", "kickoutFlexiData"
+        #)
+        
+        # deferrung kickoutFlexiData seems to cause occasional race conditions and lobby not loading
+        # when 
         query = query.defer(
-            "gameData", "rewindData", "rewindTempData", "chatData", "kickoutFlexiData"
+            "gameData",
+            "rewindData",
+            "rewindTempData",
+            "chatData",
         )
 
         # 3. Optimized Joins
@@ -1221,7 +1230,11 @@ def index(request):
 
         # 2. Only serialize if the game meets our visibility criteria
         # This saves CPU cycles on games the user won't see
-        serialized = SF_fastSerializeGame(game, user)
+        try:
+            serialized = SF_fastSerializeGame(game, user)
+        except FCM_Game.DoesNotExist:
+            SN_sendAdminErrorMessage(request, f"Game {game.getGameCode()} {game.id} does not exis - trying to serialize i in lobbyt")
+            continue 
 
         if is_involved:
             if status == "ACTIVE" and user_id not in miss_p_ids:
@@ -4254,9 +4267,7 @@ def reloadMTchatData(request):
         raise Http404(gettext("Mini Tournament does not exist"))
 
     return JsonResponse(
-        {
-            "chatData": Mini_Tournament.chatData
-        },
+        {"chatData": Mini_Tournament.chatData},
         safe=True,
     )
 
@@ -4661,9 +4672,7 @@ def reloadMainTchatData(request):
         raise Http404(gettext("Main Tournament does not exist"))
 
     return JsonResponse(
-        {
-            "chatData": currentTournament.chatData
-        },
+        {"chatData": currentTournament.chatData},
         safe=True,
     )
 
