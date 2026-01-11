@@ -40,47 +40,14 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 
 class TGZ_Game(AbstractGame):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
-
-    # db_collation='utf8mb4_general_ci'  # Specify the appropriate collation
-
-    gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
-
-    gameStatus = models.CharField(
-        max_length=9,
-        choices=SR_GAME_STATUS_CHOICES,
-        default="AVAILABLE",
-        db_index=True, 
-    )
-
     latestUpdate = models.CharField(max_length=30, blank=False, default=SR_getTimeNow, db_index=True)
     startingOptions = models.CharField(max_length=100, blank=True)
-    startingMap = models.CharField(max_length=80, blank=True)
-
+    
     allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="TGZallPlayersRelName")
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="TGZmissingPlayersRelName", blank=True
     )
-    currentPlayers = models.CharField(max_length=100, blank=True)
-
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
-
-    winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="TGZgame_winner_relName",
-        blank=True,
-    )
-
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-
-    kickoutDuration = models.PositiveSmallIntegerField(null=False, blank=False, default=200)
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
-
+    
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -95,13 +62,7 @@ class TGZ_Game(AbstractGame):
         related_name="TGZgame_host_relName",
         default=config("ADMIN_DB_KEY", default=1, cast=int),
     )
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-
-    autoMoves = models.CharField(max_length=30, blank=True, null=True, default=None)
-
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([240, 240, 240, 240, 240]))
-    statsExcludeConsent = models.CharField(max_length=5, blank=False, default="00000")
-
+    
     kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="TGZkickedPlayersRelName", blank=True)
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="TGZinvitedPlayersRelName", blank=True
@@ -109,16 +70,26 @@ class TGZ_Game(AbstractGame):
     playersWithChatNotification = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="TGZplayersWithChatNotificationName", blank=True
     )
+    
+    startingMap = models.CharField(max_length=80, blank=True)
 
-    chatData = models.TextField(blank=True)
+    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
+    winner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="TGZgame_winner_relName",
+        blank=True,
+    )
+
+    autoMoves = models.CharField(max_length=30, blank=True, null=True, default=None)
+
+    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([240, 240, 240, 240, 240]))
+    statsExcludeConsent = models.CharField(max_length=5, blank=False, default="00000")
+
     player4notes = models.TextField(blank=True)
 
-    gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -127,10 +98,6 @@ class TGZ_Game(AbstractGame):
     relatedMainTournament = models.ForeignKey(
         Main_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="maintournamentTGZ_relName"
     )
-
-    statsExcludedGame = models.BooleanField(blank=False, default=False)
-
-    kickoutFlexiData = models.TextField(blank=True)
 
     relatedMiniTournament = models.ForeignKey(
         Mini_Tournaments, on_delete=models.SET_NULL, null=True, blank=True, related_name="minitournamentTGZ_relName"

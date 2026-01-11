@@ -173,52 +173,18 @@ class IND_Tournament(models.Model):
 
 
 class IND_Game(AbstractGame):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    gameName = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-
-    gameDescription = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-
-    gameStatus = models.CharField(
-        max_length=9,
-        choices=SR_GAME_STATUS_CHOICES,
-        default="AVAILABLE",
-        db_index=True,
-    )
-
     latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
     startingOptions = models.CharField(max_length=20, blank=True)
-
+    
+    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
+    
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDallPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDmissingPlayersRelName", blank=True
     )
-    currentPlayers = models.CharField(max_length=100, blank=True)
-
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
-
-    winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="INDgame_winner_relName",
-        blank=True,
-    )
-
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-
-    kickoutDuration = models.PositiveSmallIntegerField(
-        null=False, blank=False, default=200
-    )
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
-
+    
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -233,14 +199,7 @@ class IND_Game(AbstractGame):
         related_name="INDgame_host_relName",
         default=None,
     )
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-
-    zoomLevels = models.CharField(
-        max_length=30, blank=False, default=json.dumps([0, 0, 0, 0])
-    )
-
-    # statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
-
+    
     kickedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDkickedPlayersRelName", blank=True
     )
@@ -252,16 +211,23 @@ class IND_Game(AbstractGame):
         related_name="INDplayersWithChatNotificationName",
         blank=True,
     )
+    
+    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
-    chatData = models.TextField(blank=True)
+    winner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="INDgame_winner_relName",
+        blank=True,
+    )
 
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
+    zoomLevels = models.CharField(
+        max_length=30, blank=False, default=json.dumps([0, 0, 0, 0])
+    )
+
     player4notes = models.TextField(blank=True)
 
-    gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -274,11 +240,7 @@ class IND_Game(AbstractGame):
         related_name="tournament_relName_IND",
     )
 
-    statsExcludedGame = models.BooleanField(blank=False, default=False)
-
     playersPreMoveData = models.TextField(blank=True)
-
-    kickoutFlexiData = models.TextField(blank=True)
 
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
