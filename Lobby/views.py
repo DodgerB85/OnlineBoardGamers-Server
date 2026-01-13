@@ -549,7 +549,7 @@ def DBO(request):
 
         allGames = game_in_use_model.objects.filter(query).all()
         finishedGamesCount += (
-            game_in_use_model.objects.filter(query_finished).all().count()
+            game_in_use_model.objects.filter(query_finished).count()
         )
 
         for singleGame in allGames:
@@ -2582,7 +2582,7 @@ def AllTournaments(request):
 
     return render(
         request,
-        "Lobby/tournaments/AllTournaments.html",
+        "Lobby/tournaments/AllMainTournaments.html",
         {
             "tournamentsJson": tournamentsJson,
         },
@@ -2608,13 +2608,13 @@ def Tournament(request, gameType, tournamentID):
             raise Http404(gettext("Tournament does not exist"))
         if (
             currentTournament
-            and currentTournament.startingPlayers.all().count()
+            and currentTournament.startingPlayers.count()
             < currentTournament.maxTournamentPlayers
         ):
             currentTournament.startingPlayers.add(request.user)
             currentTournament.save()
             if (
-                currentTournament.startingPlayers.all().count()
+                currentTournament.startingPlayers.count()
                 == currentTournament.maxTournamentPlayers
             ):
                 SF_startTournament(request, currentTournament, gameType)
@@ -2646,7 +2646,7 @@ def Tournament(request, gameType, tournamentID):
     if currentTournament and currentTournament.tournamentStatus == "OP":
         openSlots = []
         for i in range(
-            currentTournament.startingPlayers.all().count() + 1,
+            currentTournament.startingPlayers.count() + 1,
             currentTournament.maxTournamentPlayers + 1,
         ):
             openSlots.append(str(i))
@@ -4042,13 +4042,13 @@ def MiniTournament(request, Mini_Tournament_id):
 
         if (
             Mini_Tournament
-            and Mini_Tournament.startingPlayers.all().count()
+            and Mini_Tournament.startingPlayers.count()
             < Mini_Tournament.maxTournamentPlayers
         ):
             Mini_Tournament.startingPlayers.add(request.user)
             Mini_Tournament.save()
             if (
-                Mini_Tournament.startingPlayers.all().count()
+                Mini_Tournament.startingPlayers.count()
                 == Mini_Tournament.maxTournamentPlayers
             ):
                 SF_startMiniTournament(request, Mini_Tournament)
@@ -4125,7 +4125,7 @@ def MiniTournament(request, Mini_Tournament_id):
         invitedPlayerString = ", ".join(invitedPlayerList)
         openSlots = []
         for i in range(
-            Mini_Tournament.startingPlayers.all().count() + 1,
+            Mini_Tournament.startingPlayers.count() + 1,
             Mini_Tournament.maxTournamentPlayers + 1,
         ):
             openSlots.append(str(i))
@@ -4474,13 +4474,13 @@ def MainTournament(request, Main_Tournament_id):
 
         if (
             currentTournament
-            and currentTournament.startingPlayers.all().count()
+            and currentTournament.startingPlayers.count()
             < currentTournament.maxTournamentPlayers
         ):
             currentTournament.startingPlayers.add(request.user)
             currentTournament.save()
             if (
-                currentTournament.startingPlayers.all().count()
+                currentTournament.startingPlayers.count()
                 == currentTournament.maxTournamentPlayers
             ):
                 SF_startMainTournament(request, currentTournament)
@@ -4545,7 +4545,7 @@ def MainTournament(request, Main_Tournament_id):
     if currentTournament.tournamentStatus == "OP":
         openSlots = []
         for i in range(
-            currentTournament.startingPlayers.all().count() + 1,
+            currentTournament.startingPlayers.count() + 1,
             currentTournament.maxTournamentPlayers + 1,
         ):
             openSlots.append(str(i))

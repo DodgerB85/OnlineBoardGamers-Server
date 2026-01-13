@@ -157,6 +157,7 @@ class IND_Tournament(models.Model):
             "winnerHTML": winnerHTML,
             "createdTS": createdTS,
             "gameCode": "IND",
+            "tournamentLink": f"/INDtournament/IND/{self.id}/",
         }
 
     def getRoundsHTML(self):
