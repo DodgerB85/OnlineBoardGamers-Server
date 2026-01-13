@@ -181,15 +181,6 @@ def createWEBgame(request):
 
 
 def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    # ALLOWED_USERS = ["admin", "Joey", "Rachel", "ha.steven", "pgh_gamer","massibull", "durendal", 'DodgerB', 'BotKickStarter','Rastko','Benkyo', 'vraid', "F1087", "krieg90", "gdc", "enavico", 'PhasingPlayer']
-    # ALLOWED_USERS += ["admin","user1", "ha.steven", "massibull", "durendal", "DodgerB", "BotKickStarter", "Rastko", "Benkyo", "vraid", "F1087", "krieg90", "gdc", "enavico", "PhasingPlayer", "Acacia"]
-    # ALLOWED_USERS += ["ha.steven", "Kawlos", "Jasonbartfast", "Batch", "Juni", "TDUBZ", "BigBad", "massibull", "durendal", "DodgerB", "BotKickStarter", "33", "Rastko", "Burmer", "phil"]
-    # ALLOWED_USERS += ["Benkyo", "Steveth", "F1087", "krieg90", "gdc", "michazhn", "Hohohale", "Rachel", "Joey", "CouldUseASkittleHelp"]
-
-    ###print("******************************************************************************************************** WEB ACCESS: =================================================:  " + request.user.username)
-    # if request.user.username not in ALLOWED_USERS:
-    #    return HttpResponseRedirect(reverse("index"))
-
     try:
         currentGame = (
             WEB_Game.objects.select_related(
@@ -374,7 +365,7 @@ def db_mutex(name, timeout=10):
             yield  # Execute the code within the 'with' block
         else:
             # time out or can't open?
-            print("ERROR-FCM: Not running, %s mutex not available" % (mutex_name))
+            print("ERROR-WEB: Not running, %s mutex not available" % (mutex_name))
             return  # Important: Exit the context manager if the lock wasn't acquired
     finally:
         # Ensure the lock is ALWAYS released, even if there's an exception
@@ -384,7 +375,7 @@ def db_mutex(name, timeout=10):
                 cursor.fetchall()
             except Exception as e:
                 print(
-                    f"ERROR-FCM: Failed to release lock {mutex_name}: {e}"
+                    f"ERROR-WEB: Failed to release lock {mutex_name}: {e}"
                 )  # Log error
 
 
@@ -571,7 +562,7 @@ def _processWEBturn(request):
 
         return JsonResponse(response_data, safe=False)
 
-    # END SAVE / CREATE  TODO
+    # END SAVE / CREATE
 
     elif jsonData["action"] == "saveEndGame":
         # Check if old version is older than DB version, and if so, return

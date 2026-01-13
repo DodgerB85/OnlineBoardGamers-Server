@@ -515,9 +515,7 @@ class KFW_Game(models.Model):
         readyPlayers = []
         jsonResponse = []
 
-        # allPlayersArr = self.getAllPlayersOrderedySeat(False)
         currentPlayersArr = self.getCurrentPlayersArray()
-        # print(f"allPlayersArr: {allPlayersArr}, currentPlayersArr: {currentPlayersArr}")
         playersMoveDataArr = json.loads(self.playersMoveData)
 
         for i in range(len(playersMoveDataArr)):

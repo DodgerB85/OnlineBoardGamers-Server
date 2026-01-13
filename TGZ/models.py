@@ -21,8 +21,7 @@ from Lobby.models import User, Mini_Tournaments, Main_Tournament  # , Profile
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
     SF_kickoutRequired,
-    SF_M_ProcessMiniTournamentEndGame,
-    SF_M_ProcessMainTournamentEndGame,
+    SF_M_ProcessAnyTournamentEndGame,
 )
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
@@ -37,6 +36,8 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_sendGameStartNotification,
     SN_sendNextTurnNotification,
 )
+
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
 
 class TGZ_Game(models.Model):
@@ -151,12 +152,12 @@ class TGZ_Game(models.Model):
         return _gameName
 
     # Takes in self, request, and then 3 JSON[""] pieces of string data
-    def endGame(self, request, _winner, _finalPositions, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
         self.rewindData = ""
         self.rewindTempData = ""
         self.kickoutFlexiData = ""
         self.gameStatus = "FINISHED"
-        self.winner = User.objects.get(username=_winner)
+        self.winner = User.objects.get(username=_winnerUsername)
         self.autoMoves = None
         self.save()
 
@@ -164,9 +165,12 @@ class TGZ_Game(models.Model):
         SN_M_sendEndGameNotification(request, "TGZ", _finalPositions, _gameID, self)
 
         if self.relatedMainTournament:
-            SF_M_ProcessMainTournamentEndGame(request, self.relatedMainTournament, self, [_winner], _tournamentData)
+            # _winnerArray is an array of [winner_username, winner_username, ...]
+            # _tournamentData is an array [ [username], [username, username,... TB_VALUE], [username, username,..., TB_VALUE], [...etc] ]
+            # NB THE FIRST ENTRY IS AN ARRAY OF (MULTIPLE) WINNER(S)
+            SF_M_ProcessAnyTournamentEndGame(request, MAIN_T_FLAG, self.relatedMainTournament, self, [_winnerUsername], _tournamentData)
         if self.relatedMiniTournament:
-            SF_M_ProcessMiniTournamentEndGame(request, self.relatedMiniTournament, self, [_winner], _finalPositions)
+            SF_M_ProcessAnyTournamentEndGame(request, MINI_T_FLAG, self.relatedMiniTournament, self, [_winnerUsername], _tournamentData)
 
     def currentTurnString(self):
         return SR_currentTurnString("TGZ", self.turn, self.phase)

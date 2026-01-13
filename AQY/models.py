@@ -11,12 +11,13 @@ from django.conf import settings
 
 # from django.utils.translation import gettext, gettext_lazy
 
-from Lobby.models import User, Main_Tournament
+from Lobby.models import User, Main_Tournament, Mini_Tournaments
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
     SF_kickoutRequired,
     SF_M_ProcessTournamentEndGame,
+    SF_M_ProcessAnyTournamentEndGame,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_T_sendTournamentGameStartNotification,
@@ -35,6 +36,8 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTournamentRoundsHTML,
     SR_getTimeNow,
 )
+
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
 
 class AQY_Tournament(models.Model):
@@ -287,6 +290,10 @@ class AQY_Game(models.Model):
     relatedMainTournament = models.ForeignKey(
         Main_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="maintournamentAQY_relName"
     )
+    
+    relatedMiniTournament = models.ForeignKey(
+        Mini_Tournaments, on_delete=models.SET_NULL, null=True, blank=True, related_name="minitournamentAQY_relName"
+    )
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
 
@@ -365,6 +372,12 @@ class AQY_Game(models.Model):
 
         if self.relatedTournament:
             SF_M_ProcessTournamentEndGame(request, "AQY", self, winnerNamesArray)
+
+        if self.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(request, MAIN_T_FLAG, self.relatedMainTournament, self, winnerNamesArray, finalResults)
+
+        if self.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(request, MINI_T_FLAG, self.relatedMiniTournament, self, winnerNamesArray, finalResults)
 
     def currentTurnString(self):
         return SR_currentTurnString("AQY", self.turn, self.phase)

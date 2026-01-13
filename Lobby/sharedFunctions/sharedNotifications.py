@@ -25,6 +25,9 @@ from email.mime.multipart import MIMEMultipart
 
 from django.conf import settings
 
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
+
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
     "FcmBot",
@@ -873,7 +876,7 @@ def SN_M_T_sendTournamentGameStartNotification(
     activate(originalLang)
 
 
-def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, _tournamentType):
+def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, mainORmini):
     originalLang = get_language()
     try:
         user = User.objects.get(username=_player)
@@ -889,7 +892,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, _t
         activate(profile.profileLanguage)
         gameStrings = getGameStrings(_game)
         subject = gameStrings["tournamentWinSubject"]
-        if _tournamentType == "miniTournament":
+        if mainORmini == MINI_T_FLAG:
             subject = gameStrings["miniTournamentWinSubject"]   
         boxName = gameStrings["boxName"]
 
@@ -1483,7 +1486,9 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
     serverAddress = SERVERS[idx]
 
     if settings.LOCAL_USER:
-        user = User.objects.get(email=toEmail)
+        user = User.objects.filter(email=toEmail).first()
+        if user is None:
+            user = User.objects.get(id=1)
         user.email_user(subject, message)
     else:
         msg = MIMEMultipart()
