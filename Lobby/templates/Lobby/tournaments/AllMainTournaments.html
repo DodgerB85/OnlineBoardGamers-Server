@@ -19,7 +19,7 @@
 If anything does happen then I will keep the tournament going if at all possible, but be aware that worst case, you should still get a few fun games of FCM!</span><br />
 -->
     <h1>{% translate "Tournaments" %}</h1>
-    <p style="font-size: 25px;">
+    <p class="size25text">
       {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
       Horseless Carrige,
       {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
@@ -37,7 +37,7 @@ If anything does happen then I will keep the tournament going if at all possible
       <br />
       {% translate "For more information on tournaments, see" %} <a class="linkOther" id="helpLink2" href="{% url 'helpTournaments' %}">Tournaments Help</a> and check the Discord!
     </p>
-    <p style="font-size: 25px;">
+    <p class="size25text">
       <a class="linkOther" href="{% url 'MiniTournaments' %}">{% translate "Click here for Mini Tournaments" %}</a>
     </p>
     <div class="allTournamentsContainer">
@@ -84,11 +84,8 @@ If anything does happen then I will keep the tournament going if at all possible
         </table>
       </div>
     </div>
-    <p style="font-size: 25px;">
-      <img src="{% static "TGZ/images/tgz_icon.png" %}"
-           alt="Tgz Tourney"
-           title="Tgz Tourney"
-           class="statsIMG">
+    <p class="size25text">
+      {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
       Old TGZ Tournaments were run externally. View them on the <a href="{% url 'TGZtournaments' %}" class="linkOther">Old TGZ Tournaments Page</a>
     </p>
     <br />

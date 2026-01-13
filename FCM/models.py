@@ -25,7 +25,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
     SF_kickoutRequired,
     SF_M_ProcessTournamentEndGame,
-    SF_M_ProcessMiniTournamentEndGame,
+    SF_M_ProcessAnyTournamentEndGame,
 )
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
@@ -49,7 +49,10 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
 )
 
-from Lobby.models import User, Mini_Tournaments  # , Profile
+from Lobby.models import User, Mini_Tournaments, Main_Tournament
+
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
 
 logger = logging.getLogger(__name__)
 
@@ -248,6 +251,14 @@ class FCM_Game(models.Model):
         null=True,
         blank=True,
         related_name="tournament_relName",
+    )
+
+    relatedMainTournament = models.ForeignKey(
+        Main_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="maintournamentFCM_relName",
     )
 
     relatedMiniTournament = models.ForeignKey(
@@ -1159,11 +1170,28 @@ class FCM_Game(models.Model):
             finalPositions.append(_finalScores[i][0])
         SN_M_sendEndGameNotification(request, "FCM", finalPositions, _gameID, self)
 
+        # TODOT
+        # Get the TB passed back from the game
+        tournamentTBdata = []
         if self.relatedTournament:
             SF_M_ProcessTournamentEndGame(request, "FCM", self, [_winner])
+        elif self.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MAIN_T_FLAG,
+                self.relatedMainTournament,
+                self,
+                [_winner],
+                tournamentTBdata,
+            )
         elif self.relatedMiniTournament:
-            SF_M_ProcessMiniTournamentEndGame(
-                request, self.relatedMiniTournament, self, [_winner], finalPositions
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MINI_T_FLAG,
+                self.relatedMainTournament,
+                self,
+                [_winner],
+                tournamentTBdata,
             )
 
     def getGameCode(self):

@@ -31,6 +31,8 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
+from .common import create_aqy_game
+
 from .models import AQY_Game
 from Lobby.models import User, Profile
 
@@ -51,141 +53,9 @@ def createAQYgame(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-    # if 'trainingGame' not in request.POST and request.user.username != "admin"  and request.user.username != "massibull" and request.user.username != "DodgerB":
-    #    messages.error(request, gettext('Practice games only for now'))
-    #    return HttpResponseRedirect(reverse("createAQYpage"))
-
-    players = ["player2", "player3", "player4"]
-    usernames = []
-    for player in players:
-        username = request.POST.get(player)
-        if username:
-            usernames.append(username)
-
-    if "trainingGame" not in request.POST:
-        existing_users = User.objects.filter(username__in=usernames)
-        existing_usernames = set(user.username for user in existing_users)
-
-        for username in usernames:
-            if username not in existing_usernames:
-                messages.error(request, gettext(f"Error: {username} does not exist"))
-                return HttpResponseRedirect(reverse("createAQYpage"))
-            if username == request.user.username:
-                messages.error(request, gettext("Error: You cannot add yourself"))
-                return HttpResponseRedirect(reverse("createAQYpage"))
-
-    _gameDescription = request.POST["gameDescription"]
-    _maxPlayers = int(request.POST.get("playerNumber", "2"))
-    _startingOptions = []
-    if "trainingGame" in request.POST:
-        _startingOptions.append(int(request.POST["trainingGame"]))
-    if "learningGame" in request.POST:
-        _startingOptions.append(int(request.POST.get("learningGame")))
-    if "experiencedGame" in request.POST:
-        _startingOptions.append(int(request.POST.get("experiencedGame")))
-
-    _pace = request.POST["pace"]
-    _created = SR_getTimeNow()
-
-    with transaction.atomic():
-        newGame = AQY_Game(
-            gameDescription=_gameDescription,
-            creator=request.user,
-            host=request.user,
-            gamePace=_pace,
-            turn=0,
-            phase=0,
-            created=_created,
-            latestUpdate=_created,
-            maxPlayers=_maxPlayers,
-            gameStatus="AVAILABLE",
-        )
-        newGame.save()
-
-        _gameName = request.POST["gameName"]
-        if _gameName != "":
-            newGame.gameName = _gameName
-
-        newGame.allPlayers.add(request.user)
-
-        if "trainingGame" in request.POST:
-            newGame.gameStatus = "ACTIVE"
-            shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3"]
-            shadow_players = []
-
-            for i in range(1, _maxPlayers):
-                shadow_player = User.objects.get(username=f"{shadow_names[i-1]}")
-                newGame.allPlayers.add(shadow_player)
-
-                if request.POST[f"player{i+1}"]:
-                    display_name = request.POST[f"player{i+1}"]
-                else:
-                    display_name = f"{shadow_names[i-1]}"
-                shadow_players.append(display_name)
-
-            # newGame.rewindConsent = "2" * (_maxPlayers - 1)
-            newGame.player0notes = json.dumps(shadow_players)
-            newGame.startGame(request)
-        else:
-            usernamesToNotify = []
-            for i in range(2, _maxPlayers + 1):
-                player_username = request.POST.get(f"player{i}", "")
-                if player_username:
-                    newPlayer = get_object_or_404(User, username=player_username)
-                    newGame.gameStatus = "WAITING"
-                    newGame.invitedPlayers.add(newPlayer)
-                    usernamesToNotify.append(newPlayer.username)
-
-            SN_sendInviteNotifications(
-                request,
-                usernamesToNotify,
-                newGame.getGameName(),
-                _maxPlayers,
-                "AQY",
-            )
-
-        newGame.kickoutDuration = request.POST["kickoutDuration"]
-        zoomLevels = [16] * _maxPlayers
-        newGame.zoomLevels = json.dumps(zoomLevels)
-        newGame.statsExcludeConsent = "0" * _maxPlayers
-
-        if "trainingGame" in request.POST:
-            newGame.statsExcludeConsent = "1" * _maxPlayers
-            newGame.statsExcludedGame = True
-        elif "learningGame" in request.POST:
-            # newGame.rewindConsent = "2" * (_maxPlayers)
-            newGame.statsExcludeConsent = "1" * _maxPlayers
-            newGame.statsExcludedGame = True
-
-        newGame.startingOptions = json.dumps(_startingOptions)
-        if "mapData" in request.POST and request.POST["mapData"] != "":
-            newGame.startingMap = request.POST["mapData"]
-
-        if "privateGame" in request.POST:
-            newGame.gameStatus = "PRIVATE"
-
-        newGame.save()
-
-    if "trainingGame" in request.POST:
-        messages.success(request, gettext("Your Practice game has started"))
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "current"})
-        )
-    else:
-        messages.success(request, (SF_getGameCreationJsonReturn("AQY", newGame.id)))
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "waiting"})
-        )
-
+    return create_aqy_game(request)
 
 def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    # ALLOWED_USERS = ["admin", "ha.steven", "Kawlos", "Jasonbartfast", "Batch", "Juni", "TDUBZ", "BigBad", "massibull", "durendal", 'DodgerB', 'BotKickStarter', '33', 'Rastko', 'Burmer', 'phil', 'PhasingPlayer', 'Benkyo', 'Steveth', "F1087", "krieg90", "gdc"]
-    #                 #'looogic', 'Burmer',
-    #                 #'pgh_gamer', , 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
-    ##print("******************************************************************************************************** AQY ACCESS: =================================================:  " + request.user.username)
-    # if request.user.username not in ALLOWED_USERS:
-    #    return redirect('index')
-
     try:
         currentGame = (
             AQY_Game.objects.select_related("host", "relatedTournament", "creator")
@@ -376,11 +246,6 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
 @contextmanager
 def db_mutex(name, timeout=10):
-    # if settings.DEBUG:
-    # if 1==2:
-    #    print('Not creating mutex ' + name)
-    #    yield
-    #    return
     mutex_name = "lockAQYgame_" + name
     cursor = connection.cursor()
     # timeout returns with error

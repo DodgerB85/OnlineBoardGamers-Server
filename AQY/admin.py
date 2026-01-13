@@ -23,7 +23,8 @@ class AQY_GameAdmin(admin.ModelAdmin):
         "invitedPlayers",
         "playersWithChatNotification",
         "relatedTournament",
-        # "relatedMiniTournament",
+        "relatedMainTournament",
+        "relatedMiniTournament",
     ]
 
     # Map your Textareas here without needing a separate Form class
@@ -59,7 +60,8 @@ class AQY_GameAdmin(admin.ModelAdmin):
                 "host",
                 # "winner",
                 "relatedTournament",
-                # "relatedMiniTournament",
+                "relatedMainTournament",
+                "relatedMiniTournament",
             )
         )
 
@@ -137,8 +139,10 @@ class AQY_GameAdmin(admin.ModelAdmin):
             return getattr(
                 obj.relatedTournament, "tournamentName", str(obj.relatedTournament)
             )
-        # if obj.relatedMiniTournament:
-        #    return f"Mini: {getattr(obj.relatedMiniTournament, 'tournamentName', 'Unknown')}"
+        if obj.relatedMainTournament:
+            return f"Main: {getattr(obj.relatedMainTournament, 'tournamentName', 'Unknown')}"
+        if obj.relatedMiniTournament:
+            return f"Mini: {getattr(obj.relatedMiniTournament, 'tournamentName', 'Unknown')}"
         return "-"
 
     list_display = (
@@ -153,7 +157,8 @@ class AQY_GameAdmin(admin.ModelAdmin):
         "gameStatus",
         "maxPlayers",
         "relatedTournament",
-        # "relatedMiniTournament",
+        "relatedMainTournament",
+        "relatedMiniTournament",
     )
     search_fields = ("gameName", "creator__username")
 
@@ -260,7 +265,7 @@ class AQY_GameAdmin(admin.ModelAdmin):
             "Linked Tournament",
             {
                 "classes": ("collapse",),
-                "fields": ("relatedTournament",),  # "relatedMiniTournament"),
+                "fields": ("relatedTournament", "relatedMainTournament", "relatedMiniTournament"),
             },
         ),
     )
