@@ -11,7 +11,7 @@ from django.conf import settings
 
 # from django.utils.translation import gettext, gettext_lazy
 
-from Lobby.models import User
+from Lobby.models import User, Main_Tournament
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -157,6 +157,7 @@ class AQY_Tournament(models.Model):
             "winnerHTML": winnerHTML,
             "createdTS": createdTS,
             "gameCode": "AQY",
+            "tournamentLink": f"/AQYtournament/AQY/{self.id}/",
         }
 
     def getRoundsHTML(self):
@@ -281,6 +282,10 @@ class AQY_Game(models.Model):
         null=True,
         blank=True,
         related_name="tournament_relName_AQY",
+    )
+    
+    relatedMainTournament = models.ForeignKey(
+        Main_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="maintournamentAQY_relName"
     )
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)

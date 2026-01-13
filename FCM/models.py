@@ -130,6 +130,7 @@ class FCM_Tournament(models.Model):
             "winnerHTML": winnerHTML,
             "createdTS": createdTS,
             "gameCode": "FCM",
+            "tournamentLink": f"/FCMtournament/FCM/{self.id}/",
         }
 
     def getRoundsHTML(self):

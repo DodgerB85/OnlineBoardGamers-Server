@@ -223,6 +223,7 @@ class Bus_Tournament(models.Model):
             "winnerHTML": winnerHTML,
             "createdTS": createdTS,
             "gameCode": "Bus",
+            "tournamentLink": f"/Bustournament/Bus/{self.id}/",
         }
 
     def getRoundsHTML(self):

@@ -174,6 +174,7 @@ class HC_Tournament(models.Model):
             "winnerHTML": winnerHTML,
             "createdTS": createdTS,
             "gameCode": "HC",
+            "tournamentLink": f"/HCtournament/HC/{self.id}/",
         }
 
     def getRoundsHTML(self):

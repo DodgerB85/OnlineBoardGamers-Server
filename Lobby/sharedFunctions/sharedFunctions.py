@@ -538,7 +538,7 @@ def SF_M_ProcessTournamentEndGame(request, _game, _currentGame, _winnerArray):
 
         # check for winner
         if (
-            _currentGame.relatedTournament.nextRoundPlayers.all().count()
+            _currentGame.relatedTournament.nextRoundPlayers.count()
             < _currentGame.relatedTournament.maxGamePlayers
         ):
             # End the Tournament ONLY WORKS HERE FOR RR in KO, KO, TL
@@ -1026,9 +1026,9 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         pointsList.sort(key=lambda x: x[1])  # Sort by points (descending)
         maxPoints = pointsList[0][1]
         allPlayersList = [row[0] for row in pointsList if row[1] >= maxPoints]
-        if len(allPlayersList) < tournament.maxGamePlayers:
-            ret["endTournament"] = True
-            return ret
+        #if len(allPlayersList) < tournament.maxGamePlayers:
+        #    ret["endTournament"] = True
+        #    return ret
         roundNumberString += " (KO)"
 
     # Set final round label if exactly maxGamePlayers remain
@@ -1038,7 +1038,7 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         )
 
     # MT - Handle byes if needed - Only BYE if there is exactly 1 player left - No byes in MG
-    if tournamentType == "mini":
+    if tournamentType == "MiniT":
         if len(allPlayersList) % tournament.maxGamePlayers == 1 and len(allPlayersList) > tournament.maxGamePlayers:
             byePlayers = []
 
@@ -1138,7 +1138,7 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
 
         # Handle remaining players (>2 or 1)
         # MT just make games if possible
-        if tournamentType == "mini" and len(allPlayersList) >= 2:
+        if tournamentType == "MiniT" and len(allPlayersList) >= 2:
             currentPlayers = allPlayersList[:]
             gamesPlayers.append(currentPlayers)
             allPlayersList.clear()
@@ -1156,15 +1156,24 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         #                playerData[1] += pointsMap.get(MiniTournament.maxGamePlayers, 1)
         #                break
         #        MiniTournament.tournamentPointsData = json.dumps(pointsList)
-    ret["endTournament"] = False
-    if tournament.tournamentType == "MG" and len(allPlayersList) == 0:
-        ret["endTournament"] = True
+    #ret["endTournament"] = False
+    #if tournament.tournamentType == "MG" and len(allPlayersList) == 0:
+    #    ret["endTournament"] = True
     ret["roundNumberString"] = roundNumberString
     ret["byePlayers"] = byePlayers
     ret["gamesPlayers"] = gamesPlayers
 
     return ret
 
+
+def SF_checkForAnyTournamentEnd(tournament, tournamentType):
+    # For any tournament, check if there's a winner or not enough players for a FULL game
+    if tournament.nextRoundPlayers.count() < tournament.maxGamePlayers:
+        return True
+
+    return False
+
+# End common main/mini functions
 
 ######################################
 #
@@ -1286,7 +1295,7 @@ def SF_startMiniTournament(request, MiniTournament):
 #    from FCM.common import create_fcm_game
 #
 #    # check for winner
-#    if MiniTournament.nextRoundPlayers.all().count() < MiniTournament.maxGamePlayers:
+#    if MiniTournament.nextRoundPlayers.count() < MiniTournament.maxGamePlayers:
 #        # End the Tournament ONLY WORKS HERE FOR RR in KO, KO, TL
 #        SF_endMiniTournament(request, _currentGame, _game, _winnerArray)
 #        MiniTournament.save()
@@ -1447,20 +1456,24 @@ def start_next_mini_tournament_round(request, MiniTournament, _currentGame, _win
     from TGZ.common import create_tgz_game
 
     # Check if there's a winner or not enough players for a FULL game
-    if MiniTournament.nextRoundPlayers.count() < MiniTournament.maxGamePlayers:
+    #if MiniTournament.nextRoundPlayers.count() < MiniTournament.maxGamePlayers:
+    #    SF_endMiniTournament(request, MiniTournament, _currentGame, _winnerArray)
+    #    MiniTournament.save()
+    #    return
+    if SF_checkForAnyTournamentEnd(MiniTournament, "MiniT") == True:
         SF_endMiniTournament(request, MiniTournament, _currentGame, _winnerArray)
         MiniTournament.save()
         return
 
-    ret = SF_createNextRoundGamesSetup(MiniTournament, "mini")
+    ret = SF_createNextRoundGamesSetup(MiniTournament, "MiniT")
 
     # Clear nextRoundPlayers for new assignments
     MiniTournament.nextRoundPlayers.clear()
 
-    if ret["endTournament"] == True:
-        SF_endMiniTournament(request, MiniTournament, _currentGame, _winnerArray)
-        MiniTournament.save()
-        return
+    #if ret["endTournament"] == True:
+    #    SF_endMiniTournament(request, MiniTournament, _currentGame, _winnerArray)
+    #    MiniTournament.save()
+    #    return
 
     roundData = []
 
@@ -1835,10 +1848,11 @@ def start_next_main_tournament_round(request, MainTournament, _currentGame, _win
     from TGZ.common import create_tgz_game
 
     # Check if there's a winner or not enough players for a FULL game
-    if (
-        MainTournament.nextRoundPlayers.count() < MainTournament.maxGamePlayers
-        and MainTournament.tournamentType != "MG"
-    ):
+    #if (
+    #    MainTournament.nextRoundPlayers.count() < MainTournament.maxGamePlayers
+    #    and MainTournament.tournamentType != "MG"
+    #):
+    if SF_checkForAnyTournamentEnd(MainTournament, "MainT") == True:
         SF_endMainTournament(request, MainTournament, _currentGame, _winnerArray)
         MainTournament.save()
         return
@@ -1910,14 +1924,14 @@ def start_next_main_tournament_round(request, MainTournament, _currentGame, _win
 
                 MainTournament.save()
 
-    ret = SF_createNextRoundGamesSetup(MainTournament, "main")
+    ret = SF_createNextRoundGamesSetup(MainTournament, "MainT")
     # Clear nextRoundPlayers for new assignments
     MainTournament.nextRoundPlayers.clear()
 
-    if ret["endTournament"] == True:
-        SF_endMainTournament(request, MainTournament, _currentGame, _winnerArray)
-        MainTournament.save()
-        return
+    #if ret["endTournament"] == True:
+    #    SF_endMainTournament(request, MainTournament, _currentGame, _winnerArray)
+    #    MainTournament.save()
+    #    return
 
     roundData = []
 
