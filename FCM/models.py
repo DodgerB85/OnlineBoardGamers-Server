@@ -177,8 +177,6 @@ class FCM_Game(GeneralGame):
         blank=True,
     )
         
-    seatOffset = models.PositiveSmallIntegerField(blank=False, default=0)
-
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -191,6 +189,7 @@ class FCM_Game(GeneralGame):
         max_length=30, blank=False, default="000000"
     )
 
+    # TODOMODEL change to json, move to general game
     rewindConsent = models.CharField(max_length=10, blank=True)
 
     playersMoveData = models.TextField(blank=True)
@@ -436,7 +435,7 @@ class FCM_Game(GeneralGame):
         # 16-nightShift
 
         # Check for new player order seed
-        self.seatOffset = random.randint(1000, 32767)
+        self.playerOrderSeed = random.randint(1000, 32767)
         # Copy in an initial value to prevent forced LU values of 99999 overwriting maps
         self.latestUpdate = self.created
         self.save()
@@ -506,7 +505,7 @@ class FCM_Game(GeneralGame):
             playerList = [
                 p.username for p in all_players_list if p.username != "FCMtourneyAdmin"
             ]
-            random.Random(self.seatOffset).shuffle(playerList)
+            random.Random(self.playerOrderSeed).shuffle(playerList)
             if withoutBots:
                 return playerList
 
@@ -527,8 +526,8 @@ class FCM_Game(GeneralGame):
                 ]
             )
             playerList = playerString.split(",")
-            if self.seatOffset > 0:
-                for i in range(self.seatOffset):
+            if self.playerOrderSeed > 0:
+                for i in range(self.playerOrderSeed):
                     playerList.append(playerList.pop(0))
             if withoutBots:
                 return playerList

@@ -129,7 +129,7 @@ def create_fcm_game(
     host = None
     game_pace = 30
     created = SR_getTimeNow()
-    seat_offset = 0
+    player_Order_Seed = 0
     starting_options = []
     max_players = 2
     game_status = "AVAILABLE"
@@ -156,7 +156,7 @@ def create_fcm_game(
         host = creator
         game_pace = 30
         kickout_duration = 100
-        seat_offset = randint(1000, 32767)
+        player_Order_Seed = randint(1000, 32767)
         starting_options = tournamentObj.startingOptions
         rewind_consent = "0" * max_players
         notificationSuppression = "0" * max_players
@@ -247,7 +247,7 @@ def create_fcm_game(
             tiles = request.POST["mapData"].split(",")
             max_players = {18: 2, 24: 3, 32: 4, 40: 5, 48: 6}.get(len(tiles), 2)
 
-        seat_offset = randint(0, max_players - 1)
+        player_Order_Seed = randint(0, max_players - 1)
         starting_options = buildFCMstartingOptions(
             request.POST
         )  # Use the extracted function
@@ -321,7 +321,7 @@ def create_fcm_game(
             phase=0,
             created=created,
             latestUpdate=created,
-            seatOffset=seat_offset,
+            playerOrderSeed=player_Order_Seed,
             startingOptions=starting_options,
             maxPlayers=max_players,
             gameStatus=game_status,

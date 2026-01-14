@@ -39,8 +39,6 @@ class RNB_Game(GeneralGame):
     invitedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="RNBinvitedPlayersRelName", blank=True)
     playersWithChatNotification = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="RNBplayersWithChatNotificationName", blank=True)
     
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="RNBgame_winner_relName", blank=True)
 
     rewRNBData = models.TextField(blank=True)

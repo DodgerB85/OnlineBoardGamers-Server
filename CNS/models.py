@@ -61,8 +61,6 @@ class CNS_Game(GeneralGame):
         blank=True,
     )
     
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

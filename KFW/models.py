@@ -62,8 +62,6 @@ class KFW_Game(GeneralGame):
         settings.AUTH_USER_MODEL, related_name="KFWplayersWithChatNotificationName", blank=True
     )
     
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-
     winner = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="KFWgame_winner_relName", blank=True)
 
     player4notes = models.TextField(blank=True)

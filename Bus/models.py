@@ -344,8 +344,6 @@ class Bus_Game(GeneralGame):
         blank=True,
     )
     
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -354,6 +352,7 @@ class Bus_Game(GeneralGame):
         blank=True,
     )
 
+    # TODOMODEL change to json, move to general
     rewindConsent = models.CharField(max_length=10, blank=False, default="00000")
 
     player4notes = models.TextField(blank=True)
