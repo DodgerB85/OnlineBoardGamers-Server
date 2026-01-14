@@ -182,6 +182,7 @@ class HC_GameAdmin(admin.ModelAdmin):
                     "latestUpdate",
                     "startingOptions",
                     "seatOffset",
+                    "playerOrderSeed"
                 )
             },
         ),
