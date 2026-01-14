@@ -1138,7 +1138,7 @@ def _processTurn(request):
     # NEW
     elif jsonData["action"] == "saveSimulMove":
         unableToMove = jsonData["unableToMove"] if "unableToMove" in jsonData else False
-        continueFromStalledGame = jsonData["continueFromStalledGame"]
+        continueFromStalledGame = jsonData["continueFromStalledGame"] if "continueFromStalledGame" in jsonData else False
 
         if (
             str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate)
