@@ -26,9 +26,10 @@ class Migration(migrations.Migration):
         ('Lobby', '0052_add_cross_game_views_20251221_2139'),
     ]
 
-    operations = [
-        migrations.RunSQL(
-            sql=CREATION_SQL_V2,
-            reverse_sql=CREATION_SQL_V1
-        )
-    ]
+    # CAUSES CRASHES
+    #operations = [
+    #    migrations.RunSQL(
+    #        sql=CREATION_SQL_V2,
+    #        reverse_sql=CREATION_SQL_V1
+    #    )
+    #]
