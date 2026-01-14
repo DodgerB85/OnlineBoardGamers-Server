@@ -435,8 +435,100 @@ class GeneralGame(models.Model):
     statsExcludeConsent = models.CharField(max_length=40, blank=True, null=True)
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
+    ####### THESE ITEMS ONLY EXIST IN THIS GENERAL GAME MODEL
+    activeVotes = models.JSONField(default=dict, blank=True, null=True)
+    
     class Meta:
         abstract = True
+        
+    def clearGeneralDataOnGameEndWithoutSave(self):
+        self.gameStatus = "FINISHED"
+        self.rewindData = ""
+        self.rewindTempData = ""
+        self.kickoutFlexiData = ""
+        self.statsExcludeConsent = ""
+        self.deleteGameVotes = None
+        self.activeVotes = None
+        
+        
+        
+    ###### VOTING METHODS #######
+    def castVote(self, topic, username, choice):
+        """
+        Saves a specific choice for a user.
+        Example: topic='rewind', choice=2
+        """
+        # Double check player is in the game - WAIT FOR ALL PLAYERS TO MOVE HERE
+        #if playerName not in [p.username for p in self.allPlayers.all()]:
+        #    return False  # Player not in the game
+        if not self.activeVotes:
+            self.activeVotes = {}
+            
+        if topic not in self.activeVotes:
+            self.activeVotes[topic] = {}
+        
+        # Store as {"username": choice}
+        self.activeVotes[topic][username] = choice
+        return True
+    
+    # The topic might not be in activeVotes, but sometimes we want a full return set of username: T/F
+    def getFullSetOfTrueFalseVotes(self, topic, usernames):   
+        # Initialize the return dictionary with False for every provided username
+        generalReturn = {username: False for username in usernames}
+        
+        # If game is finished or no votes exist at all, return the all-False set
+        if self.gameStatus == "FINISHED" or not self.activeVotes:
+            return generalReturn
+        
+        # If this specific topic hasn't been started, return the all-False set
+        if topic not in self.activeVotes:
+            return generalReturn
+        
+        currentVotes = self.activeVotes[topic]
+
+        # Update the return set with actual votes where they exist
+        for username in usernames:
+            if username in currentVotes:
+                generalReturn[username] = currentVotes[username]
+        
+        return generalReturn
+
+    def getVoteResults(self, topic):
+        """
+        Returns a tally of choices.
+        Example: {0: 1, 1: 3} (1 person voted '0', 3 people voted '1')
+        """
+        if not self.activeVotes or topic not in self.activeVotes:
+            return {}
+            
+        results = {}
+        for choice in self.activeVotes[topic].values():
+            results[choice] = results.get(choice, 0) + 1
+        return results
+
+    def check_unanimous_choice_in_set(self, topic, allowed_choices, total_required):
+        """
+        Checks if EVERY player has voted and their choices are within the allowed set.
+        allowed_choices can be a single value (1) or a list ([1, 2]).
+        """
+        if not self.activeVotes or topic not in self.activeVotes:
+            return False
+        
+        votes = self.activeVotes.get(topic, {})
+        
+        # 1. Ensure everyone has voted
+        if len(votes) < total_required:
+            return False
+
+        # 2. Ensure allowed_choices is a list for the 'in' check
+        if not isinstance(allowed_choices, (list, tuple, set)):
+            allowed_choices = [allowed_choices]
+
+        # 3. Check if all submitted votes are in the allowed list
+        # (e.g., if all values are 1 or 2)
+        return all(val in allowed_choices for val in votes.values())
+    
+    # End voting methods
 
 
 class QueryableGame(models.Model):
