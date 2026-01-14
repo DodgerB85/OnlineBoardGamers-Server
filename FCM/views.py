@@ -472,12 +472,17 @@ def test(request):
 
 
 #    currentGame.endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["gameID"], currentGame)
-def endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID, currentGame):
+def endGame(
+    request, _winnerUsername, _finalScores, _tournamentData, _gameID, currentGame
+):
     with db_mutex(str(_gameID)):
-        return currentGame.endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID)
- 
+        return currentGame.endGame(
+            request, _winnerUsername, _finalScores, _tournamentData, _gameID
+        )
+
 
 def processTurn(request):
+    #time.sleep(5)
     # processing a turn must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -556,6 +561,16 @@ def _processTurn(request):
             )
         currentGame.save()
         return JsonResponse({"unlockStatus": True}, safe=False)
+
+    elif jsonData["action"] == "deleteMoveData":
+        currentGame.clearAllMoveDataV2()
+        currentGame.save()
+        return JsonResponse(
+            {
+                "result": 2,
+            },
+            safe=False,
+        )
 
     elif jsonData["action"] == "saveInProgressMap":
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
@@ -1072,7 +1087,14 @@ def _processTurn(request):
         ################ END REWIND EVERY SAVE #######################
 
         if jsonData["status"] == "FINISHED":
-            endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["tournamentData"], jsonData["gameID"], currentGame)
+            endGame(
+                request,
+                jsonData["winner"],
+                jsonData["finalScores"],
+                jsonData["tournamentData"],
+                jsonData["gameID"],
+                currentGame,
+            )
 
         currentGame.removeSingleRewindPermission()
 
@@ -1104,7 +1126,8 @@ def _processTurn(request):
 
     # NEW
     elif jsonData["action"] == "saveSimulMove":
-        movedPlayers = jsonData["movedPlayers"]
+        unableToMove = jsonData["unableToMove"]
+        continueFromStalledGame = jsonData["continueFromStalledGame"]
 
         if (
             str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate)
@@ -1125,57 +1148,58 @@ def _processTurn(request):
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        currentGame.turn = jsonData["turn"]
-        currentGame.phase = jsonData["phase"]
+        if not continueFromStalledGame:
+            currentGame.turn = jsonData["turn"]
+            currentGame.phase = jsonData["phase"]
 
-        nameToUpdate = request.user.username
-        if request.user.username in FCMsuperUsers:
-            nameToUpdate = jsonData["BKSN"]
-            if nameToUpdate.startswith("FCMtourneyAdmin/"):
-                name_parts = nameToUpdate.split("/", 1)
-                nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUpdate
+            nameToUpdate = request.user.username
+            if request.user.username in FCMsuperUsers:
+                nameToUpdate = jsonData["BKSN"]
+                if nameToUpdate.startswith("FCMtourneyAdmin/"):
+                    name_parts = nameToUpdate.split("/", 1)
+                    nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUpdate
 
-        phaseArr = [-1]
-        if currentGame.phase == 0 or currentGame.phase == 1 or currentGame.phase == 2:
-            phaseArr = [0, 1, 2]
-        elif currentGame.phase == 3:
-            phaseArr = [3, 4]
-        elif currentGame.phase in [5, 6, 7, 8, 9, 11, 12, 15]:
-            phaseArr = [5, 6, 7, 8, 9, 11, 12, 15]
-        # Decompress the incoming data
-        decompressedData = json.loads(
-            gzip.decompress(bytearray(base64.b64decode(jsonData["moveData"]))).decode(
-                "utf-8"
-            )
-        )
-
-        currentGame.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
-
-        if currentGame.phase != 0 and currentGame.phase != 1:
-            currentGame.currentPlayers = currentGame.getCurrentSimulPlayers()
-
-        if request.user.username in FCMsuperUsers:
-            flexName = jsonData["BKSN"]
-            if flexName.startswith("FCMtourneyAdmin/"):
-                name_parts = flexName.split("/", 1)
-                flexName = name_parts[1] if len(name_parts) > 1 else flexName
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(
-                currentGame.kickoutFlexiData,
-                currentGame.latestUpdate,
-                int(time.time()) * 1000,
-                flexName,
-                currentGame.kickoutDuration,
-            )
-        else:
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(
-                currentGame.kickoutFlexiData,
-                currentGame.latestUpdate,
-                int(time.time()) * 1000,
-                request.user.username,
-                currentGame.kickoutDuration,
+            phaseArr = [-1]
+            if currentGame.phase == 0 or currentGame.phase == 1 or currentGame.phase == 2:
+                phaseArr = [0, 1, 2]
+            elif currentGame.phase == 3:
+                phaseArr = [3, 4]
+            elif currentGame.phase in [5, 6, 7, 8, 9, 11, 12, 15]:
+                phaseArr = [5, 6, 7, 8, 9, 11, 12, 15]
+            # Decompress the incoming data
+            decompressedData = json.loads(
+                gzip.decompress(bytearray(base64.b64decode(jsonData["moveData"]))).decode(
+                    "utf-8"
+                )
             )
 
-        response = currentGame.getJsonMoveResponseV2(movedPlayers)
+            currentGame.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
+
+            if currentGame.phase != 0 and currentGame.phase != 1:
+                currentGame.currentPlayers = currentGame.getCurrentSimulPlayers()
+
+            if request.user.username in FCMsuperUsers:
+                flexName = jsonData["BKSN"]
+                if flexName.startswith("FCMtourneyAdmin/"):
+                    name_parts = flexName.split("/", 1)
+                    flexName = name_parts[1] if len(name_parts) > 1 else flexName
+                currentGame.kickoutFlexiData = SF_updateFlexiTime(
+                    currentGame.kickoutFlexiData,
+                    currentGame.latestUpdate,
+                    int(time.time()) * 1000,
+                    flexName,
+                    currentGame.kickoutDuration,
+                )
+            else:
+                currentGame.kickoutFlexiData = SF_updateFlexiTime(
+                    currentGame.kickoutFlexiData,
+                    currentGame.latestUpdate,
+                    int(time.time()) * 1000,
+                    request.user.username,
+                    currentGame.kickoutDuration,
+                )
+
+        response = currentGame.getJsonMoveResponseV2(unableToMove)
 
         currentGame.save()
         return JsonResponse(response, safe=False)
@@ -1311,8 +1335,14 @@ def _processTurn(request):
 
         # End Game
         if jsonData["phase"] == 10:
-            endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["tournamentData"], jsonData["gameID"], currentGame)
-
+            endGame(
+                request,
+                jsonData["winner"],
+                jsonData["finalScores"],
+                jsonData["tournamentData"],
+                jsonData["gameID"],
+                currentGame,
+            )
 
         return JsonResponse(
             {

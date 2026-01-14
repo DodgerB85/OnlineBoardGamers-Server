@@ -898,9 +898,11 @@ class FCM_Game(GeneralGame):
             ).decode("utf-8"),
         }
         # Don't clear moves at end of payday to preserve fridge data
+        # Actually, clearing moves can cause no turn order if the players browser doesn't respond
         if self.phase != 7 and self.phase != 3:
-            self.clearAllMoveDataV2()
-
+            #self.clearAllMoveDataV2()
+            pass
+        
         # Add latest update to stop flex time being double deducted
         newVer = (int(self.latestUpdate) % 1000) + 1
         self.latestUpdate = str((int(time.time()) * 1000) + newVer)
