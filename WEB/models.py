@@ -62,8 +62,6 @@ class WEB_Game(GeneralGame):
         settings.AUTH_USER_MODEL, related_name="WEBplayersWithChatNotificationName", blank=True
     )
     
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-
     winner = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="WEBgame_winner_relName", blank=True)
     
     def __str__(self):

@@ -179,7 +179,7 @@ class FCM_GameAdmin(admin.ModelAdmin):
                     "latestUpdate",
                     "startingOptions",
                     "startingMap",
-                    "seatOffset",
+                    "playerOrderSeed",
                 )
             },
         ),

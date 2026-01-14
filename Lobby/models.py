@@ -372,6 +372,9 @@ class GeneralGame(models.Model):
         default="AVAILABLE",
         db_index=True,
     )
+    
+    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
+
 
     # This is a STRING of the currentPlayer username
     # IT SHOULD PROBABLY BE CHANGED TO M2M FIELD WITH USERS

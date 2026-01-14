@@ -272,14 +272,14 @@ class HC_Game(GeneralGame):
         settings.AUTH_USER_MODEL, related_name="HCplayersWithChatNotificationName", blank=True
     )
     
-    serverTurnOrder = models.CharField(max_length=20, blank=True)
-
+    # TODOMODEL: Replace this with playerOrderSeed
     seatOffset = models.PositiveSmallIntegerField()
 
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_winner_relName", blank=True
     )
 
+    # TODOMODEL change to json, move to general game
     rewindConsent = models.CharField(max_length=10, blank=True)
 
     player0currentMoveTime = models.CharField(max_length=30, blank=True)

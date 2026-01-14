@@ -210,8 +210,6 @@ class AQY_Game(GeneralGame):
         blank=True,
     )
     
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-
     winner = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYgame_winner_relName", blank=True
     )
@@ -687,6 +685,8 @@ class AQY_Game(GeneralGame):
 
     def enableStatsExclude(self, _username):
         seatToChange = self.seatPosition(_username, True)
+        if (len(self.statsExcludeConsent)) < self.maxPlayers:
+            self.statsExcludeConsent = "0" * self.maxPlayers
         self.statsExcludeConsent = (
             self.statsExcludeConsent[:seatToChange]
             + "1"
