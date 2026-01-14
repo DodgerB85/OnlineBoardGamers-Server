@@ -6,15 +6,12 @@ import time
 import json
 import logging
 
-from unittest.mock import MagicMock
-from django.contrib.sites.models import Site
-
 from django.db.models import Q
 
 from django.db import models
 from django.conf import settings
 
-from django.utils.translation import gettext, gettext_lazy
+from django.utils.translation import gettext
 
 # from django.utils import translation
 import random
@@ -32,7 +29,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getFCMstartingOptionsHTML,
-    SR_GAME_STATUS_CHOICES,
     SR_getTournamentWinnerHTML,
     SR_getTournamentRoundsHTML,
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -49,7 +45,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
 )
 
-from Lobby.models import User, Mini_Tournaments, AbstractGame, Main_Tournament
+from Lobby.models import User, Mini_Tournaments, GeneralGame, Main_Tournament
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
@@ -149,15 +145,7 @@ class FCM_Tournament(models.Model):
         return roundsHTML
 
 
-class FCM_Game(AbstractGame):
-    latestUpdate = models.CharField(
-        max_length=15, blank=False, default=SR_getTimeNow, db_index=True
-    )
-    startingOptions = models.CharField(max_length=80, blank=True)
-    
-    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=9)
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
-    
+class FCM_Game(GeneralGame):       
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="allPlayersRelName"
     )
@@ -215,9 +203,6 @@ class FCM_Game(AbstractGame):
     player4notes = models.TextField(blank=True)
     player5notes = models.TextField(blank=True)
 
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
-
     relatedTournament = models.ForeignKey(
         FCM_Tournament,
         on_delete=models.SET_NULL,
@@ -241,8 +226,6 @@ class FCM_Game(AbstractGame):
         blank=True,
         related_name="minitournamentFCM_relName",
     )
-
-    deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
         # Use currentPlayers if available, otherwise fall back to gameName and status

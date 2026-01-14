@@ -10,12 +10,12 @@ from django.db.models import Q
 from django.conf import settings
 
 # from django.template.loader import render_to_string
-from django.utils.translation import gettext  # , get_language
+#from django.utils.translation import gettext  # , get_language
 
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.utils import translation
 
-from Lobby.models import User, AbstractGame
+from Lobby.models import User, GeneralGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -32,7 +32,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getBUSstartingOptionsHTML,
-    SR_GAME_STATUS_CHOICES,
     SR_getTournamentWinnerHTML,
     SR_TOURNAMENT_STATUS_CHOICES,
     SR_TOURNAMENT_TYPE_CHOICES,
@@ -312,15 +311,7 @@ class Bus_Tournament(models.Model):
 #
 
 
-class Bus_Game(AbstractGame):
-    latestUpdate = models.CharField(
-        max_length=30, blank=False, default=SR_getTimeNow, db_index=True
-    )
-    startingOptions = models.CharField(max_length=70, blank=True)
-    
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
-    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=3)
-    
+class Bus_Game(GeneralGame):     
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="BusAllPlayersRelName"
     )
@@ -372,9 +363,6 @@ class Bus_Game(AbstractGame):
 
     player4notes = models.TextField(blank=True)
 
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
-
     tournamentGame = models.BooleanField(blank=False, default=False)
     relatedTournament = models.ForeignKey(
         Bus_Tournament,
@@ -383,8 +371,6 @@ class Bus_Game(AbstractGame):
         blank=True,
         related_name="tournament_relName_Bus",
     )
-
-    deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())

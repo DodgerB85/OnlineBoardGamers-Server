@@ -11,19 +11,17 @@ from django.conf import settings
 
 # from django.utils.translation import gettext
 
-from Lobby.models import User, AbstractGame
+from Lobby.models import User, GeneralGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
     SF_kickoutRequired,
 )  # , SF_M_ProcessTournamentEndGame
 from Lobby.sharedFunctions.sharedRefs import (
-    SR_getTimeNow,
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getWEBstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
-    SR_GAME_STATUS_CHOICES,
     # SR_TOURNAMENT_STATUS_CHOICES,
     # SR_TOURNAMENT_TYPE_CHOICES,
     # SR_getTournamentWinnerHTML,
@@ -35,12 +33,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )  # , SN_M_T_sendTournamentGameStartNotification
 
 
-class WEB_Game(AbstractGame):
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
-    startingOptions = models.CharField(max_length=20, blank=True)
-    
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    
+class WEB_Game(GeneralGame):        
     allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="WEBallPlayersRelName")
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="WEBmissingPlayersRelName", blank=True
@@ -74,12 +67,7 @@ class WEB_Game(AbstractGame):
     winner = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="WEBgame_winner_relName", blank=True)
 
     zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([]))
-
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
     
-    deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
-
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
         return f"{getattr(self, 'id')}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"

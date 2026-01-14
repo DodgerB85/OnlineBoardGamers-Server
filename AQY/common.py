@@ -191,7 +191,7 @@ def create_aqy_game(
             creator=creator,
             host=host,
             gamePace=game_pace,
-            turn=0,
+            turn=1,
             phase=0,
             created=created_time,
             latestUpdate=created_time,

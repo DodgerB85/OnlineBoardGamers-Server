@@ -1,17 +1,14 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.utils import translation
 
 import time
 from random import randint
 import json
-import requests
-from django.template.loader import render_to_string
 from django.db.models import Q
 
 
-from Lobby.models import User, Profile, AbstractGame
+from Lobby.models import User, GeneralGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_M_ProcessTournamentEndGame,
@@ -23,7 +20,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getHCstartingOptionsHTML,
-    SR_GAME_STATUS_CHOICES,
     SR_getTournamentWinnerHTML,
     SR_TOURNAMENT_STATUS_CHOICES,
     SR_TOURNAMENT_TYPE_CHOICES,
@@ -255,13 +251,7 @@ class HC_Tournament(models.Model):
         return roundsHTML
 
 
-class HC_Game(AbstractGame):
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
-    startingOptions = models.CharField(max_length=70, blank=True)
-    
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
-    maxPlayers = models.PositiveSmallIntegerField()
-    
+class HC_Game(GeneralGame):
     allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="HCallPlayersRelName")
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="HCmissingPlayersRelName", blank=True
@@ -306,15 +296,10 @@ class HC_Game(AbstractGame):
 
     player4notes = models.TextField(blank=True)
 
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
-
     tournamentGame = models.BooleanField(blank=False, default=False)
     relatedTournament = models.ForeignKey(
         HC_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="tournament_relName"
     )
-
-    deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())

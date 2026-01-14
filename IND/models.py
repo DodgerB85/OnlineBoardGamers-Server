@@ -11,7 +11,7 @@ from django.conf import settings
 
 # from django.utils.translation import gettext
 
-from Lobby.models import User, AbstractGame
+from Lobby.models import User, GeneralGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -24,7 +24,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_gamePaceString,
     SR_getINDstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
-    SR_GAME_STATUS_CHOICES,
     SR_TOURNAMENT_STATUS_CHOICES,
     SR_TOURNAMENT_TYPE_CHOICES,
     SR_getTournamentWinnerHTML,
@@ -173,12 +172,7 @@ class IND_Tournament(models.Model):
         return roundsHTML
 
 
-class IND_Game(AbstractGame):
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
-    startingOptions = models.CharField(max_length=20, blank=True)
-    
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    
+class IND_Game(GeneralGame):        
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDallPlayersRelName"
     )
@@ -229,9 +223,6 @@ class IND_Game(AbstractGame):
 
     player4notes = models.TextField(blank=True)
 
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
-
     tournamentGame = models.BooleanField(blank=False, default=False)
     relatedTournament = models.ForeignKey(
         IND_Tournament,
@@ -242,8 +233,6 @@ class IND_Game(AbstractGame):
     )
 
     playersPreMoveData = models.TextField(blank=True)
-
-    deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
