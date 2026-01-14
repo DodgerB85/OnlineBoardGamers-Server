@@ -71,7 +71,6 @@ class FCM_Tournament(models.Model):
     )
 
     startingOptions = models.CharField(max_length=80, blank=True)
-    # startingMap = models.CharField(max_length=150, blank=True)
     startingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="startingPlayersRelName", blank=True
     )
@@ -177,9 +176,7 @@ class FCM_Game(GeneralGame):
         related_name="playersWithChatNotificationName",
         blank=True,
     )
-    
-    startingMap = models.CharField(max_length=190, blank=True)
-    
+        
     seatOffset = models.PositiveSmallIntegerField(blank=False, default=0)
 
     winner = models.ForeignKey(
@@ -190,13 +187,11 @@ class FCM_Game(GeneralGame):
         blank=True,
     )
 
-    zoomLevels = models.CharField(max_length=30, blank=True)
     notificationSuppression = models.CharField(
         max_length=30, blank=False, default="000000"
     )
 
     rewindConsent = models.CharField(max_length=10, blank=True)
-    statsExcludeConsent = models.CharField(max_length=10, blank=False, default="00")
 
     playersMoveData = models.TextField(blank=True)
 

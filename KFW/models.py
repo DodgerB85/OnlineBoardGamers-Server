@@ -66,8 +66,6 @@ class KFW_Game(GeneralGame):
 
     winner = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="KFWgame_winner_relName", blank=True)
 
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([]))
-
     player4notes = models.TextField(blank=True)
     player5notes = models.TextField(blank=True)
     

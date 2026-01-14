@@ -354,12 +354,7 @@ class Bus_Game(GeneralGame):
         blank=True,
     )
 
-    zoomLevels = models.CharField(
-        max_length=30, blank=False, default=json.dumps([120, 120, 120, 120, 120])
-    )
-
     rewindConsent = models.CharField(max_length=10, blank=False, default="00000")
-    statsExcludeConsent = models.CharField(max_length=10, blank=False, default="00000")
 
     player4notes = models.TextField(blank=True)
 

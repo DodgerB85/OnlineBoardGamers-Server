@@ -65,8 +65,6 @@ class WEB_Game(GeneralGame):
     playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
     winner = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="WEBgame_winner_relName", blank=True)
-
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([]))
     
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
