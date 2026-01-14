@@ -281,7 +281,6 @@ class HC_Game(GeneralGame):
     )
 
     rewindConsent = models.CharField(max_length=10, blank=True)
-    statsExcludeConsent = models.CharField(max_length=10, blank=False)
 
     player0currentMoveTime = models.CharField(max_length=30, blank=True)
     player0currentMoveData = models.TextField(blank=True)

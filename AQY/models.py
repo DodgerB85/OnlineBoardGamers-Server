@@ -210,19 +210,11 @@ class AQY_Game(GeneralGame):
         blank=True,
     )
     
-    startingMap = models.CharField(max_length=80, blank=True)
-
     playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
     winner = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYgame_winner_relName", blank=True
     )
-
-    zoomLevels = models.CharField(
-        max_length=30, blank=False, default=json.dumps([16, 16, 16, 16])
-    )
-
-    statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
 
     player0currentMoveTime = models.CharField(max_length=15, blank=True)
     player0currentMoveData = models.TextField(blank=True)

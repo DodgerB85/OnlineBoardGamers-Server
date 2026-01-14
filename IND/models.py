@@ -217,10 +217,6 @@ class IND_Game(GeneralGame):
         blank=True,
     )
 
-    zoomLevels = models.CharField(
-        max_length=30, blank=False, default=json.dumps([0, 0, 0, 0])
-    )
-
     player4notes = models.TextField(blank=True)
 
     tournamentGame = models.BooleanField(blank=False, default=False)

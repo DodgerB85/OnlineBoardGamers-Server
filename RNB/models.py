@@ -43,8 +43,6 @@ class RNB_Game(GeneralGame):
 
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="RNBgame_winner_relName", blank=True)
 
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([0, 0, 0, 0]))
-
     rewRNBData = models.TextField(blank=True)
     rewRNBTempData = models.TextField(blank=True)
 

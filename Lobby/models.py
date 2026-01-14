@@ -407,6 +407,10 @@ class GeneralGame(models.Model):
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
 
+    zoomLevels = models.CharField(
+        max_length=30, blank=False, default=json.dumps([16, 16, 16, 16])
+    )
+
     # This has a few different lengths, but 15 should be plenty. It is just a unix timestamp
     # THESE MIGHT BE BETTER CONVERTED TO A DATE_TIME FIELD?!
     latestUpdate = models.CharField(
@@ -414,12 +418,18 @@ class GeneralGame(models.Model):
     )
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
+    # Change to JSON field?
+    startingMap = models.CharField(max_length=190, blank=True)
+
     # The longest was 100 chars, so i set it to that.
     # Not sure if that's inefficient?
     # IN ANY CASE THIS SHOULD BE REMODELED INTO A JSONFIELD AS IT SHOULD ONLY CONTAIN A JSON DUMPED
     # ARRAY OF INTS / SUBARRS. (Except legacy FCM games perhaps).
     startingOptions = models.CharField(max_length=100, blank=True)
-    
+
+    # THESE 2 GET DELETED ON GAME END. SO MAYBE COMBINE THESE INTO "votes" OPTIONS OR SOMETHING?
+    # DELETE ON GAME END, SO NORMALLY TAKE UP ZERO SPACE
+    statsExcludeConsent = models.CharField(max_length=40, blank=True, null=True)
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
     class Meta:

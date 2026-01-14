@@ -71,12 +71,6 @@ class CNS_Game(GeneralGame):
         blank=True,
     )
 
-    zoomLevels = models.CharField(
-        max_length=30, blank=False, default=json.dumps([24, 24, 24, 24])
-    )
-
-    statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
-
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
         return f"{getattr(self, 'id')}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"

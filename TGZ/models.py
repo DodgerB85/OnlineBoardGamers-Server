@@ -67,8 +67,6 @@ class TGZ_Game(GeneralGame):
         settings.AUTH_USER_MODEL, related_name="TGZplayersWithChatNotificationName", blank=True
     )
     
-    startingMap = models.CharField(max_length=80, blank=True)
-
     playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
     winner = models.ForeignKey(
@@ -80,9 +78,6 @@ class TGZ_Game(GeneralGame):
     )
 
     autoMoves = models.CharField(max_length=30, blank=True, null=True, default=None)
-
-    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([240, 240, 240, 240, 240]))
-    statsExcludeConsent = models.CharField(max_length=5, blank=False, default="00000")
 
     player4notes = models.TextField(blank=True)
 
