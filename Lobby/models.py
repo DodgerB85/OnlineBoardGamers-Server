@@ -419,6 +419,8 @@ class GeneralGame(models.Model):
     # IN ANY CASE THIS SHOULD BE REMODELED INTO A JSONFIELD AS IT SHOULD ONLY CONTAIN A JSON DUMPED
     # ARRAY OF INTS / SUBARRS. (Except legacy FCM games perhaps).
     startingOptions = models.CharField(max_length=100, blank=True)
+    
+    deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
     class Meta:
         abstract = True
