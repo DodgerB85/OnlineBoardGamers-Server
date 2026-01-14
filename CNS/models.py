@@ -342,6 +342,8 @@ class CNS_Game(GeneralGame):
 
     def enableStatsExclude(self, _username):
         seatToChange = self.seatPosition(_username, True)
+        if (len(self.statsExcludeConsent)) < self.maxPlayers:
+            self.statsExcludeConsent = "0" * self.maxPlayers
         self.statsExcludeConsent = (
             self.statsExcludeConsent[:seatToChange]
             + "1"

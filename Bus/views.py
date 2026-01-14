@@ -124,7 +124,6 @@ def createBusGame(request):
         phase=0,
         created=_created,
         latestUpdate=_created,
-        # seatOffset=_playerSeatOffset,
         startingOptions=_startingOptions,
         maxPlayers=_maxPlayers,
         gameStatus="AVAILABLE",
