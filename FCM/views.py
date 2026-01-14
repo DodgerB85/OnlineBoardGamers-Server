@@ -472,10 +472,10 @@ def test(request):
 
 
 #    currentGame.endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["gameID"], currentGame)
-def endGame(request, _winner, _finalScores, _gameID, currentGame):
+def endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID, currentGame):
     with db_mutex(str(_gameID)):
-        return currentGame.endGame(request, _winner, _finalScores, _gameID)
-
+        return currentGame.endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID)
+ 
 
 def processTurn(request):
     # processing a turn must be via POST
@@ -1072,13 +1072,7 @@ def _processTurn(request):
         ################ END REWIND EVERY SAVE #######################
 
         if jsonData["status"] == "FINISHED":
-            endGame(
-                request,
-                jsonData["winner"],
-                jsonData["finalScores"],
-                jsonData["gameID"],
-                currentGame,
-            )
+            endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["tournamentData"], jsonData["gameID"], currentGame)
 
         currentGame.removeSingleRewindPermission()
 
@@ -1317,13 +1311,8 @@ def _processTurn(request):
 
         # End Game
         if jsonData["phase"] == 10:
-            endGame(
-                request,
-                jsonData["winner"],
-                jsonData["finalScores"],
-                jsonData["gameID"],
-                currentGame,
-            )
+            endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["tournamentData"], jsonData["gameID"], currentGame)
+
 
         return JsonResponse(
             {

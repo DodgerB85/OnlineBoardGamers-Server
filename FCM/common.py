@@ -19,6 +19,8 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
 
 def buildFCMstartingOptions(post_data):
     """Builds the starting options string for FCM games from POST data.
@@ -96,12 +98,14 @@ def buildFCMstartingOptions(post_data):
 @login_required()
 def create_fcm_game(
     request,
-    is_tournament=False,
-    is_mini_tournament=False,
-    tournament=None,
+    mainORmini="",
+    tournamentObj=None,
     round_number_string=None,
     current_players_usernames=None,
 ):
+    is_tournament = mainORmini == "normT"
+    is_main_tournament = mainORmini == MAIN_T_FLAG
+    is_mini_tournament = mainORmini == MINI_T_FLAG
     """
     Creates a new FCM game for normal play or tournaments.
 
@@ -115,7 +119,7 @@ def create_fcm_game(
     Returns:
         HttpResponseRedirect for normal games, or game ID for tournament games.
     """
-    if not is_tournament and not is_mini_tournament and request.method != "POST":
+    if not is_tournament and not is_main_tournament and not is_mini_tournament and request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
     # Initialize game parameters
@@ -140,23 +144,32 @@ def create_fcm_game(
     invited_players = []
     notificationSuppression = "0"
 
-    if is_tournament or is_mini_tournament:
-        if not tournament or not round_number_string:
+    if is_tournament or is_main_tournament or is_mini_tournament:
+        if not tournamentObj or not round_number_string:
             raise ValueError(
                 "Tournament and round_number_string required for tournament games"
             )
-        max_players = tournament.maxGamePlayers
-        game_name = f"[{tournament.tournamentName}] {round_number_string}"
+        max_players = tournamentObj.maxGamePlayers
+        game_name = f"[{tournamentObj.tournamentName}] {round_number_string}"
         game_description = ""
         creator = User.objects.get(username="admin")
         host = creator
         game_pace = 30
         kickout_duration = 100
         seat_offset = randint(1000, 32767)
-        starting_options = tournament.startingOptions
-        # rewind_consent = "0" * max_players
+        starting_options = tournamentObj.startingOptions
+        rewind_consent = "0" * max_players
         notificationSuppression = "0" * max_players
+        # If it's a mini tournemnt, check for auto enable rewinds
+        # MiniT games could also have max_players LESS than tournamentObj.maxGamePlayers
         if is_mini_tournament:
+            max_players = (
+                len(current_players_usernames)
+                if current_players_usernames
+                else tournamentObj.maxGamePlayers
+            )
+            rewind_consent = "0" * max_players
+            notificationSuppression = "0" * max_players
             # Split the string into a list
             options = starting_options.split(",") if starting_options != "" else []
             # Check if '99' is present
@@ -165,11 +178,7 @@ def create_fcm_game(
             starting_options = ",".join(options)
             # Filter out '99'
             options = [opt for opt in options if opt != "99"]
-            max_players = (
-                len(current_players_usernames)
-                if current_players_usernames
-                else tournament.maxGamePlayers
-            )
+
         game_status = "ACTIVE"
 
         stats_exclude_consent = "0" * max_players
@@ -328,9 +337,11 @@ def create_fcm_game(
         new_game.save()
 
         if is_tournament:
-            new_game.relatedTournament = tournament
+            new_game.relatedTournament = tournamentObj
+        elif is_main_tournament:
+            new_game.relatedMainTournament = tournamentObj
         elif is_mini_tournament:
-            new_game.relatedMiniTournament = tournament
+            new_game.relatedMiniTournament = tournamentObj
 
         # Add players
         for player in all_players:
@@ -338,13 +349,13 @@ def create_fcm_game(
         for player in invited_players:
             new_game.invitedPlayers.add(player)
 
-        if "trainingGame" in request.POST or is_mini_tournament or is_tournament:
+        if "trainingGame" in request.POST or is_main_tournament or is_mini_tournament or is_tournament:
             new_game.startGame(request)
 
         new_game.save()
 
     # Notifications and redirects
-    if is_tournament or is_mini_tournament:
+    if is_tournament or is_main_tournament or is_mini_tournament:
         for username in usernames_to_notify:
             tournamentType = "normalTournament"
             if is_mini_tournament:

@@ -920,7 +920,7 @@ def _processHCturn(request):
             and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate)
             and not jsonData["ignoreSync"]
         ):
-            # print("Sync Error Kickout Save " + str(jsonData["gameID"]))
+            print("HC: Sync Error Kickout Save " + str(jsonData["gameID"]))
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -1257,11 +1257,6 @@ def HChelp(request):
 
 @contextmanager
 def db_mutex(name, timeout=10):
-    # if settings.DEBUG:
-    # if 1==2:
-    #    print('Not creating mutex ' + name)
-    #    yield
-    #    return
     mutex_name = "dbmutex_" + name
     cursor = connection.cursor()
     # timeout returns with error

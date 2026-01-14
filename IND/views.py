@@ -187,15 +187,6 @@ def createINDgame(request):
 
 
 def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    # ALLOWED_USERS = ["admin", "33", "ha.steven", "massibull", "durendal", "DodgerB", "BotKickStarter", "Rastko", "Benkyo", "vraid", "F1087", "krieg90", "gdc", "enavico", "Burmer", "PhasingPlayer", "pgh_gamer", "Lamp", "JoshuaAcosta", "akramer16", 'phil', "michazhn", "Merlo"]
-    # ["admin", "ha.steven", "Kawlos", "Jasonbartfast", "Batch", "Juni", "TDUBZ", "BigBad", "massibull", "durendal", 'DodgerB', 'BotKickStarter', '33', 'Rastko', 'Benkyo', 'Steveth', "F1087", "krieg90", "gdc"]
-    #                 #'looogic', 'Burmer',
-    #                 #, , 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
-    ##print("******************************************************************************************************** IND ACCESS: =================================================:  " + request.user.username)
-    # if request.user.username not in ALLOWED_USERS:
-    #    return redirect("index")
-
-    # return render(request, "IND/showINDgame.html")
     try:
         currentGame = IND_Game.objects.select_related(
             "host", "relatedTournament", "creator"

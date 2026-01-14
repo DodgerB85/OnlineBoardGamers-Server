@@ -40,8 +40,9 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.tournyGenerator import multiGamePlayers4p, multiGamePlayersRound2
 
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
-
+NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND = ["FCMtourneyAdmin", "TGZtourneyAdmin"]
 
 def SF_getTimeNow():
     return str(int(time.time()) * 1000)
@@ -330,128 +331,7 @@ def SF_getSecondsToNextKickout(latestUpdate, kickoutDuration):
     secondsToNextKickout = (int(endPeriod)) - (int(time.time()))
     return secondsToNextKickout
 
-
-# This is used in external python to autostart HC tournament
-# Takes in request and tournament Object
-def SF_startTournament(request, tournament, gameCode):
-    from FCM.common import create_fcm_game
-    from TGZ.common import create_tgz_game
-
-    ######### COMMON TO ALL TOURNYS ##########
-    tournament.tournamentStatus = "IP"
-    allPlayersList = list(tournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-
-    # Make a set of players
-    wholeTournamentData = []
-    round1 = []
-    while len(allPlayersList) >= tournament.maxGamePlayers:
-        currentPlayers = []
-        # Gather the players
-        for i in range(tournament.maxGamePlayers):
-            currentPlayers.append(allPlayersList.pop(0))
-        # Start a game
-        newGameID = 0
-        if gameCode == "FCM":
-            newGameID = create_fcm_game(request, True, False, tournament, "Round 1", currentPlayers)
-        elif gameCode == "TGZ":
-            newGameID = create_tgz_game(request, True, False, tournament, "Round 1", currentPlayers)
-        else:
-            newGameID = tournament.createTournamentGame(request, "Round 1", currentPlayers)
-        currentPlayers.append(newGameID)
-        round1.append(currentPlayers)
-    # Add remaing players to next round
-    byePlayers = []
-    if len(allPlayersList) > 0:
-        byePlayers = ["BYEPLAYERS"]
-        for player in allPlayersList:
-            tournament.nextRoundPlayers.add(User.objects.get(username=player))
-            byePlayers.append(player)
-        round1.append(byePlayers)
-
-    wholeTournamentData.append(round1)
-    tournament.tournamentProgressionData = json.dumps(wholeTournamentData)
-    if tournament.tournamentType == "TL":
-        allPlayersList = list(tournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-        livesList = []
-        for playerName in allPlayersList:
-            livesList.extend([playerName, playerName])
-        tournament.tournamentSideData = json.dumps(livesList)
-    if tournament.tournamentType == "RR" or tournament.tournamentType == "TL" or tournament.tournamentType == "PT":
-        allPlayersList = list(tournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-        pointsList = []
-        for playerName in allPlayersList:
-            pointsList.append([playerName, 0])
-        # Now add 1 point for the byes (need the TRY in case there aren't any bye players)
-        if len(byePlayers) > 0:
-            for i in range(len(byePlayers)):
-                if byePlayers[i] != "BYEPLAYERS":
-                    # find the player in points list and add 1
-                    for j in range(len(pointsList)):
-                        if pointsList[j][0] == byePlayers[i]:
-                            if tournament.tournamentType == "PT":
-                                ###### BYED POINTS
-                                if tournament.maxGamePlayers == 2:
-                                    pointsList[j][1] += 1
-                                elif tournament.maxGamePlayers == 3:
-                                    pointsList[j][1] += 2
-                                elif tournament.maxGamePlayers == 4:
-                                    pointsList[j][1] += 3
-                                elif tournament.maxGamePlayers == 5:
-                                    pointsList[j][1] += 4
-                                elif tournament.maxGamePlayers == 6:
-                                    pointsList[j][1] += 7
-                            elif tournament.tournamentType == "RR" or tournament.tournamentType == "TL":
-                                pointsList[j][1] += 1
-                            break
-
-        tournament.tournamentPointsData = json.dumps(pointsList)
-    # tournament.tournamentProgressionData = base64.b64encode(wholeTournamentDataJSON)
-    # tournament.tournamentProgressionData = wholeTournamentData
-    tournament.save()
-
-    # Add message to Discord
-    box_name = "box_name"
-    INNER_URL = "URL"
-    if gameCode == "HC":
-        box_name = "Horseless Carriage"
-        INNER_URL = "HCtournament/HC"
-    if gameCode == "Bus":
-        box_name = "Bus"
-        INNER_URL = "Bustournament/Bus"
-    if gameCode == "AQY":
-        box_name = "Antiquity"
-        INNER_URL = "AQYtournament/AQY"
-    if gameCode == "IND":
-        box_name = "Indonesia"
-        INNER_URL = "INDtournament/IND"
-
-    tournamentTypeString = "Rounds"
-    if tournament.tournamentType == "KO":
-        tournamentTypeString = "Knockout"
-    elif tournament.tournamentType == "TL":
-        tournamentTypeString = "Two Lives"
-    elif tournament.tournamentType == "PT":
-        tournamentTypeString = "Points"
-    elif tournament.tournamentType == "RR":
-        tournamentTypeString = "Rounds"
-
-    message = (
-        f"{box_name} Tournament has started!\n"
-        "================================\n"
-        f"Name: {tournament.tournamentName}\n"
-        f"Players per Game: {tournament.maxGamePlayers}\n"
-        f"Format: {tournamentTypeString}\n"
-        f"[Click here to View](https://www.OnlineBoardGamers.com/{INNER_URL}/{tournament.id})"
-    )
-    if settings.DEBUG:
-        requests.post(
-            f"https://discordapp.com/api/webhooks/{config("WEBHOOK_ADMIN_ERROR_MSG")}",
-            data={"content": message},
-        )
-    else:
-        requests.post(f"https://discord.com/api/webhooks/{config("WEBHOOK_DISCORD_TOURNAMENTS")}", data={"content": message})
-
-
+# THIS IS THE OLD SEPERATE MODEL FUNCTION 
 def SF_M_ProcessTournamentEndGame(request, _game, _currentGame, _winnerArray):
     # Add winner into results
     tournamentProgressionDataArray = json.loads(_currentGame.relatedTournament.tournamentProgressionData)
@@ -538,7 +418,7 @@ def SF_M_ProcessTournamentEndGame(request, _game, _currentGame, _winnerArray):
 
         # check for winner
         if (
-            _currentGame.relatedTournament.nextRoundPlayers.all().count()
+            _currentGame.relatedTournament.nextRoundPlayers.count()
             < _currentGame.relatedTournament.maxGamePlayers
         ):
             # End the Tournament ONLY WORKS HERE FOR RR in KO, KO, TL
@@ -709,11 +589,11 @@ def SF_M_ProcessTournamentEndGame(request, _game, _currentGame, _winnerArray):
             # Start a game
             if _game == "FCM":
                 newGameID = create_fcm_game(
-                    request, True, False, _currentGame.relatedTournament, roundNumberString, currentPlayers
+                    request, "normT", _currentGame.relatedTournament, roundNumberString, currentPlayers
                 )
             elif _game == "TGZ":
                 newGameID = create_tgz_game(
-                    request, True, False, _currentGame.relatedTournament, roundNumberString, currentPlayers
+                    request, MAIN_T_FLAG, _currentGame.relatedTournament, roundNumberString, currentPlayers
                 )
             else:
                 newGameID = _currentGame.relatedTournament.createTournamentGame(
@@ -994,54 +874,266 @@ def SF_TGZadvancedOptions(request):
 #   MAIN/MINI TOURNAMENTS COMMON FUNCTIONS
 #
 ######################################
+def SF_startAnyTournament(request, mainORmini, tournamentObj):
+    if mainORmini == "main":
+        tournamentObj.invitedPlayers.clear()
+
+    gameCode = tournamentObj.gameCode
+
+    ######### COMMON TO ALL TOURNYS ##########
+    tournamentObj.tournamentStatus = "IP"
+    allPlayersList = list(tournamentObj.startingPlayers.all().order_by("?").values_list("username", flat=True))
+
+    # Add everyone to nextRoundPlayers
+    for player in allPlayersList:
+        tournamentObj.nextRoundPlayers.add(User.objects.get(username=player))
+
+    tournamentObj.tournamentProgressionData = json.dumps([])
+    tournamentObj.tournamentPointsData = json.dumps([])
+
+    if tournamentObj.tournamentType == "TL":
+        allPlayersList = list(tournamentObj.startingPlayers.all().order_by("?").values_list("username", flat=True))
+        livesList = []
+        for playerName in allPlayersList:
+            livesList.append([playerName, 2])
+        tournamentObj.tournamentSideData = json.dumps(livesList)
+
+    if (
+        tournamentObj.tournamentType == "RR"
+        or tournamentObj.tournamentType == "TL"
+        or tournamentObj.tournamentType == "PT"
+        or tournamentObj.tournamentType == "MG"
+    ):
+        allPlayersList = list(tournamentObj.startingPlayers.all().order_by("?").values_list("username", flat=True))
+        pointsList = []
+        for playerName in allPlayersList:
+            if tournamentObj.tournamentType == "MG":
+                # Name, played, wins (then TieBreaker to come)
+                pointsList.append([playerName, 0, 0])
+            else:
+                pointsList.append([playerName, 0])
+
+        if tournamentObj.tournamentType == "MG":
+            # dump inside a round 1 array
+            tournamentObj.tournamentPointsData = json.dumps([pointsList])
+        else:
+            tournamentObj.tournamentPointsData = json.dumps(pointsList)
+
+    start_next_any_tournament_round(request, mainORmini, tournamentObj, None, [], [])
+
+    tournamentObj.save()
+    return
+
+# Because the next round players for MG tournaments cannot always be determined
+# until all TB's and results are in, we cannot add players as we go.
+# Therefore, next round players need to be added here JUST BEFORE starting the next round
+def setNextRoundMultiGamePlayers(tournamentObj):
+    allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
+    # First round has ALREADY added everyone. Just return
+    if len(allPlayersList) > 0:
+        return
+    # So now next round is empty. So for Second round add top 14. 3rd round add top 2 from each group
+    TPDA = json.loads(tournamentObj.tournamentProgressionData)
+    # If we have had 3 rounds, then the tournament is over
+    if len(TPDA) == 3:
+        return
+    pointsList = json.loads(tournamentObj.tournamentPointsData)
+    if len(TPDA) == 1:
+        # Get 14 players for round 2
+        playersData = []
+        previousRound = pointsList[-1]
+        for row in previousRound:
+            name, played, wins = row[0], row[1], row[2]
+            tb = sorted(row[3:], reverse=True)  # sort existing TBs descending
+            tb += [[-float("inf"), -1]] * (4 - len(tb))  # pad if needed (optional)
+            normalized_row = [name, played, wins] + tb[:4]  # keep only top 4
+            playersData.append(normalized_row)
+        playersData.sort(key=lambda r: (-r[2], -r[3][0], -r[4][0], -r[5][0], -r[6][0], r[0]))
+
+        playersData = playersData[:14]
+        for i in range(14):
+            tournamentObj.nextRoundPlayers.add(User.objects.get(username=playersData[i][0]))
+
+        # Set up the points data for Round 2
+        tournamentPointsData = json.loads(tournamentObj.tournamentPointsData)
+        
+        A = playersData[0::2]   # 0,2,4,6,8,10,12
+        B = playersData[1::2]   # 1,3,5,7,9,11,13
+
+        pointsList = []
+        for row in A:
+            # Name, played, wins (then TB to come)
+            pointsList.append([row[0], 0, 0])
+        for row in B:
+            # Name, played, wins (then TB to come)
+            pointsList.append([row[0], 0, 0])
+
+        # dump inside a round 12array
+        tournamentPointsData.append(pointsList)
+        tournamentObj.tournamentPointsData = json.dumps(tournamentPointsData)
+
+        tournamentObj.save()
+
+    elif len(TPDA) == 2:
+        # Get the 4 finalists
+        previousRound = pointsList[-1]
+        groupA = previousRound[:7]
+        groupB = previousRound[7:]
+        groupAclean = getCleanedAndSortedRoundData(groupA)
+        groupBclean = getCleanedAndSortedRoundData(groupB)
+        finalists = [groupAclean[0][0], groupBclean[0][0], groupAclean[1][0], groupBclean[1][0]]
+        for player in finalists:
+            tournamentObj.nextRoundPlayers.add(User.objects.get(username=player))
+
+        # Set up the points data for Round 3
+        tournamentPointsData = json.loads(tournamentObj.tournamentPointsData)
+
+        pointsList = []
+        for player in finalists:
+            # Name, played, wins (then TB to come)
+            pointsList.append([player, 0, 0])
+
+        # dump inside a round 12array
+        tournamentPointsData.append(pointsList)
+        tournamentObj.tournamentPointsData = json.dumps(tournamentPointsData)
+
+        tournamentObj.save()
+
+def start_next_any_tournament_round(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
+    from FCM.common import create_fcm_game
+    from TGZ.common import create_tgz_game
+    from AQY.common import create_aqy_game
+
+    # MG tournaments don't add next round players dynamically
+    # End T check checks for not enough next round players
+    # So need to add players here first to prevent tournament stopping early
+    if tournamentObj.tournamentType == "MG":
+        setNextRoundMultiGamePlayers(tournamentObj)
+        
+    if SF_checkForAnyTournamentEnd(tournamentObj, mainORmini) == True:
+        SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore)
+        tournamentObj.save()
+        return
+
+    ret = SF_createNextRoundGamesSetup(tournamentObj, mainORmini)
+    
+    # Clear nextRoundPlayers for the end of the next round
+    # -- gamePlayers have now been returned in ret
+    tournamentObj.nextRoundPlayers.clear()
+
+    # Scaffold the round data. Add bye players, then add each game entry
+    roundData = []
+
+    # First, handle byes
+    byePlayers = ret["byePlayers"]
+    if len(byePlayers) > 0:
+        roundData.append(["BYEPLAYERS"] + byePlayers)
+        for player in byePlayers:
+            # Add bye players to next round
+            tournamentObj.nextRoundPlayers.add(User.objects.get(username=player))
+            # Update points for byes
+            if tournamentObj.tournamentType in ["RR", "TL", "PT"]:
+                pointsList = json.loads(tournamentObj.tournamentPointsData)
+                byePoints = 1
+                if tournamentObj.tournamentType == "PT":
+                    byePoints = SR_getPointsForPosition(99, tournamentObj.maxGamePlayers)
+                for byePlayer in byePlayers:
+                    for playerData in pointsList:
+                        if playerData[0] == byePlayer:
+                            playerData[1] += byePoints
+                            break
+                tournamentObj.tournamentPointsData = json.dumps(pointsList)
+
+    # Start the games
+    gamesPlayers = ret["gamesPlayers"]
+    ### MOVE TO RET ????
+    roundNumberString = ret["roundNumberString"]
+    tournamentGameName = f"[{tournamentObj.tournamentName}] {roundNumberString}"
+    for i, currentPlayers in enumerate(gamesPlayers):
+        if tournamentObj.tournamentType == "MG":
+            # NB the roundNumberString is whateber comes after [tourneyName] (and a space)
+            # So eg - R2-A1/B1/R1-1
+            if len(gamesPlayers) == 1:
+                tournamentGameName = f"[{tournamentObj.tournamentName}] Final"
+            elif len(gamesPlayers) == 14:
+                gameNames = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "B1", "B2", "B3", "B4", "B5", "B6", "B7"]
+                tournamentGameName = f"[{tournamentObj.tournamentName}] R2 - {gameNames[i]}"
+            else:
+                tournamentGameName = f"[{tournamentObj.tournamentName}] R1 - {i+1}"
+        ## END MOVE TO RET???
+        
+        if tournamentObj.gameCode == "FCM":
+            newGameID = create_fcm_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "TGZ":
+            newGameID = create_tgz_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "AQY":
+            newGameID = create_aqy_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
+        else:
+            # LEGACY CODE FOR SEPERARTE TOURNAMENT MODELS
+            newGameID = tournamentObj.createTournamentGame(request, roundNumberString, currentPlayers)
+        roundData.append([currentPlayers, newGameID, [], tournamentGameName])
+
+    # Save round data
+    if roundData:
+        tournamentProgressionDataArray = json.loads(tournamentObj.tournamentProgressionData)
+        tournamentProgressionDataArray.append(roundData)
+        tournamentObj.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
+
+    tournamentObj.save()
+
 # Pass in a tournament. Returns an object of { gamesPlayers: [[p1, p2...], [p5,p6...]], byePlayers: [p3, p4] }
-def SF_createNextRoundGamesSetup(tournament, tournamentType):
+def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
     ret = {}
     byePlayers = []
     gamesPlayers = []
+    
+    tournamentType = tournamentObj.tournamentType
 
     # Load tournament data
-    TPDA = json.loads(tournament.tournamentProgressionData)
+    TPDA = json.loads(tournamentObj.tournamentProgressionData)
     roundNumberString = gettext("Round") + f" {len(TPDA) + 1}"
 
     # Get players sorted by points (weakest first) for RR, PT, or TL
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
-    allPlayersList = list(tournament.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
+    allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
 
-    if tournament.tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournament.roundsBeforeKnockout:
-        pointsList = json.loads(tournament.tournamentPointsData)
+    if tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournamentObj.roundsBeforeKnockout:
+        pointsList = json.loads(tournamentObj.tournamentPointsData)
         # Being lowest points to front, in case a bye is needed
         pointsList.sort(key=lambda x: x[1])
         allPlayersList = [row[0] for row in pointsList if row[0] in allPlayersList]
         # Remove players with 0 lives in TwoLives (TL) tournaments
-        if tournament.tournamentType == "TL":
-            livesList = json.loads(tournament.tournamentSideData)
+        if tournamentType == "TL":
+            livesList = json.loads(tournamentObj.tournamentSideData)
             # Being lowest points to front, in case a bye is needed
             livesList.sort(key=lambda x: x[1])
             allPlayersList = [p for p in allPlayersList if any(p == row[0] and row[1] > 0 for row in livesList)]
 
     # Switch to knockout mode for RR after roundsBeforeKnockout
-    if tournament.tournamentType == "RR" and len(TPDA) >= tournament.roundsBeforeKnockout:
-        pointsList = json.loads(tournament.tournamentPointsData)
-        pointsList.sort(key=lambda x: x[1])  # Sort by points (descending)
+    if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout:
+        pointsList = json.loads(tournamentObj.tournamentPointsData)
+        pointsList.sort(key=lambda x: x[1], reverse=True)  # Sort by points (descending)
         maxPoints = pointsList[0][1]
         allPlayersList = [row[0] for row in pointsList if row[1] >= maxPoints]
-        if len(allPlayersList) < tournament.maxGamePlayers:
-            ret["endTournament"] = True
-            return ret
+        #if len(allPlayersList) < tournament.maxGamePlayers:
+        #    ret["endTournament"] = True
+        #    return ret
         roundNumberString += " (KO)"
 
     # Set final round label if exactly maxGamePlayers remain
-    if len(allPlayersList) == tournament.maxGamePlayers:
+    if len(allPlayersList) == tournamentObj.maxGamePlayers:
         roundNumberString = gettext("Final Round") + (
-            " (KO)" if tournament.tournamentType == "RR" and len(TPDA) >= tournament.roundsBeforeKnockout else ""
+            " (KO)" if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout else ""
         )
 
-    # MT - Handle byes if needed - Only BYE if there is exactly 1 player left - No byes in MG
-    if tournamentType == "mini":
-        if len(allPlayersList) % tournament.maxGamePlayers == 1 and len(allPlayersList) > tournament.maxGamePlayers:
-            byePlayers = []
-
+    # HANDLE BYES HERE = MAX 1 for MiniT, otherwise leftover players for MainT
+    maxRemainder = tournamentObj.maxGamePlayers -1
+    if mainORmini == MINI_T_FLAG:
+        maxRemainder = 1
+    
+    # Check if there is leftover players after at least some players have been put in a game
+    if len(allPlayersList) % tournamentObj.maxGamePlayers <= maxRemainder and len(allPlayersList) > tournamentObj.maxGamePlayers:
+        while maxRemainder > 0:
             # Create dictionary to count byes for each player
             byeCountDict = {}
 
@@ -1064,9 +1156,12 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
 
             # Remove the selected player from allPlayersList
             allPlayersList.remove(selectedByePlayer)
+            
+            # Decreade number of required byes
+            maxRemainder -= 1
 
     # MG use MG creation
-    if tournament.tournamentType == "MG":
+    if tournamentType == "MG":
         # First round MUST have more than 14 people
         if len(allPlayersList) >= 15:
             gamesPlayers = multiGamePlayers4p(allPlayersList)
@@ -1074,7 +1169,7 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         elif len(allPlayersList) == 14:
             allPlayersList  = []
             # In this case, pull out the round 2 points data, and get players in order, group A then group B
-            tournamentPointsData = json.loads(tournament.tournamentPointsData)
+            tournamentPointsData = json.loads(tournamentObj.tournamentPointsData)
             round2playersData = tournamentPointsData[-1]
             allPlayersList = [row[0] for row in round2playersData]
             
@@ -1082,6 +1177,8 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         # Final is the top 2 from each group
         elif len(allPlayersList) == 4:
             gamesPlayers = [allPlayersList]
+            
+    # OTHERWISE USE STANDARD MATCHMAKING
     else:
         # Build dictionary of previous matchup counts (pairwise)
         matchupCounts = defaultdict(int)
@@ -1097,12 +1194,12 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         allPlayersList.reverse()
 
         # Create games, prioritizing new matchups and minimizing max pair repeats
-        while len(allPlayersList) >= tournament.maxGamePlayers:
+        while len(allPlayersList) >= tournamentObj.maxGamePlayers:
             currentPlayers = [allPlayersList.pop(0)]
             candidates = allPlayersList.copy()
 
             # Try to find players, preferring those with least previous matchups with current group
-            while len(currentPlayers) < tournament.maxGamePlayers and candidates:
+            while len(currentPlayers) < tournamentObj.maxGamePlayers and candidates:
                 # Calculate max matchup count for each candidate with current group
                 candidate_scores = {}
                 for candidate in candidates:
@@ -1131,34 +1228,18 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
                 candidates.remove(selected_candidate)
 
             # Fill game if needed (edge case, though unlikely now)
-            while len(currentPlayers) < tournament.maxGamePlayers and allPlayersList:
+            while len(currentPlayers) < tournamentObj.maxGamePlayers and allPlayersList:
                 currentPlayers.append(allPlayersList.pop(0))
 
             gamesPlayers.append(currentPlayers)
 
-        # Handle remaining players (>2 or 1)
+        # Handle remaining players (>2 for MiniT -- Byes have been removed first)
         # MT just make games if possible
-        if tournamentType == "mini" and len(allPlayersList) >= 2:
+        if tournamentType == MINI_T_FLAG and len(allPlayersList) >= 2:
             currentPlayers = allPlayersList[:]
             gamesPlayers.append(currentPlayers)
             allPlayersList.clear()
-        ## THIS SHOULD NEVER RUN< AS BYES ARE HANDLED ABOVE ??????
-        # elif len(allPlayersList) == 1:
-        #    byePlayers = ["BYEPLAYERS", allPlayersList[0]]
-        #    MiniTournament.nextRoundPlayers.add(User.objects.get(username=allPlayersList[0]))
-        #    roundData.append(byePlayers)
-        #    allPlayersList.clear()
-        #    if MiniTournament.tournamentPointsData:
-        #        pointsList = json.loads(MiniTournament.tournamentPointsData)
-        #        pointsMap = {2: 1, 3: 2, 4: 3, 5: 4, 6: 7} if MiniTournament.tournamentType == "PT" else {i: 1 for i in range(2, 7)}
-        #        for playerData in pointsList:
-        #            if playerData[0] == byePlayers[1]:
-        #                playerData[1] += pointsMap.get(MiniTournament.maxGamePlayers, 1)
-        #                break
-        #        MiniTournament.tournamentPointsData = json.dumps(pointsList)
-    ret["endTournament"] = False
-    if tournament.tournamentType == "MG" and len(allPlayersList) == 0:
-        ret["endTournament"] = True
+
     ret["roundNumberString"] = roundNumberString
     ret["byePlayers"] = byePlayers
     ret["gamesPlayers"] = gamesPlayers
@@ -1166,853 +1247,66 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
     return ret
 
 
-######################################
-#
-#   MINI TOURNAMENTS
-#
-######################################
-def SF_startMiniTournament(request, MiniTournament):
-    MiniTournament.invitedPlayers.clear()
-
-    # from FCM.common import create_fcm_game
-    # from TGZ.common import create_tgz_game
-    gameCode = MiniTournament.gameCode
-
-    ######### COMMON TO ALL TOURNYS ##########
-    MiniTournament.tournamentStatus = "IP"
-    allPlayersList = list(MiniTournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-
-    # Add everyone to nextRoundPlayers
-    for player in allPlayersList:
-        MiniTournament.nextRoundPlayers.add(User.objects.get(username=player))
-
-    MiniTournament.tournamentProgressionData = json.dumps([])
-    MiniTournament.tournamentPointsData = json.dumps([])
-
-    if MiniTournament.tournamentType == "TL":
-        allPlayersList = list(MiniTournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-        livesList = []
-        for playerName in allPlayersList:
-            livesList.append([playerName, 2])
-        MiniTournament.tournamentSideData = json.dumps(livesList)
-
-    if (
-        MiniTournament.tournamentType == "RR"
-        or MiniTournament.tournamentType == "TL"
-        or MiniTournament.tournamentType == "PT"
-    ):
-        allPlayersList = list(MiniTournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-        pointsList = []
-        for playerName in allPlayersList:
-            pointsList.append([playerName, 0])
-
-        MiniTournament.tournamentPointsData = json.dumps(pointsList)
-
-    start_next_mini_tournament_round(request, MiniTournament, None, [])
-
-    MiniTournament.save()
-    return
-
-    # Make a set of players
-    wholeTournamentData = []
-    round1 = []
-    while len(allPlayersList) >= tournament.maxGamePlayers:
-        currentPlayers = []
-        # Gather the players
-        for i in range(tournament.maxGamePlayers):
-            currentPlayers.append(allPlayersList.pop(0))
-        # Start a game
-        newGameID = 0
-        if gameCode == "FCM":
-            newGameID = create_fcm_game(request, False, True, tournament, "Round 1", currentPlayers)
-        else:
-            newGameID = tournament.createTournamentGame(request, "Round 1", currentPlayers)
-        currentPlayers.append(newGameID)
-        round1.append(currentPlayers)
-    # Add remaing players to next round
-    byePlayers = []
-    if len(allPlayersList) > 0:
-        byePlayers = ["BYEPLAYERS"]
-        for player in allPlayersList:
-            tournament.nextRoundPlayers.add(User.objects.get(username=player))
-            byePlayers.append(player)
-        round1.append(byePlayers)
-
-    wholeTournamentData.append(round1)
-    tournament.tournamentProgressionData = json.dumps(wholeTournamentData)
-
-    # if tournament.tournamentType == "TL":
-    #    allPlayersList = list(tournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-    #    livesList = []
-    #    for playerName in allPlayersList:
-    #        livesList.extend([playerName, playerName])
-    #    tournament.tournamentSideData = json.dumps(livesList)
-
-    if tournament.tournamentType == "RR" or tournament.tournamentType == "TL" or tournament.tournamentType == "PT":
-        allPlayersList = list(tournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-        pointsList = []
-        for playerName in allPlayersList:
-            pointsList.append([playerName, 0])
-        # Now add 1 point for the byes (need the TRY in case there aren't any bye players)
-        if len(byePlayers) > 0:
-            for i in range(len(byePlayers)):
-                if byePlayers[i] != "BYEPLAYERS":
-                    # find the player in points list and add 1
-                    for j in range(len(pointsList)):
-                        if pointsList[j][0] == byePlayers[i]:
-                            if tournament.tournamentType == "PT":
-                                ###### BYED POINTS
-                                if tournament.maxGamePlayers == 2:
-                                    pointsList[j][1] += 1
-                                elif tournament.maxGamePlayers == 3:
-                                    pointsList[j][1] += 2
-                                elif tournament.maxGamePlayers == 4:
-                                    pointsList[j][1] += 3
-                                elif tournament.maxGamePlayers == 5:
-                                    pointsList[j][1] += 4
-                                elif tournament.maxGamePlayers == 6:
-                                    pointsList[j][1] += 7
-                            elif tournament.tournamentType == "RR" or tournament.tournamentType == "TL":
-                                pointsList[j][1] += 1
-                            break
-
-        tournament.tournamentPointsData = json.dumps(pointsList)
-    # tournament.tournamentProgressionData = base64.b64encode(wholeTournamentDataJSON)
-    # tournament.tournamentProgressionData = wholeTournamentData
-    tournament.save()
-
-
-# def start_next_mini_tournament_round(request, MiniTournament):
-#    from FCM.common import create_fcm_game
-#
-#    # check for winner
-#    if MiniTournament.nextRoundPlayers.all().count() < MiniTournament.maxGamePlayers:
-#        # End the Tournament ONLY WORKS HERE FOR RR in KO, KO, TL
-#        SF_endMiniTournament(request, _currentGame, _game, _winnerArray)
-#        MiniTournament.save()
-#        return
-#
-#    # Otherwise start a new round
-#    tournamentProgressionDataArray = json.loads(MiniTournament.tournamentProgressionData)
-#    # First get the list for Rounds of RR / PT, and TL
-#    allPlayersList = list(MiniTournament.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
-#    if (MiniTournament.tournamentType == "RR" and len(tournamentProgressionDataArray) < MiniTournament.roundsBeforeKnockout) or (MiniTournament.tournamentType == "PT" and len(tournamentProgressionDataArray) < MiniTournament.roundsBeforeKnockout) or MiniTournament.tournamentType == "TL":
-#        # In this case, allPlayersList should start with 0 points up to max points
-#        pointsList = json.loads(MiniTournament.tournamentPointsData)
-#        pointsList = sorted(pointsList, key=lambda x: x[1])
-#        # Now points list has weakest players at the top
-#        allPlayersList = []
-#        for row in pointsList:
-#            nextUsername = row[0]
-#            if nextUsername in list(MiniTournament.nextRoundPlayers.all().values_list("username", flat=True)):
-#                allPlayersList.append(nextUsername)
-#        # BUT remove 0 lives people from TL
-#        if MiniTournament.tournamentType == "TL":
-#            livesList = json.loads(MiniTournament.tournamentSideData)
-#            removalList = []
-#            for playerName in allPlayersList:
-#                if playerName not in livesList:
-#                    removalList.append(playerName)
-#            for playerName in removalList:
-#                allPlayersList.remove(playerName)
-#
-#    # BUT if rounds are over then move to knockout
-#    if MiniTournament.tournamentType == "RR" and len(tournamentProgressionDataArray) == MiniTournament.roundsBeforeKnockout:
-#        pointsList = json.loads(MiniTournament.tournamentPointsData)
-#        pointsList = sorted(pointsList, key=lambda x: x[1])
-#        allPlayersList = []
-#        # find points required for knockout
-#        maxPoints = pointsList[-1][1]
-#        for row in pointsList:
-#            if row[1] >= maxPoints:
-#                allPlayersList.append(row[0])
-#        if len(allPlayersList) < MiniTournament.maxGamePlayers:
-#            SF_endMiniTournament(request, _currentGame, _game, _winnerArray)
-#            MiniTournament.save()
-#            return
-#
-#    # NOW ALL PLAYERS LIST IS SORTED WITH WEAKEST AT TOP
-#    MiniTournament.nextRoundPlayers.clear()
-#
-#    roundNumberString = gettext("Round") + " " + str(len(tournamentProgressionDataArray) + 1)
-#    if MiniTournament.tournamentType == "RR" and len(tournamentProgressionDataArray) >= 4:
-#        roundNumberString += " (KO)"
-#    if len(allPlayersList) == MiniTournament.maxGamePlayers:
-#        if MiniTournament.tournamentType == "RR" and len(tournamentProgressionDataArray) >= 4:
-#            roundNumberString = gettext("Final Round (KO)")
-#        else:
-#            roundNumberString = gettext("Final Round")
-#
-#    # Make a set of players
-#    roundData = []
-#    # Start by removing any "BYE" plauers
-#    if len(allPlayersList) % MiniTournament.maxGamePlayers > 0 and len(allPlayersList) >= MiniTournament.maxGamePlayers:
-#        byePlayers = ["BYEPLAYERS"]
-#        currentIndex = 0
-#        alreadyByedPlayers = MiniTournament.getByedPlayersList()
-#        forceBye = False
-#        while len(allPlayersList) % MiniTournament.maxGamePlayers > 0:
-#            if allPlayersList[currentIndex] in alreadyByedPlayers and not forceBye:
-#                pass
-#            else:
-#                MiniTournament.nextRoundPlayers.add(User.objects.get(username=allPlayersList[currentIndex]))
-#                byePlayers.append(allPlayersList.pop(currentIndex))
-#            currentIndex += 1
-#            # If at the end, start force adding people
-#            if currentIndex == len(allPlayersList):
-#                currentIndex -= 1
-#                forceBye = True
-#
-#        roundData.append(byePlayers)
-#        # Now add 1 point for the byes
-#        if len(MiniTournament.tournamentPointsData) > 0:
-#            pointsList = json.loads(MiniTournament.tournamentPointsData)
-#            for i in range(len(byePlayers)):
-#                if byePlayers[i] != "BYEPLAYERS":
-#                    # find the player in points list and add 1
-#                    for j in range(len(pointsList)):
-#                        if pointsList[j][0] == byePlayers[i]:
-#                            if MiniTournament.tournamentType == "PT":
-#                            ###### BYED POINTS
-#                                if MiniTournament.maxGamePlayers == 2:
-#                                    pointsList[j][1] += 1
-#                                elif   MiniTournament.maxGamePlayers == 3:
-#                                    pointsList[j][1] += 2
-#                                elif   MiniTournament.maxGamePlayers == 4:
-#                                    pointsList[j][1] += 3
-#                                elif   MiniTournament.maxGamePlayers == 5:
-#                                    pointsList[j][1] += 4
-#                                elif   MiniTournament.maxGamePlayers == 6:
-#                                    pointsList[j][1] += 7
-#                            elif MiniTournament.tournamentType == "RR" or MiniTournament.tournamentType == "TL":
-#                                pointsList[j][1] += 1
-#                            break
-#            MiniTournament.tournamentPointsData = json.dumps(pointsList)
-#
-#    # Then create games with exact number of players required
-#    # First get all players who have played together in a list
-#    tournamentProgressionDataArray = json.loads(MiniTournament.tournamentProgressionData)
-#    previousGamesPlayers = []
-#    for round in tournamentProgressionDataArray:
-#        for row in round:
-#            if row[0] != "BYEPLAYERS":
-#                currentItem = []
-#                for i in range(MiniTournament.maxGamePlayers):
-#                    currentItem.append(row[i])
-#                previousGamesPlayers.append(currentItem)
-#
-#    while len(allPlayersList) >= MiniTournament.maxGamePlayers:
-#        currentPlayers = []
-#        # Gather the players
-#        currentPlayers.append(allPlayersList.pop(0))
-#        # for i in range(self.relatedTournament.maxGamePlayers):
-#        #    currentPlayers.append(allPlayersList.pop(0))
-#        for i in range(len(allPlayersList)):
-#            # Add fix for when 4 player rounds broke
-#            try:
-#                nextPlayer = allPlayersList[i]
-#            except Exception as e:
-#                nextPlayer = allPlayersList[0]
-#            eligible = True
-#            for row in previousGamesPlayers:
-#                if nextPlayer in row and currentPlayers[0] in row:
-#                    eligible = False
-#                    break
-#            if eligible:
-#                currentPlayers.append(nextPlayer)
-#                allPlayersList.remove(nextPlayer)
-#            if len(currentPlayers) == MiniTournament.maxGamePlayers:
-#                break
-#
-#        # Now just make sure a game is full
-#        while len(currentPlayers) < MiniTournament.maxGamePlayers:
-#            currentPlayers.append(allPlayersList.pop(0))
-#
-#        # Start a game
-#        if MiniTournament.gameCode == "FCM":
-#            newGameID = create_fcm_game(request, False, True, MiniTournament, roundNumberString, currentPlayers)
-#        else:
-#            newGameID = MiniTournament.createTournamentGame(request, roundNumberString, currentPlayers)
-#        currentPlayers.append(newGameID)
-#        roundData.append(currentPlayers)
-#
-#    if len(roundData) > 0:
-#        tournamentProgressionDataArray.append(roundData)
-#
-#    MiniTournament.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
-
-
-def start_next_mini_tournament_round(request, MiniTournament, _currentGame, _winnerArray):
-    from FCM.common import create_fcm_game
-    from TGZ.common import create_tgz_game
-
-    # Check if there's a winner or not enough players for a FULL game
-    if MiniTournament.nextRoundPlayers.count() < MiniTournament.maxGamePlayers:
-        SF_endMiniTournament(request, MiniTournament, _currentGame, _winnerArray)
-        MiniTournament.save()
-        return
-
-    ret = SF_createNextRoundGamesSetup(MiniTournament, "mini")
-
-    # Clear nextRoundPlayers for new assignments
-    MiniTournament.nextRoundPlayers.clear()
-
-    if ret["endTournament"] == True:
-        SF_endMiniTournament(request, MiniTournament, _currentGame, _winnerArray)
-        MiniTournament.save()
-        return
-
-    roundData = []
-
-    # First, handle byes
-    byePlayers = ret["byePlayers"]
-    if len(byePlayers) > 0:
-        roundData.append(["BYEPLAYERS"] + byePlayers)
-        for player in byePlayers:
-            # Add bye players to next round
-            MiniTournament.nextRoundPlayers.add(User.objects.get(username=player))
-            # Update points for byes
-            if MiniTournament.tournamentType in ["RR", "TL", "PT"]:
-                pointsList = json.loads(MiniTournament.tournamentPointsData)
-                byePoints = 1
-                if MiniTournament.tournamentType == "PT":
-                    byePoints = SR_getPointsForPosition(99, MiniTournament.maxGamePlayers)
-                for byePlayer in byePlayers:
-                    for playerData in pointsList:
-                        if playerData[0] == byePlayer:
-                            playerData[1] += byePoints
-                            break
-                MiniTournament.tournamentPointsData = json.dumps(pointsList)
-
-    # Start the games
-    gamesPlayers = ret["gamesPlayers"]
-    roundNumberString = ret["roundNumberString"]
-    for currentPlayers in gamesPlayers:
-        if MiniTournament.gameCode == "FCM":
-            newGameID = create_fcm_game(request, False, True, MiniTournament, roundNumberString, currentPlayers)
-        elif MiniTournament.gameCode == "TGZ":
-            newGameID = create_tgz_game(request, False, True, MiniTournament, roundNumberString, currentPlayers)
-        else:
-            newGameID = MiniTournament.createTournamentGame(request, roundNumberString, currentPlayers)
-        # newRowData = [currentPlayers, newGameID, []]
-        roundData.append([currentPlayers, newGameID, []])
-
-    # Save round data
-    if roundData:
-        tournamentProgressionDataArray = json.loads(MiniTournament.tournamentProgressionData)
-        tournamentProgressionDataArray.append(roundData)
-        MiniTournament.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
-
-    MiniTournament.save()
-
-
-def SF_M_ProcessMiniTournamentEndGame(request, MiniTournament, _currentGame, _winnerArray, finalPositionNames=[]):
-    # Add winner into results
-    tournamentProgressionDataArray = json.loads(MiniTournament.tournamentProgressionData)
-    # Find correct index in latest round
-    indexRequired = -1
-    for i in range(0, len(tournamentProgressionDataArray[-1])):
-        # for j in range(0, len(tournamentProgressionDataArray[-1][i])):
-        #    if tournamentProgressionDataArray[-1][i][j] == _winnerArray[0]:
-        #        indexRequired = i
-        # tournamentProgressionDataArray[-1][indexRequired][2].extend(_winnerArray[0])
-        if _winnerArray[0] in tournamentProgressionDataArray[-1][i][0]:
-            indexRequired = i
-            break
-
-    tournamentProgressionDataArray[-1][indexRequired][2].extend(_winnerArray)
-    MiniTournament.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
-
-    ############################## Add players to next round players
-    # KO JUST ADD THE WINNER
-    if MiniTournament.tournamentType == "KO":
-        for playerUsername in _winnerArray:
-            MiniTournament.nextRoundPlayers.add(User.objects.get(username=playerUsername))
-    # RR/PT Add all players not kickied
-    elif MiniTournament.tournamentType == "RR" or MiniTournament.tournamentType == "PT":
-        # Just add winner for KO part
-        if len(tournamentProgressionDataArray) >= MiniTournament.roundsBeforeKnockout:
-            for playerUsername in _winnerArray:
-                MiniTournament.nextRoundPlayers.add(User.objects.get(username=playerUsername))
-        # Else add everyone
-        else:
-            for playerObj in _currentGame.allPlayers.all():
-                if playerObj not in _currentGame.kickedPlayers.all() and playerObj.username != "FCMtourneyAdmin":
-                    MiniTournament.nextRoundPlayers.add(playerObj)
-    # TL Process lives, remove kicks, add players with lives
-    elif MiniTournament.tournamentType == "TL":
-        # Process the lives list
-        livesList = json.loads(MiniTournament.tournamentSideData)
-        for playerObj in _currentGame.allPlayers.all():
-            if playerObj != _currentGame.winner and playerObj.username != "FCMtourneyAdmin":
-                # livesList.remove(playerObj.username)
-                for i in range(len(livesList) - 1, -1, -1):
-                    player, lives = livesList[i]
-                    if player == playerObj.username:
-                        lives -= 1
-                        if lives <= 0:
-                            livesList.pop(i)
-                        else:
-                            livesList[i][1] = lives
-        for playerObj in _currentGame.kickedPlayers.all():
-            # while playerObj.username in livesList:
-            #    livesList.remove(playerObj.username)
-            for i in range(len(livesList) - 1, -1, -1):
-                player = livesList[0]
-                if player == playerObj.username:
-                    livesList.pop(i)
-
-        # Now add players to next round with 1/2 lives and not kicked
-        for playerObj in _currentGame.allPlayers.all():
-            if any(playerObj.username == subarr[0] and subarr[1] > 0 for subarr in livesList):
-                MiniTournament.nextRoundPlayers.add(playerObj)
-
-        MiniTournament.tournamentSideData = json.dumps(livesList)
-
-    ########################## Update the points
-    # Update the winners count for TL and RR
-    if MiniTournament.tournamentType == "TL" or MiniTournament.tournamentType == "RR":
-        pointsList = json.loads(MiniTournament.tournamentPointsData)
-        for i in range(len(pointsList)):
-            if pointsList[i][0] in _winnerArray:
-                pointsList[i][1] += 1
-        MiniTournament.tournamentPointsData = json.dumps(pointsList)
-    # Update the points for PT
-    elif MiniTournament.tournamentType == "PT":
-        pointsList = json.loads(MiniTournament.tournamentPointsData)
-
-        for i, player_name in enumerate(finalPositionNames):
-            # Find the index of the player in pointsList
-            points_list_idx = next((idx for idx, x in enumerate(pointsList) if x[0] == player_name), -1)
-            if points_list_idx != -1:  # Ensure player was found
-                pointsList[points_list_idx][1] += SR_getPointsForPosition(i, MiniTournament.maxGamePlayers)
-            MiniTournament.tournamentPointsData = json.dumps(pointsList)
-
-    MiniTournament.save()
-
-    # Check all games from previous round are finished
-    tournamentRoundFinished = False
-
-    # Check all games from previous round are finished
-    finishedRows = 0
-    for row in tournamentProgressionDataArray[-1]:
-        if row[0] == "BYEPLAYERS":
-            finishedRows += 1
-        else:
-            # Otherwise, check the row has a winner
-            if len(row[2]) >= 1:
-                finishedRows += 1
-    if finishedRows == len(tournamentProgressionDataArray[-1]):
-        tournamentRoundFinished = True
-
-    # All games done; either end tourny or start new round
-    if tournamentRoundFinished:
-        start_next_mini_tournament_round(request, MiniTournament, _currentGame, _winnerArray)
-
-    MiniTournament.save()
-
-
-def SF_endMiniTournament(request, MiniTournament, _currentGame, _winnerArray):
-    MiniTournament.nextRoundPlayers.clear()
-    gameCode = MiniTournament.gameCode
-    winnersData = []
-
-    # End the tournament
-    MiniTournament.tournamentStatus = "FN"
-    # RR / TL / PT
-    if (
-        MiniTournament.tournamentType == "RR"
-        or MiniTournament.tournamentType == "TL"
-        or MiniTournament.tournamentType == "PT"
-    ):
-        # get winners based on points
-        pointsList = json.loads(MiniTournament.tournamentPointsData)
-        pointsList = sorted(pointsList, key=lambda x: -x[1])
-        # Now points list has strongest players at the top
-        currentTopPoints = 0
-        firsts = []
-        seconds = []
-        thirds = []
-        ranking = 1
-        for entry in pointsList:
-            if currentTopPoints > entry[1]:
-                if ranking == 3:
-                    ranking = 4
-                if ranking == 2:
-                    ranking = 3
-                if ranking == 1:
-                    ranking = 2
-            currentTopPoints = entry[1]
-            if ranking == 1:
-                firsts.append(entry[0])
-            if ranking == 2:
-                seconds.append(entry[0])
-            if ranking == 3:
-                thirds.append(entry[0])
-
-        winnersData.append(firsts)
-        winnersData.append(seconds)
-        winnersData.append(thirds)
-        MiniTournament.winnersData = json.dumps(winnersData)
-        MiniTournament.save()
-
-    # If not RR / TL / PT
-    elif MiniTournament.tournamentType == "KO":
-        # First place is winner, 2nd place everyone else in game
-        firsts = []
-        seconds = []
-        finalPlayersList = _currentGame.getAllPlayersOrderedySeat(True)
-        # add BYES from next round first
-        nextRoundPlayersList = list(
-            MiniTournament.nextRoundPlayers.all().order_by("?").values_list("username", flat=True)
-        )
-
-        for player in nextRoundPlayersList:
-            firsts.append(player)
-
-        for player in finalPlayersList:
-            if player in _winnerArray and player not in firsts:
-                firsts.append(player)
-            elif player not in firsts:
-                seconds.append(player)
-
-        winnersData.append(firsts)
-        winnersData.append(seconds)
-        MiniTournament.winnersData = json.dumps(winnersData)
-        MiniTournament.save()
-
-    # now update the players profiles with th new wins
-    for i in range(len(winnersData)):
-        for player in winnersData[i]:
-            # playerObject = User.objects.get(username=player)
-            # relatedProfile = Profile.objects.get(user=playerObject)
-            # FCMtournamentTrophies = json.loads(relatedProfile.FCMtournamentTrophies) if relatedProfile.FCMtournamentTrophies else []
-            # while len(FCMtournamentTrophies) < 7:
-            #    FCMtournamentTrophies.append([0,0,0])
-            # baseIndex = 0
-            # if gameCode == "FCM":
-            #    baseIndex = 1
-            # if gameCode == "HC":
-            #    baseIndex = 2
-            # if gameCode == "Bus":
-            #    baseIndex = 3
-            # if gameCode == "TGZ":
-            #    baseIndex = 4
-            # if gameCode == "AQY":
-            #    baseIndex = 5
-            # if gameCode == "IND":
-            #    baseIndex = 6
-            # FCMtournamentTrophies[baseIndex][i] += 1
-            # relatedProfile.FCMtournamentTrophies = json.dumps(FCMtournamentTrophies)
-            # relatedProfile.save()
-            if i == 0:
-                SN_M_T_sendTournamentWinNotification(MiniTournament, request, player, gameCode, "miniTournament")
-
-
-######################################
-#
-#   MAIN TOURNAMENTS - MainT
-#
-######################################
-def SF_startMainTournament(request, MainTournament):
-    gameCode = MainTournament.gameCode
-
-    ######### COMMON TO ALL TOURNYS ##########
-    MainTournament.tournamentStatus = "IP"
-    allPlayersList = list(MainTournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-
-    # Add everyone to nextRoundPlayers
-    for player in allPlayersList:
-        MainTournament.nextRoundPlayers.add(User.objects.get(username=player))
-
-    MainTournament.tournamentProgressionData = json.dumps([])
-    MainTournament.tournamentPointsData = json.dumps([])
-
-    if MainTournament.tournamentType == "TL":
-        allPlayersList = list(MainTournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-        livesList = []
-        for playerName in allPlayersList:
-            livesList.append([playerName, 2])
-        MainTournament.tournamentSideData = json.dumps(livesList)
-
-    if (
-        MainTournament.tournamentType == "RR"
-        or MainTournament.tournamentType == "TL"
-        or MainTournament.tournamentType == "PT"
-        or MainTournament.tournamentType == "MG"
-    ):
-        allPlayersList = list(MainTournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-        pointsList = []
-        for playerName in allPlayersList:
-            if MainTournament.tournamentType == "MG":
-                # Name, played, wins (then TB to come)
-                pointsList.append([playerName, 0, 0])
-            else:
-                pointsList.append([playerName, 0])
-
-        if MainTournament.tournamentType == "MG":
-            # dump inside a round 1 array
-            MainTournament.tournamentPointsData = json.dumps([pointsList])
-        else:
-            MainTournament.tournamentPointsData = json.dumps(pointsList)
-
-    start_next_main_tournament_round(request, MainTournament, None, [])
-
-    MainTournament.save()
-    return
-
-    # Make a set of players
-    wholeTournamentData = []
-    round1 = []
-    while len(allPlayersList) >= tournament.maxGamePlayers:
-        currentPlayers = []
-        # Gather the players
-        for i in range(tournament.maxGamePlayers):
-            currentPlayers.append(allPlayersList.pop(0))
-        # Start a game
-        newGameID = 0
-        if gameCode == "FCM":
-            newGameID = create_fcm_game(request, False, True, tournament, "Round 1", currentPlayers)
-        else:
-            newGameID = tournament.createTournamentGame(request, "Round 1", currentPlayers)
-        currentPlayers.append(newGameID)
-        round1.append(currentPlayers)
-    # Add remaing players to next round
-    byePlayers = []
-    if len(allPlayersList) > 0:
-        byePlayers = ["BYEPLAYERS"]
-        for player in allPlayersList:
-            tournament.nextRoundPlayers.add(User.objects.get(username=player))
-            byePlayers.append(player)
-        round1.append(byePlayers)
-
-    wholeTournamentData.append(round1)
-    tournament.tournamentProgressionData = json.dumps(wholeTournamentData)
-
-    # if tournament.tournamentType == "TL":
-    #    allPlayersList = list(tournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-    #    livesList = []
-    #    for playerName in allPlayersList:
-    #        livesList.extend([playerName, playerName])
-    #    tournament.tournamentSideData = json.dumps(livesList)
-
-    if tournament.tournamentType == "RR" or tournament.tournamentType == "TL" or tournament.tournamentType == "PT":
-        allPlayersList = list(tournament.startingPlayers.all().order_by("?").values_list("username", flat=True))
-        pointsList = []
-        for playerName in allPlayersList:
-            pointsList.append([playerName, 0])
-        # Now add 1 point for the byes (need the TRY in case there aren't any bye players)
-        if len(byePlayers) > 0:
-            for i in range(len(byePlayers)):
-                if byePlayers[i] != "BYEPLAYERS":
-                    # find the player in points list and add 1
-                    for j in range(len(pointsList)):
-                        if pointsList[j][0] == byePlayers[i]:
-                            if tournament.tournamentType == "PT":
-                                ###### BYED POINTS
-                                if tournament.maxGamePlayers == 2:
-                                    pointsList[j][1] += 1
-                                elif tournament.maxGamePlayers == 3:
-                                    pointsList[j][1] += 2
-                                elif tournament.maxGamePlayers == 4:
-                                    pointsList[j][1] += 3
-                                elif tournament.maxGamePlayers == 5:
-                                    pointsList[j][1] += 4
-                                elif tournament.maxGamePlayers == 6:
-                                    pointsList[j][1] += 7
-                            elif tournament.tournamentType == "RR" or tournament.tournamentType == "TL":
-                                pointsList[j][1] += 1
-                            break
-
-        tournament.tournamentPointsData = json.dumps(pointsList)
-    # tournament.tournamentProgressionData = base64.b64encode(wholeTournamentDataJSON)
-    # tournament.tournamentProgressionData = wholeTournamentData
-    tournament.save()
-
-
-def start_next_main_tournament_round(request, MainTournament, _currentGame, _winnerArray):
-    from FCM.common import create_fcm_game
-    from TGZ.common import create_tgz_game
-
-    # Check if there's a winner or not enough players for a FULL game
-    if (
-        MainTournament.nextRoundPlayers.count() < MainTournament.maxGamePlayers
-        and MainTournament.tournamentType != "MG"
-    ):
-        SF_endMainTournament(request, MainTournament, _currentGame, _winnerArray)
-        MainTournament.save()
-        return
-
-    if MainTournament.tournamentType == "MG":
-        allPlayersList = list(MainTournament.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
-        # First round has added everyone. Second round is top 14. 3rd round is top 2 from each group
-        if len(allPlayersList) == 0:
-            TPDA = json.loads(MainTournament.tournamentProgressionData)
-            pointsList = json.loads(MainTournament.tournamentPointsData)
-            if len(TPDA) == 1:
-                # Get 14 players for round 2
-                playersData = []
-                previousRound = pointsList[-1]
-                for row in previousRound:
-                    name, played, wins = row[0], row[1], row[2]
-                    tb = sorted(row[3:], reverse=True)  # sort existing TBs descending
-                    tb += [[-float("inf"), -1]] * (4 - len(tb))  # pad if needed (optional)
-                    normalized_row = [name, played, wins] + tb[:4]  # keep only top 4
-                    playersData.append(normalized_row)
-                playersData.sort(key=lambda r: (-r[2], -r[3][0], -r[4][0], -r[5][0], -r[6][0], r[0]))
-
-                playersData = playersData[:14]
-                for i in range(14):
-                    MainTournament.nextRoundPlayers.add(User.objects.get(username=playersData[i][0]))
-
-                # Set up the points data for Round 2
-                tournamentPointsData = json.loads(MainTournament.tournamentPointsData)
-                
-                A = playersData[0::2]   # 0,2,4,6,8,10,12
-                B = playersData[1::2]   # 1,3,5,7,9,11,13
-
-                pointsList = []
-                for row in A:
-                    # Name, played, wins (then TB to come)
-                    pointsList.append([row[0], 0, 0])
-                for row in B:
-                    # Name, played, wins (then TB to come)
-                    pointsList.append([row[0], 0, 0])
-
-                # dump inside a round 12array
-                tournamentPointsData.append(pointsList)
-                MainTournament.tournamentPointsData = json.dumps(tournamentPointsData)
-
-                MainTournament.save()
-
-            elif len(TPDA) == 2:
-                # Get the 4 finalists
-                previousRound = pointsList[-1]
-                groupA = previousRound[:7]
-                groupB = previousRound[7:]
-                groupAclean = getCleanedAndSortedRoundData(groupA)
-                groupBclean = getCleanedAndSortedRoundData(groupB)
-                finalists = [groupAclean[0][0], groupBclean[0][0], groupAclean[1][0], groupBclean[1][0]]
-                for player in finalists:
-                    MainTournament.nextRoundPlayers.add(User.objects.get(username=player))
-
-                # Set up the points data for Round 3
-                tournamentPointsData = json.loads(MainTournament.tournamentPointsData)
-
-                pointsList = []
-                for player in finalists:
-                    # Name, played, wins (then TB to come)
-                    pointsList.append([player, 0, 0])
-
-                # dump inside a round 12array
-                tournamentPointsData.append(pointsList)
-                MainTournament.tournamentPointsData = json.dumps(tournamentPointsData)
-
-                MainTournament.save()
-
-    ret = SF_createNextRoundGamesSetup(MainTournament, "main")
-    # Clear nextRoundPlayers for new assignments
-    MainTournament.nextRoundPlayers.clear()
-
-    if ret["endTournament"] == True:
-        SF_endMainTournament(request, MainTournament, _currentGame, _winnerArray)
-        MainTournament.save()
-        return
-
-    roundData = []
-
-    # First, handle byes
-    byePlayers = ret["byePlayers"]
-    if len(byePlayers) > 0:
-        roundData.append(["BYEPLAYERS"] + byePlayers)
-        for player in byePlayers:
-            # Add bye players to next round
-            MainTournament.nextRoundPlayers.add(User.objects.get(username=player))
-            # Update points for byes
-            if MainTournament.tournamentType in ["RR", "TL", "PT"]:
-                pointsList = json.loads(MainTournament.tournamentPointsData)
-                byePoints = 1
-                if MainTournament.tournamentType == "PT":
-                    byePoints = SR_getPointsForPosition(99, MainTournament.maxGamePlayers)
-                for byePlayer in byePlayers:
-                    for playerData in pointsList:
-                        if playerData[0] == byePlayer:
-                            playerData[1] += byePoints
-                            break
-                MainTournament.tournamentPointsData = json.dumps(pointsList)
-
-    # Start the games
-    gamesPlayers = ret["gamesPlayers"]
-    roundNumberString = ret["roundNumberString"]
-    tournamentGameName = f"[{MainTournament.tournamentName}] {roundNumberString}"
-    for i, currentPlayers in enumerate(gamesPlayers):
-        if MainTournament.tournamentType == "MG":
-            # NB the roundNumberString is whateber comes after [tourneyName] (and a space)
-            # So eg - R2-A1/B1/R1-1
-            if len(gamesPlayers) == 1:
-                tournamentGameName = f"[{MainTournament.tournamentName}] Final"
-            elif len(gamesPlayers) == 14:
-                gameNames = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "B1", "B2", "B3", "B4", "B5", "B6", "B7"]
-                tournamentGameName = f"[{MainTournament.tournamentName}] R2 - {gameNames[i]}"
-            else:
-                tournamentGameName = f"[{MainTournament.tournamentName}] R1 - {i+1}"
-        if MainTournament.gameCode == "FCM":
-            newGameID = create_fcm_game(request, False, True, MainTournament, tournamentGameName, currentPlayers)
-        elif MainTournament.gameCode == "TGZ":
-            newGameID = create_tgz_game(request, True, False, MainTournament, tournamentGameName, currentPlayers)
-        else:
-            newGameID = MainTournament.createTournamentGame(request, roundNumberString, currentPlayers)
-        # newRowData = [currentPlayers, newGameID, []]
-        roundData.append([currentPlayers, newGameID, [], tournamentGameName])
-
-    # Save round data
-    if roundData:
-        tournamentProgressionDataArray = json.loads(MainTournament.tournamentProgressionData)
-        tournamentProgressionDataArray.append(roundData)
-        MainTournament.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
-
-    MainTournament.save()
-
-
-def SF_M_ProcessMainTournamentEndGame(request, MainTournament, _currentGame, _winnerArray, _finalPositionNamesAndScore):
-    finalPositionNames = []
-    for finalPositionNameAndScore in _finalPositionNamesAndScore:
-        finalPositionNames.append(finalPositionNameAndScore[0])
-    # Add winner into results
-    tournamentProgressionDataArray = json.loads(MainTournament.tournamentProgressionData)
+def SF_checkForAnyTournamentEnd(tournamentObj, mainORmini):
+    # For any tournament, check if there's a winner or not enough players for a FULL game
+    if tournamentObj.nextRoundPlayers.count() < tournamentObj.maxGamePlayers:
+        return True
+
+    return False
+
+# _winnerArray is an array of [winner_username, winner_username, ...]
+# _finalPositionNamesAndScore is an array [ [username], [username, username,... TB_VALUE], [username, username,..., TB_VALUE], [...etc] ]
+# NB THE FIRST ENTRY IS AN ARRAY OF (MULTIPLE) WINNER(S)
+def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
+    
+    ### Add winner(s) into results
+    tournamentProgressionDataArray = json.loads(tournamanetObj.tournamentProgressionData)
     # Find correct index in latest round using game id
     match = next((row for row in tournamentProgressionDataArray[-1] if row[1] == _currentGame.id), None)
-
     if match is not None:
         match[2].extend(_winnerArray)  # this modifies the original data!
     else:
         print("gameID not found")
+    tournamanetObj.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
 
-    MainTournament.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
+    # This is an array, with all tied player usernames at each subarray
+    finalPositionNames = []
+    for i, finalPositionNameAndScore in enumerate(_finalPositionNamesAndScore):
+        finalPositionNames.append([])
+        if i == 0:
+            # Add every name in the winners sub-array
+            for name in finalPositionNameAndScore:
+                finalPositionNames[i].append(name)
+        else:
+            # Add every entry except the TB in other sub-arrays
+            for name in finalPositionNameAndScore[:-1]:
+                finalPositionNames[i].append(name)
 
     ############################## Add players to next round players
     # KO JUST ADD THE WINNER
-    if MainTournament.tournamentType == "KO":
+    if tournamanetObj.tournamentType == "KO":
         for playerUsername in _winnerArray:
-            MainTournament.nextRoundPlayers.add(User.objects.get(username=playerUsername))
+            tournamanetObj.nextRoundPlayers.add(User.objects.get(username=playerUsername))
     # RR/PT Add all players not kickied
-    elif MainTournament.tournamentType == "RR" or MainTournament.tournamentType == "PT":
+    elif tournamanetObj.tournamentType == "RR" or tournamanetObj.tournamentType == "PT":
         # Just add winner for KO part
-        if len(tournamentProgressionDataArray) >= MainTournament.roundsBeforeKnockout:
+        if len(tournamentProgressionDataArray) >= tournamanetObj.roundsBeforeKnockout:
             for playerUsername in _winnerArray:
-                MainTournament.nextRoundPlayers.add(User.objects.get(username=playerUsername))
+                if playerUsername not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
+                    tournamanetObj.nextRoundPlayers.add(User.objects.get(username=playerUsername))
         # Else add everyone
         else:
             for playerObj in _currentGame.allPlayers.all():
-                if playerObj not in _currentGame.kickedPlayers.all() and playerObj.username != "FCMtourneyAdmin":
-                    MainTournament.nextRoundPlayers.add(playerObj)
+                if playerObj not in _currentGame.kickedPlayers.all() and playerObj.username not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
+                    tournamanetObj.nextRoundPlayers.add(playerObj)
     # TL Process lives, remove kicks, add players with lives
-    elif MainTournament.tournamentType == "TL":
-        # Process the lives list
-        livesList = json.loads(MainTournament.tournamentSideData)
+    elif tournamanetObj.tournamentType == "TL":
+        # Process the lives list - DEDUCT lives from the losers
+        livesList = json.loads(tournamanetObj.tournamentSideData)
         for playerObj in _currentGame.allPlayers.all():
-            if playerObj != _currentGame.winner and playerObj.username != "FCMtourneyAdmin":
-                # livesList.remove(playerObj.username)
+            isWinner = playerObj.username in _winnerArray
+            if not isWinner and playerObj.username not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
+                # Step BACKWARDS through entire lives list
                 for i in range(len(livesList) - 1, -1, -1):
                     player, lives = livesList[i]
                     if player == playerObj.username:
@@ -2021,9 +1315,8 @@ def SF_M_ProcessMainTournamentEndGame(request, MainTournament, _currentGame, _wi
                             livesList.pop(i)
                         else:
                             livesList[i][1] = lives
+        # Go BACKWARDS through livesList and delete all kicked players
         for playerObj in _currentGame.kickedPlayers.all():
-            # while playerObj.username in livesList:
-            #    livesList.remove(playerObj.username)
             for i in range(len(livesList) - 1, -1, -1):
                 player = livesList[0]
                 if player == playerObj.username:
@@ -2032,49 +1325,65 @@ def SF_M_ProcessMainTournamentEndGame(request, MainTournament, _currentGame, _wi
         # Now add players to next round with 1/2 lives and not kicked
         for playerObj in _currentGame.allPlayers.all():
             if any(playerObj.username == subarr[0] and subarr[1] > 0 for subarr in livesList):
-                MainTournament.nextRoundPlayers.add(playerObj)
+                tournamanetObj.nextRoundPlayers.add(playerObj)
 
-        MainTournament.tournamentSideData = json.dumps(livesList)
+        tournamanetObj.tournamentSideData = json.dumps(livesList)
 
     ########################## Update the points
     # Update the winners count for TL and RR
-    if MainTournament.tournamentType == "TL" or MainTournament.tournamentType == "RR":
-        pointsList = json.loads(MainTournament.tournamentPointsData)
+    if tournamanetObj.tournamentType == "TL" or tournamanetObj.tournamentType == "RR":
+        pointsList = json.loads(tournamanetObj.tournamentPointsData)
         for i in range(len(pointsList)):
             if pointsList[i][0] in _winnerArray:
                 pointsList[i][1] += 1
-        MainTournament.tournamentPointsData = json.dumps(pointsList)
+        tournamanetObj.tournamentPointsData = json.dumps(pointsList)
     # Update the points for PT
-    elif MainTournament.tournamentType == "PT":
-        pointsList = json.loads(MainTournament.tournamentPointsData)
+    elif tournamanetObj.tournamentType == "PT":
+        pointsList = json.loads(tournamanetObj.tournamentPointsData)
 
-        for i, player_name in enumerate(finalPositionNames):
-            # Find the index of the player in pointsList
-            points_list_idx = next((idx for idx, x in enumerate(pointsList) if x[0] == player_name), -1)
-            if points_list_idx != -1:  # Ensure player was found
-                pointsList[points_list_idx][1] += SR_getPointsForPosition(i, MainTournament.maxGamePlayers)
-            MainTournament.tournamentPointsData = json.dumps(pointsList)
+        for i, subArr in enumerate(finalPositionNames):
+            for player_name in subArr:
+                # Find the index of the player in pointsList
+                points_list_idx = next((idx for idx, x in enumerate(pointsList) if x[0] == player_name), -1)
+                if points_list_idx != -1:  # Ensure player was found
+                    pointsList[points_list_idx][1] += SR_getPointsForPosition(i, tournamanetObj.maxGamePlayers)
+        tournamanetObj.tournamentPointsData = json.dumps(pointsList)
 
     # Update the tiebreakers for TGZ MG
-    if MainTournament.tournamentType == "MG":
-        pointsList = json.loads(MainTournament.tournamentPointsData)
+    if tournamanetObj.tournamentType == "MG":    
+        pointsList = json.loads(tournamanetObj.tournamentPointsData)
         currentGameID = _currentGame.id
+
         for i, row in enumerate(_finalPositionNamesAndScore):
-            player_name = row[0]
-            points_list_idx = next((idx for idx, x in enumerate(pointsList[-1]) if x[0] == player_name), -1)
-            # Everyone has played a game
-            pointsList[-1][points_list_idx][1] += 1
-            # Winner gets a win
+            tie_breaker_value = 0
+            # Determine which entries in this row are player names
             if i == 0:
-                pointsList[-1][points_list_idx][2] += 1
-            # Everyone else gets a tie break
+                # First row: Everyone is a winner, no tie-breaker at the end
+                players_in_row = row
             else:
-                pointsList[-1][points_list_idx].append([row[1], currentGameID])
-            # Find the index of the player in pointsList
+                # Subsequent rows: All entries except the last one are names
+                players_in_row = row[:-1]
+                tie_breaker_value = row[-1] if len(row) > 1 else 0
 
-            MainTournament.tournamentPointsData = json.dumps(pointsList)
+            for player_name in players_in_row:
+                # Find the player's index in pointsList
+                points_list_idx = next((idx for idx, x in enumerate(pointsList[-1]) if x[0] == player_name), -1)
+                
+                if points_list_idx != -1:
+                    # 1. Increment games played for everyone
+                    pointsList[-1][points_list_idx][1] += 1
+                    
+                    if i == 0:
+                        # 2. Increment wins for first-row players
+                        pointsList[-1][points_list_idx][2] += 1
+                    else:
+                        # 3. Add tie-breaker and Game ID for everyone else
+                        pointsList[-1][points_list_idx].append([tie_breaker_value, currentGameID])
 
-    MainTournament.save()
+        # Save once after all loops are finished
+        tournamanetObj.tournamentPointsData = json.dumps(pointsList)
+
+    tournamanetObj.save()
 
     # Check all games from previous round are finished
     tournamentRoundFinished = False
@@ -2093,26 +1402,26 @@ def SF_M_ProcessMainTournamentEndGame(request, MainTournament, _currentGame, _wi
 
     # All games done; either end tourny or start new round
     if tournamentRoundFinished:
-        start_next_main_tournament_round(request, MainTournament, _currentGame, _winnerArray)
+        start_next_any_tournament_round(request, mainORmini, tournamanetObj, _currentGame, _winnerArray, _finalPositionNamesAndScore)
 
-    MainTournament.save()
-
-
-def SF_endMainTournament(request, MainTournament, _currentGame, _winnerArray):
-    MainTournament.nextRoundPlayers.clear()
-    gameCode = MainTournament.gameCode
+    tournamanetObj.save()
+    
+# This could be tidied up by removing _finalPositionNamesAndScore input and getting it from tournamentObj directly
+def SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
+    tournamentObj.nextRoundPlayers.clear()
+    gameCode = tournamentObj.gameCode
     winnersData = []
 
     # End the tournament
-    MainTournament.tournamentStatus = "FN"
+    tournamentObj.tournamentStatus = "FN"
     # RR / TL / PT
     if (
-        MainTournament.tournamentType == "RR"
-        or MainTournament.tournamentType == "TL"
-        or MainTournament.tournamentType == "PT"
+        tournamentObj.tournamentType == "RR"
+        or tournamentObj.tournamentType == "TL"
+        or tournamentObj.tournamentType == "PT"
     ):
         # get winners based on points
-        pointsList = json.loads(MainTournament.tournamentPointsData)
+        pointsList = json.loads(tournamentObj.tournamentPointsData)
         pointsList = sorted(pointsList, key=lambda x: -x[1])
         # Now points list has strongest players at the top
         currentTopPoints = 0
@@ -2139,48 +1448,34 @@ def SF_endMainTournament(request, MainTournament, _currentGame, _winnerArray):
         winnersData.append(firsts)
         winnersData.append(seconds)
         winnersData.append(thirds)
-        MainTournament.winnersData = json.dumps(winnersData)
-        MainTournament.save()
+        tournamentObj.winnersData = json.dumps(winnersData)
+        tournamentObj.save()
     # MG
     elif (
-        MainTournament.tournamentType == "MG"
+        tournamentObj.tournamentType == "MG"
     ):
-        # This has a single final game. So load up the game and get player order form history
-        allPlayers = _currentGame.getAllPlayersOrderedySeat(True)
-        gameData = json.loads(
-                    gzip.decompress(bytearray(base64.b64decode(_currentGame.gameData))).decode("utf-8")
-                )
-        history = gameData[7]
-        lastHistory3 = history[-1][3]
-        
-        firsts = []
-        seconds = []
-        thirds = []
-        for i, subArr in enumerate(lastHistory3):
-            playerIndex = subArr[1]
-            player = allPlayers[playerIndex]
-            if i == 0:
-                firsts.append(player)
-            if i == 1:
-                seconds.append(player)
-            if i == 2:
-                thirds.append(player)
+        # This has a single final game. So use _finalPositionNamesAndScore        
+        # firsts gets the whole sub-array
+        firsts = _finalPositionNamesAndScore[0]
+        # seconds and thirds get the sub-array except for the last entry (the TB score)
+        seconds = _finalPositionNamesAndScore[1][:-1]
+        thirds = _finalPositionNamesAndScore[2][:-1]
 
         winnersData.append(firsts)
         winnersData.append(seconds)
         winnersData.append(thirds)
-        MainTournament.winnersData = json.dumps(winnersData)
-        MainTournament.save()
+        tournamentObj.winnersData = json.dumps(winnersData)
+        tournamentObj.save()
 
-    # If not RR / TL / PT
-    elif MainTournament.tournamentType == "KO":
+    # If not RR / TL / PT / MG
+    elif tournamentObj.tournamentType == "KO":
         # First place is winner, 2nd place everyone else in game
         firsts = []
         seconds = []
         finalPlayersList = _currentGame.getAllPlayersOrderedySeat(True)
         # add BYES from next round first
         nextRoundPlayersList = list(
-            MainTournament.nextRoundPlayers.all().order_by("?").values_list("username", flat=True)
+            tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True)
         )
 
         for player in nextRoundPlayersList:
@@ -2194,32 +1489,37 @@ def SF_endMainTournament(request, MainTournament, _currentGame, _winnerArray):
 
         winnersData.append(firsts)
         winnersData.append(seconds)
-        MainTournament.winnersData = json.dumps(winnersData)
-        MainTournament.save()
+        tournamentObj.winnersData = json.dumps(winnersData)
+        tournamentObj.save()
 
     # now update the players profiles with th new wins
     for i in range(len(winnersData)):
         for player in winnersData[i]:
-            playerObject = User.objects.get(username=player)
-            relatedProfile = Profile.objects.get(user=playerObject)
-            FCMtournamentTrophies = json.loads(relatedProfile.FCMtournamentTrophies) if relatedProfile.FCMtournamentTrophies else []
-            while len(FCMtournamentTrophies) < 7:
-               FCMtournamentTrophies.append([0,0,0])
-            baseIndex = 0
-            if gameCode == "FCM":
-               baseIndex = 1
-            if gameCode == "HC":
-               baseIndex = 2
-            if gameCode == "Bus":
-               baseIndex = 3
-            if gameCode == "TGZ":
-               baseIndex = 4
-            if gameCode == "AQY":
-               baseIndex = 5
-            if gameCode == "IND":
-               baseIndex = 6
-            FCMtournamentTrophies[baseIndex][i] += 1
-            relatedProfile.FCMtournamentTrophies = json.dumps(FCMtournamentTrophies)
-            relatedProfile.save()
+            # Award trophies only for main tournaments
+            if mainORmini == MAIN_T_FLAG:
+                playerObject = User.objects.get(username=player)
+                relatedProfile = Profile.objects.get(user=playerObject)
+                FCMtournamentTrophies = json.loads(relatedProfile.FCMtournamentTrophies) if relatedProfile.FCMtournamentTrophies else []
+                while len(FCMtournamentTrophies) < 7:
+                    FCMtournamentTrophies.append([0,0,0])
+                baseIndex = 0
+                if gameCode == "FCM":
+                    baseIndex = 1
+                if gameCode == "HC":
+                    baseIndex = 2
+                if gameCode == "Bus":
+                    baseIndex = 3
+                if gameCode == "TGZ":
+                    baseIndex = 4
+                if gameCode == "AQY":
+                    baseIndex = 5
+                if gameCode == "IND":
+                    baseIndex = 6
+                FCMtournamentTrophies[baseIndex][i] += 1
+                relatedProfile.FCMtournamentTrophies = json.dumps(FCMtournamentTrophies)
+                relatedProfile.save()
+            # In all cases, notify the winner(s)
             if i == 0:
-                SN_M_T_sendTournamentWinNotification(MainTournament, request, player, gameCode, "MainTournament")
+                SN_M_T_sendTournamentWinNotification(tournamentObj, request, player, gameCode, mainORmini)
+
+# End common main/mini functions
