@@ -441,11 +441,6 @@ def busData(request, dataType):
 
 @contextmanager
 def db_mutex(name, timeout=10):
-    # if settings.DEBUG:
-    # if 1==2:
-    #    print('Not creating mutex ' + name)
-    #    yield
-    #    return
     mutex_name = "dbmutex_" + name
     cursor = connection.cursor()
     # timeout returns with error

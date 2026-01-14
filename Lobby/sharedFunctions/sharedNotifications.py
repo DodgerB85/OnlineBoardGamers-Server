@@ -4,7 +4,7 @@ import json
 import random
 import time
 import urllib.parse
-from decouple import config, Csv
+from decouple import config
 
 from django.utils.translation import gettext, activate, get_language
 from django.template.loader import render_to_string
@@ -24,6 +24,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from django.conf import settings
+
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
@@ -873,7 +876,7 @@ def SN_M_T_sendTournamentGameStartNotification(
     activate(originalLang)
 
 
-def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, _tournamentType):
+def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, mainORmini):
     originalLang = get_language()
     try:
         user = User.objects.get(username=_player)
@@ -889,7 +892,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, _t
         activate(profile.profileLanguage)
         gameStrings = getGameStrings(_game)
         subject = gameStrings["tournamentWinSubject"]
-        if _tournamentType == "miniTournament":
+        if mainORmini == MINI_T_FLAG:
             subject = gameStrings["miniTournamentWinSubject"]   
         boxName = gameStrings["boxName"]
 
@@ -1482,8 +1485,10 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
     loginUsername = LOGINS[idx]
     serverAddress = SERVERS[idx]
 
-    if settings.LOCAL_USER:
-        user = User.objects.get(email=toEmail)
+    if config("LOCAL_USER", default=True, cast=bool):
+        user = User.objects.filter(email=toEmail).first()
+        if user is None:
+            user = User.objects.get(id=1)
         user.email_user(subject, message)
     else:
         msg = MIMEMultipart()
@@ -1501,6 +1506,17 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
 def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
     if profile.webhooks == "" or profile.webhooks is None or profile.webhooks == "[]":
         return
+
+    # THERE IS NOTHING TO STOP LOCAL COPIES OF LIVE DB SENDING OUT REAL WEBHOOKS.
+    # SO PERFORM A HACK HERE TO GENERALLY NOT SEND OUT WEBHOOKS
+    if config("LOCAL_USER", default=True, cast=bool):
+        # Get the username
+        username = profile.user.username
+        ALLOWED_LOCAL_USERS = ["admin", "DodgerB", "Joey", "Rachel", "Ross", "user1", "user2", "user3"]
+        if username not in ALLOWED_LOCAL_USERS:
+            print(f"SUPRESSING WEBHOOKS FOR LOCAL USER: {username}")
+            return
+
 
     webhooks = json.loads(profile.webhooks)
     for webhookData in webhooks:

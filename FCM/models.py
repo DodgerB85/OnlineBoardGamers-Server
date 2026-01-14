@@ -25,7 +25,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
     SF_kickoutRequired,
     SF_M_ProcessTournamentEndGame,
-    SF_M_ProcessMiniTournamentEndGame,
+    SF_M_ProcessAnyTournamentEndGame,
 )
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
@@ -49,7 +49,10 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
 )
 
-from Lobby.models import User, Mini_Tournaments, AbstractGame
+from Lobby.models import User, Mini_Tournaments, AbstractGame, Main_Tournament
+
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +133,7 @@ class FCM_Tournament(models.Model):
             "winnerHTML": winnerHTML,
             "createdTS": createdTS,
             "gameCode": "FCM",
+            "tournamentLink": f"/FCMtournament/FCM/{self.id}/",
         }
 
     def getRoundsHTML(self):
@@ -220,6 +224,14 @@ class FCM_Game(AbstractGame):
         null=True,
         blank=True,
         related_name="tournament_relName",
+    )
+
+    relatedMainTournament = models.ForeignKey(
+        Main_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="maintournamentFCM_relName",
     )
 
     relatedMiniTournament = models.ForeignKey(
@@ -1110,13 +1122,12 @@ class FCM_Game(AbstractGame):
         return False
 
     # Takes in self, request, and then 3 JSON[""] pieces of string data
-
-    def endGame(self, request, _winner, _finalScores, _gameID):
+    def endGame(self, request, _winnerUsername, _finalScores, _tournamentData, _gameID):
         self.rewindData = ""
         self.rewindTempData = ""
         self.kickoutFlexiData = ""
         self.gameStatus = "FINISHED"
-        self.winner = User.objects.get(username=_winner)
+        self.winner = User.objects.get(username=_winnerUsername)
         self.deleteGameVotes = None
         self.clearAllMoveDataV2()
         self.save()
@@ -1128,10 +1139,24 @@ class FCM_Game(AbstractGame):
         SN_M_sendEndGameNotification(request, "FCM", finalPositions, _gameID, self)
 
         if self.relatedTournament:
-            SF_M_ProcessTournamentEndGame(request, "FCM", self, [_winner])
+            SF_M_ProcessTournamentEndGame(request, "FCM", self, [_winnerUsername])
+        elif self.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MAIN_T_FLAG,
+                self.relatedMainTournament,
+                self,
+                [_winnerUsername],
+                _tournamentData,
+            )
         elif self.relatedMiniTournament:
-            SF_M_ProcessMiniTournamentEndGame(
-                request, self.relatedMiniTournament, self, [_winner], finalPositions
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MINI_T_FLAG,
+                self.relatedMiniTournament,
+                self,
+                [_winnerUsername],
+                _tournamentData,
             )
 
     def getGameCode(self):

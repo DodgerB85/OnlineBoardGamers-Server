@@ -17,16 +17,19 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedFunctions import SF_TGZadvancedOptions, SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow  # Replace 'somewhere' with actual module
 
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
 
 @login_required()
 def create_tgz_game(
     request,
-    is_main_tournament=False,
-    is_mini_tournament=False,
+    mainORmini="",
     tournament=None,
     tournamentGameName=None,
     current_players_usernames=None,
 ):
+    is_main_tournament = mainORmini == MAIN_T_FLAG
+    is_mini_tournament = mainORmini == MINI_T_FLAG
     """
     Create a TGZ game, either for a tournament or regular play (training/non-training).
     Args:

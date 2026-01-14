@@ -5,7 +5,6 @@
 {% endblock %}
 {% block body %}
   {% compress js %}
-    <script src="{% static 'Lobby/AllTournaments.js' %}"></script>
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
   <div class="container">
@@ -20,7 +19,7 @@
 If anything does happen then I will keep the tournament going if at all possible, but be aware that worst case, you should still get a few fun games of FCM!</span><br />
 -->
     <h1>{% translate "Tournaments" %}</h1>
-    <p style="font-size: 25px;">
+    <p class="size25text">
       {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
       Horseless Carrige,
       {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
@@ -38,7 +37,7 @@ If anything does happen then I will keep the tournament going if at all possible
       <br />
       {% translate "For more information on tournaments, see" %} <a class="linkOther" id="helpLink2" href="{% url 'helpTournaments' %}">Tournaments Help</a> and check the Discord!
     </p>
-    <p style="font-size: 25px;">
+    <p class="size25text">
       <a class="linkOther" href="{% url 'MiniTournaments' %}">{% translate "Click here for Mini Tournaments" %}</a>
     </p>
     <div class="allTournamentsContainer">
@@ -55,24 +54,14 @@ If anything does happen then I will keep the tournament going if at all possible
             <th>{% translate "Winner" %}</th>
           </tr>
           {% for tourny in tournamentsJson %}
-            <tr class="clickableTournamentRow {{ tourny.gameCode }}"
-                id="tournamentRow{{ tourny.tournamentID }}">
+            <tr onclick="window.location.href='{{ tourny.tournamentLink }}';">
               <td>
                 {% if tourny.gameCode == 'FCM' %}
-                  <img class="tournamentGameIMG"
-                       src="{% static 'FCM/images/burger_board.png' %}"
-                       alt="FCM game"
-                       title="FCM Game">
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="FCM" %}
                 {% elif tourny.gameCode == 'HC' %}
-                  <img class="tournamentGameIMG"
-                       src="{% static 'HC/images/icon_car.png' %}"
-                       alt="HC game"
-                       title="HC Game">
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
                 {% elif tourny.gameCode == 'Bus' %}
-                  <img class="tournamentGameIMG"
-                       src="{% static 'Bus/images/bus_icon.png' %}"
-                       alt="Bus game"
-                       title="Bus Game">
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="Bus" %}
                 {% elif tourny.gameCode == 'TGZ' %}
                   {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
                 {% elif tourny.gameCode == 'AQY' %}
@@ -95,11 +84,8 @@ If anything does happen then I will keep the tournament going if at all possible
         </table>
       </div>
     </div>
-    <p style="font-size: 25px;">
-      <img src="{% static "TGZ/images/tgz_icon.png" %}"
-           alt="Tgz Tourney"
-           title="Tgz Tourney"
-           class="statsIMG">
+    <p class="size25text">
+      {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
       Old TGZ Tournaments were run externally. View them on the <a href="{% url 'TGZtournaments' %}" class="linkOther">Old TGZ Tournaments Page</a>
     </p>
     <br />

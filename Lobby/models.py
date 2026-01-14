@@ -228,6 +228,7 @@ class Main_Tournament(models.Model):
             "createdTS": createdTS,
             "gameCode": self.gameCode,
             "tournamentID": self.id,
+            "tournamentLink": f"/MainTournament/{self.id}/",
         }
 
 
