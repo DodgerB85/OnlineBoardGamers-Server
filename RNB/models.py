@@ -10,18 +10,13 @@ from django.db.models import Q
 from django.conf import settings
 # from django.utils.translation import gettext
 
-from Lobby.models import User, AbstractGame
+from Lobby.models import User, GeneralGame
 
 from Lobby.sharedFunctions.sharedFunctions import *
 from Lobby.sharedFunctions.sharedRefs import *
 
 
-class RNB_Game(AbstractGame):
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
-    startingOptions = models.CharField(max_length=20, blank=True)
-    
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    
+class RNB_Game(GeneralGame):  
     allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="RNBallPlayersRelName")
     missingPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="RNBmissingPlayersRelName", blank=True)
     

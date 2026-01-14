@@ -11,7 +11,7 @@ from django.conf import settings
 
 # from django.utils.translation import gettext, gettext_lazy
 
-from Lobby.models import User, AbstractGame, Main_Tournament, Mini_Tournaments
+from Lobby.models import User, GeneralGame, Main_Tournament, Mini_Tournaments
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -27,7 +27,6 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
     SR_TOURNAMENT_TYPE_CHOICES,
-    SR_GAME_STATUS_CHOICES,
     SR_currentTurnString,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
     SR_gamePaceString,
@@ -176,14 +175,7 @@ class AQY_Tournament(models.Model):
         return roundsHTML
 
 
-class AQY_Game(AbstractGame):
-    latestUpdate = models.CharField(
-        max_length=15, blank=False, default=SR_getTimeNow, db_index=True
-    )
-    startingOptions = models.CharField(max_length=20, blank=True)
-    
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    
+class AQY_Game(GeneralGame):       
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYallPlayersRelName"
     )
@@ -241,9 +233,6 @@ class AQY_Game(AbstractGame):
     player3currentMoveTime = models.CharField(max_length=15, blank=True)
     player3currentMoveData = models.TextField(blank=True)
 
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
-
     tournamentGame = models.BooleanField(blank=False, default=False)
     relatedTournament = models.ForeignKey(
         AQY_Tournament,
@@ -262,8 +251,6 @@ class AQY_Game(AbstractGame):
     )
 
     playerTradeData = models.TextField(blank=True)
-
-    deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())

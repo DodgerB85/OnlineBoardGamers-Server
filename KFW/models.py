@@ -11,19 +11,17 @@ from django.conf import settings
 
 # from django.utils.translation import gettext
 
-from Lobby.models import User, AbstractGame
+from Lobby.models import User, GeneralGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
     SF_kickoutRequired,
 )  # , SF_M_ProcessTournamentEndGame
 from Lobby.sharedFunctions.sharedRefs import (
-    SR_getTimeNow,
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getKFWstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
-    SR_GAME_STATUS_CHOICES,
     # SR_TOURNAMENT_STATUS_CHOICES,
     # SR_TOURNAMENT_TYPE_CHOICES,
     # SR_getTournamentWinnerHTML,
@@ -35,12 +33,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )  # , SN_M_T_sendTournamentGameStartNotification
 
 
-class KFW_Game(AbstractGame):
-    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
-    startingOptions = models.CharField(max_length=20, blank=True)
-    
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    
+class KFW_Game(GeneralGame):        
     allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="KFWallPlayersRelName")
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="KFWmissingPlayersRelName", blank=True
@@ -77,9 +70,7 @@ class KFW_Game(AbstractGame):
 
     player4notes = models.TextField(blank=True)
     player5notes = models.TextField(blank=True)
-
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
+    
     serverData = models.TextField(blank=True, default=json.dumps([[40, 40, 40, 0], [16, 16, 16]]))
     playersHiddenData = models.TextField(blank=True)
     playersMoveData = models.TextField(blank=True)

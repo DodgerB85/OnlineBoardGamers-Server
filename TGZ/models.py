@@ -16,7 +16,7 @@ from django.utils.translation import gettext  # , get_language
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.utils import translation
 
-from Lobby.models import User, Mini_Tournaments, Main_Tournament, AbstractGame
+from Lobby.models import User, Mini_Tournaments, Main_Tournament, GeneralGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -24,11 +24,9 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_M_ProcessAnyTournamentEndGame,
 )
 from Lobby.sharedFunctions.sharedRefs import (
-    SR_getTimeNow,
     SR_currentTurnString,
     SR_gamePaceString,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
-    SR_GAME_STATUS_CHOICES,
     SR_getTGZstartingOptionsHTML,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
@@ -40,10 +38,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
 
-class TGZ_Game(AbstractGame):
-    latestUpdate = models.CharField(max_length=30, blank=False, default=SR_getTimeNow, db_index=True)
-    startingOptions = models.CharField(max_length=100, blank=True)
-    
+class TGZ_Game(GeneralGame):    
     allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="TGZallPlayersRelName")
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="TGZmissingPlayersRelName", blank=True
@@ -90,9 +85,6 @@ class TGZ_Game(AbstractGame):
     statsExcludeConsent = models.CharField(max_length=5, blank=False, default="00000")
 
     player4notes = models.TextField(blank=True)
-
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
 
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)

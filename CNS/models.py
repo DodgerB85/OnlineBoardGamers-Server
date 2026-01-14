@@ -8,19 +8,17 @@ from django.db.models import Q
 from django.conf import settings
 from decouple import config
 
-from Lobby.models import User, AbstractGame
+from Lobby.models import User, GeneralGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
     SF_kickoutRequired,
 )
 from Lobby.sharedFunctions.sharedRefs import (
-    SR_getTimeNow,
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getCNSstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
-    SR_GAME_STATUS_CHOICES,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_sendEndGameNotification,
@@ -28,14 +26,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 
-class CNS_Game(AbstractGame):
-    latestUpdate = models.CharField(
-        max_length=15, blank=False, default=SR_getTimeNow, db_index=True
-    )
-    startingOptions = models.CharField(max_length=20, blank=True)
-    
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    
+class CNS_Game(GeneralGame):       
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSallPlayersRelName"
     )
@@ -85,9 +76,6 @@ class CNS_Game(AbstractGame):
     )
 
     statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
-
-    rewindData = models.TextField(blank=True)
-    rewindTempData = models.TextField(blank=True)
 
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())

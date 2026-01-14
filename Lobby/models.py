@@ -352,7 +352,7 @@ class Mini_Tournaments(models.Model):
         }
 
 
-class AbstractGame(models.Model):
+class GeneralGame(models.Model):
     """
     Abstract base model for all game types.
     All game-specific models should inherit from this.
@@ -377,13 +377,14 @@ class AbstractGame(models.Model):
     
     maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
     
+    # Set these explicity when creating a game
     turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
     phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
     
     kickoutDuration = models.PositiveSmallIntegerField(
         null=False, blank=False, default=200
     )
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
+    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=30)
     
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
     
@@ -395,10 +396,18 @@ class AbstractGame(models.Model):
     player3notes = models.TextField(blank=True)
     
     gameData = models.TextField(blank=True)
+    rewindData = models.TextField(blank=True)
+    rewindTempData = models.TextField(blank=True)
+    
     kickoutFlexiData = models.TextField(blank=True)
     
     statsExcludedGame = models.BooleanField(blank=False, default=False)
     
+    latestUpdate = models.CharField(
+        max_length=15, blank=False, default=SR_getTimeNow, db_index=True
+    )
+    startingOptions = models.CharField(max_length=100, blank=True)
+        
     class Meta:
         abstract = True
 

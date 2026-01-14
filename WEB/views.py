@@ -82,7 +82,7 @@ def createWEBgame(request):
             creator=request.user,
             host=request.user,
             gamePace=_pace,
-            turn=0,
+            turn=1,
             phase=0,
             created=_created,
             latestUpdate=_created,
