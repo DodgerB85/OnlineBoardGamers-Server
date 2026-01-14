@@ -11,7 +11,7 @@ from django.conf import settings
 
 # from django.utils.translation import gettext, gettext_lazy
 
-from Lobby.models import User, Main_Tournament, Mini_Tournaments
+from Lobby.models import User, AbstractGame, Main_Tournament, Mini_Tournaments
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -176,54 +176,21 @@ class AQY_Tournament(models.Model):
         return roundsHTML
 
 
-class AQY_Game(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    gameName = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-
-    gameDescription = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-
-    gameStatus = models.CharField(
-        max_length=9,
-        choices=SR_GAME_STATUS_CHOICES,
-        default="AVAILABLE",
-        db_index=True,
-    )
-
+class AQY_Game(AbstractGame):
     latestUpdate = models.CharField(
         max_length=15, blank=False, default=SR_getTimeNow, db_index=True
     )
     startingOptions = models.CharField(max_length=20, blank=True)
-    startingMap = models.CharField(max_length=80, blank=True)
-
+    
+    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
+    
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYallPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYmissingPlayersRelName", blank=True
     )
-    currentPlayers = models.CharField(max_length=100, blank=True)
-
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
-
-    # winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-    #                           null=True, related_name='AQYgame_winner_relName', blank=True)
-    winner = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="AQYgame_winner_relName", blank=True
-    )
-
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-
-    kickoutDuration = models.PositiveSmallIntegerField(
-        null=False, blank=False, default=200
-    )
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
-
+    
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -238,7 +205,26 @@ class AQY_Game(models.Model):
         related_name="AQYgame_host_relName",
         default=None,
     )
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
+    
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="AQYkickedPlayersRelName", blank=True
+    )
+    invitedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="AQYinvitedPlayersRelName", blank=True
+    )
+    playersWithChatNotification = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="AQYplayersWithChatNotificationName",
+        blank=True,
+    )
+    
+    startingMap = models.CharField(max_length=80, blank=True)
+
+    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
+
+    winner = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="AQYgame_winner_relName", blank=True
+    )
 
     zoomLevels = models.CharField(
         max_length=30, blank=False, default=json.dumps([16, 16, 16, 16])
@@ -255,26 +241,6 @@ class AQY_Game(models.Model):
     player3currentMoveTime = models.CharField(max_length=15, blank=True)
     player3currentMoveData = models.TextField(blank=True)
 
-    kickedPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="AQYkickedPlayersRelName", blank=True
-    )
-    invitedPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="AQYinvitedPlayersRelName", blank=True
-    )
-    playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="AQYplayersWithChatNotificationName",
-        blank=True,
-    )
-
-    chatData = models.TextField(blank=True)
-
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
-
-    gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -294,10 +260,6 @@ class AQY_Game(models.Model):
     relatedMiniTournament = models.ForeignKey(
         Mini_Tournaments, on_delete=models.SET_NULL, null=True, blank=True, related_name="minitournamentAQY_relName"
     )
-
-    statsExcludedGame = models.BooleanField(blank=False, default=False)
-
-    kickoutFlexiData = models.TextField(blank=True)
 
     playerTradeData = models.TextField(blank=True)
 

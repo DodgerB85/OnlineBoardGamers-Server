@@ -49,7 +49,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
 )
 
-from Lobby.models import User, Mini_Tournaments, Main_Tournament
+from Lobby.models import User, Mini_Tournaments, AbstractGame, Main_Tournament
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
@@ -149,53 +149,22 @@ class FCM_Tournament(models.Model):
         return roundsHTML
 
 
-class FCM_Game(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    gameName = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-    gameDescription = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-
-    gameStatus = models.CharField(
-        max_length=9,
-        choices=SR_GAME_STATUS_CHOICES,
-        default="AVAILABLE",
-        db_index=True,
-    )
+class FCM_Game(AbstractGame):
     latestUpdate = models.CharField(
         max_length=15, blank=False, default=SR_getTimeNow, db_index=True
     )
     startingOptions = models.CharField(max_length=80, blank=True)
-    startingMap = models.CharField(max_length=190, blank=True)
+    
+    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=9)
+    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
+    
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="allPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="missingPlayersRelName", blank=True
     )
-
-    currentPlayers = models.CharField(max_length=100, blank=True)
-    seatOffset = models.PositiveSmallIntegerField(blank=False, default=0)
-    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
-
-    winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="game_winner_relName",
-        blank=True,
-    )
-
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=9)
-
-    kickoutDuration = models.PositiveSmallIntegerField(
-        null=False, blank=False, default=200
-    )
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
-
+    
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -208,20 +177,7 @@ class FCM_Game(models.Model):
         null=True,
         related_name="game_host_relName",
     )
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-
-    zoomLevels = models.CharField(max_length=30, blank=True)
-    notificationSuppression = models.CharField(
-        max_length=30, blank=False, default="000000"
-    )
-
-    rewindConsent = models.CharField(max_length=10, blank=True)
-    statsExcludeConsent = models.CharField(max_length=10, blank=False, default="00")
-
-    chatData = models.TextField(blank=True)
-
-    playersMoveData = models.TextField(blank=True)
-
+    
     kickedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="kickedPlayersRelName", blank=True
     )
@@ -233,15 +189,32 @@ class FCM_Game(models.Model):
         related_name="playersWithChatNotificationName",
         blank=True,
     )
+    
+    startingMap = models.CharField(max_length=190, blank=True)
+    
+    seatOffset = models.PositiveSmallIntegerField(blank=False, default=0)
 
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
+    winner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="game_winner_relName",
+        blank=True,
+    )
+
+    zoomLevels = models.CharField(max_length=30, blank=True)
+    notificationSuppression = models.CharField(
+        max_length=30, blank=False, default="000000"
+    )
+
+    rewindConsent = models.CharField(max_length=10, blank=True)
+    statsExcludeConsent = models.CharField(max_length=10, blank=False, default="00")
+
+    playersMoveData = models.TextField(blank=True)
+
     player4notes = models.TextField(blank=True)
     player5notes = models.TextField(blank=True)
 
-    gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -268,10 +241,6 @@ class FCM_Game(models.Model):
         blank=True,
         related_name="minitournamentFCM_relName",
     )
-
-    statsExcludedGame = models.BooleanField(blank=False, default=False)
-
-    kickoutFlexiData = models.TextField(blank=True)
 
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 

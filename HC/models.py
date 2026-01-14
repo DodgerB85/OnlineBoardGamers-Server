@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from django.db.models import Q
 
 
-from Lobby.models import User, Profile
+from Lobby.models import User, Profile, AbstractGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_M_ProcessTournamentEndGame,
@@ -255,50 +255,40 @@ class HC_Tournament(models.Model):
         return roundsHTML
 
 
-class HC_Game(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    # custom_primary_key = models.CharField(max_length=6, editable=False, unique=True)
-    gameName = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
-    gameDescription = models.CharField(max_length=120, blank=True, db_collation="utf8mb4_general_ci")
-    gameStatus = models.CharField(
-        max_length=9,
-        choices=SR_GAME_STATUS_CHOICES,
-        default="AVAILABLE",
-        db_index=True, 
-    )
+class HC_Game(AbstractGame):
     latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
     startingOptions = models.CharField(max_length=70, blank=True)
-
+    
+    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
+    maxPlayers = models.PositiveSmallIntegerField()
+    
     allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="HCallPlayersRelName")
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="HCmissingPlayersRelName", blank=True
     )
-
-    currentPlayers = models.CharField(max_length=100, blank=True)
-    serverTurnOrder = models.CharField(max_length=20, blank=True)
-
-    seatOffset = models.PositiveSmallIntegerField()
-    maxPlayers = models.PositiveSmallIntegerField()
-
-    winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_winner_relName", blank=True
-    )
-
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-
-    kickoutDuration = models.PositiveSmallIntegerField(null=False, blank=False, default=200)
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
-
+    
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_creator_relName"
     )
     host = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_host_relName"
     )
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
+    
+    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="HCkickedPlayersRelName", blank=True)
+    invitedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="HCinvitedPlayersRelName", blank=True
+    )
+    playersWithChatNotification = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="HCplayersWithChatNotificationName", blank=True
+    )
+    
+    serverTurnOrder = models.CharField(max_length=20, blank=True)
 
-    # zoomLevels = models.CharField(max_length=30, blank=True)
+    seatOffset = models.PositiveSmallIntegerField()
+
+    winner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_winner_relName", blank=True
+    )
 
     rewindConsent = models.CharField(max_length=10, blank=True)
     statsExcludeConsent = models.CharField(max_length=10, blank=False)
@@ -314,25 +304,8 @@ class HC_Game(models.Model):
     player4currentMoveTime = models.CharField(max_length=30, blank=True)
     player4currentMoveData = models.TextField(blank=True)
 
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="HCkickedPlayersRelName", blank=True)
-    invitedPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="HCinvitedPlayersRelName", blank=True
-    )
-    playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="HCplayersWithChatNotificationName", blank=True
-    )
-
-    # welcomeChat = '{"name":"WelcomeBot","timestamp":' + str(int(time.time())*1000) + ',"message":"' + gettext("Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!") + '"},'
-    # chatData = models.TextField(blank=False, default=welcomeChat)
-    chatData = models.TextField(blank=True)
-
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
     player4notes = models.TextField(blank=True)
 
-    gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -340,10 +313,6 @@ class HC_Game(models.Model):
     relatedTournament = models.ForeignKey(
         HC_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="tournament_relName"
     )
-
-    statsExcludedGame = models.BooleanField(blank=False, default=False)
-
-    kickoutFlexiData = models.TextField(blank=True)
 
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 

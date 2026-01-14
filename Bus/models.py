@@ -15,7 +15,7 @@ from django.utils.translation import gettext  # , get_language
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.utils import translation
 
-from Lobby.models import User  # , Profile
+from Lobby.models import User, AbstractGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -312,55 +312,22 @@ class Bus_Tournament(models.Model):
 #
 
 
-class Bus_Game(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-
-    gameName = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-    gameDescription = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-
-    gameStatus = models.CharField(
-        max_length=9,
-        choices=SR_GAME_STATUS_CHOICES,
-        default="AVAILABLE",
-        db_index=True,
-    )
-
+class Bus_Game(AbstractGame):
     latestUpdate = models.CharField(
         max_length=30, blank=False, default=SR_getTimeNow, db_index=True
     )
     startingOptions = models.CharField(max_length=70, blank=True)
-
+    
+    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
+    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=3)
+    
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="BusAllPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="BusMissingPlayersRelName", blank=True
     )
-    currentPlayers = models.CharField(max_length=100, blank=True)
-
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=3)
-
-    winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="BusGame_winner_relName",
-        blank=True,
-    )
-
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-
-    kickoutDuration = models.PositiveSmallIntegerField(
-        null=False, blank=False, default=200
-    )
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=20)
-
+    
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -373,15 +340,7 @@ class Bus_Game(models.Model):
         null=True,
         related_name="BusGame_host_relName",
     )
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-
-    zoomLevels = models.CharField(
-        max_length=30, blank=False, default=json.dumps([120, 120, 120, 120, 120])
-    )
-
-    rewindConsent = models.CharField(max_length=10, blank=False, default="00000")
-    statsExcludeConsent = models.CharField(max_length=10, blank=False, default="00000")
-
+    
     kickedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="BusKickedPlayersRelName", blank=True
     )
@@ -393,16 +352,26 @@ class Bus_Game(models.Model):
         related_name="BusPlayersWithChatNotificationName",
         blank=True,
     )
+    
+    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
-    chatData = models.TextField(blank=True)
+    winner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="BusGame_winner_relName",
+        blank=True,
+    )
 
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
+    zoomLevels = models.CharField(
+        max_length=30, blank=False, default=json.dumps([120, 120, 120, 120, 120])
+    )
+
+    rewindConsent = models.CharField(max_length=10, blank=False, default="00000")
+    statsExcludeConsent = models.CharField(max_length=10, blank=False, default="00000")
+
     player4notes = models.TextField(blank=True)
 
-    gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -414,10 +383,6 @@ class Bus_Game(models.Model):
         blank=True,
         related_name="tournament_relName_Bus",
     )
-
-    statsExcludedGame = models.BooleanField(blank=False, default=False)
-
-    kickoutFlexiData = models.TextField(blank=True)
 
     deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
 
