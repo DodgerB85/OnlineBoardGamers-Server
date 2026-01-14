@@ -66,18 +66,6 @@ def HCgameSummary(request, game_id):
 
 #################### API ##################
 
-# This creates ths initial record
-# newGame = HC_Game(gameName=_gameName, creator=request.user, host=request.user, gamePace=_pace, turn=0, phase=0, created=_created, latestUpdate=_created,
-#                      seatOffset=_playerSeatOffset, startingOptions=_startingOptions, maxPlayers=_maxPlayers, gameStatus="AVAILABLE")@login_required()
-#   newGame.kickoutDuration = request.POST["kickoutDuration"]
-#    newGame.zoomLevels = "200" * _maxPlayers
-#    newGame.statsExcludeConsent = "0" * _maxPlayers
-#    if 'trainingGame' in request.POST:
-#        newGame.statsExcludeConsent = "1" * _maxPlayers
-#        newGame.statsExcludedGame = True
-# Set up rewind consent for training game
-
-
 @login_required()
 def createHCgame(request):
     # Creating a game must be via POST
@@ -135,8 +123,7 @@ def createHCgame(request):
     #    _maxPlayers
     # except:
     #    _maxPlayers = 3
-    _playerSeatOffset = randint(0, _maxPlayers - 1)
-    # _playerSeatOffset = 1
+    _player_order_seed = randint(0, _maxPlayers - 1)
 
     _startingOptions = ""
     if "trainingGame" in request.POST:
@@ -162,7 +149,7 @@ def createHCgame(request):
         phase=0,
         created=_created,
         latestUpdate=_created,
-        seatOffset=_playerSeatOffset,
+        playerOrderSeed=_player_order_seed,
         startingOptions=_startingOptions,
         maxPlayers=_maxPlayers,
         gameStatus="AVAILABLE",

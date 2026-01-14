@@ -181,7 +181,6 @@ class HC_GameAdmin(admin.ModelAdmin):
                 "fields": (
                     "latestUpdate",
                     "startingOptions",
-                    "seatOffset",
                     "playerOrderSeed"
                 )
             },
