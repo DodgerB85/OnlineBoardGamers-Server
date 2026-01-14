@@ -50,3 +50,7 @@ staticfiles/
 #*vuedist*/
 **/*stats/
 #*migration*/ # NO! Migrations should be part of git. Run MM & M on dev, and just M on live
+Lobby/sharedFunctions/emailCounter.txt
+Lobby/sharedFunctions/emailCounter.txt
+Lobby/sharedFunctions/emailCounter.txt
+Lobby/sharedFunctions/emailCounter.txt
