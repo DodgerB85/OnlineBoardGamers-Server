@@ -21,6 +21,9 @@ node_modules
 emailCounter.txt
 a.bat
 
+# Ignore the email counter
+Lobby/sharedFunctions/emailCounter.txt
+
 # Exclude generated stats
 *stats/
 
