@@ -75,7 +75,7 @@ class HC_Tournament(models.Model):
 
     def createTournamentGame(self, request, _roundNumberString, _currentPlayersUsernames):
         gameName = "[" + self.tournamentName + "]" + " " + _roundNumberString
-        playerSeatOffset = randint(0, self.maxGamePlayers - 1)
+        player_order_seed = randint(0, self.maxGamePlayers - 1)
 
         # _startingOptions = request.POST["startingOptions"]
         created = SR_getTimeNow()
@@ -90,7 +90,7 @@ class HC_Tournament(models.Model):
             phase=0,
             created=created,
             latestUpdate=created,
-            seatOffset=playerSeatOffset,
+            playerOrderSeed=player_order_seed,
             startingOptions=self.startingOptions,
             maxPlayers=self.maxGamePlayers,
             gameStatus="ACTIVE",
@@ -272,8 +272,8 @@ class HC_Game(GeneralGame):
         settings.AUTH_USER_MODEL, related_name="HCplayersWithChatNotificationName", blank=True
     )
     
-    # TODOMODEL: Replace this with playerOrderSeed
-    seatOffset = models.PositiveSmallIntegerField()
+    # TODOMODEL: Replace this with proper turn order code
+    #seatOffset = models.PositiveSmallIntegerField()
 
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_winner_relName", blank=True
@@ -727,8 +727,8 @@ class HC_Game(GeneralGame):
         playerList = [p.username for p in self.allPlayers.all()]
 
         # Efficiently handle rotation (seatOffset)
-        if self.seatOffset > 0:
-            offset = self.seatOffset % len(playerList) if playerList else 0
+        if self.playerOrderSeed > 0:
+            offset = self.playerOrderSeed % len(playerList) if playerList else 0
             playerList = playerList[offset:] + playerList[:offset]
 
         if withoutBots:
