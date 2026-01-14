@@ -1153,13 +1153,12 @@ class FCM_Game(models.Model):
         return False
 
     # Takes in self, request, and then 3 JSON[""] pieces of string data
-
-    def endGame(self, request, _winner, _finalScores, _gameID):
+    def endGame(self, request, _winnerUsername, _finalScores, _tournamentData, _gameID):
         self.rewindData = ""
         self.rewindTempData = ""
         self.kickoutFlexiData = ""
         self.gameStatus = "FINISHED"
-        self.winner = User.objects.get(username=_winner)
+        self.winner = User.objects.get(username=_winnerUsername)
         self.deleteGameVotes = None
         self.clearAllMoveDataV2()
         self.save()
@@ -1170,28 +1169,25 @@ class FCM_Game(models.Model):
             finalPositions.append(_finalScores[i][0])
         SN_M_sendEndGameNotification(request, "FCM", finalPositions, _gameID, self)
 
-        # TODOT
-        # Get the TB passed back from the game
-        tournamentTBdata = []
         if self.relatedTournament:
-            SF_M_ProcessTournamentEndGame(request, "FCM", self, [_winner])
+            SF_M_ProcessTournamentEndGame(request, "FCM", self, [_winnerUsername])
         elif self.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
                 MAIN_T_FLAG,
                 self.relatedMainTournament,
                 self,
-                [_winner],
-                tournamentTBdata,
+                [_winnerUsername],
+                _tournamentData,
             )
         elif self.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
                 MINI_T_FLAG,
-                self.relatedMainTournament,
+                self.relatedMiniTournament,
                 self,
-                [_winner],
-                tournamentTBdata,
+                [_winnerUsername],
+                _tournamentData,
             )
 
     def getGameCode(self):

@@ -4,7 +4,7 @@ import json
 import random
 import time
 import urllib.parse
-from decouple import config, Csv
+from decouple import config
 
 from django.utils.translation import gettext, activate, get_language
 from django.template.loader import render_to_string
@@ -1485,7 +1485,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
     loginUsername = LOGINS[idx]
     serverAddress = SERVERS[idx]
 
-    if settings.LOCAL_USER:
+    if config("LOCAL_USER", default=True, cast=bool):
         user = User.objects.filter(email=toEmail).first()
         if user is None:
             user = User.objects.get(id=1)
@@ -1506,6 +1506,17 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
 def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
     if profile.webhooks == "" or profile.webhooks is None or profile.webhooks == "[]":
         return
+
+    # THERE IS NOTHING TO STOP LOCAL COPIES OF LIVE DB SENDING OUT REAL WEBHOOKS.
+    # SO PERFORM A HACK HERE TO GENERALLY NOT SEND OUT WEBHOOKS
+    if config("LOCAL_USER", default=True, cast=bool):
+        # Get the username
+        username = profile.user.username
+        ALLOWED_LOCAL_USERS = ["admin", "DodgerB", "Joey", "Rachel", "Ross", "user1", "user2", "user3"]
+        if username not in ALLOWED_LOCAL_USERS:
+            print(f"SUPRESSING WEBHOOKS FOR LOCAL USER: {username}")
+            return
+
 
     webhooks = json.loads(profile.webhooks)
     for webhookData in webhooks:
