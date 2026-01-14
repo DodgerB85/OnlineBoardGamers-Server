@@ -563,6 +563,17 @@ def _processTurn(request):
         return JsonResponse({"unlockStatus": True}, safe=False)
 
     elif jsonData["action"] == "deleteMoveData":
+        phase = jsonData["phase"]
+        # This is the "new phase" you are just moving into
+        # If moving int TO, don't clear the moves (save pre-selectiongs)
+        # If moving into cleanup, don't clear the moves
+        if phase == 9 or phase == 4:
+            return JsonResponse(
+                {
+                    "result": 2,
+                },
+                safe=False,
+            )
         currentGame.clearAllMoveDataV2()
         currentGame.save()
         return JsonResponse(
