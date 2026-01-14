@@ -12,32 +12,31 @@ from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
-from django.shortcuts import render  # , redirect
+from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.shortcuts import get_object_or_404
-from django.db import transaction, connection
+from django.db import connection
 from django.db.models import Q
 
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_getGameCreationJsonReturn,
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
     SN_sendNextTurnNotification,
     SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
 )
-from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .common import create_aqy_game
 
 from .models import AQY_Game
 from Lobby.models import User, Profile
 
-AQYsuperUsers = ["BotKickStarter"]
+from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC
 
+
+AQYsuperUsers = ["BotKickStarter"]
+AQY_DB_LOCK_NAME = "lockAQYgame_"
 
 def index(request):
     return HttpResponse("Hello, world. You're at AQY")
@@ -88,7 +87,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     )
 
-    allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat(False))
+    allPlayerListBySeat = currentGame.getAllPlayersOrderedySeat(False)
 
     # Logged out
     returnData = {
@@ -101,10 +100,10 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "replayStep": replayStep,
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
-        "allPlayerListBySeat": allPlayerListBySeat,
+        "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
         "currentPlayers": currentGame.getCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
-        "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+        "deleteVotesData": json.dumps(currentGame.getFullSetOfTrueFalseVotes(DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True))),
         "settingsDebug": settings.DEBUG,
         # "settingsDebug": False,
     }
@@ -246,7 +245,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
 @contextmanager
 def db_mutex(name, timeout=10):
-    mutex_name = "lockAQYgame_" + name
+    mutex_name = "lock_AQY_game_" + name
     cursor = connection.cursor()
     # timeout returns with error
     cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
@@ -268,7 +267,7 @@ def processAQYturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockAQYgame_" + str(gameID)):
+    with db_mutex(AQY_DB_LOCK_NAME + str(gameID)):
         return _processAQYturn(request)
 
 
@@ -1317,7 +1316,7 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockAQYgame_" + str(gameID)):
+    with db_mutex(AQY_DB_LOCK_NAME + str(gameID)):
         return _sendChatMessage(request)
 
 
@@ -1421,7 +1420,7 @@ def voteToDelete(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockAQYgame_" + str(gameID)):
+    with db_mutex(AQY_DB_LOCK_NAME + str(gameID)):
         return _voteToDelete(request)
 
 
@@ -1437,12 +1436,14 @@ def _voteToDelete(request):
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
 
-    success = currentGame.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
+    success = currentGame.castVote(DELETE_VOTE_TOPIC, playerName, True)  # Pass playerName to addDeleteVote
 
     if success:
+        currentGame.save()
         # Check if all players have voted to delete
         all_voted = True
-        delete_votes_data = currentGame.getDeleteVotesData()
+        delete_votes_data = currentGame.getFullSetOfTrueFalseVotes(DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True))
+                
         missingPlayers = currentGame.getMissingPlayersNamesArray()
         for player, vote in delete_votes_data.items():
             if not vote and player not in missingPlayers:
@@ -1450,6 +1451,8 @@ def _voteToDelete(request):
                 break
 
         if all_voted:
+            # Get the result
+            deleteVotesData = json.dumps(currentGame.getFullSetOfTrueFalseVotes(DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)))
             # Delete the game
             currentGame.delete()
             # Add a success message
@@ -1458,7 +1461,7 @@ def _voteToDelete(request):
             return JsonResponse(
                 {
                     "voteChanged": True,
-                    "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                    "deleteVotesData": deleteVotesData,
                     "redirect_url": reverse("index"),
                 }
             )
@@ -1466,7 +1469,7 @@ def _voteToDelete(request):
         return JsonResponse(
             {
                 "voteChanged": True,
-                "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                "deleteVotesData": json.dumps(currentGame.getFullSetOfTrueFalseVotes(DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True))),
             },
             safe=False,
         )

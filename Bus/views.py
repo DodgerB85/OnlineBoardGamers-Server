@@ -880,7 +880,7 @@ def voteToDelete(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockINDgame_" + str(gameID)):
+    with db_mutex("lockBusgame_" + str(gameID)):
         return _voteToDelete(request)
 
 

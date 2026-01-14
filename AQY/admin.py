@@ -216,7 +216,7 @@ class AQY_GameAdmin(admin.ModelAdmin):
                     "kickedPlayers",
                     "invitedPlayers",
                     "playersWithChatNotification",
-                    "deleteGameVotes",
+                    "activeVotes",
                 ),
             },
         ),

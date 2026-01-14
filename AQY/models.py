@@ -258,23 +258,20 @@ class AQY_Game(GeneralGame):
 
     # Takes in self, request, and then 3 JSON[""] pieces of string data
     def endGame(self, request, _winner, _finalPositions, _gameID):
-        self.rewindData = ""
-        self.rewindTempData = ""
-        self.kickoutFlexiData = ""
-        self.gameStatus = "FINISHED"
+        self.clearGeneralDataOnGameEndWithoutSave()
         self.player0currentMoveData = ""
         self.player1currentMoveData = ""
         self.player2currentMoveData = ""
         self.player3currentMoveData = ""
         self.playerTradeData = ""
-        # self.winner = User.objects.get(username=_winner)
+        
+        # Set the winner(S)
         names = self.getAllPlayersOrderedySeat(False)
         winnerNamesArray = []
         for playerIndex in _winner:
             self.winner.add(User.objects.get(username=names[playerIndex]))
             winnerNamesArray.append(names[playerIndex])
         self.clearAllMoveData()
-        self.deleteGameVotes = None
 
         self.save()
         for i in range(len(_finalPositions)):
@@ -537,13 +534,6 @@ class AQY_Game(GeneralGame):
         self.save()
 
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-            self.save()
-
             playerListToNotify = list(
                 self.allPlayers.all().values_list("username", flat=True)
             )
@@ -881,45 +871,3 @@ class AQY_Game(GeneralGame):
 
     def getGameCode(self):
         return "AQY"
-
-    def getDeleteVotesData(self):
-        if self.gameStatus == "FINISHED":
-            deleteGameVotes = {}
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            deleteGameVotes.update({username: False for username in player_usernames})
-            return deleteGameVotes
-        if self.deleteGameVotes is None:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-            self.save()
-        return self.deleteGameVotes
-
-    def addDeleteVote(self, playerName):
-        """Records the vote of a player."""
-        # Double check player is in the game
-        if playerName not in [p.username for p in self.allPlayers.all()]:
-            return False  # Player not in the game
-
-        # Ensure deleteGameVotes is a dictionary
-        if self.deleteGameVotes is None:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        # If the playerName isn't found, wipe the votes and make sure all players are added
-        if playerName not in self.deleteGameVotes:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        # Add the vote
-        self.deleteGameVotes[playerName] = True
-        self.save()
-        return True
