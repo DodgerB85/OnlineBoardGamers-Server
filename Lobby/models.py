@@ -13,6 +13,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_TYPE_CHOICES,
     SR_getTimeNow,
     SR_getTournamentWinnerHTML,
+    SR_GAME_STATUS_CHOICES,
     # SR_getTournamentRoundsHTML,
 )
 
@@ -349,6 +350,57 @@ class Mini_Tournaments(models.Model):
             "createdTS": createdTS,
             "gameCode": self.gameCode,
         }
+
+
+class AbstractGame(models.Model):
+    """
+    Abstract base model for all game types.
+    All game-specific models should inherit from this.
+    """
+    
+    id = models.AutoField(primary_key=True)
+    
+    gameName = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
+    gameDescription = models.CharField(
+        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+    )
+    gameStatus = models.CharField(
+        max_length=9,
+        choices=SR_GAME_STATUS_CHOICES,
+        default="AVAILABLE",
+        db_index=True,
+    )
+    
+    currentPlayers = models.CharField(max_length=100, blank=True)
+    
+    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
+    
+    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
+    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
+    
+    kickoutDuration = models.PositiveSmallIntegerField(
+        null=False, blank=False, default=200
+    )
+    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
+    
+    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
+    
+    chatData = models.TextField(blank=True)
+    
+    player0notes = models.TextField(blank=True)
+    player1notes = models.TextField(blank=True)
+    player2notes = models.TextField(blank=True)
+    player3notes = models.TextField(blank=True)
+    
+    gameData = models.TextField(blank=True)
+    kickoutFlexiData = models.TextField(blank=True)
+    
+    statsExcludedGame = models.BooleanField(blank=False, default=False)
+    
+    class Meta:
+        abstract = True
 
 
 class QueryableGame(models.Model):

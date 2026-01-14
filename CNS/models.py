@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.conf import settings
 from decouple import config
 
-from Lobby.models import User
+from Lobby.models import User, AbstractGame
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -28,56 +28,21 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 
-class CNS_Game(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-
-    gameName = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-
-    gameDescription = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
-    )
-
-    gameStatus = models.CharField(
-        max_length=9,
-        choices=SR_GAME_STATUS_CHOICES,
-        default="AVAILABLE",
-        db_index=True,
-    )
-
+class CNS_Game(AbstractGame):
     latestUpdate = models.CharField(
         max_length=15, blank=False, default=SR_getTimeNow, db_index=True
     )
     startingOptions = models.CharField(max_length=20, blank=True)
-
+    
+    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
+    
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSallPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSmissingPlayersRelName", blank=True
     )
-    currentPlayers = models.CharField(max_length=100, blank=True)
-
-    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
-    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
-
-    winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="CNSgame_winner_relName",
-        blank=True,
-    )
-
-    turn = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
-    phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-
-    kickoutDuration = models.PositiveSmallIntegerField(
-        null=False, blank=False, default=200
-    )
-    gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=40)
-
+    
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -92,14 +57,7 @@ class CNS_Game(models.Model):
         related_name="CNSgame_host_relName",
         default=config("ADMIN_DB_KEY", default=1, cast=int),
     )
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-
-    zoomLevels = models.CharField(
-        max_length=30, blank=False, default=json.dumps([24, 24, 24, 24])
-    )
-
-    statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
-
+    
     kickedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSkickedPlayersRelName", blank=True
     )
@@ -111,25 +69,25 @@ class CNS_Game(models.Model):
         related_name="CNSplayersWithChatNotificationName",
         blank=True,
     )
+    
+    playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
-    chatData = models.TextField(blank=True)
+    winner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="CNSgame_winner_relName",
+        blank=True,
+    )
 
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
+    zoomLevels = models.CharField(
+        max_length=30, blank=False, default=json.dumps([24, 24, 24, 24])
+    )
 
-    gameData = models.TextField(blank=True)
+    statsExcludeConsent = models.CharField(max_length=4, blank=False, default="0000")
+
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
-
-    # tournamentGame = models.BooleanField(blank=False, default=False)
-    # relatedTournament = models.ForeignKey(HC_Tournament, on_delete=models.SET_NULL,
-    #                                      null=True, blank=True, related_name='tournament_relName')
-
-    statsExcludedGame = models.BooleanField(blank=False, default=False)
-
-    kickoutFlexiData = models.TextField(blank=True)
 
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
