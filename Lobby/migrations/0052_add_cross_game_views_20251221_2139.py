@@ -26,9 +26,10 @@ class Migration(migrations.Migration):
         ('Lobby', '0051_queryablegame_queryablegameallplayers_and_more'),
     ]
 
-    operations = [
-        migrations.RunSQL(
-            sql=CREATION_SQL,
-            reverse_sql=DESTRUCTION_SQL
-        )
-    ]
+    # THIS WAS CAUSING CRASHES WHEN TRYING TO RE MIGRATE FROM SCRATCH
+    #operations = [
+    #    migrations.RunSQL(
+    #        sql=CREATION_SQL,
+    #        reverse_sql=DESTRUCTION_SQL
+    #    )
+    #]
