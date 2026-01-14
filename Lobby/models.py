@@ -354,12 +354,12 @@ class Mini_Tournaments(models.Model):
 
 class GeneralGame(models.Model):
     """
-    Abstract base model for all game types.
+    General base model for all game types.
     All game-specific models should inherit from this.
     """
-    
+
     id = models.AutoField(primary_key=True)
-    
+
     gameName = models.CharField(
         max_length=120, blank=True, db_collation="utf8mb4_general_ci"
     )
@@ -372,42 +372,54 @@ class GeneralGame(models.Model):
         default="AVAILABLE",
         db_index=True,
     )
-    
+
+    # This is a STRING of the currentPlayer username
+    # IT SHOULD PROBABLY BE CHANGED TO M2M FIELD WITH USERS
     currentPlayers = models.CharField(max_length=100, blank=True)
-    
+
+    # Set default as 2. Games with min 3 players explicity set the defult to 3 before creation
     maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
-    
-    # Set these explicity when creating a game
+
+    # I removed this these the models - I checked each record creation for each model,
+    # and set it to 1 if a game starts at 1 instead of 0.
+    # In any case, it is updated by the client on first save anyway, which happens as soon as you enter the game)
+    # Set these explicity when creating a game, default to 0
     turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
     phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
-    
+
     kickoutDuration = models.PositiveSmallIntegerField(
         null=False, blank=False, default=200
     )
     gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=30)
-    
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-    
+
     chatData = models.TextField(blank=True)
-    
+
     player0notes = models.TextField(blank=True)
     player1notes = models.TextField(blank=True)
     player2notes = models.TextField(blank=True)
     player3notes = models.TextField(blank=True)
-    
+
     gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
-    
+
     kickoutFlexiData = models.TextField(blank=True)
-    
+
     statsExcludedGame = models.BooleanField(blank=False, default=False)
-    
+
+    # This has a few different lengths, but 15 should be plenty. It is just a unix timestamp
+    # THESE MIGHT BE BETTER CONVERTED TO A DATE_TIME FIELD?!
     latestUpdate = models.CharField(
         max_length=15, blank=False, default=SR_getTimeNow, db_index=True
     )
+    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
+
+    # The longest was 100 chars, so i set it to that.
+    # Not sure if that's inefficient?
+    # IN ANY CASE THIS SHOULD BE REMODELED INTO A JSONFIELD AS IT SHOULD ONLY CONTAIN A JSON DUMPED
+    # ARRAY OF INTS / SUBARRS. (Except legacy FCM games perhaps).
     startingOptions = models.CharField(max_length=100, blank=True)
-        
+
     class Meta:
         abstract = True
 
