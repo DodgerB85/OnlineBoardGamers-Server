@@ -889,6 +889,7 @@ def createTGZspinoff(request):
         Ncreated = jsonData["latestUpdate"] if jsonData["latestUpdate"] else SR_getTimeNow()
         NlatestUpdate = jsonData["latestUpdate"] if jsonData["latestUpdate"] else SR_getTimeNow()
         NstartingMap = currentGame.startingMap
+        NzoomLevels = currentGame.zoomLevels
 
         newGame = TGZ_Game(
             gameName=NgameName,
@@ -908,6 +909,7 @@ def createTGZspinoff(request):
             statsExcludedGame=NstatsExcludedGame,
             created=Ncreated,
             latestUpdate=NlatestUpdate,
+            zoomLevels=NzoomLevels,
         )
 
         newGame.save()
