@@ -919,7 +919,7 @@ def SF_startAnyTournament(request, mainORmini, tournamentObj):
         else:
             tournamentObj.tournamentPointsData = json.dumps(pointsList)
 
-    start_next_any_tournament_round(request, mainORmini, tournamentObj, None, [])
+    start_next_any_tournament_round(request, mainORmini, tournamentObj, None, [], [])
 
     tournamentObj.save()
     return
@@ -999,7 +999,7 @@ def setNextRoundMultiGamePlayers(tournamentObj):
 
         tournamentObj.save()
 
-def start_next_any_tournament_round(request, mainORmini, tournamentObj, _currentGame, _winnerArray):
+def start_next_any_tournament_round(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
     from FCM.common import create_fcm_game
     from TGZ.common import create_tgz_game
     from AQY.common import create_aqy_game
@@ -1011,11 +1011,10 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
         setNextRoundMultiGamePlayers(tournamentObj)
         
     if SF_checkForAnyTournamentEnd(tournamentObj, mainORmini) == True:
-        SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winnerArray)
+        SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore)
         tournamentObj.save()
         return
 
-    # TODOT chceck this
     ret = SF_createNextRoundGamesSetup(tournamentObj, mainORmini)
     
     # Clear nextRoundPlayers for the end of the next round
@@ -1083,35 +1082,37 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
     tournamentObj.save()
 
 # Pass in a tournament. Returns an object of { gamesPlayers: [[p1, p2...], [p5,p6...]], byePlayers: [p3, p4] }
-def SF_createNextRoundGamesSetup(tournament, tournamentType):
+def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
     ret = {}
     byePlayers = []
     gamesPlayers = []
+    
+    tournamentType = tournamentObj.tournamentType
 
     # Load tournament data
-    TPDA = json.loads(tournament.tournamentProgressionData)
+    TPDA = json.loads(tournamentObj.tournamentProgressionData)
     roundNumberString = gettext("Round") + f" {len(TPDA) + 1}"
 
     # Get players sorted by points (weakest first) for RR, PT, or TL
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
-    allPlayersList = list(tournament.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
+    allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
 
-    if tournament.tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournament.roundsBeforeKnockout:
-        pointsList = json.loads(tournament.tournamentPointsData)
+    if tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournamentObj.roundsBeforeKnockout:
+        pointsList = json.loads(tournamentObj.tournamentPointsData)
         # Being lowest points to front, in case a bye is needed
         pointsList.sort(key=lambda x: x[1])
         allPlayersList = [row[0] for row in pointsList if row[0] in allPlayersList]
         # Remove players with 0 lives in TwoLives (TL) tournaments
-        if tournament.tournamentType == "TL":
-            livesList = json.loads(tournament.tournamentSideData)
+        if tournamentType == "TL":
+            livesList = json.loads(tournamentObj.tournamentSideData)
             # Being lowest points to front, in case a bye is needed
             livesList.sort(key=lambda x: x[1])
             allPlayersList = [p for p in allPlayersList if any(p == row[0] and row[1] > 0 for row in livesList)]
 
     # Switch to knockout mode for RR after roundsBeforeKnockout
-    if tournament.tournamentType == "RR" and len(TPDA) >= tournament.roundsBeforeKnockout:
-        pointsList = json.loads(tournament.tournamentPointsData)
-        pointsList.sort(key=lambda x: x[1])  # Sort by points (descending)
+    if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout:
+        pointsList = json.loads(tournamentObj.tournamentPointsData)
+        pointsList.sort(key=lambda x: x[1], reverse=True)  # Sort by points (descending)
         maxPoints = pointsList[0][1]
         allPlayersList = [row[0] for row in pointsList if row[1] >= maxPoints]
         #if len(allPlayersList) < tournament.maxGamePlayers:
@@ -1120,16 +1121,19 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         roundNumberString += " (KO)"
 
     # Set final round label if exactly maxGamePlayers remain
-    if len(allPlayersList) == tournament.maxGamePlayers:
+    if len(allPlayersList) == tournamentObj.maxGamePlayers:
         roundNumberString = gettext("Final Round") + (
-            " (KO)" if tournament.tournamentType == "RR" and len(TPDA) >= tournament.roundsBeforeKnockout else ""
+            " (KO)" if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout else ""
         )
 
-    # MT - Handle byes if needed - Only BYE if there is exactly 1 player left - No byes in MG
-    if tournamentType == MINI_T_FLAG:
-        if len(allPlayersList) % tournament.maxGamePlayers == 1 and len(allPlayersList) > tournament.maxGamePlayers:
-            byePlayers = []
-
+    # HANDLE BYES HERE = MAX 1 for MiniT, otherwise leftover players for MainT
+    maxRemainder = tournamentObj.maxGamePlayers -1
+    if mainORmini == MINI_T_FLAG:
+        maxRemainder = 1
+    
+    # Check if there is leftover players after at least some players have been put in a game
+    if len(allPlayersList) % tournamentObj.maxGamePlayers <= maxRemainder and len(allPlayersList) > tournamentObj.maxGamePlayers:
+        while maxRemainder > 0:
             # Create dictionary to count byes for each player
             byeCountDict = {}
 
@@ -1152,9 +1156,12 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
 
             # Remove the selected player from allPlayersList
             allPlayersList.remove(selectedByePlayer)
+            
+            # Decreade number of required byes
+            maxRemainder -= 1
 
     # MG use MG creation
-    if tournament.tournamentType == "MG":
+    if tournamentType == "MG":
         # First round MUST have more than 14 people
         if len(allPlayersList) >= 15:
             gamesPlayers = multiGamePlayers4p(allPlayersList)
@@ -1162,7 +1169,7 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         elif len(allPlayersList) == 14:
             allPlayersList  = []
             # In this case, pull out the round 2 points data, and get players in order, group A then group B
-            tournamentPointsData = json.loads(tournament.tournamentPointsData)
+            tournamentPointsData = json.loads(tournamentObj.tournamentPointsData)
             round2playersData = tournamentPointsData[-1]
             allPlayersList = [row[0] for row in round2playersData]
             
@@ -1170,6 +1177,8 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         # Final is the top 2 from each group
         elif len(allPlayersList) == 4:
             gamesPlayers = [allPlayersList]
+            
+    # OTHERWISE USE STANDARD MATCHMAKING
     else:
         # Build dictionary of previous matchup counts (pairwise)
         matchupCounts = defaultdict(int)
@@ -1185,12 +1194,12 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
         allPlayersList.reverse()
 
         # Create games, prioritizing new matchups and minimizing max pair repeats
-        while len(allPlayersList) >= tournament.maxGamePlayers:
+        while len(allPlayersList) >= tournamentObj.maxGamePlayers:
             currentPlayers = [allPlayersList.pop(0)]
             candidates = allPlayersList.copy()
 
             # Try to find players, preferring those with least previous matchups with current group
-            while len(currentPlayers) < tournament.maxGamePlayers and candidates:
+            while len(currentPlayers) < tournamentObj.maxGamePlayers and candidates:
                 # Calculate max matchup count for each candidate with current group
                 candidate_scores = {}
                 for candidate in candidates:
@@ -1219,34 +1228,18 @@ def SF_createNextRoundGamesSetup(tournament, tournamentType):
                 candidates.remove(selected_candidate)
 
             # Fill game if needed (edge case, though unlikely now)
-            while len(currentPlayers) < tournament.maxGamePlayers and allPlayersList:
+            while len(currentPlayers) < tournamentObj.maxGamePlayers and allPlayersList:
                 currentPlayers.append(allPlayersList.pop(0))
 
             gamesPlayers.append(currentPlayers)
 
-        # Handle remaining players (>2 or 1)
+        # Handle remaining players (>2 for MiniT -- Byes have been removed first)
         # MT just make games if possible
         if tournamentType == MINI_T_FLAG and len(allPlayersList) >= 2:
             currentPlayers = allPlayersList[:]
             gamesPlayers.append(currentPlayers)
             allPlayersList.clear()
-        ## THIS SHOULD NEVER RUN< AS BYES ARE HANDLED ABOVE ??????
-        # elif len(allPlayersList) == 1:
-        #    byePlayers = ["BYEPLAYERS", allPlayersList[0]]
-        #    MiniTournament.nextRoundPlayers.add(User.objects.get(username=allPlayersList[0]))
-        #    roundData.append(byePlayers)
-        #    allPlayersList.clear()
-        #    if MiniTournament.tournamentPointsData:
-        #        pointsList = json.loads(MiniTournament.tournamentPointsData)
-        #        pointsMap = {2: 1, 3: 2, 4: 3, 5: 4, 6: 7} if MiniTournament.tournamentType == "PT" else {i: 1 for i in range(2, 7)}
-        #        for playerData in pointsList:
-        #            if playerData[0] == byePlayers[1]:
-        #                playerData[1] += pointsMap.get(MiniTournament.maxGamePlayers, 1)
-        #                break
-        #        MiniTournament.tournamentPointsData = json.dumps(pointsList)
-    #ret["endTournament"] = False
-    #if tournament.tournamentType == "MG" and len(allPlayersList) == 0:
-    #    ret["endTournament"] = True
+
     ret["roundNumberString"] = roundNumberString
     ret["byePlayers"] = byePlayers
     ret["gamesPlayers"] = gamesPlayers
@@ -1262,7 +1255,7 @@ def SF_checkForAnyTournamentEnd(tournamentObj, mainORmini):
     return False
 
 # _winnerArray is an array of [winner_username, winner_username, ...]
-# _tournamentData is an array [ [username], [username, username,... TB_VALUE], [username, username,..., TB_VALUE], [...etc] ]
+# _finalPositionNamesAndScore is an array [ [username], [username, username,... TB_VALUE], [username, username,..., TB_VALUE], [...etc] ]
 # NB THE FIRST ENTRY IS AN ARRAY OF (MULTIPLE) WINNER(S)
 def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
     
@@ -1409,11 +1402,12 @@ def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _curre
 
     # All games done; either end tourny or start new round
     if tournamentRoundFinished:
-        start_next_any_tournament_round(request, mainORmini, tournamanetObj, _currentGame, _winnerArray)
+        start_next_any_tournament_round(request, mainORmini, tournamanetObj, _currentGame, _winnerArray, _finalPositionNamesAndScore)
 
     tournamanetObj.save()
     
-def SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winnerArray):
+# This could be tidied up by removing _finalPositionNamesAndScore input and getting it from tournamentObj directly
+def SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
     tournamentObj.nextRoundPlayers.clear()
     gameCode = tournamentObj.gameCode
     winnersData = []
@@ -1460,27 +1454,12 @@ def SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winne
     elif (
         tournamentObj.tournamentType == "MG"
     ):
-        # TODOT NO! Use the tournament data, surely?
-        # This has a single final game. So load up the game and get player order form history
-        allPlayers = _currentGame.getAllPlayersOrderedySeat(True)
-        gameData = json.loads(
-                    gzip.decompress(bytearray(base64.b64decode(_currentGame.gameData))).decode("utf-8")
-                )
-        history = gameData[7]
-        lastHistory3 = history[-1][3]
-        
-        firsts = []
-        seconds = []
-        thirds = []
-        for i, subArr in enumerate(lastHistory3):
-            playerIndex = subArr[1]
-            player = allPlayers[playerIndex]
-            if i == 0:
-                firsts.append(player)
-            if i == 1:
-                seconds.append(player)
-            if i == 2:
-                thirds.append(player)
+        # This has a single final game. So use _finalPositionNamesAndScore        
+        # firsts gets the whole sub-array
+        firsts = _finalPositionNamesAndScore[0]
+        # seconds and thirds get the sub-array except for the last entry (the TB score)
+        seconds = _finalPositionNamesAndScore[1][:-1]
+        thirds = _finalPositionNamesAndScore[2][:-1]
 
         winnersData.append(firsts)
         winnersData.append(seconds)
