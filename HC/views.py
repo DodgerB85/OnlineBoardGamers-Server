@@ -1116,7 +1116,10 @@ def showHCgame(request, game_id):
 
             myMove = currentGame.isMyMove(username)
             # myZoomLevel = currentGame.zoomLevels[pov*3:pov*3+3]
-            myStatsExcludeConsent = currentGame.statsExcludeConsent[pov : pov + 1]
+            if currentGame.statsExcludeConsent is not None and pov < len(currentGame.statsExcludeConsent):
+                myStatsExcludeConsent = currentGame.statsExcludeConsent[pov : pov + 1]
+            else:
+                myStatsExcludeConsent = 0
 
             if "SHADOW" in currentGame.getAllPlayersOrderedySeat():
                 displayNames = currentGame.player0notes
