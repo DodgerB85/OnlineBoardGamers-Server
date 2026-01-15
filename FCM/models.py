@@ -867,7 +867,7 @@ class FCM_Game(GeneralGame):
         self.playersMoveData = ""
         self.save()
 
-    def getJsonMoveResponseV2(self, movedPlayerArr):
+    def getJsonMoveResponseV2(self, notRequiedPlayerNames):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         playersToMove = []
         missingPlayers = set(self.missingPlayers.values_list("username", flat=True))
@@ -875,7 +875,7 @@ class FCM_Game(GeneralGame):
             missingPlayers = {}
         for subArr in playersMoveDataArr:
             if (
-                subArr[0] not in movedPlayerArr
+                subArr[0] not in notRequiedPlayerNames
                 and subArr[0] not in missingPlayers
                 and not self.isThisValidActualMoveArrForPhase(self.phase, subArr)
             ):

@@ -1137,7 +1137,7 @@ def _processTurn(request):
 
     # NEW
     elif jsonData["action"] == "saveSimulMove":
-        unableToMove = jsonData["unableToMove"] if "unableToMove" in jsonData else False
+        notRequiedPlayerNames = jsonData["notRequiedPlayerNames"] if "notRequiedPlayerNames" in jsonData else []
         continueFromStalledGame = jsonData["continueFromStalledGame"] if "continueFromStalledGame" in jsonData else False
 
         if (
@@ -1210,7 +1210,7 @@ def _processTurn(request):
                     currentGame.kickoutDuration,
                 )
 
-        response = currentGame.getJsonMoveResponseV2(unableToMove)
+        response = currentGame.getJsonMoveResponseV2(notRequiedPlayerNames)
 
         currentGame.save()
         return JsonResponse(response, safe=False)
