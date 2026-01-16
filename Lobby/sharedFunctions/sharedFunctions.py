@@ -875,7 +875,7 @@ def SF_TGZadvancedOptions(request):
 #
 ######################################
 def SF_startAnyTournament(request, mainORmini, tournamentObj):
-    if mainORmini == "main":
+    if mainORmini == MINI_T_FLAG:
         tournamentObj.invitedPlayers.clear()
 
     gameCode = tournamentObj.gameCode
@@ -1016,7 +1016,9 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
         return
 
     ret = SF_createNextRoundGamesSetup(tournamentObj, mainORmini)
-    
+    print("RET BELOW")
+
+    print(ret)
     # Clear nextRoundPlayers for the end of the next round
     # -- gamePlayers have now been returned in ret
     tournamentObj.nextRoundPlayers.clear()
@@ -1096,6 +1098,8 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
     # Get players sorted by points (weakest first) for RR, PT, or TL
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
     allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
+    
+    print(allPlayersList)
 
     if tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournamentObj.roundsBeforeKnockout:
         pointsList = json.loads(tournamentObj.tournamentPointsData)
@@ -1126,40 +1130,54 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
             " (KO)" if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout else ""
         )
 
-    # HANDLE BYES HERE = MAX 1 for MiniT, otherwise leftover players for MainT
-    maxRemainder = tournamentObj.maxGamePlayers -1
-    if mainORmini == MINI_T_FLAG:
-        maxRemainder = 1
+       # 1. CALCULATE HOW MANY BYES ARE REQUIRED
+    num_players = len(allPlayersList)
+    max_p = tournamentObj.maxGamePlayers
+    byesRequired = 0
+
+    if mainORmini == "MainT": # Replace with your MAIN_T_FLAG
+        # Main: Everyone who doesn't fit into a full group gets a bye
+        byesRequired = num_players % max_p
     
-    # Check if there is leftover players after at least some players have been put in a game
-    if len(allPlayersList) % tournamentObj.maxGamePlayers <= maxRemainder and len(allPlayersList) > tournamentObj.maxGamePlayers:
-        while maxRemainder > 0:
-            # Create dictionary to count byes for each player
-            byeCountDict = {}
+    else: # MiniT logic
+        remainder = num_players % max_p
+        if tournamentObj.gameCode in ["HC", "Bus"]:
+            # If 3+ remain, they form a game. If 1 or 2 remain, they get byes.
+            if remainder > 0 and remainder < 3:
+                byesRequired = remainder
+        else:
+            # Other games: If 2+ remain, they form a game. If 1 remains, they get a bye.
+            if remainder == 1:
+                byesRequired = 1
 
-            # Count byes from byedPlayerList
-            byedPlayerList = [player for round in TPDA for row in round if row[0] == "BYEPLAYERS" for player in row[1:]]
-            for player in byedPlayerList:
-                byeCountDict[player] = byeCountDict.get(player, 0) + 1
+    print(f"Byes Required: {byesRequired}")
 
-            # Add players from allPlayersList who haven't had byes
-            for player in allPlayersList:
-                if player not in byeCountDict:
-                    byeCountDict[player] = 0
+    # 2. SELECT THE PLAYERS FOR BYES
+    # We loop for exactly the number of byes needed
+    for _ in range(byesRequired):
+        #if not allPlayersList:
+        #    break
 
-            # Find the minimum number of byes
-            minByes = min(byeCountDict.values())
+        # Count historical byes for players currently in the pool
+        byeCountDict = {}
+        # Flattened list of everyone who has ever had a bye in previous rounds
+        historicalByedPlayers = [
+            player for round in TPDA for row in round 
+            if row[0] == "BYEPLAYERS" for player in row[1:]
+        ]
+        
+        for player in allPlayersList:
+            byeCountDict[player] = historicalByedPlayers.count(player)
 
-            # Select the first player from allPlayersList with minimum byes
-            selectedByePlayer = next(player for player in allPlayersList if byeCountDict[player] == minByes)
-            byePlayers.append(selectedByePlayer)
+        # Find the minimum bye count among available players
+        minByes = min(byeCountDict.values())
 
-            # Remove the selected player from allPlayersList
-            allPlayersList.remove(selectedByePlayer)
-            
-            # Decreade number of required byes
-            maxRemainder -= 1
-
+        # Pick the first player in the list who has that minimum count
+        selectedByePlayer = next(p for p in allPlayersList if byeCountDict[p] == minByes)
+        
+        byePlayers.append(selectedByePlayer)
+        allPlayersList.remove(selectedByePlayer)
+        
     # MG use MG creation
     if tournamentType == "MG":
         # First round MUST have more than 14 people
@@ -1178,7 +1196,7 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
         elif len(allPlayersList) == 4:
             gamesPlayers = [allPlayersList]
             
-    # OTHERWISE USE STANDARD MATCHMAKING
+    # OTHERWISE -- NOT MG -- USE STANDARD MATCHMAKING
     else:
         # Build dictionary of previous matchup counts (pairwise)
         matchupCounts = defaultdict(int)
