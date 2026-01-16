@@ -16,7 +16,8 @@ If you get stuck, paste the error into AI and it should help you on to the next 
 NOTE: iF you don't want to use docker / have issues with it / don't hace access to fast linux, you can use the "instructions_legacy.txt" to setup this project. 
 
 1) Make sure you have a working Docker installation.
-2) Copy .env.docker and rename it to just .env
+2) Pull the code from github. `git clone --depth 1 https://github.com/DodgerB85/OnlineBoardGamers-Server`
+2) Copy .env.docker and rename it to just .env -- Also ensure all docker files for LF line endings, not CRLF.
 3) Navigate to the root of the repo and run `docker compose up --build` (MySQL port is mapped to 3307 so as not to conflict if you're running your own MySQL server)
 
 Now browse `http://localhost:8000/` and check there are no errors
@@ -24,8 +25,7 @@ You should be able to browsr around the logged-out pages, eg about, help, etc.
 (Or you might get some sort of database error). 
 
 4) Exit back to the command prompt. Confirm containers are running using: `docker compose up -d`
-5) Run this intial DB setup inside the container using `docker-compose exec obs sh ./setup_db_script.sh`
-6) To fix "OfflineGenerationError" run `docker-compose exec obs python manage.py compress`
+5) Run this intial DB setup inside the container using `./setup_db.bat` or `docker-compose exec obs sh ./setup_db_script.sh`
 7) To fix migrate errors saying a table doesn't exist, try migrating that specific table, eg `docker-compose exec obs python manage.py migrate WEB`
 
 The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). All the pre-built users have their password set to their username - however the hash will be incorrect so in practive you'll need to edit in a pasxword in the admin panel, although in practice you won't ever really need to login as any of these users anyway.
