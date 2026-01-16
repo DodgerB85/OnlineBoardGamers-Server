@@ -10,6 +10,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
+from .presenters import CannesPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -563,13 +564,13 @@ class Game(BaseGame):
         default=config("ADMIN_DB_KEY", default=1, cast=int),
     )
 
-    kickedPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="kicked_games", blank=True
-    )
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="invited_games", blank=True
     )
 
+    def presenter(self):
+        if self.gameCode == "CNS":
+            return CannesPresenter(self)
 
 class GamePlayer(models.Model):
     game = models.ForeignKey(Game, related_name="players", on_delete=models.deletion.CASCADE)
@@ -578,8 +579,16 @@ class GamePlayer(models.Model):
     notes = models.TextField(blank=True)
     winner = models.BooleanField(default=False)
 
+    is_missing = models.BooleanField(default=False)
+    is_kicked = models.BooleanField(default=False)
+
     is_current = models.BooleanField(default=False)
     has_chat_notification = models.BooleanField(default=False)
+
+    seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['seat_order']
 
 
 class QueryableGame(models.Model):
