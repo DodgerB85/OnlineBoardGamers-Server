@@ -29,8 +29,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
-from .models import CNS_Game
-from Lobby.models import User, Profile
+from Lobby.models import User, Profile, Game, GamePlayer
 
 
 # Create your views here.
@@ -87,7 +86,8 @@ def createCNSgame(request):
     _created = SR_getTimeNow()
 
     with transaction.atomic():
-        newGame = CNS_Game(
+        newGame = Game(
+            gameCode='CNS',
             gameDescription=_gameDescription,
             creator=request.user,
             host=request.user,
@@ -105,7 +105,11 @@ def createCNSgame(request):
         if _gameName != "":
             newGame.gameName = _gameName
 
-        newGame.allPlayers.add(request.user)
+        # Add creator as a player
+        GamePlayer.objects.create(
+            game=newGame,
+            player=request.user,
+        )
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
@@ -114,7 +118,10 @@ def createCNSgame(request):
 
             for i in range(1, _maxPlayers):
                 shadow_player = User.objects.get(username=f"{shadow_names[i-1]}")
-                newGame.allPlayers.add(shadow_player)
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=shadow_player,
+                )
 
                 if request.POST[f"player{i+1}"]:
                     display_name = request.POST[f"player{i+1}"]
@@ -122,8 +129,12 @@ def createCNSgame(request):
                     display_name = f"{shadow_names[i-1]}"
                 shadow_players.append(display_name)
 
-            newGame.player0notes = json.dumps(shadow_players)
-            newGame.startGame(request)
+            # Store shadow player names in creator's notes
+            creator_gp = GamePlayer.objects.get(game=newGame, player=request.user)
+            creator_gp.notes = json.dumps(shadow_players)
+            creator_gp.save()
+            
+            newGame.presenter().startGame(request)
         else:
             usernamesToNotify = []
             for i in range(2, _maxPlayers + 1):
@@ -135,7 +146,7 @@ def createCNSgame(request):
                     usernamesToNotify.append(newPlayer.username)
 
             SN_sendInviteNotifications(
-                request, usernamesToNotify, newGame.getGameName(), _maxPlayers, "CNS"
+                request, usernamesToNotify, newGame.presenter().getGameName(), _maxPlayers, "CNS"
             )
 
         newGame.kickoutDuration = request.POST["kickoutDuration"]
@@ -164,7 +175,7 @@ def createCNSgame(request):
         )
     else:
         messages.success(
-            request, (SF_getGameCreationJsonReturn("CNS", getattr(newGame, "id")))
+            request, (SF_getGameCreationJsonReturn("CNS", newGame.id))
         )
         return HttpResponseRedirect(
             reverse("indexListType", kwargs={"listType": "waiting"})
@@ -174,27 +185,28 @@ def createCNSgame(request):
 def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     try:
         currentGame = (
-            CNS_Game.objects.select_related("host", "creator")
-            .prefetch_related(
-                "allPlayers", "missingPlayers", "playersWithChatNotification"
-            )
-            .get(id=game_id)
+            Game.objects.select_related("host", "creator")
+            .prefetch_related("players__player", "invitedPlayers")
+            .get(id=game_id, gameCode='CNS')
         )
-    except CNS_Game.DoesNotExist:
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
+    presenter = currentGame.presenter()
+    
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
     # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    all_players = currentGame.players.exclude(is_kicked=True)
+    all_player_ids = {gp.player.id for gp in all_players if gp.player}
     userObj = request.user
     username = userObj.username
 
-    # Noe it is a proper started game, so set up for not logged in
+    # Now it is a proper started game, so set up for not logged in
     gameID = currentGame.id
-    gameName = currentGame.getGameName()
+    gameName = presenter.getGameName()
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = (
@@ -225,11 +237,10 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     user_id = userObj.id
 
     user_profile = Profile.objects.get(user=userObj)
-    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
-    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
-
+    user_gp = all_players.filter(player=userObj).first()
+    
     is_in_all = user_id in all_player_ids
-    is_missing = user_id in missing_player_ids
+    is_missing = user_gp.is_missing if user_gp else False
     involvedPlayer = is_in_all and not is_missing
     if username == "BotKickStarter":
         involvedPlayer = True
@@ -240,13 +251,13 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
 
     # Get Chat notification
     chatNotification = False
-    if user_id in chat_notify_ids:
+    if user_gp and user_gp.has_chat_notification:
         chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+        user_gp.has_chat_notification = False
+        user_gp.save()
 
     ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
+    nextURL = f"/nextGame?current_id={gameID}&current_code={presenter.getGameCode()}"
 
     returnData.update(
         {
@@ -260,24 +271,17 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     if not involvedPlayer:
         return render(request, "CNS/showCNSgame.html", returnData)
 
-    pov = currentGame.seatPosition(username)
+    pov = presenter.seatPosition(username)
     if request.user.username == "BotKickStarter":
         pov = -1
-    secondsToNextKickout = currentGame.getSecondsToNextKickout()
+    secondsToNextKickout = presenter.getSecondsToNextKickout()
 
-    kickoutRequired = currentGame.kickoutRequired()
+    kickoutRequired = presenter.kickoutRequired()
 
-    myMove = currentGame.isMyMove(username)
+    myMove = presenter.isMyMove(username)
 
     # Get the Notes for the user
-    seat_position = currentGame.seatPosition(username)
-    notes_dict = {
-        0: currentGame.player0notes,
-        1: currentGame.player1notes,
-        2: currentGame.player2notes,
-        3: currentGame.player3notes,
-    }
-    notes = notes_dict.get(seat_position, "")
+    notes = user_gp.notes if user_gp else ""
 
     liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
@@ -311,12 +315,16 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in currentGame.getAllPlayersOrderedySeat():
-            displayNames = currentGame.player0notes
-            currentGame.player0notes = ""
-            notes = ""
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            creator_gp = all_players.filter(player=currentGame.creator).first()
+            if creator_gp:
+                displayNames = creator_gp.notes
+                creator_gp.notes = ""
+                creator_gp.save()
+                if user_gp and user_gp.player == currentGame.creator:
+                    notes = ""
             currentGame.save()
-        allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
 
         returnData.update(
             {
@@ -368,9 +376,11 @@ def _processCNSturn(request):
     latest_update = str(jsonData.get("latestUpdate", 0))
 
     try:
-        currentGame = CNS_Game.objects.get(id=game_id)
-    except CNS_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='CNS')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -404,13 +414,18 @@ def _processCNSturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        # Update current players
+        next_player_usernames = jsonData["nextPlayer"].split(",") if jsonData["nextPlayer"] else []
+        currentGame.players.exclude(is_kicked=True).update(is_current=False)
+        if next_player_usernames:
+            for username in next_player_usernames:
+                currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            currentGame.endGame(
+            presenter.endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
@@ -441,7 +456,7 @@ def _processCNSturn(request):
                         "CNS",
                         playerListToNotify,
                         currentGame.id,
-                        currentGame.getGameName(),
+                        presenter.getGameName(),
                         currentGame,
                         oldVer,
                     )
@@ -484,7 +499,7 @@ def _processCNSturn(request):
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -494,9 +509,12 @@ def _processCNSturn(request):
     elif jsonData["action"] == "resign":
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
-        currentGame.enableStatsExclude(request.user.username)
+        missing_gp = currentGame.players.filter(player=_missingPlayer).first()
+        if missing_gp:
+            missing_gp.is_missing = True
+            missing_gp.save()
+        presenter.checkForHostChange(_missingPlayer)
+        presenter.enableStatsExclude(request.user.username)
         currentGame.save()
         # Response not used
         return JsonResponse(
@@ -553,7 +571,7 @@ def _processCNSturn(request):
             {
                 "gameData": loadData,
                 "latestUpdate": currentGame.latestUpdate,
-                "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
             safe=False,
         )
@@ -562,7 +580,14 @@ def _processCNSturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        
+        # Update current players
+        next_player_usernames = jsonData["nextPlayer"].split(",") if jsonData["nextPlayer"] else []
+        currentGame.players.exclude(is_kicked=True).update(is_current=False)
+        if next_player_usernames:
+            for username in next_player_usernames:
+                currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
+        
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -590,7 +615,7 @@ def _processCNSturn(request):
                     "CNS",
                     playerListToNotify,
                     currentGame.id,
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
                 )
@@ -598,7 +623,7 @@ def _processCNSturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -610,10 +635,13 @@ def _processCNSturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.kickedPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
-        currentGame.enableStatsExclude(_missingPlayer.username)
+        missing_gp = currentGame.players.filter(player=_missingPlayer).first()
+        if missing_gp:
+            missing_gp.is_missing = True
+            missing_gp.is_kicked = True
+            missing_gp.save()
+        presenter.checkForHostChange(_missingPlayer)
+        presenter.enableStatsExclude(_missingPlayer.username)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -623,7 +651,7 @@ def _processCNSturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -640,8 +668,8 @@ def bugEntry(request):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = CNS_Game.objects.get(id=gameID)
-    except CNS_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=gameID, gameCode='CNS')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     gameData = jsonData["gameData"]
@@ -665,15 +693,15 @@ def saveNotes(request):
     notes = jsonData["notes"]
 
     try:
-        currentGame = CNS_Game.objects.get(id=game_id)
-    except CNS_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='CNS')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    seat_position = currentGame.seatPosition(request.user.username)
-    if seat_position in range(5):
-        player_notes_field = f"player{seat_position}notes"
-        setattr(currentGame, player_notes_field, notes)
-        currentGame.save()
+    presenter = currentGame.presenter()
+    user_gp = currentGame.players.filter(player=request.user).first()
+    if user_gp:
+        user_gp.notes = notes
+        user_gp.save()
 
     return JsonResponse({"notePosted": True})
 
@@ -701,7 +729,7 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = CNS_Game.objects.get(id=game_id)
+        currentGame = Game.objects.get(id=game_id, gameCode='CNS')
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -718,8 +746,8 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.playersWithChatNotification.set(
-            currentGame.allPlayers.exclude(username=request.user.username)
+        currentGame.players.exclude(player=request.user, is_kicked=True).update(
+            has_chat_notification=True
         )
         currentGame.save()
 
@@ -736,23 +764,27 @@ def CNSdata(request, dataType):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = CNS_Game.objects.get(id=jsonData["gameID"])
-    except CNS_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='CNS')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if dataType == 1:
         # Send game data
         return JsonResponse(
             {
                 "gameData": currentGame.gameData,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
             }
         )
     elif dataType == 2:
         # Remove user from notifications
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+        user_gp = currentGame.players.filter(player=request.user).first()
+        if user_gp:
+            user_gp.has_chat_notification = False
+            user_gp.save()
         return JsonResponse(
             {"chatData": currentGame.chatData},
             safe=True,
@@ -768,7 +800,7 @@ def CNSdata(request, dataType):
             {
                 "latest": False,
                 "gameData": currentGame.gameData,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
             }
         )
@@ -785,8 +817,8 @@ def changeCNSzoom(request):
 
     if jsonData["action"] == "zoom":
         try:
-            currentGame = CNS_Game.objects.get(id=jsonData["gameID"])
-        except CNS_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='CNS')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         zoomLevels = json.loads(currentGame.zoomLevels)
 
@@ -813,10 +845,12 @@ def processStatsExcludeConsent(request):
         return JsonResponse({"error": "Wrong request."}, status=400)
     jsonData = json.loads(request.body)
     try:
-        currentGame = CNS_Game.objects.get(id=jsonData["gameID"])
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='CNS')
 
-    except CNS_Game.DoesNotExist:
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    currentGame.enableStatsExclude(request.user.username)
+    
+    presenter = currentGame.presenter()
+    presenter.enableStatsExclude(request.user.username)
     currentGame.save()
     return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
