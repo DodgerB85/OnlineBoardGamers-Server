@@ -69,12 +69,27 @@ def SF_getRequiredExp(gameCode):
 
 
 def SF_hasRequiredExperience(request, gameCode, gameModel):
+    from Lobby.models import Game
+    
     shadowUser = User.objects.get(username="SHADOW")
     experienced = False
 
-    model_games_involved = gameModel.objects.filter(
-        Q(allPlayers=request.user, gameStatus="FINISHED") & ~Q(allPlayers=shadowUser)
-    )
+    # Handle unified Game model differently
+    if gameModel == Game:
+        # For unified Game model, query through GamePlayer
+        model_games_involved = Game.objects.filter(
+            gameCode=gameCode,
+            gameStatus="FINISHED",
+            players__player=request.user
+        ).exclude(
+            players__player=shadowUser
+        ).distinct()
+    else:
+        # For legacy game models with allPlayers M2M
+        model_games_involved = gameModel.objects.filter(
+            Q(allPlayers=request.user, gameStatus="FINISHED") & ~Q(allPlayers=shadowUser)
+        )
+    
     exp = model_games_involved.count()
     if exp >= SF_getRequiredExp(gameCode):
         experienced = True
@@ -102,30 +117,58 @@ def SF_fastSerializeGame(game, user):
     """
     Zero-query serialization for any game model.
     Dynamically identifies game type (FCM, TGZ, etc.)
+    Handles both legacy models with M2M fields and unified Game model
     """
-    # --- 1. Identify Game Type ---
-    # Using app_label (e.g., 'FCM', 'TGZ') is usually the cleanest for your setup.
-    # Alternatively, use game.__class__.__name__ or game._meta.model_name
-    game_code = game._meta.app_label
-    # 1. Access prefetched sets once
-    all_players = list(game.allPlayers.all())
-    all_usernames = [u.username for u in all_players]
-    invited_usernames = [u.username for u in game.invitedPlayers.all()]
-    all_ids = {u.id for u in all_players}
-    missing_ids = {u.id for u in game.missingPlayers.all()}
-    chat_notify_ids = {u.id for u in game.playersWithChatNotification.all()}
+    from Lobby.models import Game
     
-    # 2. Winner Logic (Handles both FK and M2M)
-    winner_str = ""
-    if game.winner:
-        if hasattr(game.winner, 'all'): # M2M
-            winner_str = ", ".join([u.username for u in game.winner.all()])
-        else: # ForeignKey
-            winner_str = game.winner.username
+    # --- 1. Identify Game Type ---
+    is_unified_model = isinstance(game, Game)
+    
+    if is_unified_model:
+        game_code = game.gameCode
+    else:
+        game_code = game._meta.app_label
+    
+    # 2. Handle player data differently for unified vs legacy models
+    if is_unified_model:
+        # Unified Game model - use GamePlayer
+        all_game_players = list(game.players.exclude(is_kicked=True).select_related('player'))
+        all_players = [gp.player for gp in all_game_players if gp.player]
+        all_usernames = [p.username for p in all_players]
+        invited_usernames = [u.username for u in game.invitedPlayers.all()]
+        all_ids = {p.id for p in all_players}
+        missing_ids = {gp.player.id for gp in all_game_players if gp.is_missing and gp.player}
+        chat_notify_ids = {gp.player.id for gp in all_game_players if gp.has_chat_notification and gp.player}
+        
+        # Get current players from is_current flag
+        current_players_str = ", ".join([
+            gp.player.username for gp in all_game_players 
+            if gp.is_current and gp.player
+        ])
+        
+        # Winner from GamePlayer
+        winner_gp = next((gp for gp in all_game_players if gp.winner), None)
+        winner_str = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
+    else:
+        # Legacy model - use M2M fields
+        all_players = list(game.allPlayers.all())
+        all_usernames = [u.username for u in all_players]
+        invited_usernames = [u.username for u in game.invitedPlayers.all()]
+        all_ids = {u.id for u in all_players}
+        missing_ids = {u.id for u in game.missingPlayers.all()}
+        chat_notify_ids = {u.id for u in game.playersWithChatNotification.all()}
+        current_players_str = game.currentPlayers
+        
+        # Winner Logic (Handles both FK and M2M)
+        winner_str = ""
+        if game.winner:
+            if hasattr(game.winner, 'all'): # M2M
+                winner_str = ", ".join([u.username for u in game.winner.all()])
+            else: # ForeignKey
+                winner_str = game.winner.username
 
     # 3. Timing Calculation
     now = int(time.time())
-    # Note: latestUpdate and created should be stored in milliseconds based on your code
     ref_time = int(game.latestUpdate) // 1000 if game.gameStatus == "ACTIVE" else int(game.created) // 1000
     elapsed = max(0, now - ref_time)
     
@@ -137,15 +180,14 @@ def SF_fastSerializeGame(game, user):
     # 4. MyMove & Involved Logic
     is_my_move = False
     if user:
-        # Use quickIsMyMove logic: check if user.username is in the currentPlayers string
-        is_my_move = (not game.currentPlayers or user.username in game.currentPlayers or 
-                      any(s in game.currentPlayers for s in ["SHADOW", "FcmAI"]))
+        is_my_move = (not current_players_str or user.username in current_players_str or 
+                      any(s in current_players_str for s in ["SHADOW", "FcmAI"]))
         
         # For HC, if it is factory phase, AND you have submitted your move, set it back to false
         if game_code == "HC" and is_my_move and game.phase == 3 and game.hasMoveData(user.username) != "":
             is_my_move = False
     
-    is_involved = user.id in all_ids and user.id not in missing_ids
+    is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
     # 5. Shadow/Delete Logic
     shadow_names = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
@@ -172,6 +214,12 @@ def SF_fastSerializeGame(game, user):
     startingOptionsHTML = ""
     if game_code == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(game.startingOptions)
+    
+    # Get kickout required - use presenter for unified model
+    if is_unified_model:
+        kickoutRequiredNum = game.presenter().kickoutRequired()
+    else:
+        kickoutRequiredNum = game.kickoutRequired()
 
     return {
         "gameID": game.id,
@@ -198,8 +246,8 @@ def SF_fastSerializeGame(game, user):
         "pace": SR_gamePaceString(game.gamePace),
         "startingMap": game.startingMap if hasattr(game, 'startingMap') else "",
         "latestUpdate": game.latestUpdate,
-        "currentPlayers": game.currentPlayers, 
-        "kickoutRequiredNum": game.kickoutRequired()
+        "currentPlayers": current_players_str, 
+        "kickoutRequiredNum": kickoutRequiredNum
 
     }
             #"currentPlayers": self.currentPlayers,
