@@ -589,6 +589,9 @@ class GamePlayer(models.Model):
 
     class Meta:
         ordering = ['seat_order']
+        constraints = [
+            models.UniqueConstraint(fields=['game', 'player'], name='unique_game_player')
+        ]
 
 
 class QueryableGame(models.Model):
