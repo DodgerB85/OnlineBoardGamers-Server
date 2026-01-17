@@ -1,0 +1,66 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+    {% compress js %}
+        <script src="{% static 'Lobby/common.js' %}"></script>
+    {% endcompress %}
+{% endblock %}
+{% block body %}
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <h1>AQY Stat Games ({{ total_games_count_unique }} unique games - {{ total_games_count }} total games)</h1>
+        <!-- FINIHED GAMES -->
+        <div id="finishedGamesListView222">
+            <div class="tableOnlyDiv">
+                <table class="gamesTable">
+                    <thead>
+                        <tr class="headingRow">
+                            <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+                            <td class="playersHeader">{% translate "Players" %}</td>
+                            <td class="currentPlayersHeader">{% translate "All Players" %}</td>
+                            <td class="lastActivityHeader">{% translate "Created" %}</td>
+                            <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
+                            <td class="winnerHeader">{% translate "Winner" %}</td>
+                        </tr>
+                    </thead>
+                    {% for game in finishedGamesList %}
+                        {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                    {% endfor %}
+                </table>
+            </div>
+            <br />
+            <div class="pagination">
+                <span class="step-links">
+                    {% if z > 1 %}
+                        <a href="#" onclick="submitForm('1')">&laquo; first</a>
+                        <a href="#" onclick="submitForm('{{ page|add:'-1' }}')">previous</a>
+                    {% endif %}
+                    <span class="current">{% translate "Page" %} {{ page }} {% translate "of" %} {{ num_pages }}. {% translate "Total Games:" %} {{ total_games_count_unique }}</span>
+                    {% if page < num_pages %}
+                        <a href="#" onclick="submitForm('{{ page|add:'1' }}')">next</a>
+                        <a href="#" onclick="submitForm('{{ num_pages }}')">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+            <form id="paginationForm" method="post" action="/AQY/AQYstatGames/">
+                {% csrf_token %}
+                <input type="hidden" name="game_ids" value="{{ game_ids_json }}" />
+                <input type="hidden" id="pageInput" name="page" value="{{ page }}" />
+            </form>
+            <script>
+			function submitForm(page) {
+				document.getElementById("pageInput").value = page
+				document.getElementById("paginationForm").submit()
+			}
+            </script>
+        </div>
+        {% include 'Lobby/common/homeButton.html' %}
+    </div>
+{% endblock %}

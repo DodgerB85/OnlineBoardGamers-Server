@@ -1,0 +1,270 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  {% compress js %}
+    <script src="{% static 'AQY/AQYstats.js' %}"></script>
+  {% endcompress %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="AQYstatsPage">
+      <a class="linkOther" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
+      <br />
+      <br />
+      Data Generated: {{ timeString }}
+      <br />
+      <br />
+      <b>Note: Any game with a resigned/kicked player is not considered for these stats</b>
+      <br />
+      <br />
+      <b>Note:</b> These are stats of what happened historically.
+      <br />
+      They give an interesting insight into what has happened in previous games.
+      <br />
+      Be aware that part of the genius of Splotter games is that the winner will
+      <br />
+      almost always be the player who can read and respond to the current game state in the best way tactically.
+      <br />
+      Therefore, you should not use these stats to drive your strategy, but see them as
+      <br />
+      an interesting indication of how the game is being played.
+      <br />
+      <b>Click a green/red/grey section of the bar chart to view those games
+        <br />
+      Click an entry in the table to view those games</b>
+      <br />
+      NOTE: In 3+ player games, the same Saint could win and lose (multiple times).
+      <br />
+      <div class="tab">
+        <button class="tablinks" id="players2tab">{% translate "2 Player" %}</button>
+        <button class="tablinks" id="players3tab">{% translate "3 Player" %}</button>
+        <button class="tablinks" id="players4tab">{% translate "4 Player" %}</button>
+        <button class="tablinks" id="playerscombined_2_3_4tab">{% translate "Combined" %}</button>
+      </div>
+      {% for playerCount, row in all_data.items %}
+        <div class="statsDiv" id="players{{ playerCount }}">
+          <br />
+          Avg Turns: {{ row.avg_turns_overall }}
+          <br />
+          Total Games: {{ row.finishedGamesCount }}
+          <br />
+          <br />
+          <canvas class="bar_canvas"
+                  id="bar-chartplayers{{ playerCount }}"
+                  width="1000"></canvas>
+          <script>
+            // SAINTS BAR CHART
+            var bar_ctx = document.getElementById('bar-chartplayers{{ playerCount }}').getContext('2d');
+
+            // Modify the datasets based on god_name
+            var datasets = [{
+                label: 'Picked and Won',
+                data: [{% for saint_name, saint_data in row.saint_stats.items %}{{ saint_data.bar_chart_data.0 }},{% endfor %}],
+                backgroundColor: 'green',
+                gameIdsKey: 'won_game_ids'
+              }, {
+                label: 'Picked and Lost',
+                data: [{% for saint_name, saint_data in row.saint_stats.items %}{{ saint_data.bar_chart_data.1 }},{% endfor %}],
+                backgroundColor: 'red',
+                gameIdsKey: 'picked_game_ids'
+              }];
+
+            // Add "Not Picked" dataset, but set data to 0 for the "None" god
+            //var notPickedData = [{% for saint_name, saint_data in row.saint_stats.items %}{% if saint_name == 'None' %}0{% else %}{{ saint_data.bar_chart_data.2 }}{% endif %},{% endfor %}];
+            var notPickedData = [{% for saint_name, saint_data in row.saint_stats.items %}{{ saint_data.bar_chart_data.2 }},{% endfor %}];
+
+            datasets.push({
+                label: 'Not Picked',
+                data: notPickedData,
+                backgroundColor: 'grey',
+                gameIdsKey: 'not_picked_game_ids'
+            });
+
+            var bar_chart = new Chart(bar_ctx, {
+              type: 'bar',
+              data: {
+                labels: [{% for saint_name, saint_data in row.saint_stats.items %}"{{ saint_name }}",{% endfor %}],
+                datasets: datasets
+              },
+              options: {
+                responsive: false,
+                legend: {
+                  display: true
+                },
+                title: {
+                  display: true,
+                  text: 'Available / Picked / Won Saints',
+                  fontSize: 40
+                },
+                scales: {
+                  yAxes: [{
+                    stacked: true,
+                    ticks: {
+                      beginAtZero: true
+                    }
+                  }],
+                  xAxes: [{
+                    stacked: true,
+                    ticks: {
+                      fontStyle: 'bold',
+                      fontSize: 20
+                    }
+                  }]
+                },
+                onClick: function(evt, item) {
+                  if (item.length > 0) {
+                    var clickedItem = item[0];
+                    var clickedIndex = clickedItem._index;
+                    var clickedSaint = this.data.labels[clickedIndex];
+
+                    var clickX = evt.offsetX;
+                    var clickY = evt.offsetY;
+
+                    var chart = this.chart;
+                    var yScale = chart.scales['y-axis-0'];
+
+                    var baseValue = 0;
+                    var clickedSegmentLabel = null;
+                    var gameIds = [];
+
+                    for (var i = 0; i < this.data.datasets.length; i++) {
+                      var dataset = this.data.datasets[i];
+                      var dataValue = dataset.data[clickedIndex];
+                      var segmentTop = yScale.getPixelForValue(baseValue + dataValue);
+                      var segmentBottom = yScale.getPixelForValue(baseValue);
+
+                      if (clickY >= segmentTop && clickY <= segmentBottom) {
+                        clickedSegmentLabel = dataset.label;
+                        break;
+                      }
+                      baseValue += dataValue;
+                    }
+
+                    if (clickedSegmentLabel === 'Picked and Won') {
+                      gameIds = {{ row.saint_stats|safe }}[clickedSaint].won_game_ids || [];
+                    } else if (clickedSegmentLabel === 'Picked and Lost') {
+                      var pickedGameIds = {{ row.saint_stats|safe }}[clickedSaint].picked_game_ids || [];
+                      var wonGameIds = {{ row.saint_stats|safe }}[clickedSaint].won_game_ids || [];
+
+                      if (clickedSaint === 'None') {
+                        // For the "None" column, exclude IDs in wonGameIds from pickedGameIds
+                        gameIds = pickedGameIds.filter(function(gameId) {
+                          return !wonGameIds.includes(gameId);
+                        });
+                      } else {
+                        // Otherwise, apply the slicing logic
+                        /*if (pickedGameIds.length > wonGameIds.length) {
+                          // Remove the first N elements from pickedGameIds, where N is the length of wonGameIds
+                          gameIds = pickedGameIds.slice(wonGameIds.length);
+                        } else {
+                          gameIds = pickedGameIds; // Otherwise, just use the pickedGameIds as is
+                        }*/
+                      //gameIds = pickedGameIds.filter(function(gameId) {
+                      //      return !wonGameIds.includes(gameId);
+                      //  });
+                      gameIds = {{ row.saint_stats|safe }}[clickedSaint].lost_game_ids || [];
+                      }
+                    } else if (clickedSegmentLabel === 'Not Picked') {
+                      //var availableGameIds = {{ row.saint_stats|safe }}[clickedSaint].available_game_ids || [];
+                      //var pickedGameIds = {{ row.saint_stats|safe }}[clickedSaint].picked_game_ids || [];
+                      //var wonGameIds = {{ row.saint_stats|safe }}[clickedSaint].won_game_ids || [];
+                      var notPickedGameIDs = {{ row.saint_stats|safe }}[clickedSaint].not_picked_game_ids || [];
+
+                      // Exclude picked and won game IDs
+                      //gameIds = availableGameIds.filter(function(gameId) {
+                      //  return !pickedGameIds.includes(gameId) && !wonGameIds.includes(gameId);
+                      //});
+
+                      gameIds = notPickedGameIDs;
+                    }
+
+                    console.log('Clicked Saint:', clickedSaint);
+                    console.log('Clicked Segment:', clickedSegmentLabel);
+                    console.log('Clicked Count:', gameIds.length);
+                    console.log('Game IDs:', gameIds);
+
+                    // Example: Call a function to open a page with the game IDs for this segment
+                  openGameIdsPage(gameIds);
+                  }
+                }
+              }
+            });
+            // END SAINTS BAR CHART
+          </script>
+          <br />
+          {% translate "In this stats table, a 'picked' game includes both 'lost' and 'won'" %}
+          <br />
+          {% translate "Click a cell to see the games" %}
+          <br />
+          <table class="generalTable TGZstatsTable">
+            <tr>
+              <th>{% translate "Saint" %}</th>
+              <th>{% translate "Turns to Win" %}</th>
+              <th>{% translate "Available" %}</th>
+              <th>{% translate "Not Picked" %}</th>
+              <th>{% translate "Picked" %}</th>
+              <th>{% translate "Lost" %}</th>
+              <th>{% translate "Won" %}</th>
+              <th>{% translate "Picked Per Player %" %}</th>
+              <th>{% translate "Won When Available %" %}</th>
+              <th>{% translate "Won When Picked %" %}</th>
+            </tr>
+            {% for saint_name, saint_data in row.saint_stats.items %}
+              <tr>
+                <td>{{ saint_name }}</td>
+                <td>{{ saint_data.avg_turns_when_won }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ saint_data.available_game_ids }})">{{ saint_data.available }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ saint_data.not_picked_game_ids }})">{{ saint_data.not_picked }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ saint_data.picked_game_ids }})">{{ saint_data.picked }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ saint_data.lost_game_ids }})">{{ saint_data.lost }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ saint_data.won_game_ids }})">{{ saint_data.won }}</td>
+                <td>{{ saint_data.picked_percentage }} %</td>
+                <td>{{ saint_data.won_percentage }} %</td>
+                <td>{{ saint_data.won_when_picked_percentage }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% include 'Lobby/common/homeButton.html' %}
+  <form id="gameIdsForm" method="post" action="/AQY/AQYstatGames/">
+    {% csrf_token %}
+    <input type="hidden" id="gameIdsInput" name="game_ids">
+  </form>
+  <script>
+    function openGameIdsPage(gameIds) {
+        // Set the value of the hidden input field
+        if (gameIds.length === 0) {
+            alert("No game IDs");
+            return
+        }
+        document.getElementById('gameIdsInput').value = JSON.stringify(gameIds);
+
+        // Submit the form
+        document.getElementById('gameIdsForm').submit();
+    }
+    
+     // Add click event to the bar chart
+    //bar_chart.chart.options.onClick = function(e) {
+    //  console.log(e);
+    //  console.log(this);
+    //}
+  </script>
+{% endblock %}
