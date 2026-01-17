@@ -16,6 +16,10 @@ urlpatterns = [
         name="showAQYreplayStep",
     ),
     path("help/", views.AQYhelp, name="AQYhelp"),
+    
+    path('AQYstats/', views.AQYstats, name='AQYstats'),
+    path('AQYstatGames/', views.AQYstatGames, name='AQYstatGames'),
+    
     ## API routes
     path("createAQYgame/", views.createAQYgame, name="createAQYgame"),
     path("bugEntry/", views.bugEntry, name="bugEntry"),

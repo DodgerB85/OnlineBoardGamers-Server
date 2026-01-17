@@ -2,16 +2,6 @@ window.gameType = ""
 window.playerNumber = "players2"
 
 document.addEventListener("DOMContentLoaded", function () {
-	// Enable games tabbing
-	document.querySelector("#originalgodstab").addEventListener("click", () => {
-		window.gameType = ""
-		show_playerStatsTab()
-	})
-	document.querySelector("#schismgodstab").addEventListener("click", () => {
-		window.gameType = "schism_"
-		show_playerStatsTab()
-	})
-
 	// Enable Player Stats tabbing
 	/*document.querySelector("#players2tab").addEventListener("click", () => show_playerStatsTab("players2"))
 	document.querySelector("#players3tab").addEventListener("click", () => show_playerStatsTab("players3"))
@@ -31,15 +21,11 @@ document.addEventListener("DOMContentLoaded", function () {
 		window.playerNumber = "players4"
 		show_playerStatsTab()
 	})
-	document.querySelector("#players45tab").addEventListener("click", () => {
-		window.playerNumber = "players45"
+		document.querySelector("#playerscombined_2_3_4tab").addEventListener("click", () => {
+		window.playerNumber = "playerscombined_2_3_4"
 		show_playerStatsTab()
 	})
-	document.querySelector("#players5tab").addEventListener("click", () => {
-		window.playerNumber = "players5"
-		show_playerStatsTab()
-	})
-		
+
 	
 
 	show_playerStatsTab()
@@ -55,16 +41,9 @@ function show_playerStatsTab() {
 	for (let i = 0; i < statsDivs.length; i++) {
 		statsDivs[i].style.display = "none"
 	}
-	var statsDivs2 = document.getElementsByClassName("statsDiv_schism")
-	for (let i = 0; i < statsDivs2.length; i++) {
-		statsDivs2[i].style.display = "none"
-	}
+
 	let listType = window.gameType + window.playerNumber
 
-	let gameTypeTab = "originalgodstab"
-	if (window.gameType === "schism_") gameTypeTab = "schismgodstab"
-
-	document.getElementById(gameTypeTab).classList.add("active")
 	document.getElementById(window.playerNumber + "tab").classList.add("active")
 	document.getElementById(listType).style.display = "block"
 }

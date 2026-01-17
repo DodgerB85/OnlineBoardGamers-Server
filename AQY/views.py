@@ -9,6 +9,7 @@ from contextlib import contextmanager
 
 from django.contrib import messages
 from django.conf import settings
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
@@ -20,6 +21,7 @@ from django.db.models import Q
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
+    SF_fastSerializeGame,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
@@ -38,6 +40,7 @@ from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC
 AQYsuperUsers = ["BotKickStarter"]
 AQY_DB_LOCK_NAME = "lockAQYgame_"
 
+
 def index(request):
     return HttpResponse("Hello, world. You're at AQY")
 
@@ -53,6 +56,7 @@ def createAQYgame(request):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     return create_aqy_game(request)
+
 
 def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     try:
@@ -103,7 +107,11 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
         "currentPlayers": currentGame.getCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
-        "deleteVotesData": json.dumps(currentGame.getFullSetOfTrueFalseVotes(DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True))),
+        "deleteVotesData": json.dumps(
+            currentGame.getFullSetOfTrueFalseVotes(
+                DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
+            )
+        ),
         "settingsDebug": settings.DEBUG,
         # "settingsDebug": False,
     }
@@ -1436,14 +1444,18 @@ def _voteToDelete(request):
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
 
-    success = currentGame.castVote(DELETE_VOTE_TOPIC, playerName, True)  # Pass playerName to addDeleteVote
+    success = currentGame.castVote(
+        DELETE_VOTE_TOPIC, playerName, True
+    )  # Pass playerName to addDeleteVote
 
     if success:
         currentGame.save()
         # Check if all players have voted to delete
         all_voted = True
-        delete_votes_data = currentGame.getFullSetOfTrueFalseVotes(DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True))
-                
+        delete_votes_data = currentGame.getFullSetOfTrueFalseVotes(
+            DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
+        )
+
         missingPlayers = currentGame.getMissingPlayersNamesArray()
         for player, vote in delete_votes_data.items():
             if not vote and player not in missingPlayers:
@@ -1452,7 +1464,11 @@ def _voteToDelete(request):
 
         if all_voted:
             # Get the result
-            deleteVotesData = json.dumps(currentGame.getFullSetOfTrueFalseVotes(DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)))
+            deleteVotesData = json.dumps(
+                currentGame.getFullSetOfTrueFalseVotes(
+                    DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
+                )
+            )
             # Delete the game
             currentGame.delete()
             # Add a success message
@@ -1469,9 +1485,118 @@ def _voteToDelete(request):
         return JsonResponse(
             {
                 "voteChanged": True,
-                "deleteVotesData": json.dumps(currentGame.getFullSetOfTrueFalseVotes(DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True))),
+                "deleteVotesData": json.dumps(
+                    currentGame.getFullSetOfTrueFalseVotes(
+                        DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
+                    )
+                ),
             },
             safe=False,
         )
 
     return JsonResponse({"voteChanged": False})
+
+
+@login_required
+def AQYstats(request):
+    # Load regular stats
+    with open("./AQY/AQYstats/AQY_stats.json", "r") as f:
+        data = json.load(f)
+
+    timeString = data["time_string"]
+
+    all_data = {}
+    for playerCount in ["2", "3", "4", "combined_2_3_4"]:
+        player_data = data["player_counts"].get(str(playerCount))
+        playerCountLabel = playerCount
+        if player_data:
+            all_data[playerCountLabel] = {
+                "finishedGamesCount": player_data["finishedGamesCount"],
+                "avg_turns_overall": player_data["avg_turns_overall"],
+                "saint_stats": player_data["saint_stats"],
+            }
+
+    return render(
+        request,
+        "AQY/AQYstats.html",
+        {
+            "timeString": timeString,
+            "all_data": all_data,
+        },
+    )
+
+
+@login_required
+def AQYstatGames(request):
+    # Post is required
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Get the game ids
+    gameIDs = json.loads(request.POST["game_ids"])
+
+    total_games_count = len(gameIDs)
+    unique_gameIDs = list(set(gameIDs))
+
+    # gameIDs.reverse()
+    unique_gameIDs.reverse()
+
+    # Pagination settings
+    page = request.POST.get("page", 1)  # Get the current page number from the request
+    items_per_page = 20  # Number of games to display per page
+
+    # Get the total count of games BEFORE slicing gameIDs
+    total_games_count_unique = len(unique_gameIDs)
+
+    # Initialize paginator and related variables outside the try block
+    paginator = Paginator(unique_gameIDs, items_per_page)
+    gameIDs_page = []
+    num_pages = 1  # Default to 1 page if there are no games
+
+    # Slice gameIDs for the current page
+    try:
+        gameIDs_page = paginator.page(
+            page
+        ).object_list  # Get the gameIDs for the current page
+        num_pages = paginator.num_pages
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        gameIDs_page = paginator.page(1).object_list
+        page = 1
+        num_pages = paginator.num_pages
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        gameIDs_page = paginator.page(paginator.num_pages).object_list
+        page = paginator.num_pages
+        num_pages = paginator.num_pages
+
+    # Filter the games for the current page ONLY
+    finishedGames = (
+        AQY_Game.objects.filter(id__in=gameIDs_page)
+        .order_by("-latestUpdate")
+        .select_related("creator__profile", "creator")
+        .prefetch_related(
+            "allPlayers",
+            "missingPlayers",
+            "invitedPlayers",
+            "playersWithChatNotification",
+        )
+    )
+
+    # Serialize ONLY the games for the current page
+    finishedGamesListJson = [
+        SF_fastSerializeGame(game, request.user) for game in finishedGames
+    ]
+
+    return render(
+        request,
+        "AQY/AQYstatGames.html",
+        {
+            "finishedGamesList": finishedGamesListJson,
+            "page": int(page),
+            "num_pages": num_pages,
+            "total_games_count_unique": total_games_count_unique,  # Pass the total count to the template
+            "total_games_count": total_games_count,
+            "game_ids_json": request.POST["game_ids"],  # Pass the game_ids back to the
+        },
+    )
