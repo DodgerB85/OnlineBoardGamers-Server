@@ -2837,13 +2837,23 @@ def joinGameLink(request, joinGameLink):
     if gameModel is None:
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
+    
     try:
-        availableGame = gameModel.objects.get(id=numbers)
-    except gameModel.DoesNotExist:
+        if gameCode == "CNS":
+            from Lobby.models import Game
+            availableGame = Game.objects.get(id=numbers, gameCode='CNS')
+        else:
+            availableGame = gameModel.objects.get(id=numbers)
+    except Exception:
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
 
-    if availableGame.allPlayers.count() >= availableGame.maxPlayers:
+    if gameCode == "CNS":
+        current_player_count = availableGame.players.exclude(is_kicked=True).count()
+    else:
+        current_player_count = availableGame.allPlayers.count()
+    
+    if current_player_count >= availableGame.maxPlayers:
         messages.error(request, (gettext("Sorry, the game is full")))
         return HttpResponseRedirect(reverse("index"))
 
@@ -2880,16 +2890,32 @@ def joinGame(request, gameType):
     if not gameModel:
         return JsonResponse({"error": "Invalid Model"}, status=400)
 
-    try:
-        currentGame = gameModel.objects.prefetch_related("allPlayers").get(
-            id=jsonData["gameID"]
-        )
-    except gameModel.DoesNotExist:
-        messages.error(request, (gettext("Sorry, the game no longer exists")))
-        return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
-
-    action = jsonData.get("action", "")
-    current_players_list = list(currentGame.allPlayers.all())
+    # Handle CNS with unified Game model
+    if gameType == "CNS":
+        from Lobby.models import Game
+        try:
+            currentGame = Game.objects.prefetch_related("players__player", "invitedPlayers").get(
+                id=jsonData["gameID"],
+                gameCode='CNS'
+            )
+        except Game.DoesNotExist:
+            messages.error(request, (gettext("Sorry, the game no longer exists")))
+            return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
+        
+        action = jsonData.get("action", "")
+        current_players_list = [gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player]
+    else:
+        # Legacy game models
+        try:
+            currentGame = gameModel.objects.prefetch_related("allPlayers").get(
+                id=jsonData["gameID"]
+            )
+        except gameModel.DoesNotExist:
+            messages.error(request, (gettext("Sorry, the game no longer exists")))
+            return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
+        
+        action = jsonData.get("action", "")
+        current_players_list = list(currentGame.allPlayers.all())
 
     # Delete Training Game // Can never really fail
     if currentGame and action == "deleteTrgGame":
@@ -2906,7 +2932,13 @@ def joinGame(request, gameType):
         if currentGame.gameStatus == "ACTIVE":
             messages.error(request, (gettext("The game has already started")))
         else:
-            currentGame.allPlayers.remove(request.user)
+            if gameType == "CNS":
+                # For CNS, delete the GamePlayer
+                currentGame.players.filter(player=request.user).delete()
+            else:
+                # Legacy models
+                currentGame.allPlayers.remove(request.user)
+            
             # Using len() on the prefetched list minus the one we removed
             if len(current_players_list) <= 1:
                 currentGame.delete()
@@ -2990,34 +3022,43 @@ def checkJoinGame(request, gameType, gameID):
             )
         return
     # CHECK GAME EXISTS
-    try:
-        currentGame = gameModel.objects.prefetch_related(
-            "invitedPlayers", "allPlayers", "creator__profile__blacklistedPlayers"
-        ).get(id=gameID)
-    except gameModel.DoesNotExist:
-        messages.error(request, (gettext("Sorry, the game does not exist")))
-        if ajaxReturn:
-            return JsonResponse(
-                {
-                    "listToShow": "AVAILABLE",
-                }
-            )
-        return
-
-    # CHECK GAME IS NOT ACTIVE OR FINISHED
-    if currentGame.gameStatus == "ACTIVE":
-        messages.error(
-            request, (gettext("Sorry, someone else joined the game and it is full"))
-        )
-        errorFound = True
-
-    if currentGame.gameStatus == "FINISHED":
-        messages.error(request, (gettext("Sorry, the game has already finished")))
-        errorFound = True
-
-    # Use in-memory checks for prefetched sets (no .all() or .filter())
-    all_players_list = list(currentGame.allPlayers.all())
-    invited_players_list = list(currentGame.invitedPlayers.all())
+    if gameType == "CNS":
+        from Lobby.models import Game
+        try:
+            currentGame = Game.objects.prefetch_related(
+                "invitedPlayers", "players__player", "creator__profile__blacklistedPlayers"
+            ).get(id=gameID, gameCode='CNS')
+        except Game.DoesNotExist:
+            messages.error(request, (gettext("Sorry, the game does not exist")))
+            if ajaxReturn:
+                return JsonResponse(
+                    {
+                        "listToShow": "AVAILABLE",
+                    }
+                )
+            return
+        
+        # Get player lists for CNS
+        all_players_list = [gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player]
+        invited_players_list = list(currentGame.invitedPlayers.all())
+    else:
+        try:
+            currentGame = gameModel.objects.prefetch_related(
+                "invitedPlayers", "allPlayers", "creator__profile__blacklistedPlayers"
+            ).get(id=gameID)
+        except gameModel.DoesNotExist:
+            messages.error(request, (gettext("Sorry, the game does not exist")))
+            if ajaxReturn:
+                return JsonResponse(
+                    {
+                        "listToShow": "AVAILABLE",
+                    }
+                )
+            return
+        
+        # Use in-memory checks for prefetched sets (no .all() or .filter())
+        all_players_list = list(currentGame.allPlayers.all())
+        invited_players_list = list(currentGame.invitedPlayers.all())
 
     # Check that if the game is WAITING, you are in the invites, OR there is a blank space
     if (
@@ -3063,16 +3104,28 @@ def checkJoinGame(request, gameType, gameID):
     _latestUpdate = int(time.time()) * 1000
 
     # CHECK EXPERIENCE LEVEL HERE
-    if currentGame.isExperiencedGame():
+    is_experienced = currentGame.presenter().isExperiencedGame() if gameType == "CNS" else currentGame.isExperiencedGame()
+    
+    if is_experienced:
         # Optimization: Fetch SHADOW once
         shadow_user = User.objects.get(username="SHADOW")
 
-        # 1 Hit: Count finished games for current model
-        exp = (
-            gameModel.objects.filter(allPlayers=request.user, gameStatus="FINISHED")
-            .exclude(allPlayers=shadow_user)
-            .count()
-        )
+        if gameType == "CNS":
+            from Lobby.models import Game
+            # 1 Hit: Count finished games for CNS
+            exp = (
+                Game.objects.filter(gameCode='CNS', gameStatus="FINISHED", players__player=request.user)
+                .exclude(players__player=shadow_user)
+                .distinct()
+                .count()
+            )
+        else:
+            # 1 Hit: Count finished games for current model
+            exp = (
+                gameModel.objects.filter(allPlayers=request.user, gameStatus="FINISHED")
+                .exclude(allPlayers=shadow_user)
+                .count()
+            )
 
         if exp < SF_getRequiredExp(gameType):
             ##### SEND DISCORD ALERT
@@ -3113,21 +3166,42 @@ def checkJoinGame(request, gameType, gameID):
         fairPlayLastYear = 100
 
         for game_name, game_model in GAME_NAMES_MODELS.items():
-            finishedGames = game_model.objects.filter(
-                Q(gameStatus="FINISHED"),
-                ~Q(allPlayers__username="SHADOW"),
-                Q(allPlayers=request.user),
-            )
+            if game_name == "CNS":
+                from Lobby.models import Game
+                # Handle CNS with unified Game model
+                finishedGames = Game.objects.filter(
+                    Q(gameCode='CNS'),
+                    Q(gameStatus="FINISHED"),
+                    ~Q(players__player__username="SHADOW"),
+                    Q(players__player=request.user),
+                ).distinct()
 
-            finishedGames_last_year = finishedGames.filter(
-                Q(latestUpdate__gte=minus1year)
-            )
-            kickedOutGames = finishedGames_last_year.filter(
-                Q(kickedPlayers=request.user)
-            )
+                finishedGames_last_year = finishedGames.filter(
+                    Q(latestUpdate__gte=minus1year)
+                )
+                kickedOutGames = finishedGames_last_year.filter(
+                    Q(players__is_kicked=True, players__player=request.user)
+                ).distinct()
 
-            finishedGamesLastYear += finishedGames_last_year.count()
-            kickedOutGamesLastYear += kickedOutGames.count()
+                finishedGamesLastYear += finishedGames_last_year.count()
+                kickedOutGamesLastYear += kickedOutGames.count()
+            else:
+                # Legacy game models
+                finishedGames = game_model.objects.filter(
+                    Q(gameStatus="FINISHED"),
+                    ~Q(allPlayers__username="SHADOW"),
+                    Q(allPlayers=request.user),
+                )
+
+                finishedGames_last_year = finishedGames.filter(
+                    Q(latestUpdate__gte=minus1year)
+                )
+                kickedOutGames = finishedGames_last_year.filter(
+                    Q(kickedPlayers=request.user)
+                )
+
+                finishedGamesLastYear += finishedGames_last_year.count()
+                kickedOutGamesLastYear += kickedOutGames.count()
 
         if kickedOutGamesLastYear > 0:
             kickedOutGamesLastYear -= 1
@@ -3168,14 +3242,28 @@ def checkJoinGame(request, gameType, gameID):
             return
 
     _newPlayer = request.user
-    currentGame.allPlayers.add(_newPlayer)
+    
+    if gameType == "CNS":
+        from Lobby.models import GamePlayer
+        # For CNS, create a GamePlayer
+        GamePlayer.objects.create(
+            game=currentGame,
+            player=_newPlayer
+        )
+    else:
+        # Legacy models
+        currentGame.allPlayers.add(_newPlayer)
+    
     currentGame.latestUpdate = _latestUpdate
     currentGame.invitedPlayers.remove(request.user)
 
     current_player_count = len(all_players_list) + 1
 
     if current_player_count == currentGame.maxPlayers:
-        currentGame.startGame(request)
+        if gameType == "CNS":
+            currentGame.presenter().startGame(request)
+        else:
+            currentGame.startGame(request)
         messages.success(
             request, (gettext("You have joined the game and the game has started"))
         )
@@ -3212,13 +3300,23 @@ def deleteGame(request, gameType):
     try:
         if gameModel is None:
             return JsonResponse({"noGame": True}, safe=False)
-        currentGame = gameModel.objects.get(id=jsonData["gameID"])
+        
+        if gameType == "CNS":
+            from Lobby.models import Game
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='CNS')
+        else:
+            currentGame = gameModel.objects.get(id=jsonData["gameID"])
     except:
         return JsonResponse({"noGame": True}, safe=False)
 
     # Delete Training Game // Can never really fail
     if jsonData["action"] == "deleteTrgGame":
-        if request.user in currentGame.allPlayers.all():
+        if gameType == "CNS":
+            user_is_player = currentGame.players.filter(player=request.user).exists()
+        else:
+            user_is_player = request.user in currentGame.allPlayers.all()
+        
+        if user_is_player:
             gameStatus = currentGame.gameStatus
             currentGame.delete()
             return JsonResponse(
