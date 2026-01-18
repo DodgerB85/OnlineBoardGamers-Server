@@ -4,19 +4,11 @@ import random
 
 from django.db.models import Q
 
-from Lobby.sharedFunctions.sharedFunctions import (
-    SF_getSecondsToNextKickout,
-    SF_kickoutRequired,
-)
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getCNSstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
-)
-from Lobby.sharedFunctions.sharedNotifications import (
-    SN_M_sendEndGameNotification,
-    SN_M_sendGameStartNotification,
 )
 
 
@@ -41,6 +33,7 @@ class CannesPresenter:
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
+        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendEndGameNotification
         
         self.game.rewindData = ""
         self.game.rewindTempData = ""
@@ -103,6 +96,7 @@ class CannesPresenter:
         )
 
     def getSecondsToNextKickout(self):
+        from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
         return SF_getSecondsToNextKickout(self.game.latestUpdate, self.game.kickoutDuration)
 
     def getMissingPlayersNamesArray(self):
@@ -113,6 +107,8 @@ class CannesPresenter:
         )
 
     def kickoutRequired(self):
+        from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
+        
         all_players = self.game.players.exclude(is_kicked=True).select_related('player')
         all_player_usernames = [gp.player.username for gp in all_players if gp.player]
 
@@ -227,6 +223,14 @@ class CannesPresenter:
             return True
         return False
 
+    def isExperiencedGame(self):
+        startingOptionsListPrelim = (
+            json.loads(self.game.startingOptions) if self.game.startingOptions else []
+        )
+        if 120 in startingOptionsListPrelim:
+            return True
+        return False
+
     def seatPosition(self, _username, withoutBots=False):
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
         try:
@@ -250,6 +254,7 @@ class CannesPresenter:
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
+        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
         
         self.game.gameStatus = "ACTIVE"
         self.game.playerOrderSeed = random.randint(1000, 32767)
