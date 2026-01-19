@@ -37,6 +37,15 @@ def index(request):
     return HttpResponse("Hello, world. You're at the CNS index")
 
 
+def redirectLegacyCNS(request, original_id):
+    """Redirect from old /CNS/:original_id format to new /CNS/:id/show format"""
+    try:
+        game = Game.objects.get(gameCode='CNS', original_id=original_id)
+        return HttpResponseRedirect(reverse('CNS:showCNSgame', args=[game.id]))
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+
 def CNShelp(request):
     return render(request, "CNS/CNShelp.html")
 
