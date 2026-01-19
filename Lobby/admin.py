@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import User, Profile, changelog, Mini_Tournaments, Main_Tournament, GamePlayer, Game
+from .models import User, Profile, changelog, Mini_Tournaments, Main_Tournament, Game, GamePlayer
 from .modelProxies import FCMMiniTournament, TGZMiniTournament
 
 
@@ -60,5 +60,21 @@ class TGZMiniTournamentAdmin(admin.ModelAdmin):
     
     class Meta:
         app_label = 'TGZ'
+
+@admin.register(Game)
+class GameAdmin(admin.ModelAdmin):
+    list_display = ('id', 'gameCode', 'gameName', 'gameStatus', 'creator', 'host', 'maxPlayers', 'created')
+    list_filter = ('gameCode', 'gameStatus')
+    search_fields = ('gameName', 'gameDescription', 'gameCode')
+    autocomplete_fields = ('creator', 'host')
+    filter_horizontal = ('invitedPlayers',)
+    readonly_fields = ('created', 'latestUpdate')
+
+@admin.register(GamePlayer)
+class GamePlayerAdmin(admin.ModelAdmin):
+    list_display = ('id', 'game', 'player', 'seat_order', 'winner', 'is_current', 'is_missing', 'is_kicked')
+    list_filter = ('winner', 'is_current', 'is_missing', 'is_kicked')
+    search_fields = ('player__username', 'game__gameName')
+    autocomplete_fields = ('player',)
 
 admin.site.register(changelog)
