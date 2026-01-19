@@ -2508,6 +2508,9 @@ def playerInfo(request, usernameToProfile):
 
     # THE MASTER LOOP: One model at a time
     for game_name, game_model in GAME_NAMES_MODELS.items():
+        if game_name == "CNS":
+            continue
+        
         # Check if winner is FK or M2M to optimize JOINs
         winner_field = game_model._meta.get_field("winner")
         is_winner_m2m = winner_field.many_to_many
