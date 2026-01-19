@@ -37,6 +37,8 @@ services:
     volumes:
       # Mount the vue source code here
       - ./CNS/vueCNS/src:/app/src
+      # Mount static images at /static/CNS to match production path structure
+      - ./CNS/static/CNS:/static/CNS
     ports:
       # Expose the Vite dev server port
       - "3012:3012"

@@ -20,6 +20,8 @@ export default defineConfig(({ command, mode }) => ({
 			allow: [
 				// Search up for workspace root
 				"..",
+				// Static directory for Docker mount
+				"/static",
 				// Or be explicit by pointing to the project root
 				"C:/Roger/Programming/OnlineBoardGamers/CNS/",
 			],
