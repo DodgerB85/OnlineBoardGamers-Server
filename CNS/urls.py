@@ -7,8 +7,8 @@ app_name = "CNS"
 
 urlpatterns = [
     path("", views.index),
-    path("CNS/", views.showCNSgame, name="showCNSgame"),
-    path("<int:game_id>/", views.showCNSgame, name="showCNSgame"),
+    # New path format /CNS/:id/show
+    path("<int:game_id>/show/", views.showCNSgame, name="showCNSgame"),
     path(
         "<int:game_id>/spoilerFree/",
         views.showCNSgame,
@@ -21,6 +21,8 @@ urlpatterns = [
         {"spoilerFree": True},
         name="showCNSreplayStep",
     ),
+    # Legacy redirect from /CNS/:original_id to /CNS/:id/show
+    path("<int:original_id>/", views.redirectLegacyCNS, name="redirectLegacyCNS"),
     #
     path("help/", views.CNShelp, name="CNShelp"),
     #
