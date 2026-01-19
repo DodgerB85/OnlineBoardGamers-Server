@@ -9,4 +9,9 @@ urlpatterns = [
     path('RNB/', views.showRNBgame, name='showRNBgame'),
     
     path('help/', views.RNBhelp, name='KFWhelp'),
+    
+    ## API routes
+    #path("createWEBgame/", views.createWEBgame, name="createWEBgame"), 
+    
+    path("bugEntry/", views.bugEntry, name="bugEntry"),
 ]

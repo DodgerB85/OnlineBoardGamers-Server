@@ -375,26 +375,26 @@ def indexSpecialRedirect(request):
     #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
     # print("******************************************************************************************************** TGZ ACCESS: =================================================:  " + request.user.username)
     print(f"Db htis: {len(connection.queries)}")
-    qs = QueryableGameAllPlayers.objects.filter(player_id=1).select_related(
-        "queryable_game", "player"
-    )
-    results = list(qs)
-    print(results)
+    #qs = QueryableGameAllPlayers.objects.filter(player_id=1).select_related(
+    #    "queryable_game", "player"
+    #)
+    #results = list(qs)
+    #print(results)
 
     # for game in results:
     #    players = game.allPlayers.all()
 
-    for item in results:
+    #for item in results:
         # This will hit the DB for each loop unless you used select_related('player')
-        print(item.player.username)
+    #    print(item.player.username)
 
-    first_game = results[0]
-    print(dir(first_game))
+    #first_game = results[0]
+    #print(dir(first_game))
 
     # Or check the __dict__ to see the data stored
-    print(first_game.__dict__)
+    #print(first_game.__dict__)
 
-    print(f"Db htis: {len(connection.queries)}")
+    #print(f"Db htis: {len(connection.queries)}")
     print(f"Db htis: {len(connection.queries)}")
 
     ALLOWED_USERS = [

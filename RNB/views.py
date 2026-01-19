@@ -1,6 +1,36 @@
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+import json
+import time
+import base64
+import gzip
+
+from contextlib import contextmanager
+
+from django.contrib import messages
 from django.conf import settings
+
+from django.contrib.auth.decorators import login_required
+from django.utils.translation import gettext
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
+from django.urls import reverse
+from django.db import transaction, connection
+from django.db.models import Q
+
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_updateFlexiTime,
+    SF_getGameCreationJsonReturn,
+)
+from Lobby.sharedFunctions.sharedNotifications import (
+    SN_sendInviteNotifications,
+    SN_sendNextTurnNotification,
+    SN_sendBugReportEmail,
+    SN_sendAdminErrorMessage,
+)
+from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
+
+
+from .models import RNB_Game
+from Lobby.models import User, Profile
 
 def index(request):
     return HttpResponse("Hello, world. You're at RNB")
@@ -157,3 +187,38 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         })
     
     return render(request, "IND/showINDgame.html", returnData)
+
+
+
+@login_required()
+def bugEntry(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    gameID = jsonData["gameID"]
+
+    #try:
+    #    currentGame = WEB_Game.objects.get(id=gameID)
+    #except WEB_Game.DoesNotExist:
+    #    raise Http404(gettext("Game does not exist"))
+
+    gameData = jsonData["gameData"]
+    bugDescription = jsonData["description"]
+
+    #extraInfo = "Options: " + currentGame.startingOptions
+    extraInfo = ""
+
+    # email data to myself
+    SN_sendBugReportEmail(
+        request,
+        "RNB",
+        gameID,
+        gameData,
+        bugDescription,
+        #currentGame.rewindData, 
+        "",
+        extraInfo,
+    )
+
+    return JsonResponse({"bugEntrySuccess": True})

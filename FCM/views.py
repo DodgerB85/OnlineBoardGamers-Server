@@ -482,7 +482,7 @@ def endGame(
 
 
 def processTurn(request):
-    #time.sleep(5)
+    # time.sleep(5)
     # processing a turn must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -565,9 +565,9 @@ def _processTurn(request):
     elif jsonData["action"] == "deleteMoveData":
         phase = jsonData["phase"]
         # This is the "new phase" you are just moving into
-        # If moving int TO, don't clear the moves (save pre-selectiongs)
+        # If moving into TO, don't clear the moves (save pre-selectiongs), EXCEPT on turn 1 when there's no pre-selection
         # If moving into cleanup, don't clear the moves
-        if phase == 9 or phase == 4:
+        if phase == 9 or (phase == 4 and currentGame.turn != 1):
             return JsonResponse(
                 {
                     "result": 2,
@@ -1137,8 +1137,16 @@ def _processTurn(request):
 
     # NEW
     elif jsonData["action"] == "saveSimulMove":
-        notRequiedPlayerNames = jsonData["notRequiedPlayerNames"] if "notRequiedPlayerNames" in jsonData else []
-        continueFromStalledGame = jsonData["continueFromStalledGame"] if "continueFromStalledGame" in jsonData else False
+        notRequiedPlayerNames = (
+            jsonData["notRequiedPlayerNames"]
+            if "notRequiedPlayerNames" in jsonData
+            else []
+        )
+        continueFromStalledGame = (
+            jsonData["continueFromStalledGame"]
+            if "continueFromStalledGame" in jsonData
+            else False
+        )
 
         if (
             str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate)
@@ -1171,7 +1179,11 @@ def _processTurn(request):
                     nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUpdate
 
             phaseArr = [-1]
-            if currentGame.phase == 0 or currentGame.phase == 1 or currentGame.phase == 2:
+            if (
+                currentGame.phase == 0
+                or currentGame.phase == 1
+                or currentGame.phase == 2
+            ):
                 phaseArr = [0, 1, 2]
             elif currentGame.phase == 3:
                 phaseArr = [3, 4]
@@ -1179,9 +1191,9 @@ def _processTurn(request):
                 phaseArr = [5, 6, 7, 8, 9, 11, 12, 15]
             # Decompress the incoming data
             decompressedData = json.loads(
-                gzip.decompress(bytearray(base64.b64decode(jsonData["moveData"]))).decode(
-                    "utf-8"
-                )
+                gzip.decompress(
+                    bytearray(base64.b64decode(jsonData["moveData"]))
+                ).decode("utf-8")
             )
 
             currentGame.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
