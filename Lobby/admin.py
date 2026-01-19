@@ -1,8 +1,18 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import User, Profile, changelog, Mini_Tournaments, Main_Tournament
+from .models import User, Profile, changelog, Mini_Tournaments, Main_Tournament, GamePlayer, Game
 from .modelProxies import FCMMiniTournament, TGZMiniTournament
+
+
+@admin.register(Game)
+class GameAdmin(admin.ModelAdmin):
+    search_fields = ["gameName"]
+
+@admin.register(GamePlayer)
+class GamePlayerAdmin(admin.ModelAdmin):
+    search_fields = ["player__username"]
+
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
