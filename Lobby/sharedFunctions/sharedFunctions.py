@@ -248,7 +248,8 @@ def SF_fastSerializeGame(game, user):
         "startingMap": game.startingMap if hasattr(game, 'startingMap') else "",
         "latestUpdate": game.latestUpdate,
         "currentPlayers": current_players_str, 
-        "kickoutRequiredNum": kickoutRequiredNum
+        "kickoutRequiredNum": kickoutRequiredNum,
+        "is_unified_model": is_unified_model
 
     }
             #"currentPlayers": self.currentPlayers,

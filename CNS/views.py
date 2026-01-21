@@ -43,9 +43,8 @@ def redirectLegacyCNS(request, original_id):
         game = Game.objects.get(gameCode='CNS', original_id=original_id)
         return HttpResponseRedirect(reverse('CNS:showCNSgame', args=[game.id]))
     except Game.DoesNotExist:
-        # if you are using a legacy pattern, but actually pointing to a new game
-        # then the failure to find a legacy game should redirect to the new game to try that instead
-        return redirect('CNS:showCNSgame', game_id=original_id)
+        raise Http404(gettext("Game does not exist"))
+        
 
 
 def CNShelp(request):
