@@ -28,13 +28,13 @@ class GamePresenter:
 
 
     def clearGeneralDataOnGameEndWithoutSave(self):
-        self.gameStatus = "FINISHED"
-        self.rewindData = ""
-        self.rewindTempData = ""
-        self.kickoutFlexiData = ""
-        self.statsExcludeConsent = ""
-        self.deleteGameVotes = None
-        self.activeVotes = None
+        self.gameObj.gameStatus = "FINISHED"
+        self.gameObj.rewindData = ""
+        self.gameObj.rewindTempData = ""
+        self.gameObj.kickoutFlexiData = ""
+        self.gameObj.statsExcludeConsent = ""
+        self.gameObj.deleteGameVotes = None
+        self.gameObj.activeVotes = None
 
 
 
@@ -47,14 +47,14 @@ class GamePresenter:
         # Double check player is in the game - WAIT FOR ALL PLAYERS TO MOVE HERE
         #if playerName not in [p.username for p in self.allPlayers.all()]:
         #    return False  # Player not in the game
-        if not self.activeVotes:
-            self.activeVotes = {}
+        if not self.gameObj.activeVotes:
+            self.gameObj.activeVotes = {}
 
-        if topic not in self.activeVotes:
-            self.activeVotes[topic] = {}
+        if topic not in self.gameObj.activeVotes:
+            self.gameObj.activeVotes[topic] = {}
 
         # Store as {"username": choice}
-        self.activeVotes[topic][username] = choice
+        self.gameObj.activeVotes[topic][username] = choice
         return True
 
     # The topic might not be in activeVotes, but sometimes we want a full return set of username: T/F
@@ -63,14 +63,14 @@ class GamePresenter:
         generalReturn = {username: False for username in usernames}
 
         # If game is finished or no votes exist at all, return the all-False set
-        if self.gameStatus == "FINISHED" or not self.activeVotes:
+        if self.gameObj.gameStatus == "FINISHED" or not self.gameObj.activeVotes:
             return generalReturn
 
         # If this specific topic hasn't been started, return the all-False set
-        if topic not in self.activeVotes:
+        if topic not in self.gameObj.activeVotes:
             return generalReturn
 
-        currentVotes = self.activeVotes[topic]
+        currentVotes = self.gameObj.activeVotes[topic]
 
         # Update the return set with actual votes where they exist
         for username in usernames:
@@ -84,11 +84,11 @@ class GamePresenter:
         Returns a tally of choices.
         Example: {0: 1, 1: 3} (1 person voted '0', 3 people voted '1')
         """
-        if not self.activeVotes or topic not in self.activeVotes:
+        if not self.gameObj.activeVotes or topic not in self.gameObj.activeVotes:
             return {}
 
         results = {}
-        for choice in self.activeVotes[topic].values():
+        for choice in self.gameObj.activeVotes[topic].values():
             results[choice] = results.get(choice, 0) + 1
         return results
 
@@ -97,10 +97,10 @@ class GamePresenter:
         Checks if EVERY player has voted and their choices are within the allowed set.
         allowed_choices can be a single value (1) or a list ([1, 2]).
         """
-        if not self.activeVotes or topic not in self.activeVotes:
+        if not self.gameObj.activeVotes or topic not in self.gameObj.activeVotes:
             return False
 
-        votes = self.activeVotes.get(topic, {})
+        votes = self.gameObj.activeVotes.get(topic, {})
 
         # 1. Ensure everyone has voted
         if len(votes) < total_required:
