@@ -11,7 +11,7 @@ from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
-from django.shortcuts import render  # , redirect
+from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
@@ -43,7 +43,9 @@ def redirectLegacyCNS(request, original_id):
         game = Game.objects.get(gameCode='CNS', original_id=original_id)
         return HttpResponseRedirect(reverse('CNS:showCNSgame', args=[game.id]))
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        # if you are using a legacy pattern, but actually pointing to a new game
+        # then the failure to find a legacy game should redirect to the new game to try that instead
+        return redirect('CNS:showCNSgame', game_id=original_id)
 
 
 def CNShelp(request):
