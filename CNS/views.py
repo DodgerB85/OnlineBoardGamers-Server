@@ -157,7 +157,7 @@ def createCNSgame(request):
                     usernamesToNotify.append(newPlayer.username)
 
             SN_sendInviteNotifications(
-                request, usernamesToNotify, newGame.presenter().getGameName(), _maxPlayers, "CNS"
+                request, usernamesToNotify, newGame.getGameName(), _maxPlayers, "CNS"
             )
 
         newGame.kickoutDuration = request.POST["kickoutDuration"]
@@ -217,7 +217,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
 
     # Now it is a proper started game, so set up for not logged in
     gameID = currentGame.id
-    gameName = presenter.getGameName()
+    gameName = currentGame.getGameName()
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = (
@@ -467,7 +467,7 @@ def _processCNSturn(request):
                         "CNS",
                         playerListToNotify,
                         currentGame.id,
-                        presenter.getGameName(),
+                        currentGame.getGameName(),
                         currentGame,
                         oldVer,
                     )
@@ -626,7 +626,7 @@ def _processCNSturn(request):
                     "CNS",
                     playerListToNotify,
                     currentGame.id,
-                    presenter.getGameName(),
+                    currentGame.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
                 )

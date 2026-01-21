@@ -19,17 +19,17 @@ class CannesPresenter:
     def __str__(self):
         all_players = self.game.players.exclude(is_kicked=True).select_related('player')
         allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
-        return f"{self.game.id}: {self.getGameName()} : {allPlayersString} : {self.game.gameStatus} : {self.currentTurnString()}"
+        return f"{self.game.id}: {self.game.getGameName()} : {allPlayersString} : {self.game.gameStatus} : {self.game.currentTurnString()}"
 
-    def getGameName(self):
-        _gameName = ""
-        if self.game.gameName != "":
-            _gameName = self.game.gameName
-        else:
-            _gameName = f"[{self.game.creator.username}'s Game]"
-        if self.game.gameStatus == "PRIVATE":
-            _gameName += "[Private Game]"
-        return _gameName
+    #def getGameName(self):
+    #    _gameName = ""
+    #    if self.game.gameName != "":
+    #        _gameName = self.game.gameName
+    #    else:
+    #        _gameName = f"[{self.game.creator.username}'s Game]"
+    #    if self.game.gameStatus == "PRIVATE":
+    #        _gameName += "[Private Game]"
+    #    return _gameName
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
@@ -50,8 +50,8 @@ class CannesPresenter:
 
         SN_M_sendEndGameNotification(request, "CNS", _finalPositions, _gameID, self.game)
 
-    def currentTurnString(self):
-        return SR_currentTurnString("CNS", self.game.turn, self.game.phase)
+    #def currentTurnString(self):
+    #    return SR_currentTurnString("CNS", self.game.turn, self.game.phase)
 
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         current_players = self.game.players.filter(is_current=True).select_related('player')
@@ -180,14 +180,14 @@ class CannesPresenter:
 
         return {
             "gameID": self.game.id,
-            "gameName": self.getGameName(),
+            "gameName": self.game.getGameName(),
             "gameDescription": self.game.gameDescription,
             "creator": self.game.creator.username,
             "created": createdString,
             "allPlayers": [gp.player.username for gp in all_players if gp.player],
             "invitedPlayers": [user.username for user in self.game.invitedPlayers.all()],
             "currentPlayers": ", ".join(self.getCurrentPlayersArray()),
-            "currentTurn": self.currentTurnString(),
+            "currentTurn": self.game.currentTurnString(),
             "pace": gamePaceString,
             "latestUpdate": latestUpdateString,
             "startingOptions": startingOptionsHTML,
@@ -220,14 +220,6 @@ class CannesPresenter:
             json.loads(self.game.startingOptions) if self.game.startingOptions else []
         )
         if 110 in startingOptionsListPrelim:
-            return True
-        return False
-
-    def isExperiencedGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.game.startingOptions) if self.game.startingOptions else []
-        )
-        if 120 in startingOptionsListPrelim:
             return True
         return False
 
