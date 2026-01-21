@@ -108,7 +108,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "currentPlayers": currentGame.getCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "deleteVotesData": json.dumps(
-            currentGame.getFullSetOfTrueFalseVotes(
+            currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
                 DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
             )
         ),
@@ -1444,7 +1444,7 @@ def _voteToDelete(request):
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
 
-    success = currentGame.castVote(
+    success = currentGame.tempPresenter().castVote(
         DELETE_VOTE_TOPIC, playerName, True
     )  # Pass playerName to addDeleteVote
 
@@ -1452,7 +1452,7 @@ def _voteToDelete(request):
         currentGame.save()
         # Check if all players have voted to delete
         all_voted = True
-        delete_votes_data = currentGame.getFullSetOfTrueFalseVotes(
+        delete_votes_data = currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
             DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
         )
 
@@ -1465,7 +1465,7 @@ def _voteToDelete(request):
         if all_voted:
             # Get the result
             deleteVotesData = json.dumps(
-                currentGame.getFullSetOfTrueFalseVotes(
+                currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
                     DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
                 )
             )
@@ -1486,7 +1486,7 @@ def _voteToDelete(request):
             {
                 "voteChanged": True,
                 "deleteVotesData": json.dumps(
-                    currentGame.getFullSetOfTrueFalseVotes(
+                    currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
                         DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
                     )
                 ),

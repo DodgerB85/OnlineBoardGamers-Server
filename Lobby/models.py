@@ -6,6 +6,7 @@ from decouple import config
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
+#from django.db.models.manager import RelatedManager
 from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
@@ -18,13 +19,13 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
     SR_getTournamentWinnerHTML,
     SR_GAME_STATUS_CHOICES,
-    SR_currentTurnString
+    SR_currentTurnString,
 )
 
 from .sharedFunctions.sharedRefs import (
     SR_getFCMstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
-    SR_GAMES_CODES_AND_NAMES_CHOICES
+    SR_GAMES_CODES_AND_NAMES_CHOICES,
 )
 
 
@@ -381,7 +382,6 @@ class BaseGame(models.Model):
 
     playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
-
     # Set default as 2. Games with min 3 players explicity set the defult to 3 before creation
     maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
 
@@ -438,8 +438,6 @@ class BaseGame(models.Model):
     class Meta:
         abstract = True
 
- 
-
 
 # Subclass of all existing games
 # It includes fields that are needed for all existing game models, but which we don't want in the unified game model.
@@ -460,17 +458,24 @@ class GeneralGame(BaseGame):
     def tempPresenter(self):
         return GamePresenter(self)
 
-class Game(BaseGame):   
+
+class Game(BaseGame):
+    # Add this line to help the linter (type checking only)
+    #if typing.TYPE_CHECKING:
+    #    players: RelatedManager["GamePlayer"]
+
     gameCode = models.CharField(
         max_length=3,
         choices=SR_GAMES_CODES_AND_NAMES_CHOICES,
         default="FCM",
         db_column="gameCode",
     )
-    
+
     original_id = models.PositiveIntegerField(null=True, blank=True)
 
-    models.constraints.UniqueConstraint(fields=["gameCode", "original_id"], name="unique_game_code_and_original_id")
+    models.constraints.UniqueConstraint(
+        fields=["gameCode", "original_id"], name="unique_game_code_and_original_id"
+    )
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -490,26 +495,41 @@ class Game(BaseGame):
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="invited_games", blank=True
     )
-    
+
     relatedMainTournament = models.ForeignKey(
-        Main_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="maintournamentGEN_relName"
+        Main_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="maintournamentGEN_relName",
     )
-    
+
     relatedMiniTournament = models.ForeignKey(
-        Mini_Tournaments, on_delete=models.SET_NULL, null=True, blank=True, related_name="minitournamentGEN_relName"
+        Mini_Tournaments,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="minitournamentGEN_relName",
     )
 
     def presenter(self):
         if self.gameCode == "CNS":
             return CannesPresenter(self)
-        # Return a default to stop constant linting errors
+        # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
-        return GamePresenter(self)
+        return CannesPresenter(self)
 
 
 class GamePlayer(models.Model):
-    game = models.ForeignKey(Game, related_name="players", on_delete=models.deletion.CASCADE)
-    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.deletion.SET_NULL, null=True, related_name="games")
+    game = models.ForeignKey(
+        Game, related_name="players", on_delete=models.deletion.CASCADE
+    )
+    player = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.deletion.SET_NULL,
+        null=True,
+        related_name="games",
+    )
 
     notes = models.TextField(blank=True)
     winner = models.BooleanField(default=False)
@@ -523,9 +543,11 @@ class GamePlayer(models.Model):
     seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
-        ordering = ['seat_order']
+        ordering = ["seat_order"]
         constraints = [
-            models.UniqueConstraint(fields=['game', 'player'], name='unique_game_player')
+            models.UniqueConstraint(
+                fields=["game", "player"], name="unique_game_player"
+            )
         ]
 
 
