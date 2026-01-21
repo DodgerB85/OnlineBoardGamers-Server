@@ -12,6 +12,18 @@ SLACK = "SL"
 TELEGRAM = "TG"
 OTHER = "OT"
 
+SR_GAMES_CODES_AND_NAMES_CHOICES = [
+    ("FCM", gettext_lazy("Food Chain Magnate")),
+    ("HC", gettext_lazy("Horseless Carriage")),
+    ("Bus", gettext_lazy("Bus")),
+    ("TGZ", gettext_lazy("The Great Zimbabwe")),
+    ("CNS", gettext_lazy("Cannes")),
+    ("AQY", gettext_lazy("Antiquity")),
+    ("IND", gettext_lazy("Indonesia")),
+    ("KFW", gettext_lazy("Keyflower")),
+    ("RNB", gettext_lazy("Roads & Boats")),
+]
+
 SR_WEBHOOK_CHOICES = {
     DISCORD: gettext_lazy("Discord"),
     SLACK: gettext_lazy("Slack"),

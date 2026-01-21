@@ -24,6 +24,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 from .sharedFunctions.sharedRefs import (
     SR_getFCMstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
+    SR_GAMES_CODES_AND_NAMES_CHOICES
 )
 
 
@@ -543,8 +544,14 @@ class GeneralGame(BaseGame):
         abstract = True
 
 
-class Game(BaseGame):
-    gameCode = models.CharField(max_length=255, db_column="gameCode")
+class Game(BaseGame):   
+    gameCode = models.CharField(
+        max_length=3,
+        choices=SR_GAMES_CODES_AND_NAMES_CHOICES,
+        default="FCM",
+        db_column="gameCode",
+    )
+    
     original_id = models.PositiveIntegerField(null=True)
 
     models.constraints.UniqueConstraint(fields=["gameCode", "original_id"], name="unique_game_code_and_original_id")
