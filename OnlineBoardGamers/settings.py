@@ -163,6 +163,8 @@ STATICFILES_FINDERS = (
 )
 # Enable compression for production (even if DEBUG is False)
 COMPRESS_ENABLED = True
+if DEBUG:
+    COMPRESS_ENABLED = False
 COMPRESS_JS_FILTERS = ["compressor.filters.jsmin.JSMinFilter"]
 COMPRESS_OFFLINE = True
 if DEBUG:
