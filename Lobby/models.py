@@ -1,5 +1,8 @@
 import time
 import json
+
+from decouple import config
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
@@ -7,6 +10,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
+from .presenters import CannesPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -20,6 +24,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 from .sharedFunctions.sharedRefs import (
     SR_getFCMstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
+    SR_GAMES_CODES_AND_NAMES_CHOICES
 )
 
 
@@ -352,7 +357,8 @@ class Mini_Tournaments(models.Model):
         }
 
 
-class GeneralGame(models.Model):
+# Subclass of all game models, including the new, unified game model
+class BaseGame(models.Model):
     """
     General base model for all game types.
     All game-specific models should inherit from this.
@@ -372,13 +378,9 @@ class GeneralGame(models.Model):
         default="AVAILABLE",
         db_index=True,
     )
-    
+
     playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
-
-    # This is a STRING of the currentPlayer username
-    # IT SHOULD PROBABLY BE CHANGED TO M2M FIELD WITH USERS
-    currentPlayers = models.CharField(max_length=100, blank=True)
 
     # Set default as 2. Games with min 3 players explicity set the defult to 3 before creation
     maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
@@ -396,11 +398,6 @@ class GeneralGame(models.Model):
     gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=30)
 
     chatData = models.TextField(blank=True)
-
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
 
     gameData = models.TextField(blank=True)
     rewindData = models.TextField(blank=True)
@@ -437,10 +434,10 @@ class GeneralGame(models.Model):
 
     ####### THESE ITEMS ONLY EXIST IN THIS GENERAL GAME MODEL
     activeVotes = models.JSONField(default=dict, blank=True, null=True)
-    
+
     class Meta:
         abstract = True
-        
+
     def clearGeneralDataOnGameEndWithoutSave(self):
         self.gameStatus = "FINISHED"
         self.rewindData = ""
@@ -449,9 +446,9 @@ class GeneralGame(models.Model):
         self.statsExcludeConsent = ""
         self.deleteGameVotes = None
         self.activeVotes = None
-        
-        
-        
+
+
+
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
         """
@@ -463,34 +460,34 @@ class GeneralGame(models.Model):
         #    return False  # Player not in the game
         if not self.activeVotes:
             self.activeVotes = {}
-            
+
         if topic not in self.activeVotes:
             self.activeVotes[topic] = {}
-        
+
         # Store as {"username": choice}
         self.activeVotes[topic][username] = choice
         return True
-    
+
     # The topic might not be in activeVotes, but sometimes we want a full return set of username: T/F
-    def getFullSetOfTrueFalseVotes(self, topic, usernames):   
+    def getFullSetOfTrueFalseVotes(self, topic, usernames):
         # Initialize the return dictionary with False for every provided username
         generalReturn = {username: False for username in usernames}
-        
+
         # If game is finished or no votes exist at all, return the all-False set
         if self.gameStatus == "FINISHED" or not self.activeVotes:
             return generalReturn
-        
+
         # If this specific topic hasn't been started, return the all-False set
         if topic not in self.activeVotes:
             return generalReturn
-        
+
         currentVotes = self.activeVotes[topic]
 
         # Update the return set with actual votes where they exist
         for username in usernames:
             if username in currentVotes:
                 generalReturn[username] = currentVotes[username]
-        
+
         return generalReturn
 
     def getVoteResults(self, topic):
@@ -500,7 +497,7 @@ class GeneralGame(models.Model):
         """
         if not self.activeVotes or topic not in self.activeVotes:
             return {}
-            
+
         results = {}
         for choice in self.activeVotes[topic].values():
             results[choice] = results.get(choice, 0) + 1
@@ -513,9 +510,9 @@ class GeneralGame(models.Model):
         """
         if not self.activeVotes or topic not in self.activeVotes:
             return False
-        
+
         votes = self.activeVotes.get(topic, {})
-        
+
         # 1. Ensure everyone has voted
         if len(votes) < total_required:
             return False
@@ -527,8 +524,81 @@ class GeneralGame(models.Model):
         # 3. Check if all submitted votes are in the allowed list
         # (e.g., if all values are 1 or 2)
         return all(val in allowed_choices for val in votes.values())
-    
+
     # End voting methods
+
+
+# Subclass of all existing games
+# It includes fields that are needed for all existing game models, but which we don't want in the unified game model.
+class GeneralGame(BaseGame):
+    # This is a STRING of the currentPlayer username
+    # IT SHOULD PROBABLY BE CHANGED TO M2M FIELD WITH USERS
+    currentPlayers = models.CharField(max_length=100, blank=True)
+
+    player0notes = models.TextField(blank=True)
+    player1notes = models.TextField(blank=True)
+    player2notes = models.TextField(blank=True)
+    player3notes = models.TextField(blank=True)
+
+    class Meta:
+        abstract = True
+
+
+class Game(BaseGame):   
+    gameCode = models.CharField(
+        max_length=3,
+        choices=SR_GAMES_CODES_AND_NAMES_CHOICES,
+        default="FCM",
+        db_column="gameCode",
+    )
+    
+    original_id = models.PositiveIntegerField(null=True)
+
+    models.constraints.UniqueConstraint(fields=["gameCode", "original_id"], name="unique_game_code_and_original_id")
+
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="created_games",
+        default=config("ADMIN_DB_KEY", default=1, cast=int),
+    )
+    host = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="hosted_games",
+        default=config("ADMIN_DB_KEY", default=1, cast=int),
+    )
+
+    invitedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="invited_games", blank=True
+    )
+
+    def presenter(self):
+        if self.gameCode == "CNS":
+            return CannesPresenter(self)
+
+class GamePlayer(models.Model):
+    game = models.ForeignKey(Game, related_name="players", on_delete=models.deletion.CASCADE)
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.deletion.SET_NULL, null=True, related_name="games")
+
+    notes = models.TextField(blank=True)
+    winner = models.BooleanField(default=False)
+
+    is_missing = models.BooleanField(default=False)
+    is_kicked = models.BooleanField(default=False)
+
+    is_current = models.BooleanField(default=False)
+    has_chat_notification = models.BooleanField(default=False)
+
+    seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['seat_order']
+        constraints = [
+            models.UniqueConstraint(fields=['game', 'player'], name='unique_game_player')
+        ]
 
 
 class QueryableGame(models.Model):
