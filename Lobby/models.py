@@ -552,7 +552,7 @@ class Game(BaseGame):
         db_column="gameCode",
     )
     
-    original_id = models.PositiveIntegerField(null=True)
+    original_id = models.PositiveIntegerField(null=True, blank=True)
 
     models.constraints.UniqueConstraint(fields=["gameCode", "original_id"], name="unique_game_code_and_original_id")
 
@@ -573,6 +573,14 @@ class Game(BaseGame):
 
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="invited_games", blank=True
+    )
+    
+    relatedMainTournament = models.ForeignKey(
+        Main_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="maintournamentGEN_relName"
+    )
+    
+    relatedMiniTournament = models.ForeignKey(
+        Mini_Tournaments, on_delete=models.SET_NULL, null=True, blank=True, related_name="minitournamentGEN_relName"
     )
 
     def presenter(self):
