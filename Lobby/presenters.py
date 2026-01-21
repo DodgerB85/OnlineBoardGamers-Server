@@ -11,21 +11,25 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
+
 class GamePresenter:
     def __init__(self, gameObj):
         self.gameObj = gameObj
-    
+
     def getGameName(self):
         # Use fields already on the model. DO NOT call .all() or .count() here.
-        name = self.gameObj.gameName or f"{getattr(self.gameObj.creator, 'username', 'Unknown')}'s Game"
+        name = (
+            self.gameObj.gameName
+            or f"{getattr(self.gameObj.creator, 'username', 'Unknown')}'s Game"
+        )
         if self.gameObj.gameStatus == "PRIVATE":
             name += " [Private]"
         return name
 
     def currentTurnString(self):
-        return SR_currentTurnString(self.gameObj.gameCode, self.gameObj.turn, self.gameObj.phase)
-
-
+        return SR_currentTurnString(
+            self.gameObj.gameCode, self.gameObj.turn, self.gameObj.phase
+        )
 
     def clearGeneralDataOnGameEndWithoutSave(self):
         self.gameObj.gameStatus = "FINISHED"
@@ -36,8 +40,6 @@ class GamePresenter:
         self.gameObj.deleteGameVotes = None
         self.gameObj.activeVotes = None
 
-
-
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
         """
@@ -45,7 +47,7 @@ class GamePresenter:
         Example: topic='rewind', choice=2
         """
         # Double check player is in the game - WAIT FOR ALL PLAYERS TO MOVE HERE
-        #if playerName not in [p.username for p in self.allPlayers.all()]:
+        # if playerName not in [p.username for p in self.allPlayers.all()]:
         #    return False  # Player not in the game
         if not self.gameObj.activeVotes:
             self.gameObj.activeVotes = {}
@@ -117,47 +119,49 @@ class GamePresenter:
     # End voting methods
 
 
-
-
-
-
-
-
-
-
 class CannesPresenter(GamePresenter):
     def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related('player')
-        allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+        allPlayersString = " / ".join(
+            gp.player.username for gp in all_players if gp.player
+        )
         return f"{self.gameObj.id}: {self.gameObj.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.gameObj.currentTurnString()}"
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendEndGameNotification
-        
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendEndGameNotification,
+        )
+
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
-        
+
         winner_user = User.objects.get(username=_winner)
         winner_gp = self.gameObj.players.filter(player=winner_user).first()
         if winner_gp:
             winner_gp.winner = True
             winner_gp.save()
-        
+
         self.gameObj.save()
 
-        SN_M_sendEndGameNotification(request, "CNS", _finalPositions, _gameID, self.gameObj)
+        SN_M_sendEndGameNotification(
+            request, "CNS", _finalPositions, _gameID, self.gameObj
+        )
 
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        current_players = self.gameObj.players.filter(is_current=True).select_related('player')
-        
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+
         if not current_players.exists():
             return True
-        
+
         current_usernames = [gp.player.username for gp in current_players if gp.player]
-        
+
         if (
             loggedInPlayerUsername in current_usernames
             or "SHADOW" in current_usernames
@@ -171,13 +175,15 @@ class CannesPresenter(GamePresenter):
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return False
 
-        current_players = self.gameObj.players.filter(is_current=True).select_related('player')
-        
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+
         if not current_players.exists():
             return True
-        
+
         current_usernames = [gp.player.username for gp in current_players if gp.player]
-        
+
         shadow_values = {
             "SHADOW",
             "SHADOW_2",
@@ -186,27 +192,31 @@ class CannesPresenter(GamePresenter):
             "SHADOW_5",
             "FcmAI",
         }
-        
-        return (
-            loggedInPlayerUsername in current_usernames
-            or any(username in shadow_values for username in current_usernames)
+
+        return loggedInPlayerUsername in current_usernames or any(
+            username in shadow_values for username in current_usernames
         )
 
     def getSecondsToNextKickout(self):
         from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
-        return SF_getSecondsToNextKickout(self.gameObj.latestUpdate, self.gameObj.kickoutDuration)
+
+        return SF_getSecondsToNextKickout(
+            self.gameObj.latestUpdate, self.gameObj.kickoutDuration
+        )
 
     def getMissingPlayersNamesArray(self):
         return list(
             self.gameObj.players.filter(is_missing=True)
-            .select_related('player')
-            .values_list('player__username', flat=True)
+            .select_related("player")
+            .values_list("player__username", flat=True)
         )
 
     def kickoutRequired(self):
         from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
-        
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related('player')
+
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
         all_player_usernames = [gp.player.username for gp in all_players if gp.player]
 
         current_players = self.getCurrentPlayersArray()
@@ -222,13 +232,15 @@ class CannesPresenter(GamePresenter):
         )
 
     def serialize(self, loggedInUserObj=None):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related('player')
-        
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+
         remainingPlayersInt = self.gameObj.maxPlayers - all_players.count()
         remainingPlayers = "".join(
             str(all_players.count() + i + 1) for i in range(remainingPlayersInt)
         )
-        
+
         winner_gp = self.gameObj.players.filter(winner=True).first()
         winner = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
 
@@ -282,7 +294,9 @@ class CannesPresenter(GamePresenter):
             "creator": self.gameObj.creator.username,
             "created": createdString,
             "allPlayers": [gp.player.username for gp in all_players if gp.player],
-            "invitedPlayers": [user.username for user in self.gameObj.invitedPlayers.all()],
+            "invitedPlayers": [
+                user.username for user in self.gameObj.invitedPlayers.all()
+            ],
             "currentPlayers": ", ".join(self.getCurrentPlayersArray()),
             "currentTurn": self.gameObj.currentTurnString(),
             "pace": gamePaceString,
@@ -306,7 +320,9 @@ class CannesPresenter(GamePresenter):
 
     def isExperiencedGame(self):
         startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+            json.loads(self.gameObj.startingOptions)
+            if self.gameObj.startingOptions
+            else []
         )
         if 120 in startingOptionsListPrelim:
             return True
@@ -314,7 +330,9 @@ class CannesPresenter(GamePresenter):
 
     def isLearningGame(self):
         startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+            json.loads(self.gameObj.startingOptions)
+            if self.gameObj.startingOptions
+            else []
         )
         if 110 in startingOptionsListPrelim:
             return True
@@ -328,11 +346,15 @@ class CannesPresenter(GamePresenter):
             return -1
 
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        players = self.gameObj.players.exclude(is_kicked=True).select_related('player')
-        
+        players = (
+            self.gameObj.players#.exclude(is_kicked=True)
+            .select_related("player")
+            .order_by("seat_order")
+        )
+
         if withoutBots:
             return [gp.player.username for gp in players if gp.player]
-        
+
         result = []
         for gp in players:
             if gp.is_missing:
@@ -343,26 +365,29 @@ class CannesPresenter(GamePresenter):
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
-        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
-        
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendGameStartNotification,
+        )
+
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
-        
+
         game_players = list(self.gameObj.players.exclude(is_kicked=True))
-        
+
         random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
-        
+
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
-            gp.is_current = (idx == 0)
-        
-        GamePlayer.objects.bulk_update(game_players, ['seat_order', 'is_current'])
-        
+            gp.is_current = idx == 0
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
             playerListToNotify = [
-                gp.player.username for gp in game_players 
+                gp.player.username
+                for gp in game_players
                 if gp.player and gp.player.username != request.user.username
             ]
 
@@ -371,7 +396,9 @@ class CannesPresenter(GamePresenter):
             )
 
     def getCurrentPlayersArray(self):
-        current_players = self.gameObj.players.filter(is_current=True).select_related('player')
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
         return [gp.player.username for gp in current_players if gp.player]
 
     def getCurrentPlayersArrayForReminderEmail(self):
@@ -380,11 +407,10 @@ class CannesPresenter(GamePresenter):
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.gameObj.creator:
             possibleHost = (
-                self.gameObj.players
-                .exclude(is_kicked=True)
+                self.gameObj.players.exclude(is_kicked=True)
                 .filter(is_missing=False)
-                .select_related('player')
-                .order_by('?')
+                .select_related("player")
+                .order_by("?")
                 .first()
             )
             if possibleHost and possibleHost.player:

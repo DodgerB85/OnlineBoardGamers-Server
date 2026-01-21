@@ -176,6 +176,39 @@ function combineHexRefs(input) {
 function getRewindPanelLeft() {
 	return document.getElementById("menuButtonRewindPos").getBoundingClientRect().left + document.getElementById("menuButtonRewindPos").getBoundingClientRect().width / 2 - 200
 }
+
+function getStatsExcludeVotes(returnPlayers = false) {
+	let votes = 0
+	let players = "None"
+
+	for (const player in store.statsExcludeVotesData) {
+		// Use const or let for player
+		if (store.statsExcludeVotesData[player] === true) {
+			votes += 1
+			if (players === "None") players = String(player)
+			else players += ", " + player
+		}
+	}
+	if (returnPlayers) return players
+	return votes
+}
+
+function getDeleteVotes(returnPlayers = false) {
+	let votes = 0
+	let players = "None"
+
+	for (const player in store.deleteVotesData) {
+		// Use const or let for player
+		if (store.deleteVotesData[player] === true) {
+			votes += 1
+			if (players === "None") players = String(player)
+			else players += ", " + player
+		}
+	}
+	if (returnPlayers) return players
+	return votes
+}
+
 </script>
 
 <template>
@@ -257,7 +290,7 @@ function getRewindPanelLeft() {
 			Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other
 			players.
 			<br />
-			This will permanently alter the game - it will be rewound to the start of the previous player's turn.
+			Misuse of this feature will result in rewinds requiring permission from all players.
 
 			<br />
 			<br />
@@ -266,6 +299,25 @@ function getRewindPanelLeft() {
 				<img :src="view.getImage('icon-rewind')" />
 				<span>Rewind</span>
 			</span>
+			<hr />
+			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
+				If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
+				<br />
+				Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
+				<br />
+				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localVoteToDelete">Vote to
+					Delete
+					Game</button>
+			</div>
+			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
+				If all players agree, this game will be deleted
+				<br />
+				Votes: {{ getDeleteVotes() }} - Players: {{ getDeletePlayers() }}
+				<br />
+				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localVoteToDelete">Vote to
+					Delete
+					Game</button>
+			</div>
 		</div>
 	</transition>
 
