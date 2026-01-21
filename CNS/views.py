@@ -31,6 +31,8 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+
 
 # Create your views here.
 def index(request):
@@ -165,13 +167,9 @@ def createCNSgame(request):
         newGame.kickoutDuration = request.POST["kickoutDuration"]
         zoomLevels = [24] * _maxPlayers
         newGame.zoomLevels = json.dumps(zoomLevels)
-        newGame.statsExcludeConsent = "0" * _maxPlayers
-
         if "trainingGame" in request.POST:
-            newGame.statsExcludeConsent = "1" * _maxPlayers
             newGame.statsExcludedGame = True
         elif "learningGame" in request.POST:
-            newGame.statsExcludeConsent = "1" * _maxPlayers
             newGame.statsExcludedGame = True
 
         newGame.startingOptions = json.dumps(_startingOptions)
@@ -240,6 +238,16 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "settingsDebug": settings.DEBUG,
+        "statsExcludeVotesData": json.dumps(
+            currentGame.presenter().getFullSetOfTrueFalseVotes(
+                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True)
+            )
+        ),
+        "deleteVotesData": json.dumps(
+            currentGame.presenter().getFullSetOfTrueFalseVotes(
+                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True)
+            )
+        ),
     }
 
     if not request.user.is_authenticated:
@@ -540,7 +548,6 @@ def _processCNSturn(request):
             missing_gp.is_missing = True
             missing_gp.save()
         presenter.checkForHostChange(_missingPlayer)
-        presenter.enableStatsExclude(request.user.username)
         currentGame.save()
         # Response not used
         return JsonResponse(
@@ -684,7 +691,6 @@ def _processCNSturn(request):
             missing_gp.is_kicked = True
             missing_gp.save()
         presenter.checkForHostChange(_missingPlayer)
-        presenter.enableStatsExclude(_missingPlayer.username)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -887,19 +893,3 @@ def changeCNSzoom(request):
 
     return HttpResponse(status=204)  # No Content
 
-
-@login_required
-def processStatsExcludeConsent(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-    jsonData = json.loads(request.body)
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="CNS")
-
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    presenter = currentGame.presenter()
-    presenter.enableStatsExclude(request.user.username)
-    currentGame.save()
-    return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})

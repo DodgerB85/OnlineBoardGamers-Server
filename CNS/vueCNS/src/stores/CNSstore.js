@@ -22,6 +22,8 @@ import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
 
 export const useModelStore = defineStore('store', () => {
+  const deleteVotesData = ref({})
+  const statsExcludeVotesData = ref({})
   // This var affects the ZOOM level
   // So everything that will be affected by zooming should be referenced through this
   const refSize = ref(2400)
@@ -226,6 +228,8 @@ export const useModelStore = defineStore('store', () => {
     tableJunk,
     pirateShipRef,
     pirateResetData,
-    networkPhaseResetData
+    networkPhaseResetData,
+    deleteVotesData,
+    statsExcludeVotesData,
   }
 })

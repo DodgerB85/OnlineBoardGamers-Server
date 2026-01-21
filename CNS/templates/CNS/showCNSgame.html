@@ -5,20 +5,19 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="{% static 'CNS/images/cns_icon.png' %}" />
-
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'CNS/images/cns_icon.png' %}" />
     <meta name="title" content="Online Board Gamers - Cannes">
     <meta name="description"
           content="Play Splotter's Cannes Online for free with others, or solo!">
-    <meta name="keywords"
-          content="Cannes,Online,Play,Board,Game,Games,Gamers">
+    <meta name="keywords" content="Cannes,Online,Play,Board,Game,Games,Gamers">
     <meta name="robots" content="index, follow">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="language" content="English">
     <meta name="revisit-after" content="200 days">
     <meta name="author" content="Online Board Gamers">
     <title>OBG - {{ gameName }}</title>
-
     <style>
     body {
       margin: 0px !important;
@@ -197,6 +196,8 @@
     initData.myZoomLevel = {{ myZoomLevel }};
     initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
     initData.startingOptions = {{startingOptions}};
+    initData.deleteVotesData = {{ deleteVotesData | safe }};
+    initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
     
     {% if spoilerFree %}
     initData.spoilerFree = true;
@@ -213,7 +214,7 @@
   
     ///////////////////////
     {% if involvedPlayer %}
-    initData.myStatsExcludeConsent = {{ myStatsExcludeConsent }};
+
     initData.statsExcludedGame = {{ statsExcludedGame|lower }};
     initData.pov = {{ pov }};
     

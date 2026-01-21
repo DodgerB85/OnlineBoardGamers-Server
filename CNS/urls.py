@@ -34,9 +34,9 @@ urlpatterns = [
     path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
     path("saveNotes/", views.saveNotes, name="saveNotes"),
     path("changeCNSzoom/", views.changeCNSzoom, name="changeCNSzoom"),
-    path(
-        "processStatsExcludeConsent/",
-        views.processStatsExcludeConsent,
-        name="processStatsExcludeConsent",
-    ),
+    #path(
+    #    "processStatsExcludeConsent/",
+    #    views.processStatsExcludeConsent,
+    #    name="processStatsExcludeConsent",
+    #),
 ]
