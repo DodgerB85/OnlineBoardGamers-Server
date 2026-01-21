@@ -306,13 +306,13 @@ function getDeleteVotes(returnPlayers = false) {
 				Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
 				<br />
 				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localVoteToDelete">Vote to
-					Delete
-					Game</button>
+					Exclude
+					Game from Stats</button>
 			</div>
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
 				If all players agree, this game will be deleted
 				<br />
-				Votes: {{ getDeleteVotes() }} - Players: {{ getDeletePlayers() }}
+				Votes: {{ getDeleteVotes(false) }} - Players: {{ getDeleteVotes(true) }}
 				<br />
 				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localVoteToDelete">Vote to
 					Delete
