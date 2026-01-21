@@ -18,7 +18,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
     SR_getTournamentWinnerHTML,
     SR_GAME_STATUS_CHOICES,
-    # SR_getTournamentRoundsHTML,
+    SR_currentTurnString
 )
 
 from .sharedFunctions.sharedRefs import (
@@ -578,6 +578,16 @@ class Game(BaseGame):
     def presenter(self):
         if self.gameCode == "CNS":
             return CannesPresenter(self)
+        
+    def getGameName(self):
+        # Use fields already on the model. DO NOT call .all() or .count() here.
+        name = self.gameName or f"{getattr(self.creator, 'username', 'Unknown')}'s Game"
+        if self.gameStatus == "PRIVATE":
+            name += " [Private]"
+        return name
+
+    def currentTurnString(self):
+        return SR_currentTurnString(self.gameCode, self.turn, self.phase)
 
 class GamePlayer(models.Model):
     game = models.ForeignKey(Game, related_name="players", on_delete=models.deletion.CASCADE)
