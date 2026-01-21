@@ -9,6 +9,8 @@ import { useModelStore } from '../stores/CNSstore.js'
 export const BOT_NAME = "CnsBot"
 export const SUPER_USERS = ["BotKickStarter"]
 export const DEBUG_USERS = ['BotKickStarter', 'admin']
+export const DELETE_VOTE_TOPIC = "delete_game_votes"
+export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
 
 /* Ratios */
 export const hexBigRatio = 1.1547

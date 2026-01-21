@@ -533,3 +533,51 @@ export async function submitStatsExcludeConsent() {
 		console.error("Error zooming:", error)
 	}
 }
+
+export async function castVote(topic) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	store.topMenuViews.showLoader = true
+	let csrftoken = funcs.getCookie("csrftoken")
+
+	let postData = {
+		action: "castVote", // USED
+		topic: topic, // USED
+		gameID: personal.gameID, // USED
+	}
+
+	try {
+		const response = await fetch("/CNS/castVote/", {
+			method: "POST",
+			body: JSON.stringify(postData),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) {
+			store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+			throw new Error("Network response was not ok")
+		}
+		const data = await response.json()
+
+		store.topMenuViews.showLoader = false
+		console.log(data)
+		if (data.voteChanged === true) {
+			store.topMenuViews.tradeSuccessText = "Vote Saved"
+			
+			if (topic === rf.DELETE_VOTE_TOPIC) {
+				personal.votedToDelete = true
+				store.deleteVotesData = JSON.parse(data.votesData)
+				if (data.redirect_url) window.location.href = data.redirect_url
+			}
+			else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
+				personal.votedToExclude = true
+				store.statsExcludeVotesData = JSON.parse(data.votesData)
+			}
+			
+		} else store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+	} catch (error) {
+		console.error("Error fetching data:", error)
+		store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+		return false
+	}
+}

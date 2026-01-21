@@ -33,6 +33,7 @@ from Lobby.models import User, Profile, Game, GamePlayer
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
 
+CNS_DB_LOCK_NAME = "lockCNSgame_"
 
 # Create your views here.
 def index(request):
@@ -893,3 +894,87 @@ def changeCNSzoom(request):
 
     return HttpResponse(status=204)  # No Content
 
+@login_required()
+def castVote(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    gameID = jsonData["gameID"]
+
+    with db_mutex(CNS_DB_LOCK_NAME + str(gameID)):
+        return _castVote(request)
+
+
+@login_required
+def _castVote(request):
+    """Adds a delete vote for a player."""
+    jsonData = json.loads(request.body)
+
+    try:
+        currentGame = Game.objects.get(id=jsonData["gameID"])
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+    # player = request.user  # Assuming the logged-in user is voting
+    playerName = request.user.username  # Get the player's username
+    topic = jsonData["topic"]
+
+    success = currentGame.presenter().castVote(
+        topic, playerName, True
+    )  # Pass playerName to addDeleteVote
+
+    if success:
+        currentGame.save()
+        # Check if all players have voted to delete
+        all_voted = True
+        votesData = currentGame.presenter().getFullSetOfTrueFalseVotes(
+            topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
+        )
+
+        missingPlayers = currentGame.presenter().getMissingPlayersNamesArray()
+        for player, vote in votesData.items():
+            if not vote and player not in missingPlayers:
+                all_voted = False
+                break
+
+        if all_voted:
+            # Get the result
+            votesData = json.dumps(
+                currentGame.presenter().getFullSetOfTrueFalseVotes(
+                    topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
+                )
+            )
+            # Delete the game
+            if topic == DELETE_VOTE_TOPIC:
+                currentGame.delete()
+                # Add a success message
+                messages.success(request, gettext("Game successfully deleted"))
+            
+            if topic == STATS_EXCLUDE_VOTE_TOPIC:
+                currentGame.statsExcludedGame = True
+                currentGame.save()
+                # Add a success message
+                messages.success(request, gettext("Game stats excluded"))
+            
+            # Redirect to the index page
+            return JsonResponse(
+                {
+                    "voteChanged": True,
+                    "votesData": votesData,
+                    "redirect_url": reverse("index"),
+                }
+            )
+
+        return JsonResponse(
+            {
+                "voteChanged": True,
+                "votesData": json.dumps(
+                    currentGame.presenter().getFullSetOfTrueFalseVotes(
+                        topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
+                    )
+                ),
+            },
+            safe=False,
+        )
+
+    return JsonResponse({"voteChanged": False})
