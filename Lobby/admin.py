@@ -195,7 +195,7 @@ class GameAdmin(admin.ModelAdmin):
     def game_link(self, obj):
         gameCode = obj.gameCode
         # Use the actual gameName field (or fallback to ID)
-        full_name = obj.getGameName()
+        full_name = obj.presenter().getGameName()
 
         # Truncate to 10 chars + ellipsis if needed
         short_name = full_name if len(full_name) <= 20 else full_name[:20] + "…"
