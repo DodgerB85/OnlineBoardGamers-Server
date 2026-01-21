@@ -510,8 +510,6 @@ def _processTurn(request):
     if currentGame.relatedTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
 
-    # time.sleep(3)  # Pause execution for 3 seconds
-
     # loads the latest game and updates latest-Update
     if jsonData["action"] == "loadNew":
         currentMove = ""
@@ -1354,7 +1352,6 @@ def _processTurn(request):
                         currentGame,
                         oldVer,
                     )
-            # time.sleep(5)
 
         # End Game
         if jsonData["phase"] == 10:
