@@ -258,7 +258,7 @@ class AQY_Game(GeneralGame):
 
     # Takes in self, request, and then 3 JSON[""] pieces of string data
     def endGame(self, request, _winner, _finalPositions, _gameID):
-        self.clearGeneralDataOnGameEndWithoutSave()
+        self.tempPresenter().clearGeneralDataOnGameEndWithoutSave()
         self.player0currentMoveData = ""
         self.player1currentMoveData = ""
         self.player2currentMoveData = ""

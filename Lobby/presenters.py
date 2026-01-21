@@ -11,50 +11,147 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
+class GamePresenter:
+    def __init__(self, gameObj):
+        self.gameObj = gameObj
+    
+    def getGameName(self):
+        # Use fields already on the model. DO NOT call .all() or .count() here.
+        name = self.gameObj.gameName or f"{getattr(self.gameObj.creator, 'username', 'Unknown')}'s Game"
+        if self.gameObj.gameStatus == "PRIVATE":
+            name += " [Private]"
+        return name
 
-class CannesPresenter:
-    def __init__(self, game):
-        self.game = game
+    def currentTurnString(self):
+        return SR_currentTurnString(self.gameObj.gameCode, self.gameObj.turn, self.gameObj.phase)
 
+
+
+    def clearGeneralDataOnGameEndWithoutSave(self):
+        self.gameStatus = "FINISHED"
+        self.rewindData = ""
+        self.rewindTempData = ""
+        self.kickoutFlexiData = ""
+        self.statsExcludeConsent = ""
+        self.deleteGameVotes = None
+        self.activeVotes = None
+
+
+
+    ###### VOTING METHODS #######
+    def castVote(self, topic, username, choice):
+        """
+        Saves a specific choice for a user.
+        Example: topic='rewind', choice=2
+        """
+        # Double check player is in the game - WAIT FOR ALL PLAYERS TO MOVE HERE
+        #if playerName not in [p.username for p in self.allPlayers.all()]:
+        #    return False  # Player not in the game
+        if not self.activeVotes:
+            self.activeVotes = {}
+
+        if topic not in self.activeVotes:
+            self.activeVotes[topic] = {}
+
+        # Store as {"username": choice}
+        self.activeVotes[topic][username] = choice
+        return True
+
+    # The topic might not be in activeVotes, but sometimes we want a full return set of username: T/F
+    def getFullSetOfTrueFalseVotes(self, topic, usernames):
+        # Initialize the return dictionary with False for every provided username
+        generalReturn = {username: False for username in usernames}
+
+        # If game is finished or no votes exist at all, return the all-False set
+        if self.gameStatus == "FINISHED" or not self.activeVotes:
+            return generalReturn
+
+        # If this specific topic hasn't been started, return the all-False set
+        if topic not in self.activeVotes:
+            return generalReturn
+
+        currentVotes = self.activeVotes[topic]
+
+        # Update the return set with actual votes where they exist
+        for username in usernames:
+            if username in currentVotes:
+                generalReturn[username] = currentVotes[username]
+
+        return generalReturn
+
+    def getVoteResults(self, topic):
+        """
+        Returns a tally of choices.
+        Example: {0: 1, 1: 3} (1 person voted '0', 3 people voted '1')
+        """
+        if not self.activeVotes or topic not in self.activeVotes:
+            return {}
+
+        results = {}
+        for choice in self.activeVotes[topic].values():
+            results[choice] = results.get(choice, 0) + 1
+        return results
+
+    def check_unanimous_choice_in_set(self, topic, allowed_choices, total_required):
+        """
+        Checks if EVERY player has voted and their choices are within the allowed set.
+        allowed_choices can be a single value (1) or a list ([1, 2]).
+        """
+        if not self.activeVotes or topic not in self.activeVotes:
+            return False
+
+        votes = self.activeVotes.get(topic, {})
+
+        # 1. Ensure everyone has voted
+        if len(votes) < total_required:
+            return False
+
+        # 2. Ensure allowed_choices is a list for the 'in' check
+        if not isinstance(allowed_choices, (list, tuple, set)):
+            allowed_choices = [allowed_choices]
+
+        # 3. Check if all submitted votes are in the allowed list
+        # (e.g., if all values are 1 or 2)
+        return all(val in allowed_choices for val in votes.values())
+
+    # End voting methods
+
+
+
+
+
+
+
+
+
+
+class CannesPresenter(GamePresenter):
     def __str__(self):
-        all_players = self.game.players.exclude(is_kicked=True).select_related('player')
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related('player')
         allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
-        return f"{self.game.id}: {self.game.getGameName()} : {allPlayersString} : {self.game.gameStatus} : {self.game.currentTurnString()}"
-
-    #def getGameName(self):
-    #    _gameName = ""
-    #    if self.game.gameName != "":
-    #        _gameName = self.game.gameName
-    #    else:
-    #        _gameName = f"[{self.game.creator.username}'s Game]"
-    #    if self.game.gameStatus == "PRIVATE":
-    #        _gameName += "[Private Game]"
-    #    return _gameName
+        return f"{self.gameObj.id}: {self.gameObj.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.gameObj.currentTurnString()}"
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import SN_M_sendEndGameNotification
         
-        self.game.rewindData = ""
-        self.game.rewindTempData = ""
-        self.game.kickoutFlexiData = ""
-        self.game.gameStatus = "FINISHED"
+        self.gameObj.rewindData = ""
+        self.gameObj.rewindTempData = ""
+        self.gameObj.kickoutFlexiData = ""
+        self.gameObj.gameStatus = "FINISHED"
         
         winner_user = User.objects.get(username=_winner)
-        winner_gp = self.game.players.filter(player=winner_user).first()
+        winner_gp = self.gameObj.players.filter(player=winner_user).first()
         if winner_gp:
             winner_gp.winner = True
             winner_gp.save()
         
-        self.game.save()
+        self.gameObj.save()
 
-        SN_M_sendEndGameNotification(request, "CNS", _finalPositions, _gameID, self.game)
-
-    #def currentTurnString(self):
-    #    return SR_currentTurnString("CNS", self.game.turn, self.game.phase)
+        SN_M_sendEndGameNotification(request, "CNS", _finalPositions, _gameID, self.gameObj)
 
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        current_players = self.game.players.filter(is_current=True).select_related('player')
+        current_players = self.gameObj.players.filter(is_current=True).select_related('player')
         
         if not current_players.exists():
             return True
@@ -74,7 +171,7 @@ class CannesPresenter:
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return False
 
-        current_players = self.game.players.filter(is_current=True).select_related('player')
+        current_players = self.gameObj.players.filter(is_current=True).select_related('player')
         
         if not current_players.exists():
             return True
@@ -97,11 +194,11 @@ class CannesPresenter:
 
     def getSecondsToNextKickout(self):
         from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
-        return SF_getSecondsToNextKickout(self.game.latestUpdate, self.game.kickoutDuration)
+        return SF_getSecondsToNextKickout(self.gameObj.latestUpdate, self.gameObj.kickoutDuration)
 
     def getMissingPlayersNamesArray(self):
         return list(
-            self.game.players.filter(is_missing=True)
+            self.gameObj.players.filter(is_missing=True)
             .select_related('player')
             .values_list('player__username', flat=True)
         )
@@ -109,48 +206,48 @@ class CannesPresenter:
     def kickoutRequired(self):
         from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
         
-        all_players = self.game.players.exclude(is_kicked=True).select_related('player')
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related('player')
         all_player_usernames = [gp.player.username for gp in all_players if gp.player]
 
         current_players = self.getCurrentPlayersArray()
         current_username = current_players[0] if current_players else ""
 
         return SF_kickoutRequired(
-            self.game.gameStatus,
+            self.gameObj.gameStatus,
             all_player_usernames,
-            self.game.latestUpdate,
-            self.game.kickoutDuration,
-            self.game.kickoutFlexiData,
+            self.gameObj.latestUpdate,
+            self.gameObj.kickoutDuration,
+            self.gameObj.kickoutFlexiData,
             current_username,
         )
 
     def serialize(self, loggedInUserObj=None):
-        all_players = self.game.players.exclude(is_kicked=True).select_related('player')
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related('player')
         
-        remainingPlayersInt = self.game.maxPlayers - all_players.count()
+        remainingPlayersInt = self.gameObj.maxPlayers - all_players.count()
         remainingPlayers = "".join(
             str(all_players.count() + i + 1) for i in range(remainingPlayersInt)
         )
         
-        winner_gp = self.game.players.filter(winner=True).first()
+        winner_gp = self.gameObj.players.filter(winner=True).first()
         winner = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
 
-        createdString = self.game.created
-        latestUpdateString = self.game.latestUpdate
+        createdString = self.gameObj.created
+        latestUpdateString = self.gameObj.latestUpdate
 
         latestUpdateElapsedTimeString = ""
         if (
-            self.game.gameStatus == "WAITING"
-            or self.game.gameStatus == "AVAILABLE"
-            or self.game.gameStatus == "ACTIVE"
-            or self.game.gameStatus == "PRIVATE"
+            self.gameObj.gameStatus == "WAITING"
+            or self.gameObj.gameStatus == "AVAILABLE"
+            or self.gameObj.gameStatus == "ACTIVE"
+            or self.gameObj.gameStatus == "PRIVATE"
         ):
             elapsedTotalSeconds = (
-                int(time.time()) - int(self.game.created) // 1000
-                if self.game.gameStatus == "WAITING"
-                or self.game.gameStatus == "AVAILABLE"
-                or self.game.gameStatus == "PRIVATE"
-                else int(time.time()) - int(self.game.latestUpdate) // 1000
+                int(time.time()) - int(self.gameObj.created) // 1000
+                if self.gameObj.gameStatus == "WAITING"
+                or self.gameObj.gameStatus == "AVAILABLE"
+                or self.gameObj.gameStatus == "PRIVATE"
+                else int(time.time()) - int(self.gameObj.latestUpdate) // 1000
             )
             latestUpdateElapsedTimeString = (
                 SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
@@ -166,9 +263,9 @@ class CannesPresenter:
                 chatNotification = user_gp.has_chat_notification
                 involvedPlayer = not user_gp.is_missing
 
-        gamePaceString = SR_gamePaceString(self.game.gamePace)
+        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
 
-        startingOptionsHTML = SR_getCNSstartingOptionsHTML(self.game.startingOptions)
+        startingOptionsHTML = SR_getCNSstartingOptionsHTML(self.gameObj.startingOptions)
 
         kickoutRequiredNum = self.kickoutRequired()
 
@@ -179,28 +276,28 @@ class CannesPresenter:
         )
 
         return {
-            "gameID": self.game.id,
-            "gameName": self.game.getGameName(),
-            "gameDescription": self.game.gameDescription,
-            "creator": self.game.creator.username,
+            "gameID": self.gameObj.id,
+            "gameName": self.gameObj.getGameName(),
+            "gameDescription": self.gameObj.gameDescription,
+            "creator": self.gameObj.creator.username,
             "created": createdString,
             "allPlayers": [gp.player.username for gp in all_players if gp.player],
-            "invitedPlayers": [user.username for user in self.game.invitedPlayers.all()],
+            "invitedPlayers": [user.username for user in self.gameObj.invitedPlayers.all()],
             "currentPlayers": ", ".join(self.getCurrentPlayersArray()),
-            "currentTurn": self.game.currentTurnString(),
+            "currentTurn": self.gameObj.currentTurnString(),
             "pace": gamePaceString,
             "latestUpdate": latestUpdateString,
             "startingOptions": startingOptionsHTML,
-            "kickoutDuration": self.game.kickoutDuration,
-            "maxPlayers": self.game.maxPlayers,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "maxPlayers": self.gameObj.maxPlayers,
             "winner": winner,
             "myMove": myMove,
             "involvedPlayer": involvedPlayer,
             "chatNotification": chatNotification,
             "kickoutRequiredNum": kickoutRequiredNum,
-            "kickoutDuration": self.game.kickoutDuration,
+            "kickoutDuration": self.gameObj.kickoutDuration,
             "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
-            "game": "CNS",
+            "gameCode": "CNS",
             "remainingPlayers": remainingPlayers,
             "deleteableGame": deleteableGame,
             "learningGame": self.isLearningGame(),
@@ -209,7 +306,7 @@ class CannesPresenter:
 
     def isExperiencedGame(self):
         startingOptionsListPrelim = (
-            json.loads(self.game.startingOptions) if self.game.startingOptions else []
+            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
         )
         if 120 in startingOptionsListPrelim:
             return True
@@ -217,7 +314,7 @@ class CannesPresenter:
 
     def isLearningGame(self):
         startingOptionsListPrelim = (
-            json.loads(self.game.startingOptions) if self.game.startingOptions else []
+            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
         )
         if 110 in startingOptionsListPrelim:
             return True
@@ -231,7 +328,7 @@ class CannesPresenter:
             return -1
 
     def getAllPlayersOrderedySeat(self, withoutBots=False):
-        players = self.game.players.exclude(is_kicked=True).select_related('player')
+        players = self.gameObj.players.exclude(is_kicked=True).select_related('player')
         
         if withoutBots:
             return [gp.player.username for gp in players if gp.player]
@@ -248,12 +345,12 @@ class CannesPresenter:
         from Lobby.models import GamePlayer
         from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
         
-        self.game.gameStatus = "ACTIVE"
-        self.game.playerOrderSeed = random.randint(1000, 32767)
+        self.gameObj.gameStatus = "ACTIVE"
+        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
         
-        game_players = list(self.game.players.exclude(is_kicked=True))
+        game_players = list(self.gameObj.players.exclude(is_kicked=True))
         
-        random.Random(self.game.playerOrderSeed).shuffle(game_players)
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
         
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
@@ -261,29 +358,29 @@ class CannesPresenter:
         
         GamePlayer.objects.bulk_update(game_players, ['seat_order', 'is_current'])
         
-        self.game.save()
+        self.gameObj.save()
 
-        if not self.game.players.filter(player__username="SHADOW").exists():
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
             playerListToNotify = [
                 gp.player.username for gp in game_players 
                 if gp.player and gp.player.username != request.user.username
             ]
 
             SN_M_sendGameStartNotification(
-                request, "CNS", playerListToNotify, self.game.id, self.game
+                request, "CNS", playerListToNotify, self.gameObj.id, self.gameObj
             )
 
     def getCurrentPlayersArray(self):
-        current_players = self.game.players.filter(is_current=True).select_related('player')
+        current_players = self.gameObj.players.filter(is_current=True).select_related('player')
         return [gp.player.username for gp in current_players if gp.player]
 
     def getCurrentPlayersArrayForReminderEmail(self):
         return self.getCurrentPlayersArray()
 
     def checkForHostChange(self, _missingUser):
-        if _missingUser == self.game.creator:
+        if _missingUser == self.gameObj.creator:
             possibleHost = (
-                self.game.players
+                self.gameObj.players
                 .exclude(is_kicked=True)
                 .filter(is_missing=False)
                 .select_related('player')
@@ -291,22 +388,22 @@ class CannesPresenter:
                 .first()
             )
             if possibleHost and possibleHost.player:
-                self.game.host = possibleHost.player
+                self.gameObj.host = possibleHost.player
 
     def enableStatsExclude(self, _username):
         seatToChange = self.seatPosition(_username, True)
-        if (len(self.game.statsExcludeConsent)) < self.game.maxPlayers:
-            self.game.statsExcludeConsent = "0" * self.game.maxPlayers
-        self.game.statsExcludeConsent = (
-            self.game.statsExcludeConsent[:seatToChange]
+        if (len(self.gameObj.statsExcludeConsent)) < self.gameObj.maxPlayers:
+            self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
+        self.gameObj.statsExcludeConsent = (
+            self.gameObj.statsExcludeConsent[:seatToChange]
             + "1"
-            + self.game.statsExcludeConsent[seatToChange + 1 :]
+            + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
         )
         totalConsent = 0
-        for letter in self.game.statsExcludeConsent:
+        for letter in self.gameObj.statsExcludeConsent:
             totalConsent += int(letter)
-        if totalConsent == self.game.maxPlayers:
-            self.game.statsExcludedGame = True
+        if totalConsent == self.gameObj.maxPlayers:
+            self.gameObj.statsExcludedGame = True
 
     def getGameCode(self):
         return "CNS"
