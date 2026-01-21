@@ -189,6 +189,9 @@ async function initGame() {
     // FInally, impport data
     funcs.importModel(window.initData.gameData, false)
 
+    personal.votedToDelete = store.deleteVotesData[personal.name]
+    personal.votedToExclude = store.statsExcludeVotesData[personal.name]
+
     if (personal.trainingGame) {
       clearInterval(personal.kickoutCountdownIntervalTimer)
       clearInterval(personal.kickoutFlexiTimerTicker)    
