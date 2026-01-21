@@ -5,15 +5,6 @@ from .models import User, Profile, changelog, Mini_Tournaments, Main_Tournament,
 from .modelProxies import FCMMiniTournament, TGZMiniTournament
 
 
-@admin.register(Game)
-class GameAdmin(admin.ModelAdmin):
-    search_fields = ["gameName"]
-
-@admin.register(GamePlayer)
-class GamePlayerAdmin(admin.ModelAdmin):
-    search_fields = ["player__username"]
-
-
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     search_fields = ("email", "username")
