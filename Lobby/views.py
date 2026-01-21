@@ -91,6 +91,8 @@ from .forms import (
 )
 
 from .models import (
+    Game,
+    GamePlayer,
     Profile,
     changelog,
     Mini_Tournaments,
@@ -542,15 +544,14 @@ def DBO(request):
     finishedGamesCount = 0
 
     # Handle CNS games from unified Game model separately
-    from Lobby.models import Game
     query = (
         Q(gameStatus="ACTIVE") | Q(gameStatus="PRIVATE") | Q(gameStatus="WAITING")
     )
     query_finished = Q(gameStatus="FINISHED")
-    
+
     cns_games = Game.objects.filter(gameCode='CNS').filter(query).prefetch_related('players__player')
     finishedGamesCount += Game.objects.filter(gameCode='CNS', gameStatus="FINISHED").count()
-    
+
     for singleGame in cns_games:
         presenter = singleGame.presenter()
         timeRemaining = presenter.getSecondsToNextKickout()
@@ -989,11 +990,9 @@ def stats(request):
     excluded_names = ["SHADOW", "FcmAI"]
 
     # Handle CNS games from unified Game model first
-    from Lobby.models import Game
-    
     cns_counts_key = "counts_Game_CNS"
     cns_counts = cache.get(cns_counts_key)
-    
+
     if not cns_counts:
         cns_counts = {
             "active": Game.objects.filter(gameCode='CNS', gameStatus="ACTIVE")
@@ -1006,10 +1005,10 @@ def stats(request):
             .count(),
         }
         cache.set(cns_counts_key, cns_counts, 60)
-    
+
     game_counts.append(cns_counts["active"])
     finished_game_counts.append(cns_counts["finished"])
-    
+
     # Fetch latest CNS games
     latestGames.extend(
         Game.objects.filter(gameCode='CNS', gameStatus="ACTIVE")
@@ -1017,7 +1016,7 @@ def stats(request):
         .distinct()
         .order_by("-latestUpdate")[:10]
     )
-    
+
     latestGamesFinished.extend(
         Game.objects.filter(gameCode='CNS', gameStatus="FINISHED")
         .exclude(players__player__username__in=excluded_names)
@@ -1199,22 +1198,21 @@ def index(request):
     all_user_games = []
 
     # Handle CNS games from unified Game model first
-    from Lobby.models import Game
     from django.db.models import Exists, OuterRef
-    
+
     # For unified Game model, check through GamePlayer
     is_player_cns = Game.objects.filter(
-        id=OuterRef("id"), 
+        id=OuterRef("id"),
         gameCode='CNS',
         players__player=user
     ).values("id")
-    
+
     is_invited_cns = Game.objects.filter(
         id=OuterRef("id"),
-        gameCode='CNS', 
+        gameCode='CNS',
         invitedPlayers=user
     ).values("id")
-    
+
     cns_query = Game.objects.filter(gameCode='CNS').annotate(
         user_is_player=Exists(is_player_cns),
         user_is_invited=Exists(is_invited_cns)
@@ -1223,7 +1221,7 @@ def index(request):
         | Q(user_is_invited=True)
         | Q(gameStatus="AVAILABLE", created__gte=recent_cutoff)
     )
-    
+
     # Defer large fields
     cns_query = cns_query.defer(
         "gameData",
@@ -1231,13 +1229,13 @@ def index(request):
         "rewindTempData",
         "chatData",
     )
-    
+
     # Prefetch related data for CNS games
     cns_query = cns_query.select_related("creator").prefetch_related(
         "players__player",
         "invitedPlayers"
     )
-    
+
     all_user_games.extend(list(cns_query.distinct()))
 
     for model in GAME_MODELS:
@@ -1266,9 +1264,9 @@ def index(request):
         #query = query.defer(
         #    "gameData", "rewindData", "rewindTempData", "chatData", "kickoutFlexiData"
         #)
-        
+
         # deferrung kickoutFlexiData seems to cause occasional race conditions and lobby not loading
-        # when 
+        # when
         query = query.defer(
             "gameData",
             "rewindData",
@@ -1328,7 +1326,7 @@ def index(request):
 
         # Access prefetched data - handle both unified and legacy models
         is_unified = isinstance(game, Game)
-        
+
         if is_unified:
             # Unified Game model
             all_game_players = game.players.exclude(is_kicked=True).all()
@@ -1350,7 +1348,7 @@ def index(request):
             serialized = SF_fastSerializeGame(game, user)
         except FCM_Game.DoesNotExist:
             SN_sendAdminErrorMessage(request, f"Game {game.getGameCode() if hasattr(game, 'getGameCode') else game.gameCode} {game.id} does not exist - trying to serialize in lobby")
-            continue 
+            continue
 
         if is_involved:
             if status == "ACTIVE" and user_id not in miss_p_ids:
@@ -1923,8 +1921,6 @@ def createBusPage(request, gameID=0):
 
 @login_required
 def createCNSpage(request, gameID=0):
-    from Lobby.models import Game
-    
     experienced = SF_hasRequiredExperience(request, "CNS", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createCNS.html", {"experienced": experienced})
@@ -2509,24 +2505,29 @@ def playerInfo(request, usernameToProfile):
     # THE MASTER LOOP: One model at a time
     for game_name, game_model in GAME_NAMES_MODELS.items():
         if game_name == "CNS":
-            continue
-        
-        # Check if winner is FK or M2M to optimize JOINs
-        winner_field = game_model._meta.get_field("winner")
-        is_winner_m2m = winner_field.many_to_many
-
-        # Start the query
-        query = game_model.objects.filter(allPlayers=target_id)
-
-        # Use select_related for ForeignKeys (0 hits)
-        # Use prefetch_related for ManyToMany (1 hit per field)
-        if not is_winner_m2m:
-            query = query.select_related("winner")
-            prefetches = ["allPlayers", "missingPlayers", "kickedPlayers"]
+            # Handle CNS with unified Game model
+            all_games = list(
+                Game.objects.filter(gameCode='CNS', players__player_id=target_id)
+                .prefetch_related('players__player')
+                .distinct()
+            )
         else:
-            prefetches = ["allPlayers", "missingPlayers", "kickedPlayers", "winner"]
+            # Check if winner is FK or M2M to optimize JOINs
+            winner_field = game_model._meta.get_field("winner")
+            is_winner_m2m = winner_field.many_to_many
 
-        all_games = list(query.prefetch_related(*prefetches).distinct())
+            # Start the query
+            query = game_model.objects.filter(allPlayers=target_id)
+
+            # Use select_related for ForeignKeys (0 hits)
+            # Use prefetch_related for ManyToMany (1 hit per field)
+            if not is_winner_m2m:
+                query = query.select_related("winner")
+                prefetches = ["allPlayers", "missingPlayers", "kickedPlayers"]
+            else:
+                prefetches = ["allPlayers", "missingPlayers", "kickedPlayers", "winner"]
+
+            all_games = list(query.prefetch_related(*prefetches).distinct())
 
         # Model-specific counters for the stats table
         model_joint_finished = 0
@@ -2539,63 +2540,119 @@ def playerInfo(request, usernameToProfile):
 
         for game in all_games:
             status = game.gameStatus
-            # Optimization: Use sets for membership checks
-            all_p_ids = {p.id for p in game.allPlayers.all()}
-            is_joint = req_user_id in all_p_ids
 
-            # --- Win Calculation (0 Hits because of prefetch) ---
-            winner_ids = []
-            if game.winner:
-                if hasattr(game.winner, "all"):
-                    winner_ids = [w.id for w in game.winner.all()]
-                else:
-                    winner_ids = [game.winner.id]
+            # Handle CNS (unified Game model) differently
+            if game_name == "CNS":
+                # Optimization: Use sets for membership checks
+                all_p_ids = {gp.player.id for gp in game.players.all()}
+                is_joint = req_user_id in all_p_ids
 
-            if status == "FINISHED":
-                # General Stats Logic
-                # Exclude SHADOW from general win stats as per your original Q
-                has_shadow = any(p.username == "SHADOW" for p in game.allPlayers.all())
+                # --- Win Calculation ---
+                winner_ids = [gp.player.id for gp in game.players.all() if gp.winner]
 
-                if not has_shadow:
-                    model_total_finished += 1
-                    if target_id in winner_ids:
-                        model_total_won += 1
+                if status == "FINISHED":
+                    # General Stats Logic
+                    has_shadow = any(gp.player.username == "SHADOW" for gp in game.players.all())
 
-                    # Group by maxPlayers (2-6)
-                    if 2 <= game.maxPlayers <= 6:
-                        stats_by_size[game.maxPlayers][0] += 1
+                    if not has_shadow:
+                        model_total_finished += 1
                         if target_id in winner_ids:
-                            stats_by_size[game.maxPlayers][1] += 1
+                            model_total_won += 1
 
-                # Joint Stats Logic
-                if not is_self and is_joint:
-                    model_joint_finished += 1
-                    if req_user_id in winner_ids:
-                        model_joint_wins += 1
+                        # Group by maxPlayers (2-6)
+                        if 2 <= game.maxPlayers <= 6:
+                            stats_by_size[game.maxPlayers][0] += 1
+                            if target_id in winner_ids:
+                                stats_by_size[game.maxPlayers][1] += 1
 
-                # Fair Play Logic (Last Year)
-                if int(game.latestUpdate) >= minus1year:
-                    finishedGamesLastYear += 1
-                    if any(p.id == target_id for p in game.kickedPlayers.all()):
-                        kickedOutGamesLastYear += 1
+                    # Joint Stats Logic
+                    if not is_self and is_joint:
+                        model_joint_finished += 1
+                        if req_user_id in winner_ids:
+                            model_joint_wins += 1
 
-            # --- Categorization for Lists ---
-            if not is_self:
-                if is_joint:
-                    if status == "ACTIVE":
-                        activeJoint.append(game)
+                    # Fair Play Logic (Last Year)
+                    if int(game.latestUpdate) >= minus1year:
+                        finishedGamesLastYear += 1
+                        if any(gp.player.id == target_id and gp.is_kicked for gp in game.players.all()):
+                            kickedOutGamesLastYear += 1
+
+                # --- Categorization for Lists ---
+                if not is_self:
+                    if is_joint:
+                        if status == "ACTIVE":
+                            activeJoint.append(game)
+                        else:
+                            finishedJoint.append(game)
                     else:
-                        finishedJoint.append(game)
+                        if status == "ACTIVE":
+                            activeOther.append(game)
+                        else:
+                            finishedOther.append(game)
                 else:
                     if status == "ACTIVE":
                         activeOther.append(game)
                     else:
                         finishedOther.append(game)
             else:
-                if status == "ACTIVE":
-                    activeOther.append(game)
+                # Legacy game models
+                # Optimization: Use sets for membership checks
+                all_p_ids = {p.id for p in game.allPlayers.all()}
+                is_joint = req_user_id in all_p_ids
+
+                # --- Win Calculation (0 Hits because of prefetch) ---
+                winner_ids = []
+                if game.winner:
+                    if hasattr(game.winner, "all"):
+                        winner_ids = [w.id for w in game.winner.all()]
+                    else:
+                        winner_ids = [game.winner.id]
+
+                if status == "FINISHED":
+                    # General Stats Logic
+                    # Exclude SHADOW from general win stats as per your original Q
+                    has_shadow = any(p.username == "SHADOW" for p in game.allPlayers.all())
+
+                    if not has_shadow:
+                        model_total_finished += 1
+                        if target_id in winner_ids:
+                            model_total_won += 1
+
+                        # Group by maxPlayers (2-6)
+                        if 2 <= game.maxPlayers <= 6:
+                            stats_by_size[game.maxPlayers][0] += 1
+                            if target_id in winner_ids:
+                                stats_by_size[game.maxPlayers][1] += 1
+
+                    # Joint Stats Logic
+                    if not is_self and is_joint:
+                        model_joint_finished += 1
+                        if req_user_id in winner_ids:
+                            model_joint_wins += 1
+
+                    # Fair Play Logic (Last Year)
+                    if int(game.latestUpdate) >= minus1year:
+                        finishedGamesLastYear += 1
+                        if any(p.id == target_id for p in game.kickedPlayers.all()):
+                            kickedOutGamesLastYear += 1
+
+                # --- Categorization for Lists ---
+                if not is_self:
+                    if is_joint:
+                        if status == "ACTIVE":
+                            activeJoint.append(game)
+                        else:
+                            finishedJoint.append(game)
+                    else:
+                        if status == "ACTIVE":
+                            activeOther.append(game)
+                        else:
+                            finishedOther.append(game)
                 else:
-                    finishedOther.append(game)
+                    if status == "ACTIVE":
+                        activeOther.append(game)
+                    else:
+                        finishedOther.append(game)
 
         # Step 2: Post-Model Processing (Joint)
         if not is_self and model_joint_finished > 0:
@@ -2840,10 +2897,9 @@ def joinGameLink(request, joinGameLink):
     if gameModel is None:
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
-    
+
     try:
         if gameCode == "CNS":
-            from Lobby.models import Game
             availableGame = Game.objects.get(id=numbers, gameCode='CNS')
         else:
             availableGame = gameModel.objects.get(id=numbers)
@@ -2855,7 +2911,7 @@ def joinGameLink(request, joinGameLink):
         current_player_count = availableGame.players.exclude(is_kicked=True).count()
     else:
         current_player_count = availableGame.allPlayers.count()
-    
+
     if current_player_count >= availableGame.maxPlayers:
         messages.error(request, (gettext("Sorry, the game is full")))
         return HttpResponseRedirect(reverse("index"))
@@ -2895,7 +2951,6 @@ def joinGame(request, gameType):
 
     # Handle CNS with unified Game model
     if gameType == "CNS":
-        from Lobby.models import Game
         try:
             currentGame = Game.objects.prefetch_related("players__player", "invitedPlayers").get(
                 id=jsonData["gameID"],
@@ -2904,7 +2959,7 @@ def joinGame(request, gameType):
         except Game.DoesNotExist:
             messages.error(request, (gettext("Sorry, the game no longer exists")))
             return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
-        
+
         action = jsonData.get("action", "")
         current_players_list = [gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player]
     else:
@@ -2916,7 +2971,7 @@ def joinGame(request, gameType):
         except gameModel.DoesNotExist:
             messages.error(request, (gettext("Sorry, the game no longer exists")))
             return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
-        
+
         action = jsonData.get("action", "")
         current_players_list = list(currentGame.allPlayers.all())
 
@@ -2941,7 +2996,7 @@ def joinGame(request, gameType):
             else:
                 # Legacy models
                 currentGame.allPlayers.remove(request.user)
-            
+
             # Using len() on the prefetched list minus the one we removed
             if len(current_players_list) <= 1:
                 currentGame.delete()
@@ -3026,7 +3081,6 @@ def checkJoinGame(request, gameType, gameID):
         return
     # CHECK GAME EXISTS
     if gameType == "CNS":
-        from Lobby.models import Game
         try:
             currentGame = Game.objects.prefetch_related(
                 "invitedPlayers", "players__player", "creator__profile__blacklistedPlayers"
@@ -3040,7 +3094,7 @@ def checkJoinGame(request, gameType, gameID):
                     }
                 )
             return
-        
+
         # Get player lists for CNS
         all_players_list = [gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player]
         invited_players_list = list(currentGame.invitedPlayers.all())
@@ -3058,7 +3112,7 @@ def checkJoinGame(request, gameType, gameID):
                     }
                 )
             return
-        
+
         # Use in-memory checks for prefetched sets (no .all() or .filter())
         all_players_list = list(currentGame.allPlayers.all())
         invited_players_list = list(currentGame.invitedPlayers.all())
@@ -3108,13 +3162,12 @@ def checkJoinGame(request, gameType, gameID):
 
     # CHECK EXPERIENCE LEVEL HERE
     is_experienced = currentGame.presenter().isExperiencedGame() if gameType == "CNS" else currentGame.isExperiencedGame()
-    
+
     if is_experienced:
         # Optimization: Fetch SHADOW once
         shadow_user = User.objects.get(username="SHADOW")
 
         if gameType == "CNS":
-            from Lobby.models import Game
             # 1 Hit: Count finished games for CNS
             exp = (
                 Game.objects.filter(gameCode='CNS', gameStatus="FINISHED", players__player=request.user)
@@ -3170,7 +3223,6 @@ def checkJoinGame(request, gameType, gameID):
 
         for game_name, game_model in GAME_NAMES_MODELS.items():
             if game_name == "CNS":
-                from Lobby.models import Game
                 # Handle CNS with unified Game model
                 finishedGames = Game.objects.filter(
                     Q(gameCode='CNS'),
@@ -3245,9 +3297,8 @@ def checkJoinGame(request, gameType, gameID):
             return
 
     _newPlayer = request.user
-    
+
     if gameType == "CNS":
-        from Lobby.models import GamePlayer
         # For CNS, create a GamePlayer
         GamePlayer.objects.create(
             game=currentGame,
@@ -3256,7 +3307,7 @@ def checkJoinGame(request, gameType, gameID):
     else:
         # Legacy models
         currentGame.allPlayers.add(_newPlayer)
-    
+
     currentGame.latestUpdate = _latestUpdate
     currentGame.invitedPlayers.remove(request.user)
 
@@ -3303,9 +3354,8 @@ def deleteGame(request, gameType):
     try:
         if gameModel is None:
             return JsonResponse({"noGame": True}, safe=False)
-        
+
         if gameType == "CNS":
-            from Lobby.models import Game
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='CNS')
         else:
             currentGame = gameModel.objects.get(id=jsonData["gameID"])
@@ -3318,7 +3368,7 @@ def deleteGame(request, gameType):
             user_is_player = currentGame.players.filter(player=request.user).exists()
         else:
             user_is_player = request.user in currentGame.allPlayers.all()
-        
+
         if user_is_player:
             gameStatus = currentGame.gameStatus
             currentGame.delete()
@@ -3910,11 +3960,10 @@ def dataCheck(request):
 
     # 1. Check Available Count First (Lightest Queries)
     available_count = Mini_Tournaments.objects.filter(tournamentStatus="OP").count()
-    
+
     # Add CNS games from unified Game model
-    from Lobby.models import Game
     available_count += Game.objects.filter(gameCode='CNS', gameStatus="AVAILABLE").count()
-    
+
     for model in GAME_MODELS:
         available_count += model.objects.filter(gameStatus="AVAILABLE").count()
 
@@ -3923,14 +3972,14 @@ def dataCheck(request):
 
     # 2. Check Invitations Count (Medium Queries)
     invitations_count = 0
-    
+
     # Add CNS invitations
     invitations_count += Game.objects.filter(
         gameCode='CNS',
         gameStatus="WAITING",
         invitedPlayers=request.user
     ).count()
-    
+
     for model in GAME_MODELS:
         invitations_count += model.objects.filter(
             gameStatus="WAITING", invitedPlayers=request.user
@@ -3944,7 +3993,7 @@ def dataCheck(request):
     user_name = request.user.username
 
     my_move_count = 0
-    
+
     # Add CNS my move count
     cns_active_games = Game.objects.filter(
         gameCode='CNS',
@@ -3954,11 +4003,11 @@ def dataCheck(request):
         players__is_missing=True,
         players__player=request.user
     ).prefetch_related('players__player').distinct()
-    
+
     for g in cns_active_games:
         if g.presenter().quickIsMyMove(user_name):
             my_move_count += 1
-    
+
     for model in GAME_MODELS:
         active_games = (
             model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE")
