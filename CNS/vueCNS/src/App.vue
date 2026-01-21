@@ -36,6 +36,8 @@ const personal = usePersonalStore()
 
 async function initGame() {
   personal.haltPlay = true
+  store.deleteVotesData = window.initData.deleteVotesData
+  store.statsExcludeVotesData = window.initData.statsExcludeVotesData
 
   // Set up all Data
   personal.gameID = window.initData.gameID
