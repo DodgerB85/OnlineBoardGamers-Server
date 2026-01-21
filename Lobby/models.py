@@ -10,7 +10,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import CannesPresenter
+from .presenters import GamePresenter, CannesPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -438,94 +438,7 @@ class BaseGame(models.Model):
     class Meta:
         abstract = True
 
-    def clearGeneralDataOnGameEndWithoutSave(self):
-        self.gameStatus = "FINISHED"
-        self.rewindData = ""
-        self.rewindTempData = ""
-        self.kickoutFlexiData = ""
-        self.statsExcludeConsent = ""
-        self.deleteGameVotes = None
-        self.activeVotes = None
-
-
-
-    ###### VOTING METHODS #######
-    def castVote(self, topic, username, choice):
-        """
-        Saves a specific choice for a user.
-        Example: topic='rewind', choice=2
-        """
-        # Double check player is in the game - WAIT FOR ALL PLAYERS TO MOVE HERE
-        #if playerName not in [p.username for p in self.allPlayers.all()]:
-        #    return False  # Player not in the game
-        if not self.activeVotes:
-            self.activeVotes = {}
-
-        if topic not in self.activeVotes:
-            self.activeVotes[topic] = {}
-
-        # Store as {"username": choice}
-        self.activeVotes[topic][username] = choice
-        return True
-
-    # The topic might not be in activeVotes, but sometimes we want a full return set of username: T/F
-    def getFullSetOfTrueFalseVotes(self, topic, usernames):
-        # Initialize the return dictionary with False for every provided username
-        generalReturn = {username: False for username in usernames}
-
-        # If game is finished or no votes exist at all, return the all-False set
-        if self.gameStatus == "FINISHED" or not self.activeVotes:
-            return generalReturn
-
-        # If this specific topic hasn't been started, return the all-False set
-        if topic not in self.activeVotes:
-            return generalReturn
-
-        currentVotes = self.activeVotes[topic]
-
-        # Update the return set with actual votes where they exist
-        for username in usernames:
-            if username in currentVotes:
-                generalReturn[username] = currentVotes[username]
-
-        return generalReturn
-
-    def getVoteResults(self, topic):
-        """
-        Returns a tally of choices.
-        Example: {0: 1, 1: 3} (1 person voted '0', 3 people voted '1')
-        """
-        if not self.activeVotes or topic not in self.activeVotes:
-            return {}
-
-        results = {}
-        for choice in self.activeVotes[topic].values():
-            results[choice] = results.get(choice, 0) + 1
-        return results
-
-    def check_unanimous_choice_in_set(self, topic, allowed_choices, total_required):
-        """
-        Checks if EVERY player has voted and their choices are within the allowed set.
-        allowed_choices can be a single value (1) or a list ([1, 2]).
-        """
-        if not self.activeVotes or topic not in self.activeVotes:
-            return False
-
-        votes = self.activeVotes.get(topic, {})
-
-        # 1. Ensure everyone has voted
-        if len(votes) < total_required:
-            return False
-
-        # 2. Ensure allowed_choices is a list for the 'in' check
-        if not isinstance(allowed_choices, (list, tuple, set)):
-            allowed_choices = [allowed_choices]
-
-        # 3. Check if all submitted votes are in the allowed list
-        # (e.g., if all values are 1 or 2)
-        return all(val in allowed_choices for val in votes.values())
-
-    # End voting methods
+ 
 
 
 # Subclass of all existing games
@@ -543,6 +456,9 @@ class GeneralGame(BaseGame):
     class Meta:
         abstract = True
 
+    # Allow access early to the general presenter, before all games are converted and we can delete this
+    def tempPresenter(self):
+        return GamePresenter(self)
 
 class Game(BaseGame):   
     gameCode = models.CharField(
@@ -586,16 +502,10 @@ class Game(BaseGame):
     def presenter(self):
         if self.gameCode == "CNS":
             return CannesPresenter(self)
-        
-    def getGameName(self):
-        # Use fields already on the model. DO NOT call .all() or .count() here.
-        name = self.gameName or f"{getattr(self.creator, 'username', 'Unknown')}'s Game"
-        if self.gameStatus == "PRIVATE":
-            name += " [Private]"
-        return name
+        # Return a default to stop constant linting errors
+        print("Unknown game code: " + self.gameCode)
+        return GamePresenter(self)
 
-    def currentTurnString(self):
-        return SR_currentTurnString(self.gameCode, self.turn, self.phase)
 
 class GamePlayer(models.Model):
     game = models.ForeignKey(Game, related_name="players", on_delete=models.deletion.CASCADE)
