@@ -206,9 +206,6 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "notes": notes,
             "yourTurnAudioType": liveNotification,
             "statsExcludedGame": currentGame.statsExcludedGame,
-            "myStatsExcludeConsent": int(
-                currentGame.statsExcludeConsent[pov : pov + 1]
-            ),
             "move": move,
             "trade": trade,
         }
@@ -1031,7 +1028,6 @@ def _processAQYturn(request):
         _missingPlayer = User.objects.get(username=request.user.username)
         currentGame.missingPlayers.add(_missingPlayer)
         currentGame.checkForHostChange(_missingPlayer)
-        currentGame.enableStatsExclude(request.user.username)
 
         # Delete move data
         currentGame.clearAllMoveData()
@@ -1192,7 +1188,6 @@ def _processAQYturn(request):
         currentGame.missingPlayers.add(_missingPlayer)
         currentGame.kickedPlayers.add(_missingPlayer)
         currentGame.checkForHostChange(_missingPlayer)
-        currentGame.enableStatsExclude(_missingPlayer.username)
 
         # Clears data and saves record - DONT DELETE FAC MOVES
         # currentGame.clearAllMoveData()

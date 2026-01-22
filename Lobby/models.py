@@ -451,7 +451,7 @@ class GeneralGame(BaseGame):
     player2notes = models.TextField(blank=True)
     player3notes = models.TextField(blank=True)
 
-    class Meta:
+    class Meta(BaseGame.Meta):
         abstract = True
 
     # Allow access early to the general presenter, before all games are converted and we can delete this

@@ -1896,7 +1896,7 @@ def gameAdminGetMoveData(request):
 
     names = currentGame.getAllPlayersOrderedySeat(True)
 
-    playersMoveDataArr = json.loads(currentGame.playersMoveData)
+    playersMoveDataArr = json.loads(currentGame.playersMoveData) or []
 
     allMoveData = []
     for row in playersMoveDataArr:

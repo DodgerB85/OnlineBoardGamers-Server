@@ -673,22 +673,6 @@ class AQY_Game(GeneralGame):
             )
             self.host = possibleHost
 
-    def enableStatsExclude(self, _username):
-        seatToChange = self.seatPosition(_username, True)
-        if (len(self.statsExcludeConsent)) < self.maxPlayers:
-            self.statsExcludeConsent = "0" * self.maxPlayers
-        self.statsExcludeConsent = (
-            self.statsExcludeConsent[:seatToChange]
-            + "1"
-            + self.statsExcludeConsent[seatToChange + 1 :]
-        )
-        # CHECK TOTAL CONSENT
-        totalConsent = 0
-        for letter in self.statsExcludeConsent:
-            totalConsent += int(letter)
-        if totalConsent == self.maxPlayers:
-            self.statsExcludedGame = True
-
     def updateSingleMove(self, name, data, deleteMove=False):
         currentTime = str(int(time.time()) * 1000)
         seat = self.seatPosition(name)

@@ -10,12 +10,13 @@ from .models import (
     Game,
     GamePlayer,
 )
-from .modelProxies import FCMMiniTournament, TGZMiniTournament
+from .modelProxies import FCMMiniTournament, TGZMiniTournament, CNSgame
 
 from django.conf import settings
 from django import forms
 from django.utils.html import format_html
 from django.urls import reverse
+
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -65,28 +66,23 @@ class TGZMiniTournamentAdmin(admin.ModelAdmin):
     class Meta:
         app_label = "TGZ"
 
+
 class GamePlayerInline(admin.TabularInline):
     model = GamePlayer
     extra = 0
-    #fields = ("player", "player_number", "status", "edit_link")
-    #readonly_fields = ("edit_link",)
-    show_change_link = True 
-    fields = (
-        "player", 
-        "seat_order", 
-        "winner", 
-        "is_current", 
-        "is_missing", 
-        "is_kicked"
-    )
+    # fields = ("player", "player_number", "status", "edit_link")
+    # readonly_fields = ("edit_link",)
+    show_change_link = True
+    fields = ("player", "seat_order", "winner", "is_current", "is_missing", "is_kicked")
     autocomplete_fields = ["player"]
 
-    #@admin.display(description="Edit")
-    #def edit_link(self, obj):
+    # @admin.display(description="Edit")
+    # def edit_link(self, obj):
     #    if obj.id:
     #        url = reverse("admin:Lobby_gameplayer_change", args=[obj.id])
     #        return format_html('<a href="{}">📝 Edit Player</a>', url)
     #    return "-"
+
 
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
@@ -107,8 +103,8 @@ class GameAdmin(admin.ModelAdmin):
         "relatedMainTournament",
         "relatedMiniTournament",
     ]
-    
-    inlines = [GamePlayerInline] # Add this line
+
+    inlines = [GamePlayerInline]  # Add this line
 
     # Map your Textareas here without needing a separate Form class
     def formfield_for_dbfield(self, db_field, request, **kwargs):
@@ -144,7 +140,8 @@ class GameAdmin(admin.ModelAdmin):
                 # "winner",
                 "relatedMainTournament",
                 "relatedMiniTournament",
-            ).prefetch_related("players__player")
+            )
+            .prefetch_related("players__player")
         )
 
         # 2. Conditional Deferral
@@ -172,22 +169,21 @@ class GameAdmin(admin.ModelAdmin):
     # Nice column headers
     @admin.display(description="Players")
     def player_list(self, obj):
-#       1. Fetch related objects
-        players = obj.players.all().select_related('player')
-        
+        #       1. Fetch related objects
+        players = obj.players.all().select_related("player")
+
         links = []
         for p in players:
             if p.player:
                 # 2. Generate the URL for the GamePlayer change page
                 # Pattern: admin:<app>_<model>_change
                 url = reverse("admin:Lobby_gameplayer_change", args=[p.id])
-                
+
                 # 3. Create the HTML anchor tag
                 links.append(format_html('<a href="{}">{}</a>', url, p.player.username))
-        
+
         # 4. Join with commas and return as safe HTML
         return format_html(", ".join(["{}"] * len(links)), *links) or "No players"
-
 
     @admin.display(
         description="Game (Click to view)", ordering="gameName"
@@ -239,7 +235,9 @@ class GameAdmin(admin.ModelAdmin):
     def tournament_display(self, obj):
         if obj.relatedMainTournament:
             return getattr(
-                obj.relatedMainTournament, "tournamentName", str(obj.relatedMainTournament)
+                obj.relatedMainTournament,
+                "tournamentName",
+                str(obj.relatedMainTournament),
             )
         if obj.relatedMiniTournament:
             return f"Mini: {getattr(obj.relatedMiniTournament, 'tournamentName', 'Unknown')}"
@@ -354,11 +352,11 @@ class GameAdmin(admin.ModelAdmin):
             },
         ),
         (
-           "Linked Tournament",
-           {
-               "classes": ("collapse",),
-               "fields": ("relatedMainTournament", "relatedMiniTournament"),
-           },
+            "Linked Tournament",
+            {
+                "classes": ("collapse",),
+                "fields": ("relatedMainTournament", "relatedMiniTournament"),
+            },
         ),
     )
 
@@ -381,3 +379,17 @@ class GamePlayerAdmin(admin.ModelAdmin):
 
 
 admin.site.register(changelog)
+
+################### Register game objects to specific app
+
+
+# CNS
+@admin.register(CNSgame)
+class CNSgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="CNS")
+
+    class Meta:
+        app_label = "CNS"
+
+################### END Register game objects to specific app
