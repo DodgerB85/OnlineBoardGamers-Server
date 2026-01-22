@@ -1055,6 +1055,9 @@ class FCM_Game(GeneralGame):
             return "0"
         currentSeat = self.seatPosition(_username)
         rewindConsentList = list(self.rewindConsent)
+        if len(rewindConsentList) < currentSeat:
+            for i in range(currentSeat - len(rewindConsentList)):
+                rewindConsentList.append("0")
         return rewindConsentList[currentSeat]
 
     # takes in a user object

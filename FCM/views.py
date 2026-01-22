@@ -40,9 +40,14 @@ from .common import create_fcm_game
 from Lobby.models import User, Profile
 from .models import FCM_Game
 
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC
+
+
 # import requests  # Keep this to broadcase on WSS when it is uncommented
 FCMsuperUsers = ["BotKickStarter"]
 USE_NEW_CODE = False
+
+FCM_DB_LOCK_NAME = "lockFCMgame_"
 
 
 def index(request):
@@ -416,7 +421,7 @@ def showGame(request, game_id):
 
 @contextmanager
 def db_mutex(gameID, timeout=10):
-    mutex_name = "lockFCMgame_" + str(gameID)
+    mutex_name = FCM_DB_LOCK_NAME + str(gameID)
     cursor = connection.cursor()
     got_lock = False  # Initialize got_lock to False
     try:
@@ -2019,6 +2024,107 @@ def _voteToDelete(request):
             {
                 "voteChanged": True,
                 "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+            },
+            safe=False,
+        )
+
+    return JsonResponse({"voteChanged": False})
+
+
+@login_required()
+def castVote(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    gameID = jsonData["gameID"]
+
+    with db_mutex(str(gameID)):
+        return _castVote(request)
+
+
+@login_required
+def _castVote(request):
+    """Adds a delete vote for a player."""
+    jsonData = json.loads(request.body)
+
+    try:
+        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
+    except FCM_Game.DoesNotExist:
+        raise Http404(gettext("FCM_Game does not exist"))
+    # player = request.user  # Assuming the logged-in user is voting
+    playerName = request.user.username  # Get the player's username
+    topic = jsonData["topic"]
+    choice = jsonData["choice"]
+
+    success = currentGame.tempPresenter().castVote(
+        topic, playerName, choice
+    )  # Pass playerName to addDeleteVote
+
+    if success:
+        currentGame.save()
+        # Check if all players have voted to delete
+        all_voted = True
+        #votesData = currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
+        #    topic, currentGame.tempPresenter().getAllPlayersOrderedySeat(True)
+        #)
+        votesData = currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
+            topic, currentGame.getAllPlayersOrderedySeat(True)
+        )
+
+        #missingPlayers = currentGame.tempPresenter().getMissingPlayersNamesArray()
+        missingPlayers = currentGame.getMissingPlayersNamesArray()
+        for player, vote in votesData.items():
+            if not vote and player not in missingPlayers:
+                all_voted = False
+                break
+
+        if all_voted:
+            # Get the result
+            #votesData = json.dumps(
+            #    currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
+            #        topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
+            #    )
+            #)
+            votesData = json.dumps(
+                currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
+                    topic, currentGame.getAllPlayersOrderedySeat(True)
+                )
+            )
+            # Delete the game
+            if topic == DELETE_VOTE_TOPIC:
+                currentGame.delete()
+                # Add a success message
+                messages.success(request, gettext("Game successfully deleted"))
+            
+            if topic == STATS_EXCLUDE_VOTE_TOPIC:
+                currentGame.statsExcludedGame = True
+                currentGame.save()
+                # Add a success message
+                messages.success(request, gettext("Game stats excluded"))
+            
+            # Redirect to the index page
+            return JsonResponse(
+                {
+                    "voteChanged": True,
+                    "votesData": votesData,
+                    "redirect_url": reverse("index"),
+                }
+            )
+
+        return JsonResponse(
+            {
+                "voteChanged": True,
+                #"votesData": json.dumps(
+                #    currentGame.presenter().getFullSetOfTrueFalseVotes(
+                #        topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
+                #    )
+                #),
+                "votesData": json.dumps(
+                    currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
+                        topic, currentGame.getAllPlayersOrderedySeat(True)
+                    )
+                ),
             },
             safe=False,
         )
