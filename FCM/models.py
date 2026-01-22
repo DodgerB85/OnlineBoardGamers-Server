@@ -981,8 +981,10 @@ class FCM_Game(GeneralGame):
             if len(rewindConsentList) < hostSeat:
                 for i in range(hostSeat - len(rewindConsentList)):
                     rewindConsentList.append("0")
-                
-            rewindConsentList[hostSeat] = "2"
+            try:
+                rewindConsentList[hostSeat] = "2"
+            except:
+                pass
             rewindConsentString = "".join(rewindConsentList)
             self.rewindConsent = rewindConsentString
             self.save()
