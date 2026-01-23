@@ -1058,7 +1058,11 @@ class FCM_Game(GeneralGame):
         if len(rewindConsentList) < currentSeat:
             for i in range(currentSeat - len(rewindConsentList)):
                 rewindConsentList.append("0")
-        return rewindConsentList[currentSeat]
+        try:
+            ret = rewindConsentList[currentSeat]
+            return ret
+        except:
+            return "0"
 
     # takes in a user object
     def checkForHostChange(self, _missingUser):
