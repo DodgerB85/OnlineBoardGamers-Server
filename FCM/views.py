@@ -311,7 +311,6 @@ def showGame(request, game_id):
         if currentGame.host == request.user:
             rewindPanelType = 2
             rewindHostPossible = currentGame.getRewindHostPossible()
-            print(f"rewindHostPossible: {rewindHostPossible}")
             rewindHostHTML = currentGame.getRewindHostHTML()
 
         if request.user.username in FCMsuperUsers:
@@ -352,7 +351,6 @@ def showGame(request, game_id):
 
         # Check for kickout
         kickoutRequired = currentGame.kickoutRequired()
-
         # print_timestamp("Step 4.7: currentNotes obtained")
 
         allPlayerListBySeat = currentGame.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
@@ -385,6 +383,7 @@ def showGame(request, game_id):
     #   Use currentGame.latestUpdateLiteral
     #   Use currentGame.myMove to prevent self kickout
     # tournamentGame = False
+    
     return render(
         request,
         "FCM/GameTemplate.html",
@@ -1523,8 +1522,7 @@ def _processTurn(request):
 
         if jsonData["RSRP"]:
             currentGame.removeSingleRewindPermission()
-        print(
-            f"RSRP: {jsonData['RSRP']} ")
+
         currentGame.clearAllMoveDataV2()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
