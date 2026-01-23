@@ -6,8 +6,9 @@
   <head>
     <meta charset="iso8859-1">
     <link href="{% static 'FCM/FCM.css' %}" rel="stylesheet">
-    <link rel="icon" type="image/png" href="{% static 'FCM/images/fcm_icon.png' %}" />
-
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'FCM/images/fcm_icon.png' %}" />
     <meta name="title" content="Online Board Gamers - Food Chain Magnate">
     <meta name="description"
           content="Play Splotter's Food Chain Magnate Online for free with others, or solo!">
@@ -24,261 +25,158 @@
     <div>
       <div id="top">
         <div id="menu">
-
-            <a href="{% url 'index' %}">
-              <span class="topMenuItem" data-type="0">
-                <img src="{% static 'FCM/images/house.svg' %}" />
-                <span>{% translate "Home" %}</span>
-              </span></a>
-
-              {% if user.is_authenticated %}
+          <a href="{% url 'index' %}">
+            <span class="topMenuItem" data-type="0">
+              <img src="{% static 'FCM/images/house.svg' %}" />
+              <span>{% translate "Home" %}</span>
+            </span></a>
+            {% if user.is_authenticated %}
               <a href="{{ nextURL|safe }}">
                 <span class="topMenuItem" id="menuButtonNext">
                   <img src="{% static 'FCM/images/icon-nextGame.svg' %}" />
                   <span>Next</span></span></a>
               {% else %}
-              <span class="topMenuBlank"></span>
+                <span class="topMenuBlank"></span>
               {% endif %}
-
-                  <div  class="menuDivider"></div>
-
+              <div class="menuDivider"></div>
               <a href="{% url 'FCM:FCMhelp' %}" target="_blank"><span class="topMenuItem" data-type="1">
                 <img src="{% static 'FCM/images/icon-rulebook.svg' %}" />
                 <span>{% translate "Rules" %}</span>
               </span></a>
-
               <span class="topMenuItem" data-type="7" id="reserveMenuButton">
                 <img src="{% static 'FCM/images/cardboard-box.svg' %}" />
                 <span>{% translate "Reserve" %}</span>
               </span>
-
-              <div  class="menuDivider"></div>
-
+              <div class="menuDivider"></div>
               {% if 'SHADOW' in allPlayerListBySeat and involvedPlayer and not finishedGame %}
-              <span class="topMenuItem" data-type="10">
-                <img src="{% static 'FCM/images/rewind.svg' %}" />
-                <span>{% translate "Rewind" %}</span>
-              </span>
-              <!--<span class="topMenuItem" data-type="10"><img
-                src="{% static 'FCM/images/rewind.svg' %}"><span>{% translate "Rewind" %}</span></span>-->
-                {% elif involvedPlayer %}
+                <span class="topMenuItem" data-type="10">
+                  <img src="{% static 'FCM/images/rewind.svg' %}" />
+                  <span>{% translate "Rewind" %}</span>
+                </span>
+                <!--<span class="topMenuItem" data-type="10"><img src="{% static 'FCM/images/rewind.svg' %}"><span>{% translate "Rewind" %}</span></span>-->
+              {% elif involvedPlayer %}
                 <span class="topMenuItem" data-type="999" id="assistanceMenuButton222">
-                  <img id="assistIcon222"
-                  src="{% static 'FCM/images/assistance.svg' %}">
+                  <img id="assistIcon222" src="{% static 'FCM/images/assistance.svg' %}">
                   <span>{% translate "Aid" %}</span>
                 </span>
               {% else %}
-              <span class="topMenuBlank"></span>
+                <span class="topMenuBlank"></span>
               {% endif %}
-               
-              <br/>
+              <br />
               {% if user.is_authenticated %}
                 <span class="topMenuItem" data-type="5" id="menuButtonChat">
                   <img src="{% static 'FCM/images/talk.svg' %}" />
                   <span>{% translate "Chat" %}</span>
                 </span>
-                {% else %}
+              {% else %}
                 <span class="topMenuBlank"></span>
-                {% endif %}
-
-                {% if involvedPlayer %}
+              {% endif %}
+              {% if involvedPlayer %}
                 <span class="topMenuItem" data-type="2" id="menuButtonBug">
                   <img src="{% static 'FCM/images/stop-sign.svg' %}" />
                   <span>{% translate "Bug" %}</span>
                 </span>
-                {% else %}
+              {% else %}
                 <span class="topMenuBlank"></span>
-                {% endif %}
-
-                <div class="menuDivider"></div>
-
-                {% if involvedPlayer %}
+              {% endif %}
+              <div class="menuDivider"></div>
+              {% if involvedPlayer %}
                 <span class="topMenuItem" data-type="3" id="menuButtonNotes">
                   <img src="{% static 'FCM/images/notebook.svg' %}" />
                   <span>{% translate "Notes" %}</span>
                 </span>
-                {% else %}
+              {% else %}
                 <span class="topMenuBlank"></span>
-                {% endif %}
-
-                <span class="topMenuItem" data-type="4" id="menuButtonHistory">
-                  <img src="{% static 'FCM/images/scroll-unfurled.svg' %}" />
-                  <span>{% translate "History" %}</span>
-                </span>
-
-                <div  class="menuDivider"></div>
-
-
-                <span class="topMenuItem" data-type="9" id="replayMenuButton">
-                  <img id="replayIcon" src="{% static 'FCM/images/replay.svg' %}" />
-                  <span>{% translate "Replay" %}</span>
-                </span>
-
-               <!-- <span class="topMenuItem" data-type="999" id="assistanceMenuButton"><img id="assistIcon"
-                  src="{% static 'FCM/images/assistance.svg' %}">
+              {% endif %}
+              <span class="topMenuItem" data-type="4" id="menuButtonHistory">
+                <img src="{% static 'FCM/images/scroll-unfurled.svg' %}" />
+                <span>{% translate "History" %}</span>
+              </span>
+              <div class="menuDivider"></div>
+              <span class="topMenuItem" data-type="9" id="replayMenuButton">
+                <img id="replayIcon" src="{% static 'FCM/images/replay.svg' %}" />
+                <span>{% translate "Replay" %}</span>
+              </span>
+              <!-- <span class="topMenuItem" data-type="999" id="assistanceMenuButton"><img id="assistIcon" src="{% static 'FCM/images/assistance.svg' %}">
                   <span>{% translate "Aid" %}</span>
-                </span>-->
-
-                <!-- IF LOGGED IN -->
-
-                
+</span>-->
+              <!-- IF LOGGED IN -->
+            </div>
+            <div id="topRight">
+              <span class="live"></span>
+              <div id="liveDiv">{% translate "Connecting to server....." %}</div>
+              <div id="loggedInDiv">
+                {% if user.is_authenticated %}
+                  {% translate "Logged in as:" %} {{ user.username }}
+                {% endif %}
+                <br />
+                <span id="kickoutTimerSpan">{% translate "Time to next kickout:" %} <span id="kickoutTimerTimer"></span></span>
               </div>
-              <div id="topRight">
-                <span class="live"></span>
-                <div id="liveDiv">{% translate "Connecting to server....." %}</div>
-                <div id="loggedInDiv">
-                  {% if user.is_authenticated %}
-                    {% translate "Logged in as:" %} {{ user.username }}
-                  {% endif %}
+              <div id="testDiv"></div>
+              <div id="zoomDiv">
+                <label id="zoomLabel">{% translate "ZOOM" %}</label>
+                <br />
+                <input class="zoomButton" type="button" value="+" onclick="V.doZoom(1)">
+                &nbsp;
+                <input class="zoomButton" type="button" value="-" onclick="V.doZoom(-1)">
+                {% if rewindPanelType == 1 and not finishedGame %}
                   <br />
-                  <span id="kickoutTimerSpan">{% translate "Time to next kickout:" %} <span id="kickoutTimerTimer"></span></span>
-                </div>
-                <div id="testDiv"></div>
-                <div id="zoomDiv">
-                  <label id="zoomLabel">{% translate "ZOOM" %}</label>
-                  <br />
-                  <input class="zoomButton" type="button" value="+" onclick="V.doZoom(1)">
-                  &nbsp;
-                  <input class="zoomButton" type="button" value="-" onclick="V.doZoom(-1)">
-                  {% if rewindPanelType == 1 and not finishedGame %}
-                    <br />
-                    <div id="dropdownContainer">
-                      <div id="showDropdown">{% translate "Game Options" %} ↓</div>
-                     
-                      <div id="dropdown">
-                         <!-- ADD TEMPORARY REWIND EXTRA -- NON HOST -->
-                         {% blocktranslate trimmed %}
-                         <b><u>Trial Feature</b></u><br/>
-                         Anyone may rewind the game at any point EXCEPT during turn
-                         order, and the first person working 9-5.<br/>
-                         This is because the most important hidden information is during 
-                         restructuring.
-                         {% endblocktranslate %}
-                         <br/>
-                         <span class="topMenuItem" id="hostRewindIcon" data-type="11">
-                          <img src="{% static 'FCM/images/rewind.svg' %}" />
-                          <span>{% translate "REWIND" %}</span></span>
-                          <!--<br/><b>Removed due abuse<br/>
-                          Will return in altered form
-                         <hr/></b>-->
-                         <hr/>
-                         <!-- END TEMPORARAY REWIND EXTRA-->
-                        {% blocktranslate trimmed %}
-                          You can give permission for the host to rewind the game back to the start of the restructuring phase.
-                          All players must give permission before the host is able to rewind the game.
-                        {% endblocktranslate %}
-                        <br />
-                        {% if tournamentGame %}
+                  <div id="dropdownContainer">
+                    <div id="showDropdown">{% translate "Game Options" %} ↓</div>
+                    <div id="dropdown">
+                      <!-- ADD TEMPORARY REWIND EXTRA -- NON HOST -->
+                      {% blocktranslate trimmed %}
+                        <b><u>Trial Feature</b></u>
                           <br />
-                          <b>{% translate "Tournament games are a bit more competitive, so rewinds should not be expected" %}</b>
-                          <br />
-                          <br />
-                        {% endif %}
-                        
-                        <input type="hidden" id="rwgid" name="gameID" value="{{ gameID }}">
-                        <input type="checkbox"
-                               class="myCheckbox"
-                               id="checkOnce"
-                               name="checkOnce"
-                               value="1"
-                               {% if currentRewindConsent == 1 %}disabled checked{% endif %}
-                               {% if currentRewindConsent == 2 %}disabled{% endif %}>
-                        <label for="checkOnce">{% translate "Permission up to last Restructuring" %}</label>
-                        <br />
-                        <input type="checkbox"
-                               class="myCheckbox"
-                               id="checkPermanent"
-                               name="checkPermanent"
-                               value="2"
-                               {% if currentRewindConsent == 2 %}disabled checked{% endif %}>
-                        <label for="checkPermanent">{% translate "Permanent Permission" %}</label>
-                        <br />
-                        {% if currentRewindConsent != 2 %}
-                          <input type="submit"
-                                 id="submitRewindConsent"
-                                 class="registerbtn"
-                                 value="{% translate "Give Permission" %}">
-                        {% endif %}
-                        <br />
-                        <br />
-                        {% if myStatsExcludeConsent != "1" %}
-                          <div id="statsExcludeConsentChangeDiv">
-                            <input type="checkbox"
-                                   class="myCheckbox"
-                                   id="checkStatsExclude"
-                                   name="checkStatsExclude"
-                                   value="1"
-                                   {% if currentStatsExcludeConsent == 1 %}disabled checked{% endif %}>
-                            <label for="checkStatsExclude">{% translate "Exclude game from stats" %}</label>
-                            <input type="submit"
-                                   id="submitStatsExcludeConsent"
-                                   class="registerbtn"
-                                   value="{% translate "Exclude From Stats" %}">
-                          </div>
-                        {% elif statsExcludedGame %}
-                          <span style="background-color: darkcyan;">{% translate "Excluded from Stats" %}</span>
-                          <br />
-                        {% else %}
-                          <span style="background-color:darkgoldenrod">{% translate "Waiting for other players" %}</span>
-                          <br />
-                        {% endif %}
-                        <br />
-                        {% blocktranslate trimmed %}
-                          If all non-bot players tick and confirm this option, this game won't count in any win/loss stats. You can
-                          use this if you simply wish to have a "less competitive" game, or
-                          you wish to exclude it for other reasons (EG multiple player kickouts)
-                        {% endblocktranslate %}
-                      </div>
-                    </div>
-                  {% elif rewindPanelType == 2 and not finishedGame %}
-                    <br />
-                    <div id="dropdownContainer">
-                      <div id="showDropdown">{% translate "Game Options" %} ↓</div>
-                      <div id="dropdown">
-                          <!-- ADD TEMPORARY REWIND EXTRA -- NON HOST -->
-                          {% blocktranslate trimmed %}
-                          <b><u>Trial Feature</b></u><br/>
                           Anyone may rewind the game at any point EXCEPT during turn
-                          order, and the first person working 9-5.<br/>
-                          This is because the most important hidden information is during 
+                          order, and the first person working 9-5.
+                          <br />
+                          This is because the most important hidden information is during
                           restructuring.
-                          {% endblocktranslate %}
-                          <br/>
-                          <br/><span class="topMenuItem" id="hostRewindIcon" data-type="11">
-                          <img src="{% static 'FCM/images/rewind.svg' %}" />
-                          <span>{% translate "REWIND" %}</span></span>
-                          <!--<br/><b>Removed due abuse<br/>
-                            Will return in altered form
-                           <br/><br/></b>
-                          <hr/>-->
-                          <hr/>
-                          <!-- END TEMPORARAY REWIND EXTRA-->
-                        {% blocktranslate trimmed %}
-                          As the game host, you must wait for all players to give permission.
-                          They can allow you to rewind once, or as much as you like.
-                          Try asking in chat for permission if you wish to rewind.
-                          Current Permissions:
                         {% endblocktranslate %}
                         <br />
-                        <br />
-                        <div>{{ rewindHostHTML|safe }}</div>
-                        <br />
-                        {% translate "Reload the whole page to refresh permissions" %}
-                        <br />
-                        {% if tournamentGame %}
+                        <span class="topMenuItem" id="hostRewindIcon" data-type="11">
+                          <img src="{% static 'FCM/images/rewind.svg' %}" />
+                          <span>{% translate "REWIND" %}</span></span>
+                          <!--<br /><b>Removed due abuse<br />
+                          Will return in altered form
+                         <hr /></b>-->
+                          <hr />
+                          <!-- END TEMPORARAY REWIND EXTRA-->
+                          {% blocktranslate trimmed %}
+                            You can give permission for the host to rewind the game back to the start of the restructuring phase.
+                            All players must give permission before the host is able to rewind the game.
+                          {% endblocktranslate %}
                           <br />
-                          <b>
-                            {% translate "Tournament games are a bit more competitive, so you should not feel obligated to accept a rewind request" %}
-                          </b>
-                          <br />
-                        {% endif %}
-                        {% if rewindHostPossible %}
-                          <span class="topMenuItem" id="hostRewindIcon" data-type="10">
-                            <img src="{% static 'FCM/images/rewind.svg' %}" />
-                            <span>{% translate "REWIND" %}</span></span>
-                          {% else %}
+                          {% if tournamentGame %}
                             <br />
-                            {% translate "Please wait for all players to give permission" %}
+                            <b>{% translate "Tournament games are a bit more competitive, so rewinds should not be expected" %}</b>
+                            <br />
+                            <br />
+                          {% endif %}
+                          <input type="hidden" id="rwgid" name="gameID" value="{{ gameID }}">
+                          <input type="checkbox"
+                                 class="myCheckbox"
+                                 id="checkOnce"
+                                 name="checkOnce"
+                                 value="1"
+                                 {% if currentRewindConsent == 1 %}disabled checked{% endif %}
+                                 {% if currentRewindConsent == 2 %}disabled{% endif %}>
+                          <label for="checkOnce">{% translate "Permission up to last Restructuring" %}</label>
+                          <br />
+                          <input type="checkbox"
+                                 class="myCheckbox"
+                                 id="checkPermanent"
+                                 name="checkPermanent"
+                                 value="2"
+                                 {% if currentRewindConsent == 2 %}disabled checked{% endif %}>
+                          <label for="checkPermanent">{% translate "Permanent Permission" %}</label>
+                          <br />
+                          {% if currentRewindConsent != 2 %}
+                            <input type="submit"
+                                   id="submitRewindConsent"
+                                   class="registerbtn"
+                                   value="{% translate "Give Permission" %}">
                           {% endif %}
                           <br />
                           <br />
@@ -311,122 +209,213 @@
                           {% endblocktranslate %}
                         </div>
                       </div>
-                    {% endif %}
-                  </div>
-                </div>
-                <div id="topInfos">
-                  <div id="topbar">
-                    <div class="line">
-                      <span id="gameNameSpan">{% translate "Game:" %} <span id="gameName"></span></span>
-                    </div>
-                    <div class="line">
-                      <span>{% translate "Bank:" %} $</span><span id="bankContent"></span> |
-                      <span>{% translate "Turn:" %}</span><span id="turnNumber"></span> |
-                      <span>{% translate "Phase:" %}</span><span id="phase"></span>
-                      <span id="gameInfoSpan"> | <span>{% translate "Current player:" %}</span><span id="currentPlayer"></span></span>
-                    </div>
-                  </div>
-                  <div id="players"></div>
-                </div>
-              </div>
-              <div id="wholeMainArea">
-                <div id="bugReport">
-                  <h2>{% translate "Bug Report" %}</h2>
-                  <p>{% translate "Please submit a bug report if you encounter any issues, giving as much detail as possbile." %}</p>
-                  <p><b>{% translate "Do you think there are too many 1x Luxury Managers? Please note that COFFEE, KIMCHI, SUSHI, and NOODLES add one extra" %}</b></p>
-                  <p><b>{% translate "Please note: Cart / Truck drivers can drive around a 'roundabout' on the same tile as many times as they like. Drinks will only be collected once" %}</b></p>
-                  <p><b>{% translate "Please note: In New MS you need to actually USE an employee to get their Milestone" %}</b></p>
-                  <div>
-                    <textarea cols="150" rows="10" name="bugContent" id="bugContent"></textarea>
-                  </div>
-                  <div>
-                    <button id="submitBug"  class="actionsLineButton">{% translate "Submit" %}</button>
-                    <button id="resetBug" class="actionsLineButton">{% translate "Reset" %}</button>
-                  </div>
-                </div>
-                <div id="notesBox">
-                  <h2>{% translate "Personal game notes" %}</h2>
-                  <p>{% translate "Only you can see these notes" %}</p>
-                  <div>
-                    <textarea cols="120" rows="10" id="notes"></textarea>
-                  </div>
-                  <div>
-                    <button id="submitNotes" class='actionsLineButton'>{% translate "Submit" %}</button>
-                    <button id="clearNotes" class='actionsLineButton'>{% translate "Clear" %}</button>
-                    <button id="closeNotes" class='actionsLineButton'>{% translate "Close" %}</button>
-                  </div>
-                </div>
-                <div id="wholeChat">
-                  <div id="chatBox">
-                    <h2>{% translate "Send a message" %}</h2>
-                    <div>
-                      <textarea rows="6" name="chatMessage" id="chatMessage"></textarea>
-                    </div>
-                    <div>
-                      <button class='actionsLineButton'>{% translate "Send" %}</button>
-                    </div>
-                  </div>
-                  <div id="messageList"></div>
-                </div>
-                <div id="history"></div>
-                <div id="historyToggleDiv">
-                  <label class="textLabel">{% translate "Oldest First" %}</label>
-                  <label class="switch">
-                    <input type="checkbox" checked onclick="historyToggle()">
-                    <span class="slider round"></span>
-                  </label>
-                  <label class="textLabel">{% translate "Newest First" %}</label>
-                </div>
-                <div id="main">
-                  <div id="display"></div>
-                  <div id="reserve"></div>
-                  <div id="actions"></div>
-                  <div id="replayArea"></div>
-                  <div id="loader">
-                    <img src="{% static 'FCM/images/loading-bar-black.gif' %}" />
-                  </div>
-                  <div id="gameSavingBar">
-                    Saving Game.... Please Wait....<br/>
-                    <img src="{% static 'FCM/images/loading-bar-black.gif' %}" />
-                  </div>
-                  <div class="row">
-                    <!-- <div id="boardContainer">-->
-                    <div id="board"></div>
-                    <!-- </div>-->
-                    <div id="assistance">
-                      <div id="assistanceSummary">
-                        <h4>{% translate "Summary" %}</h4>
-                        <div id="assistanceBoard"></div>
+                    {% elif rewindPanelType == 2 and not finishedGame %}
+                      <br />
+                      <div id="dropdownContainer">
+                        <div id="showDropdown">{% translate "Game Options" %} ↓</div>
+                        <div id="dropdown">
+                          <!-- ADD TEMPORARY REWIND EXTRA -- NON HOST -->
+                          {% blocktranslate trimmed %}
+                            <b><u>Trial Feature</b></u>
+                              <br />
+                              Anyone may rewind the game at any point EXCEPT during turn
+                              order, and the first person working 9-5.
+                              <br />
+                              This is because the most important hidden information is during
+                              restructuring.
+                            {% endblocktranslate %}
+                            <br />
+                            <br />
+                            <span class="topMenuItem" id="hostRewindIcon" data-type="11">
+                              <img src="{% static 'FCM/images/rewind.svg' %}" />
+                              <span>{% translate "REWIND" %}</span></span>
+                              <!--<br /><b>Removed due abuse<br />
+                            Will return in altered form
+                           <br /><br /></b>
+                          <hr />-->
+                              <hr />
+                              <!-- END TEMPORARAY REWIND EXTRA-->
+                              {% blocktranslate trimmed %}
+                                As the game host, you must wait for all players to give permission.
+                                They can allow you to rewind once, or as much as you like.
+                                Try asking in chat for permission if you wish to rewind.
+                                Current Permissions:
+                              {% endblocktranslate %}
+                              <br />
+                              <br />
+                              <div>{{ rewindHostHTML|safe }}</div>
+                              <br />
+                              {% translate "Reload the whole page to refresh permissions" %}
+                              <br />
+                              {% if tournamentGame %}
+                                <br />
+                                <b>
+                                  {% translate "Tournament games are a bit more competitive, so you should not feel obligated to accept a rewind request" %}
+                                </b>
+                                <br />
+                              {% endif %}
+                              {% if rewindHostPossible %}
+                                <span class="topMenuItem" id="hostRewindIcon" data-type="10">
+                                  <img src="{% static 'FCM/images/rewind.svg' %}" />
+                                  <span>{% translate "REWIND" %}</span></span>
+                                {% else %}
+                                  <br />
+                                  {% translate "Please wait for all players to give permission" %}
+                                {% endif %}
+                                <br />
+                                <br />
+                                {% if myStatsExcludeConsent != "1" %}
+                                  <div id="statsExcludeConsentChangeDiv">
+                                    <input type="checkbox"
+                                           class="myCheckbox"
+                                           id="checkStatsExclude"
+                                           name="checkStatsExclude"
+                                           value="1"
+                                           {% if currentStatsExcludeConsent == 1 %}disabled checked{% endif %}>
+                                    <label for="checkStatsExclude">{% translate "Exclude game from stats" %}</label>
+                                    <input type="submit"
+                                           id="submitStatsExcludeConsent"
+                                           class="registerbtn"
+                                           value="{% translate "Exclude From Stats" %}">
+                                  </div>
+                                {% elif statsExcludedGame %}
+                                  <span style="background-color: darkcyan;">{% translate "Excluded from Stats" %}</span>
+                                  <br />
+                                {% else %}
+                                  <span style="background-color:darkgoldenrod">{% translate "Waiting for other players" %}</span>
+                                  <br />
+                                {% endif %}
+                                <br />
+                                {% blocktranslate trimmed %}
+                                  If all non-bot players tick and confirm this option, this game won't count in any win/loss stats. You can
+                                  use this if you simply wish to have a "less competitive" game, or
+                                  you wish to exclude it for other reasons (EG multiple player kickouts)
+                                {% endblocktranslate %}
+                              </div>
+                            </div>
+                          {% endif %}
+                        </div>
                       </div>
-                      <div id="assistancePlayers"></div>
-                      <div id="gourmetFoodCriticActiveDisplay"></div>
-                      <div id="hawkerMarketerActiveDisplay"></div>
-                      <div id="ruralMarketingArea"></div>
-                      <div id="sandboxDiv"></div>
-                      <!--<div id="board_information">sdfds</div>-->
+                      <div id="topInfos">
+                        <div id="topbar">
+                          <div class="line">
+                            <span id="gameNameSpan">{% translate "Game:" %} <span id="gameName"></span></span>
+                          </div>
+                          <div class="line">
+                            <span>{% translate "Bank:" %} $</span><span id="bankContent"></span> |
+                            <span>{% translate "Turn:" %}</span><span id="turnNumber"></span> |
+                            <span>{% translate "Phase:" %}</span><span id="phase"></span>
+                            <span id="gameInfoSpan"> | <span>{% translate "Current player:" %}</span><span id="currentPlayer"></span></span>
+                          </div>
+                        </div>
+                        <div id="players"></div>
+                      </div>
+                    </div>
+                    <div id="wholeMainArea">
+                      <div id="bugReport">
+                        <h2>{% translate "Bug Report" %}</h2>
+                        <p>{% translate "Please submit a bug report if you encounter any issues, giving as much detail as possbile." %}</p>
+                        <p>
+                          <b>{% translate "Do you think there are too many 1x Luxury Managers? Please note that COFFEE, KIMCHI, SUSHI, and NOODLES add one extra" %}</b>
+                        </p>
+                        <p>
+                          <b>{% translate "Please note: Cart / Truck drivers can drive around a 'roundabout' on the same tile as many times as they like. Drinks will only be collected once" %}</b>
+                        </p>
+                        <p>
+                          <b>{% translate "Please note: In New MS you need to actually USE an employee to get their Milestone" %}</b>
+                        </p>
+                        <div>
+                          <textarea cols="150" rows="10" name="bugContent" id="bugContent"></textarea>
+                        </div>
+                        <div>
+                          <button id="submitBug"  class="actionsLineButton">{% translate "Submit" %}</button>
+                          <button id="resetBug" class="actionsLineButton">{% translate "Reset" %}</button>
+                        </div>
+                      </div>
+                      <div id="notesBox">
+                        <h2>{% translate "Personal game notes" %}</h2>
+                        <p>{% translate "Only you can see these notes" %}</p>
+                        <div>
+                          <textarea cols="120" rows="10" id="notes"></textarea>
+                        </div>
+                        <div>
+                          <button id="submitNotes" class='actionsLineButton'>{% translate "Submit" %}</button>
+                          <button id="clearNotes" class='actionsLineButton'>{% translate "Clear" %}</button>
+                          <button id="closeNotes" class='actionsLineButton'>{% translate "Close" %}</button>
+                        </div>
+                      </div>
+                      <div id="wholeChat">
+                        <div id="chatBox">
+                          <h2>{% translate "Send a message" %}</h2>
+                          <div>
+                            <textarea rows="6" name="chatMessage" id="chatMessage"></textarea>
+                          </div>
+                          <div>
+                            <button class='actionsLineButton'>{% translate "Send" %}</button>
+                          </div>
+                        </div>
+                        <div id="messageList"></div>
+                      </div>
+                      <div id="history"></div>
+                      <div id="historyToggleDiv">
+                        <label class="textLabel">{% translate "Oldest First" %}</label>
+                        <label class="switch">
+                          <input type="checkbox" checked onclick="historyToggle()">
+                          <span class="slider round"></span>
+                        </label>
+                        <label class="textLabel">{% translate "Newest First" %}</label>
+                      </div>
+                      <div id="main">
+                        <div id="display"></div>
+                        <div id="reserve"></div>
+                        <div id="actions"></div>
+                        <div id="replayArea"></div>
+                        <div id="loader">
+                          <img src="{% static 'FCM/images/loading-bar-black.gif' %}" />
+                        </div>
+                        <div id="gameSavingBar">
+                          Saving Game.... Please Wait....
+                          <br />
+                          <img src="{% static 'FCM/images/loading-bar-black.gif' %}" />
+                        </div>
+                        <div class="row">
+                          <!-- <div id="boardContainer">-->
+                          <div id="board"></div>
+                          <!-- </div>-->
+                          <div id="assistance">
+                            <div id="assistanceSummary">
+                              <h4>{% translate "Summary" %}</h4>
+                              <div id="assistanceBoard"></div>
+                            </div>
+                            <div id="assistancePlayers"></div>
+                            <div id="gourmetFoodCriticActiveDisplay"></div>
+                            <div id="hawkerMarketerActiveDisplay"></div>
+                            <div id="ruralMarketingArea"></div>
+                            <div id="sandboxDiv"></div>
+                            <!--<div id="board_information">sdfds</div>-->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="mapEditor">
+                      <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="mapData" name="mapData" value="">
+                        <a href="#" onclick="openInMapEditor()">{% translate "Open in Map Editor" %}</a>
+                      </form>
+                      <form id="rematchForm" action="/createFCMpage/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="mapDataRematch" name="mapDataRematch" value="">
+                        <input type="hidden" id="rematchData" name="rematchData" value="">
+                        <input type="hidden"
+                               id="rematchFormBoo"
+                               name="rematchFormBoo"
+                               value="Correct">
+                      </form>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div id="mapEditor">
-                <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
-                  {% csrf_token %}
-                  <input type="hidden" id="mapData" name="mapData" value="">
-                  <a href="#" onclick="openInMapEditor()">{% translate "Open in Map Editor" %}</a>
-                </form>
-                <form id="rematchForm" action="/createFCMpage/" method="post">
-                  {% csrf_token %}
-                  <input type="hidden" id="mapDataRematch" name="mapDataRematch" value="">
-                  <input type="hidden" id="rematchData" name="rematchData" value="">
-                  <input type="hidden"
-                         id="rematchFormBoo"
-                         name="rematchFormBoo"
-                         value="Correct">
-                </form>
-              </div>
-            </div>
-            <div id="footer"></div>
-            <script>
+                  <div id="footer"></div>
+                  <script>
               var zoomInterval;
     var global = {};
     global.gameCreationTimestamp = {{ gameCreationTimestamp }};
@@ -439,9 +428,7 @@
     global.pov = {{ pov }};
     global.finishedGame = "{{ finishedGame }}";
     global.move = ""
-    {% if user.is_authenticated %}
-    global.chatData = "{{ chatData }}";
-    {% endif %}
+    {% if user.is_authenticated %}global.chatData = "{{ chatData }}";{% endif %}
 
     {% else %}
     // Old
@@ -461,9 +448,7 @@
 
     // If I
     {% if involvedPlayer %}
-    {% if allPlayerListBySeat %}
-    global.players = {{ allPlayerListBySeat | safe }};
-    {% endif %}
+    {% if allPlayerListBySeat %}global.players = {{ allPlayerListBySeat | safe }};{% endif %}
     // This is used
     {% if moveData %}global.move = '{{ moveData | safe }}';{% endif %}
     
@@ -486,9 +471,7 @@
 
     {%if not gameData %}
     
-    {% if displayNames %}
-    global.displayNames = {{ displayNames | safe }};
-    {% endif %}
+    {% if displayNames %}global.displayNames = {{ displayNames | safe }};{% endif %}
 
    
     {% endif %}
@@ -555,38 +538,36 @@
     global.tournamentGame = true;
     {% endif %}
 
-            </script>
-            <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
-            <!--<script src="{% statici18n LANGUAGE_CODE %}"></script>-->
-            <script src="{% url 'javascript-catalog' %}"></script>
-
-            <script src="{% static 'FCM/JS/lib/jquery-2.1.4.min.js' %}"></script>
-            <script src="{% static 'FCM/JS/lib/lodash.min.js' %}"></script>
-            {% if USE_NEW_CODE %}
-            {% if settingsDebug %}
-            <script src="/static/FCM/JS/Roger.js"></script>
-            <script src="/static/FCM/JS/utils.js"></script>
-            <script src="/static/FCM/JS/reference.js"></script>
-            <script src="/static/FCM/JS/map.js"></script>
-            <script src="/static/FCM/JS/player.js"></script>
-            <script src="/static/FCM/JS/rules.js"></script>
-            <script src="/static/FCM/JS/model.js"></script>
-            <script src="/static/FCM/JS/view.js"></script>
-            <script src="/static/FCM/JS/controller.js"></script>
-            <script src="/static/FCM/JS/history.js"></script>
-            <script src="/static/FCM/JS/io.js"></script>
-            <script src="/static/FCM/JS/bot.js"></script>
-            <script src="/static/FCM/JS/FCMreplay.js"></script>
-            <script src="/static/FCM/JS/FCM_AI.js"></script>
-            <script src="/static/FCM/JS/websocket.js"></script>
-            <script src="/static/FCM/JS/test.js"></script>
-            <script src="/static/FCM/JS/main.js"></script>
-            {% else %}
-            <script src="{% static 'FCM/JS/FCMmain.js' %}"></script>
-
-            {% endif %}
-            {% else %}
-            <script src="{% static 'FCM/JS/FCMmainOLD.js' %}"></script>
-            {% endif %}
-          </body>
-        </html>
+                  </script>
+                  <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+                  <!--<script src="{% statici18n LANGUAGE_CODE %}"></script>-->
+                  <script src="{% url 'javascript-catalog' %}"></script>
+                  <script src="{% static 'FCM/JS/lib/jquery-2.1.4.min.js' %}"></script>
+                  <script src="{% static 'FCM/JS/lib/lodash.min.js' %}"></script>
+                  {% if USE_NEW_CODE %}
+                    {% if settingsDebug %}
+                      <script src="/static/FCM/JS/Roger.js"></script>
+                      <script src="/static/FCM/JS/utils.js"></script>
+                      <script src="/static/FCM/JS/reference.js"></script>
+                      <script src="/static/FCM/JS/map.js"></script>
+                      <script src="/static/FCM/JS/player.js"></script>
+                      <script src="/static/FCM/JS/rules.js"></script>
+                      <script src="/static/FCM/JS/model.js"></script>
+                      <script src="/static/FCM/JS/view.js"></script>
+                      <script src="/static/FCM/JS/controller.js"></script>
+                      <script src="/static/FCM/JS/history.js"></script>
+                      <script src="/static/FCM/JS/io.js"></script>
+                      <script src="/static/FCM/JS/bot.js"></script>
+                      <script src="/static/FCM/JS/FCMreplay.js"></script>
+                      <script src="/static/FCM/JS/FCM_AI.js"></script>
+                      <script src="/static/FCM/JS/websocket.js"></script>
+                      <script src="/static/FCM/JS/test.js"></script>
+                      <script src="/static/FCM/JS/main.js"></script>
+                    {% else %}
+                      <script src="{% static 'FCM/JS/FCMmain.js' %}"></script>
+                    {% endif %}
+                  {% else %}
+                    <script src="{% static 'FCM/JS/FCMmainOLD.js' %}"></script>
+                  {% endif %}
+                </body>
+              </html>
