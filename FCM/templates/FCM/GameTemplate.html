@@ -180,33 +180,6 @@
                           {% endif %}
                           <br />
                           <br />
-                          {% if myStatsExcludeConsent != "1" %}
-                            <div id="statsExcludeConsentChangeDiv">
-                              <input type="checkbox"
-                                     class="myCheckbox"
-                                     id="checkStatsExclude"
-                                     name="checkStatsExclude"
-                                     value="1"
-                                     {% if currentStatsExcludeConsent == 1 %}disabled checked{% endif %}>
-                              <label for="checkStatsExclude">{% translate "Exclude game from stats" %}</label>
-                              <input type="submit"
-                                     id="submitStatsExcludeConsent"
-                                     class="registerbtn"
-                                     value="{% translate "Exclude From Stats" %}">
-                            </div>
-                          {% elif statsExcludedGame %}
-                            <span style="background-color: darkcyan;">{% translate "Excluded from Stats" %}</span>
-                            <br />
-                          {% else %}
-                            <span style="background-color:darkgoldenrod">{% translate "Waiting for other players" %}</span>
-                            <br />
-                          {% endif %}
-                          <br />
-                          {% blocktranslate trimmed %}
-                            If all non-bot players tick and confirm this option, this game won't count in any win/loss stats. You can
-                            use this if you simply wish to have a "less competitive" game, or
-                            you wish to exclude it for other reasons (EG multiple player kickouts)
-                          {% endblocktranslate %}
                         </div>
                       </div>
                     {% elif rewindPanelType == 2 and not finishedGame %}
@@ -264,33 +237,6 @@
                                 {% endif %}
                                 <br />
                                 <br />
-                                {% if myStatsExcludeConsent != "1" %}
-                                  <div id="statsExcludeConsentChangeDiv">
-                                    <input type="checkbox"
-                                           class="myCheckbox"
-                                           id="checkStatsExclude"
-                                           name="checkStatsExclude"
-                                           value="1"
-                                           {% if currentStatsExcludeConsent == 1 %}disabled checked{% endif %}>
-                                    <label for="checkStatsExclude">{% translate "Exclude game from stats" %}</label>
-                                    <input type="submit"
-                                           id="submitStatsExcludeConsent"
-                                           class="registerbtn"
-                                           value="{% translate "Exclude From Stats" %}">
-                                  </div>
-                                {% elif statsExcludedGame %}
-                                  <span style="background-color: darkcyan;">{% translate "Excluded from Stats" %}</span>
-                                  <br />
-                                {% else %}
-                                  <span style="background-color:darkgoldenrod">{% translate "Waiting for other players" %}</span>
-                                  <br />
-                                {% endif %}
-                                <br />
-                                {% blocktranslate trimmed %}
-                                  If all non-bot players tick and confirm this option, this game won't count in any win/loss stats. You can
-                                  use this if you simply wish to have a "less competitive" game, or
-                                  you wish to exclude it for other reasons (EG multiple player kickouts)
-                                {% endblocktranslate %}
                               </div>
                             </div>
                           {% endif %}
@@ -421,7 +367,10 @@
     global.gameCreationTimestamp = {{ gameCreationTimestamp }};
     global.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
     global.deleteVotesData = {{ deleteVotesData | safe }};
+    global.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+
     global.votedToDelete = false;
+    global.votedToExclude = false;
               
     {% if USE_NEW_CODE %}
     // New

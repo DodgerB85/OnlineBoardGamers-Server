@@ -2326,8 +2326,12 @@ input.radio {
 	vertical-align: middle;
 }
 
-.voteDeleteButton {
-	margin-left: 100px;
+#excludeDiv, #deleteDiv {
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	margin: auto;
+	width: 100%;
 }
 
 .ceoBonusLine {

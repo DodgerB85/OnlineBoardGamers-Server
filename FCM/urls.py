@@ -26,17 +26,9 @@ urlpatterns = [
     path("<int:game_id>/checkNewData/", views.checkNewData, name="checkNewData"),
     path("changeAssistance/", views.changeAssistance, name="changeAssistance"),
     path(
-        "processRewindConsent/", views.processRewindConsent, name="processRewindConsent"
-    ),
-    path(
-        "processStatsExcludeConsent/",
-        views.processStatsExcludeConsent,
-        name="processStatsExcludeConsent",
-    ),
-    path(
         "gameAdminGetMoveData/", views.gameAdminGetMoveData, name="gameAdminGetMoveData"
     ),
     path("data/<int:dataType>/", views.FCMdata, name="FCMdata"),
     path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
-    path("voteToDelete/", views.voteToDelete, name="addDeleteVoteFCM"),
+    path("castVote/", views.castVote, name="castVoteCNS"),
 ]

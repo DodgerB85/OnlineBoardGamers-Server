@@ -47,7 +47,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from Lobby.models import User, Mini_Tournaments, GeneralGame, Main_Tournament
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG, STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC
 
 
 logger = logging.getLogger(__name__)
@@ -190,7 +190,7 @@ class FCM_Game(GeneralGame):
     )
 
     # TODOMODEL change to json, move to general game
-    rewindConsent = models.CharField(max_length=10, blank=True)
+    #rewindConsent = models.CharField(max_length=10, blank=True)
 
     playersMoveData = models.TextField(blank=True)
 
@@ -479,14 +479,6 @@ class FCM_Game(GeneralGame):
                 _currentPlayers = user.username
                 self.currentPlayers = _currentPlayers
                 self.save()
-
-        if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-            self.save()
 
             playerListToNotify = list(
                 self.allPlayers.all().values_list("username", flat=True)
@@ -969,43 +961,24 @@ class FCM_Game(GeneralGame):
     def getCurrentPlayersArrayForReminderEmail(self):
         return self.getCurrentPlayersArray()
 
-    def setupRewindConsent(self):
-        if self.rewindConsent != "":
-            return
-        else:
-            rewindConsentString = ""
-            for i in range(self.maxPlayers):
-                rewindConsentString += "0"
-            hostSeat = self.seatPosition(getattr(self.host, "username"))
-            rewindConsentList = list(rewindConsentString)
-            if len(rewindConsentList) < hostSeat:
-                for i in range(hostSeat - len(rewindConsentList)):
-                    rewindConsentList.append("0")
-            try:
-                rewindConsentList[hostSeat] = "2"
-            except:
-                pass
-            rewindConsentString = "".join(rewindConsentList)
-            self.rewindConsent = rewindConsentString
-            self.save()
-
     # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
     def getRewindHostHTML(self):
         USE_NEW_CODE = False
         if int(self.created) > 1744974000000:
             USE_NEW_CODE = True
 
-        if self.rewindConsent == "":
-            self.setupRewindConsent()
-        allPlayersList = self.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
-        rewindConsentList = list(self.rewindConsent)
+        rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
+                REWIND_CONSENT_VOTE_TOPIC,
+                self.getAllPlayersOrderedySeat(True), 0
+            )
+        missingPlayerNames =  self.getMissingPlayersNamesArray()
+        
+
         rewindHTML = ""
 
-        for index, player in enumerate(allPlayersList):
-            if player[0:11] == "FcmBot":
-                player = "FcmBot" + player[-1]
+        for player, vote_value in rewindConsentVotes.items():
             if player != getattr(self.host, "username"):
-                if rewindConsentList[index] == "0":
+                if vote_value == 0:
                     rewindHTML += (
                         "<span style='background-color:red'>"
                         + player
@@ -1013,7 +986,7 @@ class FCM_Game(GeneralGame):
                         + gettext("No Permission")
                         + "</span><BR/>"
                     )
-                elif rewindConsentList[index] == "1":
+                elif vote_value == 1:
                     rewindHTML += (
                         "<span style='background-color:green'>"
                         + player
@@ -1021,7 +994,7 @@ class FCM_Game(GeneralGame):
                         + gettext("Single Permission")
                         + "</span><BR/>"
                     )
-                elif rewindConsentList[index] == "2":
+                elif vote_value == 2:
                     rewindHTML += (
                         "<span style='background-color:green'>"
                         + player
@@ -1032,37 +1005,41 @@ class FCM_Game(GeneralGame):
         return rewindHTML
 
     def getRewindHostPossible(self):
-        if len(self.missingPlayers.all()) > 0:
-            self.rewindConsent = "222222"
-            self.save()
+        rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
+                REWIND_CONSENT_VOTE_TOPIC,
+                self.getAllPlayersOrderedySeat(True), 0
+            )
+        missingPlayerNames =  self.getMissingPlayersNamesArray()
+        hostUsername = getattr(self.host, "username")
         possible = True
-        rewindConsentList = list(self.rewindConsent)
-        for consent in rewindConsentList:
-            if consent == "0":
+        for player in rewindConsentVotes:
+            # If the player is not missing, and has a 0 vote, then it is not possible
+            if player not in missingPlayerNames and rewindConsentVotes[player] == 0 and player != hostUsername:
                 possible = False
         return possible
 
     def removeSingleRewindPermission(self):
-        rewindConsentList = list(self.rewindConsent)
-        for i in range(len(rewindConsentList)):
-            if rewindConsentList[i] == "1":
-                rewindConsentList[i] = "0"
-        self.rewindConsent = "".join(rewindConsentList)
-        self.save()
+        rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
+                REWIND_CONSENT_VOTE_TOPIC,
+                self.getAllPlayersOrderedySeat(True), 0
+            )
+        for player in rewindConsentVotes:
+            if rewindConsentVotes[player] == 1:
+                rewindConsentVotes[player] = 0
+
+        self.tempPresenter().setVoteResults(REWIND_CONSENT_VOTE_TOPIC, rewindConsentVotes)
 
     def getCurrentRewindConsent(self, _username):
-        if self.rewindConsent == "":
-            return "0"
-        currentSeat = self.seatPosition(_username)
-        rewindConsentList = list(self.rewindConsent)
-        if len(rewindConsentList) < currentSeat:
-            for i in range(currentSeat - len(rewindConsentList)):
-                rewindConsentList.append("0")
-        try:
-            ret = rewindConsentList[currentSeat]
-            return ret
-        except:
-            return "0"
+        # return 0,1, or 2
+        rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
+                        REWIND_CONSENT_VOTE_TOPIC,
+                        self.getAllPlayersOrderedySeat(True), 0
+                    )
+        if _username in rewindConsentVotes:
+            return rewindConsentVotes[_username]
+        else:
+            return 0
+                
 
     # takes in a user object
     def checkForHostChange(self, _missingUser):
@@ -1075,24 +1052,6 @@ class FCM_Game(GeneralGame):
             )
             self.host = possibleHost
             self.save()
-
-    # takes in username
-    def enableStatsExclude(self, _username):
-        if (len(self.statsExcludeConsent)) < self.maxPlayers:
-            self.statsExcludeConsent = "0" * self.maxPlayers
-        seatToChange = self.seatPosition(_username, True)
-        self.statsExcludeConsent = (
-            self.statsExcludeConsent[:seatToChange]
-            + "1"
-            + self.statsExcludeConsent[seatToChange + 1 :]
-        )
-        # CHECK TOTAL CONSENT
-        totalConsent = 0
-        for letter in self.statsExcludeConsent:
-            totalConsent += int(letter)
-        if totalConsent == self.maxPlayers:
-            self.statsExcludedGame = True
-        self.save()
 
     def isTournamentRoundFinished(self, tournamentProgressionDataArray):
         if self.relatedTournament is None:
@@ -1118,9 +1077,13 @@ class FCM_Game(GeneralGame):
         self.rewindData = ""
         self.rewindTempData = ""
         self.kickoutFlexiData = ""
+        self.activeVotes = None
         self.gameStatus = "FINISHED"
         self.winner = User.objects.get(username=_winnerUsername)
-        self.deleteGameVotes = None
+        try:
+            self.deleteGameVotes = None
+        except:
+            pass
         self.clearAllMoveDataV2()
         self.save()
 
@@ -1153,49 +1116,6 @@ class FCM_Game(GeneralGame):
 
     def getGameCode(self):
         return "FCM"
-
-    def getDeleteVotesData(self):
-        if self.gameStatus == "FINISHED":
-            deleteGameVotes = {}
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            deleteGameVotes.update({username: False for username in player_usernames})
-            return deleteGameVotes
-        if self.deleteGameVotes is None:
-            self.deleteGameVotes = {}
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-            self.save()
-        return self.deleteGameVotes
-
-    def addDeleteVote(self, playerName):
-        """Records the vote of a player."""
-        # Double check player is in the game
-        if playerName not in [p.username for p in self.allPlayers.all()]:
-            return False  # Player not in the game
-
-        # Ensure deleteGameVotes is a dictionary
-        if self.deleteGameVotes is None:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        # If the playerName isn't found, wipe the votes and make sure all players are added
-        if playerName not in self.deleteGameVotes:
-            self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        # Add the vote
-        self.deleteGameVotes[playerName] = True
-        self.save()
-        return True
-
 
 # class FCM_Chat(models.Model):
 #    welcomeChat = '{"name":"WelcomeBot","timestamp":' + str(int(time.time(

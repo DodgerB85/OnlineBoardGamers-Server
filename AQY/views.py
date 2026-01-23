@@ -108,8 +108,8 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "currentPlayers": currentGame.getCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "deleteVotesData": json.dumps(
-            currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-                DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
+            currentGame.tempPresenter().getFullSetOfVoteResults(
+                DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True), False
             )
         ),
         "settingsDebug": settings.DEBUG,
@@ -1447,8 +1447,8 @@ def _voteToDelete(request):
         currentGame.save()
         # Check if all players have voted to delete
         all_voted = True
-        delete_votes_data = currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-            DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
+        delete_votes_data = currentGame.tempPresenter().getFullSetOfVoteResults(
+            DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True), False
         )
 
         missingPlayers = currentGame.getMissingPlayersNamesArray()
@@ -1460,8 +1460,8 @@ def _voteToDelete(request):
         if all_voted:
             # Get the result
             deleteVotesData = json.dumps(
-                currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-                    DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
+                currentGame.tempPresenter().getFullSetOfVoteResults(
+                    DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True), False
                 )
             )
             # Delete the game
@@ -1481,8 +1481,8 @@ def _voteToDelete(request):
             {
                 "voteChanged": True,
                 "deleteVotesData": json.dumps(
-                    currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-                        DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True)
+                    currentGame.tempPresenter().getFullSetOfVoteResults(
+                        DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True), False
                     )
                 ),
             },

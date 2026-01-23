@@ -311,7 +311,8 @@ function localCastVote(topic) {
 				<br />
 				Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
 				<br />
-				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to
+				<button v-if="!personal.votedToExclude" class="actionsLineButton"
+					@click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to
 					Exclude
 					Game from Stats</button>
 			</div>
@@ -320,7 +321,8 @@ function localCastVote(topic) {
 				<br />
 				Votes: {{ getDeleteVotes(false) }} - Players: {{ getDeleteVotes(true) }}
 				<br />
-				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote to
+				<button v-if="!personal.votedToDelete" class="actionsLineButton"
+					@click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote to
 					Delete
 					Game</button>
 			</div>
