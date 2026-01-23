@@ -135,8 +135,6 @@ def create_fcm_game(
     game_status = "AVAILABLE"
     kickout_duration = 24
     starting_map = ""
-    rewind_consent = ""
-    stats_exclude_consent = ""
     stats_excluded_game = False
     player0notes = ""
     usernames_to_notify = []
@@ -158,7 +156,6 @@ def create_fcm_game(
         kickout_duration = 100
         player_Order_Seed = randint(1000, 32767)
         starting_options = tournamentObj.startingOptions
-        rewind_consent = "0" * max_players
         notificationSuppression = "0" * max_players
         # If it's a mini tournemnt, check for auto enable rewinds
         # MiniT games could also have max_players LESS than tournamentObj.maxGamePlayers
@@ -168,26 +165,23 @@ def create_fcm_game(
                 if current_players_usernames
                 else tournamentObj.maxGamePlayers
             )
-            rewind_consent = "0" * max_players
             notificationSuppression = "0" * max_players
             # Split the string into a list
             options = starting_options.split(",") if starting_options != "" else []
             # Check if '99' is present
             if "99" in options:
-                rewind_consent = "2" * max_players
+                # TODO
+                pass
             starting_options = ",".join(options)
             # Filter out '99'
             options = [opt for opt in options if opt != "99"]
 
         game_status = "ACTIVE"
 
-        stats_exclude_consent = "0" * max_players
-
         # Now exclude stats if any china expansion is in starting options
         # Split the string into a list
         options_for_SE = starting_options.split(",") if starting_options != "" else []
         if any(x in options_for_SE for x in ["42", "43", "44", "45"]):
-            stats_exclude_consent = "1" * max_players
             stats_excluded_game = True
 
         all_players = [
@@ -255,7 +249,6 @@ def create_fcm_game(
         # Split the string into a list
         options_for_SE = starting_options.split(",") if starting_options != "" else []
         if any(x in options_for_SE for x in ["42", "43", "44", "45"]):
-            stats_exclude_consent = "1" * max_players
             stats_excluded_game = True
         game_pace = request.POST["pace"]
         creator = request.user
@@ -273,16 +266,11 @@ def create_fcm_game(
 
         # Set game status and consents
         game_status = "PRIVATE" if "privateGame" in request.POST else "AVAILABLE"
-        rewind_consent = (
-            "2" * max_players if "allowRewind" in request.POST else ""
-        )  # "0" * max_players
         all_players.append(request.user)
 
         if "fcmAI" in request.POST:
             game_status = "ACTIVE"
             all_players.append(User.objects.get(username="FcmAI"))
-            rewind_consent = "22"
-            stats_exclude_consent = "1" * max_players
             stats_excluded_game = True
         elif "trainingGame" in request.POST:
             game_status = "ACTIVE"
@@ -293,12 +281,8 @@ def create_fcm_game(
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
             player0notes = json.dumps(shadow_display, separators=(",", ":"))
-            rewind_consent = "2" * max_players
-            stats_exclude_consent = "1" * max_players
             stats_excluded_game = True
         elif "learningGame" in request.POST:
-            rewind_consent = "2" * max_players
-            stats_exclude_consent = "1" * max_players
             stats_excluded_game = True
         else:
             invited_players = [
@@ -307,7 +291,6 @@ def create_fcm_game(
             if invited_players:
                 game_status = "WAITING"
                 usernames_to_notify = usernames
-            stats_exclude_consent = "0" * max_players
 
     # Database operations
     with transaction.atomic():
@@ -328,8 +311,6 @@ def create_fcm_game(
             kickoutDuration=kickout_duration,
             zoomLevels="200" * max_players,
             startingMap=starting_map,
-            rewindConsent=rewind_consent,
-            statsExcludeConsent=stats_exclude_consent,
             statsExcludedGame=stats_excluded_game,
             player0notes=player0notes,
             notificationSuppression=notificationSuppression,
