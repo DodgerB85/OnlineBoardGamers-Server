@@ -60,6 +60,8 @@ class GamePresenter:
         return True
 
     def setVoteResults(self, topic, votes):
+        if not self.gameObj.activeVotes:
+            self.gameObj.activeVotes = {}
         # if the topic doesnt exist, then creat it
         if topic not in self.gameObj.activeVotes:
             self.gameObj.activeVotes[topic] = {}
@@ -74,6 +76,9 @@ class GamePresenter:
         if self.gameObj.gameStatus == "FINISHED" or not self.gameObj.activeVotes:
             return generalReturn
 
+        if not self.gameObj.activeVotes:
+            self.gameObj.activeVotes = {}
+            
         # If this specific topic hasn't been started, return the all-False set
         if topic not in self.gameObj.activeVotes:
             return generalReturn
