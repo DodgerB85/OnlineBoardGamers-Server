@@ -240,13 +240,13 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         "startingOptions": startingOptions,
         "settingsDebug": settings.DEBUG,
         "statsExcludeVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfTrueFalseVotes(
-                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True)
+            currentGame.presenter().getFullSetOfVoteResults(
+                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
             )
         ),
         "deleteVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfTrueFalseVotes(
-                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True)
+            currentGame.presenter().getFullSetOfVoteResults(
+                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
             )
         ),
     }
@@ -927,8 +927,8 @@ def _castVote(request):
         currentGame.save()
         # Check if all players have voted to delete
         all_voted = True
-        votesData = currentGame.presenter().getFullSetOfTrueFalseVotes(
-            topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
+        votesData = currentGame.presenter().getFullSetOfVoteResults(
+            topic, currentGame.presenter().getAllPlayersOrderedySeat(True), False
         )
 
         missingPlayers = currentGame.presenter().getMissingPlayersNamesArray()
@@ -940,8 +940,8 @@ def _castVote(request):
         if all_voted:
             # Get the result
             votesData = json.dumps(
-                currentGame.presenter().getFullSetOfTrueFalseVotes(
-                    topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
+                currentGame.presenter().getFullSetOfVoteResults(
+                    topic, currentGame.presenter().getAllPlayersOrderedySeat(True), False
                 )
             )
             # Delete the game
@@ -969,8 +969,8 @@ def _castVote(request):
             {
                 "voteChanged": True,
                 "votesData": json.dumps(
-                    currentGame.presenter().getFullSetOfTrueFalseVotes(
-                        topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
+                    currentGame.presenter().getFullSetOfVoteResults(
+                        topic, currentGame.presenter().getAllPlayersOrderedySeat(True), False
                     )
                 ),
             },

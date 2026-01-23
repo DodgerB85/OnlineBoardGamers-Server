@@ -40,7 +40,11 @@ from .common import create_fcm_game
 from Lobby.models import User, Profile
 from .models import FCM_Game
 
-from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC
+from Lobby.sharedFunctions.constants import (
+    STATS_EXCLUDE_VOTE_TOPIC,
+    DELETE_VOTE_TOPIC,
+    REWIND_CONSENT_VOTE_TOPIC,
+)
 
 
 # import requests  # Keep this to broadcase on WSS when it is uncommented
@@ -226,7 +230,20 @@ def showGame(request, game_id):
                 "startingOptionsLiteral": currentGame.startingOptions,
                 "startingMap": currentGame.startingMap,
                 "pov": -99,
-                "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                "statsExcludeVotesData": json.dumps(
+                    currentGame.tempPresenter().getFullSetOfVoteResults(
+                        STATS_EXCLUDE_VOTE_TOPIC,
+                        currentGame.getAllPlayersOrderedySeat(True),
+                        False,
+                    )
+                ),
+                "deleteVotesData": json.dumps(
+                    currentGame.tempPresenter().getFullSetOfVoteResults(
+                        DELETE_VOTE_TOPIC,
+                        currentGame.getAllPlayersOrderedySeat(True),
+                        False,
+                    )
+                ),
                 "preferredColour": -1,
                 "settingsDebug": settings.DEBUG,
             },
@@ -263,13 +280,12 @@ def showGame(request, game_id):
 
     myMove = False
     myZoomLevel = 200
-    myStatsExcludeConsent = 0
     liveNotification = 1
 
     rewindPanelType = 0
     rewindHostHTML = ""
     rewindHostPossible = False
-    currentRewindConsent = "0"
+    currentRewindConsent = 0
     currentPlayers = currentGame.currentPlayers
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
@@ -295,6 +311,7 @@ def showGame(request, game_id):
         if currentGame.host == request.user:
             rewindPanelType = 2
             rewindHostPossible = currentGame.getRewindHostPossible()
+            print(f"rewindHostPossible: {rewindHostPossible}")
             rewindHostHTML = currentGame.getRewindHostHTML()
 
         if request.user.username in FCMsuperUsers:
@@ -341,7 +358,6 @@ def showGame(request, game_id):
         allPlayerListBySeat = currentGame.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
         myMove = currentGame.isMyMove(request.user.username)
         myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3]
-        myStatsExcludeConsent = currentGame.statsExcludeConsent[pov : pov + 1]
         if (
             "SHADOW" in currentGame.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
             and currentGame.gameData == ""
@@ -400,12 +416,11 @@ def showGame(request, game_id):
             "rewindPanelType": rewindPanelType,
             "rewindHostHTML": rewindHostHTML,
             "rewindHostPossible": rewindHostPossible,
-            "currentRewindConsent": int(currentRewindConsent),
+            "currentRewindConsent": currentRewindConsent,
             "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
             "tournamentGame": tournamentGame,
             "highContrastBoardItems": highContrastBoardItems,
             "startingOptionsHTML": startingOptionsHTML,
-            "myStatsExcludeConsent": myStatsExcludeConsent,
             "statsExcludedGame": statsExcludedGame,
             "displayNames": displayNames,
             "nextURL": nextURL,
@@ -413,7 +428,18 @@ def showGame(request, game_id):
             "USE_NEW_CODE": USE_NEW_CODE,
             "startingOptionsLiteral": currentGame.startingOptions,
             "startingMap": currentGame.startingMap,
-            "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+            "statsExcludeVotesData": json.dumps(
+                currentGame.tempPresenter().getFullSetOfVoteResults(
+                    STATS_EXCLUDE_VOTE_TOPIC,
+                    currentGame.getAllPlayersOrderedySeat(True), False
+                )
+            ),
+            "deleteVotesData": json.dumps(
+                currentGame.tempPresenter().getFullSetOfVoteResults(
+                    DELETE_VOTE_TOPIC,
+                    currentGame.getAllPlayersOrderedySeat(True), False
+                )
+            ),
             "settingsDebug": settings.DEBUG,
         },
     )
@@ -1275,7 +1301,6 @@ def _processTurn(request):
         _missingPlayer = User.objects.get(username=request.user.username)
         currentGame.missingPlayers.add(_missingPlayer)
         currentGame.checkForHostChange(_missingPlayer)
-        currentGame.enableStatsExclude(request.user.username)
         currentGame.save()
         # Otherwise, resigned from restruc, so delete move data, allow everyone to move, generate latest update, send notifications
 
@@ -1323,7 +1348,6 @@ def _processTurn(request):
         currentGame.missingPlayers.add(_missingPlayer)
         currentGame.kickedPlayers.add(_missingPlayer)
         currentGame.checkForHostChange(_missingPlayer)
-        currentGame.enableStatsExclude(_missingPlayer.username)
 
         # Clears data and saves record
         currentGame.clearAllMoveDataV2()
@@ -1398,7 +1422,6 @@ def _processTurn(request):
         currentGame.missingPlayers.add(_missingPlayer)
         currentGame.kickedPlayers.add(_missingPlayer)
         currentGame.checkForHostChange(_missingPlayer)
-        currentGame.enableStatsExclude(_missingPlayer.username)
 
         currentGame.clearAllMoveDataV2()
 
@@ -1498,8 +1521,10 @@ def _processTurn(request):
         currentGame.rewindTempData = loadData
         currentGame.rewindData = "'SPLIT'".join(currentRewindDataArray)
 
-        if jsonData["RSRP"] and currentGame.rewindConsent != "":
+        if jsonData["RSRP"]:
             currentGame.removeSingleRewindPermission()
+        print(
+            f"RSRP: {jsonData['RSRP']} ")
         currentGame.clearAllMoveDataV2()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -1838,45 +1863,6 @@ def changeAssistance(request):
 
     return HttpResponse(status=204)  # No Content
 
-
-@login_required
-def processRewindConsent(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-    jsonData = json.loads(request.body)
-    try:
-        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-    except FCM_Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-    if currentGame.rewindConsent == "":
-        currentGame.setupRewindConsent()
-    # Set current person to 1 pr 2.
-    seatToChange = jsonData["playerNumber"]
-    rewindConsentList = list(currentGame.rewindConsent)
-    rewindConsentList[seatToChange] = jsonData["consentLevel"]
-    rewindConsentString = "".join(rewindConsentList)
-    currentGame.rewindConsent = rewindConsentString
-    currentGame.save()
-    return JsonResponse(
-        {
-            "newPermission": jsonData["consentLevel"],
-        }
-    )
-
-
-@login_required
-def processStatsExcludeConsent(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-    jsonData = json.loads(request.body)
-    try:
-        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-    except FCM_Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-    currentGame.enableStatsExclude(request.user.username)
-    return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
-
-
 @login_required()
 def gameAdmin(request):
     if request.user.username != "admin" and request.user.username != "DodgerB":
@@ -1972,66 +1958,6 @@ def FCMdata(request, dataType):
 
 
 @login_required()
-def voteToDelete(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _voteToDelete(request)
-
-
-@login_required
-def _voteToDelete(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-    except FCM_Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-    playerName = request.user.username
-
-    success = currentGame.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
-
-    if success:
-        # Check if all players have voted to delete
-        all_voted = True
-        delete_votes_data = currentGame.getDeleteVotesData()
-        missingPlayers = currentGame.getMissingPlayersNamesArray()
-        for player, vote in delete_votes_data.items():
-            if not vote and player not in missingPlayers:
-                all_voted = False
-                break
-
-        if all_voted:
-            # Delete the game
-            currentGame.delete()
-            # Add a success message
-            messages.success(request, gettext("Game successfully deleted"))
-            # Redirect to the index page
-            return JsonResponse(
-                {
-                    "voteChanged": True,
-                    "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
-                    "redirect_url": reverse("index"),
-                }
-            )
-
-        return JsonResponse(
-            {
-                "voteChanged": True,
-                "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
-            },
-            safe=False,
-        )
-
-    return JsonResponse({"voteChanged": False})
-
-
-@login_required()
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -2065,14 +1991,11 @@ def _castVote(request):
         currentGame.save()
         # Check if all players have voted to delete
         all_voted = True
-        #votesData = currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-        #    topic, currentGame.tempPresenter().getAllPlayersOrderedySeat(True)
-        #)
-        votesData = currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-            topic, currentGame.getAllPlayersOrderedySeat(True)
+        votesData = currentGame.tempPresenter().getFullSetOfVoteResults(
+            topic, currentGame.getAllPlayersOrderedySeat(True), False
         )
 
-        #missingPlayers = currentGame.tempPresenter().getMissingPlayersNamesArray()
+        # missingPlayers = currentGame.tempPresenter().getMissingPlayersNamesArray()
         missingPlayers = currentGame.getMissingPlayersNamesArray()
         for player, vote in votesData.items():
             if not vote and player not in missingPlayers:
@@ -2080,15 +2003,9 @@ def _castVote(request):
                 break
 
         if all_voted:
-            # Get the result
-            #votesData = json.dumps(
-            #    currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-            #        topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
-            #    )
-            #)
             votesData = json.dumps(
-                currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-                    topic, currentGame.getAllPlayersOrderedySeat(True)
+                currentGame.tempPresenter().getFullSetOfVoteResults(
+                    topic, currentGame.getAllPlayersOrderedySeat(True), False
                 )
             )
             # Delete the game
@@ -2096,13 +2013,13 @@ def _castVote(request):
                 currentGame.delete()
                 # Add a success message
                 messages.success(request, gettext("Game successfully deleted"))
-            
+
             if topic == STATS_EXCLUDE_VOTE_TOPIC:
                 currentGame.statsExcludedGame = True
                 currentGame.save()
                 # Add a success message
                 messages.success(request, gettext("Game stats excluded"))
-            
+
             # Redirect to the index page
             return JsonResponse(
                 {
@@ -2115,14 +2032,9 @@ def _castVote(request):
         return JsonResponse(
             {
                 "voteChanged": True,
-                #"votesData": json.dumps(
-                #    currentGame.presenter().getFullSetOfTrueFalseVotes(
-                #        topic, currentGame.presenter().getAllPlayersOrderedySeat(True)
-                #    )
-                #),
                 "votesData": json.dumps(
-                    currentGame.tempPresenter().getFullSetOfTrueFalseVotes(
-                        topic, currentGame.getAllPlayersOrderedySeat(True)
+                    currentGame.tempPresenter().getFullSetOfVoteResults(
+                        topic, currentGame.getAllPlayersOrderedySeat(True), False
                     )
                 ),
             },

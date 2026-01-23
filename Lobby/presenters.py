@@ -59,10 +59,13 @@ class GamePresenter:
         self.gameObj.activeVotes[topic][username] = choice
         return True
 
+    def setVoteResults(self, topic, votes):
+        self.gameObj.activeVotes[topic] = votes
+
     # The topic might not be in activeVotes, but sometimes we want a full return set of username: T/F
-    def getFullSetOfTrueFalseVotes(self, topic, usernames):
-        # Initialize the return dictionary with False for every provided username
-        generalReturn = {username: False for username in usernames}
+    def getFullSetOfVoteResults(self, topic, usernames, default):
+        # Initialize the return dictionary with default for every provided username
+        generalReturn = {username: default for username in usernames}
 
         # If game is finished or no votes exist at all, return the all-False set
         if self.gameObj.gameStatus == "FINISHED" or not self.gameObj.activeVotes:

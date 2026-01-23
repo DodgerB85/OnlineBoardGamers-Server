@@ -195,7 +195,7 @@ class FCM_GameAdmin(admin.ModelAdmin):
                     "gamePace",
                     "zoomLevels",
                     "notificationSuppression",
-                    "rewindConsent",
+                    #"rewindConsent",
                     "statsExcludeConsent",
                     "statsExcludedGame",
                 )
@@ -215,6 +215,7 @@ class FCM_GameAdmin(admin.ModelAdmin):
                     "invitedPlayers",
                     "playersWithChatNotification",
                     "deleteGameVotes",
+                    "activeVotes",
                 ),
             },
         ),
