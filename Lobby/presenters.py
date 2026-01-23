@@ -60,6 +60,9 @@ class GamePresenter:
         return True
 
     def setVoteResults(self, topic, votes):
+        # if the topic doesnt exist, then creat it
+        if topic not in self.gameObj.activeVotes:
+            self.gameObj.activeVotes[topic] = {}
         self.gameObj.activeVotes[topic] = votes
 
     # The topic might not be in activeVotes, but sometimes we want a full return set of username: T/F
