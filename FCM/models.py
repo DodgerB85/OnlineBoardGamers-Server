@@ -253,10 +253,14 @@ class FCM_Game(GeneralGame):
         if not self.currentPlayers or self.currentPlayers == "":
             return True
 
+        # Split the string into a list of actual names
+        player_list = [p.strip() for p in self.currentPlayers.split(",")]
+
         if (
-            loggedInPlayerUsername in self.currentPlayers
+            loggedInPlayerUsername in player_list 
             or self.currentPlayers in allowed_players
         ):
+            print(111)
             return True
 
         return False
