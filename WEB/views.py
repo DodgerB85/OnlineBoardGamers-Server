@@ -29,8 +29,8 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 
-from .models import WEB_Game
-from Lobby.models import User, Profile, Game
+# WEB_Game import removed - now using unified Game model
+from Lobby.models import User, Profile, Game, GamePlayer
 
 
 def index(request):
@@ -77,7 +77,8 @@ def createWEBgame(request):
     _created = SR_getTimeNow()
 
     with transaction.atomic():
-        newGame = WEB_Game(
+        newGame = Game(
+            gameCode='WEB',
             gameDescription=_gameDescription,
             creator=request.user,
             host=request.user,
@@ -95,7 +96,11 @@ def createWEBgame(request):
         if _gameName != "":
             newGame.gameName = _gameName
 
-        newGame.allPlayers.add(request.user)
+        # Create GamePlayer for the creator
+        GamePlayer.objects.create(
+            game=newGame,
+            player=request.user
+        )
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
@@ -103,10 +108,11 @@ def createWEBgame(request):
             shadow_players = []
 
             for i in range(1, _maxPlayers):
-                # shadow_username = f"{shadow_names[i-1]}"  # Use the base name directly
-                # shadow_player = User.objects.get(username=shadow_username)
                 shadow_player = User.objects.get(username=f"{shadow_names[i - 1]}")
-                newGame.allPlayers.add(shadow_player)
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=shadow_player
+                )
 
                 if request.POST[f"player{i + 1}"]:
                     display_name = request.POST[f"player{i + 1}"]
@@ -114,9 +120,13 @@ def createWEBgame(request):
                     display_name = f"{shadow_names[i - 1]}"
                 shadow_players.append(display_name)
 
-            # newGame.rewindConsent = "2" * (_maxPlayers - 1)
-            newGame.player0notes = json.dumps(shadow_players)
-            newGame.startGame(request)
+            # Store shadow player names in creator's notes
+            creator_gp = GamePlayer.objects.get(game=newGame, player=request.user)
+            creator_gp.notes = json.dumps(shadow_players)
+            creator_gp.save()
+            
+            presenter = newGame.presenter()
+            presenter.startGame(request)
         else:
             usernamesToNotify = []
             for i in range(2, _maxPlayers + 1):
@@ -127,10 +137,11 @@ def createWEBgame(request):
                     newGame.invitedPlayers.add(newPlayer)
                     usernamesToNotify.append(newPlayer.username)
 
+            presenter = newGame.presenter()
             SN_sendInviteNotifications(
                 request,
                 usernamesToNotify,
-                newGame.getGameName(),
+                presenter.getGameName(),
                 _maxPlayers,
                 "WEB",
             )
