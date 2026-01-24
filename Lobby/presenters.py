@@ -444,3 +444,409 @@ class CannesPresenter(GamePresenter):
 
     def getGameCode(self):
         return "CNS"
+
+
+class WebPresenter(GamePresenter):
+    def __str__(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+        allPlayersString = " / ".join(
+            gp.player.username for gp in all_players if gp.player
+        )
+        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
+
+    def endGame(self, request, _winner, _finalPositions, _gameID):
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendEndGameNotificationTieGame,
+        )
+
+        self.clearGeneralDataOnGameEndWithoutSave()
+
+        names = self.getAllPlayersOrderedySeat(False)
+        winnerNamesArray = []
+        for playerIndex in _winner:
+            winner_user = User.objects.get(username=names[playerIndex])
+            winner_gp = self.gameObj.players.filter(player=winner_user).first()
+            if winner_gp:
+                winner_gp.winner = True
+                winner_gp.save()
+            winnerNamesArray.append(names[playerIndex])
+        
+        self.gameObj.save()
+
+        for i in range(len(_finalPositions)):
+            for j in range(len(_finalPositions[i])):
+                _finalPositions[i][j] = names[_finalPositions[i][j]]
+
+        finalResults = []
+        for i in range(len(_finalPositions)):
+            for j in range(len(_finalPositions[i])):
+                text = "Trapped in a dot matrix"
+                if i == 0 and len(_finalPositions[i]) == 1:
+                    text = "1st - Congratulations!"
+                elif i == 0 and len(_finalPositions[i]) > 1:
+                    text = "Joint 1st - Congratulations!"
+                elif i == 1 and len(_finalPositions[i]) == 1:
+                    text = "Runner Up"
+                elif i == 1 and len(_finalPositions[i]) > 1:
+                    text = "Joint Runner Up"
+                finalResults.append([_finalPositions[i][j], text, i])
+
+        new_names = [name for name in names if name not in [item for sublist in _finalPositions for item in sublist]]
+
+        for name in new_names:
+            finalResults.append([name, "Trapped in a dot matrix", 9])
+
+        SN_M_sendEndGameNotificationTieGame(request, "WEB", finalResults, _gameID, self.gameObj)
+
+    def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+
+        if not current_players.exists():
+            return True
+
+        current_usernames = [gp.player.username for gp in current_players if gp.player]
+
+        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"}
+        return (
+            loggedInPlayerUsername in current_usernames
+            or any(username in shadow_values for username in current_usernames)
+        )
+
+    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+            return False
+
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+
+        if not current_players.exists():
+            return True
+
+        current_usernames = [gp.player.username for gp in current_players if gp.player]
+
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+
+        return loggedInPlayerUsername in current_usernames or any(
+            username in shadow_values for username in current_usernames
+        )
+
+    def getSecondsToNextKickout(self):
+        from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
+
+        return SF_getSecondsToNextKickout(
+            self.gameObj.latestUpdate, self.gameObj.kickoutDuration
+        )
+
+    def getMissingPlayersNamesArray(self):
+        return list(
+            self.gameObj.players.filter(is_missing=True)
+            .select_related("player")
+            .values_list("player__username", flat=True)
+        )
+
+    def kickoutRequired(self):
+        from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
+
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+        all_player_usernames = [gp.player.username for gp in all_players if gp.player]
+
+        current_players = self.getCurrentPlayersArray()
+        current_username = current_players[0] if current_players else ""
+
+        return SF_kickoutRequired(
+            self.gameObj.gameStatus,
+            all_player_usernames,
+            self.gameObj.latestUpdate,
+            self.gameObj.kickoutDuration,
+            self.gameObj.kickoutFlexiData,
+            current_username,
+        )
+
+    def serialize(self, loggedInUserObj=None):
+        from Lobby.sharedFunctions.sharedRefs import (
+            SR_gamePaceString,
+            SR_getWEBstartingOptionsHTML,
+            SR_latestUpdateElapsedTimeStringFromTotalSeconds,
+        )
+
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+
+        remainingPlayersInt = self.gameObj.maxPlayers - all_players.count()
+        remainingPlayers = "".join(
+            str(all_players.count() + i + 1) for i in range(remainingPlayersInt)
+        )
+
+        winner_gps = self.gameObj.players.filter(winner=True).select_related("player")
+        winner = ", ".join([gp.player.username for gp in winner_gps if gp.player])
+
+        createdString = self.gameObj.created
+        latestUpdateString = self.gameObj.latestUpdate
+
+        latestUpdateElapsedTimeString = ""
+        if (
+            self.gameObj.gameStatus == "WAITING"
+            or self.gameObj.gameStatus == "AVAILABLE"
+            or self.gameObj.gameStatus == "ACTIVE"
+            or self.gameObj.gameStatus == "PRIVATE"
+        ):
+            elapsedTotalSeconds = (
+                int(time.time()) - int(self.gameObj.created) // 1000
+                if self.gameObj.gameStatus == "WAITING"
+                or self.gameObj.gameStatus == "AVAILABLE"
+                or self.gameObj.gameStatus == "PRIVATE"
+                else int(time.time()) - int(self.gameObj.latestUpdate) // 1000
+            )
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
+
+        myMove = loggedInUserObj is not None and self.isMyMove(loggedInUserObj.username)
+
+        chatNotification = False
+        involvedPlayer = False
+        if loggedInUserObj:
+            user_gp = all_players.filter(player=loggedInUserObj).first()
+            if user_gp:
+                chatNotification = user_gp.has_chat_notification
+                involvedPlayer = not user_gp.is_missing
+
+        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
+
+        startingOptionsHTML = SR_getWEBstartingOptionsHTML(self.gameObj.startingOptions)
+
+        kickoutRequiredNum = self.kickoutRequired()
+
+        deleteableGame = (
+            all_players.filter(player__username="SHADOW").exists()
+            and loggedInUserObj
+            and all_players.filter(player=loggedInUserObj).exists()
+        )
+
+        return {
+            "gameID": self.gameObj.id,
+            "gameName": self.getGameName(),
+            "gameDescription": self.gameObj.gameDescription,
+            "creator": self.gameObj.creator.username,
+            "created": createdString,
+            "allPlayers": [gp.player.username for gp in all_players if gp.player],
+            "invitedPlayers": [
+                user.username for user in self.gameObj.invitedPlayers.all()
+            ],
+            "currentPlayers": ", ".join(self.getCurrentPlayersArray()),
+            "currentTurn": self.currentTurnString(),
+            "pace": gamePaceString,
+            "latestUpdate": latestUpdateString,
+            "startingOptions": startingOptionsHTML,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "maxPlayers": self.gameObj.maxPlayers,
+            "winner": winner,
+            "myMove": myMove,
+            "involvedPlayer": involvedPlayer,
+            "chatNotification": chatNotification,
+            "kickoutRequiredNum": kickoutRequiredNum,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
+            "game": "WEB",
+            "remainingPlayers": remainingPlayers,
+            "deleteableGame": deleteableGame,
+            "learningGame": self.isLearningGame(),
+            "experiencedGame": self.isExperiencedGame(),
+        }
+
+    def isExperiencedGame(self):
+        startingOptionsListPrelim = (
+            json.loads(self.gameObj.startingOptions)
+            if self.gameObj.startingOptions
+            else []
+        )
+        return 120 in startingOptionsListPrelim
+
+    def isLearningGame(self):
+        startingOptionsListPrelim = (
+            json.loads(self.gameObj.startingOptions)
+            if self.gameObj.startingOptions
+            else []
+        )
+        return 110 in startingOptionsListPrelim
+
+    def seatPosition(self, _username, withoutBots=False):
+        playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        try:
+            return playerList.index(_username)
+        except (ValueError, TypeError):
+            return -1
+
+    def getAllPlayersOrderedySeat(self, withoutBots=False):
+        players = (
+            self.gameObj.players.exclude(is_kicked=True)
+            .select_related("player")
+            .order_by("seat_order")
+        )
+
+        if withoutBots:
+            return [gp.player.username for gp in players if gp.player]
+
+        result = []
+        for idx, gp in enumerate(players):
+            if gp.is_missing:
+                result.append(f"WebBot{idx}")
+            elif gp.player:
+                result.append(gp.player.username)
+        return result
+
+    def startGame(self, request, isTournamentGame=False):
+        from Lobby.models import GamePlayer
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendGameStartNotification,
+        )
+
+        self.gameObj.gameStatus = "ACTIVE"
+        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
+
+        game_players = list(self.gameObj.players.exclude(is_kicked=True))
+
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            gp.is_current = idx == 0
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+
+        self.gameObj.save()
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
+            self.gameObj.deleteGameVotes = {}
+            all_usernames = [
+                gp.player.username for gp in game_players if gp.player
+            ]
+            self.gameObj.deleteGameVotes.update({username: False for username in all_usernames})
+            self.gameObj.save()
+
+            if not isTournamentGame:
+                playerListToNotify = [
+                    gp.player.username
+                    for gp in game_players
+                    if gp.player and gp.player.username != request.user.username
+                ]
+
+                SN_M_sendGameStartNotification(
+                    request, "WEB", playerListToNotify, self.gameObj.id, self.gameObj
+                )
+
+    def getCurrentPlayersArray(self):
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+        return [gp.player.username for gp in current_players if gp.player]
+
+    def setCurrentPlayers(self, player_usernames_string):
+        """Set current players from comma-separated string of usernames"""
+        if not player_usernames_string:
+            usernames = set()
+        else:
+            usernames = {name.strip() for name in player_usernames_string.split(',') if name.strip()}
+        
+        game_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        
+        for gp in game_players:
+            if gp.player:
+                should_be_current = gp.player.username in usernames
+                if gp.is_current != should_be_current:
+                    gp.is_current = should_be_current
+                    gp.save()
+
+    def getCurrentPlayersArrayForReminderEmail(self):
+        return self.getCurrentPlayersArray()
+
+    def checkForHostChange(self, _missingUser):
+        if _missingUser == self.gameObj.creator:
+            possibleHost = (
+                self.gameObj.players.exclude(is_kicked=True)
+                .filter(is_missing=False)
+                .select_related("player")
+                .order_by("?")
+                .first()
+            )
+            if possibleHost and possibleHost.player:
+                self.gameObj.host = possibleHost.player
+
+    def addMissingPlayer(self, user):
+        """Add a player to missing players"""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp and not gp.is_missing:
+            gp.is_missing = True
+            gp.save()
+
+    def addKickedPlayer(self, user):
+        """Add a player to kicked players"""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp and not gp.is_kicked:
+            gp.is_kicked = True
+            gp.save()
+
+    def removeChatNotification(self, user):
+        """Remove chat notification for a player"""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp and gp.has_chat_notification:
+            gp.has_chat_notification = False
+            gp.save()
+
+    def getGameCode(self):
+        return "WEB"
+
+    def getDeleteVotesData(self):
+        if self.gameObj.gameStatus == "FINISHED":
+            all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+                "player"
+            )
+            return {gp.player.username: False for gp in all_players if gp.player}
+
+        if self.gameObj.deleteGameVotes is None:
+            all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+                "player"
+            )
+            self.gameObj.deleteGameVotes = {
+                gp.player.username: False for gp in all_players if gp.player
+            }
+            self.gameObj.save()
+
+        return self.gameObj.deleteGameVotes
+
+    def addDeleteVote(self, playerName):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+        player_usernames = [gp.player.username for gp in all_players if gp.player]
+
+        if playerName not in player_usernames:
+            return False
+
+        if self.gameObj.deleteGameVotes is None:
+            self.gameObj.deleteGameVotes = {}
+            self.gameObj.deleteGameVotes.update({username: False for username in player_usernames})
+
+        if playerName not in self.gameObj.deleteGameVotes:
+            self.gameObj.deleteGameVotes = {}
+            self.gameObj.deleteGameVotes.update({username: False for username in player_usernames})
+
+        self.gameObj.deleteGameVotes[playerName] = True
+        self.gameObj.save()
+        return True
