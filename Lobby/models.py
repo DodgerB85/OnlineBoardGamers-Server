@@ -521,6 +521,13 @@ class Game(BaseGame):
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
 
+    ############### THESE NEED TO BE HERE FORE NOW TO STOP THINGS BREAKING
+    def currentTurnString(self):
+        return SR_currentTurnString(self.gameCode, self.turn, self.phase)
+    
+    def currentPlayers(self):
+        return SR_currentPlayers(self.gameCode, self.turn, self.phase)
+
 
 class GamePlayer(models.Model):
     game = models.ForeignKey(

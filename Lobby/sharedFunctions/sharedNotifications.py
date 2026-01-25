@@ -951,6 +951,12 @@ def SN_M_sendGameStartNotification(request, game, playerList, gameID, currentGam
             subject = gameStrings["gameStartSubject"]
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
+            
+            currentPlayersString = ""
+            try:
+                currentPlayersString = currentGame.currentPlayers
+            except:
+                currentPlayersString = currentGame.presenter().getCurrentPlayersString()
 
 
             messageText = (
@@ -1002,7 +1008,7 @@ def SN_M_sendGameStartNotification(request, game, playerList, gameID, currentGam
                             "maxPlayers": currentGame.maxPlayers,
                             "gameName": currentGame.getGameName(),
                             "boxName": boxName,
-                            "currentPlayer": currentGame.currentPlayers,
+                            "currentPlayer": currentPlayersString,
                             "tournamentString": tournamentString,
                         },
                     )
@@ -1026,7 +1032,7 @@ def SN_M_sendGameStartNotification(request, game, playerList, gameID, currentGam
                             "gameID": gameID,
                             "game": game,
                             "gameName": currentGame.getGameName(),
-                            "currentPlayer": currentGame.currentPlayers,
+                            "currentPlayer": currentPlayersString,
                             "boxName": boxName,
                         },
                     )

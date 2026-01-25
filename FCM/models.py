@@ -260,7 +260,6 @@ class FCM_Game(GeneralGame):
             loggedInPlayerUsername in player_list 
             or self.currentPlayers in allowed_players
         ):
-            print(111)
             return True
 
         return False

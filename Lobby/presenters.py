@@ -411,6 +411,9 @@ class CannesPresenter(GamePresenter):
             "player"
         )
         return [gp.player.username for gp in current_players if gp.player]
+    
+    def getCurrentPlayersString(self):
+        return ", ".join(self.getCurrentPlayersArray())
 
     def getCurrentPlayersArrayForReminderEmail(self):
         return self.getCurrentPlayersArray()
