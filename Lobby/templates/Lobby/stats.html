@@ -30,146 +30,31 @@
     <h1>{% translate "Current Users" %}: {{ totalUsers }}</h1>
     <h1>{% translate "Games (non-practice) in Progress" %}: {{ totalGames }}</h1>
     <h2>
-      {% for game_count in game_counts %}
-        {% if forloop.counter0 == 0 %}
-          <img src="{% static 'FCM/images/burger_board.png' %}"
-               alt="FCM game"
-               title="FCM Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 1 %}
-          <img src="{% static 'HC/images/icon_car.png' %}"
-               alt="HC game"
-               title="HC Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 2 %}
-          <img src="{% static 'Bus/images/bus_icon.png' %}"
-               alt="Bus game"
-               title="Bus Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 3 %}
-          <img src="{% static 'TGZ/images/tgz_icon.png' %}"
-               alt="TGZ game"
-               title="TGZ Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 4 %}
-          <img src="{% static 'CNS/images/cns_icon.png' %}"
-               alt="CNS game"
-               title="CNS Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 5 %}
-          <img src="{% static 'AQY/images/aqy_icon.png' %}"
-               alt="AQY game"
-               title="AQY Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 6 %}
-          <img src="{% static 'IND/images/ind_icon.png' %}"
-               alt="IND game"
-               title="IND Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 7 %}
-          <img src="{% static 'KFW/images/kfw_icon.png' %}"
-               alt="KFW game"
-               title="KFW Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 8 %}
-          <img src="{% static 'WEB/images/web_icon.png' %}"
-               alt="WEB game"
-               title="WEB Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% endif %}
-        {{ game_count }}
+      {% for game in game_stats %}
+        <img src="{% static game.img %}"
+             alt="{{ game.name }}"
+             title="{{ game.name }}"
+             class="gameCountIcon"
+             width="40"
+             height="40">
+        {{ game.active }}
       {% endfor %}
     </h2>
     <h1>{% translate "Finished Games (non-practice)" %}: {{ finishedGames }}</h1>
     <h2>
-      {% for game_count in finished_game_counts %}
-        {% if forloop.counter0 == 0 %}
-          <img src="{% static 'FCM/images/burger_board.png' %}"
-               alt="FCM game"
-               title="FCM Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 1 %}
-          <img src="{% static 'HC/images/icon_car.png' %}"
-               alt="HC game"
-               title="HC Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 2 %}
-          <img src="{% static 'Bus/images/bus_icon.png' %}"
-               alt="Bus game"
-               title="Bus Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 3 %}
-          <img src="{% static 'TGZ/images/tgz_icon.png' %}"
-               alt="TGZ game"
-               title="TGZ Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 4 %}
-          <img src="{% static 'CNS/images/cns_icon.png' %}"
-               alt="CNS game"
-               title="CNS Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 5 %}
-          <img src="{% static 'AQY/images/aqy_icon.png' %}"
-               alt="AQY game"
-               title="AQY Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 6 %}
-          <img src="{% static 'IND/images/ind_icon.png' %}"
-               alt="IND game"
-               title="IND Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 7 %}
-          <img src="{% static 'KFW/images/kfw_icon.png' %}"
-               alt="KFW game"
-               title="KFW Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% elif forloop.counter0 == 8 %}
-          <img src="{% static 'WEB/images/web_icon.png' %}"
-               alt="WEB game"
-               title="WEB Game"
-               class="gameCountIcon"
-               width="40"
-               height="40">
-        {% endif %}
-        {{ game_count }}
+      {% for game in game_stats %}
+        <img src="{% static game.img %}"
+             alt="{{ game.name }}"
+             title="{{ game.name }}"
+             class="gameCountIcon"
+             width="40"
+             height="40">
+        {{ game.finished }}
       {% endfor %}
     </h2>
     <h1>{% translate "Active users in last 24hrs" %}: {{ userActvitiy }}</h1>
     <hr />
+    {{ game_stats }}yy
     <h1>{% translate "Top Players" %}</h1>
     <div class="tab">
       <button class="tablinks" id="FCM">
