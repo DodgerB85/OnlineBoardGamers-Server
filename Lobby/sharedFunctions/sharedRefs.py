@@ -21,6 +21,7 @@ SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("AQY", gettext_lazy("Antiquity")),
     ("IND", gettext_lazy("Indonesia")),
     ("KFW", gettext_lazy("Keyflower")),
+    ("WEB", gettext_lazy("Web")),
     ("RNB", gettext_lazy("Roads & Boats")),
 ]
 
