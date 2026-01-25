@@ -32,6 +32,10 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 # WEB_Game import removed - now using unified Game model
 from Lobby.models import User, Profile, Game, GamePlayer
 
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+
+WEB_DB_LOCK_NAME = "lockWEBgame_"
+
 
 def index(request):
     return HttpResponse("Hello, world. You're at WEB")
@@ -249,7 +253,17 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "preferredWEBoptions": [-1],
         "pov": -99,
         "turn": currentGame.turn,
-        "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
+        "statsExcludeVotesData": json.dumps(
+            currentGame.presenter().getFullSetOfVoteResults(
+                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
+            )
+        ),
+        "deleteVotesData": json.dumps(
+            currentGame.presenter().getFullSetOfVoteResults(
+                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
+            )
+        ),
+        
         "settingsDEBUG": settings.DEBUG,
     }
 
@@ -364,7 +378,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
 @contextmanager
 def db_mutex(name, timeout=10):
-    mutex_name = "dbmutex_" + name
+    mutex_name = WEB_DB_LOCK_NAME + name
     cursor = connection.cursor()
     got_lock = False  # Initialize got_lock to False
     try:
@@ -399,7 +413,7 @@ def processWEBturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockWEBgame_" + str(gameID)):
+    with db_mutex(str(gameID)):
         # get rid of decorator on processTurn
         # do more stuff
         # return render(request, "somefile.html")
@@ -902,7 +916,7 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockWEBgame_" + str(gameID)):
+    with db_mutex(str(gameID)):
         return _sendChatMessage(request)
 
 
@@ -957,6 +971,8 @@ def saveNotes(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
+    presenter = currentGame.presenter()
+
     seat_position = presenter.seatPosition(request.user.username)
 
     if seat_position in range(4):
@@ -999,61 +1015,37 @@ def saveZoom(request):
 
 
 @login_required()
-def voteToDelete(request):
+def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockWEBgame_" + str(gameID)):
-        return _voteToDelete(request)
+    with db_mutex(str(gameID)):
+        return _castVote(request)
 
 
 @login_required
-def _voteToDelete(request):
+def _castVote(request):
     """Adds a delete vote for a player."""
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='WEB')
+        currentGame = Game.objects.get(id=jsonData["gameID"])
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    # player = request.user  # Assuming the logged-in user is voting
-    playerName = request.user.username  # Get the player's username
 
-    success = currentGame.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
+    # Delegate all logic to the presenter
+    result = currentGame.presenter().processVoteLogic(
+        topic=jsonData["topic"],
+        username=request.user.username,
+        choice=True,
+    ) 
 
-    if success:
-        # Check if all players have voted to delete
-        all_voted = True
-        delete_votes_data = presenter.getDeleteVotesData()
-        missingPlayers = presenter.getMissingPlayersNamesArray()
-        for player, vote in delete_votes_data.items():
-            if not vote and player not in missingPlayers:
-                all_voted = False
-                break
-
-        if all_voted:
-            # Delete the game
-            currentGame.delete()
-            # Add a success message
-            messages.success(request, gettext("Game successfully deleted"))
-            # Redirect to the index page
-            return JsonResponse(
-                {
-                    "voteChanged": True,
-                    "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
-                    "redirect_url": reverse("index"),
-                }
-            )
-
-        return JsonResponse(
-            {
-                "voteChanged": True,
-                "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
-            },
-            safe=False,
-        )
-
-    return JsonResponse({"voteChanged": False})
+    # If an action occurred that requires a user message, add it here
+    msg = result.get("message")
+    if isinstance(msg, str):  # This clarifies the type for the type checker
+        messages.success(request, msg)
+        
+    return JsonResponse(result)

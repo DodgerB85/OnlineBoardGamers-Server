@@ -249,6 +249,7 @@
   initData.pov = {{ pov }};
   initData.turn = {{turn}};
   initData.deleteVotesData = {{ deleteVotesData | safe }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
   
   {% if finishedGame %}
   initData.finishedGame = true
