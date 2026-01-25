@@ -355,21 +355,25 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         }
     )
 
-    ### NEW GAME
+    ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeat():
-            displayNames = currentGame.player0notes
-            currentGame.player0notes = ""
-            notes = ""
+            creator_gp = all_players.filter(player=currentGame.creator).first()
+            if creator_gp:
+                displayNames = creator_gp.notes
+                creator_gp.notes = ""
+                creator_gp.save()
+                if user_gp and user_gp.player == currentGame.creator:
+                    notes = ""
             currentGame.save()
-        # allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
 
         returnData.update(
             {
                 "notes": notes,
                 "displayNames": displayNames,
-                # "allPlayerListBySeat": allPlayerListBySeat,
+                "allPlayerListBySeat": allPlayerListBySeat,
             }
         )
 
