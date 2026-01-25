@@ -29,8 +29,8 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 
-from .models import WEB_Game
-from Lobby.models import User, Profile
+# WEB_Game import removed - now using unified Game model
+from Lobby.models import User, Profile, Game, GamePlayer
 
 
 def index(request):
@@ -77,7 +77,8 @@ def createWEBgame(request):
     _created = SR_getTimeNow()
 
     with transaction.atomic():
-        newGame = WEB_Game(
+        newGame = Game(
+            gameCode='WEB',
             gameDescription=_gameDescription,
             creator=request.user,
             host=request.user,
@@ -95,7 +96,11 @@ def createWEBgame(request):
         if _gameName != "":
             newGame.gameName = _gameName
 
-        newGame.allPlayers.add(request.user)
+        # Create GamePlayer for the creator
+        GamePlayer.objects.create(
+            game=newGame,
+            player=request.user
+        )
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
@@ -103,10 +108,11 @@ def createWEBgame(request):
             shadow_players = []
 
             for i in range(1, _maxPlayers):
-                # shadow_username = f"{shadow_names[i-1]}"  # Use the base name directly
-                # shadow_player = User.objects.get(username=shadow_username)
                 shadow_player = User.objects.get(username=f"{shadow_names[i - 1]}")
-                newGame.allPlayers.add(shadow_player)
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=shadow_player
+                )
 
                 if request.POST[f"player{i + 1}"]:
                     display_name = request.POST[f"player{i + 1}"]
@@ -114,9 +120,13 @@ def createWEBgame(request):
                     display_name = f"{shadow_names[i - 1]}"
                 shadow_players.append(display_name)
 
-            # newGame.rewindConsent = "2" * (_maxPlayers - 1)
-            newGame.player0notes = json.dumps(shadow_players)
-            newGame.startGame(request)
+            # Store shadow player names in creator's notes
+            creator_gp = GamePlayer.objects.get(game=newGame, player=request.user)
+            creator_gp.notes = json.dumps(shadow_players)
+            creator_gp.save()
+            
+            presenter = newGame.presenter()
+            presenter.startGame(request)
         else:
             usernamesToNotify = []
             for i in range(2, _maxPlayers + 1):
@@ -127,10 +137,11 @@ def createWEBgame(request):
                     newGame.invitedPlayers.add(newPlayer)
                     usernamesToNotify.append(newPlayer.username)
 
+            presenter = newGame.presenter()
             SN_sendInviteNotifications(
                 request,
                 usernamesToNotify,
-                newGame.getGameName(),
+                presenter.getGameName(),
                 _maxPlayers,
                 "WEB",
             )
@@ -183,29 +194,33 @@ def createWEBgame(request):
 def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     try:
         currentGame = (
-            WEB_Game.objects.select_related(
+            Game.objects.select_related(
                 "host",
                 "creator",
             )
             .prefetch_related(
-                "allPlayers", "missingPlayers", "playersWithChatNotification"
+                "players__player",
+                "invitedPlayers"
             )
-            .get(id=game_id)
+            .get(id=game_id, gameCode='WEB')
         )
-    except WEB_Game.DoesNotExist:
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
     # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    all_players = currentGame.players.exclude(is_kicked=True)
+    all_player_ids = {gp.player.id for gp in all_players if gp.player}
     userObj = request.user
     username = userObj.username
 
-    gameID = getattr(currentGame, "id")
-    gameName = currentGame.getGameName()
+    gameID = currentGame.id
+    gameName = presenter.getGameName()
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = (
@@ -215,7 +230,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     )
 
-    allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat(False))
+    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat(False))
 
     # Logged out
     returnData = {
@@ -229,12 +244,12 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "allPlayerListBySeat": allPlayerListBySeat,
-        "currentPlayers": currentGame.getCurrentPlayers(),
+        "currentPlayers": ", ".join(presenter.getCurrentPlayersArray()),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredWEBoptions": [-1],
         "pov": -99,
         "turn": currentGame.turn,
-        "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+        "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
         "settingsDEBUG": settings.DEBUG,
     }
 
@@ -245,8 +260,8 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     user_id = userObj.id
 
     user_profile = Profile.objects.get(user=userObj)
-    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
-    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+    missing_player_ids = {gp.player.id for gp in all_players if gp.player and gp.is_missing}
+    chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
 
     is_in_all = user_id in all_player_ids
     is_missing = user_id in missing_player_ids
@@ -259,14 +274,16 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     latestUpdate = currentGame.latestUpdate
 
     ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
+    nextURL = f"/nextGame?current_id={gameID}&current_code={presenter.getGameCode()}"
 
     # Get Chat notification
     chatNotification = False
     if user_id in chat_notify_ids:
         chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+        user_gp = all_players.filter(player=userObj).first()
+        if user_gp:
+            user_gp.has_chat_notification = False
+            user_gp.save()
 
     returnData["pov"] = -9
 
@@ -283,24 +300,19 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if not involvedPlayer:
         return render(request, "WEB/showWEBgame.html", returnData)
 
-    pov = currentGame.seatPosition(request.user.username)
+    pov = presenter.seatPosition(request.user.username)
     if request.user.username == "BotKickStarter":
         pov = -1
-    secondsToNextKickout = currentGame.getSecondsToNextKickout()
+    secondsToNextKickout = presenter.getSecondsToNextKickout()
 
-    kickoutRequired = currentGame.kickoutRequired()
+    kickoutRequired = presenter.kickoutRequired()
 
-    myMove = currentGame.isMyMove(request.user.username)
+    myMove = presenter.isMyMove(request.user.username)
 
     ## Get the Notes for the user
-    seat_position = currentGame.seatPosition(request.user.username)
-    notes_dict = {
-        0: currentGame.player0notes,
-        1: currentGame.player1notes,
-        2: currentGame.player2notes,
-        3: currentGame.player3notes,
-    }
-    notes = notes_dict.get(seat_position, "")
+    seat_position = presenter.seatPosition(request.user.username)
+    user_gp = all_players.filter(player=userObj).first()
+    notes = user_gp.notes if user_gp else ""
 
     liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
@@ -332,12 +344,12 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in currentGame.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
             displayNames = currentGame.player0notes
             currentGame.player0notes = ""
             notes = ""
             currentGame.save()
-        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
+        # allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
 
         returnData.update(
             {
@@ -405,9 +417,11 @@ def _processWEBturn(request):
     latest_update = str(jsonData.get("latestUpdate", 0))
 
     try:
-        currentGame = WEB_Game.objects.get(id=game_id)
-    except WEB_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='WEB')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if jsonData["action"] == "simpleSave":
         # Check if old version is older than DB version, and if so, return
@@ -416,10 +430,11 @@ def _processWEBturn(request):
         ) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
+            current_players = ", ".join(presenter.getCurrentPlayersArray())
             message = (
                 f"SYNC ERROR IN: WEB simpleSave - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {current_players}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -453,7 +468,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {db_latest_update} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -474,13 +489,13 @@ def _processWEBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            currentGame.endGame(
+            presenter.endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
@@ -495,14 +510,15 @@ def _processWEBturn(request):
                 if currentGame.startingOptions
                 else []
             )
+            current_players = presenter.getCurrentPlayersArray()
             if (
-                currentGame.currentPlayers != ""
-                and currentGame.currentPlayers != "WEBBot"
+                len(current_players) > 0
+                and not any(p.startswith("WEBBot") for p in current_players)
                 and jsonData["status"] != "FINISHED"
                 and 102 not in loadedStartingOptions
             ):
                 playerListToNotify = [
-                    player.strip() for player in currentGame.currentPlayers.split(",")
+                    player.strip() for player in current_players
                 ]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -512,7 +528,7 @@ def _processWEBturn(request):
                         "WEB",
                         playerListToNotify,
                         getattr(currentGame, "id"),
-                        currentGame.getGameName(),
+                        presenter.getGameName(),
                         currentGame,
                         oldVer,
                     )
@@ -554,10 +570,10 @@ def _processWEBturn(request):
         currentGame.save()
 
         # time.sleep(10)
-        
+
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -577,7 +593,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -593,7 +609,7 @@ def _processWEBturn(request):
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
 
-        currentGame.endGame(
+        presenter.endGame(
             request,
             jsonData["winner"],
             jsonData["finalPositions"],
@@ -604,7 +620,7 @@ def _processWEBturn(request):
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -614,8 +630,8 @@ def _processWEBturn(request):
     elif jsonData["action"] == "resign":
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
         # currentGame.enableStatsExclude(request.user.username)
 
         # newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -626,7 +642,7 @@ def _processWEBturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                # "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                # "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 # "nextPlayer": currentGame.currentPlayers,
             },
             safe=False,
@@ -642,7 +658,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -699,7 +715,7 @@ def _processWEBturn(request):
                 "gameData": loadDataArr[0],
                 # "rewindHostPossible": rewindHostPossible,
                 "latestUpdate": currentGame.latestUpdate,
-                "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
             safe=False,
         )
@@ -708,7 +724,7 @@ def _processWEBturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -722,12 +738,13 @@ def _processWEBturn(request):
             if currentGame.startingOptions
             else []
         )
+        next_players = jsonData["nextPlayer"].split(",")
         if (
             jsonData["nextPlayer"] != ""
-            and jsonData["nextPlayer"] != "WEBBot"
+            and not any(p.startswith("WEBBot") for p in next_players)
             and 102 not in loadedStartingOptions
         ):
-            playerListToNotify = jsonData["nextPlayer"].split(",")
+            playerListToNotify = next_players
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
@@ -736,7 +753,7 @@ def _processWEBturn(request):
                     "WEB",
                     playerListToNotify,
                     getattr(currentGame, "id"),
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
                 )
@@ -744,7 +761,7 @@ def _processWEBturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -761,15 +778,15 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.kickedPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.addKickedPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
         # currentGame.enableStatsExclude(_missingPlayer.username)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -780,7 +797,7 @@ def _processWEBturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 # "nextPlayer": jsonData["nextPlayer"],
             },
             safe=False,
@@ -800,14 +817,14 @@ def WEBdata(request, dataType=1):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = WEB_Game.objects.get(id=jsonData["gameID"])
-    except WEB_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='WEB')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if dataType == 1:
         returnData = {
             "gameData": currentGame.gameData,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
             "latestUpdate": currentGame.latestUpdate,
         }
@@ -815,7 +832,7 @@ def WEBdata(request, dataType=1):
         return JsonResponse(returnData)
     elif dataType == 2:
         # Remove user from notifications
-        currentGame.playersWithChatNotification.remove(request.user)
+        presenter.removeChatNotification(request.user)
         currentGame.save()
         return JsonResponse(
             {
@@ -835,7 +852,7 @@ def WEBdata(request, dataType=1):
             {
                 "latest": False,
                 "gameData": currentGame.gameData,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
             }
         )
@@ -852,8 +869,8 @@ def bugEntry(request):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = WEB_Game.objects.get(id=gameID)
-    except WEB_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=gameID, gameCode='WEB')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     gameData = jsonData["gameData"]
@@ -898,7 +915,7 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = WEB_Game.objects.get(id=game_id)
+        currentGame = Game.objects.get(id=game_id, gameCode='WEB')
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -934,11 +951,11 @@ def saveNotes(request):
     game_id = jsonData["gameID"]
     notes = jsonData["notes"]
     try:
-        currentGame = WEB_Game.objects.get(id=game_id)
-    except WEB_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='WEB')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    seat_position = currentGame.seatPosition(request.user.username)
+    seat_position = presenter.seatPosition(request.user.username)
 
     if seat_position in range(4):
         player_notes_field = f"player{seat_position}notes"
@@ -957,8 +974,8 @@ def saveZoom(request):
 
     if jsonData["action"] == "zoom":
         try:
-            currentGame = WEB_Game.objects.get(id=jsonData["gameID"])
-        except WEB_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='WEB')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         zoomLevels = json.loads(currentGame.zoomLevels)
 
@@ -997,8 +1014,8 @@ def _voteToDelete(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = WEB_Game.objects.get(id=jsonData["gameID"])
-    except WEB_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='WEB')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
@@ -1008,8 +1025,8 @@ def _voteToDelete(request):
     if success:
         # Check if all players have voted to delete
         all_voted = True
-        delete_votes_data = currentGame.getDeleteVotesData()
-        missingPlayers = currentGame.getMissingPlayersNamesArray()
+        delete_votes_data = presenter.getDeleteVotesData()
+        missingPlayers = presenter.getMissingPlayersNamesArray()
         for player, vote in delete_votes_data.items():
             if not vote and player not in missingPlayers:
                 all_voted = False
@@ -1024,7 +1041,7 @@ def _voteToDelete(request):
             return JsonResponse(
                 {
                     "voteChanged": True,
-                    "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                    "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
                     "redirect_url": reverse("index"),
                 }
             )
@@ -1032,7 +1049,7 @@ def _voteToDelete(request):
         return JsonResponse(
             {
                 "voteChanged": True,
-                "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
             },
             safe=False,
         )
