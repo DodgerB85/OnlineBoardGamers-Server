@@ -30,6 +30,165 @@ class GamePresenter:
         return SR_currentTurnString(
             self.gameObj.gameCode, self.gameObj.turn, self.gameObj.phase
         )
+        
+    def getCurrentPlayersArray(self):
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+        return [gp.player.username for gp in current_players if gp.player]
+    
+    def getCurrentPlayersString(self):
+        return ", ".join(self.getCurrentPlayersArray())
+
+    def getCurrentPlayersArrayForReminderEmail(self):
+        return self.getCurrentPlayersArray()
+    
+    def seatPosition(self, _username, withoutBots=False):
+        playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        try:
+            return playerList.index(_username)
+        except (ValueError, TypeError):
+            return -1
+
+    def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
+        players = (
+            self.gameObj.players#.exclude(is_kicked=True)
+            .select_related("player")
+            .order_by("seat_order")
+        )
+        
+        if excludeBots:
+            return [gp.player.username for gp in players if gp.player and not gp.is_missing]
+
+        if withoutBots:
+            return [gp.player.username for gp in players if gp.player]
+
+        result = []
+        for gp in players:
+            if gp.is_missing:
+                result.append("CnsBot")
+            elif gp.player:
+                result.append(gp.player.username)
+        return result
+    
+    # NOTE: HC/BUS MIGHT USE COMMA SEPERATE STRING. SO CHECK IF SOME GAMES NEED TO BE HANDLED SEPERATELY
+    # TO GET THE startOptionsListPrelim
+    def isExperiencedGame(self):
+        startingOptionsListPrelim = (
+            json.loads(self.gameObj.startingOptions)
+            if self.gameObj.startingOptions
+            else []
+        )
+        if 120 in startingOptionsListPrelim:
+            return True
+        return False
+
+    # NOTE: HC/BUS MIGHT USE COMMA SEPERATE STRING. SO CHECK IF SOME GAMES NEED TO BE HANDLED SEPERATELY
+    # TO GET THE startOptionsListPrelim
+    def isLearningGame(self):
+        startingOptionsListPrelim = (
+            json.loads(self.gameObj.startingOptions)
+            if self.gameObj.startingOptions
+            else []
+        )
+        if 110 in startingOptionsListPrelim:
+            return True
+        return False
+    
+    # KICKOUT STUFF
+    def getSecondsToNextKickout(self):
+        from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
+
+        return SF_getSecondsToNextKickout(
+            self.gameObj.latestUpdate, self.gameObj.kickoutDuration
+        )
+
+    def getMissingPlayersNamesArray(self):
+        return list(
+            self.gameObj.players.filter(is_missing=True)
+            .select_related("player")
+            .values_list("player__username", flat=True)
+        )
+
+    def kickoutRequired(self):
+        from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
+
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+        all_player_usernames = [gp.player.username for gp in all_players if gp.player]
+
+        current_players = self.getCurrentPlayersArray()
+        current_username = current_players[0] if current_players else ""
+
+        return SF_kickoutRequired(
+            self.gameObj.gameStatus,
+            all_player_usernames,
+            self.gameObj.latestUpdate,
+            self.gameObj.kickoutDuration,
+            self.gameObj.kickoutFlexiData,
+            current_username,
+        )
+        
+    # END KICKOUT STUFF
+    
+    def addMissingPlayer(self, user):
+        """Add a player to missing players"""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp and not gp.is_missing:
+            gp.is_missing = True
+            gp.save()
+
+    def addKickedPlayer(self, user):
+        """Add a player to kicked players"""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp and not gp.is_kicked:
+            gp.is_kicked = True
+            gp.save()
+    
+    def setCurrentPlayers(self, player_usernames_string):
+        """Set current players from comma-separated string of usernames"""
+        if not player_usernames_string:
+            usernames = set()
+        else:
+            usernames = {name.strip() for name in player_usernames_string.split(',') if name.strip()}
+        
+        game_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        
+        for gp in game_players:
+            if gp.player:
+                should_be_current = gp.player.username in usernames
+                if gp.is_current != should_be_current:
+                    gp.is_current = should_be_current
+                    gp.save()
+    
+    def checkForHostChange(self, _missingUser):
+        if _missingUser == self.gameObj.creator:
+            possibleHost = (
+                self.gameObj.players.exclude(is_kicked=True)
+                .filter(is_missing=False)
+                .select_related("player")
+                .order_by("?")
+                .first()
+            )
+            if possibleHost and possibleHost.player:
+                self.gameObj.host = possibleHost.player
+
+    # Take an array of usernames, and set their has_chat_notification to True
+    def addChatNotifications(self, usernames):
+        for username in usernames:
+            gp = self.gameObj.players.filter(player__username=username).first()
+            if gp and not gp.has_chat_notification:
+                print("Adding chat notification for " + username)
+                gp.has_chat_notification = True
+                gp.save()
+
+    def removeChatNotification(self, userObj):
+        """Remove chat notification for a player"""
+        gp = self.gameObj.players.filter(player=userObj).first()
+        if gp and gp.has_chat_notification:
+            gp.has_chat_notification = False
+            gp.save()
 
     def clearGeneralDataOnGameEndWithoutSave(self):
         self.gameObj.gameStatus = "FINISHED"
@@ -208,40 +367,6 @@ class CannesPresenter(GamePresenter):
             username in shadow_values for username in current_usernames
         )
 
-    def getSecondsToNextKickout(self):
-        from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
-
-        return SF_getSecondsToNextKickout(
-            self.gameObj.latestUpdate, self.gameObj.kickoutDuration
-        )
-
-    def getMissingPlayersNamesArray(self):
-        return list(
-            self.gameObj.players.filter(is_missing=True)
-            .select_related("player")
-            .values_list("player__username", flat=True)
-        )
-
-    def kickoutRequired(self):
-        from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
-
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        all_player_usernames = [gp.player.username for gp in all_players if gp.player]
-
-        current_players = self.getCurrentPlayersArray()
-        current_username = current_players[0] if current_players else ""
-
-        return SF_kickoutRequired(
-            self.gameObj.gameStatus,
-            all_player_usernames,
-            self.gameObj.latestUpdate,
-            self.gameObj.kickoutDuration,
-            self.gameObj.kickoutFlexiData,
-            current_username,
-        )
-
     def serialize(self, loggedInUserObj=None):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -329,50 +454,9 @@ class CannesPresenter(GamePresenter):
             "experiencedGame": self.isExperiencedGame(),
         }
 
-    def isExperiencedGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions)
-            if self.gameObj.startingOptions
-            else []
-        )
-        if 120 in startingOptionsListPrelim:
-            return True
-        return False
+    
 
-    def isLearningGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions)
-            if self.gameObj.startingOptions
-            else []
-        )
-        if 110 in startingOptionsListPrelim:
-            return True
-        return False
 
-    def seatPosition(self, _username, withoutBots=False):
-        playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        try:
-            return playerList.index(_username)
-        except (ValueError, TypeError):
-            return -1
-
-    def getAllPlayersOrderedySeat(self, withoutBots=False):
-        players = (
-            self.gameObj.players#.exclude(is_kicked=True)
-            .select_related("player")
-            .order_by("seat_order")
-        )
-
-        if withoutBots:
-            return [gp.player.username for gp in players if gp.player]
-
-        result = []
-        for gp in players:
-            if gp.is_missing:
-                result.append("CnsBot")
-            elif gp.player:
-                result.append(gp.player.username)
-        return result
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
@@ -405,45 +489,6 @@ class CannesPresenter(GamePresenter):
             SN_M_sendGameStartNotification(
                 request, "CNS", playerListToNotify, self.gameObj.id, self.gameObj
             )
-
-    def getCurrentPlayersArray(self):
-        current_players = self.gameObj.players.filter(is_current=True).select_related(
-            "player"
-        )
-        return [gp.player.username for gp in current_players if gp.player]
-    
-    def getCurrentPlayersString(self):
-        return ", ".join(self.getCurrentPlayersArray())
-
-    def getCurrentPlayersArrayForReminderEmail(self):
-        return self.getCurrentPlayersArray()
-
-    def checkForHostChange(self, _missingUser):
-        if _missingUser == self.gameObj.creator:
-            possibleHost = (
-                self.gameObj.players.exclude(is_kicked=True)
-                .filter(is_missing=False)
-                .select_related("player")
-                .order_by("?")
-                .first()
-            )
-            if possibleHost and possibleHost.player:
-                self.gameObj.host = possibleHost.player
-
-    def enableStatsExclude(self, _username):
-        seatToChange = self.seatPosition(_username, True)
-        if (len(self.gameObj.statsExcludeConsent)) < self.gameObj.maxPlayers:
-            self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
-        self.gameObj.statsExcludeConsent = (
-            self.gameObj.statsExcludeConsent[:seatToChange]
-            + "1"
-            + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
-        )
-        totalConsent = 0
-        for letter in self.gameObj.statsExcludeConsent:
-            totalConsent += int(letter)
-        if totalConsent == self.gameObj.maxPlayers:
-            self.gameObj.statsExcludedGame = True
 
     def getGameCode(self):
         return "CNS"
@@ -546,40 +591,6 @@ class WebPresenter(GamePresenter):
             username in shadow_values for username in current_usernames
         )
 
-    def getSecondsToNextKickout(self):
-        from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
-
-        return SF_getSecondsToNextKickout(
-            self.gameObj.latestUpdate, self.gameObj.kickoutDuration
-        )
-
-    def getMissingPlayersNamesArray(self):
-        return list(
-            self.gameObj.players.filter(is_missing=True)
-            .select_related("player")
-            .values_list("player__username", flat=True)
-        )
-
-    def kickoutRequired(self):
-        from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
-
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        all_player_usernames = [gp.player.username for gp in all_players if gp.player]
-
-        current_players = self.getCurrentPlayersArray()
-        current_username = current_players[0] if current_players else ""
-
-        return SF_kickoutRequired(
-            self.gameObj.gameStatus,
-            all_player_usernames,
-            self.gameObj.latestUpdate,
-            self.gameObj.kickoutDuration,
-            self.gameObj.kickoutFlexiData,
-            current_username,
-        )
-
     def serialize(self, loggedInUserObj=None):
         from Lobby.sharedFunctions.sharedRefs import (
             SR_gamePaceString,
@@ -673,47 +684,6 @@ class WebPresenter(GamePresenter):
             "experiencedGame": self.isExperiencedGame(),
         }
 
-    def isExperiencedGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions)
-            if self.gameObj.startingOptions
-            else []
-        )
-        return 120 in startingOptionsListPrelim
-
-    def isLearningGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions)
-            if self.gameObj.startingOptions
-            else []
-        )
-        return 110 in startingOptionsListPrelim
-
-    def seatPosition(self, _username, withoutBots=False):
-        playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        try:
-            return playerList.index(_username)
-        except (ValueError, TypeError):
-            return -1
-
-    def getAllPlayersOrderedySeat(self, withoutBots=False):
-        players = (
-            self.gameObj.players.exclude(is_kicked=True)
-            .select_related("player")
-            .order_by("seat_order")
-        )
-
-        if withoutBots:
-            return [gp.player.username for gp in players if gp.player]
-
-        result = []
-        for idx, gp in enumerate(players):
-            if gp.is_missing:
-                result.append(f"WebBot{idx}")
-            elif gp.player:
-                result.append(gp.player.username)
-        return result
-
     def startGame(self, request, isTournamentGame=False):
         from Lobby.models import GamePlayer
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -754,63 +724,7 @@ class WebPresenter(GamePresenter):
                     request, "WEB", playerListToNotify, self.gameObj.id, self.gameObj
                 )
 
-    def getCurrentPlayersArray(self):
-        current_players = self.gameObj.players.filter(is_current=True).select_related(
-            "player"
-        )
-        return [gp.player.username for gp in current_players if gp.player]
 
-    def setCurrentPlayers(self, player_usernames_string):
-        """Set current players from comma-separated string of usernames"""
-        if not player_usernames_string:
-            usernames = set()
-        else:
-            usernames = {name.strip() for name in player_usernames_string.split(',') if name.strip()}
-        
-        game_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        
-        for gp in game_players:
-            if gp.player:
-                should_be_current = gp.player.username in usernames
-                if gp.is_current != should_be_current:
-                    gp.is_current = should_be_current
-                    gp.save()
-
-    def getCurrentPlayersArrayForReminderEmail(self):
-        return self.getCurrentPlayersArray()
-
-    def checkForHostChange(self, _missingUser):
-        if _missingUser == self.gameObj.creator:
-            possibleHost = (
-                self.gameObj.players.exclude(is_kicked=True)
-                .filter(is_missing=False)
-                .select_related("player")
-                .order_by("?")
-                .first()
-            )
-            if possibleHost and possibleHost.player:
-                self.gameObj.host = possibleHost.player
-
-    def addMissingPlayer(self, user):
-        """Add a player to missing players"""
-        gp = self.gameObj.players.filter(player=user).first()
-        if gp and not gp.is_missing:
-            gp.is_missing = True
-            gp.save()
-
-    def addKickedPlayer(self, user):
-        """Add a player to kicked players"""
-        gp = self.gameObj.players.filter(player=user).first()
-        if gp and not gp.is_kicked:
-            gp.is_kicked = True
-            gp.save()
-
-    def removeChatNotification(self, user):
-        """Remove chat notification for a player"""
-        gp = self.gameObj.players.filter(player=user).first()
-        if gp and gp.has_chat_notification:
-            gp.has_chat_notification = False
-            gp.save()
 
     def getGameCode(self):
         return "WEB"

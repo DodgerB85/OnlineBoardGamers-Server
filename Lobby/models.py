@@ -525,9 +525,19 @@ class Game(BaseGame):
     def currentTurnString(self):
         return SR_currentTurnString(self.gameCode, self.turn, self.phase)
     
-    def currentPlayers(self):
-        return SR_currentPlayers(self.gameCode, self.turn, self.phase)
+    #def currentPlayers(self):
+    #    return SR_currentPlayers(self.gameCode, self.turn, self.phase)
 
+    # Add this while not every game has a preseneter - DELETE WHEN ALL GAMES HAVE A PRESENTER
+    def getGameName(self):
+        # Use fields already on the model. DO NOT call .all() or .count() here.
+        name = (
+            self.gameName
+            or f"{getattr(self.creator, 'username', 'Unknown')}'s Game"
+        )
+        if self.gameStatus == "PRIVATE":
+            name += " [Private]"
+        return name
 
 class GamePlayer(models.Model):
     game = models.ForeignKey(

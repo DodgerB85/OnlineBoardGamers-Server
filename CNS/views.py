@@ -797,12 +797,8 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        # currentGame.players.exclude(player=request.user, is_kicked=True).update(
-        #    has_chat_notification=True
-        # )
-        GamePlayer.objects.filter(game=currentGame).exclude(
-            player=request.user, is_kicked=True
-        ).update(has_chat_notification=True)
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
+        currentGame.presenter().removeChatNotification(request.user)
         
         currentGame.save()
 

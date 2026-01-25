@@ -821,6 +821,8 @@ def WEBdata(request, dataType=1):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
+    presenter = currentGame.presenter()
+
     if dataType == 1:
         returnData = {
             "gameData": currentGame.gameData,
@@ -931,10 +933,10 @@ def _sendChatMessage(request):
 
         currentGame.chatData = compressedChatData
 
-        # Now add notifications to everyone except request.user
-        currentGame.playersWithChatNotification.set(
-            currentGame.allPlayers.exclude(username=request.user.username)
-        )
+        # Now add notifications to everyone except request.user     
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
+        currentGame.presenter().removeChatNotification(request.user)
+        
         currentGame.save()
 
         return JsonResponse({"chatData": compressedChatData})
