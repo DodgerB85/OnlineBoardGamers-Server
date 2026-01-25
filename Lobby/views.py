@@ -107,7 +107,6 @@ from TGZ.models import TGZ_Game
 from AQY.models import AQY_Game, AQY_Tournament
 from IND.models import IND_Game, IND_Tournament
 from KFW.models import KFW_Game
-from WEB.models import WEB_Game
 from RNB.models import RNB_Game
 
 from user_visit.models import UserVisit
@@ -145,6 +144,17 @@ from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 User = get_user_model()
 
 logger = logging.getLogger(__name__)
+
+
+def usesUnifiedGameModel(game_code):
+    """
+    Returns True if the game uses the unified Game model with GamePlayer relationships.
+    Returns False if the game uses the legacy model with M2M relationships.
+    
+    As games are migrated to the unified model, add their game codes here.
+    """
+    return game_code in ['CNS', 'WEB']
+
 
 ##########################
 #
@@ -288,18 +298,18 @@ GAME_NAMES_MODELS = {
     "AQY": AQY_Game,
     "IND": IND_Game,
     "KFW": KFW_Game,
-    "WEB": WEB_Game,
+    "WEB": "WEB",  # Now using unified Game model
 }
 GAME_MODELS = [
     FCM_Game,
     HC_Game,
     Bus_Game,
     TGZ_Game,
-    # CNS now uses Game model
+    # CNS and WEB now use unified Game model
     AQY_Game,
     IND_Game,
     KFW_Game,
-    WEB_Game,
+    # WEB_Game removed - now uses unified Game model
 ]
 
 
@@ -543,27 +553,37 @@ def DBO(request):
     pracGamesCount = 0
     finishedGamesCount = 0
 
-    # Handle CNS games from unified Game model separately
+    # Load all unified model games at once
     query = (
         Q(gameStatus="ACTIVE") | Q(gameStatus="PRIVATE") | Q(gameStatus="WAITING")
     )
-    query_finished = Q(gameStatus="FINISHED")
+    
+    unified_games = Game.objects.filter(query).prefetch_related('players__player').select_related('creator')
+    
+    # Group by gameCode
+    from collections import defaultdict
+    games_by_code = defaultdict(list)
+    for game in unified_games:
+        games_by_code[game.gameCode].append(game)
+    
+    # Count finished games for each unified game code
+    for game_code in games_by_code.keys():
+        finishedGamesCount += Game.objects.filter(gameCode=game_code, gameStatus="FINISHED").count()
+    
+    # Process all unified games
+    for game_code, games in games_by_code.items():
+        for singleGame in games:
+            presenter = singleGame.presenter()
+            timeRemaining = presenter.getSecondsToNextKickout()
 
-    cns_games = Game.objects.filter(gameCode='CNS').filter(query).prefetch_related('players__player')
-    finishedGamesCount += Game.objects.filter(gameCode='CNS', gameStatus="FINISHED").count()
-
-    for singleGame in cns_games:
-        presenter = singleGame.presenter()
-        timeRemaining = presenter.getSecondsToNextKickout()
-
-        if (
-            timeRemaining >= remaining_start_time_expired
-            and timeRemaining <= remaining_finish_time_expired
-        ):
-            if singleGame.players.filter(player__username="SHADOW").exists():
-                pracGamesCount += 1
-            gamesList.append(presenter.serialize(request.user))
-            totalGamesCount += 1
+            if (
+                timeRemaining >= remaining_start_time_expired
+                and timeRemaining <= remaining_finish_time_expired
+            ):
+                if singleGame.players.filter(player__username="SHADOW").exists():
+                    pracGamesCount += 1
+                gamesList.append(presenter.serialize(request.user))
+                totalGamesCount += 1
 
     for game_in_use_model in GAME_MODELS:
         # Query the game_in_use_model to get the players who will timeout within the specified time range
@@ -625,6 +645,7 @@ def DBO_deleteGame(request, game_type):
         "AQY": AQY_Game,
         "IND": IND_Game,
         "KFW": KFW_Game,
+        "WEB": Game,  # Now using unified Game model
     }
 
     model = model_map.get(game_type)
@@ -639,8 +660,8 @@ def DBO_deleteGame(request, game_type):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     # 4. Fetch Game
-    if game_type == "CNS":
-        current_game = model.objects.filter(id=game_id, gameCode='CNS').first()
+    if usesUnifiedGameModel(game_type):
+        current_game = model.objects.filter(id=game_id, gameCode=game_type).first()
     else:
         current_game = model.objects.filter(id=game_id).first()
     if not current_game:
@@ -989,40 +1010,41 @@ def stats(request):
 
     excluded_names = ["SHADOW", "FcmAI"]
 
-    # Handle CNS games from unified Game model first
-    cns_counts_key = "counts_Game_CNS"
-    cns_counts = cache.get(cns_counts_key)
+    # Handle all unified model games (CNS, WEB, etc.)
+    for game_code in ['CNS', 'WEB']:  # Add more as they migrate
+        counts_key = f"counts_Game_{game_code}"
+        counts = cache.get(counts_key)
 
-    if not cns_counts:
-        cns_counts = {
-            "active": Game.objects.filter(gameCode='CNS', gameStatus="ACTIVE")
+        if not counts:
+            counts = {
+                "active": Game.objects.filter(gameCode=game_code, gameStatus="ACTIVE")
+                .exclude(players__player__username__in=excluded_names)
+                .distinct()
+                .count(),
+                "finished": Game.objects.filter(gameCode=game_code, gameStatus="FINISHED")
+                .exclude(players__player__username__in=excluded_names)
+                .distinct()
+                .count(),
+            }
+            cache.set(counts_key, counts, 60)
+
+        game_counts.append(counts["active"])
+        finished_game_counts.append(counts["finished"])
+
+        # Fetch latest games
+        latestGames.extend(
+            Game.objects.filter(gameCode=game_code, gameStatus="ACTIVE")
             .exclude(players__player__username__in=excluded_names)
             .distinct()
-            .count(),
-            "finished": Game.objects.filter(gameCode='CNS', gameStatus="FINISHED")
+            .order_by("-latestUpdate")[:10]
+        )
+
+        latestGamesFinished.extend(
+            Game.objects.filter(gameCode=game_code, gameStatus="FINISHED")
             .exclude(players__player__username__in=excluded_names)
             .distinct()
-            .count(),
-        }
-        cache.set(cns_counts_key, cns_counts, 60)
-
-    game_counts.append(cns_counts["active"])
-    finished_game_counts.append(cns_counts["finished"])
-
-    # Fetch latest CNS games
-    latestGames.extend(
-        Game.objects.filter(gameCode='CNS', gameStatus="ACTIVE")
-        .exclude(players__player__username__in=excluded_names)
-        .distinct()
-        .order_by("-latestUpdate")[:10]
-    )
-
-    latestGamesFinished.extend(
-        Game.objects.filter(gameCode='CNS', gameStatus="FINISHED")
-        .exclude(players__player__username__in=excluded_names)
-        .distinct()
-        .order_by("-latestUpdate")[:10]
-    )
+            .order_by("-latestUpdate")[:10]
+        )
 
     # Loop through GAME_MODELS once to gather counts and latest games
     for game_model in GAME_MODELS:
@@ -1197,25 +1219,23 @@ def index(request):
     # --- Step 2: Deep Prefetching (Essential for Step 3) ---
     all_user_games = []
 
-    # Handle CNS games from unified Game model first
+    # Load all unified model games at once
     from django.db.models import Exists, OuterRef
-
+    
     # For unified Game model, check through GamePlayer
-    is_player_cns = Game.objects.filter(
+    is_player = Game.objects.filter(
         id=OuterRef("id"),
-        gameCode='CNS',
         players__player=user
     ).values("id")
 
-    is_invited_cns = Game.objects.filter(
+    is_invited = Game.objects.filter(
         id=OuterRef("id"),
-        gameCode='CNS',
         invitedPlayers=user
     ).values("id")
 
-    cns_query = Game.objects.filter(gameCode='CNS').annotate(
-        user_is_player=Exists(is_player_cns),
-        user_is_invited=Exists(is_invited_cns)
+    unified_query = Game.objects.annotate(
+        user_is_player=Exists(is_player),
+        user_is_invited=Exists(is_invited)
     ).filter(
         Q(user_is_player=True)
         | Q(user_is_invited=True)
@@ -1223,20 +1243,20 @@ def index(request):
     )
 
     # Defer large fields
-    cns_query = cns_query.defer(
+    unified_query = unified_query.defer(
         "gameData",
         "rewindData",
         "rewindTempData",
         "chatData",
     )
 
-    # Prefetch related data for CNS games
-    cns_query = cns_query.select_related("creator").prefetch_related(
+    # Prefetch related data
+    unified_query = unified_query.select_related("creator").prefetch_related(
         "players__player",
         "invitedPlayers"
     )
 
-    all_user_games.extend(list(cns_query.distinct()))
+    all_user_games.extend(list(unified_query.distinct()))
 
     for model in GAME_MODELS:
         pass
@@ -2097,20 +2117,19 @@ def createKFWpage(request, gameID=0):
 
 @login_required
 def createWEBpage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "WEB", WEB_Game)
+    experienced = SF_hasRequiredExperience(request, "WEB", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createWEB.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = WEB_Game.objects.get(id=gameID)
-        except WEB_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID, gameCode='WEB')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        presenter = currentGame.presenter()
+        all_players = currentGame.players.exclude(is_kicked=True, player=request.user).select_related('player')
+        playerNames = [gp.player.username for gp in all_players if gp.player]
 
         messages.success(request, (gettext("Game creation for rematch")))
         loadedStartingOptions = (
@@ -2504,10 +2523,10 @@ def playerInfo(request, usernameToProfile):
 
     # THE MASTER LOOP: One model at a time
     for game_name, game_model in GAME_NAMES_MODELS.items():
-        if game_name == "CNS":
-            # Handle CNS with unified Game model
+        if usesUnifiedGameModel(game_name):
+            # Handle unified Game model (CNS, WEB, etc.)
             all_games = list(
-                Game.objects.filter(gameCode='CNS', players__player_id=target_id)
+                Game.objects.filter(gameCode=game_name, players__player_id=target_id)
                 .prefetch_related('players__player')
                 .distinct()
             )
@@ -2541,8 +2560,8 @@ def playerInfo(request, usernameToProfile):
         for game in all_games:
             status = game.gameStatus
 
-            # Handle CNS (unified Game model) differently
-            if game_name == "CNS":
+            # Handle unified Game model (CNS, WEB, etc.) differently
+            if usesUnifiedGameModel(game_name):
                 # Optimization: Use sets for membership checks
                 all_p_ids = {gp.player.id for gp in game.players.all()}
                 is_joint = req_user_id in all_p_ids
@@ -2899,15 +2918,15 @@ def joinGameLink(request, joinGameLink):
         return HttpResponseRedirect(reverse("index"))
 
     try:
-        if gameCode == "CNS":
-            availableGame = Game.objects.get(id=numbers, gameCode='CNS')
+        if usesUnifiedGameModel(gameCode):
+            availableGame = Game.objects.get(id=numbers, gameCode=gameCode)
         else:
             availableGame = gameModel.objects.get(id=numbers)
     except Exception:
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
 
-    if gameCode == "CNS":
+    if usesUnifiedGameModel(gameCode):
         current_player_count = availableGame.players.exclude(is_kicked=True).count()
     else:
         current_player_count = availableGame.allPlayers.count()
@@ -2949,12 +2968,12 @@ def joinGame(request, gameType):
     if not gameModel:
         return JsonResponse({"error": "Invalid Model"}, status=400)
 
-    # Handle CNS with unified Game model
-    if gameType == "CNS":
+    # Handle unified Game model (CNS, WEB, etc.)
+    if usesUnifiedGameModel(gameType):
         try:
             currentGame = Game.objects.prefetch_related("players__player", "invitedPlayers").get(
                 id=jsonData["gameID"],
-                gameCode='CNS'
+                gameCode=gameType
             )
         except Game.DoesNotExist:
             messages.error(request, (gettext("Sorry, the game no longer exists")))
@@ -2990,8 +3009,8 @@ def joinGame(request, gameType):
         if currentGame.gameStatus == "ACTIVE":
             messages.error(request, (gettext("The game has already started")))
         else:
-            if gameType == "CNS":
-                # For CNS, delete the GamePlayer
+            if usesUnifiedGameModel(gameType):
+                # For unified model games, delete the GamePlayer
                 currentGame.players.filter(player=request.user).delete()
             else:
                 # Legacy models
@@ -3080,11 +3099,11 @@ def checkJoinGame(request, gameType, gameID):
             )
         return
     # CHECK GAME EXISTS
-    if gameType == "CNS":
+    if usesUnifiedGameModel(gameType):
         try:
             currentGame = Game.objects.prefetch_related(
                 "invitedPlayers", "players__player", "creator__profile__blacklistedPlayers"
-            ).get(id=gameID, gameCode='CNS')
+            ).get(id=gameID, gameCode=gameType)
         except Game.DoesNotExist:
             messages.error(request, (gettext("Sorry, the game does not exist")))
             if ajaxReturn:
@@ -3095,7 +3114,7 @@ def checkJoinGame(request, gameType, gameID):
                 )
             return
 
-        # Get player lists for CNS
+        # Get player lists for unified model games
         all_players_list = [gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player]
         invited_players_list = list(currentGame.invitedPlayers.all())
     else:
@@ -3161,16 +3180,16 @@ def checkJoinGame(request, gameType, gameID):
     _latestUpdate = int(time.time()) * 1000
 
     # CHECK EXPERIENCE LEVEL HERE
-    is_experienced = currentGame.presenter().isExperiencedGame() if gameType == "CNS" else currentGame.isExperiencedGame()
+    is_experienced = currentGame.presenter().isExperiencedGame() if usesUnifiedGameModel(gameType) else currentGame.isExperiencedGame()
 
     if is_experienced:
         # Optimization: Fetch SHADOW once
         shadow_user = User.objects.get(username="SHADOW")
 
-        if gameType == "CNS":
-            # 1 Hit: Count finished games for CNS
+        if usesUnifiedGameModel(gameType):
+            # 1 Hit: Count finished games for unified model games
             exp = (
-                Game.objects.filter(gameCode='CNS', gameStatus="FINISHED", players__player=request.user)
+                Game.objects.filter(gameCode=gameType, gameStatus="FINISHED", players__player=request.user)
                 .exclude(players__player=shadow_user)
                 .distinct()
                 .count()
@@ -3222,10 +3241,10 @@ def checkJoinGame(request, gameType, gameID):
         fairPlayLastYear = 100
 
         for game_name, game_model in GAME_NAMES_MODELS.items():
-            if game_name == "CNS":
-                # Handle CNS with unified Game model
+            if usesUnifiedGameModel(game_name):
+                # Handle unified Game model games
                 finishedGames = Game.objects.filter(
-                    Q(gameCode='CNS'),
+                    Q(gameCode=game_name),
                     Q(gameStatus="FINISHED"),
                     ~Q(players__player__username="SHADOW"),
                     Q(players__player=request.user),
@@ -3298,8 +3317,8 @@ def checkJoinGame(request, gameType, gameID):
 
     _newPlayer = request.user
 
-    if gameType == "CNS":
-        # For CNS, create a GamePlayer
+    if usesUnifiedGameModel(gameType):
+        # For unified model games, create a GamePlayer
         GamePlayer.objects.create(
             game=currentGame,
             player=_newPlayer
@@ -3314,7 +3333,7 @@ def checkJoinGame(request, gameType, gameID):
     current_player_count = len(all_players_list) + 1
 
     if current_player_count == currentGame.maxPlayers:
-        if gameType == "CNS":
+        if usesUnifiedGameModel(gameType):
             currentGame.presenter().startGame(request)
         else:
             currentGame.startGame(request)
@@ -3355,8 +3374,8 @@ def deleteGame(request, gameType):
         if gameModel is None:
             return JsonResponse({"noGame": True}, safe=False)
 
-        if gameType == "CNS":
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='CNS')
+        if usesUnifiedGameModel(gameType):
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameType)
         else:
             currentGame = gameModel.objects.get(id=jsonData["gameID"])
     except:
@@ -3364,7 +3383,7 @@ def deleteGame(request, gameType):
 
     # Delete Training Game // Can never really fail
     if jsonData["action"] == "deleteTrgGame":
-        if gameType == "CNS":
+        if usesUnifiedGameModel(gameType):
             user_is_player = currentGame.players.filter(player=request.user).exists()
         else:
             user_is_player = request.user in currentGame.allPlayers.all()
@@ -3961,8 +3980,8 @@ def dataCheck(request):
     # 1. Check Available Count First (Lightest Queries)
     available_count = Mini_Tournaments.objects.filter(tournamentStatus="OP").count()
 
-    # Add CNS games from unified Game model
-    available_count += Game.objects.filter(gameCode='CNS', gameStatus="AVAILABLE").count()
+    # Add all unified model games (CNS, WEB, etc.)
+    available_count += Game.objects.filter(gameStatus="AVAILABLE").count()
 
     for model in GAME_MODELS:
         available_count += model.objects.filter(gameStatus="AVAILABLE").count()
@@ -3973,9 +3992,8 @@ def dataCheck(request):
     # 2. Check Invitations Count (Medium Queries)
     invitations_count = 0
 
-    # Add CNS invitations
+    # Add all unified model game invitations
     invitations_count += Game.objects.filter(
-        gameCode='CNS',
         gameStatus="WAITING",
         invitedPlayers=request.user
     ).count()
@@ -3994,9 +4012,8 @@ def dataCheck(request):
 
     my_move_count = 0
 
-    # Add CNS my move count
-    cns_active_games = Game.objects.filter(
-        gameCode='CNS',
+    # Add all unified model games my move count
+    unified_active_games = Game.objects.filter(
         gameStatus="ACTIVE",
         players__player=request.user
     ).exclude(
@@ -4004,7 +4021,7 @@ def dataCheck(request):
         players__player=request.user
     ).prefetch_related('players__player').distinct()
 
-    for g in cns_active_games:
+    for g in unified_active_games:
         if g.presenter().quickIsMyMove(user_name):
             my_move_count += 1
 

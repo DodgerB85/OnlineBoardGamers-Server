@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -515,6 +515,8 @@ class Game(BaseGame):
     def presenter(self):
         if self.gameCode == "CNS":
             return CannesPresenter(self)
+        if self.gameCode == "WEB":
+            return WebPresenter(self)
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
