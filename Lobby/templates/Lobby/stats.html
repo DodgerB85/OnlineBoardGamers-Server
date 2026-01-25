@@ -31,24 +31,14 @@
     <h1>{% translate "Games (non-practice) in Progress" %}: {{ totalGames }}</h1>
     <h2>
       {% for game in game_stats %}
-        <img src="{% static game.img %}"
-             alt="{{ game.name }}"
-             title="{{ game.name }}"
-             class="gameCountIcon"
-             width="40"
-             height="40">
+        {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
         {{ game.active }}
       {% endfor %}
     </h2>
     <h1>{% translate "Finished Games (non-practice)" %}: {{ finishedGames }}</h1>
     <h2>
       {% for game in game_stats %}
-        <img src="{% static game.img %}"
-             alt="{{ game.name }}"
-             title="{{ game.name }}"
-             class="gameCountIcon"
-             width="40"
-             height="40">
+        {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
         {{ game.finished }}
       {% endfor %}
     </h2>

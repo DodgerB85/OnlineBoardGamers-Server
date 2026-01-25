@@ -1004,15 +1004,15 @@ def stats(request):
 
     # Define metadata once to keep logic DRY
     GAME_META = {
-        'FCM': {'name': 'Food Chain Magnate', 'img': 'FCM/images/burger_board.png'},
-        'HC':  {'name': 'Hard City',           'img': 'HC/images/icon_car.png'},
-        'Bus': {'name': 'Bus',                'img': 'Bus/images/bus_icon.png'},
-        'TGZ': {'name': 'The Great Zimbabwe', 'img': 'TGZ/images/tgz_icon.png'},
-        'CNS': {'name': 'CNS',                'img': 'CNS/images/cns_icon.png'},
-        'AQY': {'name': 'Antiquity',          'img': 'AQY/images/aqy_icon.png'},
-        'IND': {'name': 'Indonesia',          'img': 'IND/images/ind_icon.png'},
-        'KFW': {'name': 'KFW',                'img': 'KFW/images/kfw_icon.png'},
-        'WEB': {'name': 'WEB',                'img': 'WEB/images/web_icon.png'},
+        'FCM': {'name': 'Food Chain Magnate', 'gameCode': 'FCM'},
+        'HC':  {'name': 'Hard City',           'gameCode':'HC'},
+        'Bus': {'name': 'Bus',                'gameCode': 'Bus'},
+        'TGZ': {'name': 'The Great Zimbabwe', 'gameCode': 'TGZ'},
+        'CNS': {'name': 'CNS',                'gameCode': 'CNS'},
+        'AQY': {'name': 'Antiquity',          'gameCode': 'AQY'},
+        'IND': {'name': 'Indonesia',          'gameCode': 'IND'},
+        'KFW': {'name': 'KFW',                'gameCode': 'KFW'},
+        'WEB': {'name': 'WEB',                'gameCode': 'WEB'},
     }
 
     # Unpack cached data
