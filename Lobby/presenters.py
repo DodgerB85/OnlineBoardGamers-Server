@@ -2,7 +2,9 @@ import time
 import json
 import random
 
+from django.utils.translation import gettext
 from django.db.models import Q
+from django.urls import reverse
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
@@ -11,10 +13,69 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+
 
 class GamePresenter:
     def __init__(self, gameObj):
         self.gameObj = gameObj
+        
+    ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
+    # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
+    def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        if self.gameObj.gameCode not in ["CNS", "WEB"]:
+            print(f"isMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False")
+            return False
+        
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+
+        if not current_players.exists():
+            return True
+
+        current_usernames = [gp.player.username for gp in current_players if gp.player]
+
+        if (
+            loggedInPlayerUsername in current_usernames
+            or "SHADOW" in current_usernames
+            or "SHADOW_2" in current_usernames
+            or "SHADOW_3" in current_usernames
+        ):
+            return True
+        return False
+
+    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        if self.gameObj.gameCode not in ["CNS", "WEB"]:
+            print(f"quickIsMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False")
+            return False
+        
+        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+            return False
+
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+
+        if not current_players.exists():
+            return True
+
+        current_usernames = [gp.player.username for gp in current_players if gp.player]
+
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+
+        return loggedInPlayerUsername in current_usernames or any(
+            username in shadow_values for username in current_usernames
+        )
+        
+    ########### END OF FUNCTIONS THAT DEPEND ON THE GAME
 
     def getGameName(self):
         # Use fields already on the model. DO NOT call .all() or .count() here.
@@ -218,6 +279,49 @@ class GamePresenter:
         self.gameObj.activeVotes[topic][username] = choice
         return True
 
+    def processVoteLogic(self, topic, username, choice):
+        """
+        Processes a vote and returns a dict ready for JsonResponse.
+        """
+        # 1. Cast the vote
+        success = self.castVote(topic, username, choice)
+        if not success:
+            return {"voteChanged": False}
+
+        # 2. Persist the vote
+        self.gameObj.save()
+
+        # 3. Check if all players have voted
+        votes_map = self.getFullSetOfVoteResults(
+            topic, self.getAllPlayersOrderedySeat(True), False
+        )
+        missing_players = self.getMissingPlayersNamesArray()
+        
+        all_voted = True
+        for player, vote in votes_map.items():
+            if not vote and player not in missing_players:
+                all_voted = False
+                break
+
+        # Prepare base response data
+        response_data = {
+            "voteChanged": True,
+            "votesData": json.dumps(votes_map)
+        }
+
+        # 4. Handle Terminal Actions
+        if all_voted:
+            if topic == DELETE_VOTE_TOPIC:
+                self.gameObj.delete()
+                response_data["message"] = gettext("Game successfully deleted")
+                response_data["redirect_url"] = reverse("index")
+            elif topic == STATS_EXCLUDE_VOTE_TOPIC:
+                self.gameObj.statsExcludedGame = True
+                self.gameObj.save()
+                #response_data["message"] = gettext("Game stats excluded")
+
+        return response_data
+
     def setVoteResults(self, topic, votes):
         if not self.gameObj.activeVotes:
             self.gameObj.activeVotes = {}
@@ -320,51 +424,6 @@ class CannesPresenter(GamePresenter):
 
         SN_M_sendEndGameNotification(
             request, "CNS", _finalPositions, _gameID, self.gameObj
-        )
-
-    def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        current_players = self.gameObj.players.filter(is_current=True).select_related(
-            "player"
-        )
-
-        if not current_players.exists():
-            return True
-
-        current_usernames = [gp.player.username for gp in current_players if gp.player]
-
-        if (
-            loggedInPlayerUsername in current_usernames
-            or "SHADOW" in current_usernames
-            or "SHADOW_2" in current_usernames
-            or "SHADOW_3" in current_usernames
-        ):
-            return True
-        return False
-
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
-            return False
-
-        current_players = self.gameObj.players.filter(is_current=True).select_related(
-            "player"
-        )
-
-        if not current_players.exists():
-            return True
-
-        current_usernames = [gp.player.username for gp in current_players if gp.player]
-
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-
-        return loggedInPlayerUsername in current_usernames or any(
-            username in shadow_values for username in current_usernames
         )
 
     def serialize(self, loggedInUserObj=None):
@@ -548,48 +607,6 @@ class WebPresenter(GamePresenter):
             finalResults.append([name, "Trapped in a dot matrix", 9])
 
         SN_M_sendEndGameNotificationTieGame(request, "WEB", finalResults, _gameID, self.gameObj)
-
-    def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        current_players = self.gameObj.players.filter(is_current=True).select_related(
-            "player"
-        )
-
-        if not current_players.exists():
-            return True
-
-        current_usernames = [gp.player.username for gp in current_players if gp.player]
-
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"}
-        return (
-            loggedInPlayerUsername in current_usernames
-            or any(username in shadow_values for username in current_usernames)
-        )
-
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
-            return False
-
-        current_players = self.gameObj.players.filter(is_current=True).select_related(
-            "player"
-        )
-
-        if not current_players.exists():
-            return True
-
-        current_usernames = [gp.player.username for gp in current_players if gp.player]
-
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-
-        return loggedInPlayerUsername in current_usernames or any(
-            username in shadow_values for username in current_usernames
-        )
 
     def serialize(self, loggedInUserObj=None):
         from Lobby.sharedFunctions.sharedRefs import (

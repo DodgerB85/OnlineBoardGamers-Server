@@ -1441,73 +1441,21 @@ def _castVote(request):
         currentGame = AQY_Game.objects.get(id=jsonData["gameID"])
     except AQY_Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    # player = request.user  # Assuming the logged-in user is voting
-    playerName = request.user.username  # Get the player's username
-    topic = jsonData["topic"]
+    
+    # Delegate all logic to the presenter
+    result = currentGame.tempPresenter().processVoteLogic(
+        topic=jsonData["topic"],
+        username=request.user.username,
+        choice=True,
+    ) 
 
-    success = currentGame.tempPresenter().castVote(
-        topic, playerName, True
-    )  # Pass playerName to addDeleteVote
-
-    if success:
-        currentGame.save()
-        # Check if all players have voted to delete
-        all_voted = True
-        votesData = currentGame.tempPresenter().getFullSetOfVoteResults(
-            topic, currentGame.getAllPlayersOrderedySeat(True), False
-        )
-
-        missingPlayers = currentGame.getMissingPlayersNamesArray()
-        for player, vote in votesData.items():
-            if not vote and player not in missingPlayers:
-                all_voted = False
-                break
-
-        if all_voted:
-            # Get the result
-            votesData = json.dumps(
-                currentGame.tempPresenter().getFullSetOfVoteResults(
-                    topic, currentGame.getAllPlayersOrderedySeat(True), False
-                )
-            )
-            # Delete the game
-            if topic == DELETE_VOTE_TOPIC:
-                currentGame.delete()
-                # Add a success message
-                messages.success(request, gettext("Game successfully deleted"))
-
-            if topic == STATS_EXCLUDE_VOTE_TOPIC:
-                currentGame.statsExcludedGame = True
-                currentGame.save()
-                # Add a success message
-                messages.success(request, gettext("Game stats excluded"))
-
-            # Redirect to the index page
-            return JsonResponse(
-                {
-                    "voteChanged": True,
-                    "votesData": votesData,
-                    "redirect_url": reverse("index"),
-                }
-            )
-
-        return JsonResponse(
-            {
-                "voteChanged": True,
-                "votesData": json.dumps(
-                    currentGame.tempPresenter().getFullSetOfVoteResults(
-                        topic,
-                        currentGame.getAllPlayersOrderedySeat(True),
-                        False,
-                    )
-                ),
-            },
-            safe=False,
-        )
-
-    return JsonResponse({"voteChanged": False})
-
-
+    # If an action occurred that requires a user message, add it here
+    msg = result.get("message")
+    if isinstance(msg, str):  # This clarifies the type for the type checker
+        messages.success(request, msg)
+        
+    return JsonResponse(result)
+    
 @login_required
 def AQYstats(request):
     # Load regular stats

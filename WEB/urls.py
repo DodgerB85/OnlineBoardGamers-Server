@@ -30,5 +30,5 @@ urlpatterns = [
     path('data/<int:dataType>/', views.WEBdata, name='WEBdata'),
 
     path("saveZoom/", views.saveZoom, name="saveZoom"),
-    path("voteToDelete/", views.voteToDelete, name="addDeleteVoteWEB"),
+    path("castVote/", views.castVote, name="castVoteCNS"),
 ]

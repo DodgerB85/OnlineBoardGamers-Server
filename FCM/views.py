@@ -1967,6 +1967,7 @@ def castVote(request):
         return _castVote(request)
 
 
+# ALTER THIS ONCE FCM IS A GENERAL GAME -- COMPARE WITH EG CNS _CASEVOTE
 @login_required
 def _castVote(request):
     """Adds a delete vote for a player."""
