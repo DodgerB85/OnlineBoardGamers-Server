@@ -21,8 +21,16 @@ class TGZMiniTournament(Mini_Tournaments):
 
 # CNS
 class CNSgame(Game):
-    class Meta:
+    class Meta(Game.Meta):
         proxy = True
         app_label = "CNS"
         verbose_name = "CNS_Game"
         verbose_name_plural = "CNS_Games"
+
+# CNS
+class WEBgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "WEB"
+        verbose_name = "WEB_Game"
+        verbose_name_plural = "WEB_Games"
