@@ -124,7 +124,8 @@ def createHCgame(request):
     # except:
     #    _maxPlayers = 3
     _player_order_seed = randint(0, _maxPlayers - 1)
-
+    statsExcludedGame = False
+    
     _startingOptions = ""
     if "trainingGame" in request.POST:
         _startingOptions += request.POST["trainingGame"] + ","
@@ -132,6 +133,26 @@ def createHCgame(request):
     #    _startingOptions += request.POST["trainingGame"] + ","
     if "experiencedGame" in request.POST:
         _startingOptions += request.POST["experiencedGame"] + ","
+        
+    if "limitVehicles" in request.POST:
+        # Exclude from stats
+        statsExcludedGame = True
+        #if "vehicleLimitRadio1" in request.POST:
+        #    _startingOptions += request.POST["vehicleLimitRadio1"] + ","
+        #if "vehicleLimitRadio2" in request.POST:
+        #    _startingOptions += request.POST["vehicleLimitRadio2"] + ","
+        #if "vehicleLimitRadio3" in request.POST:
+        #    _startingOptions += request.POST["vehicleLimitRadio3"] + ","
+        #if "vehicleLimitRadio4" in request.POST:
+        #    _startingOptions += request.POST["vehicleLimitRadio4"] + ","
+        #if "vehicleLimitRadio5" in request.POST:
+        #    _startingOptions += request.POST["vehicleLimitRadio5"] + ","
+        #if "vehicleLimitRadio6" in request.POST:
+        #    _startingOptions += request.POST["vehicleLimitRadio6"] + ","
+        if "vehicleLimitRadio" in request.POST:
+            _startingOptions += request.POST["vehicleLimitRadio"] + ","
+        if "increaseMainlines" in request.POST:
+            _startingOptions += request.POST["increaseMainlines"] + ","
 
     if len(_startingOptions) > 0:
         _startingOptions = _startingOptions.rstrip(_startingOptions[-1])
@@ -153,6 +174,7 @@ def createHCgame(request):
         startingOptions=_startingOptions,
         maxPlayers=_maxPlayers,
         gameStatus="AVAILABLE",
+        statsExcludedGame=statsExcludedGame
     )
     newGame.save()
 
@@ -1212,6 +1234,7 @@ def showHCgame(request, game_id):
             "KickoutFlexiDataArray": KickoutFlexiDataArray,
             "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
             "settingsDebug": settings.DEBUG,
+            "startingOptionsLiteral": currentGame.startingOptions,
         },
     )
 

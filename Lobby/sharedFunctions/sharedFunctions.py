@@ -36,6 +36,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     getCleanedAndSortedRoundData,
     SR_currentTurnString,
     SR_getFCMstartingOptionsHTML,
+    SR_getHCstartingOptionsHTML,
     SR_gamePaceString,
 )
 from Lobby.sharedFunctions.tournyGenerator import multiGamePlayers4p, multiGamePlayersRound2
@@ -215,6 +216,8 @@ def SF_fastSerializeGame(game, user):
     startingOptionsHTML = ""
     if game_code == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(game.startingOptions)
+    if game_code == "HC":
+        startingOptionsHTML = SR_getHCstartingOptionsHTML(game.startingOptions)
     
     # Get kickout required - use presenter for unified model
     if is_unified_model:
