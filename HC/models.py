@@ -666,7 +666,7 @@ class HC_Game(GeneralGame):
             "currentTurn": self.currentTurnString(),
             "pace": gamePaceString,
             "latestUpdate": latestUpdateString,
-            "startingOptions": startingOptionsHTML,
+            "startingOptionsHTML": startingOptionsHTML,
             "kickoutDuration": self.kickoutDuration,
             "maxPlayers": self.maxPlayers,
             "winner": winner,  # Used for Finished Games

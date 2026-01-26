@@ -1283,9 +1283,60 @@ def SR_getHCstartingOptionsHTML(startingOptions):
             )
         elif option == "120":
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+                "<img class='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
+            )
+        elif option == "3":
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
+                    + gettext("Cars Only")
+                    + "'>"
+            )
+        elif option == "4":
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_truck.jpg' title='"
+                    + gettext("Trucks Only")
+                    + "'>"
+            )
+        elif option == "5":
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_sports.jpg' title='"
+                    + gettext("Sports Only")
+                    + "'>"
+            )
+        elif option == "6":
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
+                    + gettext("Include Cars")
+                    + "'>"
+            )
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_truck.jpg' title='"
+                    + gettext("Include Trucks")
+                    + "'>"
+            )
+        elif option == "7":
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
+                    + gettext("Include Cars")
+                    + "'>"
+            )
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_sports.jpg' title='"
+                    + gettext("Include Sports")
+                    + "'>"
+            )
+        elif option == "8":
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_truck.jpg' title='"
+                    + gettext("Include Trucks")
+                    + "'>"
+            )
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/HC/images/s_sports.jpg' title='"
+                    + gettext("Include Sports")
+                    + "'>"
             )
 
     return startingOptionsHTML

@@ -359,6 +359,8 @@
     global.liveWS = true;
     global.name = '{{ name }}';
     global.nextURL = '{{ nextURL|safe }}';
+    global.startingOptions = '{{ startingOptionsLiteral }}';
+
 
     {% endif %}
 
@@ -383,12 +385,7 @@
 ////////////////////////////////
 
 //////////////////////////
-{%if not gameData %}
-global.displayNames = "{{ displayNames }}";
-
-    {% if startingOptionsLiteral %}global.startingOptions = '{{ startingOptionsLiteral }}';{% endif %}
-
-    {% endif %}
+{%if not gameData %}global.displayNames = "{{ displayNames }}";{% endif %}
 ////////////////////////
 
     global.chat = { "chat": [{{ chatData | safe }}], "testInfo": [] };

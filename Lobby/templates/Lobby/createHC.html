@@ -190,6 +190,75 @@
                         </span>
                         <br />
                     </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Game Options" %}</legend>
+                        <input type="checkbox"
+                               onchange="validateGameOptions(this.id)"
+                               class="myCheckbox"
+                               id="limitVehicles"
+                               name="limitVehicles"
+                               value="2">
+                        <label for="limitVehicles" class="checkboxLabel">{% translate "Limit Vehicles" %}</label>
+                        <br />
+                        <input type="radio"
+                               name="vehicleLimitRadio"
+                               id="vehicleLimitRadio1"
+                               disabled
+                               value="3">
+                        <label for="vehicleLimitRadio1" class="checkboxLabel">Only Cars</label>
+                        <br />
+                        <input type="radio"
+                               name="vehicleLimitRadio"
+                               id="vehicleLimitRadio2"
+                               disabled
+                               value="4">
+                        <label for="vehicleLimitRadio2" class="checkboxLabel">Only Trucks</label>
+                        <br />
+                        <input type="radio"
+                               name="vehicleLimitRadio"
+                               id="vehicleLimitRadio3"
+                               disabled
+                               value="5">
+                        <label for="vehicleLimitRadio3" class="checkboxLabel">Only Sports</label>
+                        <br />
+                        <input type="radio"
+                               name="vehicleLimitRadio"
+                               id="vehicleLimitRadio4"
+                               disabled
+                               value="6">
+                        <label for="vehicleLimitRadio4" class="checkboxLabel">Cars + Trucks</label>
+                        <br />
+                        <input type="radio"
+                               name="vehicleLimitRadio"
+                               id="vehicleLimitRadio5"
+                               disabled
+                               value="7">
+                        <label for="vehicleLimitRadio5" class="checkboxLabel">Cars + Sports</label>
+                        <br />
+                        <input type="radio"
+                               name="vehicleLimitRadio"
+                               id="vehicleLimitRadio6"
+                               disabled
+                               value="8">
+                        <label for="vehicleLimitRadio6" class="checkboxLabel">Trucks + Sports</label>
+                        <br />
+                        <span class="inlineHelp">{% translate "Limits Vehicles. For Intro game, select Only Cars. Game will be excluded from stats<br />CAUTION: Players may not wish to join this game type" %}</span>
+                        <br />
+                        <input type="checkbox"
+                               class="myCheckbox"
+                               id="increaseMainlines"
+                               name="increaseMainlines"
+                               value="9"
+                               disabled>
+                        <label for="increaseMainlines" class="checkboxLabel">{% translate "Increase Mainlines" %}</label>
+                        <br />
+                        <span class="inlineHelp">
+                            {% blocktranslate trimmed %}
+                                Adds more mainlines to adjust for unusable mainlines
+                            {% endblocktranslate %}
+                        </span>
+                        <br />
+                    </fieldset>
                 </div>
                 <br />
             </div>
