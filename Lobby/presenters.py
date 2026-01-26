@@ -292,14 +292,22 @@ class GamePresenter:
         self.gameObj.save()
 
         # 3. Check if all players have voted
-        votes_map = self.getFullSetOfVoteResults(
-            topic, self.getAllPlayersOrderedySeat(True), False
-        )
-        missing_players = self.getMissingPlayersNamesArray()
+        if self.gameObj.gameCode in ["FCM", "AQY"]:
+            ordered_players = self.gameObj.getAllPlayersOrderedySeat()
+            missing_players = {p.username for p in self.gameObj.missingPlayers.all()}
+        else:
+            # NB this "y" seat typo is everywhere! Leave for noe
+            ordered_players = self.getAllPlayersOrderedySeat(True)
+            missing_players = self.getMissingPlayersNamesArray()
+            
+        votes_map = self.getFullSetOfVoteResults(topic, ordered_players, False)
         
         all_voted = True
         for player, vote in votes_map.items():
-            if not vote and player not in missing_players:
+            # If using gameObj methods, 'player' might be an object; ensure you compare names
+            player_name = player.username if hasattr(player, 'username') else player
+            
+            if not vote and player_name not in missing_players:
                 all_voted = False
                 break
 
