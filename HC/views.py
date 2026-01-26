@@ -137,18 +137,6 @@ def createHCgame(request):
     if "limitVehicles" in request.POST:
         # Exclude from stats
         statsExcludedGame = True
-        #if "vehicleLimitRadio1" in request.POST:
-        #    _startingOptions += request.POST["vehicleLimitRadio1"] + ","
-        #if "vehicleLimitRadio2" in request.POST:
-        #    _startingOptions += request.POST["vehicleLimitRadio2"] + ","
-        #if "vehicleLimitRadio3" in request.POST:
-        #    _startingOptions += request.POST["vehicleLimitRadio3"] + ","
-        #if "vehicleLimitRadio4" in request.POST:
-        #    _startingOptions += request.POST["vehicleLimitRadio4"] + ","
-        #if "vehicleLimitRadio5" in request.POST:
-        #    _startingOptions += request.POST["vehicleLimitRadio5"] + ","
-        #if "vehicleLimitRadio6" in request.POST:
-        #    _startingOptions += request.POST["vehicleLimitRadio6"] + ","
         if "vehicleLimitRadio" in request.POST:
             _startingOptions += request.POST["vehicleLimitRadio"] + ","
         if "increaseMainlines" in request.POST:
