@@ -5,7 +5,7 @@
 #logoLoggedOut {
 	padding: 0px;
 	margin-left: 10px;
-	width: 800px;
+	width: 700px;
 }
 @media only screen and (max-width: 1475px) {
 	#logoLoggedOut {
@@ -47,7 +47,7 @@
 	}
 }
 
-@media only screen and (max-width: 972px) {
+@media only screen and (max-width: 1170px) {
 	#logoLoggedOut {
 		display: none;
 	}
