@@ -4,39 +4,41 @@
   <b><u><span>{% translate "What are the icons?" %}</span></u></b>
   <br />
   {% translate "The icons represent the options selected for that game. You can hover over the icon to see what it represents." %}
-  <br/>
-  <br/>
-    <b><u>{% translate "Game Icons" %}</u></b><br/>
+  <br />
+  <br />
+  <b><u>{% translate "Game Icons" %}</u></b>
+  <br />
   <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="FCM" %}
   {% translate "Food Chain Magnate" %}</span>
-    <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
   {% translate "Horseless Carriage" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="Bus" %}
   {% translate "Bus" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
   {% translate "The Great Zimbabwe" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="CNS" %}
   {% translate "Cannes" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="AQY" %}
   {% translate "Antiquity" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="IND" %}
   {% translate "Indonesia" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="KFW" %}
   {% translate "Keyflower" %}</span>
-        <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     {% include 'Lobby/gameDisplay/gameIcons.html' with game="WEB" %}
   {% translate "Web" %}</span>
   <br />
-  <br/>
-  <b><u>{% translate "All Games" %}</u></b><br/>
+  <br />
+  <b><u>{% translate "All Games" %}</u></b>
+  <br />
   <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
@@ -53,10 +55,10 @@
          src="/static/Lobby/images/so_experiencedGame.svg"
          title="{% translate "Experienced Game" %}">
   {% translate "Experienced Game - See <a class='linkOther' href='/help/#navGameType'>Help</a>" %}</span>
-    <br/>
-    <br/>
-    <b><u>{% translate "Food Chain Magnate" %}</u></b><br/>
-
+  <br />
+  <br />
+  <b><u>{% translate "Food Chain Magnate" %}</u></b>
+  <br />
   <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
@@ -178,7 +180,12 @@
          title="{% translate "Noodles" %}">
   {% translate "Noodles" %}</span>
   <span class="helpStartingOptionSpan">
-    <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="/static/FCM/images/so_strict.svg" title="{% translate "Turn Order Payday/Fridge" %}">
+    <img class="startingOptionHelpImg"
+         alt="Str Opt"
+         width="50"
+         height="50"
+         src="/static/FCM/images/so_strict.svg"
+         title="{% translate "Turn Order Payday/Fridge" %}">
   {% translate "Turn Order Payday/Fridge" %}</span>
   <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
@@ -211,22 +218,22 @@
          height="50"
          src="/static/FCM/images/so_noRadio.svg"
          title="{% translate "No Radio Milestone" %}">
-         {% translate "No Radio Milestone" %}</span>
-         <span class="helpStartingOptionSpan">
-           <img class="startingOptionHelpImg"
-                alt="Str Opt"
-                width="50"
-                height="50"
-                src="/static/FCM/images/hardchoices2.jpg"
-                title="{% translate "Hard Choices" %}">
-                {% translate "Hard Choices" %}</span>
-                <span class="helpStartingOptionSpan">
-                  <img class="startingOptionHelpImg"
-                       alt="Sbox"
-                       width="50"
-                       height="50"
-                       src="/static/FCM/images/so_sandbox.svg"
-                       title="{% translate "Sandbox Mode" %}">
+  {% translate "No Radio Milestone" %}</span>
+  <span class="helpStartingOptionSpan">
+    <img class="startingOptionHelpImg"
+         alt="Str Opt"
+         width="50"
+         height="50"
+         src="/static/FCM/images/hardchoices2.jpg"
+         title="{% translate "Hard Choices" %}">
+  {% translate "Hard Choices" %}</span>
+  <span class="helpStartingOptionSpan">
+    <img class="startingOptionHelpImg"
+         alt="Sbox"
+         width="50"
+         height="50"
+         src="/static/FCM/images/so_sandbox.svg"
+         title="{% translate "Sandbox Mode" %}">
   {% translate "Sandbox Mode" %}</span>
   <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
@@ -244,8 +251,7 @@
          src="/static/FCM/images/so_draftMods.jpg"
          title="{% translate "Draft Modules" %}">
   {% translate "Draft Modules" %}</span>
-
-    <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
@@ -253,7 +259,7 @@
          src="/static/FCM/images/so_urbanPlanning.svg"
          title="{% translate "Urban Planning" %}">
   {% translate "Urban Planning" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
@@ -261,7 +267,7 @@
          src="/static/FCM/images/so_urbanPlanningPlus.svg"
          title="{% translate "Urban Planning Plus" %}">
   {% translate "Urban Planning Plus" %}</span>
-       <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
@@ -269,7 +275,7 @@
          src="/static/FCM/images/so_jazz.svg"
          title="{% translate "Jazz Musicians" %}">
   {% translate "Jazz Musicians" %}</span>
-        <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
@@ -277,7 +283,7 @@
          src="/static/FCM/images/so_dumplings.svg"
          title="{% translate "Dumplings" %}">
   {% translate "Dumplings" %}</span>
-        <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
@@ -285,7 +291,7 @@
          src="/static/FCM/images/so_delivery.svg"
          title="{% translate "Delivery Drivers" %}">
   {% translate "Delivery Drivers" %}</span>
-        <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
@@ -293,10 +299,46 @@
          src="/static/FCM/images/so_hawkers.svg"
          title="{% translate "Hawker Truck Marketing" %}">
   {% translate "Hawker Truck Marketing" %}</span>
-
-  <br/>
-  <br/>
-  <b><u>{% translate "The Great Zimbabwe" %}</u></b><br/>
+  <br />
+  <br />
+  <b><u>{% translate "Horseless Carriage" %}</u></b>
+  <br />
+  <span class="helpStartingOptionSpan">
+    <img class="startingOptionHelpImg"
+         alt="Str Opt"
+         width="50"
+         height="50"
+         src="/static/HC/images/s_car.jpg"
+         title="{% translate "Use Cars" %}">
+  {% translate "Use Cars" %}</span>
+  <span class="helpStartingOptionSpan">
+    <img class="startingOptionHelpImg"
+         alt="Str Opt"
+         width="50"
+         height="50"
+         src="/static/HC/images/s_truck.jpg"
+         title="{% translate "Use Trucks" %}">
+  {% translate "Use Trucks" %}</span>
+  <span class="helpStartingOptionSpan">
+    <img class="startingOptionHelpImg"
+         alt="Str Opt"
+         width="50"
+         height="50"
+         src="/static/HC/images/s_sports.jpg"
+         title="{% translate "Use Sports" %}">
+  {% translate "Use Sports" %}</span>
+  <span class="helpStartingOptionSpan">
+    <img class="startingOptionHelpImg"
+         alt="Str Opt"
+         width="50"
+         height="50"
+         src="/static/Lobby/images/startingOptions/HC_moreMainlines.svg"
+         title="{% translate "Increase Mainlines" %}">
+  {% translate "Increase mainlines from removed vehicles" %}</span>
+  <br />
+  <br />
+  <b><u>{% translate "The Great Zimbabwe" %}</u></b>
+  <br />
   <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
@@ -330,8 +372,9 @@
          title="{% translate "Altered Spec VR" %}">
   {% translate "Altered Spec VR" %}</span>
   <br />
-  <br/>
-  <b><u>{% translate "Cannes" %}</u></b><br/>
+  <br />
+  <b><u>{% translate "Cannes" %}</u></b>
+  <br />
   <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
@@ -388,9 +431,10 @@
          src="/static/CNS/images/so_junkL.svg"
          title="{% translate "High Table Junk" %}">
   {% translate "High Table Junk" %}</span>
-  <br/>
-  <br/>
-  <b><u>{% translate "Indonesia" %}</u></b><br/>
+  <br />
+  <br />
+  <b><u>{% translate "Indonesia" %}</u></b>
+  <br />
   <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
@@ -407,9 +451,10 @@
          src="/static/IND/images/so_aegean_map.svg"
          title="{% translate "Use the fan made Aegean Map" %}">
   {% translate "Use Aegean Map Expansion" %}</span>
-  <br/>
-  <br/>
-  <b><u>{% translate "Keyflower" %}</u></b><br/>
+  <br />
+  <br />
+  <b><u>{% translate "Keyflower" %}</u></b>
+  <br />
   <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
@@ -426,40 +471,40 @@
          src="/static/KFW/images/so_promos.svg"
          title="{% translate "Use Promo Tiles" %}">
   {% translate "Use Promo Tiles" %}</span>
-    <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
          height="50"
          src="/static/KFW/images/so_infoHighPlus.svg"
          title="{% translate "High Knowledge" %}&#10;{% translate "of Hidden Info" %}">
-         <img class="startingOptionHelpImg"
+    <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
          height="50"
          src="/static/KFW/images/so_infoHighMinus.svg"
          title="{% translate "High Knowledge" %}&#10;{% translate "of Hidden Info" %}">
   {% translate "High Level of Hidden Info" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
          height="50"
          src="/static/KFW/images/so_infoMedPlus.svg"
          title="{% translate "Medium Knowledge" %}&#10;{% translate "of Hidden Info" %}">
-          <img class="startingOptionHelpImg"
+    <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
          height="50"
          src="/static/KFW/images/so_infoMedMinus.svg"
          title="{% translate "Medium Knowledge" %}&#10;{% translate "of Hidden Info" %}">
   {% translate "Medium Level" %}</span>
-      <span class="helpStartingOptionSpan">
+  <span class="helpStartingOptionSpan">
     <img class="startingOptionHelpImg"
          alt="Str Opt"
          width="50"
          height="50"
          src="/static/KFW/images/so_infoLow.svg"
-        title="{% translate "Low Knowledge" %}&#10;{% translate "of Hidden Info" %}">
+         title="{% translate "Low Knowledge" %}&#10;{% translate "of Hidden Info" %}">
   {% translate "Low Level" %}</span>
 </div>
