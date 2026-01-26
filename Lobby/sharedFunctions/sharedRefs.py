@@ -1338,6 +1338,12 @@ def SR_getHCstartingOptionsHTML(startingOptions):
                     + gettext("Include Sports")
                     + "'>"
             )
+        elif option == "9":
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/Lobby/images/startingOptions/HC_moreMainlines.svg' title='"
+                    + gettext("Extra Mainlines")
+                    + "'>"
+            )
 
     return startingOptionsHTML
 
