@@ -188,7 +188,7 @@ def telegram_test_webhook(request):
                 token = "8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y"
                 
                 # 2. Direct API call to reply
-                api_url = f"https://api.telegram.org{token}/sendMessage"
+                api_url = f"https://api.telegram.org/bot{token}/sendMessage"
                 payload = {"chat_id": chat_id, "text": "DEBUG: Server received your message!"}
                 
                 # Use a timeout so the thread doesn't hang
