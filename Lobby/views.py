@@ -9,6 +9,7 @@ import base64
 import gzip
 from django.core.cache import cache
 
+
 import json
 import asyncio
 from django.http import HttpResponse
@@ -172,44 +173,36 @@ def usesUnifiedGameModel(game_code):
 # Replace with your NEW test token from BotFather
 TEST_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
 
-# Initialize application (Sync/Global)
-test_app = Application.builder().token(TEST_TOKEN).build()
-
-# The same logic as your previous bot, but inside the Django view
-async def start_test(update: Update, context):
-    telegram_id = update.message.from_user.id
-    await update.message.reply_text(f"TEST SUCCESS! Your ID is {telegram_id}")
-
 @csrf_exempt
 def telegram_test_webhook(request):
     if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        
-        # 1. Extract the Chat ID and Message Text
-        if "message" in data:
-            chat_id = data["message"]["chat"]["id"]
-            text = data["message"].get("text", "")
-
-            # 2. If they sent /start, send a simple reply back
-            if text == "/start":
+        try:
+            # 1. Log the raw body to see what Telegram is sending
+            body = request.body.decode("utf-8")
+            print(f"TELEGRAM DATA RECEIVED: {body}")
+            
+            data = json.loads(body)
+            
+            if "message" in data:
+                chat_id = data["message"]["chat"]["id"]
                 token = "8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y"
+                
+                # 2. Direct API call to reply
                 api_url = f"https://api.telegram.org{token}/sendMessage"
-                payload = {
-                    "chat_id": chat_id,
-                    "text": f"SERVER SUCCESS! Your ID is: {chat_id}"
-                }
-                requests.post(api_url, json=payload)
+                payload = {"chat_id": chat_id, "text": "DEBUG: Server received your message!"}
+                
+                # Use a timeout so the thread doesn't hang
+                response = requests.post(api_url, json=payload, timeout=5)
+                print(f"TELEGRAM API RESPONSE: {response.status_code}")
 
-        return HttpResponse("OK", status=200)
-    return HttpResponse("Use POST", status=403)
-
-async def process_test_update(data):
-    if not test_app.initialized:
-        await test_app.initialize()
-        test_app.add_handler(CommandHandler('start', start_test))
-
-    update = Update.de_json(data, test_app.bot)
-    await test_app.process_update(update)
+            return HttpResponse("OK", status=200)
+            
+        except Exception as e:
+            # This will print the EXACT error to your PythonAnywhere Error Log
+            print(f"CRITICAL WEBHOOK ERROR: {str(e)}")
+            return HttpResponse("Error", status=200) # Still return 200 to stop Telegram retries
+            
+    return HttpResponse("Method Not Allowed", status=405)
 
 
 ##########################
