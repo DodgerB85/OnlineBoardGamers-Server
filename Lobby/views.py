@@ -9,6 +9,13 @@ import base64
 import gzip
 from django.core.cache import cache
 
+import json
+import asyncio
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from telegram import Update
+from telegram.ext import Application, CommandHandler
+
 # from telegram import Update
 # from telegram.ext import Application, CommandHandler, ContextTypes
 from decouple import config
@@ -154,6 +161,47 @@ def usesUnifiedGameModel(game_code):
     As games are migrated to the unified model, add their game codes here.
     """
     return game_code in ["CNS", "WEB"]
+
+##########################
+#
+#   Attempt at Telegram Bot. VERSION 2 - 2026
+#   Currently Disabled; using seperate python server
+#
+##########################
+
+# Replace with your NEW test token from BotFather
+TEST_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
+
+# Initialize application (Sync/Global)
+test_app = Application.builder().token(TEST_TOKEN).build()
+
+# The same logic as your previous bot, but inside the Django view
+async def start_test(update: Update, context):
+    telegram_id = update.message.from_user.id
+    await update.message.reply_text(f"TEST SUCCESS! Your ID is {telegram_id}")
+
+@csrf_exempt
+def telegram_test_webhook(request):
+    if request.method == "POST":
+        try:
+            update_data = json.loads(request.body.decode("utf-8"))
+
+            # Use a helper to run the async logic
+            asyncio.run(process_test_update(update_data))
+
+            return HttpResponse("OK", status=200)
+        except Exception as e:
+            print(f"Test Bot Error: {e}")
+            return HttpResponse("Error", status=500)
+    return HttpResponse("Use POST", status=403)
+
+async def process_test_update(data):
+    if not test_app.initialized:
+        await test_app.initialize()
+        test_app.add_handler(CommandHandler('start', start_test))
+
+    update = Update.de_json(data, test_app.bot)
+    await test_app.process_update(update)
 
 
 ##########################
