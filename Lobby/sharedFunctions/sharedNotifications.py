@@ -6,6 +6,7 @@ import time
 import urllib.parse
 from decouple import config
 
+from django.db import close_old_connections
 from django.utils.translation import gettext, activate, get_language
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
@@ -931,6 +932,8 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
 
 
 def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, currentGame, errorUsername):
+    # 1. CRITICAL: Close stale connections so Django opens a fresh one for this thread
+    close_old_connections()
     originalLang = get_language()
     for player in playerList:
         try:

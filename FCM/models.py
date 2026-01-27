@@ -1,4 +1,5 @@
 from random import randint
+import threading
 
 import base64
 import gzip
@@ -496,14 +497,14 @@ class FCM_Game(GeneralGame):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(
-                get_current_site(request),
-                "FCM",
-                playerListToNotify,
-                getattr(self, "id"),
-                self,
-                request.user.username,
-            )
+            #SN_M_sendGameStartNotification(
+            #    get_current_site(request),
+            #    "FCM",
+            #    playerListToNotify,
+            #    getattr(self, "id"),
+            #    self,
+            #    request.user.username,
+            #)
 
             #async_task(
             #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
@@ -514,6 +515,15 @@ class FCM_Game(GeneralGame):
             #    self,
             #    request.user.username,
             #)
+            
+            t = threading.Thread(
+                target=SN_M_sendGameStartNotification,
+                args=(get_current_site(request), "FCM", playerListToNotify, self.id, self, request.user.username)
+            )
+            # Set as daemon so it doesn't block the server from shutting down
+            t.daemon = True 
+            t.start()
+            self.save()
 
     # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
     def getAllPlayersOrderedySeat(self, withoutBots=False, useNewCode=True):
