@@ -19,7 +19,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
-live_env_path = '/home/OnlineGaming/OnlineBoardGamers/.env'
+live_env_path = '/home/OnlineGaming/.virtualenvs/OnlineGaming/.env'
 live_env_config = Config(RepositoryEnv(live_env_path))
 
 DEBUG = config("DEBUG", default=False, cast=bool)
