@@ -16,6 +16,7 @@ Including another URLconf
 
 from django.urls import path, re_path
 from django.views.generic import RedirectView
+from decouple import config
 
 from . import views
 from .views import registerView, ActivateAccount
@@ -152,7 +153,7 @@ urlpatterns = [
     path("sendAdminMessage/", views.sendAdminMessage, name="sendAdminMessage"),
     # API Routes
     #path("TG_webhook/", views.TG_webhook, name="TG_webhook"),
-    path('tg-test-webhook-unique-99/', views.telegram_test_webhook),
+    path(f'{config("TELEGRAM_WEBHOOK_PATH")}', views.telegram_bot_response),
     path("addTGid/<int:TGid>", views.addTGid, name="addTGid"),
     path("nextGame", views.next_game_redirect, name="next_game"),
     path("join/<str:joinGameLink>/", views.joinGameLink, name="joinGameLink"),

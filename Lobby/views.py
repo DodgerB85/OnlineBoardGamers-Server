@@ -203,7 +203,7 @@ def usesUnifiedGameModel(game_code):
 #
 
 # Constants
-API_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
+API_TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
 BOT_URL = f"https://api.telegram.org/bot{API_TOKEN}/"
 
 def generate_response(user_input: str) -> str:
@@ -223,7 +223,7 @@ def send_telegram_msg(chat_id, text):
         print(f"Failed to send Telegram message: {e}")
 
 @csrf_exempt
-def telegram_test_webhook(request):
+def telegram_bot_response(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode("utf-8"))
@@ -3759,7 +3759,7 @@ def testWebhook(request):
         return JsonResponse({"response": "ok", "type": 1})
 
     if notification[0] == "Telegram":
-        TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default=False, cast=str)
+        TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
         message = "This is a test message from Online Board Gamers"
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={notification[2]}&text={message}"
         requests.post(url)
