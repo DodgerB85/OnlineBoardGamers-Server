@@ -3380,48 +3380,71 @@ def checkJoinGame(request, gameType, gameID):
                 return JsonResponse({"listToShow": "AVAILABLE", "show_div": True})
             return
 
-    _newPlayer = request.user
+    
+    try:
+        with transaction.atomic():
+            if usesUnifiedGameModel(gameType):
+                selectedGameForJoin = Game.objects.select_for_update().get(id=gameID)
+                # Re-verify count inside the lock to prevent double-joining
+                current_count = selectedGameForJoin.players.count()
+                # For unified model games, create a GamePlayer
+                #GamePlayer.objects.create(game=currentGame, player=_newPlayer)
+            else:
+                # Legacy models
+                # For Legacy models, lock the specific model row
+                selectedGameForJoin = gameModel.objects.select_for_update().get(id=gameID)
+                current_count = selectedGameForJoin.allPlayers.count()
+                #currentGame.allPlayers.add(_newPlayer)
+            # 2. RACE CONDITION CHECK: Ensure game didn't fill up while waiting for lock
+            if current_count >= currentGame.maxPlayers:
+                messages.error(request, gettext("Sorry, this game just filled up."))
+                if ajaxReturn:
+                    return JsonResponse({"listToShow": "AVAILABLE"})
+                return
 
-    if usesUnifiedGameModel(gameType):
-        # For unified model games, create a GamePlayer
-        GamePlayer.objects.create(game=currentGame, player=_newPlayer)
-    else:
-        # Legacy models
-        currentGame.allPlayers.add(_newPlayer)
+            _newPlayer = request.user
+            if usesUnifiedGameModel(gameType):
+                GamePlayer.objects.create(game=selectedGameForJoin, player=_newPlayer)
+            else:
+                selectedGameForJoin.allPlayers.add(_newPlayer)
 
-    currentGame.latestUpdate = _latestUpdate
-    currentGame.invitedPlayers.remove(request.user)
+            # 4. UPDATE STATUS & METADATA
+            selectedGameForJoin.latestUpdate = _latestUpdate
+            selectedGameForJoin.invitedPlayers.remove(request.user)
 
-    current_player_count = len(all_players_list) + 1
+            # Calculate new count after addition
+            new_total_count = current_count + 1
 
-    if current_player_count == currentGame.maxPlayers:
-        if usesUnifiedGameModel(gameType):
-            currentGame.presenter().startGame(request)
-        else:
-            currentGame.startGame(request)
-        messages.success(
-            request, (gettext("You have joined the game and the game has started"))
-        )
-        request.session["listType"] = "ACTIVE"
-        response = JsonResponse({"listToShow": "ACTIVE"}, safe=False)
-    else:
-        messages.success(
-            request, (gettext("You have joined the game - waiting for more players"))
-        )
-        response = JsonResponse({"listToShow": "WAITING"}, safe=False)
+            # 5. START GAME LOGIC
+            if new_total_count == selectedGameForJoin.maxPlayers:
+                if usesUnifiedGameModel(gameType):
+                    selectedGameForJoin.presenter().startGame(request)
+                else:
+                    selectedGameForJoin.startGame(request)
+            
+                messages.success(
+                    request, (gettext("You have joined the game and the game has started"))
+                )
+                request.session["listType"] = "ACTIVE"
+                response = JsonResponse({"listToShow": "ACTIVE"}, safe=False)
+            else:
+                # Check if it should move from WAITING to AVAILABLE
+                # (If no more specific invites remain and game isn't private)
+                remaining_invites = selectedGameForJoin.invitedPlayers.count()
+                if remaining_invites == 0 and selectedGameForJoin.gameStatus != "PRIVATE":
+                    selectedGameForJoin.gameStatus = "AVAILABLE"
+                    
+                messages.success(request, gettext("You have joined the game - waiting for more players"))
+                response = JsonResponse({"listToShow": "WAITING"})
 
-    # If all < MAX and no more invites
-    if (
-        current_player_count != currentGame.maxPlayers
-        and len(invited_players_list) - 1 == 0
-        and currentGame.gameStatus != "PRIVATE"
-    ):
-        currentGame.gameStatus = "AVAILABLE"
-
-    currentGame.save()
-
-    return response
-
+            currentGame.save()
+            return response
+    except Exception as e:
+    # Logic if the lock fails or an error occurs (the transaction will auto-rollback)
+        SN_sendAdminErrorMessage(request, f"Error during join: {e}")
+        if ajaxReturn: 
+            return JsonResponse({"error": "Could not join game"}, status=400)
+        return
 
 @login_required()
 def deleteGame(request, gameType):
