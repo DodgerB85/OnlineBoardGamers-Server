@@ -23,11 +23,13 @@
             {% if MT_Creation %}
                 <form autocomplete="off"
                       action="{% url 'createFCMminiTournament' %}"
-                      method="post">
+                      method="post"
+                      id="gameCreationForm">
                 {% else %}
                     <form autocomplete="off"
                           action="{% url 'FCM:createFCMgame' %}"
-                          method="post">
+                          method="post"
+                          id="gameCreationForm">
                     {% endif %}
                     {% csrf_token %}
                     <div class="topOfNewGameOptionsDiv">
@@ -1019,17 +1021,19 @@
                     </div>
                     {% if MT_Creation %}
                         <b>
-                            {% translate "You are creating a Mini Tournament
-                            <br />
-                            You will need to wait for the tournament to fill up before any games start" %}
+                            {% blocktranslate trimmed %}
+                                You are creating a Mini Tournament
+                                <br />
+                                You will need to wait for the tournament to fill up before any games Start
+                            {% endblocktranslate %}
                         </b>
                         <input type="submit"
-                               class="registerbtn"
+                               class="registerbtn createNewGameButton"
                                value="{% translate "Create Food Chain Magnate Mini Tournament" %}">
                     </form>
                 {% else %}
                     <input type="submit"
-                           class="registerbtn"
+                           class="registerbtn createNewGameButton"
                            value="{% translate "Create Food Chain Magnate Game" %}">
                 </form>
             {% endif %}
@@ -1058,6 +1062,33 @@
 	    {% endif %}
 
 	    document.addEventListener('DOMContentLoaded', function () {
+            // Set submit button
+            const form = document.getElementById('gameCreationForm');    
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    // event.submitter is the modern way to get the specific button clicked
+                    const btn = event.submitter || this.querySelector('.createNewGameButton');
+                    
+                    if (btn) {
+                        // 1. Change text first
+                        {% if MT_Creation %}
+                        btn.value = "{% translate 'Creating Mini Tournament...' %}";
+                        {% else %}
+                        btn.value = "{% translate 'Creating Food Chain Magnate Game...' %}";
+                        {% endif %}
+                        
+                        // 2. Disable to prevent double-click
+                        btn.disabled = true;
+                        
+                        // 3. Visual feedback
+                        btn.style.backgroundColor = "#cccccc";
+                        btn.style.cursor = "not-allowed";
+                    } else {
+                        console.error("Submit button not found in form context.");
+                    }
+                });
+            }
+
 	        {% if MT_Creation %}
 	        initGameCreation(false);
 	        return
@@ -1068,30 +1099,27 @@
 	        setPlayersforMapData();
 	        {% endif %}
 
-	    {% if fillData %}
-	    //alert("Filling Data")
-	    var setupData = {};
-	    setupData.gameName = "{{ gameName|safe }}";
-	    setupData.gameDescription = "{{ gameDescription }}";
-	    setupData.gamePace = {{ gamePace }};
-	    setupData.kickoutDuration = "{{ kickoutDuration }}";
-	    setupData.playerNumber = {{ playerNumber }};
-	    setupData.playerNames = {{ playerNames | safe }};
-	    {% if scenarioUsed %}
-	    setupData.scenarioUsed = true;
-	    setupData.scenarioName = "{{ scenarioName }}";
-	    {% endif %}
-	    setupData.startingOptions = "{{ startingOptions }}";
-	    setupData.startingMap = "{{ startingMap }}";
+            {% if fillData %}
+            //alert("Filling Data")
+            var setupData = {};
+            setupData.gameName = "{{ gameName|safe }}";
+            setupData.gameDescription = "{{ gameDescription }}";
+            setupData.gamePace = {{ gamePace }};
+            setupData.kickoutDuration = "{{ kickoutDuration }}";
+            setupData.playerNumber = {{ playerNumber }};
+            setupData.playerNames = {{ playerNames | safe }};
+            {% if scenarioUsed %}
+            setupData.scenarioUsed = true;
+            setupData.scenarioName = "{{ scenarioName }}";
+            {% endif %}
+            setupData.startingOptions = "{{ startingOptions }}";
+            setupData.startingMap = "{{ startingMap }}";
 
-	    initGameCreation(true, setupData);
-	    {% else %}
-	    initGameCreation(false);
-	    {% endif %}
-
-
-
-	});
+            initGameCreation(true, setupData);
+            {% else %}
+            initGameCreation(false);
+            {% endif %}
+	    });
         </script>
     {% endblock script %}
 {% endblock body %}

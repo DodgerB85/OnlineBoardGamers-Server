@@ -170,7 +170,15 @@ def createINDgame(request):
         if "useAegeanMap" in request.POST:
             _startingOptions.append(int(request.POST["useAegeanMap"]))
             newGame.statsExcludedGame = True
-
+        if "usePHPmap" in request.POST:
+            _startingOptions.append(int(request.POST["usePHPmap"]))
+            newGame.statsExcludedGame = True
+        if "useMergerSubsidy" in request.POST:
+            _startingOptions.append(int(request.POST["useMergerSubsidy"]))
+        if "useShippingSubsidy" in request.POST:
+            _startingOptions.append(int(request.POST["useShippingSubsidy"]))
+            
+            
         newGame.startingOptions = json.dumps(_startingOptions)
 
         if "privateGame" in request.POST:

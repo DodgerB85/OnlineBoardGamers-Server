@@ -2,17 +2,16 @@
 /* global global, boardTiles */
 
 function initGameCreation(fillData, setupData = {}) {
-	if (global.experienced) document.getElementById("experiencedGame").disabled = false;
+	if (global.experienced) document.getElementById("experiencedGame").disabled = false
 
-	 if (global.MT_Creation) {
+	if (global.MT_Creation) {
 		global.invitedPlayersArr = []
 		autocomplete(document.getElementById("playerToInviteMT"))
 		//document.getElementById("invitePlayerMTbutton").addEventListener("click", () => invitePlayerMT)
 		document.getElementById("invitePlayerMTbutton").addEventListener("click", invitePlayerMT)
 		return
 	}
-	
-	
+
 	selectPlayers()
 
 	if (fillData) {
@@ -357,9 +356,9 @@ function pickRandomgods(event, button) {
 	// Uncheck all checkboxes
 	checkboxes.forEach(function (checkbox) {
 		checkbox.checked = false
-        toggleCustomgodCheckbox(checkbox)
+		toggleCustomgodCheckbox(checkbox)
 	})
-    
+
 	// Randomly select 8 gods
 	//var checkboxes = document.querySelectorAll('input[type="checkbox"]')
 	var randomIndexes = []
@@ -368,7 +367,7 @@ function pickRandomgods(event, button) {
 		if (!randomIndexes.includes(randomIndex)) {
 			randomIndexes.push(randomIndex)
 			checkboxes[randomIndex].checked = true
-            toggleCustomgodCheckbox(checkboxes[randomIndex])
+			toggleCustomgodCheckbox(checkboxes[randomIndex])
 		}
 	}
 }
@@ -616,7 +615,24 @@ function getCookie(name) {
 	return cookieValue
 }
 
-function validateForm(event) {
+function validateForm(event, isMT) {
+	// event.submitter is the modern way to get the specific button clicked
+	const btn = event.submitter || this.querySelector(".createNewGameButton")
+	if (btn) {
+		// 1. Change text first
+		if (isMT) btn.value = "Creating Mini Tournament..."
+		else btn.value = "Creating The Great Zimbabwe Game..."
+
+		// 2. Disable to prevent double-click
+		btn.disabled = true
+
+		// 3. Visual feedback
+		btn.style.backgroundColor = "#cccccc"
+		btn.style.cursor = "not-allowed"
+	} else {
+		console.error("Submit button not found in form context.")
+	}
+
 	// Check if expertOptions are enabled
 	const enableAdvancedOptions = document.getElementById("enableAdvancedOptions")
 	const expertOptionsChecked = enableAdvancedOptions.checked
@@ -646,6 +662,7 @@ function validateForm(event) {
 			// Additional validation rules if needed
 		}
 	}
+	
 
 	// Continue with form submission
 	document.getElementById("TGZnewGameForm").submit()

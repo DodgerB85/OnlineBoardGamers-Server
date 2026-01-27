@@ -917,3 +917,4 @@ function displayInvitedPlayersMT() {
 	let hiddenInput = document.getElementById("invtedPlayersListMT")
 	hiddenInput.value = JSON.stringify(global.invitedPlayersArr)
 }
+

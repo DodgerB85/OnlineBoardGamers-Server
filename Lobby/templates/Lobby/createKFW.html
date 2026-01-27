@@ -17,7 +17,7 @@
         {% endif %}
         <div id="allOptions">
             <span class="topOfNewGameSpan">{% translate "New to Keyflower? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
-            <form id="KFWnewGameForm"
+            <form id="gameCreationForm"
                   autocomplete="off"
                   action="{% url 'KFW:createKFWgame' %}"
                   method="post">
@@ -273,7 +273,7 @@
             </div>
             <div>
                 <input type="submit"
-                       class="registerbtn"
+                       class="registerbtn createNewGameButton"
                        value="{% translate "Create Keyflower Game" %}">
             </div>
         </form>
@@ -294,6 +294,28 @@
     global.experienced = false;
     {% endif %}
     document.addEventListener('DOMContentLoaded', function () {
+                // Set submit button
+        const form = document.getElementById('gameCreationForm');    
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                // event.submitter is the modern way to get the specific button clicked
+                const btn = event.submitter || this.querySelector('.createNewGameButton');
+                
+                if (btn) {
+                    // 1. Change text first
+                    btn.value = "{% translate 'Creating Keyflower Game...' %}";
+                    
+                    // 2. Disable to prevent double-click
+                    btn.disabled = true;
+                    
+                    // 3. Visual feedback
+                    btn.style.backgroundColor = "#cccccc";
+                    btn.style.cursor = "not-allowed";
+                } else {
+                    console.error("Submit button not found in form context.");
+                }
+            });
+        }
         autocomplete(document.getElementById("player2"));
         autocomplete(document.getElementById("player3"));
         autocomplete(document.getElementById("player4"));
