@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-from decouple import config, Csv
+from decouple import config, Config, RepositoryEnv
 import os
 from os.path import join
 from pathlib import Path
@@ -19,6 +19,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
+live_env_path = '/home/OnlineGaming/OnlineBoardGamers/.env'
+live_env_config = Config(RepositoryEnv(live_env_path))
+
 DEBUG = config("DEBUG", default=False, cast=bool)
 LOCAL_USER = config("LOCAL_USER", default=False, cast=bool)
 
@@ -208,7 +211,7 @@ else:
             "ENGINE": "django.db.backends.mysql",
             "NAME": "OnlineGaming$default",
             "USER": "OnlineGaming",
-            "PASSWORD": config("PRODUCTION_DB_PWD"),
+            "PASSWORD": live_env_config("PRODUCTION_DB_PWD"),
             "HOST": "OnlineGaming.mysql.pythonanywhere-services.com",
             "OPTIONS": {
                 "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
