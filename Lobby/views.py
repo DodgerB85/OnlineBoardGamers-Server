@@ -237,7 +237,7 @@ def telegram_bot_response(request):
             user = message.get("from", {})
             
             # Handle Commands
-            if text == "/start":
+            if text and text.startswith("/start"):
                 response = (
                     f"To easily add Telegram Notifications to your account, click this link:\n"
                     f"https://www.OnlineBoardGamers.com/addTGid/{chat_id}\n"
@@ -245,7 +245,7 @@ def telegram_bot_response(request):
                 )
                 send_telegram_msg(chat_id, response)
 
-            elif text == "/help":
+            elif text and text.startswith("/help"):
                 response = (
                     f"To easily add Telegram Notifications to your account, click this link:\n"
                     f"https://www.OnlineBoardGamers.com/addTGid/{chat_id}\n"
