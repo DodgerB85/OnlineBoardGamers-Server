@@ -11,11 +11,8 @@ from django.core.cache import cache
 
 
 import json
-import asyncio
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from telegram import Update
-from telegram.ext import Application, CommandHandler
 
 # from telegram import Update
 # from telegram.ext import Application, CommandHandler, ContextTypes
@@ -171,39 +168,113 @@ def usesUnifiedGameModel(game_code):
 ##########################
 
 # Replace with your NEW test token from BotFather
-TEST_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
+#TEST_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
+#
+#@csrf_exempt
+#def telegram_test_webhook(request):
+#    if request.method == "POST":
+#        try:
+#            # 1. Log the raw body to see what Telegram is sending
+#            body = request.body.decode("utf-8")
+#            print(f"TELEGRAM DATA RECEIVED: {body}")
+#            
+#            data = json.loads(body)
+#            
+#            if "message" in data:
+#                chat_id = data["message"]["chat"]["id"]
+#                token = "8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y"
+#                
+#                # 2. Direct API call to reply
+#                api_url = f"https://api.telegram.org/bot{token}/sendMessage"
+#                payload = {"chat_id": chat_id, "text": "DEBUG: Server received your message!"}
+#                
+#                # Use a timeout so the thread doesn't hang
+#                response = requests.post(api_url, json=payload, timeout=5)
+#                print(f"TELEGRAM API RESPONSE: {response.status_code}")
+#
+#            return HttpResponse("OK", status=200)
+#            
+#        except Exception as e:
+#            # This will print the EXACT error to your PythonAnywhere Error Log
+#            print(f"CRITICAL WEBHOOK ERROR: {str(e)}")
+#            return HttpResponse("Error", status=200) # Still return 200 to stop Telegram retries
+#            
+#    return HttpResponse("Method Not Allowed", status=405)
+#
+
+# Constants
+API_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
+BOT_URL = f"https://api.telegram.org/bot{API_TOKEN}/"
+
+def generate_response(user_input: str) -> str:
+    normalized_input = user_input.lower()
+    if 'hi' in normalized_input:
+        return 'Hello! Use /start or /help to setup notifications'
+    if 'how are you doing' in normalized_input:
+        return 'I am functioning properly!'
+    return "I didn't understand that - use /start or /help to setup notifications"
+
+def send_telegram_msg(chat_id, text):
+    url = BOT_URL + "sendMessage"
+    payload = {"chat_id": chat_id, "text": text}
+    try:
+        requests.post(url, json=payload, timeout=7)
+    except Exception as e:
+        print(f"Failed to send Telegram message: {e}")
 
 @csrf_exempt
 def telegram_test_webhook(request):
     if request.method == "POST":
         try:
-            # 1. Log the raw body to see what Telegram is sending
-            body = request.body.decode("utf-8")
-            print(f"TELEGRAM DATA RECEIVED: {body}")
+            data = json.loads(request.body.decode("utf-8"))
+            if "message" not in data:
+                return HttpResponse("OK")
+
+            message = data["message"]
+            chat_id = message["chat"]["id"]
+            chat_type = message["chat"]["type"]
+            text = message.get("text")
+            user = message.get("from", {})
             
-            data = json.loads(body)
-            
-            if "message" in data:
-                chat_id = data["message"]["chat"]["id"]
-                token = "8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y"
-                
-                # 2. Direct API call to reply
-                api_url = f"https://api.telegram.org/bot{token}/sendMessage"
-                payload = {"chat_id": chat_id, "text": "DEBUG: Server received your message!"}
-                
-                # Use a timeout so the thread doesn't hang
-                response = requests.post(api_url, json=payload, timeout=5)
-                print(f"TELEGRAM API RESPONSE: {response.status_code}")
+            # Handle Commands
+            if text == "/start":
+                response = (
+                    f"To easily add Telegram Notifications to your account, click this link:\n"
+                    f"https://www.OnlineBoardGamers.com/addTGid/{chat_id}\n"
+                    f"For more information use /help"
+                )
+                send_telegram_msg(chat_id, response)
+
+            elif text == "/help":
+                response = (
+                    f"To easily add Telegram Notifications to your account, click this link:\n"
+                    f"https://www.OnlineBoardGamers.com/addTGid/{chat_id}\n"
+                    f"Your Telegram ID is: {chat_id}\n"
+                    f"Enter this ID in the Webhooks section of your profile page on OBG:\n"
+                    f"https://www.onlineboardgamers.com"
+                )
+                send_telegram_msg(chat_id, response)
+
+            elif text == "/custom":
+                send_telegram_msg(chat_id, "This is a custom command, you can put whatever you want here.")
+
+            # Handle Regular Messages
+            elif text and not text.startswith('/'):
+                # Group logic: only respond if bot is mentioned
+                if chat_type == 'group':
+                    if '@OnlineBoardGamers_Bot' in text:
+                        cleaned_text = text.replace('@OnlineBoardGamers_Bot', '').strip()
+                        send_telegram_msg(chat_id, generate_response(cleaned_text))
+                else:
+                    send_telegram_msg(chat_id, generate_response(text))
 
             return HttpResponse("OK", status=200)
-            
-        except Exception as e:
-            # This will print the EXACT error to your PythonAnywhere Error Log
-            print(f"CRITICAL WEBHOOK ERROR: {str(e)}")
-            return HttpResponse("Error", status=200) # Still return 200 to stop Telegram retries
-            
-    return HttpResponse("Method Not Allowed", status=405)
 
+        except Exception as e:
+            print(f"WEBHOOK ERROR: {e}")
+            return HttpResponse("OK") # Return 200 to prevent Telegram from retrying on error
+
+    return HttpResponse("Forbidden", status=403)
 
 ##########################
 #
