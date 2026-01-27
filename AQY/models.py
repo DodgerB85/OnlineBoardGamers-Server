@@ -4,6 +4,7 @@ import random
 import base64
 import gzip
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.db import models
 from django.db.models import Q
 
@@ -175,14 +176,14 @@ class AQY_Tournament(models.Model):
         return roundsHTML
 
 
-class AQY_Game(GeneralGame):       
+class AQY_Game(GeneralGame):
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYallPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYmissingPlayersRelName", blank=True
     )
-    
+
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -197,7 +198,7 @@ class AQY_Game(GeneralGame):
         related_name="AQYgame_host_relName",
         default=None,
     )
-    
+
     kickedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYkickedPlayersRelName", blank=True
     )
@@ -209,7 +210,7 @@ class AQY_Game(GeneralGame):
         related_name="AQYplayersWithChatNotificationName",
         blank=True,
     )
-    
+
     winner = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="AQYgame_winner_relName", blank=True
     )
@@ -231,13 +232,21 @@ class AQY_Game(GeneralGame):
         blank=True,
         related_name="tournament_relName_AQY",
     )
-    
+
     relatedMainTournament = models.ForeignKey(
-        Main_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="maintournamentAQY_relName"
+        Main_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="maintournamentAQY_relName",
     )
-    
+
     relatedMiniTournament = models.ForeignKey(
-        Mini_Tournaments, on_delete=models.SET_NULL, null=True, blank=True, related_name="minitournamentAQY_relName"
+        Mini_Tournaments,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="minitournamentAQY_relName",
     )
 
     playerTradeData = models.TextField(blank=True)
@@ -264,7 +273,7 @@ class AQY_Game(GeneralGame):
         self.player2currentMoveData = ""
         self.player3currentMoveData = ""
         self.playerTradeData = ""
-        
+
         # Set the winner(S)
         names = self.getAllPlayersOrderedySeat(False)
         winnerNamesArray = []
@@ -310,10 +319,24 @@ class AQY_Game(GeneralGame):
             SF_M_ProcessTournamentEndGame(request, "AQY", self, winnerNamesArray)
 
         if self.relatedMainTournament:
-            SF_M_ProcessAnyTournamentEndGame(request, MAIN_T_FLAG, self.relatedMainTournament, self, winnerNamesArray, finalResults)
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MAIN_T_FLAG,
+                self.relatedMainTournament,
+                self,
+                winnerNamesArray,
+                finalResults,
+            )
 
         if self.relatedMiniTournament:
-            SF_M_ProcessAnyTournamentEndGame(request, MINI_T_FLAG, self.relatedMiniTournament, self, winnerNamesArray, finalResults)
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MINI_T_FLAG,
+                self.relatedMiniTournament,
+                self,
+                winnerNamesArray,
+                finalResults,
+            )
 
     def currentTurnString(self):
         return SR_currentTurnString("AQY", self.turn, self.phase)
@@ -542,8 +565,14 @@ class AQY_Game(GeneralGame):
 
             # The tournament sends out game start notifications
             if not isTournamentGame:
+
                 SN_M_sendGameStartNotification(
-                    request, "AQY", playerListToNotify, self.id, self
+                    get_current_site(request),
+                    "AQY",
+                    playerListToNotify,
+                    getattr(self, "id"),
+                    self,
+                    request.user.username,
                 )
 
     def hasMoveEndData(self, name):

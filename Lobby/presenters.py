@@ -2,6 +2,7 @@ import time
 import json
 import random
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.utils.translation import gettext
 from django.db.models import Q
 from django.urls import reverse
@@ -19,14 +20,16 @@ from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOT
 class GamePresenter:
     def __init__(self, gameObj):
         self.gameObj = gameObj
-        
+
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
     # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         if self.gameObj.gameCode not in ["CNS", "WEB"]:
-            print(f"isMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False")
+            print(
+                f"isMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
+            )
             return False
-        
+
         current_players = self.gameObj.players.filter(is_current=True).select_related(
             "player"
         )
@@ -47,9 +50,11 @@ class GamePresenter:
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         if self.gameObj.gameCode not in ["CNS", "WEB"]:
-            print(f"quickIsMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False")
+            print(
+                f"quickIsMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
+            )
             return False
-        
+
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return False
 
@@ -74,7 +79,7 @@ class GamePresenter:
         return loggedInPlayerUsername in current_usernames or any(
             username in shadow_values for username in current_usernames
         )
-        
+
     ########### END OF FUNCTIONS THAT DEPEND ON THE GAME
 
     def getGameName(self):
@@ -91,19 +96,19 @@ class GamePresenter:
         return SR_currentTurnString(
             self.gameObj.gameCode, self.gameObj.turn, self.gameObj.phase
         )
-        
+
     def getCurrentPlayersArray(self):
         current_players = self.gameObj.players.filter(is_current=True).select_related(
             "player"
         )
         return [gp.player.username for gp in current_players if gp.player]
-    
+
     def getCurrentPlayersString(self):
         return ", ".join(self.getCurrentPlayersArray())
 
     def getCurrentPlayersArrayForReminderEmail(self):
         return self.getCurrentPlayersArray()
-    
+
     def seatPosition(self, _username, withoutBots=False):
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
         try:
@@ -112,14 +117,14 @@ class GamePresenter:
             return -1
 
     def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
-        players = (
-            self.gameObj.players#.exclude(is_kicked=True)
-            .select_related("player")
-            .order_by("seat_order")
-        )
-        
+        players = self.gameObj.players.select_related(  # .exclude(is_kicked=True)
+            "player"
+        ).order_by("seat_order")
+
         if excludeBots:
-            return [gp.player.username for gp in players if gp.player and not gp.is_missing]
+            return [
+                gp.player.username for gp in players if gp.player and not gp.is_missing
+            ]
 
         if withoutBots:
             return [gp.player.username for gp in players if gp.player]
@@ -131,7 +136,7 @@ class GamePresenter:
             elif gp.player:
                 result.append(gp.player.username)
         return result
-    
+
     # NOTE: HC/BUS MIGHT USE COMMA SEPERATE STRING. SO CHECK IF SOME GAMES NEED TO BE HANDLED SEPERATELY
     # TO GET THE startOptionsListPrelim
     def isExperiencedGame(self):
@@ -155,7 +160,7 @@ class GamePresenter:
         if 110 in startingOptionsListPrelim:
             return True
         return False
-    
+
     # KICKOUT STUFF
     def getSecondsToNextKickout(self):
         from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
@@ -190,9 +195,9 @@ class GamePresenter:
             self.gameObj.kickoutFlexiData,
             current_username,
         )
-        
+
     # END KICKOUT STUFF
-    
+
     def addMissingPlayer(self, user):
         """Add a player to missing players"""
         gp = self.gameObj.players.filter(player=user).first()
@@ -206,23 +211,29 @@ class GamePresenter:
         if gp and not gp.is_kicked:
             gp.is_kicked = True
             gp.save()
-    
+
     def setCurrentPlayers(self, player_usernames_string):
         """Set current players from comma-separated string of usernames"""
         if not player_usernames_string:
             usernames = set()
         else:
-            usernames = {name.strip() for name in player_usernames_string.split(',') if name.strip()}
-        
-        game_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        
+            usernames = {
+                name.strip()
+                for name in player_usernames_string.split(",")
+                if name.strip()
+            }
+
+        game_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+
         for gp in game_players:
             if gp.player:
                 should_be_current = gp.player.username in usernames
                 if gp.is_current != should_be_current:
                     gp.is_current = should_be_current
                     gp.save()
-    
+
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.gameObj.creator:
             possibleHost = (
@@ -299,23 +310,20 @@ class GamePresenter:
             # NB this "y" seat typo is everywhere! Leave for noe
             ordered_players = self.getAllPlayersOrderedySeat(True)
             missing_players = self.getMissingPlayersNamesArray()
-            
+
         votes_map = self.getFullSetOfVoteResults(topic, ordered_players, False)
-        
+
         all_voted = True
         for player, vote in votes_map.items():
             # If using gameObj methods, 'player' might be an object; ensure you compare names
-            player_name = player.username if hasattr(player, 'username') else player
-            
+            player_name = player.username if hasattr(player, "username") else player
+
             if not vote and player_name not in missing_players:
                 all_voted = False
                 break
 
         # Prepare base response data
-        response_data = {
-            "voteChanged": True,
-            "votesData": json.dumps(votes_map)
-        }
+        response_data = {"voteChanged": True, "votesData": json.dumps(votes_map)}
 
         # 4. Handle Terminal Actions
         if all_voted:
@@ -326,7 +334,7 @@ class GamePresenter:
             elif topic == STATS_EXCLUDE_VOTE_TOPIC:
                 self.gameObj.statsExcludedGame = True
                 self.gameObj.save()
-                #response_data["message"] = gettext("Game stats excluded")
+                # response_data["message"] = gettext("Game stats excluded")
 
         return response_data
 
@@ -349,7 +357,7 @@ class GamePresenter:
 
         if not self.gameObj.activeVotes:
             self.gameObj.activeVotes = {}
-            
+
         # If this specific topic hasn't been started, return the all-False set
         if topic not in self.gameObj.activeVotes:
             return generalReturn
@@ -521,10 +529,6 @@ class CannesPresenter(GamePresenter):
             "experiencedGame": self.isExperiencedGame(),
         }
 
-    
-
-
-
     def startGame(self, request):
         from Lobby.models import GamePlayer
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -554,7 +558,12 @@ class CannesPresenter(GamePresenter):
             ]
 
             SN_M_sendGameStartNotification(
-                request, "CNS", playerListToNotify, self.gameObj.id, self.gameObj
+                get_current_site(request),
+                "FCM",
+                playerListToNotify,
+                getattr(self, "id"),
+                self,
+                request.user.username,
             )
 
     def getGameCode(self):
@@ -588,7 +597,7 @@ class WebPresenter(GamePresenter):
                 winner_gp.winner = True
                 winner_gp.save()
             winnerNamesArray.append(names[playerIndex])
-        
+
         self.gameObj.save()
 
         for i in range(len(_finalPositions)):
@@ -609,12 +618,18 @@ class WebPresenter(GamePresenter):
                     text = "Joint Runner Up"
                 finalResults.append([_finalPositions[i][j], text, i])
 
-        new_names = [name for name in names if name not in [item for sublist in _finalPositions for item in sublist]]
+        new_names = [
+            name
+            for name in names
+            if name not in [item for sublist in _finalPositions for item in sublist]
+        ]
 
         for name in new_names:
             finalResults.append([name, "Trapped in a dot matrix", 9])
 
-        SN_M_sendEndGameNotificationTieGame(request, "WEB", finalResults, _gameID, self.gameObj)
+        SN_M_sendEndGameNotificationTieGame(
+            request, "WEB", finalResults, _gameID, self.gameObj
+        )
 
     def serialize(self, loggedInUserObj=None):
         from Lobby.sharedFunctions.sharedRefs import (
@@ -732,10 +747,10 @@ class WebPresenter(GamePresenter):
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
             self.gameObj.deleteGameVotes = {}
-            all_usernames = [
-                gp.player.username for gp in game_players if gp.player
-            ]
-            self.gameObj.deleteGameVotes.update({username: False for username in all_usernames})
+            all_usernames = [gp.player.username for gp in game_players if gp.player]
+            self.gameObj.deleteGameVotes.update(
+                {username: False for username in all_usernames}
+            )
             self.gameObj.save()
 
             if not isTournamentGame:
@@ -746,10 +761,13 @@ class WebPresenter(GamePresenter):
                 ]
 
                 SN_M_sendGameStartNotification(
-                    request, "WEB", playerListToNotify, self.gameObj.id, self.gameObj
+                    get_current_site(request),
+                    "WEB",
+                    playerListToNotify,
+                    getattr(self, "id"),
+                    self,
+                    request.user.username,
                 )
-
-
 
     def getGameCode(self):
         return "WEB"
@@ -783,11 +801,15 @@ class WebPresenter(GamePresenter):
 
         if self.gameObj.deleteGameVotes is None:
             self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update({username: False for username in player_usernames})
+            self.gameObj.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         if playerName not in self.gameObj.deleteGameVotes:
             self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update({username: False for username in player_usernames})
+            self.gameObj.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         self.gameObj.deleteGameVotes[playerName] = True
         self.gameObj.save()

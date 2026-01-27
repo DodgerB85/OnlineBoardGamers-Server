@@ -2,6 +2,7 @@ import time
 import json
 import random
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.db import models
 from django.db.models import Q
 
@@ -319,7 +320,12 @@ class CNS_Game(GeneralGame):
                 playerListToNotify.remove(request.user.username)
 
             SN_M_sendGameStartNotification(
-                request, "CNS", playerListToNotify, getattr(self, "id"), self
+                get_current_site(request),
+                "CNS",
+                playerListToNotify,
+                getattr(self, "id"),
+                self,
+                request.user.username,
             )
 
     def getCurrentPlayersArray(self):

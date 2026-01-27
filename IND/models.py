@@ -4,6 +4,7 @@ import random
 import base64
 import gzip
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.db import models
 from django.db.models import Q
 
@@ -172,14 +173,14 @@ class IND_Tournament(models.Model):
         return roundsHTML
 
 
-class IND_Game(GeneralGame):        
+class IND_Game(GeneralGame):
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDallPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDmissingPlayersRelName", blank=True
     )
-    
+
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -194,7 +195,7 @@ class IND_Game(GeneralGame):
         related_name="INDgame_host_relName",
         default=None,
     )
-    
+
     kickedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="INDkickedPlayersRelName", blank=True
     )
@@ -206,7 +207,7 @@ class IND_Game(GeneralGame):
         related_name="INDplayersWithChatNotificationName",
         blank=True,
     )
-    
+
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -430,8 +431,8 @@ class IND_Game(GeneralGame):
     def seatPosition(self, _username, withoutBots=False):
         # 1. Get the list (This uses the prefetched cache if getAllPlayersOrderedySeat is optimized)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        
-        # 2. Use Python's 'index' to find the position. 
+
+        # 2. Use Python's 'index' to find the position.
         # This replaces the need for the .values_list() existence check.
         try:
             return playerList.index(_username)
@@ -491,7 +492,12 @@ class IND_Game(GeneralGame):
             # The tournament sends out game start notifications
             if not isTournamentGame:
                 SN_M_sendGameStartNotification(
-                    request, "IND", playerListToNotify, getattr(self, "id"), self
+                    get_current_site(request),
+                    "IND",
+                    playerListToNotify,
+                    getattr(self, "id"),
+                    self,
+                    request.user.username,
                 )
 
     def getCurrentPlayersArray(self):
@@ -628,6 +634,7 @@ class IND_Game(GeneralGame):
             -1,
         )
         return len(playersPreMoveDataArr[arrIdx][3]) > 0
+
     #########################################################
     #
     #   END OF NEW SIMUL MOVE FUNCTIONS

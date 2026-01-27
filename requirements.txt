@@ -20,3 +20,4 @@ lzstring
 djlint
 django-compressor>=4.5
 jsmin>=3.0.1
+django-q2

@@ -4,6 +4,7 @@ import json
 # import requests
 import random
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.db import models
 from django.db.models import Q
 
@@ -599,7 +600,12 @@ class Bus_Game(GeneralGame):
                 playerListToNotify.remove(request.user.username)
 
             SN_M_sendGameStartNotification(
-                request, "Bus", playerListToNotify, self.id, self
+                get_current_site(request),
+                "Bus",
+                playerListToNotify,
+                getattr(self, "id"),
+                self,
+                request.user.username,
             )
 
     # takes in a user object

@@ -4,6 +4,7 @@ import random
 import gzip
 import base64
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.db import models
 from django.db.models import Q
 
@@ -33,12 +34,14 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )  # , SN_M_T_sendTournamentGameStartNotification
 
 
-class WEB_Game(GeneralGame):        
-    allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="WEBallPlayersRelName")
+class WEB_Game(GeneralGame):
+    allPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="WEBallPlayersRelName"
+    )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="WEBmissingPlayersRelName", blank=True
     )
-    
+
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -53,17 +56,23 @@ class WEB_Game(GeneralGame):
         related_name="WEBgame_host_relName",
         default=None,
     )
-    
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="WEBkickedPlayersRelName", blank=True)
+
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="WEBkickedPlayersRelName", blank=True
+    )
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="WEBinvitedPlayersRelName", blank=True
     )
     playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="WEBplayersWithChatNotificationName", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="WEBplayersWithChatNotificationName",
+        blank=True,
     )
-    
-    winner = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="WEBgame_winner_relName", blank=True)
-    
+
+    winner = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="WEBgame_winner_relName", blank=True
+    )
+
     def __str__(self):
         allPlayersString = " / ".join(user.username for user in self.allPlayers.all())
         return f"{getattr(self, 'id')}: {self.getGameName()} : {allPlayersString} : {self.gameStatus} : {self.currentTurnString()}"
@@ -93,7 +102,7 @@ class WEB_Game(GeneralGame):
             self.winner.add(User.objects.get(username=names[playerIndex]))
             winnerNamesArray.append(names[playerIndex])
         self.save()
-        
+
         for i in range(len(_finalPositions)):
             for j in range(len(_finalPositions[i])):
                 _finalPositions[i][j] = names[_finalPositions[i][j]]
@@ -114,14 +123,18 @@ class WEB_Game(GeneralGame):
                 finalResults.append([_finalPositions[i][j], text, i])
 
         # Create a new array to store names not present in _finalPositions
-        new_names = [name for name in names if name not in [item for sublist in _finalPositions for item in sublist]]
+        new_names = [
+            name
+            for name in names
+            if name not in [item for sublist in _finalPositions for item in sublist]
+        ]
 
         for name in new_names:
             finalResults.append([name, "Trapped in a dot matrix", 9])
 
         # Now send winning notification
         SN_M_sendEndGameNotificationTieGame(request, "WEB", finalResults, _gameID, self)
-        
+
         # if self.relatedTournament:
         #    SF_M_ProcessTournamentEndGame(request, "AQY", self, winnerNamesArray)
 
@@ -152,7 +165,14 @@ class WEB_Game(GeneralGame):
             return False
 
         # Use a set for faster membership testing
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
         return (
             not self.currentPlayers
             or loggedInPlayerUsername in self.currentPlayers
@@ -182,10 +202,16 @@ class WEB_Game(GeneralGame):
 
     def serialize(self, loggedInUserObj=None):
         remainingPlayersInt = self.maxPlayers - self.allPlayers.count()
-        remainingPlayers = "".join(str(self.allPlayers.count() + i + 1) for i in range(remainingPlayersInt))
+        remainingPlayers = "".join(
+            str(self.allPlayers.count() + i + 1) for i in range(remainingPlayersInt)
+        )
 
-        #winner = self.winner.username if self.winner else ""
-        winner = ", ".join(list(self.winner.all().values_list("username", flat=True))) if self.winner.exists() else ""
+        # winner = self.winner.username if self.winner else ""
+        winner = (
+            ", ".join(list(self.winner.all().values_list("username", flat=True)))
+            if self.winner.exists()
+            else ""
+        )
 
         createdString = self.created
         latestUpdateString = self.latestUpdate
@@ -199,15 +225,22 @@ class WEB_Game(GeneralGame):
         ):
             elapsedTotalSeconds = (
                 int(time.time()) - int(self.created) // 1000
-                if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "PRIVATE"
+                if self.gameStatus == "WAITING"
+                or self.gameStatus == "AVAILABLE"
+                or self.gameStatus == "PRIVATE"
                 else int(time.time()) - int(self.latestUpdate) // 1000
             )
-            latestUpdateElapsedTimeString = SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
 
         myMove = loggedInUserObj is not None and self.isMyMove(loggedInUserObj.username)
 
         chatNotification = loggedInUserObj in self.playersWithChatNotification.all()
-        involvedPlayer = loggedInUserObj in self.allPlayers.all() and loggedInUserObj not in self.missingPlayers.all()
+        involvedPlayer = (
+            loggedInUserObj in self.allPlayers.all()
+            and loggedInUserObj not in self.missingPlayers.all()
+        )
 
         gamePaceString = SR_gamePaceString(self.gamePace)
 
@@ -262,14 +295,18 @@ class WEB_Game(GeneralGame):
         }
 
     def isExperiencedGame(self):
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
 
         if 120 in startingOptionsListPrelim:
             return True
         return False
 
     def isLearningGame(self):
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
         if 110 in startingOptionsListPrelim:
             return True
         return False
@@ -279,7 +316,7 @@ class WEB_Game(GeneralGame):
         # 1. Get the list (this uses your optimized prefetched logic)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
 
-        # 2. Use 'index' directly; if the user isn't in the list, 
+        # 2. Use 'index' directly; if the user isn't in the list,
         # it will raise a ValueError which we catch to return -1.
         try:
             return playerList.index(_username)
@@ -290,10 +327,10 @@ class WEB_Game(GeneralGame):
     # NB withoutBots returns original players. with True it replaces with WebBot
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # 1. Access the prefetched list (0 hits if prefetched in view)
-        #all_players_prefetched = list(self.allPlayers.all())
-        
+        # all_players_prefetched = list(self.allPlayers.all())
+
         # 2. Extract usernames in Python (0 hits)
-        #playerList = [p.username for p in all_players_prefetched]
+        # playerList = [p.username for p in all_players_prefetched]
         playerList = sorted([p.username for p in self.allPlayers.all()])
         # 3. Shuffle using your existing seed (0 hits)
         random.Random(self.playerOrderSeed).shuffle(playerList)
@@ -310,10 +347,9 @@ class WEB_Game(GeneralGame):
             if player in missing_usernames:
                 # Using f-string for slightly better performance/readability
                 playerList[count] = f"WebBot{count}"
-                
+
         return playerList
-    
-    
+
     def startGame(self, request, isTournamentGame=False):
         self.gameStatus = "ACTIVE"
         self.playerOrderSeed = random.randint(1000, 32767)
@@ -325,22 +361,33 @@ class WEB_Game(GeneralGame):
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
             player_usernames = [p.username for p in self.allPlayers.all()]
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
-            
-            playerListToNotify = list(self.allPlayers.all().values_list("username", flat=True))
+
+            playerListToNotify = list(
+                self.allPlayers.all().values_list("username", flat=True)
+            )
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
             # The tournament sends out game start notifications
             if not isTournamentGame:
-                SN_M_sendGameStartNotification(request, "WEB", playerListToNotify, getattr(self, "id"), self)
+                SN_M_sendGameStartNotification(
+                    get_current_site(request),
+                    "WEB",
+                    playerListToNotify,
+                    getattr(self, "id"),
+                    self,
+                    request.user.username,
+                )
 
     def getCurrentPlayers(self):
         return self.currentPlayers
-        #_currentPlayers = []
-        #_currentPlayers = self.currentPlayers.split(",")
-        #for user in self.allPlayers.all():
+        # _currentPlayers = []
+        # _currentPlayers = self.currentPlayers.split(",")
+        # for user in self.allPlayers.all():
         #    # If you have a move, then don't add
         #    if self.hasMoveEndData(user.username):
         #        pass
@@ -350,12 +397,14 @@ class WEB_Game(GeneralGame):
         #    elif user.username != "WebBot":
         #        _currentPlayers.append(user.username)
 
-        #return ",".join(_currentPlayers)
+        # return ",".join(_currentPlayers)
 
     def getCurrentPlayersArray(self):
         # _currentPlayersArray = []
         # _currentPlayersArray.append(self.currentPlayers)
-        _currentPlayersArray = [player.strip() for player in self.getCurrentPlayers().split(",")]
+        _currentPlayersArray = [
+            player.strip() for player in self.getCurrentPlayers().split(",")
+        ]
         return _currentPlayersArray
 
     def getCurrentPlayersArrayForReminderEmail(self):
@@ -364,7 +413,10 @@ class WEB_Game(GeneralGame):
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
             possibleHost = (
-                self.allPlayers.all().filter(~Q(missingPlayersRelName=getattr(self, "id"))).order_by("?").first()
+                self.allPlayers.all()
+                .filter(~Q(missingPlayersRelName=getattr(self, "id")))
+                .order_by("?")
+                .first()
             )
             self.host = possibleHost
 
@@ -379,33 +431,37 @@ class WEB_Game(GeneralGame):
         if self.deleteGameVotes is None:
             # Accessing .all() here uses the cache; no DB hit
             self.deleteGameVotes = {p.username: False for p in self.allPlayers.all()}
-            self.save() # Note: This .save() will still hit the DB to persist the change
-            
+            self.save()  # Note: This .save() will still hit the DB to persist the change
+
         return self.deleteGameVotes
-    
+
     def addDeleteVote(self, playerName):
         """Records the vote of a player."""
         # Double check player is in the game
         if playerName not in [p.username for p in self.allPlayers.all()]:
             return False  # Player not in the game
-                
+
         # Ensure deleteGameVotes is a dictionary
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # If the playerName isn't found, wipe the votes and make sure all players are added
         if playerName not in self.deleteGameVotes:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # Add the vote
         self.deleteGameVotes[playerName] = True
         self.save()
         return True
-    
+
     # def enableStatsExclude(self, _username):
     #    seatToChange = self.seatPosition(_username, True)
     #    self.statsExcludeConsent = self.statsExcludeConsent[:seatToChange] + "1" + self.statsExcludeConsent[seatToChange + 1 :]
@@ -415,5 +471,3 @@ class WEB_Game(GeneralGame):
     #        totalConsent += int(letter)
     #    if totalConsent == self.maxPlayers:
     #        self.statsExcludedGame = True
-
-  
