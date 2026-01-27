@@ -183,16 +183,24 @@ async def start_test(update: Update, context):
 @csrf_exempt
 def telegram_test_webhook(request):
     if request.method == "POST":
-        try:
-            update_data = json.loads(request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
+        
+        # 1. Extract the Chat ID and Message Text
+        if "message" in data:
+            chat_id = data["message"]["chat"]["id"]
+            text = data["message"].get("text", "")
 
-            # Use a helper to run the async logic
-            asyncio.run(process_test_update(update_data))
+            # 2. If they sent /start, send a simple reply back
+            if text == "/start":
+                token = "8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y"
+                api_url = f"https://api.telegram.org{token}/sendMessage"
+                payload = {
+                    "chat_id": chat_id,
+                    "text": f"SERVER SUCCESS! Your ID is: {chat_id}"
+                }
+                requests.post(api_url, json=payload)
 
-            return HttpResponse("OK", status=200)
-        except Exception as e:
-            print(f"Test Bot Error: {e}")
-            return HttpResponse("Error", status=500)
+        return HttpResponse("OK", status=200)
     return HttpResponse("Use POST", status=403)
 
 async def process_test_update(data):
