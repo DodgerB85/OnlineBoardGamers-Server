@@ -504,6 +504,9 @@ def _processINDturn(request):
                 playerListToNotify = [player.strip() for player in jsonData["nextPlayer"].split(",")]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
+                # Also remove the player if it is R&D phase and they have a pre move
+                if len(playerListToNotify) > 0 and jsonData["phase"] == 6 and currentGame.doesPlayerHavePreMove(playerListToNotify[0]):
+                    playerListToNotify.remove(playerListToNotify[0])
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
                         request,

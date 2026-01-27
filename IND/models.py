@@ -617,6 +617,17 @@ class IND_Game(GeneralGame):
         self.playersMoveData = ""
         self.save()
 
+    def doesPlayerHavePreMove(self, name):
+        playersPreMoveDataArr = self.getOrScaffoldAllPreMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersPreMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        return len(playersPreMoveDataArr[arrIdx][3]) > 0
     #########################################################
     #
     #   END OF NEW SIMUL MOVE FUNCTIONS
