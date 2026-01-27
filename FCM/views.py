@@ -1929,8 +1929,29 @@ def FCMdata(request, dataType):
 
     # Check for update comparison, and update or do nothing
     if dataType == 3:
-        gameUpdate = int(jsonData["latestUpdate"])
-        latestUpdate = int(currentGame.latestUpdate)
+        try:
+            gameUpdate = int(jsonData["latestUpdate"])
+            latestUpdate = int(currentGame.latestUpdate)
+        except Exception:
+            SN_sendAdminErrorMessage(request, f"ERROR IN FCMdata: gameID: {jsonData["gameID"]}")
+            # NB this might need to be changed if the above msg is getting triggered
+            specialData = False
+
+            # Use to stop actions showing when there's already move Data
+            if currentGame.hasValidActualMoveData(request.user.username):
+                specialData = True
+            return JsonResponse(
+            {
+                "latest": False,
+                "loadData": currentGame.gameData,
+                # Not used at the moment, in // comment
+                "currentPlayers": currentGame.getCurrentPlayersArray(),
+                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "specialData": specialData,
+                "latestUpdate": currentGame.latestUpdate,
+            },
+            safe=False,
+        )
         if gameUpdate == latestUpdate:
             return JsonResponse({"latest": True}, safe=False)
         # Else Send game data
