@@ -5,6 +5,7 @@ import random
 # import requests
 from decouple import config, Csv
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.db import models
 from django.db.models import Q
 
@@ -38,12 +39,14 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
 
-class TGZ_Game(GeneralGame):    
-    allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="TGZallPlayersRelName")
+class TGZ_Game(GeneralGame):
+    allPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="TGZallPlayersRelName"
+    )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="TGZmissingPlayersRelName", blank=True
     )
-    
+
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -58,15 +61,19 @@ class TGZ_Game(GeneralGame):
         related_name="TGZgame_host_relName",
         default=config("ADMIN_DB_KEY", default=1, cast=int),
     )
-    
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="TGZkickedPlayersRelName", blank=True)
+
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="TGZkickedPlayersRelName", blank=True
+    )
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="TGZinvitedPlayersRelName", blank=True
     )
     playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="TGZplayersWithChatNotificationName", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="TGZplayersWithChatNotificationName",
+        blank=True,
     )
-    
+
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -82,11 +89,19 @@ class TGZ_Game(GeneralGame):
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)
     relatedMainTournament = models.ForeignKey(
-        Main_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="maintournamentTGZ_relName"
+        Main_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="maintournamentTGZ_relName",
     )
 
     relatedMiniTournament = models.ForeignKey(
-        Mini_Tournaments, on_delete=models.SET_NULL, null=True, blank=True, related_name="minitournamentTGZ_relName"
+        Mini_Tournaments,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="minitournamentTGZ_relName",
     )
 
     def __str__(self):
@@ -104,7 +119,9 @@ class TGZ_Game(GeneralGame):
         return _gameName
 
     # Takes in self, request, and then 3 JSON[""] pieces of string data
-    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+    def endGame(
+        self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
+    ):
         self.rewindData = ""
         self.rewindTempData = ""
         self.kickoutFlexiData = ""
@@ -120,9 +137,23 @@ class TGZ_Game(GeneralGame):
             # _winnerArray is an array of [winner_username, winner_username, ...]
             # _tournamentData is an array [ [username], [username, username,... TB_VALUE], [username, username,..., TB_VALUE], [...etc] ]
             # NB THE FIRST ENTRY IS AN ARRAY OF (MULTIPLE) WINNER(S)
-            SF_M_ProcessAnyTournamentEndGame(request, MAIN_T_FLAG, self.relatedMainTournament, self, [_winnerUsername], _tournamentData)
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MAIN_T_FLAG,
+                self.relatedMainTournament,
+                self,
+                [_winnerUsername],
+                _tournamentData,
+            )
         if self.relatedMiniTournament:
-            SF_M_ProcessAnyTournamentEndGame(request, MINI_T_FLAG, self.relatedMiniTournament, self, [_winnerUsername], _tournamentData)
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MINI_T_FLAG,
+                self.relatedMiniTournament,
+                self,
+                [_winnerUsername],
+                _tournamentData,
+            )
 
     def currentTurnString(self):
         return SR_currentTurnString("TGZ", self.turn, self.phase)
@@ -146,7 +177,14 @@ class TGZ_Game(GeneralGame):
             return False
 
         # Use a set for faster membership testing
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
         return (
             not self.currentPlayers
             or loggedInPlayerUsername in self.currentPlayers
@@ -195,11 +233,17 @@ class TGZ_Game(GeneralGame):
             or self.gameStatus == "ACTIVE"
             or self.gameStatus == "PRIVATE"
         ):
-            if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "PRIVATE":
+            if (
+                self.gameStatus == "WAITING"
+                or self.gameStatus == "AVAILABLE"
+                or self.gameStatus == "PRIVATE"
+            ):
                 elapsedTotalSeconds = int(time.time()) - int(self.created) // 1000
             if self.gameStatus == "ACTIVE":
                 elapsedTotalSeconds = int(time.time()) - int(self.latestUpdate) // 1000
-            latestUpdateElapsedTimeString = SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
 
         myMove = False
         if loggedInUser is not None:
@@ -207,7 +251,9 @@ class TGZ_Game(GeneralGame):
 
         chatNotification = False
         involvedPlayer = False
-        if loggedInUser in self.allPlayers.all() and (loggedInUser not in self.missingPlayers.all()):
+        if loggedInUser in self.allPlayers.all() and (
+            loggedInUser not in self.missingPlayers.all()
+        ):
             involvedPlayer = True
         if loggedInUser in self.playersWithChatNotification.all():
             chatNotification = True
@@ -270,7 +316,9 @@ class TGZ_Game(GeneralGame):
     def isExperiencedGame(self):
         if self.startingOptions == "":
             return False
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
         if 120 in startingOptionsListPrelim:
             return True
         return False
@@ -278,7 +326,9 @@ class TGZ_Game(GeneralGame):
     def isLearningGame(self):
         if self.startingOptions == "":
             return False
-        startingOptionsListPrelim = json.loads(self.startingOptions) if self.startingOptions else []
+        startingOptionsListPrelim = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
         if 110 in startingOptionsListPrelim:
             return True
         return False
@@ -287,7 +337,7 @@ class TGZ_Game(GeneralGame):
     def seatPosition(self, name, withoutBots=False):
         # 1. Get the list (this now uses the prefetched cache we optimized earlier)
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        
+
         # 2. Try to find the index directly in the Python list
         try:
             return playerList.index(name)
@@ -295,17 +345,17 @@ class TGZ_Game(GeneralGame):
             # ValueError occurs if the name is not in the list
             return -1
 
-
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # 1. Access the prefetched cache (0 hits)
         all_players_prefetched = list(self.allPlayers.all())
-        
+
         # 2. Filter out Admin in Python memory
         playerList = [
-            p.username for p in all_players_prefetched 
+            p.username
+            for p in all_players_prefetched
             if p.username != "TGZtourneyAdmin"
         ]
-        
+
         # 3. Shuffle using the seed
         random.Random(self.playerOrderSeed).shuffle(playerList)
 
@@ -320,7 +370,7 @@ class TGZ_Game(GeneralGame):
         for count, player in enumerate(playerList):
             if player in missing_usernames:
                 playerList[count] = f"TgzBot{count}"
-                
+
         return playerList
 
     def startGame(self, request):
@@ -332,13 +382,22 @@ class TGZ_Game(GeneralGame):
         self.save()
 
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
-            playerListToNotify = list(self.allPlayers.all().values_list("username", flat=True))
-            #playerListToNotify.remove(allPlayersL[0])
+            playerListToNotify = list(
+                self.allPlayers.all().values_list("username", flat=True)
+            )
+            # playerListToNotify.remove(allPlayersL[0])
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
             # This ALWAYS send a start email, for game/tourny/MiniT
-            SN_M_sendGameStartNotification(request, "TGZ", playerListToNotify, getattr(self, "id"), self)
+            SN_M_sendGameStartNotification(
+                get_current_site(request),
+                "TGZ",
+                playerListToNotify,
+                getattr(self, "id"),
+                self,
+                request.user.username,
+            )
             if request.user.username != allPlayersL[0]:
                 SN_sendNextTurnNotification(
                     request,
@@ -364,7 +423,9 @@ class TGZ_Game(GeneralGame):
         if self.host == _missingUser:
             # Find a new host from the players who are *not* in missingPlayers
             possibleHost = (
-                self.allPlayers.exclude(id__in=self.missingPlayers.all().values_list("id", flat=True))
+                self.allPlayers.exclude(
+                    id__in=self.missingPlayers.all().values_list("id", flat=True)
+                )
                 .order_by("?")
                 .first()
             )
@@ -382,7 +443,9 @@ class TGZ_Game(GeneralGame):
         if (len(self.statsExcludeConsent)) < self.maxPlayers:
             self.statsExcludeConsent = "0" * self.maxPlayers
         self.statsExcludeConsent = (
-            self.statsExcludeConsent[:seatToChange] + "1" + self.statsExcludeConsent[seatToChange + 1 :]
+            self.statsExcludeConsent[:seatToChange]
+            + "1"
+            + self.statsExcludeConsent[seatToChange + 1 :]
         )
         # CHECK TOTAL CONSENT
         totalConsent = 0

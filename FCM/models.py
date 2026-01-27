@@ -5,8 +5,9 @@ import gzip
 import time
 import json
 import logging
-
+from django_q.tasks import async_task
 from django.db.models import Q
+from django.contrib.sites.shortcuts import get_current_site
 
 from django.db import models
 from django.conf import settings
@@ -47,7 +48,13 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from Lobby.models import User, Mini_Tournaments, GeneralGame, Main_Tournament
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG, STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC
+from Lobby.sharedFunctions.constants import (
+    MAIN_T_FLAG,
+    MINI_T_FLAG,
+    STATS_EXCLUDE_VOTE_TOPIC,
+    DELETE_VOTE_TOPIC,
+    REWIND_CONSENT_VOTE_TOPIC,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -144,14 +151,14 @@ class FCM_Tournament(models.Model):
         return roundsHTML
 
 
-class FCM_Game(GeneralGame):       
+class FCM_Game(GeneralGame):
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="allPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="missingPlayersRelName", blank=True
     )
-    
+
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -164,7 +171,7 @@ class FCM_Game(GeneralGame):
         null=True,
         related_name="game_host_relName",
     )
-    
+
     kickedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="kickedPlayersRelName", blank=True
     )
@@ -176,7 +183,7 @@ class FCM_Game(GeneralGame):
         related_name="playersWithChatNotificationName",
         blank=True,
     )
-        
+
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -190,7 +197,7 @@ class FCM_Game(GeneralGame):
     )
 
     # TODOMODEL change to json, move to general game
-    #rewindConsent = models.CharField(max_length=10, blank=True)
+    # rewindConsent = models.CharField(max_length=10, blank=True)
 
     playersMoveData = models.TextField(blank=True)
 
@@ -257,7 +264,7 @@ class FCM_Game(GeneralGame):
         player_list = [p.strip() for p in self.currentPlayers.split(",")]
 
         if (
-            loggedInPlayerUsername in player_list 
+            loggedInPlayerUsername in player_list
             or self.currentPlayers in allowed_players
         ):
             return True
@@ -490,8 +497,23 @@ class FCM_Game(GeneralGame):
                 playerListToNotify.remove(request.user.username)
 
             SN_M_sendGameStartNotification(
-                request, "FCM", playerListToNotify, getattr(self, "id"), self
+                get_current_site(request),
+                "FCM",
+                playerListToNotify,
+                getattr(self, "id"),
+                self,
+                request.user.username,
             )
+
+            #async_task(
+            #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            #    get_current_site(request),  # Do not pass the 'request' object; it cannot be serialized for background tasks
+            #    "FCM",
+            #    playerListToNotify,
+            #    self.id,
+            #    self,
+            #    request.user.username,
+            #)
 
     # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
     def getAllPlayersOrderedySeat(self, withoutBots=False, useNewCode=True):
@@ -895,9 +917,9 @@ class FCM_Game(GeneralGame):
         # Don't clear moves at end of payday to preserve fridge data
         # Actually, clearing moves can cause no turn order if the players browser doesn't respond
         if self.phase != 7 and self.phase != 3:
-            #self.clearAllMoveDataV2()
+            # self.clearAllMoveDataV2()
             pass
-        
+
         # Add latest update to stop flex time being double deducted
         newVer = (int(self.latestUpdate) % 1000) + 1
         self.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -971,11 +993,9 @@ class FCM_Game(GeneralGame):
             USE_NEW_CODE = True
 
         rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
-                REWIND_CONSENT_VOTE_TOPIC,
-                self.getAllPlayersOrderedySeat(True), 0
-            )
-        missingPlayerNames =  self.getMissingPlayersNamesArray()
-        
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
+        missingPlayerNames = self.getMissingPlayersNamesArray()
 
         rewindHTML = ""
 
@@ -1009,40 +1029,42 @@ class FCM_Game(GeneralGame):
 
     def getRewindHostPossible(self):
         rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
-                REWIND_CONSENT_VOTE_TOPIC,
-                self.getAllPlayersOrderedySeat(True), 0
-            )
-        missingPlayerNames =  self.getMissingPlayersNamesArray()
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
+        missingPlayerNames = self.getMissingPlayersNamesArray()
         hostUsername = getattr(self.host, "username")
         possible = True
         for player in rewindConsentVotes:
             # If the player is not missing, and has a 0 vote, then it is not possible
-            if player not in missingPlayerNames and rewindConsentVotes[player] == 0 and player != hostUsername:
+            if (
+                player not in missingPlayerNames
+                and rewindConsentVotes[player] == 0
+                and player != hostUsername
+            ):
                 possible = False
         return possible
 
     def removeSingleRewindPermission(self):
         rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
-                REWIND_CONSENT_VOTE_TOPIC,
-                self.getAllPlayersOrderedySeat(True), 0
-            )
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
         for player in rewindConsentVotes:
             if rewindConsentVotes[player] == 1:
                 rewindConsentVotes[player] = 0
 
-        self.tempPresenter().setVoteResults(REWIND_CONSENT_VOTE_TOPIC, rewindConsentVotes)
+        self.tempPresenter().setVoteResults(
+            REWIND_CONSENT_VOTE_TOPIC, rewindConsentVotes
+        )
 
     def getCurrentRewindConsent(self, _username):
         # return 0,1, or 2
         rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
-                        REWIND_CONSENT_VOTE_TOPIC,
-                        self.getAllPlayersOrderedySeat(True), 0
-                    )
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
         if _username in rewindConsentVotes:
             return rewindConsentVotes[_username]
         else:
             return 0
-                
 
     # takes in a user object
     def checkForHostChange(self, _missingUser):
@@ -1119,6 +1141,7 @@ class FCM_Game(GeneralGame):
 
     def getGameCode(self):
         return "FCM"
+
 
 # class FCM_Chat(models.Model):
 #    welcomeChat = '{"name":"WelcomeBot","timestamp":' + str(int(time.time(

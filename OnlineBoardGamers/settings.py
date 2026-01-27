@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.sitemaps",
     "compressor",
+    'django_q', 
     "FCM",
     "Lobby",
     "user_visit",
@@ -170,6 +171,16 @@ COMPRESS_OFFLINE = True
 if DEBUG:
     COMPRESS_OFFLINE = False
 # END JS Minifier settings
+
+# ASYNC SETTINGS
+Q_CLUSTER = {
+    'name': 'obg_cluster',
+    'workers': 4,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'orm': 'default',  # Uses your existing DB
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases

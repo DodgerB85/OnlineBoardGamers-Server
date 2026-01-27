@@ -6,7 +6,7 @@ import time
 from random import randint
 import json
 from django.db.models import Q
-
+from django.contrib.sites.shortcuts import get_current_site
 
 from Lobby.models import User, GeneralGame
 
@@ -720,7 +720,14 @@ class HC_Game(GeneralGame):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(request, "HC", playerListToNotify, self.id, self)
+            SN_M_sendGameStartNotification(
+                get_current_site(request),
+                "HC",
+                playerListToNotify,
+                getattr(self, "id"),
+                self,
+                request.user.username,
+            )
 
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # Use prefetched cache; avoid .values_list() to prevent new SQL queries

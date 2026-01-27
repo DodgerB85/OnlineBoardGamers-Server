@@ -930,7 +930,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
     activate(originalLang)
 
 
-def SN_M_sendGameStartNotification(request, game, playerList, gameID, currentGame):
+def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, currentGame, errorUsername):
     originalLang = get_language()
     for player in playerList:
         try:
@@ -997,7 +997,7 @@ def SN_M_sendGameStartNotification(request, game, playerList, gameID, currentGam
                     )
             
                 if shouldSendEmail("tournamentGameStart", player, profile, None, 0):
-                    current_site = get_current_site(request)
+                    current_site = currentSite
                     message = render_to_string(
                         "Lobby/gameEmails/tournamentGameStart.html",
                         {
@@ -1023,7 +1023,7 @@ def SN_M_sendGameStartNotification(request, game, playerList, gameID, currentGam
             else:
                 # SEND EMAIL
                 if shouldSendEmail("gameStart", player, profile, None, 0):
-                    current_site = get_current_site(request)
+                    current_site = currentSite
                     message = render_to_string(
                         "Lobby/gameEmails/gameStartEmail.html",
                         {
@@ -1045,7 +1045,7 @@ def SN_M_sendGameStartNotification(request, game, playerList, gameID, currentGam
 
         except Exception as e:
             print(
-                request.user.username
+                errorUsername
                 + " Error. SN_M_sendGameStartNotification. Notifying "
                 + game
                 + " Game Start: "

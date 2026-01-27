@@ -251,7 +251,14 @@ class RNB_Game(GeneralGame):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(request, "RNB", playerListToNotify, self.id, self)
+            #SN_M_sendGameStartNotification(
+            #    get_current_site(request),
+            #    "FCM",
+            #    playerListToNotify,
+            #    getattr(self, "id"),
+            #    self,
+            #    request.user.username,
+            #)
 
     def getCurrentPlayersArray(self):
         _currentPlayersArray = []
