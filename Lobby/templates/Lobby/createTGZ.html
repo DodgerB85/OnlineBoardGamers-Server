@@ -28,13 +28,15 @@
             {% if MT_Creation %}
                 <form autocomplete="off"
                       action="{% url 'createTGZminiTournament' %}"
-                      method="post">
+                      method="post"
+                      id="TGZnewGameForm"
+                      onsubmit="validateForm(event{% if MT_Creation %}, true{% endif %})">
                 {% else %}
                     <form id="TGZnewGameForm"
                           autocomplete="off"
                           action="{% url 'TGZ:createTGZgame' %}"
                           method="post"
-                          onsubmit="validateForm(event)">
+                          onsubmit="validateForm(event{% if MT_Creation %}, true{% endif %})">
                     {% endif %}
                     {% csrf_token %}
                     <div class="topOfNewGameOptionsDiv">

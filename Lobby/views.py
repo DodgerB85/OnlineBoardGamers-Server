@@ -2075,6 +2075,46 @@ def createINDpage(request, gameID=0):
 
     return HttpResponse(status=204)  # No Content
 
+@login_required
+def createINDpage2(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "IND", IND_Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createIND2.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = IND_Game.objects.get(id=gameID)
+        except IND_Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+
+        playerNames = []
+        for user in currentGame.allPlayers.all():
+            if request.user != user:
+                playerNames.append(user.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        loadedStartingOptions = (
+            json.loads(currentGame.startingOptions)
+            if currentGame.startingOptions
+            else []
+        )
+        return render(
+            request,
+            "Lobby/createIND2.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.gameName,
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
 
 @login_required
 def createKFWpage(request, gameID=0):

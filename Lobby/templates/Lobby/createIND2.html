@@ -17,10 +17,10 @@
         {% endif %}
         <div id="allOptions">
             <span class="topOfNewGameSpan">{% translate "New to Indonesia? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
-            <form autocomplete="off"
+            <form id="gameCreationForm"
+                  autocomplete="off"
                   action="{% url 'IND:createINDgame' %}"
-                  method="post"
-                  id="gameCreationForm">
+                  method="post">
                 {% csrf_token %}
                 <div class="topOfNewGameOptionsDiv">
                     <fieldset id="setupOptions" class="optionsGroupTop">
@@ -221,7 +221,9 @@
                                 agreed to keep money hidden.
                             {% endblocktranslate %}
                         </span>
-                        <br />
+                    </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Map Options - Aegean" %}</legend>
                         <input type="checkbox"
                                onchange="validateGameOptions(this.id)"
                                class="myCheckbox"
@@ -241,7 +243,51 @@
                              width="300"
                              height="197"
                              alt="Aegean Map" />
+                    </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Map Options - Philippines" %}</legend>
+                        <input type="checkbox"
+                               onchange="validateGameOptions(this.id)"
+                               class="myCheckbox"
+                               id="usePHPmap"
+                               name="usePHPmap"
+                               value="3">
+                        <label for="usePHPmap" class="checkboxLabel">{% translate "Use Philippines Map" %}</label>
                         <br />
+                        <span class="inlineHelp">
+                            {% blocktranslate trimmed %}
+                                Play on the fan-made Philippines map!
+                                <br />
+                                Game will be excluded from stats
+                            {% endblocktranslate %}
+                        </span>
+                        <img src="{% static 'Lobby/images/INDprofile/PHP_map_icon.jpg' %}"
+                             height="197"
+                             width="148"
+                             alt="Aegean Map" />
+                        <br />
+                        <input type="checkbox"
+                               onchange="validateGameOptions(this.id)"
+                               class="myCheckbox"
+                               id="useMergerSubsidy"
+                               name="useMergerSubsidy"
+                               value="4"
+                               disabled>
+                        <label for="useMergerSubsidy" class="checkboxLabel">{% translate "Use Merger Subsidy" %}</label>
+                        <br />
+                        <input type="checkbox"
+                               onchange="validateGameOptions(this.id)"
+                               class="myCheckbox"
+                               id="useShippingSubsidy"
+                               name="useShippingSubsidy"
+                               value="5"
+                               disabled>
+                        <label for="useShippingSubsidy" class="checkboxLabel">{% translate "Use Shipping Subsidy" %}</label>
+                        <br />
+                        {% static 'IND/PHPrules.pdf' as rules_url %}
+                        {% blocktranslate trimmed with rules_url=rules_url %}
+                            See <a class="linkOther" href="{{ rules_url }}" target="_blank">Philippines Rules</a>
+                        {% endblocktranslate %}
                     </fieldset>
                 </div>
                 <br />
@@ -278,7 +324,7 @@
                 
                 if (btn) {
                     // 1. Change text first
-                    btn.value = "{% translate 'Creating Indonesia Game...' %}";
+                    btn.value = "{% translate 'Creating Indonesia222 Game...' %}";
                     
                     // 2. Disable to prevent double-click
                     btn.disabled = true;

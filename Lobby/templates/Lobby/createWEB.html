@@ -19,7 +19,7 @@
 -->
         <div id="allOptions">
             <span class="topOfNewGameSpan">{% translate "New to Web? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
-            <form id="WEBnewGameForm"
+            <form id="gameCreationForm"
                   autocomplete="off"
                   action="{% url 'WEB:createWEBgame' %}"
                   method="post">
@@ -223,31 +223,31 @@
                                 According to the rules, you cannot remove items already on the table.
                                 This simulates some items already on the table by blocking some tile spaces.
                             {% endblocktranslate %}
-                                                                        </span>
-                                                                        <br />
-                                                                        <input type="checkbox"
-                                                                               class="myCheckbox"
-                                                                               id="useExpansion"
-                                                                               name="useExpansion"
-                                                                               value="1">
-                                                            <label for="useExpansion" class="checkboxLabel">{% translate "Use Expansion" %}</label>
-                                                            <br />
-                                                            <span class="inlineHelp">
-                                                                {% blocktranslate trimmed %}
-                                                                    Allows storage of 1 tile
-                                                                    <br />
-                                                                    Alows you to pirate unfinished movies for € 4 M
-                                                                {% endblocktranslate %}
-                                                </span>
-                                                <br />
-                                </fieldset>
-                            -->
+                                                                                                        </span>
+                                                                                                        <br />
+                                                                                                        <input type="checkbox"
+                                                                                                               class="myCheckbox"
+                                                                                                               id="useExpansion"
+                                                                                                               name="useExpansion"
+                                                                                                               value="1">
+                                                                                    <label for="useExpansion" class="checkboxLabel">{% translate "Use Expansion" %}</label>
+                                                                                    <br />
+                                                                                    <span class="inlineHelp">
+                                                                                        {% blocktranslate trimmed %}
+                                                                                            Allows storage of 1 tile
+                                                                                            <br />
+                                                                                            Alows you to pirate unfinished movies for € 4 M
+                                                                                        {% endblocktranslate %}
+                                                                </span>
+                                                                <br />
+                                        </fieldset>
+                                    -->
 </div>
 <br />
 </div>
 <div>
     <input type="submit"
-           class="registerbtn"
+           class="registerbtn createNewGameButton"
            value="{% translate "Create Web Game" %}">
 </div>
 </form>
@@ -268,6 +268,28 @@
     global.experienced = false;
     {% endif %}
     document.addEventListener('DOMContentLoaded', function () {
+                // Set submit button
+        const form = document.getElementById('gameCreationForm');    
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                // event.submitter is the modern way to get the specific button clicked
+                const btn = event.submitter || this.querySelector('.createNewGameButton');
+                
+                if (btn) {
+                    // 1. Change text first
+                    btn.value = "{% translate 'Creating Web Game...' %}";
+                    
+                    // 2. Disable to prevent double-click
+                    btn.disabled = true;
+                    
+                    // 3. Visual feedback
+                    btn.style.backgroundColor = "#cccccc";
+                    btn.style.cursor = "not-allowed";
+                } else {
+                    console.error("Submit button not found in form context.");
+                }
+            });
+        }
         autocomplete(document.getElementById("player2"));
         autocomplete(document.getElementById("player3"));
         autocomplete(document.getElementById("player4"));

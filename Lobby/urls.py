@@ -66,6 +66,7 @@ urlpatterns = [
     path("createAQYpage/", views.createAQYpage, name="createAQYpage"),
     path("createAQYpage/<int:gameID>/", views.createAQYpage, name="createAQYpage"),
     path("createINDpage/", views.createINDpage, name="createINDpage"),
+    path("createINDpage2/", views.createINDpage2, name="createINDpage2"),
     path("createINDpage/<int:gameID>/", views.createINDpage, name="createINDpage"),
     path("createKFWpage/", views.createKFWpage, name="createKFWpage"),
     path("createKFWpage/<int:gameID>/", views.createKFWpage, name="createKFWpage"),

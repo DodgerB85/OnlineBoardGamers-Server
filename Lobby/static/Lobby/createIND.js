@@ -154,6 +154,34 @@ function validateOptions(change) {
 	}
 }
 
+function validateGameOptions(change) {
+	// MAP OPTIONS
+	if (change === "useAegeanMap") {
+		if (document.getElementById("useAegeanMap").checked == true) {
+			document.getElementById("usePHPmap").checked = false
+			document.getElementById("useMergerSubsidy").checked = false
+			document.getElementById("useMergerSubsidy").disabled = true
+			document.getElementById("useShippingSubsidy").checked = false
+			document.getElementById("useShippingSubsidy").disabled = true
+		} else {
+			//
+		}
+	} else if (change === "usePHPmap") {
+		if (document.getElementById("usePHPmap").checked == true) {
+			document.getElementById("useAegeanMap").checked = false
+			document.getElementById("useMergerSubsidy").checked = false
+			document.getElementById("useMergerSubsidy").disabled = false
+			document.getElementById("useShippingSubsidy").checked = false
+			document.getElementById("useShippingSubsidy").disabled = false
+		} else {
+			document.getElementById("useMergerSubsidy").checked = false
+			document.getElementById("useMergerSubsidy").disabled = true
+			document.getElementById("useShippingSubsidy").checked = false
+			document.getElementById("useShippingSubsidy").disabled = true
+		}
+	}
+}
+
 function removeOption(option) {
 	document.getElementById(option).checked = false
 	document.getElementById(option).disabled = true
@@ -213,7 +241,6 @@ function selectPlayers() {
 			document.getElementById("selPlayer3").style.display = "flex"
 			document.getElementById("selPlayer4").style.display = "flex"
 			document.getElementById("selPlayer5").style.display = "flex"
-
 
 			if (document.getElementById("trainingGame").checked) {
 				document.getElementById("player2").value = "SHADOW"
