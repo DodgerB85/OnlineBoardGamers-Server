@@ -27,14 +27,14 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 
-class CNS_Game(GeneralGame):       
+class CNS_Game(GeneralGame):
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSallPlayersRelName"
     )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSmissingPlayersRelName", blank=True
     )
-    
+
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -49,7 +49,7 @@ class CNS_Game(GeneralGame):
         related_name="CNSgame_host_relName",
         default=config("ADMIN_DB_KEY", default=1, cast=int),
     )
-    
+
     kickedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="CNSkickedPlayersRelName", blank=True
     )
@@ -61,7 +61,7 @@ class CNS_Game(GeneralGame):
         related_name="CNSplayersWithChatNotificationName",
         blank=True,
     )
-    
+
     winner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -305,6 +305,8 @@ class CNS_Game(GeneralGame):
         return playerList
 
     def startGame(self, request):
+        from django_q.tasks import async_task
+
         self.gameStatus = "ACTIVE"
         self.playerOrderSeed = random.randint(1000, 32767)
         allPlayersL = self.getAllPlayersOrderedySeat()
@@ -319,14 +321,19 @@ class CNS_Game(GeneralGame):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(
-                get_current_site(request),
+            domain = get_current_site(request)
+            username = request.user.username
+            async_task(
+                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                 "CNS",
                 playerListToNotify,
-                getattr(self, "id"),
+                self.id,
                 self,
-                request.user.username,
+                username,
             )
+
+            self.save()
 
     def getCurrentPlayersArray(self):
         _currentPlayersArray = []

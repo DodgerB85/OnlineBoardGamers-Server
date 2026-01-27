@@ -530,14 +530,12 @@ class CannesPresenter(GamePresenter):
         }
 
     def startGame(self, request):
+        from django_q.tasks import async_task
         from Lobby.models import GamePlayer
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendGameStartNotification,
-        )
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
-
+        print(self.gameObj.gameStatus)
         game_players = list(self.gameObj.players.exclude(is_kicked=True))
 
         random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
@@ -557,13 +555,16 @@ class CannesPresenter(GamePresenter):
                 if gp.player and gp.player.username != request.user.username
             ]
 
-            SN_M_sendGameStartNotification(
-                get_current_site(request),
-                "FCM",
+            domain = get_current_site(request)
+            username = request.user.username
+            async_task(
+                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+                "CNS",
                 playerListToNotify,
-                getattr(self, "id"),
-                self,
-                request.user.username,
+                self.gameObj.id,
+                self.gameObj,
+                username,
             )
 
     def getGameCode(self):
@@ -725,10 +726,8 @@ class WebPresenter(GamePresenter):
         }
 
     def startGame(self, request, isTournamentGame=False):
+        from django_q.tasks import async_task
         from Lobby.models import GamePlayer
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendGameStartNotification,
-        )
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
@@ -760,13 +759,16 @@ class WebPresenter(GamePresenter):
                     if gp.player and gp.player.username != request.user.username
                 ]
 
-                SN_M_sendGameStartNotification(
-                    get_current_site(request),
+                domain = get_current_site(request)
+                username = request.user.username
+                async_task(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                     "WEB",
                     playerListToNotify,
-                    getattr(self, "id"),
+                    self.gameObj.id,
                     self,
-                    request.user.username,
+                    username,
                 )
 
     def getGameCode(self):

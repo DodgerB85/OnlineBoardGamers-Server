@@ -239,6 +239,7 @@ class RNB_Game(GeneralGame):
         return playerList
 
     def startGame(self, request):
+        from django_q.tasks import async_task
         self.gameStatus = "ACTIVE"
         self.playerOrderSeed = random.randint(1000, 32767)
         allPlayersL = self.getAllPlayersOrderedySeat()
