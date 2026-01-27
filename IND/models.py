@@ -466,6 +466,7 @@ class IND_Game(GeneralGame):
         return playerList
 
     def startGame(self, request, isTournamentGame=False):
+        from django_q.tasks import async_task
         self.gameStatus = "ACTIVE"
         # Only do this if no gameData ie not a form
         if self.gameData == "" or self.gameData is None:
@@ -491,13 +492,16 @@ class IND_Game(GeneralGame):
 
             # The tournament sends out game start notifications
             if not isTournamentGame:
-                SN_M_sendGameStartNotification(
-                    get_current_site(request),
+                domain = get_current_site(request)
+                username = request.user.username
+                async_task(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                     "IND",
                     playerListToNotify,
-                    getattr(self, "id"),
+                    self.id,
                     self,
-                    request.user.username,
+                    username,
                 )
 
     def getCurrentPlayersArray(self):

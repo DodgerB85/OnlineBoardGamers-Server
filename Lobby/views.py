@@ -141,6 +141,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTGZstartingOptionsHTML,
     SR_getgodsVRoptionsHTML,
     SR_getPointsForPosition,
+    SR_usesUnifiedGameModel,
 )
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
@@ -151,14 +152,7 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-def usesUnifiedGameModel(game_code):
-    """
-    Returns True if the game uses the unified Game model with GamePlayer relationships.
-    Returns False if the game uses the legacy model with M2M relationships.
 
-    As games are migrated to the unified model, add their game codes here.
-    """
-    return game_code in ["CNS", "WEB"]
 
 ##########################
 #
@@ -783,7 +777,7 @@ def DBO_deleteGame(request, game_type):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     # 4. Fetch Game
-    if usesUnifiedGameModel(game_type):
+    if SR_usesUnifiedGameModel(game_type):
         current_game = model.objects.filter(id=game_id, gameCode=game_type).first()
     else:
         current_game = model.objects.filter(id=game_id).first()
@@ -2688,7 +2682,7 @@ def playerInfo(request, usernameToProfile):
 
     # THE MASTER LOOP: One model at a time
     for game_name, game_model in GAME_NAMES_MODELS.items():
-        if usesUnifiedGameModel(game_name):
+        if SR_usesUnifiedGameModel(game_name):
             # Handle unified Game model (CNS, WEB, etc.)
             all_games = list(
                 Game.objects.filter(gameCode=game_name, players__player_id=target_id)
@@ -2726,7 +2720,7 @@ def playerInfo(request, usernameToProfile):
             status = game.gameStatus
 
             # Handle unified Game model (CNS, WEB, etc.) differently
-            if usesUnifiedGameModel(game_name):
+            if SR_usesUnifiedGameModel(game_name):
                 # Optimization: Use sets for membership checks
                 all_p_ids = {gp.player.id for gp in game.players.all()}
                 is_joint = req_user_id in all_p_ids
@@ -3090,7 +3084,7 @@ def joinGameLink(request, joinGameLink):
         return HttpResponseRedirect(reverse("index"))
 
     try:
-        if usesUnifiedGameModel(gameCode):
+        if SR_usesUnifiedGameModel(gameCode):
             availableGame = Game.objects.get(id=numbers, gameCode=gameCode)
         else:
             availableGame = gameModel.objects.get(id=numbers)
@@ -3098,7 +3092,7 @@ def joinGameLink(request, joinGameLink):
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
 
-    if usesUnifiedGameModel(gameCode):
+    if SR_usesUnifiedGameModel(gameCode):
         current_player_count = availableGame.players.exclude(is_kicked=True).count()
     else:
         current_player_count = availableGame.allPlayers.count()
@@ -3141,7 +3135,7 @@ def joinGame(request, gameType):
         return JsonResponse({"error": "Invalid Model"}, status=400)
 
     # Handle unified Game model (CNS, WEB, etc.)
-    if usesUnifiedGameModel(gameType):
+    if SR_usesUnifiedGameModel(gameType):
         try:
             currentGame = Game.objects.prefetch_related(
                 "players__player", "invitedPlayers"
@@ -3182,7 +3176,7 @@ def joinGame(request, gameType):
         if currentGame.gameStatus == "ACTIVE":
             messages.error(request, (gettext("The game has already started")))
         else:
-            if usesUnifiedGameModel(gameType):
+            if SR_usesUnifiedGameModel(gameType):
                 # For unified model games, delete the GamePlayer
                 currentGame.players.filter(player=request.user).delete()
             else:
@@ -3272,7 +3266,7 @@ def checkJoinGame(request, gameType, gameID):
             )
         return
     # CHECK GAME EXISTS
-    if usesUnifiedGameModel(gameType):
+    if SR_usesUnifiedGameModel(gameType):
         try:
             currentGame = Game.objects.prefetch_related(
                 "invitedPlayers",
@@ -3359,7 +3353,7 @@ def checkJoinGame(request, gameType, gameID):
     # CHECK EXPERIENCE LEVEL HERE
     is_experienced = (
         currentGame.presenter().isExperiencedGame()
-        if usesUnifiedGameModel(gameType)
+        if SR_usesUnifiedGameModel(gameType)
         else currentGame.isExperiencedGame()
     )
 
@@ -3367,7 +3361,7 @@ def checkJoinGame(request, gameType, gameID):
         # Optimization: Fetch SHADOW once
         shadow_user = User.objects.get(username="SHADOW")
 
-        if usesUnifiedGameModel(gameType):
+        if SR_usesUnifiedGameModel(gameType):
             # 1 Hit: Count finished games for unified model games
             exp = (
                 Game.objects.filter(
@@ -3426,7 +3420,7 @@ def checkJoinGame(request, gameType, gameID):
         fairPlayLastYear = 100
 
         for game_name, game_model in GAME_NAMES_MODELS.items():
-            if usesUnifiedGameModel(game_name):
+            if SR_usesUnifiedGameModel(game_name):
                 # Handle unified Game model games
                 finishedGames = Game.objects.filter(
                     Q(gameCode=game_name),
@@ -3503,7 +3497,7 @@ def checkJoinGame(request, gameType, gameID):
     
     try:
         with transaction.atomic():
-            if usesUnifiedGameModel(gameType):
+            if SR_usesUnifiedGameModel(gameType):
                 selectedGameForJoin = Game.objects.select_for_update().get(id=gameID)
                 # Re-verify count inside the lock to prevent double-joining
                 current_count = selectedGameForJoin.players.count()
@@ -3516,20 +3510,20 @@ def checkJoinGame(request, gameType, gameID):
                 current_count = selectedGameForJoin.allPlayers.count()
                 #currentGame.allPlayers.add(_newPlayer)
             # 2. RACE CONDITION CHECK: Ensure game didn't fill up while waiting for lock
-            if current_count >= currentGame.maxPlayers:
+            if current_count >= selectedGameForJoin.maxPlayers:
                 messages.error(request, gettext("Sorry, this game just filled up."))
                 if ajaxReturn:
                     return JsonResponse({"listToShow": "AVAILABLE"})
                 return
 
             _newPlayer = request.user
-            if usesUnifiedGameModel(gameType):
+            if SR_usesUnifiedGameModel(gameType):
                 GamePlayer.objects.create(game=selectedGameForJoin, player=_newPlayer)
             else:
                 selectedGameForJoin.allPlayers.add(_newPlayer)
 
             # 4. UPDATE STATUS & METADATA
-            selectedGameForJoin.latestUpdate = _latestUpdate
+            selectedGameForJoin.latestUpdate = str(_latestUpdate)
             selectedGameForJoin.invitedPlayers.remove(request.user)
 
             # Calculate new count after addition
@@ -3537,7 +3531,7 @@ def checkJoinGame(request, gameType, gameID):
 
             # 5. START GAME LOGIC
             if new_total_count == selectedGameForJoin.maxPlayers:
-                if usesUnifiedGameModel(gameType):
+                if SR_usesUnifiedGameModel(gameType):
                     selectedGameForJoin.presenter().startGame(request)
                 else:
                     selectedGameForJoin.startGame(request)
@@ -3557,7 +3551,7 @@ def checkJoinGame(request, gameType, gameID):
                 messages.success(request, gettext("You have joined the game - waiting for more players"))
                 response = JsonResponse({"listToShow": "WAITING"})
 
-            currentGame.save()
+            selectedGameForJoin.save()
             return response
     except Exception as e:
     # Logic if the lock fails or an error occurs (the transaction will auto-rollback)
@@ -3579,7 +3573,7 @@ def deleteGame(request, gameType):
         if gameModel is None:
             return JsonResponse({"noGame": True}, safe=False)
 
-        if usesUnifiedGameModel(gameType):
+        if SR_usesUnifiedGameModel(gameType):
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameType)
         else:
             currentGame = gameModel.objects.get(id=jsonData["gameID"])
@@ -3588,7 +3582,7 @@ def deleteGame(request, gameType):
 
     # Delete Training Game // Can never really fail
     if jsonData["action"] == "deleteTrgGame":
-        if usesUnifiedGameModel(gameType):
+        if SR_usesUnifiedGameModel(gameType):
             user_is_player = currentGame.players.filter(player=request.user).exists()
         else:
             user_is_player = request.user in currentGame.allPlayers.all()

@@ -374,6 +374,7 @@ class TGZ_Game(GeneralGame):
         return playerList
 
     def startGame(self, request):
+        from django_q.tasks import async_task
         self.gameStatus = "ACTIVE"
         self.playerOrderSeed = random.randint(1000, 32767)
         allPlayersL = self.getAllPlayersOrderedySeat()
@@ -390,13 +391,16 @@ class TGZ_Game(GeneralGame):
                 playerListToNotify.remove(request.user.username)
 
             # This ALWAYS send a start email, for game/tourny/MiniT
-            SN_M_sendGameStartNotification(
-                get_current_site(request),
+            domain = get_current_site(request)
+            username = request.user.username
+            async_task(
+                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                 "TGZ",
                 playerListToNotify,
-                getattr(self, "id"),
+                self.id,
                 self,
-                request.user.username,
+                username,
             )
             if request.user.username != allPlayersL[0]:
                 SN_sendNextTurnNotification(

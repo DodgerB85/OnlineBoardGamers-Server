@@ -27,7 +27,7 @@ from email.mime.multipart import MIMEMultipart
 from django.conf import settings
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
-
+from Lobby.sharedFunctions.sharedRefs import SR_usesUnifiedGameModel
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
@@ -67,16 +67,30 @@ def getGameStrings(game):
             "clickHereToPlayText": gettext("Click here to play FCM"),
             "bugReportSubject": gettext("FCM Bug Report"),
             "inviteSubject": gettext("Food Chain Magnate - Invitation Received"),
-            "tournamentGameStartSubject": gettext("Food Chain Magnate - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Food Chain Magnate - Mini Tournament Game Started"),
+            "tournamentGameStartSubject": gettext(
+                "Food Chain Magnate - Tournament Game Started"
+            ),
+            "miniTournamentGameStartSubject": gettext(
+                "Food Chain Magnate - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Food Chain Magnate - Tournament Won!"),
-            "miniTournamentWinSubject": gettext("Food Chain Magnate - Mini Tournament Won!"),
+            "miniTournamentWinSubject": gettext(
+                "Food Chain Magnate - Mini Tournament Won!"
+            ),
             "gameStartSubject": gettext("Your Food Chain Magnate game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for FCM"),
-            "lessThan2hoursSubject": gettext("Food Chain Magnate - Less than 2 hours to move"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for FCM"
+            ),
+            "lessThan2hoursSubject": gettext(
+                "Food Chain Magnate - Less than 2 hours to move"
+            ),
             "turnExpiredSubject": gettext("Food Chain Magnate - Turn Expired"),
-            "tournmentOpenSubject": gettext("Food Chain Magnate - Tournament Open for Signup"),
-            "MTinviteSubject": gettext("Food Chain Magnate - Mini Tournament Invitation Received"),
+            "tournmentOpenSubject": gettext(
+                "Food Chain Magnate - Tournament Open for Signup"
+            ),
+            "MTinviteSubject": gettext(
+                "Food Chain Magnate - Mini Tournament Invitation Received"
+            ),
         }
     elif game == "HC":
         return {
@@ -86,16 +100,30 @@ def getGameStrings(game):
             "clickHereToPlayText": gettext("Click here to play Horseless Carriage"),
             "bugReportSubject": gettext("HC Bug Report"),
             "inviteSubject": gettext("Horseless Carriage - Invitation Received"),
-            "tournamentGameStartSubject": gettext("Horseless Carriage - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Horseless Carriage - Mini Tournament Game Started"),
+            "tournamentGameStartSubject": gettext(
+                "Horseless Carriage - Tournament Game Started"
+            ),
+            "miniTournamentGameStartSubject": gettext(
+                "Horseless Carriage - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Horseless Carriage - Tournament Won!"),
-            "miniTournamentWinSubject": gettext("Horseless Carriage - Mini Tournament Won!"),
+            "miniTournamentWinSubject": gettext(
+                "Horseless Carriage - Mini Tournament Won!"
+            ),
             "gameStartSubject": gettext("Your Horseless Carriage game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for Horseless Carriage"),
-            "lessThan2hoursSubject": gettext("Horseless Carriage - Less than 2 hours to move"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for Horseless Carriage"
+            ),
+            "lessThan2hoursSubject": gettext(
+                "Horseless Carriage - Less than 2 hours to move"
+            ),
             "turnExpiredSubject": gettext("Horseless Carriage - Turn Expired"),
-            "tournmentOpenSubject": gettext("Horseless Carriage - Tournament Open for Signup"),
-            "MTinviteSubject": gettext("Horseless Carriage - Mini Tournament Invitation Received"),
+            "tournmentOpenSubject": gettext(
+                "Horseless Carriage - Tournament Open for Signup"
+            ),
+            "MTinviteSubject": gettext(
+                "Horseless Carriage - Mini Tournament Invitation Received"
+            ),
         }
     elif game == "Bus":
         return {
@@ -106,11 +134,15 @@ def getGameStrings(game):
             "bugReportSubject": gettext("Bus Bug Report"),
             "inviteSubject": gettext("Bus - Invitation Received"),
             "tournamentGameStartSubject": gettext("Bus - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Bus - Mini Tournament Game Started"),
+            "miniTournamentGameStartSubject": gettext(
+                "Bus - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Bus - Tournament Won!"),
             "miniTournamentWinSubject": gettext("Bus - Mini Tournament Won!"),
             "gameStartSubject": gettext("Your Bus game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for Bus"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for Bus"
+            ),
             "lessThan2hoursSubject": gettext("Bus - Less than 2 hours to move"),
             "turnExpiredSubject": gettext("Bus - Turn Expired"),
             "tournmentOpenSubject": gettext("Bus - Tournament Open for Signup"),
@@ -124,16 +156,30 @@ def getGameStrings(game):
             "clickHereToPlayText": gettext("Click here to play The Great Zimbabwe"),
             "bugReportSubject": gettext("TGZ Bug Report"),
             "inviteSubject": gettext("The Great Zimbabwe - Invitation Received"),
-            "tournamentGameStartSubject": gettext("The Great Zimbabwe - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("The Great Zimbabwe - Mini Tournament Game Started"),
+            "tournamentGameStartSubject": gettext(
+                "The Great Zimbabwe - Tournament Game Started"
+            ),
+            "miniTournamentGameStartSubject": gettext(
+                "The Great Zimbabwe - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("The Great Zimbabwe - Tournament Won!"),
-            "miniTournamentWinSubject": gettext("The Great Zimbabwe - Mini Tournament Won!"),
+            "miniTournamentWinSubject": gettext(
+                "The Great Zimbabwe - Mini Tournament Won!"
+            ),
             "gameStartSubject": gettext("Your Great Zimbabwe game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for TGZ"),
-            "lessThan2hoursSubject": gettext("The Great Zimbabwe - Less than 2 hours to move"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for TGZ"
+            ),
+            "lessThan2hoursSubject": gettext(
+                "The Great Zimbabwe - Less than 2 hours to move"
+            ),
             "turnExpiredSubject": gettext("The Great Zimbabwe - Turn Expired"),
-            "tournmentOpenSubject": gettext("The Great Zimbabwe - Tournament Open for Signup"),
-            "MTinviteSubject": gettext("The Great Zimbabwe - Mini Tournament Invitation Received"),
+            "tournmentOpenSubject": gettext(
+                "The Great Zimbabwe - Tournament Open for Signup"
+            ),
+            "MTinviteSubject": gettext(
+                "The Great Zimbabwe - Mini Tournament Invitation Received"
+            ),
         }
     elif game == "CNS":
         return {
@@ -144,11 +190,15 @@ def getGameStrings(game):
             "bugReportSubject": gettext("CNS Bug Report"),
             "inviteSubject": gettext("Cannes - Invitation Received"),
             "tournamentGameStartSubject": gettext("Cannes - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Cannes - Mini Tournament Game Started"),
+            "miniTournamentGameStartSubject": gettext(
+                "Cannes - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Cannes - Tournament Won!"),
             "miniTournamentWinSubject": gettext("Cannes - Mini Tournament Won!"),
             "gameStartSubject": gettext("Your Cannes game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for Cannes"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for Cannes"
+            ),
             "lessThan2hoursSubject": gettext("Cannes - Less than 2 hours to move"),
             "turnExpiredSubject": gettext("Cannes - Turn Expired"),
             "tournmentOpenSubject": gettext("Cannes - Tournament Open for Signup"),
@@ -162,16 +212,24 @@ def getGameStrings(game):
             "clickHereToPlayText": gettext("Click here to play Antiquity"),
             "bugReportSubject": gettext("AQY Bug Report"),
             "inviteSubject": gettext("Antiquity - Invitation Received"),
-            "tournamentGameStartSubject": gettext("Antiquity - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Antiquity - Mini Tournament Game Started"),
+            "tournamentGameStartSubject": gettext(
+                "Antiquity - Tournament Game Started"
+            ),
+            "miniTournamentGameStartSubject": gettext(
+                "Antiquity - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Antiquity - Tournament Won!"),
             "miniTournamentWinSubject": gettext("Antiquity - Mini Tournament Won!"),
             "gameStartSubject": gettext("Your Antiquity game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for Antiquity"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for Antiquity"
+            ),
             "lessThan2hoursSubject": gettext("Antiquity - Less than 2 hours to move"),
             "turnExpiredSubject": gettext("Antiquity - Turn Expired"),
             "tournmentOpenSubject": gettext("Antiquity - Tournament Open for Signup"),
-            "MTinviteSubject": gettext("Antiquity - Mini Tournament Invitation Received"),
+            "MTinviteSubject": gettext(
+                "Antiquity - Mini Tournament Invitation Received"
+            ),
         }
     elif game == "IND":
         return {
@@ -181,16 +239,24 @@ def getGameStrings(game):
             "clickHereToPlayText": gettext("Click here to play Indonesia"),
             "bugReportSubject": gettext("IND Bug Report"),
             "inviteSubject": gettext("Indonesia - Invitation Received"),
-            "tournamentGameStartSubject": gettext("Indonesia - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Indonesia - Mini Tournament Game Started"),
+            "tournamentGameStartSubject": gettext(
+                "Indonesia - Tournament Game Started"
+            ),
+            "miniTournamentGameStartSubject": gettext(
+                "Indonesia - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Indonesia - Tournament Won!"),
             "miniTournamentWinSubject": gettext("Indonesia - Mini Tournament Won!"),
             "gameStartSubject": gettext("Your Indonesia game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for Indonesia"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for Indonesia"
+            ),
             "lessThan2hoursSubject": gettext("Indonesia - Less than 2 hours to move"),
             "turnExpiredSubject": gettext("Indonesia - Turn Expired"),
             "tournmentOpenSubject": gettext("Indonesia - Tournament Open for Signup"),
-            "MTinviteSubject": gettext("Indonesia - Mini Tournament Invitation Received"),
+            "MTinviteSubject": gettext(
+                "Indonesia - Mini Tournament Invitation Received"
+            ),
         }
     elif game == "KFW":
         return {
@@ -200,16 +266,24 @@ def getGameStrings(game):
             "clickHereToPlayText": gettext("Click here to play Keyflower"),
             "bugReportSubject": gettext("Keyflower Bug Report"),
             "inviteSubject": gettext("Keyflower - Invitation Received"),
-            "tournamentGameStartSubject": gettext("Keyflower - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Keyflower - Mini Tournament Game Started"),
+            "tournamentGameStartSubject": gettext(
+                "Keyflower - Tournament Game Started"
+            ),
+            "miniTournamentGameStartSubject": gettext(
+                "Keyflower - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Keyflower - Tournament Won!"),
             "miniTournamentWinSubject": gettext("Keyflower - Mini Tournament Won!"),
             "gameStartSubject": gettext("Your Keyflower game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for Keyflower"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for Keyflower"
+            ),
             "lessThan2hoursSubject": gettext("Keyflower - Less than 2 hours to move"),
             "turnExpiredSubject": gettext("Keyflower - Turn Expired"),
             "tournmentOpenSubject": gettext("Keyflower - Tournament Open for Signup"),
-            "MTinviteSubject": gettext("Keyflower - Mini Tournament Invitation Received"),
+            "MTinviteSubject": gettext(
+                "Keyflower - Mini Tournament Invitation Received"
+            ),
         }
     elif game == "WEB":
         return {
@@ -220,11 +294,15 @@ def getGameStrings(game):
             "bugReportSubject": gettext("Web Bug Report"),
             "inviteSubject": gettext("Web - Invitation Received"),
             "tournamentGameStartSubject": gettext("Web - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Web - Mini Tournament Game Started"),
+            "miniTournamentGameStartSubject": gettext(
+                "Web - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Web - Tournament Won!"),
             "miniTournamentWinSubject": gettext("Web - Mini Tournament Won!"),
             "gameStartSubject": gettext("Your Web game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for Web"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for Web"
+            ),
             "lessThan2hoursSubject": gettext("Web - Less than 2 hours to move"),
             "turnExpiredSubject": gettext("Web - Turn Expired"),
             "tournmentOpenSubject": gettext("Web - Tournament Open for Signup"),
@@ -238,16 +316,28 @@ def getGameStrings(game):
             "clickHereToPlayText": gettext("Click here to play Roads & Boats"),
             "bugReportSubject": gettext("RNB Bug Report"),
             "inviteSubject": gettext("Roads & Boats - Invitation Received"),
-            "tournamentGameStartSubject": gettext("Roads & Boats - Tournament Game Started"),
-            "miniTournamentGameStartSubject": gettext("Roads & Boats - Mini Tournament Game Started"),
+            "tournamentGameStartSubject": gettext(
+                "Roads & Boats - Tournament Game Started"
+            ),
+            "miniTournamentGameStartSubject": gettext(
+                "Roads & Boats - Mini Tournament Game Started"
+            ),
             "tournamentWinSubject": gettext("Roads & Boats - Tournament Won!"),
             "miniTournamentWinSubject": gettext("Roads & Boats - Mini Tournament Won!"),
             "gameStartSubject": gettext("Your Roads & Boats game has started"),
-            "gameDeclineSubject": gettext("A player has declined your invitation for R&B"),
-            "lessThan2hoursSubject": gettext("Roads & Boats - Less than 2 hours to move"),
+            "gameDeclineSubject": gettext(
+                "A player has declined your invitation for R&B"
+            ),
+            "lessThan2hoursSubject": gettext(
+                "Roads & Boats - Less than 2 hours to move"
+            ),
             "turnExpiredSubject": gettext("Roads & Boats - Turn Expired"),
-            "tournmentOpenSubject": gettext("Roads & Boats - Tournament Open for Signup"),
-            "MTinviteSubject": gettext("Roads & Boats - Mini Tournament Invitation Received"),
+            "tournmentOpenSubject": gettext(
+                "Roads & Boats - Tournament Open for Signup"
+            ),
+            "MTinviteSubject": gettext(
+                "Roads & Boats - Mini Tournament Invitation Received"
+            ),
         }
 
     # Provide a default return
@@ -390,17 +480,23 @@ def shouldSendEmail(emailType, username, profile, currentGame, oldLatestUpdate):
     return True
 
 
-def SN_M_sendEndGameNotificationTieGame(request, game, finalPositions, gameID, currentGame):
+def SN_M_sendEndGameNotificationTieGame(
+    request, game, finalPositions, gameID, currentGame
+):
     originalLang = get_language()
     for entry in finalPositions:
-        #user = None
+        # user = None
         try:
             user = User.objects.get(username=entry[0])
         except User.DoesNotExist:
-            print(f"Error: could not find user object for username '{entry[0]}' in SN_M_sendEndGameNotificationTieGame")
-            continue  
+            print(
+                f"Error: could not find user object for username '{entry[0]}' in SN_M_sendEndGameNotificationTieGame"
+            )
+            continue
         except Exception as e:
-            print(f"Unexpected error in SN_M_sendEndGameNotificationTieGame for username '{entry[0]}': {e}")
+            print(
+                f"Unexpected error in SN_M_sendEndGameNotificationTieGame for username '{entry[0]}': {e}"
+            )
             continue
         try:
             if user.username != request.user.username:
@@ -440,14 +536,24 @@ def SN_M_sendEndGameNotificationTieGame(request, game, finalPositions, gameID, c
                 messageText = (
                     user.username
                     + ": "
-                    + gettext("%(box_name)s Game Finished!\n In %(gameName)s you came: %(result)s.")
-                    % {"box_name": box_name, "gameName": currentGame.getGameName(), "result": posText}
+                    + gettext(
+                        "%(box_name)s Game Finished!\n In %(gameName)s you came: %(result)s."
+                    )
+                    % {
+                        "box_name": box_name,
+                        "gameName": currentGame.getGameName(),
+                        "result": posText,
+                    }
                 )
                 urlText = gettext("Click here to view the game")
 
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-                if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+                if (
+                    profile.webhooks != ""
+                    and profile.webhooks is not None
+                    and profile.webhooks != "[]"
+                ):
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
         except Exception as e:
@@ -484,14 +590,20 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                 f"https://discordapp.com/api/webhooks/{config("WEBHOOK_ADMIN_ERROR_MSG")}",
                 data={"content": message},
             )
-        elif username != request.user.username:  # and username not in USERNAMES_NOT_TO_NOTIFY
+        elif (
+            username != request.user.username
+        ):  # and username not in USERNAMES_NOT_TO_NOTIFY
             try:
                 user = User.objects.get(username=username)
             except User.DoesNotExist:
-                print(f"Error: could not find user object for username '{username}' in SN_M_sendEndGameNotification")
-                continue  # Skip to next entry if user not found    
+                print(
+                    f"Error: could not find user object for username '{username}' in SN_M_sendEndGameNotification"
+                )
+                continue  # Skip to next entry if user not found
             except Exception as e:
-                print(f"Unexpected error in SN_M_sendEndGameNotification for username '{username}': {e}")
+                print(
+                    f"Unexpected error in SN_M_sendEndGameNotification for username '{username}': {e}"
+                )
                 continue
             try:
                 profile = Profile.objects.get(user=user)
@@ -539,14 +651,24 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                 messageText = (
                     user.username
                     + ": "
-                    + gettext("%(box_name)s Game Finished!\n In %(gameName)s you came: %(result)s.")
-                    % {"box_name": box_name, "gameName": currentGame.getGameName(), "result": posText}
+                    + gettext(
+                        "%(box_name)s Game Finished!\n In %(gameName)s you came: %(result)s."
+                    )
+                    % {
+                        "box_name": box_name,
+                        "gameName": currentGame.getGameName(),
+                        "result": posText,
+                    }
                 )
                 urlText = gettext("Click here to view the game")
 
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-                if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+                if (
+                    profile.webhooks != ""
+                    and profile.webhooks is not None
+                    and profile.webhooks != "[]"
+                ):
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
             except Exception as e:
@@ -562,17 +684,24 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
     activate(originalLang)
 
 
-def SN_sendNextTurnNotification(request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate):
+def SN_sendNextTurnNotification(
+    request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate
+):
     originalLang = get_language()
     for player in playerList:
         if player not in USERNAMES_NOT_TO_NOTIFY:
             try:
                 user = User.objects.get(username=player)
             except User.DoesNotExist:
-                print(f"Error: could not find user object in SN_sendNextTurnNotification: {player}")
+                print(
+                    f"Error: could not find user object in SN_sendNextTurnNotification: {player}"
+                )
                 continue
             except Exception as e:
-                print(f"Error: could not find user object {player} in SN_sendNextTurnNotification" + str(e))
+                print(
+                    f"Error: could not find user object {player} in SN_sendNextTurnNotification"
+                    + str(e)
+                )
                 continue
             try:
                 profile = Profile.objects.get(user=user)
@@ -600,7 +729,9 @@ def SN_sendNextTurnNotification(request, game, playerList, gameID, gameName, cur
                 )
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGame, oldLatestUpdate):
+                if shouldSendEmail(
+                    "yourTurn", player, profile, currentGame, oldLatestUpdate
+                ):
                     try:
                         current_site = get_current_site(request)
 
@@ -654,7 +785,11 @@ def SN_sendNextTurnNotification(request, game, playerList, gameID, gameName, cur
                         print(user)
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-                if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+                if (
+                    profile.webhooks != ""
+                    and profile.webhooks is not None
+                    and profile.webhooks != "[]"
+                ):
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
             except Exception as e:
@@ -675,10 +810,15 @@ def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _ga
         try:
             user = User.objects.get(username=player)
         except User.DoesNotExist:
-            print(f"Error: could not find user object in SN_sendInviteNotifications: {player}")
-            continue    
+            print(
+                f"Error: could not find user object in SN_sendInviteNotifications: {player}"
+            )
+            continue
         except Exception as e:
-            print(f"Error: could not find user object {player} in SN_sendInviteNotifications" + str(e))
+            print(
+                f"Error: could not find user object {player} in SN_sendInviteNotifications"
+                + str(e)
+            )
             continue
         # profile = Profile.objects.get(id=user.id)
         try:
@@ -710,13 +850,19 @@ def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _ga
             messageText = (
                 user.username
                 + ": "
-                + gettext("Game invite at OnlineBoardGamers\n%(gameName)s - %(maxPlayers)s players")
+                + gettext(
+                    "Game invite at OnlineBoardGamers\n%(gameName)s - %(maxPlayers)s players"
+                )
                 % {"gameName": _gameName, "maxPlayers": str(_maxPlayers)}
             )
 
             # SEND WEBHOOKS
             urlRaw = "https://www.OnlineBoardGamers.com/"
-            if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+            if (
+                profile.webhooks != ""
+                and profile.webhooks is not None
+                and profile.webhooks != "[]"
+            ):
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
             activate(originalLang)
@@ -733,15 +879,30 @@ def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _ga
             )
 
 
-def SN_sendMiniTournamentInvite(request, playerNames, _game, _MTname, _MTdescription, _maxPlayers, _gamePlayers, _format, MT_ID):
+def SN_sendMiniTournamentInvite(
+    request,
+    playerNames,
+    _game,
+    _MTname,
+    _MTdescription,
+    _maxPlayers,
+    _gamePlayers,
+    _format,
+    MT_ID,
+):
     for player in playerNames:
         try:
             user = User.objects.get(username=player)
         except User.DoesNotExist:
-            print(f"Error: could not find user object in SN_sendInviteNotifications: {player}")
+            print(
+                f"Error: could not find user object in SN_sendInviteNotifications: {player}"
+            )
             continue
         except Exception as e:
-            print(f"Error: could not find user object {player} in SN_sendInviteNotifications" + str(e))
+            print(
+                f"Error: could not find user object {player} in SN_sendInviteNotifications"
+                + str(e)
+            )
             continue
         # profile = Profile.objects.get(id=user.id)
         try:
@@ -755,8 +916,10 @@ def SN_sendMiniTournamentInvite(request, playerNames, _game, _MTname, _MTdescrip
             subject = gameStrings["MTinviteSubject"]
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
-            
-            print(f"should send email: {shouldSendEmail('MTinvite', player, profile, None, 0)}")
+
+            print(
+                f"should send email: {shouldSendEmail('MTinvite', player, profile, None, 0)}"
+            )
 
             # SEND EMAIL
             if shouldSendEmail("MTinvite", player, profile, None, 0):
@@ -780,16 +943,29 @@ def SN_sendMiniTournamentInvite(request, playerNames, _game, _MTname, _MTdescrip
                 user.username
                 + ": "
                 + gettext("Mini Tournament invite at OnlineBoardGamers")
-                + "\n" + _MTname + "\n"
-                + ((_MTdescription + "\n") if _MTdescription != "" else "") 
-                + gettext("Format:") + " " + _format + "\n"
-                + gettext("Total Tournament Players: %(_maxPlayers)s, Game Players: %(_gamePlayers)s")
+                + "\n"
+                + _MTname
+                + "\n"
+                + ((_MTdescription + "\n") if _MTdescription != "" else "")
+                + gettext("Format:")
+                + " "
+                + _format
+                + "\n"
+                + gettext(
+                    "Total Tournament Players: %(_maxPlayers)s, Game Players: %(_gamePlayers)s"
+                )
                 % {"_maxPlayers": str(_maxPlayers), "_gamePlayers": str(_gamePlayers)}
             )
 
             # SEND WEBHOOKS
-            urlRaw = "https://www.OnlineBoardGamers.com/MiniTournament/" + str(MT_ID) + "/"
-            if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+            urlRaw = (
+                "https://www.OnlineBoardGamers.com/MiniTournament/" + str(MT_ID) + "/"
+            )
+            if (
+                profile.webhooks != ""
+                and profile.webhooks is not None
+                and profile.webhooks != "[]"
+            ):
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
             activate(originalLang)
@@ -807,7 +983,15 @@ def SN_sendMiniTournamentInvite(request, playerNames, _game, _MTname, _MTdescrip
 
 
 def SN_M_T_sendTournamentGameStartNotification(
-    request, _game, _player, _maxPlayers, _gameName, _currentTurnString, _gameID, stopEmail, tournamentType="normalTournament"
+    request,
+    _game,
+    _player,
+    _maxPlayers,
+    _gameName,
+    _currentTurnString,
+    _gameID,
+    stopEmail,
+    tournamentType="normalTournament",
 ):
     # def sendTournamentInviteNotification(self, request, player, gameID):
     is_miniTournament = False
@@ -817,10 +1001,15 @@ def SN_M_T_sendTournamentGameStartNotification(
     try:
         user = User.objects.get(username=_player)
     except User.DoesNotExist:
-        print(f"Error: could not find user object in SN_M_T_sendTournamentGameStartNotification: {_player}")
+        print(
+            f"Error: could not find user object in SN_M_T_sendTournamentGameStartNotification: {_player}"
+        )
         return
     except Exception as e:
-        print(f"Error: could not find user object {_player} in SN_M_T_sendTournamentGameStartNotification" + str(e))
+        print(
+            f"Error: could not find user object {_player} in SN_M_T_sendTournamentGameStartNotification"
+            + str(e)
+        )
         return
     try:
         profile = Profile.objects.get(user=user)
@@ -834,7 +1023,9 @@ def SN_M_T_sendTournamentGameStartNotification(
         current_site = get_current_site(request)
         gameStrings = getGameStrings(_game)
 
-        if not stopEmail and shouldSendEmail("tournamentGameStart", _player, profile, None, 0):
+        if not stopEmail and shouldSendEmail(
+            "tournamentGameStart", _player, profile, None, 0
+        ):
             subject = gameStrings["tournamentGameStartSubject"]
             if is_miniTournament:
                 subject = gameStrings["miniTournamentGameStartSubject"]
@@ -855,37 +1046,56 @@ def SN_M_T_sendTournamentGameStartNotification(
         messageText = (
             user.username
             + ": "
-            + gettext("A Tournament Game of %(game_type)s has started\n%(gameName)s - %(maxPlayers)s players")
+            + gettext(
+                "A Tournament Game of %(game_type)s has started\n%(gameName)s - %(maxPlayers)s players"
+            )
             % {"game_type": box_name, "gameName": _gameName, "maxPlayers": _maxPlayers}
         )
         if is_miniTournament:
             messageText = (
                 user.username
                 + ": "
-                + gettext("A Mini Tournament Game has started\n%(gameName)s - %(maxPlayers)s players")
+                + gettext(
+                    "A Mini Tournament Game has started\n%(gameName)s - %(maxPlayers)s players"
+                )
                 % {"gameName": _gameName, "maxPlayers": _maxPlayers}
             )
 
         # SEND WEBHOOKS
         urlRaw = f"https://www.OnlineBoardGamers.com/{_game}/{str(_gameID)}/"
-        if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+        if (
+            profile.webhooks != ""
+            and profile.webhooks is not None
+            and profile.webhooks != "[]"
+        ):
             SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(request.user.username + " SN_M_T_sendTournamentGameStartNotification Error. Player: " + _player)
+        print(
+            request.user.username
+            + " SN_M_T_sendTournamentGameStartNotification Error. Player: "
+            + _player
+        )
         print(e)
     activate(originalLang)
 
 
-def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, mainORmini):
+def SN_M_T_sendTournamentWinNotification(
+    tournament, request, _player, _game, mainORmini
+):
     originalLang = get_language()
     try:
         user = User.objects.get(username=_player)
     except User.DoesNotExist:
-        print(f"Error: could not find user object in SN_M_T_sendTournamentWinNotification: {_player}")
+        print(
+            f"Error: could not find user object in SN_M_T_sendTournamentWinNotification: {_player}"
+        )
         return
     except Exception as e:
-        print(f"Error: could not find user object {_player} in SN_M_T_sendTournamentWinNotification" + str(e))
+        print(
+            f"Error: could not find user object {_player} in SN_M_T_sendTournamentWinNotification"
+            + str(e)
+        )
         return
     try:
         profile = Profile.objects.get(user=user)
@@ -894,7 +1104,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
         gameStrings = getGameStrings(_game)
         subject = gameStrings["tournamentWinSubject"]
         if mainORmini == MINI_T_FLAG:
-            subject = gameStrings["miniTournamentWinSubject"]   
+            subject = gameStrings["miniTournamentWinSubject"]
         boxName = gameStrings["boxName"]
 
         # SEND EMAIL
@@ -914,35 +1124,50 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
         messageText = (
             user.username
             + ": "
-            + gettext("You have won a %(full_game_name)s tournament! \n%(tournamentName)s")
+            + gettext(
+                "You have won a %(full_game_name)s tournament! \n%(tournamentName)s"
+            )
             % {"full_game_name": boxName, "tournamentName": tournament.tournamentName}
         )
         urlText = gettext("Click here to savour in your victory")
 
         # SEND WEBHOOKS
         urlRaw = "https://www.OnlineBoardGamers.com/"
-        if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+        if (
+            profile.webhooks != ""
+            and profile.webhooks is not None
+            and profile.webhooks != "[]"
+        ):
             SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(request.user.username + " Error SN_M_T_sendTournamentWinNotification. Notifying: " + _player)
+        print(
+            request.user.username
+            + " Error SN_M_T_sendTournamentWinNotification. Notifying: "
+            + _player
+        )
         print(e)
 
     activate(originalLang)
 
 
-def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, currentGame, errorUsername):
-    # 1. CRITICAL: Close stale connections so Django opens a fresh one for this thread
-    close_old_connections()
+def SN_M_sendGameStartNotification(
+    currentSite, gameCode, playerList, gameID, currentGame, errorUsername
+):
     originalLang = get_language()
     for player in playerList:
         try:
             user = User.objects.get(username=player)
         except User.DoesNotExist:
-            print(f"Error: could not find user object in SN_M_sendGameStartNotification: {player}")
+            print(
+                f"Error: could not find user object in SN_M_sendGameStartNotification: {player}"
+            )
             continue
         except Exception as e:
-            print(f"Error: could not find user object {player} in SN_M_sendGameStartNotification" + str(e))
+            print(
+                f"Error: could not find user object {player} in SN_M_sendGameStartNotification"
+                + str(e)
+            )
             continue
 
         try:
@@ -950,17 +1175,16 @@ def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, curren
 
             activate(profile.profileLanguage)
 
-            gameStrings = getGameStrings(game)
+            gameStrings = getGameStrings(gameCode)
             subject = gameStrings["gameStartSubject"]
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
-            
-            currentPlayersString = ""
-            try:
-                currentPlayersString = currentGame.currentPlayers
-            except:
-                currentPlayersString = currentGame.presenter().getCurrentPlayersString()
 
+            currentPlayersString = ""
+            if SR_usesUnifiedGameModel(gameCode):
+                currentPlayersString = currentGame.presenter().getCurrentPlayersString()
+            else:
+                currentPlayersString = currentGame.currentPlayers
 
             messageText = (
                 user.username
@@ -968,37 +1192,60 @@ def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, curren
                 + subject
                 + "\n"
                 + gettext("%(gameName)s - Starting Player:  %(currentPlayer)s.")
-                % {"gameName": currentGame.gameName, "currentPlayer": currentGame.currentPlayers}
+                % {
+                    "gameName": currentGame.gameName,
+                    "currentPlayer": currentPlayersString,
+                }
             )
-            
-            
-            
-            if hasattr(currentGame, 'relatedMainTournament') or hasattr(currentGame, 'relatedMiniTournament'):
+
+            if getattr(currentGame, "relatedMainTournament", None) or getattr(
+                currentGame, "relatedMiniTournament", None
+            ):
+                # This runs only if the field exists AND is not None
+
+                print("FOUND RELATED TOURNAMENT")
 
                 # Define defaults in case neither specific tournament type is present initially in the checks
-                tournamentString = "game" 
+                tournamentString = "game"
 
-                if hasattr(currentGame, 'relatedMainTournament') and currentGame.relatedMainTournament:
+                if (
+                    hasattr(currentGame, "relatedMainTournament")
+                    and currentGame.relatedMainTournament
+                ):
                     subject = gameStrings["tournamentGameStartSubject"]
-                    tournamentString = "mini tournament" 
+                    tournamentString = "mini tournament"
                     messageText = (
                         user.username
                         + ": "
-                        + gettext("A Tournament Game of %(game_type)s has started\n%(gameName)s - %(maxPlayers)s players")
-                        % {"game_type": boxName, "gameName": currentGame.getGameName(), "maxPlayers": currentGame.maxPlayers}
-                    )    
-                    
+                        + gettext(
+                            "A Tournament Game of %(game_type)s has started\n%(gameName)s - %(maxPlayers)s players"
+                        )
+                        % {
+                            "game_type": boxName,
+                            "gameName": currentGame.getGameName(),
+                            "maxPlayers": currentGame.maxPlayers,
+                        }
+                    )
+
                 # Check mini tournament existence and value
-                if hasattr(currentGame, 'relatedMiniTournament') and currentGame.relatedMiniTournament:
-                    tournamentString = "tournament" 
+                if (
+                    hasattr(currentGame, "relatedMiniTournament")
+                    and currentGame.relatedMiniTournament
+                ):
+                    tournamentString = "tournament"
                     subject = gameStrings["miniTournamentGameStartSubject"]
                     messageText = (
                         user.username
                         + ": "
-                        + gettext("A Mini Tournament Game has started\n%(gameName)s - %(maxPlayers)s players")
-                        % {"gameName": currentGame.getGameName(), "maxPlayers": currentGame.maxPlayers}
+                        + gettext(
+                            "A Mini Tournament Game has started\n%(gameName)s - %(maxPlayers)s players"
+                        )
+                        % {
+                            "gameName": currentGame.getGameName(),
+                            "maxPlayers": currentGame.maxPlayers,
+                        }
                     )
-            
+
                 if shouldSendEmail("tournamentGameStart", player, profile, None, 0):
                     current_site = currentSite
                     message = render_to_string(
@@ -1007,7 +1254,7 @@ def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, curren
                             "user": user.username,
                             "domain": current_site.domain,
                             "gameID": gameID,
-                            "game": game,
+                            "game": gameCode,
                             "maxPlayers": currentGame.maxPlayers,
                             "gameName": currentGame.getGameName(),
                             "boxName": boxName,
@@ -1016,12 +1263,16 @@ def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, curren
                         },
                     )
                     SN_sendEmail("tournamentGameStart", subject, message, user.email)
-                    
+
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-                if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
+                if (
+                    profile.webhooks != ""
+                    and profile.webhooks is not None
+                    and profile.webhooks != "[]"
+                ):
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
-                    
+
             # Otherwise, starting NON tourny game
             else:
                 # SEND EMAIL
@@ -1033,7 +1284,7 @@ def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, curren
                             "user": user.username,
                             "domain": current_site.domain,
                             "gameID": gameID,
-                            "game": game,
+                            "game": gameCode,
                             "gameName": currentGame.getGameName(),
                             "currentPlayer": currentPlayersString,
                             "boxName": boxName,
@@ -1042,15 +1293,19 @@ def SN_M_sendGameStartNotification(currentSite, game, playerList, gameID, curren
                     SN_sendEmail("gameStart", subject, message, user.email)
 
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-                if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
+                if (
+                    profile.webhooks != ""
+                    and profile.webhooks is not None
+                    and profile.webhooks != "[]"
+                ):
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
         except Exception as e:
             print(
                 errorUsername
                 + " Error. SN_M_sendGameStartNotification. Notifying "
-                + game
+                + gameCode
                 + " Game Start: "
                 + player
             )
@@ -1073,7 +1328,9 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
             gameDescription = f"({gameDescription})"
         current_site = get_current_site(request)
         gameStrings = getGameStrings(_game)
-        if shouldSendEmail("gameDecline", currentGame.creator.username, profile, None, 0):
+        if shouldSendEmail(
+            "gameDecline", currentGame.creator.username, profile, None, 0
+        ):
             subject = gameStrings["gameDeclineSubject"]
             message = render_to_string(
                 "Lobby/email/gameDeclineEmail.html",
@@ -1105,17 +1362,27 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
         urlText = gettext("Click here to view your games")
         # SEND WEBHOOKS
         urlRaw = "https://www.OnlineBoardGamers.com/"
-        if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+        if (
+            profile.webhooks != ""
+            and profile.webhooks is not None
+            and profile.webhooks != "[]"
+        ):
             SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(request.user.username + " Error. SN_sendDeclineEmail. Notifying " + currentGame.creator.username)
+        print(
+            request.user.username
+            + " Error. SN_sendDeclineEmail. Notifying "
+            + currentGame.creator.username
+        )
         print(e)
 
     activate(originalLang)
 
 
-def SN_sendBugReportEmail(request, game, gameID, gameData, bugDescription, rewindData, startingMap):
+def SN_sendBugReportEmail(
+    request, game, gameID, gameData, bugDescription, rewindData, startingMap
+):
     current_site = get_current_site(request)
     subject = getGameStrings(game)["bugReportSubject"]
     adminUser = User.objects.get(username="admin")
@@ -1137,9 +1404,9 @@ def SN_sendBugReportEmail(request, game, gameID, gameData, bugDescription, rewin
         f"BUG REPORT for game {game} (ID: {gameID}).\n"
         f"User: {request.user.username}\n"
         f"Bug Description: {bugDescription}\n"
-        #f"Game Data: {gameData}\n"
-        #f"Rewind Data: {rewindData}\n"
-        #f"Starting Map: {startingMap}"
+        # f"Game Data: {gameData}\n"
+        # f"Rewind Data: {rewindData}\n"
+        # f"Starting Map: {startingMap}"
     )
     SN_sendAdminErrorMessage(request, bug_message)
     try:
@@ -1151,7 +1418,6 @@ def SN_sendBugReportEmail(request, game, gameID, gameData, bugDescription, rewin
             f"Error: {e}"
         )
         SN_sendAdminErrorMessage(request, error_message)
-    
 
 
 def SN_sendReminderEmail(playerName, game, gameID, gameName):
@@ -1160,10 +1426,15 @@ def SN_sendReminderEmail(playerName, game, gameID, gameName):
         try:
             user = User.objects.get(username=playerName)
         except User.DoesNotExist:
-            print(f"Error: could not find user object in SN_sendReminderEmail: {playerName}")
+            print(
+                f"Error: could not find user object in SN_sendReminderEmail: {playerName}"
+            )
             return
         except Exception as e:
-            print(f"Error: could not find user object {playerName} in SN_sendReminderEmail" + str(e))
+            print(
+                f"Error: could not find user object {playerName} in SN_sendReminderEmail"
+                + str(e)
+            )
             return
 
         try:
@@ -1193,13 +1464,19 @@ def SN_sendReminderEmail(playerName, game, gameID, gameName):
             messageText = (
                 playerName
                 + ": "
-                + gettext("Less than 2 hours to move at OnlineBoardGamers!\n%(boxName)s: %(gameName)s")
+                + gettext(
+                    "Less than 2 hours to move at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
+                )
                 % {"boxName": box_name, "gameName": gameName}
             )
 
             # SEND WEBHOOKS
             urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-            if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+            if (
+                profile.webhooks != ""
+                and profile.webhooks is not None
+                and profile.webhooks != "[]"
+            ):
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
         except Exception as e:
@@ -1215,10 +1492,15 @@ def SN_sendReminderExpiredEmail(playerName, game, gameID, gameName):
         try:
             user = User.objects.get(username=playerName)
         except User.DoesNotExist:
-            print(f"Error: could not find user object in SN_sendReminderExpiredEmail: {playerName}")
+            print(
+                f"Error: could not find user object in SN_sendReminderExpiredEmail: {playerName}"
+            )
             return
         except Exception as e:
-            print(f"Error: could not find user object {playerName} in SN_sendReminderExpiredEmail" + str(e))
+            print(
+                f"Error: could not find user object {playerName} in SN_sendReminderExpiredEmail"
+                + str(e)
+            )
             return
 
         try:
@@ -1256,11 +1538,19 @@ def SN_sendReminderExpiredEmail(playerName, game, gameID, gameName):
 
             # SEND WEBHOOKS
             urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-            if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+            if (
+                profile.webhooks != ""
+                and profile.webhooks is not None
+                and profile.webhooks != "[]"
+            ):
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
         except Exception as e:
-            print(playerName + " Error. SN_sendReminderExpiredEmail. Notifying " + playerName)
+            print(
+                playerName
+                + " Error. SN_sendReminderExpiredEmail. Notifying "
+                + playerName
+            )
             print(e)
 
     activate(originalLang)
@@ -1272,14 +1562,18 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        print(f"Error: could not find user object in SN_send24HourTimedOutReminderEmail: {username} <<2")
+        print(
+            f"Error: could not find user object in SN_send24HourTimedOutReminderEmail: {username} <<2"
+        )
         return
     except Exception as e:
-        print(f"Error: could not find user object {username} in SN_send24HourTimedOutReminderEmail {str(e)} <<3")
+        print(
+            f"Error: could not find user object {username} in SN_send24HourTimedOutReminderEmail {str(e)} <<3"
+        )
         return
 
     try:
-        #profile = Profile.objects.get(user=user)
+        # profile = Profile.objects.get(user=user)
         # currentGame = Bus_Game.objects.get(id=gameID)
 
         activate(profile_obj.profileLanguage)
@@ -1317,11 +1611,19 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
         urlText = gettext("Click here to play")
         # SEND WEBHOOKS
         urlRaw = "https://www.OnlineBoardGamers.com/"
-        if profile_obj.webhooks != "" and profile_obj.webhooks is not None and profile_obj.webhooks != "[]":
+        if (
+            profile_obj.webhooks != ""
+            and profile_obj.webhooks is not None
+            and profile_obj.webhooks != "[]"
+        ):
             SN_sendWebhooks(profile_obj, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(username + " Error. SN_send24HourTimedOutReminderEmail. Notifying " + username)
+        print(
+            username
+            + " Error. SN_send24HourTimedOutReminderEmail. Notifying "
+            + username
+        )
         print(e)
 
     activate(originalLang)
@@ -1374,11 +1676,19 @@ def SN_sendTournamentOpen(new_tournament, gameCode):
 
             # SEND WEBHOOKS
             urlRaw = "https://www.OnlineBoardGamers.com/AllTournaments/"
-            if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+            if (
+                profile.webhooks != ""
+                and profile.webhooks is not None
+                and profile.webhooks != "[]"
+            ):
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
         except Exception as e:
-            print(user.username + " Error. SN_sendTournamentAnnounce. Notifying " + user.username)
+            print(
+                user.username
+                + " Error. SN_sendTournamentAnnounce. Notifying "
+                + user.username
+            )
             print(e)
 
 
@@ -1521,11 +1831,19 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
     if config("LOCAL_USER", default=True, cast=bool):
         # Get the username
         username = profile.user.username
-        ALLOWED_LOCAL_USERS = ["admin", "DodgerB", "Joey", "Rachel", "Ross", "user1", "user2", "user3"]
+        ALLOWED_LOCAL_USERS = [
+            "admin",
+            "DodgerB",
+            "Joey",
+            "Rachel",
+            "Ross",
+            "user1",
+            "user2",
+            "user3",
+        ]
         if username not in ALLOWED_LOCAL_USERS:
             print(f"SUPRESSING WEBHOOKS FOR LOCAL USER: {username}")
             return
-
 
     webhooks = json.loads(profile.webhooks)
     for webhookData in webhooks:

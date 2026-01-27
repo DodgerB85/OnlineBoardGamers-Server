@@ -552,6 +552,7 @@ class Bus_Game(GeneralGame):
         return playerList
 
     def startGame(self, request):
+        from django_q.tasks import async_task
         self.gameStatus = "ACTIVE"
         if self.playerOrderSeed == 0:
             self.playerOrderSeed = random.randint(0, 32767)
@@ -599,13 +600,16 @@ class Bus_Game(GeneralGame):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(
-                get_current_site(request),
+            domain = get_current_site(request)
+            username = request.user.username
+            async_task(
+                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                 "Bus",
                 playerListToNotify,
-                getattr(self, "id"),
+                self.id,
                 self,
-                request.user.username,
+                username,
             )
 
     # takes in a user object

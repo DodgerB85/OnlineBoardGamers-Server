@@ -698,6 +698,7 @@ class HC_Game(GeneralGame):
         return False
 
     def startGame(self, request):
+        from django_q.tasks import async_task
         self.gameStatus = "ACTIVE"
         # self.currentPlayers = ','.join(
         #    [player.username for player in self.allPlayers.all()])
@@ -720,13 +721,16 @@ class HC_Game(GeneralGame):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            SN_M_sendGameStartNotification(
-                get_current_site(request),
+            domain = get_current_site(request)
+            username = request.user.username
+            async_task(
+                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                 "HC",
                 playerListToNotify,
-                getattr(self, "id"),
+                self.id,
                 self,
-                request.user.username,
+                username,
             )
 
     def getAllPlayersOrderedySeat(self, withoutBots=False):

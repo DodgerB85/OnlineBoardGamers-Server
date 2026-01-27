@@ -1,12 +1,10 @@
-from random import randint
-import threading
-
 import base64
 import gzip
 import time
 import json
 import logging
-from django_q.tasks import async_task
+import random
+
 from django.db.models import Q
 from django.contrib.sites.shortcuts import get_current_site
 
@@ -16,7 +14,6 @@ from django.conf import settings
 from django.utils.translation import gettext
 
 # from django.utils import translation
-import random
 
 # User = get_user_model()
 
@@ -427,6 +424,7 @@ class FCM_Game(GeneralGame):
         return False
 
     def startGame(self, request):
+        from django_q.tasks import async_task
         # 8-hardChoices (original MS only)
         # 20-ketchupMilestone
         # 23-reservePrice
@@ -491,39 +489,33 @@ class FCM_Game(GeneralGame):
                 self.currentPlayers = _currentPlayers
                 self.save()
 
-            playerListToNotify = list(
-                self.allPlayers.all().values_list("username", flat=True)
-            )
-            if request.user.username in playerListToNotify:
-                playerListToNotify.remove(request.user.username)
+        playerListToNotify = list(
+            self.allPlayers.all().values_list("username", flat=True)
+        )
+        if request.user.username in playerListToNotify:
+            playerListToNotify.remove(request.user.username)
 
-            #SN_M_sendGameStartNotification(
-            #    get_current_site(request),
-            #    "FCM",
-            #    playerListToNotify,
-            #    getattr(self, "id"),
-            #    self,
-            #    request.user.username,
-            #)
+        #SN_M_sendGameStartNotification(
+        #    get_current_site(request),
+        #    "FCM",
+        #    playerListToNotify,
+        #    getattr(self, "id"),
+        #    self,
+        #    request.user.username,
+        #)
+        domain = get_current_site(request)
+        username = request.user.username
+        async_task(
+            "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+            "FCM",
+            playerListToNotify,
+            self.id,
+            self,
+            username,
+        )  
 
-            #async_task(
-            #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-            #    get_current_site(request),  # Do not pass the 'request' object; it cannot be serialized for background tasks
-            #    "FCM",
-            #    playerListToNotify,
-            #    self.id,
-            #    self,
-            #    request.user.username,
-            #)
-            
-            t = threading.Thread(
-                target=SN_M_sendGameStartNotification,
-                args=(get_current_site(request), "FCM", playerListToNotify, self.id, self, request.user.username)
-            )
-            # Set as daemon so it doesn't block the server from shutting down
-            t.daemon = True 
-            t.start()
-            self.save()
+        self.save()
 
     # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
     def getAllPlayersOrderedySeat(self, withoutBots=False, useNewCode=True):
