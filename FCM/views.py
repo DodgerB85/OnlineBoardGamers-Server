@@ -1932,8 +1932,8 @@ def FCMdata(request, dataType):
         try:
             gameUpdate = int(jsonData["latestUpdate"])
             latestUpdate = int(currentGame.latestUpdate)
-        except Exception:
-            SN_sendAdminErrorMessage(request, f"ERROR IN FCMdata: gameID: {jsonData["gameID"]}")
+        except Exception as e:
+            SN_sendAdminErrorMessage(request, f"ERROR IN FCMdata: gameID: {jsonData["gameID"]} Error: {e}")
             # NB this might need to be changed if the above msg is getting triggered
             specialData = False
 
