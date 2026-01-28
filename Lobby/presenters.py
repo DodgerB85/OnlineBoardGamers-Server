@@ -767,7 +767,7 @@ class WebPresenter(GamePresenter):
                     "WEB",
                     playerListToNotify,
                     self.gameObj.id,
-                    self,
+                    self.gameObj,
                     username,
                 )
 
