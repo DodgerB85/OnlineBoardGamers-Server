@@ -20,6 +20,7 @@ docker-compose.override.yml
 node_modules
 emailCounter.txt
 a.bat
+a.py
 
 # Ignore the email counter
 Lobby/sharedFunctions/emailCounter.txt

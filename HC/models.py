@@ -880,6 +880,9 @@ class HC_Game(GeneralGame):
 
     # takes in username
     def enableStatsExclude(self, _username):
+        # check it is not none
+        if self.statsExcludeConsent == None:
+            self.statsExcludeConsent = ""
         if (len(self.statsExcludeConsent)) < self.maxPlayers:
             self.statsExcludeConsent = "0" * self.maxPlayers
         seatToChange = self.seatPosition(_username, True)
