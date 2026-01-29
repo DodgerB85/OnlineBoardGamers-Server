@@ -1,14 +1,24 @@
 from django.urls import path
+from django.shortcuts import get_object_or_404, redirect
 
 from . import views
+from Lobby.models import Game
 
 app_name = "AQY"
 
 
+def redirect_old_url(request, original_id):
+    """Redirect from old /AQY/123/ URL to new /AQY/456/show/ URL"""
+    game = get_object_or_404(Game, gameCode='AQY', original_id=original_id)
+    return redirect('AQY:showAQYgame', game_id=game.id)
+
+
 urlpatterns = [
     path("", views.index, name="index"),
-    # path('AQY/', views.showAQYgame, name='showAQYgame'),
-    path("<int:game_id>/", views.showAQYgame, name="showAQYgame"),
+    # New path format /AQY/:id/show
+    path("<int:game_id>/show/", views.showAQYgame, name="showAQYgame"),
+    # Legacy redirect from /AQY/:original_id to /AQY/:id/show
+    path("<int:original_id>/", redirect_old_url, name="redirect_old_url"),
     path(
         "<int:game_id>/replay/<int:replayStep>/",
         views.showAQYgame,
