@@ -11,6 +11,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getCNSstartingOptionsHTML,
+    SR_getAQYstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
@@ -24,7 +25,7 @@ class GamePresenter:
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
     # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB"]:
+        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY"]:
             print(
                 f"isMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
             )
@@ -49,7 +50,7 @@ class GamePresenter:
         return False
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB"]:
+        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY"]:
             print(
                 f"quickIsMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
             )
@@ -816,3 +817,521 @@ class WebPresenter(GamePresenter):
         self.gameObj.deleteGameVotes[playerName] = True
         self.gameObj.save()
         return True
+
+
+class AqyPresenter(GamePresenter):
+    def __str__(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+        allPlayersString = " / ".join(
+            gp.player.username for gp in all_players if gp.player
+        )
+        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
+
+    def endGame(self, request, _winner, _finalPositions, _gameID):
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendEndGameNotificationTieGame,
+        )
+        from Lobby.sharedFunctions.sharedFunctions import (
+            SF_M_ProcessTournamentEndGame,
+            SF_M_ProcessAnyTournamentEndGame,
+        )
+        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
+        self.clearGeneralDataOnGameEndWithoutSave()
+
+        names = self.getAllPlayersOrderedySeat(False)
+        winnerNamesArray = []
+        for playerIndex in _winner:
+            winner_user = User.objects.get(username=names[playerIndex])
+            winner_gp = self.gameObj.players.filter(player=winner_user).first()
+            if winner_gp:
+                winner_gp.winner = True
+                winner_gp.save()
+            winnerNamesArray.append(names[playerIndex])
+
+        self.gameObj.save()
+
+        for i in range(len(_finalPositions)):
+            for j in range(len(_finalPositions[i])):
+                _finalPositions[i][j] = names[_finalPositions[i][j]]
+
+        finalResults = []
+        for i in range(len(_finalPositions)):
+            for j in range(len(_finalPositions[i])):
+                text = "Lost in Antiquity (POS ERROR)"
+                if i == 0 and len(_finalPositions[i]) == 1:
+                    text = "1st - Congratulations!"
+                elif i == 0 and len(_finalPositions[i]) > 1:
+                    text = "Joint 1st - Congratulations!"
+                elif i == 1 and len(_finalPositions[i]) == 1:
+                    text = "Runner Up"
+                elif i == 1 and len(_finalPositions[i]) > 1:
+                    text = "Joint Runner Up"
+                finalResults.append([_finalPositions[i][j], text, i])
+
+        new_names = [
+            name
+            for name in names
+            if name not in [item for sublist in _finalPositions for item in sublist]
+        ]
+
+        for name in new_names:
+            finalResults.append([name, "Lost in Antiquity", 9])
+
+        SN_M_sendEndGameNotificationTieGame(
+            request, "AQY", finalResults, _gameID, self.gameObj
+        )
+
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MAIN_T_FLAG,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                winnerNamesArray,
+                finalResults,
+            )
+
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MINI_T_FLAG,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                winnerNamesArray,
+                finalResults,
+            )
+
+    def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
+        players = self.gameObj.players.select_related(
+            "player"
+        ).order_by("seat_order")
+
+        if excludeBots:
+            return [
+                gp.player.username for gp in players if gp.player and not gp.is_missing
+            ]
+
+        if withoutBots:
+            return [gp.player.username for gp in players if gp.player]
+
+        result = []
+        for gp in players:
+            if gp.is_missing:
+                result.append("AqyBot")
+            elif gp.player:
+                result.append(gp.player.username)
+        return result
+
+    def serialize(self, loggedInUserObj=None):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+
+        remainingPlayersInt = self.gameObj.maxPlayers - all_players.count()
+        remainingPlayers = "".join(
+            str(all_players.count() + i + 1) for i in range(remainingPlayersInt)
+        )
+
+        winner_gps = self.gameObj.players.filter(winner=True).select_related("player")
+        winner = ", ".join([gp.player.username for gp in winner_gps if gp.player])
+
+        createdString = self.gameObj.created
+        latestUpdateString = self.gameObj.latestUpdate
+
+        latestUpdateElapsedTimeString = ""
+        if (
+            self.gameObj.gameStatus == "WAITING"
+            or self.gameObj.gameStatus == "AVAILABLE"
+            or self.gameObj.gameStatus == "ACTIVE"
+            or self.gameObj.gameStatus == "PRIVATE"
+        ):
+            elapsedTotalSeconds = (
+                int(time.time()) - int(self.gameObj.created) // 1000
+                if self.gameObj.gameStatus == "WAITING"
+                or self.gameObj.gameStatus == "AVAILABLE"
+                or self.gameObj.gameStatus == "PRIVATE"
+                else int(time.time()) - int(self.gameObj.latestUpdate) // 1000
+            )
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
+
+        myMove = loggedInUserObj is not None and self.isMyMove(loggedInUserObj.username)
+
+        chatNotification = False
+        involvedPlayer = False
+        if loggedInUserObj:
+            user_gp = all_players.filter(player=loggedInUserObj).first()
+            if user_gp:
+                chatNotification = user_gp.has_chat_notification
+                involvedPlayer = not user_gp.is_missing
+
+        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
+
+        startingOptionsHTML = SR_getAQYstartingOptionsHTML(self.gameObj.startingOptions)
+
+        kickoutRequiredNum = self.kickoutRequired()
+
+        deleteableGame = (
+            all_players.filter(player__username="SHADOW").exists()
+            and loggedInUserObj
+            and all_players.filter(player=loggedInUserObj).exists()
+        )
+
+        return {
+            "gameID": self.gameObj.id,
+            "gameName": self.getGameName(),
+            "gameDescription": self.gameObj.gameDescription,
+            "creator": self.gameObj.creator.username,
+            "created": createdString,
+            "allPlayers": [gp.player.username for gp in all_players if gp.player],
+            "invitedPlayers": [
+                user.username for user in self.gameObj.invitedPlayers.all()
+            ],
+            "currentPlayers": ", ".join(self.getCurrentPlayersArray()),
+            "currentTurn": self.currentTurnString(),
+            "pace": gamePaceString,
+            "latestUpdate": latestUpdateString,
+            "startingOptions": startingOptionsHTML,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "maxPlayers": self.gameObj.maxPlayers,
+            "winner": winner,
+            "myMove": myMove,
+            "involvedPlayer": involvedPlayer,
+            "chatNotification": chatNotification,
+            "kickoutRequiredNum": kickoutRequiredNum,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
+            "game": "AQY",
+            "remainingPlayers": remainingPlayers,
+            "deleteableGame": deleteableGame,
+            "learningGame": self.isLearningGame(),
+            "experiencedGame": self.isExperiencedGame(),
+            "startingMap": self.gameObj.startingMap,
+        }
+
+    def startGame(self, request, isTournamentGame=False):
+        from django_q.tasks import async_task
+        from Lobby.models import GamePlayer
+        from django.contrib.sites.shortcuts import get_current_site
+
+        self.gameObj.gameStatus = "ACTIVE"
+        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
+
+        game_players = list(self.gameObj.players.exclude(is_kicked=True))
+
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            gp.is_current = idx == 0
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+
+        self.gameObj.save()
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
+            if not isTournamentGame:
+                playerListToNotify = [
+                    gp.player.username
+                    for gp in game_players
+                    if gp.player and gp.player.username != request.user.username
+                ]
+
+                domain = get_current_site(request)
+                username = request.user.username
+                async_task(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                    domain,
+                    "AQY",
+                    playerListToNotify,
+                    self.gameObj.id,
+                    self.gameObj,
+                    username,
+                )
+
+    def getGameCode(self):
+        return "AQY"
+
+    def setCurrentPlayers(self, current_players_str):
+        """Set current players by updating is_current on GamePlayer instances"""
+        if not current_players_str:
+            # Clear all current players
+            self.gameObj.players.all().update(is_current=False)
+            return
+        
+        current_usernames = set(
+            name.strip() 
+            for name in current_players_str.split(',') 
+            if name.strip()
+        )
+        
+        for gp in self.gameObj.players.all():
+            if gp.player:
+                gp.is_current = gp.player.username in current_usernames
+                gp.save()
+
+    def addMissingPlayer(self, user):
+        """Mark a player as missing"""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp:
+            gp.is_missing = True
+            gp.save()
+
+    def addKickedPlayer(self, user):
+        """Mark a player as kicked"""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp:
+            gp.is_kicked = True
+            gp.save()
+
+    def checkForHostChange(self, missing_user):
+        """Change host if current host is missing"""
+        if missing_user == self.gameObj.host:
+            possible_hosts = self.gameObj.players.filter(
+                is_missing=False, is_kicked=False
+            ).exclude(player=missing_user).select_related('player')
+            
+            if possible_hosts.exists():
+                new_host = possible_hosts.order_by('?').first()
+                if new_host and new_host.player:
+                    self.gameObj.host = new_host.player
+                    self.gameObj.save()
+
+    def removeChatNotification(self, user):
+        """Remove chat notification for a user"""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp:
+            gp.has_chat_notification = False
+            gp.save()
+
+    def addChatNotifications(self, usernames):
+        """Add chat notifications for list of usernames"""
+        for gp in self.gameObj.players.select_related('player').all():
+            if gp.player and gp.player.username in usernames:
+                gp.has_chat_notification = True
+                gp.save()
+
+    def getMissingPlayersNamesArray(self):
+        """Get array of missing player names"""
+        missing = self.gameObj.players.filter(is_missing=True).select_related('player')
+        return [gp.player.username for gp in missing if gp.player]
+
+    def getCurrentPlayers(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        
+        _currentPlayers = []
+        for gp in all_players:
+            if gp.player:
+                if self.hasMoveEndData(gp.player.username):
+                    pass
+                elif gp.player.username != "AqyBot":
+                    _currentPlayers.append(gp.player.username)
+        
+        return ", ".join(_currentPlayers)
+
+    def hasMoveEndData(self, name):
+        seat = self.seatPosition(name)
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        if not gp:
+            return False
+        return bool(
+            gp.currentMoveData != ""
+            and gp.currentMoveTime != "MID_PHASE"
+            and gp.currentMoveTime != "PRE_MOVE"
+        )
+
+    def hasMoveMidData(self, name):
+        seat = self.seatPosition(name)
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        if not gp:
+            return False
+        return bool(gp.currentMoveData != "" and gp.currentMoveTime == "MID_PHASE")
+
+    def updateSingleMove(self, name, data, deleteMove=False):
+        import time
+        currentTime = str(int(time.time()) * 1000)
+        seat = self.seatPosition(name)
+
+        if deleteMove:
+            currentTime = ""
+            data = ""
+
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        if gp:
+            gp.currentMoveTime = currentTime
+            gp.currentMoveData = data
+            gp.save()
+
+    def updatePreMove(self, name, phase, data):
+        import base64
+        import gzip
+        import json
+
+        seat = self.seatPosition(name)
+        newJsonEntry = {"playerIndex": seat, "phase": phase, "data": data}
+
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        if not gp:
+            return
+
+        if (gp.currentMoveData == "" or gp.currentMoveData is None) and data[0] != -999:
+            dataArray = []
+            dataArray.append(newJsonEntry)
+            gp.currentMoveTime = "PRE_MOVE"
+            gp.currentMoveData = base64.b64encode(
+                gzip.compress(json.dumps(dataArray).encode("utf-8"))
+            ).decode("utf-8")
+            gp.save()
+            return
+
+        current_data = json.loads(
+            gzip.decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8")
+        )
+        index_to_remove = next(
+            (
+                index
+                for index, entry in enumerate(current_data)
+                if entry.get("phase") == phase
+            ),
+            None,
+        )
+        if index_to_remove is not None:
+            del current_data[index_to_remove]
+        if data[0] != -999:
+            current_data.append(newJsonEntry)
+        gp.currentMoveData = base64.b64encode(
+            gzip.compress(json.dumps(current_data).encode("utf-8"))
+        ).decode("utf-8")
+        gp.save()
+
+    def deleteAllPreMoves(self):
+        for gp in self.gameObj.players.all():
+            if gp.currentMoveTime == "PRE_MOVE":
+                gp.currentMoveTime = ""
+                gp.currentMoveData = ""
+                gp.save()
+
+    def getMoveData(self, name):
+        seat = self.seatPosition(name)
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        return gp.currentMoveData if gp else ""
+
+    def getMoveDataTime(self, name):
+        seat = self.seatPosition(name)
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        return gp.currentMoveTime if gp else ""
+
+    def clearAllMoveData(self):
+        for gp in self.gameObj.players.all():
+            gp.currentMoveTime = ""
+            gp.currentMoveData = ""
+            gp.save()
+
+    def getJsonMoveResponse(self):
+        import time
+        import json
+
+        readyPlayers = []
+        jsonResponse = []
+
+        for i in range(self.gameObj.maxPlayers):
+            gp = self.gameObj.players.filter(seat_order=i).first()
+            player_data = gp.currentMoveData if gp else ""
+            player_time = gp.currentMoveTime if gp else ""
+            
+            if player_data == "":
+                readyPlayers.append(False)
+                if not player_time:
+                    player_time = int(time.time() * 1000)
+                jsonResponse.append(
+                    {"timestamp": int(player_time), "content": player_data}
+                )
+            else:
+                readyPlayers.append(True)
+                jsonResponse.append(
+                    {"timestamp": int(player_time), "content": player_data}
+                )
+
+        readyWithBots = False
+        readyCount = sum(readyPlayers)
+        nbBots = self.gameObj.players.filter(is_missing=True).count()
+        if readyCount + nbBots == self.gameObj.maxPlayers:
+            readyWithBots = True
+
+        if all(readyPlayers) or readyWithBots:
+            self.clearAllMoveData()
+            jsonResponse.append({"allReady": True})
+        else:
+            jsonResponse = [{"ready": readyPlayers}]
+            jsonResponse.append({"allReady": False})
+
+        return jsonResponse
+
+    def removePlayerTrade(self, entry):
+        import json
+        import base64
+        import gzip
+
+        if self.gameObj.playerTradeData == "":
+            return
+
+        playerTradeData = json.loads(
+            gzip.decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode(
+                "utf-8"
+            )
+        )
+
+        for subarray in playerTradeData["playerTrades"]:
+            if subarray == entry:
+                playerTradeData["playerTrades"].remove(subarray)
+
+        self.gameObj.playerTradeData = base64.b64encode(
+            gzip.compress(json.dumps(playerTradeData).encode("utf-8"))
+        ).decode("utf-8")
+
+    def markPromiseComplete(self, promise):
+        import json
+        import base64
+        import gzip
+
+        if self.gameObj.playerTradeData != "":
+            playerTradeData = json.loads(
+                gzip.decompress(
+                    bytearray(base64.b64decode(self.gameObj.playerTradeData))
+                ).decode("utf-8")
+            )
+
+            for i, player in enumerate(playerTradeData["playerCityLockedData"]):
+                if len(player) > 0:
+                    playerData = json.loads(
+                        gzip.decompress(bytearray(base64.b64decode(player))).decode(
+                            "utf-8"
+                        )
+                    )
+                    for playerPromise in playerData[8]:
+                        if playerPromise == promise:
+                            playerData[8].remove(promise)
+                    playerTradeData["playerCityLockedData"][i] = base64.b64encode(
+                        gzip.compress(json.dumps(playerData).encode("utf-8"))
+                    ).decode("utf-8")
+
+            self.gameObj.playerTradeData = base64.b64encode(
+                gzip.compress(json.dumps(playerTradeData).encode("utf-8"))
+            ).decode("utf-8")
+
+        raw_data = json.loads(
+            gzip.decompress(bytearray(base64.b64decode(self.gameObj.gameData))).decode("utf-8")
+        )
+        for playerData in raw_data[1]:
+            for playerPromise in playerData[9]:
+                if playerPromise == promise:
+                    playerData[9].remove(promise)
+
+        self.gameObj.gameData = base64.b64encode(
+            gzip.compress(json.dumps(raw_data).encode("utf-8"))
+        ).decode("utf-8")
