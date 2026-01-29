@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -512,11 +512,16 @@ class Game(BaseGame):
         related_name="minitournamentGEN_relName",
     )
 
+    # TODO, only used in AQY. Remove from the Game model at some point.
+    playerTradeData = models.TextField(blank=True)
+
     def presenter(self):
         if self.gameCode == "CNS":
             return CannesPresenter(self)
         if self.gameCode == "WEB":
             return WebPresenter(self)
+        if self.gameCode == "AQY":
+            return AqyPresenter(self)
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
@@ -524,7 +529,7 @@ class Game(BaseGame):
     ############### THESE NEED TO BE HERE FORE NOW TO STOP THINGS BREAKING
     def currentTurnString(self):
         return SR_currentTurnString(self.gameCode, self.turn, self.phase)
-    
+
     #def currentPlayers(self):
     #    return SR_currentPlayers(self.gameCode, self.turn, self.phase)
 
@@ -560,6 +565,10 @@ class GamePlayer(models.Model):
     has_chat_notification = models.BooleanField(default=False)
 
     seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    # TODO, these two fields are currently used only in AQY. Remove from the Game model at some point.
+    currentMoveTime = models.CharField(max_length=15, blank=True)
+    currentMoveData = models.TextField(blank=True)
 
     class Meta:
         ordering = ["seat_order"]
