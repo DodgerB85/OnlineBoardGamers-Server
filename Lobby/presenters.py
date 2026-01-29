@@ -251,7 +251,7 @@ class GamePresenter:
         for username in usernames:
             gp = self.gameObj.players.filter(player__username=username).first()
             if gp and not gp.has_chat_notification:
-                print("Adding chat notification for " + username)
+                #print("Adding chat notification for " + username)
                 gp.has_chat_notification = True
                 gp.save()
 
@@ -535,7 +535,7 @@ class CannesPresenter(GamePresenter):
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
-        print(self.gameObj.gameStatus)
+        #print(self.gameObj.gameStatus)
         game_players = list(self.gameObj.players.exclude(is_kicked=True))
 
         random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)

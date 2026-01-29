@@ -1072,9 +1072,7 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
         return
 
     ret = SF_createNextRoundGamesSetup(tournamentObj, mainORmini)
-    print("RET BELOW")
 
-    print(ret)
     # Clear nextRoundPlayers for the end of the next round
     # -- gamePlayers have now been returned in ret
     tournamentObj.nextRoundPlayers.clear()
@@ -1155,8 +1153,6 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
     allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
     
-    print(allPlayersList)
-
     if tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournamentObj.roundsBeforeKnockout:
         pointsList = json.loads(tournamentObj.tournamentPointsData)
         # Being lowest points to front, in case a bye is needed
@@ -1206,7 +1202,7 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
             if remainder == 1:
                 byesRequired = 1
 
-    print(f"Byes Required: {byesRequired}")
+    #print(f"Byes Required: {byesRequired}")
 
     # 2. SELECT THE PLAYERS FOR BYES
     # We loop for exactly the number of byes needed
@@ -1368,9 +1364,6 @@ def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _curre
             for name in finalPositionNameAndScore[:-1]:
                 finalPositionNames[i].append(name)
 
-    print(f"finalPositionNames: {finalPositionNames}")
-
-
     ############################## Add players to next round players
     # KO JUST ADD THE WINNER
     if tournamanetObj.tournamentType == "KO":
@@ -1380,7 +1373,6 @@ def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _curre
     elif tournamanetObj.tournamentType == "RR" or tournamanetObj.tournamentType == "PT":
         # Just add winner for KO part
         if len(tournamentProgressionDataArray) >= tournamanetObj.roundsBeforeKnockout:
-            print("DOING KICKOUT ROUNDS ADDS")
             for playerUsername in _winnerArray:
                 if playerUsername not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
                     tournamanetObj.nextRoundPlayers.add(User.objects.get(username=playerUsername))
@@ -1489,8 +1481,6 @@ def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _curre
                 finishedRows += 1
     if finishedRows == len(tournamentProgressionDataArray[-1]):
         tournamentRoundFinished = True
-
-    print(f"tournamentRoundFinished: {tournamentRoundFinished}")
 
     # All games done; either end tourny or start new round
     if tournamentRoundFinished:
