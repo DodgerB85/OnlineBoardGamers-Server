@@ -1401,6 +1401,24 @@ def SR_getINDstartingOptionsHTML(startingOptions):
                 + gettext("Aegean Map")
                 + "'>"
             )
+        elif option == 3:
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_php_map.svg' title='"
+                + gettext("Philippines Map")
+                + "'>"
+            )
+        elif option == 4:
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_merger_subsidy.svg' title='"
+                + gettext("Use Merger Subsidy")
+                + "'>"
+            )
+        elif option == 5:
+            startingOptionsHTML += (
+                "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg' title='"
+                + gettext("Use Shipping Subsidy")
+                + "'>"
+            )
         elif option == 110:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
