@@ -32,8 +32,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from .common import create_aqy_game
 
-from .models import AQY_Game
-from Lobby.models import User, Profile
+from Lobby.models import User, Profile, Game
 
 from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
 
@@ -62,27 +61,29 @@ def createAQYgame(request):
 def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     try:
         currentGame = (
-            AQY_Game.objects.select_related("host", "relatedTournament", "creator")
+            Game.objects.select_related("host", "creator")
             .prefetch_related(
-                "allPlayers", "missingPlayers", "playersWithChatNotification"
+                "players__player", "invitedPlayers"
             )
-            .get(id=game_id)
+            .get(id=game_id, gameCode='AQY')
         )
-    except AQY_Game.DoesNotExist:
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
+    presenter = currentGame.presenter()
+
     # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
     userObj = request.user
     username = userObj.username
 
     # No2 it is a proper started game, so set up for not logged in
     gameID = currentGame.id
-    gameName = currentGame.getGameName()
+    gameName = presenter.getGameName()
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = (
@@ -92,7 +93,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     )
 
-    allPlayerListBySeat = currentGame.getAllPlayersOrderedySeat(False)
+    allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False)
 
     # Logged out
     returnData = {
@@ -106,16 +107,16 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
-        "currentPlayers": currentGame.getCurrentPlayers(),
+        "currentPlayers": presenter.getCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "statsExcludeVotesData": json.dumps(
-            currentGame.tempPresenter().getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True), False
+            presenter.getFullSetOfVoteResults(
+                STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
             )
         ),
         "deleteVotesData": json.dumps(
-            currentGame.tempPresenter().getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True), False
+            presenter.getFullSetOfVoteResults(
+                DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
             )
         ),
         "settingsDebug": config("AQY_USE_SOURCE_CODE", default=False, cast=bool),
@@ -129,11 +130,12 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     user_id = userObj.id
 
     user_profile = Profile.objects.get(user=userObj)
-    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
-    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
 
-    is_in_all = user_id in all_player_ids
-    is_missing = user_id in missing_player_ids
+    # Get user game player object
+    user_gp = currentGame.players.filter(player=userObj).first()
+
+    is_in_all = user_gp is not None
+    is_missing = user_gp.is_missing if user_gp else False
     involvedPlayer = is_in_all and not is_missing
     if username == "BotKickStarter":
         involvedPlayer = True
@@ -143,7 +145,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     latestUpdate = currentGame.latestUpdate
 
     ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
+    nextURL = f"/nextGame?current_id={gameID}&current_code=AQY"
 
     preferredAQYoptions = (
         json.loads(user_profile.preferredAQYoptions)
@@ -157,9 +159,9 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
     ## Get Chat notification
     chatNotification = False
-    if user_id in chat_notify_ids:
+    if user_gp and user_gp.has_chat_notification:
         chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
+        presenter.removeChatNotification(request.user)
         currentGame.save()
 
     returnData.update(
@@ -176,28 +178,22 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if not involvedPlayer:
         return render(request, "AQY/showAQYgame.html", returnData)
 
-    pov = currentGame.seatPosition(username)
+    pov = presenter.seatPosition(username)
     if request.user.username == "BotKickStarter":
         pov = -1
-    secondsToNextKickout = currentGame.getSecondsToNextKickout()
+    secondsToNextKickout = presenter.getSecondsToNextKickout()
 
-    kickoutRequired = currentGame.kickoutRequired()
+    kickoutRequired = presenter.kickoutRequired()
 
-    myMove = currentGame.isMyMove(username)
+    myMove = presenter.isMyMove(username)
 
     ## Get the Notes for the user
-    notes_mapping = {
-        0: currentGame.player0notes,
-        1: currentGame.player1notes,
-        2: currentGame.player2notes,
-        3: currentGame.player3notes,
-    }
-    notes = notes_mapping.get(pov, "")
+    notes = user_gp.notes if user_gp else ""
 
     liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
-    move = currentGame.getMoveData(username)
+    move = presenter.getMoveData(username)
     trade = currentGame.playerTradeData
 
     ## Involved Player
@@ -226,19 +222,20 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         or currentGame.phase == 8
         or currentGame.phase == 9
     ):
-        if currentGame.getMoveDataTime(username) == "PRE_MOVE":
-            returnData.update({"preMove": currentGame.getMoveData(username)})
+        if presenter.getMoveDataTime(username) == "PRE_MOVE":
+            returnData.update({"preMove": presenter.getMoveData(username)})
 
     # TODO: also send any current player pre moves in case action failed.
 
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in currentGame.getAllPlayersOrderedySeat():
-            displayNames = currentGame.player0notes
-            currentGame.player0notes = ""
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            displayNames = user_gp.notes if user_gp else ""
+            if user_gp:
+                user_gp.notes = ""
+                user_gp.save()
             notes = ""
-            currentGame.save()
         # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
         if currentGame.startingMap != "":
             returnData.update({"startingMap": json.loads(currentGame.startingMap)})
@@ -294,11 +291,13 @@ def _processAQYturn(request):
     latest_update = str(jsonData.get("latestUpdate", 0))
 
     try:
-        currentGame = AQY_Game.objects.get(id=game_id)
-    except AQY_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='AQY')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if jsonData["action"] == "save":
+        presenter = currentGame.presenter()
+
         # Check if old version is older than DB version, and if so, return
         if latest_update != "9999999999999" and latest_update != str(
             currentGame.latestUpdate
@@ -308,7 +307,7 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -341,20 +340,20 @@ def _processAQYturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.playerTradeData = ""
 
         if currentGame.phase == 1 or currentGame.phase == 2:
-            currentGame.deleteAllPreMoves()
+            presenter.deleteAllPreMoves()
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
 
         # CHECK FOR PRE-MOVE
         preTurnDataCompressed = ""
-        moveDataTime = currentGame.getMoveDataTime(jsonData["nextPlayer"])
+        moveDataTime = presenter.getMoveDataTime(jsonData["nextPlayer"])
         if moveDataTime == "PRE_MOVE":
-            moveData = currentGame.getMoveData(jsonData["nextPlayer"])
+            moveData = presenter.getMoveData(jsonData["nextPlayer"])
             # decompress the move data
             preTurnArray = json.loads(
                 gzip.decompress(bytearray(base64.b64decode(moveData))).decode("utf-8")
@@ -374,7 +373,7 @@ def _processAQYturn(request):
                 ).decode("utf-8")
 
         if jsonData["status"] == "FINISHED":
-            currentGame.endGame(
+            presenter.endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
@@ -406,7 +405,7 @@ def _processAQYturn(request):
                         "AQY",
                         playerListToNotify,
                         currentGame.id,
-                        currentGame.getGameName(),
+                        presenter.getGameName(),
                         currentGame,
                         oldVer,
                     )
@@ -451,7 +450,7 @@ def _processAQYturn(request):
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
         }
 
         if preTurnDataCompressed != "":
@@ -462,14 +461,16 @@ def _processAQYturn(request):
     # END SAVE / CREATE
 
     elif jsonData["action"] == "sendNotification":
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter = currentGame.presenter()
+
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.playerTradeData = ""
 
         # Delete pre moves for current player
-        currentGame.updateSingleMove(jsonData["nextPlayer"], "", True)
+        presenter.updateSingleMove(jsonData["nextPlayer"], "", True)
 
         if currentGame.phase == 1 or currentGame.phase == 2:
-            currentGame.deleteAllPreMoves()
+            presenter.deleteAllPreMoves()
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -496,20 +497,22 @@ def _processAQYturn(request):
                     "AQY",
                     playerListToNotify,
                     currentGame.id,
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
                 )
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
         }
 
         return JsonResponse(response_data, safe=False)
 
     ################### PRE TURN
     elif jsonData["action"] == "preTurn":
+        presenter = currentGame.presenter()
+
         # Check if old version is older than DB version, and if so, return
         if latest_update != "9999999999999" and latest_update != str(
             currentGame.latestUpdate
@@ -523,7 +526,7 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy preTurn - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -535,7 +538,7 @@ def _processAQYturn(request):
             )
         )
         # add / replace the current phase move data. # recompress and save.
-        currentGame.updatePreMove(
+        presenter.updatePreMove(
             request.user.username, jsonData["prePhase"], moveDataArray
         )
 
@@ -543,7 +546,7 @@ def _processAQYturn(request):
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "data": currentGame.getMoveData(request.user.username),
+            "data": presenter.getMoveData(request.user.username),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -551,6 +554,8 @@ def _processAQYturn(request):
     ################### END PRE TURN
 
     elif jsonData["action"] == "proposeTrade":
+        presenter = currentGame.presenter()
+
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(currentGame.latestUpdate):
@@ -563,7 +568,7 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy proposeTrade - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -576,19 +581,19 @@ def _processAQYturn(request):
         BKSN = jsonData["BKSN"]
         moveData = jsonData["moveData"]
 
-        allPlayersOrderedySeat = currentGame.getAllPlayersOrderedySeat(False)
+        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeat(False)
 
         yourPlayerIndex = allPlayersOrderedySeat.index(BKSN)
 
         # You are at least both on the same version of city building initial start.
         # So first check the opponent has not ended their turn (or you, which is impossible)
         if (
-            currentGame.hasMoveEndData(BKSN)
-            or currentGame.hasMoveEndData(
-                currentGame.getAllPlayersOrderedySeat()[opponentsPlayerIndex]
+            presenter.hasMoveEndData(BKSN)
+            or presenter.hasMoveEndData(
+                presenter.getAllPlayersOrderedySeat()[opponentsPlayerIndex]
             )
-            or currentGame.hasMoveEndData(
-                currentGame.getAllPlayersOrderedySeat()[yourPlayerIndex]
+            or presenter.hasMoveEndData(
+                presenter.getAllPlayersOrderedySeat()[yourPlayerIndex]
             )
         ):
             return JsonResponse({"endMoveError": True}, safe=False)
@@ -694,7 +699,7 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy acceptTrade - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -703,7 +708,7 @@ def _processAQYturn(request):
         moveData = jsonData["moveData"]
         entry = jsonData["entry"]
 
-        allPlayersOrderedySeat = currentGame.getAllPlayersOrderedySeat(False)
+        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeat(False)
 
         fromPlayerIndex = entry[0]
         toPlayerIndex = entry[1]
@@ -711,16 +716,16 @@ def _processAQYturn(request):
         # You are at least both on the same version of city building initial start.
         # So first check the opponent has not ended their turn
         if (
-            currentGame.hasMoveEndData(BKSN)
-            or currentGame.hasMoveEndData(
-                currentGame.getAllPlayersOrderedySeat()[fromPlayerIndex]
+            presenter.hasMoveEndData(BKSN)
+            or presenter.hasMoveEndData(
+                presenter.getAllPlayersOrderedySeat()[fromPlayerIndex]
             )
-            or currentGame.hasMoveEndData(
-                currentGame.getAllPlayersOrderedySeat()[toPlayerIndex]
+            or presenter.hasMoveEndData(
+                presenter.getAllPlayersOrderedySeat()[toPlayerIndex]
             )
         ):
             # DELETE THE TRADE
-            currentGame.removePlayerTrade(entry)
+            presenter.removePlayerTrade(entry)
             currentGame.save()
             return JsonResponse({"endMoveError": True}, safe=False)
 
@@ -870,6 +875,8 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "rejectTrade":
+        presenter = currentGame.presenter()
+
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(currentGame.latestUpdate):
@@ -882,7 +889,7 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy rejectTrade - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -890,10 +897,10 @@ def _processAQYturn(request):
         BKSN = jsonData["BKSN"]
         entry = jsonData["entry"]
 
-        allPlayersOrderedySeat = currentGame.getAllPlayersOrderedySeat(False)
+        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeat(False)
         # yourPlayerIndex = allPlayersOrderedySeat.index(BKSN)
 
-        currentGame.removePlayerTrade(entry)
+        presenter.removePlayerTrade(entry)
         currentGame.save()
 
         return JsonResponse(
@@ -902,6 +909,8 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "markPromiseComplete":
+        presenter = currentGame.presenter()
+
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(currentGame.latestUpdate):
@@ -914,7 +923,7 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy markPromiseComplete - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -923,10 +932,10 @@ def _processAQYturn(request):
         # playerIndex = jsonData["idx"]
         promise = jsonData["promise"]
 
-        # allPlayersOrderedySeat = currentGame.getAllPlayersOrderedySeat(False)
+        # allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeat(False)
         # yourPlayerIndex = allPlayersOrderedySeat.index(BKSN)
 
-        currentGame.markPromiseComplete(promise)
+        presenter.markPromiseComplete(promise)
         currentGame.save()
 
         return JsonResponse(
@@ -963,6 +972,8 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "saveSimulMove":
+        presenter = currentGame.presenter()
+
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(currentGame.latestUpdate):
@@ -975,18 +986,18 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy saveSimulMove - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
         if request.user.username not in AQYsuperUsers:
-            currentGame.updateSingleMove(request.user.username, jsonData["moveData"])
+            presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
-            currentGame.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
+            presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
 
-        currentGame.currentPlayers = currentGame.getCurrentPlayers()
+        presenter.setCurrentPlayers(presenter.getCurrentPlayers())
 
         if request.user.username in AQYsuperUsers:
             SF_updateFlexiTime(
@@ -1007,7 +1018,7 @@ def _processAQYturn(request):
 
         # Remove your trades
         if currentGame.playerTradeData != "":
-            seat = currentGame.seatPosition(jsonData["BKSN"])
+            seat = presenter.seatPosition(jsonData["BKSN"])
             byte_array = bytearray(base64.b64decode(currentGame.playerTradeData))
             decompressed_data = gzip.decompress(byte_array)
             decompressed_string = decompressed_data.decode("utf-8")
@@ -1024,19 +1035,21 @@ def _processAQYturn(request):
             base64_data = base64.b64encode(compressed_data).decode("utf-8")
             currentGame.playerTradeData = base64_data
 
-        response = currentGame.getJsonMoveResponse()
+        response = presenter.getJsonMoveResponse()
 
         currentGame.save()
         return JsonResponse(response, safe=False)
 
     elif jsonData["action"] == "resign":
+        presenter = currentGame.presenter()
+
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
 
         # Delete move data
-        currentGame.clearAllMoveData()
+        presenter.clearAllMoveData()
 
         # Add all players into currentPlayers OVERWRITTEN BY SAVE
         # currentGame.letAllPlayersMove()
@@ -1049,13 +1062,15 @@ def _processAQYturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                # "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                # "nextPlayer": currentGame.currentPlayers,
+                # "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+                # "nextPlayer": presenter.getCurrentPlayers(),
             },
             safe=False,
         )
 
     elif jsonData["action"] == "loadRewind":
+        presenter = currentGame.presenter()
+
         if latest_update != "9999999999999" and latest_update != str(
             currentGame.latestUpdate
         ):
@@ -1068,7 +1083,7 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1110,10 +1125,10 @@ def _processAQYturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        # rewindHostPossible = currentGame.getRewindHostPossible()
+        # rewindHostPossible = presenter.getRewindHostPossible()
 
         # Delete move data
-        currentGame.clearAllMoveData()
+        presenter.clearAllMoveData()
 
         currentGame.save()
 
@@ -1122,16 +1137,18 @@ def _processAQYturn(request):
                 "gameData": loadData,
                 # "rewindHostPossible": rewindHostPossible,
                 "latestUpdate": currentGame.latestUpdate,
-                "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
             safe=False,
         )
     # ENd LOAD REWIND
 
     elif jsonData["action"] == "updateDataFromLoadRewind":
+        presenter = currentGame.presenter()
+
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -1159,7 +1176,7 @@ def _processAQYturn(request):
                     "AQY",
                     playerListToNotify,
                     currentGame.id,
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
                 )
@@ -1167,12 +1184,14 @@ def _processAQYturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
 
     elif jsonData["action"] == "kickout":
+        presenter = currentGame.presenter()
+
         if latest_update != "9999999999999" and latest_update != str(
             currentGame.latestUpdate
         ):  # and not jsonData["ignoreSync"]:
@@ -1185,18 +1204,18 @@ def _processAQYturn(request):
             message = (
                 f"SYNC ERROR IN: Aqy kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.kickedPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.addKickedPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
 
         # Clears data and saves record - DONT DELETE FAC MOVES
-        # currentGame.clearAllMoveData()
+        # presenter.clearAllMoveData()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -1206,7 +1225,7 @@ def _processAQYturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 # "nextPlayer": jsonData["nextPlayer"],
             },
             safe=False,
@@ -1223,14 +1242,16 @@ def AQYdata(request, dataType):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = AQY_Game.objects.get(id=jsonData["gameID"])
-    except AQY_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='AQY')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if dataType == 1:
         returnData = {
             "gameData": currentGame.gameData,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "latestUpdate": currentGame.latestUpdate,
         }
         # Check for any premoves
@@ -1242,15 +1263,15 @@ def AQYdata(request, dataType):
             or currentGame.phase == 8
             or currentGame.phase == 9
         ):
-            if currentGame.getMoveDataTime(request.user.username) == "PRE_MOVE":
+            if presenter.getMoveDataTime(request.user.username) == "PRE_MOVE":
                 returnData.update(
-                    {"preMove": currentGame.getMoveData(request.user.username)}
+                    {"preMove": presenter.getMoveData(request.user.username)}
                 )
         # Send game data
         return JsonResponse(returnData)
     elif dataType == 2:
         # Remove user from notifications
-        currentGame.playersWithChatNotification.remove(request.user)
+        presenter.removeChatNotification(request.user)
         currentGame.save()
         return JsonResponse(
             {
@@ -1270,7 +1291,7 @@ def AQYdata(request, dataType):
             {
                 "latest": False,
                 "gameData": currentGame.gameData,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
             }
         )
@@ -1296,8 +1317,8 @@ def bugEntry(request):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = AQY_Game.objects.get(id=gameID)
-    except AQY_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=gameID, gameCode='AQY')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     gameData = jsonData["gameData"]
@@ -1340,7 +1361,8 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = AQY_Game.objects.get(id=game_id)
+        currentGame = Game.objects.get(id=game_id, gameCode='AQY')
+        presenter = currentGame.presenter()
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -1357,9 +1379,12 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.playersWithChatNotification.set(
-            currentGame.allPlayers.exclude(username=request.user.username)
-        )
+        all_player_usernames = [
+            gp.player.username
+            for gp in currentGame.players.exclude(is_kicked=True).select_related("player")
+            if gp.player and gp.player.username != request.user.username
+        ]
+        presenter.addChatNotifications(all_player_usernames)
         currentGame.save()
 
         return JsonResponse({"chatData": compressedChatData})
@@ -1376,16 +1401,15 @@ def saveNotes(request):
     game_id = jsonData["gameID"]
     notes = jsonData["notes"]
     try:
-        currentGame = AQY_Game.objects.get(id=game_id)
-    except AQY_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='AQY')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    seat_position = currentGame.seatPosition(request.user.username)
-
-    if seat_position in range(5):
-        player_notes_field = f"player{seat_position}notes"
-        setattr(currentGame, player_notes_field, notes)
-        currentGame.save()
+    # Get the player's GamePlayer instance
+    gp = currentGame.players.filter(player=request.user).first()
+    if gp:
+        gp.notes = notes
+        gp.save()
 
     return JsonResponse({"notePosted": True})
 
@@ -1399,8 +1423,8 @@ def saveZoom(request):
 
     if jsonData["action"] == "zoom":
         try:
-            currentGame = AQY_Game.objects.get(id=jsonData["gameID"])
-        except AQY_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='AQY')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         zoomLevels = json.loads(currentGame.zoomLevels)
 
@@ -1439,24 +1463,26 @@ def _castVote(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = AQY_Game.objects.get(id=jsonData["gameID"])
-    except AQY_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='AQY')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    
+
+    presenter = currentGame.presenter()
+
     # Delegate all logic to the presenter
-    result = currentGame.tempPresenter().processVoteLogic(
+    result = presenter.processVoteLogic(
         topic=jsonData["topic"],
         username=request.user.username,
         choice=True,
-    ) 
+    )
 
     # If an action occurred that requires a user message, add it here
     msg = result.get("message")
     if isinstance(msg, str):  # This clarifies the type for the type checker
         messages.success(request, msg)
-        
+
     return JsonResponse(result)
-    
+
 @login_required
 def AQYstats(request):
     # Load regular stats
@@ -1532,14 +1558,12 @@ def AQYstatGames(request):
 
     # Filter the games for the current page ONLY
     finishedGames = (
-        AQY_Game.objects.filter(id__in=gameIDs_page)
+        Game.objects.filter(id__in=gameIDs_page, gameCode='AQY')
         .order_by("-latestUpdate")
         .select_related("creator__profile", "creator")
         .prefetch_related(
-            "allPlayers",
-            "missingPlayers",
+            "players__player",
             "invitedPlayers",
-            "playersWithChatNotification",
         )
     )
 

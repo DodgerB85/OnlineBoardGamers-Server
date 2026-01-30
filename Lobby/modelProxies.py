@@ -27,10 +27,18 @@ class CNSgame(Game):
         verbose_name = "CNS_Game"
         verbose_name_plural = "CNS_Games"
 
-# CNS
+# WEB
 class WEBgame(Game):
     class Meta(Game.Meta):
         proxy = True
         app_label = "WEB"
         verbose_name = "WEB_Game"
         verbose_name_plural = "WEB_Games"
+
+# AQY
+class AQYgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "AQY"
+        verbose_name = "AQY_Game"
+        verbose_name_plural = "AQY_Games"
