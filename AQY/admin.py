@@ -107,7 +107,7 @@ class AQY_GameAdmin(admin.ModelAdmin):
 
         # Make the shortened name the clickable text
         return format_html(
-            '<a href="{}/FCM/{}" target="_blank" title="{}">{}</a>',
+            '<a href="{}/AQY/{}" target="_blank" title="{}">{}</a>',
             site_url,
             obj.id,
             full_name,
