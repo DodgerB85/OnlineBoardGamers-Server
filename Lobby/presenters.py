@@ -39,15 +39,19 @@ class GamePresenter:
             return True
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
+        
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
 
-        if (
-            loggedInPlayerUsername in current_usernames
-            or "SHADOW" in current_usernames
-            or "SHADOW_2" in current_usernames
-            or "SHADOW_3" in current_usernames
-        ):
-            return True
-        return False
+        return loggedInPlayerUsername in current_usernames or any(
+            username in shadow_values for username in current_usernames
+        )
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         if self.gameObj.gameCode not in ["CNS", "WEB", "AQY"]:
@@ -57,7 +61,7 @@ class GamePresenter:
             return False
 
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
-            return False
+            return True
 
         current_players = self.gameObj.players.filter(is_current=True).select_related(
             "player"
@@ -304,7 +308,8 @@ class GamePresenter:
         self.gameObj.save()
 
         # 3. Check if all players have voted
-        if self.gameObj.getGameCode() in ["FCM", "AQY"]:
+        #### TEMP TODO - this is just models NOT on the unified model but who use the unified voting system
+        if self.gameObj.getGameCode() in ["FCM"]:
             ordered_players = self.gameObj.getAllPlayersOrderedySeat()
             missing_players = {p.username for p in self.gameObj.missingPlayers.all()}
         else:
@@ -565,7 +570,7 @@ class CannesPresenter(GamePresenter):
                 "CNS",
                 playerListToNotify,
                 self.gameObj.id,
-                self,
+                self.gameObj,
                 username,
             )
             # async_task(
@@ -779,7 +784,7 @@ class WebPresenter(GamePresenter):
                     "WEB",
                     playerListToNotify,
                     self.gameObj.id,
-                    self,
+                    self.gameObj,
                     username,
                 )
                 #async_task(
@@ -1070,7 +1075,7 @@ class AqyPresenter(GamePresenter):
                     "AQY",
                     playerListToNotify,
                     self.gameObj.id,
-                    self,
+                    self.gameObj,
                     username,
                 )
                 #async_task(
