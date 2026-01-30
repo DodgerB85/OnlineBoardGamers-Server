@@ -268,7 +268,7 @@ def showBusGame(request, game_id):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
         "startingOptions": startingOptions,
-        "settingsDEBUG": config("BUS_USE_SOURCE_CODE", default=False, cast=bool),,
+        "settingsDEBUG": config("BUS_USE_SOURCE_CODE", default=False, cast=bool),
     }
 
     if not request.user.is_authenticated:
