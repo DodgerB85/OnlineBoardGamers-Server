@@ -531,6 +531,7 @@ def indexSpecialRedirect(request):
         "massibull",
         "phil",
         "timmymayes",
+        "SaintJason",
     ]
     if request.user.username not in ALLOWED_USERS:
         return redirect("index")
