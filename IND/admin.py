@@ -1,5 +1,3 @@
-
-
 from django.contrib import admin
 from django.conf import settings
 from .models import IND_Game, IND_Tournament

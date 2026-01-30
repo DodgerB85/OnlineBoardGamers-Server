@@ -5,10 +5,11 @@ import time
 import base64
 import gzip
 
+from decouple import config
+
 from contextlib import contextmanager
 
 from django.contrib import messages
-from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.contrib.auth.decorators import login_required
@@ -117,7 +118,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
                 DELETE_VOTE_TOPIC, currentGame.getAllPlayersOrderedySeat(True), False
             )
         ),
-        "settingsDebug": settings.DEBUG,
+        "settingsDebug": config("AQY_USE_SOURCE_CODE", default=False, cast=bool),
         # "settingsDebug": False,
     }
 

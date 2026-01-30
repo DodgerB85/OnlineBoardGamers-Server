@@ -3,9 +3,9 @@ import time
 import lzstring
 
 # import requests
+from decouple import config
 
 from contextlib import contextmanager
-from django.conf import settings
 
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
@@ -268,7 +268,7 @@ def showBusGame(request, game_id):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
         "startingOptions": startingOptions,
-        "settingsDEBUG": settings.DEBUG,
+        "settingsDEBUG": config("BUS_USE_SOURCE_CODE", default=False, cast=bool),,
     }
 
     if not request.user.is_authenticated:

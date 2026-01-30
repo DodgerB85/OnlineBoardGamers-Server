@@ -5,8 +5,9 @@ import base64
 
 import gzip
 
+from decouple import config
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.conf import settings
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
@@ -245,7 +246,7 @@ def showGame(request, game_id):
                     )
                 ),
                 "preferredColour": -1,
-                "settingsDebug": settings.DEBUG,
+                "settingsDebug": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),
             },
         )
 
@@ -439,7 +440,7 @@ def showGame(request, game_id):
                     currentGame.getAllPlayersOrderedySeat(True), False
                 )
             ),
-            "settingsDebug": settings.DEBUG,
+            "settingsDebug": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),
         },
     )
 
@@ -1866,7 +1867,7 @@ def gameAdmin(request):
     if request.user.username != "admin" and request.user.username != "DodgerB":
         return JsonResponse({"error": "Wrong request."}, status=400)
     return render(
-        request, "FCM/gameAdmin.html", {"gameID": 21, "settingsDEBUG": settings.DEBUG}
+        request, "FCM/gameAdmin.html", {"gameID": 21, "settingsDEBUG": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),}
     )
 
 

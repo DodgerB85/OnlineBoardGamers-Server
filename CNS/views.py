@@ -4,10 +4,11 @@ import time
 import base64
 import gzip
 
+from decouple import config
+
 from contextlib import contextmanager
 
 from django.contrib import messages
-from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
@@ -238,7 +239,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         "replayStep": replayStep,
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
-        "settingsDebug": settings.DEBUG,
+        "settingsDebug": config("CNS_USE_SOURCE_CODE", default=False, cast=bool),
         "statsExcludeVotesData": json.dumps(
             currentGame.presenter().getFullSetOfVoteResults(
                 STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False

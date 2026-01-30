@@ -7,8 +7,9 @@ import random
 from contextlib import contextmanager
 from itertools import chain
 
+from decouple import config
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.conf import settings
 
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render  # , redirect
@@ -62,10 +63,6 @@ def createTGZgame(request):
 
 @contextmanager
 def db_mutex(name, timeout=10):
-    # if settings.DEBUG:
-    # if 1==2:
-    #    yield
-    #    return
     mutex_name = "dbmutex_" + name
     cursor = connection.cursor()
     # timeout returns with error
@@ -124,7 +121,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         "replayStep": replayStep,
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "latestUpdateLiteral": currentGame.latestUpdate,
-        "settingsDEBUG": settings.DEBUG,
+        "settingsDEBUG": config("TGZ_USE_SOURCE_CODE", default=False, cast=bool),
     }
     
     #print_timestamp("After not logged in setup")

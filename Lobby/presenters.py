@@ -14,6 +14,8 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
+from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
+
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
 
 
@@ -251,7 +253,7 @@ class GamePresenter:
         for username in usernames:
             gp = self.gameObj.players.filter(player__username=username).first()
             if gp and not gp.has_chat_notification:
-                #print("Adding chat notification for " + username)
+                # print("Adding chat notification for " + username)
                 gp.has_chat_notification = True
                 gp.save()
 
@@ -535,7 +537,7 @@ class CannesPresenter(GamePresenter):
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
-        #print(self.gameObj.gameStatus)
+        # print(self.gameObj.gameStatus)
         game_players = list(self.gameObj.players.exclude(is_kicked=True))
 
         random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
@@ -557,15 +559,23 @@ class CannesPresenter(GamePresenter):
 
             domain = get_current_site(request)
             username = request.user.username
-            async_task(
-                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            SN_M_sendGameStartNotification(
                 domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                 "CNS",
                 playerListToNotify,
                 self.gameObj.id,
-                self.gameObj,
+                self,
                 username,
             )
+            # async_task(
+            #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+            #    "CNS",
+            #    playerListToNotify,
+            #    self.gameObj.id,
+            #    self.gameObj,
+            #    username,
+            # )
 
     def getGameCode(self):
         return "CNS"
@@ -761,15 +771,23 @@ class WebPresenter(GamePresenter):
 
                 domain = get_current_site(request)
                 username = request.user.username
-                async_task(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                SN_M_sendGameStartNotification(
                     domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                     "WEB",
                     playerListToNotify,
                     self.gameObj.id,
-                    self.gameObj,
+                    self,
                     username,
                 )
+                #async_task(
+                #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+                #    "WEB",
+                #    playerListToNotify,
+                #    self.gameObj.id,
+                #    self.gameObj,
+                #    username,
+                #)
 
     def getGameCode(self):
         return "WEB"

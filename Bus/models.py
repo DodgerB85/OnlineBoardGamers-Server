@@ -602,8 +602,7 @@ class Bus_Game(GeneralGame):
 
             domain = get_current_site(request)
             username = request.user.username
-            async_task(
-                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            SN_M_sendGameStartNotification(
                 domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                 "Bus",
                 playerListToNotify,
@@ -611,6 +610,15 @@ class Bus_Game(GeneralGame):
                 self,
                 username,
             )
+            #async_task(
+            #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+            #    "Bus",
+            #    playerListToNotify,
+            #    self.id,
+            #    self,
+            #    username,
+            #)
 
     # takes in a user object
 
