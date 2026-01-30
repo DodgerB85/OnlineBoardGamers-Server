@@ -74,7 +74,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
-    presenter = currentGame.presenter()
+    presenter = currentGame.getAQYpresenter()
 
     # Access the prefetch cache immediately to "warm" it
     all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
@@ -295,8 +295,9 @@ def _processAQYturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
+    presenter = currentGame.getAQYpresenter()
+
     if jsonData["action"] == "save":
-        presenter = currentGame.presenter()
 
         # Check if old version is older than DB version, and if so, return
         if latest_update != "9999999999999" and latest_update != str(
@@ -461,7 +462,6 @@ def _processAQYturn(request):
     # END SAVE / CREATE
 
     elif jsonData["action"] == "sendNotification":
-        presenter = currentGame.presenter()
 
         presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.playerTradeData = ""
@@ -511,7 +511,6 @@ def _processAQYturn(request):
 
     ################### PRE TURN
     elif jsonData["action"] == "preTurn":
-        presenter = currentGame.presenter()
 
         # Check if old version is older than DB version, and if so, return
         if latest_update != "9999999999999" and latest_update != str(
@@ -554,7 +553,6 @@ def _processAQYturn(request):
     ################### END PRE TURN
 
     elif jsonData["action"] == "proposeTrade":
-        presenter = currentGame.presenter()
 
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
@@ -875,7 +873,6 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "rejectTrade":
-        presenter = currentGame.presenter()
 
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
@@ -909,7 +906,6 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "markPromiseComplete":
-        presenter = currentGame.presenter()
 
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
@@ -972,7 +968,6 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "saveSimulMove":
-        presenter = currentGame.presenter()
 
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
@@ -1041,7 +1036,6 @@ def _processAQYturn(request):
         return JsonResponse(response, safe=False)
 
     elif jsonData["action"] == "resign":
-        presenter = currentGame.presenter()
 
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
@@ -1069,7 +1063,6 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "loadRewind":
-        presenter = currentGame.presenter()
 
         if latest_update != "9999999999999" and latest_update != str(
             currentGame.latestUpdate
@@ -1144,7 +1137,6 @@ def _processAQYturn(request):
     # ENd LOAD REWIND
 
     elif jsonData["action"] == "updateDataFromLoadRewind":
-        presenter = currentGame.presenter()
 
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
@@ -1190,7 +1182,6 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        presenter = currentGame.presenter()
 
         if latest_update != "9999999999999" and latest_update != str(
             currentGame.latestUpdate
@@ -1246,7 +1237,7 @@ def AQYdata(request, dataType):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = currentGame.getAQYpresenter()
 
     if dataType == 1:
         returnData = {
@@ -1362,7 +1353,7 @@ def _sendChatMessage(request):
         new_entry = jsonData["newEntry"]
 
         currentGame = Game.objects.get(id=game_id, gameCode='AQY')
-        presenter = currentGame.presenter()
+        presenter = currentGame.getAQYpresenter()
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -1467,7 +1458,7 @@ def _castVote(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = currentGame.getAQYpresenter()
 
     # Delegate all logic to the presenter
     result = presenter.processVoteLogic(

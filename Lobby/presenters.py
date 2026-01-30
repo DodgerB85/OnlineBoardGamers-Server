@@ -1037,7 +1037,8 @@ class AqyPresenter(GamePresenter):
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
-        from django.contrib.sites.shortcuts import get_current_site
+        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
+
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
@@ -1064,29 +1065,37 @@ class AqyPresenter(GamePresenter):
 
                 domain = get_current_site(request)
                 username = request.user.username
-                async_task(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-                    domain,
+                SN_M_sendGameStartNotification(
+                    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                     "AQY",
                     playerListToNotify,
                     self.gameObj.id,
-                    self.gameObj,
+                    self,
                     username,
                 )
+                #async_task(
+                #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                #    domain,
+                #    "AQY",
+                #    playerListToNotify,
+                #    self.gameObj.id,
+                #    self.gameObj,
+                #    username,
+                #)
 
     def getGameCode(self):
         return "AQY"
 
-    def setCurrentPlayers(self, current_players_str):
+    def setCurrentPlayers(self, player_usernames_string):
         """Set current players by updating is_current on GamePlayer instances"""
-        if not current_players_str:
+        if not player_usernames_string:
             # Clear all current players
             self.gameObj.players.all().update(is_current=False)
             return
         
         current_usernames = set(
             name.strip() 
-            for name in current_players_str.split(',') 
+            for name in player_usernames_string.split(',') 
             if name.strip()
         )
         
@@ -1121,13 +1130,6 @@ class AqyPresenter(GamePresenter):
                 if new_host and new_host.player:
                     self.gameObj.host = new_host.player
                     self.gameObj.save()
-
-    def removeChatNotification(self, user):
-        """Remove chat notification for a user"""
-        gp = self.gameObj.players.filter(player=user).first()
-        if gp:
-            gp.has_chat_notification = False
-            gp.save()
 
     def addChatNotifications(self, usernames):
         """Add chat notifications for list of usernames"""

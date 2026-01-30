@@ -524,6 +524,10 @@ class Game(BaseGame):
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
 
+    
+    def getAQYpresenter(self):
+        return AqyPresenter(self)
+    
     def presenter(self):
         if self.gameCode == "CNS":
             return CannesPresenter(self)
