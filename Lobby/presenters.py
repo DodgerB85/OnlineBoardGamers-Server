@@ -303,7 +303,7 @@ class GamePresenter:
         self.gameObj.save()
 
         # 3. Check if all players have voted
-        if self.gameObj.gameCode in ["FCM", "AQY"]:
+        if self.gameObj.getGameCode() in ["FCM", "AQY"]:
             ordered_players = self.gameObj.getAllPlayersOrderedySeat()
             missing_players = {p.username for p in self.gameObj.missingPlayers.all()}
         else:
