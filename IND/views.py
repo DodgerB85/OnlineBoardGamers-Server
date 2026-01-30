@@ -252,7 +252,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
         "preMoves": "",
         "sideData": "",
-        "settingsDEBUG": settings.DEBUG,
+        "settingsDEBUG": config("IND_USE_SOURCE_CODE", default=False, cast=bool),
     }
 
     #print_timestamp("returnData 1")
