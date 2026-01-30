@@ -7,8 +7,7 @@ from django.db import transaction
 from django.utils.translation import gettext
 import json
 import random
-from Lobby.models import User
-from AQY.models import AQY_Game
+from Lobby.models import User, Game, GamePlayer
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendInviteNotifications,
 )
@@ -185,7 +184,8 @@ def create_aqy_game(
 
     with transaction.atomic():
 
-        new_game = AQY_Game(
+        new_game = Game(
+            gameCode='AQY',
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -206,40 +206,44 @@ def create_aqy_game(
             startingMap=starting_map,
             startingOptions=json.dumps(starting_options),
             playerOrderSeed=player_order_seed,
-            player0notes=player0notes,
         )
         if "privateGame" in request.POST:
             new_game.gameStatus = "PRIVATE"
-
-        new_game.save()
 
         if is_main_tournament:
             new_game.relatedMainTournament = tournamentObj
         if is_mini_tournament:
             new_game.relatedMiniTournament = tournamentObj
 
-        # Add players
-        for player in all_players:
-            new_game.allPlayers.add(player)
+        new_game.save()
+
+        # Add invited players M2M
         for player in invited_usernames_objs:
             new_game.invitedPlayers.add(player)
 
+        # Create GamePlayer instances for all players
+        for idx, player in enumerate(all_players):
+            GamePlayer.objects.create(
+                game=new_game,
+                player=player,
+                seat_order=idx,
+                notes=player0notes if idx == 0 else "",
+            )
+
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            new_game.startGame(request)
-
-        new_game.save()
+            new_game.presenter().startGame(request, isTournamentGame=(is_main_tournament or is_mini_tournament))
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
         # Use the game start notifications rather than a generic tournament one
-        return getattr(new_game, "id")
+        return new_game.id
 
     # THE BELOW IS JUST FOR NORMAL GAMES - TOURNAMENT GAMES RETURN ABOVE
     # Normal Game Notifications
     if usernames_to_notify:
         SN_sendInviteNotifications(
-            request, usernames_to_notify, new_game.getGameName(), max_players, "AQY"
+            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "AQY"
         )
 
     if "trainingGame" in request.POST:
@@ -250,7 +254,7 @@ def create_aqy_game(
 
     # Otherwise, return normal game creation
     messages.success(
-        request, SF_getGameCreationJsonReturn("AQY", getattr(new_game, "id"))
+        request, SF_getGameCreationJsonReturn("AQY", new_game.id)
     )
     return HttpResponseRedirect(
         reverse("indexListType", kwargs={"listType": "waiting"})

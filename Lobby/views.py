@@ -409,7 +409,7 @@ GAME_NAMES_MODELS = {
     "Bus": Bus_Game,
     "TGZ": TGZ_Game,
     "CNS": "CNS",  # Now using unified Game model
-    "AQY": AQY_Game,
+    "AQY": "AQY",  # Now using unified Game model
     "IND": IND_Game,
     "KFW": KFW_Game,
     "WEB": "WEB",  # Now using unified Game model
@@ -419,8 +419,7 @@ GAME_MODELS = [
     HC_Game,
     Bus_Game,
     TGZ_Game,
-    # CNS and WEB now use unified Game model
-    AQY_Game,
+    # CNS, AQY and WEB now use unified Game model
     IND_Game,
     KFW_Game,
     # WEB_Game removed - now uses unified Game model
@@ -759,7 +758,7 @@ def DBO_deleteGame(request, game_type):
         "Bus": Bus_Game,
         "TGZ": TGZ_Game,
         "CNS": Game,  # Now using unified Game model
-        "AQY": AQY_Game,
+        "AQY": Game,  # Now using unified Game model
         "IND": IND_Game,
         "KFW": KFW_Game,
         "WEB": Game,  # Now using unified Game model
