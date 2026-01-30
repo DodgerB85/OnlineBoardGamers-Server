@@ -3,10 +3,11 @@ import time
 import base64
 import gzip
 
+from decouple import config
+
 from contextlib import contextmanager
 
 from django.contrib import messages
-from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
@@ -264,7 +265,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             )
         ),
         
-        "settingsDEBUG": settings.DEBUG,
+        "settingsDEBUG": config("WEB_USE_SOURCE_CODE", default=False, cast=bool),
     }
 
     if not request.user.is_authenticated:

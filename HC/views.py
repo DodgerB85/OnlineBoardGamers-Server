@@ -8,6 +8,8 @@ import re
 import lzstring
 from random import randint
 
+from decouple import config
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
@@ -20,7 +22,6 @@ from django.db.models import Q
 from contextlib import contextmanager
 
 from django.db import connection
-from django.conf import settings
 
 from Lobby.models import User, Profile
 from .models import HC_Game
@@ -57,7 +58,7 @@ def HCgameSummary(request, game_id):
         "HC/HCgameSummary.html",
         {
             # "now": now,
-            "settingsDEBUG": settings.DEBUG,
+            "settingsDEBUG": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
             "gameData": currentGame.gameData,
             "gameID": getattr(currentGame, "id"),
         },
@@ -1190,7 +1191,7 @@ def showHCgame(request, game_id):
                 "nextURL": nextURL,
                 "KickoutFlexiDataArray": KickoutFlexiDataArray,
                 "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
-                "settingsDebug": settings.DEBUG,
+                "settingsDebug": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
             },
         )
 
@@ -1221,7 +1222,7 @@ def showHCgame(request, game_id):
             "preferredColour": preferredColour,
             "KickoutFlexiDataArray": KickoutFlexiDataArray,
             "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
-            "settingsDebug": settings.DEBUG,
+            "settingsDebug": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
             "startingOptionsLiteral": currentGame.startingOptions,
         },
     )

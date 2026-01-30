@@ -425,6 +425,7 @@ class FCM_Game(GeneralGame):
 
     def startGame(self, request):
         from django_q.tasks import async_task
+
         # 8-hardChoices (original MS only)
         # 20-ketchupMilestone
         # 23-reservePrice
@@ -495,25 +496,33 @@ class FCM_Game(GeneralGame):
         if request.user.username in playerListToNotify:
             playerListToNotify.remove(request.user.username)
 
-        #SN_M_sendGameStartNotification(
+        # SN_M_sendGameStartNotification(
         #    get_current_site(request),
         #    "FCM",
         #    playerListToNotify,
         #    getattr(self, "id"),
         #    self,
         #    request.user.username,
-        #)
+        # )
         domain = get_current_site(request)
         username = request.user.username
-        async_task(
-            "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+        SN_M_sendGameStartNotification(
             domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
             "FCM",
             playerListToNotify,
             self.id,
             self,
             username,
-        )  
+        )
+        #async_task(
+        #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+        #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+        #    "FCM",
+        #    playerListToNotify,
+        #    self.id,
+        #    self,
+        #    username,
+        #)
 
         self.save()
 

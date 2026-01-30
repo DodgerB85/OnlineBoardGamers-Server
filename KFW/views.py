@@ -3,10 +3,11 @@ import time
 import base64
 import gzip
 
+from decouple import config
+
 from contextlib import contextmanager
 
 from django.contrib import messages
-from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
@@ -251,7 +252,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "pov": -99,
         "move": "",
         "turn": currentGame.turn,
-        "settingsDEBUG": settings.DEBUG,
+        "settingsDEBUG": config("KFW_USE_SOURCE_CODE", default=False, cast=bool),
     }
 
     if not request.user.is_authenticated:
@@ -379,10 +380,6 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
 @contextmanager
 def db_mutex(name, timeout=10):
-    # if settings.DEBUG:
-    # if 1==2:
-    #    yield
-    #    return
     mutex_name = "dbmutex_" + name
     cursor = connection.cursor()
     # timeout returns with error

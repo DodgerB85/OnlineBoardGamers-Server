@@ -723,8 +723,7 @@ class HC_Game(GeneralGame):
 
             domain = get_current_site(request)
             username = request.user.username
-            async_task(
-                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            SN_M_sendGameStartNotification(
                 domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                 "HC",
                 playerListToNotify,
@@ -732,6 +731,15 @@ class HC_Game(GeneralGame):
                 self,
                 username,
             )
+            #async_task(
+            #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+            #    "HC",
+            #    playerListToNotify,
+            #    self.id,
+            #    self,
+            #    username,
+            #)
 
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # Use prefetched cache; avoid .values_list() to prevent new SQL queries

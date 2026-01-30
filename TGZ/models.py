@@ -393,8 +393,7 @@ class TGZ_Game(GeneralGame):
             # This ALWAYS send a start email, for game/tourny/MiniT
             domain = get_current_site(request)
             username = request.user.username
-            async_task(
-                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            SN_M_sendGameStartNotification(
                 domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                 "TGZ",
                 playerListToNotify,
@@ -402,6 +401,15 @@ class TGZ_Game(GeneralGame):
                 self,
                 username,
             )
+            #async_task(
+            #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+            #    "TGZ",
+            #    playerListToNotify,
+            #    self.id,
+            #    self,
+            #    username,
+            #)
             if request.user.username != allPlayersL[0]:
                 SN_sendNextTurnNotification(
                     request,

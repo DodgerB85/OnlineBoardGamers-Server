@@ -550,6 +550,7 @@ class AQY_Game(GeneralGame):
 
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
+
         self.gameStatus = "ACTIVE"
         self.playerOrderSeed = random.randint(1000, 32767)
         allPlayersL = self.getAllPlayersOrderedySeat()
@@ -569,8 +570,7 @@ class AQY_Game(GeneralGame):
 
                 domain = get_current_site(request)
                 username = request.user.username
-                async_task(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                SN_M_sendGameStartNotification(
                     domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
                     "AQY",
                     playerListToNotify,
@@ -578,6 +578,15 @@ class AQY_Game(GeneralGame):
                     self,
                     username,
                 )
+                #async_task(
+                #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+                #    "AQY",
+                #    playerListToNotify,
+                #    self.id,
+                #    self,
+                #    username,
+                #)
 
     def hasMoveEndData(self, name):
         seat = self.seatPosition(name)
