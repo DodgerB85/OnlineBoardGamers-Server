@@ -14,8 +14,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
-from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
-
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
 
 
@@ -534,6 +532,8 @@ class CannesPresenter(GamePresenter):
     def startGame(self, request):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
+        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
+
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
@@ -738,6 +738,8 @@ class WebPresenter(GamePresenter):
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
+        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
+
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
