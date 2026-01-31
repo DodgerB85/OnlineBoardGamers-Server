@@ -538,6 +538,10 @@ class Game(BaseGame):
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
+    
+    # This was causing a break not having this?
+    def getGameCode(self):
+        return self.gameCode
 
     ############### THESE NEED TO BE HERE FORE NOW TO STOP THINGS BREAKING
     def currentTurnString(self):

@@ -403,6 +403,27 @@ class WEBgameAdmin(GameAdmin):
 ################### END Register game objects to specific app
 @admin.register(AQYgame)
 class AQYgameAdmin(GameAdmin):
+    # Copy parent fieldsets and convert to list to allow modification
+    #new_fieldsets = list(GameAdmin.fieldsets)
+#
+    ## Define your specific section
+    #player_moves_section = (
+    #    "Player Moves",
+    #    {
+    #        "classes": ("collapse",),
+    #        "fields": (
+    #            ("player0currentMoveTime", "player0currentMoveData"),
+    #            ("player1currentMoveTime", "player1currentMoveData"),
+    #            ("player2currentMoveTime", "player2currentMoveData"),
+    #            ("player3currentMoveTime", "player3currentMoveData"),
+    #        ),
+    #    },
+    #)
+#
+    ## Insert it at index 2 (after 'Main Game Details')
+    #new_fieldsets.insert(2, player_moves_section) # type: ignore
+    #fieldsets = tuple(new_fieldsets)
+    
     def get_queryset(self, request):
         return super().get_queryset(request).filter(gameCode="AQY")
 
