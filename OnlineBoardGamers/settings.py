@@ -175,11 +175,18 @@ if DEBUG:
 # ASYNC SETTINGS
 Q_CLUSTER = {
     'name': 'obg_cluster',
-    'workers': 4,
+    'workers': 1,          # Keep this at 1 on PythonAnywhere
     'recycle': 500,
-    'timeout': 60,
-    'compress': True,
-    'orm': 'default',  # Uses your existing DB
+    'timeout': 60,         # Process timeout
+    #'compress': True, # DO NOT USE - Instead pass minimal data as args to async tasks
+    'retry': 120,
+    'queue_limit': 10,
+    'orm': 'default',      # Or your database alias
+    
+    # --- CRITICAL CPU SAVING SETTINGS ---
+    'sleeptime': 30,       # Wait 30 seconds before checking for new tasks
+    'bulking': 10,         # Process up to 10 tasks at once to reduce overhead
+    'sync': False,
 }
 
 # Database
