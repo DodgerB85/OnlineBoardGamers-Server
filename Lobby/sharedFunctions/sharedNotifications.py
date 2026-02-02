@@ -786,6 +786,8 @@ def SN_sendNextTurnNotification(
                         print(user)
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
+                if SR_usesUnifiedGameModel(game):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
