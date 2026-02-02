@@ -1839,11 +1839,11 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         #        html_message=message,
         #        fail_silently=False, # We set this to False so we can "catch" it below
         #    )
-        except Exception as e:
-            # This will show up in your obg_cluster.log and PythonAnywhere error logs
-            msg = f"❌ NOTIFICATION FAILURE: Email to {toEmail} timed out or failed. Error: {e}"
-            print(msg)
-            SN_sendAdminErrorMessage(None, msg)
+        #except Exception as e:
+        #    # This will show up in your obg_cluster.log and PythonAnywhere error logs
+        #    msg = f"❌ NOTIFICATION FAILURE: Email to {toEmail} timed out or failed. Error: {e}"
+        #    print(msg)
+        #    SN_sendAdminErrorMessage(None, msg)
         
 
 
