@@ -1727,7 +1727,7 @@ def bugEntry(request):
         gameData,
         bugDescription,
         currentGame.rewindData,
-        currentGame.startingMap + "   Options: " + json.loads(currentGame.startingOptions) if currentGame.startingOptions else "",
+        currentGame.startingMap + "   Options: " + json.loads(currentGame.startingOptions) if currentGame.startingOptions else [],
     )
 
     return JsonResponse({"bugEntrySuccess": True})
