@@ -802,6 +802,7 @@ class WebPresenter(GamePresenter):
                 #    self.gameObj,
                 #    username,
                 #)
+                
                 async_task(
                     "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                     domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
