@@ -93,6 +93,8 @@ def create_tgz_game(
         if batch_game_data:  # Batch game creation
             batch_lines = batch_game_data.splitlines()
             error_detected = False
+            from Lobby.models import Game, GamePlayer
+            
             for line in batch_lines:
                 row = [entry.strip() for entry in line.split(",")]
                 if len(row) < 2:
@@ -107,7 +109,10 @@ def create_tgz_game(
                 with transaction.atomic():
                     created_time = SR_getTimeNow()
                     creator = request.user
-                    new_game = TGZ_Game(
+                    
+                    # Create game in unified model
+                    new_game = Game(
+                        gameCode="TGZ",
                         gameName=game_name,
                         creator=creator,
                         host=players[0],
@@ -118,7 +123,6 @@ def create_tgz_game(
                         latestUpdate=created_time,
                         maxPlayers=max_players,
                         gameStatus="ACTIVE",
-                        externalTournamentGame=True,
                         kickoutDuration=100,
                         zoomLevels=json.dumps([240] * max_players),
                         statsExcludeConsent="0" * max_players,
@@ -128,9 +132,15 @@ def create_tgz_game(
                     )
                     new_game.save()
 
-                    # Add players and send notifications
-                    for player in players:
-                        new_game.allPlayers.add(player)
+                    # Add players using GamePlayer
+                    for idx, player in enumerate(players):
+                        GamePlayer.objects.create(
+                            game=new_game,
+                            player=player,
+                            seat_order=idx,
+                            is_current=(idx == 0),
+                        )
+                        
                         SN_M_T_sendTournamentGameStartNotification(
                             request,
                             "TGZ",
@@ -143,20 +153,30 @@ def create_tgz_game(
                             "externalTournament",
                         )
 
-                    # Fix player order
+                    # Fix player order - find seed that matches input order
                     player_order_seed = random.randint(1000, 32767)
-                    player_list_raw = list(
-                        new_game.allPlayers.exclude(username="TGZtourneyAdmin").values_list("username", flat=True)
-                    )
+                    player_list_raw = [gp.player.username for gp in new_game.players.all()]
                     player_name_order_input = player_usernames
+                    
                     for seed in range(1000, 32767):
                         player_list_test = player_list_raw.copy()
                         random.Random(seed).shuffle(player_list_test)
                         if player_list_test == player_name_order_input:
                             player_order_seed = seed
                             break
+                    
                     new_game.playerOrderSeed = player_order_seed
-                    new_game.currentPlayers = new_game.getAllPlayersOrderedySeat()[0]
+                    
+                    # Update seat order based on found seed
+                    if player_order_seed != new_game.playerOrderSeed:
+                        player_list_ordered = player_list_raw.copy()
+                        random.Random(player_order_seed).shuffle(player_list_ordered)
+                        for idx, username in enumerate(player_list_ordered):
+                            gp = new_game.players.get(player__username=username)
+                            gp.seat_order = idx
+                            gp.is_current = (idx == 0)
+                            gp.save()
+                    
                     new_game.save()
 
                     send_TGZ_server_discord_notification(f"Game Created -- Game: {row}", getattr(new_game, "id"))
@@ -184,12 +204,16 @@ def create_tgz_game(
             if players is None:
                 return HttpResponseRedirect(reverse("createTGZpage"))
 
+            from Lobby.models import Game, GamePlayer
+            
             with transaction.atomic():
                 created_time = SR_getTimeNow()
                 game_name = request.POST.get("gameName", "")
                 game_description = request.POST.get("gameDescription", "")
                 pace = request.POST.get("pace", 40)
-                new_game = TGZ_Game(
+                
+                new_game = Game(
+                    gameCode="TGZ",
                     gameName=game_name,
                     gameDescription=game_description,
                     creator=request.user,
@@ -201,7 +225,6 @@ def create_tgz_game(
                     latestUpdate=created_time,
                     maxPlayers=max_players,
                     gameStatus="ACTIVE",
-                    externalTournamentGame=True,
                     kickoutDuration=request.POST.get("kickoutDuration", 100),
                     zoomLevels=json.dumps([240] * max_players),
                     statsExcludeConsent="0" * max_players,
@@ -213,8 +236,15 @@ def create_tgz_game(
                 )
                 new_game.save()
 
-                for player in players:
-                    new_game.allPlayers.add(player)
+                # Add players using GamePlayer
+                for idx, player in enumerate(players):
+                    GamePlayer.objects.create(
+                        game=new_game,
+                        player=player,
+                        seat_order=idx,
+                        is_current=(idx == 0),
+                    )
+                    
                     SN_M_T_sendTournamentGameStartNotification(
                         request,
                         "TGZ",
@@ -227,7 +257,6 @@ def create_tgz_game(
                         "externalTournament",
                     )
 
-                new_game.currentPlayers = new_game.getAllPlayersOrderedySeat()[0]
                 new_game.save()
 
                 usernames = [player.username for player in players]
@@ -276,7 +305,6 @@ def create_tgz_game(
         game_pace = 30
         kickout_duration = 100
         starting_options = json.loads(tournament.startingOptions) if tournament.startingOptions != "" else []
-        # rewind_consent = "0" * max_players
         
         # Set exclude stats if any schism in starting_options
         for option in starting_options:
@@ -308,7 +336,6 @@ def create_tgz_game(
             if invited_usernames_objs is None:
                 return HttpResponseRedirect(reverse("createTGZpage"))
             
-            #invited_players = [get_object_or_404(User, username=username) for username in invited_usernames]
             if len(invited_usernames_objs) > 0:
                 game_status = "WAITING"
                 usernames_to_notify = [user.username for user in invited_usernames_objs]
@@ -324,10 +351,6 @@ def create_tgz_game(
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
 
-                # shadow_player = get_object_or_404(User, username=shadow_names[i - 1])
-                # new_game.allPlayers.add(shadow_player)
-                # display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
-                # shadow_players.append(display_name)
             player0notes = json.dumps(shadow_display, separators=(",", ":"))
         elif "learningGame" in request.POST:
             starting_options.append(int(request.POST.get("learningGame")))
@@ -349,9 +372,12 @@ def create_tgz_game(
                 
         all_players.append(request.user)
 
+    # Use unified Game model
+    from Lobby.models import Game, GamePlayer
+    
     with transaction.atomic():
-
-        new_game = TGZ_Game(
+        new_game = Game(
+            gameCode="TGZ",
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -370,61 +396,53 @@ def create_tgz_game(
             startingMap=starting_map,
             startingOptions=json.dumps(starting_options),
             playerOrderSeed=player_order_seed,
-            player0notes=player0notes,
         )
+        
+        if is_main_tournament:
+            new_game.relatedMainTournament = tournament
+        if is_mini_tournament:
+            new_game.relatedMiniTournament = tournament
+            
         if "privateGame" in request.POST:
             new_game.gameStatus = "PRIVATE"
 
         new_game.save()
 
-        if is_main_tournament:
-           new_game.relatedMainTournament = tournament
-        if is_mini_tournament:
-            new_game.relatedMiniTournament = tournament
-
-        # new_game.allPlayers.add(request.user)
-
-        # Add players
-        for player in all_players:
-            new_game.allPlayers.add(player)
+        # Add players using GamePlayer
+        for idx, player in enumerate(all_players):
+            gp = GamePlayer.objects.create(
+                game=new_game,
+                player=player,
+                seat_order=idx,
+                is_current=(idx == 0 and game_status == "ACTIVE"),
+            )
+            # Store display names in first player's notes for training games
+            if idx == 0 and player0notes:
+                gp.notes = player0notes
+                gp.save()
+        
+        # Add invited players
         for player in invited_usernames_objs:
             new_game.invitedPlayers.add(player)
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            new_game.startGame(request)
+            new_game.presenter().startGame(request)
 
         new_game.save()
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
-        # Use the game start notifications rather than a generic tournament one
-        #for username in usernames_to_notify:
-        #    tournamentType = "FullTournament"
-        #    if is_mini_tournament:
-        #        tournamentType = "MiniTournament"
-        #    SN_M_T_sendTournamentGameStartNotification(
-        #        request,
-        #        "TGZ",
-        #        username,
-        #        new_game.maxPlayers,
-        #        new_game.gameName,
-        #        new_game.currentTurnString(),
-        #        getattr(new_game, "id"),
-        #        False,
-        #        tournamentType,
-        #    )
         return getattr(new_game, "id")
 
     # Normal Game Notifications
-
     if usernames_to_notify:
-        SN_sendInviteNotifications(request, usernames_to_notify, new_game.getGameName(), max_players, "TGZ")
+        SN_sendInviteNotifications(request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "TGZ")
 
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has been started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
 
-    # Otherwise, return normal game creation
+    # Otherwise, return normal game creation with unified model ID
     messages.success(request, SF_getGameCreationJsonReturn("TGZ", getattr(new_game, "id")))
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
