@@ -25,7 +25,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_T_sendTournamentGameStartNotification,
-    SN_M_sendGameStartNotification,
+    #SN_M_sendGameStartNotification,
     SN_M_sendEndGameNotification,
 )
 from Lobby.sharedFunctions.sharedRefs import (
@@ -38,6 +38,8 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_TYPE_CHOICES,
     SR_getTournamentRoundsHTML,
 )
+
+from Lobby.sharedFunctions.constants import BLANK_MESSAGE_TEMPLATE
 
 
 class Bus_Tournament(models.Model):
@@ -551,6 +553,9 @@ class Bus_Game(GeneralGame):
 
         return playerList
 
+    def getCurrentPlayersString(self):
+            return ", ".join(self.getCurrentPlayersArray())
+
     def startGame(self, request):
         from django_q.tasks import async_task
         self.gameStatus = "ACTIVE"
@@ -600,15 +605,22 @@ class Bus_Game(GeneralGame):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            domain = get_current_site(request)
-            username = request.user.username
-            SN_M_sendGameStartNotification(
-                domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
-                "Bus",
+            message_data = BLANK_MESSAGE_TEMPLATE.copy() 
+            #message_data["gameName"] = self.gameObj.getGameName()
+            message_data["gameID"] = self.id
+            message_data["gameName"] = self.getGameName()
+            message_data["gameCode"] = "Bus"
+            message_data["username"] = request.user.username
+            message_data["currentPlayersString"] = self.getCurrentPlayersString()
+            message_data["maxPlayers"] = self.maxPlayers
+            #message_data["relatedMainTournamentID"] = self.relatedMainTournament.id if self.relatedMainTournament else 0
+            #message_data["relatedMiniTournamentID"] = self.relatedMiniTournament.id if self.relatedMiniTournament else 0
+            
+            print("about to start Bus async task")           
+            async_task(
+                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                 playerListToNotify,
-                self.id,
-                self,
-                username,
+                message_data,
             )
             #async_task(
             #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",

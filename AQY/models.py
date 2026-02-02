@@ -23,7 +23,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_T_sendTournamentGameStartNotification,
     SN_M_sendEndGameNotificationTieGame,
-    SN_M_sendGameStartNotification,
 )
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -570,14 +569,17 @@ class AQY_Game(GeneralGame):
 
                 domain = get_current_site(request)
                 username = request.user.username
-                SN_M_sendGameStartNotification(
-                    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
-                    "AQY",
-                    playerListToNotify,
-                    self.id,
-                    self,
-                    username,
-                )
+                
+                # THIS USES PRESENTER NOT THE MODEL
+                
+                #SN_M_sendGameStartNotification(
+                #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+                #    "AQY",
+                #    playerListToNotify,
+                #    self.id,
+                #    self,
+                #    username,
+                #)
                 #async_task(
                 #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                 #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks

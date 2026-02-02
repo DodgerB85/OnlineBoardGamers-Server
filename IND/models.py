@@ -32,10 +32,11 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_sendEndGameNotification,
-    SN_M_sendGameStartNotification,
-    SN_M_T_sendTournamentGameStartNotification,
+    #$SN_M_sendGameStartNotification,
+    #SN_M_T_sendTournamentGameStartNotification,
 )
 
+from Lobby.sharedFunctions.constants import BLANK_MESSAGE_TEMPLATE
 
 class IND_Tournament(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
@@ -106,17 +107,19 @@ class IND_Tournament(models.Model):
             if _currentPlayersUsernames[i] != "":
                 player = User.objects.get(username=_currentPlayersUsernames[i])
                 newGame.allPlayers.add(player)
-                SN_M_T_sendTournamentGameStartNotification(
-                    request,
-                    "IND",
-                    _currentPlayersUsernames[i],
-                    self.maxGamePlayers,
-                    newGame.gameName,
-                    newGame.currentTurnString(),
-                    getattr(newGame, "id"),
-                    False,
-                    "normalTournament",
-                )
+                
+                
+                #SN_M_T_sendTournamentGameStartNotification(
+                #    request,
+                #    "IND",
+                #    _currentPlayersUsernames[i],
+                #    self.maxGamePlayers,
+                #    newGame.gameName,
+                #    newGame.currentTurnString(),
+                #    getattr(newGame, "id"),
+                #    False,
+                #    "normalTournament",
+                #)
 
         newGame.kickoutDuration = 100
         newGame.relatedTournament = self
@@ -465,6 +468,10 @@ class IND_Game(GeneralGame):
 
         return playerList
 
+    def getCurrentPlayersString(self):
+            return ", ".join(self.getCurrentPlayersArray())
+
+
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
 
@@ -493,15 +500,22 @@ class IND_Game(GeneralGame):
 
             # The tournament sends out game start notifications
             if not isTournamentGame:
-                domain = get_current_site(request)
-                username = request.user.username
-                SN_M_sendGameStartNotification(
-                    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
-                    "IND",
+                message_data = BLANK_MESSAGE_TEMPLATE.copy() 
+                #message_data["gameName"] = self.gameObj.getGameName()
+                message_data["gameID"] = self.id
+                message_data["gameName"] = self.getGameName()
+                message_data["gameCode"] = "IND"
+                message_data["username"] = request.user.username
+                message_data["currentPlayersString"] = self.getCurrentPlayersString()
+                message_data["maxPlayers"] = self.maxPlayers
+                #message_data["relatedMainTournamentID"] = self.relatedMainTournament.id if self.relatedMainTournament else 0
+                #message_data["relatedMiniTournamentID"] = self.relatedMiniTournament.id if self.relatedMiniTournament else 0
+                
+                print("about to start IND async task")           
+                async_task(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                     playerListToNotify,
-                    self.id,
-                    self,
-                    username,
+                    message_data,
                 )
                 #async_task(
                 #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
