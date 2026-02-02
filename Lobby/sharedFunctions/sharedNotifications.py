@@ -1820,32 +1820,25 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
             user = User.objects.get(id=1)
         user.email_user(subject, message)
     else:
-        msg = MIMEMultipart()
-        msg["From"] = fromEmail
-        msg["To"] = toEmail
-        msg["Subject"] = subject
-        msg.attach(MIMEText(message, "html"))
-        server = smtplib.SMTP(serverAddress, 587)
-        server.starttls()
-        server.login(loginUsername, fromPassword)
-        server.send_message(msg)
-        server.quit()
-        #try:
-        #    send_mail(
-        #        subject=subject,
-        #        message=message,
-        #        from_email=fromEmail,
-        #        recipient_list=[toEmail],
-        #        html_message=message,
-        #        fail_silently=False, # We set this to False so we can "catch" it below
-        #    )
-        #except Exception as e:
-        #    # This will show up in your obg_cluster.log and PythonAnywhere error logs
-        #    msg = f"❌ NOTIFICATION FAILURE: Email to {toEmail} timed out or failed. Error: {e}"
-        #    print(msg)
-        #    SN_sendAdminErrorMessage(None, msg)
-        
+        try:
+            msg = MIMEMultipart()
+            msg["From"] = fromEmail
+            msg["To"] = toEmail
+            msg["Subject"] = subject
+            msg.attach(MIMEText(message, "html"))
 
+            # ADDED TIMEOUT=15: This stops the 184-second hang if Mailrelay is slow
+            server = smtplib.SMTP(serverAddress, 587, timeout=30) 
+            server.starttls()
+            server.login(loginUsername, fromPassword)
+            server.send_message(msg)
+            server.quit()
+            
+        except Exception as e:
+            # Logs the error so you know why it failed without hanging the cluster
+            error_msg = f"❌ Mailrelay Failure for {toEmail}: {e}"
+            print(error_msg)
+            SN_sendAdminErrorMessage(None, error_msg)
 
 def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
     if profile.webhooks == "" or profile.webhooks is None or profile.webhooks == "[]":
