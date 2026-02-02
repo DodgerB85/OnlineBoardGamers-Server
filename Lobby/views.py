@@ -2600,6 +2600,7 @@ def activate(request, uidb64, token):
         return HttpResponse(gettext("Activation link is invalid"))
 
 
+@login_required
 def playerInfo(request, usernameToProfile):
     try:
         userToProfile = User.objects.select_related("profile").get(
@@ -4802,7 +4803,7 @@ def createFCMminiTournament(request):
         else []
     )
     if "allowRewind" in request.POST:
-        startgOptions = startgOptions + ",99" if startgOptions != "" else "99"
+        startgOptions.append(99)
 
     with transaction.atomic():
         newTournament = Mini_Tournaments.objects.create(
@@ -4811,7 +4812,7 @@ def createFCMminiTournament(request):
             tournamentDescription=request.POST["tournamentDescription"],
             tournamentStatus="OP",
             tournamentType=request.POST["tournamentFormat"],
-            startingOptions=startgOptions,
+            startingOptions=json.dumps(startgOptions) if startgOptions else None,
             maxTournamentPlayers=request.POST["totalPlayersMT"],
             maxGamePlayers=request.POST["playersPerGameMT"],
             roundsBeforeKnockout=4,
