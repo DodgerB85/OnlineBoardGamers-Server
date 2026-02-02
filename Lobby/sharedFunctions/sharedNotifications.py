@@ -1820,25 +1820,25 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
             user = User.objects.get(id=1)
         user.email_user(subject, message)
     else:
-        #msg = MIMEMultipart()
-        #msg["From"] = fromEmail
-        #msg["To"] = toEmail
-        #msg["Subject"] = subject
-        #msg.attach(MIMEText(message, "html"))
-        #server = smtplib.SMTP(serverAddress, 587)
-        #server.starttls()
-        #server.login(loginUsername, fromPassword)
-        #server.send_message(msg)
-        #server.quit()
-        try:
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=fromEmail,
-                recipient_list=[toEmail],
-                html_message=message,
-                fail_silently=False, # We set this to False so we can "catch" it below
-            )
+        msg = MIMEMultipart()
+        msg["From"] = fromEmail
+        msg["To"] = toEmail
+        msg["Subject"] = subject
+        msg.attach(MIMEText(message, "html"))
+        server = smtplib.SMTP(serverAddress, 587)
+        server.starttls()
+        server.login(loginUsername, fromPassword)
+        server.send_message(msg)
+        server.quit()
+        #try:
+        #    send_mail(
+        #        subject=subject,
+        #        message=message,
+        #        from_email=fromEmail,
+        #        recipient_list=[toEmail],
+        #        html_message=message,
+        #        fail_silently=False, # We set this to False so we can "catch" it below
+        #    )
         except Exception as e:
             # This will show up in your obg_cluster.log and PythonAnywhere error logs
             msg = f"❌ NOTIFICATION FAILURE: Email to {toEmail} timed out or failed. Error: {e}"
