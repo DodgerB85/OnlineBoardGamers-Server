@@ -15,7 +15,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
-from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC
 
 
 class GamePresenter:
@@ -356,6 +356,21 @@ class GamePresenter:
     def getFullSetOfVoteResults(self, topic, usernames, default):
         # Initialize the return dictionary with default for every provided username
         generalReturn = {username: default for username in usernames}
+        
+        # If the game is statsExcluded, and you are checking that vote, return True
+        if self.gameObj.statsExcludedGame and topic == STATS_EXCLUDE_VOTE_TOPIC:
+            # set all to True
+            for username in usernames:
+                generalReturn[username] = True
+            return generalReturn
+        
+        # If it is an FCM game with enabled rewinds, return 2 always
+        if self.gameObj.getGameCode() == "FCM" and topic == REWIND_CONSENT_VOTE_TOPIC:
+            startingOptionsList = self.gameObj.startingOptions.split(",")
+            if "99" in startingOptionsList:
+                for username in usernames:
+                    generalReturn[username] = 2
+                return generalReturn
 
         # If game is finished or no votes exist at all, return the all-False set
         if self.gameObj.gameStatus == "FINISHED" or not self.gameObj.activeVotes:
