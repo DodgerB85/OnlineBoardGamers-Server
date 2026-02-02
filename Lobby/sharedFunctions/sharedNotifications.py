@@ -1154,6 +1154,8 @@ def SN_M_T_sendTournamentWinNotification(
 def SN_M_sendGameStartNotification(
     currentSite, gameCode, playerList, gameID, currentGame, errorUsername
 ):
+    if gameCode == "CNS" or gameCode == "WEB":
+        print("This should be printing in the cluster")
     originalLang = get_language()
     for player in playerList:
         try:
