@@ -127,24 +127,21 @@ def createHCgame(request):
     _player_order_seed = randint(0, _maxPlayers - 1)
     statsExcludedGame = False
     
-    _startingOptions = ""
+    _startingOptions = []
     if "trainingGame" in request.POST:
-        _startingOptions += request.POST["trainingGame"] + ","
+        _startingOptions.append(int(request.POST["trainingGame"]))  
     # if 'learningGame' in request.POST:
     #    _startingOptions += request.POST["trainingGame"] + ","
     if "experiencedGame" in request.POST:
-        _startingOptions += request.POST["experiencedGame"] + ","
+        _startingOptions.append(int(request.POST["experiencedGame"])) 
         
     if "limitVehicles" in request.POST:
         # Exclude from stats
         statsExcludedGame = True
         if "vehicleLimitRadio" in request.POST:
-            _startingOptions += request.POST["vehicleLimitRadio"] + ","
+            _startingOptions.append(request.POST["vehicleLimitRadio"])
         if "increaseMainlines" in request.POST:
-            _startingOptions += request.POST["increaseMainlines"] + ","
-
-    if len(_startingOptions) > 0:
-        _startingOptions = _startingOptions.rstrip(_startingOptions[-1])
+            _startingOptions.append(request.POST["increaseMainlines"])
 
     _created = SR_getTimeNow()
     _pace = request.POST["pace"]
@@ -160,7 +157,7 @@ def createHCgame(request):
         created=_created,
         latestUpdate=_created,
         playerOrderSeed=_player_order_seed,
-        startingOptions=_startingOptions,
+        startingOptions=json.dumps(_startingOptions, separators=(',', ':')), 
         maxPlayers=_maxPlayers,
         gameStatus="AVAILABLE",
         statsExcludedGame=statsExcludedGame
