@@ -550,6 +550,8 @@ def SN_M_sendEndGameNotificationTieGame(
 
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
+                if SR_usesUnifiedGameModel(game):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -665,6 +667,8 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
 
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
+                if SR_usesUnifiedGameModel(game):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -1066,6 +1070,8 @@ def SN_M_T_sendTournamentGameStartNotification(
 
         # SEND WEBHOOKS
         urlRaw = f"https://www.OnlineBoardGamers.com/{_game}/{str(_gameID)}/"
+        if SR_usesUnifiedGameModel(_game):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{_game}/{str(_gameID)}/show/"
         if (
             profile.webhooks != ""
             and profile.webhooks is not None
@@ -1263,6 +1269,8 @@ def SN_M_sendGameStartNotification(
 
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
+                if SR_usesUnifiedGameModel(gameCode):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -1290,6 +1298,8 @@ def SN_M_sendGameStartNotification(
 
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
+                if SR_usesUnifiedGameModel(gameCode):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -1468,6 +1478,8 @@ def SN_sendReminderEmail(playerName, game, gameID, gameName):
 
             # SEND WEBHOOKS
             urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
+            if SR_usesUnifiedGameModel(game):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
             if (
                 profile.webhooks != ""
                 and profile.webhooks is not None
@@ -1534,6 +1546,8 @@ def SN_sendReminderExpiredEmail(playerName, game, gameID, gameName):
 
             # SEND WEBHOOKS
             urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
+            if SR_usesUnifiedGameModel(game):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
             if (
                 profile.webhooks != ""
                 and profile.webhooks is not None
