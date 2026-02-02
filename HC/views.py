@@ -1167,7 +1167,7 @@ def showHCgame(request, game_id):
                 "kickoutRequired": kickoutRequired,
                 "involvedPlayer": involvedPlayer,
                 "gameName": currentGame.getGameName(),
-                "startingOptionsLiteral": currentGame.startingOptions,
+                "startingOptionsLiteral": json.loads(currentGame.startingOptions) if currentGame.startingOptions else None,
                 "gameID": getattr(currentGame, "id"),
                 "currentPlayers": currentPlayers,
                 "latestUpdateLiteral": currentGame.latestUpdate,
@@ -1220,7 +1220,7 @@ def showHCgame(request, game_id):
             "KickoutFlexiDataArray": KickoutFlexiDataArray,
             "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
             "settingsDebug": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
-            "startingOptionsLiteral": currentGame.startingOptions,
+            "startingOptionsLiteral": json.loads(currentGame.startingOptions) if currentGame.startingOptions else None,
         },
     )
 

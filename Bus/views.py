@@ -254,7 +254,7 @@ def showBusGame(request, game_id):
     if currentGame.kickoutFlexiData:
         KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
 
-    startingOptions = currentGame.startingOptions
+    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
     returnData = {
         "gameID": gameID,
