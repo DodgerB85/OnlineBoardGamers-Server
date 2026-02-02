@@ -413,14 +413,14 @@ class FCM_Game(GeneralGame):
         }
 
     def isExperiencedGame(self):
-        startingOptionsListPrelim = self.startingOptions.split(",")
-        if "120" in startingOptionsListPrelim:
+        starting_options = json.loads(self.startingOptions) if self.startingOptions else []
+        if 120 in starting_options:
             return True
         return False
 
     def isLearningGame(self):
-        startingOptionsListPrelim = self.startingOptions.split(",")
-        if "110" in startingOptionsListPrelim:
+        starting_options = json.loads(self.startingOptions) if self.startingOptions else []
+        if 110 in starting_options:
             return True
         return False
 
@@ -453,37 +453,40 @@ class FCM_Game(GeneralGame):
         # Copy in an initial value to prevent forced LU values of 99999 overwriting maps
         self.latestUpdate = self.created
         self.save()
+        starting_options = json.loads(self.startingOptions) if self.startingOptions else []
 
         # need to add in possible new dist options
-        startingOptions = self.startingOptions.split(",")
-        if "200" in startingOptions:
+        if 200 in starting_options:
             availableModules = [20, 23, 18, 22, 19, 10, 11, 12, 9, 15, 13, 17, 14, 16]
             # Add hard choices only with original MS
-            if "21" not in startingOptions:
+            if 21 not in starting_options:
                 availableModules.append(8)
             selectedModules = []
             moduleRange = []
-            for i in range(len(startingOptions)):
-                if len(startingOptions[i]) == 5:
-                    moduleRange.append(startingOptions[i])
+            for i in range(len(starting_options)):
+                if len(str(starting_options[i])) == 5:
+                    moduleRange.append(str(starting_options[i]))
             for i in range(len(moduleRange)):
                 moduleRange[i] = int(moduleRange[i][-2:])
             numberOfModulesToPick = random.randrange(
-                moduleRange[0], moduleRange[1] + 1, 1
+                int(moduleRange[0]), int(moduleRange[1] + 1), 1
             )
             for i in range(numberOfModulesToPick):
                 currentIndex = random.randrange(0, len(availableModules), 1)
-                selectedModules.append(str(availableModules.pop(currentIndex)))
+                selectedModules.append(availableModules.pop(currentIndex))
             # _tournamentType = random.choice(["RR", "KO", "TL"])
-            if "18" in selectedModules:
+            if 18 in selectedModules:
                 currentIndex = random.randrange(0, 3, 1)
-                distOptions = ["", "181", "183"]
+                distOptions = [0, 181, 183]
                 chosenDistOption = distOptions[currentIndex]
-                if chosenDistOption != "":
+                if chosenDistOption > 0:
                     selectedModules.append(chosenDistOption)
-            self.startingOptions = (
-                self.startingOptions + "," + (",".join(selectedModules))
-            )
+            starting_options = json.loads(self.startingOptions) if self.startingOptions else []
+            starting_options.extend(selectedModules)
+            self.startingOptions = json.dumps(starting_options, separators=(',', ':'))
+            #self.startingOptions = (
+            #  self.startingOptions + "," + (",".join(selectedModules))
+            #)
 
         self.gameStatus = "ACTIVE"
         _currentPlayers = ""

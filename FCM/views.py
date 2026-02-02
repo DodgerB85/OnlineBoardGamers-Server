@@ -694,7 +694,7 @@ def _processTurn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "SO": currentGame.startingOptions,
+                "SO": json.loads(currentGame.startingOptions),
                 "startingOptionsHTML": SR_getFCMstartingOptionsHTML(
                     currentGame.startingOptions
                 ),
@@ -737,7 +737,8 @@ def _processTurn(request):
         currentGame.currentPlayers = jsonData["nextPlayer"]
 
         # Update module selections
-        currentGame.startingOptions += "," + str(jsonData["SM"])
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        starting_options.append(int(jsonData["SM"]))
 
         # If staying in module selection, don't save a rewind
         if currentGame.phase == 13:
@@ -745,17 +746,12 @@ def _processTurn(request):
         else:
             # You are moving into the game proper
             currentGame.rewindData = currentGame.gameData
-            startingOptionsArr = currentGame.startingOptions.split(",")
-            # Convert the list of strings to a list of integers
-            startingOptionsArr = [int(item) for item in startingOptionsArr]
-            startingOptionsArr.remove(
-                300
-            )  # Remove the integer from its current position
-            startingOptionsArr.append(300)  # Append the integer to the end of the list
-            startingOptionsArr = [str(item) for item in startingOptionsArr]
-            currentGame.startingOptions = ",".join(
-                startingOptionsArr
-            )  # Join the list back into a comma-separated string
+            # Move '300' to the end
+            if 300 in starting_options:
+                starting_options.remove(300)
+                starting_options.append(300)
+        
+        currentGame.startingOptions =  json.dumps(starting_options, separators=(',', ':')) 
 
         currentGame.save()
 
@@ -797,7 +793,7 @@ def _processTurn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "SO": currentGame.startingOptions,
+                "SO": json.loads(currentGame.startingOptions),
                 "startingOptionsHTML": SR_getFCMstartingOptionsHTML(
                     currentGame.startingOptions
                 ),
@@ -832,7 +828,7 @@ def _processTurn(request):
             and currentGame.startingMap != ""
         ):
             incomingTiles = jsonData["mapTiles"]
-            currentTiles = json.loads(currentGame.startingMap)
+            currentTiles = json.loads(currentGame.startingMap) 
             if len(incomingTiles) != len(currentTiles):
                 turn = jsonData.get(
                     "turn", "N/A"
@@ -909,10 +905,12 @@ def _processTurn(request):
             )
             SN_sendAdminErrorMessage(request, message)
 
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+
         if (
             oldPhase == 7
             and jsonData["phase"] == 7
-            and "101" not in currentGame.startingOptions
+            and 101 not in starting_options 
         ):
             print(
                 "*********************************************** Key 'phase'  PHASE 7 ERROR   "
@@ -929,7 +927,7 @@ def _processTurn(request):
         if (
             oldPhase == 9
             and jsonData["phase"] == 9
-            and "101" not in currentGame.startingOptions
+            and 101 not in starting_options
         ):
             print(
                 "*********************************************** Key 'phase'  PHASE 9 ERROR   "
@@ -951,7 +949,7 @@ def _processTurn(request):
         if (
             oldPhase == 4
             and jsonData["phase"] == 4
-            and "101" not in currentGame.startingOptions
+            and 101 not in starting_options
         ):
             returnOOBpreferences = True
 
@@ -959,14 +957,14 @@ def _processTurn(request):
         if (
             oldPhase != 7
             and jsonData["phase"] == 7
-            and "101" not in currentGame.startingOptions
+            and 101 not in starting_options
         ):
             returnPaydayPreturns = True
         # Same for cleanup
         if (
             oldPhase != 9
             and jsonData["phase"] == 9
-            and "101" not in currentGame.startingOptions
+            and 101 not in starting_options
         ):
             returnFridgePreturns = True
 
@@ -1729,7 +1727,7 @@ def bugEntry(request):
         gameData,
         bugDescription,
         currentGame.rewindData,
-        currentGame.startingMap + "   Options: " + currentGame.startingOptions,
+        currentGame.startingMap + "   Options: " + json.loads(currentGame.startingOptions) if currentGame.startingOptions else "",
     )
 
     return JsonResponse({"bugEntrySuccess": True})
