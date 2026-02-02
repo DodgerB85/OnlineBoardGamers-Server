@@ -7,11 +7,22 @@ app_name = 'TGZ'
 
 urlpatterns = [
     path('', views.index),
-    #path('TGZ/', views.showTGZgame, name='showTGZgame'),
-
-    path('<int:game_id>/', views.showTGZgame, name='showTGZgame'),
-    path('<int:game_id>/spoilerFree/', views.showTGZgame, {'spoilerFree': True}, name='showTGZgameSpoilerFree'),
-    path('<int:game_id>/replay/<int:replayStep>/', views.showTGZgame, {'spoilerFree': True}, name='showTGZreplayStep'),
+    # New path format /TGZ/:id/show
+    path('<int:game_id>/show/', views.showTGZgame, name='showTGZgame'),
+    path(
+        '<int:game_id>/spoilerFree/',
+        views.showTGZgame,
+        {'spoilerFree': True},
+        name='showTGZgameSpoilerFree',
+    ),
+    path(
+        '<int:game_id>/replay/<int:replayStep>/',
+        views.showTGZgame,
+        {'spoilerFree': True},
+        name='showTGZreplayStep',
+    ),
+    # Legacy redirect from /TGZ/:original_id to /TGZ/:id/show
+    path('<int:original_id>/', views.redirectLegacyTGZ, name='redirectLegacyTGZ'),
 
     path('help/', views.TGZhelp, name='TGZhelp'),
 
