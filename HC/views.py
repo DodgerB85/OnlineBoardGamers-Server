@@ -139,9 +139,9 @@ def createHCgame(request):
         # Exclude from stats
         statsExcludedGame = True
         if "vehicleLimitRadio" in request.POST:
-            _startingOptions.append(request.POST["vehicleLimitRadio"])
+            _startingOptions.append(int(request.POST["vehicleLimitRadio"]))
         if "increaseMainlines" in request.POST:
-            _startingOptions.append(request.POST["increaseMainlines"])
+            _startingOptions.append(int(request.POST["increaseMainlines"]))
 
     _created = SR_getTimeNow()
     _pace = request.POST["pace"]
