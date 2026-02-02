@@ -340,7 +340,7 @@ class Mini_Tournaments(models.Model):
         createdTS = str(self.created)
         startingOptionsHTML = "[None]"
         if self.gameCode == "FCM":
-            startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions))
+            startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "TGZ":
             startingOptionsHTML = SR_getTGZstartingOptionsHTML(self.startingOptions)
 
