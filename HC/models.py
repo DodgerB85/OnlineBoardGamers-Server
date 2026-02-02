@@ -26,7 +26,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_sendEndGameNotification,
-    #SN_M_sendGameStartNotification,
+    # SN_M_sendGameStartNotification,
     SN_M_T_sendTournamentGameStartNotification,
 )
 
@@ -56,7 +56,9 @@ class HC_Tournament(models.Model):
         settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_HC", blank=True
     )
     nextRoundPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="currentRoundPlayersRelName_HC", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="currentRoundPlayersRelName_HC",
+        blank=True,
     )
     maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
     maxGamePlayers = models.PositiveSmallIntegerField(blank=False)
@@ -75,7 +77,9 @@ class HC_Tournament(models.Model):
             return True
         return False
 
-    def createTournamentGame(self, request, _roundNumberString, _currentPlayersUsernames):
+    def createTournamentGame(
+        self, request, _roundNumberString, _currentPlayersUsernames
+    ):
         gameName = "[" + self.tournamentName + "]" + " " + _roundNumberString
         player_order_seed = randint(0, self.maxGamePlayers - 1)
 
@@ -116,7 +120,9 @@ class HC_Tournament(models.Model):
         #    self.sendTournamentInviteNotification(request, _currentPlayersUsernames[4], newGame.id)
         for i in range(self.maxGamePlayers):
             if i < len(_currentPlayersUsernames) and _currentPlayersUsernames[i] != "":
-                newGame.allPlayers.add(User.objects.get(username=_currentPlayersUsernames[i]))
+                newGame.allPlayers.add(
+                    User.objects.get(username=_currentPlayersUsernames[i])
+                )
                 SN_M_T_sendTournamentGameStartNotification(
                     request,
                     "HC",
@@ -217,16 +223,32 @@ class HC_Tournament(models.Model):
             roundsHTML += "<th>" + gettext("Game") + "</th>"
             roundsHTML += "<th>" + gettext("Winner") + "</th>"
             roundsHTML += "</tr>"
-            j=0
+            j = 0
             for row in TPDA[i]:
                 if row[0] != "BYEPLAYERS":
-                    roundsHTML += '<tr class="clickableGameRow HC" id="gamesRow' + str(row[self.maxGamePlayers]) + '">'
+                    roundsHTML += (
+                        '<tr class="clickableGameRow HC" id="gamesRow'
+                        + str(row[self.maxGamePlayers])
+                        + '">'
+                    )
 
                     for j in range(len(row)):
                         if j == 0:
-                            roundsHTML += '<td><a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                            roundsHTML += (
+                                '<td><a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + "</a>"
+                            )
                         elif j < self.maxGamePlayers:
-                            roundsHTML += ' VS <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                            roundsHTML += (
+                                ' VS <a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + "</a>"
+                            )
                     roundsHTML += "</td>"
                     roundsHTML += "<td>"
                     if len(row) == (self.maxGamePlayers + 2):
@@ -241,10 +263,18 @@ class HC_Tournament(models.Model):
                     for j in range(len(row)):
                         if j == 1:
                             roundsHTML += (
-                                "<td>" + gettext("BYES:") + ' <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                                "<td>"
+                                + gettext("BYES:")
+                                + ' <a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + "</a>"
                             )
                         elif j > 1:
-                            roundsHTML += ', <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                            roundsHTML += (
+                                ', <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                            )
 
             roundsHTML += "</table>"
             roundsHTML += "</div>"
@@ -254,31 +284,47 @@ class HC_Tournament(models.Model):
 
 
 class HC_Game(GeneralGame):
-    allPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="HCallPlayersRelName")
+    allPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="HCallPlayersRelName"
+    )
     missingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="HCmissingPlayersRelName", blank=True
     )
-    
+
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_creator_relName"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="HCgame_creator_relName",
     )
     host = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_host_relName"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="HCgame_host_relName",
     )
-    
-    kickedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="HCkickedPlayersRelName", blank=True)
+
+    kickedPlayers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="HCkickedPlayersRelName", blank=True
+    )
     invitedPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="HCinvitedPlayersRelName", blank=True
     )
     playersWithChatNotification = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="HCplayersWithChatNotificationName", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="HCplayersWithChatNotificationName",
+        blank=True,
     )
-    
+
     # TODOMODEL: Replace this with proper turn order code
-    #seatOffset = models.PositiveSmallIntegerField()
+    # seatOffset = models.PositiveSmallIntegerField()
 
     winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="HCgame_winner_relName", blank=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="HCgame_winner_relName",
+        blank=True,
     )
 
     # TODOMODEL change to json, move to general game
@@ -299,7 +345,11 @@ class HC_Game(GeneralGame):
 
     tournamentGame = models.BooleanField(blank=False, default=False)
     relatedTournament = models.ForeignKey(
-        HC_Tournament, on_delete=models.SET_NULL, null=True, blank=True, related_name="tournament_relName"
+        HC_Tournament,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tournament_relName",
     )
 
     def __str__(self):
@@ -383,7 +433,7 @@ class HC_Game(GeneralGame):
             data = getattr(self, f"player{i}currentMoveData")
             # Fix: Cast to str to prevent slicing error if field is an int/None
             move_time_str = str(getattr(self, f"player{i}currentMoveTime"))
-            
+
             is_ready = data != "" and move_time_str[:6] != "NODATA"
             readyAllPlayers.append(is_ready)
 
@@ -398,90 +448,91 @@ class HC_Game(GeneralGame):
             # 2. Fill empty timestamps and build response
             for i in range(self.maxPlayers):
                 move_time = getattr(self, f"player{i}currentMoveTime")
-                
+
                 # If timestamp is empty string, initialize it
                 if move_time == "":
                     move_time = current_time_ms
                     setattr(self, f"player{i}currentMoveTime", move_time)
                     setattr(self, f"player{i}currentMoveData", "::")
-                
+
                 # Build the response list
-                jsonResponse.append({
-                    "date": int(move_time), 
-                    "content": getattr(self, f"player{i}currentMoveData")
-                })
-                
+                jsonResponse.append(
+                    {
+                        "date": int(move_time),
+                        "content": getattr(self, f"player{i}currentMoveData"),
+                    }
+                )
+
             return jsonResponse
 
         return False
 
-
-#    def getMoveResponse(self, action):
-#        readyAllPlayers = []
-#        if self.player0currentMoveData == "" or self.player0currentMoveTime[:6] == "NODATA":
-#            readyAllPlayers.append(False)
-#        else:
-#            readyAllPlayers.append(True)
-#        if self.player1currentMoveData == "" or self.player1currentMoveTime[:6] == "NODATA":
-#            readyAllPlayers.append(False)
-#        else:
-#            readyAllPlayers.append(True)
-#        if self.player2currentMoveData == "" or self.player2currentMoveTime[:6] == "NODATA":
-#            readyAllPlayers.append(False)
-#        else:
-#            readyAllPlayers.append(True)
-#        if self.player3currentMoveData == "" or self.player3currentMoveTime[:6] == "NODATA":
-#            readyAllPlayers.append(False)
-#        else:
-#            readyAllPlayers.append(True)
-#        if self.player4currentMoveData == "" or self.player4currentMoveTime[:6] == "NODATA":
-#            readyAllPlayers.append(False)
-#        else:
-#            readyAllPlayers.append(True)
-#
-#        readyPlayers = readyAllPlayers[: self.maxPlayers]
-#
-#        # NB Turn 0 inserts data for the bot
-#        readyWithBots = False
-#        # readyCount = sum(readyPlayers)
-#        # nbBots = self.missingPlayers.count()
-#        # if readyCount + nbBots == self.maxPlayers:
-#        #    readyWithBots = True
-#
-#        if all(readyPlayers) or readyWithBots:
-#            if self.player0currentMoveTime == "":
-#                self.player0currentMoveTime = int(time.time()) * 1000
-#                self.player0currentMoveData = "::"
-#            if self.player1currentMoveTime == "":
-#                self.player1currentMoveTime = int(time.time()) * 1000
-#                self.player1currentMoveData = "::"
-#            if self.player2currentMoveTime == "":
-#                self.player2currentMoveTime = int(time.time()) * 1000
-#                self.player2currentMoveData = "::"
-#            if self.player3currentMoveTime == "":
-#                self.player3currentMoveTime = int(time.time()) * 1000
-#                self.player3currentMoveData = "::"
-#            if self.player4currentMoveTime == "":
-#                self.player4currentMoveTime = int(time.time()) * 1000
-#                self.player4currentMoveData = "::"
-#
-#            jsonResponse = []
-#
-#            jsonResponse.append({"date": int(self.player0currentMoveTime), "content": self.player0currentMoveData})
-#            jsonResponse.append({"date": int(self.player1currentMoveTime), "content": self.player1currentMoveData})
-#            if self.maxPlayers >= 3:
-#                jsonResponse.append({"date": int(self.player2currentMoveTime), "content": self.player2currentMoveData})
-#            if self.maxPlayers >= 4:
-#                jsonResponse.append({"date": int(self.player3currentMoveTime), "content": self.player3currentMoveData})
-#            if self.maxPlayers >= 5:
-#                jsonResponse.append({"date": int(self.player4currentMoveTime), "content": self.player4currentMoveData})
-#
-#            # self.clearAllMoveData()
-#
-#        else:
-#            jsonResponse = False
-#
-#        return jsonResponse
+    #    def getMoveResponse(self, action):
+    #        readyAllPlayers = []
+    #        if self.player0currentMoveData == "" or self.player0currentMoveTime[:6] == "NODATA":
+    #            readyAllPlayers.append(False)
+    #        else:
+    #            readyAllPlayers.append(True)
+    #        if self.player1currentMoveData == "" or self.player1currentMoveTime[:6] == "NODATA":
+    #            readyAllPlayers.append(False)
+    #        else:
+    #            readyAllPlayers.append(True)
+    #        if self.player2currentMoveData == "" or self.player2currentMoveTime[:6] == "NODATA":
+    #            readyAllPlayers.append(False)
+    #        else:
+    #            readyAllPlayers.append(True)
+    #        if self.player3currentMoveData == "" or self.player3currentMoveTime[:6] == "NODATA":
+    #            readyAllPlayers.append(False)
+    #        else:
+    #            readyAllPlayers.append(True)
+    #        if self.player4currentMoveData == "" or self.player4currentMoveTime[:6] == "NODATA":
+    #            readyAllPlayers.append(False)
+    #        else:
+    #            readyAllPlayers.append(True)
+    #
+    #        readyPlayers = readyAllPlayers[: self.maxPlayers]
+    #
+    #        # NB Turn 0 inserts data for the bot
+    #        readyWithBots = False
+    #        # readyCount = sum(readyPlayers)
+    #        # nbBots = self.missingPlayers.count()
+    #        # if readyCount + nbBots == self.maxPlayers:
+    #        #    readyWithBots = True
+    #
+    #        if all(readyPlayers) or readyWithBots:
+    #            if self.player0currentMoveTime == "":
+    #                self.player0currentMoveTime = int(time.time()) * 1000
+    #                self.player0currentMoveData = "::"
+    #            if self.player1currentMoveTime == "":
+    #                self.player1currentMoveTime = int(time.time()) * 1000
+    #                self.player1currentMoveData = "::"
+    #            if self.player2currentMoveTime == "":
+    #                self.player2currentMoveTime = int(time.time()) * 1000
+    #                self.player2currentMoveData = "::"
+    #            if self.player3currentMoveTime == "":
+    #                self.player3currentMoveTime = int(time.time()) * 1000
+    #                self.player3currentMoveData = "::"
+    #            if self.player4currentMoveTime == "":
+    #                self.player4currentMoveTime = int(time.time()) * 1000
+    #                self.player4currentMoveData = "::"
+    #
+    #            jsonResponse = []
+    #
+    #            jsonResponse.append({"date": int(self.player0currentMoveTime), "content": self.player0currentMoveData})
+    #            jsonResponse.append({"date": int(self.player1currentMoveTime), "content": self.player1currentMoveData})
+    #            if self.maxPlayers >= 3:
+    #                jsonResponse.append({"date": int(self.player2currentMoveTime), "content": self.player2currentMoveData})
+    #            if self.maxPlayers >= 4:
+    #                jsonResponse.append({"date": int(self.player3currentMoveTime), "content": self.player3currentMoveData})
+    #            if self.maxPlayers >= 5:
+    #                jsonResponse.append({"date": int(self.player4currentMoveTime), "content": self.player4currentMoveData})
+    #
+    #            # self.clearAllMoveData()
+    #
+    #        else:
+    #            jsonResponse = False
+    #
+    #        return jsonResponse
 
     def currentTurnString(self):
         return SR_currentTurnString("HC", self.turn, self.phase)
@@ -521,7 +572,14 @@ class HC_Game(GeneralGame):
             return False
 
         # Use a set for faster membership testing
-        shadow_values = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
         return (
             not self.currentPlayers
             or loggedInPlayerUsername in self.currentPlayers
@@ -591,7 +649,11 @@ class HC_Game(GeneralGame):
             or self.gameStatus == "ACTIVE"
             or self.gameStatus == "PRIVATE"
         ):
-            if self.gameStatus == "WAITING" or self.gameStatus == "AVAILABLE" or self.gameStatus == "PRIVATE":
+            if (
+                self.gameStatus == "WAITING"
+                or self.gameStatus == "AVAILABLE"
+                or self.gameStatus == "PRIVATE"
+            ):
                 elapsedTotalSeconds = int(time.time()) - int(self.created) // 1000
             if self.gameStatus == "ACTIVE":
                 elapsedTotalSeconds = int(time.time()) - int(self.latestUpdate) // 1000
@@ -620,7 +682,10 @@ class HC_Game(GeneralGame):
         chatNotification = False
         involvedPlayer = False
 
-        if loggedInUser in self.allPlayers.all() and loggedInUser not in self.missingPlayers.all():
+        if (
+            loggedInUser in self.allPlayers.all()
+            and loggedInUser not in self.missingPlayers.all()
+        ):
             involvedPlayer = True
 
         if loggedInUser in self.playersWithChatNotification.all():
@@ -628,7 +693,9 @@ class HC_Game(GeneralGame):
 
         gamePaceString = SR_gamePaceString(self.gamePace)
 
-        startingOptionsHTML = SR_getHCstartingOptionsHTML(self.startingOptions)
+        startingOptionsHTML = SR_getHCstartingOptionsHTML(
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
 
         kickoutRequiredNum = self.kickoutRequired()
 
@@ -688,26 +755,33 @@ class HC_Game(GeneralGame):
         }
 
     def isExperiencedGame(self):
-        startingOptionsListPrelim = self.startingOptions.split(",")
-        if "120" in startingOptionsListPrelim:
+        starting_optiolns = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
+        if 120 in starting_optiolns:
             return True
         return False
 
     def isLearningGame(self):
-        startingOptionsListPrelim = self.startingOptions.split(",")
-        if "110" in startingOptionsListPrelim:
+        starting_optiolns = (
+            json.loads(self.startingOptions) if self.startingOptions else []
+        )
+        if 110 in starting_optiolns:
             return True
         return False
 
     def getCurrentPlayersString(self):
-            return ", ".join(self.getCurrentPlayersArray())
+        return ", ".join(self.getCurrentPlayersArray())
 
     def startGame(self, request):
         from django_q.tasks import async_task
+
         self.gameStatus = "ACTIVE"
         # self.currentPlayers = ','.join(
         #    [player.username for player in self.allPlayers.all()])
-        self.currentPlayers = ",".join([player.username for player in self.allPlayers.all()])
+        self.currentPlayers = ",".join(
+            [player.username for player in self.allPlayers.all()]
+        )
         if self.startingOptions == 102:
             for user in self.allPlayers.all():
                 if self.seatPosition(user.username) == 0:
@@ -719,31 +793,35 @@ class HC_Game(GeneralGame):
         if "SHADOW" not in self.allPlayers.all().values_list("username", flat=True):
             player_usernames = [p.username for p in self.allPlayers.all()]
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
 
-            playerListToNotify = list(self.allPlayers.all().values_list("username", flat=True))
+            playerListToNotify = list(
+                self.allPlayers.all().values_list("username", flat=True)
+            )
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
-            message_data = BLANK_MESSAGE_TEMPLATE.copy() 
-            #message_data["gameName"] = self.gameObj.getGameName()
+            message_data = BLANK_MESSAGE_TEMPLATE.copy()
+            # message_data["gameName"] = self.gameObj.getGameName()
             message_data["gameID"] = self.id
             message_data["gameName"] = self.getGameName()
             message_data["gameCode"] = "HC"
             message_data["username"] = request.user.username
             message_data["currentPlayersString"] = self.getCurrentPlayersString()
             message_data["maxPlayers"] = self.maxPlayers
-            #message_data["relatedMainTournamentID"] = self.relatedMainTournament.id if self.relatedMainTournament else 0
-            #message_data["relatedMiniTournamentID"] = self.relatedMiniTournament.id if self.relatedMiniTournament else 0
-            
-            print("about to start HC async task")           
+            # message_data["relatedMainTournamentID"] = self.relatedMainTournament.id if self.relatedMainTournament else 0
+            # message_data["relatedMiniTournamentID"] = self.relatedMiniTournament.id if self.relatedMiniTournament else 0
+
+            print("about to start HC async task")
             async_task(
                 "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                 playerListToNotify,
                 message_data,
             )
-            #async_task(
+            # async_task(
             #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
             #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
             #    "HC",
@@ -751,7 +829,7 @@ class HC_Game(GeneralGame):
             #    self.id,
             #    self,
             #    username,
-            #)
+            # )
 
     def getAllPlayersOrderedySeat(self, withoutBots=False):
         # Use prefetched cache; avoid .values_list() to prevent new SQL queries
@@ -772,7 +850,7 @@ class HC_Game(GeneralGame):
         for count, player in enumerate(playerList):
             if player in missingPlayerNames:
                 playerList[count] = f"HcBot{count}"
-                
+
         return playerList
 
     # takes in a USERNAME
@@ -856,13 +934,13 @@ class HC_Game(GeneralGame):
 
     def hasMoveData(self, name):
         seat = self.seatPosition(name)
-        
+
         # Ensure seat is valid (seatPosition returns -1 if not found)
         if 0 <= seat <= 4:
             # Dynamically get the field names
             time_field = f"player{seat}currentMoveTime"
             data_field = f"player{seat}currentMoveData"
-            
+
             # Get values from self
             move_time = getattr(self, time_field)
             move_data = getattr(self, data_field)
@@ -876,12 +954,12 @@ class HC_Game(GeneralGame):
 
     def hasTemporaryMoveData(self, name):
         seat = self.seatPosition(name)
-        
+
         # Check if seat is within the valid range (0-4)
         if 0 <= seat <= 4:
             time_attr = f"player{seat}currentMoveTime"
             data_attr = f"player{seat}currentMoveData"
-            
+
             move_time = getattr(self, time_attr)
             move_data = getattr(self, data_attr)
 
@@ -894,7 +972,12 @@ class HC_Game(GeneralGame):
     # takes in a user object
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.creator:
-            possibleHost = self.allPlayers.all().filter(~Q(missingPlayersRelName=self.id)).order_by("?").first()
+            possibleHost = (
+                self.allPlayers.all()
+                .filter(~Q(missingPlayersRelName=self.id))
+                .order_by("?")
+                .first()
+            )
             self.host = possibleHost
             # self.save()
 
@@ -907,7 +990,9 @@ class HC_Game(GeneralGame):
             self.statsExcludeConsent = "0" * self.maxPlayers
         seatToChange = self.seatPosition(_username, True)
         self.statsExcludeConsent = (
-            self.statsExcludeConsent[:seatToChange] + "1" + self.statsExcludeConsent[seatToChange + 1 :]
+            self.statsExcludeConsent[:seatToChange]
+            + "1"
+            + self.statsExcludeConsent[seatToChange + 1 :]
         )
         #### CHECK TOTAL CONSENT
         totalConsent = 0
@@ -926,7 +1011,7 @@ class HC_Game(GeneralGame):
         for consent in rewindConsentList:
             if consent == "0":
                 possible = False
-        return possible   
+        return possible
 
     def getRewindHostHTML(self):
         if self.rewindConsent == "":
@@ -985,7 +1070,9 @@ class HC_Game(GeneralGame):
             if row[0] == "BYEPLAYERS":
                 finishedGames += 1
             else:
-                game = HC_Game.objects.get(id=row[self.relatedTournament.maxGamePlayers])
+                game = HC_Game.objects.get(
+                    id=row[self.relatedTournament.maxGamePlayers]
+                )
                 if game.gameStatus == "FINISHED":
                     finishedGames += 1
         if finishedGames == len(tournamentProgressionDataArray[-1]):
@@ -1004,7 +1091,9 @@ class HC_Game(GeneralGame):
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
             self.save()
         return self.deleteGameVotes
 
@@ -1018,13 +1107,17 @@ class HC_Game(GeneralGame):
         if self.deleteGameVotes is None:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # If the playerName isn't found, wipe the votes and make sure all players are added
         if playerName not in self.deleteGameVotes:
             self.deleteGameVotes = {}  # Initialize to an empty dictionary
             player_usernames = [p.username for p in self.allPlayers.all()]
-            self.deleteGameVotes.update({username: False for username in player_usernames})
+            self.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
 
         # Add the vote
         self.deleteGameVotes[playerName] = True

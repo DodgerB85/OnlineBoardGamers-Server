@@ -1256,18 +1256,18 @@ def SR_getCNSstartingOptionsHTML(startingOptions):
 def SR_getBUSstartingOptionsHTML(startingOptionsArr):
     if not startingOptionsArr:
         return ""
-    if len(startingOptionsArr == 0):
+    if len(startingOptionsArr) == 0:
         return ""
 
     startingOptionsHTML = ""
     for option in startingOptionsArr:
-        if option == "110":
+        if option == 110:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
-        elif option == "120":
+        elif option == 120:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
@@ -1277,45 +1277,44 @@ def SR_getBUSstartingOptionsHTML(startingOptionsArr):
     return startingOptionsHTML
 
 
-def SR_getHCstartingOptionsHTML(startingOptions):
-    if not startingOptions:
+def SR_getHCstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
         return ""
-    if startingOptions == "":
+    if len(startingOptionsArr) == 0:
         return ""
-    startingList = startingOptions.split(",")
     startingOptionsHTML = ""
-    for option in startingList:
-        if option == "110":
+    for option in startingOptionsArr:
+        if option == 110:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
-        elif option == "120":
+        elif option == 120:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
-        elif option == "3":
+        elif option == 3:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
                     + gettext("Cars Only")
                     + "'>"
             )
-        elif option == "4":
+        elif option == 4:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_truck.jpg' title='"
                     + gettext("Trucks Only")
                     + "'>"
             )
-        elif option == "5":
+        elif option == 5:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_sports.jpg' title='"
                     + gettext("Sports Only")
                     + "'>"
             )
-        elif option == "6":
+        elif option == 6:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
                     + gettext("Include Cars")
@@ -1326,7 +1325,7 @@ def SR_getHCstartingOptionsHTML(startingOptions):
                     + gettext("Include Trucks")
                     + "'>"
             )
-        elif option == "7":
+        elif option == 7:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
                     + gettext("Include Cars")
@@ -1337,7 +1336,7 @@ def SR_getHCstartingOptionsHTML(startingOptions):
                     + gettext("Include Sports")
                     + "'>"
             )
-        elif option == "8":
+        elif option == 8:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_truck.jpg' title='"
                     + gettext("Include Trucks")
@@ -1348,7 +1347,7 @@ def SR_getHCstartingOptionsHTML(startingOptions):
                     + gettext("Include Sports")
                     + "'>"
             )
-        elif option == "9":
+        elif option == 9:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/Lobby/images/startingOptions/HC_moreMainlines.svg' title='"
                     + gettext("Extra Mainlines")
