@@ -129,6 +129,7 @@ def create_tgz_game(
                         startingOptions=json.dumps(
                             SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else []
                         ),
+                        externalTournamentGame=True,
                     )
                     new_game.save()
 
@@ -233,6 +234,7 @@ def create_tgz_game(
                         SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else []
                     ),
                     playerOrderSeed=random.randint(1000, 32767),
+                    externalTournamentGame=True,
                 )
                 new_game.save()
 

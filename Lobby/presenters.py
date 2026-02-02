@@ -1680,10 +1680,6 @@ class TgzPresenter(GamePresenter):
     def isExternalTournamentGame(self):
         """
         External tournament games are TGZ games created outside the normal tournament system.
-        For unified model, we determine this by checking if TGZtourneyAdmin is a player
-        or if the game lacks tournament relations but appears to be tournament-related.
+        This is stored as a field on the game model.
         """
-        # Check if TGZtourneyAdmin is a player
-        if self.gameObj.players.filter(player__username="TGZtourneyAdmin").exists():
-            return True
-        return False
+        return self.gameObj.externalTournamentGame
