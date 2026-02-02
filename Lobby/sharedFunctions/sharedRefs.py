@@ -1381,14 +1381,13 @@ def SR_getAQYstartingOptionsHTML(startingOptions):
     return startingOptionsHTML
 
 
-def SR_getINDstartingOptionsHTML(startingOptions):
-    if not startingOptions:
+def SR_getINDstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
         return ""
-    if startingOptions == "":
+    if len(startingOptionsArr) == 0:
         return ""
-    startingList = json.loads(startingOptions)
     startingOptionsHTML = ""
-    for option in startingList:
+    for option in startingOptionsArr:
         if option == 1:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/IND/images/so_hiddenMoney.svg' title='"
