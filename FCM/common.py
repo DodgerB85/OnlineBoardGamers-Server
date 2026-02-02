@@ -90,6 +90,7 @@ def buildFCMstartingOptions(post_data):
         "dumplings",
         "deliveryDrivers",
         "hawkers",
+        "allowRewind",
     ]
     options.extend(str(post_data[opt]) for opt in option_names if opt in post_data)
     return ",".join(options) if options else ""
@@ -169,12 +170,12 @@ def create_fcm_game(
             # Split the string into a list
             options = starting_options.split(",") if starting_options != "" else []
             # Check if '99' is present
-            if "99" in options:
-                # TODO
-                pass
+            #if "99" in options:
+            #    # TODO
+            #    pass
             starting_options = ",".join(options)
             # Filter out '99'
-            options = [opt for opt in options if opt != "99"]
+            #options = [opt for opt in options if opt != "99"]
 
         game_status = "ACTIVE"
 
