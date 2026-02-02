@@ -459,7 +459,7 @@ class Bus_Game(GeneralGame):
 
         gamePaceString = SR_gamePaceString(self.gamePace)
 
-        startingOptionsHTML = SR_getBUSstartingOptionsHTML(self.startingOptions)
+        startingOptionsHTML = SR_getBUSstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
 
         kickoutRequiredNum = self.kickoutRequired()
 
@@ -512,14 +512,14 @@ class Bus_Game(GeneralGame):
         }
 
     def isExperiencedGame(self):
-        startingOptionsListPrelim = self.startingOptions.split(",")
-        if "120" in startingOptionsListPrelim:
+        starting_options = json.loads(self.startingOptions) if self.startingOptions else []
+        if 120 in starting_options:
             return True
         return False
 
     def isLearningGame(self):
-        startingOptionsListPrelim = self.startingOptions.split(",")
-        if "110" in startingOptionsListPrelim:
+        starting_options = json.loads(self.startingOptions) if self.startingOptions else []
+        if "110" in starting_options:
             return True
         return False
 
@@ -564,7 +564,8 @@ class Bus_Game(GeneralGame):
 
         allPlayersL = self.getAllPlayersOrderedySeat()
         self.currentPlayers = allPlayersL[0]
-        if self.startingOptions == 102:
+        starting_options = json.loads(self.startingOptions) if self.startingOptions else []
+        if 102 in starting_options:
             for user in self.allPlayers.all():
                 if self.seatPosition(user.username) == 0:
                     _currentPlayers = user.username

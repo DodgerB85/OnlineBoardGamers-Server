@@ -208,7 +208,6 @@ def SF_fastSerializeGame(game, user):
 
     isLearningGame = False
     isExperiencedGame = False
-    print(game.id)
 
     # Check for both string and integer values (FCM/HC/Bus use strings, others use integers)
     if 110 in startingOptions or "110" in startingOptions:

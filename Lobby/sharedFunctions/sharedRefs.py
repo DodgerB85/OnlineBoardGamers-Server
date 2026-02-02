@@ -1253,14 +1253,14 @@ def SR_getCNSstartingOptionsHTML(startingOptions):
     return startingOptionsHTML
 
 
-def SR_getBUSstartingOptionsHTML(startingOptions):
-    if not startingOptions:
+def SR_getBUSstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
         return ""
-    if startingOptions == "":
+    if len(startingOptionsArr == 0):
         return ""
-    startingList = startingOptions.split(",")
+
     startingOptionsHTML = ""
-    for option in startingList:
+    for option in startingOptionsArr:
         if option == "110":
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"

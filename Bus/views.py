@@ -100,16 +100,13 @@ def createBusGame(request):
     if "playerNumber" in request.POST:
         _maxPlayers = int(request.POST["playerNumber"])
 
-    _startingOptions = ""
+    _startingOptions = []
     if "trainingGame" in request.POST:
-        _startingOptions += request.POST["trainingGame"] + ","
+        _startingOptions.append(int(request.POST["trainingGame"]))  
     # if 'learningGame' in request.POST:
     #    _startingOptions += request.POST["trainingGame"] + ","
     if "experiencedGame" in request.POST:
-        _startingOptions += request.POST["experiencedGame"] + ","
-
-    if len(_startingOptions) > 0:
-        _startingOptions = _startingOptions.rstrip(_startingOptions[-1])
+        _startingOptions.append(int(request.POST["experiencedGame"])) 
 
     _created = SR_getTimeNow()
     _pace = request.POST["pace"]
@@ -124,7 +121,7 @@ def createBusGame(request):
         phase=0,
         created=_created,
         latestUpdate=_created,
-        startingOptions=_startingOptions,
+        startingOptions=json.dumps(_startingOptions),
         maxPlayers=_maxPlayers,
         gameStatus="AVAILABLE",
     )
@@ -594,11 +591,12 @@ def _processBusTurn(request):
 
         else:
             # Send Notifications
+            starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             if (
                 jsonData["nextPlayer"] != ""
                 and jsonData["nextPlayer"] != "HcBot"
                 and not jsonData["status"] == "FINISHED"
-                and currentGame.startingOptions != "102"
+                and 102 not in starting_options
             ):
                 playerListToNotify = jsonData["nextPlayer"].split(",")
                 if request.user.username in playerListToNotify:
@@ -734,10 +732,11 @@ def _processBusTurn(request):
         currentGame.save()
 
         # Send Notifications
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         if (
             jsonData["nextPlayer"] != ""
             and jsonData["nextPlayer"] != "HcBot"
-            and currentGame.startingOptions != "102"
+            and 102 not in starting_options
         ):
             playerListToNotify = jsonData["nextPlayer"].split(",")
             if request.user.username in playerListToNotify:
