@@ -527,6 +527,9 @@ class Game(BaseGame):
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
 
+    tournamentGame = models.BooleanField(blank=False, default=False)
+    externalTournamentGame = models.BooleanField(blank=False, default=False)
+
     
     def getAQYpresenter(self):
         return AqyPresenter(self)
