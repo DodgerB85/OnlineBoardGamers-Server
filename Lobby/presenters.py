@@ -1362,3 +1362,328 @@ class AqyPresenter(GamePresenter):
         self.gameObj.gameData = base64.b64encode(
             gzip.compress(json.dumps(raw_data).encode("utf-8"))
         ).decode("utf-8")
+
+
+class TgzPresenter(GamePresenter):
+    def __str__(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+        allPlayersString = " / ".join(
+            gp.player.username for gp in all_players if gp.player
+        )
+        return f"{self.gameObj.id}: {self.gameObj.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.gameObj.currentTurnString()}"
+
+    def getGameName(self):
+        name = (
+            self.gameObj.gameName
+            or f"[{getattr(self.gameObj.creator, 'username', 'Unknown')}'s Game]"
+        )
+        if self.gameObj.gameStatus == "PRIVATE":
+            name += "[Private Game]"
+        return name
+
+    def endGame(
+        self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
+    ):
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendEndGameNotification,
+        )
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
+        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
+        self.gameObj.rewindData = ""
+        self.gameObj.rewindTempData = ""
+        self.gameObj.kickoutFlexiData = ""
+        self.gameObj.gameStatus = "FINISHED"
+
+        winner_user = User.objects.get(username=_winnerUsername)
+        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        if winner_gp:
+            winner_gp.winner = True
+            winner_gp.save()
+
+        self.gameObj.save()
+
+        SN_M_sendEndGameNotification(
+            request, "TGZ", _finalPositions, _gameID, self.gameObj
+        )
+
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MAIN_T_FLAG,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                [_winnerUsername],
+                _tournamentData,
+            )
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MINI_T_FLAG,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                [_winnerUsername],
+                _tournamentData,
+            )
+
+    def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+
+        if not current_players.exists():
+            return True
+
+        current_usernames = [gp.player.username for gp in current_players if gp.player]
+        
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+
+        return loggedInPlayerUsername in current_usernames or any(
+            username in shadow_values for username in current_usernames
+        )
+
+    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+            return False
+
+        current_players = self.gameObj.players.filter(is_current=True).select_related(
+            "player"
+        )
+
+        if not current_players.exists():
+            return True
+
+        current_usernames = [gp.player.username for gp in current_players if gp.player]
+
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+
+        return loggedInPlayerUsername in current_usernames or any(
+            username in shadow_values for username in current_usernames
+        )
+
+    def serialize(self, loggedInUser=None):
+        from Lobby.sharedFunctions.sharedRefs import SR_getTGZstartingOptionsHTML
+
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
+        )
+
+        remainingPlayersInt = self.gameObj.maxPlayers - all_players.count()
+        remainingPlayers = ""
+        for i in range(remainingPlayersInt):
+            remainingPlayers += str(all_players.count() + i + 1)
+        
+        winner_gp = self.gameObj.players.filter(winner=True).first()
+        winner = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
+
+        createdString = self.gameObj.created
+        latestUpdateString = self.gameObj.latestUpdate
+
+        latestUpdateElapsedTimeString = ""
+        elapsedTotalSeconds = 0
+        if (
+            self.gameObj.gameStatus == "WAITING"
+            or self.gameObj.gameStatus == "AVAILABLE"
+            or self.gameObj.gameStatus == "ACTIVE"
+            or self.gameObj.gameStatus == "PRIVATE"
+        ):
+            if (
+                self.gameObj.gameStatus == "WAITING"
+                or self.gameObj.gameStatus == "AVAILABLE"
+                or self.gameObj.gameStatus == "PRIVATE"
+            ):
+                elapsedTotalSeconds = int(time.time()) - int(self.gameObj.created) // 1000
+            if self.gameObj.gameStatus == "ACTIVE":
+                elapsedTotalSeconds = int(time.time()) - int(self.gameObj.latestUpdate) // 1000
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
+
+        myMove = False
+        if loggedInUser is not None:
+            myMove = self.isMyMove(loggedInUser.username)
+
+        chatNotification = False
+        involvedPlayer = False
+        if loggedInUser:
+            user_gp = all_players.filter(player=loggedInUser).first()
+            if user_gp:
+                chatNotification = user_gp.has_chat_notification
+                involvedPlayer = not user_gp.is_missing
+
+        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
+
+        startingOptionsHTML = SR_getTGZstartingOptionsHTML(self.gameObj.startingOptions)
+
+        kickoutRequiredNum = self.kickoutRequired()
+
+        deleteableGame = (
+            all_players.filter(player__username="SHADOW").exists()
+            and loggedInUser
+            and all_players.filter(player=loggedInUser).exists()
+        )
+
+        return {
+            "gameID": self.gameObj.id,
+            "gameName": self.getGameName(),
+            "gameDescription": self.gameObj.gameDescription,
+            "creator": getattr(self.gameObj.creator, "username"),
+            "created": createdString,
+            "allPlayers": [gp.player.username for gp in all_players if gp.player],
+            "invitedPlayers": [
+                user.username for user in self.gameObj.invitedPlayers.all()
+            ],
+            "currentPlayers": ", ".join(self.getCurrentPlayersArray()),
+            "currentTurn": self.currentTurnString(),
+            "pace": gamePaceString,
+            "latestUpdate": latestUpdateString,
+            "startingOptions": startingOptionsHTML,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "maxPlayers": self.gameObj.maxPlayers,
+            "winner": winner,
+            "myMove": myMove,
+            "involvedPlayer": involvedPlayer,
+            "startingMap": self.gameObj.startingMap,
+            "chatNotification": chatNotification,
+            "kickoutRequiredNum": kickoutRequiredNum,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
+            "game": "TGZ",
+            "remainingPlayers": remainingPlayers,
+            "deleteableGame": deleteableGame,
+            "learningGame": self.isLearningGame(),
+            "experiencedGame": self.isExperiencedGame(),
+        }
+
+    def seatPosition(self, name, withoutBots=False):
+        playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        try:
+            return playerList.index(name)
+        except (ValueError, TypeError):
+            return -1
+
+    def getAllPlayersOrderedySeat(self, withoutBots=False):
+        all_players_gp = list(
+            self.gameObj.players.exclude(
+                is_kicked=True, player__username="TGZtourneyAdmin"
+            ).select_related("player").order_by("seat_order")
+        )
+        
+        playerList = [gp.player.username for gp in all_players_gp if gp.player]
+
+        if withoutBots:
+            return playerList
+
+        missing_gps = {gp for gp in all_players_gp if gp.is_missing}
+
+        for count, gp in enumerate(all_players_gp):
+            if gp in missing_gps:
+                playerList[count] = f"TgzBot{count}"
+
+        return playerList
+
+    def startGame(self, request):
+        from django_q.tasks import async_task
+        from Lobby.models import GamePlayer
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendGameStartNotification,
+            SN_sendNextTurnNotification,
+        )
+
+        self.gameObj.gameStatus = "ACTIVE"
+        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
+        
+        game_players = list(
+            self.gameObj.players.exclude(
+                is_kicked=True, player__username="TGZtourneyAdmin"
+            )
+        )
+
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            gp.is_current = idx == 0
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+
+        allPlayersL = self.getAllPlayersOrderedySeat()
+
+        self.gameObj.save()
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
+            playerListToNotify = [
+                gp.player.username
+                for gp in game_players
+                if gp.player and gp.player.username != request.user.username
+            ]
+
+            domain = get_current_site(request)
+            username = request.user.username
+            SN_M_sendGameStartNotification(
+                domain,
+                "TGZ",
+                playerListToNotify,
+                self.gameObj.id,
+                self.gameObj,
+                username,
+            )
+            if request.user.username != allPlayersL[0]:
+                SN_sendNextTurnNotification(
+                    request,
+                    "TGZ",
+                    [allPlayersL[0]],
+                    getattr(self.gameObj, "id"),
+                    self.gameObj.gameName,
+                    self.gameObj,
+                    self.gameObj.latestUpdate,
+                )
+
+    def enableStatsExclude(self, _username):
+        if self.gameObj.statsExcludeConsent is None:
+            self.gameObj.statsExcludeConsent = ""
+        if len(self.gameObj.statsExcludeConsent) < self.gameObj.maxPlayers:
+            self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
+        seatToChange = self.seatPosition(_username, True)
+        
+        self.gameObj.statsExcludeConsent = (
+            self.gameObj.statsExcludeConsent[:seatToChange]
+            + "1"
+            + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
+        )
+        totalConsent = 0
+        for letter in self.gameObj.statsExcludeConsent:
+            totalConsent += int(letter)
+        if totalConsent == self.gameObj.maxPlayers:
+            self.gameObj.statsExcludedGame = True
+
+    def getGameCode(self):
+        return "TGZ"
+    
+    def isExternalTournamentGame(self):
+        """
+        External tournament games are TGZ games created outside the normal tournament system.
+        For unified model, we determine this by checking if TGZtourneyAdmin is a player
+        or if the game lacks tournament relations but appears to be tournament-related.
+        """
+        # Check if TGZtourneyAdmin is a player
+        if self.gameObj.players.filter(player__username="TGZtourneyAdmin").exists():
+            return True
+        return False
