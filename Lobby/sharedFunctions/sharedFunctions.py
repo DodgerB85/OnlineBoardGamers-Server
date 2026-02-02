@@ -200,28 +200,25 @@ def SF_fastSerializeGame(game, user):
     if gameName == "":
         gameName = f"[{creator}'s Game]"
 
-    startingOptions = []
-    if game_code == "HC" or game_code == "Bus":
-        startingOptions = game.startingOptions.split(",")
-    else:
-        startingOptions = json.loads(game.startingOptions) if game.startingOptions else []
+    startingOptionsArr = json.loads(game.startingOptions) if game.startingOptions else []
 
     isLearningGame = False
     isExperiencedGame = False
 
     # Check for both string and integer values (FCM/HC/Bus use strings, others use integers)
-    if 110 in startingOptions or "110" in startingOptions:
+    #print(f"code: {game_code} startingOptionsArr: {startingOptionsArr} id: {game.id}")
+    if 110 in startingOptionsArr:
         isLearningGame = True
-    if 120 in startingOptions or "120" in startingOptions:
+    if 120 in startingOptionsArr:
         isExperiencedGame = True
     
     startingOptionsHTML = ""
     if game_code == "FCM":
-        startingOptionsHTML = SR_getFCMstartingOptionsHTML(game.startingOptions)
+        startingOptionsHTML = SR_getFCMstartingOptionsHTML(startingOptionsArr)
     if game_code == "HC":
-        startingOptionsHTML = SR_getHCstartingOptionsHTML(game.startingOptions)
+        startingOptionsHTML = SR_getHCstartingOptionsHTML(startingOptionsArr)
     if game_code == "IND":
-        startingOptionsHTML = SR_getINDstartingOptionsHTML(game.startingOptions)
+        startingOptionsHTML = SR_getINDstartingOptionsHTML(startingOptionsArr)
     
     # Get kickout required - use presenter for unified model
     if is_unified_model:
