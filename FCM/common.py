@@ -31,30 +31,32 @@ def buildFCMstartingOptions(post_data):
     Returns:
         str: Comma-separated string of game options.
     """
-    options = []
+    optionsArr = []
     if "trainingGame" in post_data:
-        options.extend(["101", post_data["trainingGame"]])
+        optionsArr.extend([101, int(post_data["trainingGame"])])
     if "fcmAI" in post_data:
-        options.extend(["101", "102"])
+        optionsArr.extend([101, 102])
 
     if "enableAdvancedOptions" in post_data:
         if "randomModules" in post_data:
             if post_data["random_MS"] == "202":
-                options.append("21")
-            options.append("200")
+                optionsArr.append(21)
+            optionsArr.append(200)
             min_modules = post_data["minModules"].zfill(2)  # Pad to two digits
             max_modules = post_data["maxModules"].zfill(2)
-            options.extend([f"210{min_modules}", f"211{max_modules}"])
+            minStr = f"210{min_modules}"
+            maxStr = f"211{max_modules}"
+            optionsArr.extend([int(minStr), int(maxStr)])
         if "draftModules" in post_data:
             if post_data["draft_MS"] == "302":
-                options.append("21")
+                optionsArr.append(21)
             if "newDistrictsDraft" in post_data:
-                options.append("18")
+                optionsArr.append(18)
             if "newDistrictsAppDraft" in post_data:
-                options.append("181")
+                optionsArr.append(181)
             if "newDistrictsParkDraft" in post_data:
-                options.append("183")
-            options.append("300")
+                optionsArr.append(183)
+            optionsArr.append(300)
 
     option_names = [
         "short",
@@ -92,9 +94,9 @@ def buildFCMstartingOptions(post_data):
         "hawkers",
         "allowRewind",
     ]
-    options.extend(str(post_data[opt]) for opt in option_names if opt in post_data)
-    return ",".join(options) if options else ""
-
+    optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)
+    #return ",".join(options) if options else ""
+    return optionsArr
 
 @login_required()
 def create_fcm_game(
@@ -156,6 +158,7 @@ def create_fcm_game(
         game_pace = 30
         kickout_duration = 100
         player_Order_Seed = randint(1000, 32767)
+        # TODO
         starting_options = tournamentObj.startingOptions
         notificationSuppression = "0" * max_players
         # If it's a mini tournemnt, check for auto enable rewinds
@@ -247,9 +250,7 @@ def create_fcm_game(
             request.POST
         )  # Use the extracted function
         # Now exclude stats if any china expansion is in starting options
-        # Split the string into a list
-        options_for_SE = starting_options.split(",") if starting_options != "" else []
-        if any(x in options_for_SE for x in ["42", "43", "44", "45"]):
+        if any(x in starting_options for x in [42, 43, 44, 45]):
             stats_excluded_game = True
         game_pace = request.POST["pace"]
         creator = request.user
@@ -306,7 +307,7 @@ def create_fcm_game(
             created=created,
             latestUpdate=created,
             playerOrderSeed=player_Order_Seed,
-            startingOptions=starting_options,
+            startingOptions=json.dumps(starting_options, separators=(',', ':')),
             maxPlayers=max_players,
             gameStatus=game_status,
             kickoutDuration=kickout_duration,

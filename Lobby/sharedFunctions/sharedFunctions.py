@@ -201,13 +201,15 @@ def SF_fastSerializeGame(game, user):
         gameName = f"[{creator}'s Game]"
 
     startingOptions = []
-    if game_code == "FCM" or game_code == "HC" or game_code == "Bus":
+    if game_code == "HC" or game_code == "Bus":
         startingOptions = game.startingOptions.split(",")
     else:
         startingOptions = json.loads(game.startingOptions) if game.startingOptions else []
 
     isLearningGame = False
     isExperiencedGame = False
+    print(game.id)
+
     # Check for both string and integer values (FCM/HC/Bus use strings, others use integers)
     if 110 in startingOptions or "110" in startingOptions:
         isLearningGame = True

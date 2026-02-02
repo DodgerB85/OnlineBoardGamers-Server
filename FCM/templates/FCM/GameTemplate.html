@@ -413,7 +413,7 @@
     {% if startingMap %}global.startingMap = {{ startingMap }};{% endif %}
 
     {% if gameData %}global.load = '{{ gameData|safe }}';{% endif %}
-    {% if startingOptionsLiteral %}global.startingOptions = '{{ startingOptionsLiteral }}';
+    {% if startingOptionsLiteral %}global.startingOptions = {{ startingOptionsLiteral }};
     {% else %}
     global.startingOptions = '';
     {% endif %}
@@ -425,7 +425,7 @@
    
     {% endif %}
 
-    {% if gameData and phase == 13 %}global.startingOptions = '{{ startingOptionsLiteral }}';{% endif %}
+    {% if gameData and phase == 13 %}global.startingOptions = {{ startingOptionsLiteral }};{% endif %}
 
     global.assistance = {{ showAssistance }};
     global.assistance = true;

@@ -682,81 +682,82 @@ def SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds):
 def SR_getFCMstartingOptionsHTML(startingOptions):
     if not startingOptions:
         return "[None]"
-    if startingOptions == "":
+    if len(startingOptions) == 0:
         return "[None]"
-    startingOptionsListPrelim = startingOptions.split(",")
-    if startingOptionsListPrelim[0] != "":
-        startingOptionsListPrelim = list(map(int, startingOptionsListPrelim))
+    
+    # If it's a string, load it to json
+    if type(startingOptions) == str:
+        startingOptions = json.loads(startingOptions)
 
     # Reorder Options to have a better order
     startingOptionsList = []
-    if 110 in startingOptionsListPrelim:
+    if 110 in startingOptions:
         startingOptionsList.append(110)  # learning Game
-    if 120 in startingOptionsListPrelim:
+    if 120 in startingOptions:
         startingOptionsList.append(120)  # Experienced Game
-    if 5 in startingOptionsListPrelim:
+    if 5 in startingOptions:
         startingOptionsList.append(5)  # Allow Surrender
-    if 1 in startingOptionsListPrelim:
+    if 1 in startingOptions:
         startingOptionsList.append(1)  # Short Game
-    if 2 in startingOptionsListPrelim:
+    if 2 in startingOptions:
         startingOptionsList.append(2)  # No MS
-    if 3 in startingOptionsListPrelim:
+    if 3 in startingOptions:
         startingOptionsList.append(3)  # No CEO
-    if 6 in startingOptionsListPrelim:
+    if 6 in startingOptions:
         startingOptionsList.append(6)  # No Radio
-    if 8 in startingOptionsListPrelim:
+    if 8 in startingOptions:
         startingOptionsList.append(8)  # Hard Choices
-    if 21 in startingOptionsListPrelim:
+    if 21 in startingOptions:
         startingOptionsList.append(21)  # New MS
-    if 20 in startingOptionsListPrelim:
+    if 20 in startingOptions:
         startingOptionsList.append(20)  # Ketchup MS (-1 dist)
-    if 23 in startingOptionsListPrelim:
+    if 23 in startingOptions:
         startingOptionsList.append(23)  # New Reserve
-    if 14 in startingOptionsListPrelim:
+    if 14 in startingOptions:
         startingOptionsList.append(14)  # Movie Stars
-    if 15 in startingOptionsListPrelim:
+    if 15 in startingOptions:
         startingOptionsList.append(15)  # Mass Marketers
-    if 13 in startingOptionsListPrelim:
+    if 13 in startingOptions:
         startingOptionsList.append(13)  # Gourmet Food Critics
-    if 17 in startingOptionsListPrelim:
+    if 17 in startingOptions:
         startingOptionsList.append(17)  # Rural Marketer
-    if 18 in startingOptionsListPrelim:
+    if 18 in startingOptions:
         startingOptionsList.append(18)  # New Districts
-    if 22 in startingOptionsListPrelim:
+    if 22 in startingOptions:
         startingOptionsList.append(22)  # Lobbyists
-    if 16 in startingOptionsListPrelim:
+    if 16 in startingOptions:
         startingOptionsList.append(16)  # NightShift
-    if 19 in startingOptionsListPrelim:
+    if 19 in startingOptions:
         startingOptionsList.append(19)  # Cofffee
-    if 9 in startingOptionsListPrelim:
+    if 9 in startingOptions:
         startingOptionsList.append(9)  # Fry Chef
-    if 10 in startingOptionsListPrelim:
+    if 10 in startingOptions:
         startingOptionsList.append(10)  # Kimchi
-    if 11 in startingOptionsListPrelim:
+    if 11 in startingOptions:
         startingOptionsList.append(11)  # Sushi
-    if 12 in startingOptionsListPrelim:
+    if 12 in startingOptions:
         startingOptionsList.append(12)  # Noodles
-    if 101 in startingOptionsListPrelim:
+    if 101 in startingOptions:
         startingOptionsList.append(101)  # Strict Pay / Fridge
-    if 200 in startingOptionsListPrelim:
+    if 200 in startingOptions:
         startingOptionsList.append(200)  # Random Mods
-    if 300 in startingOptionsListPrelim:
+    if 300 in startingOptions:
         startingOptionsList.append(300)  # Draft Mods
-    if 999 in startingOptionsListPrelim:
+    if 999 in startingOptions:
         startingOptionsList.append(999)  # Skip Module
-    if 103 in startingOptionsListPrelim:
+    if 103 in startingOptions:
         startingOptionsList.append(103)  # Sandbox Mode
-    if 40 in startingOptionsListPrelim:
+    if 40 in startingOptions:
         startingOptionsList.append(40)  # Urabn Planning
-    if 41 in startingOptionsListPrelim:
+    if 41 in startingOptions:
         startingOptionsList.append(41)  # Urabn Planning Plus
-    if 42 in startingOptionsListPrelim:
+    if 42 in startingOptions:
         startingOptionsList.append(42)  # jazz
-    if 43 in startingOptionsListPrelim:
+    if 43 in startingOptions:
         startingOptionsList.append(43)  # dumpling
-    if 44 in startingOptionsListPrelim:
+    if 44 in startingOptions:
         startingOptionsList.append(44)  # delivery
-    if 45 in startingOptionsListPrelim:
+    if 45 in startingOptions:
         startingOptionsList.append(45)  # hawker
     # 99 is used to allow rewinds in mini tournaments
 
@@ -947,9 +948,9 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
         if option == 200:
             # usedOptions += 1
             moduleRange = []
-            for i in range(len(startingOptionsListPrelim)):
-                if startingOptionsListPrelim[i] > 21000 and startingOptionsListPrelim[i] < 21116:
-                    numStr = str(startingOptionsListPrelim[i] % 100)
+            for i in range(len(startingOptions)):
+                if startingOptions[i] > 21000 and startingOptions[i] < 21116:
+                    numStr = str(startingOptions[i] % 100)
                     moduleRange.append(numStr[-2:])
             if len(moduleRange) != 2:
                 moduleRange = ["??", "??"]
