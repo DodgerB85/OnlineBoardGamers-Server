@@ -182,6 +182,9 @@ Q_CLUSTER = {
     'retry': 120,
     'queue_limit': 10,
     'orm': 'default',      # Or your database alias
+    'save_limit': 100,      # Only keep the last 50 successful tasks
+    'gc_interval': 3600,   # Run the garbage collector every hour (3600 seconds)
+    'label': 'Django Q',   # Admin label
     
     # --- CRITICAL CPU SAVING SETTINGS ---
     'sleeptime': 30,       # Wait 30 seconds before checking for new tasks
