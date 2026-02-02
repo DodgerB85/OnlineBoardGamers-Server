@@ -588,6 +588,7 @@ class CannesPresenter(GamePresenter):
             #    self.gameObj,
             #    username,
             #)
+            print("about to start CNS async task")
             async_task(
                 "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                 domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
@@ -802,7 +803,7 @@ class WebPresenter(GamePresenter):
                 #    self.gameObj,
                 #    username,
                 #)
-                
+                print("about to start WEB async task")
                 async_task(
                     "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                     domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
