@@ -159,7 +159,7 @@ def create_fcm_game(
         kickout_duration = 100
         player_Order_Seed = randint(1000, 32767)
         # TODO
-        starting_options = tournamentObj.startingOptions
+        starting_options = json.loads(tournamentObj.startingOptions) if tournamentObj.startingOptions else []
         notificationSuppression = "0" * max_players
         # If it's a mini tournemnt, check for auto enable rewinds
         # MiniT games could also have max_players LESS than tournamentObj.maxGamePlayers
@@ -170,22 +170,12 @@ def create_fcm_game(
                 else tournamentObj.maxGamePlayers
             )
             notificationSuppression = "0" * max_players
-            # Split the string into a list
-            options = starting_options.split(",") if starting_options != "" else []
-            # Check if '99' is present
-            #if "99" in options:
-            #    # TODO
-            #    pass
-            starting_options = ",".join(options)
-            # Filter out '99'
-            #options = [opt for opt in options if opt != "99"]
 
         game_status = "ACTIVE"
 
         # Now exclude stats if any china expansion is in starting options
         # Split the string into a list
-        options_for_SE = starting_options.split(",") if starting_options != "" else []
-        if any(x in options_for_SE for x in ["42", "43", "44", "45"]):
+        if any(x in starting_options for x in [42, 43, 44, 45]):
             stats_excluded_game = True
 
         all_players = [
