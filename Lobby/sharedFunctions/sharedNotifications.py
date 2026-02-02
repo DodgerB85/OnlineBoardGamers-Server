@@ -7,6 +7,7 @@ import urllib.parse
 from decouple import config
 
 from django.db import close_old_connections
+from django.core.mail import send_mail
 from django.utils.translation import gettext, activate, get_language
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
@@ -1812,16 +1813,31 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
             user = User.objects.get(id=1)
         user.email_user(subject, message)
     else:
-        msg = MIMEMultipart()
-        msg["From"] = fromEmail
-        msg["To"] = toEmail
-        msg["Subject"] = subject
-        msg.attach(MIMEText(message, "html"))
-        server = smtplib.SMTP(serverAddress, 587)
-        server.starttls()
-        server.login(loginUsername, fromPassword)
-        server.send_message(msg)
-        server.quit()
+        #msg = MIMEMultipart()
+        #msg["From"] = fromEmail
+        #msg["To"] = toEmail
+        #msg["Subject"] = subject
+        #msg.attach(MIMEText(message, "html"))
+        #server = smtplib.SMTP(serverAddress, 587)
+        #server.starttls()
+        #server.login(loginUsername, fromPassword)
+        #server.send_message(msg)
+        #server.quit()
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=fromEmail,
+                recipient_list=[toEmail],
+                html_message=message,
+                fail_silently=False, # We set this to False so we can "catch" it below
+            )
+        except Exception as e:
+            # This will show up in your obg_cluster.log and PythonAnywhere error logs
+            msg = f"❌ NOTIFICATION FAILURE: Email to {toEmail} timed out or failed. Error: {e}"
+            print(msg)
+            SN_sendAdminErrorMessage(None, msg)
+        
 
 
 def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
@@ -1847,32 +1863,46 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
             print(f"SUPRESSING WEBHOOKS FOR LOCAL USER: {username}")
             return
 
-    webhooks = json.loads(profile.webhooks)
-    for webhookData in webhooks:
-        # Discord
-        if webhookData[0] == "DC":
-            discordMessage = ""
-            if webhookData[2] != "":
-                discordMessage += "<@" + webhookData[2] + ">\n"
-            discordMessage += f"{messageText}\n[{urlText}]({urlRaw})"
-            requests.post(webhookData[1], data={"content": discordMessage})
-        # Slack
-        if webhookData[0] == "SL":
-            slackMessage = f"{messageText}\n<{urlRaw}|{urlText}>"
-            if webhookData[2] != "":
-                message = gettext("This is a test message from Online Board Gamers")
-                slackMessage = f"<@{webhookData[2]}>\n{slackMessage}"
-            requests.post(webhookData[1], json.dumps({"text": slackMessage}))
-        # Telegram
-        if webhookData[0] == "TG":
-            TOKEN = config("TELEGRAM_OBG_BOT_TOKEN")
-            telegramMessage = f"{messageText}\n<a href='{urlRaw}'>{urlText}</a>"
-            # message = "This is a test message from <b>Online Board Gamers</b> <a href='https://www.onlineboardgamers.com/profile/'>Click here to go to url</a>"
-            # encoded_message = urllib.parse.quote_plus(message, safe=':/')
-            encoded_telegramMessage = urllib.parse.quote(telegramMessage, safe=":/")
-            url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={webhookData[2]}&text={encoded_telegramMessage}&parse_mode=HTML"
-            requests.post(url)
+    try:
+        webhooks = json.loads(profile.webhooks)
+    except (json.JSONDecodeError, TypeError) as e:
+        print(f"Error parsing webhooks: {profile.webhooks} Error: {e}")
+        return
+    with requests.Session() as session:
+        for webhookData in webhooks:
+            w_type = webhookData[0]
+            w_url = webhookData[1]
+            w_id = webhookData[2]
+            
+            try:
+                # Discord
+                if w_type == "DC":
+                    mention = f"<@{w_id}>\n" if w_id else ""
+                    content = f"{mention}{messageText}\n[{urlText}]({urlRaw})" 
+                    session.post(w_url, data={"content": content}, timeout=10)
+                # Slack
+                elif w_type== "SL":
+                    mention = f"<@{w_id}>\n" if w_id else ""
+                    payload = {"text": f"{mention}{messageText}\n<{urlRaw}|{urlText}>"}
+                    session.post(w_url, json=payload, timeout=10)
+                    
+                # Telegram
+                elif w_type == "TG":
+                    TOKEN = config("TELEGRAM_OBG_BOT_TOKEN")
+                    msg = f"{messageText}\n<a href='{urlRaw}'>{urlText}</a>"
+                    encoded_msg = urllib.parse.quote(msg, safe=":/")
+                    tg_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={w_id}&text={encoded_msg}&parse_mode=HTML"
+                    # message = "This is a test message from <b>Online Board Gamers</b> <a href='https://www.onlineboardgamers.com/profile/'>Click here to go to url</a>"
+                    # encoded_message = urllib.parse.quote_plus(message, safe=':/')
+                    #url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={webhookData[2]}&text={encoded_telegramMessage}&parse_mode=HTML"
+                    #requests.post(url)
+                    session.post(tg_url, timeout=10)
 
+            except requests.exceptions.RequestException as e:
+                SN_sendAdminErrorMessage(None, f"Webhook failed ({w_type}): {e} User: {profile.user.username}")
+                # Log the specific webhook failure without stopping the loop
+                print(f"Webhook failed ({w_type}): {e}")
+                
 
 def SN_sendAdminErrorMessage(request, message):
     try:

@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import socket
 from decouple import config, Csv
 import os
 from os.path import join
@@ -74,7 +74,7 @@ else:
     EMAIL_HOST_USER = "OnlineBoardGamers@gmail.com"
     EMAIL_HOST_PASSWORD = config("OBG_EMAIL_APP_PWD")
 
-
+EMAIL_TIMEOUT = 20  # This protects your CPU budget
 EMAIL_HOST_USER_TURN = []
 EMAIL_HOST_PASSWORD_TURN = []
 
@@ -188,6 +188,9 @@ Q_CLUSTER = {
     'bulking': 10,         # Process up to 10 tasks at once to reduce overhead
     'sync': False,
 }
+
+# NB this oculd kill very long DB connections
+socket.setdefaulttimeout(120) 
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
