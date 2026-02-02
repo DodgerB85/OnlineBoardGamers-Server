@@ -23,7 +23,6 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_sendEndGameNotification,
-    SN_M_sendGameStartNotification,
 )
 
 
@@ -323,14 +322,17 @@ class CNS_Game(GeneralGame):
 
             domain = get_current_site(request)
             username = request.user.username
-            SN_M_sendGameStartNotification(
-                domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
-                "CNS",
-                playerListToNotify,
-                self.id,
-                self,
-                username,
-            )
+            
+            # THIS USES PRESENTER
+            
+            #SN_M_sendGameStartNotification(
+            #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+            #    "CNS",
+            #    playerListToNotify,
+            #    self.id,
+            #    self,
+            #    username,
+            #)
             #async_task(
             #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
             #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks

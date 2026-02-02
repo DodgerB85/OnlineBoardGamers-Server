@@ -1153,12 +1153,22 @@ def SN_M_T_sendTournamentWinNotification(
 
 
 def SN_M_sendGameStartNotification(
-    currentSite, gameCode, playerList, gameID, currentGame, errorUsername
+    playerListToNotify, message_data
 ):
+    errorUsername = message_data["username"]
+    gameCode = message_data["gameCode"]
+    gameID = message_data["gameID"]
+    gameName = message_data["gameName"]
+    currentPlayersString = message_data["currentPlayersString"]
+    domain = message_data["domain"]
+    maxPlayers = message_data["maxPlayers"]
+    relatedMainTournamentID = message_data["relatedMainTournamentID"]
+    relatedMiniTournamentID = message_data["relatedMiniTournamentID"]
+
     if gameCode == "CNS" or gameCode == "WEB":
         print("This should be printing in the cluster")
     originalLang = get_language()
-    for player in playerList:
+    for player in playerListToNotify:
         try:
             user = User.objects.get(username=player)
         except User.DoesNotExist:
@@ -1182,13 +1192,7 @@ def SN_M_sendGameStartNotification(
             subject = gameStrings["gameStartSubject"]
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
-
-            currentPlayersString = ""
-            if SR_usesUnifiedGameModel(gameCode):
-                currentPlayersString = currentGame.presenter().getCurrentPlayersString()
-            else:
-                currentPlayersString = currentGame.currentPlayers
-
+            
             messageText = (
                 user.username
                 + ": "
@@ -1196,25 +1200,17 @@ def SN_M_sendGameStartNotification(
                 + "\n"
                 + gettext("%(gameName)s - Starting Player:  %(currentPlayer)s.")
                 % {
-                    "gameName": currentGame.gameName,
+                    "gameName": gameName,
                     "currentPlayer": currentPlayersString,
                 }
             )
 
-            if getattr(currentGame, "relatedMainTournament", None) or getattr(
-                currentGame, "relatedMiniTournament", None
-            ):
+            if relatedMainTournamentID > 0 or relatedMiniTournamentID > 0:
                 # This runs only if the field exists AND is not None
-
-                print("FOUND RELATED TOURNAMENT")
-
                 # Define defaults in case neither specific tournament type is present initially in the checks
                 tournamentString = "game"
 
-                if (
-                    hasattr(currentGame, "relatedMainTournament")
-                    and currentGame.relatedMainTournament
-                ):
+                if relatedMainTournamentID > 0:
                     subject = gameStrings["tournamentGameStartSubject"]
                     tournamentString = "mini tournament"
                     messageText = (
@@ -1225,16 +1221,13 @@ def SN_M_sendGameStartNotification(
                         )
                         % {
                             "game_type": boxName,
-                            "gameName": currentGame.getGameName(),
-                            "maxPlayers": currentGame.maxPlayers,
+                            "gameName": gameName,
+                            "maxPlayers": maxPlayers,
                         }
                     )
 
                 # Check mini tournament existence and value
-                if (
-                    hasattr(currentGame, "relatedMiniTournament")
-                    and currentGame.relatedMiniTournament
-                ):
+                if relatedMiniTournamentID > 0:
                     tournamentString = "tournament"
                     subject = gameStrings["miniTournamentGameStartSubject"]
                     messageText = (
@@ -1244,22 +1237,21 @@ def SN_M_sendGameStartNotification(
                             "A Mini Tournament Game has started\n%(gameName)s - %(maxPlayers)s players"
                         )
                         % {
-                            "gameName": currentGame.getGameName(),
-                            "maxPlayers": currentGame.maxPlayers,
+                            "gameName": gameName,
+                            "maxPlayers": maxPlayers,
                         }
                     )
 
                 if shouldSendEmail("tournamentGameStart", player, profile, None, 0):
-                    current_site = currentSite
                     message = render_to_string(
                         "Lobby/gameEmails/tournamentGameStart.html",
                         {
                             "user": user.username,
-                            "domain": current_site.domain,
+                            "domain": domain,
                             "gameID": gameID,
                             "game": gameCode,
-                            "maxPlayers": currentGame.maxPlayers,
-                            "gameName": currentGame.getGameName(),
+                            "maxPlayers": maxPlayers,
+                            "gameName": gameName,
                             "boxName": boxName,
                             "currentPlayer": currentPlayersString,
                             "tournamentString": tournamentString,
@@ -1280,15 +1272,14 @@ def SN_M_sendGameStartNotification(
             else:
                 # SEND EMAIL
                 if shouldSendEmail("gameStart", player, profile, None, 0):
-                    current_site = currentSite
                     message = render_to_string(
                         "Lobby/gameEmails/gameStartEmail.html",
                         {
                             "user": user.username,
-                            "domain": current_site.domain,
+                            "domain": domain,
                             "gameID": gameID,
                             "game": gameCode,
-                            "gameName": currentGame.getGameName(),
+                            "gameName": gameName,
                             "currentPlayer": currentPlayersString,
                             "boxName": boxName,
                         },

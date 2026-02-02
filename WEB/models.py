@@ -30,7 +30,6 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_sendEndGameNotificationTieGame,
-    SN_M_sendGameStartNotification,
 )  # , SN_M_T_sendTournamentGameStartNotification
 
 
@@ -378,14 +377,17 @@ class WEB_Game(GeneralGame):
             if not isTournamentGame:
                 domain = get_current_site(request)
                 username = request.user.username
-                SN_M_sendGameStartNotification(
-                    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
-                    "TGZ",
-                    playerListToNotify,
-                    self.id,
-                    self,
-                    username,
-                )
+                
+                # THIS IS DONE ON PRESENTER
+                
+                #SN_M_sendGameStartNotification(
+                #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+                #    "TGZ",
+                #    playerListToNotify,
+                #    self.id,
+                #    self,
+                #    username,
+                #)
                 #async_task(
                 #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                 #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
