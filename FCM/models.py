@@ -122,7 +122,9 @@ class FCM_Tournament(models.Model):
         winnerHTML = SR_getTournamentWinnerHTML(self.tournamentStatus, self.winnersData)
 
         createdTS = str(self.created)
-        startingOptionsHTML = SR_getFCMstartingOptionsHTML(self.startingOptions)
+        so_string = self.startingOptions
+        so_list = so_string.split(",")
+        startingOptionsHTML = SR_getFCMstartingOptionsHTML(so_list)
 
         return {
             "tournamentID": getattr(self, "id"),
