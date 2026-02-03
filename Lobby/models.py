@@ -530,9 +530,12 @@ class Game(BaseGame):
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)
 
-    
+    # NB To remove linting errors, we need BOTH bespoke eg getAQYpresenter and general eg presenter
     def getAQYpresenter(self):
         return AqyPresenter(self)
+    
+    def getTGZpresenter(self):
+        return TgzPresenter(self)
     
     def presenter(self):
         if self.gameCode == "CNS":

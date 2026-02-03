@@ -32,7 +32,6 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_sendEndGameNotification,
-    SN_M_sendGameStartNotification,
     SN_sendNextTurnNotification,
 )
 

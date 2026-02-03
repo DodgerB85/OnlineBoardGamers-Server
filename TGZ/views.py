@@ -91,7 +91,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             .prefetch_related("players__player", "invitedPlayers")
             .get(id=game_id, gameCode="TGZ")
         )
-        presenter = currentGame.presenter()
+        presenter = currentGame.getTGZpresenter()
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -220,11 +220,8 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         if Game.objects.filter(gameCode="TGZ", players__player=request.user, gameStatus="FINISHED").distinct().count() >= 5:
             experiencedPlayer = True
 
+    # TODO modfix
     myStatsExcludeConsent = "0"
-    try:
-        myStatsExcludeConsent = int(currentGame.statsExcludeConsent[pov : pov + 1])
-    except:
-        myStatsExcludeConsent = "0"
 
     #print_timestamp("After getting myStatsExcludeConsent")
 
@@ -255,12 +252,13 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in currentGame.getAllPlayersOrderedySeat():
-            displayNames = currentGame.player0notes
-            currentGame.player0notes = ""
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            displayNames = user_gp.notes if user_gp else ""
+            if user_gp:
+                user_gp.notes = ""
+                user_gp.save()
             notes = ""
-            currentGame.save()
-        allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
         if currentGame.startingMap != "":
             returnData.update({"startingMap": json.loads(currentGame.startingMap)})
 
@@ -297,7 +295,7 @@ def _processTGZturn(request):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = currentGame.presenter()
+        presenter = currentGame.getTGZpresenter()
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -648,7 +646,7 @@ def _processTGZturn(request):
             {
                 "gameData": loadData,
                 "latestUpdate": currentGame.latestUpdate,
-                "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
             safe=False,
         )
@@ -769,7 +767,7 @@ def saveNotes(request):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = currentGame.presenter()
+        #presenter = currentGame.getTGZpresenter()
         
         # Find the user's GamePlayer
         user_gp = GamePlayer.objects.filter(game=currentGame, player=request.user).first()
@@ -779,6 +777,8 @@ def saveNotes(request):
             return JsonResponse({"notePosted": True})
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+    
+    return JsonResponse({"error": "No response found"}, status=400)
 
 
 @login_required()
@@ -856,7 +856,7 @@ def TGZdata(request, dataType):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = currentGame.presenter()
+        presenter = currentGame.getTGZpresenter()
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -1025,7 +1025,7 @@ def processStatsExcludeConsent(request):
     
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = currentGame.presenter()
+        presenter = currentGame.getTGZpresenter()
         presenter.enableStatsExclude(request.user.username)
         currentGame.save()
         return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})

@@ -122,22 +122,41 @@ class GamePresenter:
             return -1
 
     def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
-        players = self.gameObj.players.select_related(  # .exclude(is_kicked=True)
+        all_players_gp = self.gameObj.players.select_related(  # .exclude(is_kicked=True)
             "player"
         ).order_by("seat_order")
 
         if excludeBots:
             return [
-                gp.player.username for gp in players if gp.player and not gp.is_missing
+                gp.player.username for gp in all_players_gp if gp.player and not gp.is_missing
             ]
 
         if withoutBots:
-            return [gp.player.username for gp in players if gp.player]
+            return [gp.player.username for gp in all_players_gp if gp.player]
 
         result = []
-        for gp in players:
+        for gp in all_players_gp:
+            BOT_NAME = "Bot"
+            if self.gameObj.gameCode == "FCM":
+                BOT_NAME = "FcmBot"
+            elif self.gameObj.gameCode == "HC":
+                BOT_NAME = "HcBot"
+            elif self.gameObj.gameCode == "Bus":
+                BOT_NAME = "BusBot"
+            elif self.gameObj.gameCode == "TGZ":
+                BOT_NAME = "TgzBot"
+            elif self.gameObj.gameCode == "CNS":
+                BOT_NAME = "CnsBot"
+            elif self.gameObj.gameCode == "AQY":
+                BOT_NAME = "AqyBot"
+            elif self.gameObj.gameCode == "IND":
+                BOT_NAME = "IndBot"
+            elif self.gameObj.gameCode == "KFW":
+                BOT_NAME = "KfwBot"
+            if self.gameObj.gameCode == "WEB":
+                BOT_NAME = "WebBot"
             if gp.is_missing:
-                result.append("CnsBot")
+                result.append(BOT_NAME)
             elif gp.player:
                 result.append(gp.player.username)
         return result
@@ -553,8 +572,6 @@ class CannesPresenter(GamePresenter):
     def startGame(self, request):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
-        #from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
-
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
@@ -577,31 +594,32 @@ class CannesPresenter(GamePresenter):
                 for gp in game_players
                 if gp.player and gp.player.username != request.user.username
             ]
-            #SN_M_sendGameStartNotification(
-            #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
-            #    "CNS",
-            #    playerListToNotify,
-            #    self.gameObj.id,
-            #    self.gameObj,
-            #    username,
-            #)
-            message_data = BLANK_MESSAGE_TEMPLATE.copy() 
-            #message_data["gameName"] = self.gameObj.getGameName()
-            message_data["gameID"] = self.gameObj.id
-            message_data["gameName"] = self.getGameName()
-            message_data["gameCode"] = "CNS"
-            message_data["username"] = request.user.username
-            message_data["currentPlayersString"] = self.getCurrentPlayersString()
-            message_data["maxPlayers"] = self.gameObj.maxPlayers
-            message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
-            message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
-            
-            print("about to start CNS async task")           
-            async_task(
-                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-                playerListToNotify,
-                message_data,
-            )
+            if len(playerListToNotify) > 0:
+                #SN_M_sendGameStartNotification(
+                #    domain,  # Do not pass the 'request' object; it cannot be serialized for background tasks
+                #    "CNS",
+                #    playerListToNotify,
+                #    self.gameObj.id,
+                #    self.gameObj,
+                #    username,
+                #)
+                message_data = BLANK_MESSAGE_TEMPLATE.copy() 
+                #message_data["gameName"] = self.gameObj.getGameName()
+                message_data["gameID"] = self.gameObj.id
+                message_data["gameName"] = self.getGameName()
+                message_data["gameCode"] = "CNS"
+                message_data["username"] = request.user.username
+                message_data["currentPlayersString"] = self.getCurrentPlayersString()
+                message_data["maxPlayers"] = self.gameObj.maxPlayers
+                message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
+                message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
+                
+                print("about to start CNS async task")           
+                async_task(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                    playerListToNotify,
+                    message_data,
+                )
 
     def getGameCode(self):
         return "CNS"
@@ -764,8 +782,6 @@ class WebPresenter(GamePresenter):
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
-        #from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
-
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
@@ -796,24 +812,24 @@ class WebPresenter(GamePresenter):
                     for gp in game_players
                     if gp.player and gp.player.username != request.user.username
                 ]
-
-                message_data = BLANK_MESSAGE_TEMPLATE.copy() 
-                #message_data["gameName"] = self.gameObj.getGameName()
-                message_data["gameID"] = self.gameObj.id
-                message_data["gameName"] = self.getGameName()
-                message_data["gameCode"] = "WEB"
-                message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getCurrentPlayersString()
-                message_data["maxPlayers"] = self.gameObj.maxPlayers
-                message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
-                message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
-                
-                print("about to start WEB async task")           
-                async_task(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-                    playerListToNotify,
-                    message_data,
-                )
+                if len(playerListToNotify) > 0:
+                    message_data = BLANK_MESSAGE_TEMPLATE.copy() 
+                    #message_data["gameName"] = self.gameObj.getGameName()
+                    message_data["gameID"] = self.gameObj.id
+                    message_data["gameName"] = self.getGameName()
+                    message_data["gameCode"] = "WEB"
+                    message_data["username"] = request.user.username
+                    message_data["currentPlayersString"] = self.getCurrentPlayersString()
+                    message_data["maxPlayers"] = self.gameObj.maxPlayers
+                    message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
+                    message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
+                    
+                    print("about to start WEB async task")           
+                    async_task(
+                        "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                        playerListToNotify,
+                        message_data,
+                    )
 
     def getGameCode(self):
         return "WEB"
@@ -1060,8 +1076,6 @@ class AqyPresenter(GamePresenter):
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
-        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
-
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
@@ -1085,33 +1099,24 @@ class AqyPresenter(GamePresenter):
                     for gp in game_players
                     if gp.player and gp.player.username != request.user.username
                 ]
-
-                message_data = BLANK_MESSAGE_TEMPLATE.copy() 
-                #message_data["gameName"] = self.gameObj.getGameName()
-                message_data["gameID"] = self.gameObj.id
-                message_data["gameName"] = self.getGameName()
-                message_data["gameCode"] = "AQY"
-                message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getCurrentPlayersString()
-                message_data["maxPlayers"] = self.gameObj.maxPlayers
-                message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
-                message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
-                
-                print("about to start AQY async task")           
-                async_task(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-                    playerListToNotify,
-                    message_data,
-                )
-                #async_task(
-                #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-                #    domain,
-                #    "AQY",
-                #    playerListToNotify,
-                #    self.gameObj.id,
-                #    self.gameObj,
-                #    username,
-                #)
+                if len(playerListToNotify) > 0:
+                    message_data = BLANK_MESSAGE_TEMPLATE.copy() 
+                    #message_data["gameName"] = self.gameObj.getGameName()
+                    message_data["gameID"] = self.gameObj.id
+                    message_data["gameName"] = self.getGameName()
+                    message_data["gameCode"] = "AQY"
+                    message_data["username"] = request.user.username
+                    message_data["currentPlayersString"] = self.getCurrentPlayersString()
+                    message_data["maxPlayers"] = self.gameObj.maxPlayers
+                    message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
+                    message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
+                    
+                    print("about to start AQY async task")           
+                    async_task(
+                        "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                        playerListToNotify,
+                        message_data,
+                    )
 
     def getGameCode(self):
         return "AQY"
@@ -1320,7 +1325,7 @@ class AqyPresenter(GamePresenter):
             jsonResponse.append({"allReady": True})
         else:
             jsonResponse = [{"ready": readyPlayers}]
-            jsonResponse.append({"allReady": False})
+            jsonResponse.append({"allReady": False}) # ignore this linting error for now
 
         return jsonResponse
 
@@ -1604,31 +1609,11 @@ class TgzPresenter(GamePresenter):
         except (ValueError, TypeError):
             return -1
 
-    def getAllPlayersOrderedySeat(self, withoutBots=False):
-        all_players_gp = list(
-            self.gameObj.players.exclude(
-                is_kicked=True, player__username="TGZtourneyAdmin"
-            ).select_related("player").order_by("seat_order")
-        )
-        
-        playerList = [gp.player.username for gp in all_players_gp if gp.player]
-
-        if withoutBots:
-            return playerList
-
-        missing_gps = {gp for gp in all_players_gp if gp.is_missing}
-
-        for count, gp in enumerate(all_players_gp):
-            if gp in missing_gps:
-                playerList[count] = f"TgzBot{count}"
-
-        return playerList
 
     def startGame(self, request):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
         from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendGameStartNotification,
             SN_sendNextTurnNotification,
         )
 
@@ -1659,17 +1644,24 @@ class TgzPresenter(GamePresenter):
                 for gp in game_players
                 if gp.player and gp.player.username != request.user.username
             ]
-
-            domain = get_current_site(request)
-            username = request.user.username
-            SN_M_sendGameStartNotification(
-                domain,
-                "TGZ",
-                playerListToNotify,
-                self.gameObj.id,
-                self.gameObj,
-                username,
-            )
+            if len(playerListToNotify) > 0:
+                message_data = BLANK_MESSAGE_TEMPLATE.copy() 
+                #message_data["gameName"] = self.gameObj.getGameName()
+                message_data["gameID"] = self.gameObj.id
+                message_data["gameName"] = self.getGameName()
+                message_data["gameCode"] = "TGZ"
+                message_data["username"] = request.user.username
+                message_data["currentPlayersString"] = self.getCurrentPlayersString()
+                message_data["maxPlayers"] = self.gameObj.maxPlayers
+                message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
+                message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
+                
+                print("about to start TGZ async task")           
+                async_task(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                    playerListToNotify,
+                    message_data,
+                )
             if request.user.username != allPlayersL[0]:
                 SN_sendNextTurnNotification(
                     request,
