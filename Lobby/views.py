@@ -1430,6 +1430,7 @@ def index(request):
             "rewindData",
             "rewindTempData",
             "chatData",
+            "autoMoves",  # Add this here -- THIS CAN DEFER NON-EXISTANT FIELDS
         )
 
         # 3. Optimized Joins
@@ -2726,6 +2727,10 @@ def playerInfo(request, usernameToProfile):
             # Start the query
             query = game_model.objects.filter(allPlayers=target_id)
 
+            query = query.defer(
+                        "autoMoves",  # Add this here -- THIS CAN DEFER NON-EXISTANT FIELDS
+                    )
+
             # Use select_related for ForeignKeys (0 hits)
             # Use prefetch_related for ManyToMany (1 hit per field)
             if not is_winner_m2m:
@@ -2733,7 +2738,7 @@ def playerInfo(request, usernameToProfile):
                 prefetches = ["allPlayers", "missingPlayers", "kickedPlayers"]
             else:
                 prefetches = ["allPlayers", "missingPlayers", "kickedPlayers", "winner"]
-
+            
             all_games = list(query.prefetch_related(*prefetches).distinct())
 
         # Model-specific counters for the stats table
@@ -3360,7 +3365,7 @@ def checkJoinGame(request, gameType, gameID):
 
     # Check the host hasn't blacklisted you
     if (
-        request.user in currentGame.creator.profile.blacklistedPlayers.all()
+        currentGame.creator and request.user in currentGame.creator.profile.blacklistedPlayers.all()
     ):  # =request.user:
         messages.error(
             request, (gettext("The creator has blocked you from joining their games"))
@@ -3383,7 +3388,7 @@ def checkJoinGame(request, gameType, gameID):
     is_experienced = (
         currentGame.presenter().isExperiencedGame()
         if SR_usesUnifiedGameModel(gameType)
-        else currentGame.isExperiencedGame()
+        else currentGame.isExperiencedGame() # I think this error is ok. Remove when all unified
     )
 
     if is_experienced:
