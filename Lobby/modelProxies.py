@@ -42,3 +42,11 @@ class AQYgame(Game):
         app_label = "AQY"
         verbose_name = "AQY_Game"
         verbose_name_plural = "AQY_Games"
+
+# TGZ
+class TGZgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "TGZ"
+        verbose_name = "TGZ_Game"
+        verbose_name_plural = "TGZ_Games"
