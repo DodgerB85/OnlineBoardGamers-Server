@@ -418,11 +418,10 @@ GAME_MODELS = [
     FCM_Game,
     HC_Game,
     Bus_Game,
-    TGZ_Game,
+    # TGZ_Game - now uses unified Game model exclusively
     # CNS, AQY and WEB now use unified Game model
     IND_Game,
     KFW_Game,
-    # WEB_Game removed - now uses unified Game model
 ]
 
 
@@ -974,6 +973,7 @@ def next_game_redirect(request):
     except (TypeError, ValueError):
         return redirect("/")
 
+    # Collect games from legacy models
     currentGamesList = list(
         chain(
             *[
@@ -986,12 +986,31 @@ def next_game_redirect(request):
             ]
         )
     )
+    
+    # Add unified model games (CNS, WEB, AQY, TGZ)
+    unified_games = Game.objects.filter(
+        players__player=request.user,
+        gameStatus="ACTIVE"
+    ).exclude(
+        players__is_missing=True,
+        players__player=request.user
+    ).distinct().select_related("creator").prefetch_related("players__player")
+    
+    currentGamesList.extend(list(unified_games))
     currentGamesList.sort(key=lambda instance: instance.latestUpdate, reverse=True)
 
     # Filter currentGamesList based on isMyMove function
-    filteredGamesList = [
-        game for game in currentGamesList if game.quickIsMyMove(request.user.username)
-    ]
+    filteredGamesList = []
+    for game in currentGamesList:
+        if isinstance(game, Game):
+            # Unified model - use presenter
+            presenter = game.presenter()
+            if presenter.quickIsMyMove(request.user.username):
+                filteredGamesList.append(game)
+        else:
+            # Legacy model
+            if game.quickIsMyMove(request.user.username):
+                filteredGamesList.append(game)
 
     # Handle cases when there are no filtered games
     if not filteredGamesList:
@@ -1003,7 +1022,11 @@ def next_game_redirect(request):
             return redirect("/")
         else:
             nextGameCode = nextGame.getGameCode()
-            return redirect(f"/{nextGame.getGameCode()}/{nextGame.id}/")
+            # Check if it's a unified model game
+            if isinstance(nextGame, Game):
+                return redirect(f"/{nextGameCode}/{nextGame.id}/show/")
+            else:
+                return redirect(f"/{nextGameCode}/{nextGame.id}/")
 
     # Get the index of the game with the specified game_id
     index = next(
@@ -1022,7 +1045,12 @@ def next_game_redirect(request):
         nextGame = filteredGamesList[index + 1]  # .serialize()
 
     # Construct the nextURL using the next game details
-    return redirect(f"/{nextGame.getGameCode()}/{nextGame.id}/")
+    nextGameCode = nextGame.getGameCode()
+    # Check if it's a unified model game
+    if isinstance(nextGame, Game):
+        return redirect(f"/{nextGameCode}/{nextGame.id}/show/")
+    else:
+        return redirect(f"/{nextGameCode}/{nextGame.id}/")
 
 
 def password_reset_request(request):
@@ -1139,8 +1167,8 @@ def stats(request):
     excluded_names = ["SHADOW", "FcmAI"]
     stats_map = {} # Using a dict temporarily to collect data
 
-    # Handle all unified model games (CNS, WEB, etc.)
-    for game_code in ["CNS", "WEB"]:  # Add more as they migrate
+    # Handle all unified model games (CNS, WEB, AQY, TGZ, etc.)
+    for game_code in ["CNS", "WEB", "AQY", "TGZ"]:  # Add more as they migrate
         counts_key = f"counts_Game_{game_code}"
         counts = cache.get(counts_key)
 

@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -404,6 +404,9 @@ class BaseGame(models.Model):
     rewindTempData = models.TextField(blank=True)
 
     kickoutFlexiData = models.TextField(blank=True)
+    
+    # TGZ only
+    autoMoves = models.CharField(max_length=30, blank=True, null=True, default=None)
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
 
@@ -524,6 +527,9 @@ class Game(BaseGame):
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
 
+    tournamentGame = models.BooleanField(blank=False, default=False)
+    externalTournamentGame = models.BooleanField(blank=False, default=False)
+
     
     def getAQYpresenter(self):
         return AqyPresenter(self)
@@ -535,6 +541,8 @@ class Game(BaseGame):
             return WebPresenter(self)
         if self.gameCode == "AQY":
             return AqyPresenter(self)
+        if self.gameCode == "TGZ":
+            return TgzPresenter(self)
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
