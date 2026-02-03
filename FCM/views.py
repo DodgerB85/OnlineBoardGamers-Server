@@ -941,8 +941,13 @@ def _processTurn(request):
             )
             SN_sendAdminErrorMessage(request, message)
         ###########
+        
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        trainingGame = False
+        if 102 in starting_options:
+            trainingGame = True
 
-        if jsonData["checksum"]:
+        if jsonData["checksum"] or trainingGame:
             currentGame.clearAllMoveDataV2()
 
         # If you are saving into turn order, return all players OOB preferences
@@ -999,7 +1004,8 @@ def _processTurn(request):
         # If it WAS a working day save the side data (pre moves) - UNLESS it is now working day again
         # So also check you're not coming from Turn Order
         if (
-            nameToUse != ""
+            not trainingGame 
+            and nameToUse != ""
             and oldPhase != 4
             and jsonData["phase"] != 3
             and (jsonData["phase"] == 5 or oldPhase == 5)
@@ -1639,6 +1645,11 @@ def _processTurn(request):
     elif jsonData["action"] == "saveAndUpdateNotifictions":
         currentGame.gameData = jsonData["data"]
         referringPhase = jsonData["referringPhase"]
+        
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        trainingGame = False
+        if 102 in starting_options:
+            trainingGame = True
 
         # Send Notifications - and remove pre-data for players with illegal moves
         playerIndexesToNotify = jsonData["playerIndexesToNotify"]
@@ -1647,7 +1658,8 @@ def _processTurn(request):
         for playerIndex in playerIndexesToNotify:
             playerListToNotify.append(playerNames[playerIndex])
         for playerName in playerListToNotify:
-            currentGame.insertPlayerMoveData(playerName, [-1], [])
+            if not trainingGame:
+                currentGame.insertPlayerMoveData(playerName, [-1], [])
 
         # Add players to currentPlayers
         currentPlayersArr = currentGame.currentPlayers.split(",")
