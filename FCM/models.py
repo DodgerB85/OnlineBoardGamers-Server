@@ -1044,6 +1044,10 @@ class FCM_Game(GeneralGame):
         return rewindHTML
 
     def getRewindHostPossible(self):
+        # TODO - move this to new vote system
+        starting_options = json.loads(self.startingOptions) if self.startingOptions else []
+        if 102 in starting_options:
+            return True
         rewindConsentVotes = self.tempPresenter().getFullSetOfVoteResults(
             REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
         )
