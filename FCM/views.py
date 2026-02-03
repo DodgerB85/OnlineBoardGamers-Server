@@ -1719,6 +1719,11 @@ def bugEntry(request):
     gameData = jsonData["gameData"]
     bugDescription = jsonData["description"]
 
+    bug_info = (
+    f"{currentGame.startingMap}   Options: {json.loads(currentGame.startingOptions)}" 
+    if currentGame.startingOptions else currentGame.startingMap
+)
+
     # email data to myself
     SN_sendBugReportEmail(
         request,
@@ -1727,7 +1732,7 @@ def bugEntry(request):
         gameData,
         bugDescription,
         currentGame.rewindData,
-        currentGame.startingMap + "   Options: " + json.loads(currentGame.startingOptions) if currentGame.startingOptions else [],
+        f"{currentGame.startingMap} Options: {currentGame.startingOptions}",
     )
 
     return JsonResponse({"bugEntrySuccess": True})
