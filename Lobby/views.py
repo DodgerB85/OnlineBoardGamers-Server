@@ -4714,6 +4714,8 @@ def MiniTournament(request, Mini_Tournament_id):
                     if Mini_Tournament.winnersData
                     else []
                 ),
+                "isUnifiedModel": SR_usesUnifiedGameModel(Mini_Tournament.gameCode),
+
             }
         )
         return render(
