@@ -5148,6 +5148,7 @@ def MainTournament(request, Main_Tournament_id):
                     if currentTournament.winnersData
                     else []
                 ),
+                "isUnifiedModel": SR_usesUnifiedGameModel(currentTournament.gameCode),
             }
         )
         return render(
