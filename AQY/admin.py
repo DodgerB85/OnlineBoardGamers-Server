@@ -3,7 +3,7 @@ from django.conf import settings
 from django import forms
 from django.utils.html import format_html
 
-from .models import AQY_Game, AQY_Tournament
+from .models import AQY_Game
 
 
 @admin.register(AQY_Game)
@@ -22,7 +22,6 @@ class AQY_GameAdmin(admin.ModelAdmin):
         "kickedPlayers",
         "invitedPlayers",
         "playersWithChatNotification",
-        "relatedTournament",
         "relatedMainTournament",
         "relatedMiniTournament",
     ]
@@ -59,7 +58,6 @@ class AQY_GameAdmin(admin.ModelAdmin):
                 "creator",
                 "host",
                 # "winner",
-                "relatedTournament",
                 "relatedMainTournament",
                 "relatedMiniTournament",
             )
@@ -134,11 +132,6 @@ class AQY_GameAdmin(admin.ModelAdmin):
 
     @admin.display(description="Tournament")
     def tournament_display(self, obj):
-        if obj.relatedTournament:
-            # return obj.relatedTournament.tournamentName
-            return getattr(
-                obj.relatedTournament, "tournamentName", str(obj.relatedTournament)
-            )
         if obj.relatedMainTournament:
             return f"Main: {getattr(obj.relatedMainTournament, 'tournamentName', 'Unknown')}"
         if obj.relatedMiniTournament:
@@ -156,7 +149,6 @@ class AQY_GameAdmin(admin.ModelAdmin):
     list_filter = (
         "gameStatus",
         "maxPlayers",
-        "relatedTournament",
         "relatedMainTournament",
         "relatedMiniTournament",
     )
@@ -265,17 +257,7 @@ class AQY_GameAdmin(admin.ModelAdmin):
             "Linked Tournament",
             {
                 "classes": ("collapse",),
-                "fields": ("relatedTournament", "relatedMainTournament", "relatedMiniTournament"),
+                "fields": ("relatedMainTournament", "relatedMiniTournament"),
             },
         ),
     )
-
-
-class AQY_TournamentAdmin(admin.ModelAdmin):
-    save_on_top = True
-    save_as = True
-    filter_horizontal = ("startingPlayers", "nextRoundPlayers")
-    search_fields = ["tournamentName"]
-
-
-admin.site.register(AQY_Tournament, AQY_TournamentAdmin)

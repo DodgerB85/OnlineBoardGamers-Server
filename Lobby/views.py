@@ -109,7 +109,7 @@ from FCM.models import FCM_Game, FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
 from Bus.models import Bus_Game, Bus_Tournament
 from TGZ.models import TGZ_Game
-from AQY.models import AQY_Game, AQY_Tournament
+from AQY.models import AQY_Game
 from IND.models import IND_Game, IND_Tournament
 from KFW.models import KFW_Game
 from RNB.models import RNB_Game
@@ -1339,7 +1339,6 @@ def index(request):
         "FCM": FCM_Tournament,
         "HC": HC_Tournament,
         "Bus": Bus_Tournament,
-        "AQY": AQY_Tournament,
         "IND": IND_Tournament,
     }
 
@@ -2957,7 +2956,6 @@ def AllTournaments(request):
     tournaments_FCM = FCM_Tournament.objects.order_by("-id").all()
     tournaments_HC = HC_Tournament.objects.order_by("-id").all()
     tournaments_Bus = Bus_Tournament.objects.order_by("-id").all()
-    tournaments_AQY = AQY_Tournament.objects.order_by("-id").all()
     tournaments_IND = IND_Tournament.objects.order_by("-id").all()
     tournaments_MAIN = Main_Tournament.objects.order_by("-id").all()
 
@@ -2966,7 +2964,6 @@ def AllTournaments(request):
             tournaments_FCM,
             tournaments_HC,
             tournaments_Bus,
-            tournaments_AQY,
             tournaments_IND,
             tournaments_MAIN,
         ),
@@ -2996,8 +2993,6 @@ def Tournament(request, gameType, tournamentID):
                 currentTournament = HC_Tournament.objects.get(id=tournamentID)
             if gameType == "Bus":
                 currentTournament = Bus_Tournament.objects.get(id=tournamentID)
-            if gameType == "AQY":
-                currentTournament = AQY_Tournament.objects.get(id=tournamentID)
             if gameType == "IND":
                 currentTournament = IND_Tournament.objects.get(id=tournamentID)
         except Exception:
@@ -3032,8 +3027,6 @@ def Tournament(request, gameType, tournamentID):
             currentTournament = HC_Tournament.objects.get(id=tournamentID)
         if gameType == "Bus":
             currentTournament = Bus_Tournament.objects.get(id=tournamentID)
-        if gameType == "AQY":
-            currentTournament = AQY_Tournament.objects.get(id=tournamentID)
         if gameType == "IND":
             currentTournament = IND_Tournament.objects.get(id=tournamentID)
     except Exception:

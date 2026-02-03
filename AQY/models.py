@@ -21,7 +21,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_M_ProcessAnyTournamentEndGame,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_M_T_sendTournamentGameStartNotification,
     SN_M_sendEndGameNotificationTieGame,
 )
 from Lobby.sharedFunctions.sharedRefs import (
@@ -31,149 +30,9 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
     SR_gamePaceString,
     SR_getAQYstartingOptionsHTML,
-    SR_getTournamentWinnerHTML,
-    SR_getTournamentRoundsHTML,
-    SR_getTimeNow,
 )
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
-
-
-class AQY_Tournament(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    tournamentName = models.CharField(max_length=120)
-
-    tournamentStatus = models.CharField(
-        max_length=2,
-        choices=SR_TOURNAMENT_STATUS_CHOICES,
-        default="OP",
-    )
-
-    tournamentType = models.CharField(
-        max_length=2,
-        choices=SR_TOURNAMENT_TYPE_CHOICES,
-        default="RR",
-    )
-
-    startingOptions = models.CharField(max_length=20, blank=True, default="")
-    startingPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_AQY", blank=True
-    )
-    nextRoundPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="currentRoundPlayersRelName_AQY",
-        blank=True,
-    )
-
-    maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
-    maxGamePlayers = models.PositiveSmallIntegerField(blank=False)
-    roundsBeforeKnockout = models.PositiveSmallIntegerField(blank=False, default=4)
-
-    winnersData = models.TextField(blank=True)
-
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-    tournamentProgressionData = models.TextField(blank=True)
-    tournamentSideData = models.TextField(blank=True)
-    tournamentPointsData = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"{getattr(self, 'id')}: {self.tournamentName} : {self.tournamentType} : {self.tournamentStatus}"
-
-    def isSignedUp(self, loggedInUser):
-        if loggedInUser in self.startingPlayers.all():
-            return True
-        return False
-
-    def createTournamentGame(
-        self, request, _roundNumberString, _currentPlayersUsernames
-    ):
-        gameName = f"[{self.tournamentName}] {_roundNumberString}"
-        playerOrderSeed = random.randint(1000, 32767)
-        pace = 30
-        creator = User.objects.get(username="admin")
-
-        newGame = AQY_Game(
-            gameName=gameName,
-            creator=creator,
-            gamePace=pace,
-            playerOrderSeed=playerOrderSeed,
-            startingOptions=self.startingOptions,
-            maxPlayers=self.maxGamePlayers,
-            gameStatus="ACTIVE",
-        )
-
-        newGame.save()
-
-        for i in range(self.maxGamePlayers):
-            if _currentPlayersUsernames[i] != "":
-                player = User.objects.get(username=_currentPlayersUsernames[i])
-                newGame.allPlayers.add(player)
-                SN_M_T_sendTournamentGameStartNotification(
-                    request,
-                    "AQY",
-                    _currentPlayersUsernames[i],
-                    self.maxGamePlayers,
-                    newGame.gameName,
-                    newGame.currentTurnString(),
-                    newGame.id,
-                    False,
-                    "normalTournament",
-                )
-
-        newGame.kickoutDuration = 100
-        newGame.relatedTournament = self
-        newGame.host = newGame.allPlayers.all().order_by("?").first()
-        newGame.tournamentGame = True
-
-        newGame.save()
-        newGame.startGame(request, True)
-        return newGame.id
-
-    def getByedPlayersList(self):
-        byedPlayerList = []
-        TPDA = json.loads(self.tournamentProgressionData)
-        for round in TPDA:
-            for row in round:
-                if row[0] == "BYEPLAYERS":
-                    byedPlayerList.extend(row)
-        return byedPlayerList
-
-    def get_tournamentType_display(self):
-        return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
-
-    def serialize(self, loggedInUser=None):
-        # Used for Finished Games
-        winnerHTML = SR_getTournamentWinnerHTML(self.tournamentStatus, self.winnersData)
-
-        createdTS = str(self.created)
-        startingOptionsHTML = "[None]"
-
-        return {
-            "tournamentID": self.id,
-            "tournamentName": self.tournamentName,
-            # "tournamentStatus": self.get_tournamentStatus_display(),
-            "tournamentType": self.get_tournamentType_display(),
-            "maxTournamentPlayers": self.maxTournamentPlayers,
-            "maxGamePlayers": self.maxGamePlayers,
-            "startingOptionsHTML": startingOptionsHTML,
-            "winnerHTML": winnerHTML,
-            "createdTS": createdTS,
-            "gameCode": "AQY",
-            "tournamentLink": f"/AQYtournament/AQY/{self.id}/",
-        }
-
-    def getRoundsHTML(self):
-        # Only for IP or FN tournaments
-        roundsHTML = SR_getTournamentRoundsHTML(
-            self.tournamentType,
-            self.maxGamePlayers,
-            self.tournamentProgressionData,
-            self.tournamentPointsData,
-            "AQY",
-            self,
-        )
-        return roundsHTML
-
 
 class AQY_Game(GeneralGame):
     allPlayers = models.ManyToManyField(
@@ -224,13 +83,6 @@ class AQY_Game(GeneralGame):
     player3currentMoveData = models.TextField(blank=True)
 
     tournamentGame = models.BooleanField(blank=False, default=False)
-    relatedTournament = models.ForeignKey(
-        AQY_Tournament,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="tournament_relName_AQY",
-    )
 
     relatedMainTournament = models.ForeignKey(
         Main_Tournament,
@@ -313,9 +165,6 @@ class AQY_Game(GeneralGame):
 
         # Now send winning notification
         SN_M_sendEndGameNotificationTieGame(request, "AQY", finalResults, _gameID, self)
-
-        if self.relatedTournament:
-            SF_M_ProcessTournamentEndGame(request, "AQY", self, winnerNamesArray)
 
         if self.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
