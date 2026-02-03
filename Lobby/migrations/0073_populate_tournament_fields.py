@@ -48,14 +48,7 @@ def populate_tournament_fields(apps, schema_editor):
         gameCode='TGZ'
     ).update(tournamentGame=True)
     
-    games_with_mini_tournament = Game.objects.filter(
-        relatedMiniTournament__isnull=False
-    ).exclude(
-        gameCode='TGZ'
-    ).update(tournamentGame=True)
-    
     print(f"  Set tournamentGame=True for {games_with_main_tournament} non-TGZ games with main tournament")
-    print(f"  Set tournamentGame=True for {games_with_mini_tournament} non-TGZ games with mini tournament")
     
     print("Tournament fields population complete\n")
 
