@@ -528,7 +528,7 @@ class CannesPresenter(GamePresenter):
 
         gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
 
-        startingOptionsHTML = SR_getCNSstartingOptionsHTML(self.gameObj.startingOptions)
+        startingOptionsHTML = SR_getCNSstartingOptionsHTML(json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else {})
 
         kickoutRequiredNum = self.kickoutRequired()
 
@@ -738,7 +738,7 @@ class WebPresenter(GamePresenter):
 
         gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
 
-        startingOptionsHTML = SR_getWEBstartingOptionsHTML(self.gameObj.startingOptions)
+        startingOptionsHTML = SR_getWEBstartingOptionsHTML(json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else {})
 
         kickoutRequiredNum = self.kickoutRequired()
 
@@ -1031,7 +1031,7 @@ class AqyPresenter(GamePresenter):
 
         gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
 
-        startingOptionsHTML = SR_getAQYstartingOptionsHTML(self.gameObj.startingOptions)
+        startingOptionsHTML = SR_getAQYstartingOptionsHTML(json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else {})
 
         kickoutRequiredNum = self.kickoutRequired()
 
@@ -1560,7 +1560,7 @@ class TgzPresenter(GamePresenter):
 
         gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
 
-        startingOptionsHTML = SR_getTGZstartingOptionsHTML(self.gameObj.startingOptions)
+        startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else {})
 
         kickoutRequiredNum = self.kickoutRequired()
 

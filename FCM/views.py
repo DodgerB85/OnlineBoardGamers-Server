@@ -201,7 +201,7 @@ def showGame(request, game_id):
     if currentGame.relatedTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
 
-    startingOptionsHTML = SR_getFCMstartingOptionsHTML(currentGame.startingOptions)
+    startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(currentGame.startingOptions) if currentGame.startingOptions else [])
     gameCreationTimestamp = currentGame.created
 
     KickoutFlexiDataArray = []

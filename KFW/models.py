@@ -264,7 +264,7 @@ class KFW_Game(GeneralGame):
 
         gamePaceString = SR_gamePaceString(self.gamePace)
 
-        startingOptionsHTML = SR_getKFWstartingOptionsHTML(self.startingOptions)
+        startingOptionsHTML = SR_getKFWstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
 
         kickoutRequiredNum = self.kickoutRequired()
 
