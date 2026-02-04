@@ -694,9 +694,9 @@ def _processTurn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "SO": json.loads(currentGame.startingOptions),
+                "SO": currentGame.startingOptions if currentGame.startingOptions else "[]",
                 "startingOptionsHTML": SR_getFCMstartingOptionsHTML(
-                    currentGame.startingOptions
+                    json.loads(currentGame.startingOptions) if currentGame.startingOptions else [],
                 ),
                 "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
             },
@@ -793,9 +793,9 @@ def _processTurn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "SO": json.loads(currentGame.startingOptions),
+                "SO": currentGame.startingOptions if currentGame.startingOptions else "[]",
                 "startingOptionsHTML": SR_getFCMstartingOptionsHTML(
-                    currentGame.startingOptions
+                    json.loads(currentGame.startingOptions) if currentGame.startingOptions else [],
                 ),
                 "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
             },
@@ -1732,8 +1732,7 @@ def bugEntry(request):
     bugDescription = jsonData["description"]
 
     bug_info = (
-    f"{currentGame.startingMap}   Options: {json.loads(currentGame.startingOptions)}" 
-    if currentGame.startingOptions else currentGame.startingMap
+    f"{currentGame.startingMap}   Options: {json.loads(currentGame.startingOptions) if currentGame.startingOptions else ""}" 
 )
 
     # email data to myself
@@ -1744,7 +1743,7 @@ def bugEntry(request):
         gameData,
         bugDescription,
         currentGame.rewindData,
-        f"{currentGame.startingMap} Options: {currentGame.startingOptions}",
+        f"{currentGame.startingMap} Options: {currentGame.startingOptions if currentGame.startingOptions else ''}",
     )
 
     return JsonResponse({"bugEntrySuccess": True})
