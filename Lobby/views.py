@@ -109,7 +109,6 @@ from FCM.models import FCM_Game, FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
 from Bus.models import Bus_Game, Bus_Tournament
 from TGZ.models import TGZ_Game
-from AQY.models import AQY_Game
 from IND.models import IND_Game, IND_Tournament
 from KFW.models import KFW_Game
 from RNB.models import RNB_Game
@@ -2127,14 +2126,14 @@ def createCNSpage(request, gameID=0):
 
 @login_required
 def createAQYpage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "AQY", AQY_Game)
+    experienced = SF_hasRequiredExperience(request, "AQY", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createAQY.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = AQY_Game.objects.get(id=gameID)
-        except AQY_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID)
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
         playerNames = []
