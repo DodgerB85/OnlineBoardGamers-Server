@@ -207,7 +207,18 @@ def SF_fastSerializeGame(game, user):
     if gameName == "":
         gameName = f"[{creator}'s Game]"
 
-    startingOptionsArr = json.loads(game.startingOptions) if game.startingOptions else []
+    # Handle both JSON array format and legacy comma-separated string format
+    if game.startingOptions:
+        try:
+            startingOptionsArr = json.loads(game.startingOptions)
+        except (json.JSONDecodeError, ValueError):
+            # Legacy format: comma-separated string like "21,200,21001"
+            try:
+                startingOptionsArr = [int(x.strip()) for x in game.startingOptions.split(',') if x.strip()]
+            except (ValueError, AttributeError):
+                startingOptionsArr = []
+    else:
+        startingOptionsArr = []
 
     isLearningGame = False
     isExperiencedGame = False
