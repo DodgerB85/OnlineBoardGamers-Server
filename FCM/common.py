@@ -281,8 +281,9 @@ def create_fcm_game(
                 get_object_or_404(User, username=username) for username in usernames
             ]
             if invited_players:
-                game_status = "WAITING"
                 usernames_to_notify = usernames
+                if "privateGame" not in request.POST:
+                    game_status = "WAITING"
 
     # Database operations
     with transaction.atomic():
