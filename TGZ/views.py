@@ -7,6 +7,7 @@ import random
 from contextlib import contextmanager
 
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -43,6 +44,9 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .common import create_tgz_game
 
+if TYPE_CHECKING:
+    from Lobby.presenters import TgzPresenter 
+ 
 def index(request):
     return HttpResponse("Secret tip! Click your name in the top right in a PRACTICE game to unlock all gods!")
 
@@ -91,7 +95,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             .prefetch_related("players__player", "invitedPlayers")
             .get(id=game_id, gameCode="TGZ")
         )
-        presenter = currentGame.getTGZpresenter()
+        presenter = cast('TgzPresenter', currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -295,7 +299,7 @@ def _processTGZturn(request):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = currentGame.getTGZpresenter()
+        presenter = cast('TgzPresenter', currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -767,7 +771,6 @@ def saveNotes(request):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        #presenter = currentGame.getTGZpresenter()
         
         # Find the user's GamePlayer
         user_gp = GamePlayer.objects.filter(game=currentGame, player=request.user).first()
@@ -803,7 +806,6 @@ def _sendChatMessage(request):
     if jsonData["action"] == "sendChatMessage":
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-            presenter = currentGame.presenter()
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         
@@ -856,7 +858,7 @@ def TGZdata(request, dataType):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = currentGame.getTGZpresenter()
+        presenter = cast('TgzPresenter', currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -1025,7 +1027,7 @@ def processStatsExcludeConsent(request):
     
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = currentGame.getTGZpresenter()
+        presenter = cast('TgzPresenter', currentGame.presenter())
         presenter.enableStatsExclude(request.user.username)
         currentGame.save()
         return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
