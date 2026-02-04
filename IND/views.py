@@ -31,7 +31,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .models import IND_Game
-from Lobby.models import User, Profile
+from Lobby.models import User, Profile, Game, GamePlayer
 
 INDsuperUsers = ["BotKickStarter"]
 
@@ -90,7 +90,8 @@ def createINDgame(request):
     _created = SR_getTimeNow()
 
     with transaction.atomic():
-        newGame = IND_Game(
+        newGame = Game(
+            gameCode='IND',
             gameDescription=_gameDescription,
             creator=request.user,
             host=request.user,
@@ -102,13 +103,25 @@ def createINDgame(request):
             maxPlayers=_maxPlayers,
             gameStatus="AVAILABLE",
         )
-        newGame.save()
 
         _gameName = request.POST["gameName"]
         if _gameName != "":
             newGame.gameName = _gameName
 
-        newGame.allPlayers.add(request.user)
+        newGame.save()
+
+        # Create GamePlayer for the creator
+        GamePlayer.objects.create(
+            game=newGame,
+            player=request.user,
+            seat_order=0,
+            is_current=False,
+            is_missing=False,
+            is_kicked=False,
+            has_chat_notification=False,
+            winner=False,
+            notes="",
+        )
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
@@ -117,7 +130,19 @@ def createINDgame(request):
 
             for i in range(1, _maxPlayers):
                 shadow_player = User.objects.get(username=f"{shadow_names[i-1]}")
-                newGame.allPlayers.add(shadow_player)
+
+                # Create GamePlayer for shadow player
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=shadow_player,
+                    seat_order=i,
+                    is_current=False,
+                    is_missing=False,
+                    is_kicked=False,
+                    has_chat_notification=False,
+                    winner=False,
+                    notes="",
+                )
 
                 if request.POST[f"player{i+1}"]:
                     display_name = request.POST[f"player{i+1}"]
@@ -125,9 +150,13 @@ def createINDgame(request):
                     display_name = f"{shadow_names[i-1]}"
                 shadow_players.append(display_name)
 
-            # newGame.rewindConsent = "2" * (_maxPlayers - 1)
-            newGame.player0notes = json.dumps(shadow_players)
-            newGame.startGame(request)
+            # Store display names in the first player's notes (seat_order=0)
+            first_gp = newGame.players.filter(seat_order=0).first()
+            if first_gp:
+                first_gp.notes = json.dumps(shadow_players)
+                first_gp.save()
+
+            newGame.presenter().startGame(request)
         else:
             usernamesToNotify = []
             for i in range(2, _maxPlayers + 1):
@@ -141,7 +170,7 @@ def createINDgame(request):
             SN_sendInviteNotifications(
                 request,
                 usernamesToNotify,
-                newGame.getGameName(),
+                newGame.presenter().getGameName(),
                 _maxPlayers,
                 "IND",
             )
@@ -191,28 +220,30 @@ def createINDgame(request):
         messages.success(request, gettext("Your Practice game has started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
     else:
-        messages.success(request, (SF_getGameCreationJsonReturn("IND", getattr(newGame, "id"))))
+        messages.success(request, (SF_getGameCreationJsonReturn("IND", newGame.id)))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
 def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     try:
-        currentGame = IND_Game.objects.select_related(
-            "host", "relatedTournament", "creator"
+        currentGame = Game.objects.select_related(
+            "host", "relatedINDTournament", "creator"
         ).prefetch_related(
-            "allPlayers", 
-            "missingPlayers", 
-            "playersWithChatNotification"
-        ).get(id=game_id)
-    except IND_Game.DoesNotExist:
+            "players__player",
+            "invitedPlayers"
+        ).get(id=game_id, gameCode='IND')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
     # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    all_game_players = currentGame.players.exclude(is_kicked=True).all()
+    all_player_ids = {gp.player.id for gp in all_game_players if gp.player}
     userObj = request.user
     username = userObj.username
     
@@ -224,14 +255,14 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
 
     # No2 it is a proper started game, so set up for not logged in
-    gameID = getattr(currentGame, "id")
-    gameName = currentGame.getGameName()
+    gameID = currentGame.id
+    gameName = presenter.getGameName()
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
-    allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat(False))
+    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat(False))
 
     # Logged out
     returnData = {
@@ -245,11 +276,11 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "allPlayerListBySeat": allPlayerListBySeat,
-        "currentPlayers": currentGame.currentPlayers,
+        "currentPlayers": presenter.getCurrentPlayersString(),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredINDoptions": [-1, 0, 0, 1, 1, 1],
         "pov": -99,
-        "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+        "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
         "preMoves": "",
         "sideData": "",
         "settingsDEBUG": config("IND_USE_SOURCE_CODE", default=False, cast=bool),
@@ -262,10 +293,10 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     # Now you are logged in
     user_id = userObj.id
-    
-    user_profile = Profile.objects.get(user=userObj) 
-    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
-    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+
+    user_profile = Profile.objects.get(user=userObj)
+    missing_player_ids = {gp.player.id for gp in currentGame.players.filter(is_missing=True) if gp.player}
+    chat_notify_ids = {gp.player.id for gp in currentGame.players.filter(has_chat_notification=True) if gp.player}
 
     is_in_all = user_id in all_player_ids
     is_missing = user_id in missing_player_ids
@@ -278,7 +309,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     latestUpdate = currentGame.latestUpdate
 
     ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
+    nextURL = f"/nextGame?current_id={gameID}&current_code={presenter.getGameCode()}"
 
     #print_timestamp("nextURL")
 
@@ -298,8 +329,10 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     chatNotification = False
     if user_id in chat_notify_ids:
         chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+        user_gp = currentGame.players.filter(player=request.user).first()
+        if user_gp:
+            user_gp.has_chat_notification = False
+            user_gp.save()
 
     returnData.update(
         {
@@ -318,24 +351,21 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if not involvedPlayer:
         return render(request, "IND/showINDgame.html", returnData)
 
-    pov = currentGame.seatPosition(username)
+    pov = presenter.seatPosition(username)
     if request.user.username == "BotKickStarter":
         pov = -1
-    secondsToNextKickout = currentGame.getSecondsToNextKickout()
+    secondsToNextKickout = presenter.getSecondsToNextKickout()
 
-    kickoutRequired = currentGame.kickoutRequired()
+    kickoutRequired = presenter.kickoutRequired()
 
-    myMove = currentGame.isMyMove(username)
+    myMove = presenter.isMyMove(username)
 
     ## Get the Notes for the user
-    notes_mapping = {
-            0: currentGame.player0notes,
-            1: currentGame.player1notes,
-            2: currentGame.player2notes,
-            3: currentGame.player3notes,
-            4: currentGame.player4notes,
-        }
-    notes = notes_mapping.get(pov, "")
+    notes = ""
+    if pov >= 0:
+        user_gp = currentGame.players.filter(player=userObj).first()
+        if user_gp:
+            notes = user_gp.notes
 
     #print_timestamp("notes")
 
@@ -363,20 +393,23 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "yourTurnAudioType": liveNotification,
             "statsExcludedGame": currentGame.statsExcludedGame,
             "isHost": isHost,
-            "preMoves": currentGame.getCompressedPreMoveArr(request.user.username),
-            "sideData": currentGame.getAllPreMoveDataCompressed()
+            "preMoves": presenter.getCompressedPreMoveArr(request.user.username),
+            "sideData": presenter.getAllPreMoveDataCompressed()
         }
     )
 
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in currentGame.getAllPlayersOrderedySeat():
-            displayNames = currentGame.player0notes
-            currentGame.player0notes = ""
-            notes = ""
-            currentGame.save()
-        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            # For shadow games, display names are stored in the first player's notes
+            first_gp = currentGame.players.filter(seat_order=0).first()
+            if first_gp and first_gp.notes:
+                displayNames = first_gp.notes
+                first_gp.notes = ""
+                first_gp.save()
+                notes = ""
+        # allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
 
         returnData.update(
             {
@@ -428,9 +461,11 @@ def _processINDturn(request):
     latest_update = str(jsonData.get("latestUpdate", 0))
 
     try:
-        currentGame = IND_Game.objects.get(id=game_id)
-    except IND_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='IND')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -451,10 +486,10 @@ def _processINDturn(request):
 
         # If saving into >= operations, delete all pre-moves
         if (jsonData["phase"] >= 7):
-            currentGame.clearAllPreMoveData()
+            presenter.clearAllPreMoveData()
         # If saving less than ops, from >= ops, delete all pre-moves
         elif (currentGame.phase >= 7 and jsonData["phase"] < 7):
-            currentGame.clearAllPreMoveData()
+            presenter.clearAllPreMoveData()
 
         currentGame.gameData = jsonData["data"]
         currentGame.turn = jsonData["turn"]
@@ -489,7 +524,7 @@ def _processINDturn(request):
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            currentGame.endGame(
+            presenter.endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
@@ -510,15 +545,15 @@ def _processINDturn(request):
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 # Also remove the player if it is R&D phase and they have a pre move
-                if len(playerListToNotify) > 0 and jsonData["phase"] == 6 and currentGame.doesPlayerHavePreMove(playerListToNotify[0]):
+                if len(playerListToNotify) > 0 and jsonData["phase"] == 6 and presenter.doesPlayerHavePreMove(playerListToNotify[0]):
                     playerListToNotify.remove(playerListToNotify[0])
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
                         request,
                         "IND",
                         playerListToNotify,
-                        getattr(currentGame, "id"),
-                        currentGame.getGameName(),
+                        currentGame.id,
+                        presenter.getGameName(),
                         currentGame,
                         oldVer,
                     )
@@ -563,8 +598,8 @@ def _processINDturn(request):
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-            "sideData": currentGame.getAllPreMoveDataCompressed()
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "sideData": presenter.getAllPreMoveDataCompressed()
         }
 
         return JsonResponse(response_data, safe=False)
@@ -574,10 +609,13 @@ def _processINDturn(request):
     elif jsonData["action"] == "resign":
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
-        success = currentGame.addDeleteVote(_missingPlayer.username)  # Pass playerName to addDeleteVote
-        # currentGame.enableStatsExclude(request.user.username)
+        _missingPlayer_gp = currentGame.players.filter(player=_missingPlayer).first()
+        if _missingPlayer_gp:
+            _missingPlayer_gp.is_missing = True
+            _missingPlayer_gp.save()
+        presenter.checkForHostChange(_missingPlayer)
+        success = presenter.addDeleteVote(_missingPlayer.username)  # Pass playerName to addDeleteVote
+        # presenter.enableStatsExclude(request.user.username)
 
         # newVer = (int(currentGame.latestUpdate) % 1000) + 1
         # currentGame.latestUpdate = str((int(time.time())*1000) + newVer)
@@ -684,8 +722,8 @@ def _processINDturn(request):
                     request,
                     "IND",
                     playerListToNotify,
-                    getattr(currentGame, "id"),
-                    currentGame.getGameName(),
+                    currentGame.id,
+                    presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
                 )
@@ -714,11 +752,14 @@ def _processINDturn(request):
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.kickedPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
-        success = currentGame.addDeleteVote(_missingPlayer.username)  # Pass playerName to addDeleteVote
-        # currentGame.enableStatsExclude(_missingPlayer.username)
+        _missingPlayer_gp = currentGame.players.filter(player=_missingPlayer).first()
+        if _missingPlayer_gp:
+            _missingPlayer_gp.is_missing = True
+            _missingPlayer_gp.is_kicked = True
+            _missingPlayer_gp.save()
+        presenter.checkForHostChange(_missingPlayer)
+        success = presenter.addDeleteVote(_missingPlayer.username)  # Pass playerName to addDeleteVote
+        # presenter.enableStatsExclude(_missingPlayer.username)
 
         # Clears data and saves record - DONT DELETE FAC MOVES
         # currentGame.clearAllMoveData()
@@ -731,7 +772,7 @@ def _processINDturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 # "nextPlayer": jsonData["nextPlayer"],
             },
             safe=False,
@@ -755,20 +796,20 @@ def _processINDturn(request):
         # moveDataArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
         moveDataArray = jsonData["data"]
         
-        # First, check for deleteion
+        # First, check for deletion
         if len(moveDataArray) == 0:
-            currentGame.insertPlayerPreMoveData(request.user.username, jsonData["prePhase"], moveDataArray)
+            presenter.insertPlayerPreMoveData(request.user.username, jsonData["prePhase"], moveDataArray)
         else:
             # If turns don't match, replace with no data
             if moveDataArray[0] != currentGame.turn:
                 moveDataArray = []
-                
+
             # add / replace the current phase move data. # recompress and save.
-            currentGame.insertPlayerPreMoveData(request.user.username, jsonData["prePhase"], moveDataArray)
+            presenter.insertPlayerPreMoveData(request.user.username, jsonData["prePhase"], moveDataArray)
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "data": currentGame.getCompressedPreMoveArr(request.user.username),
+            "data": presenter.getCompressedPreMoveArr(request.user.username),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -786,14 +827,16 @@ def INDdata(request, dataType):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = IND_Game.objects.get(id=jsonData["gameID"])
-    except IND_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='IND')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if dataType == 1:
         returnData = {
             "gameData": currentGame.gameData,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
             "latestUpdate": currentGame.latestUpdate,
         }
@@ -801,8 +844,10 @@ def INDdata(request, dataType):
         return JsonResponse(returnData)
     elif dataType == 2:
         # Remove user from notifications
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+        user_gp = currentGame.players.filter(player=request.user).first()
+        if user_gp:
+            user_gp.has_chat_notification = False
+            user_gp.save()
         return JsonResponse(
             {
                 "chatData": currentGame.chatData
@@ -821,7 +866,7 @@ def INDdata(request, dataType):
             {
                 "latest": False,
                 "gameData": currentGame.gameData,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
             }
         )
@@ -838,8 +883,8 @@ def bugEntry(request):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = IND_Game.objects.get(id=gameID)
-    except IND_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=gameID, gameCode='IND')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     gameData = jsonData["gameData"]
@@ -874,7 +919,7 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = IND_Game.objects.get(id=game_id)
+        currentGame = Game.objects.get(id=game_id, gameCode='IND')
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -889,10 +934,10 @@ def _sendChatMessage(request):
         compressedChatData = base64.b64encode(compressed_data).decode("utf-8")
 
         currentGame.chatData = compressedChatData
+        currentGame.save()
 
         # Now add notifications to everyone except request.user
-        currentGame.playersWithChatNotification.set(currentGame.allPlayers.exclude(username=request.user.username))
-        currentGame.save()
+        currentGame.players.exclude(player=request.user).update(has_chat_notification=True)
 
         return JsonResponse({"chatData": compressedChatData})
 
@@ -908,16 +953,15 @@ def saveNotes(request):
     game_id = jsonData["gameID"]
     notes = jsonData["notes"]
     try:
-        currentGame = IND_Game.objects.get(id=game_id)
-    except IND_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='IND')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    seat_position = currentGame.seatPosition(request.user.username)
-
-    if seat_position in range(5):
-        player_notes_field = f"player{seat_position}notes"
-        setattr(currentGame, player_notes_field, notes)
-        currentGame.save()
+    # Save notes to the GamePlayer record
+    user_gp = currentGame.players.filter(player=request.user).first()
+    if user_gp:
+        user_gp.notes = notes
+        user_gp.save()
 
     return JsonResponse({"notePosted": True})
 
@@ -931,8 +975,8 @@ def saveZoom(request):
 
     if jsonData["action"] == "zoom":
         try:
-            currentGame = IND_Game.objects.get(id=jsonData["gameID"])
-        except IND_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='IND')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         zoomLevels = json.loads(currentGame.zoomLevels)
 
@@ -961,39 +1005,52 @@ def forkINDgame(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = IND_Game.objects.get(id=jsonData["gameID"])
-    except IND_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='IND')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     # Clone the currentGame object
     newGame = copy.deepcopy(currentGame)
-    # newGame.id = None  # Set id to None to create a new object
-    setattr(newGame, "id", None)
+    newGame.id = None  # Set id to None to create a new object
+    newGame.original_id = None  # Clear original_id for the fork
 
     # Modify the fields you want to change
     newGame.gameName = currentGame.gameName + " (fork)"
     newGame.save()
-    # Copy Many-to-Many relationships
-    for m2m_field in currentGame._meta.many_to_many:
-        related_objects = getattr(currentGame, m2m_field.name).all()
-        getattr(newGame, m2m_field.name).add(*related_objects)
+
+    # Copy invited players M2M
+    newGame.invitedPlayers.set(currentGame.invitedPlayers.all())
+
+    # Copy GamePlayer relationships
+    all_game_players = currentGame.players.exclude(is_kicked=True).all()
+    for gp in all_game_players:
+        GamePlayer.objects.create(
+            game=newGame,
+            player=gp.player,
+            seat_order=gp.seat_order,
+            is_missing=gp.is_missing,
+            is_kicked=gp.is_kicked,
+            is_current=gp.is_current,
+            has_chat_notification=gp.has_chat_notification,
+            winner=gp.winner,
+            notes=gp.notes,
+        )
 
     # Change game to private
     newGame.gameStatus = "PRIVATE"
 
     # Add all current players to invited players
-    for player in newGame.allPlayers.all():
-        if player.username != request.user.username:
-            newGame.invitedPlayers.add(player)
+    for gp in all_game_players:
+        if gp.player and gp.player.username != request.user.username:
+            newGame.invitedPlayers.add(gp.player)
 
-    # remove all but current player
-    newGame.allPlayers.clear()
-    newGame.allPlayers.add(request.user)
+    # Remove all but current player from GamePlayer
+    newGame.players.exclude(player=request.user).delete()
 
     # Save the newGame object
     newGame.save()
 
-    return JsonResponse({"response": "ok", "newID": getattr(newGame, "id")})
+    return JsonResponse({"response": "ok", "newID": newGame.id})
 
 
 @login_required()
@@ -1014,19 +1071,20 @@ def _voteToDelete(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = IND_Game.objects.get(id=jsonData["gameID"])
-    except IND_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='IND')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    # player = request.user  # Assuming the logged-in user is voting
+
+    presenter = currentGame.presenter()
     playerName = request.user.username  # Get the player's username
 
-    success = currentGame.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
+    success = presenter.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
 
     if success:
         # Check if all players have voted to delete
         all_voted = True
-        delete_votes_data = currentGame.getDeleteVotesData()
-        missingPlayers = currentGame.getMissingPlayersNamesArray()
+        delete_votes_data = presenter.getDeleteVotesData()
+        missingPlayers = presenter.getMissingPlayersNamesArray()
         for player, vote in delete_votes_data.items():
             if not vote and player not in missingPlayers:
                 all_voted = False
@@ -1035,18 +1093,18 @@ def _voteToDelete(request):
         if all_voted:
             # Delete the game
             currentGame.delete()
-             # Add a success message
+            # Add a success message
             messages.success(request, gettext("Game successfully deleted"))
             # Redirect to the index page
             return JsonResponse({
-                "voteChanged": True, 
-                "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                "voteChanged": True,
+                "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
                 "redirect_url": reverse("index")})
 
         return JsonResponse(
             {
                 "voteChanged": True,
-                "deleteVotesData": json.dumps(currentGame.getDeleteVotesData()),
+                "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
             },
             safe=False,
         )
