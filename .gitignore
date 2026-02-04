@@ -12,7 +12,6 @@ media
 env/
 venv/
 ENV/
-siteUtils/
 env.bak/
 venv.bak/
 local_settings.py
