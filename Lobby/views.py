@@ -27,7 +27,7 @@ from datetime import timedelta
 from collections import Counter
 
 from django.db import connection, transaction
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Max
 from django.contrib import messages
 from django.contrib.auth import (
     authenticate,
@@ -409,7 +409,7 @@ GAME_NAMES_MODELS = {
     "TGZ": TGZ_Game,
     "CNS": "CNS",  # Now using unified Game model
     "AQY": "AQY",  # Now using unified Game model
-    "IND": IND_Game,
+    "IND": "IND",  # Now using unified Game model
     "KFW": KFW_Game,
     "WEB": "WEB",  # Now using unified Game model
 }
@@ -418,8 +418,8 @@ GAME_MODELS = [
     HC_Game,
     Bus_Game,
     # TGZ_Game - now uses unified Game model exclusively
-    # CNS, AQY and WEB now use unified Game model
-    IND_Game,
+    # CNS, AQY, WEB, and IND now use unified Game model
+    # IND_Game - removed, now uses unified Game model
     KFW_Game,
 ]
 
@@ -758,7 +758,7 @@ def DBO_deleteGame(request, game_type):
         "TGZ": TGZ_Game,
         "CNS": Game,  # Now using unified Game model
         "AQY": Game,  # Now using unified Game model
-        "IND": IND_Game,
+        "IND": Game,  # Now using unified Game model
         "KFW": KFW_Game,
         "WEB": Game,  # Now using unified Game model
     }
@@ -1166,8 +1166,8 @@ def stats(request):
     excluded_names = ["SHADOW", "FcmAI"]
     stats_map = {} # Using a dict temporarily to collect data
 
-    # Handle all unified model games (CNS, WEB, AQY, TGZ, etc.)
-    for game_code in ["CNS", "WEB", "AQY", "TGZ"]:  # Add more as they migrate
+    # Handle all unified model games (CNS, WEB, AQY, TGZ, IND, etc.)
+    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND"]:  # Add more as they migrate
         counts_key = f"counts_Game_{game_code}"
         counts = cache.get(counts_key)
 
@@ -2177,14 +2177,15 @@ def createAQYpage(request, gameID=0):
 
 @login_required
 def createINDpage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "IND", IND_Game)
+    # For unified games, pass the Game model with gameCode filter
+    experienced = SF_hasRequiredExperience(request, "IND", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createIND.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = IND_Game.objects.get(id=gameID)
-        except IND_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID, gameCode='IND')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
         playerNames = []
@@ -2218,20 +2219,22 @@ def createINDpage(request, gameID=0):
 
 @login_required
 def createINDpage2(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "IND", IND_Game)
+    experienced = SF_hasRequiredExperience(request, "IND", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createIND2.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = IND_Game.objects.get(id=gameID)
-        except IND_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID, gameCode='IND')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
         playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        # Get players from GamePlayer relationship
+        all_players = currentGame.players.exclude(is_kicked=True).select_related('player')
+        for gp in all_players:
+            if gp.player and request.user != gp.player:
+                playerNames.append(gp.player.username)
 
         messages.success(request, (gettext("Game creation for rematch")))
         loadedStartingOptions = (
@@ -2259,7 +2262,7 @@ def createINDpage2(request, gameID=0):
 
 @login_required
 def createKFWpage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "KFW", IND_Game)
+    experienced = SF_hasRequiredExperience(request, "KFW", KFW_Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createKFW.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
@@ -3544,7 +3547,24 @@ def checkJoinGame(request, gameType, gameID):
 
             _newPlayer = request.user
             if SR_usesUnifiedGameModel(gameType):
-                GamePlayer.objects.create(game=selectedGameForJoin, player=_newPlayer)
+                # Create GamePlayer with all required fields
+                # Determine the next seat_order based on existing players
+                max_seat_order = selectedGameForJoin.players.aggregate(
+                    max_seat=Max('seat_order')
+                )['max_seat']
+                next_seat_order = (max_seat_order + 1) if max_seat_order is not None else 0
+
+                GamePlayer.objects.create(
+                    game=selectedGameForJoin,
+                    player=_newPlayer,
+                    seat_order=next_seat_order,
+                    is_current=False,
+                    is_missing=False,
+                    is_kicked=False,
+                    has_chat_notification=False,
+                    winner=False,
+                    notes=""
+                )
             else:
                 selectedGameForJoin.allPlayers.add(_newPlayer)
 
