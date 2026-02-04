@@ -527,14 +527,6 @@ class Game(BaseGame):
 
     if TYPE_CHECKING:
         players: RelatedManager[GamePlayer]
-        
-    # NB To remove linting errors, we need BOTH bespoke eg getAQYpresenter and general eg presenter
-    def getAQYpresenter(self):
-        return AqyPresenter(self)
-    
-    def getTGZpresenter(self):
-        return TgzPresenter(self)
-    
     
     def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter]:
         if self.gameCode == "CNS":

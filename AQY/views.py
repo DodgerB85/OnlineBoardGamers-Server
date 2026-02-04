@@ -6,6 +6,7 @@ import base64
 import gzip
 
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from contextlib import contextmanager
 
@@ -36,6 +37,8 @@ from Lobby.models import User, Profile, Game
 
 from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
 
+if TYPE_CHECKING:
+    from Lobby.presenters import AqyPresenter 
 
 AQYsuperUsers = ["BotKickStarter"]
 AQY_DB_LOCK_NAME = "lockAQYgame_"
@@ -74,7 +77,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
-    presenter = currentGame.getAQYpresenter()
+    presenter = cast('AqyPresenter', currentGame.presenter())
 
     # Access the prefetch cache immediately to "warm" it
     all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
@@ -295,7 +298,7 @@ def _processAQYturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.getAQYpresenter()
+    presenter = cast('AqyPresenter', currentGame.presenter())
 
     if jsonData["action"] == "save":
 
@@ -1237,7 +1240,7 @@ def AQYdata(request, dataType):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.getAQYpresenter()
+    presenter = cast('AqyPresenter', currentGame.presenter())
 
     if dataType == 1:
         returnData = {
@@ -1353,7 +1356,7 @@ def _sendChatMessage(request):
         new_entry = jsonData["newEntry"]
 
         currentGame = Game.objects.get(id=game_id, gameCode='AQY')
-        presenter = currentGame.getAQYpresenter()
+        presenter = cast('AqyPresenter', currentGame.presenter())
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -1458,7 +1461,7 @@ def _castVote(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.getAQYpresenter()
+    presenter = cast('AqyPresenter', currentGame.presenter())
 
     # Delegate all logic to the presenter
     result = presenter.processVoteLogic(
