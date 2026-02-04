@@ -130,12 +130,10 @@ if dayNumber == 1 and (monthNumber in MONTHS_FOR_AQY or monthNumber in MONTHS_FO
     maxGamePlayers = random.randrange(3, 5, 1)
     gameCode = "AQY"
     if monthNumber in MONTHS_FOR_AQY:
-        pass
-        #tournament_model = AQY_Tournament
-        #box_name = "Antiquity"
-        #INNER_URL = "AQYtournament/AQY"
-        #maxGamePlayers = random.randrange(2, 5, 1)
-        #gameCode = "AQY"
+        box_name = "Antiquity"
+        INNER_URL = "AQYtournament/AQY"
+        maxGamePlayers = random.randrange(2, 5, 1)
+        gameCode = "AQY"
     if monthNumber in MONTHS_FOR_IND:
         tournament_model = IND_Tournament
         box_name = "Indonesia"
