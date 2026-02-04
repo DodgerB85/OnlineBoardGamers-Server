@@ -1093,30 +1093,30 @@ class AqyPresenter(GamePresenter):
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            if not isTournamentGame:
-                playerListToNotify = [
-                    gp.player.username
-                    for gp in game_players
-                    if gp.player and gp.player.username != request.user.username
-                ]
-                if len(playerListToNotify) > 0:
-                    message_data = BLANK_MESSAGE_TEMPLATE.copy() 
-                    #message_data["gameName"] = self.gameObj.getGameName()
-                    message_data["gameID"] = self.gameObj.id
-                    message_data["gameName"] = self.getGameName()
-                    message_data["gameCode"] = "AQY"
-                    message_data["username"] = request.user.username
-                    message_data["currentPlayersString"] = self.getCurrentPlayersString()
-                    message_data["maxPlayers"] = self.gameObj.maxPlayers
-                    message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
-                    message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
+            playerListToNotify = [
+                gp.player.username
+                for gp in game_players
+                if gp.player and gp.player.username != request.user.username
+            ]
+            if len(playerListToNotify) > 0:
+                message_data = BLANK_MESSAGE_TEMPLATE.copy() 
+                #message_data["gameName"] = self.gameObj.getGameName()
+                message_data["gameID"] = self.gameObj.id
+                message_data["gameName"] = self.getGameName()
+                message_data["gameCode"] = "AQY"
+                message_data["username"] = request.user.username
+                message_data["currentPlayersString"] = self.getCurrentPlayersString()
+                message_data["maxPlayers"] = self.gameObj.maxPlayers
+                message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
+                message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
+                
+                print("about to start AQY async task")           
+                async_task(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                    playerListToNotify,
+                    message_data,
+                )
                     
-                    print("about to start AQY async task")           
-                    async_task(
-                        "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-                        playerListToNotify,
-                        message_data,
-                    )
 
     def getGameCode(self):
         return "AQY"
