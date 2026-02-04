@@ -2,6 +2,7 @@ import time
 import json
 
 from decouple import config
+from typing import Union, TYPE_CHECKING
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -28,6 +29,9 @@ from .sharedFunctions.sharedRefs import (
     SR_GAMES_CODES_AND_NAMES_CHOICES,
 )
 
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
+    from .models import GamePlayer # Import your GamePlayer model
 
 class User(AbstractUser):
     # Fields that you are not obliged to implement
@@ -521,6 +525,9 @@ class Game(BaseGame):
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)
 
+    if TYPE_CHECKING:
+        players: RelatedManager[GamePlayer]
+        
     # NB To remove linting errors, we need BOTH bespoke eg getAQYpresenter and general eg presenter
     def getAQYpresenter(self):
         return AqyPresenter(self)
@@ -528,7 +535,8 @@ class Game(BaseGame):
     def getTGZpresenter(self):
         return TgzPresenter(self)
     
-    def presenter(self):
+    
+    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter]:
         if self.gameCode == "CNS":
             return CannesPresenter(self)
         if self.gameCode == "WEB":
