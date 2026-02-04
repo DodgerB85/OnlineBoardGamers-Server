@@ -50,3 +50,11 @@ class TGZgame(Game):
         app_label = "TGZ"
         verbose_name = "TGZ_Game"
         verbose_name_plural = "TGZ_Games"
+
+# IND
+class INDgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "IND"
+        verbose_name = "IND_Game"
+        verbose_name_plural = "IND_Games"
