@@ -185,15 +185,17 @@ Q_CLUSTER = {
     'save_limit': 100,      # Only keep the last 50 successful tasks
     'gc_interval': 3600,   # Run the garbage collector every hour (3600 seconds)
     'label': 'Django Q',   # Admin label
+    'ack_failures': True,  # Cleanup failed tasks
     
     # --- CRITICAL CPU SAVING SETTINGS ---
     'sleeptime': 30,       # Wait 30 seconds before checking for new tasks
     'bulking': 10,         # Process up to 10 tasks at once to reduce overhead
     'sync': False,
+    'guard_cycle': 5.0,    # MOST IMPORTANT: Idle sleep time in seconds (default is 0.5)
 }
 
 # NB this oculd kill very long DB connections
-socket.setdefaulttimeout(120) 
+#socket.setdefaulttimeout(120) 
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
