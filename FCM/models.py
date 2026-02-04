@@ -373,7 +373,7 @@ class FCM_Game(GeneralGame):
 
         # Pace and Options (0 hits if these are just CharFields/TextFields)
         gamePaceString = SR_gamePaceString(self.gamePace)
-        startingOptionsHTML = SR_getFCMstartingOptionsHTML(self.startingOptions)
+        startingOptionsHTML = SR_getFCMstartingOptionsHTML(self.startingOptions if self.startingOptions else [])
         kickoutRequiredNum = self.kickoutRequired()  # Inspect this for queries!
 
         # Check for Shadow/AI without hitting the DB
