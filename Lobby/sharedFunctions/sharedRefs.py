@@ -990,14 +990,14 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
         if option == 110:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         if option == 120:
             # usedOptions += 1
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1090,13 +1090,13 @@ def SR_getTGZstartingOptionsHTML(startingOptions):
         retHTML += "</div></div>"
     if 110 in locStartingOptions:
         retHTML += (
-            "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
+            "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
             + gettext("Learning Game")
             + "'>"
         )
     elif 120 in locStartingOptions:
         retHTML += (
-            "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+            "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
             + gettext("Experienced Game")
             + "'>"
         )
@@ -1239,13 +1239,13 @@ def SR_getCNSstartingOptionsHTML(startingOptions):
             )
         elif option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1263,13 +1263,13 @@ def SR_getBUSstartingOptionsHTML(startingOptionsArr):
     for option in startingOptionsArr:
         if option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1286,13 +1286,13 @@ def SR_getHCstartingOptionsHTML(startingOptionsArr):
     for option in startingOptionsArr:
         if option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+                "<img class='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1367,13 +1367,13 @@ def SR_getAQYstartingOptionsHTML(startingOptions):
     for option in startingList:
         if option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1420,13 +1420,13 @@ def SR_getINDstartingOptionsHTML(startingOptionsArr):
             )
         elif option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1487,13 +1487,13 @@ def SR_getKFWstartingOptionsHTML(startingOptions):
             )
         if option == 110:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_learningGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
         elif option == 120:
             startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/so_experiencedGame.svg' title='"
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
                 + "'>"
             )
@@ -1504,15 +1504,23 @@ def SR_getKFWstartingOptionsHTML(startingOptions):
 def SR_getWEBstartingOptionsHTML(startingOptions):
     if not startingOptions:
         return ""
-    if startingOptions == "":
+    if len(startingOptions) == 0:
         return ""
     startingList = json.loads(startingOptions)
     startingOptionsHTML = ""
     for option in startingList:
-        if option == 1:
+        if option == 110:
+            # usedOptions += 1
             startingOptionsHTML += (
-                "<img class='startingOption' src='/static/WEB/images/so_expansion.svg' title='"
-                + gettext("Use Expansion")
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
+                + gettext("Learning Game")
+                + "'>"
+                )
+        if option == 120:
+            # usedOptions += 1
+            startingOptionsHTML += (
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
+                + gettext("Experienced Game")
                 + "'>"
             )
 

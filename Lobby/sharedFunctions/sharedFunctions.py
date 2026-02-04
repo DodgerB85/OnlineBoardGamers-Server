@@ -37,7 +37,13 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_getFCMstartingOptionsHTML,
     SR_getHCstartingOptionsHTML,
+    SR_getBUSstartingOptionsHTML,
+    SR_getTGZstartingOptionsHTML,
+    SR_getCNSstartingOptionsHTML,
+    SR_getAQYstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
+    SR_getKFWstartingOptionsHTML,
+    SR_getWEBstartingOptionsHTML,
     SR_gamePaceString,
     SR_usesUnifiedGameModel,
 )
@@ -218,8 +224,20 @@ def SF_fastSerializeGame(game, user):
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(startingOptionsArr)
     if game_code == "HC":
         startingOptionsHTML = SR_getHCstartingOptionsHTML(startingOptionsArr)
+    if game_code == "Bus":
+        startingOptionsHTML = SR_getBUSstartingOptionsHTML(startingOptionsArr)
+    if game_code == "TGZ":
+        startingOptionsHTML = SR_getTGZstartingOptionsHTML(startingOptionsArr)
+    if game_code == "CNS":
+        startingOptionsHTML = SR_getCNSstartingOptionsHTML(startingOptionsArr)
+    if game_code == "AQY":
+        startingOptionsHTML = SR_getAQYstartingOptionsHTML(startingOptionsArr)
     if game_code == "IND":
         startingOptionsHTML = SR_getINDstartingOptionsHTML(startingOptionsArr)
+    if game_code == "KFW":
+        startingOptionsHTML = SR_getKFWstartingOptionsHTML(startingOptionsArr)
+    if game_code == "WEB":
+        startingOptionsHTML = SR_getWEBstartingOptionsHTML(game.startingOptions)
     
     # Get kickout required - use presenter for unified model
     if is_unified_model:
