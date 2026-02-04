@@ -1014,7 +1014,7 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
 def SR_getTGZstartingOptionsHTML(startingOptions):
     if startingOptions == "":
         return ""
-    locStartingOptions = json.loads(startingOptions).copy() if startingOptions else []
+    locStartingOptions = startingOptions
     if len(locStartingOptions) == 0:
         return ""
     if locStartingOptions[0] == 102:
@@ -1105,7 +1105,8 @@ def SR_getTGZstartingOptionsHTML(startingOptions):
 
 
 def SR_getgodsVRoptionsHTML(startingOptions):
-    locStartingOptions = json.loads(startingOptions) if startingOptions else []
+    #locStartingOptions = json.loads(startingOptions) if startingOptions else []
+    locStartingOptions = startingOptions
     customgods = []
     customVR = []
     specVR = []
@@ -1192,9 +1193,9 @@ def SR_getgodsVRoptionsHTML(startingOptions):
 def SR_getCNSstartingOptionsHTML(startingOptions):
     if not startingOptions:
         return ""
-    if startingOptions == "":
+    if len(startingOptions) == 0:
         return ""
-    startingList = json.loads(startingOptions)
+    startingList = startingOptions
     startingOptionsHTML = ""
     for option in startingList:
         if option == 1:
@@ -1357,14 +1358,13 @@ def SR_getHCstartingOptionsHTML(startingOptionsArr):
     return startingOptionsHTML
 
 
-def SR_getAQYstartingOptionsHTML(startingOptions):
-    if not startingOptions:
+def SR_getAQYstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
         return ""
-    if startingOptions == "":
+    if len(startingOptionsArr) == 0:
         return ""
-    startingList = json.loads(startingOptions)
     startingOptionsHTML = ""
-    for option in startingList:
+    for option in startingOptionsArr:
         if option == 110:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
@@ -1434,14 +1434,13 @@ def SR_getINDstartingOptionsHTML(startingOptionsArr):
     return startingOptionsHTML
 
 
-def SR_getKFWstartingOptionsHTML(startingOptions):
-    if not startingOptions:
+def SR_getKFWstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
         return ""
-    if startingOptions == "":
+    if len(startingOptionsArr) == 0:
         return ""
-    startingList = json.loads(startingOptions)
     startingOptionsHTML = ""
-    for option in startingList:
+    for option in startingOptionsArr:
         if option == 7:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/KFW/images/so_infoLow.svg' title='"
@@ -1501,14 +1500,13 @@ def SR_getKFWstartingOptionsHTML(startingOptions):
     return startingOptionsHTML
 
 
-def SR_getWEBstartingOptionsHTML(startingOptions):
-    if not startingOptions:
+def SR_getWEBstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
         return ""
-    if len(startingOptions) == 0:
+    if len(startingOptionsArr) == 0:
         return ""
-    startingList = json.loads(startingOptions)
     startingOptionsHTML = ""
-    for option in startingList:
+    for option in startingOptionsArr:
         if option == 110:
             # usedOptions += 1
             startingOptionsHTML += (
