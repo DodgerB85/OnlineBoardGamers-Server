@@ -5,6 +5,7 @@ import base64
 import gzip
 
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from contextlib import contextmanager
 
@@ -12,7 +13,7 @@ from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
@@ -34,6 +35,9 @@ from Lobby.models import User, Profile, Game, GamePlayer
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
 
+if TYPE_CHECKING:
+    from Lobby.presenters import CannesPresenter 
+    
 CNS_DB_LOCK_NAME = "lockCNSgame_"
 
 # Create your views here.
@@ -402,7 +406,7 @@ def _processCNSturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('CannesPresenter', currentGame.presenter())
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
