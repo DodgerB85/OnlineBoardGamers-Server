@@ -39,6 +39,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getHCstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
     SR_gamePaceString,
+    SR_usesUnifiedGameModel,
 )
 from Lobby.sharedFunctions.tournyGenerator import multiGamePlayers4p, multiGamePlayersRound2
 
@@ -1363,8 +1364,18 @@ def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _curre
         else:
             # Add every entry except the TB in other sub-arrays
             for name in finalPositionNameAndScore[:-1]:
-                finalPositionNames[i].append(name)
+                finalPositionNames[i].append(name)  
+    
+    if SR_usesUnifiedGameModel(_currentGame.getGameCode()):
+        localAllPlayers = [p.player for p in _currentGame.players.all() if p.player]
+    else:    
+        localAllPlayers = _currentGame.allPlayers.all()
 
+    if SR_usesUnifiedGameModel(_currentGame.getGameCode()):
+        localKickedPlayers = [p.player for p in _currentGame.players.all() if p.player and p.is_kicked]
+    else:    
+        localKickedPlayers = _currentGame.kickedPlayers.all()   
+    
     ############################## Add players to next round players
     # KO JUST ADD THE WINNER
     if tournamanetObj.tournamentType == "KO":
@@ -1378,15 +1389,16 @@ def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _curre
                 if playerUsername not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
                     tournamanetObj.nextRoundPlayers.add(User.objects.get(username=playerUsername))
         # Else add everyone
-        else:
-            for playerObj in _currentGame.allPlayers.all():
-                if playerObj not in _currentGame.kickedPlayers.all() and playerObj.username not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
+        else:   
+            for playerObj in localAllPlayers:
+                if playerObj not in localKickedPlayers and playerObj.username not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
                     tournamanetObj.nextRoundPlayers.add(playerObj)
     # TL Process lives, remove kicks, add players with lives
     elif tournamanetObj.tournamentType == "TL":
         # Process the lives list - DEDUCT lives from the losers
         livesList = json.loads(tournamanetObj.tournamentSideData)
-        for playerObj in _currentGame.allPlayers.all():
+        
+        for playerObj in localAllPlayers:
             isWinner = playerObj.username in _winnerArray
             if not isWinner and playerObj.username not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
                 # Step BACKWARDS through entire lives list
@@ -1399,14 +1411,14 @@ def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _curre
                         else:
                             livesList[i][1] = lives
         # Go BACKWARDS through livesList and delete all kicked players
-        for playerObj in _currentGame.kickedPlayers.all():
+        for playerObj in localKickedPlayers:
             for i in range(len(livesList) - 1, -1, -1):
-                player = livesList[0]
+                player = livesList[i][0]
                 if player == playerObj.username:
                     livesList.pop(i)
 
         # Now add players to next round with 1/2 lives and not kicked
-        for playerObj in _currentGame.allPlayers.all():
+        for playerObj in localAllPlayers:
             if any(playerObj.username == subarr[0] and subarr[1] > 0 for subarr in livesList):
                 tournamanetObj.nextRoundPlayers.add(playerObj)
 
@@ -1555,6 +1567,7 @@ def SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winne
         # First place is winner, 2nd place everyone else in game
         firsts = []
         seconds = []
+        # TODO convert this to unigied model -- MAYBE JUST PASS IN THIS DATA!?
         finalPlayersList = _currentGame.getAllPlayersOrderedySeat(True)
         # add BYES from next round first
         nextRoundPlayersList = list(
