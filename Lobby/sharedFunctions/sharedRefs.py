@@ -679,85 +679,81 @@ def SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds):
     return latestUpdateElapsedTimeString
 
 
-def SR_getFCMstartingOptionsHTML(startingOptions):
-    if not startingOptions:
+def SR_getFCMstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
         return "[None]"
-    if len(startingOptions) == 0:
+    if len(startingOptionsArr) == 0:
         return "[None]"
     
-    # If it's a string, load it to json
-    if type(startingOptions) == str:
-        startingOptions = json.loads(startingOptions)
-
     # Reorder Options to have a better order
     startingOptionsList = []
-    if 110 in startingOptions:
+    if 110 in startingOptionsArr:
         startingOptionsList.append(110)  # learning Game
-    if 120 in startingOptions:
+    if 120 in startingOptionsArr:
         startingOptionsList.append(120)  # Experienced Game
-    if 5 in startingOptions:
+    if 5 in startingOptionsArr:
         startingOptionsList.append(5)  # Allow Surrender
-    if 1 in startingOptions:
+    if 1 in startingOptionsArr:
         startingOptionsList.append(1)  # Short Game
-    if 2 in startingOptions:
+    if 2 in startingOptionsArr:
         startingOptionsList.append(2)  # No MS
-    if 3 in startingOptions:
+    if 3 in startingOptionsArr:
         startingOptionsList.append(3)  # No CEO
-    if 6 in startingOptions:
+    if 6 in startingOptionsArr:
         startingOptionsList.append(6)  # No Radio
-    if 8 in startingOptions:
+    if 8 in startingOptionsArr:
         startingOptionsList.append(8)  # Hard Choices
-    if 21 in startingOptions:
+    if 21 in startingOptionsArr:
         startingOptionsList.append(21)  # New MS
-    if 20 in startingOptions:
+    if 20 in startingOptionsArr:
         startingOptionsList.append(20)  # Ketchup MS (-1 dist)
-    if 23 in startingOptions:
+    if 23 in startingOptionsArr:
         startingOptionsList.append(23)  # New Reserve
-    if 14 in startingOptions:
+    if 14 in startingOptionsArr:
         startingOptionsList.append(14)  # Movie Stars
-    if 15 in startingOptions:
+    if 15 in startingOptionsArr:
         startingOptionsList.append(15)  # Mass Marketers
-    if 13 in startingOptions:
+    if 13 in startingOptionsArr:
         startingOptionsList.append(13)  # Gourmet Food Critics
-    if 17 in startingOptions:
+    if 17 in startingOptionsArr:
         startingOptionsList.append(17)  # Rural Marketer
-    if 18 in startingOptions:
+    if 18 in startingOptionsArr:
         startingOptionsList.append(18)  # New Districts
-    if 22 in startingOptions:
+    if 22 in startingOptionsArr:
         startingOptionsList.append(22)  # Lobbyists
-    if 16 in startingOptions:
+    if 16 in startingOptionsArr:
         startingOptionsList.append(16)  # NightShift
-    if 19 in startingOptions:
+    if 19 in startingOptionsArr:
         startingOptionsList.append(19)  # Cofffee
-    if 9 in startingOptions:
+    if 9 in startingOptionsArr:
         startingOptionsList.append(9)  # Fry Chef
-    if 10 in startingOptions:
+    if 10 in startingOptionsArr:
         startingOptionsList.append(10)  # Kimchi
-    if 11 in startingOptions:
+    if 11 in startingOptionsArr:
         startingOptionsList.append(11)  # Sushi
-    if 12 in startingOptions:
+    if 12 in startingOptionsArr:
         startingOptionsList.append(12)  # Noodles
-    if 101 in startingOptions:
+    if 101 in startingOptionsArr:
         startingOptionsList.append(101)  # Strict Pay / Fridge
-    if 200 in startingOptions:
+    if 200 in startingOptionsArr:
         startingOptionsList.append(200)  # Random Mods
-    if 300 in startingOptions:
+    if 300 in startingOptionsArr:
         startingOptionsList.append(300)  # Draft Mods
-    if 999 in startingOptions:
+    if 999 in startingOptionsArr:
         startingOptionsList.append(999)  # Skip Module
-    if 103 in startingOptions:
+    if 103 in startingOptionsArr:
         startingOptionsList.append(103)  # Sandbox Mode
-    if 40 in startingOptions:
+    if 40 in startingOptionsArr:
         startingOptionsList.append(40)  # Urabn Planning
-    if 41 in startingOptions:
+    if 41 in startingOptionsArr:
         startingOptionsList.append(41)  # Urabn Planning Plus
-    if 42 in startingOptions:
+    if 42 in startingOptionsArr:
         startingOptionsList.append(42)  # jazz
-    if 43 in startingOptions:
+    if 43 in startingOptionsArr:
         startingOptionsList.append(43)  # dumpling
-    if 44 in startingOptions:
+    if 44 in startingOptionsArr:
         startingOptionsList.append(44)  # delivery
-    if 45 in startingOptions:
+    if 45 in startingOptionsArr:
         startingOptionsList.append(45)  # hawker
     # 99 is used to allow rewinds in mini tournaments
 
@@ -948,9 +944,9 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
         if option == 200:
             # usedOptions += 1
             moduleRange = []
-            for i in range(len(startingOptions)):
-                if startingOptions[i] > 21000 and startingOptions[i] < 21116:
-                    numStr = str(startingOptions[i] % 100)
+            for i in range(len(startingOptionsArr)):
+                if startingOptionsArr[i] > 21000 and startingOptionsArr[i] < 21116:
+                    numStr = str(startingOptionsArr[i] % 100)
                     moduleRange.append(numStr[-2:])
             if len(moduleRange) != 2:
                 moduleRange = ["??", "??"]
@@ -1011,22 +1007,21 @@ def SR_getFCMstartingOptionsHTML(startingOptions):
     return startingOptionsHTML
 
 
-def SR_getTGZstartingOptionsHTML(startingOptions):
-    if startingOptions == "":
+def SR_getTGZstartingOptionsHTML(startingOptionsArr):
+    if startingOptionsArr == "":
         return ""
-    locStartingOptions = startingOptions
-    if len(locStartingOptions) == 0:
+    if len(startingOptionsArr) == 0:
         return ""
-    if locStartingOptions[0] == 102:
-        del locStartingOptions[0]
-    if len(locStartingOptions) == 0:
+    if startingOptionsArr[0] == 102:
+        del startingOptionsArr[0]
+    if len(startingOptionsArr) == 0:
         return ""
     # Now you have an array of 1 or 2 length, with [0] being gods, OR schism
     requiresHTML = False
     customgods = []
     customVR = []
     specVR = []
-    for index, entry in enumerate(locStartingOptions):
+    for index, entry in enumerate(startingOptionsArr):
         if isinstance(entry, list) and len(entry) > 0 and entry[0] == 90:
             requiresHTML = True
             customgods = copy.deepcopy(entry)  # Make a copy of the entry array
@@ -1046,19 +1041,19 @@ def SR_getTGZstartingOptionsHTML(startingOptions):
         return ""
 
     retHTML = ""
-    if 7 in locStartingOptions:
+    if 7 in startingOptionsArr:
         retHTML += (
             "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='"
             + gettext("Use Schism Expansion - Random Mix")
             + "'>"
         )
-    if 8 in locStartingOptions:
+    if 8 in startingOptionsArr:
         retHTML += (
             "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='"
             + gettext("Use Schism Expansion - 4/4 Mix")
             + "'>"
         )
-    if 9 in locStartingOptions:
+    if 9 in startingOptionsArr:
         retHTML += (
             "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='"
             + gettext("Use Schism Expansion - All SChism")
@@ -1086,15 +1081,15 @@ def SR_getTGZstartingOptionsHTML(startingOptions):
             )
 
         retHTML += "<div class='TGZinfoPopup'>"
-        retHTML += SR_getgodsVRoptionsHTML(startingOptions)
+        retHTML += SR_getgodsVRoptionsHTML(startingOptionsArr)
         retHTML += "</div></div>"
-    if 110 in locStartingOptions:
+    if 110 in startingOptionsArr:
         retHTML += (
             "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
             + gettext("Learning Game")
             + "'>"
         )
-    elif 120 in locStartingOptions:
+    elif 120 in startingOptionsArr:
         retHTML += (
             "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
             + gettext("Experienced Game")
@@ -1104,14 +1099,12 @@ def SR_getTGZstartingOptionsHTML(startingOptions):
     return retHTML
 
 
-def SR_getgodsVRoptionsHTML(startingOptions):
-    #locStartingOptions = json.loads(startingOptions) if startingOptions else []
-    locStartingOptions = startingOptions
+def SR_getgodsVRoptionsHTML(startingOptionsArr):
     customgods = []
     customVR = []
     specVR = []
 
-    for entry in locStartingOptions:
+    for entry in startingOptionsArr:
         if isinstance(entry, list) and entry:
             if entry[0] == 90:
                 customgods.extend(entry)
@@ -1190,14 +1183,13 @@ def SR_getgodsVRoptionsHTML(startingOptions):
     return retHTML
 
 
-def SR_getCNSstartingOptionsHTML(startingOptions):
-    if not startingOptions:
+def SR_getCNSstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
         return ""
-    if len(startingOptions) == 0:
+    if len(startingOptionsArr) == 0:
         return ""
-    startingList = startingOptions
     startingOptionsHTML = ""
-    for option in startingList:
+    for option in startingOptionsArr:
         if option == 1:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/CNS/images/so_expansion.svg' title='"
