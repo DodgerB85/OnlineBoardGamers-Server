@@ -1079,24 +1079,27 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
     roundData = []
 
     # First, handle byes
+    print(tournamentObj.tournamentPointsData)
     byePlayers = ret["byePlayers"]
     if len(byePlayers) > 0:
         roundData.append(["BYEPLAYERS"] + byePlayers)
-        for player in byePlayers:
+        byePoints = 1
+        if tournamentObj.tournamentType == "PT":
+            byePoints = SR_getPointsForPosition(99, tournamentObj.maxGamePlayers)
+        pointsList = json.loads(tournamentObj.tournamentPointsData)
+        for byePlayer in byePlayers:
             # Add bye players to next round
-            tournamentObj.nextRoundPlayers.add(User.objects.get(username=player))
+            tournamentObj.nextRoundPlayers.add(User.objects.get(username=byePlayer))
             # Update points for byes
             if tournamentObj.tournamentType in ["RR", "TL", "PT"]:
-                pointsList = json.loads(tournamentObj.tournamentPointsData)
-                byePoints = 1
-                if tournamentObj.tournamentType == "PT":
-                    byePoints = SR_getPointsForPosition(99, tournamentObj.maxGamePlayers)
-                for byePlayer in byePlayers:
-                    for playerData in pointsList:
-                        if playerData[0] == byePlayer:
-                            playerData[1] += byePoints
-                            break
-                tournamentObj.tournamentPointsData = json.dumps(pointsList)
+                for playerData in pointsList:
+                    if playerData[0] == byePlayer:
+                        playerData[1] += byePoints
+                        break
+        tournamentObj.tournamentPointsData = json.dumps(pointsList)
+        
+    print("AAA")
+    print(tournamentObj.tournamentPointsData)
 
     # Start the games
     gamesPlayers = ret["gamesPlayers"]
