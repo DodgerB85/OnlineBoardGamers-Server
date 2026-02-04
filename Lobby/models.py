@@ -219,9 +219,9 @@ class Main_Tournament(models.Model):
         createdTS = str(self.created)
         startingOptionsHTML = "[None]"
         if self.gameCode == "FCM":
-            startingOptionsHTML = SR_getFCMstartingOptionsHTML(self.startingOptions)
+            startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "TGZ":
-            startingOptionsHTML = SR_getTGZstartingOptionsHTML(self.startingOptions)
+            startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
 
         if startingOptionsHTML == "":
             startingOptionsHTML = "[None]"
@@ -346,7 +346,7 @@ class Mini_Tournaments(models.Model):
         if self.gameCode == "FCM":
             startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "TGZ":
-            startingOptionsHTML = SR_getTGZstartingOptionsHTML(self.startingOptions)
+            startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
 
         return {
             "Mini_Tournament_id": self.id,

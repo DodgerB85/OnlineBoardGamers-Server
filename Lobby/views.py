@@ -4604,13 +4604,13 @@ def MiniTournament(request, Mini_Tournament_id):
     startingOptionsHTML = ""
     if Mini_Tournament.gameCode == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(
-            Mini_Tournament.startingOptions
+            json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else []
         )
         if startingOptionsHTML == "[None]":
             startingOptionsHTML = "(No Starting Options)"
     elif Mini_Tournament.gameCode == "TGZ":
         startingOptionsHTML = SR_getTGZstartingOptionsHTML(
-            Mini_Tournament.startingOptions
+            json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else []
         )
 
     pointsValues = {}
@@ -5038,13 +5038,13 @@ def MainTournament(request, Main_Tournament_id):
     startingOptionsHTML = ""
     if currentTournament.gameCode == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(
-            currentTournament.startingOptions
+            json.loads(currentTournament.startingOptions) if currentTournament.startingOptions else []
         )
         if startingOptionsHTML == "[None]":
             startingOptionsHTML = "(No Starting Options)"
     elif currentTournament.gameCode == "TGZ":
         startingOptionsHTML = SR_getTGZstartingOptionsHTML(
-            currentTournament.startingOptions
+            json.loads(currentTournament.startingOptions) if currentTournament.startingOptions else []
         )
 
     pointsValues = {}

@@ -237,7 +237,7 @@ def SF_fastSerializeGame(game, user):
     if game_code == "KFW":
         startingOptionsHTML = SR_getKFWstartingOptionsHTML(startingOptionsArr)
     if game_code == "WEB":
-        startingOptionsHTML = SR_getWEBstartingOptionsHTML(game.startingOptions)
+        startingOptionsHTML = SR_getWEBstartingOptionsHTML(startingOptionsArr)
     
     # Get kickout required - use presenter for unified model
     if is_unified_model:

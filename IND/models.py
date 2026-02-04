@@ -363,7 +363,7 @@ class IND_Game(GeneralGame):
 
         gamePaceString = SR_gamePaceString(self.gamePace)
 
-        startingOptionsHTML = SR_getINDstartingOptionsHTML(self.startingOptions)
+        startingOptionsHTML = SR_getINDstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
 
         kickoutRequiredNum = self.kickoutRequired()
 
