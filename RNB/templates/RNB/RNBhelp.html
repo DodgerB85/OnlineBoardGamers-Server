@@ -44,30 +44,30 @@
             {% blocktranslate trimmed %}
               Temp
             {% endblocktranslate %}
+                                                                                  </div>
+                                                                                  <div class="imageWithTextDiv">
+                                                                                    <img src="{% static 'KFW/images/icon-rewind.svg' %}"
+                                                                                         alt="Reserve"
+                                                                                         width="50"
+                                                                                         height="50"
+                                                                                         class="topMenuIconForHelp imageWithTextIconImg">
+                                                                                    {% blocktranslate trimmed %}
+                                                                                      Any player can rewind the game at any time.
+                                                                                      <br />
+                                                                                      If rewinding the game would "undo" revealing any hidden information, you will be informed
+                                                                                      before you rewind, and if you continue to rewind it will be recoded in the History.
+                                                                                    {% endblocktranslate %}
                                               </div>
                                               <div class="imageWithTextDiv">
-                                                <img src="{% static 'KFW/images/icon-rewind.svg' %}"
-                                                     alt="Reserve"
-                                                     width="50"
-                                                     height="50"
-                                                     class="topMenuIconForHelp imageWithTextIconImg">
-                                                {% blocktranslate trimmed %}
-                                                  Any player can rewind the game at any time.
-                                                  <br />
-                                                  If rewinding the game would "undo" revealing any hidden information, you will be informed
-                                                  before you rewind, and if you continue to rewind it will be recoded in the History.
-                                                {% endblocktranslate %}
-                            </div>
-                            <div class="imageWithTextDiv">
-                              <img src="{% static 'Lobby/images/help/KFWmeepleHighlight.jpg' %}"
-                                   alt="Info High"
-                                   width="150"
-                                   height="228">
-                              <p>
-                                {% blocktranslate trimmed %}
-                                  At the start of your turn, any workers used for bidding/actions since your last turn will have a highlight
-                                  so you can easily see what moves other players have made.
-                                {% endblocktranslate %}
+                                                <img src="{% static 'Lobby/images/help/KFWmeepleHighlight.jpg' %}"
+                                                     alt="Info High"
+                                                     width="150"
+                                                     height="228">
+                                                <p>
+                                                  {% blocktranslate trimmed %}
+                                                    At the start of your turn, any workers used for bidding/actions since your last turn will have a highlight
+                                                    so you can easily see what moves other players have made.
+                                                  {% endblocktranslate %}
             </p>
           </div>
           <div class="imageWithTextDiv">
@@ -196,6 +196,9 @@
           it will be highlighted to allow you to pick it up directly.
         </li>
         <li>
+          You may also "steal" goods direcly from your OWN transporters, as a shortcut to dropping a good on the tile and then picking it up again
+        </li>
+        <li>
           You can only unload a transporter at the start of the Movement Phase.
           However, the game will allow you to drop a transporter that has been picked up but not moved,
           as that is the equivalent of just “undoing” the action.
@@ -211,15 +214,13 @@
       <b>Building Phase:</b>
       Select a transporter.
       <br />
-      If you are able to build any walls, then your options will be highlighted.
+      NOTE THAT THE AUTO-HIGHLIGHTS ON THE MAP WILL BE REMOVED SOON
       <br />
-      If you are able to demolish any walls, then those walls will be highlighted.
+      If you are able to build any buildings these will be displayed above the map.
       <br />
-      If you are able to build any bridges, then your options will be highlighted.
+      If you are able to start a build wall / bridge / road, or demolish wall action, these will be shown after the available buildings.
       <br />
-      If you are able to build any roads, then the tile areas that you can build you road TO will be highlighted (obviously the road must come from the tile area where the selected transporter is).
-      <br />
-      If you are able to build any buildings……. Uhhh, then at the moment you just get buttons above the map with your options. Not ideal, but it works.
+      Click a wall / bridge / road option, and your available choices will be highlighted on the map.
       <br />
       <br />
       <b>Building Phase Shortcuts:</b>
@@ -244,6 +245,8 @@
     {% blocktranslate trimmed %}
       <b>Wonder Phase:</b> Goods on your home tile will be highlighted.
       When you have selected enough to produce the next wonder brick, it will be automatically added to the wonder.
+      <br />
+      NOTE: I EXPECT THIS TO MOVE TO SHOWING AVAILABLE RESOURCES IN THE "ACTION" AREA FOR SELECTION THERE
     {% endblocktranslate %}
     <br />
     <br />
