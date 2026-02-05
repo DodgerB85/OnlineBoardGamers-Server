@@ -266,6 +266,11 @@ class GameAdmin(admin.ModelAdmin):
     # search_fields = ("gameName", "creator__username")
     search_fields = ("gameName", "gameDescription", "gameCode")
 
+    readonly_fields = ("ind_premove_display",)
+    @admin.display(description='IND premove')
+    def ind_premove_display(self, obj):
+        return obj.playersPreMoveData
+
     # 4. Fieldsets for a cleaner UI
     fieldsets = (
         (
@@ -305,6 +310,15 @@ class GameAdmin(admin.ModelAdmin):
                     "zoomLevels",
                     "statsExcludeConsent",
                     "statsExcludedGame",
+                ),
+            },
+        ),
+        (
+            "UNIQUE Game Details",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "ind_premove_display",
                 ),
             },
         ),
