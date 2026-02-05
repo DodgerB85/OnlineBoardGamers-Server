@@ -3980,14 +3980,14 @@ def schism(request):
 def indPhpMap(request):
     # Fetch querysets
     availableGamesList = Game.objects.filter(
-        gameStatus="AVAILABLE", gameCode="TGZ"
+        gameStatus="AVAILABLE", gameCode="IND"
     ).order_by("-latestUpdate")
-    activeGamesList = Game.objects.filter(gameStatus="ACTIVE", gameCode="TGZ"
+    activeGamesList = Game.objects.filter(gameStatus="ACTIVE", gameCode="IND"
                                               ).order_by(
         "-latestUpdate"
     )
     finishedGamesList = Game.objects.filter(
-        gameStatus="FINISHED", gameCode="TGZ"
+        gameStatus="FINISHED", gameCode="IND"
     ).order_by("-latestUpdate")
 
     # Filter finished games for startingOptions containing [7, 8, 9]
