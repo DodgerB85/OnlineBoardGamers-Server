@@ -146,6 +146,7 @@ urlpatterns = [
     path("profile/<str:usernameToProfile>/", views.playerInfo, name="playerInfo"),
     path("activate/<uidb64>/<token>/", ActivateAccount.as_view(), name="activate"),
     path("schism/", views.schism, name="schism"),
+    path("indPhpMap/", views.indPhpMap, name="indPhpMap"),
     # ADMIN ONLY PATHS
     path("DBO/", views.DBO, name="DBO"),
     path("DBO_deleteGame/<str:gameType>/", views.DBO_deleteGame, name="DBO_deleteGame"),

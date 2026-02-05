@@ -1,0 +1,143 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  {% compress js %}
+    <script src="{% static 'Lobby/schism.js' %}"></script>
+    <script src="{% static 'Lobby/common.js' %}"></script>
+  {% endcompress %}
+  <form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
+    {% csrf_token %}
+    <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
+  </form>
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div id="playerInfoNameDiv">
+      <h1>Indonesia - Php Games</h1>
+    </div>
+    {% if availableGames %}
+      <h2>{% translate "Available Games (non-private)" %}</h2>
+      <div class="tableOnlyDiv">
+        <table class="gamesTable">
+          <thead>
+            <tr class="headingRow">
+              <td class="joinHeader"></td>
+              <td class="nameHeader">{% translate "Name" %}</td>
+              <td class="creatorHeader">{% translate "Creator" %}</td>
+              <td class="playersHeader">{% translate "Players" %}</td>
+              <td class="speedHeader">{% translate "Speed" %}</td>
+              <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+              <td class="createdHeader">{% translate "Created" %}</td>
+              <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
+            </tr>
+          </thead>
+          {% for game in availableGames %}
+            {% include 'Lobby/gameDisplay/availableGameRow.html' with game=game %}
+          {% endfor %}
+        </table>
+      </div>
+    {% else %}
+      <h2>{% translate "No Available Games" %}</h2>
+    {% endif %}
+    {% if activeGames %}
+      <h2>{% translate "Active Games" %}</h2>
+      <div id="gamesListView">
+        <table class="gamesTable">
+          <thead>
+            <tr class="headingRow">
+              <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+              <td class="creatorHeader">{% translate "Creator" %}</td>
+              <td class="playersHeader">{% translate "Players" %}</td>
+              <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+              <td class="currentTurnHeader">{% translate "Current Turn" %}</td>
+              <td class="speedHeader">{% translate "Speed" %}</td>
+              <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
+            </tr>
+          </thead>
+          {% for game in activeGames %}
+            {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+          {% endfor %}
+        </table>
+      </div>
+    {% else %}
+      <h2>{% translate "No Current Games" %}</h2>
+    {% endif %}
+    {% if finishedGames %}
+      <h2>{% translate "Finished Games" %}</h2>
+      <div class="pagination">
+        <span class="step-links">
+          {% if finished_current_page > 1 %}
+            <a href="#" onclick="submitForm('1')">&laquo; first</a>
+            <a href="#" onclick="submitForm('{{ finished_current_page|add:'-1' }}')">previous</a>
+          {% endif %}
+          <span class="current">
+            {% translate "Page" %} {{ finished_current_page }} {% translate "of" %} {{ finished_paginator.num_pages }}. {% translate "Total Games:" %}
+            {{ finished_paginator.count }}
+          </span>
+          {% if finished_current_page < finished_paginator.num_pages %}
+            <a href="#" onclick="submitForm('{{ finished_current_page|add:'1' }}')">next</a>
+            <a href="#" onclick="submitForm('{{ finished_paginator.num_pages }}')">last &raquo;</a>
+          {% endif %}
+        </span>
+      </div>
+      <div id="gamesListView">
+        <table class="gamesTable">
+          <thead>
+            <tr class="headingRow">
+              <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+              <td class="playersHeader">{% translate "Players" %}</td>
+              <td class="currentPlayersHeader">{% translate "All Players" %}</td>
+              <td class="createdHeader">{% translate "Created" %}</td>
+              <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
+              <td class="winnerHeader">{% translate "Winner" %}</td>
+            </tr>
+          </thead>
+          {% for game in finishedGames %}
+            {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+          {% endfor %}
+        </table>
+        <div class="pagination">
+          <span class="step-links">
+            {% if finished_current_page > 1 %}
+              <a href="#" onclick="submitForm('1')">&laquo; first</a>
+              <a href="#" onclick="submitForm('{{ finished_current_page|add:'-1' }}')">previous</a>
+            {% endif %}
+            <span class="current">
+              {% translate "Page" %} {{ finished_current_page }} {% translate "of" %} {{ finished_paginator.num_pages }}. {% translate "Total Games:" %}
+              {{ finished_paginator.count }}
+            </span>
+            {% if finished_current_page < finished_paginator.num_pages %}
+              <a href="#" onclick="submitForm('{{ finished_current_page|add:'1' }}')">next</a>
+              <a href="#" onclick="submitForm('{{ finished_paginator.num_pages }}')">last &raquo;</a>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+      <form id="paginationForm" method="post" action="{% url 'schism' %}">
+        {% csrf_token %}
+        <input type="hidden"
+               id="pageInput"
+               name="page"
+               value="{{ finished_current_page }}">
+      </form>
+      <script>
+          function submitForm(pageNumber) {
+              document.getElementById('pageInput').value = pageNumber;
+              document.getElementById('paginationForm').submit();
+          }
+      </script>
+    {% else %}
+      <h2>{% translate "No Finished Games" %}</h2>
+    {% endif %}
+    {% include 'Lobby/common/homeButton.html' %}
+  </div>
+{% endblock %}
