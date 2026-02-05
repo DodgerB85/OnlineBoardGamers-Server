@@ -256,11 +256,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         ):
             experiencedPlayer = True
 
-    # TODO modfix
-    myStatsExcludeConsent = "0"
-
-    # print_timestamp("After getting myStatsExcludeConsent")
-
     # Determine external tournament game status
     is_external_tournament = presenter.isExternalTournamentGame()
 
@@ -279,7 +274,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             "preferredTGZcolour": preferredTGZcolour,
             "autoPass": autoPass,
             "statsExcludedGame": currentGame.statsExcludedGame,
-            "myStatsExcludeConsent": myStatsExcludeConsent,
             "externalTournamentGame": is_external_tournament,
             "experiencedPlayer": experiencedPlayer,
         }
@@ -671,7 +665,6 @@ def _processTGZturn(request):
             player_gp.save()
 
         presenter.checkForHostChange(_missingPlayer)
-        #presenter.enableStatsExclude(usernameToUse)
         currentGame.save()
         # Response not used
         return JsonResponse(
@@ -804,7 +797,6 @@ def _processTGZturn(request):
             player_gp.is_kicked = True
             player_gp.save()
         presenter.checkForHostChange(_missingPlayer)
-        #presenter.enableStatsExclude(_missingPlayer.username)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -1136,23 +1128,6 @@ def createTGZspinoff(request):
         return JsonResponse({"response": "ok", "newID": getattr(newGame, "id")})
 
     return JsonResponse({"error": "Wrong request."}, status=400)
-
-
-# @login_required
-# def processStatsExcludeConsent(request):
-#    if request.method != "PUT":
-#        return JsonResponse({"error": "Wrong request."}, status=400)
-#    jsonData = json.loads(request.body)
-#
-#    try:
-#        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-#        presenter = cast('TgzPresenter', currentGame.presenter())
-#        presenter.enableStatsExclude(request.user.username)
-#        currentGame.save()
-#        return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
-#    except Game.DoesNotExist:
-#        raise Http404(gettext("Game does not exist"))
-
 
 # @login_required
 # def TGZstats(request):
