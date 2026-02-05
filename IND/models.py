@@ -12,7 +12,7 @@ from django.conf import settings
 
 # from django.utils.translation import gettext
 
-from Lobby.models import User, GeneralGame
+from Lobby.models import User, GeneralGame, Game, GamePlayer
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getSecondsToNextKickout,
@@ -91,24 +91,42 @@ class IND_Tournament(models.Model):
         pace = 30
         creator = User.objects.get(username="admin")
 
-        newGame = IND_Game(
+        newGame = Game(
+            gameCode='IND',
             gameName=gameName,
             creator=creator,
+            host=creator,  # Will be updated below
             gamePace=pace,
             playerOrderSeed=playerOrderSeed,
             startingOptions=self.startingOptions,
             maxPlayers=self.maxGamePlayers,
             gameStatus="ACTIVE",
+            kickoutDuration=100,
+            relatedINDTournament=self,
+            tournamentGame=True,
         )
 
         newGame.save()
 
+        # Create GamePlayer instances for tournament players
+        players = []
         for i in range(self.maxGamePlayers):
             if _currentPlayersUsernames[i] != "":
                 player = User.objects.get(username=_currentPlayersUsernames[i])
-                newGame.allPlayers.add(player)
-                
-                
+                players.append(player)
+
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=player,
+                    seat_order=i,
+                    is_current=False,
+                    is_missing=False,
+                    is_kicked=False,
+                    has_chat_notification=False,
+                    winner=False,
+                    notes="",
+                )
+
                 #SN_M_T_sendTournamentGameStartNotification(
                 #    request,
                 #    "IND",
@@ -116,19 +134,18 @@ class IND_Tournament(models.Model):
                 #    self.maxGamePlayers,
                 #    newGame.gameName,
                 #    newGame.currentTurnString(),
-                #    getattr(newGame, "id"),
+                #    newGame.id,
                 #    False,
                 #    "normalTournament",
                 #)
 
-        newGame.kickoutDuration = 100
-        newGame.relatedTournament = self
-        newGame.host = newGame.allPlayers.all().order_by("?").first()
-        newGame.tournamentGame = True
+        # Set host to a random player
+        if players:
+            newGame.host = random.choice(players)
+            newGame.save()
 
-        newGame.save()
-        newGame.startGame(request, True)
-        return getattr(newGame, "id")
+        newGame.presenter().startGame(request, True)
+        return newGame.id
 
     def getByedPlayersList(self):
         byedPlayerList = []

@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -519,16 +519,28 @@ class Game(BaseGame):
         related_name="minitournamentGEN_relName",
     )
 
+    # TODO, only used in IND. Remove from the Game model at some point.
+    relatedINDTournament = models.ForeignKey(
+        "IND.IND_Tournament",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="unified_tournament_games_IND",
+    )
+
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
+
+    # TODO, only used in IND. Remove from the Game model at some point.
+    playersPreMoveData = models.TextField(blank=True)
 
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)
 
     if TYPE_CHECKING:
         players: RelatedManager[GamePlayer]
-    
-    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter]:
+
+    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter]:
         if self.gameCode == "CNS":
             return CannesPresenter(self)
         if self.gameCode == "WEB":
@@ -537,10 +549,12 @@ class Game(BaseGame):
             return AqyPresenter(self)
         if self.gameCode == "TGZ":
             return TgzPresenter(self)
+        if self.gameCode == "IND":
+            return IndPresenter(self)
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
-    
+
     # This was causing a break not having this?
     def getGameCode(self):
         return self.gameCode
