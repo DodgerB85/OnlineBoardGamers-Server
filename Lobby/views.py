@@ -151,8 +151,6 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-
-
 ##########################
 #
 #   Attempt at Telegram Bot. VERSION 2 - 2026
@@ -161,37 +159,37 @@ logger = logging.getLogger(__name__)
 ##########################
 
 # Replace with your NEW test token from BotFather
-#TEST_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
+# TEST_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
 #
-#@csrf_exempt
-#def telegram_test_webhook(request):
+# @csrf_exempt
+# def telegram_test_webhook(request):
 #    if request.method == "POST":
 #        try:
 #            # 1. Log the raw body to see what Telegram is sending
 #            body = request.body.decode("utf-8")
 #            print(f"TELEGRAM DATA RECEIVED: {body}")
-#            
+#
 #            data = json.loads(body)
-#            
+#
 #            if "message" in data:
 #                chat_id = data["message"]["chat"]["id"]
 #                token = "8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y"
-#                
+#
 #                # 2. Direct API call to reply
 #                api_url = f"https://api.telegram.org/bot{token}/sendMessage"
 #                payload = {"chat_id": chat_id, "text": "DEBUG: Server received your message!"}
-#                
+#
 #                # Use a timeout so the thread doesn't hang
 #                response = requests.post(api_url, json=payload, timeout=5)
 #                print(f"TELEGRAM API RESPONSE: {response.status_code}")
 #
 #            return HttpResponse("OK", status=200)
-#            
+#
 #        except Exception as e:
 #            # This will print the EXACT error to your PythonAnywhere Error Log
 #            print(f"CRITICAL WEBHOOK ERROR: {str(e)}")
 #            return HttpResponse("Error", status=200) # Still return 200 to stop Telegram retries
-#            
+#
 #    return HttpResponse("Method Not Allowed", status=405)
 #
 
@@ -199,13 +197,15 @@ logger = logging.getLogger(__name__)
 API_TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
 BOT_URL = f"https://api.telegram.org/bot{API_TOKEN}/"
 
+
 def generate_response(user_input: str) -> str:
     normalized_input = user_input.lower()
-    if 'hi' in normalized_input:
-        return 'Hello! Use /start or /help to setup notifications'
-    if 'how are you doing' in normalized_input:
-        return 'I am functioning properly!'
+    if "hi" in normalized_input:
+        return "Hello! Use /start or /help to setup notifications"
+    if "how are you doing" in normalized_input:
+        return "I am functioning properly!"
     return "I didn't understand that - use /start or /help to setup notifications"
+
 
 def send_telegram_msg(chat_id, text):
     url = BOT_URL + "sendMessage"
@@ -214,6 +214,7 @@ def send_telegram_msg(chat_id, text):
         requests.post(url, json=payload, timeout=7)
     except Exception as e:
         print(f"Failed to send Telegram message: {e}")
+
 
 @csrf_exempt
 def telegram_bot_response(request):
@@ -228,7 +229,7 @@ def telegram_bot_response(request):
             chat_type = message["chat"]["type"]
             text = message.get("text")
             user = message.get("from", {})
-            
+
             # Handle Commands
             if text and text.startswith("/start"):
                 response = (
@@ -249,14 +250,19 @@ def telegram_bot_response(request):
                 send_telegram_msg(chat_id, response)
 
             elif text == "/custom":
-                send_telegram_msg(chat_id, "This is a custom command, you can put whatever you want here.")
+                send_telegram_msg(
+                    chat_id,
+                    "This is a custom command, you can put whatever you want here.",
+                )
 
             # Handle Regular Messages
-            elif text and not text.startswith('/'):
+            elif text and not text.startswith("/"):
                 # Group logic: only respond if bot is mentioned
-                if chat_type == 'group':
-                    if '@OnlineBoardGamers_Bot' in text:
-                        cleaned_text = text.replace('@OnlineBoardGamers_Bot', '').strip()
+                if chat_type == "group":
+                    if "@OnlineBoardGamers_Bot" in text:
+                        cleaned_text = text.replace(
+                            "@OnlineBoardGamers_Bot", ""
+                        ).strip()
                         send_telegram_msg(chat_id, generate_response(cleaned_text))
                 else:
                     send_telegram_msg(chat_id, generate_response(text))
@@ -265,9 +271,12 @@ def telegram_bot_response(request):
 
         except Exception as e:
             print(f"WEBHOOK ERROR: {e}")
-            return HttpResponse("OK") # Return 200 to prevent Telegram from retrying on error
+            return HttpResponse(
+                "OK"
+            )  # Return 200 to prevent Telegram from retrying on error
 
     return HttpResponse("Forbidden", status=403)
+
 
 ##########################
 #
@@ -985,16 +994,16 @@ def next_game_redirect(request):
             ]
         )
     )
-    
+
     # Add unified model games (CNS, WEB, AQY, TGZ)
-    unified_games = Game.objects.filter(
-        players__player=request.user,
-        gameStatus="ACTIVE"
-    ).exclude(
-        players__is_missing=True,
-        players__player=request.user
-    ).distinct().select_related("creator").prefetch_related("players__player")
-    
+    unified_games = (
+        Game.objects.filter(players__player=request.user, gameStatus="ACTIVE")
+        .exclude(players__is_missing=True, players__player=request.user)
+        .distinct()
+        .select_related("creator")
+        .prefetch_related("players__player")
+    )
+
     currentGamesList.extend(list(unified_games))
     currentGamesList.sort(key=lambda instance: instance.latestUpdate, reverse=True)
 
@@ -1145,15 +1154,15 @@ def stats(request):
 
     # Define metadata once to keep logic DRY
     GAME_META = {
-        'FCM': {'name': 'Food Chain Magnate', 'gameCode': 'FCM'},
-        'HC':  {'name': 'Hard City',           'gameCode':'HC'},
-        'Bus': {'name': 'Bus',                'gameCode': 'Bus'},
-        'TGZ': {'name': 'The Great Zimbabwe', 'gameCode': 'TGZ'},
-        'CNS': {'name': 'CNS',                'gameCode': 'CNS'},
-        'AQY': {'name': 'Antiquity',          'gameCode': 'AQY'},
-        'IND': {'name': 'Indonesia',          'gameCode': 'IND'},
-        'KFW': {'name': 'KFW',                'gameCode': 'KFW'},
-        'WEB': {'name': 'WEB',                'gameCode': 'WEB'},
+        "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
+        "HC": {"name": "Hard City", "gameCode": "HC"},
+        "Bus": {"name": "Bus", "gameCode": "Bus"},
+        "TGZ": {"name": "The Great Zimbabwe", "gameCode": "TGZ"},
+        "CNS": {"name": "CNS", "gameCode": "CNS"},
+        "AQY": {"name": "Antiquity", "gameCode": "AQY"},
+        "IND": {"name": "Indonesia", "gameCode": "IND"},
+        "KFW": {"name": "KFW", "gameCode": "KFW"},
+        "WEB": {"name": "WEB", "gameCode": "WEB"},
     }
 
     # Unpack cached data
@@ -1164,7 +1173,7 @@ def stats(request):
     latestGamesFinished = []
 
     excluded_names = ["SHADOW", "FcmAI"]
-    stats_map = {} # Using a dict temporarily to collect data
+    stats_map = {}  # Using a dict temporarily to collect data
 
     # Handle all unified model games (CNS, WEB, AQY, TGZ, etc.)
     for game_code in ["CNS", "WEB", "AQY", "TGZ"]:  # Add more as they migrate
@@ -1172,18 +1181,32 @@ def stats(request):
         counts = cache.get(counts_key)
 
         if not counts:
-            qs = Game.objects.filter(gameCode=game_code).exclude(players__player__username__in=excluded_names).distinct()
+            qs = (
+                Game.objects.filter(gameCode=game_code)
+                .exclude(players__player__username__in=excluded_names)
+                .distinct()
+            )
             counts = {
                 "active": qs.filter(gameStatus="ACTIVE").count(),
                 "finished": qs.filter(gameStatus="FINISHED").count(),
             }
             cache.set(counts_key, counts, 60)
-        
+
         stats_map[game_code] = {**GAME_META.get(game_code, {}), **counts}
 
         # Fetch latest
-        latestGames.extend(Game.objects.filter(gameCode=game_code, gameStatus="ACTIVE").exclude(players__player__username__in=excluded_names).distinct().order_by("-latestUpdate")[:10])
-        latestGamesFinished.extend(Game.objects.filter(gameCode=game_code, gameStatus="FINISHED").exclude(players__player__username__in=excluded_names).distinct().order_by("-latestUpdate")[:10])
+        latestGames.extend(
+            Game.objects.filter(gameCode=game_code, gameStatus="ACTIVE")
+            .exclude(players__player__username__in=excluded_names)
+            .distinct()
+            .order_by("-latestUpdate")[:10]
+        )
+        latestGamesFinished.extend(
+            Game.objects.filter(gameCode=game_code, gameStatus="FINISHED")
+            .exclude(players__player__username__in=excluded_names)
+            .distinct()
+            .order_by("-latestUpdate")[:10]
+        )
 
     # Loop through GAME_MODELS once to gather counts and latest games
     for game_model in GAME_MODELS:
@@ -1192,12 +1215,12 @@ def stats(request):
         # So it's actually less hits just to get the latest 10 games for each model without prefetch (~150 hits)
         # Get counts (1 hit per model)
         # If the model is 'FCMGame', this becomes 'FCM'
-        model_name = game_model.__name__.replace('_Game', '')
+        model_name = game_model.__name__.replace("_Game", "")
         # Cache counts per model to avoid heavy COUNT(*) on every page load
         counts_key = f"counts_{model_name}"
         counts = cache.get(counts_key)
 
-        if not counts:           
+        if not counts:
             qs = game_model.objects.exclude(allPlayers__username__in=excluded_names)
             counts = {
                 "active": qs.filter(gameStatus="ACTIVE").count(),
@@ -1226,11 +1249,11 @@ def stats(request):
         # Only add to the list if we actually found data for this game
         if code in stats_map:
             game_stats.append(stats_map[code])
-    #game_stats = list(stats_map.values())
-    
+    # game_stats = list(stats_map.values())
+
     # Calculate grand totals
-    totalGames = sum(g['active'] for g in game_stats)
-    finishedGames = sum(g['finished'] for g in game_stats)
+    totalGames = sum(g["active"] for g in game_stats)
+    finishedGames = sum(g["finished"] for g in game_stats)
 
     # Sort the latest games by latestUpdate
     latestGames.sort(key=lambda game: game.latestUpdate, reverse=True)
@@ -2216,6 +2239,7 @@ def createINDpage(request, gameID=0):
 
     return HttpResponse(status=204)  # No Content
 
+
 @login_required
 def createINDpage2(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "IND", IND_Game)
@@ -2256,6 +2280,7 @@ def createINDpage2(request, gameID=0):
         )
 
     return HttpResponse(status=204)  # No Content
+
 
 @login_required
 def createKFWpage(request, gameID=0):
@@ -2726,8 +2751,8 @@ def playerInfo(request, usernameToProfile):
             query = game_model.objects.filter(allPlayers=target_id)
 
             query = query.defer(
-                        "autoMoves",  # Add this here -- THIS CAN DEFER NON-EXISTANT FIELDS
-                    )
+                "autoMoves",  # Add this here -- THIS CAN DEFER NON-EXISTANT FIELDS
+            )
 
             # Use select_related for ForeignKeys (0 hits)
             # Use prefetch_related for ManyToMany (1 hit per field)
@@ -2736,7 +2761,7 @@ def playerInfo(request, usernameToProfile):
                 prefetches = ["allPlayers", "missingPlayers", "kickedPlayers"]
             else:
                 prefetches = ["allPlayers", "missingPlayers", "kickedPlayers", "winner"]
-            
+
             all_games = list(query.prefetch_related(*prefetches).distinct())
 
         # Model-specific counters for the stats table
@@ -3357,7 +3382,8 @@ def checkJoinGame(request, gameType, gameID):
 
     # Check the host hasn't blacklisted you
     if (
-        currentGame.creator and request.user in currentGame.creator.profile.blacklistedPlayers.all()
+        currentGame.creator
+        and request.user in currentGame.creator.profile.blacklistedPlayers.all()
     ):  # =request.user:
         messages.error(
             request, (gettext("The creator has blocked you from joining their games"))
@@ -3380,7 +3406,7 @@ def checkJoinGame(request, gameType, gameID):
     is_experienced = (
         currentGame.presenter().isExperiencedGame()
         if SR_usesUnifiedGameModel(gameType)
-        else currentGame.isExperiencedGame() # I think this error is ok. Remove when all unified
+        else currentGame.isExperiencedGame()  # I think this error is ok. Remove when all unified
     )
 
     if is_experienced:
@@ -3520,7 +3546,6 @@ def checkJoinGame(request, gameType, gameID):
                 return JsonResponse({"listToShow": "AVAILABLE", "show_div": True})
             return
 
-    
     try:
         with transaction.atomic():
             if SR_usesUnifiedGameModel(gameType):
@@ -3528,13 +3553,15 @@ def checkJoinGame(request, gameType, gameID):
                 # Re-verify count inside the lock to prevent double-joining
                 current_count = selectedGameForJoin.players.count()
                 # For unified model games, create a GamePlayer
-                #GamePlayer.objects.create(game=currentGame, player=_newPlayer)
+                # GamePlayer.objects.create(game=currentGame, player=_newPlayer)
             else:
                 # Legacy models
                 # For Legacy models, lock the specific model row
-                selectedGameForJoin = gameModel.objects.select_for_update().get(id=gameID)
+                selectedGameForJoin = gameModel.objects.select_for_update().get(
+                    id=gameID
+                )
                 current_count = selectedGameForJoin.allPlayers.count()
-                #currentGame.allPlayers.add(_newPlayer)
+                # currentGame.allPlayers.add(_newPlayer)
             # 2. RACE CONDITION CHECK: Ensure game didn't fill up while waiting for lock
             if current_count >= selectedGameForJoin.maxPlayers:
                 messages.error(request, gettext("Sorry, this game just filled up."))
@@ -3561,9 +3588,10 @@ def checkJoinGame(request, gameType, gameID):
                     selectedGameForJoin.presenter().startGame(request)
                 else:
                     selectedGameForJoin.startGame(request)
-            
+
                 messages.success(
-                    request, (gettext("You have joined the game and the game has started"))
+                    request,
+                    (gettext("You have joined the game and the game has started")),
                 )
                 request.session["listType"] = "ACTIVE"
                 response = JsonResponse({"listToShow": "ACTIVE"}, safe=False)
@@ -3571,20 +3599,27 @@ def checkJoinGame(request, gameType, gameID):
                 # Check if it should move from WAITING to AVAILABLE
                 # (If no more specific invites remain and game isn't private)
                 remaining_invites = selectedGameForJoin.invitedPlayers.count()
-                if remaining_invites == 0 and selectedGameForJoin.gameStatus != "PRIVATE":
+                if (
+                    remaining_invites == 0
+                    and selectedGameForJoin.gameStatus != "PRIVATE"
+                ):
                     selectedGameForJoin.gameStatus = "AVAILABLE"
-                    
-                messages.success(request, gettext("You have joined the game - waiting for more players"))
+
+                messages.success(
+                    request,
+                    gettext("You have joined the game - waiting for more players"),
+                )
                 response = JsonResponse({"listToShow": "WAITING"})
 
             selectedGameForJoin.save()
             return response
     except Exception as e:
-    # Logic if the lock fails or an error occurs (the transaction will auto-rollback)
+        # Logic if the lock fails or an error occurs (the transaction will auto-rollback)
         SN_sendAdminErrorMessage(request, f"Error during join: {e}")
-        if ajaxReturn: 
+        if ajaxReturn:
             return JsonResponse({"error": "Could not join game"}, status=400)
         return
+
 
 @login_required()
 def deleteGame(request, gameType):
@@ -3834,32 +3869,32 @@ def TGZtournaments(request):
 
 @login_required
 def schism(request):
-    def serializeLocal(game):
-        winner = game.winner.username if game.winner else None
-        latestUpdateString = str(game.latestUpdate)
-        return {
-            "gameID": game.id,
-            "gameName": game.getGameName(),
-            "allPlayers": [user.username for user in game.allPlayers.all()],
-            "currentTurn": game.currentTurnString(),
-            "latestUpdate": latestUpdateString,
-            "startingOptions": "",
-            "maxPlayers": game.maxPlayers,
-            "winner": winner,
-            "created": game.created,
-            "game": "TGZ",
-        }
+    # def serializeLocal(game):
+    #    winner = game.winner.username if game.winner else None
+    #    latestUpdateString = str(game.latestUpdate)
+    #    return {
+    #        "gameID": game.id,
+    #        "gameName": game.getGameName(),
+    #        "allPlayers": [user.username for user in game.allPlayers.all()],
+    #        "currentTurn": game.currentTurnString(),
+    #        "latestUpdate": latestUpdateString,
+    #        "startingOptions": "",
+    #        "maxPlayers": game.maxPlayers,
+    #        "winner": winner,
+    #        "created": game.created,
+    #        "game": "TGZ",
+    #    }
 
     # Fetch querysets
-    availableGamesList = TGZ_Game.objects.filter(gameStatus="AVAILABLE").order_by(
+    availableGamesList = Game.objects.filter(
+        gameStatus="AVAILABLE", gameCode="TGZ"
+    ).order_by("-latestUpdate")
+    activeGamesList = Game.objects.filter(gameStatus="ACTIVE", gameCode="TGZ").order_by(
         "-latestUpdate"
     )
-    activeGamesList = TGZ_Game.objects.filter(gameStatus="ACTIVE").order_by(
-        "-latestUpdate"
-    )
-    finishedGamesList = TGZ_Game.objects.filter(gameStatus="FINISHED").order_by(
-        "-latestUpdate"
-    )
+    finishedGamesList = Game.objects.filter(
+        gameStatus="FINISHED", gameCode="TGZ"
+    ).order_by("-latestUpdate")
 
     # Filter finished games for startingOptions containing [7, 8, 9]
     filtered_finished_games = []
@@ -3896,7 +3931,7 @@ def schism(request):
         for game in game_list:
             if game.startingOptions:
                 try:
-                    starting_options = json.loads(game.startingOptions)
+                    starting_options = json.loads(game.startingOptions if game.startingOptions else [])
                     logger.debug(
                         f"Game {getattr(game, 'id', 'unknown')} (non-finished) startingOptions: {starting_options}"
                     )
@@ -3905,13 +3940,9 @@ def schism(request):
                             f"Game {getattr(game, 'id', 'unknown')} startingOptions is not a list: {starting_options}"
                         )
                         continue
-                    starting_options = [
-                        int(opt) if isinstance(opt, str) else opt
-                        for opt in starting_options
-                    ]
                     if any(option in starting_options for option in [7, 8, 9]):
                         game_json.append(
-                            game.serialize(request.user)
+                            SF_fastSerializeGame(game, request.user)
                         )  # Use serializeLocal for consistency
                 except (json.JSONDecodeError, ValueError) as e:
                     logger.error(
@@ -3926,7 +3957,7 @@ def schism(request):
     # Serialize paginated finished games
     finishedGamesJson = []
     for game in finished_games_page.object_list:
-        finishedGamesJson.append(serializeLocal(game))
+        finishedGamesJson.append(SF_fastSerializeGame(game, request.user))
 
     return render(
         request,
@@ -4604,13 +4635,17 @@ def MiniTournament(request, Mini_Tournament_id):
     startingOptionsHTML = ""
     if Mini_Tournament.gameCode == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(
-            json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else []
+            json.loads(Mini_Tournament.startingOptions)
+            if Mini_Tournament.startingOptions
+            else []
         )
         if startingOptionsHTML == "[None]":
             startingOptionsHTML = "(No Starting Options)"
     elif Mini_Tournament.gameCode == "TGZ":
         startingOptionsHTML = SR_getTGZstartingOptionsHTML(
-            json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else []
+            json.loads(Mini_Tournament.startingOptions)
+            if Mini_Tournament.startingOptions
+            else []
         )
 
     pointsValues = {}
@@ -4707,7 +4742,6 @@ def MiniTournament(request, Mini_Tournament_id):
                     else []
                 ),
                 "isUnifiedModel": SR_usesUnifiedGameModel(Mini_Tournament.gameCode),
-
             }
         )
         return render(
@@ -5038,13 +5072,17 @@ def MainTournament(request, Main_Tournament_id):
     startingOptionsHTML = ""
     if currentTournament.gameCode == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(
-            json.loads(currentTournament.startingOptions) if currentTournament.startingOptions else []
+            json.loads(currentTournament.startingOptions)
+            if currentTournament.startingOptions
+            else []
         )
         if startingOptionsHTML == "[None]":
             startingOptionsHTML = "(No Starting Options)"
     elif currentTournament.gameCode == "TGZ":
         startingOptionsHTML = SR_getTGZstartingOptionsHTML(
-            json.loads(currentTournament.startingOptions) if currentTournament.startingOptions else []
+            json.loads(currentTournament.startingOptions)
+            if currentTournament.startingOptions
+            else []
         )
 
     pointsValues = {}
