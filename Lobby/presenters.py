@@ -1674,23 +1674,23 @@ class TgzPresenter(GamePresenter):
                     self.gameObj.latestUpdate,
                 )
 
-    def enableStatsExclude(self, _username):
-        if self.gameObj.statsExcludeConsent is None:
-            self.gameObj.statsExcludeConsent = ""
-        if len(self.gameObj.statsExcludeConsent) < self.gameObj.maxPlayers:
-            self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
-        seatToChange = self.seatPosition(_username, True)
-        
-        self.gameObj.statsExcludeConsent = (
-            self.gameObj.statsExcludeConsent[:seatToChange]
-            + "1"
-            + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
-        )
-        totalConsent = 0
-        for letter in self.gameObj.statsExcludeConsent:
-            totalConsent += int(letter)
-        if totalConsent == self.gameObj.maxPlayers:
-            self.gameObj.statsExcludedGame = True
+    #def enableStatsExclude(self, _username):
+    #    if self.gameObj.statsExcludeConsent is None:
+    #        self.gameObj.statsExcludeConsent = ""
+    #    if len(self.gameObj.statsExcludeConsent) < self.gameObj.maxPlayers:
+    #        self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
+    #    seatToChange = self.seatPosition(_username, True)
+    #    
+    #    self.gameObj.statsExcludeConsent = (
+    #        self.gameObj.statsExcludeConsent[:seatToChange]
+    #        + "1"
+    #        + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
+    #    )
+    #    totalConsent = 0
+    #    for letter in self.gameObj.statsExcludeConsent:
+    #        totalConsent += int(letter)
+    #    if totalConsent == self.gameObj.maxPlayers:
+    #        self.gameObj.statsExcludedGame = True
 
     def getGameCode(self):
         return "TGZ"

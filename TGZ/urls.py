@@ -37,9 +37,10 @@ urlpatterns = [
     path("saveNotes/", views.saveNotes, name="saveNotes"),
     path("changeTGZzoom/", views.changeTGZzoom, name="changeTGZzoom"),
     path("createTGZspinoff/", views.createTGZspinoff, name="createTGZspinoff"),
-    path("processStatsExcludeConsent/", views.processStatsExcludeConsent, name="processStatsExcludeConsent"),
+    #path("processStatsExcludeConsent/", views.processStatsExcludeConsent, name="processStatsExcludeConsent"),
 
     path("createTGZgame/", views.createTGZgame, name="createTGZgame"),
+    path("castVote/", views.castVote, name="castVoteCNS"),
 
 
 ]
