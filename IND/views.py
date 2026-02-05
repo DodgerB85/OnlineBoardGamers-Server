@@ -7,6 +7,7 @@ import copy
 from contextlib import contextmanager
 
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from django.contrib import messages
 
@@ -33,6 +34,9 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 from .models import IND_Game
 from Lobby.models import User, Profile, Game, GamePlayer
 
+if TYPE_CHECKING:
+    from Lobby.presenters import IndPresenter 
+    
 INDsuperUsers = ["BotKickStarter"]
 
 def index(request):
@@ -235,7 +239,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('IndPresenter', currentGame.presenter())
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
@@ -465,7 +469,7 @@ def _processINDturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('IndPresenter', currentGame.presenter())
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -478,7 +482,7 @@ def _processINDturn(request):
             message = (
                 f"SYNC ERROR IN: IND save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -518,7 +522,7 @@ def _processINDturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -626,7 +630,7 @@ def _processINDturn(request):
             {
                 "latestUpdate": currentGame.latestUpdate,
                 # "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                # "nextPlayer": currentGame.currentPlayers,
+                # "nextPlayer": presenter.getCurrentPlayersArray(),
             },
             safe=False,
         )
@@ -641,7 +645,7 @@ def _processINDturn(request):
             message = (
                 f"SYNC ERROR IN: IND loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -694,7 +698,7 @@ def _processINDturn(request):
                 "gameData": loadData,
                 # "rewindHostPossible": rewindHostPossible,
                 "latestUpdate": currentGame.latestUpdate,
-                "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
             safe=False,
         )
@@ -703,7 +707,7 @@ def _processINDturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -731,7 +735,7 @@ def _processINDturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -746,7 +750,7 @@ def _processINDturn(request):
             message = (
                 f"SYNC ERROR IN: IND kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -787,7 +791,7 @@ def _processINDturn(request):
             message = (
                 f"SYNC ERROR IN: IND preTurn - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -831,7 +835,7 @@ def INDdata(request, dataType):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('IndPresenter', currentGame.presenter())
 
     if dataType == 1:
         returnData = {
@@ -1005,25 +1009,29 @@ def forkINDgame(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='IND')
+        source_game  = Game.objects.get(id=jsonData["gameID"], gameCode='IND')
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     # Clone the currentGame object
-    newGame = copy.deepcopy(currentGame)
-    newGame.id = None  # Set id to None to create a new object
-    newGame.original_id = None  # Clear original_id for the fork
-
+    #newGame = copy.deepcopy(currentGame)
+    #newGame.pk = None  # Set id to None to create a new object
+    #newGame.original_id = None  # Clear original_id for the fork
     # Modify the fields you want to change
-    newGame.gameName = currentGame.gameName + " (fork)"
-    newGame.save()
-
-    # Copy invited players M2M
-    newGame.invitedPlayers.set(currentGame.invitedPlayers.all())
+    #newGame.gameName = currentGame.gameName + " (fork)"
+    #newGame.save()
+    original_players = list(source_game.players.all()) 
+    
+    newGame = source_game
+    newGame.pk = None 
+    #newGame.id = None  
+    newGame.gameName = f"{source_game.getGameName()} (fork)"
+    newGame.gameStatus = "ACTIVE"
+    newGame.save() # This creates the new record and assigns a new ID
 
     # Copy GamePlayer relationships
-    all_game_players = currentGame.players.exclude(is_kicked=True).all()
-    for gp in all_game_players:
+    #all_game_players = currentGame.players.all()
+    for gp in original_players:
         GamePlayer.objects.create(
             game=newGame,
             player=gp.player,
@@ -1036,16 +1044,14 @@ def forkINDgame(request):
             notes=gp.notes,
         )
 
-    # Change game to private
-    newGame.gameStatus = "PRIVATE"
 
     # Add all current players to invited players
-    for gp in all_game_players:
-        if gp.player and gp.player.username != request.user.username:
-            newGame.invitedPlayers.add(gp.player)
+    #for gp in all_game_players:
+    #    if gp.player and gp.player.username != request.user.username:
+    #        newGame.invitedPlayers.add(gp.player)
 
     # Remove all but current player from GamePlayer
-    newGame.players.exclude(player=request.user).delete()
+    #newGame.players.exclude(player=request.user).delete()
 
     # Save the newGame object
     newGame.save()
@@ -1075,7 +1081,7 @@ def _voteToDelete(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('IndPresenter', currentGame.presenter())
     playerName = request.user.username  # Get the player's username
 
     success = presenter.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
