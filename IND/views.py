@@ -843,6 +843,7 @@ def INDdata(request, dataType):
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
             "latestUpdate": currentGame.latestUpdate,
+            "preMoves": presenter.getCompressedPreMoveArr(request.user.username),
         }
         # Send game data
         return JsonResponse(returnData)
@@ -872,6 +873,7 @@ def INDdata(request, dataType):
                 "gameData": currentGame.gameData,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
+                "preMoves": presenter.getCompressedPreMoveArr(request.user.username),
             }
         )
 

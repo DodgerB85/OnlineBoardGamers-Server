@@ -5,8 +5,9 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="{% static 'TGZ/images/tgz_icon.png' %}" />
-
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'TGZ/images/tgz_icon.png' %}" />
     <meta name="title" content="Online Board Gamers - The Great Zimbabwe">
     <meta name="description"
           content="Play Splotter's The Great Zimbabwe Online for free with others, or solo!">
@@ -18,7 +19,6 @@
     <meta name="revisit-after" content="200 days">
     <meta name="author" content="Online Board Gamers">
     <title>OBG - {{ gameName }}</title>
-
     <style>
     body {
       margin: 0px !important;
@@ -106,6 +106,8 @@
   initData.myZoomLevel = {{ myZoomLevel }};
   initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
   initData.latestUpdate = {{ latestUpdateLiteral }};
+  initData.deleteVotesData = {{ deleteVotesData | safe }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
   
   {% if spoilerFree %}
   initData.spoilerFree = true;

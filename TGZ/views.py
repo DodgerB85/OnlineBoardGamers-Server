@@ -44,11 +44,19 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .common import create_tgz_game
 
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+
+
 if TYPE_CHECKING:
-    from Lobby.presenters import TgzPresenter 
- 
+    from Lobby.presenters import TgzPresenter
+
+TGZ_DB_LOCK_NAME = "lockTGZgame_"
+
+
 def index(request):
-    return HttpResponse("Secret tip! Click your name in the top right in a PRACTICE game to unlock all gods!")
+    return HttpResponse(
+        "Secret tip! Click your name in the top right in a PRACTICE game to unlock all gods!"
+    )
 
 
 def redirectLegacyTGZ(request, original_id):
@@ -72,9 +80,10 @@ def createTGZgame(request):
 
     return create_tgz_game(request)
 
+
 @contextmanager
 def db_mutex(name, timeout=10):
-    mutex_name = "dbmutex_" + name
+    mutex_name = TGZ_DB_LOCK_NAME + name
     cursor = connection.cursor()
     # timeout returns with error
     cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
@@ -95,40 +104,40 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             .prefetch_related("players__player", "invitedPlayers")
             .get(id=game_id, gameCode="TGZ")
         )
-        presenter = cast('TgzPresenter', currentGame.presenter())
+        presenter = cast("TgzPresenter", currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
-    
+
     # Access the prefetch cache immediately to "warm" it
     all_players = GamePlayer.objects.filter(game=currentGame).exclude(is_kicked=True)
     all_player_ids = {gp.player.id for gp in all_players if gp.player}
-    
+
     userObj = request.user
     username = userObj.username
-    
-    #start_time = time.time()
-    #show_timestamps = username in ["admin", "DodgerB"]
-    #def print_timestamp(label):
+
+    # start_time = time.time()
+    # show_timestamps = username in ["admin", "DodgerB"]
+    # def print_timestamp(label):
     #    if show_timestamps:
     #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
 
     # Noe it is a proper started game, so set up for not logged in
     gameID = getattr(currentGame, "id")
-    
+
     gameName = presenter.getGameName()
-    
+
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = []
     if currentGame.kickoutFlexiData:
         KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
-    
+
     gameCode = presenter.getGameCode()
-    
+
     returnData = {
         "gameID": gameID,
         "gameName": gameName,
@@ -140,34 +149,48 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "latestUpdateLiteral": currentGame.latestUpdate,
         "settingsDEBUG": config("TGZ_USE_SOURCE_CODE", default=False, cast=bool),
+        "statsExcludeVotesData": json.dumps(
+            currentGame.presenter().getFullSetOfVoteResults(
+                STATS_EXCLUDE_VOTE_TOPIC,
+                currentGame.presenter().getAllPlayersOrderedySeat(True),
+                False,
+            )
+        ),
+        "deleteVotesData": json.dumps(
+            currentGame.presenter().getFullSetOfVoteResults(
+                DELETE_VOTE_TOPIC,
+                currentGame.presenter().getAllPlayersOrderedySeat(True),
+                False,
+            )
+        ),
     }
-    
-    #print_timestamp("After not logged in setup")
+
+    # print_timestamp("After not logged in setup")
 
     if not request.user.is_authenticated:
         return render(request, "TGZ/showTGZgame.html", returnData)
 
     # Now you are logged in
     user_id = userObj.id
-    
+
     user_profile = Profile.objects.get(user=userObj)
-    
+
     user_gp = all_players.filter(player=userObj).first()
     is_in_all = user_id in all_player_ids
     is_missing = user_gp.is_missing if user_gp else False
-    
+
     involvedPlayer = is_in_all and not is_missing
     if username == "BotKickStarter":
         involvedPlayer = True
     if username == "TGZtourneyAdmin" and currentGame.relatedMainTournament is not None:
         involvedPlayer = True
-            
+
     preferredTGZcolour = user_profile.preferredTGZcolour
     chatData = currentGame.chatData
 
     ## Get the next URL
     nextURL = f"/nextGame?current_id={gameID}&current_code={gameCode}/"
-    
+
     chatNotification = False
     if user_gp and user_gp.has_chat_notification:
         chatNotification = True
@@ -186,19 +209,19 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
 
     if not involvedPlayer:
         return render(request, "TGZ/showTGZgame.html", returnData)
-    
-    #print_timestamp("After not involvedPlayer")
+
+    # print_timestamp("After not involvedPlayer")
 
     pov = presenter.seatPosition(username)
-    
+
     if username == "BotKickStarter":
         pov = 0
     # Check for external tournament game
     is_external_tournament = presenter.isExternalTournamentGame()
-    
+
     if username == "TGZtourneyAdmin" and is_external_tournament:
         pov = 0
-    
+
     secondsToNextKickout = presenter.getSecondsToNextKickout()
     kickoutRequired = presenter.kickoutRequired()
     myMove = presenter.isMyMove(username)
@@ -206,14 +229,16 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     # Get the Notes for the user
     notes = user_gp.notes if user_gp else ""
 
-    #print_timestamp("After getting notes")
+    # print_timestamp("After getting notes")
 
     liveNotification = user_profile.liveNotification
-    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    startingOptions = (
+        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    )
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
     autoPass = "false"
-    if hasattr(currentGame, 'autoMoves') and currentGame.autoMoves is not None:
+    if hasattr(currentGame, "autoMoves") and currentGame.autoMoves is not None:
         autoMoves = json.loads(currentGame.autoMoves)
         if autoMoves[pov] == 1:
             autoPass = "true"
@@ -221,13 +246,20 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     experiencedPlayer = False
     if currentGame.turn == 0:
         # Count finished games for user in unified model
-        if Game.objects.filter(gameCode="TGZ", players__player=request.user, gameStatus="FINISHED").distinct().count() >= 5:
+        if (
+            Game.objects.filter(
+                gameCode="TGZ", players__player=request.user, gameStatus="FINISHED"
+            )
+            .distinct()
+            .count()
+            >= 5
+        ):
             experiencedPlayer = True
 
     # TODO modfix
     myStatsExcludeConsent = "0"
 
-    #print_timestamp("After getting myStatsExcludeConsent")
+    # print_timestamp("After getting myStatsExcludeConsent")
 
     # Determine external tournament game status
     is_external_tournament = presenter.isExternalTournamentGame()
@@ -285,7 +317,7 @@ def processTGZturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("processTurn_" + str(gameID)):
+    with db_mutex(str(gameID)):
         return _processTGZturn(request)
 
 
@@ -299,7 +331,7 @@ def _processTGZturn(request):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = cast('TgzPresenter', currentGame.presenter())
+        presenter = cast("TgzPresenter", currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -307,13 +339,18 @@ def _processTGZturn(request):
     def set_current_players(next_player_str):
         """Update current players for unified model"""
         from Lobby.models import GamePlayer
+
         # Clear all is_current flags
         currentGame.players.update(is_current=False)
         # Set is_current for the next players
         if next_player_str:
-            next_usernames = [name.strip() for name in next_player_str.split(',') if name.strip()]
+            next_usernames = [
+                name.strip() for name in next_player_str.split(",") if name.strip()
+            ]
             for username in next_usernames:
-                currentGame.players.filter(player__username=username).update(is_current=True)
+                currentGame.players.filter(player__username=username).update(
+                    is_current=True
+                )
 
     if jsonData["action"] == "setAutoPass":
         playerIndex = jsonData["playerNumber"]
@@ -334,12 +371,18 @@ def _processTGZturn(request):
 
     elif jsonData["action"] == "simpleSave":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(
-            currentGame.latestUpdate
-        ):
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
+            jsonData["latestUpdate"]
+        ) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
-            current_players = ", ".join([gp.player.username for gp in currentGame.players.filter(is_current=True) if gp.player])
+            current_players = ", ".join(
+                [
+                    gp.player.username
+                    for gp in currentGame.players.filter(is_current=True)
+                    if gp.player
+                ]
+            )
             message = (
                 f"SYNC ERROR IN: TGZ simpleSave - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
@@ -369,12 +412,18 @@ def _processTGZturn(request):
 
     elif jsonData["action"] == "replaceExternalTournamentPlayer":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(
-            currentGame.latestUpdate
-        ):
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
+            jsonData["latestUpdate"]
+        ) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
-            current_players = ", ".join([gp.player.username for gp in currentGame.players.filter(is_current=True) if gp.player])
+            current_players = ", ".join(
+                [
+                    gp.player.username
+                    for gp in currentGame.players.filter(is_current=True)
+                    if gp.player
+                ]
+            )
             message = (
                 f"SYNC ERROR IN: TGZ replaceExternalTournamentPlayer - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
@@ -385,27 +434,29 @@ def _processTGZturn(request):
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         tourney_admin = User.objects.get(username="TGZtourneyAdmin")
-        
+
         # For unified model, update GamePlayer records
         from Lobby.models import GamePlayer
-        
+
         # Mark player as missing/kicked
         player_gp = currentGame.players.filter(player=_missingPlayer).first()
         if player_gp:
             player_gp.is_missing = True
             player_gp.is_kicked = True
             player_gp.save()
-        
+
         # Add TGZ tourney admin if not already a player
         if not currentGame.players.filter(player=tourney_admin).exists():
             # Find the seat order of the kicked player
-            kicked_seat = player_gp.seat_order if player_gp else currentGame.players.count()
+            kicked_seat = (
+                player_gp.seat_order if player_gp else currentGame.players.count()
+            )
             GamePlayer.objects.create(
                 game=currentGame,
                 player=tourney_admin,
                 seat_order=kicked_seat,
                 is_missing=False,
-                is_kicked=False
+                is_kicked=False,
             )
 
         # Change host to TGZ tourney admin (works for both models)
@@ -424,9 +475,9 @@ def _processTGZturn(request):
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
-        
+
         secondsToNextKickout = presenter.getSecondsToNextKickout()
-            
+
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
             "secondsToNextKickout": secondsToNextKickout,
@@ -436,12 +487,18 @@ def _processTGZturn(request):
 
     elif jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(
-            currentGame.latestUpdate
-        ):
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
+            jsonData["latestUpdate"]
+        ) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
-            current_players = ", ".join([gp.player.username for gp in currentGame.players.filter(is_current=True) if gp.player])
+            current_players = ", ".join(
+                [
+                    gp.player.username
+                    for gp in currentGame.players.filter(is_current=True)
+                    if gp.player
+                ]
+            )
             message = (
                 f"SYNC ERROR IN: TGZ save - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
@@ -505,8 +562,17 @@ def _processTGZturn(request):
             # _winnerArray is an array of [winner_username, winner_username, ...]
             # _tournamentData is an array [ [username], [username, username,... TB_VALUE], [username, username,..., TB_VALUE], [...etc] ]
             # NB THE FIRST ENTRY IS AN ARRAY OF (MULTIPLE) WINNER(S)
-            presenter.endGame(request, jsonData["winner"], jsonData["finalPositions"], jsonData["tournamentData"], jsonData["gameID"])
-            if "externalTournamentGame" in jsonData and jsonData["externalTournamentGame"] is True:
+            presenter.endGame(
+                request,
+                jsonData["winner"],
+                jsonData["finalPositions"],
+                jsonData["tournamentData"],
+                jsonData["gameID"],
+            )
+            if (
+                "externalTournamentGame" in jsonData
+                and jsonData["externalTournamentGame"] is True
+            ):
                 currentGame.kickoutFlexiData = ""
                 currentGame.kickoutFlexiData = json.dumps(jsonData["tournamentData"])
                 currentGame.save()
@@ -558,7 +624,10 @@ def _processTGZturn(request):
                 currentRewindData.append(jsonData["data"])
             else:
                 # else check last one isn't same as cufrent, and if not then add
-                if len(currentRewindData) == 0 or currentRewindData[-1] != jsonData["data"]:
+                if (
+                    len(currentRewindData) == 0
+                    or currentRewindData[-1] != jsonData["data"]
+                ):
                     currentRewindData.append(jsonData["data"])
                     # Limit to 20 rewind points by removing oldest
                     while len(currentRewindData) > 20:
@@ -573,8 +642,11 @@ def _processTGZturn(request):
 
         # Get secondsToNextKickout
         secondsToNextKickout = presenter.getSecondsToNextKickout()
-            
-        response_data = {"latestUpdate": newLatestUpdate, "secondsToNextKickout": secondsToNextKickout}
+
+        response_data = {
+            "latestUpdate": newLatestUpdate,
+            "secondsToNextKickout": secondsToNextKickout,
+        }
 
         if autoPass:
             response_data["processAutoPass"] = autoPass
@@ -589,16 +661,17 @@ def _processTGZturn(request):
         if usernameToUse == "BotKickStarter":
             usernameToUse = jsonData["BKSN"]
         _missingPlayer = User.objects.get(username=usernameToUse)
-        
+
         # For unified model, update GamePlayer records
         from Lobby.models import GamePlayer
+
         player_gp = currentGame.players.filter(player=_missingPlayer).first()
         if player_gp:
             player_gp.is_missing = True
             player_gp.save()
-        
+
         presenter.checkForHostChange(_missingPlayer)
-        presenter.enableStatsExclude(usernameToUse)
+        #presenter.enableStatsExclude(usernameToUse)
         currentGame.save()
         # Response not used
         return JsonResponse(
@@ -668,7 +741,11 @@ def _processTGZturn(request):
         currentGame.save()
 
         # Send Notifications
-        if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "TGZbot" and currentGame.startingOptions != "102":
+        if (
+            jsonData["nextPlayer"] != ""
+            and jsonData["nextPlayer"] != "TGZbot"
+            and currentGame.startingOptions != "102"
+        ):
             playerListToNotify = jsonData["nextPlayer"].split(",")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
@@ -694,12 +771,20 @@ def _processTGZturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
+            jsonData["latestUpdate"]
+        ) != str(
             currentGame.latestUpdate
         ):  # and not jsonData["ignoreSync"]:
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
-            current_players = ", ".join([gp.player.username for gp in currentGame.players.filter(is_current=True) if gp.player])
+            current_players = ", ".join(
+                [
+                    gp.player.username
+                    for gp in currentGame.players.filter(is_current=True)
+                    if gp.player
+                ]
+            )
             message = (
                 f"SYNC ERROR IN: TGZ kickout - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
@@ -709,16 +794,17 @@ def _processTGZturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        
+
         # For unified model, update GamePlayer records
         from Lobby.models import GamePlayer
+
         player_gp = currentGame.players.filter(player=_missingPlayer).first()
         if player_gp:
             player_gp.is_missing = True
             player_gp.is_kicked = True
             player_gp.save()
         presenter.checkForHostChange(_missingPlayer)
-        presenter.enableStatsExclude(_missingPlayer.username)
+        #presenter.enableStatsExclude(_missingPlayer.username)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -756,7 +842,13 @@ def bugEntry(request):
 
     # email data to myself
     SN_sendBugReportEmail(
-        request, "TGZ", gameID, gameData, bugDescription, currentGame.rewindData, currentGame.startingMap
+        request,
+        "TGZ",
+        gameID,
+        gameData,
+        bugDescription,
+        currentGame.rewindData,
+        currentGame.startingMap,
     )
 
     return JsonResponse({"bugEntrySuccess": True})
@@ -771,16 +863,18 @@ def saveNotes(request):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        
+
         # Find the user's GamePlayer
-        user_gp = GamePlayer.objects.filter(game=currentGame, player=request.user).first()
+        user_gp = GamePlayer.objects.filter(
+            game=currentGame, player=request.user
+        ).first()
         if user_gp:
             user_gp.notes = jsonData["notes"]
             user_gp.save()
             return JsonResponse({"notePosted": True})
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    
+
     return JsonResponse({"error": "No response found"}, status=400)
 
 
@@ -792,7 +886,7 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("sendChatMessage_" + str(gameID)):
+    with db_mutex(str(gameID)):
         return _sendChatMessage(request)
 
 
@@ -808,8 +902,10 @@ def _sendChatMessage(request):
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
-        
-        user_gp = GamePlayer.objects.filter(game=currentGame, player=request.user).first()
+
+        user_gp = GamePlayer.objects.filter(
+            game=currentGame, player=request.user
+        ).first()
         if user_gp and user_gp.has_chat_notification:
             user_gp.has_chat_notification = False
             user_gp.save()
@@ -821,7 +917,9 @@ def _sendChatMessage(request):
         if chat_data:  # Check if chatData is not None and not empty
             # currentChatData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.chatData))
             try:
-                decompressed_chat_data = LZS.decompressFromEncodedURIComponent(chat_data)
+                decompressed_chat_data = LZS.decompressFromEncodedURIComponent(
+                    chat_data
+                )
                 if decompressed_chat_data:
                     currentChatData = json.loads(decompressed_chat_data)
             except (TypeError, json.JSONDecodeError) as e:
@@ -831,17 +929,21 @@ def _sendChatMessage(request):
         currentChatData.insert(0, jsonData["newEntry"])
 
         # save chat data.
-        compressedChatData = LZS.compressToEncodedURIComponent(json.dumps(currentChatData))
+        compressedChatData = LZS.compressToEncodedURIComponent(
+            json.dumps(currentChatData)
+        )
 
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        all_game_players = GamePlayer.objects.filter(game=currentGame).exclude(is_kicked=True)
+        all_game_players = GamePlayer.objects.filter(game=currentGame).exclude(
+            is_kicked=True
+        )
         for gp in all_game_players:
             if gp.player and gp.player != request.user:
                 gp.has_chat_notification = True
                 gp.save()
-        
+
         currentGame.save()
 
         return JsonResponse({"chatData": compressedChatData})
@@ -858,7 +960,7 @@ def TGZdata(request, dataType):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = cast('TgzPresenter', currentGame.presenter())
+        presenter = cast("TgzPresenter", currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -873,11 +975,13 @@ def TGZdata(request, dataType):
         )
     if dataType == 2:
         # Remove user from notifications
-        user_gp = GamePlayer.objects.filter(game=currentGame, player=request.user).first()
+        user_gp = GamePlayer.objects.filter(
+            game=currentGame, player=request.user
+        ).first()
         if user_gp and user_gp.has_chat_notification:
             user_gp.has_chat_notification = False
             user_gp.save()
-        
+
         return JsonResponse(
             {
                 "chatData": currentGame.chatData
@@ -916,7 +1020,7 @@ def changeTGZzoom(request):
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
-        
+
         zoomLevels = json.loads(currentGame.zoomLevels)
         zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
         if jsonData.get("allPlayers"):
@@ -967,8 +1071,12 @@ def createTGZspinoff(request):
         NgameData = jsonData["data"]
         NstatsExcludedGame = True
         # For some reason jsonData["latestUpdate"] didn't come through one time. Use this as a fallback so it doesn't fail
-        Ncreated = jsonData["latestUpdate"] if jsonData["latestUpdate"] else SR_getTimeNow()
-        NlatestUpdate = jsonData["latestUpdate"] if jsonData["latestUpdate"] else SR_getTimeNow()
+        Ncreated = (
+            jsonData["latestUpdate"] if jsonData["latestUpdate"] else SR_getTimeNow()
+        )
+        NlatestUpdate = (
+            jsonData["latestUpdate"] if jsonData["latestUpdate"] else SR_getTimeNow()
+        )
         NstartingMap = currentGame.startingMap
         NzoomLevels = currentGame.zoomLevels
 
@@ -997,15 +1105,26 @@ def createTGZspinoff(request):
 
         # Add players using GamePlayer
         from Lobby.models import GamePlayer
-        GamePlayer.objects.create(game=newGame, player=request.user, seat_order=0, is_current=True)
-        GamePlayer.objects.create(game=newGame, player=User.objects.get(username="SHADOW"), seat_order=1)
+
+        GamePlayer.objects.create(
+            game=newGame, player=request.user, seat_order=0, is_current=True
+        )
+        GamePlayer.objects.create(
+            game=newGame, player=User.objects.get(username="SHADOW"), seat_order=1
+        )
         if NmaxPlayers >= 3:
-            GamePlayer.objects.create(game=newGame, player=User.objects.get(username="SHADOW_2"), seat_order=2)
+            GamePlayer.objects.create(
+                game=newGame, player=User.objects.get(username="SHADOW_2"), seat_order=2
+            )
         if NmaxPlayers >= 4:
-            GamePlayer.objects.create(game=newGame, player=User.objects.get(username="SHADOW_3"), seat_order=3)
+            GamePlayer.objects.create(
+                game=newGame, player=User.objects.get(username="SHADOW_3"), seat_order=3
+            )
         if NmaxPlayers >= 5:
-            GamePlayer.objects.create(game=newGame, player=User.objects.get(username="SHADOW_4"), seat_order=4)
-        
+            GamePlayer.objects.create(
+                game=newGame, player=User.objects.get(username="SHADOW_4"), seat_order=4
+            )
+
         newGame.latestUpdate = str(int(time.time()) * 1000)
 
         rewindDataArray = []
@@ -1019,20 +1138,20 @@ def createTGZspinoff(request):
     return JsonResponse({"error": "Wrong request."}, status=400)
 
 
-@login_required
-def processStatsExcludeConsent(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-    jsonData = json.loads(request.body)
-    
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = cast('TgzPresenter', currentGame.presenter())
-        presenter.enableStatsExclude(request.user.username)
-        currentGame.save()
-        return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+# @login_required
+# def processStatsExcludeConsent(request):
+#    if request.method != "PUT":
+#        return JsonResponse({"error": "Wrong request."}, status=400)
+#    jsonData = json.loads(request.body)
+#
+#    try:
+#        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
+#        presenter = cast('TgzPresenter', currentGame.presenter())
+#        presenter.enableStatsExclude(request.user.username)
+#        currentGame.save()
+#        return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
+#    except Game.DoesNotExist:
+#        raise Http404(gettext("Game does not exist"))
 
 
 # @login_required
@@ -1115,8 +1234,8 @@ def TGZstats(request):
         if playerCount == 4.5:
             playerCountLabel = "45"
         if player_data:
-            seat_wins = player_data.get("seat_wins", [])  
-            
+            seat_wins = player_data.get("seat_wins", [])
+
             all_data[playerCountLabel] = {
                 "finishedGamesCount": player_data["finishedGamesCount"],
                 "god_stats": player_data["god_stats"],
@@ -1128,7 +1247,7 @@ def TGZstats(request):
     with open("./TGZ/TGZstats/TGZ_stats_schism.json", "r") as f_schism:
         data_schism = json.load(f_schism)
 
-    #timeString_schism = data_schism["time_string"]
+    # timeString_schism = data_schism["time_string"]
 
     all_data_schism = {}
     for playerCount in [2, 3, 4, 4.5, 5]:
@@ -1162,7 +1281,7 @@ def TGZstatGames(request):
 
     # Get the game ids
     gameIDs = json.loads(request.POST["game_ids"])
-    
+
     gameIDs.reverse()
 
     # Pagination settings
@@ -1179,7 +1298,9 @@ def TGZstatGames(request):
 
     # Slice gameIDs for the current page
     try:
-        gameIDs_page = paginator.page(page).object_list  # Get the gameIDs for the current page
+        gameIDs_page = paginator.page(
+            page
+        ).object_list  # Get the gameIDs for the current page
         num_pages = paginator.num_pages
     except PageNotAnInteger:
         # If page is not an integer, deliver first page.
@@ -1194,41 +1315,43 @@ def TGZstatGames(request):
 
     # Filter the games for the current page ONLY
     # Query unified Game model only
-    unified_games = Game.objects.filter(
-        gameCode="TGZ", original_id__in=gameIDs_page
-    ).select_related("creator__profile", "creator").prefetch_related(
-        "players__player", "invitedPlayers"
+    unified_games = (
+        Game.objects.filter(gameCode="TGZ", original_id__in=gameIDs_page)
+        .select_related("creator__profile", "creator")
+        .prefetch_related("players__player", "invitedPlayers")
     )
-    
+
     finishedGames = list(unified_games)
-    
+
     # Sort by latestUpdate
     finishedGames.sort(key=lambda x: x.latestUpdate, reverse=True)
 
-#    def serializeLocal(game):
-#        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner
-#
-#        latestUpdateString = str(game.latestUpdate)
-#
-#        latestUpdateElapsedTimeString = ""  # You can calculate this if needed
-#
-#        # startingOptionsHTML = SR_getTGZstartingOptionsHTML(game.startingOptions)
-#
-#        return {
-#            "gameID": game.id,
-#            "gameName": game.getGameName(),
-#            # "creator": game.creator.username,
-#            "allPlayers": [user.username for user in game.allPlayers.all()],
-#            "currentTurn": game.currentTurnString(),
-#            "latestUpdate": latestUpdateString,
-#            "startingOptions": "",
-#            "maxPlayers": game.maxPlayers,
-#            "winner": winner,  # Used for Finished Games
-#            "game": "TGZ",
-#        }
+    #    def serializeLocal(game):
+    #        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner
+    #
+    #        latestUpdateString = str(game.latestUpdate)
+    #
+    #        latestUpdateElapsedTimeString = ""  # You can calculate this if needed
+    #
+    #        # startingOptionsHTML = SR_getTGZstartingOptionsHTML(game.startingOptions)
+    #
+    #        return {
+    #            "gameID": game.id,
+    #            "gameName": game.getGameName(),
+    #            # "creator": game.creator.username,
+    #            "allPlayers": [user.username for user in game.allPlayers.all()],
+    #            "currentTurn": game.currentTurnString(),
+    #            "latestUpdate": latestUpdateString,
+    #            "startingOptions": "",
+    #            "maxPlayers": game.maxPlayers,
+    #            "winner": winner,  # Used for Finished Games
+    #            "game": "TGZ",
+    #        }
 
     # Serialize ONLY the games for the current page
-    finishedGamesListJson = [SF_fastSerializeGame(game, request.user) for game in finishedGames]
+    finishedGamesListJson = [
+        SF_fastSerializeGame(game, request.user) for game in finishedGames
+    ]
 
     return render(
         request,
@@ -1241,3 +1364,40 @@ def TGZstatGames(request):
             "game_ids_json": request.POST["game_ids"],  # Pass the game_ids back to the
         },
     )
+
+
+@login_required()
+def castVote(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    gameID = jsonData["gameID"]
+
+    with db_mutex(str(gameID)):
+        return _castVote(request)
+
+
+@login_required
+def _castVote(request):
+    """Adds a delete vote for a player."""
+    jsonData = json.loads(request.body)
+
+    try:
+        currentGame = Game.objects.get(id=jsonData["gameID"])
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+    # Delegate all logic to the presenter
+    result = currentGame.presenter().processVoteLogic(
+        topic=jsonData["topic"],
+        username=request.user.username,
+        choice=True,
+    )
+
+    # If an action occurred that requires a user message, add it here
+    msg = result.get("message")
+    if isinstance(msg, str):  # This clarifies the type for the type checker
+        messages.success(request, msg)
+
+    return JsonResponse(result)
