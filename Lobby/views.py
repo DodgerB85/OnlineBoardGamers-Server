@@ -3931,7 +3931,7 @@ def schism(request):
         for game in game_list:
             if game.startingOptions:
                 try:
-                    starting_options = json.loads(game.startingOptions if game.startingOptions else [])
+                    starting_options = json.loads(game.startingOptions) if game.startingOptions else []
                     logger.debug(
                         f"Game {getattr(game, 'id', 'unknown')} (non-finished) startingOptions: {starting_options}"
                     )
@@ -3970,7 +3970,96 @@ def schism(request):
             "finished_current_page": int(page),
         },
     )
+    
 
+#@login_required
+#def indPhpMaps(request):
+#    # Fetch querysets
+#    availableGamesList = Game.objects.filter(
+#        gameStatus="AVAILABLE", gameCode="TGZ"
+#    ).order_by("-latestUpdate")
+#    activeGamesList = Game.objects.filter(gameStatus="ACTIVE", gameCode="TGZ").order_by(
+#        "-latestUpdate"
+#    )
+#    finishedGamesList = Game.objects.filter(
+#        gameStatus="FINISHED", gameCode="TGZ"
+#    ).order_by("-latestUpdate")
+#
+#    # Filter finished games for startingOptions containing [7, 8, 9]
+#    filtered_finished_games = []
+#    for game in finishedGamesList:
+#        if game.startingOptions:
+#            starting_options = json.loads(game.startingOptions)
+#            if any(option in starting_options for option in [7, 8, 9]):
+#                filtered_finished_games.append(game)
+#
+#    # Pagination
+#    items_per_page = 20
+#    page = request.POST.get("page", 1)  # Changed to POST to match form
+#    paginator = Paginator(filtered_finished_games, items_per_page)
+#    try:
+#        finished_games_page = paginator.page(page)
+#    except PageNotAnInteger:
+#        finished_games_page = paginator.page(1)
+#        page = 1
+#    except EmptyPage:
+#        finished_games_page = (
+#            paginator.page(paginator.num_pages)
+#            if paginator.num_pages > 0
+#            else paginator.page(1)
+#        )
+#        page = paginator.num_pages if paginator.num_pages > 0 else 1
+#
+#    # Process available and active games
+#    availableGamesJson = []
+#    activeGamesJson = []
+#    for game_list, game_json in [
+#        (availableGamesList, availableGamesJson),
+#        (activeGamesList, activeGamesJson),
+#    ]:
+#        for game in game_list:
+#            if game.startingOptions:
+#                try:
+#                    starting_options = json.loads(game.startingOptions) if game.startingOptions else []
+#                    logger.debug(
+#                        f"Game {getattr(game, 'id', 'unknown')} (non-finished) startingOptions: {starting_options}"
+#                    )
+#                    if not isinstance(starting_options, list):
+#                        logger.warning(
+#                            f"Game {getattr(game, 'id', 'unknown')} startingOptions is not a list: {starting_options}"
+#                        )
+#                        continue
+#                    if any(option in starting_options for option in [7, 8, 9]):
+#                        game_json.append(
+#                            SF_fastSerializeGame(game, request.user)
+#                        )  # Use serializeLocal for consistency
+#                except (json.JSONDecodeError, ValueError) as e:
+#                    logger.error(
+#                        f"Error processing startingOptions for game {getattr(game, 'id', 'unknown')}: {e}"
+#                    )
+#                    continue
+#            else:
+#                logger.warning(
+#                    f"Game {getattr(game, 'id', 'unknown')} has no startingOptions"
+#                )
+#
+#    # Serialize paginated finished games
+#    finishedGamesJson = []
+#    for game in finished_games_page.object_list:
+#        finishedGamesJson.append(SF_fastSerializeGame(game, request.user))
+#
+#    return render(
+#        request,
+#        "Lobby/schism.html",
+#        {
+#            "availableGames": availableGamesJson,
+#            "activeGames": activeGamesJson,
+#            "finishedGames": finishedGamesJson,
+#            "finished_paginator": paginator,
+#            "finished_current_page": int(page),
+#        },
+#    )
+#
 
 def TGZtournamentFixedSpring24(request):
     return render(request, "Lobby/TGZT/TGZtournamentFixedSpring24.html")
