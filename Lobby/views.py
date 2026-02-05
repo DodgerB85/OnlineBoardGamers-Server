@@ -3979,15 +3979,15 @@ def schism(request):
 @login_required
 def indPhpMap(request):
     # Fetch querysets
-    availableGamesList = IND_Game.objects.filter(
-        gameStatus="AVAILABLE"#, gameCode="TGZ"
+    availableGamesList = Game.objects.filter(
+        gameStatus="AVAILABLE", gameCode="TGZ"
     ).order_by("-latestUpdate")
-    activeGamesList = IND_Game.objects.filter(gameStatus="ACTIVE"#, gameCode="TGZ"
+    activeGamesList = Game.objects.filter(gameStatus="ACTIVE", gameCode="TGZ"
                                               ).order_by(
         "-latestUpdate"
     )
-    finishedGamesList = IND_Game.objects.filter(
-        gameStatus="FINISHED"#, gameCode="TGZ"
+    finishedGamesList = Game.objects.filter(
+        gameStatus="FINISHED", gameCode="TGZ"
     ).order_by("-latestUpdate")
 
     # Filter finished games for startingOptions containing [7, 8, 9]
