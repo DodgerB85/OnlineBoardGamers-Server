@@ -1836,43 +1836,37 @@ class IndPresenter(GamePresenter):
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_sendNextTurnNotification,
+        )
 
         self.gameObj.gameStatus = "ACTIVE"
-        # Only do this if no gameData ie not a form
+        # Only do this if no gameData ie not a form -- WHAT DOES THIS MEAN??
         if self.gameObj.gameData == "" or self.gameObj.gameData is None:
             self.gameObj.playerOrderSeed = random.randint(1000, 32767)
-            allPlayersL = self.getAllPlayersOrderedySeat()
-
-            # Set first player as current
-            first_player_username = allPlayersL[0]
-            game_players = list(self.gameObj.players.exclude(is_kicked=True))
-
+            game_players = list(self.gameObj.players.all())
             random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
-
+            
             for idx, gp in enumerate(game_players):
                 gp.seat_order = idx
-                gp.is_current = (gp.player and gp.player.username == first_player_username)
-
+                gp.is_current = (gp.player and idx == 0)
             GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
 
-        self.gameObj.save()
+            self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            all_players = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
+            all_players = list(self.gameObj.players.select_related("player"))
             player_usernames = [gp.player.username for gp in all_players if gp.player]
+            # REMOVE THIS WHEN ON MAIN VOTING SYSTEM
             self.gameObj.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
             self.gameObj.save()
 
             playerListToNotify = [
                 username for username in player_usernames
                 if username != request.user.username
             ]
-
             # The tournament sends out game start notifications
-            if not isTournamentGame and len(playerListToNotify) > 0:
+            if len(playerListToNotify) > 0:
                 message_data = BLANK_MESSAGE_TEMPLATE.copy()
                 message_data["gameID"] = self.gameObj.id
                 message_data["gameName"] = self.getGameName()
@@ -1886,6 +1880,17 @@ class IndPresenter(GamePresenter):
                     "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
                     playerListToNotify,
                     message_data,
+                )
+            allPlayersL = self.getAllPlayersOrderedySeat()
+            if request.user.username != allPlayersL[0]:
+                SN_sendNextTurnNotification(
+                    request,
+                    "IND",
+                    [allPlayersL[0]],
+                    getattr(self.gameObj, "id"),
+                    self.gameObj.gameName,
+                    self.gameObj,
+                    self.gameObj.latestUpdate,
                 )
 
     def isLearningGame(self):
