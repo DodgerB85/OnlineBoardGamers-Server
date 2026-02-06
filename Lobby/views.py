@@ -2825,17 +2825,17 @@ def playerInfo(request, usernameToProfile):
                     if is_joint:
                         if status == "ACTIVE":
                             activeJoint.append(game)
-                        else:
+                        elif status == "FINISHED":
                             finishedJoint.append(game)
                     else:
                         if status == "ACTIVE":
                             activeOther.append(game)
-                        else:
+                        elif status == "FINISHED":
                             finishedOther.append(game)
                 else:
                     if status == "ACTIVE":
                         activeOther.append(game)
-                    else:
+                    elif status == "FINISHED":
                         finishedOther.append(game)
             else:
                 # Legacy game models
@@ -2886,17 +2886,17 @@ def playerInfo(request, usernameToProfile):
                     if is_joint:
                         if status == "ACTIVE":
                             activeJoint.append(game)
-                        else:
+                        elif status == "FINISHED":
                             finishedJoint.append(game)
                     else:
                         if status == "ACTIVE":
                             activeOther.append(game)
-                        else:
+                        elif status == "FINISHED":
                             finishedOther.append(game)
                 else:
                     if status == "ACTIVE":
                         activeOther.append(game)
-                    else:
+                    elif status == "FINISHED":
                         finishedOther.append(game)
 
         # Step 2: Post-Model Processing (Joint)
