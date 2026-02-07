@@ -141,7 +141,8 @@ def SF_fastSerializeGame(game, user):
     # 2. Handle player data differently for unified vs legacy models
     if is_unified_model:
         # Unified Game model - use GamePlayer
-        all_game_players = list(game.players.exclude(is_kicked=True).select_related('player'))
+        #all_game_players = list(game.players.exclude(is_missing=True).select_related('player'))
+        all_game_players = list(game.players.all().select_related('player'))
         all_players = [gp.player for gp in all_game_players if gp.player]
         all_usernames = [p.username for p in all_players]
         invited_usernames = [u.username for u in game.invitedPlayers.all()]
