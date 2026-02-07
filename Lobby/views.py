@@ -2116,7 +2116,6 @@ def createCNSpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        presenter = currentGame.presenter()
         all_players = currentGame.players.exclude(
             is_kicked=True, player=request.user
         ).select_related("player")
@@ -2159,10 +2158,10 @@ def createAQYpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        all_players = currentGame.players.exclude(
+            is_kicked=True, player=request.user
+        ).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
 
         messages.success(request, (gettext("Game creation for rematch")))
         loadedStartingOptions = (
@@ -2182,8 +2181,8 @@ def createAQYpage(request, gameID=0):
                 "playerNames": playerNames,
                 "kickoutDuration": currentGame.kickoutDuration,
                 "startingOptions": loadedStartingOptions,
-                "startingMap": json.loads(currentGame.startingMap),
-                "mapData": json.loads(currentGame.startingMap),
+                "startingMap": json.loads(currentGame.startingMap) if currentGame.startingMap else {},
+                "mapData": json.loads(currentGame.startingMap) if currentGame.startingMap else {},
                 "experienced": experienced,
             },
         )
@@ -2211,10 +2210,11 @@ def createINDpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        all_players = currentGame.players.exclude(
+        is_kicked=True, player=request.user
+        ).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
+
 
         messages.success(request, (gettext("Game creation for rematch")))
         loadedStartingOptions = (
@@ -2338,25 +2338,25 @@ def createWEBpage(request, gameID=0):
             currentGame = Game.objects.get(id=gameID, gameCode="WEB")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
-
         presenter = currentGame.presenter()
         all_players = currentGame.players.exclude(
             is_kicked=True, player=request.user
         ).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
-        messages.success(request, (gettext("Game creation for rematch")))
         loadedStartingOptions = (
             json.loads(currentGame.startingOptions)
             if currentGame.startingOptions
             else []
         )
+        
+        messages.success(request, (gettext("Game creation for rematch")))
         return render(
             request,
             "Lobby/createWEB.html",
             {
                 "fillData": True,
-                "gameName": currentGame.gameName,
+                "gameName": currentGame.getGameName(),
                 "gameDescription": currentGame.gameDescription,
                 "gamePace": currentGame.gamePace,
                 "playerNumber": currentGame.maxPlayers,
@@ -2378,14 +2378,14 @@ def createTGZpage(request, gameID=0):
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = TGZ_Game.objects.get(id=gameID)
-        except TGZ_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID)
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        all_players = currentGame.players.exclude(
+            is_kicked=True, player=request.user
+        ).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
 
         messages.success(request, (gettext("Game creation for rematch")))
         return render(
@@ -2400,7 +2400,7 @@ def createTGZpage(request, gameID=0):
                 "playerNames": playerNames,
                 "kickoutDuration": currentGame.kickoutDuration,
                 "startingOptions": currentGame.startingOptions,
-                "startingMap": json.loads(currentGame.startingMap),
+                "startingMap": json.loads(currentGame.startingMap) if currentGame.startingMap else [],
                 "experienced": experienced,
             },
         )
