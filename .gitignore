@@ -24,9 +24,6 @@ a.py
 # Ignore the email counter
 Lobby/sharedFunctions/emailCounter.txt
 
-# Exclude generated stats
-*stats/
-
 # Exclude the entire 'Private' directory in the project root
 /Private/
 
@@ -46,8 +43,31 @@ vuePPF/
 
 staticfiles/
 
-# Ignore any directory that contains the word 'vuedist' anywhere (*vuedist*)
-#*vuedist*/
-**/*stats/
+# Handle stats carefully and specifically
+# Ignore everything inside the folder
+/AQY/AQYstats/*
+/BOB/BOBstats/*
+/Bus/Busstats/*
+/CNS/CNSstats/*
+/FCM/FCMstats/*
+/HC/HCstats/*
+/IND/INDstats/*
+/KFW/KFWstats/*
+/RNB/RNBstats/*
+/TGZ/TGZstats/*
+/WEB/WEBstats/*
+# But DO NOT ignore the .gitkeep file (this keeps the folder alive)
+!/AQY/AQYstats/.gitkeep
+!/BOB/BOBstats/.gitkeep
+!/Bus/Busstats/.gitkeep
+!/CNS/CNSstats/.gitkeep
+!/FCM/FCMstats/.gitkeep
+!/HC/HCstats/.gitkeep
+!/IND/INDstats/.gitkeep
+!/KFW/KFWstats/.gitkeep
+!/RNB/RNBstats/.gitkeep
+!/TGZ/TGZstats/.gitkeep
+!/WEB/WEBstats/.gitkeep
+
 #*migration*/ # NO! Migrations should be part of git. Run MM & M on dev, and just M on live
 Lobby/sharedFunctions/emailCounter.txt
