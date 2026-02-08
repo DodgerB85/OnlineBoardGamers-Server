@@ -15,6 +15,7 @@ from typing import List, Union, Dict
 DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
 
+# comment to force and test update
 # Because the live and dev servers are in different folder names, we need to go up one from that
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
