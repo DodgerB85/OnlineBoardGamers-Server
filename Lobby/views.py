@@ -108,7 +108,6 @@ from .models import (
 from FCM.models import FCM_Game, FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
 from Bus.models import Bus_Game, Bus_Tournament
-from IND.models import IND_Game
 from KFW.models import KFW_Game
 from RNB.models import RNB_Game
 

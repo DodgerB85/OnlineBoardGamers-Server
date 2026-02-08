@@ -21,7 +21,7 @@ urlpatterns = [
     path('<int:game_id>/show/', views.showINDgame, name='showINDgame'),
     path('<int:game_id>/show/replay/<int:replayStep>/', views.showINDgame, {'spoilerFree': True}, name='showINDreplayStep'),
 
-    # Old URL format redirect (original_id is the old IND_Game.id)
+    # Old URL format redirect (original_id is the old IND model _Game.id)
     path('<int:original_id>/', redirect_old_url, name='redirect_old_url'),
 
     path('help/', views.INDhelp, name='INDhelp'),

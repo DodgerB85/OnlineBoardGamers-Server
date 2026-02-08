@@ -52,7 +52,6 @@ except Exception as e:
 from FCM.models import FCM_Game
 from HC.models import HC_Game
 from Bus.models import Bus_Game
-from IND.models import IND_Game
 from KFW.models import KFW_Game
 
 from Lobby.models import User
@@ -129,7 +128,6 @@ for game in games:
     game_in_use_model = FCM_Game
     if game == "HC": game_in_use_model = HC_Game
     if game == "BUS": game_in_use_model = Bus_Game
-    if game == "IND": game_in_use_model = IND_Game
     if game == "KFW": game_in_use_model = KFW_Game
 
     # First calculate the fair play stat

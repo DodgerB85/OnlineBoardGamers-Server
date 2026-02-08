@@ -31,7 +31,6 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
-from .models import IND_Game
 from Lobby.models import User, Profile, Game, GamePlayer
 
 if TYPE_CHECKING:
