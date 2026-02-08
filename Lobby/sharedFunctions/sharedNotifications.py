@@ -1594,7 +1594,7 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
             game_info = {
                 "game_name": game.getGameName(),
                 "days_since_last_move": days_since_last_move,
-                "game_link": f"http://www.OnlineBoardGamers.com/{game.getGameCode()}/{game.id}/",  # Update with actual link format
+                "game_link": f"http://www.OnlineBoardGamers.com/{game.getGameCode()}/{game.id}/show/",  # Update with actual link format
             }
             games_info.append(game_info)
 
