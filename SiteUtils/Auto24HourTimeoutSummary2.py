@@ -43,25 +43,14 @@ except Exception as e:
     print(f"Error setting up Django: {e}")
     sys.exit(1)
 
-from FCM.models import FCM_Game # noqa: E402
-from HC.models import HC_Game # noqa: E402
-from Bus.models import Bus_Game # noqa: E402
-from IND.models import IND_Game # noqa: E402
-from RNB.models import RNB_Game # noqa: E402
-from KFW.models import KFW_Game # noqa: E402
-
-from Lobby.models import User, Profile  # noqa: E402
+from Lobby.models import User, Game, GamePlayer  # noqa: E402
 
 from Lobby.sharedFunctions.sharedNotifications import SN_send24HourTimedOutReminderEmail # noqa: E402
 
-#sys.exit()
-
-GAME_NAMES_MODELS = {"FCM": FCM_Game, "HC": HC_Game, "BUS": Bus_Game, "IND": IND_Game, "RNB": RNB_Game, "KFW": KFW_Game}
+GAME_CODES = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 start_calc_time = time.perf_counter()
 email_counter = 0
-
-
 
 def daysSinceLastMove(latestUpdate):
     elapsedTotalSeconds = int(time.time()) - (int(latestUpdate) / 1000)
@@ -76,16 +65,22 @@ def daysSinceLastMove(latestUpdate):
 #allActiveGames = list(chain.from_iterable(game_model.objects.filter(active_games_query).all() for game_model in GAME_NAMES_MODELS.values()))
 
 # 1. Fetch all active games with their players in one go per model
-active_games_query = Q(gameStatus="ACTIVE") & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
-allActiveGames = []
-for game_model in GAME_NAMES_MODELS.values():
-    # prefetch_related prevents a DB hit every time you look at players
-    games = game_model.objects.filter(active_games_query).prefetch_related('allPlayers').distinct()
-    allActiveGames.extend(list(games))
+active_games_query = Q(gameStatus="ACTIVE") & ~Q(players__player__username="SHADOW") & ~Q(players__player__username="FcmAI")
 
+# 2. Use select_related inside prefetch_related for maximum efficiency
+# This fetches the GamePlayer and the User (player) in one go for each game.
+allActiveGames = list(
+    Game.objects.filter(active_games_query)
+    .prefetch_related('players__player')
+    .distinct()
+)
 
-# Extract current player usernames for comparison
-current_players_set = set([player.username for game in allActiveGames for player in game.allPlayers.all()])
+# High-speed alternative: gets only usernames from the database
+#current_players_set = set(
+#    GamePlayer.objects.filter(game__gameStatus="ACTIVE")
+#    .exclude(player__username__in=["SHADOW", "FcmAI"])
+#    .values_list('player__username', flat=True)
+#)
 
 # 2. Build a map of { username: [(game, days_elapsed)] } in memory
 # This replaces the nested loop that was hitting the DB repeatedly
@@ -95,14 +90,18 @@ for game in allActiveGames:
     days_elapsed = daysSinceLastMove(game.latestUpdate)
     
     if 1 <= days_elapsed <= 6:
-        # Assuming getCurrentPlayersArrayForReminderEmail just filters game.allPlayers
-        # If it does complex logic, try to replicate it here using game.allPlayers.all()
-        current_players = game.getCurrentPlayersArrayForReminderEmail() 
+        # NEW LOGIC: Extract usernames from the intermediate GamePlayer model
+        # Use .all() on the prefetched manager to avoid new DB hits
+        current_game_usernames = [
+            gp.player.username for gp in game.players.all() 
+            if gp.player and gp.player.username not in ["SHADOW", "FcmAI"]
+        ]
         
-        for username in current_players:
+        for username in current_game_usernames:
             if username not in user_to_games_map:
                 user_to_games_map[username] = []
             user_to_games_map[username].append((game, days_elapsed))
+
 
 
 # 3. Sort the game lists for each user
