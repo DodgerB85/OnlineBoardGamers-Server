@@ -1622,12 +1622,43 @@ def index(request):
     )
 
 
-@csrf_exempt
 def login_view(request):
     if request.method == "POST":
         # Attempt to sign user in
-        username = request.POST["username"]
-        password = request.POST["password"]
+         # 1. SAFE DATA EXTRACTION
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        # 2. VALIDATION: If these are missing, don't even try to authenticate
+        if not username or not password:    
+            # Gather all metadata
+            debug_info = {
+                "IP": request.META.get('REMOTE_ADDR'),
+                "UA": request.META.get('HTTP_USER_AGENT'),
+                "Path": request.path,
+                "Method": request.method,
+                "Content_Type": request.headers.get('Content-Type'),
+                "POST_Keys": list(request.POST.keys()),
+            }
+
+            # Try to peek at the raw body in case it's JSON
+            try:
+                body_sample = request.body.decode('utf-8')[:500]
+                debug_info["Raw_Body_Sample"] = body_sample
+            except:
+                debug_info["Raw_Body_Status"] = "Not decodable"
+
+            formatted_data = json.dumps(debug_info, indent=2)
+            # Discord has a 2000 character limit, so we truncate if needed
+            content = f"**!!! LOGIN ATTEMPT: Missing Fields !!!**\n```json\n{formatted_data[:1800]}\n```"
+
+            # Send to Discord
+            SN_sendAdminErrorMessage(request, content)
+            
+            messages.error(request, gettext("Username and password are required."))
+            return render(request, "Lobby/login.html")
+        
+        
         user = authenticate(request, username=username, password=password)
 
         # Check if authentication successful
@@ -4069,7 +4100,9 @@ def TGZtournamentMain(request, tournamentName):
     # word_part = tournamentName[:-2].upper()
     # digit_part = tournamentName[-2:]
     # tournamentKey = word_part + " " + digit_part
-
+    if 1==1:
+        return render(request, "Lobby/TGZT/TGZtournamentFixedSummer25.html")
+    
     tournamentKey = "TGZ Summer 25"  # Then immewdiately " A1" or " B2" NOTE THE KEY DOESN'T INCLUDE THE SPACE FOR SOME REASON
 
     # This line is common to all
