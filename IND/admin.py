@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.conf import settings
-from .models import IND_Game, IND_Tournament
+from .models import IND_Game
 from django import forms
 
 
@@ -22,7 +22,6 @@ class IND_GameAdmin(admin.ModelAdmin):
         "kickedPlayers",
         "invitedPlayers",
         "playersWithChatNotification",
-        "relatedTournament",
         #"relatedMiniTournament",
     ]
 
@@ -55,7 +54,6 @@ class IND_GameAdmin(admin.ModelAdmin):
                 "creator",
                 "host",
                 "winner",
-                "relatedTournament",
                 #"relatedMiniTournament",
             )
         )
@@ -131,11 +129,6 @@ class IND_GameAdmin(admin.ModelAdmin):
 
     @admin.display(description="Tournament")
     def tournament_display(self, obj):
-        if obj.relatedTournament:
-            # return obj.relatedTournament.tournamentName
-            return getattr(
-                obj.relatedTournament, "tournamentName", str(obj.relatedTournament)
-            )
         #if obj.relatedMiniTournament:
         #    return f"Mini: {getattr(obj.relatedMiniTournament, 'tournamentName', 'Unknown')}"
         return "-"
@@ -151,7 +144,6 @@ class IND_GameAdmin(admin.ModelAdmin):
     list_filter = (
         "gameStatus",
         "maxPlayers",
-        "relatedTournament",
         #"relatedMiniTournament",
     )
     search_fields = ("gameName", "creator__username")
@@ -243,15 +235,7 @@ class IND_GameAdmin(admin.ModelAdmin):
             "Linked Tournament",
             {
                 "classes": ("collapse",),
-                "fields": ("relatedTournament",),# "relatedMiniTournament"),
+                "fields": ("",),# "relatedMiniTournament"),
             },
         ),
     )
-
-class IND_TournamentAdmin(admin.ModelAdmin):
-    save_on_top = True
-    save_as = True
-    filter_horizontal = ('startingPlayers', 'nextRoundPlayers')
-    search_fields = ["tournamentName"]
-
-admin.site.register(IND_Tournament, IND_TournamentAdmin)
