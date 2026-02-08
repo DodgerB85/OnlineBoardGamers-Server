@@ -1426,7 +1426,7 @@ def SN_sendBugReportEmail(
         SN_sendAdminErrorMessage(request, error_message)
 
 
-def SN_sendReminderEmail(playerName, game, gameID, gameName):
+def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
     originalLang = get_language()
     if playerName not in USERNAMES_NOT_TO_NOTIFY:
         try:
@@ -1448,7 +1448,7 @@ def SN_sendReminderEmail(playerName, game, gameID, gameName):
 
             activate(profile.profileLanguage)
 
-            gameStrings = getGameStrings(game)
+            gameStrings = getGameStrings(gameCode)
             box_name = gameStrings["boxName"]
             urlText = gameStrings["clickHereToPlayText"]
             # SEND EMAIL
@@ -1457,7 +1457,7 @@ def SN_sendReminderEmail(playerName, game, gameID, gameName):
                 message = render_to_string(
                     "Lobby/email/gameReminderEmail.html",
                     {
-                        "game": game,
+                        "game": gameCode,
                         "playerName": playerName,
                         "domain": "www.OnlineBoardGamers.com",
                         "gameName": gameName,
@@ -1477,9 +1477,9 @@ def SN_sendReminderEmail(playerName, game, gameID, gameName):
             )
 
             # SEND WEBHOOKS
-            urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-            if SR_usesUnifiedGameModel(game):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+            urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
+            if SR_usesUnifiedGameModel(gameCode):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
             if (
                 profile.webhooks != ""
                 and profile.webhooks is not None
@@ -1494,7 +1494,7 @@ def SN_sendReminderEmail(playerName, game, gameID, gameName):
     activate(originalLang)
 
 
-def SN_sendReminderExpiredEmail(playerName, game, gameID, gameName):
+def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
     originalLang = get_language()
     if playerName not in USERNAMES_NOT_TO_NOTIFY:
         try:
@@ -1515,7 +1515,7 @@ def SN_sendReminderExpiredEmail(playerName, game, gameID, gameName):
             profile = Profile.objects.get(user=user)
             activate(profile.profileLanguage)
 
-            gameStrings = getGameStrings(game)
+            gameStrings = getGameStrings(gameCode)
             box_name = gameStrings["boxName"]
             urlText = gameStrings["clickHereToPlayText"]
 
@@ -1525,7 +1525,7 @@ def SN_sendReminderExpiredEmail(playerName, game, gameID, gameName):
                 message = render_to_string(
                     "Lobby/email/gameReminderExpiredEmail.html",
                     {
-                        "game": game,
+                        "game": gameCode,
                         "playerName": playerName,
                         "domain": "www.OnlineBoardGamers.com",
                         "gameName": gameName,
@@ -1545,9 +1545,9 @@ def SN_sendReminderExpiredEmail(playerName, game, gameID, gameName):
             )
 
             # SEND WEBHOOKS
-            urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-            if SR_usesUnifiedGameModel(game):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+            urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
+            if SR_usesUnifiedGameModel(gameCode):
+                    urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
             if (
                 profile.webhooks != ""
                 and profile.webhooks is not None
