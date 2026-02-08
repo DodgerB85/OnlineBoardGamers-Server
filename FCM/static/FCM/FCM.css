@@ -2376,3 +2376,16 @@ input.radio {
 .ceoBonusOptionDivSelected {
 	border: lightgreen 2px solid !important;
 }
+
+#phaseDiv {
+	width: 100%;
+	/*background-color: red;*/
+	color: black;
+	font-weight: bolder;
+	/**/
+	/*z-index: 1;*/
+}
+
+.currentPhaseGlow {
+	background-color: lightgreen;
+}
