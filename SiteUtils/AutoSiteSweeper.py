@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 
 # from itertools import chain
-from django.db.models import Q
+from django.db.models import Count, Q, IntegerField, Case, When
 from unittest.mock import MagicMock
 from decouple import config  # , Csv
 from django.db import OperationalError, transaction 
@@ -50,28 +50,15 @@ except Exception as e:
 from django.conf import settings
 
 # Import models after Django setup to avoid import errors
-from FCM.models import FCM_Game
-from HC.models import HC_Game
-from Bus.models import Bus_Game
-from IND.models import IND_Game
-from KFW.models import KFW_Game
-from RNB.models import RNB_Game
+
 
 from Lobby.models import (
-    User,
+    Game,
     Mini_Tournaments,
 )  # Unused; consider removing unless needed
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
-# Mapping of game names to models
-GAME_NAMES_MODELS = {
-    "FCM": FCM_Game,
-    "HC": HC_Game,
-    "Bus": Bus_Game,
-    "IND": IND_Game,
-    "KFW": KFW_Game,
-    "RNB": RNB_Game,
-}
+GAME_CODES = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 start_calc_time = time.perf_counter()
 deleted_games = 0  # Unused; consider removing unless used elsewhere
@@ -89,19 +76,32 @@ def daysSinceLastMove(latestUpdate):
 
 
 # 1. Process Games (Combined monitored and active logic)
-for game_code, game_model in GAME_NAMES_MODELS.items():
-
+for gameCode in GAME_CODES:
     # FETCH: Only games that are either old OR stalled (Single query per model)
     # Prefetch allPlayers so we check "SHADOW" in memory, not via SQL
     MONITORED_STATUSES = ["ACTIVE", "PRIVATE", "AVAILABLE", "WAITING"]
 
-    games_to_check = game_model.objects.filter(
-        # Condition A: Old and in a specific state
-        Q(latestUpdate__lt=cutoff_ms, gameStatus__in=MONITORED_STATUSES)
-        |
-        # Condition B: Stalled (ACTIVE with no players) - regardless of age
-        Q(gameStatus="ACTIVE", currentPlayers="")
-    ).prefetch_related("allPlayers")
+    #games_to_check = Game.objects.filter(
+    #    # Condition A: Old and in a specific state
+    #    Q(latestUpdate__lt=cutoff_ms, gameStatus__in=MONITORED_STATUSES)
+    #    |
+    #    # Condition B: Stalled (ACTIVE with no players) - regardless of age
+    #    Q(gameStatus="ACTIVE", currentPlayers="")
+    #).prefetch_related("allPlayers")
+    
+    # FETCH: Annotate with a count of players where is_current is True
+    games_to_check = Game.objects.annotate(
+        current_player_count=Count(
+            'players', 
+            filter=Q(players__is_current=True)
+        )
+    ).filter(
+        # Group everything else inside one set of parentheses
+        Q(gameCode=gameCode) & (
+            Q(latestUpdate__lt=cutoff_ms, gameStatus__in=MONITORED_STATUSES) |
+            Q(gameStatus="ACTIVE", current_player_count=0)
+        )
+    ).prefetch_related("players__player")
 
     # Group IDs for bulk deletion to avoid N-queries
     ids_to_delete = []
@@ -114,23 +114,24 @@ for game_code, game_model in GAME_NAMES_MODELS.items():
             deleted_games += 1
 
             # Use prefetched data: check usernames in memory (0 DB hits)
-            usernames = [p.username for p in game.allPlayers.all()]
-            if "SHADOW" in usernames or "FcmAI" in usernames:
+            #usernames = [p.username for p in game.allPlayers.all()]
+            usernames = [gp.player.username for gp in game.players.all() if gp.player]
+            if any(name in ["SHADOW", "FcmAI"] for name in usernames):
                 deleted_practice_games += 1
 
             if ACTUALLY_DELETE_ITEMS:
                 ids_to_delete.append(game.id)
             else:
                 print(
-                    f"WOULD DELETE: {game_code} - ID: {game.id} ({days_since_update} days old)"
+                    f"WOULD DELETE: {gameCode} - ID: {game.id} ({days_since_update} days old)"
                 )
 
         # CHECK FOR STALLED (ACTIVE but no current player)
-        elif game.gameStatus == "ACTIVE" and game.currentPlayers == "":
+        elif game.gameStatus == "ACTIVE" and game.current_player_count == 0:
             stalled_games += 1
             mock_request = MagicMock()
             mock_request.site = Site.objects.get_current()
-            message = f"NO CP: {game_code} - ID: {game.id}"
+            message = f"NO CP: {gameCode} - ID: {game.id}"
             print(message)
             SN_sendAdminErrorMessage(mock_request, message)
 
@@ -144,19 +145,19 @@ for game_code, game_model in GAME_NAMES_MODELS.items():
                 try:
                     # Using atomic ensures the transaction is clean on retry
                     with transaction.atomic():
-                        game_model.objects.filter(id__in=batch).delete()
-                        print(f"Deleted {game_code} batch: {batch}")
+                        Game.objects.filter(id__in=batch).delete()
+                        print(f"Deleted {gameCode} batch: {batch}")
                     break # Success, move to next chunk
                 except OperationalError as e:
                     if "1213" in str(e) and attempt < 2:
                         time.sleep(2) # Wait 2 seconds for other locks to clear
                         continue
-                    print(f"Permanent DB Error deleting {game_code} batch: {e}")
+                    print(f"Permanent DB Error deleting {gameCode} batch: {e}")
                     break
             
     else:
         for game_id in ids_to_delete:
-            print(f"WOULD DELETE: {game_code} - ID: {game_id}")
+            print(f"WOULD DELETE: {gameCode} - ID: {game_id}")
 
 # 2. Process Mini Tournaments (Bulk)
 mt_cutoff = (
