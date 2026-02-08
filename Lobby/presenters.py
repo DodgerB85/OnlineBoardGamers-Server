@@ -1741,8 +1741,8 @@ class IndPresenter(GamePresenter):
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "IND", finalPositionsArr, _gameID, self.gameObj)
 
-        if self.gameObj.relatedINDTournament:
-            SF_M_ProcessTournamentEndGame(request, "IND", self.gameObj, [_winner])
+        #if self.gameObj.relatedINDTournament:
+        #    SF_M_ProcessTournamentEndGame(request, "IND", self.gameObj, [_winner])
 
     def serialize(self, loggedInUserObj=None):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
