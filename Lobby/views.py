@@ -3851,7 +3851,8 @@ def TGZtournaments(request):
     tournamentKey = "TGZ Summer 25 "
 
     activeGamesList = sorted(
-        TGZ_Game.objects.filter(
+        Game.objects.filter(
+            Q(gameCode="TGZ"),
             Q(creator=userToProfile),
             Q(gameStatus="ACTIVE"),
             gameName__istartswith=tournamentKey,
@@ -3860,10 +3861,11 @@ def TGZtournaments(request):
         key=lambda instance: instance.latestUpdate,
         reverse=True,
     )
-    activeGamesListJson = [game.serialize(request.user) for game in activeGamesList]
+    activeGamesListJson = [SF_fastSerializeGame(game, request.user) for game in activeGamesList]
 
     finishedGamesList = sorted(
-        TGZ_Game.objects.filter(
+        Game.objects.filter(
+            Q(gameCode="TGZ"),
             Q(creator=userToProfile),
             Q(gameStatus="FINISHED"),
             gameName__istartswith=tournamentKey,
@@ -3872,7 +3874,7 @@ def TGZtournaments(request):
         key=lambda instance: instance.latestUpdate,
         reverse=True,
     )
-    finishedGamesListJson = [game.serialize(request.user) for game in finishedGamesList]
+    finishedGamesListJson = [SF_fastSerializeGame(game, request.user) for game in finishedGamesList]
 
     return render(
         request,
@@ -4065,6 +4067,7 @@ def TGZtournamentFixedSummer25(request):
     return render(request, "Lobby/TGZT/TGZtournamentFixedSummer25.html")
 
 
+# NB THIS IS NOT ACCESSED> TGZ_Game DOES NOT EXIST EITHER. LEFT FOR REFERENCE
 def TGZtournamentMain(request, tournamentName):
     ##### USE THIS FOR GROUPINGS
     # Find the tournament key
@@ -4555,46 +4558,7 @@ def BGH_API(request, options):
     return JsonResponse(final_dictionary)  # , safe=False)
 
 
-@login_required
-def kbbrScraper(request, game):
-    ALLOWED_USERS_SCRAPER = ["admin", "DodgerB", "kbbr"]
-    if request.user.username not in ALLOWED_USERS_SCRAPER:
-        return redirect("index")
-    game_in_use_model = FCM_Game
-    if game == "HC":
-        game_in_use_model = HC_Game
-    if game == "Bus":
-        game_in_use_model = Bus_Game
-    if game == "TGZ":
-        game_in_use_model = TGZ_Game
 
-    query = Q(gameStatus="FINISHED") & ~Q(
-        allPlayers__username="admin"
-    )  # & ~Q(allPlayers__username="SHADOW") & ~Q(statsExcludedGame=True)
-
-    matching_games = game_in_use_model.objects.filter(query)
-    # For each game, [gameID, gameType]
-
-    response_data = {
-        "finished_games": [
-            [
-                getattr(game, "id"),
-                (
-                    1
-                    if "SHADOW" in game.allPlayers.values_list("username", flat=True)
-                    else (
-                        2
-                        if hasattr(game, "relatedTournament")
-                        and getattr(game, "relatedTournament", None) is not None
-                        else 0
-                    )
-                ),
-            ]
-            for game in matching_games
-        ]
-    }
-
-    return JsonResponse(response_data)
 
 
 ###################################

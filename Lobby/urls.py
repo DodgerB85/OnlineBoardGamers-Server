@@ -173,7 +173,6 @@ urlpatterns = [
     path("addWebhook/", views.addWebhook, name="addWebhook"),
     path("deleteWebhook/", views.deleteWebhook, name="deleteWebhook"),
     path("BGH_API/<str:options>/", views.BGH_API),
-    path("kbbrScraper/<str:game>/", views.kbbrScraper),
     path("dataCheck/", views.dataCheck),
     path("setStopEmails/", views.setStopEmails),
     path("sendMTchatMessage/", views.sendMTchatMessage, name="sendMTchatMessage"),

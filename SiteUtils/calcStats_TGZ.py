@@ -202,10 +202,6 @@ def analyze_games(player_count_index, schism_games=False, external_tournament=Fa
             .values_list("gameData", "players__player__username", "id")
             .distinct()
         )
-    # Fetch only required fields
-    # dataSet = TGZ_Game.objects.filter(query).values_list(
-    #    "gameData", "winner__username", "id"
-    # )
     finishedGamesCount = len(dataSet)
 
     for game_data_encoded, winner_username, game_id in dataSet:
