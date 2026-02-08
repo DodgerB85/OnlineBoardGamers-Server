@@ -44,11 +44,6 @@ django.setup()
 start_calc_time = time.perf_counter()
 
 from Lobby.models import User, Main_Tournament
-#from FCM.models import FCM_Tournament
-#from FCM.models import FCM_Game
-from HC.models import HC_Tournament
-from Bus.models import Bus_Tournament
-from IND.models import IND_Tournament
 
 from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
 from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen 
