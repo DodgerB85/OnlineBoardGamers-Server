@@ -108,7 +108,6 @@ from .models import (
 from FCM.models import FCM_Game, FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
 from Bus.models import Bus_Game, Bus_Tournament
-from TGZ.models import TGZ_Game
 from IND.models import IND_Game, IND_Tournament
 from KFW.models import KFW_Game
 from RNB.models import RNB_Game
@@ -415,7 +414,7 @@ GAME_NAMES_MODELS = {
     "FCM": FCM_Game,
     "HC": HC_Game,
     "Bus": Bus_Game,
-    "TGZ": TGZ_Game,
+    "TGZ": "TGZ",
     "CNS": "CNS",  # Now using unified Game model
     "AQY": "AQY",  # Now using unified Game model
     "IND": "IND",  # Now using unified Game model
@@ -426,9 +425,7 @@ GAME_MODELS = [
     FCM_Game,
     HC_Game,
     Bus_Game,
-    # TGZ_Game - now uses unified Game model exclusively
-    # CNS, AQY, WEB, and IND now use unified Game model
-    # IND_Game - removed, now uses unified Game model
+    # CNS, AQY, WEB, and IND, etc now use unified Game model
     KFW_Game,
 ]
 
@@ -764,7 +761,7 @@ def DBO_deleteGame(request, game_type):
         "FCM": FCM_Game,
         "HC": HC_Game,
         "Bus": Bus_Game,
-        "TGZ": TGZ_Game,
+        "TGZ": Game,
         "CNS": Game,  # Now using unified Game model
         "AQY": Game,  # Now using unified Game model
         "IND": Game,  # Now using unified Game model
@@ -2372,7 +2369,7 @@ def createWEBpage(request, gameID=0):
 
 @login_required
 def createTGZpage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "TGZ", TGZ_Game)
+    experienced = SF_hasRequiredExperience(request, "TGZ", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createTGZ.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
@@ -2416,8 +2413,8 @@ def createTGZpage(request, gameID=0):
 @login_required
 def showTGZoptions(request, gameID):
     try:
-        currentGame = TGZ_Game.objects.get(id=gameID)
-    except TGZ_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=gameID)
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     return render(
@@ -2426,7 +2423,7 @@ def showTGZoptions(request, gameID):
         {
             "gameName": currentGame.gameName,
             "gameDescription": currentGame.gameDescription,
-            "godsVRhtml": SR_getgodsVRoptionsHTML(currentGame.startingOptions),
+            "godsVRhtml": SR_getgodsVRoptionsHTML(json.loads(currentGame.startingOptions) if currentGame.startingOptions else []),
         },
     )
 

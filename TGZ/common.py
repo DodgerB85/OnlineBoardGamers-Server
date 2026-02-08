@@ -9,7 +9,6 @@ import json
 import random
 import requests
 from Lobby.models import User
-from TGZ.models import TGZ_Game
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_T_sendTournamentGameStartNotification,
     SN_sendInviteNotifications,
