@@ -519,15 +519,6 @@ class Game(BaseGame):
         related_name="minitournamentGEN_relName",
     )
 
-    # TODO, only used in IND. Remove from the Game model at some point.
-    relatedINDTournament = models.ForeignKey(
-        "IND.IND_Tournament",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="unified_tournament_games_IND",
-    )
-
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
 
