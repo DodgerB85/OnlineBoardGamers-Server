@@ -40,20 +40,13 @@ os.environ.setdefault(
 
 django.setup()
 
-from FCM.models import FCM_Game
-from HC.models import HC_Game
-from Bus.models import Bus_Game
-from IND.models import IND_Game
-from RNB.models import RNB_Game
-from KFW.models import KFW_Game
-
-# from Lobby.models import User
+from Lobby.models import Game
 
 # from Lobby.sharedFunctions.sharedFunctions import *
 from Lobby.sharedFunctions.sharedNotifications import SN_sendReminderEmail, SN_sendReminderExpiredEmail
 
 # sys.exit()
-games = ["FCM", "HC", "BUS", "IND", "RNB", "KFW"]
+GAME_CODES = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 # reminder_start_time = int((datetime.now() - timedelta(minutes=118)).timestamp() * 1000)
 # reminder_finish_time = int((datetime.now() - timedelta(minutes=182)).timestamp() * 1000)
@@ -65,60 +58,47 @@ remaining_finish_time_expired = 0  # Now
 
 start_calc_time = time.perf_counter()
 
-for game in games:
+for gameCode in GAME_CODES:
     game_start_calc_time = time.perf_counter()
-
-    game_in_use_model = FCM_Game
-    if game == "HC":
-        game_in_use_model = HC_Game
-    if game == "Bus":
-        game_in_use_model = Bus_Game
-    if game == "IND":
-        game_in_use_model = IND_Game
-    if game == "RNB":
-        game_in_use_model = RNB_Game
-
-    if game == "KFW":
-        game_in_use_model = KFW_Game
 
     # Query the game_in_use_model to get the players who will timeout within the specified time range
     # players = game_in_use_model.objects.filter(timeout__gt=timeout_threshold_start, timeout__lt=timeout_threshold_end)
-    query = Q(gameStatus="ACTIVE") & ~Q(allPlayers__username="SHADOW") & ~Q(allPlayers__username="FcmAI")
+    query = Q(gameCode=gameCode) & Q(gameStatus="ACTIVE") & ~Q(players__player__username="SHADOW") & ~Q(players__player__username="FcmAI")
 
-    allGames = game_in_use_model.objects.filter(query).all()
+    allGames = Game.objects.filter(query).all()
     for singleGame in allGames:
         # print(singleGame.id)
-        timeRemaining = singleGame.getSecondsToNextKickout()
+        timeRemaining = singleGame.presenter().getSecondsToNextKickout()
         if timeRemaining >= remaining_start_time and timeRemaining <= remaining_finish_time:
-            print(game + ": 2hr: " + str(singleGame.id))
-            playersToNotify = singleGame.getCurrentPlayersArrayForReminderEmail()
+            print(f"{gameCode}: 2hr: {singleGame.id}")
+            playersToNotify = singleGame.presenter().getCurrentPlayersArrayForReminderEmail()
             for playerName in playersToNotify:
-                print("2hr: " + playerName)
-                SN_sendReminderEmail(playerName, game, singleGame.id, singleGame.getGameName())
+                print(f"2hr Email: {playerName}")
+                SN_sendReminderEmail(playerName, gameCode, singleGame.id, singleGame.getGameName())
 
         if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
             # print(singleGame.getCurrentPlayersArray())
-            print(game + ": exp: " + str(singleGame.id))
-            playersToNotify = singleGame.getCurrentPlayersArrayForReminderEmail()
+            print(f"{gameCode}: exp: {singleGame.id}")
+            playersToNotify = singleGame.presenter().getCurrentPlayersArrayForReminderEmail()
             for playerName in playersToNotify:
-                print("KO: " + playerName)
-                SN_sendReminderExpiredEmail(playerName, game, singleGame.id, singleGame.getGameName())
+                print(f"Expired Email: {playerName}")
+                SN_sendReminderExpiredEmail(playerName, gameCode, singleGame.id, singleGame.getGameName())
 
-            if game == "FCM" and singleGame.relatedTournament:
+            if gameCode == "FCM" and singleGame.relatedMainTournament:
                 try:
                     message = "===========================\n"
                     message += "GAME EXPIRY AUTO-DETECTED\n"
-                    message += "Player: " + singleGame.currentPlayers + "\n"
+                    message += f"Player: {singleGame.presenter().getCurrentPlayersArrayForReminderEmail()}\n"
                     message += "[Click here to view the game](https://www.OnlineBoardGamers.com/FCM/" + str(singleGame.id) + "/)"
                     requests.post(f'https://discordapp.com/api/webhooks/{config("WEBHOOK_FCM_TOURNAMENT_ADMIN")}', data={"content": message})
                 except Exception as e:
                     print(e)
 
-            if game == "TGZ" and singleGame.externalTournamentGame:
+            if gameCode == "TGZ" and singleGame.relatedMainTournament:
                 try:
                     message = "===========================\n"
                     message += "GAME EXPIRY AUTO-DETECTED\n"
-                    message += "Player: " + singleGame.currentPlayers + "\n"
+                    message += f"Player: {singleGame.presenter().getCurrentPlayersArrayForReminderEmail()}\n"
                     message += "[Click here to view the game](https://www.OnlineBoardGamers.com/TGZ/" + str(singleGame.id) + "/)"
                     requests.post(f'https://discordapp.com/api/webhooks/{config("WEBHOOK_TGZ_TOURNAMENT_ADMIN")}', data={"content": message})
                 except Exception as e:
@@ -127,7 +107,7 @@ for game in games:
     calc_time = time.perf_counter() - start_calc_time
     game_calc_time = time.perf_counter() - game_start_calc_time
     if PRINT_TIME:
-        print("****** " + game + " calc time: " + str(game_calc_time) + "   TOTAL: " + str(calc_time))
+        print("****** " + gameCode + " calc time: " + str(game_calc_time) + "   TOTAL: " + str(calc_time))
 
 calc_time = time.perf_counter() - start_calc_time
 
