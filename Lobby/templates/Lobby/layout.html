@@ -126,11 +126,13 @@
                         <input class="loginInput"
                                type="text"
                                name="username"
-                               placeholder="{% translate " Username" %}">
+                               placeholder="{% translate " Username" %}"
+                               required>
                         <input class="loginInput"
                                type="password"
                                name="password"
-                               placeholder="{% translate " Password" %}">
+                               placeholder="{% translate " Password" %}"
+                               required>
                         <input type="hidden" name="next" value="{{ request.GET.next }}" />
                         <input type="submit" value="{% translate " Login" %}">
                     </form>

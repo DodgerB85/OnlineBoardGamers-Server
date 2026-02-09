@@ -1624,9 +1624,9 @@ def index(request):
 def login_view(request):
     if request.method == "POST":
         # Attempt to sign user in
-         # 1. SAFE DATA EXTRACTION
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        # 1. SAFE DATA EXTRACTION
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
 
         # 2. VALIDATION: If these are missing, don't even try to authenticate
         if not username or not password:    
