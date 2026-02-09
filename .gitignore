@@ -45,6 +45,7 @@ staticfiles/
 
 # Handle stats carefully and specifically
 # Ignore everything inside the folder
+/Lobby/stats/*
 /AQY/AQYstats/*
 /BOB/BOBstats/*
 /Bus/Busstats/*
@@ -57,6 +58,7 @@ staticfiles/
 /TGZ/TGZstats/*
 /WEB/WEBstats/*
 # But DO NOT ignore the .gitkeep file (this keeps the folder alive)
+!/Lobby/stats/.gitkeep
 !/AQY/AQYstats/.gitkeep
 !/BOB/BOBstats/.gitkeep
 !/Bus/Busstats/.gitkeep
