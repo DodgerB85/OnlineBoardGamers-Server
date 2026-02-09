@@ -122,17 +122,29 @@ finishedGames_all = dataSet_old_code.count() + dataSet_new_code.count()
 
 def filter_by_starting_options(queryset, new_ms_value, include):
     """Filters a queryset based on the presence of NEW_MS in startingOptions."""
-    q = (
-        Q(startingOptions=str(new_ms_value))
-        | Q(startingOptions__startswith=str(new_ms_value) + ",")
-        | Q(startingOptions__endswith="," + str(new_ms_value))
-        | Q(startingOptions__contains="," + str(new_ms_value) + ",")
-    )
+    # This regex looks for your value:
+    # 1. After a bracket or comma: [\[,]
+    # 2. Followed by optional whitespace: \s*
+    # 3. Followed by your value
+    # 4. Followed by optional whitespace: \s*
+    # 5. Followed by a comma or closing bracket: [,\\]]
+    
+    pattern = rf'[\[,]\s*{new_ms_value}\s*[,\\]]'
+    
+    #q = (
+    #    Q(startingOptions=str(new_ms_value))
+    #    | Q(startingOptions__startswith=str(new_ms_value) + ",")
+    #    | Q(startingOptions__endswith="," + str(new_ms_value))
+    #    | Q(startingOptions__contains="," + str(new_ms_value) + ",")
+    #)
+    #if include:
+    #    return queryset.filter(q)
+    #else:
+    #    return queryset.exclude(q)
     if include:
-        return queryset.filter(q)
+        return queryset.filter(startingOptions__iregex=pattern)
     else:
-        return queryset.exclude(q)
-
+        return queryset.exclude(startingOptions__iregex=pattern)
 
 def calculate_average_turn(queryset):
     """Calculates the average turn for a given queryset, excluding null and zero values."""
@@ -242,8 +254,9 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
         if not is_old_code:
             raw_player_index = 0
             raw_ms_index = 6
-            options = game.startingOptions.split(",")
-            options_int = [int(x) for x in options if x]
+            #options = game.startingOptions.split(",")
+            #options_int = [int(x) for x in options if x]
+            options_int = json.loads(game.startingOptions) if game.startingOptions else []
             if LOBBYISTS in options_int:
                 raw_player_index = 1
         if len(raw_data) > 0:
@@ -366,8 +379,8 @@ query_turns_gt_4 = (
 def has_new_ms(starting_options_str, new_ms_value):
     if not starting_options_str:
         return False
-    options = starting_options_str.split(',')
-    return str(new_ms_value) in options
+    options = json.loads(starting_options_str) if starting_options_str else []
+    return new_ms_value in options
 
 # 2. Fetch ALL relevant Old Code games in ONE hit
 # We use select_related to solve the N+1 winner issue and .only() to save memory
