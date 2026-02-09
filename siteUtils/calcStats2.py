@@ -86,17 +86,17 @@ win1mArr6p_E = []
 
 
 GAME_CODES = [
-    #"FCM",
-    #"HC",
-    #"Bus",
-    #"TGZ",
-    #"CNS",
+    "FCM",
+    "HC",
+    "Bus",
+    "TGZ",
+    "CNS",
     "AQY",
     "IND",
     "KFW",
     "WEB",
-    #"RNB",
-    #"BOB",
+    "RNB",
+    "BOB",
 ]
 
 EXCLUDE_USERS = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"]
