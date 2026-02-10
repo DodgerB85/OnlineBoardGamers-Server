@@ -16,8 +16,13 @@ urlpatterns = [
     # API routes
     path("createBusGame/", views.createBusGame, name="createBusGame"),
     path("processBusTurn/", views.processBusTurn, name="processBusTurn"),
+    path("<int:game_id>/processBusTurn/", views.processBusTurn, name="processBusTurnWithId"),
     path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
+    path("<int:game_id>/sendChatMessage/", views.sendChatMessage, name="sendChatMessageWithId"),
     path("saveNotes/", views.saveNotes, name="saveNotes"),
+    path("<int:game_id>/saveNotes/", views.saveNotes, name="saveNotesWithId"),
     path("changeBusViewport/", views.changeBusViewport, name="changeBusViewport"),
+    path("<int:game_id>/changeBusViewport/", views.changeBusViewport, name="changeBusViewportWithId"),
     path("voteToDelete/", views.voteToDelete, name="addDeleteVoteBus"),
+    path("<int:game_id>/voteToDelete/", views.voteToDelete, name="addDeleteVoteBusWithId"),
 ]
