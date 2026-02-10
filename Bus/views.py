@@ -7,7 +7,7 @@ from decouple import config
 
 from contextlib import contextmanager
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 
@@ -44,6 +44,12 @@ def index(request):
 
 def BusHelp(request):
     return render(request, "Bus/BusHelp.html")
+
+
+def redirect_old_url(request, original_id):
+    """Redirect old Bus_Game URLs to new unified Game URLs"""
+    game = get_object_or_404(Game, gameCode='Bus', original_id=original_id)
+    return redirect('Bus:showBusGame', game_id=game.id)
 
 
 @login_required()
