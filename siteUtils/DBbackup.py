@@ -37,7 +37,7 @@ try:
         raise FileNotFoundError(f"Backup file {backup_filename} was not created")
     print(f"Created backup: {backup_filename}")
 except Exception as e:
-    print(f"Error creating backup: {e}")
+    print(f"ERROR FOUND: Error creating backup: {e}")
     exit(1)
 
 # Delete old backup files
@@ -56,19 +56,19 @@ try:
                 print(f"Deleting file: {f}")
                 os.remove(os.path.join(backup_dir, f))
 except FileNotFoundError:
-    print(f"Directory {backup_dir} not found")
+    print(f"ERROR FOUND: Directory not found: {backup_dir}")
 except Exception as e:
-    print(f"Error deleting old files: {e}")
+    print(f"ERROR FOUND: Error deleting old files: {e}")
 
 # Upload to Google Drive
 try:
     gauth = GoogleAuth()
     gauth.LoadCredentialsFile(CREDS_FILE)
     if gauth.credentials is None:
-        print(f"Credentials file {CREDS_FILE} not found or invalid")
+        print(f"Issue: Attempting to Auth. Credentials file not found or invalid: {CREDS_FILE}")
         gauth.LocalWebserverAuth()
     elif gauth.access_token_expired:
-        print("Access token expired, attempting to refresh")
+        print("Issue: Access token expired, attempting to refresh")
         gauth.Refresh()
     else:
         print("Credentials valid, authorizing")
@@ -77,7 +77,7 @@ try:
 
     # CRITICAL: Save credentials for the next run!
     gauth.SaveCredentialsFile(CREDS_FILE)
-    print(f"Credentials saved/updated in {CREDS_FILE}")
+    print(f"Credentials saved/updated in: {CREDS_FILE}")
 
 
     drive = GoogleDrive(gauth)
@@ -94,5 +94,5 @@ try:
     gdrive_file.Upload()
     print(f"Backup file uploaded to Google Drive. Link: {gdrive_file['alternateLink']}")
 except Exception as e:
-    print(f"Error uploading to Google Drive: {e}")
+    print(f"ERROF FOUND: Error uploading to Google Drive: {e}")
     exit(1)
