@@ -9,6 +9,7 @@ import * as seed from './CNSseed'
 import hexlib from './hexlib.js'
 
 import { useModelStore } from '../stores/CNSstore.js'
+import { usePersonalStore } from '../stores/CNSpersonal.js'
 
 export function goToReplayStep(step) {
   const store = useModelStore()
@@ -22,6 +23,7 @@ export function goToReplayStep(step) {
 
 export function performStep(amount) {
   const store = useModelStore()
+  const personal = usePersonalStore()
 
   store.clearHistoryHelpers()
   if (amount === -99) store.replayStep = 0
@@ -30,6 +32,20 @@ export function performStep(amount) {
   if (amount === 1) store.replayStep++
   if (amount === 9) store.replayStep += 5
   if (amount === 99) store.replayStep = store.replayData.length - 1
+
+  	// Performing back to my last
+	if (amount === -999) {
+		let idx = store.replayStep
+		idx--
+		while (idx > 0) {
+			let histEntry = store.history[idx]
+			if (histEntry[1] === personal.pov) {
+				store.replayStep = idx
+				break
+			}
+			idx--
+		}
+	}
 
   if (store.replayStep < 0) store.replayStep = 0
   if (store.replayStep > store.replayData.length - 1) store.replayStep = store.replayData.length - 1

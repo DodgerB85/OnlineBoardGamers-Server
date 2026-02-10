@@ -69,6 +69,8 @@ function copyToClipboard() {
 
 <template>
     <template v-if="store.topMenuViews.showReplay">
+        <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
+            @click="replay.performStep(-999)">Back to my last move</button>
         <button class="actionsLineButton" :disabled="store.replayStep === 0"
             @click="replay.performStep(-99)">|&lt;</button>
         <button class="actionsLineButton" :disabled="store.replayStep === 0"
