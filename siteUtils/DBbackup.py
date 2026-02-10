@@ -66,13 +66,19 @@ try:
     gauth.LoadCredentialsFile(CREDS_FILE)
     if gauth.credentials is None:
         print(f"Credentials file {CREDS_FILE} not found or invalid")
-        exit(1)
+        gauth.LocalWebserverAuth()
     elif gauth.access_token_expired:
         print("Access token expired, attempting to refresh")
         gauth.Refresh()
     else:
         print("Credentials valid, authorizing")
         gauth.Authorize()
+
+
+    # CRITICAL: Save credentials for the next run!
+    gauth.SaveCredentialsFile(CREDS_FILE)
+    print(f"Credentials saved/updated in {CREDS_FILE}")
+
 
     drive = GoogleDrive(gauth)
 
