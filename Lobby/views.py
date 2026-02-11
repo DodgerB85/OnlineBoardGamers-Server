@@ -3011,7 +3011,6 @@ def AllTournaments(request):
         chain(
             tournaments_FCM,
             tournaments_HC,
-            tournaments_Bus,
             tournaments_MAIN,
         ),
         key=lambda instance: instance.created,
