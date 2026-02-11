@@ -228,6 +228,8 @@ def SR_getAnyTournamentPlayersData(tournament):
             for subarr in sideData:
                 if subarr[0] == rawName:
                     lives = subarr[1]
+            if len(name) > 14:
+                name = name[:12] + "..."
             name = name + " (" + str(lives) + ")"
         # Include raw name to allow linking the row to the profile
         playersData.append([name, points, rawName])
