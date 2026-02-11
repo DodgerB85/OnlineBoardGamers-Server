@@ -2354,27 +2354,24 @@ class BusPresenter(GamePresenter):
         except ValueError:
             return -1
 
-    def getAllPlayersOrderedySeat(self, withoutBots=False):
-        # Use list comprehension on .all() to access the prefetch cache
-        all_players_gp = list(self.gameObj.players.select_related("player").all())
-        playerList = [gp.player.username for gp in all_players_gp if gp.player]
-        random.Random(self.gameObj.playerOrderSeed).shuffle(playerList)
-
-        if withoutBots:
-            return playerList
-
-        # Access prefetched missingPlayers usernames in memory
-        missingPlayerUsernames = {gp.player.username for gp in all_players_gp if gp.player and gp.is_missing}
-
-        # Use a set for missingPlayerUsernames for O(1) lookup speed
-        for count, player in enumerate(playerList):
-            if player in missingPlayerUsernames:
-                playerList[count] = "BusBot" + str(count)
-
-        return playerList
-
-    def getCurrentPlayersString(self):
-        return ", ".join(self.getCurrentPlayersArray())
+#    def getAllPlayersOrderedySeat(self, withoutBots=False):
+#        # Use list comprehension on .all() to access the prefetch cache
+#        all_players_gp = list(self.gameObj.players.select_related("player").all())
+#        playerList = [gp.player.username for gp in all_players_gp if gp.player]
+#        random.Random(self.gameObj.playerOrderSeed).shuffle(playerList)
+#
+#        if withoutBots:
+#            return playerList
+#
+#        # Access prefetched missingPlayers usernames in memory
+#        missingPlayerUsernames = {gp.player.username for gp in all_players_gp if gp.player and gp.is_missing}
+#
+#        # Use a set for missingPlayerUsernames for O(1) lookup speed
+#        for count, player in enumerate(playerList):
+#            if player in missingPlayerUsernames:
+#                playerList[count] = "BusBot" + str(count)
+#
+#        return playerList
 
     def startGame(self, request):
         from django_q.tasks import async_task

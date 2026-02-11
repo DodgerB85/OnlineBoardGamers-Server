@@ -4,6 +4,7 @@ import lzstring
 
 # import requests
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from contextlib import contextmanager
 
@@ -37,6 +38,10 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
+if TYPE_CHECKING:
+    from Lobby.presenters import BusPresenter
+
+BUS_DB_LOCK_NAME = "lockTGZgame_"
 
 def index(request):
     return HttpResponse("Hello Geeks")
@@ -180,7 +185,7 @@ def createBusGame(request):
             player0_gp.notes = json.dumps(displayNames)
             player0_gp.save()
 
-        presenter = newGame.presenter()
+        presenter = cast("BusPresenter", newGame.presenter())
         presenter.startGame(request)
     else:
         usernamesToNotify = []
@@ -192,7 +197,7 @@ def createBusGame(request):
                 newGame.invitedPlayers.add(newPlayer)
                 usernamesToNotify.append(newPlayer.username)
 
-        presenter = newGame.presenter()
+        presenter = cast("BusPresenter", newGame.presenter())
         SN_sendInviteNotifications(
             request,
             usernamesToNotify,
@@ -247,7 +252,7 @@ def showBusGame(request, game_id):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast("BusPresenter", currentGame.presenter())
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
@@ -401,7 +406,7 @@ def saveNotes(request, game_id=None):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast("BusPresenter", currentGame.presenter())
     seat = presenter.seatPosition(request.user.username)
 
     if seat >= 0:
@@ -425,7 +430,7 @@ def busData(request, dataType):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast("BusPresenter", currentGame.presenter())
 
     if dataType == 2:
         # Send game data
@@ -489,7 +494,7 @@ def _sendChatMessage(request):
 
     if jsonData["action"] == "sendChatMessage":
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='Bus')
-        presenter = currentGame.presenter()
+        presenter = cast("BusPresenter", currentGame.presenter())
 
         # Remove chat notification for current user
         presenter.removeChatNotification(request.user)
@@ -550,7 +555,7 @@ def _processBusTurn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast("BusPresenter", currentGame.presenter())
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -918,7 +923,7 @@ def _voteToDelete(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast("BusPresenter", currentGame.presenter())
     playerName = request.user.username  # Get the player's username
 
     success = presenter.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
