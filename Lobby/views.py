@@ -2106,7 +2106,7 @@ def createBusPage(request, gameID=0):
 
         playerNames = []
         for gp in currentGame.players.exclude(is_kicked=True).select_related('player'):
-            if request.user != gp.player:
+            if request.user != gp.player and gp.player:
                 playerNames.append(gp.player.username)
 
         messages.success(request, (gettext("Game creation for rematch")))
@@ -2807,16 +2807,16 @@ def playerInfo(request, usernameToProfile):
             # Handle unified Game model (CNS, WEB, etc.) differently
             if SR_usesUnifiedGameModel(game_name):
                 # Optimization: Use sets for membership checks
-                all_p_ids = {gp.player.id for gp in game.players.all()}
+                all_p_ids = {gp.player.id for gp in game.players.all() if gp.player}
                 is_joint = req_user_id in all_p_ids
 
                 # --- Win Calculation ---
-                winner_ids = [gp.player.id for gp in game.players.all() if gp.winner]
+                winner_ids = [gp.player.id for gp in game.players.all() if gp.player and gp.winner]
 
                 if status == "FINISHED":
                     # General Stats Logic
                     has_shadow = any(
-                        gp.player.username == "SHADOW" for gp in game.players.all()
+                        gp.player.username == "SHADOW" for gp in game.players.all() if gp.player
                     )
 
                     if not has_shadow:
@@ -2840,7 +2840,7 @@ def playerInfo(request, usernameToProfile):
                     if int(game.latestUpdate) >= minus1year:
                         finishedGamesLastYear += 1
                         if any(
-                            gp.player.id == target_id and gp.is_kicked
+                            gp.player.id == target_id and gp.is_kicked if gp.player else False
                             for gp in game.players.all()
                         ):
                             kickedOutGamesLastYear += 1
