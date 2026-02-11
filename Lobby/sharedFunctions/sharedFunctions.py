@@ -1086,6 +1086,7 @@ def setNextRoundMultiGamePlayers(tournamentObj):
 
 def start_next_any_tournament_round(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
     from FCM.common import create_fcm_game
+    from Bus.common import create_bus_game
     from TGZ.common import create_tgz_game
     from AQY.common import create_aqy_game
 
@@ -1129,7 +1130,6 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
                         break
         tournamentObj.tournamentPointsData = json.dumps(pointsList)
         
-    print("AAA")
     print(tournamentObj.tournamentPointsData)
 
     # Start the games
@@ -1152,6 +1152,8 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
         
         if tournamentObj.gameCode == "FCM":
             newGameID = create_fcm_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "Bus":
+            newGameID = create_bus_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "TGZ":
             newGameID = create_tgz_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "AQY":

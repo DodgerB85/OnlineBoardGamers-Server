@@ -2094,14 +2094,15 @@ class BusPresenter(GamePresenter):
             _gameName += "[Private Game]"
         return _gameName
 
-    def endGame(self, request, _winner, _finalPositions, _gameID):
+    def endGame(
+        self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
+    ):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotification,
         )
-        from Lobby.sharedFunctions.sharedFunctions import (
-            SF_M_ProcessTournamentEndGame,
-        )
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
+        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
@@ -2109,7 +2110,7 @@ class BusPresenter(GamePresenter):
         self.gameObj.gameStatus = "FINISHED"
         self.gameObj.deleteGameVotes = None
 
-        winner_user = User.objects.get(username=_winner)
+        winner_user = User.objects.get(username=_winnerUsername)
         winner_gp = self.gameObj.players.filter(player=winner_user).first()
         if winner_gp:
             winner_gp.winner = True
@@ -2121,8 +2122,27 @@ class BusPresenter(GamePresenter):
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "Bus", _finalPositions, _gameID, self.gameObj)
 
-        if self.gameObj.relatedBusTournament:
-            SF_M_ProcessTournamentEndGame(request, "Bus", self.gameObj, [_winner])
+        #if self.gameObj.relatedBusTournament:
+        #    SF_M_ProcessTournamentEndGame(request, "Bus", self.gameObj, [_winner])
+            
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MAIN_T_FLAG,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                [_winnerUsername],
+                _tournamentData,
+            )
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MINI_T_FLAG,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                [_winnerUsername],
+                _tournamentData,
+            )
 
     def getCurrentPlayersArray(self):
         current_players = self.gameObj.players.filter(is_current=True).select_related(
@@ -2373,7 +2393,7 @@ class BusPresenter(GamePresenter):
 #
 #        return playerList
 
-    def startGame(self, request):
+    def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
 

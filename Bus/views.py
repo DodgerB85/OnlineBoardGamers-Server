@@ -26,6 +26,9 @@ from django.db.models import Q
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
+from .common import create_bus_game
+
+
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
     SF_getGameCreationJsonReturn,
@@ -62,6 +65,8 @@ def createBusGame(request):
     # Creating a game must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
+
+    return create_bus_game(request)
 
     # Check Not You
     if "trainingGame" not in request.POST:
@@ -611,12 +616,22 @@ def _processBusTurn(request):
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
+            # _winnerArray is an array of [winner_username, winner_username, ...]
+            # _tournamentData is an array [ [username], [username, username,... TB_VALUE], [username, username,..., TB_VALUE], [...etc] ]
+            # NB THE FIRST ENTRY IS AN ARRAY OF (MULTIPLE) WINNER(S)
             presenter.endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
+                jsonData.get("tournamentData") if jsonData.get("tournamentData") else [],
                 jsonData["gameID"],
             )
+            #presenter.endGame(
+            #    request,
+            #    jsonData["winner"],
+            #    jsonData["finalPositions"],
+            #    jsonData["gameID"],
+            #)
 
         else:
             # Send Notifications
