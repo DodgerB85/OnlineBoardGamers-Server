@@ -5,7 +5,7 @@ var displayType = "tables"
 var global = {}
 
 document.addEventListener("DOMContentLoaded", function () {
-	let ALL_GAMES = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+	let ALL_GAMES = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 	//var forcerefresh;
 
