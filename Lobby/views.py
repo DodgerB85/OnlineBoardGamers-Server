@@ -107,7 +107,7 @@ from .models import (
 
 from FCM.models import FCM_Game, FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
-from Bus.models import Bus_Game, Bus_Tournament
+from Bus.models import Bus_Tournament
 from KFW.models import KFW_Game
 from RNB.models import RNB_Game
 
@@ -412,7 +412,7 @@ def addTGid(request, TGid):
 GAME_NAMES_MODELS = {
     "FCM": FCM_Game,
     "HC": HC_Game,
-    "Bus": Bus_Game,
+    "Bus": "Bus",  # Now using unified Game model
     "TGZ": "TGZ",
     "CNS": "CNS",  # Now using unified Game model
     "AQY": "AQY",  # Now using unified Game model
@@ -423,8 +423,7 @@ GAME_NAMES_MODELS = {
 GAME_MODELS = [
     FCM_Game,
     HC_Game,
-    Bus_Game,
-    # CNS, AQY, WEB, and IND, etc now use unified Game model
+    # Bus, CNS, AQY, WEB, and IND, etc now use unified Game model
     KFW_Game,
 ]
 
@@ -759,7 +758,7 @@ def DBO_deleteGame(request, game_type):
     model_map = {
         "FCM": FCM_Game,
         "HC": HC_Game,
-        "Bus": Bus_Game,
+        "Bus": Game,  # Now using unified Game model
         "TGZ": Game,
         "CNS": Game,  # Now using unified Game model
         "AQY": Game,  # Now using unified Game model
@@ -2095,20 +2094,20 @@ def profileIND(request):
 
 @login_required
 def createBusPage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "Bus", Bus_Game)
+    experienced = SF_hasRequiredExperience(request, "Bus", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createBus.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = Bus_Game.objects.get(id=gameID)
-        except Bus_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID, gameCode='Bus')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
         playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        for gp in currentGame.players.exclude(is_kicked=True).select_related('player'):
+            if request.user != gp.player:
+                playerNames.append(gp.player.username)
 
         messages.success(request, (gettext("Game creation for rematch")))
         return render(
@@ -2116,7 +2115,7 @@ def createBusPage(request, gameID=0):
             "Lobby/createBus.html",
             {
                 "fillData": True,
-                "gameName": currentGame.getGameName(),
+                "gameName": currentGame.presenter().getGameName(),
                 "gameDescription": currentGame.gameDescription,
                 "gamePace": currentGame.gamePace,
                 "playerNumber": currentGame.maxPlayers,

@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -519,6 +519,14 @@ class Game(BaseGame):
         related_name="minitournamentGEN_relName",
     )
 
+    relatedBusTournament = models.ForeignKey(
+        "Bus.Bus_Tournament",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bustournamentGEN_relName",
+    )
+
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
 
@@ -531,7 +539,7 @@ class Game(BaseGame):
     if TYPE_CHECKING:
         players: RelatedManager[GamePlayer]
 
-    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter]:
+    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter]:
         if self.gameCode == "CNS":
             return CannesPresenter(self)
         if self.gameCode == "WEB":
@@ -542,6 +550,8 @@ class Game(BaseGame):
             return TgzPresenter(self)
         if self.gameCode == "IND":
             return IndPresenter(self)
+        if self.gameCode == "Bus":
+            return BusPresenter(self)
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
