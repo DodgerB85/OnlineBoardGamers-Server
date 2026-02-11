@@ -2456,9 +2456,9 @@ class BusPresenter(GamePresenter):
             )
             self.gameObj.save()
 
-        # The tournament sends out game start notifications
+        # The tournament sends out game start notifications ## TODO compare this to other starts
         if (
-            self.gameObj.relatedBusTournament is None
+            self.gameObj.relateMsinTournament is None and self.gameObj.relatedMiniTournament is None
             and not self.gameObj.players.filter(player__username="SHADOW").exists()
         ):
             playerListToNotify = [
