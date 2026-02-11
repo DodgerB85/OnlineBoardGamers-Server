@@ -246,7 +246,7 @@ def showBusGame(request, game_id):
         currentGame = (
             Game.objects.select_related(
                 "host",
-                "relatedBusTournament",
+                #"relatedBusTournament",
                 "creator",
             )
             .prefetch_related(
