@@ -107,7 +107,6 @@ from .models import (
 
 from FCM.models import FCM_Game, FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
-from Bus.models import Bus_Tournament
 from KFW.models import KFW_Game
 from RNB.models import RNB_Game
 
@@ -1355,7 +1354,6 @@ def index(request):
     tournament_models = {
         "FCM": FCM_Tournament,
         "HC": HC_Tournament,
-        "Bus": Bus_Tournament,
     }
 
     # --- Step 1: Optimized Blacklist (2 Queries total) ---
@@ -3007,7 +3005,6 @@ def playerInfo(request, usernameToProfile):
 def AllTournaments(request):
     tournaments_FCM = FCM_Tournament.objects.order_by("-id").all()
     tournaments_HC = HC_Tournament.objects.order_by("-id").all()
-    tournaments_Bus = Bus_Tournament.objects.order_by("-id").all()
     tournaments_MAIN = Main_Tournament.objects.order_by("-id").all()
 
     tournaments = sorted(
@@ -3041,8 +3038,6 @@ def Tournament(request, gameType, tournamentID):
                 currentTournament = FCM_Tournament.objects.get(id=tournamentID)
             if gameType == "HC":
                 currentTournament = HC_Tournament.objects.get(id=tournamentID)
-            if gameType == "Bus":
-                currentTournament = Bus_Tournament.objects.get(id=tournamentID)
         except Exception:
             raise Http404(gettext("Tournament does not exist"))
         if (
@@ -3073,8 +3068,6 @@ def Tournament(request, gameType, tournamentID):
             currentTournament = FCM_Tournament.objects.get(id=tournamentID)
         if gameType == "HC":
             currentTournament = HC_Tournament.objects.get(id=tournamentID)
-        if gameType == "Bus":
-            currentTournament = Bus_Tournament.objects.get(id=tournamentID)
     except Exception:
         raise Http404(gettext("Tournament does not exist"))
 

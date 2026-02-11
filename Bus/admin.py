@@ -4,7 +4,7 @@ from django import forms
 
 from django.utils.html import format_html
 
-from .models import Bus_Game, Bus_Tournament
+from .models import Bus_Game
 
 
 @admin.register(Bus_Game)
@@ -23,7 +23,7 @@ class Bus_GameAdmin(admin.ModelAdmin):
         "kickedPlayers",
         "invitedPlayers",
         "playersWithChatNotification",
-        "relatedTournament",
+        #"relatedTournament",
         # "relatedMiniTournament",
     ]
 
@@ -60,7 +60,7 @@ class Bus_GameAdmin(admin.ModelAdmin):
                 "creator",
                 "host",
                 "winner",
-                "relatedTournament",
+                #"relatedTournament",
                 # "relatedMiniTournament",
             )
         )
@@ -135,11 +135,11 @@ class Bus_GameAdmin(admin.ModelAdmin):
 
     @admin.display(description="Tournament")
     def tournament_display(self, obj):
-        if obj.relatedTournament:
-            # return obj.relatedTournament.tournamentName
-            return getattr(
-                obj.relatedTournament, "tournamentName", str(obj.relatedTournament)
-            )
+        #if obj.relatedTournament:
+        #    # return obj.relatedTournament.tournamentName
+        #    return getattr(
+        #        obj.relatedTournament, "tournamentName", str(obj.relatedTournament)
+        #    )
         # if obj.relatedMiniTournament:
         #    return f"Mini: {getattr(obj.relatedMiniTournament, 'tournamentName', 'Unknown')}"
         return "-"
@@ -155,7 +155,7 @@ class Bus_GameAdmin(admin.ModelAdmin):
     list_filter = (
         "gameStatus",
         "maxPlayers",
-        "relatedTournament",
+        #"relatedTournament",
         # "relatedMiniTournament",
     )
     search_fields = ("gameName", "creator__username")
@@ -244,21 +244,12 @@ class Bus_GameAdmin(admin.ModelAdmin):
                 ),
             },
         ),
-        (
-            "Linked Tournament",
-            {
-                "classes": ("collapse",),
-                "fields": ("relatedTournament",),  # "relatedMiniTournament"),
-            },
-        ),
+        #(
+        #    "Linked Tournament",
+        #    {
+        #        "classes": ("collapse",),
+        #        "fields": ("relatedTournament",),  # "relatedMiniTournament"),
+        #    },
+        #),
     )
 
-
-class Bus_TournamentAdmin(admin.ModelAdmin):
-    save_on_top = True
-    save_as = True
-    filter_horizontal = ("startingPlayers", "nextRoundPlayers")
-    search_fields = ["tournamentName"]
-
-
-admin.site.register(Bus_Tournament, Bus_TournamentAdmin)
