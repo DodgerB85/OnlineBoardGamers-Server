@@ -201,7 +201,9 @@ def showGame(request, game_id):
     if currentGame.relatedTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
 
-    startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(currentGame.startingOptions) if currentGame.startingOptions else [])
+    startingOptionsHTML = SR_getFCMstartingOptionsHTML(
+        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    )
     gameCreationTimestamp = currentGame.created
 
     KickoutFlexiDataArray = []
@@ -209,7 +211,7 @@ def showGame(request, game_id):
         KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
 
     # print_timestamp("Step 1: initial setup done")
-
+    OOBpreference = 0
     # If not logged in, return now
     if not request.user.is_authenticated:
         return render(
@@ -246,7 +248,10 @@ def showGame(request, game_id):
                     )
                 ),
                 "preferredColour": -1,
-                "settingsDebug": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),
+                "settingsDebug": config(
+                    "FCM_USE_SOURCE_CODE", default=False, cast=bool
+                ),
+                "OOBpreference": OOBpreference,
             },
         )
 
@@ -354,6 +359,9 @@ def showGame(request, game_id):
         kickoutRequired = currentGame.kickoutRequired()
         # print_timestamp("Step 4.7: currentNotes obtained")
 
+        # Get OOBpreference
+        OOBpreference = currentGame.getOOBpreference(request.user.username)
+
         allPlayerListBySeat = currentGame.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
         myMove = currentGame.isMyMove(request.user.username)
         myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3]
@@ -384,7 +392,7 @@ def showGame(request, game_id):
     #   Use currentGame.latestUpdateLiteral
     #   Use currentGame.myMove to prevent self kickout
     # tournamentGame = False
-    
+
     return render(
         request,
         "FCM/GameTemplate.html",
@@ -428,16 +436,19 @@ def showGame(request, game_id):
             "USE_NEW_CODE": USE_NEW_CODE,
             "startingOptionsLiteral": currentGame.startingOptions,
             "startingMap": currentGame.startingMap,
+            "OOBpreference": OOBpreference,
             "statsExcludeVotesData": json.dumps(
                 currentGame.tempPresenter().getFullSetOfVoteResults(
                     STATS_EXCLUDE_VOTE_TOPIC,
-                    currentGame.getAllPlayersOrderedySeat(True), False
+                    currentGame.getAllPlayersOrderedySeat(True),
+                    False,
                 )
             ),
             "deleteVotesData": json.dumps(
                 currentGame.tempPresenter().getFullSetOfVoteResults(
                     DELETE_VOTE_TOPIC,
-                    currentGame.getAllPlayersOrderedySeat(True), False
+                    currentGame.getAllPlayersOrderedySeat(True),
+                    False,
                 )
             ),
             "settingsDebug": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),
@@ -547,6 +558,8 @@ def _processTurn(request):
         # Use to stop actions showing when there's already move Data
         if currentGame.hasValidActualMoveData(request.user.username):
             currentMove = currentGame.getCompressedMoveArr(request.user.username)
+
+        OOBpreference = currentGame.getOOBpreference(request.user.username)
         return JsonResponse(
             {
                 "loadData": currentGame.gameData,
@@ -556,6 +569,7 @@ def _processTurn(request):
                 "specialData": currentMove,
                 "latestUpdate": currentGame.latestUpdate,
                 "startingMap": currentGame.startingMap,
+                "OOBpreference": OOBpreference,
             },
             safe=False,
         )
@@ -591,6 +605,30 @@ def _processTurn(request):
         currentGame.save()
         return JsonResponse({"unlockStatus": True}, safe=False)
 
+    # save OOB preference
+    elif jsonData["action"] == "saveOOBpreference":
+        if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+            turn = jsonData.get(
+                "turn", "N/A"
+            )  # Get the value for 'turn' or 'N/A' if not present
+            phase = jsonData.get(
+                "phase", "N/A"
+            )  # Get the value for 'phase' or 'N/A' if not present
+            message = (
+                f"SYNC ERROR IN: FCM saveOOBpreference - gameID: {getattr(currentGame,'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+            )
+            SN_sendAdminErrorMessage(request, message)
+            return JsonResponse({"syncError": True}, safe=False)
+
+        # Wipe the move data
+        setCorrectly = currentGame.setOOBpreference(request.user.username, jsonData["OOBpreference"])
+
+        
+        currentGame.save()
+        return JsonResponse({"OOBsaved": setCorrectly}, safe=False)
+    
     elif jsonData["action"] == "deleteMoveData":
         phase = jsonData["phase"]
         # This is the "new phase" you are just moving into
@@ -694,9 +732,15 @@ def _processTurn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "SO": currentGame.startingOptions if currentGame.startingOptions else "[]",
+                "SO": (
+                    currentGame.startingOptions if currentGame.startingOptions else "[]"
+                ),
                 "startingOptionsHTML": SR_getFCMstartingOptionsHTML(
-                    json.loads(currentGame.startingOptions) if currentGame.startingOptions else [],
+                    (
+                        json.loads(currentGame.startingOptions)
+                        if currentGame.startingOptions
+                        else []
+                    ),
                 ),
                 "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
             },
@@ -737,7 +781,11 @@ def _processTurn(request):
         currentGame.currentPlayers = jsonData["nextPlayer"]
 
         # Update module selections
-        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        starting_options = (
+            json.loads(currentGame.startingOptions)
+            if currentGame.startingOptions
+            else []
+        )
         starting_options.append(int(jsonData["SM"]))
 
         # If staying in module selection, don't save a rewind
@@ -750,8 +798,10 @@ def _processTurn(request):
             if 300 in starting_options:
                 starting_options.remove(300)
                 starting_options.append(300)
-        
-        currentGame.startingOptions =  json.dumps(starting_options, separators=(',', ':')) 
+
+        currentGame.startingOptions = json.dumps(
+            starting_options, separators=(",", ":")
+        )
 
         currentGame.save()
 
@@ -793,9 +843,15 @@ def _processTurn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "SO": currentGame.startingOptions if currentGame.startingOptions else "[]",
+                "SO": (
+                    currentGame.startingOptions if currentGame.startingOptions else "[]"
+                ),
                 "startingOptionsHTML": SR_getFCMstartingOptionsHTML(
-                    json.loads(currentGame.startingOptions) if currentGame.startingOptions else [],
+                    (
+                        json.loads(currentGame.startingOptions)
+                        if currentGame.startingOptions
+                        else []
+                    ),
                 ),
                 "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
             },
@@ -828,7 +884,7 @@ def _processTurn(request):
             and currentGame.startingMap != ""
         ):
             incomingTiles = jsonData["mapTiles"]
-            currentTiles = json.loads(currentGame.startingMap) 
+            currentTiles = json.loads(currentGame.startingMap)
             if len(incomingTiles) != len(currentTiles):
                 turn = jsonData.get(
                     "turn", "N/A"
@@ -905,13 +961,13 @@ def _processTurn(request):
             )
             SN_sendAdminErrorMessage(request, message)
 
-        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        starting_options = (
+            json.loads(currentGame.startingOptions)
+            if currentGame.startingOptions
+            else []
+        )
 
-        if (
-            oldPhase == 7
-            and jsonData["phase"] == 7
-            and 101 not in starting_options 
-        ):
+        if oldPhase == 7 and jsonData["phase"] == 7 and 101 not in starting_options:
             print(
                 "*********************************************** Key 'phase'  PHASE 7 ERROR   "
             )
@@ -924,11 +980,7 @@ def _processTurn(request):
             )
             SN_sendAdminErrorMessage(request, message)
 
-        if (
-            oldPhase == 9
-            and jsonData["phase"] == 9
-            and 101 not in starting_options
-        ):
+        if oldPhase == 9 and jsonData["phase"] == 9 and 101 not in starting_options:
             print(
                 "*********************************************** Key 'phase'  PHASE 9 ERROR   "
             )
@@ -941,8 +993,12 @@ def _processTurn(request):
             )
             SN_sendAdminErrorMessage(request, message)
         ###########
-        
-        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+
+        starting_options = (
+            json.loads(currentGame.startingOptions)
+            if currentGame.startingOptions
+            else []
+        )
         trainingGame = False
         if 102 in starting_options:
             trainingGame = True
@@ -951,26 +1007,14 @@ def _processTurn(request):
             currentGame.clearAllMoveDataV2()
 
         # If you are saving into turn order, return all players OOB preferences
-        if (
-            oldPhase == 4
-            and jsonData["phase"] == 4
-            and 101 not in starting_options
-        ):
+        if oldPhase == 4 and jsonData["phase"] == 4 and 101 not in starting_options:
             returnOOBpreferences = True
 
         # If the stored game is not payday, and the new data IS payday, then we need to return payday preturns
-        if (
-            oldPhase != 7
-            and jsonData["phase"] == 7
-            and 101 not in starting_options
-        ):
+        if oldPhase != 7 and jsonData["phase"] == 7 and 101 not in starting_options:
             returnPaydayPreturns = True
         # Same for cleanup
-        if (
-            oldPhase != 9
-            and jsonData["phase"] == 9
-            and 101 not in starting_options
-        ):
+        if oldPhase != 9 and jsonData["phase"] == 9 and 101 not in starting_options:
             returnFridgePreturns = True
 
         # Remove move data at start of reatruc
@@ -1004,7 +1048,7 @@ def _processTurn(request):
         # If it WAS a working day save the side data (pre moves) - UNLESS it is now working day again
         # So also check you're not coming from Turn Order
         if (
-            not trainingGame 
+            not trainingGame
             and nameToUse != ""
             and oldPhase != 4
             and jsonData["phase"] != 3
@@ -1645,8 +1689,12 @@ def _processTurn(request):
     elif jsonData["action"] == "saveAndUpdateNotifictions":
         currentGame.gameData = jsonData["data"]
         referringPhase = jsonData["referringPhase"]
-        
-        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+
+        starting_options = (
+            json.loads(currentGame.startingOptions)
+            if currentGame.startingOptions
+            else []
+        )
         trainingGame = False
         if 102 in starting_options:
             trainingGame = True
@@ -1731,9 +1779,7 @@ def bugEntry(request):
     gameData = jsonData["gameData"]
     bugDescription = jsonData["description"]
 
-    bug_info = (
-    f"{currentGame.startingMap}   Options: {json.loads(currentGame.startingOptions) if currentGame.startingOptions else ""}" 
-)
+    bug_info = f"{currentGame.startingMap}   Options: {json.loads(currentGame.startingOptions) if currentGame.startingOptions else ""}"
 
     # email data to myself
     SN_sendBugReportEmail(
@@ -1876,12 +1922,18 @@ def changeAssistance(request):
 
     return HttpResponse(status=204)  # No Content
 
+
 @login_required()
 def gameAdmin(request):
     if request.user.username != "admin" and request.user.username != "DodgerB":
         return JsonResponse({"error": "Wrong request."}, status=400)
     return render(
-        request, "FCM/gameAdmin.html", {"gameID": 21, "settingsDEBUG": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),}
+        request,
+        "FCM/gameAdmin.html",
+        {
+            "gameID": 21,
+            "settingsDEBUG": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),
+        },
     )
 
 
@@ -1948,7 +2000,9 @@ def FCMdata(request, dataType):
             gameUpdate = int(jsonData["latestUpdate"])
             latestUpdate = int(currentGame.latestUpdate)
         except Exception as e:
-            SN_sendAdminErrorMessage(request, f"ERROR IN FCMdata: gameID: {jsonData["gameID"]} Error: {e}")
+            SN_sendAdminErrorMessage(
+                request, f"ERROR IN FCMdata: gameID: {jsonData["gameID"]} Error: {e}"
+            )
             # NB this might need to be changed if the above msg is getting triggered
             specialData = False
 
@@ -1956,17 +2010,17 @@ def FCMdata(request, dataType):
             if currentGame.hasValidActualMoveData(request.user.username):
                 specialData = True
             return JsonResponse(
-            {
-                "latest": False,
-                "loadData": currentGame.gameData,
-                # Not used at the moment, in // comment
-                "currentPlayers": currentGame.getCurrentPlayersArray(),
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                "specialData": specialData,
-                "latestUpdate": currentGame.latestUpdate,
-            },
-            safe=False,
-        )
+                {
+                    "latest": False,
+                    "loadData": currentGame.gameData,
+                    # Not used at the moment, in // comment
+                    "currentPlayers": currentGame.getCurrentPlayersArray(),
+                    "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                    "specialData": specialData,
+                    "latestUpdate": currentGame.latestUpdate,
+                },
+                safe=False,
+            )
         if gameUpdate == latestUpdate:
             return JsonResponse({"latest": True}, safe=False)
         # Else Send game data
