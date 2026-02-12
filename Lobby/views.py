@@ -105,7 +105,7 @@ from .models import (
     QueryableGameAllPlayers,
 )
 
-from FCM.models import FCM_Game, FCM_Tournament
+from FCM.models import FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
 from KFW.models import KFW_Game
 from RNB.models import RNB_Game
@@ -422,7 +422,7 @@ def addTGid(request, TGid):
 
 
 GAME_NAMES_MODELS = {
-    "FCM": FCM_Game,
+    "FCM": "FCM",  # Now using unified Game model
     "HC": HC_Game,
     "Bus": "Bus",  # Now using unified Game model
     "TGZ": "TGZ",
@@ -433,9 +433,8 @@ GAME_NAMES_MODELS = {
     "WEB": "WEB",  # Now using unified Game model
 }
 GAME_MODELS = [
-    FCM_Game,
     HC_Game,
-    # Bus, CNS, AQY, WEB, and IND, etc now use unified Game model
+    # Bus, CNS, AQY, WEB, IND, FCM, etc now use unified Game model
     KFW_Game,
 ]
 
@@ -757,7 +756,7 @@ def DBO_deleteGame(request, game_type):
 
     # 2. Map game types to Models
     model_map = {
-        "FCM": FCM_Game,
+        "FCM": Game,  # Now using unified Game model
         "HC": HC_Game,
         "Bus": Game,  # Now using unified Game model
         "TGZ": Game,
@@ -1522,7 +1521,7 @@ def index(request):
         # This saves CPU cycles on games the user won't see
         try:
             serialized = SF_fastSerializeGame(game, user)
-        except FCM_Game.DoesNotExist:
+        except Game.DoesNotExist:
             SN_sendAdminErrorMessage(
                 request,
                 f"Game {game.getGameCode() if hasattr(game, 'getGameCode') else game.gameCode} {game.id} does not exist - trying to serialize in lobby",
@@ -2522,15 +2521,15 @@ def createHCpage(request, gameID=0):
 
 @login_required
 def createFCMpage(request, gameID=None):
-    experienced = SF_hasRequiredExperience(request, "FCM", FCM_Game)
+    experienced = SF_hasRequiredExperience(request, "FCM", Game)
 
     if request.method != "POST" and gameID is None:
         return render(request, "Lobby/createFCM.html", {"experienced": experienced})
     elif request.method != "POST" and gameID is not None:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = FCM_Game.objects.get(id=gameID)
-        except FCM_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID, gameCode='FCM')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
         SCENARIO_NAMES = [
@@ -2557,9 +2556,9 @@ def createFCMpage(request, gameID=None):
                 scenarioName = scen
 
         playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        for gp in currentGame.players.all().select_related("player"):
+            if gp.player and request.user != gp.player:
+                playerNames.append(gp.player.username)
 
         messages.success(request, (gettext("Game creation for rematch")))
         return render(
@@ -2567,7 +2566,7 @@ def createFCMpage(request, gameID=None):
             "Lobby/createFCM.html",
             {
                 "fillData": True,
-                "gameName": currentGame.getGameName(),
+                "gameName": currentGame.presenter().getGameName(),
                 "gameDescription": currentGame.gameDescription,
                 "gamePace": currentGame.gamePace,
                 "playerNumber": currentGame.maxPlayers,
@@ -4935,7 +4934,7 @@ def reloadMTchatData(request):
 
 @login_required
 def createFCMminiTournament(request):
-    # experienced = SF_hasRequiredExperience(request, "FCM", FCM_Game)
+    # experienced = SF_hasRequiredExperience(request, "FCM", Game)
     if request.method != "POST":
         return render(
             request,
