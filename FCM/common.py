@@ -10,8 +10,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.contrib.auth.models import User
 
-from Lobby.models import User  # , Profile
-from .models import FCM_Game
+from Lobby.models import User, Game, GamePlayer
 from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendInviteNotifications,
@@ -287,7 +286,8 @@ def create_fcm_game(
 
     # Database operations
     with transaction.atomic():
-        new_game = FCM_Game(
+        new_game = Game(
+            gameCode='FCM',
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -305,31 +305,44 @@ def create_fcm_game(
             zoomLevels="200" * max_players,
             startingMap=starting_map,
             statsExcludedGame=stats_excluded_game,
-            player0notes=player0notes,
-            notificationSuppression=notificationSuppression,
+            FCMnotificationSuppression=notificationSuppression,
         )
         new_game.save()
 
         if is_tournament:
-            new_game.relatedTournament = tournamentObj
+            new_game.relatedFCMTournament = tournamentObj
         elif is_main_tournament:
             new_game.relatedMainTournament = tournamentObj
         elif is_mini_tournament:
             new_game.relatedMiniTournament = tournamentObj
 
-        # Add players
-        for player in all_players:
-            new_game.allPlayers.add(player)
+        # Add players as GamePlayer instances
+        for idx, player in enumerate(all_players):
+            GamePlayer.objects.create(
+                game=new_game,
+                player=player,
+                seat_order=idx,
+            )
+
+        # Set player0notes on seat 0 for training games
+        if player0notes:
+            seat0_gp = new_game.players.filter(seat_order=0).first()
+            if seat0_gp:
+                seat0_gp.notes = player0notes
+                seat0_gp.save()
+
         for player in invited_players:
             new_game.invitedPlayers.add(player)
 
         if "trainingGame" in request.POST or is_main_tournament or is_mini_tournament or is_tournament:
-            new_game.startGame(request)
+            new_game.save()
+            new_game.presenter().startGame(request)
 
         new_game.save()
 
     # Notifications and redirects
     if is_tournament or is_main_tournament or is_mini_tournament:
+        presenter = new_game.presenter()
         for username in usernames_to_notify:
             tournamentType = "normalTournament"
             if is_mini_tournament:
@@ -340,7 +353,7 @@ def create_fcm_game(
                 username,
                 new_game.maxPlayers,
                 new_game.gameName,
-                new_game.currentTurnString(),
+                presenter.currentTurnString(),
                 getattr(new_game, "id"),
                 False,
                 tournamentType,
@@ -350,7 +363,7 @@ def create_fcm_game(
     # Now handle normal games
     if usernames_to_notify:
         SN_sendInviteNotifications(
-            request, usernames_to_notify, new_game.getGameName(), max_players, "FCM"
+            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "FCM"
         )
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has been started"))
