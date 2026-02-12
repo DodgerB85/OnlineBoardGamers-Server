@@ -364,7 +364,7 @@ def showGame(request, game_id):
         # print_timestamp("Step 4.7: currentNotes obtained")
 
         # Get OOBpreference
-        OOBpreference = currentGame.getOOBpreference(request.user.username)
+        OOBpreference = presenter.getOOBpreference(request.user.username)
         allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
         myMove = presenter.isMyMove(request.user.username)
 
@@ -567,7 +567,7 @@ def _processTurn(request):
         if presenter.hasValidActualMoveData(request.user.username):
             currentMove = presenter.getCompressedMoveArr(request.user.username)
 
-        OOBpreference = currentGame.getOOBpreference(request.user.username)
+        OOBpreference = presenter.getOOBpreference(request.user.username)
         return JsonResponse(
             {
                 "loadData": currentGame.gameData,
@@ -630,7 +630,7 @@ def _processTurn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
-        setCorrectly = currentGame.setOOBpreference(request.user.username, jsonData["OOBpreference"])
+        setCorrectly = presenter.setOOBpreference(request.user.username, jsonData["OOBpreference"])
 
         
         currentGame.save()
