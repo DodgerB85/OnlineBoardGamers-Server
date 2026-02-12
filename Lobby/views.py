@@ -1171,7 +1171,7 @@ def stats(request):
     stats_map = {}  # Using a dict temporarily to collect data
 
     # Handle all unified model games (CNS, WEB, AQY, TGZ, IND, etc.)
-    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND"]:  # Add more as they migrate
+    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
         counts_key = f"counts_Game_{game_code}"
         counts = cache.get(counts_key)
 
