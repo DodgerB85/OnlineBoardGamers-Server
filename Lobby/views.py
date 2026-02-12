@@ -147,6 +147,19 @@ User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
+ALLOWED_USERS_RNB = [
+        "admin",
+        "DodgerB",
+        "durendal",
+        "Benkyo",
+        "vraid",
+        "JoshuaAcosta",
+        "massibull",
+        "phil",
+        "timmymayes",
+        "SaintJason",
+        "h",
+]
 
 ##########################
 #
@@ -522,19 +535,8 @@ def indexSpecialRedirect(request):
     # print(f"Db htis: {len(connection.queries)}")
     print(f"Db htis: {len(connection.queries)}")
 
-    ALLOWED_USERS = [
-        "admin",
-        "DodgerB",
-        "durendal",
-        "Benkyo",
-        "vraid",
-        "JoshuaAcosta",
-        "massibull",
-        "phil",
-        "timmymayes",
-        "SaintJason",
-    ]
-    if request.user.username not in ALLOWED_USERS:
+
+    if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")
 
     # return redirect('index')
@@ -2392,6 +2394,48 @@ def createWEBpage(request, gameID=0):
 
     return HttpResponse(status=204)  # No Content
 
+def createRNBpage(request, gameID=0):
+    if request.user.username not in ALLOWED_USERS_RNB:
+        return redirect("index")
+    experienced = SF_hasRequiredExperience(request, "RNB", Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createRNB.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = Game.objects.get(id=gameID, gameCode="RNB")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+        presenter = currentGame.presenter()
+        all_players = currentGame.players.exclude(
+            is_kicked=True, player=request.user
+        ).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
+
+        loadedStartingOptions = (
+            json.loads(currentGame.startingOptions)
+            if currentGame.startingOptions
+            else []
+        )
+        
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createRNB.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
 
 @login_required
 def createTGZpage(request, gameID=0):

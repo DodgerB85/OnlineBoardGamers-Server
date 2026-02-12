@@ -73,6 +73,8 @@ urlpatterns = [
     path("createKFWpage/<int:gameID>/", views.createKFWpage, name="createKFWpage"),
     path("createWEBpage/", views.createWEBpage, name="createWEBpage"),
     path("createWEBpage/<int:gameID>/", views.createWEBpage, name="createWEBpage"),
+    path("createRNBpage/", views.createRNBpage, name="createRNBpage"),
+    path("createRNBpage/<int:gameID>/", views.createRNBpage, name="createRNBpage"),
     path("FCMmapEditor/", views.FCMmapEditor, name="FCMmapEditor"),
     path("TGZmapEditor/", views.TGZmapEditor, name="TGZmapEditor"),
     path("AQYmapEditor/", views.AQYmapEditor, name="AQYmapEditor"),
@@ -153,7 +155,7 @@ urlpatterns = [
     path("userStats/", views.userStats, name="userStats"),
     path("sendAdminMessage/", views.sendAdminMessage, name="sendAdminMessage"),
     # API Routes
-    #path("TG_webhook/", views.TG_webhook, name="TG_webhook"),
+    # path("TG_webhook/", views.TG_webhook, name="TG_webhook"),
     path(f'{config("TELEGRAM_WEBHOOK_PATH")}', views.telegram_bot_response),
     path("addTGid/<int:TGid>", views.addTGid, name="addTGid"),
     path("nextGame", views.next_game_redirect, name="next_game"),
