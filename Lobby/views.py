@@ -2141,9 +2141,7 @@ def createCNSpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        all_players = currentGame.players.exclude(
-            is_kicked=True, player=request.user
-        ).select_related("player")
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
         messages.success(request, (gettext("Game creation for rematch")))
@@ -2183,9 +2181,7 @@ def createAQYpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        all_players = currentGame.players.exclude(
-            is_kicked=True, player=request.user
-        ).select_related("player")
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
         messages.success(request, (gettext("Game creation for rematch")))
@@ -2235,9 +2231,7 @@ def createINDpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        all_players = currentGame.players.exclude(
-        is_kicked=True, player=request.user
-        ).select_related("player")
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
 
@@ -2278,12 +2272,9 @@ def createINDpage2(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        playerNames = []
         # Get players from GamePlayer relationship
-        all_players = currentGame.players.exclude(is_kicked=True).select_related('player')
-        for gp in all_players:
-            if gp.player and request.user != gp.player:
-                playerNames.append(gp.player.username)
+        all_players = currentGame.players.exclude(player=request.user).select_related('player')
+        playerNames = [gp.player.username for gp in all_players if gp.player]
 
         messages.success(request, (gettext("Game creation for rematch")))
         loadedStartingOptions = (
@@ -2364,9 +2355,7 @@ def createWEBpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         presenter = currentGame.presenter()
-        all_players = currentGame.players.exclude(
-            is_kicked=True, player=request.user
-        ).select_related("player")
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
         loadedStartingOptions = (
@@ -2407,9 +2396,7 @@ def createRNBpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         presenter = currentGame.presenter()
-        all_players = currentGame.players.exclude(
-            is_kicked=True, player=request.user
-        ).select_related("player")
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
         loadedStartingOptions = (
@@ -2449,9 +2436,7 @@ def createTGZpage(request, gameID=0):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
-        all_players = currentGame.players.exclude(
-            is_kicked=True, player=request.user
-        ).select_related("player")
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
         messages.success(request, (gettext("Game creation for rematch")))
