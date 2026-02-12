@@ -66,3 +66,11 @@ class Busgame(Game):
         app_label = "Bus"
         verbose_name = "Bus_Game"
         verbose_name_plural = "Bus_Games"
+
+# FCM
+class FCMgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "FCM"
+        verbose_name = "FCM_Game"
+        verbose_name_plural = "FCM_Games"

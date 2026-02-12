@@ -10,7 +10,7 @@ from .models import (
     Game,
     GamePlayer,
 )
-from .modelProxies import FCMMiniTournament, TGZMiniTournament, CNSgame, WEBgame, AQYgame, TGZgame, INDgame, Busgame
+from .modelProxies import FCMMiniTournament, TGZMiniTournament, CNSgame, WEBgame, AQYgame, TGZgame, INDgame, Busgame, FCMgame
 
 from django.conf import settings
 from django import forms
@@ -467,5 +467,13 @@ class BusgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "Bus"
+
+@admin.register(FCMgame)
+class FCMgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="FCM")
+
+    class Meta:
+        app_label = "FCM"
 
 ################### END Register game objects to specific app
