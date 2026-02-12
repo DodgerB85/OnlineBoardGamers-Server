@@ -684,6 +684,72 @@ class FCM_Game(GeneralGame):
 
         # Finally, check it is valid
         return self.isThisValidActualMoveArrForPhase(self.phase, playerMoveArr)
+    
+    def getOOBpreference(self, name):
+        if not self.playersMoveData:
+            return 0
+        seat = self.seatPosition(name)
+        if seat < 0:
+            return 0
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        if arrIdx == -1:
+            return 0  # Player's move data not found
+
+        playerMoveArr = playersMoveDataArr[arrIdx]
+
+        # If no phase is set, then there's no move Data
+        if playerMoveArr[1] == [-1]:
+            return 0
+
+        # Finally, check it is valid
+        if self.isThisValidActualMoveArrForPhase(self.phase, playerMoveArr):
+            if self.phase == 4:
+                return playerMoveArr[3][2]
+    
+        return 0
+    
+    def setOOBpreference(self, name, OOBpreference):
+        if not self.playersMoveData:
+            return False
+        seat = self.seatPosition(name)
+        if seat < 0:
+            return False
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        if arrIdx == -1:
+            return False  # Player's move data not found
+
+        playerMoveArr = playersMoveDataArr[arrIdx]
+
+        # If no phase is set, then there's no move Data
+        if playerMoveArr[1] == [-1]:
+            playerMoveArr[1] = [3,4]
+
+        # Finally, check it is valid
+        if self.phase == 4:
+            playerMoveArr[3][2] = OOBpreference
+            self.playersMoveData = json.dumps(playersMoveDataArr)
+            print(playerMoveArr)
+            print(self.playersMoveData)
+            self.save()
+            return True
+    
+        return False
 
     def hasValidActualCleanupPreset(self, name):
         if not self.playersMoveData:
