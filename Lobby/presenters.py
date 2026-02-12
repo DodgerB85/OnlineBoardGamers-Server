@@ -29,7 +29,7 @@ class GamePresenter:
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
     # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND"]:
+        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
             print(
                 f"isMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
             )
@@ -58,7 +58,7 @@ class GamePresenter:
         )
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND"]:
+        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
             print(
                 f"quickIsMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
             )
