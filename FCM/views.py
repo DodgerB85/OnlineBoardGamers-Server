@@ -529,7 +529,7 @@ def endGame(
         )
 
 
-def processTurn(request):
+def processTurn(request, game_id=None):
     # time.sleep(5)
     # processing a turn must be via POST
     if request.method != "POST":
@@ -1778,7 +1778,7 @@ def _processTurn(request):
 
 
 @login_required()
-def bugEntry(request):
+def bugEntry(request, game_id=None):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -1810,7 +1810,7 @@ def bugEntry(request):
 
 
 @login_required()
-def sendChatMessage(request):
+def sendChatMessage(request, game_id=None):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -1861,7 +1861,7 @@ def _sendChatMessage(request):
 
 
 @login_required()
-def notes(request):
+def notes(request, game_id=None):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 

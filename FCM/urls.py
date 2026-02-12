@@ -36,8 +36,11 @@ urlpatterns = [
     # API Routes
     path("createFCMgame/", views.createFCMgame, name="createFCMgame"),
     path("processTurn/", views.processTurn, name="processTurn"),
+    path("<int:game_id>/processTurn/", views.processTurn, name="processTurnWithId"),
     path("bugEntry/", views.bugEntry, name="bugEntry"),
+    path("<int:game_id>/bugEntry/", views.bugEntry, name="bugEntryWithId"),
     path("notes/", views.notes, name="notes"),
+    path("<int:game_id>/notes/", views.notes, name="notesWithId"),
     path("<int:game_id>/checkNewData/", views.checkNewData, name="checkNewData"),
     path("changeAssistance/", views.changeAssistance, name="changeAssistance"),
     path(
@@ -45,5 +48,6 @@ urlpatterns = [
     ),
     path("data/<int:dataType>/", views.FCMdata, name="FCMdata"),
     path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
+    path("<int:game_id>/sendChatMessage/", views.sendChatMessage, name="sendChatMessageWithId"),
     path("castVote/", views.castVote, name="castVoteCNS"),
 ]
