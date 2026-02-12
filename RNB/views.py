@@ -222,3 +222,6 @@ def bugEntry(request):
     )
 
     return JsonResponse({"bugEntrySuccess": True})
+
+def createRNBgame(request):
+    return render(request, "Lobby/index.html")
