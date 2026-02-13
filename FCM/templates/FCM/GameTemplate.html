@@ -516,10 +516,10 @@
                       <script src="/static/FCM/JS/test.js"></script>
                       <script src="/static/FCM/JS/main.js"></script>
                     {% else %}
-                      <script src="{% static 'FCM/JS/FCMmain.js' %}"></script>
+                      <script src="{% static 'FCM/FCMdist/FCMmain.js' %}"></script>
                     {% endif %}
                   {% else %}
-                    <script src="{% static 'FCM/JS/FCMmainOLD.js' %}"></script>
+                    <script src="{% static 'FCM/FCMdist/FCMmainOLD.js' %}"></script>
                   {% endif %}
                 </body>
               </html>
