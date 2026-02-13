@@ -2971,49 +2971,6 @@ class FcmPresenter(GamePresenter):
 
         self.gameObj.save()
 
-    # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
-    # After migration, seat_order is set correctly for all games (old rotation and new shuffle),
-    # so useNewCode is accepted for compatibility but both paths use seat_order.
-    def getAllPlayersOrderedySeat(self, withoutBots=False, useNewCode=True):
-        # seat_order was pre-computed during migration (shuffle for new games, rotation for old games)
-        # and is set by startGame() for newly created games, so both code paths
-        # now just read by seat_order.
-        if useNewCode:
-            all_players_list = list(self.gameObj.players.all().select_related("player"))
-            playerList = [
-                gp.player.username for gp in all_players_list if gp.player and gp.player.username != "FCMtourneyAdmin"
-            ]
-            if withoutBots:
-                return playerList
-
-            missing_players_usernames = [gp.player.username for gp in all_players_list if gp.is_missing and gp.player]
-            # REPLACE WITH KICKOUTS
-            for count, player in enumerate(playerList):
-                if player in missing_players_usernames:
-                    playerList[count] = "FcmBot"
-            return playerList
-
-        ############ OLD CODE -- NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
-        else:
-            all_players_list = list(self.gameObj.players.all().select_related("player"))
-            playerList = [
-                gp.player.username for gp in all_players_list if gp.player and gp.player.username != "FCMtourneyAdmin"
-            ]
-            if withoutBots:
-                return playerList
-
-            missing_players_usernames = [gp.player.username for gp in all_players_list if gp.is_missing and gp.player]
-
-            # REPLACE WITH KICKOUTS
-            newPlayerList = []
-            for count, player in enumerate(playerList):
-                if player in missing_players_usernames:
-                    newPlayerList.append("FcmBot")
-                else:
-                    newPlayerList.append(player)
-
-            return newPlayerList
-
     # takes in a USERNAME
     def seatPosition(self, name, withoutBots=False):
         if name != "FCMtourneyAdmin":

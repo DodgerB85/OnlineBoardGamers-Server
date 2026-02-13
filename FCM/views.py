@@ -6,6 +6,7 @@ import base64
 import gzip
 
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -46,6 +47,8 @@ from Lobby.sharedFunctions.constants import (
     REWIND_CONSENT_VOTE_TOPIC,
 )
 
+if TYPE_CHECKING:
+    from Lobby.presenters import FcmPresenter 
 
 # import requests  # Keep this to broadcase on WSS when it is uncommented
 FCMsuperUsers = ["BotKickStarter"]
@@ -183,7 +186,7 @@ def showGame(request, game_id):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('FcmPresenter', currentGame.presenter())
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
@@ -365,15 +368,16 @@ def showGame(request, game_id):
 
         # Get OOBpreference
         OOBpreference = presenter.getOOBpreference(request.user.username)
-        allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
+        allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, False)
         myMove = presenter.isMyMove(request.user.username)
 
         myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3]
         if (
-            "SHADOW" in presenter.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
-            and currentGame.gameData == ""
+            currentGame.gameData == ""
+            and "SHADOW" in presenter.getAllPlayersOrderedySeat(False, False)
         ):
             displayNames = ["test"]
+            seat0_gp = None
             try:
                 seat0_gp = currentGame.players.filter(seat_order=0).first()
                 displayNames = json.loads(seat0_gp.notes) if seat0_gp and seat0_gp.notes else ["SHADOW"]
@@ -555,7 +559,7 @@ def _processTurn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('FcmPresenter', currentGame.presenter())
 
     if currentGame.relatedFCMTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
@@ -624,7 +628,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveOOBpreference - gameID: {getattr(currentGame,'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1833,7 +1837,7 @@ def _sendChatMessage(request):
         new_entry = jsonData["newEntry"]
 
         currentGame = Game.objects.get(id=game_id, gameCode='FCM')
-        presenter = currentGame.presenter()
+        presenter = cast('FcmPresenter', currentGame.presenter())
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -1954,7 +1958,7 @@ def gameAdminGetMoveData(request):
     except Game.DoesNotExist:
         return render(request, "FCM/gameAdmin.html", {"gameID": 21})
 
-    presenter = currentGame.presenter()
+    presenter = cast('FcmPresenter', currentGame.presenter())
 
     names = presenter.getAllPlayersOrderedySeat(True)
 
@@ -1980,7 +1984,7 @@ def FCMdata(request, dataType):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('FcmPresenter', currentGame.presenter())
 
     USE_NEW_CODE = False
     if int(currentGame.created) > 1744974000000:
@@ -2076,7 +2080,7 @@ def _castVote(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('FcmPresenter', currentGame.presenter())
 
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
