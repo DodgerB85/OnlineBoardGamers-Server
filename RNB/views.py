@@ -3,6 +3,9 @@ import time
 import base64
 import gzip
 
+from decouple import config
+from typing import TYPE_CHECKING, cast
+
 from contextlib import contextmanager
 
 from django.contrib import messages
@@ -30,7 +33,14 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 
 from .models import RNB_Game
-from Lobby.models import User, Profile
+from .common import create_rnb_game
+
+from Lobby.models import User, Profile, Game
+
+from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
+
+if TYPE_CHECKING:
+    from Lobby.presenters import RnbPresenter 
 
 def index(request):
     return HttpResponse("Hello, world. You're at RNB")
@@ -49,112 +59,145 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if request.user.username not in ALLOWED_USERS:
         return redirect('index')
  
-    return render(request, "RNB/showRNBgame.html")
-    #try:
-    #    currentGame = IND_Game.objects.get(id=game_id)
-    #except IND_Game.DoesNotExist:
-    #    raise Http404(gettext("Game does not exist"))
+    try:
+        currentGame = (
+            Game.objects.select_related("host", "creator")
+            .prefetch_related(
+                "players__player", "invitedPlayers"
+            )
+            .get(id=game_id, gameCode='RNB')
+        )
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
 
-    #if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
-    #    messages.error(request, gettext("The game is not Active"))
-    #    return HttpResponseRedirect(reverse("index"))
+    if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
+        messages.error(request, gettext("The game is not Active"))
+        return HttpResponseRedirect(reverse("index"))
+
+    presenter = cast('RnbPresenter', currentGame.presenter())
+
+    # Access the prefetch cache immediately to "warm" it
+    all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
+    userObj = request.user
+    username = userObj.username
 
     # No2 it is a proper started game, so set up for not logged in
-    gameID = 1#currentGame.id
-    gameName = "Test Game Name" # currentGame.getGameName()
-    gameData = ""#currentGame.gameData
-    gameCreationTimestamp = SR_getTimeNow()#currentGame.created
-    KickoutFlexiDataArray = []#json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    startingOptions = []#json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    gameID = currentGame.id
+    gameName = presenter.getGameName()
+    gameData = currentGame.gameData
+    gameCreationTimestamp = currentGame.created
+    KickoutFlexiDataArray = (
+        json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
+    )
+    startingOptions = (
+        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    )
 
-    allPlayerListBySeat = []#json.dumps(currentGame.getAllPlayersOrderedySeat(False))
+    allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, False)
 
     # Logged out
     returnData = {
-            "gameID": gameID,
-            "gameName": gameName,
-            "gameData": gameData,
-            "gameCreationTimestamp": gameCreationTimestamp,
-            "myZoomLevel": 16,
-            "spoilerFree": spoilerFree,
-            "replayStep": replayStep,
-            "KickoutFlexiDataArray": KickoutFlexiDataArray,
-            "startingOptions": startingOptions,
-            "allPlayerListBySeat": allPlayerListBySeat,
-            "currentPlayers": currentGame.getCurrentPlayers(),
-            "preferredINDoptions": [-1,1,0,0,1,1,0]
-        }
+        "gameID": gameID,
+        "gameName": gameName,
+        "gameData": gameData,
+        "gameCreationTimestamp": gameCreationTimestamp,
+        "myZoomLevel": 16,
+        "spoilerFree": spoilerFree,
+        "replayStep": replayStep,
+        "KickoutFlexiDataArray": KickoutFlexiDataArray,
+        "startingOptions": startingOptions,
+        "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
+        "currentPlayers": presenter.getCurrentPlayers(),
+        #"preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
+        "statsExcludeVotesData": json.dumps(
+            presenter.getFullSetOfVoteResults(
+                STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
+            )
+        ),
+        "deleteVotesData": json.dumps(
+            presenter.getFullSetOfVoteResults(
+                DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
+            )
+        ),
+        "settingsDebug": config("RNB_USE_SOURCE_CODE", default=False, cast=bool),
+    }
 
     if not request.user.is_authenticated:
-        return render(request, "IND/showINDgame.html", returnData)
+        return render(request, "RNB/showRNBgame.html", returnData)
 
     # Now you are logged in
-    name = request.user.username
+    user_id = userObj.id
+
+    user_profile = Profile.objects.get(user=userObj)
+
+    # Get user game player object
+    user_gp = currentGame.players.filter(player=userObj).first()
+
+    is_in_all = user_gp is not None
+    is_missing = user_gp.is_missing if user_gp else False
+    involvedPlayer = is_in_all and not is_missing
+    if username == "BotKickStarter":
+        involvedPlayer = True
+
     chatData = currentGame.chatData
 
     latestUpdate = currentGame.latestUpdate
-    
-    preferredINDoptions = json.loads(request.user.profile.preferredINDoptions) if request.user.profile.preferredINDoptions != "" else [-1,1,0,0,1,1,0]
 
-    # preferredINDoptions
+    ## Get the next URL
+    nextURL = f"/nextGame?current_id={gameID}&current_code=RNB"
+
+    #preferredAQYoptions = (
+    #    json.loads(user_profile.preferredAQYoptions)
+    #    if user_profile.preferredAQYoptions != ""
+    #    else [-1, 1, 0, 0, 1, 1, 0]
+    #)
+
+    # preferredAQYoptions
     # colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes,showPollutionUnderRes, housesInNumberOrder
-    
+
     # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
     ## Get Chat notification
     chatNotification = False
-    if request.user in currentGame.playersWithChatNotification.all():
+    if user_gp and user_gp.has_chat_notification:
         chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
+        presenter.removeChatNotification(request.user)
         currentGame.save()
-    
-    returnData.update({
-            "name": name,
+
+    returnData.update(
+        {
+            "name": username,
             "chatData": chatData,
             "latestUpdateLiteral": latestUpdate,
             "nextURL": nextURL,
-            "preferredINDoptions": preferredINDoptions,
+            #"preferredAQYoptions": preferredAQYoptions,
             "chatNotification": chatNotification,
-
-        })
-    
-
-        
-        
-    involvedPlayer = request.user in currentGame.allPlayers.all() and request.user not in currentGame.missingPlayers.all()
-    if request.user.username == "BotKickStarter":
-        involvedPlayer = True
+        }
+    )
 
     if not involvedPlayer:
-        return render(request, "IND/showINDgame.html", returnData)
+        return render(request, "RNB/showRNBgame.html", returnData)
 
-    pov = currentGame.seatPosition(request.user.username)
-    if request.user.username == "BotKickStarter": pov = 0
-    secondsToNextKickout = currentGame.getSecondsToNextKickout()
-    
-    kickoutRequired = currentGame.kickoutRequired()
-    
-    myMove = currentGame.isMyMove(request.user.username)
- 
+    pov = presenter.seatPosition(username)
+    if request.user.username == "BotKickStarter":
+        pov = -1
+    secondsToNextKickout = presenter.getSecondsToNextKickout()
+
+    kickoutRequired = presenter.kickoutRequired()
+
+    myMove = presenter.isMyMove(username)
+
     ## Get the Notes for the user
-    seat_position = currentGame.seatPosition(request.user.username)
-    notes_dict = {
-        0: currentGame.player0notes,
-        1: currentGame.player1notes,
-        2: currentGame.player2notes,
-        3: currentGame.player3notes,
-    }
-    notes = notes_dict.get(seat_position, "")
+    notes = user_gp.notes if user_gp else ""
 
-
-    
-    liveNotification = request.user.profile.liveNotification
+    liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
-    
-    move = currentGame.getMoveData(request.user.username)
+
+    move = presenter.getMoveData(username)
     trade = currentGame.playerTradeData
 
     ## Involved Player
-    returnData.update({
+    returnData.update(
+        {
             "involvedPlayer": True,
             "pov": pov,
             "secondsToNextKickout": secondsToNextKickout,
@@ -164,29 +207,47 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "notes": notes,
             "yourTurnAudioType": liveNotification,
             "statsExcludedGame": currentGame.statsExcludedGame,
-            "myStatsExcludeConsent": int(currentGame.statsExcludeConsent[pov:pov+1]),
             "move": move,
             "trade": trade,
-        })
-    
+        }
+    )
+
+    ## pre move
+    #if (
+    #    currentGame.phase == 4
+    #    or currentGame.phase == 5
+    #    or currentGame.phase == 6
+    #    or currentGame.phase == 7
+    #    or currentGame.phase == 8
+    #    or currentGame.phase == 9
+    #):
+    #    if presenter.getMoveDataTime(username) == "PRE_MOVE":
+    #        returnData.update({"preMove": presenter.getMoveData(username)})
+
+    # TODO: also send any current player pre moves in case action failed.
+
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in currentGame.getAllPlayersOrderedySeat():
-            displayNames = currentGame.player0notes
-            currentGame.player0notes = ""
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            displayNames = user_gp.notes if user_gp else ""
+            if user_gp:
+                user_gp.notes = ""
+                user_gp.save()
             notes = ""
-            currentGame.save()
-        #allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
-        if currentGame.startingMap != "": returnData.update({"startingMap": json.loads(currentGame.startingMap) })
-    
-        returnData.update({
-            "notes": notes,
-            "displayNames": displayNames,
-            #"allPlayerListBySeat": allPlayerListBySeat,
-        })
-    
-    return render(request, "IND/showINDgame.html", returnData)
+        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
+        if currentGame.startingMap != "":
+            returnData.update({"startingMap": json.loads(currentGame.startingMap)})
+
+        returnData.update(
+            {
+                "notes": notes,
+                "displayNames": displayNames,
+                # "allPlayerListBySeat": allPlayerListBySeat,
+            }
+        )
+
+    return render(request, "RNB/showRNBgame.html", returnData)
 
 
 
@@ -224,4 +285,8 @@ def bugEntry(request):
     return JsonResponse({"bugEntrySuccess": True})
 
 def createRNBgame(request):
-    return render(request, "Lobby/index.html")
+    # Creating a game must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    return create_rnb_game(request)
