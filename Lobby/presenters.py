@@ -172,24 +172,14 @@ class GamePresenter:
     # NOTE: HC/BUS MIGHT USE COMMA SEPERATE STRING. SO CHECK IF SOME GAMES NEED TO BE HANDLED SEPERATELY
     # TO GET THE startOptionsListPrelim
     def isExperiencedGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions)
-            if self.gameObj.startingOptions
-            else []
-        )
-        if 120 in startingOptionsListPrelim:
+        starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+        if 120 in starting_options:
             return True
         return False
 
-    # NOTE: HC/BUS MIGHT USE COMMA SEPERATE STRING. SO CHECK IF SOME GAMES NEED TO BE HANDLED SEPERATELY
-    # TO GET THE startOptionsListPrelim
     def isLearningGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions)
-            if self.gameObj.startingOptions
-            else []
-        )
-        if 110 in startingOptionsListPrelim:
+        starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+        if 110 in starting_options:
             return True
         return False
 
@@ -1900,22 +1890,6 @@ class IndPresenter(GamePresenter):
                     self.gameObj.latestUpdate,
                 )
 
-    def isLearningGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        )
-        if 110 in startingOptionsListPrelim:
-            return True
-        return False
-
-    def isExperiencedGame(self):
-        startingOptionsListPrelim = (
-            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        )
-        if 120 in startingOptionsListPrelim:
-            return True
-        return False
-
     def getGameCode(self):
         return "IND"
 
@@ -2357,18 +2331,6 @@ class BusPresenter(GamePresenter):
             "experiencedGame": self.isExperiencedGame(),
         }
 
-    def isExperiencedGame(self):
-        starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if 120 in starting_options:
-            return True
-        return False
-
-    def isLearningGame(self):
-        starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if "110" in starting_options:
-            return True
-        return False
-
     # takes in a USERNAME
     def seatPosition(self, name, withoutBots=False):
         # 1. Get the list of players (this already uses the prefetch cache)
@@ -2642,6 +2604,7 @@ class BusPresenter(GamePresenter):
         if gp and gp.has_chat_notification:
             gp.has_chat_notification = False
             gp.save()
+
 
 
 
@@ -3064,3 +3027,1007 @@ class RnbPresenter(GamePresenter):
         return jsonResponse
 
  
+
+class FcmPresenter(GamePresenter):
+    def __str__(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        allPlayersString = " / ".join(
+            gp.player.username for gp in all_players if gp.player
+        )
+        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
+
+    def currentTurnString(self):
+        return SR_currentTurnString("FCM", self.gameObj.turn, self.gameObj.phase)
+
+    def getGameName(self):
+        # Use fields already on the model. DO NOT call .all() or .count() here.
+        name = self.gameObj.gameName or f"{getattr(self.gameObj.creator, 'username', 'Unknown')}'s Game"
+        if self.gameObj.gameStatus == "PRIVATE":
+            name += " [Private]"
+        return name
+
+    def isMyMove(self, loggedInPlayerUsername="ADFSADASDASDASDASADADA"):
+        allowed_players = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+
+        currentPlayers = self._getCurrentPlayersField()
+        if not currentPlayers or currentPlayers == "":
+            return True
+
+        # Split the string into a list of actual names
+        player_list = [p.strip() for p in currentPlayers.split(",")]
+
+        if (
+            loggedInPlayerUsername in player_list
+            or currentPlayers in allowed_players
+        ):
+            return True
+
+        return False
+
+    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        # Return False if no username is provided
+        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+            return False
+
+        # Use a set for faster membership testing
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+        currentPlayers = self._getCurrentPlayersField()
+        return (
+            not currentPlayers
+            or loggedInPlayerUsername in currentPlayers
+            or currentPlayers in shadow_values
+        )
+
+    def _getCurrentPlayersField(self):
+        """Get current players as a string (matching old currentPlayers field format)"""
+        current_gps = self.gameObj.players.filter(is_current=True).select_related("player")
+        usernames = [gp.player.username for gp in current_gps if gp.player]
+        return ",".join(usernames) if usernames else ""
+
+    def getSecondsToNextKickout(self):
+        from Lobby.sharedFunctions.sharedFunctions import SF_getSecondsToNextKickout
+
+        return SF_getSecondsToNextKickout(self.gameObj.latestUpdate, self.gameObj.kickoutDuration)
+
+    def getMissingPlayersNamesArray(self):
+        ret = []
+        for gp in self.gameObj.players.filter(is_missing=True).select_related("player"):
+            if gp.player:
+                ret.append(gp.player.username)
+        return ret
+
+    def kickoutRequired(self):
+        from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
+
+        # USE the prefetched allPlayers list instead of .values_list()
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        all_player_usernames = [gp.player.username for gp in all_players if gp.player]
+
+        # Also ensure getCurrentPlayersArray() doesn't hit the DB.
+        # If it does, extract the username from self.currentPlayers string directly.
+        current_username = self.getCurrentPlayersArray()[0]
+
+        return SF_kickoutRequired(
+            self.gameObj.gameStatus,
+            all_player_usernames,  # Pass the Python list, not a QuerySet
+            self.gameObj.latestUpdate,
+            self.gameObj.kickoutDuration,
+            self.gameObj.kickoutFlexiData,
+            current_username,
+        )
+
+    def serialize(self, loggedInUser=None):
+        # USE len() instead of .count() to use the prefetch cache
+        all_players_gps = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
+        all_players_count = len(all_players_gps)
+
+        remainingPlayersInt = self.gameObj.maxPlayers - all_players_count
+        remainingPlayers = "".join(
+            [str(all_players_count + i + 1) for i in range(remainingPlayersInt)]
+        )
+
+        # Use select_related('winner') in the view to make this 0 hits
+        winner_gp = self.gameObj.players.filter(winner=True).first()
+        winner = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
+
+        # Timestamps are already in the object (0 hits)
+        createdString = str(self.gameObj.created)
+        latestUpdateString = str(self.gameObj.latestUpdate)
+        latestUpdateElapsedTimeString = ""
+
+        if self.gameObj.gameStatus in ["WAITING", "AVAILABLE", "ACTIVE", "PRIVATE"]:
+            now = int(time.time())
+            # Use simple math; avoid repeated int() casts if possible
+            elapsedTotalSeconds = now - (
+                int(self.gameObj.created) // 1000
+                if self.gameObj.gameStatus != "ACTIVE"
+                else int(self.gameObj.latestUpdate) // 1000
+            )
+
+            days, rem = divmod(elapsedTotalSeconds, 86400)
+            hours, rem = divmod(rem, 3600)
+            mins, secs = divmod(rem, 60)
+
+            if days > 0:
+                latestUpdateElapsedTimeString += f"{days}d"
+            if hours > 0:
+                latestUpdateElapsedTimeString += f" {hours}h"
+            if mins > 0:
+                latestUpdateElapsedTimeString += f" {mins}m"
+            latestUpdateElapsedTimeString += f" {secs}s"
+
+        # !!! WARNING: isMyMove probably has queries. Check its code!
+        myMove = self.isMyMove(loggedInUser.username) if loggedInUser else False
+
+        # Efficiency: use the prefetched lists already in memory
+        missing_players_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.is_missing}
+        chat_notify_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.has_chat_notification}
+
+        involvedPlayer = False
+        chatNotification = False
+        if loggedInUser:
+            involvedPlayer = any(
+                gp.player == loggedInUser and gp.player.id not in missing_players_ids
+                for gp in all_players_gps if gp.player
+            )
+            chatNotification = loggedInUser.id in chat_notify_ids
+
+        # Pace and Options (0 hits if these are just CharFields/TextFields)
+        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
+        startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else [])
+        kickoutRequiredNum = self.kickoutRequired()  # Inspect this for queries!
+
+        # Check for Shadow/AI without hitting the DB
+        all_usernames = {gp.player.username for gp in all_players_gps if gp.player}
+        deleteableGame = False
+        if loggedInUser and (("SHADOW" in all_usernames) or ("FcmAI" in all_usernames)):
+            if any(gp.player == loggedInUser for gp in all_players_gps if gp.player):
+                deleteableGame = True
+
+        return {
+            "gameID": self.gameObj.id,
+            "gameName": self.getGameName(),
+            "gameDescription": self.gameObj.gameDescription,
+            "creator": getattr(self.gameObj.creator, "username", None),
+            "created": createdString,
+            "allPlayers": list(all_usernames),
+            "invitedPlayers": [user.username for user in self.gameObj.invitedPlayers.all()],
+            "currentPlayers": self._getCurrentPlayersField(),
+            "currentTurn": self.currentTurnString(),
+            "pace": gamePaceString,
+            "latestUpdate": latestUpdateString,
+            "startingOptions": startingOptionsHTML,
+            "maxPlayers": self.gameObj.maxPlayers,
+            "winner": winner,
+            "myMove": myMove,
+            "involvedPlayer": involvedPlayer,
+            "startingMap": self.gameObj.startingMap,
+            "chatNotification": chatNotification,
+            "kickoutRequiredNum": kickoutRequiredNum,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
+            "game": "FCM",
+            "remainingPlayers": remainingPlayers,
+            "deleteableGame": deleteableGame,
+            "learningGame": self.isLearningGame(),
+            "experiencedGame": self.isExperiencedGame(),
+        }
+
+    def startGame(self, request):
+        from django_q.tasks import async_task
+        from Lobby.models import GamePlayer
+
+        # 8-hardChoices (original MS only)
+        # 20-ketchupMilestone
+        # 23-reservePrice
+        # 18-newDistricts
+        #      181-newDistrictsApp
+        #      183-newDistrictsPark
+        # 22-lobbyists
+        # 19-coffee
+        # 10-kimchi
+        # 11-sushi
+        # 12-noodles
+        # 9-frychefs
+        # 15-massMarketers
+        # 13-gourmet
+        # 17-ruralMarketers
+        # 14-movieStars
+        # 16-nightShift
+
+        # Check for new player order seed
+        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
+        # Copy in an initial value to prevent forced LU values of 99999 overwriting maps
+        self.gameObj.latestUpdate = self.gameObj.created
+        self.gameObj.save()
+        starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+
+        # need to add in possible new dist options
+        if 200 in starting_options:
+            availableModules = [20, 23, 18, 22, 19, 10, 11, 12, 9, 15, 13, 17, 14, 16]
+            # Add hard choices only with original MS
+            if 21 not in starting_options:
+                availableModules.append(8)
+            selectedModules = []
+            moduleRange = []
+            for i in range(len(starting_options)):
+                if len(str(starting_options[i])) == 5:
+                    moduleRange.append(str(starting_options[i]))
+            for i in range(len(moduleRange)):
+                moduleRange[i] = int(moduleRange[i][-2:])
+            numberOfModulesToPick = random.randrange(
+                int(moduleRange[0]), int(moduleRange[1] + 1), 1
+            )
+            for i in range(numberOfModulesToPick):
+                currentIndex = random.randrange(0, len(availableModules), 1)
+                selectedModules.append(availableModules.pop(currentIndex))
+            # _tournamentType = random.choice(["RR", "KO", "TL"])
+            if 18 in selectedModules:
+                currentIndex = random.randrange(0, 3, 1)
+                distOptions = [0, 181, 183]
+                chosenDistOption = distOptions[currentIndex]
+                if chosenDistOption > 0:
+                    selectedModules.append(chosenDistOption)
+            starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+            starting_options.extend(selectedModules)
+            self.gameObj.startingOptions = json.dumps(starting_options, separators=(',', ':'))
+            #self.startingOptions = (
+            #  self.startingOptions + "," + (",".join(selectedModules))
+            #)
+
+        self.gameObj.gameStatus = "ACTIVE"
+
+        # Shuffle GamePlayers to determine seat order
+        # Exclude FCMtourneyAdmin from ordering (add at end), matching original FCM_Game behavior
+        all_gps = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
+        game_players = [gp for gp in all_gps if gp.player and gp.player.username != "FCMtourneyAdmin"]
+        fcm_tourney_admin_gps = [gp for gp in all_gps if gp.player and gp.player.username == "FCMtourneyAdmin"]
+
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+        game_players.extend(fcm_tourney_admin_gps)
+
+        _currentPlayers = ""
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            if idx == 0:
+                gp.is_current = True
+                _currentPlayers = gp.player.username
+            else:
+                gp.is_current = False
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+
+        playerListToNotify = [
+            gp.player.username for gp in game_players
+            if gp.player and gp.player.username != request.user.username
+        ]
+
+        # SN_M_sendGameStartNotification(
+        #    get_current_site(request),
+        #    "FCM",
+        #    playerListToNotify,
+        #    getattr(self, "id"),
+        #    self,
+        #    request.user.username,
+        # )
+        message_data = BLANK_MESSAGE_TEMPLATE.copy()
+        #message_data["gameName"] = self.gameObj.getGameName()
+        message_data["gameID"] = self.gameObj.id
+        message_data["gameName"] = self.getGameName()
+        message_data["gameCode"] = "FCM"
+        message_data["username"] = request.user.username
+        message_data["currentPlayersString"] = self.getCurrentPlayersString()
+        message_data["maxPlayers"] = self.gameObj.maxPlayers
+        message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
+        message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
+
+        print("about to start FCM async task")
+        async_task(
+            "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            playerListToNotify,
+            message_data,
+        )
+
+        self.gameObj.save()
+
+    # takes in a USERNAME
+    def seatPosition(self, name, withoutBots=False):
+        if name != "FCMtourneyAdmin":
+            playerList = self.getAllPlayersOrderedySeat(withoutBots)
+            try:
+                return playerList.index(name)
+            except Exception:
+                return -1
+        return -1
+
+    #########################################################
+    #
+    #   NEW SIMUL MOVE FUNCTIONS
+    #
+    #########################################################
+
+    # This always ensures you get a valid array return
+    # any bots are set to phase -99 here, so you know nothing is expcected, ie they can't move
+    def getOrScaffoldAllMoveData(self):
+        try:
+            data = json.loads(self.gameObj.FCMplayersMoveData)
+            if len(data) != self.gameObj.maxPlayers:
+                raise ValueError("Invalid number of players")
+            return data
+        except (json.JSONDecodeError, ValueError):
+            # Scaffold default structure
+            allPlayers = self.getAllPlayersOrderedySeat(True, True)
+            missing_players = set(
+                self.gameObj.players.filter(is_missing=True)
+                .values_list("player__username", flat=True)
+            )
+            # In a tournament, don't remove missing players, as FCMtA plays for them
+            if self.gameObj.relatedFCMTournament:
+                missing_players = {}
+            return [
+                [
+                    playerName,
+                    [-1] if playerName not in missing_players else [-99],
+                    "",
+                    [],
+                ]
+                for playerName in allPlayers
+            ]
+
+    def getCurrentSimulPlayersV2(self):
+        # ASSUME THAT self.currentPlayers IS THE LATEST JSON INCOMING
+        # ASSUME THAT phase is the start of simul phase
+
+        currentPlayers = self._getCurrentPlayersField()
+
+        # If there are no current players, add everyone
+        if not currentPlayers:
+            current_players = [gp.player.username for gp in self.gameObj.players.all().select_related("player") if gp.player]
+            return ",".join(current_players)
+
+        # Get an array of possible players to move
+        current_players = [player.strip() for player in currentPlayers.split(",")]
+
+        # Remove missing players
+        missing_players = set(
+            self.gameObj.players.filter(is_missing=True)
+            .values_list("player__username", flat=True)
+        )
+        current_players = [
+            username for username in current_players if username not in missing_players
+        ]
+
+        # Remove players with move data in a single pass using a list comprehension
+        current_players_str = ",".join(
+            username
+            for username in current_players
+            if not self.hasValidActualMoveData(username)
+        )
+
+        return current_players_str
+
+    def hasAnyPlayerMovedThisPhase(self, phase):
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        for playerMoveArr in playersMoveDataArr:
+            if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr):
+                return True
+
+        return False
+
+    def hasValidActualMoveData(self, name):
+        if not self.gameObj.FCMplayersMoveData:
+            return False
+        seat = self.seatPosition(name)
+        if seat < 0:
+            return False
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        if arrIdx == -1:
+            return False  # Player's move data not found
+
+        playerMoveArr = playersMoveDataArr[arrIdx]
+
+        # If no phase is set, then there's no move Data
+        if playerMoveArr[1] == [-1]:
+            return False
+
+        # Finally, check it is valid
+        return self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr)
+
+    def hasValidActualCleanupPreset(self, name):
+        if not self.gameObj.FCMplayersMoveData:
+            return False
+        seat = self.seatPosition(name)
+        if seat < 0:
+            return False
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        if arrIdx == -1:
+            return False  # Player's move data not found
+        playerMoveArr = playersMoveDataArr[arrIdx]
+        # If no phase/wrong phase / empty data is set, then there's no move Data
+        if (
+            playerMoveArr[1] == [-1]
+            or 9 not in playerMoveArr[1]
+            or playerMoveArr[3] == []
+        ):
+            return False
+        if (
+            len(playerMoveArr) >= 4
+            and len(playerMoveArr[3]) >= 2
+            and isinstance(playerMoveArr[3][1], list)
+            and len(playerMoveArr[3][1]) > 0
+            and playerMoveArr[3][1][0] != -9
+        ):
+            return True
+
+        return False
+
+    # rf.PHASE_SETUP_RESTAURANT1 = 0
+    # rf.PHASE_SETUP_RESTAURANT2 = 1
+    # rf.PHASE_SETUP_RESERVE = 2
+    # rf.PHASE_RESTRUCTURING = 3
+    # rf.PHASE_TURN_ORDER = 4
+    # rf.PHASE_WORKING_DAY = 5
+    # rf.PHASE_DINNERTIME = 6
+    # rf.PHASE_PIZZA_BOMB = 11
+    # rf.PHASE_PAYDAY = 7
+    # rf.PHASE_MARKETING_CAMPAIGNS = 8
+    # rf.PHASE_COFFE_SHOP_MS = 12
+    # rf.PHASE_CLEAN_UP = 9
+    # rf.PHASE_GAME_OVER = 10
+    # rf.PHASE_SETUP_MODULES = 13
+
+    def isThisValidActualMoveArrForPhase(self, phase, moveArr):
+        from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
+
+        # If the phase is < 0 then it is not an actual move
+        if moveArr[1][0] < 0:
+            return False
+        # Check the game phase is in the move phase array
+        if phase not in moveArr[1]:
+            message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase1 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
+            SN_sendAdminErrorMessage("", message)
+            return False
+
+        # Now we have move data that should match the phase. So just check it is valid
+        if moveArr[3] == []:
+            return False
+
+        # Res card is single array of length one, containing 1,2,or 3
+        if phase <= 2:
+            data = moveArr[3]
+            if not isinstance(data, list) or len(data) != 1 or data[0] not in [1, 2, 3]:
+                message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase2 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
+                SN_sendAdminErrorMessage("", message)
+                return False
+            return True
+
+        # Restruc is an arrayy, like [arr,arr,int]
+        if phase == 3:
+            moveData = moveArr[3]
+            # Make sure it's an array, Make sure it has a length of 3, Make sure the first element is an array, second element is an array, and third element is a single int of 0,1,2
+            validData = True
+            if not isinstance(moveData, list) or len(moveData) != 3:
+                validData = False
+            if not isinstance(moveData[0], list) or not isinstance(moveData[1], list):
+                validData = False
+            if not isinstance(moveData[2], int) or moveData[2] not in [0, 1, 2]:
+                validData = False
+
+            # If the daya is not valid, delete it and return false
+            if not validData:
+                message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase3 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
+                SN_sendAdminErrorMessage("", message)
+                return False
+
+            return True
+
+        if phase == 4:
+            moveData = moveArr[3]
+            # Make sure it's an array, Make sure it has a length of 3, Make sure the first element is an array, second element is an array, and third element is a single int of 0,1,2
+            validData = True
+            if not isinstance(moveData, list) or len(moveData) != 3:
+                validData = False
+            if not isinstance(moveData[0], list) or not isinstance(moveData[1], list):
+                validData = False
+            if not isinstance(moveData[2], int) or moveData[2] not in [0, 1, 2]:
+                validData = False
+
+            if not validData:
+                message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase3.4 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
+                SN_sendAdminErrorMessage("", message)
+                return False
+
+            if moveData[2] == 1 or moveData[2] == 2:
+                return True
+
+            return False
+
+        # Now phase is 7 or 9, AND there is move data
+        # moveData = [[[-9],[]],[-9]]
+        if phase in [5, 6, 7, 8, 9, 11, 12, 15]:
+            moveData = moveArr[3]
+            # check the move array is a list with 2 items (one for each phase)
+            if not isinstance(moveData, list) or len(moveData) != 2:
+                message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase4 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
+                SN_sendAdminErrorMessage("", message)
+                return False
+            # check there are 2 arrays, one for each phase
+            if not isinstance(moveData[0], list) or not isinstance(moveData[1], list):
+                message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase5 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
+                SN_sendAdminErrorMessage("", message)
+                return False
+            # First arr must be an arr then an arr
+            if not isinstance(moveData[0][0], list) or not isinstance(
+                moveData[0][1], list
+            ):
+                message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase6 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
+                SN_sendAdminErrorMessage("", message)
+                return False
+            # Second arr must just contain at least one int
+            if len(moveData[1]) < 1 or not isinstance(moveData[1][0], int):
+                message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase7 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
+                SN_sendAdminErrorMessage("", message)
+                return False
+
+            # Now there is valid data, so check it is an ACTUAL move
+            if phase == 7 and moveData[0][0][0] == -9:
+                return False
+            if phase == 9 and moveData[1][0] == -9:
+                return False
+
+            return True
+
+    def insertPlayerMoveData(self, name, phasesArr, moveArr):
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+
+        playersMoveDataArr[arrIdx] = [
+            name,
+            phasesArr,
+            str(int(time.time()) * 1000),
+            moveArr,
+        ]
+
+        self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
+
+        self.gameObj.save()
+
+    def getCompressedMoveArr(self, name, forceReturnForPresetCleanup=False):
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        # Only return the move if it is valid for current phase OR has a preset-clenaup
+        if (
+            self.isThisValidActualMoveArrForPhase(
+                self.gameObj.phase, playersMoveDataArr[arrIdx]
+            )
+            or forceReturnForPresetCleanup
+        ):
+            return base64.b64encode(
+                gzip.compress(
+                    json.dumps(
+                        playersMoveDataArr[arrIdx], separators=(",", ":")
+                    ).encode("utf-8")
+                )
+            ).decode("utf-8")
+
+    def deleteSinglePlayersMove(self, name):
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        playersMoveDataArr[arrIdx] = [name, [-1], "", []]
+        self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
+        self.gameObj.save()
+
+    def clearAllMoveDataV2(self):
+        self.gameObj.FCMplayersMoveData = ""
+        self.gameObj.save()
+
+    def getJsonMoveResponseV2(self, notRequiedPlayerNames):
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        playersToMove = []
+        missingPlayers = set(
+            self.gameObj.players.filter(is_missing=True)
+            .values_list("player__username", flat=True)
+        )
+        if self.gameObj.relatedFCMTournament:
+            missingPlayers = {}
+        for subArr in playersMoveDataArr:
+            if (
+                subArr[0] not in notRequiedPlayerNames
+                and subArr[0] not in missingPlayers
+                and not self.isThisValidActualMoveArrForPhase(self.gameObj.phase, subArr)
+            ):
+                playersToMove.append(subArr[0])
+
+        # If players left to move, then return them
+        if len(playersToMove) > 0:
+            jsonResponse = {"allPlayersMoved": False, "playersToMove": playersToMove}
+            return jsonResponse
+
+        # All players have moved, so return move data
+        jsonResponse = {
+            "allPlayersMoved": True,
+            "moveData": base64.b64encode(
+                gzip.compress(
+                    json.dumps(playersMoveDataArr, separators=(",", ":")).encode(
+                        "utf-8"
+                    )
+                )
+            ).decode("utf-8"),
+        }
+        # Don't clear moves at end of payday to preserve fridge data
+        # Actually, clearing moves can cause no turn order if the players browser doesn't respond
+        if self.gameObj.phase != 7 and self.gameObj.phase != 3:
+            # self.clearAllMoveDataV2()
+            pass
+
+        # Add latest update to stop flex time being double deducted
+        newVer = (int(self.gameObj.latestUpdate) % 1000) + 1
+        self.gameObj.latestUpdate = str((int(time.time()) * 1000) + newVer)
+        # jsonResponse.append({"latestUpdate": self.latestUpdate})
+        jsonResponse["latestUpdate"] = self.gameObj.latestUpdate
+
+        return jsonResponse
+
+    #########################################################
+    #
+    #   END OF NEW SIMUL MOVE FUNCTIONS
+    #
+    #########################################################
+
+    # This should be superfluouts, as data is updated after rewind anyway
+    def addAllPlayersToCurrentPlayers(self):
+        # Original code: getAllPlayersOrderedySeat(False) returns "FcmBot" for missing players
+        # So missing players are NOT set as current (matching original behavior where
+        # currentPlayers string contained "FcmBot" instead of the missing player's username)
+        for gp in self.gameObj.players.exclude(is_kicked=True):
+            should_be_current = not gp.is_missing
+            if gp.is_current != should_be_current:
+                gp.is_current = should_be_current
+                gp.save()
+        self.gameObj.save()
+
+    def getCurrentSimulPlayers(self):
+        # ASSUME THAT self.currentPlayers IS THE LATEST JSON INCOMING
+        # ASSUME THAT phase is the start of simul phase
+
+        currentPlayers = self._getCurrentPlayersField()
+
+        # If there ar no current players, add everyone
+        if currentPlayers == "":
+            _currentPlayers = ""
+            for gp in self.gameObj.players.all().select_related("player"):
+                if gp.player and gp.player.username != "FCMtourneyAdmin":
+                    _currentPlayers += gp.player.username + ","
+            # remove final comma
+            _currentPlayers = _currentPlayers[:-1]
+            return _currentPlayers
+
+        # Get an array of possible player to move
+        _currentPlayers = [player.strip() for player in currentPlayers.split(",")]
+        # Remove missing players
+        missing_players = set(
+            self.gameObj.players.filter(is_missing=True)
+            .values_list("player__username", flat=True)
+        )
+        if self.gameObj.relatedFCMTournament:
+            missing_players = {}
+        _currentPlayers = [
+            username for username in _currentPlayers if username not in missing_players
+        ]
+
+        # If any play has a move, then remove them
+        playersToRemove = []
+        for username in _currentPlayers:
+            if self.hasValidActualMoveData(username):
+                playersToRemove.append(username)
+
+        for username in playersToRemove:
+            _currentPlayers.remove(username)
+
+        # Join the list elements with ','
+        _currentPlayers = ",".join(_currentPlayers)
+
+        return _currentPlayers
+
+    # This just converts to array
+    def getCurrentPlayersArray(self):
+        currentPlayers = self._getCurrentPlayersField()
+        return [player.strip() for player in currentPlayers.split(",")]
+
+    def getCurrentPlayersArrayForReminderEmail(self):
+        return self.getCurrentPlayersArray()
+
+    # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
+    def getRewindHostHTML(self):
+        USE_NEW_CODE = False
+        if int(self.gameObj.created) > 1744974000000:
+            USE_NEW_CODE = True
+
+        rewindConsentVotes = self.getFullSetOfVoteResults(
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
+        missingPlayerNames = self.getMissingPlayersNamesArray()
+
+        rewindHTML = ""
+
+        for player, vote_value in rewindConsentVotes.items():
+            if player != getattr(self.gameObj.host, "username"):
+                if vote_value == 0:
+                    rewindHTML += (
+                        "<span style='background-color:red'>"
+                        + player
+                        + ": "
+                        + gettext("No Permission")
+                        + "</span><BR/>"
+                    )
+                elif vote_value == 1:
+                    rewindHTML += (
+                        "<span style='background-color:green'>"
+                        + player
+                        + ": "
+                        + gettext("Single Permission")
+                        + "</span><BR/>"
+                    )
+                elif vote_value == 2:
+                    rewindHTML += (
+                        "<span style='background-color:green'>"
+                        + player
+                        + ": "
+                        + gettext("Permanent Permission")
+                        + "</span><BR/>"
+                    )
+        return rewindHTML
+
+    def getRewindHostPossible(self):
+        # TODO - move this to new vote system
+        starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+        if 102 in starting_options:
+            return True
+        rewindConsentVotes = self.getFullSetOfVoteResults(
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
+        missingPlayerNames = self.getMissingPlayersNamesArray()
+        hostUsername = getattr(self.gameObj.host, "username")
+        possible = True
+        for player in rewindConsentVotes:
+            # If the player is not missing, and has a 0 vote, then it is not possible
+            if (
+                player not in missingPlayerNames
+                and rewindConsentVotes[player] == 0
+                and player != hostUsername
+            ):
+                possible = False
+        return possible
+
+    def removeSingleRewindPermission(self):
+        rewindConsentVotes = self.getFullSetOfVoteResults(
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
+        for player in rewindConsentVotes:
+            if rewindConsentVotes[player] == 1:
+                rewindConsentVotes[player] = 0
+
+        self.setVoteResults(
+            REWIND_CONSENT_VOTE_TOPIC, rewindConsentVotes
+        )
+
+    def getCurrentRewindConsent(self, _username):
+        # return 0,1, or 2
+        rewindConsentVotes = self.getFullSetOfVoteResults(
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
+        if _username in rewindConsentVotes:
+            return rewindConsentVotes[_username]
+        else:
+            return 0
+
+    # takes in a user object
+    def checkForHostChange(self, _missingUser):
+        if _missingUser == self.gameObj.creator:
+            possibleHostGP = (
+                self.gameObj.players.filter(is_missing=False)
+                .select_related("player")
+                .order_by("?")
+                .first()
+            )
+            self.gameObj.host = possibleHostGP.player if possibleHostGP else None
+            self.gameObj.save()
+
+    def isTournamentRoundFinished(self, tournamentProgressionDataArray):
+        if self.gameObj.relatedFCMTournament is None:
+            return False
+
+        from Lobby.models import Game
+
+        # Check all games from previous round are finished
+        finishedGames = 0
+        for row in tournamentProgressionDataArray[-1]:
+            if row[0] == "BYEPLAYERS":
+                finishedGames += 1
+            else:
+                game_id = row[self.gameObj.relatedFCMTournament.maxGamePlayers]
+                try:
+                    game = Game.objects.get(id=game_id, gameCode='FCM')
+                except Game.DoesNotExist:
+                    game = Game.objects.get(gameCode='FCM', original_id=game_id)
+                if game.gameStatus == "FINISHED":
+                    finishedGames += 1
+        if finishedGames == len(tournamentProgressionDataArray[-1]):
+            return True
+        return False
+
+    # Takes in self, request, and then 3 JSON[""] pieces of string data
+    def endGame(self, request, _winnerUsername, _finalScores, _tournamentData, _gameID):
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendEndGameNotification
+        from Lobby.sharedFunctions.sharedFunctions import (
+            SF_M_ProcessTournamentEndGame,
+            SF_M_ProcessAnyTournamentEndGame,
+        )
+        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+
+        self.gameObj.rewindData = ""
+        self.gameObj.rewindTempData = ""
+        self.gameObj.kickoutFlexiData = ""
+        self.gameObj.activeVotes = None
+        self.gameObj.gameStatus = "FINISHED"
+
+        winner_user = User.objects.get(username=_winnerUsername)
+        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        if winner_gp:
+            winner_gp.winner = True
+            winner_gp.save()
+
+        try:
+            self.gameObj.deleteGameVotes = None
+        except:
+            pass
+        self.clearAllMoveDataV2()
+        self.gameObj.save()
+
+        # This is sorted with winner in [0][name, money]
+        finalPositions = []
+        for i in range(len(_finalScores)):
+            finalPositions.append(_finalScores[i][0])
+        SN_M_sendEndGameNotification(request, "FCM", finalPositions, _gameID, self.gameObj)
+
+        if self.gameObj.relatedFCMTournament:
+            SF_M_ProcessTournamentEndGame(request, "FCM", self.gameObj, [_winnerUsername])
+        elif self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MAIN_T_FLAG,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                [_winnerUsername],
+                _tournamentData,
+            )
+        elif self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                MINI_T_FLAG,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                [_winnerUsername],
+                _tournamentData,
+            )
+
+    def getOOBpreference(self, name):
+        if not self.gameObj.FCMplayersMoveData:
+            return 0
+        seat = self.seatPosition(name)
+        if seat < 0:
+            return 0
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        if arrIdx == -1:
+            return 0  # Player's move data not found
+
+        playerMoveArr = playersMoveDataArr[arrIdx]
+
+        # If no phase is set, then there's no move Data
+        if playerMoveArr[1] == [-1]:
+            return 0
+
+        # Finally, check it is valid
+        if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr):
+            if self.gameObj.phase == 4:
+                return playerMoveArr[3][2]
+
+        return 0
+
+    def setOOBpreference(self, name, OOBpreference):
+        if not self.gameObj.FCMplayersMoveData:
+            return False
+        seat = self.seatPosition(name)
+        if seat < 0:
+            return False
+        playersMoveDataArr = self.getOrScaffoldAllMoveData()
+        arrIdx = next(
+            (
+                i
+                for i, sub_arr in enumerate(playersMoveDataArr)
+                if len(sub_arr) > 0 and sub_arr[0] == name
+            ),
+            -1,
+        )
+        if arrIdx == -1:
+            return False  # Player's move data not found
+
+        playerMoveArr = playersMoveDataArr[arrIdx]
+
+        # If no phase is set, then there's no move Data
+        if playerMoveArr[1] == [-1]:
+            playerMoveArr[1] = [3,4]
+
+        # Finally, check it is valid
+        if self.gameObj.phase == 4:
+            playerMoveArr[3][2] = OOBpreference
+            self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
+            print(playerMoveArr)
+            print(self.gameObj.FCMplayersMoveData)
+            self.gameObj.save()
+            return True
+
+        return False
+
+    def getGameCode(self):
+        return "FCM"

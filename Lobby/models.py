@@ -12,8 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, RnbPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -543,7 +542,7 @@ class Game(BaseGame):
     if TYPE_CHECKING:
         players: RelatedManager[GamePlayer]
 
-    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter]:
+    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter]:
         if self.gameCode == "CNS":
             return CannesPresenter(self)
         if self.gameCode == "WEB":
@@ -558,6 +557,8 @@ class Game(BaseGame):
             return BusPresenter(self)
         if self.gameCode == "FCM":
             return FcmPresenter(self)
+        if self.gameCode == "RNB":
+            return RnbPresenter(self)
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
