@@ -57,7 +57,7 @@ from Bus.models import Bus_Game
 from FCM.models import FCM_Game
 from FCM.models import FCM_Tournament
 from KFW.models import KFW_Game
-from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament
+from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament, Mini_Tournaments
 
 from Lobby.sharedFunctions.sharedFunctions import SF_endAnyTournament#(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
 
@@ -111,9 +111,9 @@ def update_ids_recursive(data, id_map):
                 update_ids_recursive(item, id_map)
 
 # 1. Collect all old IDs across all relevant tournaments
-tournamentsToConvert = Main_Tournament.objects.filter(
+tournamentsToConvert = Mini_Tournaments.objects.filter(
     gameCode=TARGET_CODE,
-    id__gte=9
+    id__gte=0
 )
 old_ids = set()
 
