@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
+
+admin.site.unregister(Group)
 
 # Register your models here.
 from .models import (
@@ -10,7 +13,7 @@ from .models import (
     Game,
     GamePlayer,
 )
-from .modelProxies import FCMMiniTournament, TGZMiniTournament, CNSgame, WEBgame, AQYgame, TGZgame, INDgame, Busgame, FCMgame
+from .modelProxies import FCMMiniTournament, TGZMiniTournament, CNSgame, WEBgame, AQYgame, TGZgame, INDgame, Busgame, FCMgame, RNBgame
 
 from django.conf import settings
 from django import forms
@@ -475,5 +478,13 @@ class FCMgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "FCM"
+        
+@admin.register(RNBgame)
+class RNBgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="RNB")
+
+    class Meta:
+        app_label = "RNB"
 
 ################### END Register game objects to specific app

@@ -430,6 +430,8 @@ GAME_NAMES_MODELS = {
     "IND": "IND",  # Now using unified Game model
     "KFW": KFW_Game,
     "WEB": "WEB",  # Now using unified Game model
+    "RNB": "RNB",
+    "BOB": "BOB",
 }
 GAME_MODELS = [
     HC_Game,
@@ -538,8 +540,8 @@ def indexSpecialRedirect(request):
         return redirect("index")
 
     # return redirect('index')
-    return HttpResponseRedirect(reverse("RNB:showRNBgame"))
-    # return HttpResponseRedirect(reverse('IND:showINDgame'))
+    #return HttpResponseRedirect(reverse("RNB:showRNBgame"))
+    return HttpResponseRedirect(reverse("createRNBpage"))
 
 
 def set_language_custom(request):
@@ -3687,6 +3689,8 @@ def deleteGame(request, gameType):
             return JsonResponse({"noGame": True}, safe=False)
 
         if SR_usesUnifiedGameModel(gameType):
+            print(gameType)
+            print(jsonData["gameID"])
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameType)
         else:
             currentGame = gameModel.objects.get(id=jsonData["gameID"])
