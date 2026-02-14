@@ -460,7 +460,8 @@
     global.historyOrder = 0;
 
     {% if currentNotes %}
-    global.notes = "{{ currentNotes | safe }}";
+    // This must be single quotes, as names are in double
+    global.notes = '{{ currentNotes | safe }}';
     {% else %}
     global.notes = ""
     {% endif %}
