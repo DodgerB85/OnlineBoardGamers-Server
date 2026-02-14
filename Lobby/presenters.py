@@ -3942,9 +3942,9 @@ class FcmPresenter(GamePresenter):
             finalPositions.append(_finalScores[i][0])
         SN_M_sendEndGameNotification(request, "FCM", finalPositions, _gameID, self.gameObj)
 
-        if self.gameObj.relatedFCMTournament:
-            SF_M_ProcessTournamentEndGame(request, "FCM", self.gameObj, [_winnerUsername])
-        elif self.gameObj.relatedMainTournament:
+        #if self.gameObj.relatedFCMTournament:
+        #    SF_M_ProcessTournamentEndGame(request, "FCM", self.gameObj, [_winnerUsername])
+        if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
                 MAIN_T_FLAG,
