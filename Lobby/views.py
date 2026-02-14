@@ -2382,6 +2382,7 @@ def createWEBpage(request, gameID=0):
 
     return HttpResponse(status=204)  # No Content
 
+@login_required
 def createRNBpage(request, gameID=0):
     if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")
