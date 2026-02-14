@@ -41,6 +41,20 @@ from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOT
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
+ALLOWED_USERS_RNB = [
+        "admin",
+        "DodgerB",
+        "durendal",
+        "Benkyo",
+        "vraid",
+        "JoshuaAcosta",
+        "massibull",
+        "phil",
+        "timmymayes",
+        "SaintJason",
+        "h",
+]
+
 if TYPE_CHECKING:
     from Lobby.presenters import RnbPresenter 
 
@@ -63,9 +77,9 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     #                 #'looogic', 'Burmer',
     #                 #'pgh_gamer', , 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
     ##print("******************************************************************************************************** IND ACCESS: =================================================:  " + request.user.username)
-    ALLOWED_USERS = ['admin', 'DodgerB', 'durendal', 'Benkyo', 'vraid', 'JoshuaAcosta', "massibull", "phil", "timmymayes", "SaintJason"]
+    #ALLOWED_USERS = ['admin', 'DodgerB', 'durendal', 'Benkyo', 'vraid', 'JoshuaAcosta', "massibull", "phil", "timmymayes", "SaintJason"]
     
-    if request.user.username not in ALLOWED_USERS:
+    if request.user.username not in ALLOWED_USERS_RNB:
         return redirect('index')
  
     try:
@@ -110,7 +124,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "gameName": gameName,
         "gameData": gameData,
         "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 16,
+        "myZoomLevel": 24,
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
