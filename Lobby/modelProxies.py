@@ -74,3 +74,11 @@ class FCMgame(Game):
         app_label = "FCM"
         verbose_name = "FCM_Game"
         verbose_name_plural = "FCM_Games"
+        
+# RNB
+class RNBgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "RNB"
+        verbose_name = "RNB_Game"
+        verbose_name_plural = "RNB_Games"
