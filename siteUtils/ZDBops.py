@@ -98,7 +98,7 @@ allUsers = User.objects.all()
 games = allHCgames
 count = 0
 
-TARGET_CODE = "Bus"
+TARGET_CODE = "FCM"
 
 def update_ids_recursive(data, id_map):
     """Recursively wanders through lists to replace old IDs with new ones."""
