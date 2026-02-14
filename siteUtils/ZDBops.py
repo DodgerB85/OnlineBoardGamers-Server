@@ -53,7 +53,6 @@ django.setup()
 from django.contrib.sites.models import Site
 
 from HC.models import HC_Game, HC_Tournament
-from Bus.models import Bus_Game
 from FCM.models import FCM_Game
 from KFW.models import KFW_Game
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament, Mini_Tournaments
@@ -64,7 +63,6 @@ from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
 allFCMgames = FCM_Game.objects.all()
 allHCgames = HC_Game.objects.all()
-allBUSgames = Bus_Game.objects.all()
 allKFWgames = KFW_Game.objects.all()
 allMiniTs = Mini_Tournaments.objects.all()
 

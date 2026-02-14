@@ -59,7 +59,6 @@ from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
-#allBUSgames = Bus_Game.objects.all()
 #allMiniTs = Mini_Tournaments.objects.all()
 
 #game = HC_Game.objects.last()
