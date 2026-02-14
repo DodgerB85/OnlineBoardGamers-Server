@@ -60,96 +60,6 @@ logger = logging.getLogger(__name__)
 
 USE_NEW_CODE = False
 
-
-class FCM_Tournament(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    tournamentName = models.CharField(max_length=120)
-    tournamentStatus = models.CharField(
-        max_length=2,
-        choices=SR_TOURNAMENT_STATUS_CHOICES,
-        default="OP",
-    )
-
-    tournamentType = models.CharField(
-        max_length=2,
-        choices=SR_TOURNAMENT_TYPE_CHOICES,
-        default="RR",
-    )
-
-    startingOptions = models.CharField(max_length=80, blank=True)
-    startingPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="startingPlayersRelName", blank=True
-    )
-    nextRoundPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="currentRoundPlayersRelName", blank=True
-    )
-
-    maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
-    maxGamePlayers = models.PositiveSmallIntegerField(blank=False)
-    roundsBeforeKnockout = models.PositiveSmallIntegerField(blank=False, default=4)
-
-    winnersData = models.TextField(blank=True)
-
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-    tournamentProgressionData = models.TextField(blank=True)
-    tournamentSideData = models.TextField(blank=True)
-    tournamentPointsData = models.TextField(blank=True)
-
-    def __str__(self):
-        # Use currentPlayers if available, otherwise fall back to gameName and status
-        return f"{getattr(self, 'id')}: {self.tournamentName} : {self.tournamentStatus}: {self.maxTournamentPlayers} players"
-
-    def isSignedUp(self, loggedInUser=None):
-        if loggedInUser in self.startingPlayers.all():
-            return True
-        return False
-
-    def getByedPlayersList(self):
-        byedPlayerList = []
-        TPDA = json.loads(self.tournamentProgressionData)
-        for round in TPDA:
-            for row in round:
-                if row[0] == "BYEPLAYERS":
-                    byedPlayerList.extend(row)
-
-        return byedPlayerList
-
-    def get_tournamentType_display(self):
-        return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
-
-    def serialize(self, loggedInUser=None):
-        # Used for Finished Games
-        winnerHTML = SR_getTournamentWinnerHTML(self.tournamentStatus, self.winnersData)
-
-        createdTS = str(self.created)
-        startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
-
-        return {
-            "tournamentID": getattr(self, "id"),
-            "tournamentName": self.tournamentName,
-            "tournamentType": self.get_tournamentType_display(),
-            "maxTournamentPlayers": self.maxTournamentPlayers,
-            "maxGamePlayers": self.maxGamePlayers,
-            "startingOptionsHTML": startingOptionsHTML,
-            "winnerHTML": winnerHTML,
-            "createdTS": createdTS,
-            "gameCode": "FCM",
-            "tournamentLink": f"/FCMtournament/FCM/{self.id}/",
-        }
-
-    def getRoundsHTML(self):
-        # Only for IP or FN tournaments
-        roundsHTML = SR_getTournamentRoundsHTML(
-            self.tournamentType,
-            self.maxGamePlayers,
-            self.tournamentProgressionData,
-            self.tournamentPointsData,
-            "FCM",
-            self,
-        )
-        return roundsHTML
-
-
 class FCM_Game(GeneralGame):
     allPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="allPlayersRelName"
@@ -202,14 +112,6 @@ class FCM_Game(GeneralGame):
 
     player4notes = models.TextField(blank=True)
     player5notes = models.TextField(blank=True)
-
-    relatedTournament = models.ForeignKey(
-        FCM_Tournament,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="tournament_relName",
-    )
 
     relatedMainTournament = models.ForeignKey(
         Main_Tournament,
@@ -611,8 +513,8 @@ class FCM_Game(GeneralGame):
                 self.missingPlayers.values_list("username", flat=True)
             )
             # In a tournament, don't remove missing players, as FCMtA plays for them
-            if self.relatedTournament:
-                missing_players = {}
+            #if self.relatedMainTournament:
+            #    missing_players = {}
             return [
                 [
                     playerName,
@@ -970,8 +872,8 @@ class FCM_Game(GeneralGame):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         playersToMove = []
         missingPlayers = set(self.missingPlayers.values_list("username", flat=True))
-        if self.relatedTournament:
-            missingPlayers = {}
+        #if self.relatedTournament:
+        #    missingPlayers = {}
         for subArr in playersMoveDataArr:
             if (
                 subArr[0] not in notRequiedPlayerNames
@@ -1040,8 +942,8 @@ class FCM_Game(GeneralGame):
         _currentPlayers = [player.strip() for player in self.currentPlayers.split(",")]
         # Remove missing players
         missing_players = set(self.missingPlayers.values_list("username", flat=True))
-        if self.relatedTournament:
-            missing_players = {}
+        #if self.relatedMainTournament:
+        #    missing_players = {}
         _currentPlayers = [
             username for username in _currentPlayers if username not in missing_players
         ]
@@ -1165,20 +1067,20 @@ class FCM_Game(GeneralGame):
             self.save()
 
     def isTournamentRoundFinished(self, tournamentProgressionDataArray):
-        if self.relatedTournament is None:
-            return False
+        #if self.relatedTournament is None:
+         #   return False
 
         # Check all games from previous round are finished
         finishedGames = 0
         for row in tournamentProgressionDataArray[-1]:
             if row[0] == "BYEPLAYERS":
                 finishedGames += 1
-            else:
-                game = FCM_Game.objects.get(
-                    id=row[self.relatedTournament.maxGamePlayers]
-                )
-                if game.gameStatus == "FINISHED":
-                    finishedGames += 1
+            #else:
+            #    #game = FCM_Game.objects.get(
+            #    #    id=row[self.relatedTournament.maxGamePlayers]
+            #    #)
+            #    if game.gameStatus == "FINISHED":
+            #        finishedGames += 1
         if finishedGames == len(tournamentProgressionDataArray[-1]):
             return True
         return False
@@ -1204,9 +1106,9 @@ class FCM_Game(GeneralGame):
             finalPositions.append(_finalScores[i][0])
         SN_M_sendEndGameNotification(request, "FCM", finalPositions, _gameID, self)
 
-        if self.relatedTournament:
-            SF_M_ProcessTournamentEndGame(request, "FCM", self, [_winnerUsername])
-        elif self.relatedMainTournament:
+        #if self.relatedTournament:
+        #    SF_M_ProcessTournamentEndGame(request, "FCM", self, [_winnerUsername])
+        if self.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
                 MAIN_T_FLAG,

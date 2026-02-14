@@ -176,7 +176,7 @@ def createFCMgame(request):
 def showGame(request, game_id):
     try:
         currentGame = (
-            Game.objects.select_related("host", "relatedFCMTournament")
+            Game.objects.select_related("host")
             .prefetch_related(
                 "players__player",
                 "invitedPlayers",
@@ -213,7 +213,7 @@ def showGame(request, game_id):
     if int(currentGame.created) > 1744974000000:
         USE_NEW_CODE = True
 
-    if currentGame.relatedFCMTournament and request.user.username == "FCMtourneyAdmin":
+    if currentGame.relatedMainTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
 
     startingOptionsHTML = SR_getFCMstartingOptionsHTML(
@@ -325,7 +325,7 @@ def showGame(request, game_id):
 
     # If person is logged in and in the game
     if involvedPlayer:
-        if currentGame.relatedFCMTournament:
+        if currentGame.relatedMainTournament:
             tournamentGame = True
         rewindPanelType = 1
         if currentGame.host == request.user:
@@ -561,7 +561,7 @@ def _processTurn(request):
 
     presenter = cast('FcmPresenter', currentGame.presenter())
 
-    if currentGame.relatedFCMTournament and request.user.username == "FCMtourneyAdmin":
+    if currentGame.relatedMainTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
 
     # loads the latest game and updates latest-Update

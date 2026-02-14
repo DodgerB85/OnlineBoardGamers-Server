@@ -105,7 +105,6 @@ from .models import (
     QueryableGameAllPlayers,
 )
 
-from FCM.models import FCM_Tournament
 from HC.models import HC_Game, HC_Tournament
 from KFW.models import KFW_Game
 from RNB.models import RNB_Game
@@ -1353,7 +1352,6 @@ def index(request):
 
     list_type = request.session.pop("listType", "current")
     tournament_models = {
-        "FCM": FCM_Tournament,
         "HC": HC_Tournament,
     }
 
@@ -3032,13 +3030,11 @@ def playerInfo(request, usernameToProfile):
 
 @login_required()
 def AllTournaments(request):
-    tournaments_FCM = FCM_Tournament.objects.order_by("-id").all()
     tournaments_HC = HC_Tournament.objects.order_by("-id").all()
     tournaments_MAIN = Main_Tournament.objects.order_by("-id").all()
 
     tournaments = sorted(
         chain(
-            tournaments_FCM,
             tournaments_HC,
             tournaments_MAIN,
         ),
@@ -3062,8 +3058,6 @@ def Tournament(request, gameType, tournamentID):
     if request.method == "POST":
         currentTournament = None
         try:
-            if gameType == "FCM":
-                currentTournament = FCM_Tournament.objects.get(id=tournamentID)
             if gameType == "HC":
                 currentTournament = HC_Tournament.objects.get(id=tournamentID)
         except Exception:
@@ -3092,8 +3086,6 @@ def Tournament(request, gameType, tournamentID):
 
     currentTournament = None
     try:
-        if gameType == "FCM":
-            currentTournament = FCM_Tournament.objects.get(id=tournamentID)
         if gameType == "HC":
             currentTournament = HC_Tournament.objects.get(id=tournamentID)
     except Exception:
