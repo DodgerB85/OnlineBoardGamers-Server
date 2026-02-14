@@ -53,14 +53,14 @@ django.setup()
 
 from django.contrib.sites.models import Site
 
-from Bus.models import Bus_Game, Bus_Tournament
+from FCM.models import FCM_Game, FCM_Tournament
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament
 
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
-allBUSgames = Bus_Game.objects.all()
-allMiniTs = Mini_Tournaments.objects.all()
+#allBUSgames = Bus_Game.objects.all()
+#allMiniTs = Mini_Tournaments.objects.all()
 
 #game = HC_Game.objects.last()
 #for game in allTGZgames:
@@ -79,7 +79,7 @@ remaining_finish_time_expired = -60 *60 * 24 * 30 # Now
 
 PRINT_TIME = True
 
-LZD = lzstring.LZString()
+#LZD = lzstring.LZString()
 
 start_calc_time = time.perf_counter()
 count = 0
@@ -137,32 +137,32 @@ def transform_tpda(old_tpda_str, tournament_name):
         return old_tpda_str
 
 def migrate_bus_to_main():
-    bus_tourneys = Bus_Tournament.objects.all()
+    fcm_tourneys = FCM_Tournament.objects.all()
     
     with transaction.atomic():
-        for bus in bus_tourneys:
+        for fcm in fcm_tourneys:
             # Apply the specific index transformation
-            converted_tpda = transform_tpda(bus.tournamentProgressionData, bus.tournamentName)
+            converted_tpda = transform_tpda(fcm.tournamentProgressionData, fcm.tournamentName)
             
             main = Main_Tournament.objects.create(
-                gameCode="Bus",
-                tournamentName=bus.tournamentName,
-                tournamentStatus=bus.tournamentStatus,
-                tournamentType=bus.tournamentType,
-                startingOptions=bus.startingOptions,
-                maxTournamentPlayers=bus.maxTournamentPlayers,
-                maxGamePlayers=bus.maxGamePlayers,
-                roundsBeforeKnockout=bus.roundsBeforeKnockout,
-                winnersData=bus.winnersData,
-                created=bus.created,
+                gameCode="FCM",
+                tournamentName=fcm.tournamentName,
+                tournamentStatus=fcm.tournamentStatus,
+                tournamentType=fcm.tournamentType,
+                startingOptions=fcm.startingOptions,
+                maxTournamentPlayers=fcm.maxTournamentPlayers,
+                maxGamePlayers=fcm.maxGamePlayers,
+                roundsBeforeKnockout=fcm.roundsBeforeKnockout,
+                winnersData=fcm.winnersData,
+                created=fcm.created,
                 tournamentProgressionData=converted_tpda,
-                tournamentSideData=bus.tournamentSideData,
-                tournamentPointsData=bus.tournamentPointsData,
+                tournamentSideData=fcm.tournamentSideData,
+                tournamentPointsData=fcm.tournamentPointsData,
             )
 
             # Copy Many-to-Many relationships
-            main.startingPlayers.set(bus.startingPlayers.all())
-            main.nextRoundPlayers.set(bus.nextRoundPlayers.all())
+            main.startingPlayers.set(fcm.startingPlayers.all())
+            main.nextRoundPlayers.set(fcm.nextRoundPlayers.all())
 
             print(f"Migrated and Formatted: {main.tournamentName}")
 
