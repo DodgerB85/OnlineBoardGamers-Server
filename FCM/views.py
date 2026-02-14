@@ -376,18 +376,11 @@ def showGame(request, game_id):
             currentGame.gameData == ""
             and "SHADOW" in presenter.getAllPlayersOrderedySeat(False, False)
         ):
-            displayNames = ["test"]
-            seat0_gp = None
-            try:
-                seat0_gp = currentGame.players.filter(seat_order=0).first()
-                displayNames = json.loads(seat0_gp.notes) if seat0_gp and seat0_gp.notes else ["SHADOW"]
-            except Exception as e:
-                displayNames = ["SHADOW"]
-                print(f"Failed to load displayNames, {e} ")
+            displayNames = player_gp.notes if player_gp else ""
+            if player_gp:
+                player_gp.notes = ""
+                player_gp.save()
             currentNotes = ""
-            if seat0_gp:
-                seat0_gp.notes = ""
-                seat0_gp.save()
 
     # print_timestamp("Step 5: involvedPlayer processing done")
 
