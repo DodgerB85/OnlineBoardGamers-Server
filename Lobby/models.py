@@ -13,6 +13,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy
 
 from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, RnbPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,

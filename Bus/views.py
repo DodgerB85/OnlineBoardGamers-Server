@@ -477,7 +477,7 @@ def db_mutex(name, timeout=10):
 
 
 @login_required()
-def sendChatMessage(request, game_id=None):
+def sendChatMessage(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -536,7 +536,7 @@ def _sendChatMessage(request):
 
 
 @login_required()
-def processBusTurn(request, game_id=None):
+def processBusTurn(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -846,7 +846,7 @@ def _processBusTurn(request):
 
 
 @login_required
-def changeBusViewport(request, game_id=None):
+def changeBusViewport(request):
     if request.method != "PUT":
         return JsonResponse({"error": "Wrong request."}, status=400)
 
@@ -917,7 +917,7 @@ def bugEntry(request):
 
 
 @login_required()
-def voteToDelete(request, game_id=None):
+def voteToDelete(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 

@@ -5,7 +5,20 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="{% static 'Lobby/favicon.png' %}" />
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'RNB/images/rnb_icon.png' %}" />
+    <meta name="title" content="Online Board Gamers - Antiquity">
+    <meta name="description"
+          content="Play Splotter's Antiquity Online for free with others, or solo!">
+    <meta name="keywords"
+          content="Antiquity,Online,Play,Board,Game,Games,Gamers">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="200 days">
+    <meta name="author" content="Online Board Gamers">
+    <title>OBG - {{ gameName }}</title>
     <style>
     body {
       margin: 0px !important;
@@ -25,7 +38,7 @@
 
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
-    {% if debug %}
+    {% if settingsDebug %}
       <script type="module" src="http://localhost:3042/static/@vite/client"></script>
       <script type="module" src="http://localhost:3042/static/main.js"></script>
     {% else %}
@@ -34,7 +47,6 @@
               crossorigin=""
               src="{% static 'RNB/RNBvuedist/main.js' %}"></script>
     {% endif %}
-    <title>Roads & Boats</title>
   </head>
   <body>
     <noscript>
@@ -42,63 +54,103 @@
     </noscript>
     <div id="app">
       <div id="loadingText">Roads & Boats is loading........</div>
-      
     </div>
   </body>
   <script>
+  /*const yearElement = document.getElementById('year');
+
+  //const startYear = new Date().getFullYear();
+  const endYear = 1826;
+  //const duration = 3000;
+  //const fontSizeDifference = 2000; // Increase the font size difference
+
+  let currentYear = 1900;
+
+  setInterval(() => {
+            if (currentYear > 1826) {
+                currentYear--;
+                yearElement.innerText = currentYear;
+            }
+        }, 3);*/
+
+  /*function updateYear() {
+      /*if (currentYear >= endYear) {
+          yearElement.innerText = currentYear;
+          const fontSize = 120 - ((currentYear - startYear) / (endYear - startYear) * fontSizeDifference);
+          yearElement.style.fontSize = `${fontSize}px`;
+          currentYear--;
+      } else {
+          clearInterval(yearInterval);
+      }*/
+  //}
+  //updateYear();
+
+  //const yearInterval = setInterval(updateYear, duration / (startYear - endYear));
+
   
-  var initData = {};
-  
-    ///////////////////////
-    initData.gameID = 0;
-    initData.gameName = "Test Name";
-    initData.gameCreationTimestamp = 1712906318;
-    initData.finishedGame = false;
-    initData.startingOptions = [];
-    initData.myZoomLevel = 24;
-    initData.pov = 0;
-    initData.name = 'Ross';
-initData.latestUpdate = 1712906318;
-initData.gameData = '';
-initData.secondsToNextKickout = 50000;
-    initData.myStatsExcludeConsent = 0;
-    initData.statsExcludedGame = false;
-    initData.kickoutRequired = 0;
-initData.KickoutFlexiDataArray = [];
-    initData.notes = 'NOTES test';
-    initData.chatNotification = false;
-      initData.yourTurnAudioType = 1;
-      
-      
-
-
-    //initData.spoilerFree = true;
-    //initData.replayStep = {{replayStep}}-1;
-
-    ///////////////////////
-    
-    initData.chatData = "";
-    
-    initData.nextURL = '';
+    var initData = {};
   
     ///////////////////////
+    initData.gameID = {{ gameID }};
+    initData.gameName = "{{ gameName }}";
+    initData.gameData = '{{ gameData|safe }}';
+    initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+    initData.myZoomLevel = {{ myZoomLevel }};
+    initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+    initData.startingOptions = {{startingOptions}};
+    initData.playerNames = {{ allPlayerListBySeat | safe }};
+    initData.currentPlayers = '{{ currentPlayers }}'
+    //initData.preferredRNBoptions = {{ preferredRNBoptions }};
+    initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+    initData.deleteVotesData = {{ deleteVotesData | safe }};
 
-	
+    {% if spoilerFree %}
+    initData.spoilerFree = true;
+    initData.replayStep = {{replayStep}}-1;
+    {% endif %}
+
+    ///////////////////////
+    {% if user.is_authenticated %}
+    initData.name = '{{ name }}';
+    initData.chatData = "{{ chatData }}";
+    initData.latestUpdate = {{ latestUpdateLiteral }};
+    initData.nextURL = '{{ nextURL|safe }}';
+    {% if chatNotification %}initData.chatNotification = true;{% endif %}
+    {% endif %}
+  
+    ///////////////////////
+    {% if involvedPlayer %}
+    initData.statsExcludedGame = {{ statsExcludedGame|lower }};
+    initData.pov = {{ pov }};
+    initData.move = '{{ move }}';
+    initData.trade = '{{ trade }}';
     
+    initData.secondsToNextKickout = {{ secondsToNextKickout }};
+    {% if kickoutRequired > 0 and not myMove %}
+    initData.kickoutRequired = {{kickoutRequired}};
+    {% endif %}
+    initData.notes = '{{ notes | safe }}';
+    initData.yourTurnAudioType = {{ yourTurnAudioType }};
 
-//    initData.chatNotification = true;
-
-    initData.preferredRNBcolour = 1;
-
-
+    {% if preMove %}
+    initData.preMove = "{{preMove}}";
+    {% else %}
+    initData.preMove = "";
+    {% endif %}
     /////////////////////
-		// Use this to adjust player count
-		initData.playerNames = ["Ross", "Rachel"] //, "Joey", "Phoebe"];
-		//initData.playerNames = ["Ross", "Rachel", "Joey"]//, "Phoebe"];
-		//initData.playerNames = ["Ross", "Rachel", "Joey", "Phoebe"]
-    //initData.playerNames = ["Ross", "Rachel", "Joey", "Phoebe", "Chandler"];
+    {% if not gameData %}
+    {% if startingMap %}
+  initData.startingMap = {{ startingMap }};
+  {% endif %}
+    {% if displayNames %}
+    initData.displayNames = {{ displayNames | safe }};
+    {% endif %}
+    initData.playerNames = {{ allPlayerListBySeat | safe }};
+    {% endif %}
+    {% endif %}
 
-    //initData.displayNames = ["Ross", "Rachel", "Joey", "Phoebe"];
-    initData.displayNames = []
+    // DEBUG FIX
+    initData.displayNames = {{allPlayerListBySeat | safe}};
+
   </script>
 </html>

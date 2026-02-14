@@ -8,7 +8,7 @@ app_name = "RNB"
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("RNB/", views.showRNBgame, name="showRNBgame"),
+    #path("RNB/", views.showRNBgame, name="showRNBgame"),
     path("<int:game_id>/show/", views.showRNBgame, name="showRNBgame"),
     path("help/", views.RNBhelp, name="RNBhelp"),
     ## API routes
