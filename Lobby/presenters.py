@@ -273,7 +273,6 @@ class GamePresenter:
         for username in usernames:
             gp = self.gameObj.players.filter(player__username=username).first()
             if gp and not gp.has_chat_notification:
-                # print("Adding chat notification for " + username)
                 gp.has_chat_notification = True
                 gp.save()
 
@@ -573,7 +572,6 @@ class CannesPresenter(GamePresenter):
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
-        # print(self.gameObj.gameStatus)
         game_players = list(self.gameObj.players.exclude(is_kicked=True))
 
         random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
@@ -3363,9 +3361,14 @@ class FcmPresenter(GamePresenter):
     # This always ensures you get a valid array return
     # any bots are set to phase -99 here, so you know nothing is expcected, ie they can't move
     def getOrScaffoldAllMoveData(self):
+        temp = json.loads(self.gameObj.FCMplayersMoveData)
+        missing_players = set(
+            self.gameObj.players.filter(is_missing=True)
+            .values_list("player__username", flat=True)
+        )
         try:
             data = json.loads(self.gameObj.FCMplayersMoveData)
-            if len(data) != self.gameObj.maxPlayers:
+            if len(data) != self.gameObj.maxPlayers - len(missing_players):
                 raise ValueError("Invalid number of players")
             return data
         except (json.JSONDecodeError, ValueError):
@@ -3617,7 +3620,6 @@ class FcmPresenter(GamePresenter):
             ),
             -1,
         )
-
         playersMoveDataArr[arrIdx] = [
             name,
             phasesArr,
@@ -3688,7 +3690,6 @@ class FcmPresenter(GamePresenter):
                 and not self.isThisValidActualMoveArrForPhase(self.gameObj.phase, subArr)
             ):
                 playersToMove.append(subArr[0])
-
         # If players left to move, then return them
         if len(playersToMove) > 0:
             jsonResponse = {"allPlayersMoved": False, "playersToMove": playersToMove}
@@ -4026,8 +4027,6 @@ class FcmPresenter(GamePresenter):
         if self.gameObj.phase == 4:
             playerMoveArr[3][2] = OOBpreference
             self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
-            print(playerMoveArr)
-            print(self.gameObj.FCMplayersMoveData)
             self.gameObj.save()
             return True
 
