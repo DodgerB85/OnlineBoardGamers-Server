@@ -3361,7 +3361,6 @@ class FcmPresenter(GamePresenter):
     # This always ensures you get a valid array return
     # any bots are set to phase -99 here, so you know nothing is expcected, ie they can't move
     def getOrScaffoldAllMoveData(self):
-        temp = json.loads(self.gameObj.FCMplayersMoveData)
         missing_players = set(
             self.gameObj.players.filter(is_missing=True)
             .values_list("player__username", flat=True)
