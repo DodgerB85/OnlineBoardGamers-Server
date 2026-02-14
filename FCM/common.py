@@ -138,7 +138,7 @@ def create_fcm_game(
     kickout_duration = 24
     starting_map = ""
     stats_excluded_game = False
-    player0notes = ""
+    shadowNameNotes = ""
     usernames_to_notify = []
     all_players = []
     invited_players = []
@@ -271,7 +271,7 @@ def create_fcm_game(
                 all_players.append(User.objects.get(username=shadow_names[i - 1]))
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
-            player0notes = json.dumps(shadow_display, separators=(",", ":"))
+            shadowNameNotes = json.dumps(shadow_display, separators=(",", ":"))
             stats_excluded_game = True
         elif "learningGame" in request.POST:
             stats_excluded_game = True
@@ -320,14 +320,8 @@ def create_fcm_game(
                 game=new_game,
                 player=player,
                 seat_order=idx,
+                notes=shadowNameNotes if player==request.user else "",
             )
-
-        # Set player0notes on seat 0 for training games
-        if player0notes:
-            seat0_gp = new_game.players.filter(seat_order=0).first()
-            if seat0_gp:
-                seat0_gp.notes = player0notes
-                seat0_gp.save()
 
         for player in invited_players:
             new_game.invitedPlayers.add(player)
