@@ -3376,8 +3376,8 @@ class FcmPresenter(GamePresenter):
                 .values_list("player__username", flat=True)
             )
             # In a tournament, don't remove missing players, as FCMtA plays for them
-            if self.gameObj.relatedFCMTournament:
-                missing_players = {}
+            #if self.gameObj.relatedMainTournament:
+            #    missing_players = {}
             return [
                 [
                     playerName,
@@ -3679,8 +3679,8 @@ class FcmPresenter(GamePresenter):
             self.gameObj.players.filter(is_missing=True)
             .values_list("player__username", flat=True)
         )
-        if self.gameObj.relatedFCMTournament:
-            missingPlayers = {}
+        #if self.gameObj.relatedMainTournament:
+        #    missingPlayers = {}
         for subArr in playersMoveDataArr:
             if (
                 subArr[0] not in notRequiedPlayerNames
@@ -3760,8 +3760,8 @@ class FcmPresenter(GamePresenter):
             self.gameObj.players.filter(is_missing=True)
             .values_list("player__username", flat=True)
         )
-        if self.gameObj.relatedFCMTournament:
-            missing_players = {}
+        #if self.gameObj.relatedMainTournament:
+        #    missing_players = {}
         _currentPlayers = [
             username for username in _currentPlayers if username not in missing_players
         ]
@@ -3885,7 +3885,9 @@ class FcmPresenter(GamePresenter):
             self.gameObj.save()
 
     def isTournamentRoundFinished(self, tournamentProgressionDataArray):
-        if self.gameObj.relatedFCMTournament is None:
+        if self.gameObj.relatedMainTournament is None:
+            return False
+        elif self.gameObj.relatedMiniTournament is not None:
             return False
 
         from Lobby.models import Game
@@ -3896,7 +3898,11 @@ class FcmPresenter(GamePresenter):
             if row[0] == "BYEPLAYERS":
                 finishedGames += 1
             else:
-                game_id = row[self.gameObj.relatedFCMTournament.maxGamePlayers]
+                game_id = 0
+                if self.gameObj.relatedMainTournament:
+                    game_id = row[self.gameObj.relatedMainTournament.maxGamePlayers]
+                elif self.gameObj.relatedMiniTournament:
+                    game_id = row[self.gameObj.relatedMiniTournament.maxGamePlayers]
                 try:
                     game = Game.objects.get(id=game_id, gameCode='FCM')
                 except Game.DoesNotExist:
@@ -3942,8 +3948,6 @@ class FcmPresenter(GamePresenter):
             finalPositions.append(_finalScores[i][0])
         SN_M_sendEndGameNotification(request, "FCM", finalPositions, _gameID, self.gameObj)
 
-        #if self.gameObj.relatedFCMTournament:
-        #    SF_M_ProcessTournamentEndGame(request, "FCM", self.gameObj, [_winnerUsername])
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,

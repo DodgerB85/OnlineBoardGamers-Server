@@ -309,9 +309,7 @@ def create_fcm_game(
         )
         new_game.save()
 
-        if is_tournament:
-            new_game.relatedFCMTournament = tournamentObj
-        elif is_main_tournament:
+        if is_main_tournament:
             new_game.relatedMainTournament = tournamentObj
         elif is_mini_tournament:
             new_game.relatedMiniTournament = tournamentObj

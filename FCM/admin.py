@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.conf import settings
-from .models import FCM_Game, FCM_Tournament
+from .models import FCM_Game
 #from django.contrib.admin import display
 from django import forms
 
@@ -22,7 +22,7 @@ class FCM_GameAdmin(admin.ModelAdmin):
         "kickedPlayers",
         "invitedPlayers",
         "playersWithChatNotification",
-        "relatedTournament",
+        "relatedMainTournament",
         "relatedMiniTournament",
     ]
 
@@ -55,7 +55,7 @@ class FCM_GameAdmin(admin.ModelAdmin):
                 "creator",
                 "host",
                 "winner",
-                "relatedTournament",
+                "relatedMainTournament",
                 "relatedMiniTournament",
             )
         )
@@ -132,10 +132,10 @@ class FCM_GameAdmin(admin.ModelAdmin):
 
     @admin.display(description="Tournament")
     def tournament_display(self, obj):
-        if obj.relatedTournament:
-            # return obj.relatedTournament.tournamentName
+        if obj.relatedMainTournament:
+            # return obj.relatedMainTournament.tournamentName
             return getattr(
-                obj.relatedTournament, "tournamentName", str(obj.relatedTournament)
+                obj.relatedMainTournament, "tournamentName", str(obj.relatedMainTournament)
             )
         if obj.relatedMiniTournament:
             # return f"Mini: {obj.relatedMiniTournament.tournamentName}"
@@ -153,7 +153,7 @@ class FCM_GameAdmin(admin.ModelAdmin):
     list_filter = (
         "gameStatus",
         "maxPlayers",
-        "relatedTournament",
+        "relatedMainTournament",
         "relatedMiniTournament",
     )
     search_fields = ("gameName", "creator__username")
@@ -251,15 +251,7 @@ class FCM_GameAdmin(admin.ModelAdmin):
             "Linked Tournament",
             {
                 "classes": ("collapse",),
-                "fields": ("relatedTournament", "relatedMiniTournament"),
+                "fields": ("relatedMainTournament", "relatedMiniTournament"),
             },
         ),
     )
-
-@admin.register(FCM_Tournament)
-class FCM_TournamentAdmin(admin.ModelAdmin):
-    save_on_top = True
-    save_as = True
-    filter_horizontal = ("startingPlayers", "nextRoundPlayers")
-    search_fields = ["tournamentName"]
-

@@ -528,13 +528,6 @@ class Game(BaseGame):
     # FCM-specific fields
     FCMplayersMoveData = models.TextField(blank=True)
     FCMnotificationSuppression = models.CharField(max_length=30, blank=False, default="000000")
-    relatedFCMTournament = models.ForeignKey(
-        "FCM.FCM_Tournament",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="fcmtournamentGEN_relName",
-    )
 
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)
