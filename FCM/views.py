@@ -6,6 +6,7 @@ import base64
 import gzip
 
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -38,8 +39,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from .common import create_fcm_game
 
-from Lobby.models import User, Profile
-from .models import FCM_Game
+from Lobby.models import User, Profile, Game, GamePlayer
 
 from Lobby.sharedFunctions.constants import (
     STATS_EXCLUDE_VOTE_TOPIC,
@@ -47,6 +47,8 @@ from Lobby.sharedFunctions.constants import (
     REWIND_CONSENT_VOTE_TOPIC,
 )
 
+if TYPE_CHECKING:
+    from Lobby.presenters import FcmPresenter 
 
 # import requests  # Keep this to broadcase on WSS when it is uncommented
 FCMsuperUsers = ["BotKickStarter"]
@@ -127,17 +129,26 @@ def FCMstatGames(request):
         page = Paginator(gameIDs, items_per_page).num_pages
 
     # Filter the games for the current page ONLY
+    # Try to find games by id first, then fall back to original_id for old game references
     finishedGames = (
-        FCM_Game.objects.filter(id__in=gameIDs_page)
+        Game.objects.filter(id__in=gameIDs_page, gameCode='FCM')
         .order_by("-latestUpdate")
-        .select_related("creator__profile", "creator", "winner")
+        .select_related("creator__profile", "creator")
         .prefetch_related(
-            "allPlayers",
-            "missingPlayers",
+            "players__player",
             "invitedPlayers",
-            "playersWithChatNotification",
         )
     )
+    if not finishedGames.exists():
+        finishedGames = (
+            Game.objects.filter(original_id__in=gameIDs_page, gameCode='FCM')
+            .order_by("-latestUpdate")
+            .select_related("creator__profile", "creator")
+            .prefetch_related(
+                "players__player",
+                "invitedPlayers",
+            )
+        )
 
     # Serialize ONLY the games for the current page
     finishedGamesListJson = [
@@ -165,21 +176,25 @@ def createFCMgame(request):
 def showGame(request, game_id):
     try:
         currentGame = (
-            FCM_Game.objects.select_related("host", "relatedTournament")
+            Game.objects.select_related("host", "relatedFCMTournament")
             .prefetch_related(
-                "allPlayers", "missingPlayers", "playersWithChatNotification"
+                "players__player",
+                "invitedPlayers",
             )
-            .get(id=game_id)
+            .get(id=game_id, gameCode='FCM')
         )
-    except FCM_Game.DoesNotExist:
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = cast('FcmPresenter', currentGame.presenter())
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
     # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    all_player_gps = list(currentGame.players.all().select_related("player"))
+    all_player_ids = {gp.player.id for gp in all_player_gps if gp.player}
     # start_time = time.time()
     user = request.user
     user_id = user.id
@@ -198,7 +213,7 @@ def showGame(request, game_id):
     if int(currentGame.created) > 1744974000000:
         USE_NEW_CODE = True
 
-    if currentGame.relatedTournament and request.user.username == "FCMtourneyAdmin":
+    if currentGame.relatedFCMTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
 
     startingOptionsHTML = SR_getFCMstartingOptionsHTML(
@@ -223,7 +238,7 @@ def showGame(request, game_id):
                 "showAssistance": "true",
                 "latestUpdateLiteral": currentGame.latestUpdate,
                 "involvedPlayer": False,
-                "gameName": currentGame.getGameName(),
+                "gameName": presenter.getGameName(),
                 "myMove": False,
                 "startingOptionsHTML": startingOptionsHTML,
                 "gameCreationTimestamp": gameCreationTimestamp,
@@ -234,16 +249,16 @@ def showGame(request, game_id):
                 "startingMap": currentGame.startingMap,
                 "pov": -99,
                 "statsExcludeVotesData": json.dumps(
-                    currentGame.tempPresenter().getFullSetOfVoteResults(
+                    presenter.getFullSetOfVoteResults(
                         STATS_EXCLUDE_VOTE_TOPIC,
-                        currentGame.getAllPlayersOrderedySeat(True),
+                        presenter.getAllPlayersOrderedySeat(True),
                         False,
                     )
                 ),
                 "deleteVotesData": json.dumps(
-                    currentGame.tempPresenter().getFullSetOfVoteResults(
+                    presenter.getFullSetOfVoteResults(
                         DELETE_VOTE_TOPIC,
-                        currentGame.getAllPlayersOrderedySeat(True),
+                        presenter.getAllPlayersOrderedySeat(True),
                         False,
                     )
                 ),
@@ -257,8 +272,8 @@ def showGame(request, game_id):
 
     # If person is logged in, may or may not be in game
     user_profile = Profile.objects.get(user=request.user)
-    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
-    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+    missing_player_ids = {gp.player.id for gp in all_player_gps if gp.player and gp.is_missing}
+    chat_notify_ids = {gp.player.id for gp in all_player_gps if gp.player and gp.has_chat_notification}
 
     is_in_all = user_id in all_player_ids
     is_missing = user_id in missing_player_ids
@@ -280,7 +295,7 @@ def showGame(request, game_id):
     currentNotes = ""
     pov = -9
     preferredRestaurantColour = -1
-    allPlayerListBySeat = currentGame.getAllPlayersOrderedySeat()
+    allPlayerListBySeat = presenter.getAllPlayersOrderedySeat()
     kickoutRequired = 0
     chatNotification = False
 
@@ -292,44 +307,43 @@ def showGame(request, game_id):
     rewindHostHTML = ""
     rewindHostPossible = False
     currentRewindConsent = 0
-    currentPlayers = currentGame.currentPlayers
+    currentPlayers = presenter._getCurrentPlayersField()
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
 
     # Do Chat notification separately, as could be kicked out, and so not involoved
     if is_in_all and user_id in chat_notify_ids:
         chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+        presenter.removeChatNotification(request.user)
 
     # print_timestamp("Step 2: Before nextURL")
 
     ## Get the next URL
-    nextURL = f"/nextGame?current_id={game_id}&current_code={currentGame.getGameCode()}"
+    nextURL = f"/nextGame?current_id={game_id}&current_code=FCM"
 
     # print_timestamp("Step 4: nextURL obtained")
 
     # If person is logged in and in the game
     if involvedPlayer:
-        if currentGame.relatedTournament:
+        if currentGame.relatedFCMTournament:
             tournamentGame = True
         rewindPanelType = 1
         if currentGame.host == request.user:
             rewindPanelType = 2
-            rewindHostPossible = currentGame.getRewindHostPossible()
-            rewindHostHTML = currentGame.getRewindHostHTML()
+            rewindHostPossible = presenter.getRewindHostPossible()
+            rewindHostHTML = presenter.getRewindHostHTML()
 
         if request.user.username in FCMsuperUsers:
             rewindPanelType = 2
             rewindHostPossible = True
-            rewindHostHTML = currentGame.getRewindHostHTML()
+            rewindHostHTML = presenter.getRewindHostHTML()
 
         # print_timestamp("Step 4.5: Involved player")
 
-        pov = currentGame.seatPosition(request.user.username)
+        pov = presenter.seatPosition(request.user.username)
         if request.user.username in FCMsuperUsers:
             involvedPlayer = True
-        currentRewindConsent = currentGame.getCurrentRewindConsent(
+        currentRewindConsent = presenter.getCurrentRewindConsent(
             request.user.username
         )
 
@@ -337,47 +351,43 @@ def showGame(request, game_id):
         liveNotification = user_profile.liveNotification
 
         currentMove = ""
-        if currentGame.hasValidActualMoveData(
+        if presenter.hasValidActualMoveData(
             request.user.username
-        ) or currentGame.hasValidActualCleanupPreset(request.user.username):
-            currentMove = currentGame.getCompressedMoveArr(request.user.username, True)
+        ) or presenter.hasValidActualCleanupPreset(request.user.username):
+            currentMove = presenter.getCompressedMoveArr(request.user.username, True)
 
         # print_timestamp("Step 4.6: currentMove obtained")
 
-        # Mapping for notes
-        notes_mapping = {
-            0: currentGame.player0notes,
-            1: currentGame.player1notes,
-            2: currentGame.player2notes,
-            3: currentGame.player3notes,
-            4: currentGame.player4notes,
-            5: currentGame.player5notes,
-        }
-        currentNotes = notes_mapping.get(pov, "")
+        # Get notes from GamePlayer
+        player_gp = currentGame.players.filter(player=request.user).first()
+        currentNotes = player_gp.notes if player_gp else ""
 
         # Check for kickout
-        kickoutRequired = currentGame.kickoutRequired()
+        kickoutRequired = presenter.kickoutRequired()
         # print_timestamp("Step 4.7: currentNotes obtained")
 
         # Get OOBpreference
-        OOBpreference = currentGame.getOOBpreference(request.user.username)
+        OOBpreference = presenter.getOOBpreference(request.user.username)
+        allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, False)
+        myMove = presenter.isMyMove(request.user.username)
 
-        allPlayerListBySeat = currentGame.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
-        myMove = currentGame.isMyMove(request.user.username)
         myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3]
         if (
-            "SHADOW" in currentGame.getAllPlayersOrderedySeat(False, USE_NEW_CODE)
-            and currentGame.gameData == ""
+            currentGame.gameData == ""
+            and "SHADOW" in presenter.getAllPlayersOrderedySeat(False, False)
         ):
             displayNames = ["test"]
+            seat0_gp = None
             try:
-                displayNames = json.loads(currentGame.player0notes)
+                seat0_gp = currentGame.players.filter(seat_order=0).first()
+                displayNames = json.loads(seat0_gp.notes) if seat0_gp and seat0_gp.notes else ["SHADOW"]
             except Exception as e:
                 displayNames = ["SHADOW"]
                 print(f"Failed to load displayNames, {e} ")
             currentNotes = ""
-            currentGame.player0notes = ""
-            currentGame.save()
+            if seat0_gp:
+                seat0_gp.notes = ""
+                seat0_gp.save()
 
     # print_timestamp("Step 5: involvedPlayer processing done")
 
@@ -412,7 +422,7 @@ def showGame(request, game_id):
             "currentNotes": currentNotes,
             "kickoutRequired": kickoutRequired,
             "involvedPlayer": involvedPlayer,
-            "gameName": currentGame.getGameName(),
+            "gameName": presenter.getGameName(),
             "phase": currentGame.phase,  # Used for module draft to inject starting options
             "gameID": getattr(currentGame, "id"),
             "currentPlayers": currentPlayers,
@@ -425,7 +435,7 @@ def showGame(request, game_id):
             "rewindHostHTML": rewindHostHTML,
             "rewindHostPossible": rewindHostPossible,
             "currentRewindConsent": currentRewindConsent,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "tournamentGame": tournamentGame,
             "highContrastBoardItems": highContrastBoardItems,
             "startingOptionsHTML": startingOptionsHTML,
@@ -438,16 +448,16 @@ def showGame(request, game_id):
             "startingMap": currentGame.startingMap,
             "OOBpreference": OOBpreference,
             "statsExcludeVotesData": json.dumps(
-                currentGame.tempPresenter().getFullSetOfVoteResults(
+                presenter.getFullSetOfVoteResults(
                     STATS_EXCLUDE_VOTE_TOPIC,
-                    currentGame.getAllPlayersOrderedySeat(True),
+                    presenter.getAllPlayersOrderedySeat(True),
                     False,
                 )
             ),
             "deleteVotesData": json.dumps(
-                currentGame.tempPresenter().getFullSetOfVoteResults(
+                presenter.getFullSetOfVoteResults(
                     DELETE_VOTE_TOPIC,
-                    currentGame.getAllPlayersOrderedySeat(True),
+                    presenter.getAllPlayersOrderedySeat(True),
                     False,
                 )
             ),
@@ -489,8 +499,8 @@ def db_mutex(gameID, timeout=10):
 def checkNewData(request, game_id):
     if request.method == "GET":
         try:
-            currentGame = FCM_Game.objects.get(id=game_id)
-        except FCM_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=game_id, gameCode='FCM')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
             # pass
         return HttpResponse(currentGame.latestUpdate)
@@ -518,12 +528,12 @@ def endGame(
     request, _winnerUsername, _finalScores, _tournamentData, _gameID, currentGame
 ):
     with db_mutex(str(_gameID)):
-        return currentGame.endGame(
+        return currentGame.presenter().endGame(
             request, _winnerUsername, _finalScores, _tournamentData, _gameID
         )
 
 
-def processTurn(request):
+def processTurn(request, game_id=None):
     # time.sleep(5)
     # processing a turn must be via POST
     if request.method != "POST":
@@ -545,27 +555,29 @@ def _processTurn(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-    except FCM_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    if currentGame.relatedTournament and request.user.username == "FCMtourneyAdmin":
+    presenter = cast('FcmPresenter', currentGame.presenter())
+
+    if currentGame.relatedFCMTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
 
     # loads the latest game and updates latest-Update
     if jsonData["action"] == "loadNew":
         currentMove = ""
         # Use to stop actions showing when there's already move Data
-        if currentGame.hasValidActualMoveData(request.user.username):
-            currentMove = currentGame.getCompressedMoveArr(request.user.username)
+        if presenter.hasValidActualMoveData(request.user.username):
+            currentMove = presenter.getCompressedMoveArr(request.user.username)
 
-        OOBpreference = currentGame.getOOBpreference(request.user.username)
+        OOBpreference = presenter.getOOBpreference(request.user.username)
         return JsonResponse(
             {
                 "loadData": currentGame.gameData,
                 # Not used at the moment, in // comment
-                "currentPlayers": currentGame.getCurrentPlayersArray(),
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "currentPlayers": presenter.getCurrentPlayersArray(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "specialData": currentMove,
                 "latestUpdate": currentGame.latestUpdate,
                 "startingMap": currentGame.startingMap,
@@ -589,19 +601,18 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM unlockRestructure - gameID: {getattr(currentGame,'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
-        currentGame.deleteSinglePlayersMove(request.user.username)
+        presenter.deleteSinglePlayersMove(request.user.username)
 
         # Update current playes
-        if request.user.username not in currentGame.currentPlayers:
-            currentGame.currentPlayers = (
-                currentGame.currentPlayers + "," + request.user.username
-            )
+        currentPlayersStr = presenter._getCurrentPlayersField()
+        if request.user.username not in currentPlayersStr:
+            presenter.setCurrentPlayers(currentPlayersStr + "," + request.user.username)
         currentGame.save()
         return JsonResponse({"unlockStatus": True}, safe=False)
 
@@ -617,13 +628,13 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveOOBpreference - gameID: {getattr(currentGame,'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
-        setCorrectly = currentGame.setOOBpreference(request.user.username, jsonData["OOBpreference"])
+        setCorrectly = presenter.setOOBpreference(request.user.username, jsonData["OOBpreference"])
 
         
         currentGame.save()
@@ -641,7 +652,7 @@ def _processTurn(request):
                 },
                 safe=False,
             )
-        currentGame.clearAllMoveDataV2()
+        presenter.clearAllMoveDataV2()
         currentGame.save()
         return JsonResponse(
             {
@@ -661,7 +672,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveInProgressMap - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -680,7 +691,7 @@ def _processTurn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
 
         # Update module selections
         currentGame.startingMap = jsonData["tiles"]
@@ -704,16 +715,16 @@ def _processTurn(request):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             for player in playerListToNotify:
-                ppov = currentGame.seatPosition(player)
-                playerNotificationSuppression = currentGame.notificationSuppression[
+                ppov = presenter.seatPosition(player)
+                playerNotificationSuppression = currentGame.FCMnotificationSuppression[
                     ppov : ppov + 1
                 ]
                 if playerNotificationSuppression == "1":
                     playerListToNotify.remove(player)
-                    currentGame.notificationSuppression = (
-                        currentGame.notificationSuppression[:ppov]
+                    currentGame.FCMnotificationSuppression = (
+                        currentGame.FCMnotificationSuppression[:ppov]
                         + "0"
-                        + currentGame.notificationSuppression[ppov + 1 :]
+                        + currentGame.FCMnotificationSuppression[ppov + 1 :]
                     )
 
             if len(playerListToNotify) > 0:
@@ -722,7 +733,7 @@ def _processTurn(request):
                     "FCM",
                     playerListToNotify,
                     jsonData["gameID"],
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     oldVer,
                 )
@@ -742,7 +753,7 @@ def _processTurn(request):
                         else []
                     ),
                 ),
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -758,7 +769,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveModuleSelection - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -778,7 +789,7 @@ def _processTurn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
 
         # Update module selections
         starting_options = (
@@ -815,16 +826,16 @@ def _processTurn(request):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             for player in playerListToNotify:
-                ppov = currentGame.seatPosition(player)
-                playerNotificationSuppression = currentGame.notificationSuppression[
+                ppov = presenter.seatPosition(player)
+                playerNotificationSuppression = currentGame.FCMnotificationSuppression[
                     ppov : ppov + 1
                 ]
                 if playerNotificationSuppression == "1":
                     playerListToNotify.remove(player)
-                    currentGame.notificationSuppression = (
-                        currentGame.notificationSuppression[:ppov]
+                    currentGame.FCMnotificationSuppression = (
+                        currentGame.FCMnotificationSuppression[:ppov]
                         + "0"
-                        + currentGame.notificationSuppression[ppov + 1 :]
+                        + currentGame.FCMnotificationSuppression[ppov + 1 :]
                     )
 
             if len(playerListToNotify) > 0:
@@ -833,7 +844,7 @@ def _processTurn(request):
                     "FCM",
                     playerListToNotify,
                     jsonData["gameID"],
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     oldVer,
                 )
@@ -853,7 +864,7 @@ def _processTurn(request):
                         else []
                     ),
                 ),
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -870,7 +881,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveNormal - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -895,7 +906,7 @@ def _processTurn(request):
                 message = (
                     f"MAP TILES LENGTH OUT OF SYNC - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                     f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                    f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                    f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
                 )
                 SN_sendAdminErrorMessage(request, message)
                 return JsonResponse({"syncError": True}, safe=False)
@@ -910,7 +921,7 @@ def _processTurn(request):
                     message = (
                         f"MAP TILES CONTENT OUT OF SYNC - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - DB Tiles: {currentTiles} - IN Tiles: {incomingTiles} - JSON_LU: {jsonData['latestUpdate']} "
                         f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                        f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                        f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
                     )
                     SN_sendAdminErrorMessage(request, message)
                     return JsonResponse(
@@ -951,13 +962,13 @@ def _processTurn(request):
             print(jsonData["gameID"])
             print(f"DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} ")
             print(
-                f" -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f" -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             print(jsonData)
             message = (
                 f"******** PHASE NOT FOUND IN JSONDATA ********* - jsonData: {jsonData} - User: {request.user.username} - "
                 f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
-                f" -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f" -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
 
@@ -976,7 +987,7 @@ def _processTurn(request):
             message = (
                 f"******** DOUBLE PHASE SAVE PAYDAY (ok with kickout) ********* - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
 
@@ -989,7 +1000,7 @@ def _processTurn(request):
             message = (
                 f"******** DOUBLE PHASE SAVE CLEANUP ********* - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
         ###########
@@ -1004,7 +1015,7 @@ def _processTurn(request):
             trainingGame = True
 
         if jsonData["checksum"] or trainingGame:
-            currentGame.clearAllMoveDataV2()
+            presenter.clearAllMoveDataV2()
 
         # If you are saving into turn order, return all players OOB preferences
         if oldPhase == 4 and jsonData["phase"] == 4 and 101 not in starting_options:
@@ -1019,22 +1030,23 @@ def _processTurn(request):
 
         # Remove move data at start of reatruc
         if currentGame.phase != 3 and jsonData["phase"] == 3:
-            currentGame.clearAllMoveDataV2()
+            presenter.clearAllMoveDataV2()
             # Emergency check; make sure all players except bots are in currentPlayers
             missing_players = set(
-                currentGame.missingPlayers.values_list("username", flat=True)
+                currentGame.players.filter(is_missing=True)
+                .values_list("player__username", flat=True)
             )
             current_players = [
-                user.username
-                for user in currentGame.allPlayers.all()
-                if user.username not in missing_players
+                gp.player.username
+                for gp in currentGame.players.all().select_related("player")
+                if gp.player and gp.player.username not in missing_players
             ]
-            currentGame.currentPlayers = ",".join(current_players)
+            presenter.setCurrentPlayers(",".join(current_players))
             currentGame.save()
 
         # Remove move data at start of working day
         if currentGame.phase != 5 and jsonData["phase"] == 5:
-            currentGame.clearAllMoveDataV2()
+            presenter.clearAllMoveDataV2()
 
         # Phase first otherwise MOVE payday skip overwrites with phase 7
         currentGame.turn = jsonData["turn"]
@@ -1043,7 +1055,7 @@ def _processTurn(request):
 
         # reset notifs - SAVE NORMAL
         if jsonData["phase"] == 5 or oldPhase == 5:
-            currentGame.notificationSuppression = "0" * currentGame.maxPlayers
+            currentGame.FCMnotificationSuppression = "0" * currentGame.maxPlayers
 
         # If it WAS a working day save the side data (pre moves) - UNLESS it is now working day again
         # So also check you're not coming from Turn Order
@@ -1061,7 +1073,7 @@ def _processTurn(request):
                     ).decode("utf-8")
                 )
                 # currentGame.updateWholeMoveData(nameToUse, json.dumps(preMoveArray, separators=(",", ":")))
-                currentGame.insertPlayerMoveData(
+                presenter.insertPlayerMoveData(
                     nameToUse, [5, 6, 7, 8, 9, 11, 12, 15], preMoveArray
                 )
 
@@ -1080,27 +1092,28 @@ def _processTurn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # First, save the currentPlayers from the jsonData
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
 
         # Before sending notifications, update the currentPlayers
         # If saving into phase 2/7/9, then update for simul players
         if jsonData["phase"] == 2 or jsonData["phase"] == 7 or jsonData["phase"] == 9:
-            currentGame.currentPlayers = currentGame.getCurrentSimulPlayersV2()
+            presenter.setCurrentPlayers(presenter.getCurrentSimulPlayersV2())
 
         # Send Notifications - payday/fridge with moves are already removd
+        _currentPlayersField = presenter._getCurrentPlayersField()
         if (
-            currentGame.currentPlayers != ""
-            and currentGame.currentPlayers != "FcmBot"
-            and currentGame.currentPlayers != "FcmAI"
+            _currentPlayersField != ""
+            and _currentPlayersField != "FcmBot"
+            and _currentPlayersField != "FcmAI"
             and not jsonData["status"] == "FINISHED"
         ):
-            playerListToNotify = currentGame.currentPlayers.split(",")
+            playerListToNotify = _currentPlayersField.split(",")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
 
             # If you are saving into phase 4, and the next player has OOB, remove them from notifications
             if jsonData["phase"] == 4:
-                if currentGame.hasValidActualMoveData(jsonData["nextPlayer"]):
+                if presenter.hasValidActualMoveData(jsonData["nextPlayer"]):
                     playerListToNotify.remove(jsonData["nextPlayer"])
 
             if len(playerListToNotify) > 0:
@@ -1109,7 +1122,7 @@ def _processTurn(request):
                     "FCM",
                     playerListToNotify,
                     jsonData["gameID"],
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     oldVer,
                 )
@@ -1184,17 +1197,17 @@ def _processTurn(request):
                 currentGame,
             )
 
-        currentGame.removeSingleRewindPermission()
+        presenter.removeSingleRewindPermission()
 
         currentGame.save()
 
         returnResponse = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
         }
 
         if returnPaydayPreturns or returnFridgePreturns or returnOOBpreferences:
-            playersMoveDataArr = currentGame.getOrScaffoldAllMoveData()
+            playersMoveDataArr = presenter.getOrScaffoldAllMoveData()
             compressedData = (
                 base64.b64encode(
                     gzip.compress(
@@ -1239,7 +1252,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveSimulMove - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1273,10 +1286,10 @@ def _processTurn(request):
                 ).decode("utf-8")
             )
 
-            currentGame.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
+            presenter.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
 
             if currentGame.phase != 0 and currentGame.phase != 1:
-                currentGame.currentPlayers = currentGame.getCurrentSimulPlayers()
+                presenter.setCurrentPlayers(presenter.getCurrentSimulPlayers())
 
             if request.user.username in FCMsuperUsers:
                 flexName = jsonData["BKSN"]
@@ -1299,7 +1312,7 @@ def _processTurn(request):
                     currentGame.kickoutDuration,
                 )
 
-        response = currentGame.getJsonMoveResponseV2(notRequiedPlayerNames)
+        response = presenter.getJsonMoveResponseV2(notRequiedPlayerNames)
 
         currentGame.save()
         return JsonResponse(response, safe=False)
@@ -1317,7 +1330,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM kickout - preTurn: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1330,7 +1343,7 @@ def _processTurn(request):
         )
 
         # FIX THIS TO ALLOW NAME CHECK (or just don't do pre turns with FCMtA)
-        currentGame.insertPlayerMoveData(
+        presenter.insertPlayerMoveData(
             request.user.username, [5, 6, 7, 8, 9, 11, 12, 15], preMoveArray
         )
 
@@ -1347,16 +1360,16 @@ def _processTurn(request):
     elif jsonData["action"] == "resign":
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
         currentGame.save()
         # Otherwise, resigned from restruc, so delete move data, allow everyone to move, generate latest update, send notifications
 
         # Delete move data
-        currentGame.clearAllMoveDataV2()
+        presenter.clearAllMoveDataV2()
 
         # Add all players into currentPlayers
-        currentGame.addAllPlayersToCurrentPlayers()
+        presenter.addAllPlayersToCurrentPlayers()
 
         # Response not used
         return JsonResponse(
@@ -1382,7 +1395,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveAfterKickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1393,19 +1406,19 @@ def _processTurn(request):
         currentGame.phase = jsonData["phase"]
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.kickedPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.addKickedPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
 
         # Clears data and saves record
-        currentGame.clearAllMoveDataV2()
+        presenter.clearAllMoveDataV2()
 
         oldVer = currentGame.latestUpdate
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # WHY WAS THIS COMMENTED OUT????
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.save()
 
         # Send notification s
@@ -1425,7 +1438,7 @@ def _processTurn(request):
                         "FCM",
                         playerListToNotify,
                         jsonData["gameID"],
-                        currentGame.getGameName(),
+                        presenter.getGameName(),
                         currentGame,
                         oldVer,
                     )
@@ -1444,7 +1457,7 @@ def _processTurn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "nextPlayer": jsonData["nextPlayer"],
             },
             safe=False,
@@ -1461,17 +1474,17 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM kickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.kickedPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.addKickedPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
 
-        currentGame.clearAllMoveDataV2()
+        presenter.clearAllMoveDataV2()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -1481,7 +1494,7 @@ def _processTurn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -1489,7 +1502,7 @@ def _processTurn(request):
     elif jsonData["action"] == "loadRewind":
         # If working day, clear move data now, to get rid of pre-prepared SALARY phase
         if jsonData["phase"] == 5:
-            currentGame.clearAllMoveDataV2()
+            presenter.clearAllMoveDataV2()
         currentRewindData = currentGame.rewindData
         if len(currentRewindData) == 0:
             return JsonResponse(
@@ -1509,7 +1522,7 @@ def _processTurn(request):
 
         if (
             not allowAnyRewind
-            and not currentGame.getRewindHostPossible()
+            and not presenter.getRewindHostPossible()
             and request.user.username not in FCMsuperUsers
         ):
             return JsonResponse(
@@ -1525,12 +1538,12 @@ def _processTurn(request):
 
         currentRewindDataArray = currentRewindData.split("'SPLIT'")
         # If there is any move data, simply clear it out and go back to the game
-        if currentGame.hasAnyPlayerMovedThisPhase(currentGame.phase):
+        if presenter.hasAnyPlayerMovedThisPhase(currentGame.phase):
             # This saves it anyway
-            currentGame.clearAllMoveDataV2()
-            rewindHostPossible = currentGame.getRewindHostPossible()
+            presenter.clearAllMoveDataV2()
+            rewindHostPossible = presenter.getRewindHostPossible()
             # add all players back into currentPlayers
-            currentGame.addAllPlayersToCurrentPlayers()
+            presenter.addAllPlayersToCurrentPlayers()
 
             if currentGame.rewindTempData != "":
                 loadData = currentGame.rewindTempData
@@ -1552,7 +1565,7 @@ def _processTurn(request):
                     "loadData": loadData,
                     "rewindHostPossible": rewindHostPossible,
                     "latestUpdate": currentGame.latestUpdate,
-                    "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                    "missingPlayers": presenter.getMissingPlayersNamesArray(),
                 },
                 safe=False,
             )
@@ -1570,22 +1583,22 @@ def _processTurn(request):
         currentGame.rewindData = "'SPLIT'".join(currentRewindDataArray)
 
         if jsonData["RSRP"]:
-            currentGame.removeSingleRewindPermission()
+            presenter.removeSingleRewindPermission()
 
-        currentGame.clearAllMoveDataV2()
+        presenter.clearAllMoveDataV2()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         currentGame.save()
-        rewindHostPossible = currentGame.getRewindHostPossible()
+        rewindHostPossible = presenter.getRewindHostPossible()
 
         return JsonResponse(
             {
                 "loadData": loadData,
                 "rewindHostPossible": rewindHostPossible,
                 "latestUpdate": currentGame.latestUpdate,
-                "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
             safe=False,
         )
@@ -1594,7 +1607,7 @@ def _processTurn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["data"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -1617,7 +1630,7 @@ def _processTurn(request):
                     "FCM",
                     playerListToNotify,
                     jsonData["gameID"],
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
                 )
@@ -1641,20 +1654,24 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM adminKickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.kickedPlayers.add(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.addKickedPlayer(_missingPlayer)
 
         # Add FCM tourney admin player
-        currentGame.allPlayers.add(User.objects.get(username="FCMtourneyAdmin"))
+        fcm_tourney_admin = User.objects.get(username="FCMtourneyAdmin")
+        GamePlayer.objects.get_or_create(
+            game=currentGame, player=fcm_tourney_admin,
+            defaults={'seat_order': currentGame.maxPlayers}
+        )
 
         # Change host to FCM tourney admin
-        currentGame.host = User.objects.get(username="FCMtourneyAdmin")
+        currentGame.host = fcm_tourney_admin
 
         # Delete Rewind Data
         currentGame.rewindData = ""
@@ -1665,13 +1682,13 @@ def _processTurn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        currentGame.clearAllMoveDataV2()
+        presenter.clearAllMoveDataV2()
 
         currentGame.save()
         response_data = {
             "result": 2,
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -1701,21 +1718,22 @@ def _processTurn(request):
 
         # Send Notifications - and remove pre-data for players with illegal moves
         playerIndexesToNotify = jsonData["playerIndexesToNotify"]
-        playerNames = currentGame.getAllPlayersOrderedySeat(False, True)
+        playerNames = presenter.getAllPlayersOrderedySeat(False, True)
         playerListToNotify = []
         for playerIndex in playerIndexesToNotify:
             playerListToNotify.append(playerNames[playerIndex])
         for playerName in playerListToNotify:
             if not trainingGame:
-                currentGame.insertPlayerMoveData(playerName, [-1], [])
+                presenter.insertPlayerMoveData(playerName, [-1], [])
 
         # Add players to currentPlayers
-        currentPlayersArr = currentGame.currentPlayers.split(",")
+        currentPlayersStr = presenter._getCurrentPlayersField()
+        currentPlayersArr = currentPlayersStr.split(",")
         for player in playerListToNotify:
             if player not in currentPlayersArr:
                 currentPlayersArr.append(player)
 
-        currentGame.currentPlayers = ",".join(currentPlayersArr)
+        presenter.setCurrentPlayers(",".join(currentPlayersArr))
 
         currentGame.save()
 
@@ -1724,16 +1742,16 @@ def _processTurn(request):
 
         # SAVE UPDATE NOTIFICATION
         for player in playerListToNotify:
-            ppov = currentGame.seatPosition(player)
-            playerNotificationSuppression = currentGame.notificationSuppression[
+            ppov = presenter.seatPosition(player)
+            playerNotificationSuppression = currentGame.FCMnotificationSuppression[
                 ppov : ppov + 1
             ]
             if playerNotificationSuppression == "1":
                 playerListToNotify.remove(player)
-                currentGame.notificationSuppression = (
-                    currentGame.notificationSuppression[:ppov]
+                currentGame.FCMnotificationSuppression = (
+                    currentGame.FCMnotificationSuppression[:ppov]
                     + "0"
-                    + currentGame.notificationSuppression[ppov + 1 :]
+                    + currentGame.FCMnotificationSuppression[ppov + 1 :]
                 )
 
         if len(playerListToNotify) > 0:
@@ -1742,7 +1760,7 @@ def _processTurn(request):
                 "FCM",
                 playerListToNotify,
                 jsonData["gameID"],
-                currentGame.getGameName(),
+                presenter.getGameName(),
                 currentGame,
                 currentGame.latestUpdate,
             )
@@ -1764,7 +1782,7 @@ def _processTurn(request):
 
 
 @login_required()
-def bugEntry(request):
+def bugEntry(request, game_id=None):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -1772,8 +1790,8 @@ def bugEntry(request):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = FCM_Game.objects.get(id=gameID)
-    except FCM_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=gameID, gameCode='FCM')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     gameData = jsonData["gameData"]
@@ -1796,7 +1814,7 @@ def bugEntry(request):
 
 
 @login_required()
-def sendChatMessage(request):
+def sendChatMessage(request, game_id=None):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -1818,7 +1836,8 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = FCM_Game.objects.get(id=game_id)
+        currentGame = Game.objects.get(id=game_id, gameCode='FCM')
+        presenter = cast('FcmPresenter', currentGame.presenter())
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -1835,11 +1854,9 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.playersWithChatNotification.set(
-            currentGame.allPlayers.exclude(username=request.user.username)
-        )
+        all_usernames = [gp.player.username for gp in currentGame.players.all().select_related("player") if gp.player and gp.player.username != request.user.username]
+        presenter.addChatNotifications(all_usernames)
 
-        # currentGame.save(update_fields=["chatData", "playersWithChatNotification"])
         currentGame.save()
 
         return JsonResponse({"chatData": compressedChatData})
@@ -1848,30 +1865,21 @@ def _sendChatMessage(request):
 
 
 @login_required()
-def notes(request):
+def notes(request, game_id=None):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-    except FCM_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    if currentGame.seatPosition(request.user.username) == 0:
-        currentGame.player0notes = jsonData["note"]
-    if currentGame.seatPosition(request.user.username) == 1:
-        currentGame.player1notes = jsonData["note"]
-    if currentGame.seatPosition(request.user.username) == 2:
-        currentGame.player2notes = jsonData["note"]
-    if currentGame.seatPosition(request.user.username) == 3:
-        currentGame.player3notes = jsonData["note"]
-    if currentGame.seatPosition(request.user.username) == 4:
-        currentGame.player4notes = jsonData["note"]
-    if currentGame.seatPosition(request.user.username) == 5:
-        currentGame.player5notes = jsonData["note"]
-    currentGame.save()
+    player_gp = currentGame.players.filter(player=request.user).first()
+    if player_gp:
+        player_gp.notes = jsonData["note"]
+        player_gp.save()
 
     return JsonResponse({"notePosted": True})
 
@@ -1901,8 +1909,8 @@ def changeAssistance(request):
 
     elif jsonData["action"] == "zoom":
         try:
-            currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-        except FCM_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         if len(currentGame.zoomLevels) < 3 * currentGame.maxPlayers:
             currentGame.zoomLevels = "200" * currentGame.maxPlayers
@@ -1946,13 +1954,15 @@ def gameAdminGetMoveData(request):
 
     jsonData = json.loads(request.body)
     try:
-        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-    except FCM_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
+    except Game.DoesNotExist:
         return render(request, "FCM/gameAdmin.html", {"gameID": 21})
 
-    names = currentGame.getAllPlayersOrderedySeat(True)
+    presenter = cast('FcmPresenter', currentGame.presenter())
 
-    playersMoveDataArr = json.loads(currentGame.playersMoveData) or []
+    names = presenter.getAllPlayersOrderedySeat(True)
+
+    playersMoveDataArr = json.loads(currentGame.FCMplayersMoveData) if currentGame.FCMplayersMoveData else []
 
     allMoveData = []
     for row in playersMoveDataArr:
@@ -1970,9 +1980,11 @@ def FCMdata(request, dataType):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-    except FCM_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = cast('FcmPresenter', currentGame.presenter())
 
     USE_NEW_CODE = False
     if int(currentGame.created) > 1744974000000:
@@ -1981,10 +1993,10 @@ def FCMdata(request, dataType):
     # if dataType == 1:
     # Send game data
     #    return JsonResponse({"gameData": currentGame.gameData,
-    #                        "secondsToNextKickout": currentGame.getSecondsToNextKickout()} )
+    #                        "secondsToNextKickout": presenter.getSecondsToNextKickout()} )
     if dataType == 2:
         # Remove user from notifications
-        currentGame.playersWithChatNotification.remove(request.user)
+        presenter.removeChatNotification(request.user)
         currentGame.save()
         return JsonResponse(
             {
@@ -2007,15 +2019,15 @@ def FCMdata(request, dataType):
             specialData = False
 
             # Use to stop actions showing when there's already move Data
-            if currentGame.hasValidActualMoveData(request.user.username):
+            if presenter.hasValidActualMoveData(request.user.username):
                 specialData = True
             return JsonResponse(
                 {
                     "latest": False,
                     "loadData": currentGame.gameData,
                     # Not used at the moment, in // comment
-                    "currentPlayers": currentGame.getCurrentPlayersArray(),
-                    "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                    "currentPlayers": presenter.getCurrentPlayersArray(),
+                    "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                     "specialData": specialData,
                     "latestUpdate": currentGame.latestUpdate,
                 },
@@ -2027,15 +2039,15 @@ def FCMdata(request, dataType):
         specialData = False
 
         # Use to stop actions showing when there's already move Data
-        if currentGame.hasValidActualMoveData(request.user.username):
+        if presenter.hasValidActualMoveData(request.user.username):
             specialData = True
         return JsonResponse(
             {
                 "latest": False,
                 "loadData": currentGame.gameData,
                 # Not used at the moment, in // comment
-                "currentPlayers": currentGame.getCurrentPlayersArray(),
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "currentPlayers": presenter.getCurrentPlayersArray(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "specialData": specialData,
                 "latestUpdate": currentGame.latestUpdate,
             },
@@ -2064,15 +2076,18 @@ def _castVote(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = FCM_Game.objects.get(id=jsonData["gameID"])
-    except FCM_Game.DoesNotExist:
-        raise Http404(gettext("FCM_Game does not exist"))
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+    presenter = cast('FcmPresenter', currentGame.presenter())
+
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
     topic = jsonData["topic"]
     choice = jsonData["choice"]
 
-    success = currentGame.tempPresenter().castVote(
+    success = presenter.castVote(
         topic, playerName, choice
     )  # Pass playerName to addDeleteVote
 
@@ -2080,12 +2095,11 @@ def _castVote(request):
         currentGame.save()
         # Check if all players have voted to delete
         all_voted = True
-        votesData = currentGame.tempPresenter().getFullSetOfVoteResults(
-            topic, currentGame.getAllPlayersOrderedySeat(True), False
+        votesData = presenter.getFullSetOfVoteResults(
+            topic, presenter.getAllPlayersOrderedySeat(True), False
         )
 
-        # missingPlayers = currentGame.tempPresenter().getMissingPlayersNamesArray()
-        missingPlayers = currentGame.getMissingPlayersNamesArray()
+        missingPlayers = presenter.getMissingPlayersNamesArray()
         for player, vote in votesData.items():
             if not vote and player not in missingPlayers:
                 all_voted = False
@@ -2093,8 +2107,8 @@ def _castVote(request):
 
         if all_voted:
             votesData = json.dumps(
-                currentGame.tempPresenter().getFullSetOfVoteResults(
-                    topic, currentGame.getAllPlayersOrderedySeat(True), False
+                presenter.getFullSetOfVoteResults(
+                    topic, presenter.getAllPlayersOrderedySeat(True), False
                 )
             )
             # Delete the game
@@ -2122,8 +2136,8 @@ def _castVote(request):
             {
                 "voteChanged": True,
                 "votesData": json.dumps(
-                    currentGame.tempPresenter().getFullSetOfVoteResults(
-                        topic, currentGame.getAllPlayersOrderedySeat(True), False
+                    presenter.getFullSetOfVoteResults(
+                        topic, presenter.getAllPlayersOrderedySeat(True), False
                     )
                 ),
             },

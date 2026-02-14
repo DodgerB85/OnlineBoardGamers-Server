@@ -1,3 +1,5 @@
+import base64
+import gzip
 import time
 import json
 import random
@@ -11,6 +13,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_gamePaceString,
     SR_getCNSstartingOptionsHTML,
+    SR_getFCMstartingOptionsHTML,
     SR_getAQYstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
@@ -26,7 +29,7 @@ class GamePresenter:
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
     # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND"]:
+        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
             print(
                 f"isMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
             )
@@ -55,7 +58,7 @@ class GamePresenter:
         )
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND"]:
+        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
             print(
                 f"quickIsMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
             )
@@ -333,7 +336,7 @@ class GamePresenter:
 
         # 3. Check if all players have voted
         #### TEMP TODO - this is just models NOT on the unified model but who use the unified voting system
-        if self.gameObj.getGameCode() in ["FCM"]:
+        if self.gameObj.getGameCode() in []:
             ordered_players = self.gameObj.getAllPlayersOrderedySeat()
             missing_players = {p.username for p in self.gameObj.missingPlayers.all()}
         else:
@@ -390,8 +393,8 @@ class GamePresenter:
         
         # If it is an FCM game with enabled rewinds, return 2 always
         if self.gameObj.getGameCode() == "FCM" and topic == REWIND_CONSENT_VOTE_TOPIC:
-            startingOptionsList = self.gameObj.startingOptions.split(",")
-            if "99" in startingOptionsList:
+            startingOptionsList = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+            if 99 in startingOptionsList:
                 for username in usernames:
                     generalReturn[username] = 2
                 return generalReturn
