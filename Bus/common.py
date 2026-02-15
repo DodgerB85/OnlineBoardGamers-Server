@@ -99,7 +99,7 @@ def create_bus_game(
     game_status = "AVAILABLE"
     kickout_duration = 24
     starting_map = ""
-    player0notes = ""
+    shadowNameNotes = ""
     usernames_to_notify = []
     invited_usernames = []
     stats_exclude = False
@@ -171,13 +171,13 @@ def create_bus_game(
             starting_options.append(int(request.POST["trainingGame"]))
             game_status = "ACTIVE"
             stats_exclude = True
-            shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3"]
+            shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4"]
             shadow_display = []
             for i in range(1, max_players):
                 all_players.append(User.objects.get(username=shadow_names[i - 1]))
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
-            player0notes = json.dumps(shadow_display, separators=(",", ":"))
+            shadowNameNotes = json.dumps(shadow_display, separators=(",", ":"))
         elif "learningGame" in request.POST:
             starting_options.append(int(request.POST.get("learningGame")))
             stats_exclude = True
@@ -231,7 +231,7 @@ def create_bus_game(
                 game=new_game,
                 player=player,
                 seat_order=idx,
-                notes=player0notes if idx == 0 else "",
+                notes=shadowNameNotes if player==request.user else "",
             )
 
         # Start pre-populated games

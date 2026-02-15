@@ -155,7 +155,7 @@ def create_tgz_game(
 
                     # Fix player order - find seed that matches input order
                     player_order_seed = random.randint(1000, 32767)
-                    player_list_raw = [gp.player.username for gp in new_game.players.all()]
+                    player_list_raw = [gp.player.username if gp.player else "" for gp in new_game.players.all()]
                     player_name_order_input = player_usernames
                     
                     for seed in range(1000, 32767):
@@ -285,7 +285,7 @@ def create_tgz_game(
     game_status = "AVAILABLE"
     kickout_duration = 24
     starting_map = ""
-    player0notes = ""
+    shadowNameNotes = ""
     usernames_to_notify = []
     invited_players = []
     stats_exclude = False
@@ -352,7 +352,7 @@ def create_tgz_game(
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
 
-            player0notes = json.dumps(shadow_display, separators=(",", ":"))
+            shadowNameNotes = json.dumps(shadow_display, separators=(",", ":"))
         elif "learningGame" in request.POST:
             starting_options.append(int(request.POST.get("learningGame")))
             stats_exclude = True
@@ -416,11 +416,8 @@ def create_tgz_game(
                 player=player,
                 seat_order=idx,
                 is_current=(idx == 0 and game_status == "ACTIVE"),
+                notes=shadowNameNotes if player==request.user else "",
             )
-            # Store display names in first player's notes for training games
-            if idx == 0 and player0notes:
-                gp.notes = player0notes
-                gp.save()
         
         # Add invited players
         for player in invited_usernames_objs:

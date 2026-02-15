@@ -380,11 +380,11 @@ def showBusGame(request, game_id):
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeat():
             # Get display names from player0's notes
-            player0_gp = currentGame.players.filter(seat_order=0).first()
-            if player0_gp:
-                displayNames = player0_gp.notes
-                player0_gp.notes = ""
-                player0_gp.save()
+            user_gp = currentGame.players.filter(player=request.user).first()
+            if user_gp:
+                displayNames = user_gp.notes
+                user_gp.notes = ""
+                user_gp.save()
             notes = ""
         allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
 
