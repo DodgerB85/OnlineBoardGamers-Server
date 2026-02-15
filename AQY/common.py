@@ -99,7 +99,7 @@ def create_aqy_game(
     game_status = "AVAILABLE"
     kickout_duration = 24
     starting_map = ""
-    player0notes = ""
+    shadowNameNotes = ""
     usernames_to_notify = []
     invited_usernames = []
     stats_exclude = False
@@ -177,7 +177,7 @@ def create_aqy_game(
                 all_players.append(User.objects.get(username=shadow_names[i - 1]))
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
-            player0notes = json.dumps(shadow_display, separators=(",", ":"))
+            shadowNameNotes = json.dumps(shadow_display, separators=(",", ":"))
         elif "learningGame" in request.POST:
             starting_options.append(int(request.POST.get("learningGame")))
             stats_exclude = True
@@ -231,7 +231,7 @@ def create_aqy_game(
                 game=new_game,
                 player=player,
                 seat_order=idx,
-                notes=player0notes if idx == 0 else "",
+                notes=shadowNameNotes if player==request.user else "",
             )
 
         # Start pre-populated games

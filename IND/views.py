@@ -157,12 +157,13 @@ def createINDgame(request):
                 shadow_players.append(display_name)
 
             # Store display names in the first player's notes (seat_order=0)
-            first_gp = newGame.players.filter(seat_order=0).first()
-            if first_gp:
-                first_gp.notes = json.dumps(shadow_players)
-                first_gp.save()
+            user_gp = newGame.players.filter(player=request.user).first()
+            if user_gp:
+                user_gp.notes = json.dumps(shadow_players)
+                user_gp.save()
 
-            newGame.presenter().startGame(request)
+            presenter = cast("IndPresenter", newGame.presenter())
+            presenter.startGame(request)
         else:
             usernamesToNotify = []
             for i in range(2, _maxPlayers + 1):
@@ -421,11 +422,11 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeat():
             # For shadow games, display names are stored in the first player's notes
-            first_gp = currentGame.players.filter(seat_order=0).first()
-            if first_gp and first_gp.notes:
-                displayNames = first_gp.notes
-                first_gp.notes = ""
-                first_gp.save()
+            user_gp = currentGame.players.filter(player=userObj).first()
+            if user_gp and user_gp.notes:
+                displayNames = user_gp.notes
+                user_gp.notes = ""
+                user_gp.save()
                 notes = ""
         # allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
 
