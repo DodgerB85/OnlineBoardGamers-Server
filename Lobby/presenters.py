@@ -3361,18 +3361,24 @@ class FcmPresenter(GamePresenter):
     # This always ensures you get a valid array return
     # any bots are set to phase -99 here, so you know nothing is expcected, ie they can't move
     def getOrScaffoldAllMoveData(self):
+        from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
+
         missing_players = set(
             self.gameObj.players.filter(is_missing=True)
             .values_list("player__username", flat=True)
         )
         try:
             data = json.loads(self.gameObj.FCMplayersMoveData)
-            if len(data) != self.gameObj.maxPlayers - len(missing_players):
+            # For some reason we need to check both here. A kickout can apparently result in missing data
+            if len(data) != self.gameObj.maxPlayers:# and len(data) != self.gameObj.maxPlayers - len(missing_players):
+                SN_sendAdminErrorMessage(None, f"Invalid number of players - getOrScaffoldAllMoveData - FCM pres {self.gameObj.id}")
+            
+            
                 raise ValueError("Invalid number of players")
             return data
         except (json.JSONDecodeError, ValueError):
             # Scaffold default structure
-            allPlayers = self.getAllPlayersOrderedySeat(True, True)
+            allPlayers = self.getAllPlayersOrderedySeat(True, False)
             missing_players = set(
                 self.gameObj.players.filter(is_missing=True)
                 .values_list("player__username", flat=True)

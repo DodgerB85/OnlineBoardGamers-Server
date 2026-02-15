@@ -504,6 +504,7 @@ class FCM_Game(GeneralGame):
         try:
             data = json.loads(self.playersMoveData)
             if len(data) != self.maxPlayers:
+                SN_sendAdminErrorMessage(None, f"Invalid number of players - getOrScaffoldAllMoveData - FCM model {self.id}")
                 raise ValueError("Invalid number of players")
             return data
         except (json.JSONDecodeError, ValueError):
