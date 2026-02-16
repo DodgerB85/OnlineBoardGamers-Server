@@ -58,12 +58,7 @@ class GamePresenter:
         )
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
-            print(
-                f"quickIsMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
-            )
-            return False
-
+        from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return True
 
@@ -72,6 +67,7 @@ class GamePresenter:
         )
 
         if not current_players.exists():
+            SN_sendAdminErrorMessage(None, f"*****************************************************************************quickIsMyMove: no current players - gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id}")
             return True
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
@@ -1478,32 +1474,6 @@ class TgzPresenter(GamePresenter):
             username in shadow_values for username in current_usernames
         )
 
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
-            return False
-
-        current_players = self.gameObj.players.filter(is_current=True).select_related(
-            "player"
-        )
-
-        if not current_players.exists():
-            return True
-
-        current_usernames = [gp.player.username for gp in current_players if gp.player]
-
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-
-        return loggedInPlayerUsername in current_usernames or any(
-            username in shadow_values for username in current_usernames
-        )
-
     def serialize(self, loggedInUser=None):
         from Lobby.sharedFunctions.sharedRefs import SR_getTGZstartingOptionsHTML
 
@@ -2158,27 +2128,6 @@ class BusPresenter(GamePresenter):
         else:
             return False
 
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        # Return False if no username is provided
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
-            return False
-
-        currentPlayers = self._getCurrentPlayersField()
-
-        # Use a set for faster membership testing
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-        return (
-            not currentPlayers
-            or loggedInPlayerUsername in currentPlayers
-            or currentPlayers in shadow_values
-        )
 
     def getMissingPlayersNamesArray(self):
         return list(
@@ -3068,27 +3017,6 @@ class FcmPresenter(GamePresenter):
             return True
 
         return False
-
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        # Return False if no username is provided
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
-            return False
-
-        # Use a set for faster membership testing
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-        currentPlayers = self._getCurrentPlayersField()
-        return (
-            not currentPlayers
-            or loggedInPlayerUsername in currentPlayers
-            or currentPlayers in shadow_values
-        )
 
     def _getCurrentPlayersField(self):
         """Get current players as a string (matching old currentPlayers field format)"""
