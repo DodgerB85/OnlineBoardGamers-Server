@@ -121,6 +121,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # Logged out
     returnData = {
         "gameID": gameID,
+        "pov": -99,
         "gameName": gameName,
         "gameData": gameData,
         "gameCreationTimestamp": gameCreationTimestamp,
@@ -189,6 +190,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(
         {
             "name": username,
+            "pov": -9,
             "chatData": chatData,
             "latestUpdateLiteral": latestUpdate,
             "nextURL": nextURL,
@@ -748,6 +750,57 @@ def _processRNBturn(request):
 
     return HttpResponse(status=204)  # No Content
 
+@login_required()
+def sendChatMessageRNB(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    gameID = jsonData["gameID"]
+
+    with db_mutex(str(gameID)):
+        return _sendChatMessageRNB(request)
+
+
+
+@login_required()
+def _sendChatMessageRNB(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    if jsonData["action"] == "sendChatMessage":
+        game_id = jsonData["gameID"]
+        new_entry = jsonData["newEntry"]
+
+        currentGame = Game.objects.get(id=game_id, gameCode="RNB")
+
+        currentChatData = []
+        base64_data = currentGame.chatData if currentGame.chatData else ""
+        if len(base64_data) > 0:
+            compressed_data = base64.b64decode(base64_data)
+            unzipped = gzip.decompress(compressed_data).decode("utf-8")
+            currentChatData = json.loads(unzipped)
+        currentChatData.insert(0, new_entry)
+
+        json_string = json.dumps(currentChatData)
+        compressed_data = gzip.compress(json_string.encode("utf-8"))
+        compressedChatData = base64.b64encode(compressed_data).decode("utf-8")
+
+        currentGame.chatData = compressedChatData
+
+        # Now add notifications to everyone except request.user     
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
+        currentGame.presenter().removeChatNotification(request.user)
+        
+        currentGame.save()
+
+        return JsonResponse({"chatData": compressedChatData})
+
+    return HttpResponse(status=204)  # No Content
+
+
 
 @login_required()
 def bugEntryRNB(request):
@@ -797,6 +850,36 @@ def saveNotesRNB(request):
     currentGame.players.filter(player=request.user).update(notes=notes)
 
     return JsonResponse({"notePosted": True})
+
+@login_required
+def saveZoomRNB(request):
+    if request.method != "PUT":
+        return JsonResponse({"error": "Wrong request."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    if jsonData["action"] == "zoom":
+        try:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="RNB")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+        zoomLevels = json.loads(currentGame.zoomLevels)
+
+        if jsonData.get("allPlayers"):
+            for i in range(len(zoomLevels)):
+                zoomLevels[i] = int(jsonData["zoomLevel"])
+        else:
+            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
+
+        currentGame.zoomLevels = json.dumps(zoomLevels)
+        currentGame.save()
+        return JsonResponse(
+            {
+                "response": "ok",
+            }
+        )
+
+    return HttpResponse(status=204)  # No Content
 
 
 @login_required()

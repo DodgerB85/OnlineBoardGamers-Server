@@ -103,6 +103,7 @@
     //initData.preferredRNBoptions = {{ preferredRNBoptions }};
     initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
     initData.deleteVotesData = {{ deleteVotesData | safe }};
+    initData.pov = {{ pov }};
 
     {% if spoilerFree %}
     initData.spoilerFree = true;
@@ -121,7 +122,6 @@
     ///////////////////////
     {% if involvedPlayer %}
     initData.statsExcludedGame = {{ statsExcludedGame|lower }};
-    initData.pov = {{ pov }};
     initData.move = '{{ move }}';
     initData.trade = '{{ trade }}';
     

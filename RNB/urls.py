@@ -14,10 +14,10 @@ urlpatterns = [
     ## API routes
     path("createRNBgame/", views.createRNBgame, name="createRNBgame"),
     path("bugEntry/", views.bugEntryRNB, name="bugEntryRNB"),
-    #path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
+    path("sendChatMessageRNB/", views.sendChatMessageRNB, name="sendChatMessagRNB"),
     path("saveNotesRNB/", views.saveNotesRNB, name="saveNotesRNB"),
     path("processRNBturn/", views.processRNBturn, name="processRNBturn"),
     path("data/<int:dataType>/", views.RNBdata, name="RNBdata"),
-    #path("saveZoom/", views.saveZoom, name="saveZoom"),
+    path("saveZoomRNB/", views.saveZoomRNB, name="saveZoomRNB"),
     #path("castVote/", views.castVote, name="castVoteRNB"),
 ]
