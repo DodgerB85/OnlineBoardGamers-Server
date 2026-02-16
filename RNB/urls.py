@@ -13,11 +13,11 @@ urlpatterns = [
     path("help/", views.RNBhelp, name="RNBhelp"),
     ## API routes
     path("createRNBgame/", views.createRNBgame, name="createRNBgame"),
-    path("bugEntry/", views.bugEntry, name="bugEntryRNB"),
+    path("bugEntry/", views.bugEntryRNB, name="bugEntryRNB"),
     #path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
-    #path("saveNotes/", views.saveNotes, name="saveNotes"),
+    path("saveNotesRNB/", views.saveNotesRNB, name="saveNotesRNB"),
     path("processRNBturn/", views.processRNBturn, name="processRNBturn"),
-    #path("data/<int:dataType>/", views.RNBdata, name="RNBdata"),
+    path("data/<int:dataType>/", views.RNBdata, name="RNBdata"),
     #path("saveZoom/", views.saveZoom, name="saveZoom"),
-    #path("castVote/", views.castVote, name="castVoteCNS"),
+    #path("castVote/", views.castVote, name="castVoteRNB"),
 ]

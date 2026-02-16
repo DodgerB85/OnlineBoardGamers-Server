@@ -67,6 +67,7 @@ function sendChatMessage() {
 }
 function clearNotes() {
 	personal.notes = ""
+	IO.saveNotes()
 }
 
 function loadRewind() {
