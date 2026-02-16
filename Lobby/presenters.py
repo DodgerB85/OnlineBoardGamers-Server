@@ -3929,8 +3929,9 @@ class FcmPresenter(GamePresenter):
 
     def setOOBpreference(self, name, OOBpreference):
         if not self.gameObj.FCMplayersMoveData:
-            return False
+            self.gameObj.FCMplayersMoveData = json.dumps(self.getOrScaffoldAllMoveData())
         seat = self.seatPosition(name)
+        print(f"OOBpreference: {OOBpreference} seat: {seat}")
         if seat < 0:
             return False
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
@@ -3953,7 +3954,14 @@ class FcmPresenter(GamePresenter):
 
         # Finally, check it is valid
         if self.gameObj.phase == 4:
+            print(f"playerMoveArr: {playerMoveArr}")
+            while len(playerMoveArr[3]) < 2:
+                playerMoveArr[3].append([])
+            if len(playerMoveArr[3]) < 3:
+                playerMoveArr[3].append(0)
             playerMoveArr[3][2] = OOBpreference
+            print(f"oob: {OOBpreference}")
+            print(f"playerMoveArr: {playerMoveArr}")
             self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
             self.gameObj.save()
             return True
