@@ -750,7 +750,7 @@ def _processRNBturn(request):
 
 
 @login_required()
-def bugEntry(request):
+def bugEntryRNB(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -779,3 +779,79 @@ def bugEntry(request):
     )
 
     return JsonResponse({"bugEntrySuccess": True})
+
+@login_required()
+def saveNotesRNB(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    game_id = jsonData["gameID"]
+    notes = jsonData["notes"]
+    try:
+        currentGame = Game.objects.get(id=game_id, gameCode='RNB')
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+    # This directly saves the notes
+    currentGame.players.filter(player=request.user).update(notes=notes)
+
+    return JsonResponse({"notePosted": True})
+
+
+@login_required()
+def RNBdata(request, dataType=1):
+    if not request.user.is_authenticated:
+        # User is not logged in, redirect to login page
+        return redirect(reverse("myLogin"))
+
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    try:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='RNB')
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+    presenter = cast('RnbPresenter', currentGame.presenter())
+
+    if dataType == 1:
+        returnData = {
+            "gameData": currentGame.gameData,
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "finishedGame": currentGame.gameStatus == "FINISHED",
+            "latestUpdate": currentGame.latestUpdate,
+        }
+        # Send game data
+        return JsonResponse(returnData)
+    elif dataType == 2:
+        # Remove user from notifications
+        presenter.removeChatNotification(request.user)
+        currentGame.save()
+        return JsonResponse(
+            {
+                "chatData": currentGame.chatData
+                # }, safe=False)
+            },
+            safe=True,
+        )
+    # Check for update comparison, and update or do nothing
+    if dataType == 3:
+        gameUpdate = int(jsonData["latestUpdate"])
+        latestUpdate = int(currentGame.latestUpdate)
+        if gameUpdate == latestUpdate:
+            return JsonResponse({"latest": True}, safe=False)
+        # Else Send game data
+        return JsonResponse(
+            {
+                "latest": False,
+                "gameData": currentGame.gameData,
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+                "latestUpdate": currentGame.latestUpdate,
+            }
+        )
+
+    return HttpResponse(status=204)  # No Content
+

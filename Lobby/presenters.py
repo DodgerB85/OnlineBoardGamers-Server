@@ -29,12 +29,6 @@ class GamePresenter:
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
     # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
-            print(
-                f"isMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
-            )
-            return False
-
         current_players = self.gameObj.players.filter(is_current=True).select_related(
             "player"
         )
@@ -115,11 +109,12 @@ class GamePresenter:
         return self.getCurrentPlayersArray()
 
     def seatPosition(self, _username, withoutBots=False):
-        playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        try:
-            return playerList.index(_username)
-        except (ValueError, TypeError):
-            return -1
+        #playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        #try:
+        #    return playerList.index(_username)
+        #except (ValueError, TypeError):
+        #    return -1
+        return self.gameObj.players.filter(player__username=_username).first().seat_order
 
     def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
         all_players_gp = self.gameObj.players.select_related(  # .exclude(is_kicked=True)
