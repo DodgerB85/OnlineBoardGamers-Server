@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -408,7 +408,7 @@ class BaseGame(models.Model):
     rewindTempData = models.TextField(blank=True)
 
     kickoutFlexiData = models.TextField(blank=True)
-    
+
     # TGZ only
     autoMoves = models.CharField(max_length=30, blank=True, null=True, default=None)
 
@@ -529,13 +529,22 @@ class Game(BaseGame):
     FCMplayersMoveData = models.TextField(blank=True)
     FCMnotificationSuppression = models.CharField(max_length=30, blank=False, default="000000")
 
+    # HC-specific fields (temporary, for migration)
+    relatedHCTournament = models.ForeignKey(
+        'HC.HC_Tournament',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='hctournamentGEN_relName',
+    )
+
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)
 
     if TYPE_CHECKING:
         players: RelatedManager[GamePlayer]
 
-    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter]:
+    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter]:
         if self.gameCode == "CNS":
             return CannesPresenter(self)
         if self.gameCode == "WEB":
@@ -552,6 +561,8 @@ class Game(BaseGame):
             return FcmPresenter(self)
         if self.gameCode == "RNB":
             return RnbPresenter(self)
+        if self.gameCode == "HC":
+            return HcPresenter(self)
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
@@ -600,7 +611,7 @@ class GamePlayer(models.Model):
 
     seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
 
-    # TODO, these two fields are currently used only in AQY. Remove from the Game model at some point.
+    # TODO, these two fields are currently used only in AQY and HC. Remove from the Game model at some point.
     currentMoveTime = models.CharField(max_length=15, blank=True)
     currentMoveData = models.TextField(blank=True)
 

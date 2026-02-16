@@ -16,6 +16,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getFCMstartingOptionsHTML,
     SR_getAQYstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
+    SR_getHCstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
@@ -29,7 +30,7 @@ class GamePresenter:
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
     # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
+        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC"]:
             print(
                 f"isMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
             )
@@ -43,7 +44,7 @@ class GamePresenter:
             return True
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
-        
+
         shadow_values = {
             "SHADOW",
             "SHADOW_2",
@@ -58,7 +59,7 @@ class GamePresenter:
         )
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
+        if self.gameObj.gameCode not in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC"]:
             print(
                 f"quickIsMyMove: gameCode: {self.gameObj.gameCode} ERROR: will always return False"
             )
@@ -4039,3 +4040,592 @@ class FcmPresenter(GamePresenter):
 
     def getGameCode(self):
         return "FCM"
+
+
+class HcPresenter(GamePresenter):
+    def __str__(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        allPlayersString = " / ".join(
+            gp.player.username for gp in all_players if gp.player
+        )
+        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
+
+    def currentTurnString(self):
+        return SR_currentTurnString("HC", self.gameObj.turn, self.gameObj.phase)
+
+    def getGameName(self):
+        _gameName = ""
+        if self.gameObj.gameName != "":
+            _gameName = self.gameObj.gameName
+        else:
+            _gameName = f"[{getattr(self.gameObj.creator, 'username')}'s Game]"
+        if self.gameObj.gameStatus == "PRIVATE":
+            _gameName += "[Private Game]"
+        return _gameName
+
+    def _getCurrentPlayersField(self):
+        """Get current players as a string (matching old currentPlayers field format)"""
+        current_gps = self.gameObj.players.filter(is_current=True).select_related("player")
+        usernames = [gp.player.username for gp in current_gps if gp.player]
+        return ",".join(usernames) if usernames else ""
+
+    def isMyMove(self, loggedInPlayerUsername="ADFSADASDASDASDASADADA"):
+        currentPlayers = self._getCurrentPlayersField()
+        if currentPlayers == "":
+            return True
+        currentPlayerrsList = currentPlayers.split(",")
+        if (
+            self.gameObj.phase == 3
+            and self.hasMoveData(loggedInPlayerUsername)
+            and loggedInPlayerUsername != currentPlayerrsList[0]
+        ):
+            return False
+        if (
+            (loggedInPlayerUsername in currentPlayers)
+            or (currentPlayers == "SHADOW")
+            or (currentPlayers == "SHADOW_2")
+            or (currentPlayers == "SHADOW_3")
+            or (currentPlayers == "SHADOW_4")
+        ):
+            return True
+        else:
+            return False
+
+    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        # Return False if no username is provided
+        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+            return False
+
+        currentPlayers = self._getCurrentPlayersField()
+        currentPlayerrsList = currentPlayers.split(",")
+        if (
+            self.gameObj.phase == 3
+            and self.hasMoveData(loggedInPlayerUsername)
+            and loggedInPlayerUsername != currentPlayerrsList[0]
+        ):
+            return False
+
+        # Use a set for faster membership testing
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+        return (
+            not currentPlayers
+            or loggedInPlayerUsername in currentPlayers
+            or currentPlayers in shadow_values
+        )
+
+    def getCurrentPlayersArray(self):
+        currentPlayers = self._getCurrentPlayersField()
+        if not currentPlayers:
+            return [""]
+        if "," in currentPlayers:
+            return [player.strip() for player in currentPlayers.split(",")]
+        else:
+            return [currentPlayers]
+
+    def getCurrentPlayersArrayForReminderEmail(self):
+        currentPlayersArray = self.getCurrentPlayersArray()
+        playersToNotify = []
+        for player in currentPlayersArray:
+            if self.isMyMove(player):
+                playersToNotify.append(player)
+        return playersToNotify
+
+    def serialize(self, loggedInUser=None):
+        all_players_gps = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
+        all_players_count = len(all_players_gps)
+
+        remainingPlayersInt = self.gameObj.maxPlayers - all_players_count
+        remainingPlayers = ""
+        for i in range(remainingPlayersInt):
+            remainingPlayers += str(all_players_count + i + 1)
+
+        winner_gp = self.gameObj.players.filter(winner=True).first()
+        winner = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
+
+        createdString = str(self.gameObj.created)
+        latestUpdateString = str(self.gameObj.latestUpdate)
+
+        latestUpdateElapsedTimeString = ""
+        elapsedTotalSeconds = 0
+        if (
+            self.gameObj.gameStatus == "WAITING"
+            or self.gameObj.gameStatus == "AVAILABLE"
+            or self.gameObj.gameStatus == "ACTIVE"
+            or self.gameObj.gameStatus == "PRIVATE"
+        ):
+            if (
+                self.gameObj.gameStatus == "WAITING"
+                or self.gameObj.gameStatus == "AVAILABLE"
+                or self.gameObj.gameStatus == "PRIVATE"
+            ):
+                elapsedTotalSeconds = int(time.time()) - int(self.gameObj.created) // 1000
+            if self.gameObj.gameStatus == "ACTIVE":
+                elapsedTotalSeconds = int(time.time()) - int(self.gameObj.latestUpdate) // 1000
+            elapsedDays = elapsedTotalSeconds // (60 * 60 * 24)
+            elapsedTotalSeconds = elapsedTotalSeconds % (60 * 60 * 24)
+            elapsedHours = elapsedTotalSeconds // (60 * 60)
+            elapsedTotalSeconds = elapsedTotalSeconds % (60 * 60)
+            elapsedmins = elapsedTotalSeconds // (60)
+            elapsedTotalSeconds = elapsedTotalSeconds % (60)
+
+            if elapsedDays > 0:
+                latestUpdateElapsedTimeString += str(elapsedDays) + "d"
+
+            if elapsedHours > 0:
+                latestUpdateElapsedTimeString += " " + str(elapsedHours) + "h"
+            if elapsedmins > 0:
+                latestUpdateElapsedTimeString += " " + str(elapsedmins) + "m"
+            latestUpdateElapsedTimeString += " " + str(elapsedTotalSeconds) + "s"
+
+        myMove = False
+        if loggedInUser is not None:
+            myMove = self.isMyMove(loggedInUser.username)
+
+        chatNotification = False
+        involvedPlayer = False
+
+        missing_player_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.is_missing}
+        chat_notify_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.has_chat_notification}
+
+        if loggedInUser is not None:
+            involvedPlayer = any(
+                gp.player == loggedInUser and gp.player.id not in missing_player_ids
+                for gp in all_players_gps if gp.player
+            )
+            chatNotification = loggedInUser.id in chat_notify_ids
+
+        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
+
+        startingOptionsHTML = SR_getHCstartingOptionsHTML(
+            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+        )
+
+        kickoutRequiredNum = self.kickoutRequired()
+
+        all_usernames = [gp.player.username for gp in all_players_gps if gp.player]
+        deleteableGame = False
+        if (
+            "SHADOW" in all_usernames
+            and loggedInUser
+            and any(gp.player == loggedInUser for gp in all_players_gps if gp.player)
+        ):
+            deleteableGame = True
+
+        currentPlayersDisplayList = self._getCurrentPlayersField().split(",")
+        if loggedInUser is not None:
+            if not myMove and loggedInUser.username in currentPlayersDisplayList:
+                currentPlayersDisplayList.remove(loggedInUser.username)
+        currentPlayersDisplayString = ",".join(currentPlayersDisplayList)
+
+        return {
+            "gameID": self.gameObj.id,
+            "gameName": self.getGameName(),
+            "gameDescription": self.gameObj.gameDescription,
+            "creator": getattr(self.gameObj.creator, "username"),
+            "created": createdString,
+            "allPlayers": all_usernames,
+            "invitedPlayers": [user.username for user in self.gameObj.invitedPlayers.all()],
+            "currentPlayers": currentPlayersDisplayString,
+            "currentTurn": self.currentTurnString(),
+            "pace": gamePaceString,
+            "latestUpdate": latestUpdateString,
+            "startingOptionsHTML": startingOptionsHTML,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "maxPlayers": self.gameObj.maxPlayers,
+            "winner": winner,
+            "myMove": myMove,
+            "involvedPlayer": involvedPlayer,
+            "chatNotification": chatNotification,
+            "kickoutRequiredNum": kickoutRequiredNum,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
+            "game": "HC",
+            "remainingPlayers": remainingPlayers,
+            "deleteableGame": deleteableGame,
+            "learningGame": self.isLearningGame(),
+            "experiencedGame": self.isExperiencedGame(),
+        }
+
+    def startGame(self, request):
+        from django_q.tasks import async_task
+        from Lobby.models import GamePlayer
+
+        self.gameObj.gameStatus = "ACTIVE"
+
+        # Use rotation algorithm for seat order
+        game_players = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
+
+        if self.gameObj.playerOrderSeed > 0:
+            offset = self.gameObj.playerOrderSeed % len(game_players) if game_players else 0
+            game_players = game_players[offset:] + game_players[:offset]
+
+        _currentPlayers = ",".join([gp.player.username for gp in game_players if gp.player])
+
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            gp.is_current = True  # HC starts with all players as current
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+
+        # NOTE: Old HC_Game had `if self.startingOptions == 102:` which was dead code
+        # (string field compared to int, always False in Python 3).
+        # Keeping it commented out to preserve old behavior.
+        # starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+        # if 102 in starting_options:
+        #     for gp in game_players:
+        #         gp.is_current = (gp.seat_order == 0)
+        #     GamePlayer.objects.bulk_update(game_players, ["is_current"])
+
+        # Initialize rewind consent in activeVotes
+        rewind_votes = {}
+        host_username = getattr(self.gameObj.host, "username") if self.gameObj.host else None
+        for gp in game_players:
+            if gp.player:
+                username = gp.player.username
+                if username == host_username:
+                    rewind_votes[username] = 2
+                else:
+                    rewind_votes[username] = 0
+
+        if not self.gameObj.activeVotes:
+            self.gameObj.activeVotes = {}
+        self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+
+        self.gameObj.save()
+
+        if "SHADOW" not in [gp.player.username for gp in game_players if gp.player]:
+            player_usernames = [gp.player.username for gp in game_players if gp.player]
+            self.gameObj.deleteGameVotes = {}
+            self.gameObj.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
+            self.gameObj.save()
+
+            playerListToNotify = list(player_usernames)
+            if request.user.username in playerListToNotify:
+                playerListToNotify.remove(request.user.username)
+
+            message_data = BLANK_MESSAGE_TEMPLATE.copy()
+            message_data["gameID"] = self.gameObj.id
+            message_data["gameName"] = self.getGameName()
+            message_data["gameCode"] = "HC"
+            message_data["username"] = request.user.username
+            message_data["currentPlayersString"] = self.getCurrentPlayersString()
+            message_data["maxPlayers"] = self.gameObj.maxPlayers
+
+            print("about to start HC async task")
+            async_task(
+                "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                playerListToNotify,
+                message_data,
+            )
+
+    def endGame(self, request, _winner, _finalPositions, _gameID):
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendEndGameNotification,
+        )
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessTournamentEndGame
+
+        self.clearGeneralDataOnGameEndWithoutSave()
+        self.clearAllMoveData()
+
+        winner_user = User.objects.get(username=_winner)
+        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        if winner_gp:
+            winner_gp.winner = True
+            winner_gp.save()
+
+        self.gameObj.save()
+
+        # Now send winning notification
+        SN_M_sendEndGameNotification(request, "HC", _finalPositions, _gameID, self.gameObj)
+
+        if self.gameObj.relatedHCTournament:
+            SF_M_ProcessTournamentEndGame(request, "HC", self.gameObj, [_winner])
+
+    def getCurrentPlayers(self):
+        _currentPlayers = ""
+        all_players_gps = list(self.gameObj.players.select_related("player").order_by("seat_order"))
+        missing_player_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.is_missing}
+        for gp in all_players_gps:
+            if gp.player:
+                if self.hasMoveData(gp.player.username):
+                    pass
+                else:
+                    if gp.player.id in missing_player_ids:
+                        _currentPlayers += "HcBot,"
+                    else:
+                        _currentPlayers += gp.player.username + ","
+        if _currentPlayers != "":
+            # Remove trailing comma
+            _currentPlayers = _currentPlayers[:-1]
+
+        return _currentPlayers
+
+    # Move data methods using GamePlayer.currentMoveTime/currentMoveData
+    def updateSingleMove(self, name, data):
+        currentTime = str(int(time.time()) * 1000)
+        seat = self.seatPosition(name, True)
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        if gp:
+            gp.currentMoveTime = currentTime
+            gp.currentMoveData = data
+            gp.save()
+
+    def saveFactoryWithoutEndingTurn(self, name, data):
+        currentTime = "NODATASFWET"
+        seat = self.seatPosition(name, True)
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        if gp:
+            gp.currentMoveTime = currentTime
+            gp.currentMoveData = data
+            gp.save()
+
+    def getMoveResponse(self, action):
+        readyAllPlayers = []
+        current_time_ms = int(time.time() * 1000)
+
+        all_gps = list(self.gameObj.players.order_by("seat_order").select_related("player"))
+
+        # 1. Determine which players are ready
+        for gp in all_gps:
+            data = gp.currentMoveData
+            move_time_str = str(gp.currentMoveTime)
+            is_ready = data != "" and move_time_str[:6] != "NODATA"
+            readyAllPlayers.append(is_ready)
+
+        readyPlayers = readyAllPlayers[: self.gameObj.maxPlayers]
+
+        readyWithBots = False
+
+        if all(readyPlayers) or readyWithBots:
+            jsonResponse = []
+
+            for i in range(self.gameObj.maxPlayers):
+                gp = all_gps[i]
+                move_time = gp.currentMoveTime
+
+                if move_time == "":
+                    move_time = current_time_ms
+                    gp.currentMoveTime = str(move_time)
+                    gp.currentMoveData = "::"
+                    gp.save()
+
+                jsonResponse.append(
+                    {
+                        "date": int(move_time),
+                        "content": gp.currentMoveData,
+                    }
+                )
+
+            return jsonResponse
+
+        return False
+
+    def getSingleMoveForName(self, name):
+        seat = self.seatPosition(name)
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        if gp:
+            return gp.currentMoveData
+        return ""
+
+    def hasMoveData(self, name):
+        seat = self.seatPosition(name)
+        if 0 <= seat <= 4:
+            gp = self.gameObj.players.filter(seat_order=seat).first()
+            if gp:
+                move_time = gp.currentMoveTime
+                move_data = gp.currentMoveData
+                if str(move_time)[:6] != "NODATA":
+                    return move_data
+        return ""
+
+    def hasTemporaryMoveData(self, name):
+        seat = self.seatPosition(name)
+        if 0 <= seat <= 4:
+            gp = self.gameObj.players.filter(seat_order=seat).first()
+            if gp:
+                move_time = gp.currentMoveTime
+                move_data = gp.currentMoveData
+                if str(move_time)[:6] == "NODATA":
+                    return [move_time, move_data]
+        return ""
+
+    def clearAllMoveData(self):
+        self.gameObj.players.all().update(currentMoveTime="", currentMoveData="")
+
+    # Rewind methods using activeVotes
+    def getCurrentRewindConsent(self, _username):
+        seat = self.seatPosition(_username)
+        if seat < 0:
+            return 0
+        votes = self.gameObj.activeVotes.get(REWIND_CONSENT_VOTE_TOPIC, {}) if self.gameObj.activeVotes else {}
+        return votes.get(_username, 0)
+
+    def setupRewindConsent(self):
+        if self.gameObj.activeVotes and REWIND_CONSENT_VOTE_TOPIC in self.gameObj.activeVotes:
+            return
+        rewind_votes = {}
+        all_players = self.getAllPlayersOrderedySeat(True)
+        host_username = getattr(self.gameObj.host, "username") if self.gameObj.host else None
+        for player in all_players:
+            if player == host_username:
+                rewind_votes[player] = 2
+            else:
+                rewind_votes[player] = 0
+        if not self.gameObj.activeVotes:
+            self.gameObj.activeVotes = {}
+        self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+        self.gameObj.save()
+
+    def getRewindHostPossible(self):
+        if self.gameObj.players.filter(is_missing=True).exists():
+            if not self.gameObj.activeVotes:
+                self.gameObj.activeVotes = {}
+            rewind_votes = {}
+            for gp in self.gameObj.players.select_related("player"):
+                if gp.player:
+                    rewind_votes[gp.player.username] = 2
+            self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+            self.gameObj.save()
+
+        if not self.gameObj.activeVotes or REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
+            return False
+
+        rewind_votes = self.gameObj.activeVotes.get(REWIND_CONSENT_VOTE_TOPIC, {})
+        for consent in rewind_votes.values():
+            if consent == 0:
+                return False
+        return True
+
+    def getRewindHostHTML(self):
+        if not self.gameObj.activeVotes or REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
+            self.setupRewindConsent()
+
+        rewindConsentVotes = self.getFullSetOfVoteResults(
+            REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
+        )
+
+        rewindHTML = ""
+
+        for player, vote_value in rewindConsentVotes.items():
+            if player != getattr(self.gameObj.host, "username"):
+                if vote_value == 0:
+                    rewindHTML += (
+                        "<span style='background-color:red'>"
+                        + player
+                        + ": "
+                        + gettext("No Permission")
+                        + "</span><BR/>"
+                    )
+                elif vote_value == 1:
+                    rewindHTML += (
+                        "<span style='background-color:green'>"
+                        + player
+                        + ": "
+                        + gettext("Single Permission")
+                        + "</span><BR/>"
+                    )
+                elif vote_value == 2:
+                    rewindHTML += (
+                        "<span style='background-color:green'>"
+                        + player
+                        + ": "
+                        + gettext("Permanent Permission")
+                        + "</span><BR/>"
+                    )
+        return rewindHTML
+
+    def actionRewindAlterConsent(self):
+        if not self.gameObj.activeVotes or REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
+            return
+        rewind_votes = self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC]
+        for username in rewind_votes:
+            if rewind_votes[username] == 1:
+                rewind_votes[username] = 0
+        self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+
+    # takes in username
+    def enableStatsExclude(self, _username):
+        if self.gameObj.statsExcludeConsent == None:
+            self.gameObj.statsExcludeConsent = ""
+        if (len(self.gameObj.statsExcludeConsent)) < self.gameObj.maxPlayers:
+            self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
+        seatToChange = self.seatPosition(_username, True)
+        self.gameObj.statsExcludeConsent = (
+            self.gameObj.statsExcludeConsent[:seatToChange]
+            + "1"
+            + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
+        )
+        totalConsent = 0
+        for letter in self.gameObj.statsExcludeConsent:
+            totalConsent += int(letter)
+        if totalConsent == self.gameObj.maxPlayers:
+            self.gameObj.statsExcludedGame = True
+
+    def getDeleteVotesData(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        player_usernames = [gp.player.username for gp in all_players if gp.player]
+
+        if self.gameObj.gameStatus == "FINISHED":
+            return {username: False for username in player_usernames}
+
+        if self.gameObj.deleteGameVotes is None:
+            self.gameObj.deleteGameVotes = {username: False for username in player_usernames}
+            self.gameObj.save()
+
+        return self.gameObj.deleteGameVotes
+
+    def addDeleteVote(self, playerName):
+        """Records the vote of a player."""
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        player_usernames = [gp.player.username for gp in all_players if gp.player]
+
+        if playerName not in player_usernames:
+            return False
+
+        if self.gameObj.deleteGameVotes is None:
+            self.gameObj.deleteGameVotes = {}
+            self.gameObj.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
+
+        if playerName not in self.gameObj.deleteGameVotes:
+            self.gameObj.deleteGameVotes = {}
+            self.gameObj.deleteGameVotes.update(
+                {username: False for username in player_usernames}
+            )
+
+        self.gameObj.deleteGameVotes[playerName] = True
+        self.gameObj.save()
+        return True
+
+    def isTournamentRoundFinished(self, tournamentProgressionDataArray):
+        from Lobby.models import Game
+        if self.gameObj.relatedHCTournament is None:
+            return False
+
+        finishedGames = 0
+        for row in tournamentProgressionDataArray[-1]:
+            if row[0] == "BYEPLAYERS":
+                finishedGames += 1
+            else:
+                game = Game.objects.get(
+                    id=row[self.gameObj.relatedHCTournament.maxGamePlayers]
+                )
+                if game.gameStatus == "FINISHED":
+                    finishedGames += 1
+        if finishedGames == len(tournamentProgressionDataArray[-1]):
+            return True
+        return False
+
+    def getGameCode(self):
+        return "HC"
