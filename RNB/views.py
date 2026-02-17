@@ -547,98 +547,27 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
-        # If the client and server both agree that this person is first, then the browser will only allow valid moves
-        # So it must be a valid move
+        nameToUse = request.user.username
+        if request.user.username == "BotKickStarter":
+            nameToUse = jsonData["BKSN"]
 
-        check_name = jsonData.get("checkName", request.user.username)
+        # Remove flex time
         currentGame.kickoutFlexiData = SF_updateFlexiTime(
             currentGame.kickoutFlexiData,
-            db_latest_update,
+            currentGame.latestUpdate,
             int(time.time()) * 1000,
-            check_name,
+            nameToUse,
             currentGame.kickoutDuration,
         )
-        oldVer = db_latest_update
-        newVer = (int(db_latest_update) % 1000) + 1
-        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
+        
+        # If the client and server both agree that this person is first, then the browser will only allow valid moves
+        # So it must be a valid move
+        if jsonData["isCurrent"] == True and (len(currentGame.serverRemainingPlayerOrderByNames) >0 and currentGame.serverRemainingPlayerOrderByNames[0] == nameToUse):
+            print("SAVING THE GAME")
+            pass
+       
 
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
-
-        # SAVE BEFORE NOTIFICATIONS
-        currentGame.save()
-
-        if jsonData["status"] == "FINISHED":
-            presenter.endGame(
-                request,
-                jsonData["winner"],
-                jsonData["finalPositions"],
-                jsonData["gameID"],
-            )
-
-        # Only notify if game still running
-        else:
-            # Send Notifications
-            loadedStartingOptions = (
-                json.loads(currentGame.startingOptions)
-                if currentGame.startingOptions
-                else []
-            )
-            current_players = presenter.getCurrentPlayersArray()
-            if (
-                len(current_players) > 0
-                and not any(p.startswith("RnbBot") for p in current_players)
-                and jsonData["status"] != "FINISHED"
-                and 102 not in loadedStartingOptions
-            ):
-                playerListToNotify = [player.strip() for player in current_players]
-                if request.user.username in playerListToNotify:
-                    playerListToNotify.remove(request.user.username)
-                if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
-                        "RNB",
-                        playerListToNotify,
-                        getattr(currentGame, "id"),
-                        presenter.getGameName(),
-                        currentGame,
-                        oldVer,
-                    )
-
-        ################ REWIND EVERY SAVE #######################
-
-        if jsonData["saveRewind"]:
-            currentRewindData = []
-            # Need this as intially it is totally empty
-            if currentGame.rewindData != "":
-                currentRewindData = json.loads(currentGame.rewindData)
-            # currentRewindDataArray = currentRewindData.split("'SPLIT'")
-
-            # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
-            if len(currentGame.rewindTempData) > 0:
-                if len(currentRewindData) == 0 or (
-                    currentRewindData[-1] != currentGame.rewindTempData
-                    and jsonData["gameData"] != currentGame.rewindTempData
-                ):
-                    # add to RWdata and RWdata[]
-                    currentRewindData.append(json.loads(currentGame.rewindTempData))
-                currentGame.rewindTempData = ""
-
-            # If no rewind data, then start it with this data
-            if not currentRewindData:
-                currentRewindData.append([jsonData["gameData"]])
-            else:
-                # else check last one isn't same as current, and if not then add
-                if currentRewindData[-1][0] != jsonData["gameData"]:
-                    currentRewindData.append([jsonData["gameData"]])
-                    # Limit to 20 rewind points by removing oldest
-                    while len(currentRewindData) > 20:
-                        currentRewindData.pop(0)
-
-            currentGame.rewindData = json.dumps(currentRewindData)
-
-        ################ END REWIND EVERY SAVE #######################
-
-        currentGame.save()
+        #currentGame.save()
 
         # time.sleep(10)
 
