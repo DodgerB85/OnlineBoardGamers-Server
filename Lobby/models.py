@@ -518,6 +518,9 @@ class Game(BaseGame):
         blank=True,
         related_name="minitournamentGEN_relName",
     )
+    
+    # CURRENTLY RnB ONLY
+    serverRemainingPlayerOrderByNames = models.CharField(max_length=150, blank=True)
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)

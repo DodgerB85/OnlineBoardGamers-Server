@@ -2730,7 +2730,7 @@ class RnbPresenter(GamePresenter):
         from Lobby.models import GamePlayer
 
         self.gameObj.gameStatus = "ACTIVE"
-        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
+        #self.gameObj.playerOrderSeed = random.randint(1000, 32767)
 
         game_players = list(self.gameObj.players.exclude(is_kicked=True))
 
@@ -2739,6 +2739,8 @@ class RnbPresenter(GamePresenter):
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
             gp.is_current = idx == 0
+            
+        self.gameObj.serverRemainingPlayerOrderByNames = [gp.player.username for gp in game_players]
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
 
