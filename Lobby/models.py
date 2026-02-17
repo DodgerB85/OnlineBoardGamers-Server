@@ -404,6 +404,7 @@ class BaseGame(models.Model):
     chatData = models.TextField(blank=True)
 
     gameData = models.TextField(blank=True)
+    gameDataBLOB = models.BinaryField(null=True, blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -602,6 +603,8 @@ class GamePlayer(models.Model):
     has_chat_notification = models.BooleanField(default=False)
 
     seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
+    
+    moveDataJSON = models.JSONField(default=list, null=True, blank=True)
 
     # TODO, these two fields are currently used only in AQY. Remove from the Game model at some point.
     currentMoveTime = models.CharField(max_length=15, blank=True)

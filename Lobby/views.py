@@ -107,7 +107,6 @@ from .models import (
 
 from HC.models import HC_Game, HC_Tournament
 from KFW.models import KFW_Game
-from RNB.models import RNB_Game
 
 from user_visit.models import UserVisit
 
