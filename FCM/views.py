@@ -602,7 +602,7 @@ def _processTurn(request):
         # Wipe the move data
         presenter.deleteSinglePlayersMove(request.user.username)
 
-        # Update current playes
+        # Update current players
         currentPlayersStr = presenter._getCurrentPlayersField()
         if request.user.username not in currentPlayersStr:
             presenter.setCurrentPlayers(currentPlayersStr + "," + request.user.username)
