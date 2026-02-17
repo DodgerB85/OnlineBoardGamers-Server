@@ -82,3 +82,11 @@ class RNBgame(Game):
         app_label = "RNB"
         verbose_name = "RNB_Game"
         verbose_name_plural = "RNB_Games"
+
+# HC
+class HCgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "HC"
+        verbose_name = "HC_Game"
+        verbose_name_plural = "HC_Games"
