@@ -1150,7 +1150,7 @@ def stats(request):
     # Define metadata once to keep logic DRY
     GAME_META = {
         "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
-        "HC": {"name": "Hard City", "gameCode": "HC"},
+        "HC": {"name": "Horseless Carriage", "gameCode": "HC"},
         "Bus": {"name": "Bus", "gameCode": "Bus"},
         "TGZ": {"name": "The Great Zimbabwe", "gameCode": "TGZ"},
         "CNS": {"name": "CNS", "gameCode": "CNS"},
