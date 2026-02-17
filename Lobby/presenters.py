@@ -3213,7 +3213,7 @@ class FcmPresenter(GamePresenter):
         self.gameObj.gameStatus = "ACTIVE"
 
         # Shuffle GamePlayers to determine seat order
-        # Exclude FCMtourneyAdmin from ordering (add at end), matching original FCM_Game behavior
+        # Exclude FCMtourneyAdmin from ordering (add at end), matching original FCM.Game behavior
         all_gps = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
         game_players = [gp for gp in all_gps if gp.player and gp.player.username != "FCMtourneyAdmin"]
         fcm_tourney_admin_gps = [gp for gp in all_gps if gp.player and gp.player.username == "FCMtourneyAdmin"]

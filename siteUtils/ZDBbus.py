@@ -53,7 +53,6 @@ django.setup()
 
 from django.contrib.sites.models import Site
 
-from FCM.models import FCM_Game, FCM_Tournament
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament
 
 
