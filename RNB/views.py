@@ -42,27 +42,30 @@ from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOT
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
 ALLOWED_USERS_RNB = [
-        "admin",
-        "DodgerB",
-        "durendal",
-        "Benkyo",
-        "vraid",
-        "JoshuaAcosta",
-        "massibull",
-        "phil",
-        "timmymayes",
-        "SaintJason",
-        "h",
+    "admin",
+    "DodgerB",
+    "durendal",
+    "Benkyo",
+    "vraid",
+    "JoshuaAcosta",
+    "massibull",
+    "phil",
+    "timmymayes",
+    "SaintJason",
+    "h",
 ]
 
 if TYPE_CHECKING:
-    from Lobby.presenters import RnbPresenter 
+    from Lobby.presenters import RnbPresenter
+
 
 def index(request):
     return HttpResponse("Hello, world. You're at RNB")
 
+
 def RNBhelp(request):
     return render(request, "RNB/RNBhelp.html")
+
 
 def createRNBgame(request):
     # Creating a game must be via POST
@@ -71,24 +74,23 @@ def createRNBgame(request):
 
     return create_rnb_game(request)
 
+
 def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    #ALLOWED_USERS = ["admin", "ha.steven", "massibull", "durendal", 'DodgerB', 'BotKickStarter','Rastko','Benkyo', 'vraid', "F1087", "krieg90", "gdc", "enavico", 'PhasingPlayer']
-    #["admin", "ha.steven", "Kawlos", "Jasonbartfast", "Batch", "Juni", "TDUBZ", "BigBad", "massibull", "durendal", 'DodgerB', 'BotKickStarter', '33', 'Rastko', 'Burmer', 'phil', 'Benkyo', 'Steveth', "F1087", "krieg90", "gdc"]
+    # ALLOWED_USERS = ["admin", "ha.steven", "massibull", "durendal", 'DodgerB', 'BotKickStarter','Rastko','Benkyo', 'vraid', "F1087", "krieg90", "gdc", "enavico", 'PhasingPlayer']
+    # ["admin", "ha.steven", "Kawlos", "Jasonbartfast", "Batch", "Juni", "TDUBZ", "BigBad", "massibull", "durendal", 'DodgerB', 'BotKickStarter', '33', 'Rastko', 'Burmer', 'phil', 'Benkyo', 'Steveth', "F1087", "krieg90", "gdc"]
     #                 #'looogic', 'Burmer',
     #                 #'pgh_gamer', , 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
     ##print("******************************************************************************************************** IND ACCESS: =================================================:  " + request.user.username)
-    #ALLOWED_USERS = ['admin', 'DodgerB', 'durendal', 'Benkyo', 'vraid', 'JoshuaAcosta', "massibull", "phil", "timmymayes", "SaintJason"]
-    
+    # ALLOWED_USERS = ['admin', 'DodgerB', 'durendal', 'Benkyo', 'vraid', 'JoshuaAcosta', "massibull", "phil", "timmymayes", "SaintJason"]
+
     if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect('index')
- 
+        return redirect("index")
+
     try:
         currentGame = (
             Game.objects.select_related("host", "creator")
-            .prefetch_related(
-                "players__player", "invitedPlayers"
-            )
-            .get(id=game_id, gameCode='RNB')
+            .prefetch_related("players__player", "invitedPlayers")
+            .get(id=game_id, gameCode="RNB")
         )
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
@@ -97,7 +99,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
-    presenter = cast('RnbPresenter', currentGame.presenter())
+    presenter = cast("RnbPresenter", currentGame.presenter())
 
     # Access the prefetch cache immediately to "warm" it
     all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
@@ -132,10 +134,12 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "startingOptions": startingOptions,
         "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
         "currentPlayers": presenter.getCurrentPlayers(),
-        #"preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
+        # "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "statsExcludeVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
+                STATS_EXCLUDE_VOTE_TOPIC,
+                presenter.getAllPlayersOrderedySeat(True),
+                False,
             )
         ),
         "deleteVotesData": json.dumps(
@@ -170,11 +174,11 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ## Get the next URL
     nextURL = f"/nextGame?current_id={gameID}&current_code=RNB"
 
-    #preferredAQYoptions = (
+    # preferredAQYoptions = (
     #    json.loads(user_profile.preferredAQYoptions)
     #    if user_profile.preferredAQYoptions != ""
     #    else [-1, 1, 0, 0, 1, 1, 0]
-    #)
+    # )
 
     # preferredAQYoptions
     # colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes,showPollutionUnderRes, housesInNumberOrder
@@ -194,7 +198,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "chatData": chatData,
             "latestUpdateLiteral": latestUpdate,
             "nextURL": nextURL,
-            #"preferredAQYoptions": preferredAQYoptions,
+            # "preferredAQYoptions": preferredAQYoptions,
             "chatNotification": chatNotification,
         }
     )
@@ -238,14 +242,14 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     )
 
     ## pre move
-    #if (
+    # if (
     #    currentGame.phase == 4
     #    or currentGame.phase == 5
     #    or currentGame.phase == 6
     #    or currentGame.phase == 7
     #    or currentGame.phase == 8
     #    or currentGame.phase == 9
-    #):
+    # ):
     #    if presenter.getMoveDataTime(username) == "PRE_MOVE":
     #        returnData.update({"preMove": presenter.getMoveData(username)})
 
@@ -275,9 +279,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     return render(request, "RNB/showRNBgame.html", returnData)
 
 
-
-#@login_required()
-#def bugEntry(request):
+# @login_required()
+# def bugEntry(request):
 #    if request.method != "POST":
 #        return JsonResponse({"error": "POST request required."}, status=400)
 #
@@ -302,7 +305,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 #        gameID,
 #        gameData,
 #        bugDescription,
-#        #currentGame.rewindData, 
+#        #currentGame.rewindData,
 #        "",
 #        extraInfo,
 #    )
@@ -362,17 +365,15 @@ def _processRNBturn(request):
     latest_update = str(jsonData.get("latestUpdate", 0))
 
     try:
-        currentGame = Game.objects.get(id=game_id, gameCode='RNB')
+        currentGame = Game.objects.get(id=game_id, gameCode="RNB")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('RnbPresenter', currentGame.presenter())
+    presenter = cast("RnbPresenter", currentGame.presenter())
 
     if jsonData["action"] == "simpleSave":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
-            jsonData["latestUpdate"]
-        ) != str(currentGame.latestUpdate):
+        if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             current_players = ", ".join(presenter.getCurrentPlayersArray())
@@ -462,9 +463,7 @@ def _processRNBturn(request):
                 and jsonData["status"] != "FINISHED"
                 and 102 not in loadedStartingOptions
             ):
-                playerListToNotify = [
-                    player.strip() for player in current_players
-                ]
+                playerListToNotify = [player.strip() for player in current_players]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if len(playerListToNotify) > 0:
@@ -527,9 +526,7 @@ def _processRNBturn(request):
 
     elif jsonData["action"] == "saveEndGame":
         # Check if old version is older than DB version, and if so, return
-        if latest_update != "9999999999999" and str(latest_update) != str(
-            currentGame.latestUpdate
-        ):
+        if str(latest_update) != str(currentGame.latestUpdate):
             print(
                 f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: RNB, save -- user: {request.user.username}"
             )
@@ -750,6 +747,7 @@ def _processRNBturn(request):
 
     return HttpResponse(status=204)  # No Content
 
+
 @login_required()
 def sendChatMessageRNB(request):
     if request.method != "POST":
@@ -760,7 +758,6 @@ def sendChatMessageRNB(request):
 
     with db_mutex(str(gameID)):
         return _sendChatMessageRNB(request)
-
 
 
 @login_required()
@@ -790,16 +787,17 @@ def _sendChatMessageRNB(request):
 
         currentGame.chatData = compressedChatData
 
-        # Now add notifications to everyone except request.user     
-        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
+        # Now add notifications to everyone except request.user
+        currentGame.presenter().addChatNotifications(
+            currentGame.presenter().getAllPlayersOrderedySeat(False, True)
+        )
         currentGame.presenter().removeChatNotification(request.user)
-        
+
         currentGame.save()
 
         return JsonResponse({"chatData": compressedChatData})
 
     return HttpResponse(status=204)  # No Content
-
 
 
 @login_required()
@@ -811,7 +809,7 @@ def bugEntryRNB(request):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = Game.objects.get(id=gameID, gameCode='RNB')
+        currentGame = Game.objects.get(id=gameID, gameCode="RNB")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -833,6 +831,7 @@ def bugEntryRNB(request):
 
     return JsonResponse({"bugEntrySuccess": True})
 
+
 @login_required()
 def saveNotesRNB(request):
     if request.method != "POST":
@@ -842,7 +841,7 @@ def saveNotesRNB(request):
     game_id = jsonData["gameID"]
     notes = jsonData["notes"]
     try:
-        currentGame = Game.objects.get(id=game_id, gameCode='RNB')
+        currentGame = Game.objects.get(id=game_id, gameCode="RNB")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -850,6 +849,7 @@ def saveNotesRNB(request):
     currentGame.players.filter(player=request.user).update(notes=notes)
 
     return JsonResponse({"notePosted": True})
+
 
 @login_required
 def saveZoomRNB(request):
@@ -894,11 +894,11 @@ def RNBdata(request, dataType=1):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='RNB')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="RNB")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('RnbPresenter', currentGame.presenter())
+    presenter = cast("RnbPresenter", currentGame.presenter())
 
     if dataType == 1:
         returnData = {
@@ -937,4 +937,3 @@ def RNBdata(request, dataType=1):
         )
 
     return HttpResponse(status=204)  # No Content
-

@@ -321,6 +321,7 @@ class GameAdmin(admin.ModelAdmin):
             {
                 "classes": ("collapse",),
                 "fields": (
+                    "serverRemainingPlayerOrderByNames",
                     "FCMplayersMoveData",
                     "ind_premove_display",
                 ),
