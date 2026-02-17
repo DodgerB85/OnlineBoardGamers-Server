@@ -1385,7 +1385,6 @@ def notes(request, game_id=None):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
     user_gp = currentGame.players.filter(player=request.user).first()
     if user_gp:
         user_gp.notes = jsonData["note"]
