@@ -140,6 +140,23 @@ finishedGames_all = dataSet_old_code.count() + dataSet_new_code.count()
 
 def filter_by_starting_options(queryset, new_ms_value, include):
     """Filters a queryset based on the presence of NEW_MS in startingOptions."""
+    """Filters a JSON string in a TextField using common JSON delimiters."""
+    # We check for the number:
+    # 1. As the only item: [10]
+    # 2. At the start: [10,
+    # 3. In the middle: , 10,
+    # 4. At the end: , 10]
+    
+    q = (
+        Q(startingOptions__contains=f"[{new_ms_value}]") |
+        Q(startingOptions__contains=f"[{new_ms_value},") |
+        Q(startingOptions__contains=f", {new_ms_value},") |
+        Q(startingOptions__contains=f",{new_ms_value},") |
+        Q(startingOptions__contains=f", {new_ms_value}]") |
+        Q(startingOptions__contains=f",{new_ms_value}]")
+    )
+    
+    return queryset.filter(q) if include else queryset.exclude(q)
     # This regex looks for your value:
     # 1. After a bracket or comma: [\[,]
     # 2. Followed by optional whitespace: \s*
@@ -147,7 +164,7 @@ def filter_by_starting_options(queryset, new_ms_value, include):
     # 4. Followed by optional whitespace: \s*
     # 5. Followed by a comma or closing bracket: [,\\]]
 
-    pattern = rf"[\[,]\s*{new_ms_value}\s*[,\\]]"
+    #pattern = rf"[\[,]\s*{new_ms_value}\s*[,\\]]"
 
     # q = (
     #    Q(startingOptions=str(new_ms_value))
@@ -159,10 +176,10 @@ def filter_by_starting_options(queryset, new_ms_value, include):
     #    return queryset.filter(q)
     # else:
     #    return queryset.exclude(q)
-    if include:
-        return queryset.filter(startingOptions__iregex=pattern)
-    else:
-        return queryset.exclude(startingOptions__iregex=pattern)
+    #if include:
+    #    return queryset.filter(startingOptions__iregex=pattern)
+    #else:
+    #    return queryset.exclude(startingOptions__iregex=pattern)
 
 
 def calculate_average_turn(queryset):
