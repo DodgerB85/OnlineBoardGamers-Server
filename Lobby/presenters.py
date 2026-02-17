@@ -228,13 +228,15 @@ class GamePresenter:
     def setCurrentPlayers(self, player_usernames_string):
         """Set current players from comma-separated string of usernames"""
         if not player_usernames_string:
-            usernames = set()
-        else:
-            usernames = {
-                name.strip()
-                for name in player_usernames_string.split(",")
-                if name.strip()
-            }
+            # Clear all current players
+            self.gameObj.players.all().update(is_current=False)
+            return
+
+        current_usernames = {
+            name.strip()
+            for name in player_usernames_string.split(",")
+            if name.strip()
+        }
 
         game_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -242,10 +244,8 @@ class GamePresenter:
 
         for gp in game_players:
             if gp.player:
-                should_be_current = gp.player.username in usernames
-                if gp.is_current != should_be_current:
-                    gp.is_current = should_be_current
-                    gp.save()
+                gp.is_current = gp.player.username in current_usernames
+                gp.save()
 
     def checkForHostChange(self, _missingUser):
         if _missingUser == self.gameObj.creator:
@@ -1108,23 +1108,6 @@ class AqyPresenter(GamePresenter):
     def getGameCode(self):
         return "AQY"
 
-    def setCurrentPlayers(self, player_usernames_string):
-        """Set current players by updating is_current on GamePlayer instances"""
-        if not player_usernames_string:
-            # Clear all current players
-            self.gameObj.players.all().update(is_current=False)
-            return
-        
-        current_usernames = set(
-            name.strip() 
-            for name in player_usernames_string.split(',') 
-            if name.strip()
-        )
-        
-        for gp in self.gameObj.players.all():
-            if gp.player:
-                gp.is_current = gp.player.username in current_usernames
-                gp.save()
 
     def addMissingPlayer(self, user):
         """Mark a player as missing"""
@@ -2497,27 +2480,6 @@ class BusPresenter(GamePresenter):
         self.gameObj.save()
         return True
 
-    def setCurrentPlayers(self, player_usernames_string):
-        """Set current players from comma-separated string of usernames"""
-        if not player_usernames_string:
-            usernames = set()
-        else:
-            usernames = {
-                name.strip()
-                for name in player_usernames_string.split(",")
-                if name.strip()
-            }
-
-        game_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-
-        for gp in game_players:
-            if gp.player:
-                should_be_current = gp.player.username in usernames
-                if gp.is_current != should_be_current:
-                    gp.is_current = should_be_current
-                    gp.save()
 
     def addMissingPlayer(self, user):
         """Add a player to missing players"""
@@ -2775,22 +2737,25 @@ class RnbPresenter(GamePresenter):
     def getGameCode(self):
         return "RNB"
 
-    def setCurrentPlayers(self, player_usernames_string):
+    def setCurrentPlayersFromArr(self, current_players_array):
         """Set current players by updating is_current on GamePlayer instances"""
-        if not player_usernames_string:
+        if not current_players_array or len(current_players_array) == 0:
             # Clear all current players
             self.gameObj.players.all().update(is_current=False)
+            self.gameObj.serverRemainingPlayerOrderByNames = []
+            self.gameObj.save()
             return
         
-        current_usernames = set(
-            name.strip() 
-            for name in player_usernames_string.split(',') 
-            if name.strip()
+        self.gameObj.serverRemainingPlayerOrderByNames = current_players_array
+        self.gameObj.save()
+        
+        game_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+            "player"
         )
         
-        for gp in self.gameObj.players.all():
+        for gp in game_players:
             if gp.player:
-                gp.is_current = gp.player.username in current_usernames
+                gp.is_current = gp.player.username in current_players_array
                 gp.save()
 
     def checkForHostChange(self, missing_user):
