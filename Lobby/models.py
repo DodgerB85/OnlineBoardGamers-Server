@@ -521,7 +521,7 @@ class Game(BaseGame):
     )
     
     # CURRENTLY RnB ONLY
-    #serverRemainingPlayerOrderByNames = models.JSONField(default=list, blank=True)
+    serverRemainingPlayerOrderByNames = models.JSONField(default=list, blank=True)
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
