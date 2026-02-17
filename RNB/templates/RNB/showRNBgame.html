@@ -37,6 +37,7 @@
     }
 
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/msgpack-lite/0.1.26/msgpack.min.js"></script>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     {% if settingsDebug %}
       <script type="module" src="http://localhost:3042/static/@vite/client"></script>
@@ -56,6 +57,7 @@
       <div id="loadingText">Roads & Boats is loading........</div>
     </div>
   </body>
+  {{ gameDataB64|json_script:"gameDataB64" }}
   <script>
   /*const yearElement = document.getElementById('year');
 
@@ -93,7 +95,9 @@
     ///////////////////////
     initData.gameID = {{ gameID }};
     initData.gameName = "{{ gameName }}";
-    initData.gameData = '{{ gameData|safe }}';
+
+
+
     initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
     initData.myZoomLevel = {{ myZoomLevel }};
     initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
