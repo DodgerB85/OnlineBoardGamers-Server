@@ -431,7 +431,6 @@ GAME_NAMES_MODELS = {
     "KFW": KFW_Game,
     "WEB": "WEB",  # Now using unified Game model
     "RNB": "RNB",
-    "BOB": "BOB",
 }
 GAME_MODELS = [
     # HC, Bus, CNS, AQY, WEB, IND, FCM, etc now use unified Game model
@@ -1171,7 +1170,7 @@ def stats(request):
     stats_map = {}  # Using a dict temporarily to collect data
 
     # Handle all unified model games (CNS, WEB, AQY, TGZ, IND, etc.)
-    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
+    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC"]:
         counts_key = f"counts_Game_{game_code}"
         counts = cache.get(counts_key)
 

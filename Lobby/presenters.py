@@ -162,8 +162,6 @@ class GamePresenter:
                 BOT_NAME = "WebBot"
             if self.gameObj.gameCode == "RNB":
                 BOT_NAME = "RnbBot"
-            if self.gameObj.gameCode == "BOB":
-                BOT_NAME = "BobBot"
             if gp.is_missing:
                 result.append(BOT_NAME)
             elif gp.player:
