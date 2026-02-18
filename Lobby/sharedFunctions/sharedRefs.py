@@ -19,7 +19,7 @@ def SR_usesUnifiedGameModel(game_code):
 
     As games are migrated to the unified model, add their game codes here.
     """
-    return game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "RNB", "BOB"]
+    return game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC", "RNB"]
 
 SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("FCM", gettext_lazy("Food Chain Magnate")),
