@@ -34,6 +34,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendInviteNotifications,
     SN_sendBugReportEmail,
     SN_sendNextTurnNotification,
+    SN_sendFactoryAlertNotification,
     SN_sendAdminErrorMessage
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
@@ -574,8 +575,8 @@ def _processHCturn(request):
 
         currentGame.save()
         if len(currentPlayersList) > 0:
-            sendFactoryAlertNotification(
-                request, currentPlayersList[0], jsonData["gameID"]
+            SN_sendFactoryAlertNotification(
+                request, currentPlayersList[0], jsonData["gameID"], currentGame
             )
 
         return JsonResponse(
@@ -1228,82 +1229,6 @@ def db_mutex(name, timeout=10):
         print("ERROR-HC: Not running, %s mutex not available" % (mutex_name))
 
 
-# TODO move this to SN_
-def sendFactoryAlertNotification(request, player, gameID):
-    user = User.objects.get(username=player)
-    try:
-        profile = Profile.objects.get(user=user)
-        currentGame = Game.objects.get(id=gameID, gameCode='HC')
-        presenter = cast('HcPresenter', currentGame.presenter())
-
-        originalLang = get_language()
-        translation.activate(profile.profileLanguage)
-
-        # SEND EMAIL
-        if profile.sendEmailNotificationOnTurn:
-            current_site = get_current_site(request)
-            subject = gettext(
-                "It is your turn at Horseless Carriage - Factory Building"
-            )
-            message = render_to_string(
-                "HC/yourTurnEmailFactory.html",
-                {
-                    "user": user.username,
-                    "domain": current_site.domain,
-                    "gameID": gameID,
-                    "gameName": presenter.getGameName(),
-                    "currentTurnString": presenter.currentTurnString(),
-                },
-            )
-            user.email_user(subject, message)
-
-        messageText = (
-            user.username
-            + ": "
-            + gettext(
-                "Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs building\n%(gameName)s - %(currentTurnString)s."
-            )
-            % {
-                "gameName": presenter.getGameName(),
-                "currentTurnString": presenter.currentTurnString(),
-            }
-        )
-        urlText = gettext("Click here to play Horseless Carriage")
-
-        # SEND DISCORD
-        # if profile.sendDiscordWebhookNotificationOnTurn:
-        #    message = ""
-        #    if len(profile.discordWebhookUserID) != 0:
-        #        message += "<@" + profile.discordWebhookUserID + ">\n"
-        #    message += messageText + "\n[" + urlText + "](https://www.OnlineBoardGamers.com/HC/" + str(currentGame.id) + "/)"
-        #
-        #    # message = ""
-        #    # if  len(profile.discordWebhookUserID) != 0: message += "<@" + profile.discordWebhookUserID + ">\n"
-        #    # message += user.username + ": "
-        #    # message += gettext("Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs fixing!\n%(gameName)s - %(currentTurnString)s.\n[Click here to play Horseless Carriage](https://www.OnlineBoardGamers.com/HC/%(gameID)s/)") % {'gameName' : currentGame.gameName, 'currentTurnString' : currentGame.currentTurnString(), 'gameID' : str(currentGame.id)}
-        #
-        #    # message += "Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs fixing!\n" + currentGame.gameName + " - " + currentGame.currentTurnString() +  ".\n[Click here to play Horseless Carriage](https://www.OnlineBoardGamers.com/HC/" + str(currentGame.id) + "/)"
-        #    # str(currentGame.turn) + "." + str(currentGame.phase) + \
-        #    requests.post("" + profile.discordWebhookURL, data={"content": message})
-        #
-        ## SEND SLACK
-        # if profile.sendSlackWebhookNotificationOnTurn:
-        #    message = ""
-        #    message += messageText + "\n<https://www.OnlineBoardGamers.com/HC/" + str(currentGame.id) + "/|" + urlText + ">"
-        #
-        #    # message = user.username + ": "
-        #    # message += gettext("Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs fixing!\n%(gameName)s - %(currentTurnString)s.\n<https://www.OnlineBoardGamers.com/HC/%(gameID)s/|Click here to play Horseless Carriage>") % {'gameName' : currentGame.gameName, 'currentTurnString' : currentGame.currentTurnString(), 'gameID' : str(currentGame.id)}
-        #
-        #    # message += "Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs fixing!\n" + currentGame.gameName + " - " + currentGame.currentTurnString() + ".\n<https://www.OnlineBoardGamers.com/HC/" +str(currentGame.id) + "/|Click here to play Horseless Carriage>"
-        #    # str(currentGame.turn) + "." + str(currentGame.phase) + \
-        #
-        #    payload = {"text": message}
-        #    requests.post(profile.slackWebhookURL, json.dumps(payload))
-
-        translation.activate(originalLang)
-
-    except Exception:
-        print("Error seinding factory notifiction")
 
 
 @login_required()
