@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('HC', '0047_hc_game_automoves'),
+        ('HC', '0048_hc_game_gamedatablob'),
         ('Lobby', '0083_remove_game_relatedfcmtournament'),
     ]
 
