@@ -1532,7 +1532,9 @@ def SR_getPointsForPosition(position, maxPlayers):
     """
     # First check for bye points
     if position == 99:
-        if maxPlayers == 3:
+        if maxPlayers == 2:
+            return 1
+        elif maxPlayers == 3:
             return 6
         elif maxPlayers == 4:
             return 9
@@ -1542,7 +1544,7 @@ def SR_getPointsForPosition(position, maxPlayers):
             return 13
 
     # Points schemas for 3, 4, 5, and 6 players
-    points_schemas = {3: [10, 7, 3], 4: [15, 11, 7, 3], 5: [20, 14, 10, 6, 2], 6: [25, 18, 13, 9, 5, 2]}
+    points_schemas = {2: [2,0], 3: [10, 7, 3], 4: [15, 11, 7, 3], 5: [20, 14, 10, 6, 2], 6: [25, 18, 13, 9, 5, 2]}
 
     # Check if player_number is valid
     if maxPlayers not in points_schemas:
