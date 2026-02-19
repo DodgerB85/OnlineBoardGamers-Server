@@ -80,6 +80,8 @@ class HC_Tournament(models.Model):
     def createTournamentGame(
         self, request, _roundNumberString, _currentPlayersUsernames
     ):
+        from Lobby.models import Game, GamePlayer
+
         gameName = "[" + self.tournamentName + "]" + " " + _roundNumberString
         player_order_seed = randint(0, self.maxGamePlayers - 1)
 
@@ -88,7 +90,8 @@ class HC_Tournament(models.Model):
         pace = 30
         creator = User.objects.get(username="admin")
 
-        newGame = HC_Game(
+        newGame = Game(
+            gameCode='HC',
             gameName=gameName,
             creator=creator,
             gamePace=pace,
@@ -100,6 +103,8 @@ class HC_Tournament(models.Model):
             startingOptions=self.startingOptions,
             maxPlayers=self.maxGamePlayers,
             gameStatus="ACTIVE",
+            relatedHCTournament=self,
+            tournamentGame=True,
         )
         newGame.save()
 
@@ -120,8 +125,11 @@ class HC_Tournament(models.Model):
         #    self.sendTournamentInviteNotification(request, _currentPlayersUsernames[4], newGame.id)
         for i in range(self.maxGamePlayers):
             if i < len(_currentPlayersUsernames) and _currentPlayersUsernames[i] != "":
-                newGame.allPlayers.add(
-                    User.objects.get(username=_currentPlayersUsernames[i])
+                player = User.objects.get(username=_currentPlayersUsernames[i])
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=player,
+                    seat_order=i,
                 )
                 SN_M_T_sendTournamentGameStartNotification(
                     request,
@@ -129,7 +137,7 @@ class HC_Tournament(models.Model):
                     _currentPlayersUsernames[i],
                     self.maxGamePlayers,
                     newGame.gameName,
-                    newGame.currentTurnString(),
+                    newGame.presenter().currentTurnString(),
                     newGame.id,
                     False,
                     "normalTournament",
@@ -137,12 +145,15 @@ class HC_Tournament(models.Model):
 
         newGame.kickoutDuration = 100
         # newGame.zoomLevels = "200" * self.maxGamePlayers
-        newGame.relatedTournament = self
-        newGame.host = newGame.allPlayers.all().order_by("?").first()
-        newGame.setupRewindConsent()
-
+        # Pick random host from players
+        random_gp = newGame.players.order_by("?").first()
+        if random_gp and random_gp.player:
+            newGame.host = random_gp.player
         newGame.save()
-        newGame.startGame(request)
+
+        presenter = newGame.presenter()
+        presenter.setupRewindConsent()
+        presenter.startGame(request)
         return newGame.id
 
     def getByedPlayersList(self):

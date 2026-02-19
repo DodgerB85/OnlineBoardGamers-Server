@@ -105,7 +105,7 @@ from .models import (
     QueryableGameAllPlayers,
 )
 
-from HC.models import HC_Game, HC_Tournament
+from HC.models import HC_Tournament
 from KFW.models import KFW_Game
 
 from user_visit.models import UserVisit
@@ -421,7 +421,7 @@ def addTGid(request, TGid):
 
 GAME_NAMES_MODELS = {
     "FCM": "FCM",  # Now using unified Game model
-    "HC": HC_Game,
+    "HC": "HC",  # Now using unified Game model
     "Bus": "Bus",  # Now using unified Game model
     "TGZ": "TGZ",
     "CNS": "CNS",  # Now using unified Game model
@@ -430,11 +430,9 @@ GAME_NAMES_MODELS = {
     "KFW": KFW_Game,
     "WEB": "WEB",  # Now using unified Game model
     "RNB": "RNB",
-    "BOB": "BOB",
 }
 GAME_MODELS = [
-    HC_Game,
-    # Bus, CNS, AQY, WEB, IND, FCM, etc now use unified Game model
+    # HC, Bus, CNS, AQY, WEB, IND, FCM, etc now use unified Game model
     KFW_Game,
 ]
 
@@ -757,7 +755,7 @@ def DBO_deleteGame(request, game_type):
     # 2. Map game types to Models
     model_map = {
         "FCM": Game,  # Now using unified Game model
-        "HC": HC_Game,
+        "HC": Game,  # Now using unified Game model
         "Bus": Game,  # Now using unified Game model
         "TGZ": Game,
         "CNS": Game,  # Now using unified Game model
@@ -1150,7 +1148,7 @@ def stats(request):
     # Define metadata once to keep logic DRY
     GAME_META = {
         "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
-        "HC": {"name": "Hard City", "gameCode": "HC"},
+        "HC": {"name": "Horseless Carriage", "gameCode": "HC"},
         "Bus": {"name": "Bus", "gameCode": "Bus"},
         "TGZ": {"name": "The Great Zimbabwe", "gameCode": "TGZ"},
         "CNS": {"name": "CNS", "gameCode": "CNS"},
@@ -1171,7 +1169,7 @@ def stats(request):
     stats_map = {}  # Using a dict temporarily to collect data
 
     # Handle all unified model games (CNS, WEB, AQY, TGZ, IND, etc.)
-    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM"]:
+    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC"]:
         counts_key = f"counts_Game_{game_code}"
         counts = cache.get(counts_key)
 
@@ -2484,20 +2482,20 @@ def showTGZoptions(request, gameID):
 
 @login_required
 def createHCpage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "HC", HC_Game)
+    experienced = SF_hasRequiredExperience(request, "HC", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createHC.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = HC_Game.objects.get(id=gameID)
-        except HC_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID, gameCode='HC')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
         playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        for gp in currentGame.players.all().select_related("player"):
+            if gp.player and request.user != gp.player:
+                playerNames.append(gp.player.username)
 
         messages.success(request, (gettext("Game creation for rematch")))
         return render(
