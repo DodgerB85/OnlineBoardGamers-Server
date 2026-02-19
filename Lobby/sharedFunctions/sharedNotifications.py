@@ -515,6 +515,9 @@ def SN_M_sendEndGameNotificationTieGame(
                 if entry[2] == 0:
                     subject += ". " + gettext("Congratulations!") + ""
 
+                presenter = currentGame.presenter()
+                gameName = presenter.getGameName()
+
                 # SEND EMAIL
                 if shouldSendEmail("gameEnd", user.username, profile, currentGame, 0):
                     current_site = get_current_site(request)
@@ -525,7 +528,7 @@ def SN_M_sendEndGameNotificationTieGame(
                             "user": user.username,
                             "domain": current_site.domain,
                             "gameID": gameID,
-                            "gameName": currentGame.getGameName(),
+                            "gameName": gameName,
                             "box_name": box_name,
                             "position": posText,
                             "game": game,
@@ -542,7 +545,7 @@ def SN_M_sendEndGameNotificationTieGame(
                     )
                     % {
                         "box_name": box_name,
-                        "gameName": currentGame.getGameName(),
+                        "gameName": gameName,
                         "result": posText,
                     }
                 )
@@ -632,6 +635,9 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
 
                 if pos == 0:
                     subject += ". " + gettext("Congratulations!") + ""
+                
+                presenter = currentGame.presenter()
+                gameName = presenter.getGameName()
 
                 # SEND EMAIL
                 if shouldSendEmail("gameEnd", user.username, profile, currentGame, 0):
@@ -643,7 +649,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                             "user": user.username,
                             "domain": current_site.domain,
                             "gameID": gameID,
-                            "gameName": currentGame.getGameName(),
+                            "gameName": gameName,
                             "box_name": box_name,
                             "position": posText,
                             "game": game,
@@ -659,7 +665,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                     )
                     % {
                         "box_name": box_name,
-                        "gameName": currentGame.getGameName(),
+                        "gameName": gameName,
                         "result": posText,
                     }
                 )
@@ -712,7 +718,7 @@ def SN_sendNextTurnNotification(
                 profile = Profile.objects.get(user=user)
                 activate(profile.profileLanguage)
                 # Set up language vars
-                currentTurnString = currentGame.currentTurnString()
+                currentTurnString = currentGame.presenter().currentTurnString()
 
                 gameStrings = getGameStrings(game)
                 subject = gameStrings["yourTurnSubject"]
@@ -740,7 +746,6 @@ def SN_sendNextTurnNotification(
                     try:
                         current_site = get_current_site(request)
 
-                        currentTurnString = currentGame.currentTurnString()
                         message = render_to_string(
                             "Lobby/gameEmails/yourTurnEmail.html",
                             {
@@ -1334,6 +1339,10 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
             gameDescription = f"({gameDescription})"
         current_site = get_current_site(request)
         gameStrings = getGameStrings(_game)
+        
+        presenter = currentGame.presenter()
+        gameName = presenter.getGameName()
+        
         if shouldSendEmail(
             "gameDecline", currentGame.creator.username, profile, None, 0
         ):
@@ -1344,7 +1353,7 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
                     "creatorUsername": currentGame.creator.username,
                     "declinerUsername": declinerObj.username,
                     "domain": current_site.domain,
-                    "gameName": currentGame.getGameName(),
+                    "gameName": gameName,
                     "gameDescription": gameDescription,
                     "box_name": box_name,
                     "reason": reason,
@@ -1359,7 +1368,7 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
                 "A Player has declined your invitation\n%(gameName)s %(gameDescription)s\nPlayer: %(declinerUsername)s\nReason: %(reason)s"
             )
             % {
-                "gameName": currentGame.getGameName(),
+                "gameName": gameName,
                 "gameDescription": currentGame.gameDescription,
                 "declinerUsername": declinerObj.username,
                 "reason": reason,
@@ -1587,12 +1596,18 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
         # currentGame = Bus_Game.objects.get(id=gameID)
 
         activate(profile_obj.profileLanguage)
+        
+        
 
         # Prepare game details for the email
         games_info = []
         for game, days_since_last_move in allPlayerMyMoveGamesList:
+            
+            presenter = game.presenter()
+            gameName = presenter.getGameName()
+        
             game_info = {
-                "game_name": game.getGameName(),
+                "game_name": gameName,
                 "days_since_last_move": days_since_last_move,
                 "game_link": f"http://www.OnlineBoardGamers.com/{game.getGameCode()}/{game.id}/show/",  # Update with actual link format
             }

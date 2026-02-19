@@ -107,7 +107,6 @@ from .models import (
 
 from HC.models import HC_Tournament
 from KFW.models import KFW_Game
-from RNB.models import RNB_Game
 
 from user_visit.models import UserVisit
 
@@ -702,7 +701,7 @@ def DBO(request):
             ):
                 if singleGame.players.filter(player__username="SHADOW").exists():
                     pracGamesCount += 1
-                gamesList.append(presenter.serialize(request.user))
+                gamesList.append(SF_fastSerializeGame(singleGame, request.user))  # singleGame.serialize(request.user))
                 totalGamesCount += 1
 
     for game_in_use_model in GAME_MODELS:
@@ -724,7 +723,7 @@ def DBO(request):
             ):
                 if singleGame.allPlayers.filter(username="SHADOW").exists():
                     pracGamesCount += 1
-                gamesList.append(singleGame.serialize(request.user))
+                gamesList.append(SF_fastSerializeGame(singleGame, request.user))  # singleGame.serialize(request.user))
                 totalGamesCount += 1
 
     # Sort the list by the latestUpdate property
@@ -1018,7 +1017,7 @@ def next_game_redirect(request):
     if not filteredGamesList:
         return redirect("/")
     if len(filteredGamesList) == 1:
-        nextGame = filteredGamesList[0]  # .serialize()
+        nextGame = filteredGamesList[0]  
         nextID = nextGame.id
         if nextID == current_game_id:
             return redirect("/")
@@ -1042,9 +1041,9 @@ def next_game_redirect(request):
 
     # Determine the next game details based on the index
     if index is None or index >= len(filteredGamesList) - 1:
-        nextGame = filteredGamesList[0]  # .serialize()
+        nextGame = filteredGamesList[0]  
     else:
-        nextGame = filteredGamesList[index + 1]  # .serialize()
+        nextGame = filteredGamesList[index + 1]  
 
     # Construct the nextURL using the next game details
     nextGameCode = nextGame.getGameCode()
@@ -2367,7 +2366,7 @@ def createWEBpage(request, gameID=0):
             "Lobby/createWEB.html",
             {
                 "fillData": True,
-                "gameName": currentGame.getGameName(),
+                "gameName": currentGame.presenter().getGameName(),
                 "gameDescription": currentGame.gameDescription,
                 "gamePace": currentGame.gamePace,
                 "playerNumber": currentGame.maxPlayers,
@@ -2409,7 +2408,7 @@ def createRNBpage(request, gameID=0):
             "Lobby/createRNB.html",
             {
                 "fillData": True,
-                "gameName": currentGame.getGameName(),
+                "gameName": currentGame.presenter().getGameName(),
                 "gameDescription": currentGame.gameDescription,
                 "gamePace": currentGame.gamePace,
                 "playerNumber": currentGame.maxPlayers,

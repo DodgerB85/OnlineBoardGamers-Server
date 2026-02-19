@@ -5,8 +5,9 @@ import time
 from pathlib import Path
 from decouple import config
 from django.db import connection
+
 # import time
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, Prefetch
 import json
 import django
 import datetime
@@ -17,15 +18,21 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
 
 # Because the live and dev servers are in different folder names, we need to go up one from that
-ROOT_DIR  = Path(__file__).resolve().parents[2]
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
 if DEBUG:
-    os.environ["LOCAL_DB_NAME"] = str(config("LOCAL_DB_NAME", default="password", cast=str))
-    os.environ["LOCAL_DB_USER"] = str(config("LOCAL_DB_USER", default="password", cast=str))
-    os.environ["LOCAL_DB_PWD"] = str(config("LOCAL_DB_PWD", default="password", cast=str))
+    os.environ["LOCAL_DB_NAME"] = str(
+        config("LOCAL_DB_NAME", default="password", cast=str)
+    )
+    os.environ["LOCAL_DB_USER"] = str(
+        config("LOCAL_DB_USER", default="password", cast=str)
+    )
+    os.environ["LOCAL_DB_PWD"] = str(
+        config("LOCAL_DB_PWD", default="password", cast=str)
+    )
     os.environ["LOCAL_DB_HOST"] = "127.0.0.1"
 
-BASE_DIR = ROOT_DIR / "OnlineBoardGamers" 
+BASE_DIR = ROOT_DIR / "OnlineBoardGamers"
 
 # 3. Now sys.path.append is much cleaner
 sys.path.append(str(BASE_DIR))
@@ -40,7 +47,7 @@ print(BASE_DIR)
 django.setup()
 start_calc_time = time.perf_counter()
 
-from FCM.models import FCM_Game
+from Lobby.models import Game, GamePlayer
 
 NEW_MS = 21
 
@@ -87,64 +94,93 @@ new_code_timestamp_ms = "1744974000000"
 # "old_ms_winner_rg": 1242, >> new calc is 1241
 # new_code_timestamp_ms = "1744972920000"
 
+# 1. Define the prefetch for the specific GamePlayer who is the winner
+winner_prefetch = Prefetch(
+    "players",
+    queryset=GamePlayer.objects.filter(winner=True)
+    .select_related("player")
+    .only(
+        "game_id",
+        "player__username",  # Always include the join field (game_id) in .only()
+    ),
+    to_attr="winner_record",  # Stores the result as an attribute on the Game object
+)
+
+
 query_old_code = (
     Q(gameStatus="FINISHED")
-    & ~Q(allPlayers__username="admin")
-    & ~Q(allPlayers__username="SHADOW")
+    & ~Q(players__player__username__in=["admin", "SHADOW", "FcmAI"])
     & ~Q(statsExcludedGame=True)
-    & ~Q(allPlayers__username="FcmAI")
     & Q(created__lte=new_code_timestamp_ms)
     & Q(latestUpdate__lte=new_code_timestamp_ms)
-    & Q(missingPlayers__isnull=True)
+    & ~Q(players__is_missing=True)
 )
 query_new_code = (
     Q(gameStatus="FINISHED")  # Corrected query
-    & ~Q(allPlayers__username="admin")
-    & ~Q(allPlayers__username="SHADOW")
+    & ~Q(players__player__username__in=["admin", "SHADOW", "FcmAI"])
     & ~Q(statsExcludedGame=True)
-    & ~Q(allPlayers__username="FcmAI")
     & Q(created__gte=new_code_timestamp_ms)
-    & Q(missingPlayers__isnull=True)
+    & ~Q(players__is_missing=True)
 )
 
-base_queryset = FCM_Game.objects.select_related("winner").only(
-    "id", "gameData", "winner__username", "startingOptions", "turn", "gameStatus"
-)
+base_queryset = (
+    Game.objects.filter(gameCode="FCM").prefetch_related(winner_prefetch)
+    # .select_related("winner")
+    .only("id", "gameData", "startingOptions", "turn", "gameStatus")
+).distinct()
 
 dataSet_old_code = base_queryset.filter(query_old_code)
 dataSet_new_code = base_queryset.filter(query_new_code)
 
-#dataSet_old_code = FCM_Game.objects.filter(query_old_code)
-#dataSet_new_code = FCM_Game.objects.filter(query_new_code)
+# dataSet_old_code = FCM_Game.objects.filter(query_old_code)
+# dataSet_new_code = FCM_Game.objects.filter(query_new_code)
 
 finishedGames_all = dataSet_old_code.count() + dataSet_new_code.count()
 
 
 def filter_by_starting_options(queryset, new_ms_value, include):
     """Filters a queryset based on the presence of NEW_MS in startingOptions."""
+    """Filters a JSON string in a TextField using common JSON delimiters."""
+    # We check for the number:
+    # 1. As the only item: [10]
+    # 2. At the start: [10,
+    # 3. In the middle: , 10,
+    # 4. At the end: , 10]
+    
+    q = (
+        Q(startingOptions__contains=f"[{new_ms_value}]") |
+        Q(startingOptions__contains=f"[{new_ms_value},") |
+        Q(startingOptions__contains=f", {new_ms_value},") |
+        Q(startingOptions__contains=f",{new_ms_value},") |
+        Q(startingOptions__contains=f", {new_ms_value}]") |
+        Q(startingOptions__contains=f",{new_ms_value}]")
+    )
+    
+    return queryset.filter(q) if include else queryset.exclude(q)
     # This regex looks for your value:
     # 1. After a bracket or comma: [\[,]
     # 2. Followed by optional whitespace: \s*
     # 3. Followed by your value
     # 4. Followed by optional whitespace: \s*
     # 5. Followed by a comma or closing bracket: [,\\]]
-    
-    pattern = rf'[\[,]\s*{new_ms_value}\s*[,\\]]'
-    
-    #q = (
+
+    #pattern = rf"[\[,]\s*{new_ms_value}\s*[,\\]]"
+
+    # q = (
     #    Q(startingOptions=str(new_ms_value))
     #    | Q(startingOptions__startswith=str(new_ms_value) + ",")
     #    | Q(startingOptions__endswith="," + str(new_ms_value))
     #    | Q(startingOptions__contains="," + str(new_ms_value) + ",")
-    #)
-    #if include:
+    # )
+    # if include:
     #    return queryset.filter(q)
-    #else:
+    # else:
     #    return queryset.exclude(q)
-    if include:
-        return queryset.filter(startingOptions__iregex=pattern)
-    else:
-        return queryset.exclude(startingOptions__iregex=pattern)
+    #if include:
+    #    return queryset.filter(startingOptions__iregex=pattern)
+    #else:
+    #    return queryset.exclude(startingOptions__iregex=pattern)
+
 
 def calculate_average_turn(queryset):
     """Calculates the average turn for a given queryset, excluding null and zero values."""
@@ -238,6 +274,18 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
             results[f"picked_t_and_rg_{num_players}p_ids"] = []
 
     for game in queryset:
+        # --- NEW WINNER LOOKUP LOGIC ---
+        # Since we use Prefetch(to_attr="winner_record"), it's a list on the game object.
+        winner_gp_list = getattr(game, "winner_record", [])
+        winner_gp = winner_gp_list[0] if winner_gp_list else None
+        
+        if not winner_gp or not winner_gp.player:
+            print(f"NO WINNER:: {getattr(game, 'id')}")
+            continue
+            
+        winner_username = winner_gp.player.username
+        # -------------------------------
+        
         raw_data = []
         try:
             byte_array = bytearray(base64.b64decode(game.gameData))
@@ -254,9 +302,11 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
         if not is_old_code:
             raw_player_index = 0
             raw_ms_index = 6
-            #options = game.startingOptions.split(",")
-            #options_int = [int(x) for x in options if x]
-            options_int = json.loads(game.startingOptions) if game.startingOptions else []
+            # options = game.startingOptions.split(",")
+            # options_int = [int(x) for x in options if x]
+            options_int = (
+                json.loads(game.startingOptions) if game.startingOptions else []
+            )
             if LOBBYISTS in options_int:
                 raw_player_index = 1
         if len(raw_data) > 0:
@@ -289,38 +339,38 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
                     else:
                         ms_type = "none"
 
-                if game.winner is None:
-                    print(f"NO WINNER:: {getattr(game, 'id')}")
-                    continue
                 playerName = player[0]
                 if not is_old_code:
                     playerName = player[0][0]
-                is_winner = playerName == game.winner.username
+                is_winner = playerName == winner_username
 
                 if is_winner:
                     results[f"winner_{ms_type}"] += 1
-                    results[f"winner_{ms_type}_ids"].append(getattr(game, 'id'))
+                    results[f"winner_{ms_type}_ids"].append(getattr(game, "id"))
                 else:
                     results[f"picked_{ms_type}"] += 1
-                    results[f"picked_{ms_type}_ids"].append(getattr(game, 'id'))
+                    results[f"picked_{ms_type}_ids"].append(getattr(game, "id"))
 
                 # Update player count specific stats
                 num_players = len(playerData)
                 if 2 <= num_players <= 6:
                     if is_winner:
                         results[f"winner_{ms_type}_{num_players}p"] += 1
-                        results[f"winner_{ms_type}_{num_players}p_ids"].append(getattr(game, 'id'))
+                        results[f"winner_{ms_type}_{num_players}p_ids"].append(
+                            getattr(game, "id")
+                        )
                     else:
                         results[f"picked_{ms_type}_{num_players}p"] += 1
-                        results[f"picked_{ms_type}_{num_players}p_ids"].append(getattr(game, 'id'))
-
+                        results[f"picked_{ms_type}_{num_players}p_ids"].append(
+                            getattr(game, "id")
+                        )
 
     return results
 
 
 # --- Calculate Average Turns (after filtering for turn > 4) ---
 ##################################################
-#query_turns_gt_4 = (
+# query_turns_gt_4 = (
 #    Q(gameStatus="FINISHED")
 #    & ~Q(allPlayers__username="admin")
 #    & ~Q(allPlayers__username="SHADOW")
@@ -328,52 +378,55 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
 #    & ~Q(allPlayers__username="FcmAI")
 #    & Q(turn__gt=4)
 #    & Q(missingPlayers__isnull=True)
-#)
+# )
 #
-#dataset_old_code_turns_gt_4 = FCM_Game.objects.filter(query_turns_gt_4 & query_old_code)
-#dataset_new_code_turns_gt_4 = FCM_Game.objects.filter(query_turns_gt_4 & query_new_code)
+# dataset_old_code_turns_gt_4 = FCM_Game.objects.filter(query_turns_gt_4 & query_old_code)
+# dataset_new_code_turns_gt_4 = FCM_Game.objects.filter(query_turns_gt_4 & query_new_code)
 #
 #
-#dataset_oldMS_old_code_turns_gt_4 = filter_by_starting_options(
+# dataset_oldMS_old_code_turns_gt_4 = filter_by_starting_options(
 #    dataset_old_code_turns_gt_4, NEW_MS, include=False
-#)
-#dataset_newMS_old_code_turns_gt_4 = filter_by_starting_options(
+# )
+# dataset_newMS_old_code_turns_gt_4 = filter_by_starting_options(
 #    dataset_old_code_turns_gt_4, NEW_MS, include=True
-#)
+# )
 #
-#dataset_oldMS_new_code_turns_gt_4 = filter_by_starting_options(
+# dataset_oldMS_new_code_turns_gt_4 = filter_by_starting_options(
 #    dataset_new_code_turns_gt_4, NEW_MS, include=False
-#)
-#dataset_newMS_new_code_turns_gt_4 = filter_by_starting_options(
+# )
+# dataset_newMS_new_code_turns_gt_4 = filter_by_starting_options(
 #    dataset_new_code_turns_gt_4, NEW_MS, include=True
-#)
+# )
 #
 #
 ## --- Analyze MS Usage for all combinations ---
-#old_code_old_ms_stats = analyze_ms_usage(
+# old_code_old_ms_stats = analyze_ms_usage(
 #    dataset_oldMS_old_code_turns_gt_4, is_old_ms=True, is_old_code=True
-#)
-#old_code_new_ms_stats = analyze_ms_usage(
+# )
+# old_code_new_ms_stats = analyze_ms_usage(
 #    dataset_newMS_old_code_turns_gt_4, is_old_ms=False, is_old_code=True
-#)
+# )
 #
-#new_code_old_ms_stats = analyze_ms_usage(
+# new_code_old_ms_stats = analyze_ms_usage(
 #    dataset_oldMS_new_code_turns_gt_4, is_old_ms=True, is_old_code=False
-#)
-#new_code_new_ms_stats = analyze_ms_usage(
+# )
+# new_code_new_ms_stats = analyze_ms_usage(
 #    dataset_newMS_new_code_turns_gt_4, is_old_ms=False, is_old_code=False
-#)
+# )
 ####################################################
 
 query_turns_gt_4 = (
     Q(gameStatus="FINISHED")
-    & ~Q(allPlayers__username="admin")
-    & ~Q(allPlayers__username="SHADOW")
+    & ~Q(
+        players__player__username__in=["admin", "SHADOW", "FcmAI"]
+    )  # Updated to 'players' relation
     & ~Q(statsExcludedGame=True)
-    & ~Q(allPlayers__username="FcmAI")
     & Q(turn__gt=4)
-    & Q(missingPlayers__isnull=True)
+    & ~Q(
+        players__is_missing=True
+    )  # Replaced missingPlayers__isnull=True with the GamePlayer field
 )
+
 
 # 1. Define the MS filter logic as a Python helper to avoid extra DB queries
 def has_new_ms(starting_options_str, new_ms_value):
@@ -382,35 +435,59 @@ def has_new_ms(starting_options_str, new_ms_value):
     options = json.loads(starting_options_str) if starting_options_str else []
     return new_ms_value in options
 
+
 # 2. Fetch ALL relevant Old Code games in ONE hit
 # We use select_related to solve the N+1 winner issue and .only() to save memory
+
+
 old_code_games_t4 = list(
-    FCM_Game.objects.select_related("winner")
-    .only("id", "gameData", "winner__username", "startingOptions", "turn")
+    Game.objects.filter(gameCode="FCM")
+    .prefetch_related(winner_prefetch)
+    .only("id", "gameData", "startingOptions", "turn")
     .filter(query_turns_gt_4 & query_old_code)
+    .distinct()
 )
 
 # 3. Split the list in memory (0 DB hits)
-dataset_newMS_old_code_turns_gt_4 = [g for g in old_code_games_t4 if has_new_ms(g.startingOptions, NEW_MS)]
-dataset_oldMS_old_code_turns_gt_4 = [g for g in old_code_games_t4 if not has_new_ms(g.startingOptions, NEW_MS)]
+dataset_newMS_old_code_turns_gt_4 = [
+    g for g in old_code_games_t4 if has_new_ms(g.startingOptions, NEW_MS)
+]
+dataset_oldMS_old_code_turns_gt_4 = [
+    g for g in old_code_games_t4 if not has_new_ms(g.startingOptions, NEW_MS)
+]
 
 # 4. Fetch ALL relevant New Code games in ONE hit
 new_code_games_t4 = list(
-    FCM_Game.objects.select_related("winner")
-    .only("id", "gameData", "winner__username", "startingOptions", "turn")
+    Game.objects.filter(gameCode="FCM")
+    .prefetch_related(winner_prefetch)
+    .only("id", "gameData", "startingOptions", "turn")
     .filter(query_turns_gt_4 & query_new_code)
+    .distinct()
 )
 
+
 # 5. Split the list in memory (0 DB hits)
-dataset_newMS_new_code_turns_gt_4 = [g for g in new_code_games_t4 if has_new_ms(g.startingOptions, NEW_MS)]
-dataset_oldMS_new_code_turns_gt_4 = [g for g in new_code_games_t4 if not has_new_ms(g.startingOptions, NEW_MS)]
+dataset_newMS_new_code_turns_gt_4 = [
+    g for g in new_code_games_t4 if has_new_ms(g.startingOptions, NEW_MS)
+]
+dataset_oldMS_new_code_turns_gt_4 = [
+    g for g in new_code_games_t4 if not has_new_ms(g.startingOptions, NEW_MS)
+]
 
 # 6. Run your analysis (Now using pre-fetched Python lists)
-old_code_old_ms_stats = analyze_ms_usage(dataset_oldMS_old_code_turns_gt_4, is_old_ms=True, is_old_code=True)
-old_code_new_ms_stats = analyze_ms_usage(dataset_newMS_old_code_turns_gt_4, is_old_ms=False, is_old_code=True)
+old_code_old_ms_stats = analyze_ms_usage(
+    dataset_oldMS_old_code_turns_gt_4, is_old_ms=True, is_old_code=True
+)
+old_code_new_ms_stats = analyze_ms_usage(
+    dataset_newMS_old_code_turns_gt_4, is_old_ms=False, is_old_code=True
+)
 
-new_code_old_ms_stats = analyze_ms_usage(dataset_oldMS_new_code_turns_gt_4, is_old_ms=True, is_old_code=False)
-new_code_new_ms_stats = analyze_ms_usage(dataset_newMS_new_code_turns_gt_4, is_old_ms=False, is_old_code=False)
+new_code_old_ms_stats = analyze_ms_usage(
+    dataset_oldMS_new_code_turns_gt_4, is_old_ms=True, is_old_code=False
+)
+new_code_new_ms_stats = analyze_ms_usage(
+    dataset_newMS_new_code_turns_gt_4, is_old_ms=False, is_old_code=False
+)
 
 
 # Combine MS Stats and Calculate Ratios
@@ -443,38 +520,30 @@ combined_ms_stats["new_ms_picked_none"] = old_code_new_ms_stats.get(
 ) + new_code_new_ms_stats.get("picked_none", 0)
 
 # Combine the _ids arrays
-combined_ms_stats["new_ms_winner_mkt_ids"] = (
-    old_code_new_ms_stats.get("winner_mkt_ids", [])
-    + new_code_new_ms_stats.get("winner_mkt_ids", [])
-)
-combined_ms_stats["new_ms_winner_rg_ids"] = (
-    old_code_new_ms_stats.get("winner_rg_ids", [])
-    + new_code_new_ms_stats.get("winner_rg_ids", [])
-)
-combined_ms_stats["new_ms_winner_t_ids"] = (
-    old_code_new_ms_stats.get("winner_t_ids", [])
-    + new_code_new_ms_stats.get("winner_t_ids", [])
-)
-combined_ms_stats["new_ms_winner_none_ids"] = (
-    old_code_new_ms_stats.get("winner_none_ids", [])
-    + new_code_new_ms_stats.get("winner_none_ids", [])
-)
-combined_ms_stats["new_ms_picked_mkt_ids"] = (
-    old_code_new_ms_stats.get("picked_mkt_ids", [])
-    + new_code_new_ms_stats.get("picked_mkt_ids", [])
-)
-combined_ms_stats["new_ms_picked_rg_ids"] = (
-    old_code_new_ms_stats.get("picked_rg_ids", [])
-    + new_code_new_ms_stats.get("picked_rg_ids", [])
-)
-combined_ms_stats["new_ms_picked_t_ids"] = (
-    old_code_new_ms_stats.get("picked_t_ids", [])
-    + new_code_new_ms_stats.get("picked_t_ids", [])
-)
-combined_ms_stats["new_ms_picked_none_ids"] = (
-    old_code_new_ms_stats.get("picked_none_ids", [])
-    + new_code_new_ms_stats.get("picked_none_ids", [])
-)
+combined_ms_stats["new_ms_winner_mkt_ids"] = old_code_new_ms_stats.get(
+    "winner_mkt_ids", []
+) + new_code_new_ms_stats.get("winner_mkt_ids", [])
+combined_ms_stats["new_ms_winner_rg_ids"] = old_code_new_ms_stats.get(
+    "winner_rg_ids", []
+) + new_code_new_ms_stats.get("winner_rg_ids", [])
+combined_ms_stats["new_ms_winner_t_ids"] = old_code_new_ms_stats.get(
+    "winner_t_ids", []
+) + new_code_new_ms_stats.get("winner_t_ids", [])
+combined_ms_stats["new_ms_winner_none_ids"] = old_code_new_ms_stats.get(
+    "winner_none_ids", []
+) + new_code_new_ms_stats.get("winner_none_ids", [])
+combined_ms_stats["new_ms_picked_mkt_ids"] = old_code_new_ms_stats.get(
+    "picked_mkt_ids", []
+) + new_code_new_ms_stats.get("picked_mkt_ids", [])
+combined_ms_stats["new_ms_picked_rg_ids"] = old_code_new_ms_stats.get(
+    "picked_rg_ids", []
+) + new_code_new_ms_stats.get("picked_rg_ids", [])
+combined_ms_stats["new_ms_picked_t_ids"] = old_code_new_ms_stats.get(
+    "picked_t_ids", []
+) + new_code_new_ms_stats.get("picked_t_ids", [])
+combined_ms_stats["new_ms_picked_none_ids"] = old_code_new_ms_stats.get(
+    "picked_none_ids", []
+) + new_code_new_ms_stats.get("picked_none_ids", [])
 
 # Calculate New MS Ratios
 combined_ms_stats["new_ms_mkt_ratio"] = (
@@ -529,38 +598,30 @@ combined_ms_stats["old_ms_picked_none"] = old_code_old_ms_stats.get(
 ) + new_code_old_ms_stats.get("picked_none", 0)
 
 # Combine the _ids arrays
-combined_ms_stats["old_ms_winner_t_and_rg_ids"] = (
-    old_code_old_ms_stats.get("winner_t_and_rg_ids", [])
-    + new_code_old_ms_stats.get("winner_t_and_rg_ids", [])
-)
-combined_ms_stats["old_ms_winner_rg_ids"] = (
-    old_code_old_ms_stats.get("winner_rg_ids", [])
-    + new_code_old_ms_stats.get("winner_rg_ids", [])
-)
-combined_ms_stats["old_ms_winner_t_ids"] = (
-    old_code_old_ms_stats.get("winner_t_ids", [])
-    + new_code_old_ms_stats.get("winner_t_ids", [])
-)
-combined_ms_stats["old_ms_winner_none_ids"] = (
-    old_code_old_ms_stats.get("winner_none_ids", [])
-    + new_code_old_ms_stats.get("winner_none_ids", [])
-)
-combined_ms_stats["old_ms_picked_t_and_rg_ids"] = (
-    old_code_old_ms_stats.get("picked_t_and_rg_ids", [])
-    + new_code_old_ms_stats.get("picked_t_and_rg_ids", [])
-)
-combined_ms_stats["old_ms_picked_rg_ids"] = (
-    old_code_old_ms_stats.get("picked_rg_ids", [])
-    + new_code_old_ms_stats.get("picked_rg_ids", [])
-)
-combined_ms_stats["old_ms_picked_t_ids"] = (
-    old_code_old_ms_stats.get("picked_t_ids", [])
-    + new_code_old_ms_stats.get("picked_t_ids", [])
-)
-combined_ms_stats["old_ms_picked_none_ids"] = (
-    old_code_old_ms_stats.get("picked_none_ids", [])
-    + new_code_old_ms_stats.get("picked_none_ids", [])
-)
+combined_ms_stats["old_ms_winner_t_and_rg_ids"] = old_code_old_ms_stats.get(
+    "winner_t_and_rg_ids", []
+) + new_code_old_ms_stats.get("winner_t_and_rg_ids", [])
+combined_ms_stats["old_ms_winner_rg_ids"] = old_code_old_ms_stats.get(
+    "winner_rg_ids", []
+) + new_code_old_ms_stats.get("winner_rg_ids", [])
+combined_ms_stats["old_ms_winner_t_ids"] = old_code_old_ms_stats.get(
+    "winner_t_ids", []
+) + new_code_old_ms_stats.get("winner_t_ids", [])
+combined_ms_stats["old_ms_winner_none_ids"] = old_code_old_ms_stats.get(
+    "winner_none_ids", []
+) + new_code_old_ms_stats.get("winner_none_ids", [])
+combined_ms_stats["old_ms_picked_t_and_rg_ids"] = old_code_old_ms_stats.get(
+    "picked_t_and_rg_ids", []
+) + new_code_old_ms_stats.get("picked_t_and_rg_ids", [])
+combined_ms_stats["old_ms_picked_rg_ids"] = old_code_old_ms_stats.get(
+    "picked_rg_ids", []
+) + new_code_old_ms_stats.get("picked_rg_ids", [])
+combined_ms_stats["old_ms_picked_t_ids"] = old_code_old_ms_stats.get(
+    "picked_t_ids", []
+) + new_code_old_ms_stats.get("picked_t_ids", [])
+combined_ms_stats["old_ms_picked_none_ids"] = old_code_old_ms_stats.get(
+    "picked_none_ids", []
+) + new_code_old_ms_stats.get("picked_none_ids", [])
 
 # Calculate Old MS Ratios
 combined_ms_stats["old_ms_t_and_rg_ratio"] = (
@@ -777,8 +838,10 @@ for num_players in range(2, 7):
     combined_ms_stats[f"old_ms_ratio_t_and_rg_adjusted_{num_players}p"] = (
         combined_ms_stats[f"old_ms_winner_t_and_rg_{num_players}p"]
         * num_players
-        / (combined_ms_stats[f"old_ms_winner_t_and_rg_{num_players}p"]
-        + combined_ms_stats[f"old_ms_picked_t_and_rg_{num_players}p"])
+        / (
+            combined_ms_stats[f"old_ms_winner_t_and_rg_{num_players}p"]
+            + combined_ms_stats[f"old_ms_picked_t_and_rg_{num_players}p"]
+        )
         * 100
         if combined_ms_stats[f"old_ms_picked_t_and_rg_{num_players}p"] != 0
         else 0
@@ -786,8 +849,10 @@ for num_players in range(2, 7):
     combined_ms_stats[f"old_ms_ratio_rg_adjusted_{num_players}p"] = (
         combined_ms_stats[f"old_ms_winner_rg_{num_players}p"]
         * num_players
-        / (combined_ms_stats[f"old_ms_winner_rg_{num_players}p"]
-        + combined_ms_stats[f"old_ms_picked_rg_{num_players}p"])
+        / (
+            combined_ms_stats[f"old_ms_winner_rg_{num_players}p"]
+            + combined_ms_stats[f"old_ms_picked_rg_{num_players}p"]
+        )
         * 100
         if combined_ms_stats[f"old_ms_picked_rg_{num_players}p"] != 0
         else 0
@@ -795,8 +860,10 @@ for num_players in range(2, 7):
     combined_ms_stats[f"old_ms_ratio_t_adjusted_{num_players}p"] = (
         combined_ms_stats[f"old_ms_winner_t_{num_players}p"]
         * num_players
-        / (combined_ms_stats[f"old_ms_winner_t_{num_players}p"]
-        + combined_ms_stats[f"old_ms_picked_t_{num_players}p"])
+        / (
+            combined_ms_stats[f"old_ms_winner_t_{num_players}p"]
+            + combined_ms_stats[f"old_ms_picked_t_{num_players}p"]
+        )
         * 100
         if combined_ms_stats[f"old_ms_picked_t_{num_players}p"] != 0
         else 0
@@ -804,8 +871,10 @@ for num_players in range(2, 7):
     combined_ms_stats[f"old_ms_ratio_none_adjusted_{num_players}p"] = (
         combined_ms_stats[f"old_ms_winner_none_{num_players}p"]
         * num_players
-        / (combined_ms_stats[f"old_ms_winner_none_{num_players}p"]
-        + combined_ms_stats[f"old_ms_picked_none_{num_players}p"])
+        / (
+            combined_ms_stats[f"old_ms_winner_none_{num_players}p"]
+            + combined_ms_stats[f"old_ms_picked_none_{num_players}p"]
+        )
         * 100
         if combined_ms_stats[f"old_ms_picked_none_{num_players}p"] != 0
         else 0
@@ -814,8 +883,10 @@ for num_players in range(2, 7):
     combined_ms_stats[f"new_ms_ratio_mkt_adjusted_{num_players}p"] = (
         combined_ms_stats[f"new_ms_winner_mkt_{num_players}p"]
         * num_players
-        / (combined_ms_stats[f"new_ms_winner_mkt_{num_players}p"]
-        + combined_ms_stats[f"new_ms_picked_mkt_{num_players}p"])
+        / (
+            combined_ms_stats[f"new_ms_winner_mkt_{num_players}p"]
+            + combined_ms_stats[f"new_ms_picked_mkt_{num_players}p"]
+        )
         * 100
         if combined_ms_stats[f"new_ms_picked_mkt_{num_players}p"] != 0
         else 0
@@ -823,8 +894,10 @@ for num_players in range(2, 7):
     combined_ms_stats[f"new_ms_ratio_rg_adjusted_{num_players}p"] = (
         combined_ms_stats[f"new_ms_winner_rg_{num_players}p"]
         * num_players
-        / (combined_ms_stats[f"new_ms_winner_rg_{num_players}p"]
-        + combined_ms_stats[f"new_ms_picked_rg_{num_players}p"])
+        / (
+            combined_ms_stats[f"new_ms_winner_rg_{num_players}p"]
+            + combined_ms_stats[f"new_ms_picked_rg_{num_players}p"]
+        )
         * 100
         if combined_ms_stats[f"new_ms_picked_rg_{num_players}p"] != 0
         else 0
@@ -832,8 +905,10 @@ for num_players in range(2, 7):
     combined_ms_stats[f"new_ms_ratio_t_adjusted_{num_players}p"] = (
         combined_ms_stats[f"new_ms_winner_t_{num_players}p"]
         * num_players
-        / (combined_ms_stats[f"new_ms_winner_t_{num_players}p"]
-        + combined_ms_stats[f"new_ms_picked_t_{num_players}p"])
+        / (
+            combined_ms_stats[f"new_ms_winner_t_{num_players}p"]
+            + combined_ms_stats[f"new_ms_picked_t_{num_players}p"]
+        )
         * 100
         if combined_ms_stats[f"new_ms_picked_t_{num_players}p"] != 0
         else 0
@@ -841,8 +916,10 @@ for num_players in range(2, 7):
     combined_ms_stats[f"new_ms_ratio_none_adjusted_{num_players}p"] = (
         combined_ms_stats[f"new_ms_winner_none_{num_players}p"]
         * num_players
-        / (combined_ms_stats[f"new_ms_winner_none_{num_players}p"]
-        + combined_ms_stats[f"new_ms_picked_none_{num_players}p"])
+        / (
+            combined_ms_stats[f"new_ms_winner_none_{num_players}p"]
+            + combined_ms_stats[f"new_ms_picked_none_{num_players}p"]
+        )
         * 100
         if combined_ms_stats[f"new_ms_picked_none_{num_players}p"] != 0
         else 0
@@ -876,14 +953,16 @@ def count_module_usage(queryset):
         "NIGHT_SHIFT_MANAGER": NIGHT_SHIFT_MANAGER,
     }
     for module_name, module_value in modules.items():
-        #module_counts[f"finished_games_{module_name}"] = filter_by_starting_options(
+        # module_counts[f"finished_games_{module_name}"] = filter_by_starting_options(
         #    queryset, module_value, include=True
-        #).count()
+        # ).count()
         filtered_queryset = filter_by_starting_options(
             queryset, module_value, include=True
         )
         module_counts[f"finished_games_{module_name}"] = filtered_queryset.count()
-        module_counts[f"game_ids_{module_name}"] = list(filtered_queryset.values_list('id', flat=True))  # Get a list of game IDs
+        module_counts[f"game_ids_{module_name}"] = list(
+            filtered_queryset.values_list("id", flat=True)
+        )  # Get a list of game IDs
 
     return module_counts
 
@@ -942,9 +1021,9 @@ file_path = BASE_DIR / "FCM" / "FCMstats" / "FCM_stats.json"
 
 with open(file_path, mode="w") as filehandle:
     json.dump(returnData, filehandle)
-    
+
 print(f"DB hits: {len(connection.queries)}")
-    
+
 # Calculate and print execution time
 calc_time = time.perf_counter() - start_calc_time
 if PRINT_TIME:

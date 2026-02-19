@@ -74,7 +74,7 @@ for gameCode in GAME_CODES:
             playersToNotify = singleGame.presenter().getCurrentPlayersArrayForReminderEmail()
             for playerName in playersToNotify:
                 print(f"2hr Email: {playerName}")
-                SN_sendReminderEmail(playerName, gameCode, singleGame.id, singleGame.getGameName())
+                SN_sendReminderEmail(playerName, gameCode, singleGame.id, singleGame.presenter().getGameName())
 
         if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
             # print(singleGame.getCurrentPlayersArray())
@@ -82,7 +82,7 @@ for gameCode in GAME_CODES:
             playersToNotify = singleGame.presenter().getCurrentPlayersArrayForReminderEmail()
             for playerName in playersToNotify:
                 print(f"Expired Email: {playerName}")
-                SN_sendReminderExpiredEmail(playerName, gameCode, singleGame.id, singleGame.getGameName())
+                SN_sendReminderExpiredEmail(playerName, gameCode, singleGame.id, singleGame.presenter().getGameName())
 
             if gameCode == "FCM" and singleGame.relatedMainTournament:
                 try:

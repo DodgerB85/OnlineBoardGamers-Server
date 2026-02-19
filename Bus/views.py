@@ -564,7 +564,7 @@ def _processBusTurn(request):
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        current_players_str = presenter.getCurrentPlayersString()
+        currentPlayersArr = presenter.getCurrentPlayersArray()
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(currentGame.latestUpdate):
@@ -579,7 +579,7 @@ def _processBusTurn(request):
             message = (
                 f"SYNC ERROR IN: Bus save - gameID: {gameID} - User: {request.user.username} - JSON_LU: {latestUpdate} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {current_players_str}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentPlayersArr}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -805,7 +805,7 @@ def _processBusTurn(request):
         )
 
     elif jsonData["action"] == "saveGameDataAfterKickout":
-        current_players_str = presenter.getCurrentPlayersString()
+        currentPlayersArr = presenter.getCurrentPlayersArray()
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(
@@ -816,7 +816,7 @@ def _processBusTurn(request):
             message = (
                 f"SYNC ERROR IN: Bus saveGameDataAfterKickout - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {current_players_str}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentPlayersArr}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)

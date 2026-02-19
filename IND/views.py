@@ -289,7 +289,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "allPlayerListBySeat": allPlayerListBySeat,
-        "currentPlayers": presenter.getCurrentPlayersString(),
+        "currentPlayers": presenter.getCurrentPlayersString(True),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredINDoptions": [-1, 0, 0, 1, 1, 1],
         "pov": -99,
@@ -1069,12 +1069,15 @@ def forkINDgame(request):
     # Modify the fields you want to change
     # newGame.gameName = currentGame.gameName + " (fork)"
     # newGame.save()
+    
+    old_presenter = cast("IndPresenter", source_game.presenter())
+    
     original_players = list(source_game.players.all())
 
     newGame = source_game
     newGame.pk = None
     # newGame.id = None
-    newGame.gameName = f"{source_game.getGameName()} (fork)"
+    newGame.gameName = f"{old_presenter.getGameName()} (fork)"
     newGame.gameStatus = "ACTIVE"
     newGame.save()  # This creates the new record and assigns a new ID
 

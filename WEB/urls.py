@@ -24,11 +24,11 @@ urlpatterns = [
     
     path("bugEntry/", views.bugEntry, name="bugEntry"),
     path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
-    path("saveNotes/", views.saveNotes, name="saveNotes"),
+    path("saveNotesWEB/", views.saveNotesWEB, name="saveNotesWEB"),
 
     path("processWEBturn/", views.processWEBturn, name="processWEBturn"),
     path('data/<int:dataType>/', views.WEBdata, name='WEBdata'),
 
     path("saveZoom/", views.saveZoom, name="saveZoom"),
-    path("castVote/", views.castVote, name="castVoteCNS"),
+    path("castVote/", views.castVote, name="castVoteWEB"),
 ]

@@ -220,7 +220,8 @@ class GameAdmin(admin.ModelAdmin):
     def game_name(self, obj):
         # assuming you have a field or property called gameName
         # if you have a method getGameName already, just rename it:
-        return obj.gameName or obj.getGameName()
+        presenter = obj.presenter()
+        return presenter.getGameName()
 
     # @admin.display(description='Status')
     # def status(self, obj):
@@ -269,7 +270,7 @@ class GameAdmin(admin.ModelAdmin):
     # search_fields = ("gameName", "creator__username")
     search_fields = ("gameName", "gameDescription", "gameCode")
 
-    readonly_fields = ("ind_premove_display",)
+    readonly_fields = ("ind_premove_display", "gameDataBLOB")
     @admin.display(description='IND premove')
     def ind_premove_display(self, obj):
         return obj.playersPreMoveData
@@ -321,6 +322,7 @@ class GameAdmin(admin.ModelAdmin):
             {
                 "classes": ("collapse",),
                 "fields": (
+                    "serverRemainingPlayerOrderByNames",
                     "FCMplayersMoveData",
                     "ind_premove_display",
                     "currentPlayersInTurnOrder",
@@ -351,6 +353,7 @@ class GameAdmin(admin.ModelAdmin):
                 "classes": ("collapse",),
                 "fields": (
                     "gameData",
+                    "gameDataBLOB",
                     "rewindData",
                     "rewindTempData",
                     "chatData",

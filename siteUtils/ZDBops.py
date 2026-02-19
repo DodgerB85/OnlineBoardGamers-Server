@@ -53,7 +53,6 @@ django.setup()
 from django.contrib.sites.models import Site
 
 from HC.models import HC_Tournament
-from FCM.models import FCM_Game
 from KFW.models import KFW_Game
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament, Mini_Tournaments
 
@@ -61,8 +60,7 @@ from Lobby.sharedFunctions.sharedFunctions import SF_endAnyTournament#(request, 
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
-allFCMgames = FCM_Game.objects.all()
-allHCgames = Game.objects.filter(gameCode='HC')
+
 allKFWgames = KFW_Game.objects.all()
 allMiniTs = Mini_Tournaments.objects.all()
 
