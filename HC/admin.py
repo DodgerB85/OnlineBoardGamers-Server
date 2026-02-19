@@ -197,7 +197,6 @@ class HC_GameAdmin(admin.ModelAdmin):
                     "created",
                     "kickoutDuration",
                     "gamePace",
-                    "rewindConsent",
                     "statsExcludeConsent",
                     "statsExcludedGame",
                 ),
