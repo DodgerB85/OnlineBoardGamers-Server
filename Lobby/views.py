@@ -104,7 +104,6 @@ from .models import (
     Main_Tournament,
 )
 
-from HC.models import HC_Tournament
 from KFW.models import KFW_Game
 
 from user_visit.models import UserVisit
@@ -968,22 +967,8 @@ def next_game_redirect(request):
     except (TypeError, ValueError):
         return redirect("/")
 
-    # Collect games from legacy models
-    currentGamesList = list(
-        chain(
-            *[
-                model.objects.filter(
-                    Q(allPlayers=request.user),
-                    Q(gameStatus="ACTIVE"),
-                    ~Q(missingPlayers=request.user),
-                )
-                for model in GAME_MODELS
-            ]
-        )
-    )
-
     # Add unified model games (CNS, WEB, AQY, TGZ)
-    unified_games = (
+    currentGamesList = list(
         Game.objects.filter(players__player=request.user, gameStatus="ACTIVE")
         .exclude(players__is_missing=True, players__player=request.user)
         .distinct()
@@ -991,21 +976,16 @@ def next_game_redirect(request):
         .prefetch_related("players__player")
     )
 
-    currentGamesList.extend(list(unified_games))
     currentGamesList.sort(key=lambda instance: instance.latestUpdate, reverse=True)
 
     # Filter currentGamesList based on isMyMove function
     filteredGamesList = []
     for game in currentGamesList:
-        if isinstance(game, Game):
-            # Unified model - use presenter
-            presenter = game.presenter()
-            if presenter.quickIsMyMove(request.user.username):
-                filteredGamesList.append(game)
-        else:
-            # Legacy model
-            if game.quickIsMyMove(request.user.username):
-                filteredGamesList.append(game)
+        # Unified model - use presenter
+        presenter = game.presenter()
+        if presenter.quickIsMyMove(request.user.username):
+            filteredGamesList.append(game)
+
 
     # Handle cases when there are no filtered games
     if not filteredGamesList:
@@ -1018,10 +998,7 @@ def next_game_redirect(request):
         else:
             nextGameCode = nextGame.getGameCode()
             # Check if it's a unified model game
-            if isinstance(nextGame, Game):
-                return redirect(f"/{nextGameCode}/{nextGame.id}/show/")
-            else:
-                return redirect(f"/{nextGameCode}/{nextGame.id}/")
+            return redirect(f"/{nextGameCode}/{nextGame.id}/show/")
 
     # Get the index of the game with the specified game_id
     index = next(
@@ -1042,10 +1019,7 @@ def next_game_redirect(request):
     # Construct the nextURL using the next game details
     nextGameCode = nextGame.getGameCode()
     # Check if it's a unified model game
-    if isinstance(nextGame, Game):
-        return redirect(f"/{nextGameCode}/{nextGame.id}/show/")
-    else:
-        return redirect(f"/{nextGameCode}/{nextGame.id}/")
+    return redirect(f"/{nextGameCode}/{nextGame.id}/show/")
 
 
 def password_reset_request(request):
@@ -1344,9 +1318,6 @@ def index(request):
     #        )
 
     list_type = request.session.pop("listType", "current")
-    tournament_models = {
-        "HC": HC_Tournament,
-    }
 
     # --- Step 1: Optimized Blacklist (2 Queries total) ---
     profile = request.user.profile
@@ -1563,17 +1534,12 @@ def index(request):
     cache_key = f"lobby_main_tournaments_check"
     available_tournaments = cache.get(cache_key)
     if available_tournaments is None:
-        available_tournaments = [
-            name
-            for name, model in tournament_models.items()
-            if model.objects.filter(tournamentStatus="OP").exists()
-        ]
         main_tours = list(
             Main_Tournament.objects.filter(tournamentStatus="OP").values_list(
                 "gameCode", flat=True
             )
         )
-        available_tournaments = list(set(available_tournaments + main_tours))
+        available_tournaments = list(set(main_tours))
         cache.set(cache_key, available_tournaments, 60)  # Cache for 1 minute
 
     # print_timestamp("Final prep complete")
@@ -2774,6 +2740,8 @@ def playerInfo(request, usernameToProfile):
     minus1year = int(
         (datetime.datetime.now() - datetime.timedelta(days=365)).timestamp() * 1000
     )
+    
+    all_games = []
 
     # THE MASTER LOOP: One model at a time
     for game_name, game_model in GAME_NAMES_MODELS.items():
@@ -2785,26 +2753,7 @@ def playerInfo(request, usernameToProfile):
                 .distinct()
             )
         else:
-            # Check if winner is FK or M2M to optimize JOINs
-            winner_field = game_model._meta.get_field("winner")
-            is_winner_m2m = winner_field.many_to_many
-
-            # Start the query
-            query = game_model.objects.filter(allPlayers=target_id)
-
-            query = query.defer(
-                "autoMoves",  # Add this here -- THIS CAN DEFER NON-EXISTANT FIELDS
-            )
-
-            # Use select_related for ForeignKeys (0 hits)
-            # Use prefetch_related for ManyToMany (1 hit per field)
-            if not is_winner_m2m:
-                query = query.select_related("winner")
-                prefetches = ["allPlayers", "missingPlayers", "kickedPlayers"]
-            else:
-                prefetches = ["allPlayers", "missingPlayers", "kickedPlayers", "winner"]
-
-            all_games = list(query.prefetch_related(*prefetches).distinct())
+            pass
 
         # Model-specific counters for the stats table
         model_joint_finished = 0
@@ -2818,125 +2767,63 @@ def playerInfo(request, usernameToProfile):
         for game in all_games:
             status = game.gameStatus
 
-            # Handle unified Game model (CNS, WEB, etc.) differently
-            if SR_usesUnifiedGameModel(game_name):
-                # Optimization: Use sets for membership checks
-                all_p_ids = {gp.player.id for gp in game.players.all() if gp.player}
-                is_joint = req_user_id in all_p_ids
+            # Optimization: Use sets for membership checks
+            all_p_ids = {gp.player.id for gp in game.players.all() if gp.player}
+            is_joint = req_user_id in all_p_ids
 
-                # --- Win Calculation ---
-                winner_ids = [gp.player.id for gp in game.players.all() if gp.player and gp.winner]
+            # --- Win Calculation ---
+            winner_ids = [gp.player.id for gp in game.players.all() if gp.player and gp.winner]
 
-                if status == "FINISHED":
-                    # General Stats Logic
-                    has_shadow = any(
-                        gp.player.username == "SHADOW" for gp in game.players.all() if gp.player
-                    )
+            if status == "FINISHED":
+                # General Stats Logic
+                has_shadow = any(
+                    gp.player.username == "SHADOW" for gp in game.players.all() if gp.player
+                )
 
-                    if not has_shadow:
-                        model_total_finished += 1
+                if not has_shadow:
+                    model_total_finished += 1
+                    if target_id in winner_ids:
+                        model_total_won += 1
+
+                    # Group by maxPlayers (2-6)
+                    if 2 <= game.maxPlayers <= 6:
+                        stats_by_size[game.maxPlayers][0] += 1
                         if target_id in winner_ids:
-                            model_total_won += 1
+                            stats_by_size[game.maxPlayers][1] += 1
 
-                        # Group by maxPlayers (2-6)
-                        if 2 <= game.maxPlayers <= 6:
-                            stats_by_size[game.maxPlayers][0] += 1
-                            if target_id in winner_ids:
-                                stats_by_size[game.maxPlayers][1] += 1
+                # Joint Stats Logic
+                if not is_self and is_joint:
+                    model_joint_finished += 1
+                    if req_user_id in winner_ids:
+                        model_joint_wins += 1
 
-                    # Joint Stats Logic
-                    if not is_self and is_joint:
-                        model_joint_finished += 1
-                        if req_user_id in winner_ids:
-                            model_joint_wins += 1
+                # Fair Play Logic (Last Year)
+                if int(game.latestUpdate) >= minus1year:
+                    finishedGamesLastYear += 1
+                    if any(
+                        gp.player.id == target_id and gp.is_kicked if gp.player else False
+                        for gp in game.players.all()
+                    ):
+                        kickedOutGamesLastYear += 1
 
-                    # Fair Play Logic (Last Year)
-                    if int(game.latestUpdate) >= minus1year:
-                        finishedGamesLastYear += 1
-                        if any(
-                            gp.player.id == target_id and gp.is_kicked if gp.player else False
-                            for gp in game.players.all()
-                        ):
-                            kickedOutGamesLastYear += 1
-
-                # --- Categorization for Lists ---
-                if not is_self:
-                    if is_joint:
-                        if status == "ACTIVE":
-                            activeJoint.append(game)
-                        elif status == "FINISHED":
-                            finishedJoint.append(game)
-                    else:
-                        if status == "ACTIVE":
-                            activeOther.append(game)
-                        elif status == "FINISHED":
-                            finishedOther.append(game)
+            # --- Categorization for Lists ---
+            if not is_self:
+                if is_joint:
+                    if status == "ACTIVE":
+                        activeJoint.append(game)
+                    elif status == "FINISHED":
+                        finishedJoint.append(game)
                 else:
                     if status == "ACTIVE":
                         activeOther.append(game)
                     elif status == "FINISHED":
                         finishedOther.append(game)
             else:
-                # Legacy game models
-                # Optimization: Use sets for membership checks
-                all_p_ids = {p.id for p in game.allPlayers.all()}
-                is_joint = req_user_id in all_p_ids
+                if status == "ACTIVE":
+                    activeOther.append(game)
+                elif status == "FINISHED":
+                    finishedOther.append(game)
 
-                # --- Win Calculation (0 Hits because of prefetch) ---
-                winner_ids = []
-                if game.winner:
-                    if hasattr(game.winner, "all"):
-                        winner_ids = [w.id for w in game.winner.all()]
-                    else:
-                        winner_ids = [game.winner.id]
-
-                if status == "FINISHED":
-                    # General Stats Logic
-                    # Exclude SHADOW from general win stats as per your original Q
-                    has_shadow = any(
-                        p.username == "SHADOW" for p in game.allPlayers.all()
-                    )
-
-                    if not has_shadow:
-                        model_total_finished += 1
-                        if target_id in winner_ids:
-                            model_total_won += 1
-
-                        # Group by maxPlayers (2-6)
-                        if 2 <= game.maxPlayers <= 6:
-                            stats_by_size[game.maxPlayers][0] += 1
-                            if target_id in winner_ids:
-                                stats_by_size[game.maxPlayers][1] += 1
-
-                    # Joint Stats Logic
-                    if not is_self and is_joint:
-                        model_joint_finished += 1
-                        if req_user_id in winner_ids:
-                            model_joint_wins += 1
-
-                    # Fair Play Logic (Last Year)
-                    if int(game.latestUpdate) >= minus1year:
-                        finishedGamesLastYear += 1
-                        if any(p.id == target_id for p in game.kickedPlayers.all()):
-                            kickedOutGamesLastYear += 1
-
-                # --- Categorization for Lists ---
-                if not is_self:
-                    if is_joint:
-                        if status == "ACTIVE":
-                            activeJoint.append(game)
-                        elif status == "FINISHED":
-                            finishedJoint.append(game)
-                    else:
-                        if status == "ACTIVE":
-                            activeOther.append(game)
-                        elif status == "FINISHED":
-                            finishedOther.append(game)
-                else:
-                    if status == "ACTIVE":
-                        activeOther.append(game)
-                    elif status == "FINISHED":
-                        finishedOther.append(game)
 
         # Step 2: Post-Model Processing (Joint)
         if not is_self and model_joint_finished > 0:
@@ -3019,14 +2906,10 @@ def playerInfo(request, usernameToProfile):
 
 @login_required()
 def AllTournaments(request):
-    tournaments_HC = HC_Tournament.objects.order_by("-id").all()
     tournaments_MAIN = Main_Tournament.objects.order_by("-id").all()
 
     tournaments = sorted(
-        chain(
-            tournaments_HC,
             tournaments_MAIN,
-        ),
         key=lambda instance: instance.created,
     )
     tournaments.reverse()
@@ -3040,98 +2923,6 @@ def AllTournaments(request):
             "tournamentsJson": tournamentsJson,
         },
     )
-
-
-@login_required()
-def Tournament(request, gameType, tournamentID):
-    if request.method == "POST":
-        currentTournament = None
-        try:
-            if gameType == "HC":
-                currentTournament = HC_Tournament.objects.get(id=tournamentID)
-        except Exception:
-            raise Http404(gettext("Tournament does not exist"))
-        if (
-            currentTournament
-            and currentTournament.startingPlayers.count()
-            < currentTournament.maxTournamentPlayers
-        ):
-            currentTournament.startingPlayers.add(request.user)
-            currentTournament.save()
-            if (
-                currentTournament.startingPlayers.count()
-                == currentTournament.maxTournamentPlayers
-            ):
-                pass
-            messages.success(request, (gettext("You have joined the Tournament")))
-        else:
-            messages.error(request, gettext("The Tournament is already full"))
-        return HttpResponseRedirect(
-            reverse(
-                "Tournament",
-                kwargs={"gameType": gameType, "tournamentID": tournamentID},
-            )
-        )
-
-    currentTournament = None
-    try:
-        if gameType == "HC":
-            currentTournament = HC_Tournament.objects.get(id=tournamentID)
-    except Exception:
-        raise Http404(gettext("Tournament does not exist"))
-
-    if currentTournament and currentTournament.tournamentStatus == "OP":
-        openSlots = []
-        for i in range(
-            currentTournament.startingPlayers.count() + 1,
-            currentTournament.maxTournamentPlayers + 1,
-        ):
-            openSlots.append(str(i))
-        return render(
-            request,
-            "Lobby/Tournament.html",
-            {
-                "tournament": currentTournament,
-                "gameType": gameType,
-                "openSlots": openSlots,
-                "isSignedUp": currentTournament.isSignedUp(request.user),
-            },
-        )
-
-    if (
-        currentTournament
-        and currentTournament.tournamentStatus == "IP"
-        or currentTournament
-        and currentTournament.tournamentStatus == "FN"
-    ):
-        winnerHTML = ""
-        if currentTournament.tournamentStatus == "FN":
-            winnersData = json.loads(currentTournament.winnersData)
-            winnersData = winnersData[0]
-            winnerHTML = "Winner"
-            if len(winnersData) > 1:
-                winnerHTML += "s"
-            winnerHTML += ": "
-            for index, name in enumerate(winnersData):
-                winnerHTML += "<B>" + name + "</B>"
-                if index + 1 != len(winnersData):
-                    winnerHTML += ", "
-        tournamentProgressionDataArray = json.loads(
-            currentTournament.tournamentProgressionData
-        )
-        return render(
-            request,
-            "Lobby/Tournament.html",
-            {
-                "tournament": currentTournament,
-                "roundsHTML": currentTournament.getRoundsHTML(),
-                "TPDA": tournamentProgressionDataArray,
-                "winnerHTML": winnerHTML,
-                "gameType": gameType,
-            },
-        )
-
-    return render(request, "Lobby/Tournament.html")
 
 
 def joinGameLink(request, joinGameLink):

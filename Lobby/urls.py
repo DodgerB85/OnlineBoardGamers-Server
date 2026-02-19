@@ -107,31 +107,7 @@ urlpatterns = [
         views.TGZtournamentFixedSummer25,
         name="TGZtournamentFixedSummer25",
     ),
-    path(
-        "FCMtournament/<str:gameType>/<int:tournamentID>/",
-        views.Tournament,
-        name="Tournament",
-    ),
-    path(
-        "HCtournament/<str:gameType>/<int:tournamentID>/",
-        views.Tournament,
-        name="Tournament",
-    ),
-    path(
-        "Bustournament/<str:gameType>/<int:tournamentID>/",
-        views.Tournament,
-        name="Tournament",
-    ),
-    path(
-        "AQYtournament/<str:gameType>/<int:tournamentID>/",
-        views.Tournament,
-        name="Tournament",
-    ),
-    path(
-        "INDtournament/<str:gameType>/<int:tournamentID>/",
-        views.Tournament,
-        name="Tournament",
-    ),
+   
     path("MiniTournaments/", views.MiniTournaments, name="MiniTournaments"),
     path(
         "MiniTournament/<int:Mini_Tournament_id>/",

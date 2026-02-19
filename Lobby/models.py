@@ -523,15 +523,6 @@ class Game(BaseGame):
     FCMplayersMoveData = models.TextField(blank=True)
     FCMnotificationSuppression = models.CharField(max_length=30, blank=False, default="000000")
 
-    # HC-specific fields (temporary, for migration)
-    relatedHCTournament = models.ForeignKey(
-        'HC.HC_Tournament',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='hctournamentGEN_relName',
-    )
-
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)
 
@@ -590,6 +581,8 @@ class GamePlayer(models.Model):
     has_chat_notification = models.BooleanField(default=False)
 
     seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    moveDataJSON = models.JSONField(default=list, null=True, blank=True)
 
     # TODO, these two fields are currently used only in AQY. Remove from the Game model at some point.
     currentMoveTime = models.CharField(max_length=15, blank=True)
