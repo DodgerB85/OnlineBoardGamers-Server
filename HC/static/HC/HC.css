@@ -161,10 +161,17 @@ span.live {
 
 }
 
+#excludeDiv, #deleteDiv {
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	margin: auto;
+	width: 100%;
+}
+
 #dropdown input[type="submit"] {
 	text-align: center;
 	width: 200px;
-	margin-left: 100px;
 	font-weight: bolder;
 }
 
@@ -865,6 +872,7 @@ body.noassistance #assistancePlayers {
 	border: 2px solid green;
 	border-radius: 5px;
 	font-weight: bolder;
+	padding: 5px;
 }
 .actionsLineButton:hover {
     background-color: lightgrey;
@@ -1270,8 +1278,4 @@ body.noassistance #assistancePlayers {
 	height: 50px;
 	background-color: darkgray;
 	margin: 0px 10px 0px 10px;
-}
-
-.voteDeleteButton {
-	margin-left: 100px;
 }
