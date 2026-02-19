@@ -26,7 +26,6 @@ from Lobby.sharedFunctions.sharedRefs import (
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC, BLANK_MESSAGE_TEMPLATE
 
-### TEMP DELETE THIS LINE
 class GamePresenter:
     def __init__(self, gameObj):
         self.gameObj = gameObj
