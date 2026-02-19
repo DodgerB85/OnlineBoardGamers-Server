@@ -35,7 +35,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendBugReportEmail,
     SN_sendNextTurnNotification,
     SN_sendFactoryAlertNotification,
-    SN_sendAdminErrorMessage
+    SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
@@ -43,7 +43,8 @@ from django.utils.translation import gettext, get_language
 from django.utils import translation
 
 if TYPE_CHECKING:
-    from Lobby.presenters import HcPresenter 
+    from Lobby.presenters import HcPresenter
+
 
 def index(request):
     return HttpResponse("Hello Geeks")
@@ -52,7 +53,7 @@ def index(request):
 @login_required
 def HCgameSummary(request, game_id):
     try:
-        currentGame = Game.objects.get(id=game_id, gameCode='HC')
+        currentGame = Game.objects.get(id=game_id, gameCode="HC")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -69,6 +70,7 @@ def HCgameSummary(request, game_id):
 
 
 #################### API ##################
+
 
 @login_required()
 def createHCgame(request):
@@ -144,7 +146,7 @@ def createHCgame(request):
     _pace = request.POST["pace"]
 
     newGame = Game(
-        gameCode='HC',
+        gameCode="HC",
         gameName=_gameName,
         gameDescription=_gameDescription,
         creator=request.user,
@@ -155,10 +157,10 @@ def createHCgame(request):
         created=_created,
         latestUpdate=_created,
         playerOrderSeed=_player_order_seed,
-        startingOptions=json.dumps(_startingOptions, separators=(',', ':')),
+        startingOptions=json.dumps(_startingOptions, separators=(",", ":")),
         maxPlayers=_maxPlayers,
         gameStatus="AVAILABLE",
-        statsExcludedGame=statsExcludedGame
+        statsExcludedGame=statsExcludedGame,
     )
     newGame.save()
 
@@ -202,7 +204,7 @@ def createHCgame(request):
         if player0_gp:
             player0_gp.notes = displayNames
             player0_gp.save()
-        presenter = cast('HcPresenter', newGame.presenter())
+        presenter = cast("HcPresenter", newGame.presenter())
         presenter.startGame(request)
     else:
         usernamesToNotify = []
@@ -269,11 +271,11 @@ def _processHCturn(request):
     game_id = jsonData["gameID"]
 
     try:
-        currentGame = Game.objects.get(id=game_id, gameCode='HC')
+        currentGame = Game.objects.get(id=game_id, gameCode="HC")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('HcPresenter', currentGame.presenter())
+    presenter = cast("HcPresenter", currentGame.presenter())
 
     if jsonData["action"] == "turn0move":
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
@@ -355,9 +357,7 @@ def _processHCturn(request):
             safe=False,
         )
     elif jsonData["action"] == "saveFactoryWithoutEndingTurn":
-        presenter.saveFactoryWithoutEndingTurn(
-            request.user.username, jsonData["data"]
-        )
+        presenter.saveFactoryWithoutEndingTurn(request.user.username, jsonData["data"])
         return JsonResponse({"savedFac": True}, safe=False)
 
     elif jsonData["action"] == "saveFactoryMove":
@@ -536,9 +536,7 @@ def _processHCturn(request):
 
                 # end the first players turn
                 currentPlayersList.pop(0)
-                while (
-                    len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot"
-                ):
+                while len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot":
                     currentPlayersList.pop(0)
 
             else:
@@ -555,7 +553,7 @@ def _processHCturn(request):
         presenter.setCurrentPlayers(",".join(currentPlayersList))
 
         # It is ok for currentPlayersList to be 0 length here - then the JS should go to next phase
-        #if len(currentPlayersList) == 0:
+        # if len(currentPlayersList) == 0:
         #    message = (
         #        f"************ No players left in HC after processing factory - gameID: {game_id} - User: {request.user.username}  "
         #        f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
@@ -575,8 +573,16 @@ def _processHCturn(request):
 
         currentGame.save()
         if len(currentPlayersList) > 0:
+            # Send an alert, and set a "yout turn" indicator in the lobby
+            newNameCurrent = currentPlayersList[0]
+            seat = presenter.seatPosition(newNameCurrent)
+            gp = currentGame.players.filter(seat_order=seat).first()
+
+            if gp:
+                gp.currentMoveTime = "ILLEGALMOVE"  # "NODATASFWET"
+                gp.save()
             SN_sendFactoryAlertNotification(
-                request, currentPlayersList[0], jsonData["gameID"], currentGame
+                request, newNameCurrent, jsonData["gameID"], currentGame
             )
 
         return JsonResponse(
@@ -945,7 +951,9 @@ def _processHCturn(request):
 # def endGame(request, _winner, _finalScores, _gameID, currentGame):
 def endGame(request, _winner, _finalPositions, _gameID, currentGame):
     with db_mutex("endGame"):
-        return currentGame.presenter().endGame(request, _winner, _finalPositions, _gameID)
+        return currentGame.presenter().endGame(
+            request, _winner, _finalPositions, _gameID
+        )
 
 
 @login_required
@@ -953,15 +961,13 @@ def showHCgame(request, game_id):
     try:
         currentGame = (
             Game.objects.select_related("host", "relatedHCTournament")
-            .prefetch_related(
-                "players__player", "invitedPlayers"
-            )
-            .get(id=game_id, gameCode='HC')
+            .prefetch_related("players__player", "invitedPlayers")
+            .get(id=game_id, gameCode="HC")
         )
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('HcPresenter', currentGame.presenter())
+    presenter = cast("HcPresenter", currentGame.presenter())
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
@@ -977,8 +983,14 @@ def showHCgame(request, game_id):
     if request.user.is_authenticated:
         all_players_gps = list(currentGame.players.all().select_related("player"))
         all_player_ids = {gp.player.id for gp in all_players_gps if gp.player}
-        missing_player_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.is_missing}
-        chat_notify_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.has_chat_notification}
+        missing_player_ids = {
+            gp.player.id for gp in all_players_gps if gp.player and gp.is_missing
+        }
+        chat_notify_ids = {
+            gp.player.id
+            for gp in all_players_gps
+            if gp.player and gp.has_chat_notification
+        }
 
         userObj = request.user
         username = userObj.username
@@ -1051,14 +1063,14 @@ def showHCgame(request, game_id):
 
             preferredHCcolour = user_profile.preferredHCcolour
             liveNotification = user_profile.liveNotification
-            if presenter.hasMoveData(username):
+            if presenter.hasMoveData(username, True):
                 currentMove = (
                     '{"phase": '
                     + str(currentGame.phase)
                     + ',"turn": '
                     + str(currentGame.turn)
                     + ',"content": "'
-                    + presenter.hasMoveData(username)
+                    + presenter.getMoveData(username)
                     + '"}'
                 )
 
@@ -1072,7 +1084,10 @@ def showHCgame(request, game_id):
                 )
 
             # Get the Notes for the user
-            user_gp = next((gp for gp in all_players_gps if gp.player and gp.player.id == user_id), None)
+            user_gp = next(
+                (gp for gp in all_players_gps if gp.player and gp.player.id == user_id),
+                None,
+            )
             if user_gp:
                 currentNotes = user_gp.notes
 
@@ -1081,13 +1096,17 @@ def showHCgame(request, game_id):
 
             myMove = presenter.isMyMove(username)
             # myZoomLevel = currentGame.zoomLevels[pov*3:pov*3+3]
-            if currentGame.statsExcludeConsent is not None and pov < len(currentGame.statsExcludeConsent):
+            if currentGame.statsExcludeConsent is not None and pov < len(
+                currentGame.statsExcludeConsent
+            ):
                 myStatsExcludeConsent = currentGame.statsExcludeConsent[pov : pov + 1]
             else:
                 myStatsExcludeConsent = 0
 
             if "SHADOW" in presenter.getAllPlayersOrderedySeat():
-                player0_gp = next((gp for gp in all_players_gps if gp.seat_order == 0), None)
+                player0_gp = next(
+                    (gp for gp in all_players_gps if gp.seat_order == 0), None
+                )
                 if player0_gp:
                     displayNames = player0_gp.notes
                     player0_gp.notes = ""
@@ -1126,7 +1145,11 @@ def showHCgame(request, game_id):
                 "kickoutRequired": kickoutRequired,
                 "involvedPlayer": involvedPlayer,
                 "gameName": presenter.getGameName(),
-                "startingOptionsLiteral": json.loads(currentGame.startingOptions) if currentGame.startingOptions else [],
+                "startingOptionsLiteral": (
+                    json.loads(currentGame.startingOptions)
+                    if currentGame.startingOptions
+                    else []
+                ),
                 "gameID": getattr(currentGame, "id"),
                 "currentPlayers": currentPlayers,
                 "latestUpdateLiteral": currentGame.latestUpdate,
@@ -1179,7 +1202,11 @@ def showHCgame(request, game_id):
             "KickoutFlexiDataArray": KickoutFlexiDataArray,
             "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
             "settingsDebug": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
-            "startingOptionsLiteral": json.loads(currentGame.startingOptions) if currentGame.startingOptions else [],
+            "startingOptionsLiteral": (
+                json.loads(currentGame.startingOptions)
+                if currentGame.startingOptions
+                else []
+            ),
         },
     )
 
@@ -1194,7 +1221,7 @@ def bugEntry(request, game_id=None):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = Game.objects.get(id=gameID, gameCode='HC')
+        currentGame = Game.objects.get(id=gameID, gameCode="HC")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -1229,8 +1256,6 @@ def db_mutex(name, timeout=10):
         print("ERROR-HC: Not running, %s mutex not available" % (mutex_name))
 
 
-
-
 @login_required()
 def chat(request, game_id=None):
     if request.method != "POST":
@@ -1238,8 +1263,8 @@ def chat(request, game_id=None):
 
     jsonData = json.loads(request.body)
     if jsonData["action"] == "refreshChat":
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
-        presenter = cast('HcPresenter', currentGame.presenter())
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
+        presenter = cast("HcPresenter", currentGame.presenter())
         presenter.removeChatNotification(request.user)
         currentGame.save()
 
@@ -1265,10 +1290,14 @@ def chat(request, game_id=None):
         return JsonResponse({"error": "No messages found"}, status=404)
 
     if jsonData["action"] == "addMessage":
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
-        presenter = cast('HcPresenter', currentGame.presenter())
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
+        presenter = cast("HcPresenter", currentGame.presenter())
         # Add chat notifications for all players except current user
-        all_player_usernames = [gp.player.username for gp in currentGame.players.all().select_related("player") if gp.player]
+        all_player_usernames = [
+            gp.player.username
+            for gp in currentGame.players.all().select_related("player")
+            if gp.player
+        ]
         other_players = [u for u in all_player_usernames if u != request.user.username]
         presenter.addChatNotifications(other_players)
         currentGame.save()
@@ -1309,7 +1338,7 @@ def notes(request, game_id=None):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -1328,11 +1357,11 @@ def processHCrewindConsent(request, game_id=None):
 
     jsonData = json.loads(request.body)
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('HcPresenter', currentGame.presenter())
+    presenter = cast("HcPresenter", currentGame.presenter())
     presenter.setupRewindConsent()
 
     # Set current person to 1 pr 2.
@@ -1360,10 +1389,10 @@ def processHCstatsExcludeConsent(request, game_id=None):
         return JsonResponse({"error": "Wrong request."}, status=400)
     jsonData = json.loads(request.body)
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
     except Game.DoesNotExist:
         raise Http404("Game does not exist")
-    presenter = cast('HcPresenter', currentGame.presenter())
+    presenter = cast("HcPresenter", currentGame.presenter())
     presenter.enableStatsExclude(request.user.username)
     currentGame.save()
     return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
@@ -1387,11 +1416,11 @@ def _voteToDelete(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('HcPresenter', currentGame.presenter())
+    presenter = cast("HcPresenter", currentGame.presenter())
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
 
