@@ -9,6 +9,7 @@ import lzstring
 from random import randint
 
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
@@ -40,6 +41,8 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 from django.utils.translation import gettext, get_language
 from django.utils import translation
 
+if TYPE_CHECKING:
+    from Lobby.presenters import HcPresenter 
 
 def index(request):
     return HttpResponse("Hello Geeks")
@@ -198,7 +201,7 @@ def createHCgame(request):
         if player0_gp:
             player0_gp.notes = displayNames
             player0_gp.save()
-        presenter = newGame.presenter()
+        presenter = cast('HcPresenter', newGame.presenter())
         presenter.startGame(request)
     else:
         usernamesToNotify = []
@@ -269,7 +272,7 @@ def _processHCturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('HcPresenter', currentGame.presenter())
 
     if jsonData["action"] == "turn0move":
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
@@ -387,7 +390,7 @@ def _processHCturn(request):
 
         # CHECK IF WE CAN ACCEPT THE AVAILABLE COMPONENTS FROM THE PLAYER
         # if the player's name is at idx 0 of currnet players in game AND in DB
-        currentPlayers = presenter._getCurrentPlayersField()
+        currentPlayers = presenter.getCurrentPlayersInOrderString()
         currentPlayersList = currentPlayers.split(",")
         while len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot":
             currentPlayersList.pop(0)
@@ -436,7 +439,7 @@ def _processHCturn(request):
         currentGame.save()
 
         # Now process as many factories as possible
-        currentPlayers = presenter._getCurrentPlayersField()
+        currentPlayers = presenter.getCurrentPlayersInOrderString()
         currentPlayersList = currentPlayers.split(",")
         while len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot":
             currentPlayersList.pop(0)
@@ -461,7 +464,7 @@ def _processHCturn(request):
                 message = (
                     f"************ Max 'i' hit in HC - gameID: {game_id} - User: {request.user.username}  "
                     f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
-                    f"--- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
+                    f"--- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersInOrderString()}"
                 )
                 SN_sendAdminErrorMessage(request, message)
             if len(currentPlayersList) == 0:
@@ -579,7 +582,7 @@ def _processHCturn(request):
             {
                 "VFFFP": True,
                 "latestUpdate": currentGame.latestUpdate,
-                "currentPlayers": presenter._getCurrentPlayersField(),
+                "currentPlayers": presenter.getCurrentPlayersInOrderString(),
                 "gameData": currentGame.gameData,
             },
             safe=False,
@@ -957,7 +960,7 @@ def showHCgame(request, game_id):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('HcPresenter', currentGame.presenter())
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
@@ -1013,7 +1016,7 @@ def showHCgame(request, game_id):
         rewindHostHTML = ""
         rewindHostPossible = False
         currentRewindConsent = "0"
-        currentPlayers = presenter._getCurrentPlayersField()
+        currentPlayers = presenter.getCurrentPlayersInOrderString()
         # if currentPlayers == "":
         #    currentPlayers = presenter.getAllPlayersOrderedySeat()
         statsExcludedGame = currentGame.statsExcludedGame
@@ -1231,7 +1234,7 @@ def sendFactoryAlertNotification(request, player, gameID):
     try:
         profile = Profile.objects.get(user=user)
         currentGame = Game.objects.get(id=gameID, gameCode='HC')
-        presenter = currentGame.presenter()
+        presenter = cast('HcPresenter', currentGame.presenter())
 
         originalLang = get_language()
         translation.activate(profile.profileLanguage)
@@ -1311,7 +1314,7 @@ def chat(request, game_id=None):
     jsonData = json.loads(request.body)
     if jsonData["action"] == "refreshChat":
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
-        presenter = currentGame.presenter()
+        presenter = cast('HcPresenter', currentGame.presenter())
         presenter.removeChatNotification(request.user)
         currentGame.save()
 
@@ -1338,7 +1341,7 @@ def chat(request, game_id=None):
 
     if jsonData["action"] == "addMessage":
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
-        presenter = currentGame.presenter()
+        presenter = cast('HcPresenter', currentGame.presenter())
         # Add chat notifications for all players except current user
         all_player_usernames = [gp.player.username for gp in currentGame.players.all().select_related("player") if gp.player]
         other_players = [u for u in all_player_usernames if u != request.user.username]
@@ -1404,7 +1407,7 @@ def processHCrewindConsent(request, game_id=None):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('HcPresenter', currentGame.presenter())
     presenter.setupRewindConsent()
 
     # Set current person to 1 pr 2.
@@ -1435,7 +1438,7 @@ def processHCstatsExcludeConsent(request, game_id=None):
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
     except Game.DoesNotExist:
         raise Http404("Game does not exist")
-    presenter = currentGame.presenter()
+    presenter = cast('HcPresenter', currentGame.presenter())
     presenter.enableStatsExclude(request.user.username)
     currentGame.save()
     return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
@@ -1463,7 +1466,7 @@ def _voteToDelete(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('HcPresenter', currentGame.presenter())
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
 

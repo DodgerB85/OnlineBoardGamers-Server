@@ -518,6 +518,13 @@ class Game(BaseGame):
         blank=True,
         related_name="minitournamentGEN_relName",
     )
+    
+    currentPlayersInTurnOrder = models.CharField(
+        max_length=150, 
+        blank=True, 
+        null=True, 
+        default=None
+    )
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
