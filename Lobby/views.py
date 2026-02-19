@@ -2368,7 +2368,7 @@ def createWEBpage(request, gameID=0):
             "Lobby/createWEB.html",
             {
                 "fillData": True,
-                "gameName": currentGame.getGameName(),
+                "gameName": currentGame.presenter().getGameName(),
                 "gameDescription": currentGame.gameDescription,
                 "gamePace": currentGame.gamePace,
                 "playerNumber": currentGame.maxPlayers,
@@ -2410,7 +2410,7 @@ def createRNBpage(request, gameID=0):
             "Lobby/createRNB.html",
             {
                 "fillData": True,
-                "gameName": currentGame.getGameName(),
+                "gameName": currentGame.presenter().getGameName(),
                 "gameDescription": currentGame.gameDescription,
                 "gamePace": currentGame.gamePace,
                 "playerNumber": currentGame.maxPlayers,
