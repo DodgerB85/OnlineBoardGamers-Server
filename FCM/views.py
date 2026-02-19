@@ -604,8 +604,10 @@ def _processTurn(request):
 
         # Update current players
         currentPlayersArr = presenter.getCurrentPlayersArray()
+        print(currentPlayersArr)
         if request.user.username not in currentPlayersArr:
-            presenter.setCurrentPlayersFromArr(currentPlayersArr.append(request.user.username))
+            currentPlayersArr.append(request.user.username) # This updates the list directly
+            presenter.setCurrentPlayersFromArr(currentPlayersArr)
         currentGame.save()
         return JsonResponse({"unlockStatus": True}, safe=False)
 
