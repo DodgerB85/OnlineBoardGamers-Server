@@ -220,7 +220,8 @@ class GameAdmin(admin.ModelAdmin):
     def game_name(self, obj):
         # assuming you have a field or property called gameName
         # if you have a method getGameName already, just rename it:
-        return obj.gameName or obj.getGameName()
+        presenter = obj.presenter()
+        return presenter.getGameName()
 
     # @admin.display(description='Status')
     # def status(self, obj):

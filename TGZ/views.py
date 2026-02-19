@@ -1301,28 +1301,6 @@ def TGZstatGames(request):
     # Sort by latestUpdate
     finishedGames.sort(key=lambda x: x.latestUpdate, reverse=True)
 
-    #    def serializeLocal(game):
-    #        winner = game.winner.username if game.winner else None  # Handle cases where there is no winner
-    #
-    #        latestUpdateString = str(game.latestUpdate)
-    #
-    #        latestUpdateElapsedTimeString = ""  # You can calculate this if needed
-    #
-    #        # startingOptionsHTML = SR_getTGZstartingOptionsHTML(game.startingOptions)
-    #
-    #        return {
-    #            "gameID": game.id,
-    #            "gameName": game.getGameName(),
-    #            # "creator": game.creator.username,
-    #            "allPlayers": [user.username for user in game.allPlayers.all()],
-    #            "currentTurn": game.currentTurnString(),
-    #            "latestUpdate": latestUpdateString,
-    #            "startingOptions": "",
-    #            "maxPlayers": game.maxPlayers,
-    #            "winner": winner,  # Used for Finished Games
-    #            "game": "TGZ",
-    #        }
-
     # Serialize ONLY the games for the current page
     finishedGamesListJson = [
         SF_fastSerializeGame(game, request.user) for game in finishedGames
