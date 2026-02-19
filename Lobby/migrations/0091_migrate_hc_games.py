@@ -6,7 +6,7 @@ def migrate_hc_games(apps, schema_editor):
     Game = apps.get_model('Lobby', 'Game')
     GamePlayer = apps.get_model('Lobby', 'GamePlayer')
 
-    print(f"\nMigrating {HC_Game.objects.all().count()} IND games to unified Game model...")
+    print(f"\nMigrating {HC_Game.objects.all().count()} HC games to unified Game model...")
 
     migrated_count = 0
 
@@ -132,7 +132,7 @@ def reverse_migration(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Lobby', '0084_game_relatedhctournament'),
+        ('Lobby', '0090_game_relatedhctournament'),
         ('HC', '0047_hc_game_automoves'),
     ]
 

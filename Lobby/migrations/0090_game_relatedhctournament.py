@@ -7,8 +7,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('HC', '0048_hcgame'),
-        ('Lobby', '0083_remove_game_relatedfcmtournament'),
+        ('HC', '0049_hcgame'),
+        ('Lobby', '0089_alter_changelog_timestamp_and_more'),
     ]
 
     operations = [
