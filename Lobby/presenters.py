@@ -1447,51 +1447,7 @@ class IndPresenter(GamePresenter):
         )
         return len(playersPreMoveDataArr[arrIdx][3]) > 0
 
-    def getDeleteVotesData(self):
-        """Get the delete votes data for the game"""
-        if self.gameObj.gameStatus == "FINISHED":
-            all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-                "player"
-            )
-            return {gp.player.username: False for gp in all_players if gp.player}
-
-        if self.gameObj.deleteGameVotes is None:
-            all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-                "player"
-            )
-            self.gameObj.deleteGameVotes = {
-                gp.player.username: False for gp in all_players if gp.player
-            }
-            self.gameObj.save()
-
-        return self.gameObj.deleteGameVotes
-
-    def addDeleteVote(self, playerName):
-        """Add a delete vote for a player"""
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        player_usernames = [gp.player.username for gp in all_players if gp.player]
-
-        if playerName not in player_usernames:
-            return False
-
-        if self.gameObj.deleteGameVotes is None:
-            self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        if playerName not in self.gameObj.deleteGameVotes:
-            self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        self.gameObj.deleteGameVotes[playerName] = True
-        self.gameObj.save()
-        return True
-
+ 
 
 class BusPresenter(GamePresenter):
     def __str__(self):
@@ -1727,50 +1683,7 @@ class BusPresenter(GamePresenter):
     def getGameCode(self):
         return "Bus"
 
-    def getDeleteVotesData(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        player_usernames = [gp.player.username for gp in all_players if gp.player]
-
-        if self.gameObj.gameStatus == "FINISHED":
-            return {username: False for username in player_usernames}
-
-        if self.gameObj.deleteGameVotes is None:
-            self.gameObj.deleteGameVotes = {username: False for username in player_usernames}
-            self.gameObj.save()
-
-        return self.gameObj.deleteGameVotes
-
-    def addDeleteVote(self, playerName):
-        """Records the vote of a player."""
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        player_usernames = [gp.player.username for gp in all_players if gp.player]
-
-        # Double check player is in the game
-        if playerName not in player_usernames:
-            return False  # Player not in the game
-
-        # Ensure deleteGameVotes is a dictionary
-        if self.gameObj.deleteGameVotes is None:
-            self.gameObj.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        # If the playerName isn't found, wipe the votes and make sure all players are added
-        if playerName not in self.gameObj.deleteGameVotes:
-            self.gameObj.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        # Add the vote
-        self.gameObj.deleteGameVotes[playerName] = True
-        self.gameObj.save()
-        return True
+ 
 
 class RnbPresenter(GamePresenter):
     def __str__(self):

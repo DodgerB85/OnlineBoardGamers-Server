@@ -19,5 +19,6 @@ urlpatterns = [
     path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
     path("saveNotes/", views.saveNotes, name="saveNotes"),
     path("changeBusViewport/", views.changeBusViewport, name="changeBusViewport"),
-    path("voteToDelete/", views.voteToDelete, name="addDeleteVoteBus"),
+        path("castVote/", views.castVote, name="castVoteWEB"),
+
 ]
