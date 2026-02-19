@@ -28,6 +28,8 @@ from Lobby.models import User, Profile, Game, GamePlayer
 
 from .common import create_bus_game
 
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
@@ -46,6 +48,7 @@ if TYPE_CHECKING:
 
 BUS_DB_LOCK_NAME = "lockTGZgame_"
 
+
 def index(request):
     return HttpResponse("Hello Geeks")
 
@@ -56,8 +59,8 @@ def BusHelp(request):
 
 def redirect_old_url(request, original_id):
     """Redirect old Bus_Game URLs to new unified Game URLs"""
-    game = get_object_or_404(Game, gameCode='Bus', original_id=original_id)
-    return redirect('Bus:showBusGame', game_id=game.id)
+    game = get_object_or_404(Game, gameCode="Bus", original_id=original_id)
+    return redirect("Bus:showBusGame", game_id=game.id)
 
 
 @login_required()
@@ -127,7 +130,7 @@ def createBusGame(request):
     _pace = request.POST["pace"]
 
     newGame = Game(
-        gameCode='Bus',
+        gameCode="Bus",
         gameName=_gameName,
         gameDescription=_gameDescription,
         creator=request.user,
@@ -246,13 +249,11 @@ def showBusGame(request, game_id):
         currentGame = (
             Game.objects.select_related(
                 "host",
-                #"relatedBusTournament",
+                # "relatedBusTournament",
                 "creator",
             )
-            .prefetch_related(
-                "players__player", "invitedPlayers"
-            )
-            .get(id=game_id, gameCode='Bus')
+            .prefetch_related("players__player", "invitedPlayers")
+            .get(id=game_id, gameCode="Bus")
         )
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
@@ -279,7 +280,9 @@ def showBusGame(request, game_id):
     if currentGame.kickoutFlexiData:
         KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
 
-    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    startingOptions = (
+        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    )
 
     returnData = {
         "gameID": gameID,
@@ -288,9 +291,18 @@ def showBusGame(request, game_id):
         "gameCreationTimestamp": gameCreationTimestamp,
         "myZoomLevel": 120,
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
         "startingOptions": startingOptions,
         "settingsDEBUG": config("BUS_USE_SOURCE_CODE", default=False, cast=bool),
+        "statsExcludeVotesData": json.dumps(
+            currentGame.presenter().getFullSetOfVoteResults(
+                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
+            )
+        ),
+        "deleteVotesData": json.dumps(
+            currentGame.presenter().getFullSetOfVoteResults(
+                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
+            )
+        ),
     }
 
     if not request.user.is_authenticated:
@@ -356,7 +368,11 @@ def showBusGame(request, game_id):
 
     liveNotification = user_profile.liveNotification
 
-    myZoomLevel = json.loads(currentGame.zoomLevels)[pov] if pov >= 0 and pov < len(json.loads(currentGame.zoomLevels)) else 120
+    myZoomLevel = (
+        json.loads(currentGame.zoomLevels)[pov]
+        if pov >= 0 and pov < len(json.loads(currentGame.zoomLevels))
+        else 120
+    )
 
     # Involved Player
     returnData.update(
@@ -407,7 +423,7 @@ def saveNotes(request, game_id=None):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='Bus')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -431,7 +447,7 @@ def busData(request, dataType):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='Bus')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -498,7 +514,7 @@ def _sendChatMessage(request):
     jsonData = json.loads(request.body)
 
     if jsonData["action"] == "sendChatMessage":
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='Bus')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
         presenter = cast("BusPresenter", currentGame.presenter())
 
         # Remove chat notification for current user
@@ -524,7 +540,13 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        all_usernames = [gp.player.username for gp in currentGame.players.exclude(is_kicked=True).select_related('player') if gp.player]
+        all_usernames = [
+            gp.player.username
+            for gp in currentGame.players.exclude(is_kicked=True).select_related(
+                "player"
+            )
+            if gp.player
+        ]
         usernames_to_notify = [u for u in all_usernames if u != request.user.username]
         presenter.addChatNotifications(usernames_to_notify)
 
@@ -556,7 +578,7 @@ def _processBusTurn(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='Bus')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -623,19 +645,27 @@ def _processBusTurn(request):
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
-                jsonData.get("tournamentData") if jsonData.get("tournamentData") else [],
+                (
+                    jsonData.get("tournamentData")
+                    if jsonData.get("tournamentData")
+                    else []
+                ),
                 jsonData["gameID"],
             )
-            #presenter.endGame(
+            # presenter.endGame(
             #    request,
             #    jsonData["winner"],
             #    jsonData["finalPositions"],
             #    jsonData["gameID"],
-            #)
+            # )
 
         else:
             # Send Notifications
-            starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            starting_options = (
+                json.loads(currentGame.startingOptions)
+                if currentGame.startingOptions
+                else []
+            )
             if (
                 jsonData["nextPlayer"] != ""
                 and jsonData["nextPlayer"] != "HcBot"
@@ -776,7 +806,11 @@ def _processBusTurn(request):
         currentGame.save()
 
         # Send Notifications
-        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        starting_options = (
+            json.loads(currentGame.startingOptions)
+            if currentGame.startingOptions
+            else []
+        )
         if (
             jsonData["nextPlayer"] != ""
             and jsonData["nextPlayer"] != "HcBot"
@@ -872,7 +906,7 @@ def changeBusViewport(request):
 
     elif jsonData["action"] == "zoom":
         try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='Bus')
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         zoomLevels = json.loads(currentGame.zoomLevels)
@@ -901,7 +935,7 @@ def bugEntry(request):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = Game.objects.get(id=gameID, gameCode='Bus')
+        currentGame = Game.objects.get(id=gameID, gameCode="Bus")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -917,62 +951,37 @@ def bugEntry(request):
 
 
 @login_required()
-def voteToDelete(request):
+def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockBusgame_" + str(gameID)):
-        return _voteToDelete(request)
+    with db_mutex(str(gameID)):
+        return _castVote(request)
 
 
 @login_required
-def _voteToDelete(request):
+def _castVote(request):
     """Adds a delete vote for a player."""
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='Bus')
+        currentGame = Game.objects.get(id=jsonData["gameID"])
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("BusPresenter", currentGame.presenter())
-    playerName = request.user.username  # Get the player's username
+    # Delegate all logic to the presenter
+    result = currentGame.presenter().processVoteLogic(
+        topic=jsonData["topic"],
+        username=request.user.username,
+        choice=True,
+    )
 
-    success = presenter.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
+    # If an action occurred that requires a user message, add it here
+    msg = result.get("message")
+    if isinstance(msg, str):  # This clarifies the type for the type checker
+        messages.success(request, msg)
 
-    if success:
-        # Check if all players have voted to delete
-        all_voted = True
-        delete_votes_data = presenter.getDeleteVotesData()
-        missingPlayers = presenter.getMissingPlayersNamesArray()
-        for player, vote in delete_votes_data.items():
-            if not vote and player not in missingPlayers:
-                all_voted = False
-                break
-
-        if all_voted:
-            # Delete the game
-            currentGame.delete()
-            # Add a success message
-            messages.success(request, gettext("Game successfully deleted"))
-            # Redirect to the index page
-            return JsonResponse(
-                {
-                    "voteChanged": True,
-                    "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
-                    "redirect_url": reverse("index"),
-                }
-            )
-
-        return JsonResponse(
-            {
-                "voteChanged": True,
-                "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
-            },
-            safe=False,
-        )
-
-    return JsonResponse({"voteChanged": False})
+    return JsonResponse(result)

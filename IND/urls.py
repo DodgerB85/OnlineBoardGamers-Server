@@ -36,6 +36,6 @@ urlpatterns = [
     path("forkINDgame/", views.forkINDgame, name="forkINDgame"),
     path('data/<int:dataType>/', views.INDdata, name='INDdata'),
     path("saveZoom/", views.saveZoom, name="saveZoom"),
-    path("voteToDelete/", views.voteToDelete, name="addDeleteVoteIND"),
+    path("castVote/", views.castVote, name="castVoteCNS"),
 
 ]

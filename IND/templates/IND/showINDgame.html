@@ -5,7 +5,6 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <meta name="title" content="Online Board Gamers - Indonesia">
     <meta name="description"
           content="Play Splotter's Indonesia Online for free with others, or solo!">
@@ -16,8 +15,9 @@
     <meta name="language" content="English">
     <meta name="revisit-after" content="200 days">
     <meta name="author" content="Online Board Gamers">
-
-    <link rel="icon" type="image/png" href="{% static 'IND/images/ind_icon.png' %}" />
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'IND/images/ind_icon.png' %}" />
     <title>OBG - {{ gameName }}</title>
     <style>
     body {
@@ -146,10 +146,12 @@
   initData.playerNames = {{ allPlayerListBySeat | safe }};
   initData.currentPlayers = '{{ currentPlayers }}'
   initData.preferredINDoptions = {{ preferredINDoptions }};
-  initData.deleteVotesData = {{ deleteVotesData | safe }};
   initData.pov = {{ pov }};
   initData.preMoves = "{{ preMoves }}";
   initData.sideData = "{{ sideData|safe }}";
+
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+  initData.deleteVotesData = {{ deleteVotesData | safe }};
 
   {% if finishedGame %}
   initData.finishedGame = true

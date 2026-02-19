@@ -94,8 +94,10 @@
     initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
     initData.myZoomLevel = {{ myZoomLevel}};
     initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
-    initData.deleteVotesData = {{ deleteVotesData | safe }};
     initData.startingOptions = {{startingOptions}};
+
+    initData.deleteVotesData = {{ deleteVotesData | safe }};
+    initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
 
     ///////////////////////
     {% if user.is_authenticated %}

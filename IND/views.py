@@ -33,6 +33,8 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
+from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
+
 if TYPE_CHECKING:
     from Lobby.presenters import IndPresenter
 
@@ -293,10 +295,19 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredINDoptions": [-1, 0, 0, 1, 1, 1],
         "pov": -99,
-        "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
         "preMoves": "",
         "sideData": "",
         "settingsDEBUG": config("IND_USE_SOURCE_CODE", default=False, cast=bool),
+        "statsExcludeVotesData": json.dumps(
+            presenter.getFullSetOfVoteResults(
+                STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
+            )
+        ),
+        "deleteVotesData": json.dumps(
+            presenter.getFullSetOfVoteResults(
+                DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
+            )
+        ),
     }
 
     # print_timestamp("returnData 1")
@@ -639,9 +650,6 @@ def _processINDturn(request):
             _missingPlayer_gp.is_missing = True
             _missingPlayer_gp.save()
         presenter.checkForHostChange(_missingPlayer)
-        success = presenter.addDeleteVote(
-            _missingPlayer.username
-        )  # Pass playerName to addDeleteVote
         # presenter.enableStatsExclude(request.user.username)
 
         # newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -795,9 +803,6 @@ def _processINDturn(request):
             _missingPlayer_gp.is_kicked = True
             _missingPlayer_gp.save()
         presenter.checkForHostChange(_missingPlayer)
-        success = presenter.addDeleteVote(
-            _missingPlayer.username
-        )  # Pass playerName to addDeleteVote
         # presenter.enableStatsExclude(_missingPlayer.username)
 
         # Clears data and saves record - DONT DELETE FAC MOVES
@@ -1110,63 +1115,41 @@ def forkINDgame(request):
     return JsonResponse({"response": "ok", "newID": newGame.id})
 
 
+
 @login_required()
-def voteToDelete(request):
+def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockINDgame_" + str(gameID)):
-        return _voteToDelete(request)
+    with db_mutex(str(gameID)):
+        return _castVote(request)
 
 
 @login_required
-def _voteToDelete(request):
+def _castVote(request):
     """Adds a delete vote for a player."""
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="IND")
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='IND')
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("IndPresenter", currentGame.presenter())
-    playerName = request.user.username  # Get the player's username
+    presenter = cast('IndPresenter', currentGame.presenter())
 
-    success = presenter.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
+    # Delegate all logic to the presenter
+    result = presenter.processVoteLogic(
+        topic=jsonData["topic"],
+        username=request.user.username,
+        choice=True,
+    )
 
-    if success:
-        # Check if all players have voted to delete
-        all_voted = True
-        delete_votes_data = presenter.getDeleteVotesData()
-        missingPlayers = presenter.getMissingPlayersNamesArray()
-        for player, vote in delete_votes_data.items():
-            if not vote and player not in missingPlayers:
-                all_voted = False
-                break
+    # If an action occurred that requires a user message, add it here
+    msg = result.get("message")
+    if isinstance(msg, str):  # This clarifies the type for the type checker
+        messages.success(request, msg)
 
-        if all_voted:
-            # Delete the game
-            currentGame.delete()
-            # Add a success message
-            messages.success(request, gettext("Game successfully deleted"))
-            # Redirect to the index page
-            return JsonResponse(
-                {
-                    "voteChanged": True,
-                    "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
-                    "redirect_url": reverse("index"),
-                }
-            )
-
-        return JsonResponse(
-            {
-                "voteChanged": True,
-                "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
-            },
-            safe=False,
-        )
-
-    return JsonResponse({"voteChanged": False})
+    return JsonResponse(result)
