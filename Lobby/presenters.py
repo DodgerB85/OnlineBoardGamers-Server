@@ -65,7 +65,7 @@ class GamePresenter:
         )
 
         if not current_players.exists():
-            SN_sendAdminErrorMessage(None, f"*****************************************************************************quickIsMyMove: no current players - gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id}")
+            SN_sendAdminErrorMessage(None, f"*****************************************************************************quickIsMyMove: no current players - gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id} - loggedInPlayerUsername: {loggedInPlayerUsername}")
             return True
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
