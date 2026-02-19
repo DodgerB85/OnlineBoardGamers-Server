@@ -44,7 +44,6 @@ class User(AbstractUser):
         activeString = "" if self.is_active else " :A NOT AN ACTIVE USER"
         return f"{self.username} {activeString}"
 
-
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     sendEmailNotificationOnTurn = models.BooleanField(default=True)
@@ -114,15 +113,10 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
-
-def get_default_timestamp():
-    return str(int(time.time()) * 1000)
-
-
 class changelog(models.Model):
     update = models.CharField(max_length=120)
     timestamp = models.CharField(
-        max_length=30, blank=False, default=get_default_timestamp, db_index=True
+        max_length=30, blank=False, default=SR_getTimeNow, db_index=True
     )
 
     def __str__(self):
@@ -132,20 +126,9 @@ class changelog(models.Model):
 class Main_Tournament(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
 
-    MAIN_TOURNAMENT_GAME_CHOICES = [
-        ("FCM", gettext_lazy("Food Chain Magnate")),
-        ("HC", gettext_lazy("Horseless Carriage")),
-        ("Bus", gettext_lazy("Bus")),
-        ("TGZ", gettext_lazy("The Great Zimbabwe")),
-        ("CNS", gettext_lazy("Cannes")),
-        ("AQY", gettext_lazy("Antiquity")),
-        ("IND", gettext_lazy("Indonesia")),
-        ("KFW", gettext_lazy("Keyflower")),
-    ]
-
     gameCode = models.CharField(
         max_length=3,
-        choices=MAIN_TOURNAMENT_GAME_CHOICES,
+        choices=SR_GAMES_CODES_AND_NAMES_CHOICES,
         default="FCM",
     )
 
@@ -404,6 +387,7 @@ class BaseGame(models.Model):
     chatData = models.TextField(blank=True)
 
     gameData = models.TextField(blank=True)
+    gameDataBLOB = models.BinaryField(null=True, blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -525,6 +509,9 @@ class Game(BaseGame):
         null=True, 
         default=None
     )
+    
+    # CURRENTLY RnB ONLY
+    serverRemainingPlayerOrderByNames = models.JSONField(default=list, blank=True)
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
@@ -579,22 +566,8 @@ class Game(BaseGame):
         return self.gameCode
 
     ############### THESE NEED TO BE HERE FORE NOW TO STOP THINGS BREAKING
-    def currentTurnString(self):
-        return SR_currentTurnString(self.gameCode, self.turn, self.phase)
-
-    #def currentPlayers(self):
-    #    return SR_currentPlayers(self.gameCode, self.turn, self.phase)
-
-    # Add this while not every game has a preseneter - DELETE WHEN ALL GAMES HAVE A PRESENTER
-    def getGameName(self):
-        # Use fields already on the model. DO NOT call .all() or .count() here.
-        name = (
-            self.gameName
-            or f"{getattr(self.creator, 'username', 'Unknown')}'s Game"
-        )
-        if self.gameStatus == "PRIVATE":
-            name += " [Private]"
-        return name
+    #def currentTurnString(self):
+    #    return SR_currentTurnString(self.gameCode, self.turn, self.phase)
 
 class GamePlayer(models.Model):
     game = models.ForeignKey(
@@ -618,7 +591,7 @@ class GamePlayer(models.Model):
 
     seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
 
-    # TODO, these two fields are currently used only in AQY and HC. Remove from the Game model at some point.
+    # TODO, these two fields are currently used only in AQY. Remove from the Game model at some point.
     currentMoveTime = models.CharField(max_length=15, blank=True)
     currentMoveData = models.TextField(blank=True)
 

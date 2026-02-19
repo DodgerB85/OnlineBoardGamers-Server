@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='changelog',
             name='timestamp',
-            field=models.CharField(db_index=True, default=Lobby.models.get_default_timestamp, max_length=30),
+            field=models.CharField(db_index=True, default="TEMP_PLACEHOLDER", max_length=30),
         ),
     ]

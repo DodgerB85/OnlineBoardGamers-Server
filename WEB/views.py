@@ -968,7 +968,7 @@ def _sendChatMessage(request):
 
 
 @login_required()
-def saveNotes(request):
+def saveNotesWEB(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -980,17 +980,10 @@ def saveNotes(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
-
-    seat_position = presenter.seatPosition(request.user.username)
-
-    if seat_position in range(4):
-        player_notes_field = f"player{seat_position}notes"
-        setattr(currentGame, player_notes_field, notes)
-        currentGame.save()
+    # This directly saves the notes
+    currentGame.players.filter(player=request.user).update(notes=notes)
 
     return JsonResponse({"notePosted": True})
-
 
 @login_required
 def saveZoom(request):
