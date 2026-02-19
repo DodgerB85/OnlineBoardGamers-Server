@@ -26,18 +26,9 @@ urlpatterns = [
     # API Routes
     path("createHCgame/", views.createHCgame, name="createHCgame"),
     path("processHCturn/", views.processHCturn, name="processHCturn"),
-    path("<int:game_id>/processHCturn/", views.processHCturn, name="processHCturnWithId"),
     path("bugEntry/", views.bugEntry, name="bugEntry"),
-    path("<int:game_id>/bugEntry/", views.bugEntry, name="bugEntryWithId"),
     path("chat/", views.chat, name="chat"),
-    path("<int:game_id>/chat/", views.chat, name="chatWithId"),
     path("notes/", views.notes, name="notes"),
-    path("<int:game_id>/notes/", views.notes, name="notesWithId"),
-    path("processHCrewindConsent/", views.processHCrewindConsent, name="processHCrewindConsent"),
-    path("<int:game_id>/processHCrewindConsent/", views.processHCrewindConsent, name="processHCrewindConsentWithId"),
-    path("processHCstatsExcludeConsent/", views.processHCstatsExcludeConsent, name="processHCstatsExcludeConsent"),
-    path("<int:game_id>/processHCstatsExcludeConsent/", views.processHCstatsExcludeConsent, name="processHCstatsExcludeConsentWithId"),
-    path("voteToDelete/", views.voteToDelete, name="addDeleteVoteHC"),
-    path("<int:game_id>/voteToDelete/", views.voteToDelete, name="addDeleteVoteHCWithId"),
+    path("castVote/", views.castVote, name="castVoteCNS"),
 
 ]

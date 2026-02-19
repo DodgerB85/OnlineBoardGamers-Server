@@ -26,6 +26,12 @@ from django.db import connection
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
+from Lobby.sharedFunctions.constants import (
+    STATS_EXCLUDE_VOTE_TOPIC,
+    DELETE_VOTE_TOPIC,
+    REWIND_CONSENT_VOTE_TOPIC,
+)
+
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
     SF_getGameCreationJsonReturn,
@@ -250,7 +256,7 @@ def createHCgame(request):
         )
 
 
-def processHCturn(request, game_id=None):
+def processHCturn(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -1169,8 +1175,21 @@ def showHCgame(request, game_id):
                 "displayNames": displayNames,
                 "nextURL": nextURL,
                 "KickoutFlexiDataArray": KickoutFlexiDataArray,
-                "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
                 "settingsDebug": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
+                "statsExcludeVotesData": json.dumps(
+                    presenter.getFullSetOfVoteResults(
+                        STATS_EXCLUDE_VOTE_TOPIC,
+                        presenter.getAllPlayersOrderedySeat(True),
+                        False,
+                    )
+                ),
+                "deleteVotesData": json.dumps(
+                    presenter.getFullSetOfVoteResults(
+                        DELETE_VOTE_TOPIC,
+                        presenter.getAllPlayersOrderedySeat(True),
+                        False,
+                    )
+                ),
             },
         )
 
@@ -1207,12 +1226,26 @@ def showHCgame(request, game_id):
                 if currentGame.startingOptions
                 else []
             ),
+            "statsExcludeVotesData": json.dumps(
+                presenter.getFullSetOfVoteResults(
+                    STATS_EXCLUDE_VOTE_TOPIC,
+                    presenter.getAllPlayersOrderedySeat(True),
+                    False,
+                )
+            ),
+            "deleteVotesData": json.dumps(
+                presenter.getFullSetOfVoteResults(
+                    DELETE_VOTE_TOPIC,
+                    presenter.getAllPlayersOrderedySeat(True),
+                    False,
+                )
+            ),
         },
     )
 
 
 @login_required()
-def bugEntry(request, game_id=None):
+def bugEntry(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -1257,7 +1290,7 @@ def db_mutex(name, timeout=10):
 
 
 @login_required()
-def chat(request, game_id=None):
+def chat(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -1331,7 +1364,7 @@ def chat(request, game_id=None):
 
 
 @login_required()
-def notes(request, game_id=None):
+def notes(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -1350,102 +1383,77 @@ def notes(request, game_id=None):
     return JsonResponse({"notePosted": True})
 
 
-@login_required
-def processHCrewindConsent(request, game_id=None):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-
-    jsonData = json.loads(request.body)
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    presenter = cast("HcPresenter", currentGame.presenter())
-    presenter.setupRewindConsent()
-
-    # Set current person to 1 pr 2.
-    seatToChange = jsonData["playerNumber"]
-    all_players = presenter.getAllPlayersOrderedySeat(True)
-    if seatToChange < len(all_players):
-        username_to_change = all_players[seatToChange]
-        presenter.castVote(
-            "rewind_consent",
-            username_to_change,
-            int(jsonData["consentLevel"]),
-        )
-        currentGame.save()
-
-    return JsonResponse(
-        {
-            "newPermission": jsonData["consentLevel"],
-        }
-    )
-
-
-@login_required
-def processHCstatsExcludeConsent(request, game_id=None):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-    jsonData = json.loads(request.body)
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
-    except Game.DoesNotExist:
-        raise Http404("Game does not exist")
-    presenter = cast("HcPresenter", currentGame.presenter())
-    presenter.enableStatsExclude(request.user.username)
-    currentGame.save()
-    return JsonResponse({"statsExcludedGame": currentGame.statsExcludedGame})
-
-
 @login_required()
-def voteToDelete(request, game_id=None):
+def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("lockHCgame_" + str(gameID)):
-        return _voteToDelete(request)
+    with db_mutex(str(gameID)):
+        return _castVote(request)
 
 
+# ALTER THIS ONCE FCM IS A GENERAL GAME -- COMPARE WITH EG CNS _CASEVOTE
 @login_required
-def _voteToDelete(request):
+def _castVote(request):
     """Adds a delete vote for a player."""
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("HcPresenter", currentGame.presenter())
+    presenter = cast('HcPresenter', currentGame.presenter())
+
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username
+    topic = jsonData["topic"]
+    choice = jsonData["choice"]
 
-    success = presenter.addDeleteVote(playerName)  # Pass playerName to addDeleteVote
+    success = presenter.castVote(
+        topic, playerName, choice
+    )  # Pass playerName to addDeleteVote
 
     if success:
+        currentGame.save()
         # Check if all players have voted to delete
         all_voted = True
-        delete_votes_data = presenter.getDeleteVotesData()
+        votesData = presenter.getFullSetOfVoteResults(
+            topic, presenter.getAllPlayersOrderedySeat(True), False
+        )
+
         missingPlayers = presenter.getMissingPlayersNamesArray()
-        for player, vote in delete_votes_data.items():
+        for player, vote in votesData.items():
             if not vote and player not in missingPlayers:
                 all_voted = False
                 break
 
         if all_voted:
+            votesData = json.dumps(
+                presenter.getFullSetOfVoteResults(
+                    topic, presenter.getAllPlayersOrderedySeat(True), False
+                )
+            )
             # Delete the game
-            currentGame.delete()
-            # Add a success message
-            messages.success(request, gettext("Game successfully deleted"))
+            if topic == DELETE_VOTE_TOPIC:
+                currentGame.delete()
+                # Add a success message
+                messages.success(request, gettext("Game successfully deleted"))
+
+            if topic == STATS_EXCLUDE_VOTE_TOPIC:
+                currentGame.statsExcludedGame = True
+                currentGame.save()
+                # Add a success message
+                messages.success(request, gettext("Game stats excluded"))
+
             # Redirect to the index page
             return JsonResponse(
                 {
                     "voteChanged": True,
-                    "deleteVotesData": json.dumps(delete_votes_data),
+                    "votesData": votesData,
                     "redirect_url": reverse("index"),
                 }
             )
@@ -1453,9 +1461,15 @@ def _voteToDelete(request):
         return JsonResponse(
             {
                 "voteChanged": True,
-                "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
+                "votesData": json.dumps(
+                    presenter.getFullSetOfVoteResults(
+                        topic, presenter.getAllPlayersOrderedySeat(True), False
+                    )
+                ),
             },
             safe=False,
         )
 
     return JsonResponse({"voteChanged": False})
+
+
