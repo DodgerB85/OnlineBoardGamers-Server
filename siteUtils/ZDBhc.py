@@ -55,7 +55,6 @@ from django.contrib.sites.models import Site
 
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament
 
-from HC.models import HC_Tournament
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
@@ -135,7 +134,6 @@ def transform_tpda(old_tpda_str, tournament_name):
         return old_tpda_str
 
 def migrate_hc_to_main():
-    hc_tourneys = HC_Tournament.objects.all()
     
     with transaction.atomic():
         for hct in hc_tourneys:

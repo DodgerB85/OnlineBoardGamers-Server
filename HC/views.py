@@ -966,7 +966,7 @@ def endGame(request, _winner, _finalPositions, _gameID, currentGame):
 def showHCgame(request, game_id):
     try:
         currentGame = (
-            Game.objects.select_related("host", "relatedHCTournament")
+            Game.objects.select_related("host")
             .prefetch_related("players__player", "invitedPlayers")
             .get(id=game_id, gameCode="HC")
         )

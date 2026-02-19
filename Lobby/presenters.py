@@ -3070,9 +3070,6 @@ class HcPresenter(GamePresenter):
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "HC", _finalPositions, _gameID, self.gameObj)
 
-        if self.gameObj.relatedHCTournament:
-            SF_M_ProcessTournamentEndGame(request, "HC", self.gameObj, [_winner])
-
     def getCurrentPlayers(self):
         _currentPlayers = ""
         all_players_gps = list(self.gameObj.players.select_related("player").order_by("seat_order"))
@@ -3343,8 +3340,7 @@ class HcPresenter(GamePresenter):
 
     def isTournamentRoundFinished(self, tournamentProgressionDataArray):
         from Lobby.models import Game
-        if self.gameObj.relatedHCTournament is None:
-            return False
+        return False
 
         finishedGames = 0
         for row in tournamentProgressionDataArray[-1]:

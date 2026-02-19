@@ -52,7 +52,6 @@ django.setup()
 
 from django.contrib.sites.models import Site
 
-from HC.models import HC_Tournament
 from KFW.models import KFW_Game
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament, Mini_Tournaments
 
