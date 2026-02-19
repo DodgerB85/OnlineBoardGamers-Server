@@ -4,7 +4,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Lobby', '0088_game_serverremainingplayerorderbynames'),
+        ('Lobby', '0091_migrate_hc_games'),
     ]
 
     operations = [
