@@ -367,6 +367,9 @@ def shouldSendEmail(emailType, username, profile, currentGame, oldLatestUpdate):
         return False
     if not profile.email_confirmed:
         return False
+    
+    if emailType == "yourTurnFactoryFix":
+        return True
 
     emailNotifications = (
         json.loads(profile.emailNotifications)
@@ -816,6 +819,87 @@ def SN_sendNextTurnNotification(
 
     activate(originalLang)
 
+def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
+    if player in USERNAMES_NOT_TO_NOTIFY:
+        return
+    
+    originalLang = get_language()
+
+    try:
+        user = User.objects.get(username=player)
+    except User.DoesNotExist:
+        print(
+            f"Error: could not find user object in SN_sendNextTurnNotification: {player}"
+        )
+        return
+    try:
+        profile = Profile.objects.get(user=user)
+        activate(profile.profileLanguage)
+        
+        gameStrings = getGameStrings("HC")
+        urlText = gameStrings["clickHereToPlayText"]
+        
+        presenter = currentGame.presenter()
+        
+        messageText = (
+            user.username
+            + ": "
+            + gettext(
+                "Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs building\n%(gameName)s - %(currentTurnString)s."
+            )
+            % {
+                "gameName": presenter.getGameName(),
+                "currentTurnString": presenter.currentTurnString(),
+            }
+        )
+
+        # SEND EMAIL
+        if shouldSendEmail(
+                    "yourTurnFactoryFix", player, profile, currentGame, 0
+            ):
+            try:
+                current_site = get_current_site(request)
+                subject = gettext(
+                "It is your turn at Horseless Carriage - Factory Building"
+                )
+                message = render_to_string(
+                    "HC/yourTurnEmailFactory.html",
+                    {
+                        "user": user.username,
+                        "domain": current_site.domain,
+                        "gameID": gameID,
+                        "gameName": presenter.getGameName(),
+                        "currentTurnString": presenter.currentTurnString(),
+                    },
+                )
+                SN_sendEmail("yourTurnFactoryFix", subject, message, user.email)
+            except Exception as e:
+                print(
+                    f"\n{'*' * 36} EMAIL ERROR - Send Next Turn Notification FACTORY {'*' * 18}\n"
+                    f"Error: {e}\n"
+                    f"User:  {user.username} ({user.email})\n"
+                    f"Obj:   {user}\n"
+                )
+        
+        # SEND WEBHOOKS
+        urlRaw = f"https://www.OnlineBoardGamers.com/HC/{str(gameID)}/show/"
+        if (
+            profile.webhooks != ""
+            and profile.webhooks is not None
+            and profile.webhooks != "[]"
+        ):
+            SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+    except Exception as e:
+        print(
+            request.user.username
+            + " /// ended the turn. SF "
+            + " sendNextTurnNotificationFACTORY.  Error no profile/other error trying to email /// "
+            + player
+        )
+        print(e)
+
+    activate(originalLang)
 
 def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _game):
     for player in playerNames:
@@ -1789,6 +1873,8 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         idx = MAIL_RELAY_IDX
     elif emailTypeFlag == "MTinvite":
         idx = OBG_MAILER_IDX
+    elif emailTypeFlag == "yourTurnFactoryFix":
+        idx = MAIL_RELAY_IDX
     elif emailTypeFlag == "yourTurn":
         counter = 0
         try:
