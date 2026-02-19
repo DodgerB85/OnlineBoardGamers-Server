@@ -102,7 +102,6 @@ from .models import (
     changelog,
     Mini_Tournaments,
     Main_Tournament,
-    QueryableGameAllPlayers,
 )
 
 from HC.models import HC_Game, HC_Tournament
@@ -512,11 +511,6 @@ def indexSpecialRedirect(request):
     #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
     # print("******************************************************************************************************** TGZ ACCESS: =================================================:  " + request.user.username)
     print(f"Db htis: {len(connection.queries)}")
-    # qs = QueryableGameAllPlayers.objects.filter(player_id=1).select_related(
-    #    "queryable_game", "player"
-    # )
-    # results = list(qs)
-    # print(results)
 
     # for game in results:
     #    players = game.allPlayers.all()
@@ -1586,10 +1580,6 @@ def index(request):
 
     # print_timestamp("Final prep complete")
 
-    # finished_games = QueryableGameAllPlayers.objects.filter(
-    #    Q(player_id=user_id) &
-    #    Q(queryable_game__gameStatus="FINISHED")
-    #    ).prefetch_related("queryable_game__winners__winner").prefetch_related("queryable_game__all_players__player").order_by("-queryable_game__latestUpdate")[:10]
 
     return render(
         request,
