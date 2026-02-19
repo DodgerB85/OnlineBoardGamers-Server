@@ -90,7 +90,6 @@ count = 0
 
 allUsers = User.objects.all()
 
-games = allHCgames
 count = 0
 
 TARGET_CODE = "FCM"
