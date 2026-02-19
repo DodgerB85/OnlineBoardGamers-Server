@@ -518,7 +518,10 @@ def _processHCturn(request):
                 # STORES PLACE IN factpryComponents ARRAY TO ALLOW HIGHLIGHTING LATER
                 # store the length of FCNATT, and subtract that from the length of facComp to get index. Or store current length
                 # 3 = players           X = select player                       0 =fac
-                DBgameDataRaw[3][presenter.seatPosition(currentPlayersList[0])][0][4]
+                # THIS LINE WAS REMOVED FOR BEING USELESS
+                #DBgameDataRaw[3][presenter.seatPosition(currentPlayersList[0])][0][4]
+                
+                #DBgameDataRaw[3][seatPosition][0][4]
 
                 DBgameDataRaw[15].append(
                     [
