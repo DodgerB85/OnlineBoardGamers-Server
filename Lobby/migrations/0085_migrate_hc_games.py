@@ -1,10 +1,14 @@
 from django.db import migrations
-
+import json
 
 def migrate_hc_games(apps, schema_editor):
     HC_Game = apps.get_model('HC', 'HC_Game')
     Game = apps.get_model('Lobby', 'Game')
     GamePlayer = apps.get_model('Lobby', 'GamePlayer')
+
+    print(f"\nMigrating {HC_Game.objects.all().count()} IND games to unified Game model...")
+
+    migrated_count = 0
 
     for old_game in HC_Game.objects.all():
         new_game = Game.objects.create(
@@ -65,6 +69,12 @@ def migrate_hc_games(apps, schema_editor):
 
         # Get winner id
         winner_id = old_game.winner_id if old_game.winner_id else None
+        
+        # Convery the currentPlayers
+        currentPlayersString = old_game.currentPlayers
+        current_players_arr = currentPlayersString.split(',') if currentPlayersString else []
+        new_game.currentPlayersInTurnOrder = json.dumps(current_players_arr)
+        new_game.save()
 
         for idx, player in enumerate(player_list):
             # Get notes for this seat position
@@ -106,6 +116,12 @@ def migrate_hc_games(apps, schema_editor):
                     consent_dict[player.username] = int(old_game.rewindConsent[seat_idx])
             new_game.activeVotes = {"rewind_consent": consent_dict}
             new_game.save()
+
+        migrated_count += 1
+        if migrated_count % 100 == 0:
+            print(f"  Migrated {migrated_count} games...")
+
+    print(f"Successfully migrated {migrated_count} HC games!")
 
 
 def reverse_migration(apps, schema_editor):
