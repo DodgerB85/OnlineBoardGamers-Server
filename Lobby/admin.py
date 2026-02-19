@@ -323,6 +323,7 @@ class GameAdmin(admin.ModelAdmin):
                 "fields": (
                     "FCMplayersMoveData",
                     "ind_premove_display",
+                    "currentPlayersInTurnOrder",
                 ),
             },
         ),

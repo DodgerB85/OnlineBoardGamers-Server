@@ -235,6 +235,9 @@ class GamePresenter:
 
     def setCurrentPlayers(self, player_usernames_string):
         """Set current players from comma-separated string of usernames"""
+        if self.gameObj.gameCode == "HC":
+            self.gameObj.currentPlayersInTurnOrder = json.dumps(player_usernames_string.split(",")) if player_usernames_string else ""
+            self.gameObj.save()
         if not player_usernames_string:
             usernames = set()
         else:
@@ -4061,14 +4064,13 @@ class HcPresenter(GamePresenter):
             _gameName += "[Private Game]"
         return _gameName
 
-    def _getCurrentPlayersField(self):
+    def getCurrentPlayersInOrderString(self):
         """Get current players as a string (matching old currentPlayers field format)"""
-        current_gps = self.gameObj.players.filter(is_current=True).select_related("player")
-        usernames = [gp.player.username for gp in current_gps if gp.player]
-        return ",".join(usernames) if usernames else ""
+        current_players_arr = json.loads(self.gameObj.currentPlayersInTurnOrder) if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder != "" else []
+        return ",".join(current_players_arr) if len(current_players_arr) > 0 and current_players_arr else ""
 
     def isMyMove(self, loggedInPlayerUsername="ADFSADASDASDASDASADADA"):
-        currentPlayers = self._getCurrentPlayersField()
+        currentPlayers = self.getCurrentPlayersInOrderString()
         if currentPlayers == "":
             return True
         currentPlayerrsList = currentPlayers.split(",")
@@ -4094,7 +4096,7 @@ class HcPresenter(GamePresenter):
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return False
 
-        currentPlayers = self._getCurrentPlayersField()
+        currentPlayers = self.getCurrentPlayersInOrderString()
         currentPlayerrsList = currentPlayers.split(",")
         if (
             self.gameObj.phase == 3
@@ -4119,7 +4121,7 @@ class HcPresenter(GamePresenter):
         )
 
     def getCurrentPlayersArray(self):
-        currentPlayers = self._getCurrentPlayersField()
+        currentPlayers = self.getCurrentPlayersInOrderString()
         if not currentPlayers:
             return [""]
         if "," in currentPlayers:
@@ -4216,7 +4218,7 @@ class HcPresenter(GamePresenter):
         ):
             deleteableGame = True
 
-        currentPlayersDisplayList = self._getCurrentPlayersField().split(",")
+        currentPlayersDisplayList = self.getCurrentPlayersInOrderString().split(",")
         if loggedInUser is not None:
             if not myMove and loggedInUser.username in currentPlayersDisplayList:
                 currentPlayersDisplayList.remove(loggedInUser.username)
