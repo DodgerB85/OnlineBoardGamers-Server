@@ -92,7 +92,7 @@ allUsers = User.objects.all()
 
 count = 0
 
-TARGET_CODE = "FCM"
+TARGET_CODE = "HC"
 
 def update_ids_recursive(data, id_map):
     """Recursively wanders through lists to replace old IDs with new ones."""
@@ -105,7 +105,7 @@ def update_ids_recursive(data, id_map):
                 update_ids_recursive(item, id_map)
 
 # 1. Collect all old IDs across all relevant tournaments
-tournamentsToConvert = Mini_Tournaments.objects.filter(
+tournamentsToConvert = Main_Tournament.objects.filter(
     gameCode=TARGET_CODE,
     id__gte=0
 )

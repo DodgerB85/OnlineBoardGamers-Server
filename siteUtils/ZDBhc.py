@@ -66,7 +66,7 @@ from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 #    game.statsExcludeConsent = "0" * game.maxPlayers
 
 
-#games = ["FCM"]
+#games = ["hct"]
 
 #reminder_start_time = int((datetime.now() - timedelta(minutes=118)).timestamp() * 1000)
 #reminder_finish_time = int((datetime.now() - timedelta(minutes=182)).timestamp() * 1000)
@@ -83,7 +83,6 @@ PRINT_TIME = True
 start_calc_time = time.perf_counter()
 count = 0
 
-#games = ["FCM", "HC", "Bus", "TGZ"]
 
 allUsers = User.objects.all()
 
@@ -135,38 +134,38 @@ def transform_tpda(old_tpda_str, tournament_name):
         print(f"Error converting data: {e}")
         return old_tpda_str
 
-def migrate_bus_to_main():
-    fcm_tourneys = HC_Tournament.objects.all()
+def migrate_hc_to_main():
+    hc_tourneys = HC_Tournament.objects.all()
     
     with transaction.atomic():
-        for fcm in fcm_tourneys:
+        for hct in hc_tourneys:
             # Apply the specific index transformation
-            converted_tpda = transform_tpda(fcm.tournamentProgressionData, fcm.tournamentName)
+            converted_tpda = transform_tpda(hct.tournamentProgressionData, hct.tournamentName)
             
             main = Main_Tournament.objects.create(
-                gameCode="FCM",
-                tournamentName=fcm.tournamentName,
-                tournamentStatus=fcm.tournamentStatus,
-                tournamentType=fcm.tournamentType,
-                startingOptions=fcm.startingOptions,
-                maxTournamentPlayers=fcm.maxTournamentPlayers,
-                maxGamePlayers=fcm.maxGamePlayers,
-                roundsBeforeKnockout=fcm.roundsBeforeKnockout,
-                winnersData=fcm.winnersData,
-                created=fcm.created,
+                gameCode="HC",
+                tournamentName=hct.tournamentName,
+                tournamentStatus=hct.tournamentStatus,
+                tournamentType=hct.tournamentType,
+                startingOptions=hct.startingOptions,
+                maxTournamentPlayers=hct.maxTournamentPlayers,
+                maxGamePlayers=hct.maxGamePlayers,
+                roundsBeforeKnockout=hct.roundsBeforeKnockout,
+                winnersData=hct.winnersData,
+                created=hct.created,
                 tournamentProgressionData=converted_tpda,
-                tournamentSideData=fcm.tournamentSideData,
-                tournamentPointsData=fcm.tournamentPointsData,
+                tournamentSideData=hct.tournamentSideData,
+                tournamentPointsData=hct.tournamentPointsData,
             )
 
             # Copy Many-to-Many relationships
-            main.startingPlayers.set(fcm.startingPlayers.all())
-            main.nextRoundPlayers.set(fcm.nextRoundPlayers.all())
+            main.startingPlayers.set(hct.startingPlayers.all())
+            main.nextRoundPlayers.set(hct.nextRoundPlayers.all())
 
             print(f"Migrated and Formatted: {main.tournamentName}")
 
 if __name__ == "__main__":
-    migrate_bus_to_main()
+    migrate_hc_to_main()
 
 calc_time = time.perf_counter() - start_calc_time
 
