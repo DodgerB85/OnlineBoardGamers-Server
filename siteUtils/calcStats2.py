@@ -96,7 +96,6 @@ GAME_CODES = [
     "KFW",
     "WEB",
     "RNB",
-    "BOB",
 ]
 
 EXCLUDE_USERS = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"]

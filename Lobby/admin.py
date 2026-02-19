@@ -13,7 +13,7 @@ from .models import (
     Game,
     GamePlayer,
 )
-from .modelProxies import FCMMiniTournament, TGZMiniTournament, CNSgame, WEBgame, AQYgame, TGZgame, INDgame, Busgame, FCMgame, RNBgame
+from .modelProxies import FCMMiniTournament, TGZMiniTournament, CNSgame, WEBgame, AQYgame, TGZgame, INDgame, Busgame, FCMgame, RNBgame, HCgame
 
 from django.conf import settings
 from django import forms
@@ -325,6 +325,7 @@ class GameAdmin(admin.ModelAdmin):
                     "serverRemainingPlayerOrderByNames",
                     "FCMplayersMoveData",
                     "ind_premove_display",
+                    "currentPlayersInTurnOrder",
                 ),
             },
         ),
@@ -490,5 +491,13 @@ class RNBgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "RNB"
+
+@admin.register(HCgame)
+class HCgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="HC")
+
+    class Meta:
+        app_label = "HC"
 
 ################### END Register game objects to specific app
