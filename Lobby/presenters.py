@@ -3246,16 +3246,27 @@ class HcPresenter(GamePresenter):
             return gp.currentMoveData
         return ""
 
-    def hasMoveData(self, name):
+    def hasMoveData(self, name, includeIllegal=False):
         seat = self.seatPosition(name)
         if 0 <= seat <= 4:
             gp = self.gameObj.players.filter(seat_order=seat).first()
             if gp:
                 move_time = gp.currentMoveTime
                 move_data = gp.currentMoveData
+                if str(move_time) == "ILLEGALMOVE" and not includeIllegal:
+                    return False
+                if move_data == "":
+                    return False
                 if str(move_time)[:6] != "NODATA":
-                    return move_data
-        return ""
+                    return True
+                
+            return True
+        
+        return False
+
+    def getMoveData(self, name):
+        gp = self.gameObj.players.filter(player__username=name).first()
+        return gp.currentMoveData
 
     def hasTemporaryMoveData(self, name):
         seat = self.seatPosition(name)
