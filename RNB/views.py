@@ -577,7 +577,6 @@ def _processRNBturn(request):
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
-        # currentGame.enableStatsExclude(request.user.username)
 
         # newVer = (int(currentGame.latestUpdate) % 1000) + 1
         # currentGame.latestUpdate = str((int(time.time())*1000) + newVer)
@@ -748,7 +747,6 @@ def _processRNBturn(request):
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
-        # currentGame.enableStatsExclude(_missingPlayer.username)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)

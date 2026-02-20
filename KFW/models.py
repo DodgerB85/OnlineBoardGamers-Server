@@ -485,15 +485,6 @@ class KFW_Game(GeneralGame):
     def getGameCode(self):
         return "KFW"
 
-    # def enableStatsExclude(self, _username):
-    #    seatToChange = self.seatPosition(_username, True)
-    #    self.statsExcludeConsent = self.statsExcludeConsent[:seatToChange] + "1" + self.statsExcludeConsent[seatToChange + 1 :]
-    #    # CHECK TOTAL CONSENT
-    #    totalConsent = 0
-    #    for letter in self.statsExcludeConsent:
-    #        totalConsent += int(letter)
-    #    if totalConsent == self.maxPlayers:
-    #        self.statsExcludedGame = True
 
     #####################################################################
     ###################### Simul turns code

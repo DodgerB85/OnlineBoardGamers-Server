@@ -1196,24 +1196,6 @@ class TgzPresenter(GamePresenter):
                     self.gameObj.latestUpdate,
                 )
 
-    #def enableStatsExclude(self, _username):
-    #    if self.gameObj.statsExcludeConsent is None:
-    #        self.gameObj.statsExcludeConsent = ""
-    #    if len(self.gameObj.statsExcludeConsent) < self.gameObj.maxPlayers:
-    #        self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
-    #    seatToChange = self.seatPosition(_username, True)
-    #    
-    #    self.gameObj.statsExcludeConsent = (
-    #        self.gameObj.statsExcludeConsent[:seatToChange]
-    #        + "1"
-    #        + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
-    #    )
-    #    totalConsent = 0
-    #    for letter in self.gameObj.statsExcludeConsent:
-    #        totalConsent += int(letter)
-    #    if totalConsent == self.gameObj.maxPlayers:
-    #        self.gameObj.statsExcludedGame = True
-
     def getGameCode(self):
         return "TGZ"
 
@@ -1597,8 +1579,6 @@ class BusPresenter(GamePresenter):
             self.gameObj.activeVotes = {}
         self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
 
-        self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
-
         # required to send correct start player notification
         self.gameObj.save()
 
@@ -1637,53 +1617,9 @@ class BusPresenter(GamePresenter):
                     message_data,
                 )
 
-    # takes in username
-    def enableStatsExclude(self, _username):
-        seatToChange = self.seatPosition(_username)
-        if self.gameObj.statsExcludeConsent == None:
-            self.gameObj.statsExcludeConsent = ""
-        if (len(self.gameObj.statsExcludeConsent)) < self.gameObj.maxPlayers:
-            self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
-        self.gameObj.statsExcludeConsent = (
-            self.gameObj.statsExcludeConsent[:seatToChange]
-            + "1"
-            + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
-        )
-        # CHECK TOTAL CONSENT
-        totalConsent = 0
-        for letter in self.gameObj.statsExcludeConsent:
-            totalConsent += int(letter)
-        if totalConsent == self.gameObj.maxPlayers:
-            self.gameObj.statsExcludedGame = True
-
-    def getRewindHostPossible(self):
-        from Lobby.sharedFunctions.constants import REWIND_CONSENT_VOTE_TOPIC
-        # If any players are missing, enable rewind for all
-        if self.gameObj.players.filter(is_missing=True).exists():
-            if not self.gameObj.activeVotes:
-                self.gameObj.activeVotes = {}
-            # Set all to 2 (full consent)
-            rewind_votes = {}
-            for gp in self.gameObj.players.select_related("player"):
-                if gp.player:
-                    rewind_votes[gp.player.username] = 2
-            self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
-            self.gameObj.save()
-
-        # Check if all have consent
-        if not self.gameObj.activeVotes or REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
-            return False
-
-        rewind_votes = self.gameObj.activeVotes.get(REWIND_CONSENT_VOTE_TOPIC, {})
-        for consent in rewind_votes.values():
-            if consent == 0:
-                return False
-        return True
-
     def getGameCode(self):
         return "Bus"
 
- 
 
 class RnbPresenter(GamePresenter):
     def __str__(self):
@@ -3283,60 +3219,6 @@ class HcPresenter(GamePresenter):
                 rewind_votes[username] = 0
         self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
 
-    # takes in username
-    def enableStatsExclude(self, _username):
-        if self.gameObj.statsExcludeConsent == None:
-            self.gameObj.statsExcludeConsent = ""
-        if (len(self.gameObj.statsExcludeConsent)) < self.gameObj.maxPlayers:
-            self.gameObj.statsExcludeConsent = "0" * self.gameObj.maxPlayers
-        seatToChange = self.seatPosition(_username, True)
-        self.gameObj.statsExcludeConsent = (
-            self.gameObj.statsExcludeConsent[:seatToChange]
-            + "1"
-            + self.gameObj.statsExcludeConsent[seatToChange + 1 :]
-        )
-        totalConsent = 0
-        for letter in self.gameObj.statsExcludeConsent:
-            totalConsent += int(letter)
-        if totalConsent == self.gameObj.maxPlayers:
-            self.gameObj.statsExcludedGame = True
-
-    def getDeleteVotesData(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        player_usernames = [gp.player.username for gp in all_players if gp.player]
-
-        if self.gameObj.gameStatus == "FINISHED":
-            return {username: False for username in player_usernames}
-
-        if self.gameObj.deleteGameVotes is None:
-            self.gameObj.deleteGameVotes = {username: False for username in player_usernames}
-            self.gameObj.save()
-
-        return self.gameObj.deleteGameVotes
-
-    def addDeleteVote(self, playerName):
-        """Records the vote of a player."""
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        player_usernames = [gp.player.username for gp in all_players if gp.player]
-
-        if playerName not in player_usernames:
-            return False
-
-        if self.gameObj.deleteGameVotes is None:
-            self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        if playerName not in self.gameObj.deleteGameVotes:
-            self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        self.gameObj.deleteGameVotes[playerName] = True
-        self.gameObj.save()
-        return True
 
     def isTournamentRoundFinished(self, tournamentProgressionDataArray):
         from Lobby.models import Game

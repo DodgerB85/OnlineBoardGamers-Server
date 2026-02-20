@@ -232,9 +232,7 @@ def createHCgame(request):
 
     newGame.kickoutDuration = request.POST["kickoutDuration"]
 
-    newGame.statsExcludeConsent = "0" * _maxPlayers
     if "trainingGame" in request.POST:
-        newGame.statsExcludeConsent = "1" * _maxPlayers
         newGame.statsExcludedGame = True
 
     if "privateGame" in request.POST:
@@ -353,7 +351,6 @@ def _processHCturn(request):
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
-        presenter.enableStatsExclude(request.user.username)
         currentGame.save()
         # Response not used
         return JsonResponse(
@@ -902,7 +899,6 @@ def _processHCturn(request):
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
-        presenter.enableStatsExclude(_missingPlayer.username)
 
         # Clears data and saves record - DONT DELETE FAC MOVES
         # presenter.clearAllMoveData()
@@ -1029,7 +1025,6 @@ def showHCgame(request, game_id):
 
         myMove = False
         # myZoomLevel = 200
-        myStatsExcludeConsent = 0
         liveNotification = 1
         finishedGame = False
         if currentGame.gameStatus == "FINISHED":
@@ -1104,13 +1099,6 @@ def showHCgame(request, game_id):
             kickoutRequired = presenter.kickoutRequired()
 
             myMove = presenter.isMyMove(username)
-            # myZoomLevel = currentGame.zoomLevels[pov*3:pov*3+3]
-            if currentGame.statsExcludeConsent is not None and pov < len(
-                currentGame.statsExcludeConsent
-            ):
-                myStatsExcludeConsent = currentGame.statsExcludeConsent[pov : pov + 1]
-            else:
-                myStatsExcludeConsent = 0
 
             if "SHADOW" in presenter.getAllPlayersOrderedySeat():
                 player0_gp = next(
@@ -1173,7 +1161,6 @@ def showHCgame(request, game_id):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 # "tournamentGame": currentGame.relatedTournament,
                 # "startingOptionsHTML": startingOptionsHTML,
-                "myStatsExcludeConsent": myStatsExcludeConsent,
                 "statsExcludedGame": statsExcludedGame,
                 "displayNames": displayNames,
                 "nextURL": nextURL,
@@ -1222,7 +1209,6 @@ def showHCgame(request, game_id):
             "now": now,
             "preferredColour": preferredColour,
             "KickoutFlexiDataArray": KickoutFlexiDataArray,
-            "deleteVotesData": json.dumps(presenter.getDeleteVotesData()),
             "settingsDebug": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
             "startingOptionsLiteral": (
                 json.loads(currentGame.startingOptions)

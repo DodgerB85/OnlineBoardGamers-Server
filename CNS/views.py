@@ -332,9 +332,6 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
             "yourTurnAudioType": liveNotification,
             "preferredCNScolour": preferredCNScolour,
             "statsExcludedGame": currentGame.statsExcludedGame,
-            #"myStatsExcludeConsent": int(
-            #    currentGame.statsExcludeConsent[pov : pov + 1]
-            #),
         }
     )
 
