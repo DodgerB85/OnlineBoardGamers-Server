@@ -1500,8 +1500,7 @@ class BusPresenter(GamePresenter):
             return [""]
         return [gp.player.username for gp in current_players if gp.player]
 
-    def getCurrentPlayersArrayForReminderEmail(self):
-        return self.getCurrentPlayersArray()
+
 
     def getCurrentRewindConsent(self, _username):
         # rewindConsent is stored in activeVotes under 'rewind_consent' topic
@@ -2484,8 +2483,7 @@ class FcmPresenter(GamePresenter):
 
         return _currentPlayers
 
-    def getCurrentPlayersArrayForReminderEmail(self):
-        return self.getCurrentPlayersArray()
+
 
     # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
     def getRewindHostHTML(self):
@@ -2709,18 +2707,6 @@ class HcPresenter(GamePresenter):
         )
         return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
 
-    def currentTurnString(self):
-        return SR_currentTurnString("HC", self.gameObj.turn, self.gameObj.phase)
-
-    def getGameName(self):
-        _gameName = ""
-        if self.gameObj.gameName != "":
-            _gameName = self.gameObj.gameName
-        else:
-            _gameName = f"[{getattr(self.gameObj.creator, 'username')}'s Game]"
-        if self.gameObj.gameStatus == "PRIVATE":
-            _gameName += "[Private Game]"
-        return _gameName
 
     def getCurrentPlayersInOrderString(self):
         """Get current players as a string (matching old currentPlayers field format)"""
@@ -2786,130 +2772,6 @@ class HcPresenter(GamePresenter):
             return [player.strip() for player in currentPlayers.split(",")]
         else:
             return [currentPlayers]
-
-    def getCurrentPlayersArrayForReminderEmail(self):
-        currentPlayersArray = self.getCurrentPlayersArray()
-        playersToNotify = []
-        for player in currentPlayersArray:
-            if self.isMyMove(player):
-                playersToNotify.append(player)
-        return playersToNotify
-
-    def serialize(self, loggedInUser=None):
-        all_players_gps = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
-        all_players_count = len(all_players_gps)
-
-        remainingPlayersInt = self.gameObj.maxPlayers - all_players_count
-        remainingPlayers = ""
-        for i in range(remainingPlayersInt):
-            remainingPlayers += str(all_players_count + i + 1)
-
-        winner_gp = self.gameObj.players.filter(winner=True).first()
-        winner = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
-
-        createdString = str(self.gameObj.created)
-        latestUpdateString = str(self.gameObj.latestUpdate)
-
-        latestUpdateElapsedTimeString = ""
-        elapsedTotalSeconds = 0
-        if (
-            self.gameObj.gameStatus == "WAITING"
-            or self.gameObj.gameStatus == "AVAILABLE"
-            or self.gameObj.gameStatus == "ACTIVE"
-            or self.gameObj.gameStatus == "PRIVATE"
-        ):
-            if (
-                self.gameObj.gameStatus == "WAITING"
-                or self.gameObj.gameStatus == "AVAILABLE"
-                or self.gameObj.gameStatus == "PRIVATE"
-            ):
-                elapsedTotalSeconds = int(time.time()) - int(self.gameObj.created) // 1000
-            if self.gameObj.gameStatus == "ACTIVE":
-                elapsedTotalSeconds = int(time.time()) - int(self.gameObj.latestUpdate) // 1000
-            elapsedDays = elapsedTotalSeconds // (60 * 60 * 24)
-            elapsedTotalSeconds = elapsedTotalSeconds % (60 * 60 * 24)
-            elapsedHours = elapsedTotalSeconds // (60 * 60)
-            elapsedTotalSeconds = elapsedTotalSeconds % (60 * 60)
-            elapsedmins = elapsedTotalSeconds // (60)
-            elapsedTotalSeconds = elapsedTotalSeconds % (60)
-
-            if elapsedDays > 0:
-                latestUpdateElapsedTimeString += str(elapsedDays) + "d"
-
-            if elapsedHours > 0:
-                latestUpdateElapsedTimeString += " " + str(elapsedHours) + "h"
-            if elapsedmins > 0:
-                latestUpdateElapsedTimeString += " " + str(elapsedmins) + "m"
-            latestUpdateElapsedTimeString += " " + str(elapsedTotalSeconds) + "s"
-
-        myMove = False
-        if loggedInUser is not None:
-            myMove = self.isMyMove(loggedInUser.username)
-
-        chatNotification = False
-        involvedPlayer = False
-
-        missing_player_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.is_missing}
-        chat_notify_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.has_chat_notification}
-
-        if loggedInUser is not None:
-            involvedPlayer = any(
-                gp.player == loggedInUser and gp.player.id not in missing_player_ids
-                for gp in all_players_gps if gp.player
-            )
-            chatNotification = loggedInUser.id in chat_notify_ids
-
-        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
-
-        startingOptionsHTML = SR_getHCstartingOptionsHTML(
-            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        )
-
-        kickoutRequiredNum = self.kickoutRequired()
-
-        all_usernames = [gp.player.username for gp in all_players_gps if gp.player]
-        deleteableGame = False
-        if (
-            "SHADOW" in all_usernames
-            and loggedInUser
-            and any(gp.player == loggedInUser for gp in all_players_gps if gp.player)
-        ):
-            deleteableGame = True
-
-        currentPlayersDisplayList = self.getCurrentPlayersInOrderString().split(",")
-        if loggedInUser is not None:
-            if not myMove and loggedInUser.username in currentPlayersDisplayList:
-                currentPlayersDisplayList.remove(loggedInUser.username)
-        currentPlayersDisplayString = ",".join(currentPlayersDisplayList)
-
-        return {
-            "gameID": self.gameObj.id,
-            "gameName": self.getGameName(),
-            "gameDescription": self.gameObj.gameDescription,
-            "creator": getattr(self.gameObj.creator, "username"),
-            "created": createdString,
-            "allPlayers": all_usernames,
-            "invitedPlayers": [user.username for user in self.gameObj.invitedPlayers.all()],
-            "currentPlayers": currentPlayersDisplayString,
-            "currentTurn": self.currentTurnString(),
-            "pace": gamePaceString,
-            "latestUpdate": latestUpdateString,
-            "startingOptionsHTML": startingOptionsHTML,
-            "kickoutDuration": self.gameObj.kickoutDuration,
-            "maxPlayers": self.gameObj.maxPlayers,
-            "winner": winner,
-            "myMove": myMove,
-            "involvedPlayer": involvedPlayer,
-            "chatNotification": chatNotification,
-            "kickoutRequiredNum": kickoutRequiredNum,
-            "kickoutDuration": self.gameObj.kickoutDuration,
-            "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
-            "game": "HC",
-            "remainingPlayers": remainingPlayers,
-            "deleteableGame": deleteableGame,
-            "learningGame": self.isLearningGame(),
-            "experiencedGame": self.isExperiencedGame(),
-        }
 
     def startGame(self, request):
         from django_q.tasks import async_task
