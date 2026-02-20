@@ -21,6 +21,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getAQYstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
     SR_getHCstartingOptionsHTML,
+    SR_getKFWstartingOptionsHTML,
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
@@ -3358,3 +3359,838 @@ class HcPresenter(GamePresenter):
 
     def getGameCode(self):
         return "HC"
+
+
+class KfwPresenter(GamePresenter):
+    def __str__(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
+        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
+
+    def _getCurrentPlayersField(self):
+        """Returns comma-separated string of is_current players (replaces old currentPlayers string field)"""
+        current_gps = self.gameObj.players.filter(is_current=True).select_related("player")
+        return ",".join(gp.player.username for gp in current_gps if gp.player)
+
+    def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        currentPlayersField = self._getCurrentPlayersField()
+        if currentPlayersField == "":
+            return True
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+        if (
+            (loggedInPlayerUsername in currentPlayersField)
+            or any(sv in currentPlayersField for sv in shadow_values)
+        ):
+            return True
+        return False
+
+    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+            return False
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+        currentPlayersField = self._getCurrentPlayersField()
+        return (
+            not currentPlayersField
+            or loggedInPlayerUsername in currentPlayersField
+            or any(sv in currentPlayersField for sv in shadow_values)
+        )
+
+    def checkForHostChange(self, _missingUser):
+        if _missingUser == self.gameObj.creator:
+            possibleHost = (
+                self.gameObj.players.filter(is_missing=False, is_kicked=False)
+                .select_related("player")
+                .order_by("?")
+                .first()
+            )
+            if possibleHost and possibleHost.player:
+                self.gameObj.host = possibleHost.player
+
+    def endGame(self, request, _winner, _finalPositions, _gameID):
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedNotifications import (
+            SN_M_sendEndGameNotificationTieGame,
+        )
+
+        self.gameObj.rewindData = ""
+        self.gameObj.rewindTempData = ""
+        self.gameObj.KFWserverData = ""
+        self.gameObj.KFWplayersHiddenData = ""
+        self.gameObj.KFWplayersMoveData = ""
+        self.gameObj.kickoutFlexiData = ""
+        self.gameObj.gameStatus = "FINISHED"
+
+        names = self.getAllPlayersOrderedySeat(False)
+        winnerNamesArray = []
+        for playerIndex in _winner:
+            winner_user = User.objects.get(username=names[playerIndex])
+            winner_gp = self.gameObj.players.filter(player=winner_user).first()
+            if winner_gp:
+                winner_gp.winner = True
+                winner_gp.save()
+            winnerNamesArray.append(names[playerIndex])
+
+        self.gameObj.save()
+        for i in range(len(_finalPositions)):
+            for j in range(len(_finalPositions[i])):
+                _finalPositions[i][j] = names[_finalPositions[i][j]]
+
+        # Flatten the array to [username, position]
+        finalResults = []
+        for i in range(len(_finalPositions)):
+            for j in range(len(_finalPositions[i])):
+                text = "Out to sea"
+                if i == 0 and len(_finalPositions[i]) == 1:
+                    text = "1st - Congratulations!"
+                elif i == 0 and len(_finalPositions[i]) > 1:
+                    text = "Joint 1st - Congratulations!"
+                elif i == 1 and len(_finalPositions[i]) == 1:
+                    text = "Runner Up"
+                elif i == 1 and len(_finalPositions[i]) > 1:
+                    text = "Joint Runner Up"
+                finalResults.append([_finalPositions[i][j], text, i])
+
+        # Create a new array to store names not present in _finalPositions
+        new_names = [
+            name
+            for name in names
+            if name not in [item for sublist in _finalPositions for item in sublist]
+        ]
+
+        for name in new_names:
+            finalResults.append([name, "Out to sea", 9])
+
+        # Now send winning notification
+        SN_M_sendEndGameNotificationTieGame(request, "KFW", finalResults, _gameID, self.gameObj)
+
+    def startGame(self, request, isTournamentGame=False):
+        from django_q.tasks import async_task
+        from Lobby.models import GamePlayer
+
+        self.gameObj.gameStatus = "ACTIVE"
+        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
+
+        # Get and sort all players alphabetically (matching old getAllPlayersOrderedySeat logic)
+        all_players_gp = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
+        all_players_gp_sorted = sorted(all_players_gp, key=lambda gp: gp.player.username if gp.player else "")
+
+        # Shuffle with seed (same as old code)
+        random.Random(self.gameObj.playerOrderSeed).shuffle(all_players_gp_sorted)
+
+        # Set seat_order
+        for idx, gp in enumerate(all_players_gp_sorted):
+            gp.seat_order = idx
+        GamePlayer.objects.bulk_update(all_players_gp_sorted, ["seat_order"])
+
+        allPlayersL = [gp.player.username for gp in all_players_gp_sorted if gp.player]
+
+        # Set current players to first player
+        self.setCurrentPlayers(allPlayersL[0])
+
+        serverDataArr = json.loads(self.gameObj.KFWserverData)
+        meeple_bag = serverDataArr[0]
+        skills_bag = serverDataArr[1]
+
+        # Scaffold the playersHiddenData
+        # This has one subarray per player. Index in arr is playerIndex ["name", [meeplesArray], [skillsArray], [historyArray] ]
+        playerHiddenArr = []
+        for name in allPlayersL:
+            entry = [name, [0, 0, 0, 0], [0, 0, 0], []]
+            [startingMeeples, meeple_bag] = self.pull_items_from_bag(8, meeple_bag)
+            entry[1] = startingMeeples
+            playerHiddenArr.append(entry)
+        self.gameObj.KFWplayersHiddenData = json.dumps(playerHiddenArr)
+        self.gameObj.KFWserverData = json.dumps([meeple_bag, skills_bag])
+
+        # Scaffold the playersMoveData
+        # This has one subarray per player. Index in arr is playerIndex ["name", compressedData]
+        playerMoveArr = []
+        for name in allPlayersL:
+            # Name, TS, compressed data
+            entry = [name, "", ""]
+            playerMoveArr.append(entry)
+        self.gameObj.KFWplayersMoveData = json.dumps(playerMoveArr)
+
+        self.gameObj.save()
+
+        # If not a training game, send out notifications
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
+            playerListToNotify = [
+                gp.player.username
+                for gp in all_players_gp_sorted
+                if gp.player and gp.player.username != request.user.username
+            ]
+
+            # The tournament sends out game start notifications
+            if not isTournamentGame:
+                message_data = BLANK_MESSAGE_TEMPLATE.copy()
+                message_data["gameID"] = self.gameObj.id
+                message_data["gameName"] = self.getGameName()
+                message_data["gameCode"] = "KFW"
+                message_data["username"] = request.user.username
+                message_data["currentPlayersString"] = self.getCurrentPlayersString()
+                message_data["maxPlayers"] = self.gameObj.maxPlayers
+
+                print("about to start KFW async task")
+                async_task(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+                    playerListToNotify,
+                    message_data,
+                )
+
+    def getCurrentPlayers(self):
+        _currentPlayers = []
+        currentPlayersField = self._getCurrentPlayersField()
+        current_usernames_set = set(u.strip() for u in currentPlayersField.split(",") if u.strip())
+        all_gps = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        for gp in all_gps:
+            if not gp.player:
+                continue
+            username = gp.player.username
+            # If you have a move, then don't add
+            if self.hasMoveEndData(username):
+                pass
+            # if you don't NEED to move (not in currentPlayers), then don't add
+            elif username not in current_usernames_set:
+                pass
+            elif username != "KfwBot":
+                _currentPlayers.append(username)
+
+        return ",".join(_currentPlayers)
+
+    def getCurrentPlayersArray(self):
+        _currentPlayersArray = [
+            player.strip() for player in self.getCurrentPlayers().split(",")
+        ]
+        return _currentPlayersArray
+
+    def getCurrentPlayersArrayForReminderEmail(self):
+        return self.getCurrentPlayersArray()
+
+    def serialize(self, loggedInUserObj=None):
+        all_players_gp = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        all_player_count = all_players_gp.count()
+        remainingPlayersInt = self.gameObj.maxPlayers - all_player_count
+        remainingPlayers = "".join(
+            str(all_player_count + i + 1) for i in range(remainingPlayersInt)
+        )
+
+        winner_gps = self.gameObj.players.filter(winner=True).select_related("player")
+        winner = (
+            ", ".join(gp.player.username for gp in winner_gps if gp.player)
+            if winner_gps.exists()
+            else ""
+        )
+
+        createdString = self.gameObj.created
+        latestUpdateString = self.gameObj.latestUpdate
+
+        latestUpdateElapsedTimeString = ""
+        if (
+            self.gameObj.gameStatus == "WAITING"
+            or self.gameObj.gameStatus == "AVAILABLE"
+            or self.gameObj.gameStatus == "ACTIVE"
+            or self.gameObj.gameStatus == "PRIVATE"
+        ):
+            elapsedTotalSeconds = (
+                int(time.time()) - int(self.gameObj.created) // 1000
+                if self.gameObj.gameStatus == "WAITING"
+                or self.gameObj.gameStatus == "AVAILABLE"
+                or self.gameObj.gameStatus == "PRIVATE"
+                else int(time.time()) - int(self.gameObj.latestUpdate) // 1000
+            )
+            latestUpdateElapsedTimeString = (
+                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
+            )
+
+        myMove = loggedInUserObj is not None and self.isMyMove(loggedInUserObj.username)
+
+        chatNotification = (
+            loggedInUserObj is not None
+            and self.gameObj.players.filter(player=loggedInUserObj, has_chat_notification=True).exists()
+        )
+        involvedPlayer = (
+            loggedInUserObj is not None
+            and self.gameObj.players.filter(player=loggedInUserObj, is_missing=False, is_kicked=False).exists()
+        )
+
+        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
+
+        startingOptionsHTML = SR_getKFWstartingOptionsHTML(json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else [])
+
+        kickoutRequiredNum = self.kickoutRequired()
+
+        deleteableGame = (
+            self.gameObj.players.filter(player__username="SHADOW").exists()
+            and loggedInUserObj is not None
+            and self.gameObj.players.filter(player=loggedInUserObj).exists()
+        )
+
+        return {
+            "gameID": getattr(self.gameObj, "id"),
+            "gameName": self.getGameName(),
+            "gameDescription": self.gameObj.gameDescription,
+            "creator": self.gameObj.creator.username if self.gameObj.creator else "",
+            "created": createdString,
+            "allPlayers": [gp.player.username for gp in all_players_gp if gp.player],
+            "invitedPlayers": [u.username for u in self.gameObj.invitedPlayers.all()],
+            "currentPlayers": self.getCurrentPlayersString(),
+            "currentTurn": self.currentTurnString(),
+            "pace": gamePaceString,
+            "latestUpdate": latestUpdateString,
+            "startingOptions": startingOptionsHTML,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "maxPlayers": self.gameObj.maxPlayers,
+            "winner": winner,  # Used for Finished Games
+            "myMove": myMove,
+            # Used to not allow join in available games // set join / leave
+            "involvedPlayer": involvedPlayer,
+            "chatNotification": chatNotification,
+            "kickoutRequiredNum": kickoutRequiredNum,
+            "kickoutDuration": self.gameObj.kickoutDuration,
+            "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
+            "game": "KFW",
+            "remainingPlayers": remainingPlayers,  # Used in lobby somewhere
+            "deleteableGame": deleteableGame,
+            "learningGame": self.isLearningGame(),
+            "experiencedGame": self.isExperiencedGame(),
+        }
+
+    #####################################################################
+    ###################### Simul turns code
+    #####################################################################
+
+    def anyMoveData(self):
+        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+        for playerMoveData in playersMoveDataArr:
+            if playerMoveData[2] != "":
+                return True
+        return False
+
+    def getMoveData(self, name):
+        if self.gameObj.KFWplayersMoveData == "":
+            return ""
+        seat = self.seatPosition(name)
+        if seat < 0:
+            return ""
+        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+        if playersMoveDataArr[seat][2] == "":
+            return ""
+        return playersMoveDataArr[seat][2]
+
+    def updateSingleMove(self, name, data, deleteMove=False):
+        currentTime = str(int(time.time()) * 1000)
+        seat = self.seatPosition(name, True)
+
+        if deleteMove:
+            currentTime = 0
+            data = ""
+
+        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+
+        playerMoveData = playersMoveDataArr[seat]
+        playerMoveData[1] = currentTime
+        playerMoveData[2] = data
+
+        playersMoveDataArr[seat] = playerMoveData
+
+        self.gameObj.KFWplayersMoveData = json.dumps(playersMoveDataArr)
+
+        self.gameObj.save()
+
+    def getJsonMoveResponse(self):
+        readyPlayers = []
+        jsonResponse = []
+
+        currentPlayersArr = self.getCurrentPlayersArray()
+        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+
+        for i in range(len(playersMoveDataArr)):
+            player_time = playersMoveDataArr[i][1]
+            player_data = playersMoveDataArr[i][2]
+            # ALWAYS add the move data, even if blank, in case of bots
+            # If you dont't have a move, AND you're in currentPlayers, then you need to move
+            if (
+                player_data == "" and playersMoveDataArr[i][0] in currentPlayersArr
+            ):  # or allPlayersWithBots[self.getSeat]:
+                readyPlayers.append(False)
+                if player_time == "":
+                    player_time = int(time.time() * 1000)
+                jsonResponse.append(
+                    {"timestamp": int(player_time), "content": player_data}
+                )
+            else:
+                readyPlayers.append(True)
+                # if readyPlayers[i]:
+                if player_time == "":
+                    player_time = int(time.time() * 1000)
+                jsonResponse.append(
+                    {"timestamp": int(player_time), "content": player_data}
+                )
+
+        readyWithBots = False
+
+        if all(readyPlayers) or readyWithBots:
+            self.clearAllMoveData()
+            jsonResponse.append({"allReady": True})
+        else:
+            jsonResponse.append({"ready": readyPlayers})  # Corrected line
+            jsonResponse.append({"allReady": False})
+
+        return jsonResponse
+
+    def getJsonMoveResponseFinalScoring(self):
+        readyPlayers = []
+        allPlayerReturnData = []
+        jsonResponse = []
+
+        currentPlayersArr = self.getCurrentPlayersArray()
+        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+
+        for i in range(len(playersMoveDataArr)):
+            player_time = playersMoveDataArr[i][1]
+            player_data = playersMoveDataArr[i][2]
+            # ALWAYS add the move data, even if blank, in case of bots
+            # If you dont't have a move, AND you're in currentPlayers, then you need to move
+            if player_data == "" and playersMoveDataArr[i][0] in currentPlayersArr:
+                readyPlayers.append(False)
+                if player_time == "":
+                    player_time = int(time.time() * 1000)
+                jsonResponse.append(
+                    {"timestamp": int(player_time), "content": player_data}
+                )
+            else:
+                readyPlayers.append(True)
+                if player_time == "":
+                    player_time = int(time.time() * 1000)
+                # if readyPlayers[i]:
+                allPlayerReturnData.append(
+                    {"timestamp": int(player_time), "content": player_data}
+                )
+
+        readyWithBots = False
+
+        if all(readyPlayers) or readyWithBots:
+            jsonResponse.append({"allPlayerReturnData": allPlayerReturnData})
+            self.clearAllMoveData()
+
+            ### GAME DATA 1
+            playersHiddenDataArr = json.loads(self.gameObj.KFWplayersHiddenData)
+            returnData1 = []
+            for playerData in playersHiddenDataArr:
+                returnData1.append(playerData[1:])
+            gameData1 = self.compressData(returnData1)
+
+            ### GAME DATA 3
+            serverDataArr = json.loads(self.gameObj.KFWserverData)
+            meepleArr = serverDataArr[0]
+            skillsArr = serverDataArr[1]
+            returnData3 = [meepleArr, skillsArr]
+            gameData3 = self.compressData(returnData3)
+
+            jsonResponse.append({"gameData1": gameData1})
+            jsonResponse.append({"gameData3": gameData3})
+
+            ## THIS MUST BE LAST
+            jsonResponse.append({"allReady": True})
+        else:
+            jsonResponse.append({"ready": readyPlayers})  # Corrected line
+            jsonResponse.append({"allReady": False})
+
+        return jsonResponse
+
+    def hasMoveEndData(self, name):
+        if self.gameObj.KFWplayersMoveData == "":
+            return False
+        seat = self.seatPosition(name)
+
+        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+        player_time = playersMoveDataArr[seat][1]
+        player_move = playersMoveDataArr[seat][2]
+
+        return bool(
+            player_move != ""
+            and player_time != ""
+            and player_time != "MID_PHASE"
+            and player_time != "PRE_MOVE"
+        )
+
+    def clearAllMoveData(self):
+        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+        for i in range(len(playersMoveDataArr)):
+            playersMoveDataArr[i][1] = ""
+            playersMoveDataArr[i][2] = ""
+
+        self.gameObj.KFWplayersMoveData = json.dumps(playersMoveDataArr)
+
+        self.gameObj.save()
+
+    def getCurrentSimulPlayers(self):
+        # ASSUME THAT players have move data <=> they have moved
+        # ASSUME THAT phase is the start of simul phase
+
+        currentPlayersField = self._getCurrentPlayersField()
+
+        # If there are no current players, add everyone
+        if currentPlayersField == "":
+            all_gps = self.gameObj.players.filter(is_missing=False, is_kicked=False).select_related("player")
+            return ",".join(gp.player.username for gp in all_gps if gp.player)
+
+        # Get an array of possible players to move
+        _currentPlayers = [u.strip() for u in currentPlayersField.split(",") if u.strip()]
+        # Remove missing players
+        missing_gps = self.gameObj.players.filter(is_missing=True).select_related("player")
+        missing_usernames = {gp.player.username for gp in missing_gps if gp.player}
+        _currentPlayers = [
+            username for username in _currentPlayers if username not in missing_usernames
+        ]
+
+        # If any player has a move, then remove them
+        playersToRemove = []
+        for username in _currentPlayers:
+            if self.hasMoveEndData(username):
+                playersToRemove.append(username)
+
+        for username in playersToRemove:
+            _currentPlayers.remove(username)
+
+        # Join the list elements with ','
+        _currentPlayers = ",".join(_currentPlayers)
+
+        return _currentPlayers
+
+    #####################################################################
+    ###################### KFW specific server code
+    #####################################################################
+
+    def compressData(self, data_to_compress):
+        return base64.b64encode(
+            gzip.compress(json.dumps(data_to_compress).encode("utf-8"))
+        ).decode("utf-8")
+
+    def decompressData(self, string_to_decompress):
+        return json.loads(
+            gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode(
+                "utf-8"
+            )
+        )
+
+    def isTrainingGame(self):
+        startingOptions = (
+            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+        )
+        return 102 in startingOptions
+
+    def getGameData3compressed(self):
+        if self.gameObj.KFWserverData == "":
+            return ""
+        serverDataArr = json.loads(self.gameObj.KFWserverData)
+        meepleArr = serverDataArr[0]
+        skillsArr = serverDataArr[1]
+        if self.isTrainingGame():
+            returnData = [meepleArr, skillsArr]
+            return self.compressData(returnData)
+        returnData = [sum(meepleArr), sum(skillsArr)]
+        return self.compressData(returnData)
+
+    def getGameData1Compressed(self, username):
+        if self.gameObj.KFWplayersHiddenData == "":
+            return ""
+        # This has one subarray per player. Index in arr is playerIndex ["name", [meeplesArray], [skillsArray], [historyArray] ]
+        playersHiddenDataArr = json.loads(self.gameObj.KFWplayersHiddenData)
+        if self.isTrainingGame():
+            returnData = []
+            for playerData in playersHiddenDataArr:
+                returnData.append(playerData[1:])
+            return self.compressData(returnData)
+
+        # Find the subarray with the username we want to return data for
+        for playerData in playersHiddenDataArr:
+            if playerData[0] == username:
+                # return the data without the username
+                return self.compressData(playerData[1:])
+        return self.compressData([[], [], []])
+
+    def pull_items_from_bag(self, num_items, itmes_bag):
+        pulled_meeples = [0, 0, 0, 0]
+        for _ in range(num_items):
+            bag_size = sum(itmes_bag)
+            if bag_size == 0:
+                break
+            picked = _kfw_pick_random(bag_size, itmes_bag)
+            if picked == -1:
+                raise ValueError("Invalid pick from items bag")
+            itmes_bag[picked] -= 1
+            pulled_meeples[picked] += 1
+
+        return [pulled_meeples, itmes_bag]
+
+    def processEndOfTurnActions(self, compressedString):
+        SERV_MEEPLES_FROM_PLAYER_TO_BAG = (
+            0  # MOVE from player to bg --  then [MR, MR, ...]
+        )
+        SERV_MEEPLES_FROM_BAG_TO_PLAYER = 1
+        SERV_MEEPLES_REMOVE_FROM_PLAYER = 2  # JUST remove from player --
+        SERV_MEEPLES_JUST_TO_PLAYER = 3  # JUST get meeples --  then [MR, MR, ...]
+        SERV_MEEPLES_JUST_TO_BAG = 4  # JUST get meeples --  then [MR, MR, ...]
+        SERV_GET_RADOM_MEEPLES_FROM_BAG_TO_PLAYER = 5  # then entry[3]
+
+        MEEPLE_RANDOM = -4
+
+        SERV_SKILLS_FROM_PLAYER_TO_BAG = (
+            10  # MOVE from player to bg --  then [SS, SS, ...]
+        )
+        SERV_SKILLS_FROM_BAG_TO_PLAYER = 11
+        SERV_SKILLS_REMOVE_FROM_PLAYER = 12  # JUST remove from player --
+        SERV_SKILLS_JUST_TO_PLAYER = 13  # JUST get meeples --  then [SS, SS, ...]
+        SERV_SKILLS_JUST_TO_BAG = 14  # JUST get meeples --  then [SS, SS, ...]
+        SERV_GET_RADOM_SKILLS_FROM_BAG_TO_PLAYER = 15  # then entry[3]
+
+        SKILL_ANY_RANDOM = -3
+
+        SERV_GET_RANDOM_MEEPLE_RANDOM_SKILL = 20  # then entry[3]
+
+        dataArr = self.decompressData(compressedString)
+        newInformation = [[], [], -1]
+        if len(dataArr) > 0:
+            newInformation[2] = dataArr[0][0]
+        allPlayersHiddenData = json.loads(self.gameObj.KFWplayersHiddenData)
+        serverDataArr = json.loads(self.gameObj.KFWserverData)
+        meeple_bag = serverDataArr[0]
+        skills_bag = serverDataArr[1]
+
+        for row in dataArr:
+            # [playerindex, serverAction, num, histindex, [histData]]
+            playerIndex = row[0]
+            serverAction = row[1]
+
+            playerHiddenData = allPlayersHiddenData[playerIndex]
+
+            # Removing actions should be done first
+            if serverAction == SERV_MEEPLES_FROM_BAG_TO_PLAYER:
+                meeples = row[2]
+                for num in meeples:
+                    # Add to the player
+                    playerHiddenData[1][num] += 1
+                    # Remove from the bag
+                    meeple_bag[num] -= 1
+
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            elif serverAction == SERV_SKILLS_FROM_BAG_TO_PLAYER:
+                skills = row[2]
+                for num in skills:
+                    # Add to the player
+                    playerHiddenData[2][num] += 1
+                    # Remove from the bag
+                    skills_bag[num] -= 1
+
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            # Now draw random
+            elif serverAction == SERV_GET_RADOM_MEEPLES_FROM_BAG_TO_PLAYER:
+                num = row[2]
+                histIndex = row[3]
+                histEntry = row[4]
+
+                # Remove meeples from bag
+                [meeplesPulledArr, meeple_bag] = self.pull_items_from_bag(
+                    num, meeple_bag
+                )
+                meeplesPulled = []
+                for i in range(len(meeplesPulledArr)):
+                    for _ in range(meeplesPulledArr[i]):
+                        meeplesPulled.append(i)
+                        newInformation[0].append(i)
+                # Add meeples to player
+                playerHiddenData[1] = [
+                    x + y for x, y in zip(playerHiddenData[1], meeplesPulledArr)
+                ]
+                for i, value in enumerate(histEntry):
+                    if value == MEEPLE_RANDOM and meeplesPulled:
+                        histEntry[i] = meeplesPulled.pop()
+                histArr = [histIndex, histEntry]
+
+                playerHiddenData[3].append(histArr)
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            elif serverAction == SERV_GET_RADOM_SKILLS_FROM_BAG_TO_PLAYER:
+                num = row[2]
+                histIndex = row[3]
+                histEntry = row[4]
+
+                # Remove skills from bag
+                [skillsPulledArr, skills_bag] = self.pull_items_from_bag(
+                    num, skills_bag
+                )
+                skillsPulled = []
+                for i in range(len(skillsPulledArr)):
+                    for _ in range(skillsPulledArr[i]):
+                        skillsPulled.append(i)
+                        newInformation[1].append(i)
+                # Add skills to player
+                playerHiddenData[2] = [
+                    x + y for x, y in zip(playerHiddenData[2], skillsPulledArr)
+                ]
+                # Create the history
+                for i, value in enumerate(histEntry):
+                    if value == SKILL_ANY_RANDOM and skillsPulled:
+                        histEntry[i] = skillsPulled.pop()
+                histArr = [histIndex, histEntry]
+
+                playerHiddenData[3].append(histArr)
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            elif serverAction == SERV_GET_RANDOM_MEEPLE_RANDOM_SKILL:
+                num = row[2]
+                histIndex = row[3]
+                histEntry = row[4]
+
+                # Remove meeples from bag
+                [meeplesPulledArr, meeple_bag] = self.pull_items_from_bag(
+                    num, meeple_bag
+                )
+                meeplesPulled = []
+                for i in range(len(meeplesPulledArr)):
+                    for _ in range(meeplesPulledArr[i]):
+                        meeplesPulled.append(i)
+                        newInformation[0].append(i)
+                # Add meeples to player
+                playerHiddenData[1] = [
+                    x + y for x, y in zip(playerHiddenData[1], meeplesPulledArr)
+                ]
+
+                # Remove skills from bag
+                [skillsPulledArr, skills_bag] = self.pull_items_from_bag(
+                    num, skills_bag
+                )
+                skillsPulled = []
+                for i in range(len(skillsPulledArr)):
+                    for _ in range(skillsPulledArr[i]):
+                        skillsPulled.append(i)
+                        newInformation[1].append(i)
+
+                # Add skills to player
+                playerHiddenData[2] = [
+                    x + y for x, y in zip(playerHiddenData[2], skillsPulledArr)
+                ]
+                histEntry[0] = meeplesPulled[0]
+                histEntry[1] = skillsPulled[0]
+
+                histArr = [histIndex, histEntry]
+
+                playerHiddenData[3].append(histArr)
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            ######### ACTIONS JUST TO CATCH THE SERVER UP WITH THE GAME
+            elif serverAction == SERV_MEEPLES_JUST_TO_PLAYER:
+                meeples = row[2]
+
+                for num in meeples:
+                    # Add to the player
+                    playerHiddenData[1][num] += 1
+
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            elif serverAction == SERV_SKILLS_JUST_TO_PLAYER:
+                skills = row[2]
+
+                for num in skills:
+                    # Add to the player
+                    playerHiddenData[2][num] += 1
+
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            elif serverAction == SERV_MEEPLES_REMOVE_FROM_PLAYER:
+                meeples = row[2]
+
+                for num in meeples:
+                    # Remove from the player
+                    playerHiddenData[1][num] -= 1
+
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            elif serverAction == SERV_SKILLS_REMOVE_FROM_PLAYER:
+                skills = row[2]
+
+                for num in skills:
+                    # Remove from the player
+                    playerHiddenData[2][num] -= 1
+
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            # Depositing actions should be done last
+            elif serverAction == SERV_MEEPLES_FROM_PLAYER_TO_BAG:
+                meeples = row[2]
+                for num in meeples:
+                    # Remove from the player
+                    playerHiddenData[1][num] -= 1
+                    # Add to the bag
+                    meeple_bag[num] += 1
+
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            elif serverAction == SERV_SKILLS_FROM_PLAYER_TO_BAG:
+                skills = row[2]
+                for num in skills:
+                    # Remove from the player
+                    playerHiddenData[2][num] -= 1
+                    # Add to the bag
+                    skills_bag[num] += 1
+
+                allPlayersHiddenData[playerIndex] = playerHiddenData
+
+            elif serverAction == SERV_MEEPLES_JUST_TO_BAG:
+                meeples = row[2]
+                for num in meeples:
+                    # Add to the bag
+                    meeple_bag[num] += 1
+
+            elif serverAction == SERV_SKILLS_JUST_TO_BAG:
+                skills = row[2]
+                for num in skills:
+                    # Add to the bag
+                    skills_bag[num] += 1
+
+        self.gameObj.KFWplayersHiddenData = json.dumps(allPlayersHiddenData)
+        self.gameObj.KFWserverData = json.dumps([meeple_bag, skills_bag])
+
+        return newInformation
+
+    def getMissingPlayersNamesArray(self):
+        return list(
+            self.gameObj.players.filter(
+                is_missing=True,
+                player__isnull=False
+            )
+            .values_list("player__username", flat=True)
+        )
+
+    def getGameCode(self):
+        return "KFW"
+
+
+##########$
+# UTILS for KFW
+def _kfw_pick_random(count, selection):
+    random_index = random.randint(0, count - 1)
+    max_val = 0
+    for i in range(len(selection)):
+        max_val += selection[i]
+        if max_val > random_index:
+            return i
+    return -1
