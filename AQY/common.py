@@ -203,9 +203,6 @@ def create_aqy_game(
             gameStatus=game_status,
             kickoutDuration=kickout_duration,
             zoomLevels=json.dumps([16] * max_players),
-            statsExcludeConsent=(
-                "1" * max_players if stats_exclude else "0" * max_players
-            ),
             statsExcludedGame=stats_exclude,
             startingMap=starting_map,
             startingOptions=json.dumps(starting_options),

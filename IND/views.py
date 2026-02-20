@@ -187,14 +187,10 @@ def createINDgame(request):
         newGame.kickoutDuration = request.POST["kickoutDuration"]
         zoomLevels = [0] * _maxPlayers
         newGame.zoomLevels = json.dumps(zoomLevels)
-        # newGame.statsExcludeConsent = "0" * _maxPlayers
 
         if "trainingGame" in request.POST:
-            # newGame.statsExcludeConsent = "1" * _maxPlayers
             newGame.statsExcludedGame = True
         elif "learningGame" in request.POST:
-            # newGame.rewindConsent = "2" * (_maxPlayers)
-            # newGame.statsExcludeConsent = "1" * _maxPlayers
             newGame.statsExcludedGame = True
 
         _startingOptions = []
@@ -650,7 +646,6 @@ def _processINDturn(request):
             _missingPlayer_gp.is_missing = True
             _missingPlayer_gp.save()
         presenter.checkForHostChange(_missingPlayer)
-        # presenter.enableStatsExclude(request.user.username)
 
         # newVer = (int(currentGame.latestUpdate) % 1000) + 1
         # currentGame.latestUpdate = str((int(time.time())*1000) + newVer)
@@ -803,7 +798,6 @@ def _processINDturn(request):
             _missingPlayer_gp.is_kicked = True
             _missingPlayer_gp.save()
         presenter.checkForHostChange(_missingPlayer)
-        # presenter.enableStatsExclude(_missingPlayer.username)
 
         # Clears data and saves record - DONT DELETE FAC MOVES
         # currentGame.clearAllMoveData()
