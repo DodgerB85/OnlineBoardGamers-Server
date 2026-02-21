@@ -418,11 +418,6 @@ class BaseGame(models.Model):
     # ARRAY OF INTS / SUBARRS. (Except legacy FCM games perhaps).
     startingOptions = models.CharField(max_length=100, blank=True)
 
-    # THESE 2 GET DELETED ON GAME END. SO MAYBE COMBINE THESE INTO "votes" OPTIONS OR SOMETHING?
-    # DELETE ON GAME END, SO NORMALLY TAKE UP ZERO SPACE
-    statsExcludeConsent = models.CharField(max_length=40, blank=True, null=True)
-    deleteGameVotes = models.JSONField(default=dict, blank=True, null=True)
-
     ####### THESE ITEMS ONLY EXIST IN THIS GENERAL GAME MODEL
     activeVotes = models.JSONField(default=dict, blank=True, null=True)
 
@@ -511,7 +506,7 @@ class Game(BaseGame):
     )
     
     # CURRENTLY RnB ONLY
-    serverRemainingPlayerOrderByNames = models.JSONField(default=list, blank=True)
+    serverCurrentPlayerNamesInTurnOrder = models.JSONField(default=list, blank=True)
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)

@@ -312,7 +312,6 @@ class GameAdmin(admin.ModelAdmin):
                     "kickoutDuration",
                     "gamePace",
                     "zoomLevels",
-                    "statsExcludeConsent",
                     "statsExcludedGame",
                 ),
             },
@@ -322,7 +321,7 @@ class GameAdmin(admin.ModelAdmin):
             {
                 "classes": ("collapse",),
                 "fields": (
-                    "serverRemainingPlayerOrderByNames",
+                    "serverCurrentPlayerNamesInTurnOrder",
                     "FCMplayersMoveData",
                     "ind_premove_display",
                     "currentPlayersInTurnOrder",
@@ -342,7 +341,6 @@ class GameAdmin(admin.ModelAdmin):
                     # "kickedPlayers",
                     "invitedPlayers",
                     # "playersWithChatNotification",
-                    # "deleteGameVotes",
                     "activeVotes",
                 ),
             },

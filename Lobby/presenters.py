@@ -266,11 +266,11 @@ class GamePresenter:
         if not current_players_array or len(current_players_array) == 0:
             # Clear all current players
             self.gameObj.players.all().update(is_current=False)
-            self.gameObj.serverRemainingPlayerOrderByNames = []
+            self.gameObj.serverCurrentPlayerNamesInTurnOrder = []
             self.gameObj.save()
             return
         
-        self.gameObj.serverRemainingPlayerOrderByNames = current_players_array
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
         self.gameObj.save()
         
         game_players = self.gameObj.players.exclude(is_kicked=True).select_related(
@@ -315,8 +315,6 @@ class GamePresenter:
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
         self.gameObj.kickoutFlexiData = ""
-        self.gameObj.statsExcludeConsent = ""
-        self.gameObj.deleteGameVotes = None
         self.gameObj.activeVotes = None
 
     ###### VOTING METHODS #######
@@ -639,12 +637,12 @@ class WebPresenter(GamePresenter):
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            self.gameObj.deleteGameVotes = {}
-            all_usernames = [gp.player.username for gp in game_players if gp.player]
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in all_usernames}
-            )
-            self.gameObj.save()
+            #self.gameObj.deleteGameVotes = {}
+            #all_usernames = [gp.player.username for gp in game_players if gp.player]
+            #self.gameObj.deleteGameVotes.update(
+            #    {username: False for username in all_usernames}
+            #)
+            #self.gameObj.save()
 
             if not isTournamentGame:
                 playerListToNotify = [
@@ -672,50 +670,6 @@ class WebPresenter(GamePresenter):
 
     def getGameCode(self):
         return "WEB"
-
-    def getDeleteVotesData(self):
-        if self.gameObj.gameStatus == "FINISHED":
-            all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-                "player"
-            )
-            return {gp.player.username: False for gp in all_players if gp.player}
-
-        if self.gameObj.deleteGameVotes is None:
-            all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-                "player"
-            )
-            self.gameObj.deleteGameVotes = {
-                gp.player.username: False for gp in all_players if gp.player
-            }
-            self.gameObj.save()
-
-        return self.gameObj.deleteGameVotes
-
-    def addDeleteVote(self, playerName):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        player_usernames = [gp.player.username for gp in all_players if gp.player]
-
-        if playerName not in player_usernames:
-            return False
-
-        if self.gameObj.deleteGameVotes is None:
-            self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        if playerName not in self.gameObj.deleteGameVotes:
-            self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-
-        self.gameObj.deleteGameVotes[playerName] = True
-        self.gameObj.save()
-        return True
-
 
 class AqyPresenter(GamePresenter):
     def __str__(self):
@@ -1274,8 +1228,6 @@ class IndPresenter(GamePresenter):
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
             all_players = list(self.gameObj.players.select_related("player"))
             player_usernames = [gp.player.username for gp in all_players if gp.player]
-            # REMOVE THIS WHEN ON MAIN VOTING SYSTEM
-            self.gameObj.deleteGameVotes = {}  # Initialize to an empty dictionary
             self.gameObj.save()
 
             playerListToNotify = [
@@ -1456,7 +1408,6 @@ class BusPresenter(GamePresenter):
         self.gameObj.rewindTempData = ""
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
-        self.gameObj.deleteGameVotes = None
 
         winner_user = User.objects.get(username=_winnerUsername)
         winner_gp = self.gameObj.players.filter(player=winner_user).first()
@@ -1580,14 +1531,6 @@ class BusPresenter(GamePresenter):
 
         # required to send correct start player notification
         self.gameObj.save()
-
-        if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            player_usernames = [gp.player.username for gp in game_players if gp.player]
-            self.gameObj.deleteGameVotes = {}  # Initialize to an empty dictionary
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-            self.gameObj.save()
 
         # The tournament sends out game start notifications ## TODO compare this to other starts
         if (
@@ -1723,7 +1666,7 @@ class RnbPresenter(GamePresenter):
             gp.seat_order = idx
             gp.is_current = idx == 0
             
-        self.gameObj.serverRemainingPlayerOrderByNames = [gp.player.username for gp in game_players]
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players]
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
 
@@ -2591,10 +2534,6 @@ class FcmPresenter(GamePresenter):
             winner_gp.winner = True
             winner_gp.save()
 
-        try:
-            self.gameObj.deleteGameVotes = None
-        except:
-            pass
         self.clearAllMoveDataV2()
         self.gameObj.save()
 
@@ -2822,11 +2761,6 @@ class HcPresenter(GamePresenter):
 
         if "SHADOW" not in [gp.player.username for gp in game_players if gp.player]:
             player_usernames = [gp.player.username for gp in game_players if gp.player]
-            self.gameObj.deleteGameVotes = {}
-            self.gameObj.deleteGameVotes.update(
-                {username: False for username in player_usernames}
-            )
-            self.gameObj.save()
 
             playerListToNotify = list(player_usernames)
             if request.user.username in playerListToNotify:
