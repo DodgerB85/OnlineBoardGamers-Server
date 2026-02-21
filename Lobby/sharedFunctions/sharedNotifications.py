@@ -721,8 +721,11 @@ def SN_sendNextTurnNotification(
                 profile = Profile.objects.get(user=user)
                 activate(profile.profileLanguage)
                 # Set up language vars
-                currentTurnString = currentGame.presenter().currentTurnString()
-
+                if SR_usesUnifiedGameModel(game):
+                    currentTurnString = currentGame.presenter().currentTurnString()
+                else:
+                    currentTurnString = currentGame.currentTurnString()
+                    
                 gameStrings = getGameStrings(game)
                 subject = gameStrings["yourTurnSubject"]
                 boxName = gameStrings["boxName"]
