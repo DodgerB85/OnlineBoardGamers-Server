@@ -109,10 +109,9 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     gameID = currentGame.id
     gameName = presenter.getGameName()
 
-    # 1. Get the raw binary (Gzip + MsgPack)
-    raw_blob = currentGame.gameDataBLOB or b""
-    # 2. Encode to Base64 so it can travel safely in HTML
-    gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
+
+    # Encode to Base64 so it can travel safely in HTML
+    gameDataB64 = base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
 
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = (
@@ -123,7 +122,6 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     )
 
     allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, False)
-
     # Logged out
     returnData = {
         "gameID": gameID,
@@ -139,7 +137,6 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
         "currentPlayers": presenter.getCurrentPlayersArray(),
         # "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
-        
         "statsExcludeVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
                 STATS_EXCLUDE_VOTE_TOPIC,
@@ -243,7 +240,6 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "statsExcludedGame": currentGame.statsExcludedGame,
             "move": move,
             "trade": trade,
-            
         }
     )
 
@@ -443,15 +439,18 @@ def _processRNBturn(request):
             currentGame.kickoutDuration,
         )
 
+        # First, add the conflict preset move
+        conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
+        conflictPresetMove["status"] = "pending"
+        PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
+
         # If the client and server both agree that this person is first, then the browser will only allow valid moves
-        # So it must be a valid move
+        # So it must be a valid move. So update the game with the ALREADY PROCESSED game data, and move on
         if jsonData["isCurrent"] == True and (
             len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
             and currentGame.serverCurrentPlayerNamesInTurnOrder[0] == nameToUse
             and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"])
         ):
-            # Save your conflict preset
-            PaddMoveToPlayer(currentGame, nameToUse, PdecompressData(jsonData["conflictPresetData"]))
             # Perform most of a normal save
             db_latest_update = currentGame.latestUpdate
             latest_update = jsonData.get("latestUpdate", 0)
@@ -468,14 +467,17 @@ def _processRNBturn(request):
             newVer = (int(db_latest_update) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
             print(f"nextCurrentPlayers: {jsonData['nextCurrentPlayers']}")
-            presenter.setCurrentPlayersFromArr(jsonData["nextCurrentPlayers"])
+            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayers"])
 
             # SAVE BEFORE NOTIFICATIONS
             currentGame.save()
 
             ################ REWIND EVERY SAVE #######################
             # Don't save rewind if all players have moved - wait for client to process phase
-            if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+            if (
+                jsonData["saveRewind"]
+                and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
+            ):
                 doSaveRewind(currentGame, jsonData)
 
             ################ END REWIND EVERY SAVE #######################
@@ -483,29 +485,22 @@ def _processRNBturn(request):
             currentGame.save()
 
             # time.sleep(10)
-            print(f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}")
+            print(
+                f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}"
+            )
 
             response_data = {
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "savingFromStackMove": True,
                 "stacks": getCurrentStackMoves(currentGame),
-                "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0
+                "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
             }
 
             return JsonResponse(response_data, safe=False)
 
-        # You are not current in BOTH server and browser, so save moves first
-        newMoveEntry = {
-            "turn": jsonData["turn"],
-            "phase": jsonData["phase"],
-            "actionStack": jsonData["actionStack"],
-        }
-        PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
-        PaddMoveToPlayer(
-            currentGame, nameToUse, PdecompressData(jsonData["conflictPresetData"])
-        )
-
+        # Otherwise, You are not current in BOTH server and browser.
+        # But if you are the current player on the SERVER, thenn proceed for immediate processing
         # If you are current player on SERVER, the client must have missed an update
         # So return the mvoe for immediate client-side verification
         if (
@@ -513,9 +508,34 @@ def _processRNBturn(request):
             and currentGame.serverCurrentPlayerNamesInTurnOrder[0] == nameToUse
             and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"])
         ):
-            pass
+            # First save the move in case the return somehow fails
+            newMoveEntry = {
+                "turn": jsonData["turn"],
+                "phase": jsonData["phase"],
+                "actionStack": jsonData["actionStack"],
+                "status": "current",
+            }
+            PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
+            
+            response_data = {
+                "latestUpdate": currentGame.latestUpdate,
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+                "immediateProcess": True,
+                "stacks": getCurrentStackMoves(currentGame),
+                "gameDataB64": base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
+            }
+            
+            return JsonResponse(response_data, safe=False)
+
 
         # Otherwise, you are not a current player. So just return confirmation of saved-for-later
+        newMoveEntry = {
+            "turn": jsonData["turn"],
+            "phase": jsonData["phase"],
+            "actionStack": jsonData["actionStack"],
+            "status": "pending",
+        }
+        PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
@@ -678,7 +698,7 @@ def _processRNBturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArr(jsonData["nextCurrentPlayers"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayers"])
 
         gameDataStr = jsonData["gameData"]
         raw_binary = base64.b64decode(gameDataStr)
@@ -764,6 +784,7 @@ def _processRNBturn(request):
 
     return HttpResponse(status=204)  # No Content
 
+
 def doSaveRewind(currentGame, jsonData):
     # Need this as intially it is totally empty
     # 1. Load existing history (safely handle empty string)
@@ -780,10 +801,7 @@ def doSaveRewind(currentGame, jsonData):
     # 3. Handle Temp Data (ensure it's also a B64 string)
     if currentGame.rewindTempData:
         # If temp exists and is different from last save, add it
-        if (
-            not currentRewindData
-            or currentRewindData[-1] != currentGame.rewindTempData
-        ):
+        if not currentRewindData or currentRewindData[-1] != currentGame.rewindTempData:
             currentRewindData.append(currentGame.rewindTempData)
         currentGame.rewindTempData = ""  # Reset temp storage
 
@@ -798,20 +816,24 @@ def doSaveRewind(currentGame, jsonData):
 
     currentGame.rewindData = json.dumps(currentRewindData)
 
+
 def getCurrentStackMoves(currentGame):
     currentStackMoves = []
     for gp in currentGame.players.all():
         gp_moveData = gp.moveDataJSON
         # Find an entry matching the turn and phase
         for entry in gp_moveData:
-            if entry["turn"] == currentGame.turn and entry["phase"] == currentGame.phase:
+            if (
+                entry["turn"] == currentGame.turn
+                and entry["phase"] == currentGame.phase
+            ):
                 entryToAdd = entry
                 entryToAdd["player"] = gp.player.username
                 currentStackMoves.append(entryToAdd)
                 break
 
     return currentStackMoves
-    
+
 
 def performSaveGame(request, currentGame, jsonData):
     db_latest_update = currentGame.latestUpdate
@@ -851,7 +873,7 @@ def performSaveGame(request, currentGame, jsonData):
     newVer = (int(db_latest_update) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    presenter.setCurrentPlayersFromArr(jsonData["nextCurrentPlayers"])
+    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayers"])
 
     # SAVE BEFORE NOTIFICATIONS
     currentGame.save()

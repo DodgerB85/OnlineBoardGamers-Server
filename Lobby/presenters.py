@@ -261,7 +261,7 @@ class GamePresenter:
                 gp.is_current = gp.player.username in current_usernames
                 gp.save()
 
-    def setCurrentPlayersFromArr(self, current_players_array):
+    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array):
         """Set current players by updating is_current on GamePlayer instances"""
         if not current_players_array or len(current_players_array) == 0:
             # Clear all current players

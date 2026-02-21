@@ -604,10 +604,9 @@ def _processTurn(request):
 
         # Update current players
         currentPlayersArr = presenter.getCurrentPlayersArray()
-        print(currentPlayersArr)
         if request.user.username not in currentPlayersArr:
             currentPlayersArr.append(request.user.username) # This updates the list directly
-            presenter.setCurrentPlayersFromArr(currentPlayersArr)
+            presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersArr)
         currentGame.save()
         return JsonResponse({"unlockStatus": True}, safe=False)
 
@@ -1979,7 +1978,8 @@ def FCMdata(request, dataType):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        #raise Http404(gettext("Game does not exist"))
+        raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: FCM)")
 
     presenter = cast('FcmPresenter', currentGame.presenter())
 
