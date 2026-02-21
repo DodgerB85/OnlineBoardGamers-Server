@@ -297,6 +297,7 @@ class GameAdmin(admin.ModelAdmin):
                 "fields": (
                     "latestUpdate",
                     "startingOptions",
+                    "startingMap",
                     "playerOrderSeed",
                 )
             },

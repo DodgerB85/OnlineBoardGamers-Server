@@ -488,13 +488,18 @@ def _processRNBturn(request):
             print(
                 f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}"
             )
+            
+            # Now get the NEXT set of moves -- and set the next player's stack to current
+            if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+                setPlayerStackToCurrent(currentGame, currentGame.serverCurrentPlayerNamesInTurnOrder[0])
 
             response_data = {
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "savingFromStackMove": True,
-                "stacks": getCurrentStackMoves(currentGame),
+                "stacks": getAllCurrentStackPhaseMoves(currentGame),
                 "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
+                "sCurrentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
             }
 
             return JsonResponse(response_data, safe=False)
@@ -521,7 +526,7 @@ def _processRNBturn(request):
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "immediateProcess": True,
-                "stacks": getCurrentStackMoves(currentGame),
+                "stacks": getAllCurrentStackPhaseMoves(currentGame),
                 "gameDataB64": base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
             }
             
@@ -816,8 +821,21 @@ def doSaveRewind(currentGame, jsonData):
 
     currentGame.rewindData = json.dumps(currentRewindData)
 
+def setPlayerStackToCurrent(currentGame, playerName):
+    gp = currentGame.players.filter(player__username=playerName).first()
+    gp_moveData = gp.moveDataJSON
+    # Find an entry matching the turn and phase
+    for entry in gp_moveData:
+        if (
+            entry["turn"] == currentGame.turn
+            and entry["phase"] == currentGame.phase
+        ):
+            entry["status"] = "current"
+            gp.moveDataJSON = gp_moveData
+            gp.save()
+            break
 
-def getCurrentStackMoves(currentGame):
+def getAllCurrentStackPhaseMoves(currentGame):
     currentStackMoves = []
     for gp in currentGame.players.all():
         gp_moveData = gp.moveDataJSON
