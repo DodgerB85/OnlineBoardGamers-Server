@@ -52,7 +52,6 @@ django.setup()
 
 from django.contrib.sites.models import Site
 
-from KFW.models import KFW_Game
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament, Mini_Tournaments
 
 from Lobby.sharedFunctions.sharedFunctions import SF_endAnyTournament#(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
@@ -60,7 +59,7 @@ from Lobby.sharedFunctions.sharedFunctions import SF_endAnyTournament#(request, 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
 
-allKFWgames = KFW_Game.objects.all()
+allKFWgames = Game.objects.filter(gameCode='KFW')
 allMiniTs = Mini_Tournaments.objects.all()
 
 #game = HC_Game.objects.last()

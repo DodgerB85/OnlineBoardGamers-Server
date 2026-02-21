@@ -104,7 +104,7 @@ from .models import (
     Main_Tournament,
 )
 
-from KFW.models import KFW_Game
+# KFW now uses unified Game model
 
 from user_visit.models import UserVisit
 
@@ -425,13 +425,12 @@ GAME_NAMES_MODELS = {
     "CNS": "CNS",  # Now using unified Game model
     "AQY": "AQY",  # Now using unified Game model
     "IND": "IND",  # Now using unified Game model
-    "KFW": KFW_Game,
+    "KFW": "KFW",  # Now using unified Game model
     "WEB": "WEB",  # Now using unified Game model
     "RNB": "RNB",
 }
 GAME_MODELS = [
-    # HC, Bus, CNS, AQY, WEB, IND, FCM, etc now use unified Game model
-    KFW_Game,
+    # All games now use unified Game model
 ]
 
 
@@ -754,7 +753,7 @@ def DBO_deleteGame(request, game_type):
         "CNS": Game,  # Now using unified Game model
         "AQY": Game,  # Now using unified Game model
         "IND": Game,  # Now using unified Game model
-        "KFW": KFW_Game,
+        "KFW": Game,  # Now using unified Game model
         "WEB": Game,  # Now using unified Game model
     }
 
@@ -1137,7 +1136,7 @@ def stats(request):
     stats_map = {}  # Using a dict temporarily to collect data
 
     # Handle all unified model games (CNS, WEB, AQY, TGZ, IND, etc.)
-    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC"]:
+    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC", "KFW"]:
         counts_key = f"counts_Game_{game_code}"
         counts = cache.get(counts_key)
 
@@ -2255,20 +2254,20 @@ def createINDpage2(request, gameID=0):
 
 @login_required
 def createKFWpage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "KFW", KFW_Game)
+    experienced = SF_hasRequiredExperience(request, "KFW", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createKFW.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = KFW_Game.objects.get(id=gameID)
-        except KFW_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=gameID, gameCode="KFW")
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
         playerNames = []
-        for user in currentGame.allPlayers.all():
-            if request.user != user:
-                playerNames.append(user.username)
+        for gp in currentGame.players.exclude(is_kicked=True).select_related("player"):
+            if gp.player and request.user != gp.player:
+                playerNames.append(gp.player.username)
 
         messages.success(request, (gettext("Game creation for rematch")))
         loadedStartingOptions = (
