@@ -3793,7 +3793,7 @@ def schism(request):
     
 
 @login_required
-def indPhpMap(request):
+def phpgames(request):
     # Fetch querysets
     availableGamesList = Game.objects.filter(
         gameStatus="AVAILABLE", gameCode="IND"
