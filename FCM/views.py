@@ -1715,7 +1715,7 @@ def _processTurn(request):
 
         # Send Notifications - and remove pre-data for players with illegal moves
         playerIndexesToNotify = jsonData["playerIndexesToNotify"]
-        playerNames = presenter.getAllPlayersOrderedySeat(False, True)
+        playerNames = presenter.getAllPlayersOrderedySeat(False, False)
         playerListToNotify = []
         for playerIndex in playerIndexesToNotify:
             playerListToNotify.append(playerNames[playerIndex])
