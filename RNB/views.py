@@ -446,8 +446,8 @@ def _processRNBturn(request):
         # If the client and server both agree that this person is first, then the browser will only allow valid moves
         # So it must be a valid move
         if jsonData["isCurrent"] == True and (
-            len(currentGame.serverRemainingPlayerOrderByNames) > 0
-            and currentGame.serverRemainingPlayerOrderByNames[0] == nameToUse
+            len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
+            and currentGame.serverCurrentPlayerNamesInTurnOrder[0] == nameToUse
             and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"])
         ):
             # Save your conflict preset
@@ -475,7 +475,7 @@ def _processRNBturn(request):
 
             ################ REWIND EVERY SAVE #######################
             # Don't save rewind if all players have moved - wait for client to process phase
-            if jsonData["saveRewind"] and len(currentGame.serverRemainingPlayerOrderByNames) > 0:
+            if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
                 doSaveRewind(currentGame, jsonData)
 
             ################ END REWIND EVERY SAVE #######################
@@ -483,14 +483,14 @@ def _processRNBturn(request):
             currentGame.save()
 
             # time.sleep(10)
-            print(f"servNames: {currentGame.serverRemainingPlayerOrderByNames} len: {len(currentGame.serverRemainingPlayerOrderByNames)}")
+            print(f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}")
 
             response_data = {
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "savingFromStackMove": True,
                 "stacks": getCurrentStackMoves(currentGame),
-                "nextPhase": len(currentGame.serverRemainingPlayerOrderByNames) == 0
+                "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0
             }
 
             return JsonResponse(response_data, safe=False)
@@ -509,8 +509,8 @@ def _processRNBturn(request):
         # If you are current player on SERVER, the client must have missed an update
         # So return the mvoe for immediate client-side verification
         if (
-            len(currentGame.serverRemainingPlayerOrderByNames) > 0
-            and currentGame.serverRemainingPlayerOrderByNames[0] == nameToUse
+            len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
+            and currentGame.serverCurrentPlayerNamesInTurnOrder[0] == nameToUse
             and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"])
         ):
             pass
