@@ -90,3 +90,11 @@ class HCgame(Game):
         app_label = "HC"
         verbose_name = "HC_Game"
         verbose_name_plural = "HC_Games"
+
+# KFW
+class KFWgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "KFW"
+        verbose_name = "KFW_Game"
+        verbose_name_plural = "KFW_Games"
