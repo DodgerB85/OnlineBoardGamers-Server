@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter
+from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter, KfwPresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -518,13 +518,18 @@ class Game(BaseGame):
     FCMplayersMoveData = models.TextField(blank=True)
     FCMnotificationSuppression = models.CharField(max_length=30, blank=False, default="000000")
 
+    # KFW-specific fields
+    KFWserverData = models.TextField(blank=True, default=json.dumps([[40, 40, 40, 0], [16, 16, 16]]))
+    KFWplayersHiddenData = models.TextField(blank=True)
+    KFWplayersMoveData = models.TextField(blank=True)
+
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)
 
     if TYPE_CHECKING:
         players: RelatedManager[GamePlayer]
 
-    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter]:
+    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter, KfwPresenter]:
         if self.gameCode == "CNS":
             return CannesPresenter(self)
         if self.gameCode == "WEB":
@@ -543,6 +548,8 @@ class Game(BaseGame):
             return RnbPresenter(self)
         if self.gameCode == "HC":
             return HcPresenter(self)
+        if self.gameCode == "KFW":
+            return KfwPresenter(self)
         # Return a CannesPresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
         return CannesPresenter(self)
