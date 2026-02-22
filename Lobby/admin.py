@@ -76,7 +76,7 @@ class GamePlayerInline(admin.TabularInline):
     # fields = ("player", "player_number", "status", "edit_link")
     # readonly_fields = ("edit_link",)
     show_change_link = True
-    fields = ("player", "seat_order", "winner", "is_current", "is_missing", "is_kicked")
+    fields = ("player", "seat_order", "winner", "is_current", "is_missing", "is_kicked", "moveDataJSON")
     autocomplete_fields = ["player"]
 
     # @admin.display(description="Edit")
@@ -297,6 +297,7 @@ class GameAdmin(admin.ModelAdmin):
                 "fields": (
                     "latestUpdate",
                     "startingOptions",
+                    "startingMap",
                     "playerOrderSeed",
                 )
             },
@@ -312,7 +313,6 @@ class GameAdmin(admin.ModelAdmin):
                     "kickoutDuration",
                     "gamePace",
                     "zoomLevels",
-                    "statsExcludeConsent",
                     "statsExcludedGame",
                 ),
             },
@@ -322,7 +322,7 @@ class GameAdmin(admin.ModelAdmin):
             {
                 "classes": ("collapse",),
                 "fields": (
-                    "serverRemainingPlayerOrderByNames",
+                    "serverCurrentPlayerNamesInTurnOrder",
                     "FCMplayersMoveData",
                     "ind_premove_display",
                     "currentPlayersInTurnOrder",
@@ -342,7 +342,6 @@ class GameAdmin(admin.ModelAdmin):
                     # "kickedPlayers",
                     "invitedPlayers",
                     # "playersWithChatNotification",
-                    # "deleteGameVotes",
                     "activeVotes",
                 ),
             },

@@ -150,14 +150,10 @@ def createKFWgame(request):
         newGame.kickoutDuration = request.POST["kickoutDuration"]
         zoomLevels = [0] * _maxPlayers
         newGame.zoomLevels = json.dumps(zoomLevels)
-        # newGame.statsExcludeConsent = "0" * _maxPlayers
 
         if "trainingGame" in request.POST:
-            # newGame.statsExcludeConsent = "1" * _maxPlayers
             newGame.statsExcludedGame = True
         elif "learningGame" in request.POST:
-            # newGame.rewindConsent = "2" * (_maxPlayers)
-            # newGame.statsExcludeConsent = "1" * _maxPlayers
             newGame.statsExcludedGame = True
 
         _startingOptions = []

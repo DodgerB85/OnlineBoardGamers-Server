@@ -124,7 +124,6 @@ def create_tgz_game(
                         gameStatus="ACTIVE",
                         kickoutDuration=100,
                         zoomLevels=json.dumps([240] * max_players),
-                        statsExcludeConsent="0" * max_players,
                         startingOptions=json.dumps(
                             SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else []
                         ),
@@ -227,7 +226,6 @@ def create_tgz_game(
                     gameStatus="ACTIVE",
                     kickoutDuration=request.POST.get("kickoutDuration", 100),
                     zoomLevels=json.dumps([240] * max_players),
-                    statsExcludeConsent="0" * max_players,
                     startingMap=request.POST.get("mapData", ""),
                     startingOptions=json.dumps(
                         SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else []
@@ -392,7 +390,6 @@ def create_tgz_game(
             gameStatus=game_status,
             kickoutDuration=kickout_duration,
             zoomLevels=json.dumps([240] * max_players),
-            statsExcludeConsent="1" * max_players if stats_exclude else "0" * max_players,
             statsExcludedGame=stats_exclude,
             startingMap=starting_map,
             startingOptions=json.dumps(starting_options),
