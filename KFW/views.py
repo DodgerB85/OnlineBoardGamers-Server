@@ -4,6 +4,7 @@ import base64
 import gzip
 
 from decouple import config
+from typing import TYPE_CHECKING, cast
 
 from contextlib import contextmanager
 
@@ -32,6 +33,9 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from Lobby.models import Game, GamePlayer, User, Profile
 
+if TYPE_CHECKING:
+    from Lobby.presenters import KfwPresenter 
+    
 KFW_SUPER_USERS = ["BotKickStarter"]
 
 def index(request):
@@ -127,7 +131,7 @@ def createKFWgame(request):
                 creator_gp.notes = json.dumps(shadow_players)
                 creator_gp.save()
 
-            presenter = newGame.presenter()
+            presenter = cast('KfwPresenter', newGame.presenter())
             presenter.startGame(request)
         else:
             usernamesToNotify = []
@@ -200,7 +204,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('KfwPresenter', currentGame.presenter())
 
     # Access the prefetch cache immediately to "warm" it
     all_game_players = list(currentGame.players.select_related("player").all())
@@ -398,7 +402,7 @@ def _processKFWturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('KfwPresenter', currentGame.presenter())
 
     if jsonData["action"] == "getBoatMeeplesAndSkills":
         incomingData = presenter.decompressData(jsonData["gameData"])
@@ -998,7 +1002,7 @@ def KFWdata(request, data_type=1):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('KfwPresenter', currentGame.presenter())
 
     if data_type == 1:
         gameData1 = (
