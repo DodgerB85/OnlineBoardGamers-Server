@@ -183,6 +183,12 @@ class GamePresenter:
         if 110 in starting_options:
             return True
         return False
+    
+    def isTrainingGame(self):
+        startingOptions = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+        if 102 in startingOptions:
+            return True
+        return False
 
     # KICKOUT STUFF
     def getSecondsToNextKickout(self):
@@ -1499,8 +1505,7 @@ class BusPresenter(GamePresenter):
 
         allPlayersL = self.getAllPlayersOrderedySeat()
 
-        starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if 102 in starting_options:
+        if self.isTrainingGame():
             # Set the first player by seat as current
             for gp in game_players:
                 if gp.seat_order == 0:
@@ -2438,7 +2443,6 @@ class FcmPresenter(GamePresenter):
         rewindConsentVotes = self.getFullSetOfVoteResults(
             REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
         )
-        missingPlayerNames = self.getMissingPlayersNamesArray()
 
         rewindHTML = ""
 
@@ -2472,8 +2476,7 @@ class FcmPresenter(GamePresenter):
 
     def getRewindHostPossible(self):
         # TODO - move this to new vote system
-        starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if 102 in starting_options:
+        if self.isTrainingGame():
             return True
         rewindConsentVotes = self.getFullSetOfVoteResults(
             REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0
@@ -3045,59 +3048,6 @@ class KfwPresenter(GamePresenter):
         allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
         return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
 
-    def _getCurrentPlayersField(self):
-        """Returns comma-separated string of is_current players (replaces old currentPlayers string field)"""
-        current_gps = self.gameObj.players.filter(is_current=True).select_related("player")
-        return ",".join(gp.player.username for gp in current_gps if gp.player)
-
-    def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        currentPlayersField = self._getCurrentPlayersField()
-        if currentPlayersField == "":
-            return True
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-        if (
-            (loggedInPlayerUsername in currentPlayersField)
-            or any(sv in currentPlayersField for sv in shadow_values)
-        ):
-            return True
-        return False
-
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
-            return False
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-        currentPlayersField = self._getCurrentPlayersField()
-        return (
-            not currentPlayersField
-            or loggedInPlayerUsername in currentPlayersField
-            or any(sv in currentPlayersField for sv in shadow_values)
-        )
-
-    def checkForHostChange(self, _missingUser):
-        if _missingUser == self.gameObj.creator:
-            possibleHost = (
-                self.gameObj.players.filter(is_missing=False, is_kicked=False)
-                .select_related("player")
-                .order_by("?")
-                .first()
-            )
-            if possibleHost and possibleHost.player:
-                self.gameObj.host = possibleHost.player
-
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -3232,7 +3182,7 @@ class KfwPresenter(GamePresenter):
 
     def getCurrentPlayers(self):
         _currentPlayers = []
-        currentPlayersField = self._getCurrentPlayersField()
+        currentPlayersField = self.getCurrentPlayersString()
         current_usernames_set = set(u.strip() for u in currentPlayersField.split(",") if u.strip())
         all_gps = self.gameObj.players.exclude(is_kicked=True).select_related("player")
         for gp in all_gps:
@@ -3250,103 +3200,6 @@ class KfwPresenter(GamePresenter):
 
         return ",".join(_currentPlayers)
 
-    def getCurrentPlayersArray(self):
-        _currentPlayersArray = [
-            player.strip() for player in self.getCurrentPlayers().split(",")
-        ]
-        return _currentPlayersArray
-
-    def getCurrentPlayersArrayForReminderEmail(self):
-        return self.getCurrentPlayersArray()
-
-    def serialize(self, loggedInUserObj=None):
-        all_players_gp = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        all_player_count = all_players_gp.count()
-        remainingPlayersInt = self.gameObj.maxPlayers - all_player_count
-        remainingPlayers = "".join(
-            str(all_player_count + i + 1) for i in range(remainingPlayersInt)
-        )
-
-        winner_gps = self.gameObj.players.filter(winner=True).select_related("player")
-        winner = (
-            ", ".join(gp.player.username for gp in winner_gps if gp.player)
-            if winner_gps.exists()
-            else ""
-        )
-
-        createdString = self.gameObj.created
-        latestUpdateString = self.gameObj.latestUpdate
-
-        latestUpdateElapsedTimeString = ""
-        if (
-            self.gameObj.gameStatus == "WAITING"
-            or self.gameObj.gameStatus == "AVAILABLE"
-            or self.gameObj.gameStatus == "ACTIVE"
-            or self.gameObj.gameStatus == "PRIVATE"
-        ):
-            elapsedTotalSeconds = (
-                int(time.time()) - int(self.gameObj.created) // 1000
-                if self.gameObj.gameStatus == "WAITING"
-                or self.gameObj.gameStatus == "AVAILABLE"
-                or self.gameObj.gameStatus == "PRIVATE"
-                else int(time.time()) - int(self.gameObj.latestUpdate) // 1000
-            )
-            latestUpdateElapsedTimeString = (
-                SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds)
-            )
-
-        myMove = loggedInUserObj is not None and self.isMyMove(loggedInUserObj.username)
-
-        chatNotification = (
-            loggedInUserObj is not None
-            and self.gameObj.players.filter(player=loggedInUserObj, has_chat_notification=True).exists()
-        )
-        involvedPlayer = (
-            loggedInUserObj is not None
-            and self.gameObj.players.filter(player=loggedInUserObj, is_missing=False, is_kicked=False).exists()
-        )
-
-        gamePaceString = SR_gamePaceString(self.gameObj.gamePace)
-
-        startingOptionsHTML = SR_getKFWstartingOptionsHTML(json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else [])
-
-        kickoutRequiredNum = self.kickoutRequired()
-
-        deleteableGame = (
-            self.gameObj.players.filter(player__username="SHADOW").exists()
-            and loggedInUserObj is not None
-            and self.gameObj.players.filter(player=loggedInUserObj).exists()
-        )
-
-        return {
-            "gameID": getattr(self.gameObj, "id"),
-            "gameName": self.getGameName(),
-            "gameDescription": self.gameObj.gameDescription,
-            "creator": self.gameObj.creator.username if self.gameObj.creator else "",
-            "created": createdString,
-            "allPlayers": [gp.player.username for gp in all_players_gp if gp.player],
-            "invitedPlayers": [u.username for u in self.gameObj.invitedPlayers.all()],
-            "currentPlayers": self.getCurrentPlayersString(),
-            "currentTurn": self.currentTurnString(),
-            "pace": gamePaceString,
-            "latestUpdate": latestUpdateString,
-            "startingOptions": startingOptionsHTML,
-            "kickoutDuration": self.gameObj.kickoutDuration,
-            "maxPlayers": self.gameObj.maxPlayers,
-            "winner": winner,  # Used for Finished Games
-            "myMove": myMove,
-            # Used to not allow join in available games // set join / leave
-            "involvedPlayer": involvedPlayer,
-            "chatNotification": chatNotification,
-            "kickoutRequiredNum": kickoutRequiredNum,
-            "kickoutDuration": self.gameObj.kickoutDuration,
-            "latestUpdateElapsedTimeString": latestUpdateElapsedTimeString,
-            "game": "KFW",
-            "remainingPlayers": remainingPlayers,  # Used in lobby somewhere
-            "deleteableGame": deleteableGame,
-            "learningGame": self.isLearningGame(),
-            "experiencedGame": self.isExperiencedGame(),
-        }
 
     #####################################################################
     ###################### Simul turns code
@@ -3521,7 +3374,7 @@ class KfwPresenter(GamePresenter):
         # ASSUME THAT players have move data <=> they have moved
         # ASSUME THAT phase is the start of simul phase
 
-        currentPlayersField = self._getCurrentPlayersField()
+        currentPlayersField = self.getCurrentPlayersString()
 
         # If there are no current players, add everyone
         if currentPlayersField == "":
@@ -3566,12 +3419,6 @@ class KfwPresenter(GamePresenter):
                 "utf-8"
             )
         )
-
-    def isTrainingGame(self):
-        startingOptions = (
-            json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        )
-        return 102 in startingOptions
 
     def getGameData3compressed(self):
         if self.gameObj.KFWserverData == "":
@@ -3848,15 +3695,6 @@ class KfwPresenter(GamePresenter):
         self.gameObj.KFWserverData = json.dumps([meeple_bag, skills_bag])
 
         return newInformation
-
-    def getMissingPlayersNamesArray(self):
-        return list(
-            self.gameObj.players.filter(
-                is_missing=True,
-                player__isnull=False
-            )
-            .values_list("player__username", flat=True)
-        )
 
     def getGameCode(self):
         return "KFW"

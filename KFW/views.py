@@ -434,7 +434,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW simpleSave - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -463,7 +463,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -512,7 +512,7 @@ def _processKFWturn(request):
             if jsonData["phase"] == 2:
                 presenter.setCurrentPlayers(presenter.getCurrentSimulPlayers())
             # If there are no players, return the simul moves to move the game on
-            if presenter._getCurrentPlayersField() == "":
+            if presenter.getCurrentPlayersString() == "":
                 currentGame.save()
                 response_data = {
                     "latestUpdate": currentGame.latestUpdate,
@@ -540,7 +540,7 @@ def _processKFWturn(request):
         else:
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-            currentPlayersField = presenter._getCurrentPlayersField()
+            currentPlayersField = presenter.getCurrentPlayersString()
             if (
                 currentPlayersField != ""
                 and currentPlayersField != "KfwBot"
@@ -629,7 +629,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW saveSimulMove - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -681,7 +681,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW saveFinalScoringMove - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -733,7 +733,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -792,7 +792,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -940,7 +940,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
