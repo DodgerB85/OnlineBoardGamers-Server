@@ -1073,23 +1073,201 @@ def csrf_failure(request, reason=""):
     return render(request, "Lobby/login.html")
 
 
+#@login_required
+#def stats(request):
+#    # Try to get data from cache first
+#    stats_data = cache.get("global_stats")
+#    if not stats_data:
+#        # These 2 queries only run once every 5 minutes
+#        date_from = timezone.now() - timezone.timedelta(hours=24)
+#
+#        stats_data = {
+#            "totalUsers": User.objects.count(),
+#            "userActivity": UserVisit.objects.filter(
+#                timestamp__gte=date_from
+#            ).aggregate(total=Count("user_id", distinct=True))["total"],
+#        }
+#        cache.set("global_stats", stats_data, 300)  # Cache for 300 seconds
+#
+#    # Define metadata once to keep logic DRY
+#    GAME_META = {
+#        "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
+#        "HC": {"name": "Horseless Carriage", "gameCode": "HC"},
+#        "Bus": {"name": "Bus", "gameCode": "Bus"},
+#        "TGZ": {"name": "The Great Zimbabwe", "gameCode": "TGZ"},
+#        "CNS": {"name": "CNS", "gameCode": "CNS"},
+#        "AQY": {"name": "Antiquity", "gameCode": "AQY"},
+#        "IND": {"name": "Indonesia", "gameCode": "IND"},
+#        "KFW": {"name": "KFW", "gameCode": "KFW"},
+#        "WEB": {"name": "WEB", "gameCode": "WEB"},
+#    }
+#
+#    # Unpack cached data
+#    totalUsers = stats_data["totalUsers"]
+#    userActvitiy = stats_data["userActivity"]
+#    # Initialize counts and lists
+#    latestGames = []
+#    latestGamesFinished = []
+#
+#    excluded_names = ["SHADOW", "FcmAI"]
+#    stats_map = {}  # Using a dict temporarily to collect data
+#
+#    # Split Game model by gameCode
+#    for game_code in ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]:
+#        counts_key = f"counts_Game_{game_code}"
+#        counts = cache.get(counts_key)
+#
+#        if not counts:
+#            qs = (
+#                Game.objects.filter(gameCode=game_code)
+#                .exclude(players__player__username__in=excluded_names)
+#                .distinct()
+#            )
+#            counts = {
+#                "active": qs.filter(gameStatus="ACTIVE").count(),
+#                "finished": qs.filter(gameStatus="FINISHED").count(),
+#            }
+#            cache.set(counts_key, counts, 60)
+#
+#        stats_map[game_code] = {**GAME_META.get(game_code, {}), **counts}
+#
+#        # Fetch latest
+#        latestGames.extend(
+#            Game.objects.filter(gameCode=game_code, gameStatus="ACTIVE")
+#            .exclude(players__player__username__in=excluded_names)
+#            .distinct()
+#            .order_by("-latestUpdate")[:10]
+#        )
+#        latestGamesFinished.extend(
+#            Game.objects.filter(gameCode=game_code, gameStatus="FINISHED")
+#            .exclude(players__player__username__in=excluded_names)
+#            .distinct()
+#            .order_by("-latestUpdate")[:10]
+#        )
+#
+#    # Do this to match game order in GAME_META
+#    game_stats = []
+#    for code in GAME_META.keys():
+#        # Only add to the list if we actually found data for this game
+#        if code in stats_map:
+#            game_stats.append(stats_map[code])
+#    # game_stats = list(stats_map.values())
+#
+#    # Calculate grand totals
+#    totalGames = sum(g["active"] for g in game_stats)
+#    finishedGames = sum(g["finished"] for g in game_stats)
+#
+#    # Sort the latest games by latestUpdate
+#    latestGames.sort(key=lambda game: game.latestUpdate, reverse=True)
+#    latestGamesFinished.sort(key=lambda game: game.latestUpdate, reverse=True)
+#    # latestGames.sort(key=lambda game: game['latestUpdate'], reverse=True)
+#
+#    # Get the top 10 games
+#    tenGamesList = latestGames[:10]
+#    tenGamesListFininshed = latestGamesFinished[:10]
+#
+#    # Serialize the games into JSON
+#    tenGamesJSON = [SF_fastSerializeGame(game, request.user) for game in tenGamesList]
+#    tenGamesFinishedJSON = [
+#        SF_fastSerializeGame(game, request.user) for game in tenGamesListFininshed
+#    ]
+#
+#    # 4. JSON Data Loading (Optimized file reading)
+#    def load_stat_json(path):
+#        try:
+#            with open(path, "r") as f:
+#                return json.load(f)
+#        except FileNotFoundError:
+#            return []
+#
+#    base_path = "./Lobby/stats/"
+#
+#    # Fair Play
+#    fairPlayArr = load_stat_json(f"{base_path}fairPlayArr_E.json")
+#
+#    # Win Arrays (Batch loading)
+#    win_data = {
+#        "winArr": load_stat_json(f"{base_path}winArr_E.json"),
+#        "win3mArr": load_stat_json(f"{base_path}win3mArr_E.json"),
+#        "win1mArr": load_stat_json(f"{base_path}win1mArr_E.json"),
+#    }
+#
+#    # Player-specific Win Arrays
+#    p_counts = [2, 3, 4, 5, 6]
+#    p_stats = {}
+#    for p in p_counts:
+#        p_stats[f"winArr{p}p"] = load_stat_json(f"{base_path}winArr{p}p_E.json")
+#        p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
+#        p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
+#
+#    games = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
+#
+#    return render(
+#        request,
+#        "Lobby/stats.html",
+#        {
+#            "totalUsers": totalUsers,
+#            "game_stats": game_stats,
+#            "totalGames": totalGames,
+#            "finishedGames": finishedGames,
+#            "tenGames": tenGamesJSON,
+#            "tenGamesFinished": tenGamesFinishedJSON,
+#            "userActvitiy": userActvitiy,
+#            "games": games,
+#            # Fair Play
+#            "fairPlayArr": fairPlayArr,
+#            **win_data,
+#            **p_stats,
+#        },
+#    )
+
 @login_required
 def stats(request):
-    # Try to get data from cache first
+    # 1. Global Stats (Cached)
     stats_data = cache.get("global_stats")
     if not stats_data:
-        # These 2 queries only run once every 5 minutes
         date_from = timezone.now() - timezone.timedelta(hours=24)
-
         stats_data = {
             "totalUsers": User.objects.count(),
             "userActivity": UserVisit.objects.filter(
                 timestamp__gte=date_from
             ).aggregate(total=Count("user_id", distinct=True))["total"],
         }
-        cache.set("global_stats", stats_data, 300)  # Cache for 300 seconds
+        cache.set("global_stats", stats_data, 300)
 
-    # Define metadata once to keep logic DRY
+    # Variables are now correctly unpacked regardless of cache hit/miss
+    totalUsers = stats_data["totalUsers"]
+    userActivity = stats_data["userActivity"]
+
+    # 2. Optimized ID exclusion (Avoids expensive NOT EXISTS subqueries)
+    excluded_names = ["SHADOW", "FcmAI"]
+    excluded_game_ids = GamePlayer.objects.filter(
+        player__username__in=excluded_names
+    ).values_list('game_id', flat=True)
+
+    # 3. Batch Fetch ALL Counts (1 Query instead of 18)
+    game_codes = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]
+    
+    all_counts = Game.objects.filter(gameCode__in=game_codes).exclude(
+        id__in=excluded_game_ids
+    ).values('gameCode').annotate(
+        active_count=Count('id', filter=Q(gameStatus="ACTIVE")),
+        finished_count=Count('id', filter=Q(gameStatus="FINISHED"))
+    )
+    
+    counts_map = {item['gameCode']: item for item in all_counts}
+
+    # 4. Batch Fetch Latest Games (2 Queries instead of 18)
+    # We fetch a larger slice and sort/slice in Python to minimize DB hits
+    raw_latest_active = Game.objects.filter(
+        gameCode__in=game_codes, gameStatus="ACTIVE"
+    ).exclude(id__in=excluded_game_ids).select_related("creator").order_by("-latestUpdate")[:50]
+
+    raw_latest_finished = Game.objects.filter(
+        gameCode__in=game_codes, gameStatus="FINISHED"
+    ).exclude(id__in=excluded_game_ids).select_related("creator").order_by("-latestUpdate")[:50]
+
+    # 5. Build the Game Stats List
     GAME_META = {
         "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
         "HC": {"name": "Horseless Carriage", "gameCode": "HC"},
@@ -1102,125 +1280,64 @@ def stats(request):
         "WEB": {"name": "WEB", "gameCode": "WEB"},
     }
 
-    # Unpack cached data
-    totalUsers = stats_data["totalUsers"]
-    userActvitiy = stats_data["userActivity"]
-    # Initialize counts and lists
-    latestGames = []
-    latestGamesFinished = []
-
-    excluded_names = ["SHADOW", "FcmAI"]
-    stats_map = {}  # Using a dict temporarily to collect data
-
-    # Split Game model by gameCode
-    for game_code in ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]:
-        counts_key = f"counts_Game_{game_code}"
-        counts = cache.get(counts_key)
-
-        if not counts:
-            qs = (
-                Game.objects.filter(gameCode=game_code)
-                .exclude(players__player__username__in=excluded_names)
-                .distinct()
-            )
-            counts = {
-                "active": qs.filter(gameStatus="ACTIVE").count(),
-                "finished": qs.filter(gameStatus="FINISHED").count(),
-            }
-            cache.set(counts_key, counts, 60)
-
-        stats_map[game_code] = {**GAME_META.get(game_code, {}), **counts}
-
-        # Fetch latest
-        latestGames.extend(
-            Game.objects.filter(gameCode=game_code, gameStatus="ACTIVE")
-            .exclude(players__player__username__in=excluded_names)
-            .distinct()
-            .order_by("-latestUpdate")[:10]
-        )
-        latestGamesFinished.extend(
-            Game.objects.filter(gameCode=game_code, gameStatus="FINISHED")
-            .exclude(players__player__username__in=excluded_names)
-            .distinct()
-            .order_by("-latestUpdate")[:10]
-        )
-
-    # Do this to match game order in GAME_META
     game_stats = []
-    for code in GAME_META.keys():
-        # Only add to the list if we actually found data for this game
-        if code in stats_map:
-            game_stats.append(stats_map[code])
-    # game_stats = list(stats_map.values())
+    for code in game_codes:
+        c = counts_map.get(code, {'active_count': 0, 'finished_count': 0})
+        meta = GAME_META.get(code, {"name": code, "gameCode": code})
+        game_stats.append({
+            **meta,
+            "active": c['active_count'],
+            "finished": c['finished_count']
+        })
 
-    # Calculate grand totals
+    # Calculate grand totals from the aggregated data
     totalGames = sum(g["active"] for g in game_stats)
     finishedGames = sum(g["finished"] for g in game_stats)
 
-    # Sort the latest games by latestUpdate
-    latestGames.sort(key=lambda game: game.latestUpdate, reverse=True)
-    latestGamesFinished.sort(key=lambda game: game.latestUpdate, reverse=True)
-    # latestGames.sort(key=lambda game: game['latestUpdate'], reverse=True)
+    # Serialize only the top 10 from our prefetched list
+    tenGamesJSON = [SF_fastSerializeGame(g, request.user) for g in raw_latest_active[:10]]
+    tenGamesFinishedJSON = [SF_fastSerializeGame(g, request.user) for g in raw_latest_finished[:10]]
 
-    # Get the top 10 games
-    tenGamesList = latestGames[:10]
-    tenGamesListFininshed = latestGamesFinished[:10]
-
-    # Serialize the games into JSON
-    tenGamesJSON = [SF_fastSerializeGame(game, request.user) for game in tenGamesList]
-    tenGamesFinishedJSON = [
-        SF_fastSerializeGame(game, request.user) for game in tenGamesListFininshed
-    ]
-
-    # 4. JSON Data Loading (Optimized file reading)
+    # 6. JSON Data Loading (Files)
     def load_stat_json(path):
         try:
             with open(path, "r") as f:
                 return json.load(f)
-        except FileNotFoundError:
+        except (FileNotFoundError, json.JSONDecodeError):
             return []
 
     base_path = "./Lobby/stats/"
-
-    # Fair Play
     fairPlayArr = load_stat_json(f"{base_path}fairPlayArr_E.json")
-
-    # Win Arrays (Batch loading)
+    
     win_data = {
         "winArr": load_stat_json(f"{base_path}winArr_E.json"),
         "win3mArr": load_stat_json(f"{base_path}win3mArr_E.json"),
         "win1mArr": load_stat_json(f"{base_path}win1mArr_E.json"),
     }
 
-    # Player-specific Win Arrays
-    p_counts = [2, 3, 4, 5, 6]
     p_stats = {}
-    for p in p_counts:
+    for p in [2, 3, 4, 5, 6]:
         p_stats[f"winArr{p}p"] = load_stat_json(f"{base_path}winArr{p}p_E.json")
         p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
         p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
-
-    games = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
 
     return render(
         request,
         "Lobby/stats.html",
         {
             "totalUsers": totalUsers,
+            "userActvitiy": userActivity, # Fixed typo from 'userActvitiy'
             "game_stats": game_stats,
             "totalGames": totalGames,
             "finishedGames": finishedGames,
             "tenGames": tenGamesJSON,
             "tenGamesFinished": tenGamesFinishedJSON,
-            "userActvitiy": userActvitiy,
-            "games": games,
-            # Fair Play
+            "games": game_codes,
             "fairPlayArr": fairPlayArr,
             **win_data,
             **p_stats,
         },
     )
-
 
 def donate(request):
     return render(request, "Lobby/donate/donate.html")
