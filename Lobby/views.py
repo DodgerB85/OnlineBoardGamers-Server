@@ -27,7 +27,6 @@ from datetime import timedelta
 from collections import Counter
 
 from django.db import connection, transaction
-from django.db.models import Exists, OuterRef, Max
 from django.contrib import messages
 from django.contrib.auth import (
     authenticate,
@@ -76,6 +75,8 @@ from django.db.models import (
     Q,
     Count,
     IntegerField,
+    Prefetch,
+    Max
 )
 from django.db.models.functions import TruncDate, Cast
 from django.db.models.expressions import RawSQL
@@ -1274,42 +1275,64 @@ def index(request):
 
     # print_timestamp("Step 1: Blacklists fetched")
 
-    # --- Step 2: Deep Prefetching (Essential for Step 3) ---
-    all_user_games = []
+    # OLD STEP 2
+#    # --- Step 2: Deep Prefetching (Essential for Step 3) ---
+#    all_user_games = []
+#
+#    from django.db.models import Exists, OuterRef
+#
+#    # For Game model, check through GamePlayer
+#    is_player = Game.objects.filter(id=OuterRef("id"), players__player=user).values(
+#        "id"
+#    )
+#
+#    is_invited = Game.objects.filter(id=OuterRef("id"), invitedPlayers=user).values(
+#        "id"
+#    )
+#
+#    games_query = Game.objects.annotate(
+#        user_is_player=Exists(is_player), user_is_invited=Exists(is_invited)
+#    ).filter(
+#        Q(user_is_player=True)
+#        | Q(user_is_invited=True)
+#        | Q(gameStatus="AVAILABLE", created__gte=recent_cutoff)
+#    )
+#
+#    # Defer large fields
+#    games_query = games_query.defer(
+#        "gameData",
+#        "rewindData",
+#        "rewindTempData",
+#        "chatData",
+#    )
+#
+#    # Prefetch related data
+#    games_query = games_query.select_related("creator").prefetch_related(
+#        "players__player", "invitedPlayers"
+#    )
 
-    from django.db.models import Exists, OuterRef
+    player_game_ids = GamePlayer.objects.filter(player=user).values_list('game_id', flat=True)
+    invited_game_ids = Game.invitedPlayers.through.objects.filter(user=user).values_list('game_id', flat=True)
 
-    # For Game model, check through GamePlayer
-    is_player = Game.objects.filter(id=OuterRef("id"), players__player=user).values(
-        "id"
-    )
 
-    is_invited = Game.objects.filter(id=OuterRef("id"), invitedPlayers=user).values(
-        "id"
-    )
 
-    games_query = Game.objects.annotate(
-        user_is_player=Exists(is_player), user_is_invited=Exists(is_invited)
-    ).filter(
-        Q(user_is_player=True)
-        | Q(user_is_invited=True)
-        | Q(gameStatus="AVAILABLE", created__gte=recent_cutoff)
-    )
+    # 2. Combine these IDs with the 'AVAILABLE' criteria in a single clean 'IN' clause
+    # This avoids the messy JOIN logic in the main query
+    games_query = Game.objects.filter(
+        Q(id__in=player_game_ids) | 
+        Q(id__in=invited_game_ids) | 
+        Q(gameStatus="AVAILABLE", created__gte=recent_cutoff)
+    ).distinct().select_related("creator").prefetch_related(
+        Prefetch(
+            "players", 
+            queryset=GamePlayer.objects.filter(is_kicked=False).select_related("player"),
+            to_attr="active_players"
+        ),
+        "invitedPlayers"
+    ).defer("gameData", "rewindData", "rewindTempData", "chatData")
 
-    # Defer large fields
-    games_query = games_query.defer(
-        "gameData",
-        "rewindData",
-        "rewindTempData",
-        "chatData",
-    )
 
-    # Prefetch related data
-    games_query = games_query.select_related("creator").prefetch_related(
-        "players__player", "invitedPlayers"
-    )
-
-    all_user_games.extend(list(games_query.distinct()))
+    all_user_games = (list(games_query))
 
     all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
 
@@ -1332,29 +1355,42 @@ def index(request):
         if status == "FINISHED" and len(finished_games) >= 10:
             continue
 
-        # Blacklist check (already optimized)
-        if (
-            game.creator_id in blacklisted_players_ids
-            or game.creator_id in blocked_by_user_ids
-        ):
-            # We still allow involved games even if blacklisted
-            is_blacklisted_game = True
-        else:
-            is_blacklisted_game = False
+#        # Blacklist check (already optimized)
+#        if (
+#            game.creator_id in blacklisted_players_ids
+#            or game.creator_id in blocked_by_user_ids
+#        ):
+#            # We still allow involved games even if blacklisted
+#            is_blacklisted_game = True
+#        else:
+#            is_blacklisted_game = False
+#
+#        # Access prefetched data 
+#        all_game_players = game.players.exclude(is_kicked=True).all()
+#        all_p_ids = {gp.player.id for gp in all_game_players if gp.player}
+#        inv_p_ids = {p.id for p in game.invitedPlayers.all()}
+#        miss_p_ids = {
+#            gp.player.id for gp in all_game_players if gp.is_missing and gp.player
+#        }
+#
+#        is_involved = user_id in all_p_ids
+#        is_invited = user_id in inv_p_ids
+#
+#        # 2. Only serialize if the game meets our visibility criteria
+#        # This saves CPU cycles on games the user won't see
 
-        # Access prefetched data 
-        all_game_players = game.players.exclude(is_kicked=True).all()
-        all_p_ids = {gp.player.id for gp in all_game_players if gp.player}
+
+        # Use the cached '.active_players' list from our Prefetch object
+        # This replaces: game.players.exclude(is_kicked=True).all()
+        all_p_ids = {gp.player_id for gp in game.active_players}
         inv_p_ids = {p.id for p in game.invitedPlayers.all()}
-        miss_p_ids = {
-            gp.player.id for gp in all_game_players if gp.is_missing and gp.player
-        }
+        miss_p_ids = {gp.player_id for gp in game.active_players if gp.is_missing}
 
         is_involved = user_id in all_p_ids
         is_invited = user_id in inv_p_ids
+        is_blacklisted_game = (game.creator_id in blacklisted_players_ids or 
+                              game.creator_id in blocked_by_user_ids)
 
-        # 2. Only serialize if the game meets our visibility criteria
-        # This saves CPU cycles on games the user won't see
         try:
             serialized = SF_fastSerializeGame(game, user)
         except Game.DoesNotExist:
