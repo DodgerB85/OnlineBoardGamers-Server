@@ -30,8 +30,6 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
-
-# WEB_Game import removed - now using unified Game model
 from Lobby.models import User, Profile, Game, GamePlayer
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC

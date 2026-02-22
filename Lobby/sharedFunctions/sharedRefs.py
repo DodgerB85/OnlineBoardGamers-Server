@@ -12,15 +12,6 @@ SLACK = "SL"
 TELEGRAM = "TG"
 OTHER = "OT"
 
-def SR_usesUnifiedGameModel(game_code):
-    """
-    Returns True if the game uses the unified Game model with GamePlayer relationships.
-    Returns False if the game uses the legacy model with M2M relationships.
-
-    As games are migrated to the unified model, add their game codes here.
-    """
-    return game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC", "RNB", "KFW"]
-
 SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("FCM", gettext_lazy("Food Chain Magnate")),
     ("HC", gettext_lazy("Horseless Carriage")),

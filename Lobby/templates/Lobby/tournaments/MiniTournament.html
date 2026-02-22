@@ -201,7 +201,7 @@
                     </thead>
                     {% for game in round.gamesData %}
                       <tr class="clickableGameRow  {{ tournament.gameCode }}"
-                          onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/{% if isUnifiedModel %}show/{% endif %}';"
+                          onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/show/';"
                           id="gamesRow{{ game.gameID }}">
                         <td>
                           {% for player in game.players %}

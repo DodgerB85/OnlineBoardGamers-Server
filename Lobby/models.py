@@ -345,7 +345,7 @@ class Mini_Tournaments(models.Model):
         }
 
 
-# Subclass of all game models, including the new, unified game model
+# Subclass of all game models, including the new, Game game model
 class BaseGame(models.Model):
     """
     General base model for all game types.
@@ -423,27 +423,6 @@ class BaseGame(models.Model):
 
     class Meta:
         abstract = True
-
-
-# Subclass of all existing games
-# It includes fields that are needed for all existing game models, but which we don't want in the unified game model.
-class GeneralGame(BaseGame):
-    # This is a STRING of the currentPlayer username
-    # IT SHOULD PROBABLY BE CHANGED TO M2M FIELD WITH USERS
-    currentPlayers = models.CharField(max_length=100, blank=True)
-
-    player0notes = models.TextField(blank=True)
-    player1notes = models.TextField(blank=True)
-    player2notes = models.TextField(blank=True)
-    player3notes = models.TextField(blank=True)
-
-    class Meta(BaseGame.Meta):
-        abstract = True
-
-    # Allow access early to the general presenter, before all games are converted and we can delete this
-    def tempPresenter(self):
-        return GamePresenter(self)
-
 
 class Game(BaseGame):
     # Add this line to help the linter (type checking only)

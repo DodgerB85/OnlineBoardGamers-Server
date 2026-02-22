@@ -45,7 +45,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getKFWstartingOptionsHTML,
     SR_getWEBstartingOptionsHTML,
     SR_gamePaceString,
-    SR_usesUnifiedGameModel,
 )
 from Lobby.sharedFunctions.tournyGenerator import multiGamePlayers4p, multiGamePlayersRound2
 
@@ -83,22 +82,15 @@ def SF_hasRequiredExperience(request, gameCode, gameModel):
     shadowUser = User.objects.get(username="SHADOW")
     experienced = False
 
-    # Handle unified Game model differently
-    if gameModel == Game:
-        # For unified Game model, query through GamePlayer
-        model_games_involved = Game.objects.filter(
-            gameCode=gameCode,
-            gameStatus="FINISHED",
-            players__player=request.user
-        ).exclude(
-            players__player=shadowUser
-        ).distinct()
-    else:
-        # For legacy game models with allPlayers M2M
-        model_games_involved = gameModel.objects.filter(
-            Q(allPlayers=request.user, gameStatus="FINISHED") & ~Q(allPlayers=shadowUser)
-        )
-    
+    # For Game model, query through GamePlayer
+    model_games_involved = Game.objects.filter(
+        gameCode=gameCode,
+        gameStatus="FINISHED",
+        players__player=request.user
+    ).exclude(
+        players__player=shadowUser
+    ).distinct()
+
     exp = model_games_involved.count()
     if exp >= SF_getRequiredExp(gameCode):
         experienced = True
@@ -126,56 +118,32 @@ def SF_fastSerializeGame(game, user):
     """
     Zero-query serialization for any game model.
     Dynamically identifies game type (FCM, TGZ, etc.)
-    Handles both legacy models with M2M fields and unified Game model
     """
     from Lobby.models import Game
     
     # --- 1. Identify Game Type ---
-    is_unified_model = isinstance(game, Game)
+    game_code = game.gameCode
+
+    # Game model - use GamePlayer
+    #all_game_players = list(game.players.exclude(is_missing=True).select_related('player'))
+    all_game_players = list(game.players.all().select_related('player'))
+    all_players = [gp.player for gp in all_game_players if gp.player]
+    all_usernames = [p.username for p in all_players]
+    invited_usernames = [u.username for u in game.invitedPlayers.all()]
+    all_ids = {p.id for p in all_players}
+    missing_ids = {gp.player.id for gp in all_game_players if gp.is_missing and gp.player}
+    chat_notify_ids = {gp.player.id for gp in all_game_players if gp.has_chat_notification and gp.player}
     
-    if is_unified_model:
-        game_code = game.gameCode
-    else:
-        game_code = game._meta.app_label
+    # Get current players from is_current flag
+    current_players_str = ", ".join([
+        gp.player.username for gp in all_game_players 
+        if gp.is_current and gp.player
+    ])
     
-    # 2. Handle player data differently for unified vs legacy models
-    if is_unified_model:
-        # Unified Game model - use GamePlayer
-        #all_game_players = list(game.players.exclude(is_missing=True).select_related('player'))
-        all_game_players = list(game.players.all().select_related('player'))
-        all_players = [gp.player for gp in all_game_players if gp.player]
-        all_usernames = [p.username for p in all_players]
-        invited_usernames = [u.username for u in game.invitedPlayers.all()]
-        all_ids = {p.id for p in all_players}
-        missing_ids = {gp.player.id for gp in all_game_players if gp.is_missing and gp.player}
-        chat_notify_ids = {gp.player.id for gp in all_game_players if gp.has_chat_notification and gp.player}
-        
-        # Get current players from is_current flag
-        current_players_str = ", ".join([
-            gp.player.username for gp in all_game_players 
-            if gp.is_current and gp.player
-        ])
-        
-        # Winner from GamePlayer
-        winner_gp = next((gp for gp in all_game_players if gp.winner), None)
-        winner_str = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
-    else:
-        # Legacy model - use M2M fields
-        all_players = list(game.allPlayers.all())
-        all_usernames = [u.username for u in all_players]
-        invited_usernames = [u.username for u in game.invitedPlayers.all()]
-        all_ids = {u.id for u in all_players}
-        missing_ids = {u.id for u in game.missingPlayers.all()}
-        chat_notify_ids = {u.id for u in game.playersWithChatNotification.all()}
-        current_players_str = game.currentPlayers
-        
-        # Winner Logic (Handles both FK and M2M)
-        winner_str = ""
-        if game.winner:
-            if hasattr(game.winner, 'all'): # M2M
-                winner_str = ", ".join([u.username for u in game.winner.all()])
-            else: # ForeignKey
-                winner_str = game.winner.username
+    # Winner from GamePlayer
+    winner_gp = next((gp for gp in all_game_players if gp.winner), None)
+    winner_str = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
+    
 
     # 3. Timing Calculation
     now = int(time.time())
@@ -251,11 +219,7 @@ def SF_fastSerializeGame(game, user):
     if game_code == "WEB":
         startingOptionsHTML = SR_getWEBstartingOptionsHTML(startingOptionsArr)
     
-    # Get kickout required - use presenter for unified model
-    if is_unified_model:
-        kickoutRequiredNum = game.presenter().kickoutRequired()
-    else:
-        kickoutRequiredNum = game.kickoutRequired()
+    kickoutRequiredNum = game.presenter().kickoutRequired()
 
     return {
         "gameID": game.id,
@@ -284,8 +248,6 @@ def SF_fastSerializeGame(game, user):
         "latestUpdate": game.latestUpdate,
         "currentPlayers": current_players_str, 
         "kickoutRequiredNum": kickoutRequiredNum,
-        "is_unified_model": is_unified_model
-
     }
             #"currentPlayers": self.currentPlayers,
             #"kickoutRequiredNum": kickoutRequiredNum,
@@ -1398,16 +1360,11 @@ def SF_M_ProcessAnyTournamentEndGame(request, mainORmini, tournamanetObj, _curre
             for name in finalPositionNameAndScore[:-1]:
                 finalPositionNames[i].append(name)  
     
-    if SR_usesUnifiedGameModel(_currentGame.getGameCode()):
-        localAllPlayers = [p.player for p in _currentGame.players.all() if p.player]
-    else:    
-        localAllPlayers = _currentGame.allPlayers.all()
+    localAllPlayers = [p.player for p in _currentGame.players.all() if p.player]
 
-    if SR_usesUnifiedGameModel(_currentGame.getGameCode()):
-        localKickedPlayers = [p.player for p in _currentGame.players.all() if p.player and p.is_kicked]
-    else:    
-        localKickedPlayers = _currentGame.kickedPlayers.all()   
-    
+
+    localKickedPlayers = [p.player for p in _currentGame.players.all() if p.player and p.is_kicked]
+  
     ############################## Add players to next round players
     # KO JUST ADD THE WINNER
     if tournamanetObj.tournamentType == "KO":

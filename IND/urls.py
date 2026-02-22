@@ -7,7 +7,7 @@ app_name = 'IND'
 
 
 def redirect_old_url(request, original_id):
-    """Redirect old IND game URLs to new unified format"""
+    """Redirect old IND game URLs to new Game format"""
     from Lobby.models import Game
     game = get_object_or_404(Game, gameCode='IND', original_id=original_id)
     return redirect('IND:showINDgame', game_id=game.id)
@@ -17,7 +17,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path('IND/', views.showINDgameOLD, name='showINDgameOLD'),
 
-    # New unified URL format (game_id is the unified Game.id)
+    # New Game URL format (game_id is the Game Game.id)
     path('<int:game_id>/show/', views.showINDgame, name='showINDgame'),
     path('<int:game_id>/show/replay/<int:replayStep>/', views.showINDgame, {'spoilerFree': True}, name='showINDreplayStep'),
 
