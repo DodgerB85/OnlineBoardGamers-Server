@@ -30,8 +30,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 
-from .models import KFW_Game
-from Lobby.models import User, Profile
+from Lobby.models import Game, GamePlayer, User, Profile
 
 KFW_SUPER_USERS = ["BotKickStarter"]
 
@@ -48,17 +47,6 @@ def createKFWgame(request):
     # Creating a game must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
-    # if (
-    #    "trainingGame" not in request.POST
-    #     and request.user.username != "admin"
-    #    # and request.user.username != "massibull"
-    #     and request.user.username != "DodgerB"
-    #    # and request.user.username != "pgh_gamer"
-    #    # and request.user.username != "PhasingPlayer"
-    # ):
-    #    messages.error(request, gettext("Practice games only for now"))
-    #    return HttpResponseRedirect(reverse("createKFWpage"))
 
     players = ["player2", "player3", "player4", "player5", "player6"]
     usernames = []
@@ -86,7 +74,8 @@ def createKFWgame(request):
     _created = SR_getTimeNow()
 
     with transaction.atomic():
-        newGame = KFW_Game(
+        newGame = Game(
+            gameCode='KFW',
             gameDescription=_gameDescription,
             creator=request.user,
             host=request.user,
@@ -104,7 +93,13 @@ def createKFWgame(request):
         if _gameName != "":
             newGame.gameName = _gameName
 
-        newGame.allPlayers.add(request.user)
+        # Create GamePlayer for creator
+        GamePlayer.objects.create(
+            game=newGame,
+            player=request.user,
+            seat_order=0,
+            is_current=False,
+        )
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
@@ -112,10 +107,13 @@ def createKFWgame(request):
             shadow_players = []
 
             for i in range(1, _maxPlayers):
-                # shadow_username = f"{shadow_names[i-1]}"  # Use the base name directly
-                # shadow_player = User.objects.get(username=shadow_username)
                 shadow_player = User.objects.get(username=f"{shadow_names[i - 1]}")
-                newGame.allPlayers.add(shadow_player)
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=shadow_player,
+                    seat_order=i,
+                    is_current=False,
+                )
 
                 if request.POST[f"player{i + 1}"]:
                     display_name = request.POST[f"player{i + 1}"]
@@ -123,9 +121,14 @@ def createKFWgame(request):
                     display_name = f"{shadow_names[i - 1]}"
                 shadow_players.append(display_name)
 
-            # newGame.rewindConsent = "2" * (_maxPlayers - 1)
-            newGame.player0notes = json.dumps(shadow_players)
-            newGame.startGame(request)
+            # Store shadow display names in creator's notes (replaces player0notes)
+            creator_gp = newGame.players.filter(player=request.user).first()
+            if creator_gp:
+                creator_gp.notes = json.dumps(shadow_players)
+                creator_gp.save()
+
+            presenter = newGame.presenter()
+            presenter.startGame(request)
         else:
             usernamesToNotify = []
             for i in range(2, _maxPlayers + 1):
@@ -139,7 +142,7 @@ def createKFWgame(request):
             SN_sendInviteNotifications(
                 request,
                 usernamesToNotify,
-                newGame.getGameName(),
+                newGame.presenter().getGameName(),
                 _maxPlayers,
                 "KFW",
             )
@@ -184,49 +187,46 @@ def createKFWgame(request):
 
 
 def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    # ALLOWED_USERS = ["admin","user1", "ha.steven", "massibull", "durendal", "DodgerB", "BotKickStarter", "Rastko", "Benkyo", "vraid", "F1087", "krieg90", "gdc", "enavico", "PhasingPlayer", "Acacia"]
-    # ALLOWED_USERS += ["ha.steven", "Kawlos", "Jasonbartfast", "Batch", "Juni", "TDUBZ", "BigBad", "massibull", "durendal", "DodgerB", "BotKickStarter", "33", "Rastko", "Burmer", "phil"]
-    # ALLOWED_USERS += ["Benkyo", "Steveth", "F1087", "krieg90", "gdc", "michazhn", "Hohohale", "Rachel", "Joey", "CouldUseASkittleHelp"]
-
-    ##print("******************************************************************************************************** KFW ACCESS: =================================================:  " + request.user.username)
-    # if request.user.username not in ALLOWED_USERS:
-    #    return HttpResponseRedirect(reverse("index"))
-
     try:
-        currentGame = KFW_Game.objects.select_related(
+        currentGame = Game.objects.select_related(
             "host", "creator"
         ).prefetch_related(
-            "allPlayers", 
-            "missingPlayers", 
-            "playersWithChatNotification"
-        ).get(id=game_id)
-    except KFW_Game.DoesNotExist:
+            "players__player",
+        ).get(id=game_id, gameCode='KFW')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
+    presenter = currentGame.presenter()
+
     # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {p.id for p in currentGame.allPlayers.all()}
+    all_game_players = list(currentGame.players.select_related("player").all())
+    all_player_ids = {gp.player.id for gp in all_game_players if gp.player}
+    missing_player_ids = {gp.player.id for gp in all_game_players if gp.player and gp.is_missing}
+    kicked_player_ids = {gp.player.id for gp in all_game_players if gp.player and gp.is_kicked}
+    chat_notify_ids = {gp.player.id for gp in all_game_players if gp.player and gp.has_chat_notification}
+
     userObj = request.user
     username = userObj.username
 
     gameID = currentGame.id
-    gameName = currentGame.getGameName()
+    gameName = presenter.getGameName()
     gameData = currentGame.gameData
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
-    allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat(False))
+    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat(False))
 
     gameData1 = (
-        currentGame.getGameData1Compressed(request.user.username)
+        presenter.getGameData1Compressed(request.user.username)
         if request.user.is_authenticated
-        else currentGame.getGameData1Compressed("")
+        else presenter.getGameData1Compressed("")
     )
-    gameData3 = currentGame.getGameData3compressed()
+    gameData3 = presenter.getGameData3compressed()
 
     # Logged out
     returnData = {
@@ -242,7 +242,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "allPlayerListBySeat": allPlayerListBySeat,
-        "currentPlayers": currentGame.getCurrentPlayers(),
+        "currentPlayers": presenter.getCurrentPlayers(),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredKFWoptions": [-1],
         "pov": -99,
@@ -256,38 +256,29 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     # Now you are logged in
     user_id = userObj.id
-    
-    user_profile = Profile.objects.get(user=userObj) 
-    missing_player_ids = {p.id for p in currentGame.missingPlayers.all()}
-    chat_notify_ids = {p.id for p in currentGame.playersWithChatNotification.all()}
+
+    user_profile = Profile.objects.get(user=userObj)
 
     is_in_all = user_id in all_player_ids
     is_missing = user_id in missing_player_ids
-    involvedPlayer = is_in_all and not is_missing
+    is_kicked = user_id in kicked_player_ids
+    involvedPlayer = is_in_all and not is_missing and not is_kicked
     if username in KFW_SUPER_USERS:
         involvedPlayer = True
-    
+
     chatData = currentGame.chatData
 
     latestUpdate = currentGame.latestUpdate
 
     ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={currentGame.getGameCode()}"
-
-    # preferredKFWoptions = json.loads(request.user.profile.preferredKFWoptions) if request.user.profile.preferredKFWoptions != "" else []
-
-    # if len(preferredKFWoptions) < 6:
-    #    preferredKFWoptions.extend([1] * (6 - len(preferredKFWoptions)))
-    # preferredKFWoptions
-    #
+    nextURL = f"/nextGame?current_id={gameID}&current_code=KFW"
 
     # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
     ## Get Chat notification
     chatNotification = False
     if user_id in chat_notify_ids:
         chatNotification = True
-        currentGame.playersWithChatNotification.remove(request.user)
-        currentGame.save()
+        presenter.removeChatNotification(request.user)
 
     returnData["pov"] = -9
 
@@ -297,7 +288,6 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "chatData": chatData,
             "latestUpdateLiteral": latestUpdate,
             "nextURL": nextURL,
-            # "preferredKFWoptions": preferredKFWoptions,
             "chatNotification": chatNotification,
         }
     )
@@ -305,34 +295,25 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if not involvedPlayer:
         return render(request, "KFW/showKFWgame.html", returnData)
 
-    pov = currentGame.seatPosition(request.user.username)
+    pov = presenter.seatPosition(request.user.username)
     if username in KFW_SUPER_USERS:
-        # Not sure this can handle -1
         pov = 0
-    secondsToNextKickout = currentGame.getSecondsToNextKickout()
+    secondsToNextKickout = presenter.getSecondsToNextKickout()
 
-    kickoutRequired = currentGame.kickoutRequired()
+    kickoutRequired = presenter.kickoutRequired()
 
-    myMove = currentGame.isMyMove(request.user.username)
+    myMove = presenter.isMyMove(request.user.username)
 
     ## Get the Notes for the user
-    seat_position = currentGame.seatPosition(request.user.username)
-    notes_dict = {
-        0: currentGame.player0notes,
-        1: currentGame.player1notes,
-        2: currentGame.player2notes,
-        3: currentGame.player3notes,
-        4: currentGame.player4notes,
-        5: currentGame.player5notes,
-    }
-    notes = notes_dict.get(seat_position, "")
+    player_gp = currentGame.players.filter(player=request.user).first()
+    notes = player_gp.notes if player_gp else ""
 
     liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
     ## Involved Player
     returnData["pov"] = pov
-    returnData["move"] = currentGame.getMoveData(request.user.username)
+    returnData["move"] = presenter.getMoveData(request.user.username)
 
     preferredKFWoptions = (
         json.loads(user_profile.preferredKFWoptions) if user_profile.preferredKFWoptions != "" else [-1]
@@ -355,18 +336,19 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in currentGame.getAllPlayersOrderedySeat():
-            displayNames = currentGame.player0notes
-            currentGame.player0notes = ""
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            # Display names are stored in the creator's notes (replaces player0notes)
+            creator_gp = currentGame.players.filter(player=currentGame.creator).first()
+            displayNames = creator_gp.notes if creator_gp else ""
+            if creator_gp:
+                creator_gp.notes = ""
+                creator_gp.save()
             notes = ""
-            currentGame.save()
-        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
 
         returnData.update(
             {
                 "notes": notes,
                 "displayNames": displayNames,
-                # "allPlayerListBySeat": allPlayerListBySeat,
             }
         )
 
@@ -412,26 +394,28 @@ def _processKFWturn(request):
     latest_update = str(jsonData.get("latestUpdate", 0))
 
     try:
-        currentGame = KFW_Game.objects.get(id=game_id)
-    except KFW_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='KFW')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
+    presenter = currentGame.presenter()
+
     if jsonData["action"] == "getBoatMeeplesAndSkills":
-        incomingData = currentGame.decompressData(jsonData["gameData"])
+        incomingData = presenter.decompressData(jsonData["gameData"])
         meeplesRequired = incomingData[0]
         skillsRequired = incomingData[1]
-        serverDataArr = json.loads(currentGame.serverData)
+        serverDataArr = json.loads(currentGame.KFWserverData)
         meeple_bag = serverDataArr[0]
         skills_bag = serverDataArr[1]
-        [meeplesPulled, meeple_bag] = currentGame.pull_items_from_bag(meeplesRequired, meeple_bag)
-        [skillsPulled, skills_bag] = currentGame.pull_items_from_bag(skillsRequired, skills_bag)
-        currentGame.serverData = json.dumps([meeple_bag, skills_bag])
+        [meeplesPulled, meeple_bag] = presenter.pull_items_from_bag(meeplesRequired, meeple_bag)
+        [skillsPulled, skills_bag] = presenter.pull_items_from_bag(skillsRequired, skills_bag)
+        currentGame.KFWserverData = json.dumps([meeple_bag, skills_bag])
         currentGame.save()
-        returnData = currentGame.compressData([meeplesPulled, skillsPulled])
+        returnData = presenter.compressData([meeplesPulled, skillsPulled])
         return JsonResponse(
             {
                 "data": returnData,
-                "data3": currentGame.getGameData3compressed(),
+                "data3": presenter.getGameData3compressed(),
             },
             safe=False,
         )
@@ -446,7 +430,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW simpleSave - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -455,15 +439,11 @@ def _processKFWturn(request):
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
-        # newVer = (int(currentGame.latestUpdate) % 1000) + 1
-        # currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
-
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
 
         response_data = {
             "completed": True,
-            # "latestUpdate": currentGame.latestUpdate,
         }
 
         return JsonResponse(response_data, safe=False)
@@ -479,19 +459,17 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         # Process any end of turn actions
-        newInformation = currentGame.processEndOfTurnActions(jsonData["data2"])
+        newInformation = presenter.processEndOfTurnActions(jsonData["data2"])
 
         # If moving INTO winter tiles choosing, make sure data is clear
         if jsonData["phase"] == 3 and currentGame.phase != 3:
-            currentGame.clearAllMoveData()
-
-        # oldPhase = currentGame.phase
+            presenter.clearAllMoveData()
 
         currentGame.gameData = jsonData["data"]
         currentGame.turn = jsonData["turn"]
@@ -517,32 +495,28 @@ def _processKFWturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        currentGame.currentPlayers = jsonData["nextPlayer"]
-
-        # If moving INTO village building phase, remove players from currentPlayers who have pre-moved
-        # if jsonData["phase"] == 2 and oldPhase != 2:
-        #    currentGame.currentPlayers = currentGame.getCurrentSimulPlayers()
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
 
         # If it is boat collection phase, and there is a submitted village, then that player has no pending tiles
-        if currentGame.phase == 1 or currentGame.phase == 2 and not currentGame.isTrainingGame():
+        if currentGame.phase == 1 or currentGame.phase == 2 and not presenter.isTrainingGame():
             if jsonData["IPM"] != "":
                 if request.user.username not in KFW_SUPER_USERS:
-                    currentGame.updateSingleMove(request.user.username, jsonData["IPM"])
+                    presenter.updateSingleMove(request.user.username, jsonData["IPM"])
                 else:
-                    currentGame.updateSingleMove(jsonData["BKSN"], jsonData["IPM"])
+                    presenter.updateSingleMove(jsonData["BKSN"], jsonData["IPM"])
             # If you are saving INTO village expansion, check if the phase is complete
             if jsonData["phase"] == 2:
-                currentGame.currentPlayers = currentGame.getCurrentSimulPlayers()
+                presenter.setCurrentPlayers(presenter.getCurrentSimulPlayers())
             # If there are no players, return the simul moves to move the game on
-            if currentGame.currentPlayers == "":
+            if presenter._getCurrentPlayersField() == "":
                 currentGame.save()
                 response_data = {
                     "latestUpdate": currentGame.latestUpdate,
-                    "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                    "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                     "phaseEnded": True,
-                    "gameData1": currentGame.getGameData1Compressed(request.user.username),
-                    "gameData3": currentGame.getGameData3compressed(),
-                    "newInformation": currentGame.compressData(newInformation),
+                    "gameData1": presenter.getGameData1Compressed(request.user.username),
+                    "gameData3": presenter.getGameData3compressed(),
+                    "newInformation": presenter.compressData(newInformation),
                 }
 
                 return JsonResponse(response_data, safe=False)
@@ -551,7 +525,7 @@ def _processKFWturn(request):
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            currentGame.endGame(
+            presenter.endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
@@ -562,13 +536,14 @@ def _processKFWturn(request):
         else:
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            currentPlayersField = presenter._getCurrentPlayersField()
             if (
-                currentGame.currentPlayers != ""
-                and currentGame.currentPlayers != "KfwBot"
+                currentPlayersField != ""
+                and currentPlayersField != "KfwBot"
                 and jsonData["status"] != "FINISHED"
                 and 102 not in loadedStartingOptions
             ):
-                playerListToNotify = [player.strip() for player in currentGame.currentPlayers.split(",")]
+                playerListToNotify = [player.strip() for player in currentPlayersField.split(",")]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if len(playerListToNotify) > 0:
@@ -577,7 +552,7 @@ def _processKFWturn(request):
                         "KFW",
                         playerListToNotify,
                         getattr(currentGame, "id"),
-                        currentGame.getGameName(),
+                        presenter.getGameName(),
                         currentGame,
                         oldVer,
                     )
@@ -589,9 +564,8 @@ def _processKFWturn(request):
             # Need this as intially it is totally empty
             if currentGame.rewindData != "":
                 currentRewindData = json.loads(currentGame.rewindData)
-            # currentRewindDataArray = currentRewindData.split("'SPLIT'")
 
-            # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
+            # If tempData isn't already on the end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
                 if len(currentRewindData) == 0 or (
                     currentRewindData[-1] != currentGame.rewindTempData
@@ -606,8 +580,8 @@ def _processKFWturn(request):
                 currentRewindData.append(
                     [
                         jsonData["data"],
-                        json.loads(currentGame.serverData),
-                        json.loads(currentGame.playersHiddenData),
+                        json.loads(currentGame.KFWserverData),
+                        json.loads(currentGame.KFWplayersHiddenData),
                     ]
                 )
             else:
@@ -616,8 +590,8 @@ def _processKFWturn(request):
                     currentRewindData.append(
                         [
                             jsonData["data"],
-                            json.loads(currentGame.serverData),
-                            json.loads(currentGame.playersHiddenData),
+                            json.loads(currentGame.KFWserverData),
+                            json.loads(currentGame.KFWplayersHiddenData),
                         ]
                     )
                     # Limit to 20 rewind points by removing oldest
@@ -630,14 +604,12 @@ def _processKFWturn(request):
 
         currentGame.save()
 
-        # time.sleep(10)
-
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-            "gameData1": currentGame.getGameData1Compressed(request.user.username),
-            "gameData3": currentGame.getGameData3compressed(),
-            "newInformation": currentGame.compressData(newInformation),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "gameData1": presenter.getGameData1Compressed(request.user.username),
+            "gameData3": presenter.getGameData3compressed(),
+            "newInformation": presenter.compressData(newInformation),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -653,7 +625,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW saveSimulMove - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -663,11 +635,11 @@ def _processKFWturn(request):
         # currentGame.phase = jsonData["phase"]
 
         if request.user.username not in KFW_SUPER_USERS:
-            currentGame.updateSingleMove(request.user.username, jsonData["moveData"])
+            presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
-            currentGame.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
+            presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
 
-        currentGame.currentPlayers = currentGame.getCurrentPlayers()
+        presenter.setCurrentPlayers(presenter.getCurrentPlayers())
 
         if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(
@@ -686,9 +658,9 @@ def _processKFWturn(request):
                 currentGame.kickoutDuration,
             )
 
-        response = currentGame.getJsonMoveResponse()
+        response = presenter.getJsonMoveResponse()
         response.append({"GameDataBoo": False})
-        # If saving from a pre-phase, return the game data  as well
+        # If saving from a pre-phase, return the game data as well
         if jsonData["phase"] == 12:
             response[-1]["GameDataBoo"] = True  # Corrected line
             response.append({"GameData": currentGame.gameData})
@@ -705,24 +677,24 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW saveFinalScoringMove - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Process any end of turn actions
-        newInformation = currentGame.processEndOfTurnActions(jsonData["data2"])
+        newInformation = presenter.processEndOfTurnActions(jsonData["data2"])
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
-        # If you're not a super user, and it's not a practice game, then save accoriding to your login
+        # If you're not a super user, and it's not a practice game, then save according to your login
         if request.user.username not in KFW_SUPER_USERS and 102 not in json.loads(currentGame.startingOptions):
-            currentGame.updateSingleMove(request.user.username, jsonData["moveData"])
+            presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
             # Otherwise, save according to the name sent by the game
-            currentGame.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
+            presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
 
-        currentGame.currentPlayers = currentGame.getCurrentPlayers()
+        presenter.setCurrentPlayers(presenter.getCurrentPlayers())
 
         if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(
@@ -741,7 +713,7 @@ def _processKFWturn(request):
                 currentGame.kickoutDuration,
             )
 
-        response = currentGame.getJsonMoveResponseFinalScoring()
+        response = presenter.getJsonMoveResponseFinalScoring()
 
         currentGame.save()
         return JsonResponse(response, safe=False)
@@ -757,7 +729,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -773,7 +745,7 @@ def _processKFWturn(request):
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
 
-        currentGame.endGame(
+        presenter.endGame(
             request,
             jsonData["winner"],
             jsonData["finalPositions"],
@@ -784,7 +756,7 @@ def _processKFWturn(request):
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -794,19 +766,14 @@ def _processKFWturn(request):
     elif jsonData["action"] == "resign":
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
 
-        # newVer = (int(currentGame.latestUpdate) % 1000) + 1
-        # currentGame.latestUpdate = str((int(time.time())*1000) + newVer)
-        # currentGame.save()
         currentGame.save()
         # Response not used
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                # "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                # "nextPlayer": currentGame.currentPlayers,
             },
             safe=False,
         )
@@ -821,7 +788,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -838,32 +805,29 @@ def _processKFWturn(request):
 
         currentRewindDataArray = json.loads(currentGame.rewindData)
 
-        if currentGame.anyMoveData():
+        if presenter.anyMoveData():
             # This saves it anyway
-            currentGame.clearAllMoveData()
+            presenter.clearAllMoveData()
             # add all players back into currentPlayers
-            currentGame.currentPlayers = currentGame.getCurrentSimulPlayers()
+            presenter.setCurrentPlayers(presenter.getCurrentSimulPlayers())
 
             if currentGame.rewindTempData != "":
                 loadDataArr = json.loads(currentGame.rewindTempData)
             else:
-                # loadData = currentRewindDataArray[-1]
                 loadDataArr = currentRewindDataArray.pop()
 
             ####################################
-            # But this load data needs to be moved to temp
             currentGame.gameData = loadDataArr[0]
-            currentGame.serverData = json.dumps(loadDataArr[1])
-            currentGame.playersHiddenData = json.dumps(loadDataArr[2])
-
+            currentGame.KFWserverData = json.dumps(loadDataArr[1])
+            currentGame.KFWplayersHiddenData = json.dumps(loadDataArr[2])
             ####################################
 
             newVer = (int(currentGame.latestUpdate) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
             currentGame.save()
 
-            gameData1 = currentGame.getGameData1Compressed(request.user.username)
-            gameData3 = currentGame.getGameData3compressed()
+            gameData1 = presenter.getGameData1Compressed(request.user.username)
+            gameData3 = presenter.getGameData3compressed()
 
             return JsonResponse(
                 {
@@ -871,7 +835,7 @@ def _processKFWturn(request):
                     "gameData1": gameData1,
                     "gameData3": gameData3,
                     "latestUpdate": currentGame.latestUpdate,
-                    "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                    "missingPlayers": presenter.getMissingPlayersNamesArray(),
                 },
                 safe=False,
             )
@@ -895,44 +859,39 @@ def _processKFWturn(request):
 
         currentGame.gameData = loadDataArr[0]
 
-        currentGame.serverData = json.dumps(loadDataArr[1])
-        currentGame.playersHiddenData = json.dumps(loadDataArr[2])
+        currentGame.KFWserverData = json.dumps(loadDataArr[1])
+        currentGame.KFWplayersHiddenData = json.dumps(loadDataArr[2])
 
         currentGame.rewindTempData = json.dumps(loadDataArr)
         currentGame.rewindData = json.dumps(currentRewindDataArray)
 
-        # currentGame.actionRewindAlterConsent()
-
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        # rewindHostPossible = currentGame.getRewindHostPossible()
-
         # Delete move data
-        currentGame.clearAllMoveData()
+        presenter.clearAllMoveData()
 
         currentGame.save()
 
-        gameData1 = currentGame.getGameData1Compressed(request.user.username)
-        gameData3 = currentGame.getGameData3compressed()
+        gameData1 = presenter.getGameData1Compressed(request.user.username)
+        gameData3 = presenter.getGameData3compressed()
 
         return JsonResponse(
             {
                 "gameData": loadDataArr[0],
                 "gameData1": gameData1,
                 "gameData3": gameData3,
-                # "rewindHostPossible": rewindHostPossible,
                 "latestUpdate": currentGame.latestUpdate,
-                "missingPlayers": currentGame.getMissingPlayersNamesArray(),
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
             safe=False,
         )
-    # ENd LOAD REWIND
+    # End LOAD REWIND
 
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        currentGame.currentPlayers = jsonData["nextPlayer"]
+        presenter.setCurrentPlayers(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -952,7 +911,7 @@ def _processKFWturn(request):
                     "KFW",
                     playerListToNotify,
                     getattr(currentGame, "id"),
-                    currentGame.getGameName(),
+                    presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
                 )
@@ -960,7 +919,7 @@ def _processKFWturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -968,7 +927,7 @@ def _processKFWturn(request):
     elif jsonData["action"] == "kickout":
         if latest_update != "9999999999999" and str(latest_update) != str(
             currentGame.latestUpdate
-        ):  # and not jsonData["ignoreSync"]:
+        ):
             print(
                 f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: KFW, kickout -- user: {request.user.username}"
             )
@@ -977,19 +936,16 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentGame.currentPlayers}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter._getCurrentPlayersField()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        currentGame.missingPlayers.add(_missingPlayer)
-        currentGame.kickedPlayers.add(_missingPlayer)
-        currentGame.checkForHostChange(_missingPlayer)
-        currentGame.clearAllMoveData()
-
-        # Clears data and saves record - DONT DELETE FAC MOVES
-        # currentGame.clearAllMoveData()
+        presenter.addMissingPlayer(_missingPlayer)
+        presenter.addKickedPlayer(_missingPlayer)
+        presenter.checkForHostChange(_missingPlayer)
+        presenter.clearAllMoveData()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -999,24 +955,23 @@ def _processKFWturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                # "nextPlayer": jsonData["nextPlayer"],
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
 
     elif jsonData["action"] == "adminDataInspection":
         # data1
-        playersHiddenDataArr = json.loads(currentGame.playersHiddenData)
+        playersHiddenDataArr = json.loads(currentGame.KFWplayersHiddenData)
         returnData1 = []
         for playerData in playersHiddenDataArr:
             returnData1.append(playerData[1:])
-        gameData1 = currentGame.compressData(returnData1)
+        gameData1 = presenter.compressData(returnData1)
         # data3
-        serverDataArr = json.loads(currentGame.serverData)
+        serverDataArr = json.loads(currentGame.KFWserverData)
         meepleArr = serverDataArr[0]
         skillsArr = serverDataArr[1]
-        gameData3 = currentGame.compressData([meepleArr, skillsArr])
+        gameData3 = presenter.compressData([meepleArr, skillsArr])
         return JsonResponse(
             {
                 "gameData1": gameData1,
@@ -1039,36 +994,37 @@ def KFWdata(request, data_type=1):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = KFW_Game.objects.get(id=jsonData["gameID"])
-    except KFW_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='KFW')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
+
+    presenter = currentGame.presenter()
 
     if data_type == 1:
         gameData1 = (
-            currentGame.getGameData1Compressed(request.user.username)
+            presenter.getGameData1Compressed(request.user.username)
             if request.user.is_authenticated
-            else currentGame.getGameData1Compressed("")
+            else presenter.getGameData1Compressed("")
         )
-        gameData3 = currentGame.getGameData3compressed()
+        gameData3 = presenter.getGameData3compressed()
         returnData = {
             "gameData": currentGame.gameData,
             "gameData1": gameData1,
             "gameData3": gameData3,
-            "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
             "latestUpdate": currentGame.latestUpdate,
-            "move": currentGame.getMoveData(request.user.username),
+            "move": presenter.getMoveData(request.user.username),
         }
         # Send game data
         return JsonResponse(returnData)
     elif data_type == 2:
         # Remove user from notifications
-        currentGame.playersWithChatNotification.remove(request.user)
+        presenter.removeChatNotification(request.user)
         currentGame.save()
         return JsonResponse(
             {
                 "chatData": currentGame.chatData
-                # }, safe=False)
             },
             safe=True,
         )
@@ -1080,20 +1036,20 @@ def KFWdata(request, data_type=1):
             return JsonResponse({"latest": True}, safe=False)
         # Else Send game data
         gameData1 = (
-            currentGame.getGameData1Compressed(request.user.username)
+            presenter.getGameData1Compressed(request.user.username)
             if request.user.is_authenticated
-            else currentGame.getGameData1Compressed("")
+            else presenter.getGameData1Compressed("")
         )
-        gameData3 = currentGame.getGameData3compressed()
+        gameData3 = presenter.getGameData3compressed()
         return JsonResponse(
             {
                 "latest": False,
                 "gameData": currentGame.gameData,
                 "gameData1": gameData1,
                 "gameData3": gameData3,
-                "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
-                "move": currentGame.getMoveData(request.user.username),
+                "move": presenter.getMoveData(request.user.username),
             }
         )
 
@@ -1109,8 +1065,8 @@ def bugEntry(request):
     gameID = jsonData["gameID"]
 
     try:
-        currentGame = KFW_Game.objects.get(id=gameID)
-    except KFW_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=gameID, gameCode='KFW')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
     gameData = jsonData["gameData"]
@@ -1120,11 +1076,11 @@ def bugEntry(request):
         "Options: "
         + currentGame.startingOptions
         + "ServerData: "
-        + currentGame.serverData
+        + currentGame.KFWserverData
         + "  PlayersHiddenData: "
-        + currentGame.playersHiddenData
+        + currentGame.KFWplayersHiddenData
         + "  PlayersMoveData: "
-        + currentGame.playersMoveData
+        + currentGame.KFWplayersMoveData
     )
 
     # email data to myself
@@ -1156,7 +1112,7 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = KFW_Game.objects.get(id=game_id)
+        currentGame = Game.objects.get(id=game_id, gameCode='KFW')
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -1173,7 +1129,7 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.playersWithChatNotification.set(currentGame.allPlayers.exclude(username=request.user.username))
+        currentGame.players.exclude(player__username=request.user.username).exclude(is_kicked=True).update(has_chat_notification=True)
         currentGame.save()
 
         return JsonResponse({"chatData": compressedChatData})
@@ -1190,16 +1146,14 @@ def saveNotes(request):
     game_id = jsonData["gameID"]
     notes = jsonData["notes"]
     try:
-        currentGame = KFW_Game.objects.get(id=game_id)
-    except KFW_Game.DoesNotExist:
+        currentGame = Game.objects.get(id=game_id, gameCode='KFW')
+    except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    seat_position = currentGame.seatPosition(request.user.username)
-
-    if seat_position in range(5):
-        player_notes_field = f"player{seat_position}notes"
-        setattr(currentGame, player_notes_field, notes)
-        currentGame.save()
+    player_gp = currentGame.players.filter(player=request.user).first()
+    if player_gp:
+        player_gp.notes = notes
+        player_gp.save()
 
     return JsonResponse({"notePosted": True})
 
@@ -1213,8 +1167,8 @@ def saveZoom(request):
 
     if jsonData["action"] == "zoom":
         try:
-            currentGame = KFW_Game.objects.get(id=jsonData["gameID"])
-        except KFW_Game.DoesNotExist:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='KFW')
+        except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         zoomLevels = json.loads(currentGame.zoomLevels)
 
