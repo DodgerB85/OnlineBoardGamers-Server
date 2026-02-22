@@ -134,7 +134,7 @@ def reverse_migration(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Lobby', '0095_game_kfw_fields'),
+        ('Lobby', '0096_game_kfw_fields'),
         ('KFW', '0015_kfw_game_gamedatablob'),
     ]
 

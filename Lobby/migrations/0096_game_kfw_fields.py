@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Lobby', '0094_gameplayer_movedatajson'),
+        ('Lobby', '0095_rename_serverremainingplayerorderbynames_game_servercurrentplayernamesinturnorder_and_more'),
     ]
 
     operations = [
