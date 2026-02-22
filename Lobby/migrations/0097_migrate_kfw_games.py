@@ -38,8 +38,6 @@ def migrate_kfw_games(apps, schema_editor):
             created=old_game.created,
             startingMap=old_game.startingMap if hasattr(old_game, 'startingMap') else "",
             startingOptions=old_game.startingOptions,
-            statsExcludeConsent=old_game.statsExcludeConsent,
-            deleteGameVotes=old_game.deleteGameVotes if hasattr(old_game, 'deleteGameVotes') else None,
             creator=old_game.creator,
             host=old_game.host,
             tournamentGame=old_game.tournamentGame,
