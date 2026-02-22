@@ -71,179 +71,6 @@ def createBusGame(request):
 
     return create_bus_game(request)
 
-    # Check Not You
-    if "trainingGame" not in request.POST:
-        # if request.user.username in [request.POST["player2"], request.POST["player3"], request.POST["player4"], request.POST["player5"]]:
-        if request.user.username in [
-            request.POST.get("player3"),
-            request.POST.get("player4"),
-            request.POST.get("player5"),
-        ]:
-            messages.error(
-                request, gettext("You cannot add yourself as another player")
-            )
-            return HttpResponseRedirect(reverse("createBusPage"))
-
-        # CHECK APPROPRIATE NUMBER OF ENTERED USERS ARE REAL AND UNIQUE
-        if request.POST["player2"] != "":
-            try:
-                User.objects.get(username=request.POST["player2"])
-            except User.DoesNotExist:
-                messages.error(request, gettext("Error: Player 2 does not exist"))
-                return HttpResponseRedirect(reverse("createBusPage"))
-        if request.POST["player3"] != "":
-            try:
-                User.objects.get(username=request.POST["player3"])
-            except User.DoesNotExist:
-                messages.error(request, gettext("Error: Player 3 does not exist"))
-                return HttpResponseRedirect(reverse("createBusPage"))
-        if request.POST["player4"] != "":
-            try:
-                User.objects.get(username=request.POST["player4"])
-            except User.DoesNotExist:
-                messages.error(request, gettext("Error: Player 4 does not exist"))
-                return HttpResponseRedirect(reverse("createBusPage"))
-        if request.POST["player5"] != "":
-            try:
-                User.objects.get(username=request.POST["player5"])
-            except User.DoesNotExist:
-                messages.error(request, gettext("Error: Player 5 does not exist"))
-                return HttpResponseRedirect(reverse("createBusPage"))
-
-    _gameName = request.POST["gameName"]
-
-    _gameDescription = request.POST["gameDescription"]
-
-    _maxPlayers = 3
-    if "playerNumber" in request.POST:
-        _maxPlayers = int(request.POST["playerNumber"])
-
-    _startingOptions = []
-    if "trainingGame" in request.POST:
-        _startingOptions.append(int(request.POST["trainingGame"]))
-    # if 'learningGame' in request.POST:
-    #    _startingOptions += request.POST["trainingGame"] + ","
-    if "experiencedGame" in request.POST:
-        _startingOptions.append(int(request.POST["experiencedGame"]))
-
-    _created = SR_getTimeNow()
-    _pace = request.POST["pace"]
-
-    newGame = Game(
-        gameCode="Bus",
-        gameName=_gameName,
-        gameDescription=_gameDescription,
-        creator=request.user,
-        host=request.user,
-        gamePace=_pace,
-        turn=0,
-        phase=0,
-        created=_created,
-        latestUpdate=_created,
-        startingOptions=json.dumps(_startingOptions),
-        maxPlayers=_maxPlayers,
-        gameStatus="AVAILABLE",
-    )
-    newGame.save()
-
-    # Add player1 (creator) as a GamePlayer
-    _player1 = request.user
-    GamePlayer.objects.create(game=newGame, player=_player1, seat_order=0)
-
-    if "trainingGame" in request.POST:
-        newGame.gameStatus = "ACTIVE"
-
-        # Add shadow players
-        _newPlayer1 = User.objects.get(username="SHADOW")
-        GamePlayer.objects.create(game=newGame, player=_newPlayer1, seat_order=1)
-
-        displayNames = []
-        if request.POST["player2"] != "":
-            displayNames.append(request.POST["player2"])
-        else:
-            displayNames.append("SHADOW")
-
-        if _maxPlayers >= 3:
-            _newPlayer2 = User.objects.get(username="SHADOW_2")
-            GamePlayer.objects.create(game=newGame, player=_newPlayer2, seat_order=2)
-            if request.POST["player3"] != "":
-                displayNames.append(request.POST["player3"])
-            else:
-                displayNames.append("SHADOW_2")
-
-        if _maxPlayers >= 4:
-            _newPlayer3 = User.objects.get(username="SHADOW_3")
-            GamePlayer.objects.create(game=newGame, player=_newPlayer3, seat_order=3)
-            if request.POST["player4"] != "":
-                displayNames.append(request.POST["player4"])
-            else:
-                displayNames.append("SHADOW_3")
-
-        if _maxPlayers >= 5:
-            _newPlayer4 = User.objects.get(username="SHADOW_4")
-            GamePlayer.objects.create(game=newGame, player=_newPlayer4, seat_order=4)
-            if request.POST["player5"] != "":
-                displayNames.append(request.POST["player5"])
-            else:
-                displayNames.append("SHADOW_4")
-
-        # Store display names in player0's notes temporarily
-        player0_gp = newGame.players.filter(seat_order=0).first()
-        if player0_gp:
-            player0_gp.notes = json.dumps(displayNames)
-            player0_gp.save()
-
-        presenter = cast("BusPresenter", newGame.presenter())
-        presenter.startGame(request)
-    else:
-        usernamesToNotify = []
-        for i in range(2, _maxPlayers + 1):
-            player_username = request.POST.get(f"player{i}", "")
-            if player_username:
-                newPlayer = get_object_or_404(User, username=player_username)
-                newGame.gameStatus = "WAITING"
-                newGame.invitedPlayers.add(newPlayer)
-                usernamesToNotify.append(newPlayer.username)
-
-        presenter = cast("BusPresenter", newGame.presenter())
-        SN_sendInviteNotifications(
-            request,
-            usernamesToNotify,
-            presenter.getGameName(),
-            _maxPlayers,
-            "Bus",
-        )
-
-    newGame.kickoutDuration = request.POST["kickoutDuration"]
-
-    # newGame.zoomLevels = "200" * _maxPlayers
-    zoomLevels = []
-    for i in range(_maxPlayers):
-        zoomLevels.append(120)
-    newGame.zoomLevels = json.dumps(zoomLevels)
-
-    newGame.statsExcludeConsent = "0" * _maxPlayers
-    if "trainingGame" in request.POST:
-        newGame.statsExcludeConsent = "1" * _maxPlayers
-        newGame.statsExcludedGame = True
-
-    if "privateGame" in request.POST:
-        newGame.gameStatus = "PRIVATE"
-
-    newGame.save()
-
-    if "trainingGame" in request.POST:
-        messages.success(request, (gettext("Your Practice game has started")))
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "current"})
-        )
-    else:
-        messages.success(request, (SF_getGameCreationJsonReturn("Bus", newGame.id)))
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "waiting"})
-        )
-
-
 def showBusGame(request, game_id):
     try:
         currentGame = (
@@ -740,7 +567,6 @@ def _processBusTurn(request):
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
-        presenter.enableStatsExclude(request.user.username)
         currentGame.save()
         # Response not used
         return JsonResponse(
@@ -780,13 +606,11 @@ def _processBusTurn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        rewindHostPossible = presenter.getRewindHostPossible()
         currentGame.save()
 
         return JsonResponse(
             {
                 "gameData": loadData,
-                "rewindHostPossible": rewindHostPossible,
                 "latestUpdate": currentGame.latestUpdate,
                 "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
@@ -859,7 +683,6 @@ def _processBusTurn(request):
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
-        presenter.enableStatsExclude(_missingPlayer.username)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)

@@ -882,15 +882,27 @@ def handler404(request, exception):
     # if data:
     #    return HttpResponseNotFound(data[0])
     try:
-        message = ""
-        message += "=== 404 ===================================\n"
-        message += "404 ERROR\n"
+        message = "=== 404 ERROR ===\n"
+        message += f"Path: {request.path} [{request.method}]\n"
+        message += f"User: {request.user.username if request.user.is_authenticated else 'Anonymous'}\n"
+
+        # --- ADD THIS: Capture POST Data ---
+        if request.method == "POST":
+            try:
+                # If it's JSON (like your FCM data)
+                body_data = json.loads(request.body)
+                message += f"POST Data: {json.dumps(body_data, indent=2)}\n"
+            except Exception:
+                # Fallback for non-JSON or malformed data
+                message += f"Raw Body (Partial): {request.body[:500]!r}\n"
+
+        if exception.args:
+            message += f"Exception Detail: {exception.args[0]}\n"
+
         if request.user.is_authenticated:
             message += "User: " + request.user.username + "\n"
         else:
             message += "User Not Logged In\n"
-        message += "Path: " + request.path + "\n"
-        message += "Method: " + request.method + "\n"
         message += "User Is Authenticated: " + str(request.user.is_authenticated) + "\n"
         if request.user.is_authenticated:
             message += "Email: " + request.user.email + "\n"
@@ -3792,7 +3804,7 @@ def schism(request):
     
 
 @login_required
-def indPhpMap(request):
+def phpgames(request):
     # Fetch querysets
     availableGamesList = Game.objects.filter(
         gameStatus="AVAILABLE", gameCode="IND"
