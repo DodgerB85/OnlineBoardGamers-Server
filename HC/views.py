@@ -206,10 +206,10 @@ def createHCgame(request):
 
         displayNames = displayNames[:-1]
         # Store displayNames in player0's notes
-        player0_gp = newGame.players.filter(seat_order=0).first()
-        if player0_gp:
-            player0_gp.notes = displayNames
-            player0_gp.save()
+        player_gp = newGame.players.filter(player=request.user).first()
+        if player_gp:
+            player_gp.notes = displayNames
+            player_gp.save()
         presenter = cast("HcPresenter", newGame.presenter())
         presenter.startGame(request)
     else:
@@ -1034,8 +1034,8 @@ def showHCgame(request, game_id):
         rewindHostPossible = False
         currentRewindConsent = "0"
         currentPlayers = presenter.getCurrentPlayersInOrderString()
-        # if currentPlayers == "":
-        #    currentPlayers = presenter.getAllPlayersOrderedySeat()
+        if currentPlayers == "":
+           currentPlayers = presenter.getAllPlayersOrderedySeat()[0]
         statsExcludedGame = currentGame.statsExcludedGame
         displayNames = ""
 
@@ -1101,13 +1101,17 @@ def showHCgame(request, game_id):
             myMove = presenter.isMyMove(username)
 
             if "SHADOW" in presenter.getAllPlayersOrderedySeat():
-                player0_gp = next(
-                    (gp for gp in all_players_gps if gp.seat_order == 0), None
+                player_gp = next(
+                    (
+                        gp
+                        for gp in all_players_gps
+                        if gp.player and gp.player.id == user_id
+                    )
                 )
-                if player0_gp:
-                    displayNames = player0_gp.notes
-                    player0_gp.notes = ""
-                    player0_gp.save()
+                if player_gp:
+                    displayNames = player_gp.notes
+                    player_gp.notes = ""
+                    player_gp.save()
                 currentNotes = ""
 
         #######
