@@ -4,8 +4,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('KFW', '0015_kfw_game_gamedatablob'),
-        ('Lobby', '0096_migrate_kfw_games'),
+        ('KFW', '0016_remove_kfw_game_deletegamevotes_and_more'),
+        ('Lobby', '0097_migrate_kfw_games'),
     ]
 
     operations = [
