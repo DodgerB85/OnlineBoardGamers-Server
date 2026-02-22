@@ -104,8 +104,6 @@ from .models import (
     Main_Tournament,
 )
 
-# KFW now uses unified Game model
-
 from user_visit.models import UserVisit
 
 from FCM.common import buildFCMstartingOptions
@@ -133,7 +131,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTGZstartingOptionsHTML,
     SR_getgodsVRoptionsHTML,
     SR_getPointsForPosition,
-    SR_usesUnifiedGameModel,
 )
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
@@ -418,21 +415,17 @@ def addTGid(request, TGid):
 
 
 GAME_NAMES_MODELS = {
-    "FCM": "FCM",  # Now using unified Game model
-    "HC": "HC",  # Now using unified Game model
-    "Bus": "Bus",  # Now using unified Game model
+    "FCM": "FCM", 
+    "HC": "HC",  
+    "Bus": "Bus",  
     "TGZ": "TGZ",
-    "CNS": "CNS",  # Now using unified Game model
-    "AQY": "AQY",  # Now using unified Game model
-    "IND": "IND",  # Now using unified Game model
-    "KFW": "KFW",  # Now using unified Game model
-    "WEB": "WEB",  # Now using unified Game model
+    "CNS": "CNS", 
+    "AQY": "AQY",  
+    "IND": "IND", 
+    "KFW": "KFW",  
+    "WEB": "WEB",  
     "RNB": "RNB",
 }
-GAME_MODELS = [
-    # All games now use unified Game model
-]
-
 
 def testLobby(request):
     # subject = 'Thank you for registering to our site'
@@ -659,10 +652,10 @@ def DBO(request):
     pracGamesCount = 0
     finishedGamesCount = 0
 
-    # Load all unified model games at once
+    # Load all Game model games at once
     query = Q(gameStatus="ACTIVE") | Q(gameStatus="PRIVATE") | Q(gameStatus="WAITING")
 
-    unified_games = (
+    filtered_games = (
         Game.objects.filter(query)
         .prefetch_related("players__player")
         .select_related("creator")
@@ -672,16 +665,16 @@ def DBO(request):
     from collections import defaultdict
 
     games_by_code = defaultdict(list)
-    for game in unified_games:
+    for game in filtered_games:
         games_by_code[game.gameCode].append(game)
 
-    # Count finished games for each unified game code
+    # Count finished games for each filtered_games game code
     for game_code in games_by_code.keys():
         finishedGamesCount += Game.objects.filter(
             gameCode=game_code, gameStatus="FINISHED"
         ).count()
 
-    # Process all unified games
+    # Process all filtered_games games
     for game_code, games in games_by_code.items():
         for singleGame in games:
             presenter = singleGame.presenter()
@@ -692,28 +685,6 @@ def DBO(request):
                 and timeRemaining <= remaining_finish_time_expired
             ):
                 if singleGame.players.filter(player__username="SHADOW").exists():
-                    pracGamesCount += 1
-                gamesList.append(SF_fastSerializeGame(singleGame, request.user))  # singleGame.serialize(request.user))
-                totalGamesCount += 1
-
-    for game_in_use_model in GAME_MODELS:
-        # Query the game_in_use_model to get the players who will timeout within the specified time range
-        query = (
-            Q(gameStatus="ACTIVE") | Q(gameStatus="PRIVATE") | Q(gameStatus="WAITING")
-        )
-        query_finished = Q(gameStatus="FINISHED")
-
-        allGames = game_in_use_model.objects.filter(query).all()
-        finishedGamesCount += game_in_use_model.objects.filter(query_finished).count()
-
-        for singleGame in allGames:
-            timeRemaining = singleGame.getSecondsToNextKickout()
-
-            if (
-                timeRemaining >= remaining_start_time_expired
-                and timeRemaining <= remaining_finish_time_expired
-            ):
-                if singleGame.allPlayers.filter(username="SHADOW").exists():
                     pracGamesCount += 1
                 gamesList.append(SF_fastSerializeGame(singleGame, request.user))  # singleGame.serialize(request.user))
                 totalGamesCount += 1
@@ -746,15 +717,15 @@ def DBO_deleteGame(request, game_type):
 
     # 2. Map game types to Models
     model_map = {
-        "FCM": Game,  # Now using unified Game model
-        "HC": Game,  # Now using unified Game model
-        "Bus": Game,  # Now using unified Game model
+        "FCM": Game, 
+        "HC": Game, 
+        "Bus": Game, 
         "TGZ": Game,
-        "CNS": Game,  # Now using unified Game model
-        "AQY": Game,  # Now using unified Game model
-        "IND": Game,  # Now using unified Game model
-        "KFW": Game,  # Now using unified Game model
-        "WEB": Game,  # Now using unified Game model
+        "CNS": Game, 
+        "AQY": Game, 
+        "IND": Game, 
+        "KFW": Game, 
+        "WEB": Game, 
     }
 
     model = model_map.get(game_type)
@@ -769,10 +740,7 @@ def DBO_deleteGame(request, game_type):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     # 4. Fetch Game
-    if SR_usesUnifiedGameModel(game_type):
-        current_game = model.objects.filter(id=game_id, gameCode=game_type).first()
-    else:
-        current_game = model.objects.filter(id=game_id).first()
+    current_game = model.objects.filter(id=game_id, gameCode=game_type).first()
     if not current_game:
         return JsonResponse({"noGame": True})
 
@@ -978,7 +946,6 @@ def next_game_redirect(request):
     except (TypeError, ValueError):
         return redirect("/")
 
-    # Add unified model games (CNS, WEB, AQY, TGZ)
     currentGamesList = list(
         Game.objects.filter(players__player=request.user, gameStatus="ACTIVE")
         .exclude(players__is_missing=True, players__player=request.user)
@@ -992,7 +959,6 @@ def next_game_redirect(request):
     # Filter currentGamesList based on isMyMove function
     filteredGamesList = []
     for game in currentGamesList:
-        # Unified model - use presenter
         presenter = game.presenter()
         if presenter.quickIsMyMove(request.user.username):
             filteredGamesList.append(game)
@@ -1007,8 +973,8 @@ def next_game_redirect(request):
         if nextID == current_game_id:
             return redirect("/")
         else:
+            #TODO: CHECK - does nextgame.getGameCode() exist?
             nextGameCode = nextGame.getGameCode()
-            # Check if it's a unified model game
             return redirect(f"/{nextGameCode}/{nextGame.id}/show/")
 
     # Get the index of the game with the specified game_id
@@ -1029,9 +995,7 @@ def next_game_redirect(request):
 
     # Construct the nextURL using the next game details
     nextGameCode = nextGame.getGameCode()
-    # Check if it's a unified model game
     return redirect(f"/{nextGameCode}/{nextGame.id}/show/")
-
 
 def password_reset_request(request):
     if request.method == "POST":
@@ -1147,8 +1111,8 @@ def stats(request):
     excluded_names = ["SHADOW", "FcmAI"]
     stats_map = {}  # Using a dict temporarily to collect data
 
-    # Handle all unified model games (CNS, WEB, AQY, TGZ, IND, etc.)
-    for game_code in ["CNS", "WEB", "AQY", "TGZ", "IND", "Bus", "FCM", "HC", "KFW"]:
+    # Split Game model by gameCode
+    for game_code in ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]:
         counts_key = f"counts_Game_{game_code}"
         counts = cache.get(counts_key)
 
@@ -1177,41 +1141,6 @@ def stats(request):
             Game.objects.filter(gameCode=game_code, gameStatus="FINISHED")
             .exclude(players__player__username__in=excluded_names)
             .distinct()
-            .order_by("-latestUpdate")[:10]
-        )
-
-    # Loop through GAME_MODELS once to gather counts and latest games
-    for game_model in GAME_MODELS:
-        #### NOTE - DO NOT USE PRE-FETCHES FOR THIS FUNCTION
-        # To get the latest 10 games, we need to load 10x game models. But we only want to serialise the latest 10
-        # So it's actually less hits just to get the latest 10 games for each model without prefetch (~150 hits)
-        # Get counts (1 hit per model)
-        # If the model is 'FCMGame', this becomes 'FCM'
-        model_name = game_model.__name__.replace("_Game", "")
-        # Cache counts per model to avoid heavy COUNT(*) on every page load
-        counts_key = f"counts_{model_name}"
-        counts = cache.get(counts_key)
-
-        if not counts:
-            qs = game_model.objects.exclude(allPlayers__username__in=excluded_names)
-            counts = {
-                "active": qs.filter(gameStatus="ACTIVE").count(),
-                "finished": qs.filter(gameStatus="FINISHED").count(),
-            }
-            cache.set(counts_key, counts, 60)
-
-        stats_map[model_name] = {**GAME_META.get(model_name, {}), **counts}
-        # Fetch latest games
-        # We only fetch 10 per model, then slice the combined list to 10 at the end
-        latestGames.extend(
-            game_model.objects.filter(gameStatus="ACTIVE")
-            .exclude(allPlayers__username__in=excluded_names)
-            .order_by("-latestUpdate")[:10]
-        )
-
-        latestGamesFinished.extend(
-            game_model.objects.filter(gameStatus="FINISHED")
-            .exclude(allPlayers__username__in=excluded_names)
             .order_by("-latestUpdate")[:10]
         )
 
@@ -1348,10 +1277,9 @@ def index(request):
     # --- Step 2: Deep Prefetching (Essential for Step 3) ---
     all_user_games = []
 
-    # Load all unified model games at once
     from django.db.models import Exists, OuterRef
 
-    # For unified Game model, check through GamePlayer
+    # For Game model, check through GamePlayer
     is_player = Game.objects.filter(id=OuterRef("id"), players__player=user).values(
         "id"
     )
@@ -1360,7 +1288,7 @@ def index(request):
         "id"
     )
 
-    unified_query = Game.objects.annotate(
+    games_query = Game.objects.annotate(
         user_is_player=Exists(is_player), user_is_invited=Exists(is_invited)
     ).filter(
         Q(user_is_player=True)
@@ -1369,7 +1297,7 @@ def index(request):
     )
 
     # Defer large fields
-    unified_query = unified_query.defer(
+    games_query = games_query.defer(
         "gameData",
         "rewindData",
         "rewindTempData",
@@ -1377,67 +1305,11 @@ def index(request):
     )
 
     # Prefetch related data
-    unified_query = unified_query.select_related("creator").prefetch_related(
+    games_query = games_query.select_related("creator").prefetch_related(
         "players__player", "invitedPlayers"
     )
 
-    all_user_games.extend(list(unified_query.distinct()))
-
-    for model in GAME_MODELS:
-        pass
-        # Prepare subqueries for existence checks (much faster than JOINs)
-        is_player = model.objects.filter(id=OuterRef("id"), allPlayers=user).values(
-            "id"
-        )
-        is_invited = model.objects.filter(
-            id=OuterRef("id"), invitedPlayers=user
-        ).values("id")
-
-        # 1. Start with a lean queryset
-        query = model.objects.annotate(
-            user_is_player=Exists(is_player), user_is_invited=Exists(is_invited)
-        ).filter(
-            Q(user_is_player=True)
-            | Q(user_is_invited=True)
-            | Q(
-                gameStatus="AVAILABLE", created__gte=recent_cutoff
-            )  # Don't look at old available games
-        )
-
-        # 2. Defer huge fields that are NOT needed for the lobby listing
-        # This is the single biggest "win" for memory and speed
-        # query = query.defer(
-        #    "gameData", "rewindData", "rewindTempData", "chatData", "kickoutFlexiData"
-        # )
-
-        # deferrung kickoutFlexiData seems to cause occasional race conditions and lobby not loading
-        # when
-        query = query.defer(
-            "gameData",
-            "rewindData",
-            "rewindTempData",
-            "chatData",
-            "autoMoves",  # Add this here -- THIS CAN DEFER NON-EXISTANT FIELDS
-        )
-
-        # 3. Optimized Joins
-        winner_is_m2m = model._meta.get_field("winner").many_to_many
-        query = query.select_related("creator")
-
-        if not winner_is_m2m:
-            query = query.select_related("winner")
-
-        # 4. Prefetch M2Ms needed for serialization
-        prefetches = [
-            "allPlayers",
-            "missingPlayers",
-            "invitedPlayers",
-            "playersWithChatNotification",
-        ]
-        if winner_is_m2m:
-            prefetches.append("winner")
-
-        all_user_games.extend(list(query.prefetch_related(*prefetches).distinct()))
+    all_user_games.extend(list(games_query.distinct()))
 
     all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
 
@@ -1470,22 +1342,13 @@ def index(request):
         else:
             is_blacklisted_game = False
 
-        # Access prefetched data - handle both unified and legacy models
-        is_unified = isinstance(game, Game)
-
-        if is_unified:
-            # Unified Game model
-            all_game_players = game.players.exclude(is_kicked=True).all()
-            all_p_ids = {gp.player.id for gp in all_game_players if gp.player}
-            inv_p_ids = {p.id for p in game.invitedPlayers.all()}
-            miss_p_ids = {
-                gp.player.id for gp in all_game_players if gp.is_missing and gp.player
-            }
-        else:
-            # Legacy model
-            all_p_ids = {p.id for p in game.allPlayers.all()}
-            inv_p_ids = {p.id for p in game.invitedPlayers.all()}
-            miss_p_ids = {p.id for p in game.missingPlayers.all()}
+        # Access prefetched data 
+        all_game_players = game.players.exclude(is_kicked=True).all()
+        all_p_ids = {gp.player.id for gp in all_game_players if gp.player}
+        inv_p_ids = {p.id for p in game.invitedPlayers.all()}
+        miss_p_ids = {
+            gp.player.id for gp in all_game_players if gp.is_missing and gp.player
+        }
 
         is_involved = user_id in all_p_ids
         is_invited = user_id in inv_p_ids
@@ -2183,7 +2046,6 @@ def createAQYpage(request, gameID=0):
 
 @login_required
 def createINDpage(request, gameID=0):
-    # For unified games, pass the Game model with gameCode filter
     experienced = SF_hasRequiredExperience(request, "IND", Game)
     if request.method != "POST" and gameID == 0:
         return render(request, "Lobby/createIND.html", {"experienced": experienced})
@@ -2756,15 +2618,12 @@ def playerInfo(request, usernameToProfile):
 
     # THE MASTER LOOP: One model at a time
     for game_name, game_model in GAME_NAMES_MODELS.items():
-        if SR_usesUnifiedGameModel(game_name):
-            # Handle unified Game model (CNS, WEB, etc.)
-            all_games = list(
-                Game.objects.filter(gameCode=game_name, players__player_id=target_id)
-                .prefetch_related("players__player")
-                .distinct()
-            )
-        else:
-            pass
+        all_games = list(
+            Game.objects.filter(gameCode=game_name, players__player_id=target_id)
+            .prefetch_related("players__player")
+            .distinct()
+        )
+
 
         # Model-specific counters for the stats table
         model_joint_finished = 0
@@ -2961,24 +2820,16 @@ def joinGameLink(request, joinGameLink):
         return HttpResponseRedirect(reverse("index"))
 
     try:
-        if SR_usesUnifiedGameModel(gameCode):
-            availableGame = Game.objects.get(id=numbers, gameCode=gameCode)
-        else:
-            availableGame = gameModel.objects.get(id=numbers)
+        availableGame = Game.objects.get(id=numbers, gameCode=gameCode)
     except Exception:
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
 
-    if SR_usesUnifiedGameModel(gameCode):
-        current_player_count = availableGame.players.exclude(is_kicked=True).count()
-    else:
-        current_player_count = availableGame.allPlayers.count()
+    current_player_count = availableGame.players.exclude(is_kicked=True).count()
 
     if current_player_count >= availableGame.maxPlayers:
         messages.error(request, (gettext("Sorry, the game is full")))
         return HttpResponseRedirect(reverse("index"))
-
-    availableGamesList = [availableGame]
 
     # Serialize the game objects using Django's serializer
     availableGamesListJson = [SF_fastSerializeGame(availableGame, request.user)]
@@ -3011,32 +2862,19 @@ def joinGame(request, gameType):
     if not gameModel:
         return JsonResponse({"error": "Invalid Model"}, status=400)
 
-    # Handle unified Game model (CNS, WEB, etc.)
-    if SR_usesUnifiedGameModel(gameType):
-        try:
-            currentGame = Game.objects.prefetch_related(
-                "players__player", "invitedPlayers"
-            ).get(id=jsonData["gameID"], gameCode=gameType)
-        except Game.DoesNotExist:
-            messages.error(request, (gettext("Sorry, the game no longer exists")))
-            return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
+    try:
+        currentGame = Game.objects.prefetch_related(
+            "players__player", "invitedPlayers"
+        ).get(id=jsonData["gameID"], gameCode=gameType)
+    except Game.DoesNotExist:
+        messages.error(request, (gettext("Sorry, the game no longer exists")))
+        return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
 
-        action = jsonData.get("action", "")
-        current_players_list = [
-            gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player
-        ]
-    else:
-        # Legacy game models
-        try:
-            currentGame = gameModel.objects.prefetch_related("allPlayers").get(
-                id=jsonData["gameID"]
-            )
-        except gameModel.DoesNotExist:
-            messages.error(request, (gettext("Sorry, the game no longer exists")))
-            return JsonResponse({"listToShow": "AVAILABLE"}, safe=False)
+    action = jsonData.get("action", "")
+    current_players_list = [
+        gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player
+    ]
 
-        action = jsonData.get("action", "")
-        current_players_list = list(currentGame.allPlayers.all())
 
     # Delete Training Game // Can never really fail
     if currentGame and action == "deleteTrgGame":
@@ -3053,12 +2891,8 @@ def joinGame(request, gameType):
         if currentGame.gameStatus == "ACTIVE":
             messages.error(request, (gettext("The game has already started")))
         else:
-            if SR_usesUnifiedGameModel(gameType):
-                # For unified model games, delete the GamePlayer
-                currentGame.players.filter(player=request.user).delete()
-            else:
-                # Legacy models
-                currentGame.allPlayers.remove(request.user)
+            currentGame.players.filter(player=request.user).delete()
+
 
             # Using len() on the prefetched list minus the one we removed
             if len(current_players_list) <= 1:
@@ -3143,46 +2977,26 @@ def checkJoinGame(request, gameType, gameID):
             )
         return
     # CHECK GAME EXISTS
-    if SR_usesUnifiedGameModel(gameType):
-        try:
-            currentGame = Game.objects.prefetch_related(
-                "invitedPlayers",
-                "players__player",
-                "creator__profile__blacklistedPlayers",
-            ).get(id=gameID, gameCode=gameType)
-        except Game.DoesNotExist:
-            messages.error(request, (gettext("Sorry, the game does not exist")))
-            if ajaxReturn:
-                return JsonResponse(
-                    {
-                        "listToShow": "AVAILABLE",
-                    }
-                )
-            return
+    try:
+        currentGame = Game.objects.prefetch_related(
+            "invitedPlayers",
+            "players__player",
+            "creator__profile__blacklistedPlayers",
+        ).get(id=gameID, gameCode=gameType)
+    except Game.DoesNotExist:
+        messages.error(request, (gettext("Sorry, the game does not exist")))
+        if ajaxReturn:
+            return JsonResponse(
+                {
+                    "listToShow": "AVAILABLE",
+                }
+            )
+        return
 
-        # Get player lists for unified model games
-        all_players_list = [
-            gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player
-        ]
-        invited_players_list = list(currentGame.invitedPlayers.all())
-    else:
-        try:
-            currentGame = gameModel.objects.prefetch_related(
-                "invitedPlayers", "allPlayers", "creator__profile__blacklistedPlayers"
-            ).get(id=gameID)
-        except gameModel.DoesNotExist:
-            messages.error(request, (gettext("Sorry, the game does not exist")))
-            if ajaxReturn:
-                return JsonResponse(
-                    {
-                        "listToShow": "AVAILABLE",
-                    }
-                )
-            return
-
-        # Use in-memory checks for prefetched sets (no .all() or .filter())
-        all_players_list = list(currentGame.allPlayers.all())
-        invited_players_list = list(currentGame.invitedPlayers.all())
+    all_players_list = [
+        gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player
+    ]
+    invited_players_list = list(currentGame.invitedPlayers.all())
 
     # Check that if the game is WAITING, you are in the invites, OR there is a blank space
     if (
@@ -3231,33 +3045,21 @@ def checkJoinGame(request, gameType, gameID):
     # CHECK EXPERIENCE LEVEL HERE
     is_experienced = (
         currentGame.presenter().isExperiencedGame()
-        if SR_usesUnifiedGameModel(gameType)
-        else currentGame.isExperiencedGame()  # I think this error is ok. Remove when all unified
     )
 
     if is_experienced:
         # Optimization: Fetch SHADOW once
         shadow_user = User.objects.get(username="SHADOW")
-
-        if SR_usesUnifiedGameModel(gameType):
-            # 1 Hit: Count finished games for unified model games
-            exp = (
-                Game.objects.filter(
-                    gameCode=gameType,
-                    gameStatus="FINISHED",
-                    players__player=request.user,
-                )
-                .exclude(players__player=shadow_user)
-                .distinct()
-                .count()
+        exp = (
+            Game.objects.filter(
+                gameCode=gameType,
+                gameStatus="FINISHED",
+                players__player=request.user,
             )
-        else:
-            # 1 Hit: Count finished games for current model
-            exp = (
-                gameModel.objects.filter(allPlayers=request.user, gameStatus="FINISHED")
-                .exclude(allPlayers=shadow_user)
-                .count()
-            )
+            .exclude(players__player=shadow_user)
+            .distinct()
+            .count()
+        )
 
         if exp < SF_getRequiredExp(gameType):
             ##### SEND DISCORD ALERT
@@ -3298,41 +3100,23 @@ def checkJoinGame(request, gameType, gameID):
         fairPlayLastYear = 100
 
         for game_name, game_model in GAME_NAMES_MODELS.items():
-            if SR_usesUnifiedGameModel(game_name):
-                # Handle unified Game model games
-                finishedGames = Game.objects.filter(
-                    Q(gameCode=game_name),
-                    Q(gameStatus="FINISHED"),
-                    ~Q(players__player__username="SHADOW"),
-                    Q(players__player=request.user),
-                ).distinct()
+            finishedGames = Game.objects.filter(
+                Q(gameCode=game_name),
+                Q(gameStatus="FINISHED"),
+                ~Q(players__player__username="SHADOW"),
+                Q(players__player=request.user),
+            ).distinct()
 
-                finishedGames_last_year = finishedGames.filter(
-                    Q(latestUpdate__gte=minus1year)
-                )
-                kickedOutGames = finishedGames_last_year.filter(
-                    Q(players__is_kicked=True, players__player=request.user)
-                ).distinct()
+            finishedGames_last_year = finishedGames.filter(
+                Q(latestUpdate__gte=minus1year)
+            )
+            kickedOutGames = finishedGames_last_year.filter(
+                Q(players__is_kicked=True, players__player=request.user)
+            ).distinct()
 
-                finishedGamesLastYear += finishedGames_last_year.count()
-                kickedOutGamesLastYear += kickedOutGames.count()
-            else:
-                # Legacy game models
-                finishedGames = game_model.objects.filter(
-                    Q(gameStatus="FINISHED"),
-                    ~Q(allPlayers__username="SHADOW"),
-                    Q(allPlayers=request.user),
-                )
+            finishedGamesLastYear += finishedGames_last_year.count()
+            kickedOutGamesLastYear += kickedOutGames.count()
 
-                finishedGames_last_year = finishedGames.filter(
-                    Q(latestUpdate__gte=minus1year)
-                )
-                kickedOutGames = finishedGames_last_year.filter(
-                    Q(kickedPlayers=request.user)
-                )
-
-                finishedGamesLastYear += finishedGames_last_year.count()
-                kickedOutGamesLastYear += kickedOutGames.count()
 
         if kickedOutGamesLastYear > 0:
             kickedOutGamesLastYear -= 1
@@ -3374,20 +3158,12 @@ def checkJoinGame(request, gameType, gameID):
 
     try:
         with transaction.atomic():
-            if SR_usesUnifiedGameModel(gameType):
-                selectedGameForJoin = Game.objects.select_for_update().get(id=gameID)
-                # Re-verify count inside the lock to prevent double-joining
-                current_count = selectedGameForJoin.players.count()
-                # For unified model games, create a GamePlayer
-                # GamePlayer.objects.create(game=currentGame, player=_newPlayer)
-            else:
-                # Legacy models
-                # For Legacy models, lock the specific model row
-                selectedGameForJoin = gameModel.objects.select_for_update().get(
-                    id=gameID
-                )
-                current_count = selectedGameForJoin.allPlayers.count()
-                # currentGame.allPlayers.add(_newPlayer)
+            selectedGameForJoin = Game.objects.select_for_update().get(id=gameID)
+            # Re-verify count inside the lock to prevent double-joining
+            current_count = selectedGameForJoin.players.count()
+            # For Game model games, create a GamePlayer
+            # GamePlayer.objects.create(game=currentGame, player=_newPlayer)
+
             # 2. RACE CONDITION CHECK: Ensure game didn't fill up while waiting for lock
             if current_count >= selectedGameForJoin.maxPlayers:
                 messages.error(request, gettext("Sorry, this game just filled up."))
@@ -3396,28 +3172,26 @@ def checkJoinGame(request, gameType, gameID):
                 return
 
             _newPlayer = request.user
-            if SR_usesUnifiedGameModel(gameType):
-                # Create GamePlayer with all required fields
-                # Determine the next seat_order based on existing players
-                max_seat_order = selectedGameForJoin.players.aggregate(
-                    max_seat=Max('seat_order')
-                )['max_seat']
-                next_seat_order = (max_seat_order + 1) if max_seat_order is not None else 0
 
-                GamePlayer.objects.create(
-                    game=selectedGameForJoin,
-                    player=_newPlayer,
-                    seat_order=next_seat_order,
-                    is_current=False,
-                    is_missing=False,
-                    is_kicked=False,
-                    has_chat_notification=False,
-                    winner=False,
-                    notes=""
-                )
-            else:
-                selectedGameForJoin.allPlayers.add(_newPlayer)
+            # Create GamePlayer with all required fields
+            # Determine the next seat_order based on existing players
+            max_seat_order = selectedGameForJoin.players.aggregate(
+                max_seat=Max('seat_order')
+            )['max_seat']
+            next_seat_order = (max_seat_order + 1) if max_seat_order is not None else 0
 
+            GamePlayer.objects.create(
+                game=selectedGameForJoin,
+                player=_newPlayer,
+                seat_order=next_seat_order,
+                is_current=False,
+                is_missing=False,
+                is_kicked=False,
+                has_chat_notification=False,
+                winner=False,
+                notes=""
+            )
+                
             # 4. UPDATE STATUS & METADATA
             selectedGameForJoin.latestUpdate = str(_latestUpdate)
             selectedGameForJoin.invitedPlayers.remove(request.user)
@@ -3427,10 +3201,7 @@ def checkJoinGame(request, gameType, gameID):
 
             # 5. START GAME LOGIC
             if new_total_count == selectedGameForJoin.maxPlayers:
-                if SR_usesUnifiedGameModel(gameType):
-                    selectedGameForJoin.presenter().startGame(request)
-                else:
-                    selectedGameForJoin.startGame(request)
+                selectedGameForJoin.presenter().startGame(request)
 
                 messages.success(
                     request,
@@ -3476,23 +3247,13 @@ def deleteGame(request, gameType):
     try:
         if gameModel is None:
             return JsonResponse({"noGame": True}, safe=False)
-
-        if SR_usesUnifiedGameModel(gameType):
-            print(gameType)
-            print(jsonData["gameID"])
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameType)
-        else:
-            currentGame = gameModel.objects.get(id=jsonData["gameID"])
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameType)
     except:
         return JsonResponse({"noGame": True}, safe=False)
 
     # Delete Training Game // Can never really fail
     if jsonData["action"] == "deleteTrgGame":
-        if SR_usesUnifiedGameModel(gameType):
-            user_is_player = currentGame.players.filter(player=request.user).exists()
-        else:
-            user_is_player = request.user in currentGame.allPlayers.all()
-
+        user_is_player = currentGame.players.filter(player=request.user).exists()
         if user_is_player:
             gameStatus = currentGame.gameStatus
             currentGame.delete()
@@ -4150,11 +3911,7 @@ def dataCheck(request):
     # 1. Check Available Count First (Lightest Queries)
     available_count = Mini_Tournaments.objects.filter(tournamentStatus="OP").count()
 
-    # Add all unified model games (CNS, WEB, etc.)
     available_count += Game.objects.filter(gameStatus="AVAILABLE").count()
-
-    for model in GAME_MODELS:
-        available_count += model.objects.filter(gameStatus="AVAILABLE").count()
 
     if available_count != jsonData.get("availableCount", 0):
         return JsonResponse({"latest": False})
@@ -4162,15 +3919,9 @@ def dataCheck(request):
     # 2. Check Invitations Count (Medium Queries)
     invitations_count = 0
 
-    # Add all unified model game invitations
     invitations_count += Game.objects.filter(
         gameStatus="WAITING", invitedPlayers=request.user
     ).count()
-
-    for model in GAME_MODELS:
-        invitations_count += model.objects.filter(
-            gameStatus="WAITING", invitedPlayers=request.user
-        ).count()
 
     if invitations_count != jsonData.get("invitationsCount", 0):
         return JsonResponse({"latest": False})
@@ -4181,25 +3932,17 @@ def dataCheck(request):
 
     my_move_count = 0
 
-    # Add all unified model games my move count
-    unified_active_games = (
+    # Add all Game model games my move count
+    active_games = (
         Game.objects.filter(gameStatus="ACTIVE", players__player=request.user)
         .exclude(players__is_missing=True, players__player=request.user)
         .prefetch_related("players__player")
         .distinct()
     )
 
-    for g in unified_active_games:
+    for g in active_games:
         if g.presenter().quickIsMyMove(user_name):
             my_move_count += 1
-
-    for model in GAME_MODELS:
-        active_games = (
-            model.objects.filter(allPlayers=request.user, gameStatus="ACTIVE")
-            .exclude(missingPlayers=request.user)
-            .only("id", "currentPlayers")
-        )
-        my_move_count += sum(1 for g in active_games if g.quickIsMyMove(user_name))
 
     if my_move_count != jsonData.get("myMoveCount", 0):
         return JsonResponse({"latest": False})
@@ -4616,7 +4359,6 @@ def MiniTournament(request, Mini_Tournament_id):
                     if Mini_Tournament.winnersData
                     else []
                 ),
-                "isUnifiedModel": SR_usesUnifiedGameModel(Mini_Tournament.gameCode),
             }
         )
         return render(
@@ -5053,7 +4795,6 @@ def MainTournament(request, Main_Tournament_id):
                     if currentTournament.winnersData
                     else []
                 ),
-                "isUnifiedModel": SR_usesUnifiedGameModel(currentTournament.gameCode),
             }
         )
         return render(

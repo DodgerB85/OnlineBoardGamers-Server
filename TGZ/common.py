@@ -109,7 +109,6 @@ def create_tgz_game(
                     created_time = SR_getTimeNow()
                     creator = request.user
                     
-                    # Create game in unified model
                     new_game = Game(
                         gameCode="TGZ",
                         gameName=game_name,
@@ -371,7 +370,6 @@ def create_tgz_game(
                 
         all_players.append(request.user)
 
-    # Use unified Game model
     from Lobby.models import Game, GamePlayer
     
     with transaction.atomic():
@@ -438,6 +436,6 @@ def create_tgz_game(
         messages.success(request, gettext("Your Practice game has been started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
 
-    # Otherwise, return normal game creation with unified model ID
+    # Otherwise, return normal game creation with Game model ID
     messages.success(request, SF_getGameCreationJsonReturn("TGZ", getattr(new_game, "id")))
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))

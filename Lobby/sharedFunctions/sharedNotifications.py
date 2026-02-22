@@ -28,7 +28,6 @@ from email.mime.multipart import MIMEMultipart
 from django.conf import settings
 
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
-from Lobby.sharedFunctions.sharedRefs import SR_usesUnifiedGameModel
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
@@ -555,9 +554,7 @@ def SN_M_sendEndGameNotificationTieGame(
                 urlText = gettext("Click here to view the game")
 
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-                if SR_usesUnifiedGameModel(game):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -675,9 +672,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                 urlText = gettext("Click here to view the game")
 
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-                if SR_usesUnifiedGameModel(game):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -721,11 +716,8 @@ def SN_sendNextTurnNotification(
                 profile = Profile.objects.get(user=user)
                 activate(profile.profileLanguage)
                 # Set up language vars
-                if SR_usesUnifiedGameModel(game):
-                    currentTurnString = currentGame.presenter().currentTurnString()
-                else:
-                    currentTurnString = currentGame.currentTurnString()
-                    
+                currentTurnString = currentGame.presenter().currentTurnString()
+              
                 gameStrings = getGameStrings(game)
                 subject = gameStrings["yourTurnSubject"]
                 boxName = gameStrings["boxName"]
@@ -800,9 +792,7 @@ def SN_sendNextTurnNotification(
                         print(user.username)
                         print(user)
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/"
-                if SR_usesUnifiedGameModel(game):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -1161,9 +1151,7 @@ def SN_M_T_sendTournamentGameStartNotification(
             )
 
         # SEND WEBHOOKS
-        urlRaw = f"https://www.OnlineBoardGamers.com/{_game}/{str(_gameID)}/"
-        if SR_usesUnifiedGameModel(_game):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{_game}/{str(_gameID)}/show/"
+        urlRaw = f"https://www.OnlineBoardGamers.com/{_game}/{str(_gameID)}/show/"
         if (
             profile.webhooks != ""
             and profile.webhooks is not None
@@ -1360,9 +1348,7 @@ def SN_M_sendGameStartNotification(
                     SN_sendEmail("tournamentGameStart", subject, message, user.email)
 
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
-                if SR_usesUnifiedGameModel(gameCode):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -1389,9 +1375,7 @@ def SN_M_sendGameStartNotification(
                     SN_sendEmail("gameStart", subject, message, user.email)
 
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
-                if SR_usesUnifiedGameModel(gameCode):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -1573,9 +1557,7 @@ def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
             )
 
             # SEND WEBHOOKS
-            urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
-            if SR_usesUnifiedGameModel(gameCode):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+            urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
             if (
                 profile.webhooks != ""
                 and profile.webhooks is not None
@@ -1641,9 +1623,7 @@ def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
             )
 
             # SEND WEBHOOKS
-            urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/"
-            if SR_usesUnifiedGameModel(gameCode):
-                    urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+            urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
             if (
                 profile.webhooks != ""
                 and profile.webhooks is not None

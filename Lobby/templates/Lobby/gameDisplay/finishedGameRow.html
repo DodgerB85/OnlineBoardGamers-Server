@@ -1,7 +1,7 @@
 {% load static i18n %}
 <tr class="clickableGameRow"
     id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
-    onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/{% if game.is_unified_model %}show/{% endif %}';">
+    onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/show/';">
   <td class="nameTDcurrent tdWithBox">
     {% if game.chatNotification %}
       <img class="startingOption"
@@ -12,7 +12,7 @@
            title="New Chat Message">
     {% endif %}
     {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
-    <a href="/{{ game.gameCode }}/{{ game.gameID }}/{% if game.is_unified_model %}/show/{% endif %}">{{ game.gameName }}</a>
+    <a href="/{{ game.gameCode }}/{{ game.gameID }}/show/">{{ game.gameName }}</a>
     {% if game.gameDescription %}- <i>{{ game.gameDescription }}</i>{% endif %}
     {% if game.startingMap and game.gameCode == "FCM" %}
       <img class="startingOption startingMap"

@@ -136,22 +136,22 @@
                         <td class="IPpointsTD">{{ playerEntry.2 }}</td>
                         {% if playerEntry.3 %}
                           <td class="IPpointsTD">
-                            <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.3.0 }}</a>
+                            <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/show/">{{ playerEntry.3.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.4 %}
                           <td class="IPpointsTD">
-                            <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.4.0 }}</a>
+                            <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/show/">{{ playerEntry.4.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.5 %}
                           <td class="IPpointsTD">
-                            <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.5.0 }}</a>
+                            <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/show/">{{ playerEntry.5.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.6 %}
                           <td class="IPpointsTD">
-                            <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.6.0 }}</a>
+                            <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/show/">{{ playerEntry.6.0 }}</a>
                           </td>
                         {% endif %}
                       </tr>
@@ -188,22 +188,22 @@
                           <td class="IPpointsTD">{{ playerEntry.2 }}</td>
                           {% if playerEntry.3 %}
                             <td class="IPpointsTD">
-                              <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.3.0 }}</a>
+                              <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/show/">{{ playerEntry.3.0 }}</a>
                             </td>
                           {% endif %}
                           {% if playerEntry.4 %}
                             <td class="IPpointsTD">
-                              <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.4.0 }}</a>
+                              <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/show/">{{ playerEntry.4.0 }}</a>
                             </td>
                           {% endif %}
                           {% if playerEntry.5 %}
                             <td class="IPpointsTD">
-                              <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.5.0 }}</a>
+                              <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/show/">{{ playerEntry.5.0 }}</a>
                             </td>
                           {% endif %}
                           {% if playerEntry.6 %}
                             <td class="IPpointsTD">
-                              <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.6.0 }}</a>
+                              <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/show/">{{ playerEntry.6.0 }}</a>
                             </td>
                           {% endif %}
                         </tr>
@@ -233,22 +233,22 @@
                         <td class="IPpointsTD">{{ playerEntry.2 }}</td>
                         {% if playerEntry.3 %}
                           <td class="IPpointsTD">
-                            <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.3.0 }}</a>
+                            <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/show/">{{ playerEntry.3.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.4 %}
                           <td class="IPpointsTD">
-                            <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.4.0 }}</a>
+                            <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/show/">{{ playerEntry.4.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.5 %}
                           <td class="IPpointsTD">
-                            <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.5.0 }}</a>
+                            <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/show/">{{ playerEntry.5.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.6 %}
                           <td class="IPpointsTD">
-                            <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/{% if isUnifiedModel %}show/{% endif %}">{{ playerEntry.6.0 }}</a>
+                            <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/show/">{{ playerEntry.6.0 }}</a>
                           </td>
                         {% endif %}
                       </tr>
@@ -327,10 +327,10 @@
                           </thead>
                           {% for game in group %}
                             <tr class="clickableGameRow  {{ tournament.gameCode }}"
-                                onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/{% if isUnifiedModel %}show/{% endif %}';"
+                                onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/show/';"
                                 id="gamesRow{{ game.gameID }}">
                               <td>
-                                <a href="/{{ gameCode }}/{{ game.gameID }}/{% if isUnifiedModel %}show/{% endif %}">{{ game.gameName }}</a>
+                                <a href="/{{ gameCode }}/{{ game.gameID }}/show/">{{ game.gameName }}</a>
                               </td>
                               <td>
                                 {% for player in game.players %}
@@ -359,10 +359,10 @@
                         </thead>
                         {% for game in round.gamesData %}
                           <tr class="clickableGameRow  {{ tournament.gameCode }}"
-                              onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/{% if isUnifiedModel %}show/{% endif %}';"
+                              onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/show/';"
                               id="gamesRow{{ game.gameID }}">
                             <td>
-                              <a href="/{{ gameCode }}/{{ game.gameID }}/{% if isUnifiedModel %}show/{% endif %}">{{ game.gameName }}</a>
+                              <a href="/{{ gameCode }}/{{ game.gameID }}/show/">{{ game.gameName }}</a>
                             </td>
                             <td>
                               {% for player in game.players %}
@@ -483,7 +483,7 @@
                       </thead>
                       {% for game in round.gamesData %}
                         <tr class="clickableGameRow  {{ tournament.gameCode }}"
-                            onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/{% if isUnifiedModel %}show/{% endif %}';"
+                            onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/show/';"
                             id="gamesRow{{ game.gameID }}">
                           <td>{{ game.gameName }}</td>
                           <td>

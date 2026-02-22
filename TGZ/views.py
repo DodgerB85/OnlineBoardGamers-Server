@@ -245,7 +245,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
 
     experiencedPlayer = False
     if currentGame.turn == 0:
-        # Count finished games for user in unified model
+        # Count finished games for user in Game model
         if (
             Game.objects.filter(
                 gameCode="TGZ", players__player=request.user, gameStatus="FINISHED"
@@ -331,7 +331,7 @@ def _processTGZturn(request):
 
     # Helper function to update current players
     def set_current_players(next_player_str):
-        """Update current players for unified model"""
+        """Update current players for Game model"""
         from Lobby.models import GamePlayer
 
         # Clear all is_current flags
@@ -429,7 +429,7 @@ def _processTGZturn(request):
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         tourney_admin = User.objects.get(username="TGZtourneyAdmin")
 
-        # For unified model, update GamePlayer records
+        # For Game model, update GamePlayer records
         from Lobby.models import GamePlayer
 
         # Mark player as missing/kicked
@@ -656,7 +656,7 @@ def _processTGZturn(request):
             usernameToUse = jsonData["BKSN"]
         _missingPlayer = User.objects.get(username=usernameToUse)
 
-        # For unified model, update GamePlayer records
+        # For Game model, update GamePlayer records
         from Lobby.models import GamePlayer
 
         player_gp = currentGame.players.filter(player=_missingPlayer).first()
@@ -788,7 +788,7 @@ def _processTGZturn(request):
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
 
-        # For unified model, update GamePlayer records
+        # For Game model, update GamePlayer records
         from Lobby.models import GamePlayer
 
         player_gp = currentGame.players.filter(player=_missingPlayer).first()
@@ -1289,14 +1289,13 @@ def TGZstatGames(request):
         num_pages = paginator.num_pages
 
     # Filter the games for the current page ONLY
-    # Query unified Game model only
-    unified_games = (
+    TGZ_games = (
         Game.objects.filter(gameCode="TGZ", original_id__in=gameIDs_page)
         .select_related("creator__profile", "creator")
         .prefetch_related("players__player", "invitedPlayers")
     )
 
-    finishedGames = list(unified_games)
+    finishedGames = list(TGZ_games)
 
     # Sort by latestUpdate
     finishedGames.sort(key=lambda x: x.latestUpdate, reverse=True)

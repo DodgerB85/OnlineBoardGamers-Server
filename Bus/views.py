@@ -58,7 +58,7 @@ def BusHelp(request):
 
 
 def redirect_old_url(request, original_id):
-    """Redirect old Bus_Game URLs to new unified Game URLs"""
+    """Redirect old Bus_Game URLs to new Game Game URLs"""
     game = get_object_or_404(Game, gameCode="Bus", original_id=original_id)
     return redirect("Bus:showBusGame", game_id=game.id)
 

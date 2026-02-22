@@ -12,7 +12,7 @@ app_name = "FCM"
 
 
 def redirect_old_url(request, original_id):
-    """Redirect old FCM_Game URLs to new unified Game URLs"""
+    """Redirect old FCM_Game URLs to new Game Game URLs"""
     try:
         game = Game.objects.get(gameCode='FCM', original_id=original_id)
         return redirect('FCM:showFCMgame', game_id=game.id)
