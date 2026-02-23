@@ -2645,6 +2645,8 @@ class HCpresenter(GamePresenter):
         self.gameObj.save()
 
     def getRewindHostPossible(self):
+        if self.isTrainingGame():
+            return True
         if self.gameObj.players.filter(is_missing=True).exists():
             if not self.gameObj.activeVotes:
                 self.gameObj.activeVotes = {}
