@@ -31,6 +31,13 @@ class GamePresenter:
     def __init__(self, gameObj):
         self.gameObj = gameObj
 
+    def __str__(self):
+        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        allPlayersString = " / ".join(
+            gp.player.username for gp in all_players if gp.player
+        )
+        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
+
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
     # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
     def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
@@ -475,15 +482,6 @@ class GamePresenter:
 
 
 class CannesPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -563,15 +561,6 @@ class CannesPresenter(GamePresenter):
 
 
 class WebPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -680,15 +669,6 @@ class WebPresenter(GamePresenter):
         return "WEB"
 
 class AqyPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -1031,15 +1011,6 @@ class AqyPresenter(GamePresenter):
 
 
 class TgzPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
     def endGame(
         self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
     ):
@@ -1170,15 +1141,6 @@ class TgzPresenter(GamePresenter):
 
 
 class IndPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -1392,16 +1354,6 @@ class IndPresenter(GamePresenter):
  
 
 class BusPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
-
     def endGame(
         self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
     ):
@@ -1571,15 +1523,6 @@ class BusPresenter(GamePresenter):
 
 
 class RnbPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        )
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         # Return False if no username is provided
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
@@ -1903,15 +1846,6 @@ class RnbPresenter(GamePresenter):
  
 
 class FcmPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
-
-
     def startGame(self, request):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
@@ -2683,14 +2617,6 @@ class FcmPresenter(GamePresenter):
 
 
 class HcPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
-
     def getCurrentPlayersInOrderString(self):
         """Get current players as a string (matching old currentPlayers field format)"""
         current_players_arr = json.loads(self.gameObj.currentPlayersInTurnOrder) if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder != "" else []
@@ -3083,11 +3009,6 @@ class HcPresenter(GamePresenter):
 
 
 class KfwPresenter(GamePresenter):
-    def __str__(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
-        return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
-
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
