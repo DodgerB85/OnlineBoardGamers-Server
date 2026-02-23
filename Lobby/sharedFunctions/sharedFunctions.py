@@ -157,13 +157,16 @@ def SF_fastSerializeGame(game, user):
 
     # 4. MyMove & Involved Logic
     is_my_move = False
-    if user:
+    if user and game.gameStatus == "ACTIVE":
         is_my_move = (not current_players_str or user.username in current_players_str or 
                       any(s in current_players_str for s in ["SHADOW", "FcmAI"]))
         
         # For HC, if it is factory phase, AND you have submitted your move, set it back to false
         if game_code == "HC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
             is_my_move = False
+        if game_code == "RNB":
+            if is_my_move and not game.presenter().quickIsMyMove(user.username):
+                is_my_move = False
     
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 

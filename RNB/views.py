@@ -21,16 +21,14 @@ from django.db.models import Q
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
-    SF_getGameCreationJsonReturn,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
+    SN_sendPendingRNBturnNotification,
     SN_sendNextTurnNotification,
     SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
+    SN_sendFixNextTurnNotification,
 )
-from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
-
 
 from .common import create_rnb_game
 
@@ -87,9 +85,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     try:
         currentGame = (
-            Game.objects.select_related("host", "creator")
-            .prefetch_related("players__player", "invitedPlayers")
-            .get(id=game_id, gameCode="RNB")
+            Game.objects.select_related("host", "creator").prefetch_related("players__player", "invitedPlayers").get(id=game_id, gameCode="RNB")
         )
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
@@ -109,18 +105,13 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     gameID = currentGame.id
     gameName = presenter.getGameName()
 
-
     # Encode to Base64 so it can travel safely in HTML
-    #gameDataB64 = base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
+    # gameDataB64 = base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
     gameDataB64 = currentGame.gameData
 
     gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = (
-        json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    )
-    startingOptions = (
-        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    )
+    KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
+    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
     allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, False)
     # Logged out
@@ -145,11 +136,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
                 False,
             )
         ),
-        "deleteVotesData": json.dumps(
-            presenter.getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
-            )
-        ),
+        "deleteVotesData": json.dumps(presenter.getFullSetOfVoteResults(DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False)),
         "settingsDebug": config("RNB_USE_SOURCE_CODE", default=False, cast=bool),
     }
 
@@ -224,7 +211,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     liveNotification = user_profile.liveNotification
     myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
 
-    move = presenter.getMoveData(username)
+    currentMove = presenter.getCurrentMoveData(username)
     trade = currentGame.playerTradeData
 
     ## Involved Player
@@ -239,7 +226,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "notes": notes,
             "yourTurnAudioType": liveNotification,
             "statsExcludedGame": currentGame.statsExcludedGame,
-            "move": move,
+            "currentMove": currentMove,
             "trade": trade,
         }
     )
@@ -259,7 +246,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # TODO: also send any current player pre moves in case action failed.
 
     ### NEW GAME
-    #if not currentGame.gameDataBLOB:
+    # if not currentGame.gameDataBLOB:
     if not currentGame.gameData or currentGame.gameData == "":
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeat():
@@ -341,9 +328,7 @@ def db_mutex(name, timeout=10):
                 cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
                 cursor.fetchall()
             except Exception as e:
-                print(
-                    f"ERROR-RNB: Failed to release lock {mutex_name}: {e}"
-                )  # Log error
+                print(f"ERROR-RNB: Failed to release lock {mutex_name}: {e}")  # Log error
 
 
 def processRNBturn(request):
@@ -389,7 +374,7 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        #currentGame.gameDataBLOB = jsonData["data"]
+        # currentGame.gameDataBLOB = jsonData["data"]
         currentGame.gameData = jsonData["data"]
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
@@ -417,9 +402,7 @@ def _processRNBturn(request):
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
         savingPhase = jsonData["phase"]
-        if savingTurn < currentGame.turn or (
-            savingTurn == currentGame.turn and savingPhase < currentGame.phase
-        ):
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
             print(
                 f"RNB saveStackMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB, save -- user: {request.user.username}"
             )
@@ -461,8 +444,8 @@ def _processRNBturn(request):
             presenter = cast("RnbPresenter", currentGame.presenter())
 
             gameDataStr = jsonData["gameData"]
-            #raw_binary = base64.b64decode(gameDataStr)
-            #currentGame.gameDataBLOB = raw_binary
+            # raw_binary = base64.b64decode(gameDataStr)
+            # currentGame.gameDataBLOB = raw_binary
             currentGame.gameData = gameDataStr
             currentGame.turn = jsonData["turn"]
             currentGame.phase = jsonData["phase"]
@@ -470,18 +453,15 @@ def _processRNBturn(request):
             oldVer = db_latest_update
             newVer = (int(db_latest_update) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
-            print(f"nextCurrentPlayers: {jsonData['nextCurrentPlayers']}")
-            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayers"])
+
+            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayers"])
 
             # SAVE BEFORE NOTIFICATIONS
             currentGame.save()
 
             ################ REWIND EVERY SAVE #######################
             # Don't save rewind if all players have moved - wait for client to process phase
-            if (
-                jsonData["saveRewind"]
-                and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
-            ):
+            if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
                 doSaveRewind(currentGame, jsonData)
 
             ################ END REWIND EVERY SAVE #######################
@@ -489,10 +469,8 @@ def _processRNBturn(request):
             currentGame.save()
 
             # time.sleep(10)
-            print(
-                f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}"
-            )
-            
+            print(f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}")
+
             # Now get the NEXT set of moves -- and set the next player's stack to current
             if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
                 setPlayerStackToCurrent(currentGame, currentGame.serverCurrentPlayerNamesInTurnOrder[0])
@@ -502,7 +480,7 @@ def _processRNBturn(request):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "savingFromStackMove": True,
                 "stacks": getAllCurrentStackMoves(currentGame),
-                "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
+                # "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
                 "sCurrentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
             }
 
@@ -525,18 +503,17 @@ def _processRNBturn(request):
                 "status": "current",
             }
             PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
-            
+
             response_data = {
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "immediateProcess": True,
                 "stacks": getAllCurrentStackMoves(currentGame),
-                #"gameDataB64": base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
-                "gameDataB64": currentGame.gameData
+                # "gameDataB64": base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
+                "gameDataB64": currentGame.gameData,
             }
-            
-            return JsonResponse(response_data, safe=False)
 
+            return JsonResponse(response_data, safe=False)
 
         # Otherwise, you are not a current player. So just return confirmation of saved-for-later
         newMoveEntry = {
@@ -557,12 +534,128 @@ def _processRNBturn(request):
 
     # End stack move
 
+    elif jsonData["action"] == "saveAndUpdateNotifictionsAfterStack":
+        db_latest_update = currentGame.latestUpdate
+        latest_update = jsonData.get("latestUpdate", 0)
+        game_id = currentGame.id
+        presenter = cast("RnbPresenter", currentGame.presenter())
+        # Check if old version is older than DB version, and if so, return
+        if str(latest_update) != str(db_latest_update):
+            print(f"Sync Error: {latest_update} != {db_latest_update} Game: RNB, save -- user: {request.user.username}")
+            turn = jsonData.get("turn", "N/A")
+            phase = jsonData.get("phase", "N/A")
+            message = (
+                f"SYNC ERROR IN: RNB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
+                f"- DB_LU: {db_latest_update} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+            )
+            SN_sendAdminErrorMessage(request, message)
+            return JsonResponse({"syncError": "12345"}, safe=False)
+
+        gameDataStr = jsonData["gameData"]
+        # raw_binary = base64.b64decode(gameDataStr)
+        # currentGame.gameDataBLOB = raw_binary
+        currentGame.gameData = gameDataStr
+        currentGame.turn = jsonData["turn"]
+        currentGame.phase = jsonData["phase"]
+
+        oldVer = db_latest_update
+        newVer = (int(db_latest_update) % 1000) + 1
+        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
+        
+        print(f"allcurrentplayers: {jsonData['allCurrentPlayers']}")
+
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayers"])
+
+        # SAVE BEFORE NOTIFICATIONS
+        currentGame.save()
+
+        if jsonData["status"] == "FINISHED":
+            presenter.endGame(
+                request,
+                jsonData["winner"],
+                jsonData["finalPositions"],
+                jsonData["gameID"],
+            )
+
+        # Only notify if game still running
+        else:
+            # Send Notifications
+            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            nextCurrentPlayer = jsonData["nextCurrentPlayer"]
+            if (
+                nextCurrentPlayer != ""
+                and nextCurrentPlayer != "RnbBot"
+                and jsonData["status"] != "FINISHED"
+                and 102 not in loadedStartingOptions
+            ):
+                playerListToNotify = [nextCurrentPlayer]
+                if request.user.username in playerListToNotify:
+                    playerListToNotify.remove(request.user.username)
+                if len(playerListToNotify) > 0:
+                    if jsonData["currentPlayerNeedsToFixMove"] == True:
+                        SN_sendFixNextTurnNotification(
+                            request,
+                            "RNB",
+                            playerListToNotify,
+                            getattr(currentGame, "id"),
+                            presenter.getGameName(),
+                            currentGame,
+                            oldVer,
+                        )
+                    else:
+                        SN_sendNextTurnNotification(
+                            request,
+                            "RNB",
+                            playerListToNotify,
+                            getattr(currentGame, "id"),
+                            presenter.getGameName(),
+                            currentGame,
+                            oldVer,
+                        )
+            pendingPlayers = jsonData["pendingPlayers"]
+            if (
+                len(pendingPlayers) > 0
+                and not any(p.startswith("RnbBot") for p in pendingPlayers)
+                and jsonData["status"] != "FINISHED"
+                and 102 not in loadedStartingOptions
+            ):
+                playerListToNotify = [player.strip() for player in pendingPlayers]
+                if request.user.username in playerListToNotify:
+                    playerListToNotify.remove(request.user.username)
+                if len(playerListToNotify) > 0:
+                    SN_sendPendingRNBturnNotification(
+                        request,
+                        "RNB",
+                        playerListToNotify,
+                        getattr(currentGame, "id"),
+                        presenter.getGameName(),
+                        currentGame,
+                        oldVer,
+                    )
+
+        ################ REWIND EVERY SAVE #######################
+
+        doSaveRewind(currentGame, jsonData)
+
+        ################ END REWIND EVERY SAVE #######################
+
+        currentGame.save()
+
+        # time.sleep(10)
+
+        response_data = {
+            "latestUpdate": currentGame.latestUpdate,
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "savingFromStackMove": False,
+        }
+
+        return JsonResponse(response_data, safe=False)
+
     elif jsonData["action"] == "saveEndGame":
         # Check if old version is older than DB version, and if so, return
         if str(latest_update) != str(currentGame.latestUpdate):
-            print(
-                f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: RNB, save -- user: {request.user.username}"
-            )
+            print(f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: RNB, save -- user: {request.user.username}")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -573,7 +666,7 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
-        #currentGame.gameDataBLOB = jsonData["data"]
+        # currentGame.gameDataBLOB = jsonData["data"]
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
@@ -624,9 +717,7 @@ def _processRNBturn(request):
 
     elif jsonData["action"] == "loadRewind":
         if str(latest_update) != str(currentGame.latestUpdate):
-            print(
-                f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: RNB, loadRewind -- user: {request.user.username}"
-            )
+            print(f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: RNB, loadRewind -- user: {request.user.username}")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -637,17 +728,9 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
-        if (
-            not currentGame.rewindData
-            or currentGame.rewindData == "[]"
-            or len(currentGame.rewindData) == 0
-        ):
+        if not currentGame.rewindData or currentGame.rewindData == "[]" or len(currentGame.rewindData) == 0:
             return JsonResponse(
-                {
-                    "errorMessage": gettext(
-                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
-                    )
-                },
+                {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
 
@@ -655,21 +738,17 @@ def _processRNBturn(request):
 
         if not currentRewindDataArray or len(currentRewindDataArray) == 0:
             return JsonResponse(
-                {
-                    "errorMessage": gettext(
-                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
-                    )
-                },
+                {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
 
         loadDatab64 = currentRewindDataArray.pop() if currentRewindDataArray else ""
 
         # Decode the Base64 string from the rewind list into raw bytes for the BLOB field
-        #load_data_bytes = base64.b64decode(loadDatab64) if loadDatab64 != "" else b""
-        #db_blob_bytes = (
+        # load_data_bytes = base64.b64decode(loadDatab64) if loadDatab64 != "" else b""
+        # db_blob_bytes = (
         #    bytes(currentGame.gameDataBLOB) if currentGame.gameDataBLOB else b""
-        #)
+        # )
 
         while (
             len(currentRewindDataArray) > 0
@@ -677,7 +756,7 @@ def _processRNBturn(request):
             and loadDatab64 == currentGame.gameData
         ):
             loadDatab64 = currentRewindDataArray.pop()
-            #load_data_bytes = base64.b64decode(loadDatab64)
+            # load_data_bytes = base64.b64decode(loadDatab64)
 
         currentGame.gameData = loadDatab64 if loadDatab64 != "" else ""
 
@@ -711,8 +790,8 @@ def _processRNBturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayers"])
 
         gameDataStr = jsonData["gameData"]
-        #raw_binary = base64.b64decode(gameDataStr)
-        #currentGame.gameDataBLOB = raw_binary
+        # raw_binary = base64.b64decode(gameDataStr)
+        # currentGame.gameDataBLOB = raw_binary
         currentGame.gameData = gameDataStr
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -721,22 +800,10 @@ def _processRNBturn(request):
         currentGame.save()
 
         # Send Notifications
-        loadedStartingOptions = (
-            json.loads(currentGame.startingOptions)
-            if currentGame.startingOptions
-            else []
-        )
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         nextPlayersArr = jsonData["nextCurrentPlayers"]
-        if (
-            len(nextPlayersArr) > 0
-            and not any(p.startswith("RnbBot") for p in nextPlayersArr)
-            and 102 not in loadedStartingOptions
-        ):
-            playerListToNotify = [
-                p
-                for p in nextPlayersArr
-                if p != request.user.username and p != "RnbBot"
-            ]
+        if len(nextPlayersArr) > 0 and not any(p.startswith("RnbBot") for p in nextPlayersArr) and 102 not in loadedStartingOptions:
+            playerListToNotify = [p for p in nextPlayersArr if p != request.user.username and p != "RnbBot"]
 
             if len(playerListToNotify) > 0:
                 SN_sendNextTurnNotification(
@@ -758,12 +825,8 @@ def _processRNBturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        if str(latest_update) != str(
-            currentGame.latestUpdate
-        ):  # and not jsonData["ignoreSync"]:
-            print(
-                f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: RNB, kickout -- user: {request.user.username}"
-            )
+        if str(latest_update) != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
+            print(f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: RNB, kickout -- user: {request.user.username}")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -828,7 +891,6 @@ def doSaveRewind(currentGame, jsonData):
     currentGame.rewindData = json.dumps(currentRewindData)
 
 
-
 def performSaveGame(request, currentGame, jsonData):
     db_latest_update = currentGame.latestUpdate
     latest_update = jsonData.get("latestUpdate", 0)
@@ -836,9 +898,7 @@ def performSaveGame(request, currentGame, jsonData):
     presenter = cast("RnbPresenter", currentGame.presenter())
     # Check if old version is older than DB version, and if so, return
     if str(latest_update) != str(db_latest_update):
-        print(
-            f"Sync Error: {latest_update} != {db_latest_update} Game: RNB, save -- user: {request.user.username}"
-        )
+        print(f"Sync Error: {latest_update} != {db_latest_update} Game: RNB, save -- user: {request.user.username}")
         turn = jsonData.get("turn", "N/A")
         phase = jsonData.get("phase", "N/A")
         message = (
@@ -850,8 +910,8 @@ def performSaveGame(request, currentGame, jsonData):
         return JsonResponse({"syncError": "12345"}, safe=False)
 
     gameDataStr = jsonData["gameData"]
-    #raw_binary = base64.b64decode(gameDataStr)
-    #currentGame.gameDataBLOB = raw_binary
+    # raw_binary = base64.b64decode(gameDataStr)
+    # currentGame.gameDataBLOB = raw_binary
     currentGame.gameData = gameDataStr
     currentGame.turn = jsonData["turn"]
     currentGame.phase = jsonData["phase"]
@@ -868,7 +928,7 @@ def performSaveGame(request, currentGame, jsonData):
     newVer = (int(db_latest_update) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayers"])
+    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayers"])
 
     # SAVE BEFORE NOTIFICATIONS
     currentGame.save()
@@ -884,23 +944,34 @@ def performSaveGame(request, currentGame, jsonData):
     # Only notify if game still running
     else:
         # Send Notifications
-        loadedStartingOptions = (
-            json.loads(currentGame.startingOptions)
-            if currentGame.startingOptions
-            else []
-        )
-        current_players = presenter.getCurrentPlayersArray()
-        if (
-            len(current_players) > 0
-            and not any(p.startswith("RnbBot") for p in current_players)
-            and jsonData["status"] != "FINISHED"
-            and 102 not in loadedStartingOptions
-        ):
-            playerListToNotify = [player.strip() for player in current_players]
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        nextCurrentPlayer = jsonData["nextCurrentPlayer"]
+        if len(nextCurrentPlayer) != "" and nextCurrentPlayer != "RnbBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
+            playerListToNotify = [nextCurrentPlayer]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
                 SN_sendNextTurnNotification(
+                    request,
+                    "RNB",
+                    playerListToNotify,
+                    getattr(currentGame, "id"),
+                    presenter.getGameName(),
+                    currentGame,
+                    oldVer,
+                )
+        pendingPlayers = jsonData["pendingPlayers"]
+        if (
+            len(pendingPlayers) > 0
+            and not any(p.startswith("RnbBot") for p in pendingPlayers)
+            and jsonData["status"] != "FINISHED"
+            and 102 not in loadedStartingOptions
+        ):
+            playerListToNotify = [player.strip() for player in pendingPlayers]
+            if request.user.username in playerListToNotify:
+                playerListToNotify.remove(request.user.username)
+            if len(playerListToNotify) > 0:
+                SN_sendPendingRNBturnNotification(
                     request,
                     "RNB",
                     playerListToNotify,
@@ -970,9 +1041,7 @@ def _sendChatMessageRNB(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.presenter().addChatNotifications(
-            currentGame.presenter().getAllPlayersOrderedySeat(False, True)
-        )
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
         currentGame.presenter().removeChatNotification(request.user)
 
         currentGame.save()
@@ -1084,15 +1153,17 @@ def RNBdata(request, dataType=1):
 
     if dataType == 1:
         # 1. Get the raw binary (Gzip + MsgPack)
-        #raw_blob = currentGame.gameDataBLOB or b""
+        # raw_blob = currentGame.gameDataBLOB or b""
         # 2. Encode to Base64 so it can travel safely in HTML
-        #gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
+        # gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
         gameDataB64 = currentGame.gameData
+        currentMove = presenter.getCurrentMoveData(request.user.username)
         returnData = {
             "gameDataB64": gameDataB64,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
             "latestUpdate": currentGame.latestUpdate,
+            "currentMove": currentMove,
         }
         # Send game data
         return JsonResponse(returnData)
@@ -1115,16 +1186,18 @@ def RNBdata(request, dataType=1):
             return JsonResponse({"latest": True}, safe=False)
         # Else Send game data
         # 1. Get the raw binary (Gzip + MsgPack)
-        #raw_blob = currentGame.gameDataBLOB or b""
+        # raw_blob = currentGame.gameDataBLOB or b""
         # 2. Encode to Base64 so it can travel safely in HTML
-        #gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
+        # gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
         gameDataB64 = currentGame.gameData
+        currentMove = presenter.getCurrentMoveData(request.user.username)
         return JsonResponse(
             {
                 "latest": False,
                 "gameDataB64": gameDataB64,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
+                "currentMove": currentMove,
             }
         )
 
@@ -1141,10 +1214,10 @@ def RNBdata(request, dataType=1):
 def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
     newMoveEntry["player"] = nameToUse
     gp_player = currentGame.players.only("moveDataJSON").get(player__username=nameToUse)
-    
+
     moves = gp_player.moveDataJSON or []
     turn, phase = newMoveEntry["turn"], newMoveEntry["phase"]
-    
+
     # Use enumerate for cleaner, faster indexing
     for i, entry in enumerate(moves):
         if entry.get("turn") == turn and entry.get("phase") == phase:
@@ -1155,30 +1228,26 @@ def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
         moves.append(newMoveEntry)
 
     gp_player.moveDataJSON = moves
-    gp_player.save(update_fields=["moveDataJSON"]) # ONLY save this field
+    gp_player.save(update_fields=["moveDataJSON"])  # ONLY save this field
 
 
 def PdecompressData(string_to_decompress):
     # return json.loads(gzip.decompress(base64.b64decode(string_to_decompress)).decode("utf-8"))
-    return json.loads(
-        gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode(
-            "utf-8"
-        )
-    )
+    return json.loads(gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
+
 
 def setPlayerStackToCurrent(currentGame, playerName):
     gp = currentGame.players.filter(player__username=playerName).first()
-    gp_moveData = gp.moveDataJSON
+    print(f"Setting {playerName} to current: got {gp}")
+    gp_moveData = gp.moveDataJSON if gp.moveDataJSON else []
     # Find an entry matching the turn and phase
     for entry in gp_moveData:
-        if (
-            entry["turn"] == currentGame.turn
-            and entry["phase"] == currentGame.phase
-        ):
+        if entry["turn"] == currentGame.turn and entry["phase"] == currentGame.phase:
             entry["status"] = "current"
             gp.moveDataJSON = gp_moveData
             gp.save()
             break
+
 
 ##################### THIS IS NOT USED - Leave in case things change
 def getAllCurrentStackPhaseMoves(currentGame):
@@ -1187,16 +1256,14 @@ def getAllCurrentStackPhaseMoves(currentGame):
         gp_moveData = gp.moveDataJSON
         # Find an entry matching the turn and phase
         for entry in gp_moveData:
-            if (
-                entry["turn"] == currentGame.turn
-                and entry["phase"] == currentGame.phase
-            ):
+            if entry["turn"] == currentGame.turn and entry["phase"] == currentGame.phase:
                 entryToAdd = entry
                 entryToAdd["player"] = gp.player.username
                 currentStackMoves.append(entryToAdd)
                 break
 
     return currentStackMoves
+
 
 def getAllCurrentStackMoves(currentGame):
     currentStackMoves = []

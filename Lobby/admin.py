@@ -270,7 +270,7 @@ class GameAdmin(admin.ModelAdmin):
     # search_fields = ("gameName", "creator__username")
     search_fields = ("gameName", "gameDescription", "gameCode")
 
-    readonly_fields = ("ind_premove_display", "gameDataBLOB")
+    readonly_fields = ("ind_premove_display",)#, "gameDataBLOB")
     @admin.display(description='IND premove')
     def ind_premove_display(self, obj):
         return obj.playersPreMoveData
@@ -352,7 +352,7 @@ class GameAdmin(admin.ModelAdmin):
                 "classes": ("collapse",),
                 "fields": (
                     "gameData",
-                    "gameDataBLOB",
+                    #"gameDataBLOB",
                     "rewindData",
                     "rewindTempData",
                     "chatData",
