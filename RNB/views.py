@@ -111,7 +111,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
 
     # Encode to Base64 so it can travel safely in HTML
-    gameDataB64 = base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
+    #gameDataB64 = base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
+    gameDataB64 = currentGame.gameData
 
     gameCreationTimestamp = currentGame.created
     KickoutFlexiDataArray = (
@@ -258,7 +259,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # TODO: also send any current player pre moves in case action failed.
 
     ### NEW GAME
-    if not currentGame.gameDataBLOB:
+    #if not currentGame.gameDataBLOB:
+    if not currentGame.gameData or currentGame.gameData == "":
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeat():
             displayNames = user_gp.notes if user_gp else ""
@@ -387,7 +389,8 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        currentGame.gameDataBLOB = jsonData["data"]
+        #currentGame.gameDataBLOB = jsonData["data"]
+        currentGame.gameData = jsonData["data"]
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
@@ -458,8 +461,9 @@ def _processRNBturn(request):
             presenter = cast("RnbPresenter", currentGame.presenter())
 
             gameDataStr = jsonData["gameData"]
-            raw_binary = base64.b64decode(gameDataStr)
-            currentGame.gameDataBLOB = raw_binary
+            #raw_binary = base64.b64decode(gameDataStr)
+            #currentGame.gameDataBLOB = raw_binary
+            currentGame.gameData = gameDataStr
             currentGame.turn = jsonData["turn"]
             currentGame.phase = jsonData["phase"]
 
@@ -497,7 +501,7 @@ def _processRNBturn(request):
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "savingFromStackMove": True,
-                "stacks": getAllCurrentStackPhaseMoves(currentGame),
+                "stacks": getAllCurrentStackMoves(currentGame),
                 "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
                 "sCurrentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
             }
@@ -526,8 +530,9 @@ def _processRNBturn(request):
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "immediateProcess": True,
-                "stacks": getAllCurrentStackPhaseMoves(currentGame),
-                "gameDataB64": base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
+                "stacks": getAllCurrentStackMoves(currentGame),
+                #"gameDataB64": base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
+                "gameDataB64": currentGame.gameData
             }
             
             return JsonResponse(response_data, safe=False)
@@ -568,7 +573,7 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
-        currentGame.gameDataBLOB = jsonData["data"]
+        #currentGame.gameDataBLOB = jsonData["data"]
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
@@ -661,20 +666,20 @@ def _processRNBturn(request):
         loadDatab64 = currentRewindDataArray.pop() if currentRewindDataArray else ""
 
         # Decode the Base64 string from the rewind list into raw bytes for the BLOB field
-        load_data_bytes = base64.b64decode(loadDatab64) if loadDatab64 != "" else b""
-        db_blob_bytes = (
-            bytes(currentGame.gameDataBLOB) if currentGame.gameDataBLOB else b""
-        )
+        #load_data_bytes = base64.b64decode(loadDatab64) if loadDatab64 != "" else b""
+        #db_blob_bytes = (
+        #    bytes(currentGame.gameDataBLOB) if currentGame.gameDataBLOB else b""
+        #)
 
         while (
             len(currentRewindDataArray) > 0
             # and load_data_bytes == bytes(currentGame.gameDataBLOB)
-            and load_data_bytes == db_blob_bytes
+            and loadDatab64 == currentGame.gameData
         ):
             loadDatab64 = currentRewindDataArray.pop()
-            load_data_bytes = base64.b64decode(loadDatab64)
+            #load_data_bytes = base64.b64decode(loadDatab64)
 
-        currentGame.gameDataBLOB = load_data_bytes if load_data_bytes != "" else None
+        currentGame.gameData = loadDatab64 if loadDatab64 != "" else ""
 
         # currentGame.rewindTempData = json.dumps(loadDataArr)
         currentGame.rewindTempData = loadDatab64
@@ -706,8 +711,9 @@ def _processRNBturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayers"])
 
         gameDataStr = jsonData["gameData"]
-        raw_binary = base64.b64decode(gameDataStr)
-        currentGame.gameDataBLOB = raw_binary
+        #raw_binary = base64.b64decode(gameDataStr)
+        #currentGame.gameDataBLOB = raw_binary
+        currentGame.gameData = gameDataStr
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -821,36 +827,6 @@ def doSaveRewind(currentGame, jsonData):
 
     currentGame.rewindData = json.dumps(currentRewindData)
 
-def setPlayerStackToCurrent(currentGame, playerName):
-    gp = currentGame.players.filter(player__username=playerName).first()
-    gp_moveData = gp.moveDataJSON
-    # Find an entry matching the turn and phase
-    for entry in gp_moveData:
-        if (
-            entry["turn"] == currentGame.turn
-            and entry["phase"] == currentGame.phase
-        ):
-            entry["status"] = "current"
-            gp.moveDataJSON = gp_moveData
-            gp.save()
-            break
-
-def getAllCurrentStackPhaseMoves(currentGame):
-    currentStackMoves = []
-    for gp in currentGame.players.all():
-        gp_moveData = gp.moveDataJSON
-        # Find an entry matching the turn and phase
-        for entry in gp_moveData:
-            if (
-                entry["turn"] == currentGame.turn
-                and entry["phase"] == currentGame.phase
-            ):
-                entryToAdd = entry
-                entryToAdd["player"] = gp.player.username
-                currentStackMoves.append(entryToAdd)
-                break
-
-    return currentStackMoves
 
 
 def performSaveGame(request, currentGame, jsonData):
@@ -874,8 +850,9 @@ def performSaveGame(request, currentGame, jsonData):
         return JsonResponse({"syncError": "12345"}, safe=False)
 
     gameDataStr = jsonData["gameData"]
-    raw_binary = base64.b64decode(gameDataStr)
-    currentGame.gameDataBLOB = raw_binary
+    #raw_binary = base64.b64decode(gameDataStr)
+    #currentGame.gameDataBLOB = raw_binary
+    currentGame.gameData = gameDataStr
     currentGame.turn = jsonData["turn"]
     currentGame.phase = jsonData["phase"]
 
@@ -1107,9 +1084,10 @@ def RNBdata(request, dataType=1):
 
     if dataType == 1:
         # 1. Get the raw binary (Gzip + MsgPack)
-        raw_blob = currentGame.gameDataBLOB or b""
+        #raw_blob = currentGame.gameDataBLOB or b""
         # 2. Encode to Base64 so it can travel safely in HTML
-        gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
+        #gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
+        gameDataB64 = currentGame.gameData
         returnData = {
             "gameDataB64": gameDataB64,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
@@ -1137,9 +1115,10 @@ def RNBdata(request, dataType=1):
             return JsonResponse({"latest": True}, safe=False)
         # Else Send game data
         # 1. Get the raw binary (Gzip + MsgPack)
-        raw_blob = currentGame.gameDataBLOB or b""
+        #raw_blob = currentGame.gameDataBLOB or b""
         # 2. Encode to Base64 so it can travel safely in HTML
-        gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
+        #gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
+        gameDataB64 = currentGame.gameData
         return JsonResponse(
             {
                 "latest": False,
@@ -1160,24 +1139,23 @@ def RNBdata(request, dataType=1):
 
 
 def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
-    print(f"PaddMoveToPlayer: {nameToUse} - {newMoveEntry}")
-    gp_player = currentGame.players.get(player__username=nameToUse)
-    gp_player_moveDataJSON = gp_player.moveDataJSON
-
-    turn = newMoveEntry["turn"]
-    phase = newMoveEntry["phase"]
-    # First, see if there is a mstching entry already there
-    for entry in gp_player_moveDataJSON:
-        if entry["turn"] == turn and entry["phase"] == phase:
-            # If so, replace it
-            entry = newMoveEntry
+    newMoveEntry["player"] = nameToUse
+    gp_player = currentGame.players.only("moveDataJSON").get(player__username=nameToUse)
+    
+    moves = gp_player.moveDataJSON or []
+    turn, phase = newMoveEntry["turn"], newMoveEntry["phase"]
+    
+    # Use enumerate for cleaner, faster indexing
+    for i, entry in enumerate(moves):
+        if entry.get("turn") == turn and entry.get("phase") == phase:
+            moves[i] = newMoveEntry
             break
     else:
-        # If not, add it
-        gp_player_moveDataJSON.append(newMoveEntry)
+        # 'else' on a loop only runs if no 'break' occurred
+        moves.append(newMoveEntry)
 
-    gp_player.moveDataJSON = gp_player_moveDataJSON
-    gp_player.save()
+    gp_player.moveDataJSON = moves
+    gp_player.save(update_fields=["moveDataJSON"]) # ONLY save this field
 
 
 def PdecompressData(string_to_decompress):
@@ -1187,3 +1165,44 @@ def PdecompressData(string_to_decompress):
             "utf-8"
         )
     )
+
+def setPlayerStackToCurrent(currentGame, playerName):
+    gp = currentGame.players.filter(player__username=playerName).first()
+    gp_moveData = gp.moveDataJSON
+    # Find an entry matching the turn and phase
+    for entry in gp_moveData:
+        if (
+            entry["turn"] == currentGame.turn
+            and entry["phase"] == currentGame.phase
+        ):
+            entry["status"] = "current"
+            gp.moveDataJSON = gp_moveData
+            gp.save()
+            break
+
+##################### THIS IS NOT USED - Leave in case things change
+def getAllCurrentStackPhaseMoves(currentGame):
+    currentStackMoves = []
+    for gp in currentGame.players.all():
+        gp_moveData = gp.moveDataJSON
+        # Find an entry matching the turn and phase
+        for entry in gp_moveData:
+            if (
+                entry["turn"] == currentGame.turn
+                and entry["phase"] == currentGame.phase
+            ):
+                entryToAdd = entry
+                entryToAdd["player"] = gp.player.username
+                currentStackMoves.append(entryToAdd)
+                break
+
+    return currentStackMoves
+
+def getAllCurrentStackMoves(currentGame):
+    currentStackMoves = []
+    for gp in currentGame.players.all():
+        for entry in gp.moveDataJSON:
+            entry["player"] = gp.player.username
+            currentStackMoves.append(entry)
+
+    return currentStackMoves
