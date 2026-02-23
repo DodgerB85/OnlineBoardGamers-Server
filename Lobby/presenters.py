@@ -106,12 +106,13 @@ class GamePresenter:
         return ", ".join(self.getArrayOfIsCurrentPlayers())
 
     def seatPosition(self, _username, withoutBots=False):
-        playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        try:
-            return playerList.index(_username)
-        except (ValueError, TypeError):
-            return -1
-        #return self.gameObj.players.filter(player__username=_username).first().seat_order
+        #playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        #try:
+        #    return playerList.index(_username)
+        #except (ValueError, TypeError):
+        #    return -1
+        print(_username)
+        return self.gameObj.players.filter(player__username=_username).first().seat_order
 
     def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
         all_players_gp = self.gameObj.players.select_related("player").order_by("seat_order")
