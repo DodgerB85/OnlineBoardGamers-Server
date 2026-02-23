@@ -178,7 +178,7 @@ for username in timed_out_usernames:
 # timed_out_not_unique = []
 # for game in allActiveGames:
 #    if 1 <= daysSinceLastMove(game.latestUpdate) <= 6:
-#        timed_out_not_unique += game.getCurrentPlayersArrayForReminderEmail()
+#        timed_out_not_unique += game.getArrayOfIsCurrentPlayers()
 
 # timed_out_usernames = set(timed_out_not_unique)
 # timed_out_usernames = list(timed_out_usernames)
@@ -194,7 +194,7 @@ for username in timed_out_usernames:
 #        print("Exiting loop. Reached 100 emails sent.")
 #        break
 #
-#    allPlayerMyMoveGamesList = [(game, daysSinceLastMove(game.latestUpdate)) for game in allActiveGames if username in game.getCurrentPlayersArrayForReminderEmail()]
+#    allPlayerMyMoveGamesList = [(game, daysSinceLastMove(game.latestUpdate)) for game in allActiveGames if username in game.getArrayOfIsCurrentPlayers()]
 #
 #    # Sort games by least time remaining
 #    allPlayerMyMoveGamesList.sort(key=lambda x: -x[1])

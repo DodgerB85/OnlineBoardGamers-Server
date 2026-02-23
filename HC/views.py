@@ -563,7 +563,7 @@ def _processHCturn(request):
         #    message = (
         #        f"************ No players left in HC after processing factory - gameID: {game_id} - User: {request.user.username}  "
         #        f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
-        #        f"--- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+        #        f"--- DB_phase: {currentGame.phase} -- currentP: {presenter.getArr()}"
         #    )
         #    SN_sendAdminErrorMessage(request, message)
 

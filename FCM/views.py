@@ -307,7 +307,7 @@ def showGame(request, game_id):
     rewindHostHTML = ""
     rewindHostPossible = False
     currentRewindConsent = 0
-    currentPlayers = presenter.getCurrentPlayersString(True) # for string MUST be single comma separated only
+    currentPlayers = presenter.getStringOfIsCurrentPlayers(True) # for string MUST be single comma separated only
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
 
@@ -594,7 +594,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM unlockRestructure - gameID: {getattr(currentGame,'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -667,7 +667,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveInProgressMap - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -764,7 +764,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveModuleSelection - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -876,7 +876,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveNormal - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -901,7 +901,7 @@ def _processTurn(request):
                 message = (
                     f"MAP TILES LENGTH OUT OF SYNC - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                     f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                    f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                    f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
                 )
                 SN_sendAdminErrorMessage(request, message)
                 return JsonResponse({"syncError": True}, safe=False)
@@ -916,7 +916,7 @@ def _processTurn(request):
                     message = (
                         f"MAP TILES CONTENT OUT OF SYNC - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - DB Tiles: {currentTiles} - IN Tiles: {incomingTiles} - JSON_LU: {jsonData['latestUpdate']} "
                         f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                        f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                        f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
                     )
                     SN_sendAdminErrorMessage(request, message)
                     return JsonResponse(
@@ -957,13 +957,13 @@ def _processTurn(request):
             print(jsonData["gameID"])
             print(f"DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} ")
             print(
-                f" -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f" -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             print(jsonData)
             message = (
                 f"******** PHASE NOT FOUND IN JSONDATA ********* - jsonData: {jsonData} - User: {request.user.username} - "
                 f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
-                f" -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f" -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
 
@@ -982,7 +982,7 @@ def _processTurn(request):
             message = (
                 f"******** DOUBLE PHASE SAVE PAYDAY (ok with kickout) ********* - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
 
@@ -995,7 +995,7 @@ def _processTurn(request):
             message = (
                 f"******** DOUBLE PHASE SAVE CLEANUP ********* - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
         ###########
@@ -1247,7 +1247,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveSimulMove - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1327,7 +1327,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM kickout - preTurn: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1392,7 +1392,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveAfterKickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1471,7 +1471,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM kickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1651,7 +1651,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM adminKickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
