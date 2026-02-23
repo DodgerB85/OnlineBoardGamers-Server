@@ -1181,8 +1181,8 @@ def SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winne
         # First place is winner, 2nd place everyone else in game
         firsts = []
         seconds = []
-        # TODO convert this to unigied model -- MAYBE JUST PASS IN THIS DATA!?
-        finalPlayersList = _currentGame.getAllPlayersOrderedySeat(True)
+        
+        finalPlayersList = _currentGame.presenter().getAllPlayersOrderedySeat(True)
         # add BYES from next round first
         nextRoundPlayersList = list(
             tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True)
