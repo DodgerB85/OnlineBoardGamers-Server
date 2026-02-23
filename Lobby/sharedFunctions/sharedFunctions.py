@@ -196,7 +196,6 @@ def SF_fastSerializeGame(game, user):
     isExperiencedGame = False
 
     # Check for both string and integer values (FCM/HC/Bus use strings, others use integers)
-    #print(f"code: {game_code} startingOptionsArr: {startingOptionsArr} id: {game.id}")
     if 110 in startingOptionsArr:
         isLearningGame = True
     if 120 in startingOptionsArr:
@@ -698,7 +697,6 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
     roundData = []
 
     # First, handle byes
-    print(tournamentObj.tournamentPointsData)
     byePlayers = ret["byePlayers"]
     if len(byePlayers) > 0:
         roundData.append(["BYEPLAYERS"] + byePlayers)
@@ -717,8 +715,6 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
                         break
         tournamentObj.tournamentPointsData = json.dumps(pointsList)
         
-    print(tournamentObj.tournamentPointsData)
-
     # Start the games
     gamesPlayers = ret["gamesPlayers"]
     ### MOVE TO RET ????
@@ -822,8 +818,6 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
             # Other games: If 2+ remain, they form a game. If 1 remains, they get a bye.
             if remainder == 1:
                 byesRequired = 1
-
-    #print(f"Byes Required: {byesRequired}")
 
     # 2. SELECT THE PLAYERS FOR BYES
     # We loop for exactly the number of byes needed
