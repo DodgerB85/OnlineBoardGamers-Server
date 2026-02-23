@@ -125,7 +125,7 @@
     ///////////////////////
     {% if involvedPlayer %}
     initData.statsExcludedGame = {{ statsExcludedGame|lower }};
-    initData.move = '{{ move }}';
+    initData.currentMove = {{ currentMove | safe }};
     initData.trade = '{{ trade }}';
     
     initData.secondsToNextKickout = {{ secondsToNextKickout }};

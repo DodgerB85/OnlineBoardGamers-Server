@@ -57,6 +57,7 @@ class GamePresenter:
         )
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        print(f"quickIsMyMove: gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id} - loggedInPlayerUsername: {loggedInPlayerUsername}")
         from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return True
@@ -1579,6 +1580,41 @@ class RnbPresenter(GamePresenter):
         )
         return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
 
+    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+        # Return False if no username is provided
+        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+            return False
+
+        currentPlayersList = self.gameObj.serverCurrentPlayerNamesInTurnOrder
+        print(
+            f"currentPlayersList: {currentPlayersList} loggedInPlayerUsername: {loggedInPlayerUsername}")
+        # If you are front of the queue, it is your turn
+        if currentPlayersList[0] == loggedInPlayerUsername:
+            return True
+        # If you are IN the list, BUT have a preset move, return false
+        if loggedInPlayerUsername in currentPlayersList:
+            gp = self.gameObj.players.filter(player__username=loggedInPlayerUsername).first()
+            presetMoves = gp.moveDataJSON
+            for entry in presetMoves:
+                if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
+                    print("FOUND PRESET MOVE")
+                    return False
+
+        # Use a set for faster membership testing
+        shadow_values = {
+            "SHADOW",
+            "SHADOW_2",
+            "SHADOW_3",
+            "SHADOW_4",
+            "SHADOW_5",
+            "FcmAI",
+        }
+        return (
+            not currentPlayersList
+            or loggedInPlayerUsername in currentPlayersList
+            or  currentPlayersList[0] in shadow_values
+        )
+
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -1804,10 +1840,14 @@ class RnbPresenter(GamePresenter):
                 gp.currentMoveData = ""
                 gp.save()
 
-    def getMoveData(self, name):
+    def getCurrentMoveData(self, name):
         seat = self.seatPosition(name)
         gp = self.gameObj.players.filter(seat_order=seat).first()
-        return gp.currentMoveData if gp else ""
+        gp_move_data = gp.moveDataJSON if gp.moveDataJSON else []
+        for entry in gp_move_data:
+            if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
+                return entry
+        return {}
 
     def getMoveDataTime(self, name):
         seat = self.seatPosition(name)

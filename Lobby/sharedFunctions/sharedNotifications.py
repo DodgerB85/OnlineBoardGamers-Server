@@ -338,6 +338,9 @@ def getGameStrings(game):
             "MTinviteSubject": gettext(
                 "Roads & Boats - Mini Tournament Invitation Received"
             ),
+            # UNIQUE TO RNB
+            "yourPendingTurnSubject": gettext("You can set a move in Roads & Boats"),
+            "yourTurnFixSubject": gettext("You need to fix your move in Roads & Boats"),
         }
 
     # Provide a default return
@@ -366,7 +369,7 @@ def shouldSendEmail(emailType, username, profile, currentGame, oldLatestUpdate):
         return False
     if not profile.email_confirmed:
         return False
-    
+
     if emailType == "yourTurnFactoryFix":
         return True
 
@@ -635,7 +638,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
 
                 if pos == 0:
                     subject += ". " + gettext("Congratulations!") + ""
-                
+
                 presenter = currentGame.presenter()
                 gameName = presenter.getGameName()
 
@@ -717,7 +720,7 @@ def SN_sendNextTurnNotification(
                 activate(profile.profileLanguage)
                 # Set up language vars
                 currentTurnString = currentGame.presenter().currentTurnString()
-              
+
                 gameStrings = getGameStrings(game)
                 subject = gameStrings["yourTurnSubject"]
                 boxName = gameStrings["boxName"]
@@ -812,28 +815,221 @@ def SN_sendNextTurnNotification(
 
     activate(originalLang)
 
+
+def SN_sendFixNextTurnNotification(
+    request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate
+):
+    originalLang = get_language()
+    for player in playerList:
+        if player not in USERNAMES_NOT_TO_NOTIFY:
+            try:
+                user = User.objects.get(username=player)
+            except User.DoesNotExist:
+                print(
+                    f"Error: could not find user object in SN_sendFixNextTurnNotification: {player}"
+                )
+                continue
+            except Exception as e:
+                print(
+                    f"Error: could not find user object {player} in SN_sendFixNextTurnNotification"
+                    + str(e)
+                )
+                continue
+            try:
+                profile = Profile.objects.get(user=user)
+                activate(profile.profileLanguage)
+                # Set up language vars
+                currentTurnString = currentGame.presenter().currentTurnString()
+
+                gameStrings = getGameStrings(game)
+                subject = gameStrings["yourTurnFixSubject"]
+                boxName = gameStrings["boxName"]
+                urlText = gameStrings["clickHereToPlayText"]
+
+                # messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers!\n%(gameName)s - %(currentTurnString)s.") % {"gameName": gameName, "currentTurnString": currentTurnString}
+
+                messageText = (
+                    user.username
+                    + ": "
+                    + gettext("Other players have intefered with your move at OnlineBoardGamers")
+                    + " - "
+                    + boxName
+                    + "\n"
+                    + gameName
+                    + " - "
+                    + currentTurnString
+                    + "\n"
+                    + gettext("You will need to redo your move")
+                )
+
+                # SEND EMAIL
+                if shouldSendEmail(
+                    "yourTurn", player, profile, currentGame, oldLatestUpdate
+                ):
+                    try:
+                        current_site = get_current_site(request)
+
+                        message = render_to_string(
+                            "Lobby/gameEmails/yourTurnFixRNBemail.html",
+                            {
+                                "game": game,
+                                "user": user.username,
+                                "domain": current_site.domain,
+                                "gameID": gameID,
+                                "gameName": gameName,
+                                "currentTurnString": currentTurnString,
+                                "boxName": boxName,
+                            },
+                        )
+                        SN_sendEmail("yourTurn", subject, message, user.email)
+                      
+
+                    except Exception as e:
+                        print(
+                            "************************************ EMAIL ERROR - Send Next Turn Notification ******************"
+                        )
+                        print(str(e))
+                        print(user.email)
+                        print(user.username)
+                        print(user)
+                # SEND WEBHOOKS
+                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+                if (
+                    profile.webhooks != ""
+                    and profile.webhooks is not None
+                    and profile.webhooks != "[]"
+                ):
+                    SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+            except Exception as e:
+                print(
+                    request.user.username
+                    + " /// ended the turn. SF "
+                    + game
+                    + " sendNextTurnNotification.  Error no profile/other error trying to email /// "
+                    + player
+                )
+                print(e)
+
+    activate(originalLang)
+
+def SN_sendPendingRNBturnNotification(
+    request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate
+):
+    originalLang = get_language()
+    for player in playerList:
+        if player not in USERNAMES_NOT_TO_NOTIFY:
+            try:
+                user = User.objects.get(username=player)
+            except User.DoesNotExist:
+                print(
+                    f"Error: could not find user object in SN_sendPendingRNBturnNotification: {player}"
+                )
+                continue
+            except Exception as e:
+                print(
+                    f"Error: could not find user object {player} in SN_sendPendingRNBturnNotification"
+                    + str(e)
+                )
+                continue
+            try:
+                profile = Profile.objects.get(user=user)
+                activate(profile.profileLanguage)
+                # Set up language vars
+                currentTurnString = currentGame.presenter().currentTurnString()
+
+                gameStrings = getGameStrings(game)
+                subject = gameStrings["yourPendingTurnSubject"]
+                boxName = gameStrings["boxName"]
+                urlText = gameStrings["clickHereToPlayText"]
+
+                # messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers!\n%(gameName)s - %(currentTurnString)s.") % {"gameName": gameName, "currentTurnString": currentTurnString}
+
+                messageText = (
+                    user.username
+                    + ": "
+                    + gettext("You can move at OnlineBoardGamers")
+                    + " - "
+                    + boxName
+                    + "\n"
+                    + gameName
+                    + " - "
+                    + currentTurnString
+                )
+
+                # SEND EMAIL
+                if shouldSendEmail(
+                    "yourTurn", player, profile, currentGame, oldLatestUpdate
+                ):
+                    try:
+                        current_site = get_current_site(request)
+
+                        message = render_to_string(
+                            "Lobby/gameEmails/yourPendingTurnEmail.html",
+                            {
+                                "game": game,
+                                "user": user.username,
+                                "domain": current_site.domain,
+                                "gameID": gameID,
+                                "gameName": gameName,
+                                "currentTurnString": currentTurnString,
+                                "boxName": boxName,
+                            },
+                        )
+                        SN_sendEmail("yourTurn", subject, message, user.email)
+
+                    except Exception as e:
+                        print(
+                            "************************************ EMAIL ERROR - Send Next Turn Notification ******************"
+                        )
+                        print(str(e))
+                        print(user.email)
+                        print(user.username)
+                        print(user)
+                # SEND WEBHOOKS
+                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+                if (
+                    profile.webhooks != ""
+                    and profile.webhooks is not None
+                    and profile.webhooks != "[]"
+                ):
+                    SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+            except Exception as e:
+                print(
+                    request.user.username
+                    + " /// ended the turn. SF "
+                    + game
+                    + " sendNextTurnNotification.  Error no profile/other error trying to email /// "
+                    + player
+                )
+                print(e)
+
+    activate(originalLang)
+
+
 def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
     if player in USERNAMES_NOT_TO_NOTIFY:
         return
-    
+
     originalLang = get_language()
 
     try:
         user = User.objects.get(username=player)
     except User.DoesNotExist:
         print(
-            f"Error: could not find user object in SN_sendNextTurnNotification: {player}"
+            f"Error: could not find user object in SN_sendFactoryAlertNotification: {player}"
         )
         return
     try:
         profile = Profile.objects.get(user=user)
         activate(profile.profileLanguage)
-        
+
         gameStrings = getGameStrings("HC")
         urlText = gameStrings["clickHereToPlayText"]
-        
+
         presenter = currentGame.presenter()
-        
+
         messageText = (
             user.username
             + ": "
@@ -847,13 +1043,11 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
         )
 
         # SEND EMAIL
-        if shouldSendEmail(
-                    "yourTurnFactoryFix", player, profile, currentGame, 0
-            ):
+        if shouldSendEmail("yourTurnFactoryFix", player, profile, currentGame, 0):
             try:
                 current_site = get_current_site(request)
                 subject = gettext(
-                "It is your turn at Horseless Carriage - Factory Building"
+                    "It is your turn at Horseless Carriage - Factory Building"
                 )
                 message = render_to_string(
                     "HC/yourTurnEmailFactory.html",
@@ -873,7 +1067,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
                     f"User:  {user.username} ({user.email})\n"
                     f"Obj:   {user}\n"
                 )
-        
+
         # SEND WEBHOOKS
         urlRaw = f"https://www.OnlineBoardGamers.com/HC/{str(gameID)}/show/"
         if (
@@ -893,6 +1087,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
         print(e)
 
     activate(originalLang)
+
 
 def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _game):
     for player in playerNames:
@@ -1240,9 +1435,7 @@ def SN_M_T_sendTournamentWinNotification(
     activate(originalLang)
 
 
-def SN_M_sendGameStartNotification(
-    playerListToNotify, message_data
-):
+def SN_M_sendGameStartNotification(playerListToNotify, message_data):
     errorUsername = message_data["username"]
     gameCode = message_data["gameCode"]
     gameID = message_data["gameID"]
@@ -1280,7 +1473,7 @@ def SN_M_sendGameStartNotification(
             subject = gameStrings["gameStartSubject"]
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
-            
+
             messageText = (
                 user.username
                 + ": "
@@ -1348,7 +1541,9 @@ def SN_M_sendGameStartNotification(
                     SN_sendEmail("tournamentGameStart", subject, message, user.email)
 
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+                urlRaw = (
+                    f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+                )
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -1375,7 +1570,9 @@ def SN_M_sendGameStartNotification(
                     SN_sendEmail("gameStart", subject, message, user.email)
 
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+                urlRaw = (
+                    f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+                )
                 if (
                     profile.webhooks != ""
                     and profile.webhooks is not None
@@ -1410,10 +1607,10 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
             gameDescription = f"({gameDescription})"
         current_site = get_current_site(request)
         gameStrings = getGameStrings(_game)
-        
+
         presenter = currentGame.presenter()
         gameName = presenter.getGameName()
-        
+
         if shouldSendEmail(
             "gameDecline", currentGame.creator.username, profile, None, 0
         ):
@@ -1663,16 +1860,14 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
         # currentGame = Bus_Game.objects.get(id=gameID)
 
         activate(profile_obj.profileLanguage)
-        
-        
 
         # Prepare game details for the email
         games_info = []
         for game, days_since_last_move in allPlayerMyMoveGamesList:
-            
+
             presenter = game.presenter()
             gameName = presenter.getGameName()
-        
+
             game_info = {
                 "game_name": gameName,
                 "days_since_last_move": days_since_last_move,
@@ -1912,17 +2107,18 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
             msg.attach(MIMEText(message, "html"))
 
             # ADDED TIMEOUT=15: This stops the 184-second hang if Mailrelay is slow
-            server = smtplib.SMTP(serverAddress, 587, timeout=30) 
+            server = smtplib.SMTP(serverAddress, 587, timeout=30)
             server.starttls()
             server.login(loginUsername, fromPassword)
             server.send_message(msg)
             server.quit()
-            
+
         except Exception as e:
             # Logs the error so you know why it failed without hanging the cluster
             error_msg = f"❌ Mailrelay Failure for {toEmail}: {e}"
             print(error_msg)
             SN_sendAdminErrorMessage(None, error_msg)
+
 
 def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
     if profile.webhooks == "" or profile.webhooks is None or profile.webhooks == "[]":
@@ -1957,19 +2153,19 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
             w_type = webhookData[0]
             w_url = webhookData[1]
             w_id = webhookData[2]
-            
+
             try:
                 # Discord
                 if w_type == "DC":
                     mention = f"<@{w_id}>\n" if w_id else ""
-                    content = f"{mention}{messageText}\n[{urlText}]({urlRaw})" 
+                    content = f"{mention}{messageText}\n[{urlText}]({urlRaw})"
                     session.post(w_url, data={"content": content}, timeout=10)
                 # Slack
-                elif w_type== "SL":
+                elif w_type == "SL":
                     mention = f"<@{w_id}>\n" if w_id else ""
                     payload = {"text": f"{mention}{messageText}\n<{urlRaw}|{urlText}>"}
                     session.post(w_url, json=payload, timeout=10)
-                    
+
                 # Telegram
                 elif w_type == "TG":
                     TOKEN = config("TELEGRAM_OBG_BOT_TOKEN")
@@ -1978,15 +2174,18 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
                     tg_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={w_id}&text={encoded_msg}&parse_mode=HTML"
                     # message = "This is a test message from <b>Online Board Gamers</b> <a href='https://www.onlineboardgamers.com/profile/'>Click here to go to url</a>"
                     # encoded_message = urllib.parse.quote_plus(message, safe=':/')
-                    #url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={webhookData[2]}&text={encoded_telegramMessage}&parse_mode=HTML"
-                    #requests.post(url)
+                    # url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={webhookData[2]}&text={encoded_telegramMessage}&parse_mode=HTML"
+                    # requests.post(url)
                     session.post(tg_url, timeout=10)
 
             except requests.exceptions.RequestException as e:
-                SN_sendAdminErrorMessage(None, f"Webhook failed ({w_type}): {e} User: {profile.user.username}")
+                SN_sendAdminErrorMessage(
+                    None,
+                    f"Webhook failed ({w_type}): {e} User: {profile.user.username}",
+                )
                 # Log the specific webhook failure without stopping the loop
                 print(f"Webhook failed ({w_type}): {e}")
-                
+
 
 def SN_sendAdminErrorMessage(request, message):
     try:

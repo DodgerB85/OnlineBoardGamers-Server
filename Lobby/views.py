@@ -1442,7 +1442,7 @@ def index(request):
     ).distinct().select_related("creator").prefetch_related(
         Prefetch(
             "players", 
-            queryset=GamePlayer.objects.filter(is_kicked=False).select_related("player"),
+            queryset=GamePlayer.objects.filter(is_missing=False).select_related("player"),
             to_attr="active_players"
         ),
         "invitedPlayers"
@@ -1503,7 +1503,7 @@ def index(request):
         inv_p_ids = {p.id for p in game.invitedPlayers.all()}
         miss_p_ids = {gp.player_id for gp in game.active_players if gp.is_missing}
 
-        is_involved = user_id in all_p_ids
+        is_involved = user_id in all_p_ids 
         is_invited = user_id in inv_p_ids
         is_blacklisted_game = (game.creator_id in blacklisted_players_ids or 
                               game.creator_id in blocked_by_user_ids)

@@ -20,7 +20,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
     SR_getTournamentWinnerHTML,
     SR_GAME_STATUS_CHOICES,
-    SR_currentTurnString,
 )
 
 from .sharedFunctions.sharedRefs import (
@@ -387,7 +386,7 @@ class BaseGame(models.Model):
     chatData = models.TextField(blank=True)
 
     gameData = models.TextField(blank=True)
-    gameDataBLOB = models.BinaryField(null=True, blank=True)
+    #gameDataBLOB = models.BinaryField(null=True, blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
