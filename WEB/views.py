@@ -128,7 +128,7 @@ def createWEBgame(request):
                 shadow_players.append(display_name)
 
             # Store shadow player names in creator's notes
-            creator_gp = GamePlayer.objects.get(game=newGame, player=request.user)
+            creator_gp = newGame.players.get(player=request.user)
             creator_gp.notes = json.dumps(shadow_players)
             creator_gp.save()
             

@@ -3050,24 +3050,6 @@ class HCpresenter(GamePresenter):
         self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
 
 
-    def isTournamentRoundFinished(self, tournamentProgressionDataArray):
-        from Lobby.models import Game
-        return False
-
-        finishedGames = 0
-        for row in tournamentProgressionDataArray[-1]:
-            if row[0] == "BYEPLAYERS":
-                finishedGames += 1
-            else:
-                game = Game.objects.get(
-                    id=row[self.gameObj.relatedHCTournament.maxGamePlayers]
-                )
-                if game.gameStatus == "FINISHED":
-                    finishedGames += 1
-        if finishedGames == len(tournamentProgressionDataArray[-1]):
-            return True
-        return False
-
     def getGameCode(self):
         return "HC"
 
