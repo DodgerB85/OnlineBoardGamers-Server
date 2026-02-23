@@ -628,7 +628,6 @@ def _processTurn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
-        print(f"jsonData['OOBpreference']: {jsonData['OOBpreference']}")
         setCorrectly = presenter.setOOBpreference(request.user.username, jsonData["OOBpreference"])
 
         
