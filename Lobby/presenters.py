@@ -288,6 +288,18 @@ class GamePresenter:
         self.gameObj.rewindTempData = ""
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.activeVotes = None
+        # TGZ
+        self.gameObj.autoMoves = None
+        # AQY
+        self.gameObj.playerTradeData = ""
+        # IND
+        self.gameObj.playersPreMoveData = ""
+        # FCM
+        self.gameObj.FCMplayersMoveData = ""
+        
+        # TO LOOK AT
+        # currentPlayersInTurnOrder
+        # serverCurrentPlayerNamesInTurnOrder
 
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
@@ -449,6 +461,8 @@ class CNSpresenter(GamePresenter):
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotification,
         )
+        
+        self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
@@ -926,6 +940,8 @@ class TGZpresenter(GamePresenter):
         )
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
         from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+        
+        self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
@@ -1234,6 +1250,8 @@ class BusPresenter(GamePresenter):
         )
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
         from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+        
+        self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
@@ -2221,6 +2239,8 @@ class FCMpresenter(GamePresenter):
             SF_M_ProcessAnyTournamentEndGame,
         )
         from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+        
+        self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
@@ -2686,6 +2706,8 @@ class KFWpresenter(GamePresenter):
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotificationTieGame,
         )
+        
+        self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
