@@ -569,7 +569,7 @@ def _processTurn(request):
             {
                 "loadData": currentGame.gameData,
                 # Not used at the moment, in // comment
-                "currentPlayers": presenter.getCurrentPlayersArray(),
+                "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "specialData": currentMove,
                 "latestUpdate": currentGame.latestUpdate,
@@ -603,7 +603,7 @@ def _processTurn(request):
         presenter.deleteSinglePlayersMove(request.user.username)
 
         # Update current players
-        currentPlayersArr = presenter.getCurrentPlayersArray()
+        currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
         if request.user.username not in currentPlayersArr:
             currentPlayersArr.append(request.user.username) # This updates the list directly
             presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersArr)
@@ -622,7 +622,7 @@ def _processTurn(request):
             message = (
                 f"SYNC ERROR IN: FCM saveOOBpreference - gameID: {getattr(currentGame,'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1095,7 +1095,7 @@ def _processTurn(request):
             presenter.setCurrentPlayers(presenter.getCurrentSimulPlayersV2())
 
         # Send Notifications - payday/fridge with moves are already removd
-        currentPlayersArr = presenter.getCurrentPlayersArray()
+        currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
         if (
             len(currentPlayersArr) > 0
             and currentPlayersArr[0] != "FcmBot"
@@ -1724,7 +1724,7 @@ def _processTurn(request):
                 presenter.insertPlayerMoveData(playerName, [-1], [])
 
         # Add players to currentPlayers
-        currentPlayersArr = presenter.getCurrentPlayersArray()
+        currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
         for player in playerListToNotify:
             if player not in currentPlayersArr:
                 currentPlayersArr.append(player)
@@ -2023,7 +2023,7 @@ def FCMdata(request, dataType):
                     "latest": False,
                     "loadData": currentGame.gameData,
                     # Not used at the moment, in // comment
-                    "currentPlayers": presenter.getCurrentPlayersArray(),
+                    "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
                     "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                     "specialData": specialData,
                     "latestUpdate": currentGame.latestUpdate,
@@ -2043,7 +2043,7 @@ def FCMdata(request, dataType):
                 "latest": False,
                 "loadData": currentGame.gameData,
                 # Not used at the moment, in // comment
-                "currentPlayers": presenter.getCurrentPlayersArray(),
+                "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "specialData": specialData,
                 "latestUpdate": currentGame.latestUpdate,
