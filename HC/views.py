@@ -1163,7 +1163,6 @@ def showHCgame(request, game_id):
                 "rewindHostPossible": rewindHostPossible,
                 "currentRewindConsent": int(currentRewindConsent),
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
-                # "tournamentGame": currentGame.relatedTournament,
                 # "startingOptionsHTML": startingOptionsHTML,
                 "statsExcludedGame": statsExcludedGame,
                 "displayNames": displayNames,
