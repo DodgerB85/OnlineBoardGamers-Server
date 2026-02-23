@@ -48,7 +48,7 @@ from Lobby.sharedFunctions.constants import (
 )
 
 if TYPE_CHECKING:
-    from Lobby.presenters import FcmPresenter 
+    from Lobby.presenters import FCMpresenter 
 
 # import requests  # Keep this to broadcase on WSS when it is uncommented
 FCMsuperUsers = ["BotKickStarter"]
@@ -186,7 +186,7 @@ def showGame(request, game_id):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('FcmPresenter', currentGame.presenter())
+    presenter = cast('FCMpresenter', currentGame.presenter())
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
@@ -552,7 +552,7 @@ def _processTurn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('FcmPresenter', currentGame.presenter())
+    presenter = cast('FCMpresenter', currentGame.presenter())
 
     if currentGame.relatedMainTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
@@ -1833,7 +1833,7 @@ def _sendChatMessage(request):
         new_entry = jsonData["newEntry"]
 
         currentGame = Game.objects.get(id=game_id, gameCode='FCM')
-        presenter = cast('FcmPresenter', currentGame.presenter())
+        presenter = cast('FCMpresenter', currentGame.presenter())
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -1954,7 +1954,7 @@ def gameAdminGetMoveData(request):
     except Game.DoesNotExist:
         return render(request, "FCM/gameAdmin.html", {"gameID": 21})
 
-    presenter = cast('FcmPresenter', currentGame.presenter())
+    presenter = cast('FCMpresenter', currentGame.presenter())
 
     names = presenter.getAllPlayersOrderedySeat(True)
 
@@ -1981,7 +1981,7 @@ def FCMdata(request, dataType):
         #raise Http404(gettext("Game does not exist"))
         raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: FCM)")
 
-    presenter = cast('FcmPresenter', currentGame.presenter())
+    presenter = cast('FCMpresenter', currentGame.presenter())
 
     USE_NEW_CODE = False
     if int(currentGame.created) > 1744974000000:
@@ -2077,7 +2077,7 @@ def _castVote(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('FcmPresenter', currentGame.presenter())
+    presenter = cast('FCMpresenter', currentGame.presenter())
 
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username

@@ -48,7 +48,7 @@ from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOT
 
 
 if TYPE_CHECKING:
-    from Lobby.presenters import TgzPresenter
+    from Lobby.presenters import TGZpresenter
 
 TGZ_DB_LOCK_NAME = "lockTGZgame_"
 
@@ -104,7 +104,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             .prefetch_related("players__player", "invitedPlayers")
             .get(id=game_id, gameCode="TGZ")
         )
-        presenter = cast("TgzPresenter", currentGame.presenter())
+        presenter = cast("TGZpresenter", currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -325,7 +325,7 @@ def _processTGZturn(request):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = cast("TgzPresenter", currentGame.presenter())
+        presenter = cast("TGZpresenter", currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -952,7 +952,7 @@ def TGZdata(request, dataType):
 
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        presenter = cast("TgzPresenter", currentGame.presenter())
+        presenter = cast("TGZpresenter", currentGame.presenter())
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 

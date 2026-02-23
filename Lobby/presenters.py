@@ -474,7 +474,7 @@ class GamePresenter:
     # End voting methods
 
 
-class CannesPresenter(GamePresenter):
+class CNSpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -562,7 +562,7 @@ class CannesPresenter(GamePresenter):
         return "CNS"
 
 
-class WebPresenter(GamePresenter):
+class WEBpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -679,7 +679,7 @@ class WebPresenter(GamePresenter):
     def getGameCode(self):
         return "WEB"
 
-class AqyPresenter(GamePresenter):
+class AQYpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -1030,7 +1030,7 @@ class AqyPresenter(GamePresenter):
         ).decode("utf-8")
 
 
-class TgzPresenter(GamePresenter):
+class TGZpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -1169,7 +1169,7 @@ class TgzPresenter(GamePresenter):
         return self.gameObj.externalTournamentGame
 
 
-class IndPresenter(GamePresenter):
+class INDpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -1570,7 +1570,7 @@ class BusPresenter(GamePresenter):
         return "Bus"
 
 
-class RnbPresenter(GamePresenter):
+class RNBpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -1902,7 +1902,7 @@ class RnbPresenter(GamePresenter):
 
  
 
-class FcmPresenter(GamePresenter):
+class FCMpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
         allPlayersString = " / ".join(
@@ -2682,7 +2682,7 @@ class FcmPresenter(GamePresenter):
         return "FCM"
 
 
-class HcPresenter(GamePresenter):
+class HCpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
         allPlayersString = " / ".join(
@@ -3082,7 +3082,7 @@ class HcPresenter(GamePresenter):
         return "HC"
 
 
-class KfwPresenter(GamePresenter):
+class KFWpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
         allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)

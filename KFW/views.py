@@ -34,7 +34,7 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 from Lobby.models import Game, GamePlayer, User, Profile
 
 if TYPE_CHECKING:
-    from Lobby.presenters import KfwPresenter 
+    from Lobby.presenters import KFWpresenter 
     
 KFW_SUPER_USERS = ["BotKickStarter"]
 
@@ -131,7 +131,7 @@ def createKFWgame(request):
                 creator_gp.notes = json.dumps(shadow_players)
                 creator_gp.save()
 
-            presenter = cast('KfwPresenter', newGame.presenter())
+            presenter = cast('KFWpresenter', newGame.presenter())
             presenter.startGame(request)
         else:
             usernamesToNotify = []
@@ -204,7 +204,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
-    presenter = cast('KfwPresenter', currentGame.presenter())
+    presenter = cast('KFWpresenter', currentGame.presenter())
 
     # Access the prefetch cache immediately to "warm" it
     all_game_players = list(currentGame.players.select_related("player").all())
@@ -402,7 +402,7 @@ def _processKFWturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('KfwPresenter', currentGame.presenter())
+    presenter = cast('KFWpresenter', currentGame.presenter())
 
     if jsonData["action"] == "getBoatMeeplesAndSkills":
         incomingData = presenter.decompressData(jsonData["gameData"])
@@ -1002,7 +1002,7 @@ def KFWdata(request, data_type=1):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('KfwPresenter', currentGame.presenter())
+    presenter = cast('KFWpresenter', currentGame.presenter())
 
     if data_type == 1:
         gameData1 = (

@@ -36,7 +36,7 @@ from Lobby.models import User, Profile, Game, GamePlayer
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
 
 if TYPE_CHECKING:
-    from Lobby.presenters import CannesPresenter 
+    from Lobby.presenters import CNSpresenter 
     
 CNS_DB_LOCK_NAME = "lockCNSgame_"
 
@@ -403,7 +403,7 @@ def _processCNSturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('CannesPresenter', currentGame.presenter())
+    presenter = cast('CNSpresenter', currentGame.presenter())
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
