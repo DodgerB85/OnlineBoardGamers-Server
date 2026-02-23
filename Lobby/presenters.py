@@ -104,6 +104,9 @@ class GamePresenter:
             name += " [Private]"
         return name
 
+    def getGameCode(self):
+        return self.gameObj.gameCode
+
     def currentTurnString(self):
         return SR_currentTurnString(
             self.gameObj.gameCode, self.gameObj.turn, self.gameObj.phase
@@ -439,7 +442,7 @@ class GamePresenter:
             return generalReturn
         
         # If it is an FCM game with enabled rewinds, return 2 always
-        if self.gameObj.getGameCode() == "FCM" and topic == REWIND_CONSENT_VOTE_TOPIC:
+        if self.gameObj.gameCode == "FCM" and topic == REWIND_CONSENT_VOTE_TOPIC:
             startingOptionsList = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
             if 99 in startingOptionsList:
                 for username in usernames:
@@ -554,9 +557,6 @@ class CannesPresenter(GamePresenter):
             ]
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def getGameCode(self):
-        return "CNS"
-
 
 class WebPresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
@@ -645,9 +645,6 @@ class WebPresenter(GamePresenter):
                     if gp.player and gp.player.username != request.user.username
                 ]
                 self._sendStartGameNotification(request, playerListToNotify)
-
-    def getGameCode(self):
-        return "WEB"
 
 class AqyPresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
@@ -753,9 +750,6 @@ class AqyPresenter(GamePresenter):
                 if gp.player and gp.player.username != request.user.username
             ]
             self._sendStartGameNotification(request, playerListToNotify)
-
-    def getGameCode(self):
-        return "AQY"
 
     def getCurrentPlayers(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
@@ -1075,9 +1069,6 @@ class TgzPresenter(GamePresenter):
                     self.gameObj.latestUpdate,
                 )
 
-    def getGameCode(self):
-        return "TGZ"
-
     def isExternalTournamentGame(self):
         """
         External tournament games are TGZ games created outside the normal tournament system.
@@ -1162,9 +1153,6 @@ class IndPresenter(GamePresenter):
                     self.gameObj,
                     self.gameObj.latestUpdate,
                 )
-
-    def getGameCode(self):
-        return "IND"
 
     #########################################################
     #
@@ -1434,9 +1422,6 @@ class BusPresenter(GamePresenter):
 
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def getGameCode(self):
-        return "Bus"
-
 
 class RnbPresenter(GamePresenter):
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
@@ -1580,11 +1565,6 @@ class RnbPresenter(GamePresenter):
             ]
             self._sendStartGameNotification(request, playerListToNotify)
                     
-
-    def getGameCode(self):
-        return "RNB"
-
-
 
     def getCurrentPlayers(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
@@ -2487,9 +2467,6 @@ class FcmPresenter(GamePresenter):
 
         return False
 
-    def getGameCode(self):
-        return "FCM"
-
 
 class HcPresenter(GamePresenter):
     def getCurrentPlayersInOrderString(self):
@@ -2864,9 +2841,6 @@ class HcPresenter(GamePresenter):
         if finishedGames == len(tournamentProgressionDataArray[-1]):
             return True
         return False
-
-    def getGameCode(self):
-        return "HC"
 
 
 class KfwPresenter(GamePresenter):
@@ -3503,9 +3477,6 @@ class KfwPresenter(GamePresenter):
         self.gameObj.KFWserverData = json.dumps([meeple_bag, skills_bag])
 
         return newInformation
-
-    def getGameCode(self):
-        return "KFW"
 
 
 ##########$
