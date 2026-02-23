@@ -1752,7 +1752,7 @@ class RnbPresenter(GamePresenter):
             if gp.player:
                 if self.hasMoveEndData(gp.player.username):
                     pass
-                elif gp.player.username != "AqyBot":
+                elif gp.player.username != "RnbBot":
                     _currentPlayers.append(gp.player.username)
         
         return ", ".join(_currentPlayers)

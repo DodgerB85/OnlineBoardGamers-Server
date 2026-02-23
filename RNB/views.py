@@ -127,7 +127,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
-        "currentPlayers": presenter.getCurrentPlayersArray(),
+        #"currentPlayers": presenter.getCurrentPlayersArray(),
+        "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
         # "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "statsExcludeVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
