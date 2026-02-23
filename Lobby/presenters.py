@@ -695,7 +695,6 @@ class AQYpresenter(GamePresenter):
             SN_M_sendEndGameNotificationTieGame,
         )
         from Lobby.sharedFunctions.sharedFunctions import (
-            SF_M_ProcessTournamentEndGame,
             SF_M_ProcessAnyTournamentEndGame,
         )
         from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
@@ -1185,7 +1184,8 @@ class INDpresenter(GamePresenter):
             SN_M_sendEndGameNotification,
         )
         from Lobby.sharedFunctions.sharedFunctions import (
-            SF_M_ProcessTournamentEndGame,
+            # TODO: get this working
+            SF_M_ProcessAnyTournamentEndGame,
         )
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -1206,11 +1206,6 @@ class INDpresenter(GamePresenter):
             finalPositionsArr.append(self.getAllPlayersOrderedySeat()[seatPos])
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "IND", finalPositionsArr, _gameID, self.gameObj)
-
-        #if self.gameObj.relatedINDTournament:
-        #    SF_M_ProcessTournamentEndGame(request, "IND", self.gameObj, [_winner])
-
- 
 
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
@@ -1429,9 +1424,6 @@ class BusPresenter(GamePresenter):
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "Bus", _finalPositions, _gameID, self.gameObj)
 
-        #if self.gameObj.relatedBusTournament:
-        #    SF_M_ProcessTournamentEndGame(request, "Bus", self.gameObj, [_winner])
-            
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
@@ -2561,7 +2553,6 @@ class FCMpresenter(GamePresenter):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import SN_M_sendEndGameNotification
         from Lobby.sharedFunctions.sharedFunctions import (
-            SF_M_ProcessTournamentEndGame,
             SF_M_ProcessAnyTournamentEndGame,
         )
         from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
@@ -2830,7 +2821,6 @@ class HCpresenter(GamePresenter):
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotification,
         )
-        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
         self.clearAllMoveData()
