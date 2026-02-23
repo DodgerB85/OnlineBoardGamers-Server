@@ -1446,8 +1446,6 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
     relatedMainTournamentID = message_data["relatedMainTournamentID"]
     relatedMiniTournamentID = message_data["relatedMiniTournamentID"]
 
-    if gameCode == "CNS" or gameCode == "WEB":
-        print("This should be printing in the cluster")
     originalLang = get_language()
     for player in playerListToNotify:
         try:
