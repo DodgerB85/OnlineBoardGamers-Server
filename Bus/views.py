@@ -24,7 +24,7 @@ from django.db import connection
 from django.db.models import Q
 
 
-from Lobby.models import User, Profile, Game, GamePlayer
+from Lobby.models import User, Profile, Game
 
 from .common import create_bus_game
 
