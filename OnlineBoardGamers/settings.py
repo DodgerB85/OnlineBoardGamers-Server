@@ -62,7 +62,7 @@ if LOCAL_USER and DEBUG:
     ALLOWED_HOSTS = ["localhost", "192.168.1.2"]
 else:
     # ALLOWED_HOSTS = ['pythonanywhere']
-    ALLOWED_HOSTS = ["www.onlineboardgamers.com", "onlineboardgamers.com"]
+    ALLOWED_HOSTS = ["www.onlineboardgamers.com", "onlineboardgamers.com", "webapp-1380192.pythonanywhere.com"]
 
 if LOCAL_USER:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
