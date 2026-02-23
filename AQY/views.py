@@ -355,9 +355,12 @@ def _processAQYturn(request):
 
         # CHECK FOR PRE-MOVE
         preTurnDataCompressed = ""
-        moveDataTime = presenter.getMoveDataTime(jsonData["nextPlayer"])
+        nextPlayerString = jsonData["nextPlayer"]
+        nextPlayerArr = nextPlayerString.split(",")
+        nextPlayerSingular = nextPlayerArr[0]
+        moveDataTime = presenter.getMoveDataTime(nextPlayerSingular)
         if moveDataTime == "PRE_MOVE":
-            moveData = presenter.getMoveData(jsonData["nextPlayer"])
+            moveData = presenter.getMoveData(nextPlayerSingular)
             # decompress the move data
             preTurnArray = json.loads(
                 gzip.decompress(bytearray(base64.b64decode(moveData))).decode("utf-8")
@@ -470,7 +473,10 @@ def _processAQYturn(request):
         currentGame.playerTradeData = ""
 
         # Delete pre moves for current player
-        presenter.updateSingleMove(jsonData["nextPlayer"], "", True)
+        nextPlayerString = jsonData["nextPlayer"]
+        nextPlayerArr = nextPlayerString.split(",")
+        nextPlayerSingular = nextPlayerArr[0]
+        presenter.updateSingleMove(nextPlayerSingular, "", True)
 
         if currentGame.phase == 1 or currentGame.phase == 2:
             presenter.deleteAllPreMoves()
