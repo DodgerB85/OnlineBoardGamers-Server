@@ -426,9 +426,10 @@ def _processRNBturn(request):
         )
 
         # First, add the conflict preset move
-        conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
-        conflictPresetMove["status"] = "pending"
-        PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
+        if jsonData["conflictPresetData"] != "":
+            conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
+            conflictPresetMove["status"] = "pending"
+            PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
 
         # If the client and server both agree that this person is first, then the browser will only allow valid moves
         # So it must be a valid move. So update the game with the ALREADY PROCESSED game data, and move on
@@ -1268,7 +1269,8 @@ def getAllCurrentStackPhaseMoves(currentGame):
 def getAllCurrentStackMoves(currentGame):
     currentStackMoves = []
     for gp in currentGame.players.all():
-        for entry in gp.moveDataJSON:
+        gp_moveDataJSON = gp.moveDataJSON if gp.moveDataJSON else []
+        for entry in gp_moveDataJSON:
             entry["player"] = gp.player.username
             currentStackMoves.append(entry)
 
