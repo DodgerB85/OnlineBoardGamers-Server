@@ -1256,14 +1256,11 @@ def _processTurn(request):
             currentGame.phase = jsonData["phase"]
 
             nameToUpdate = request.user.username
-            print(f"1 {nameToUpdate}")
             if request.user.username in FCMsuperUsers:
                 nameToUpdate = jsonData["BKSN"]
-                print(f"2 {nameToUpdate}")
                 if nameToUpdate.startswith("FCMtourneyAdmin/"):
                     name_parts = nameToUpdate.split("/", 1)
                     nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUpdate
-            print(f"NAME TO UPDATE: {nameToUpdate} {request.user.username} - {nameToUpdate.startswith('FCMtourneyAdmin/')}")
             phaseArr = [-1]
             if (
                 currentGame.phase == 0
