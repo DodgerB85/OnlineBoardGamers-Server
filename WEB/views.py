@@ -247,7 +247,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "allPlayerListBySeat": allPlayerListBySeat,
-        "currentPlayers": ", ".join(presenter.getCurrentPlayersArray()),
+        "currentPlayers": ", ".join(presenter.getArrayOfIsCurrentPlayers()),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredWEBoptions": [-1],
         "pov": -99,
@@ -446,7 +446,7 @@ def _processWEBturn(request):
         ) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
-            current_players = ", ".join(presenter.getCurrentPlayersArray())
+            current_players = ", ".join(presenter.getArrayOfIsCurrentPlayers())
             message = (
                 f"SYNC ERROR IN: WEB simpleSave - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
@@ -484,7 +484,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {db_latest_update} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -526,7 +526,7 @@ def _processWEBturn(request):
                 if currentGame.startingOptions
                 else []
             )
-            current_players = presenter.getCurrentPlayersArray()
+            current_players = presenter.getArrayOfIsCurrentPlayers()
             if (
                 len(current_players) > 0
                 and not any(p.startswith("WEBBot") for p in current_players)
@@ -609,7 +609,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -673,7 +673,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -793,7 +793,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)

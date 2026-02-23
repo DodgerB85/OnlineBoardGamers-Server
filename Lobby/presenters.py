@@ -15,14 +15,6 @@ from django.urls import reverse
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
-    SR_gamePaceString,
-    SR_getCNSstartingOptionsHTML,
-    SR_getFCMstartingOptionsHTML,
-    SR_getAQYstartingOptionsHTML,
-    SR_getINDstartingOptionsHTML,
-    SR_getHCstartingOptionsHTML,
-    SR_getKFWstartingOptionsHTML,
-    SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC, BLANK_MESSAGE_TEMPLATE
@@ -102,7 +94,7 @@ class GamePresenter:
             self.gameObj.gameCode, self.gameObj.turn, self.gameObj.phase
         )
 
-    def getCurrentPlayersArray(self):
+    def getArrayOfIsCurrentPlayers(self):
         current_players = self.gameObj.players.filter(is_current=True).select_related(
             "player"
         )
@@ -110,11 +102,11 @@ class GamePresenter:
 
     def getCurrentPlayersString(self, noSpaces=False):
         if noSpaces:
-            return ",".join(self.getCurrentPlayersArray())
-        return ", ".join(self.getCurrentPlayersArray())
+            return ",".join(self.getArrayOfIsCurrentPlayers())
+        return ", ".join(self.getArrayOfIsCurrentPlayers())
 
     def getCurrentPlayersArrayForReminderEmail(self):
-        return self.getCurrentPlayersArray()
+        return self.getArrayOfIsCurrentPlayers()
 
     def seatPosition(self, _username, withoutBots=False):
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
@@ -216,7 +208,7 @@ class GamePresenter:
         )
         all_player_usernames = [gp.player.username for gp in all_players if gp.player]
 
-        current_players = self.getCurrentPlayersArray()
+        current_players = self.getArrayOfIsCurrentPlayers()
         current_username = current_players[0] if current_players else ""
 
         return SF_kickoutRequired(
@@ -3259,7 +3251,7 @@ class KFWpresenter(GamePresenter):
         readyPlayers = []
         jsonResponse = []
 
-        currentPlayersArr = self.getCurrentPlayersArray()
+        currentPlayersArr = self.getArrayOfIsCurrentPlayers()
         playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
 
         for i in range(len(playersMoveDataArr)):
@@ -3301,7 +3293,7 @@ class KFWpresenter(GamePresenter):
         allPlayerReturnData = []
         jsonResponse = []
 
-        currentPlayersArr = self.getCurrentPlayersArray()
+        currentPlayersArr = self.getArrayOfIsCurrentPlayers()
         playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
 
         for i in range(len(playersMoveDataArr)):
