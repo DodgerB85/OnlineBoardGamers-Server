@@ -95,12 +95,20 @@ class GamePresenter:
         return ", ".join(self.getArrayOfIsCurrentPlayers())
 
     def seatPosition(self, _username, withoutBots=False):
-        # playerList = self.getAllPlayersOrderedySeat(withoutBots)
-        # try:
-        #    return playerList.index(_username)
-        # except (ValueError, TypeError):
-        #    return -1
-        return self.gameObj.players.filter(player__username=_username).first().seat_order
+        # 1. Attempt DB lookup for real users
+        gp = self.gameObj.players.filter(player__username=_username).first()
+        if gp:
+            return gp.seat_order
+
+        # 2. Fallback for Bots (or missing users)
+        # This uses your existing logic that converts 'missing' players to strings
+        playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        try:
+            print(f"NO PLAYER FOUND: {_username}")
+            return playerList.index(_username)
+        except (ValueError, TypeError):
+            print(f"NO PLAYER FOUND: {_username}")
+            return -1
 
     def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
         all_players_gp = self.gameObj.players.select_related("player").order_by("seat_order")
