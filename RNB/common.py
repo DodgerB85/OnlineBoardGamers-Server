@@ -21,7 +21,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
 if TYPE_CHECKING:
-    from Lobby.presenters import RnbPresenter 
+    from Lobby.presenters import RNBpresenter 
  
 @login_required()
 def create_rnb_game(
@@ -233,7 +233,7 @@ def create_rnb_game(
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            presenter = cast('RnbPresenter', new_game.presenter())
+            presenter = cast('RNBpresenter', new_game.presenter())
             presenter.startGame(request, isTournamentGame=(is_main_tournament or is_mini_tournament))
 
     # Tournament Notifications and redirects and return

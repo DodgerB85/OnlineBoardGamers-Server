@@ -36,7 +36,7 @@ from Lobby.models import User, Profile, Game, GamePlayer
 from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
 
 if TYPE_CHECKING:
-    from Lobby.presenters import IndPresenter
+    from Lobby.presenters import INDpresenter
 
 INDsuperUsers = ["BotKickStarter"]
 
@@ -164,7 +164,7 @@ def createINDgame(request):
                 user_gp.notes = json.dumps(shadow_players)
                 user_gp.save()
 
-            presenter = cast("IndPresenter", newGame.presenter())
+            presenter = cast("INDpresenter", newGame.presenter())
             presenter.startGame(request)
         else:
             usernamesToNotify = []
@@ -242,7 +242,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("IndPresenter", currentGame.presenter())
+    presenter = cast("INDpresenter", currentGame.presenter())
 
     if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
         messages.error(request, gettext("The game is not Active"))
@@ -491,7 +491,7 @@ def _processINDturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("IndPresenter", currentGame.presenter())
+    presenter = cast("INDpresenter", currentGame.presenter())
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -877,7 +877,7 @@ def INDdata(request, dataType):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("IndPresenter", currentGame.presenter())
+    presenter = cast("INDpresenter", currentGame.presenter())
 
     if dataType == 1:
         returnData = {
@@ -1069,7 +1069,7 @@ def forkINDgame(request):
     # newGame.gameName = currentGame.gameName + " (fork)"
     # newGame.save()
     
-    old_presenter = cast("IndPresenter", source_game.presenter())
+    old_presenter = cast("INDpresenter", source_game.presenter())
     
     original_players = list(source_game.players.all())
 
@@ -1132,7 +1132,7 @@ def _castVote(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('IndPresenter', currentGame.presenter())
+    presenter = cast('INDpresenter', currentGame.presenter())
 
     # Delegate all logic to the presenter
     result = presenter.processVoteLogic(

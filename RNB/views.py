@@ -53,7 +53,7 @@ ALLOWED_USERS_RNB = [
 ]
 
 if TYPE_CHECKING:
-    from Lobby.presenters import RnbPresenter
+    from Lobby.presenters import RNBpresenter
 
 
 def index(request):
@@ -94,7 +94,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         messages.error(request, gettext("The game is not Active"))
         return HttpResponseRedirect(reverse("index"))
 
-    presenter = cast("RnbPresenter", currentGame.presenter())
+    presenter = cast("RNBpresenter", currentGame.presenter())
 
     # Access the prefetch cache immediately to "warm" it
     all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
@@ -359,7 +359,7 @@ def _processRNBturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("RnbPresenter", currentGame.presenter())
+    presenter = cast("RNBpresenter", currentGame.presenter())
 
     if jsonData["action"] == "simpleSave":
         # Check if old version is older than DB version, and if so, return
@@ -443,7 +443,7 @@ def _processRNBturn(request):
             db_latest_update = currentGame.latestUpdate
             latest_update = jsonData.get("latestUpdate", 0)
             game_id = currentGame.id
-            presenter = cast("RnbPresenter", currentGame.presenter())
+            presenter = cast("RNBpresenter", currentGame.presenter())
 
             gameDataStr = jsonData["gameData"]
             # raw_binary = base64.b64decode(gameDataStr)
@@ -540,7 +540,7 @@ def _processRNBturn(request):
         db_latest_update = currentGame.latestUpdate
         latest_update = jsonData.get("latestUpdate", 0)
         game_id = currentGame.id
-        presenter = cast("RnbPresenter", currentGame.presenter())
+        presenter = cast("RNBpresenter", currentGame.presenter())
         # Check if old version is older than DB version, and if so, return
         if str(latest_update) != str(db_latest_update):
             print(f"Sync Error: {latest_update} != {db_latest_update} Game: RNB, save -- user: {request.user.username}")
@@ -897,7 +897,7 @@ def performSaveGame(request, currentGame, jsonData):
     db_latest_update = currentGame.latestUpdate
     latest_update = jsonData.get("latestUpdate", 0)
     game_id = currentGame.id
-    presenter = cast("RnbPresenter", currentGame.presenter())
+    presenter = cast("RNBpresenter", currentGame.presenter())
     # Check if old version is older than DB version, and if so, return
     if str(latest_update) != str(db_latest_update):
         print(f"Sync Error: {latest_update} != {db_latest_update} Game: RNB, save -- user: {request.user.username}")
@@ -1151,7 +1151,7 @@ def RNBdata(request, dataType=1):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("RnbPresenter", currentGame.presenter())
+    presenter = cast("RNBpresenter", currentGame.presenter())
 
     if dataType == 1:
         # 1. Get the raw binary (Gzip + MsgPack)

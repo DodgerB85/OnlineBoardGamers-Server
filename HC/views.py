@@ -49,7 +49,7 @@ from django.utils.translation import gettext, get_language
 from django.utils import translation
 
 if TYPE_CHECKING:
-    from Lobby.presenters import HcPresenter
+    from Lobby.presenters import HCpresenter
 
 
 def index(request):
@@ -210,7 +210,7 @@ def createHCgame(request):
         if player_gp:
             player_gp.notes = displayNames
             player_gp.save()
-        presenter = cast("HcPresenter", newGame.presenter())
+        presenter = cast("HCpresenter", newGame.presenter())
         presenter.startGame(request)
     else:
         usernamesToNotify = []
@@ -279,7 +279,7 @@ def _processHCturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("HcPresenter", currentGame.presenter())
+    presenter = cast("HCpresenter", currentGame.presenter())
 
     if jsonData["action"] == "turn0move":
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
@@ -972,7 +972,7 @@ def showHCgame(request, game_id):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("HcPresenter", currentGame.presenter())
+    presenter = cast("HCpresenter", currentGame.presenter())
 
     if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
         messages.error(request, gettext("The game is not Active"))
@@ -1290,7 +1290,7 @@ def chat(request):
     jsonData = json.loads(request.body)
     if jsonData["action"] == "refreshChat":
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
-        presenter = cast("HcPresenter", currentGame.presenter())
+        presenter = cast("HCpresenter", currentGame.presenter())
         presenter.removeChatNotification(request.user)
         currentGame.save()
 
@@ -1317,7 +1317,7 @@ def chat(request):
 
     if jsonData["action"] == "addMessage":
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
-        presenter = cast("HcPresenter", currentGame.presenter())
+        presenter = cast("HCpresenter", currentGame.presenter())
         # Add chat notifications for all players except current user
         all_player_usernames = [
             gp.player.username
@@ -1399,7 +1399,7 @@ def _castVote(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('HcPresenter', currentGame.presenter())
+    presenter = cast('HCpresenter', currentGame.presenter())
 
     # player = request.user  # Assuming the logged-in user is voting
     playerName = request.user.username  # Get the player's username

@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter, KfwPresenter
+from .presenters import GamePresenter, CNSpresenter, WEBpresenter, AQYpresenter, TGZpresenter, INDpresenter, BusPresenter, FCMpresenter, RNBpresenter, HCpresenter, KFWpresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -507,30 +507,30 @@ class Game(BaseGame):
     if TYPE_CHECKING:
         players: RelatedManager[GamePlayer]
 
-    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter, KfwPresenter]:
+    def presenter(self) -> Union[CNSpresenter, WEBpresenter, AQYpresenter, TGZpresenter, INDpresenter, BusPresenter, FCMpresenter, RNBpresenter, HCpresenter, KFWpresenter]:
         if self.gameCode == "CNS":
-            return CannesPresenter(self)
+            return CNSpresenter(self)
         if self.gameCode == "WEB":
-            return WebPresenter(self)
+            return WEBpresenter(self)
         if self.gameCode == "AQY":
-            return AqyPresenter(self)
+            return AQYpresenter(self)
         if self.gameCode == "TGZ":
-            return TgzPresenter(self)
+            return TGZpresenter(self)
         if self.gameCode == "IND":
-            return IndPresenter(self)
+            return INDpresenter(self)
         if self.gameCode == "Bus":
             return BusPresenter(self)
         if self.gameCode == "FCM":
-            return FcmPresenter(self)
+            return FCMpresenter(self)
         if self.gameCode == "RNB":
-            return RnbPresenter(self)
+            return RNBpresenter(self)
         if self.gameCode == "HC":
-            return HcPresenter(self)
+            return HCpresenter(self)
         if self.gameCode == "KFW":
-            return KfwPresenter(self)
-        # Return a CannesPresenter to stop constant linting errors
+            return KFWpresenter(self)
+        # Return a CNSpresenter to stop constant linting errors
         print("Unknown game code: " + self.gameCode)
-        return CannesPresenter(self)
+        return CNSpresenter(self)
 
     # This was causing a break not having this?
     def getGameCode(self):

@@ -35,7 +35,7 @@ from Lobby.models import User, Profile, Game, GamePlayer
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
 
 if TYPE_CHECKING:
-    from Lobby.presenters import WebPresenter 
+    from Lobby.presenters import WEBpresenter 
     
 WEB_DB_LOCK_NAME = "lockWEBgame_"
 
@@ -437,7 +437,7 @@ def _processWEBturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('WebPresenter', currentGame.presenter())
+    presenter = cast('WEBpresenter', currentGame.presenter())
 
     if jsonData["action"] == "simpleSave":
         # Check if old version is older than DB version, and if so, return
