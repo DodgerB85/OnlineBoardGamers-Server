@@ -584,6 +584,29 @@ def SR_currentTurnString(game, turn, phase):
         currentTurnString = gettext("Turn") + " - " + str(turn)
         return currentTurnString
 
+    elif game == "RNB":
+        currentTurnString = str(turn) + " - "
+        if phase == 0:
+            currentTurnString +=  gettext("Conflict (Production)")
+        if phase == 2:
+            currentTurnString +=  gettext("Conflict (Movement)")
+        if phase == 4:
+            currentTurnString +=  gettext("Conflict (Building)")
+        if phase == 6:
+            currentTurnString +=  gettext("Conflict (Wonder)")
+        if phase == 1:
+            currentTurnString +=  gettext("Production")
+        if phase == 3:
+            currentTurnString +=  gettext("Movement")
+        if phase == 5:
+            currentTurnString +=  gettext("Building")
+        if phase == 7:
+            currentTurnString +=  gettext("Wonder")
+        if phase == 9:
+            currentTurnString =  gettext("Game End")
+        
+        return currentTurnString
+
     return "NO CURRENT TURN STRING"
 
 
