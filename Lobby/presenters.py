@@ -111,7 +111,6 @@ class GamePresenter:
         #    return playerList.index(_username)
         #except (ValueError, TypeError):
         #    return -1
-        print(_username)
         return self.gameObj.players.filter(player__username=_username).first().seat_order
 
     def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
@@ -161,8 +160,6 @@ class GamePresenter:
 #
 #        return playerList
 
-    # NOTE: HC/BUS MIGHT USE COMMA SEPERATE STRING. SO CHECK IF SOME GAMES NEED TO BE HANDLED SEPERATELY
-    # TO GET THE startOptionsListPrelim
     def isExperiencedGame(self):
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
         if 120 in starting_options:
@@ -803,7 +800,7 @@ class AQYpresenter(GamePresenter):
     def getGameCode(self):
         return "AQY"
 
-    def getCurrentPlayers(self):
+    def getCurrentPlayersArrayAQY(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
         
         _currentPlayers = []
@@ -814,7 +811,7 @@ class AQYpresenter(GamePresenter):
                 elif gp.player.username != "AqyBot":
                     _currentPlayers.append(gp.player.username)
         
-        return ", ".join(_currentPlayers)
+        return _currentPlayers
 
     def hasMoveEndData(self, name):
         seat = self.seatPosition(name)
