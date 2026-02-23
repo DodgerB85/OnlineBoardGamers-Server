@@ -459,7 +459,7 @@ def _processBusTurn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # Set current players via presenter
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -494,12 +494,12 @@ def _processBusTurn(request):
                 else []
             )
             if (
-                jsonData["nextPlayer"] != ""
-                and jsonData["nextPlayer"] != "HcBot"
+                len(jsonData["nextPlayer"]) > 0 
+                and "BusBot" not in jsonData["nextPlayer"] 
                 and not jsonData["status"] == "FINISHED"
                 and 102 not in starting_options
             ):
-                playerListToNotify = jsonData["nextPlayer"].split(",")
+                playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
 
@@ -621,7 +621,7 @@ def _processBusTurn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -636,11 +636,11 @@ def _processBusTurn(request):
             else []
         )
         if (
-            jsonData["nextPlayer"] != ""
-            and jsonData["nextPlayer"] != "HcBot"
+            len(jsonData["nextPlayer"]) > 0
+            and "BusBot" not in jsonData["nextPlayer"] 
             and 102 not in starting_options
         ):
-            playerListToNotify = jsonData["nextPlayer"].split(",")
+            playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
