@@ -231,7 +231,6 @@ class GamePresenter:
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = []
             self.gameObj.save()
             return
-        print(f"gameCode: {self.gameObj.gameCode} current_players_array: {current_players_array}")
         if self.gameObj.gameCode == "RNB":
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
         elif self.gameObj.gameCode == "HC":
