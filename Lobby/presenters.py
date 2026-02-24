@@ -253,14 +253,18 @@ class GamePresenter:
             if name.strip()
         }
 
-        game_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+        game_players = list(self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
-        )
+        ))
 
+        to_update = []
         for gp in game_players:
             if gp.player:
                 gp.is_current = gp.player.username in current_usernames
-                gp.save()
+                to_update.append(gp)
+        if to_update:
+            from Lobby.models import GamePlayer
+            GamePlayer.objects.bulk_update(to_update, ["is_current"])
 
     def setCurrentPlayersFromArrInTurnOrder(self, current_players_array):
         """Set current players by updating is_current on GamePlayer instances"""
@@ -270,18 +274,22 @@ class GamePresenter:
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = []
             self.gameObj.save()
             return
-        
+
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
         self.gameObj.save()
-        
-        game_players = self.gameObj.players.exclude(is_kicked=True).select_related(
+
+        game_players = list(self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
-        )
-        
+        ))
+
+        to_update = []
         for gp in game_players:
             if gp.player:
                 gp.is_current = gp.player.username in current_players_array
-                gp.save()
+                to_update.append(gp)
+        if to_update:
+            from Lobby.models import GamePlayer
+            GamePlayer.objects.bulk_update(to_update, ["is_current"])
 
     def checkForHostChange(self, _missingUser):
         """Change host if current host is missing"""
