@@ -89,12 +89,6 @@ class GamePresenter:
         current_players = self.gameObj.players.filter(is_current=True).select_related("player")
         return [gp.player.username for gp in current_players if gp.player]
 
-    # This is being removed
-    def getStringOfIsCurrentPlayers(self, noSpaces=False):
-        if noSpaces:
-            return ",".join(self.getArrayOfIsCurrentPlayers())
-        return ", ".join(self.getArrayOfIsCurrentPlayers())
-
     def seatPosition(self, _username, withoutBots=False):
         # 1. Attempt DB lookup for real users
         gp = self.gameObj.players.filter(player__username=_username).first()
@@ -499,7 +493,7 @@ class CNSpresenter(GamePresenter):
                 message_data["gameName"] = self.getGameName()
                 message_data["gameCode"] = "CNS"
                 message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+                message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
                 message_data["maxPlayers"] = self.gameObj.maxPlayers
                 message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
                 message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
@@ -601,7 +595,7 @@ class WEBpresenter(GamePresenter):
                     message_data["gameName"] = self.getGameName()
                     message_data["gameCode"] = "WEB"
                     message_data["username"] = request.user.username
-                    message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+                    message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
                     message_data["maxPlayers"] = self.gameObj.maxPlayers
                     message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
                     message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
@@ -719,7 +713,7 @@ class AQYpresenter(GamePresenter):
                 message_data["gameName"] = self.getGameName()
                 message_data["gameCode"] = "AQY"
                 message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+                message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
                 message_data["maxPlayers"] = self.gameObj.maxPlayers
                 message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
                 message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
@@ -1002,7 +996,7 @@ class TGZpresenter(GamePresenter):
                 message_data["gameName"] = self.getGameName()
                 message_data["gameCode"] = "TGZ"
                 message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+                message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
                 message_data["maxPlayers"] = self.gameObj.maxPlayers
                 message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
                 message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
@@ -1104,7 +1098,7 @@ class INDpresenter(GamePresenter):
                 message_data["gameName"] = self.getGameName()
                 message_data["gameCode"] = "IND"
                 message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+                message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
                 message_data["maxPlayers"] = self.gameObj.maxPlayers
 
                 print("about to start IND async task")
@@ -1371,7 +1365,7 @@ class BusPresenter(GamePresenter):
                 message_data["gameName"] = self.getGameName()
                 message_data["gameCode"] = "Bus"
                 message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+                message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
                 message_data["maxPlayers"] = self.gameObj.maxPlayers
 
                 print("about to start Bus async task")
@@ -1518,7 +1512,7 @@ class RNBpresenter(GamePresenter):
                 message_data["gameName"] = self.getGameName()
                 message_data["gameCode"] = "RNB"
                 message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+                message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
                 message_data["maxPlayers"] = self.gameObj.maxPlayers
                 message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
                 message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
@@ -1776,7 +1770,7 @@ class FCMpresenter(GamePresenter):
         message_data["gameName"] = self.getGameName()
         message_data["gameCode"] = "FCM"
         message_data["username"] = request.user.username
-        message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+        message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
         message_data["maxPlayers"] = self.gameObj.maxPlayers
         message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
         message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
@@ -2419,7 +2413,7 @@ class HCpresenter(GamePresenter):
             message_data["gameName"] = self.getGameName()
             message_data["gameCode"] = "HC"
             message_data["username"] = request.user.username
-            message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+            message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
             message_data["maxPlayers"] = self.gameObj.maxPlayers
 
             print("about to start HC async task")
@@ -2767,7 +2761,7 @@ class KFWpresenter(GamePresenter):
                 message_data["gameName"] = self.getGameName()
                 message_data["gameCode"] = "KFW"
                 message_data["username"] = request.user.username
-                message_data["currentPlayersString"] = self.getStringOfIsCurrentPlayers()
+                message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
                 message_data["maxPlayers"] = self.gameObj.maxPlayers
 
                 print("about to start KFW async task")
@@ -2780,8 +2774,8 @@ class KFWpresenter(GamePresenter):
     # TODO can this be moved to gen P?
     def getCurrentPlayers(self):
         _currentPlayers = []
-        currentPlayersField = self.getStringOfIsCurrentPlayers()
-        current_usernames_set = set(u.strip() for u in currentPlayersField.split(",") if u.strip())
+        currentPlayersArr = self.getArrayOfIsCurrentPlayers()
+        current_usernames_set = set(u.strip() for u in currentPlayersArr if u.strip())
         all_gps = self.gameObj.players.exclude(is_kicked=True).select_related("player")
         for gp in all_gps:
             if not gp.player:
@@ -2957,30 +2951,29 @@ class KFWpresenter(GamePresenter):
         # ASSUME THAT players have move data <=> they have moved
         # ASSUME THAT phase is the start of simul phase
 
-        currentPlayersField = self.getStringOfIsCurrentPlayers()
+        currentPlayersArr = self.getArrayOfIsCurrentPlayers()
 
         # If there are no current players, add everyone
-        if currentPlayersField == "":
+        if len(currentPlayersArr) == 0:
             all_gps = self.gameObj.players.filter(is_missing=False, is_kicked=False).select_related("player")
             return ",".join(gp.player.username for gp in all_gps if gp.player)
 
         # Get an array of possible players to move
-        _currentPlayers = [u.strip() for u in currentPlayersField.split(",") if u.strip()]
         # Remove missing players
         missing_gps = self.gameObj.players.filter(is_missing=True).select_related("player")
         missing_usernames = {gp.player.username for gp in missing_gps if gp.player}
-        _currentPlayers = [username for username in _currentPlayers if username not in missing_usernames]
+        currentPlayersArr = [username for username in currentPlayersArr if username not in missing_usernames]
 
         # If any player has a move, then remove them
         playersToRemove = []
-        for username in _currentPlayers:
+        for username in currentPlayersArr:
             if self.hasMoveEndData(username):
                 playersToRemove.append(username)
 
         for username in playersToRemove:
-            _currentPlayers.remove(username)
+            currentPlayersArr.remove(username)
 
-        return _currentPlayers
+        return currentPlayersArr
 
     #####################################################################
     ###################### KFW specific server code
