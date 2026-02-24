@@ -928,7 +928,7 @@ def _processHCturn(request):
                 len(jsonData["nextPlayer"]) > 0 
                 and not jsonData["status"] == "FINISHED"
             ):
-                playerListToNotify = jsonData["nextPlayer"].split(",")
+                playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if "HcBot" in playerListToNotify:
