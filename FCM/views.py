@@ -307,7 +307,7 @@ def showGame(request, game_id):
     rewindHostHTML = ""
     rewindHostPossible = False
     currentRewindConsent = 0
-    currentPlayers = presenter.getStringOfIsCurrentPlayers(True) # for string MUST be single comma separated only
+    currentPlayers = presenter.getArrayOfIsCurrentPlayers() 
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
 
@@ -685,7 +685,7 @@ def _processTurn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # Update module selections
         currentGame.startingMap = jsonData["tiles"]
@@ -783,7 +783,7 @@ def _processTurn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # Update module selections
         starting_options = (
@@ -1035,7 +1035,7 @@ def _processTurn(request):
                 for gp in currentGame.players.all().select_related("player")
                 if gp.player and gp.player.username not in missing_players
             ]
-            presenter.setCurrentPlayers(",".join(current_players))
+            presenter.setCurrentPlayersFromArrInTurnOrder(current_players)
             currentGame.save()
 
         # Remove move data at start of working day
@@ -1086,12 +1086,12 @@ def _processTurn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # First, save the currentPlayers from the jsonData
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # Before sending notifications, update the currentPlayers
         # If saving into phase 2/7/9, then update for simul players
         if jsonData["phase"] == 2 or jsonData["phase"] == 7 or jsonData["phase"] == 9:
-            presenter.setCurrentPlayers(presenter.getCurrentSimulPlayersV2())
+            presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM())
 
         # Send Notifications - payday/fridge with moves are already removd
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
@@ -1282,7 +1282,7 @@ def _processTurn(request):
             presenter.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
 
             if currentGame.phase != 0 and currentGame.phase != 1:
-                presenter.setCurrentPlayers(presenter.getCurrentSimulPlayers())
+                presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM())
 
             if request.user.username in FCMsuperUsers:
                 flexName = jsonData["BKSN"]
@@ -1411,7 +1411,7 @@ def _processTurn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # WHY WAS THIS COMMENTED OUT????
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.save()
 
         # Send notification s
@@ -1600,7 +1600,7 @@ def _processTurn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["data"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -1725,7 +1725,7 @@ def _processTurn(request):
             if player not in currentPlayersArr:
                 currentPlayersArr.append(player)
 
-        presenter.setCurrentPlayers(",".join(currentPlayersArr))
+        presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersArr)
 
         currentGame.save()
 

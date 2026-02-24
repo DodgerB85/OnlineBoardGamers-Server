@@ -1853,28 +1853,7 @@ class FCMpresenter(GamePresenter):
                 for playerName in allPlayers
             ]
 
-    def getCurrentSimulPlayersV2(self):
-        # ASSUME THAT self.currentPlayers IS THE LATEST JSON INCOMING
-        # ASSUME THAT phase is the start of simul phase
 
-        currentPlayers = self.getStringOfIsCurrentPlayers(True)
-
-        # If there are no current players, add everyone
-        if not currentPlayers:
-            current_players = [gp.player.username for gp in self.gameObj.players.all().select_related("player") if gp.player]
-            return ",".join(current_players)
-
-        # Get an array of possible players to move
-        current_players = [player.strip() for player in currentPlayers.split(",")]
-
-        # Remove missing players
-        missing_players = set(self.gameObj.players.filter(is_missing=True).values_list("player__username", flat=True))
-        current_players = [username for username in current_players if username not in missing_players]
-
-        # Remove players with move data in a single pass using a list comprehension
-        current_players_str = ",".join(username for username in current_players if not self.hasValidActualMoveData(username))
-
-        return current_players_str
 
     def hasAnyPlayerMovedThisPhase(self, phase):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
@@ -2145,43 +2124,37 @@ class FCMpresenter(GamePresenter):
                 gp.save()
         self.gameObj.save()
 
-    def getCurrentSimulPlayers(self):
+
+    def getCurrentSimulPlayersFCM(self):
         # ASSUME THAT self.currentPlayers IS THE LATEST JSON INCOMING
         # ASSUME THAT phase is the start of simul phase
 
-        currentPlayers = self.getStringOfIsCurrentPlayers(True)
+        currentPlayers = self.getArrayOfIsCurrentPlayers()
 
         # If there ar no current players, add everyone
-        if currentPlayers == "":
-            _currentPlayers = ""
+        if len(currentPlayers) == 0:
+            _currentPlayers = []
             for gp in self.gameObj.players.all().select_related("player"):
                 if gp.player and gp.player.username != "FCMtourneyAdmin":
-                    _currentPlayers += gp.player.username + ","
-            # remove final comma
-            _currentPlayers = _currentPlayers[:-1]
+                    _currentPlayers.append(gp.player.username)
             return _currentPlayers
 
-        # Get an array of possible player to move
-        _currentPlayers = [player.strip() for player in currentPlayers.split(",")]
         # Remove missing players
         missing_players = set(self.gameObj.players.filter(is_missing=True).values_list("player__username", flat=True))
         # if self.gameObj.relatedMainTournament:
         #    missing_players = {}
-        _currentPlayers = [username for username in _currentPlayers if username not in missing_players]
+        currentPlayers = [username for username in currentPlayers if username not in missing_players]
 
         # If any play has a move, then remove them
         playersToRemove = []
-        for username in _currentPlayers:
+        for username in currentPlayers:
             if self.hasValidActualMoveData(username):
                 playersToRemove.append(username)
 
         for username in playersToRemove:
-            _currentPlayers.remove(username)
+            currentPlayers.remove(username)
 
-        # Join the list elements with ','
-        _currentPlayers = ",".join(_currentPlayers)
-
-        return _currentPlayers
+        return currentPlayers
 
     # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
     def getRewindHostHTML(self):
@@ -2831,7 +2804,7 @@ class KFWpresenter(GamePresenter):
                     message_data,
                 )
 
-    # TODO array
+    # TODO can this be moved to gen P?
     def getCurrentPlayers(self):
         _currentPlayers = []
         currentPlayersField = self.getStringOfIsCurrentPlayers()
@@ -3006,7 +2979,7 @@ class KFWpresenter(GamePresenter):
 
         self.gameObj.save()
 
-    # TODO find all these to arrays
+    # TODO mvoe to general?
     def getCurrentSimulPlayers(self):
         # ASSUME THAT players have move data <=> they have moved
         # ASSUME THAT phase is the start of simul phase
