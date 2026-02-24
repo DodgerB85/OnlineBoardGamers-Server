@@ -228,6 +228,7 @@ class GamePresenter:
             gp.is_kicked = True
             gp.save()
 
+    #This should be removed eventually
     def setCurrentPlayers(self, player_usernames_string):
         """Set current players from comma-separated string of usernames"""
         if self.gameObj.gameCode == "HC":
