@@ -88,7 +88,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
-    allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False)
+    allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray(False)
 
     # Logged out
     returnData = {
@@ -105,9 +105,9 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "currentPlayers": presenter.getCurrentPlayersArrayAQY(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "statsExcludeVotesData": json.dumps(
-            presenter.getFullSetOfVoteResults(STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False)
+            presenter.getFullSetOfVoteResults(STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeatInArray(True), False)
         ),
-        "deleteVotesData": json.dumps(presenter.getFullSetOfVoteResults(DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False)),
+        "deleteVotesData": json.dumps(presenter.getFullSetOfVoteResults(DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeatInArray(True), False)),
         "settingsDebug": config("AQY_USE_SOURCE_CODE", default=False, cast=bool),
         # "settingsDebug": False,
     }
@@ -116,7 +116,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "AQY/showAQYgame.html", returnData)
 
     # Now you are logged in
-    #user_id = userObj.id
+    user_id = userObj.id
 
     user_profile = Profile.objects.get(user=userObj)
 
@@ -215,13 +215,13 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             displayNames = user_gp.notes if user_gp else ""
             if user_gp:
                 user_gp.notes = ""
                 user_gp.save()
             notes = ""
-        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
+        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeatInArray())
         if currentGame.startingMap != "":
             returnData.update({"startingMap": json.loads(currentGame.startingMap)})
 
@@ -524,7 +524,7 @@ def _processAQYturn(request):
         BKSN = jsonData["BKSN"]
         moveData = jsonData["moveData"]
 
-        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeat(False)
+        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeatInArray(False)
 
         yourPlayerIndex = allPlayersOrderedySeat.index(BKSN)
 
@@ -532,8 +532,8 @@ def _processAQYturn(request):
         # So first check the opponent has not ended their turn (or you, which is impossible)
         if (
             presenter.hasMoveEndData(BKSN)
-            or presenter.hasMoveEndData(presenter.getAllPlayersOrderedySeat()[opponentsPlayerIndex])
-            or presenter.hasMoveEndData(presenter.getAllPlayersOrderedySeat()[yourPlayerIndex])
+            or presenter.hasMoveEndData(presenter.getAllPlayersOrderedySeatInArray()[opponentsPlayerIndex])
+            or presenter.hasMoveEndData(presenter.getAllPlayersOrderedySeatInArray()[yourPlayerIndex])
         ):
             return JsonResponse({"endMoveError": True}, safe=False)
 
@@ -615,7 +615,7 @@ def _processAQYturn(request):
         moveData = jsonData["moveData"]
         entry = jsonData["entry"]
 
-        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeat(False)
+        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeatInArray(False)
 
         fromPlayerIndex = entry[0]
         toPlayerIndex = entry[1]
@@ -624,8 +624,8 @@ def _processAQYturn(request):
         # So first check the opponent has not ended their turn
         if (
             presenter.hasMoveEndData(BKSN)
-            or presenter.hasMoveEndData(presenter.getAllPlayersOrderedySeat()[fromPlayerIndex])
-            or presenter.hasMoveEndData(presenter.getAllPlayersOrderedySeat()[toPlayerIndex])
+            or presenter.hasMoveEndData(presenter.getAllPlayersOrderedySeatInArray()[fromPlayerIndex])
+            or presenter.hasMoveEndData(presenter.getAllPlayersOrderedySeatInArray()[toPlayerIndex])
         ):
             # DELETE THE TRADE
             presenter.removePlayerTrade(entry)
@@ -772,7 +772,7 @@ def _processAQYturn(request):
         BKSN = jsonData["BKSN"]
         entry = jsonData["entry"]
 
-        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeat(False)
+        allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeatInArray(False)
         # yourPlayerIndex = allPlayersOrderedySeat.index(BKSN)
 
         presenter.removePlayerTrade(entry)
@@ -800,7 +800,7 @@ def _processAQYturn(request):
         # playerIndex = jsonData["idx"]
         promise = jsonData["promise"]
 
-        # allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeat(False)
+        # allPlayersOrderedySeat = presenter.getAllPlayersOrderedySeatInArray(False)
         # yourPlayerIndex = allPlayersOrderedySeat.index(BKSN)
 
         presenter.markPromiseComplete(promise)

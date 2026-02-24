@@ -223,7 +223,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
-    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat(False))
+    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray(False))
 
     gameData1 = (
         presenter.getGameData1Compressed(request.user.username)
@@ -340,7 +340,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             # Display names are stored in the creator's notes (replaces player0notes)
             creator_gp = currentGame.players.filter(player=currentGame.creator).first()
             displayNames = creator_gp.notes if creator_gp else ""

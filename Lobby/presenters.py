@@ -8,7 +8,6 @@ import time
 import json
 import random
 
-from django.contrib.sites.shortcuts import get_current_site
 from django.utils.translation import gettext
 from django.db.models import Q
 from django.urls import reverse
@@ -97,7 +96,7 @@ class GamePresenter:
 
         # 2. Fallback for Bots (or missing users)
         # This uses your existing logic that converts 'missing' players to strings
-        playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
         try:
             print(f"NO PLAYER FOUND-1: {_username} gameCode: {self.gameObj.gameCode} playerList: {playerList} id: {self.gameObj.id}")
             return playerList.index(_username)
@@ -105,13 +104,13 @@ class GamePresenter:
             print(f"NO PLAYER FOUND-2: {_username} gameCode: {self.gameObj.gameCode} playerList: {playerList} id: {self.gameObj.id}")
             return -1
 
-    def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
+    def getAllPlayersOrderedySeatInArray(self, keepOriginalNamesForMissingPlayers=False, removeBotsFromArrayToShortenIt=False):
         all_players_gp = self.gameObj.players.select_related("player").order_by("seat_order")
 
-        if excludeBots:
+        if removeBotsFromArrayToShortenIt:
             return [gp.player.username for gp in all_players_gp if gp.player and not gp.is_missing]
 
-        if withoutBots:
+        if keepOriginalNamesForMissingPlayers:
             return [gp.player.username for gp in all_players_gp if gp.player]
 
         # Map gameCode to Bot Name Prefix
@@ -138,25 +137,6 @@ class GamePresenter:
             elif gp.player:
                 result.append(gp.player.username)
         return result
-
-    #    def getAllPlayersOrderedySeat(self, withoutBots=False):
-    #        # Use list comprehension on .all() to access the prefetch cache
-    #        all_players_gp = list(self.gameObj.players.select_related("player").all())
-    #        playerList = [gp.player.username for gp in all_players_gp if gp.player]
-    #        random.Random(self.gameObj.playerOrderSeed).shuffle(playerList)
-    #
-    #        if withoutBots:
-    #            return playerList
-    #
-    #        # Access prefetched missingPlayers usernames in memory
-    #        missingPlayerUsernames = {gp.player.username for gp in all_players_gp if gp.player and gp.is_missing}
-    #
-    #        # Use a set for missingPlayerUsernames for O(1) lookup speed
-    #        for count, player in enumerate(playerList):
-    #            if player in missingPlayerUsernames:
-    #                playerList[count] = "BusBot" + str(count)
-    #
-    #        return playerList
 
     def isExperiencedGame(self):
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
@@ -313,7 +293,7 @@ class GamePresenter:
 
         # 3. Check if all players have voted
         # NB this "y" seat typo is everywhere! Leave for noe
-        ordered_players = self.getAllPlayersOrderedySeat(True)
+        ordered_players = self.getAllPlayersOrderedySeatInArray(True)
         missing_players = self.getMissingPlayersNamesArray()
 
         votes_map = self.getFullSetOfVoteResults(topic, ordered_players, False)
@@ -522,7 +502,7 @@ class WEBpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        names = self.getAllPlayersOrderedySeat(False)
+        names = self.getAllPlayersOrderedySeatInArray(False)
         winnerNamesArray = []
         for playerIndex in _winner:
             winner_user = User.objects.get(username=names[playerIndex])
@@ -628,7 +608,7 @@ class AQYpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        names = self.getAllPlayersOrderedySeat(False)
+        names = self.getAllPlayersOrderedySeatInArray(False)
         winnerNamesArray = []
         for playerIndex in _winner:
             winner_user = User.objects.get(username=names[playerIndex])
@@ -957,7 +937,7 @@ class TGZpresenter(GamePresenter):
             )
 
     def seatPosition(self, name, withoutBots=False):
-        playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
         try:
             return playerList.index(name)
         except (ValueError, TypeError):
@@ -983,7 +963,7 @@ class TGZpresenter(GamePresenter):
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
 
-        allPlayersL = self.getAllPlayersOrderedySeat()
+        allPlayersL = self.getAllPlayersOrderedySeatInArray()
 
         self.gameObj.save()
 
@@ -1059,7 +1039,7 @@ class INDpresenter(GamePresenter):
         # finalPositionsArr is an array of [pos, username]
         finalPositionsArr = []
         for seatPos in _finalPositions:
-            finalPositionsArr.append(self.getAllPlayersOrderedySeat()[seatPos])
+            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "IND", finalPositionsArr, _gameID, self.gameObj)
 
@@ -1106,7 +1086,7 @@ class INDpresenter(GamePresenter):
                     playerListToNotify,
                     message_data,
                 )
-            allPlayersL = self.getAllPlayersOrderedySeat()
+            allPlayersL = self.getAllPlayersOrderedySeatInArray()
             if request.user.username != allPlayersL[0]:
                 SN_sendNextTurnNotification(
                     request,
@@ -1138,7 +1118,7 @@ class INDpresenter(GamePresenter):
             return data
         except (json.JSONDecodeError, ValueError):
             # Scaffold default structure
-            allPlayers = self.getAllPlayersOrderedySeat(True)
+            allPlayers = self.getAllPlayersOrderedySeatInArray(True)
             return [[playerName, [-1], "", []] for playerName in allPlayers]
 
     def insertPlayerPreMoveData(self, name, phasesArr, moveArr):
@@ -1288,7 +1268,7 @@ class BusPresenter(GamePresenter):
     # takes in a USERNAME
     def seatPosition(self, name, withoutBots=False):
         # 1. Get the list of players (this already uses the prefetch cache)
-        playerList = self.getAllPlayersOrderedySeat(withoutBots)
+        playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
 
         # 2. Use 'index' to find the position.
         # If the name isn't in the list, it will raise a ValueError.
@@ -1314,7 +1294,7 @@ class BusPresenter(GamePresenter):
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
 
-        allPlayersL = self.getAllPlayersOrderedySeat()
+        allPlayersL = self.getAllPlayersOrderedySeatInArray()
 
         if self.isTrainingGame():
             # Set the first player by seat as current
@@ -1424,7 +1404,7 @@ class RNBpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        names = self.getAllPlayersOrderedySeat(False)
+        names = self.getAllPlayersOrderedySeatInArray(False)
         winnerNamesArray = []
         for playerIndex in _winner:
             winner_user = User.objects.get(username=names[playerIndex])
@@ -1786,7 +1766,7 @@ class FCMpresenter(GamePresenter):
     # takes in a USERNAME
     def seatPosition(self, name, withoutBots=False):
         if name != "FCMtourneyAdmin":
-            playerList = self.getAllPlayersOrderedySeat(withoutBots)
+            playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
             try:
                 return playerList.index(name)
             except Exception:
@@ -1815,7 +1795,7 @@ class FCMpresenter(GamePresenter):
             return data
         except (json.JSONDecodeError, ValueError):
             # Scaffold default structure
-            allPlayers = self.getAllPlayersOrderedySeat(True, False)
+            allPlayers = self.getAllPlayersOrderedySeatInArray(True, False)
             missing_players = set(self.gameObj.players.filter(is_missing=True).values_list("player__username", flat=True))
             # In a tournament, don't remove missing players, as FCMtA plays for them
             # if self.gameObj.relatedMainTournament:
@@ -2091,9 +2071,7 @@ class FCMpresenter(GamePresenter):
 
     # This should be superfluouts, as data is updated after rewind anyway
     def addAllPlayersToCurrentPlayers(self):
-        # Original code: getAllPlayersOrderedySeat(False) returns "FcmBot" for missing players
-        # So missing players are NOT set as current (matching original behavior where
-        # currentPlayers string contained "FcmBot" instead of the missing player's username)
+        # NB: missing players are NOT set as current
         for gp in self.gameObj.players.exclude(is_kicked=True):
             should_be_current = not gp.is_missing
             if gp.is_current != should_be_current:
@@ -2139,7 +2117,7 @@ class FCMpresenter(GamePresenter):
         if int(self.gameObj.created) > 1744974000000:
             USE_NEW_CODE = True
 
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
 
         rewindHTML = ""
 
@@ -2157,7 +2135,7 @@ class FCMpresenter(GamePresenter):
         # TODO - move this to new vote system
         if self.isTrainingGame():
             return True
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
         missingPlayerNames = self.getMissingPlayersNamesArray()
         hostUsername = getattr(self.gameObj.host, "username")
         possible = True
@@ -2168,7 +2146,7 @@ class FCMpresenter(GamePresenter):
         return possible
 
     def removeSingleRewindPermission(self):
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
         for player in rewindConsentVotes:
             if rewindConsentVotes[player] == 1:
                 rewindConsentVotes[player] = 0
@@ -2177,7 +2155,7 @@ class FCMpresenter(GamePresenter):
 
     def getCurrentRewindConsent(self, _username):
         # return 0,1, or 2
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
         if _username in rewindConsentVotes:
             return rewindConsentVotes[_username]
         else:
@@ -2573,7 +2551,7 @@ class HCpresenter(GamePresenter):
         if self.gameObj.activeVotes and REWIND_CONSENT_VOTE_TOPIC in self.gameObj.activeVotes:
             return
         rewind_votes = {}
-        all_players = self.getAllPlayersOrderedySeat(True)
+        all_players = self.getAllPlayersOrderedySeatInArray(True)
         host_username = getattr(self.gameObj.host, "username") if self.gameObj.host else None
         for player in all_players:
             if player == host_username:
@@ -2611,7 +2589,7 @@ class HCpresenter(GamePresenter):
         if not self.gameObj.activeVotes or REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
             self.setupRewindConsent()
 
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeat(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
 
         rewindHTML = ""
 
@@ -2660,7 +2638,7 @@ class KFWpresenter(GamePresenter):
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
 
-        names = self.getAllPlayersOrderedySeat(False)
+        names = self.getAllPlayersOrderedySeatInArray(False)
         winnerNamesArray = []
         for playerIndex in _winner:
             winner_user = User.objects.get(username=names[playerIndex])
@@ -2706,7 +2684,7 @@ class KFWpresenter(GamePresenter):
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
 
-        # Get and sort all players alphabetically (matching old getAllPlayersOrderedySeat logic)
+        # Get and sort all players alphabetically (matching old getAllPlayersOrderedySeatInArray logic)
         all_players_gp = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
         all_players_gp_sorted = sorted(all_players_gp, key=lambda gp: gp.player.username if gp.player else "")
 

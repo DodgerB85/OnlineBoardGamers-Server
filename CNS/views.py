@@ -245,12 +245,12 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         "settingsDebug": config("CNS_USE_SOURCE_CODE", default=False, cast=bool),
         "statsExcludeVotesData": json.dumps(
             currentGame.presenter().getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
+                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeatInArray(True), False
             )
         ),
         "deleteVotesData": json.dumps(
             currentGame.presenter().getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
+                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeatInArray(True), False
             )
         ),
     }
@@ -337,7 +337,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             creator_gp = all_players.filter(player=currentGame.creator).first()
             if creator_gp:
                 displayNames = creator_gp.notes
@@ -346,7 +346,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
                 if user_gp and user_gp.player == currentGame.creator:
                     notes = ""
             currentGame.save()
-        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
 
         returnData.update(
             {
@@ -771,7 +771,7 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True))
         currentGame.presenter().removeChatNotification(request.user)
         
         currentGame.save()

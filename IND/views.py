@@ -273,7 +273,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     )
 
-    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat(False))
+    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray(False))
 
     # Logged out
     returnData = {
@@ -296,12 +296,12 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "settingsDEBUG": config("IND_USE_SOURCE_CODE", default=False, cast=bool),
         "statsExcludeVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
+                STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeatInArray(True), False
             )
         ),
         "deleteVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
+                DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeatInArray(True), False
             )
         ),
     }
@@ -427,7 +427,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             # For shadow games, display names are stored in the first player's notes
             user_gp = currentGame.players.filter(player=userObj).first()
             if user_gp and user_gp.notes:
@@ -435,7 +435,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
                 user_gp.notes = ""
                 user_gp.save()
                 notes = ""
-        # allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        # allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
 
         returnData.update(
             {

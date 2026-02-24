@@ -1023,7 +1023,7 @@ def showHCgame(request, game_id):
         temporaryMove = ""
         pov = None
         preferredHCcolour = -1
-        allPlayerListBySeat = presenter.getAllPlayersOrderedySeat()
+        allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray()
         kickoutRequired = 0
         chatNotification = False
 
@@ -1039,7 +1039,7 @@ def showHCgame(request, game_id):
         currentRewindConsent = "0"
         currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
         if len(currentPlayers) == 0:
-           currentPlayers = [presenter.getAllPlayersOrderedySeat()[0]]
+           currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
         statsExcludedGame = currentGame.statsExcludedGame
         displayNames = ""
 
@@ -1104,7 +1104,7 @@ def showHCgame(request, game_id):
 
             myMove = presenter.isMyMove(username)
 
-            if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
                 player_gp = next(
                     (
                         gp
@@ -1176,14 +1176,14 @@ def showHCgame(request, game_id):
                 "statsExcludeVotesData": json.dumps(
                     presenter.getFullSetOfVoteResults(
                         STATS_EXCLUDE_VOTE_TOPIC,
-                        presenter.getAllPlayersOrderedySeat(True),
+                        presenter.getAllPlayersOrderedySeatInArray(True),
                         False,
                     )
                 ),
                 "deleteVotesData": json.dumps(
                     presenter.getFullSetOfVoteResults(
                         DELETE_VOTE_TOPIC,
-                        presenter.getAllPlayersOrderedySeat(True),
+                        presenter.getAllPlayersOrderedySeatInArray(True),
                         False,
                     )
                 ),
@@ -1225,14 +1225,14 @@ def showHCgame(request, game_id):
             "statsExcludeVotesData": json.dumps(
                 presenter.getFullSetOfVoteResults(
                     STATS_EXCLUDE_VOTE_TOPIC,
-                    presenter.getAllPlayersOrderedySeat(True),
+                    presenter.getAllPlayersOrderedySeatInArray(True),
                     False,
                 )
             ),
             "deleteVotesData": json.dumps(
                 presenter.getFullSetOfVoteResults(
                     DELETE_VOTE_TOPIC,
-                    presenter.getAllPlayersOrderedySeat(True),
+                    presenter.getAllPlayersOrderedySeatInArray(True),
                     False,
                 )
             ),
@@ -1418,7 +1418,7 @@ def _castVote(request):
         # Check if all players have voted to delete
         all_voted = True
         votesData = presenter.getFullSetOfVoteResults(
-            topic, presenter.getAllPlayersOrderedySeat(True), False
+            topic, presenter.getAllPlayersOrderedySeatInArray(True), False
         )
 
         missingPlayers = presenter.getMissingPlayersNamesArray()
@@ -1430,7 +1430,7 @@ def _castVote(request):
         if all_voted:
             votesData = json.dumps(
                 presenter.getFullSetOfVoteResults(
-                    topic, presenter.getAllPlayersOrderedySeat(True), False
+                    topic, presenter.getAllPlayersOrderedySeatInArray(True), False
                 )
             )
             # Delete the game
@@ -1459,7 +1459,7 @@ def _castVote(request):
                 "voteChanged": True,
                 "votesData": json.dumps(
                     presenter.getFullSetOfVoteResults(
-                        topic, presenter.getAllPlayersOrderedySeat(True), False
+                        topic, presenter.getAllPlayersOrderedySeatInArray(True), False
                     )
                 ),
             },
