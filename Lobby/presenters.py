@@ -2315,9 +2315,8 @@ class HCpresenter(GamePresenter):
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return False
 
-        currentPlayers = self.getCurrentPlayersInOrderArrHC()
-        currentPlayerrsList = currentPlayers
-        if self.gameObj.phase == 3 and self.hasMoveData(loggedInPlayerUsername) and loggedInPlayerUsername != currentPlayerrsList[0]:
+        currentPlayersArr = self.getCurrentPlayersInOrderArrHC()
+        if self.gameObj.phase == 3 and self.hasMoveData(loggedInPlayerUsername) and loggedInPlayerUsername != currentPlayersArr[0]:
             return False
 
         # Use a set for faster membership testing
@@ -2329,7 +2328,7 @@ class HCpresenter(GamePresenter):
             "SHADOW_5",
             "FcmAI",
         }
-        return not currentPlayers or loggedInPlayerUsername in currentPlayers or currentPlayers in shadow_values
+        return not currentPlayersArr or len(currentPlayersArr) == 0 or loggedInPlayerUsername in currentPlayersArr or currentPlayersArr[0] in shadow_values
 
     def startGame(self, request):
         from django_q.tasks import async_task
