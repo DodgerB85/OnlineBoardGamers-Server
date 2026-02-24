@@ -89,6 +89,7 @@ class GamePresenter:
         current_players = self.gameObj.players.filter(is_current=True).select_related("player")
         return [gp.player.username for gp in current_players if gp.player]
 
+    # This is being removed
     def getStringOfIsCurrentPlayers(self, noSpaces=False):
         if noSpaces:
             return ",".join(self.getArrayOfIsCurrentPlayers())
@@ -2830,6 +2831,7 @@ class KFWpresenter(GamePresenter):
                     message_data,
                 )
 
+    # TODO array
     def getCurrentPlayers(self):
         _currentPlayers = []
         currentPlayersField = self.getStringOfIsCurrentPlayers()
@@ -2848,7 +2850,7 @@ class KFWpresenter(GamePresenter):
             elif username != "KfwBot":
                 _currentPlayers.append(username)
 
-        return ",".join(_currentPlayers)
+        return _currentPlayers
 
     #####################################################################
     ###################### Simul turns code
@@ -3004,6 +3006,7 @@ class KFWpresenter(GamePresenter):
 
         self.gameObj.save()
 
+    # TODO find all these to arrays
     def getCurrentSimulPlayers(self):
         # ASSUME THAT players have move data <=> they have moved
         # ASSUME THAT phase is the start of simul phase
@@ -3030,9 +3033,6 @@ class KFWpresenter(GamePresenter):
 
         for username in playersToRemove:
             _currentPlayers.remove(username)
-
-        # Join the list elements with ','
-        _currentPlayers = ",".join(_currentPlayers)
 
         return _currentPlayers
 
