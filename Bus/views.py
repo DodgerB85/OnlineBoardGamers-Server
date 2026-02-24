@@ -143,7 +143,7 @@ def showBusGame(request, game_id):
     # Find user's GamePlayer record
     user_gp = None
     for gp in all_player_gps:
-        if gp.player and gp.player.id == user_id:
+        if gp.player and gp.player == userObj:
             user_gp = gp
             break
 

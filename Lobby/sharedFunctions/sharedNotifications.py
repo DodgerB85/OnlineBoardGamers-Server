@@ -1104,7 +1104,6 @@ def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _ga
                 + str(e)
             )
             continue
-        # profile = Profile.objects.get(id=user.id)
         try:
             profile = Profile.objects.get(user=user)
 
@@ -1188,7 +1187,6 @@ def SN_sendMiniTournamentInvite(
                 + str(e)
             )
             continue
-        # profile = Profile.objects.get(id=user.id)
         try:
             profile = Profile.objects.get(user=user)
 

@@ -76,7 +76,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     presenter = cast("AQYpresenter", currentGame.presenter())
 
     # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
+    #all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
     userObj = request.user
     username = userObj.username
 
@@ -116,7 +116,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "AQY/showAQYgame.html", returnData)
 
     # Now you are logged in
-    user_id = userObj.id
+    #user_id = userObj.id
 
     user_profile = Profile.objects.get(user=userObj)
 
