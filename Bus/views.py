@@ -33,10 +33,8 @@ from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOT
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
-    SF_getGameCreationJsonReturn,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
     SN_sendNextTurnNotification,
     SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
@@ -502,7 +500,6 @@ def _processBusTurn(request):
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
-
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
                         request,
