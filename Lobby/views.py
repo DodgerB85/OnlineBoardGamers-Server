@@ -134,7 +134,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getPointsForPosition,
 )
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG, SHADOW_USERNAMES
 
 
 User = get_user_model()
@@ -1240,9 +1240,8 @@ def stats(request):
     userActivity = stats_data["userActivity"]
 
     # 2. Optimized ID exclusion (Avoids expensive NOT EXISTS subqueries)
-    excluded_names = ["SHADOW", "FcmAI"]
     excluded_game_ids = GamePlayer.objects.filter(
-        player__username__in=excluded_names
+        player__username__in=SHADOW_USERNAMES
     ).values_list('game_id', flat=True)
 
     # 3. Batch Fetch ALL Counts (1 Query instead of 18)
