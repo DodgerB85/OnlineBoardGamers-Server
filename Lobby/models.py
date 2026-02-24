@@ -507,30 +507,19 @@ class Game(BaseGame):
     if TYPE_CHECKING:
         players: RelatedManager[GamePlayer]
 
-    def presenter(self) -> Union[CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter, KfwPresenter]:
-        if self.gameCode == "CNS":
+    PRESENTER_MAP = {
+        "CNS": CannesPresenter, "WEB": WebPresenter, "AQY": AqyPresenter,
+        "TGZ": TgzPresenter, "IND": IndPresenter, "Bus": BusPresenter,
+        "FCM": FcmPresenter, "RNB": RnbPresenter, "HC": HcPresenter,
+        "KFW": KfwPresenter,
+    }
+
+    def presenter(self) -> GamePresenter:
+        cls = self.PRESENTER_MAP.get(self.gameCode)
+        if not cls:
+            print("Unknown game code: " + self.gameCode)
             return CannesPresenter(self)
-        if self.gameCode == "WEB":
-            return WebPresenter(self)
-        if self.gameCode == "AQY":
-            return AqyPresenter(self)
-        if self.gameCode == "TGZ":
-            return TgzPresenter(self)
-        if self.gameCode == "IND":
-            return IndPresenter(self)
-        if self.gameCode == "Bus":
-            return BusPresenter(self)
-        if self.gameCode == "FCM":
-            return FcmPresenter(self)
-        if self.gameCode == "RNB":
-            return RnbPresenter(self)
-        if self.gameCode == "HC":
-            return HcPresenter(self)
-        if self.gameCode == "KFW":
-            return KfwPresenter(self)
-        # Return a CannesPresenter to stop constant linting errors
-        print("Unknown game code: " + self.gameCode)
-        return CannesPresenter(self)
+        return cls(self)
 
     # This was causing a break not having this?
     def getGameCode(self):
