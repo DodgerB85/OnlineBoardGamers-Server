@@ -505,7 +505,7 @@ def _processWEBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -739,7 +739,7 @@ def _processWEBturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -753,10 +753,10 @@ def _processWEBturn(request):
             if currentGame.startingOptions
             else []
         )
-        next_players = jsonData["nextPlayer"].split(",")
+        next_players = jsonData["nextPlayer"]
         if (
-            jsonData["nextPlayer"] != ""
-            and not any(p.startswith("WEBBot") for p in next_players)
+            len(jsonData["nextPlayer"]) > 0 
+            and not any(p.startswith("WebBotot") for p in next_players)
             and 102 not in loadedStartingOptions
         ):
             playerListToNotify = next_players
