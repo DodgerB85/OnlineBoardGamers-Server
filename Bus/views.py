@@ -411,7 +411,7 @@ def _processBusTurn(request):
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        currentPlayersArr = presenter.getCurrentPlayersArray()
+        currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(currentGame.latestUpdate):
@@ -660,7 +660,7 @@ def _processBusTurn(request):
         )
 
     elif jsonData["action"] == "saveGameDataAfterKickout":
-        currentPlayersArr = presenter.getCurrentPlayersArray()
+        currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(
