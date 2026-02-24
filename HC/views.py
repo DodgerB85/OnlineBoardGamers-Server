@@ -293,14 +293,14 @@ def _processHCturn(request):
 
         presenter.updateSingleMove(nameToUse, jsonData["content"])
         moveResponse = presenter.getMoveResponse("turn0move")
-        currentPlayers = presenter.getCurrentPlayers()
-        presenter.setCurrentPlayers(currentPlayers)
+        currentPlayers = presenter.getCurrentPlayersHC()
+        presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayers)
 
         currentGame.save()
 
         if not moveResponse:
             return JsonResponse(
-                {"ready": False, "currentPlayers": presenter.getCurrentPlayers()},
+                {"ready": False, "currentPlayers": presenter.getCurrentPlayersHC()},
                 safe=False,
             )
         else:
@@ -394,8 +394,8 @@ def _processHCturn(request):
 
         # CHECK IF WE CAN ACCEPT THE AVAILABLE COMPONENTS FROM THE PLAYER
         # if the player's name is at idx 0 of currnet players in game AND in DB
-        currentPlayers = presenter.getCurrentPlayersInOrderString()
-        currentPlayersList = currentPlayers.split(",")
+        currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
+        currentPlayersList = currentPlayers
         while len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot":
             currentPlayersList.pop(0)
 
@@ -443,8 +443,8 @@ def _processHCturn(request):
         currentGame.save()
 
         # Now process as many factories as possible
-        currentPlayers = presenter.getCurrentPlayersInOrderString()
-        currentPlayersList = currentPlayers.split(",")
+        currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
+        currentPlayersList = currentPlayers
         while len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot":
             currentPlayersList.pop(0)
 
@@ -468,7 +468,7 @@ def _processHCturn(request):
                 message = (
                     f"************ Max 'i' hit in HC - gameID: {game_id} - User: {request.user.username}  "
                     f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
-                    f"--- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersInOrderString()}"
+                    f"--- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersInOrderArrHC()}"
                 )
                 SN_sendAdminErrorMessage(request, message)
             if len(currentPlayersList) == 0:
@@ -556,7 +556,7 @@ def _processHCturn(request):
             json.dumps(DBgameDataRaw)
         )
         # remove name from current players
-        presenter.setCurrentPlayers(",".join(currentPlayersList))
+        presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersList)
 
         # It is ok for currentPlayersList to be 0 length here - then the JS should go to next phase
         # if len(currentPlayersList) == 0:
@@ -595,7 +595,9 @@ def _processHCturn(request):
             {
                 "VFFFP": True,
                 "latestUpdate": currentGame.latestUpdate,
-                "currentPlayers": presenter.getCurrentPlayersInOrderString(),
+                #"currentPlayers": presenter.getCurrentPlayersInOrderArrHC(),
+                # !!!!!!!!!!!!!!!!!! Need to allow a return of 0 names to process phase !!!!!!!!!!!!!!!!!!!
+                "currentPlayers": currentPlayersList,
                 "gameData": currentGame.gameData,
             },
             safe=False,
@@ -654,7 +656,7 @@ def _processHCturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         currentGame.save()
 
@@ -669,13 +671,14 @@ def _processHCturn(request):
         else:
             # Send Notifications
             if (
-                jsonData["nextPlayer"] != ""
-                and jsonData["nextPlayer"] != "HcBot"
+                len(jsonData["nextPlayer"]) > 0 
                 and not jsonData["status"] == "FINISHED"
             ):
-                playerListToNotify = jsonData["nextPlayer"].split(",")
+                playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
+                if "HcBot" in playerListToNotify:
+                    playerListToNotify.remove("HcBot")
 
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
@@ -745,7 +748,7 @@ def _processHCturn(request):
             {
                 "loadData": currentGame.gameData,
                 # Not used at the moment, in // comment
-                "currentPlayers": presenter.getCurrentPlayers(),
+                "currentPlayers": presenter.getCurrentPlayersHC(),
                 # "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 # "specialData": specialData,
                 "latestUpdate": currentGame.latestUpdate,
@@ -849,7 +852,7 @@ def _processHCturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["data"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -858,8 +861,8 @@ def _processHCturn(request):
         currentGame.save()
 
         # Send Notifications
-        if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "HcBot":
-            playerListToNotify = jsonData["nextPlayer"].split(",")
+        if len(jsonData["nextPlayer"]) > 0 and jsonData["nextPlayer"][0] != "HcBot":
+            playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
@@ -907,7 +910,7 @@ def _processHCturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         ## WHY WAS THIS COMMENTED OUT????
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
@@ -922,13 +925,14 @@ def _processHCturn(request):
         else:
             # Send Notifications
             if (
-                jsonData["nextPlayer"] != ""
-                and jsonData["nextPlayer"] != "HcBot"
+                len(jsonData["nextPlayer"]) > 0 
                 and not jsonData["status"] == "FINISHED"
             ):
                 playerListToNotify = jsonData["nextPlayer"].split(",")
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
+                if "HcBot" in playerListToNotify:
+                    playerListToNotify.remove("HcBot")
 
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
@@ -1033,9 +1037,9 @@ def showHCgame(request, game_id):
         rewindHostHTML = ""
         rewindHostPossible = False
         currentRewindConsent = "0"
-        currentPlayers = presenter.getCurrentPlayersInOrderString()
-        if currentPlayers == "":
-           currentPlayers = presenter.getAllPlayersOrderedySeat()[0]
+        currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
+        if len(currentPlayers) == 0:
+           currentPlayers = [presenter.getAllPlayersOrderedySeat()[0]]
         statsExcludedGame = currentGame.statsExcludedGame
         displayNames = ""
 

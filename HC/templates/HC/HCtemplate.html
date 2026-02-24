@@ -339,9 +339,9 @@
     {% if now %}global.now = {{ now }};{% endif %}
 
     {% if currentPlayers %}
-    global.currentPlayers = '{{ currentPlayers }}';
+    global.currentPlayers = {{ currentPlayers | safe }};
     {% else %}
-    global.currentPlayers = '';
+    global.currentPlayers = [];
     {% endif %}
 
     //global.displayNames = 'adam,bob'

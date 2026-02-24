@@ -105,10 +105,10 @@ class GamePresenter:
         # This uses your existing logic that converts 'missing' players to strings
         playerList = self.getAllPlayersOrderedySeat(withoutBots)
         try:
-            print(f"NO PLAYER FOUND: {_username}")
+            print(f"NO PLAYER FOUND-1: {_username} gameCode: {self.gameObj.gameCode} playerList: {playerList} id: {self.gameObj.id}")
             return playerList.index(_username)
         except (ValueError, TypeError):
-            print(f"NO PLAYER FOUND: {_username}")
+            print(f"NO PLAYER FOUND-2: {_username} gameCode: {self.gameObj.gameCode} playerList: {playerList} id: {self.gameObj.id}")
             return -1
 
     def getAllPlayersOrderedySeat(self, withoutBots=False, excludeBots=False):
@@ -229,26 +229,6 @@ class GamePresenter:
             gp.is_kicked = True
             gp.save()
 
-    #This should be removed eventually
-    def setCurrentPlayers(self, player_usernames_string):
-        """Set current players from comma-separated string of usernames"""
-        if self.gameObj.gameCode == "HC":
-            self.gameObj.currentPlayersInTurnOrder = json.dumps(player_usernames_string.split(",")) if player_usernames_string else ""
-            self.gameObj.save()
-        if not player_usernames_string:
-            # Clear all current players
-            self.gameObj.players.all().update(is_current=False)
-            return
-
-        current_usernames = {name.strip() for name in player_usernames_string.split(",") if name.strip()}
-
-        game_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-
-        for gp in game_players:
-            if gp.player:
-                gp.is_current = gp.player.username in current_usernames
-                gp.save()
-
     def setCurrentPlayersFromArrInTurnOrder(self, current_players_array):
         """Set current players by updating is_current on GamePlayer instances"""
         if not current_players_array or len(current_players_array) == 0:
@@ -257,8 +237,12 @@ class GamePresenter:
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = []
             self.gameObj.save()
             return
-
-        self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
+        print(f"gameCode: {self.gameObj.gameCode} current_players_array: {current_players_array}")
+        if self.gameObj.gameCode == "RNB":
+            self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
+        elif self.gameObj.gameCode == "HC":
+            print(current_players_array)
+            self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
         self.gameObj.save()
 
         game_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
@@ -2327,20 +2311,21 @@ class HCpresenter(GamePresenter):
         allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
         return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
 
-    def getCurrentPlayersInOrderString(self):
-        """Get current players as a string (matching old currentPlayers field format)"""
+    def getCurrentPlayersInOrderArrHC(self):
+        """Get current players as an array"""
         current_players_arr = (
             json.loads(self.gameObj.currentPlayersInTurnOrder)
             if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder != ""
             else []
         )
-        return ",".join(current_players_arr) if len(current_players_arr) > 0 and current_players_arr else ""
+        #return ",".join(current_players_arr) if len(current_players_arr) > 0 and current_players_arr else ""
+        return current_players_arr 
 
     def isMyMove(self, loggedInPlayerUsername="ADFSADASDASDASDASADADA"):
-        currentPlayers = self.getCurrentPlayersInOrderString()
-        if currentPlayers == "":
+        currentPlayers = self.getCurrentPlayersInOrderArrHC()
+        if len(currentPlayers) == 0:
             return True
-        currentPlayerrsList = currentPlayers.split(",")
+        currentPlayerrsList = currentPlayers
         if self.gameObj.phase == 3 and self.hasMoveData(loggedInPlayerUsername) and loggedInPlayerUsername != currentPlayerrsList[0]:
             return False
         if (
@@ -2359,8 +2344,8 @@ class HCpresenter(GamePresenter):
         if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
             return False
 
-        currentPlayers = self.getCurrentPlayersInOrderString()
-        currentPlayerrsList = currentPlayers.split(",")
+        currentPlayers = self.getCurrentPlayersInOrderArrHC()
+        currentPlayerrsList = currentPlayers
         if self.gameObj.phase == 3 and self.hasMoveData(loggedInPlayerUsername) and loggedInPlayerUsername != currentPlayerrsList[0]:
             return False
 
@@ -2375,15 +2360,6 @@ class HCpresenter(GamePresenter):
         }
         return not currentPlayers or loggedInPlayerUsername in currentPlayers or currentPlayers in shadow_values
 
-    def getCurrentPlayersArray(self):
-        currentPlayers = self.getCurrentPlayersInOrderString()
-        if not currentPlayers:
-            return [""]
-        if "," in currentPlayers:
-            return [player.strip() for player in currentPlayers.split(",")]
-        else:
-            return [currentPlayers]
-
     def startGame(self, request):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
@@ -2397,7 +2373,7 @@ class HCpresenter(GamePresenter):
             offset = self.gameObj.playerOrderSeed % len(game_players) if game_players else 0
             game_players = game_players[offset:] + game_players[:offset]
 
-        _currentPlayers = ",".join([gp.player.username for gp in game_players if gp.player])
+        self.gameObj.currentPlayersInTurnOrder = json.dumps([gp.player.username for gp in game_players if gp.player])
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
@@ -2473,8 +2449,8 @@ class HCpresenter(GamePresenter):
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "HC", _finalPositions, _gameID, self.gameObj)
 
-    def getCurrentPlayers(self):
-        _currentPlayers = ""
+    def getCurrentPlayersHC(self):
+        _currentPlayers = []
         all_players_gps = list(self.gameObj.players.select_related("player").order_by("seat_order"))
         missing_player_ids = {gp.player.id for gp in all_players_gps if gp.player and gp.is_missing}
         for gp in all_players_gps:
@@ -2483,12 +2459,9 @@ class HCpresenter(GamePresenter):
                     pass
                 else:
                     if gp.player.id in missing_player_ids:
-                        _currentPlayers += "HcBot,"
+                        _currentPlayers.append("HcBot")
                     else:
-                        _currentPlayers += gp.player.username + ","
-        if _currentPlayers != "":
-            # Remove trailing comma
-            _currentPlayers = _currentPlayers[:-1]
+                        _currentPlayers.append(gp.player.username)
 
         return _currentPlayers
 
@@ -2755,7 +2728,7 @@ class KFWpresenter(GamePresenter):
         allPlayersL = [gp.player.username for gp in all_players_gp_sorted if gp.player]
 
         # Set current players to first player
-        self.setCurrentPlayers(allPlayersL[0])
+        self.setCurrentPlayersFromArrInTurnOrder([allPlayersL[0]])
 
         serverDataArr = json.loads(self.gameObj.KFWserverData)
         meeple_bag = serverDataArr[0]
