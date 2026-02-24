@@ -150,14 +150,14 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         "statsExcludeVotesData": json.dumps(
             currentGame.presenter().getFullSetOfVoteResults(
                 STATS_EXCLUDE_VOTE_TOPIC,
-                currentGame.presenter().getAllPlayersOrderedySeat(True),
+                currentGame.presenter().getAllPlayersOrderedySeatInArray(True),
                 False,
             )
         ),
         "deleteVotesData": json.dumps(
             currentGame.presenter().getFullSetOfVoteResults(
                 DELETE_VOTE_TOPIC,
-                currentGame.presenter().getAllPlayersOrderedySeat(True),
+                currentGame.presenter().getAllPlayersOrderedySeatInArray(True),
                 False,
             )
         ),
@@ -271,13 +271,13 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             displayNames = user_gp.notes if user_gp else ""
             if user_gp:
                 user_gp.notes = ""
                 user_gp.save()
             notes = ""
-        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
         if currentGame.startingMap != "":
             returnData.update({"startingMap": json.loads(currentGame.startingMap)})
 

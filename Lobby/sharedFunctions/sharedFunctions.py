@@ -1176,7 +1176,7 @@ def SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winne
         firsts = []
         seconds = []
         
-        finalPlayersList = _currentGame.presenter().getAllPlayersOrderedySeat(True)
+        finalPlayersList = _currentGame.presenter().getAllPlayersOrderedySeatInArray(True)
         # add BYES from next round first
         nextRoundPlayersList = list(
             tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True)

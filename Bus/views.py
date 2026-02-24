@@ -120,12 +120,12 @@ def showBusGame(request, game_id):
         "settingsDEBUG": config("BUS_USE_SOURCE_CODE", default=False, cast=bool),
         "statsExcludeVotesData": json.dumps(
             currentGame.presenter().getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
+                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeatInArray(True), False
             )
         ),
         "deleteVotesData": json.dumps(
             currentGame.presenter().getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
+                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeatInArray(True), False
             )
         ),
     }
@@ -219,7 +219,7 @@ def showBusGame(request, game_id):
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             # Get display names from player0's notes
             user_gp = currentGame.players.filter(player=request.user).first()
             if user_gp:
@@ -227,7 +227,7 @@ def showBusGame(request, game_id):
                 user_gp.notes = ""
                 user_gp.save()
             notes = ""
-        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
 
         returnData.update(
             {

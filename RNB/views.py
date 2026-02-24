@@ -113,7 +113,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
-    allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, False)
+    allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray(False, False)
     # Logged out
     returnData = {
         "gameID": gameID,
@@ -133,11 +133,11 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "statsExcludeVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
                 STATS_EXCLUDE_VOTE_TOPIC,
-                presenter.getAllPlayersOrderedySeat(True),
+                presenter.getAllPlayersOrderedySeatInArray(True),
                 False,
             )
         ),
-        "deleteVotesData": json.dumps(presenter.getFullSetOfVoteResults(DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False)),
+        "deleteVotesData": json.dumps(presenter.getFullSetOfVoteResults(DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeatInArray(True), False)),
         "settingsDebug": config("RNB_USE_SOURCE_CODE", default=False, cast=bool),
     }
 
@@ -250,13 +250,13 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # if not currentGame.gameDataBLOB:
     if not currentGame.gameData or currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             displayNames = user_gp.notes if user_gp else ""
             if user_gp:
                 user_gp.notes = ""
                 user_gp.save()
             notes = ""
-        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
+        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeatInArray())
         if currentGame.startingMap != "":
             returnData.update({"startingMap": json.loads(currentGame.startingMap)})
 
@@ -1043,7 +1043,7 @@ def _sendChatMessageRNB(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True))
         currentGame.presenter().removeChatNotification(request.user)
 
         currentGame.save()
