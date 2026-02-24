@@ -1,6 +1,7 @@
 ## TODO:
 # Simplify seatPosition once all games converted
-
+# combine all isMyMove/quickIMM 
+# Maybe unify end/start games, with flags?
 
 import base64
 import gzip
@@ -25,7 +26,7 @@ class GamePresenter:
 
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
     # - NEED TO BE UPDATED WITH EACH NEW MIGRATION TO GENERAL GAME MODEL
-    def isMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+    def isMyMove(self, loggedInPlayerUsername=None):
         current_players = self.gameObj.players.filter(is_current=True).select_related("player")
 
         if not current_players.exists():
@@ -44,11 +45,11 @@ class GamePresenter:
 
         return loggedInPlayerUsername in current_usernames or any(username in shadow_values for username in current_usernames)
 
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+    def quickIsMyMove(self, loggedInPlayerUsername=None):
         from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
-            return True
+        if not loggedInPlayerUsername:
+            return False
 
         current_players = self.gameObj.players.filter(is_current=True).select_related("player")
 
@@ -255,11 +256,11 @@ class GamePresenter:
         self.gameObj.playersPreMoveData = ""
         # FCM
         self.gameObj.FCMplayersMoveData = ""
+        # HC
+        self.gameObj.currentPlayersInTurnOrder = None # Check this doesn't crash game load if game ended
+        # RNB
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = None # Check this doesn't crash game load if game ended
         
-        # TO LOOK AT
-        # currentPlayersInTurnOrder
-        # serverCurrentPlayerNamesInTurnOrder
-
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
         """
@@ -936,13 +937,6 @@ class TGZpresenter(GamePresenter):
                 _tournamentData,
             )
 
-    def seatPosition(self, name, withoutBots=False):
-        playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
-        try:
-            return playerList.index(name)
-        except (ValueError, TypeError):
-            return -1
-
     def startGame(self, request):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
@@ -1004,6 +998,7 @@ class TGZpresenter(GamePresenter):
         """
         External tournament games are TGZ games created outside the normal tournament system.
         This is stored as a field on the game model.
+        TODO: change this to check game names. There will be no more extTgames
         """
         return self.gameObj.externalTournamentGame
 
@@ -1248,35 +1243,6 @@ class BusPresenter(GamePresenter):
                 _tournamentData,
             )
 
-    def getCurrentPlayersArray(self):
-        current_players = self.gameObj.players.filter(is_current=True).select_related("player")
-        if not current_players.exists():
-            return [""]
-        return [gp.player.username for gp in current_players if gp.player]
-
-    def getCurrentRewindConsent(self, _username):
-        # rewindConsent is stored in activeVotes under 'rewind_consent' topic
-        # Returns value at seat position
-        from Lobby.sharedFunctions.constants import REWIND_CONSENT_VOTE_TOPIC
-
-        seat = self.seatPosition(_username)
-        if seat < 0:
-            return 0
-        votes = self.gameObj.activeVotes.get(REWIND_CONSENT_VOTE_TOPIC, {}) if self.gameObj.activeVotes else {}
-        return votes.get(_username, 0)
-
-    # takes in a USERNAME
-    def seatPosition(self, name, withoutBots=False):
-        # 1. Get the list of players (this already uses the prefetch cache)
-        playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
-
-        # 2. Use 'index' to find the position.
-        # If the name isn't in the list, it will raise a ValueError.
-        try:
-            return playerList.index(name)
-        except ValueError:
-            return -1
-
     def startGame(self, request, isTournamentGame=False):
         from django_q.tasks import async_task
         from Lobby.models import GamePlayer
@@ -1293,8 +1259,6 @@ class BusPresenter(GamePresenter):
             gp.is_current = idx == 0
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
-
-        allPlayersL = self.getAllPlayersOrderedySeatInArray()
 
         if self.isTrainingGame():
             # Set the first player by seat as current
@@ -1364,9 +1328,9 @@ class RNBpresenter(GamePresenter):
         allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
         return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
 
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+    def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+        if loggedInPlayerUsername == None:
             return False
 
         currentPlayersList = self.gameObj.serverCurrentPlayerNamesInTurnOrder
@@ -2286,13 +2250,13 @@ class HCpresenter(GamePresenter):
         """Get current players as an array"""
         current_players_arr = (
             json.loads(self.gameObj.currentPlayersInTurnOrder)
-            if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder != ""
+            if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder != None and self.gameObj.currentPlayersInTurnOrder != ""
             else []
         )
         #return ",".join(current_players_arr) if len(current_players_arr) > 0 and current_players_arr else ""
         return current_players_arr 
 
-    def isMyMove(self, loggedInPlayerUsername="ADFSADASDASDASDASADADA"):
+    def isMyMove(self, loggedInPlayerUsername=None):
         currentPlayers = self.getCurrentPlayersInOrderArrHC()
         if len(currentPlayers) == 0:
             return True
@@ -2310,9 +2274,9 @@ class HCpresenter(GamePresenter):
         else:
             return False
 
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+    def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
-        if loggedInPlayerUsername == "NO_USER_LOGGED_IN":
+        if loggedInPlayerUsername == None:
             return False
 
         currentPlayersArr = self.getCurrentPlayersInOrderArrHC()
