@@ -29,6 +29,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
+from Lobby.sharedFunctions.constants import SHADOW_PLAYER_NAMES
 
 
 from Lobby.models import Game, GamePlayer, User, Profile
@@ -107,7 +108,7 @@ def createKFWgame(request):
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
-            shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
+            shadow_names = SHADOW_PLAYER_NAMES
             shadow_players = []
 
             for i in range(1, _maxPlayers):

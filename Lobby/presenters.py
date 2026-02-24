@@ -25,9 +25,10 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_latestUpdateElapsedTimeStringFromTotalSeconds,
 )
 
-from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC, BLANK_MESSAGE_TEMPLATE
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC, BLANK_MESSAGE_TEMPLATE, SHADOW_USERNAMES
 
 class GamePresenter:
+
     def __init__(self, gameObj):
         self.gameObj = gameObj
 
@@ -50,17 +51,8 @@ class GamePresenter:
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
 
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-
         return loggedInPlayerUsername in current_usernames or any(
-            username in shadow_values for username in current_usernames
+            username in SHADOW_USERNAMES for username in current_usernames
         )
 
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
@@ -79,17 +71,8 @@ class GamePresenter:
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
 
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
-
         return loggedInPlayerUsername in current_usernames or any(
-            username in shadow_values for username in current_usernames
+            username in SHADOW_USERNAMES for username in current_usernames
         )
 
     ########### END OF FUNCTIONS THAT DEPEND ON THE GAME
@@ -1444,19 +1427,10 @@ class RnbPresenter(GamePresenter):
                     print("FOUND PRESET MOVE")
                     return False
 
-        # Use a set for faster membership testing
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
         return (
             not currentPlayersList
             or loggedInPlayerUsername in currentPlayersList
-            or  currentPlayersList[0] in shadow_values
+            or currentPlayersList[0] in SHADOW_USERNAMES
         )
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
@@ -2510,19 +2484,10 @@ class HcPresenter(GamePresenter):
         ):
             return False
 
-        # Use a set for faster membership testing
-        shadow_values = {
-            "SHADOW",
-            "SHADOW_2",
-            "SHADOW_3",
-            "SHADOW_4",
-            "SHADOW_5",
-            "FcmAI",
-        }
         return (
             not currentPlayers
             or loggedInPlayerUsername in currentPlayers
-            or currentPlayers in shadow_values
+            or currentPlayers in SHADOW_USERNAMES
         )
 
     def getCurrentPlayersArray(self):
