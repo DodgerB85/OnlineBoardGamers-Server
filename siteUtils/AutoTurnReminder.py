@@ -67,7 +67,6 @@ for gameCode in GAME_CODES:
 
     allGames = Game.objects.filter(query).all()
     for singleGame in allGames:
-        # print(singleGame.id)
         timeRemaining = singleGame.presenter().getSecondsToNextKickout()
         if timeRemaining >= remaining_start_time and timeRemaining <= remaining_finish_time:
             print(f"{gameCode}: 2hr: {singleGame.id}")
