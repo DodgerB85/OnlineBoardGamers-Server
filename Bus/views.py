@@ -29,6 +29,7 @@ from Lobby.models import User, Profile, Game, GamePlayer
 from .common import create_bus_game
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+from Lobby.gameViewHelpers import build_show_game_data
 
 
 from Lobby.sharedFunctions.sharedFunctions import (
@@ -72,151 +73,30 @@ def createBusGame(request):
     return create_bus_game(request)
 
 def showBusGame(request, game_id):
-    try:
-        currentGame = (
-            Game.objects.select_related(
-                "host",
-                # "relatedBusTournament",
-                "creator",
-            )
-            .prefetch_related("players__player", "invitedPlayers")
-            .get(id=game_id, gameCode="Bus")
-        )
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "Bus",
+        default_zoom=120, settings_debug_key="BUS_USE_SOURCE_CODE")
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
-    presenter = cast("BusPresenter", currentGame.presenter())
+    currentGame = result["game"]
+    presenter = result["presenter"]
+    user_gp = result["user_gp"]
 
-    if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
+    returnData = {**result["base_data"]}
+    # Bus uses settingsDEBUG (uppercase) as template key
+    returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
 
-    # Access the prefetch cache immediately to "warm" it
-    all_player_gps = list(currentGame.players.exclude(is_kicked=True))
-    all_player_ids = {gp.player.id for gp in all_player_gps if gp.player}
-    userObj = request.user
-    username = userObj.username
-
-    # Now it is a proper started game, so set up for not logged in
-    gameID = currentGame.id
-    gameName = presenter.getGameName()
-    gameData = currentGame.gameData
-    gameCreationTimestamp = currentGame.created
-
-    KickoutFlexiDataArray = []
-    if currentGame.kickoutFlexiData:
-        KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
-
-    startingOptions = (
-        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    )
-
-    returnData = {
-        "gameID": gameID,
-        "gameName": gameName,
-        "gameData": gameData,
-        "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 120,
-        "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "startingOptions": startingOptions,
-        "settingsDEBUG": config("BUS_USE_SOURCE_CODE", default=False, cast=bool),
-        "statsExcludeVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
-            )
-        ),
-        "deleteVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
-            )
-        ),
-    }
-
-    if not request.user.is_authenticated:
+    if not result["is_authenticated"]:
         return render(request, "Bus/showBusGame.html", returnData)
 
-    # Now you are logged in
-    user_id = userObj.id
+    returnData.update(result["auth_data"])
+    returnData["preferredBusBoard"] = result["user_profile"].preferredBusBoard
 
-    user_profile = Profile.objects.get(user=userObj)
-
-    # Find user's GamePlayer record
-    user_gp = None
-    for gp in all_player_gps:
-        if gp.player and gp.player.id == user_id:
-            user_gp = gp
-            break
-
-    is_in_all = user_id in all_player_ids
-    is_missing = user_gp.is_missing if user_gp else False
-    involvedPlayer = is_in_all and not is_missing
-    if username == "BotKickStarter":
-        involvedPlayer = True
-
-    chatData = currentGame.chatData
-
-    ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={presenter.getGameCode()}"
-
-    # Get Chat notification
-    chatNotification = False
-    if user_gp and user_gp.has_chat_notification:
-        chatNotification = True
-        user_gp.has_chat_notification = False
-        user_gp.save()
-
-    returnData.update(
-        {
-            "name": username,
-            "chatData": chatData,
-            "preferredBusBoard": user_profile.preferredBusBoard,
-            "nextURL": nextURL,
-            "chatNotification": chatNotification,
-        }
-    )
-
-    if not involvedPlayer:
+    if not result["is_involved"]:
         return render(request, "Bus/showBusGame.html", returnData)
 
-    pov = presenter.seatPosition(request.user.username)
-    if request.user.username == "BotKickStarter":
-        pov = -1
-    latestUpdate = currentGame.latestUpdate
-    secondsToNextKickout = presenter.getSecondsToNextKickout()
-
-    kickoutRequired = presenter.kickoutRequired()
-
-    myMove = presenter.isMyMove(request.user.username)
-
-    # Get the Notes for the user from GamePlayer
-    notes = ""
-    if user_gp:
-        notes = user_gp.notes or ""
-
-    liveNotification = user_profile.liveNotification
-
-    myZoomLevel = (
-        json.loads(currentGame.zoomLevels)[pov]
-        if pov >= 0 and pov < len(json.loads(currentGame.zoomLevels))
-        else 120
-    )
-
-    # Involved Player
-    returnData.update(
-        {
-            "involvedPlayer": True,
-            "pov": pov,
-            "latestUpdateLiteral": latestUpdate,
-            "secondsToNextKickout": secondsToNextKickout,
-            "kickoutRequired": kickoutRequired,
-            "myMove": myMove,
-            "myZoomLevel": myZoomLevel,
-            "notes": notes,
-            "chatNotification": chatNotification,
-            "yourTurnAudioType": liveNotification,
-            "preferredBusColour": user_profile.preferredBusColour,
-        }
-    )
+    returnData.update(result["involved_data"])
+    returnData["preferredBusColour"] = result["user_profile"].preferredBusColour
 
     ## NEW GAME
     if currentGame.gameData == "":
@@ -228,12 +108,11 @@ def showBusGame(request, game_id):
                 displayNames = user_gp.notes
                 user_gp.notes = ""
                 user_gp.save()
-            notes = ""
+            returnData["notes"] = ""
         allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
 
         returnData.update(
             {
-                "notes": notes,
                 "displayNames": displayNames,
                 "allPlayerListBySeat": allPlayerListBySeat,
             }

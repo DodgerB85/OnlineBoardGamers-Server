@@ -34,6 +34,7 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 from Lobby.models import User, Profile, Game, GamePlayer
 
 from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC, SHADOW_PLAYER_NAMES
+from Lobby.gameViewHelpers import build_show_game_data
 
 if TYPE_CHECKING:
     from Lobby.presenters import IndPresenter
@@ -233,217 +234,82 @@ def createINDgame(request):
 
 
 def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    try:
-        currentGame = (
-            Game.objects.select_related("host", "creator")
-            .prefetch_related("players__player", "invitedPlayers")
-            .get(id=game_id, gameCode="IND")
-        )
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "IND",
+        default_zoom=0, settings_debug_key="IND_USE_SOURCE_CODE")
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
+    currentGame = result["game"]
     presenter = cast("IndPresenter", currentGame.presenter())
-
-    if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
-
-    # Access the prefetch cache immediately to "warm" it
-    all_game_players = currentGame.players.exclude(is_kicked=True).all()
-    all_player_ids = {gp.player.id for gp in all_game_players if gp.player}
+    user_gp = result["user_gp"]
+    username = request.user.username
     userObj = request.user
-    username = userObj.username
 
-    # start_time = time.time()
-    # show_timestamps = username in ["admin", "DodgerB"]
-
-    # def print_timestamp(label):
-    #    if show_timestamps:
-    #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
-
-    # No2 it is a proper started game, so set up for not logged in
-    gameID = currentGame.id
-    gameName = presenter.getGameName()
-    gameData = currentGame.gameData
-    gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = (
-        json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    )
-    startingOptions = (
-        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    )
-
-    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat(False))
-
-    # Logged out
-    returnData = {
-        "gameID": gameID,
-        "gameName": gameName,
-        "gameData": gameData,
-        "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 0,
+    returnData = {**result["base_data"]}
+    returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
+    returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "startingOptions": startingOptions,
-        "allPlayerListBySeat": allPlayerListBySeat,
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
         "currentPlayers": presenter.getCurrentPlayersString(True),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredINDoptions": [-1, 0, 0, 1, 1, 1],
         "pov": -99,
         "preMoves": "",
         "sideData": "",
-        "settingsDEBUG": config("IND_USE_SOURCE_CODE", default=False, cast=bool),
-        "statsExcludeVotesData": json.dumps(
-            presenter.getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
-            )
-        ),
-        "deleteVotesData": json.dumps(
-            presenter.getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False
-            )
-        ),
-    }
+    })
 
-    # print_timestamp("returnData 1")
-
-    if not request.user.is_authenticated:
+    if not result["is_authenticated"]:
         return render(request, "IND/showINDgame.html", returnData)
 
-    # Now you are logged in
-    user_id = userObj.id
-
-    user_profile = Profile.objects.get(user=userObj)
-    missing_player_ids = {
-        gp.player.id for gp in currentGame.players.filter(is_missing=True) if gp.player
-    }
-    chat_notify_ids = {
-        gp.player.id
-        for gp in currentGame.players.filter(has_chat_notification=True)
-        if gp.player
-    }
-
-    is_in_all = user_id in all_player_ids
-    is_missing = user_id in missing_player_ids
-    involvedPlayer = is_in_all and not is_missing
-    if username == "BotKickStarter":
-        involvedPlayer = True
-
-    chatData = currentGame.chatData
-
-    latestUpdate = currentGame.latestUpdate
-
-    ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={presenter.getGameCode()}"
-
-    # print_timestamp("nextURL")
+    returnData.update(result["auth_data"])
+    returnData["pov"] = -9
 
     preferredINDoptions = (
-        json.loads(user_profile.preferredINDoptions)
-        if user_profile.preferredINDoptions != ""
+        json.loads(result["user_profile"].preferredINDoptions)
+        if result["user_profile"].preferredINDoptions != ""
         else [-1, 0, 0, 1, 1, 1]
     )
-
     if len(preferredINDoptions) < 6:
         preferredINDoptions.extend([1] * (6 - len(preferredINDoptions)))
-    # preferredINDoptions
-    # colour, map, citySizeColour, outline
+    returnData["preferredINDoptions"] = preferredINDoptions
 
-    # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
-    ## Get Chat notification
-    chatNotification = False
-    if user_id in chat_notify_ids:
-        chatNotification = True
-        user_gp = currentGame.players.filter(player=request.user).first()
-        if user_gp:
-            user_gp.has_chat_notification = False
-            user_gp.save()
-
-    returnData.update(
-        {
-            "name": username,
-            "chatData": chatData,
-            "latestUpdateLiteral": latestUpdate,
-            "nextURL": nextURL,
-            "preferredINDoptions": preferredINDoptions,
-            "chatNotification": chatNotification,
-            "pov": -9,
-        }
-    )
-
-    # print_timestamp("returnData 2")
-
-    if not involvedPlayer:
+    if not result["is_involved"]:
         return render(request, "IND/showINDgame.html", returnData)
 
-    pov = presenter.seatPosition(username)
-    if request.user.username == "BotKickStarter":
-        pov = -1
-    secondsToNextKickout = presenter.getSecondsToNextKickout()
+    returnData.update(result["involved_data"])
 
-    kickoutRequired = presenter.kickoutRequired()
+    pov = result["pov"]
 
-    myMove = presenter.isMyMove(username)
-
-    ## Get the Notes for the user
+    # IND: only get notes if pov >= 0
     notes = ""
     if pov >= 0:
-        user_gp = currentGame.players.filter(player=userObj).first()
         if user_gp:
             notes = user_gp.notes
+    returnData["notes"] = notes
 
-    # print_timestamp("notes")
+    # IND: zoom fallback to 100 when pov < 0
+    if pov < 0:
+        returnData["myZoomLevel"] = 100
 
-    liveNotification = user_profile.liveNotification
-    myZoomLevel = 100
-    if pov >= 0:
-        myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
-
-    isHost = False
-    if currentGame.host == userObj:
-        isHost = True
-
-    # print_timestamp("returnData 3")
-
-    ## Involved Player
-    returnData.update(
-        {
-            "involvedPlayer": True,
-            "pov": pov,
-            "secondsToNextKickout": secondsToNextKickout,
-            "kickoutRequired": kickoutRequired,
-            "myMove": myMove,
-            "myZoomLevel": myZoomLevel,
-            "notes": notes,
-            "yourTurnAudioType": liveNotification,
-            "statsExcludedGame": currentGame.statsExcludedGame,
-            "isHost": isHost,
-            "preMoves": presenter.getCompressedPreMoveArr(request.user.username),
-            "sideData": presenter.getAllPreMoveDataCompressed(),
-        }
-    )
+    returnData.update({
+        "isHost": currentGame.host == userObj,
+        "preMoves": presenter.getCompressedPreMoveArr(username),
+        "sideData": presenter.getAllPreMoveDataCompressed(),
+    })
 
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeat():
-            # For shadow games, display names are stored in the first player's notes
             user_gp = currentGame.players.filter(player=userObj).first()
             if user_gp and user_gp.notes:
                 displayNames = user_gp.notes
                 user_gp.notes = ""
                 user_gp.save()
-                notes = ""
-        # allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+                returnData["notes"] = ""
 
-        returnData.update(
-            {
-                "notes": notes,
-                "displayNames": displayNames,
-                # "allPlayerListBySeat": allPlayerListBySeat,
-            }
-        )
+        returnData["displayNames"] = displayNames
 
     return render(request, "IND/showINDgame.html", returnData)
 
