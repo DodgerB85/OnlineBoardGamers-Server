@@ -33,7 +33,7 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 from Lobby.models import User, Profile, Game, GamePlayer
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, SHADOW_PLAYER_NAMES
-from Lobby.gameViewHelpers import build_show_game_data
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:
     from Lobby.presenters import WebPresenter 
@@ -763,34 +763,8 @@ def WEBdata(request, dataType=1):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode='WEB')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    extraInfo = "Options: " + currentGame.startingOptions
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request,
-        "WEB",
-        gameID,
-        gameData,
-        bugDescription,
-        currentGame.rewindData,
-        extraInfo,
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "WEB",
+        extra_info_fn=lambda g: "Options: " + g.startingOptions)
 
 
 @login_required()
@@ -845,85 +819,18 @@ def _sendChatMessage(request):
 
 @login_required()
 def saveNotesWEB(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
+    return shared_save_notes(request, "WEB")
 
-    jsonData = json.loads(request.body)
-    game_id = jsonData["gameID"]
-    notes = jsonData["notes"]
-    try:
-        currentGame = Game.objects.get(id=game_id, gameCode='WEB')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    # This directly saves the notes
-    currentGame.players.filter(player=request.user).update(notes=notes)
-
-    return JsonResponse({"notePosted": True})
 
 @login_required
 def saveZoom(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    if jsonData["action"] == "zoom":
-        try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='WEB')
-        except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-        zoomLevels = json.loads(currentGame.zoomLevels)
-
-        if jsonData.get("allPlayers"):
-            for i in range(len(zoomLevels)):
-                zoomLevels[i] = int(jsonData["zoomLevel"])
-        else:
-            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
-
-        currentGame.zoomLevels = json.dumps(zoomLevels)
-        currentGame.save()
-        return JsonResponse(
-            {
-                "response": "ok",
-            }
-        )
-
-    return HttpResponse(status=204)  # No Content
+    return shared_save_zoom(request, "WEB")
 
 
 @login_required()
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _castVote(request)
-
-
-@login_required
-def _castVote(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"])
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    # Delegate all logic to the presenter
-    result = currentGame.presenter().processVoteLogic(
-        topic=jsonData["topic"],
-        username=request.user.username,
-        choice=True,
-    ) 
-
-    # If an action occurred that requires a user message, add it here
-    msg = result.get("message")
-    if isinstance(msg, str):  # This clarifies the type for the type checker
-        messages.success(request, msg)
-        
-    return JsonResponse(result)
+    with db_mutex(str(jsonData["gameID"])):
+        return shared_cast_vote(request)

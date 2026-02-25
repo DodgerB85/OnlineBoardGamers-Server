@@ -32,7 +32,7 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 from Lobby.sharedFunctions.constants import SHADOW_PLAYER_NAMES
 
 from Lobby.models import Game, GamePlayer, User, Profile
-from Lobby.gameViewHelpers import build_show_game_data
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry
 
 if TYPE_CHECKING:
     from Lobby.presenters import KfwPresenter 
@@ -989,35 +989,11 @@ def KFWdata(request, data_type=1):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode='KFW')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    extraInfo = (
-        "Options: "
-        + currentGame.startingOptions
-        + "ServerData: "
-        + currentGame.KFWserverData
-        + "  PlayersHiddenData: "
-        + currentGame.KFWplayersHiddenData
-        + "  PlayersMoveData: "
-        + currentGame.KFWplayersMoveData
-    )
-
-    # email data to myself
-    SN_sendBugReportEmail(request, "KFW", gameID, gameData, bugDescription, currentGame.rewindData, extraInfo)
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "KFW", extra_info_fn=lambda g:
+        "Options: " + g.startingOptions
+        + "ServerData: " + g.KFWserverData
+        + "  PlayersHiddenData: " + g.KFWplayersHiddenData
+        + "  PlayersMoveData: " + g.KFWplayersMoveData)
 
 
 @login_required()
@@ -1070,51 +1046,9 @@ def _sendChatMessage(request):
 
 @login_required()
 def saveNotes(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    game_id = jsonData["gameID"]
-    notes = jsonData["notes"]
-    try:
-        currentGame = Game.objects.get(id=game_id, gameCode='KFW')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    player_gp = currentGame.players.filter(player=request.user).first()
-    if player_gp:
-        player_gp.notes = notes
-        player_gp.save()
-
-    return JsonResponse({"notePosted": True})
+    return shared_save_notes(request, "KFW")
 
 
 @login_required
 def saveZoom(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    if jsonData["action"] == "zoom":
-        try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='KFW')
-        except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-        zoomLevels = json.loads(currentGame.zoomLevels)
-
-        if jsonData.get("allPlayers"):
-            for i in range(len(zoomLevels)):
-                zoomLevels[i] = int(jsonData["zoomLevel"])
-        else:
-            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
-
-        currentGame.zoomLevels = json.dumps(zoomLevels)
-        currentGame.save()
-        return JsonResponse(
-            {
-                "response": "ok",
-            }
-        )
-
-    return HttpResponse(status=204)  # No Content
+    return shared_save_zoom(request, "KFW")
