@@ -31,7 +31,7 @@ from Lobby.sharedFunctions.constants import (
     DELETE_VOTE_TOPIC,
     REWIND_CONSENT_VOTE_TOPIC,
 )
-from Lobby.gameViewHelpers import build_show_game_data
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
@@ -1126,27 +1126,7 @@ def showHCgame(request, game_id):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode="HC")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request, "HC", gameID, gameData, bugDescription, currentGame.rewindData, ""
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "HC")
 
 
 def HChelp(request):
@@ -1245,111 +1225,15 @@ def chat(request):
 
 @login_required()
 def notes(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    user_gp = currentGame.players.filter(player=request.user).first()
-    if user_gp:
-        user_gp.notes = jsonData["note"]
-        user_gp.save()
-
-    return JsonResponse({"notePosted": True})
+    return shared_save_notes(request, "HC", json_key="note")
 
 
 @login_required()
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _castVote(request)
-
-
-# ALTER THIS ONCE FCM IS A GENERAL GAME -- COMPARE WITH EG CNS _CASEVOTE
-@login_required
-def _castVote(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    presenter = cast('HcPresenter', currentGame.presenter())
-
-    # player = request.user  # Assuming the logged-in user is voting
-    playerName = request.user.username  # Get the player's username
-    topic = jsonData["topic"]
-    choice = jsonData["choice"]
-
-    success = presenter.castVote(
-        topic, playerName, choice
-    )  # Pass playerName to addDeleteVote
-
-    if success:
-        currentGame.save()
-        # Check if all players have voted to delete
-        all_voted = True
-        votesData = presenter.getFullSetOfVoteResults(
-            topic, presenter.getAllPlayersOrderedySeat(True), False
-        )
-
-        missingPlayers = presenter.getMissingPlayersNamesArray()
-        for player, vote in votesData.items():
-            if not vote and player not in missingPlayers:
-                all_voted = False
-                break
-
-        if all_voted:
-            votesData = json.dumps(
-                presenter.getFullSetOfVoteResults(
-                    topic, presenter.getAllPlayersOrderedySeat(True), False
-                )
-            )
-            # Delete the game
-            if topic == DELETE_VOTE_TOPIC:
-                currentGame.delete()
-                # Add a success message
-                messages.success(request, gettext("Game successfully deleted"))
-
-            if topic == STATS_EXCLUDE_VOTE_TOPIC:
-                currentGame.statsExcludedGame = True
-                currentGame.save()
-                # Add a success message
-                messages.success(request, gettext("Game stats excluded"))
-
-            # Redirect to the index page
-            return JsonResponse(
-                {
-                    "voteChanged": True,
-                    "votesData": votesData,
-                    "redirect_url": reverse("index"),
-                }
-            )
-
-        return JsonResponse(
-            {
-                "voteChanged": True,
-                "votesData": json.dumps(
-                    presenter.getFullSetOfVoteResults(
-                        topic, presenter.getAllPlayersOrderedySeat(True), False
-                    )
-                ),
-            },
-            safe=False,
-        )
-
-    return JsonResponse({"voteChanged": False})
+    with db_mutex(str(jsonData["gameID"])):
+        return shared_cast_vote(request)
 
 

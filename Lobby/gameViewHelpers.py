@@ -2,12 +2,13 @@ import json
 
 from decouple import config
 from django.contrib import messages
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext
 
 from Lobby.models import Profile, Game
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+from Lobby.sharedFunctions.sharedNotifications import SN_sendBugReportEmail
 
 
 def build_show_game_data(request, game_id, game_code, *,
@@ -204,3 +205,90 @@ def build_show_game_data(request, game_id, game_code, *,
         "auth_data": auth_data,
         "involved_data": involved_data,
     }
+
+
+def shared_save_zoom(request, game_code):
+    if request.method != "PUT":
+        return JsonResponse({"error": "Wrong request."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    if jsonData["action"] == "zoom":
+        try:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=game_code)
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist"))
+        zoomLevels = json.loads(currentGame.zoomLevels)
+
+        if jsonData.get("allPlayers"):
+            for i in range(len(zoomLevels)):
+                zoomLevels[i] = int(jsonData["zoomLevel"])
+        else:
+            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
+
+        currentGame.zoomLevels = json.dumps(zoomLevels)
+        currentGame.save()
+        return JsonResponse({"response": "ok"})
+
+    return HttpResponse(status=204)
+
+
+def shared_save_notes(request, game_code, json_key="notes"):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    try:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=game_code)
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+    user_gp = currentGame.players.filter(player=request.user).first()
+    if user_gp:
+        user_gp.notes = jsonData[json_key]
+        user_gp.save()
+
+    return JsonResponse({"notePosted": True})
+
+
+def shared_bug_entry(request, game_code, extra_info_fn=None):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    gameID = jsonData["gameID"]
+
+    try:
+        currentGame = Game.objects.get(id=gameID, gameCode=game_code)
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+    extra_info = extra_info_fn(currentGame) if extra_info_fn else ""
+
+    SN_sendBugReportEmail(
+        request, game_code, gameID, jsonData["gameData"], jsonData["description"],
+        currentGame.rewindData, extra_info,
+    )
+
+    return JsonResponse({"bugEntrySuccess": True})
+
+
+def shared_cast_vote(request):
+    jsonData = json.loads(request.body)
+
+    try:
+        currentGame = Game.objects.get(id=jsonData["gameID"])
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+
+    result = currentGame.presenter().processVoteLogic(
+        topic=jsonData["topic"],
+        username=request.user.username,
+        choice=jsonData.get("choice", True),
+    )
+
+    msg = result.get("message")
+    if isinstance(msg, str):
+        messages.success(request, msg)
+
+    return JsonResponse(result)

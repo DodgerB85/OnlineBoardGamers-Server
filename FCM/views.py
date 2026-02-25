@@ -46,7 +46,7 @@ from Lobby.sharedFunctions.constants import (
     DELETE_VOTE_TOPIC,
     REWIND_CONSENT_VOTE_TOPIC,
 )
-from Lobby.gameViewHelpers import build_show_game_data
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:
     from Lobby.presenters import FcmPresenter 
@@ -1689,34 +1689,8 @@ def _processTurn(request):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode='FCM')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    bug_info = f"{currentGame.startingMap}   Options: {json.loads(currentGame.startingOptions) if currentGame.startingOptions else ""}"
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request,
-        "FCM",
-        gameID,
-        gameData,
-        bugDescription,
-        currentGame.rewindData,
-        f"{currentGame.startingMap} Options: {currentGame.startingOptions if currentGame.startingOptions else ''}",
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "FCM", extra_info_fn=lambda g:
+        f"{g.startingMap} Options: {g.startingOptions if g.startingOptions else ''}")
 
 
 @login_required()
@@ -1772,22 +1746,7 @@ def _sendChatMessage(request):
 
 @login_required()
 def notes(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    player_gp = currentGame.players.filter(player=request.user).first()
-    if player_gp:
-        player_gp.notes = jsonData["note"]
-        player_gp.save()
-
-    return JsonResponse({"notePosted": True})
+    return shared_save_notes(request, "FCM", json_key="note")
 
 
 @login_required
@@ -1968,87 +1927,6 @@ def FCMdata(request, dataType):
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _castVote(request)
-
-
-# ALTER THIS ONCE FCM IS A GENERAL GAME -- COMPARE WITH EG CNS _CASEVOTE
-@login_required
-def _castVote(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='FCM')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    presenter = cast('FcmPresenter', currentGame.presenter())
-
-    # player = request.user  # Assuming the logged-in user is voting
-    playerName = request.user.username  # Get the player's username
-    topic = jsonData["topic"]
-    choice = jsonData["choice"]
-
-    success = presenter.castVote(
-        topic, playerName, choice
-    )  # Pass playerName to addDeleteVote
-
-    if success:
-        currentGame.save()
-        # Check if all players have voted to delete
-        all_voted = True
-        votesData = presenter.getFullSetOfVoteResults(
-            topic, presenter.getAllPlayersOrderedySeat(True), False
-        )
-
-        missingPlayers = presenter.getMissingPlayersNamesArray()
-        for player, vote in votesData.items():
-            if not vote and player not in missingPlayers:
-                all_voted = False
-                break
-
-        if all_voted:
-            votesData = json.dumps(
-                presenter.getFullSetOfVoteResults(
-                    topic, presenter.getAllPlayersOrderedySeat(True), False
-                )
-            )
-            # Delete the game
-            if topic == DELETE_VOTE_TOPIC:
-                currentGame.delete()
-                # Add a success message
-                messages.success(request, gettext("Game successfully deleted"))
-
-            if topic == STATS_EXCLUDE_VOTE_TOPIC:
-                currentGame.statsExcludedGame = True
-                currentGame.save()
-                # Add a success message
-                messages.success(request, gettext("Game stats excluded"))
-
-            # Redirect to the index page
-            return JsonResponse(
-                {
-                    "voteChanged": True,
-                    "votesData": votesData,
-                    "redirect_url": reverse("index"),
-                }
-            )
-
-        return JsonResponse(
-            {
-                "voteChanged": True,
-                "votesData": json.dumps(
-                    presenter.getFullSetOfVoteResults(
-                        topic, presenter.getAllPlayersOrderedySeat(True), False
-                    )
-                ),
-            },
-            safe=False,
-        )
-
-    return JsonResponse({"voteChanged": False})
+    with db_mutex(str(jsonData["gameID"])):
+        return shared_cast_vote(request)

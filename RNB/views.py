@@ -35,7 +35,7 @@ from .common import create_rnb_game
 from Lobby.models import User, Profile, Game
 
 from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
-from Lobby.gameViewHelpers import build_show_game_data
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
@@ -921,84 +921,18 @@ def _sendChatMessageRNB(request):
 
 @login_required()
 def bugEntryRNB(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode="RNB")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    extraInfo = "Options: " + currentGame.startingOptions
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request,
-        "RNB",
-        gameID,
-        gameData,
-        bugDescription,
-        currentGame.rewindData,
-        extraInfo,
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "RNB",
+        extra_info_fn=lambda g: "Options: " + g.startingOptions)
 
 
 @login_required()
 def saveNotesRNB(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    game_id = jsonData["gameID"]
-    notes = jsonData["notes"]
-    try:
-        currentGame = Game.objects.get(id=game_id, gameCode="RNB")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    # This directly saves the notes
-    currentGame.players.filter(player=request.user).update(notes=notes)
-
-    return JsonResponse({"notePosted": True})
+    return shared_save_notes(request, "RNB")
 
 
 @login_required
 def saveZoomRNB(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    if jsonData["action"] == "zoom":
-        try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="RNB")
-        except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-        zoomLevels = json.loads(currentGame.zoomLevels)
-
-        if jsonData.get("allPlayers"):
-            for i in range(len(zoomLevels)):
-                zoomLevels[i] = int(jsonData["zoomLevel"])
-        else:
-            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
-
-        currentGame.zoomLevels = json.dumps(zoomLevels)
-        currentGame.save()
-        return JsonResponse(
-            {
-                "response": "ok",
-            }
-        )
-
-    return HttpResponse(status=204)  # No Content
+    return shared_save_zoom(request, "RNB")
 
 
 @login_required()

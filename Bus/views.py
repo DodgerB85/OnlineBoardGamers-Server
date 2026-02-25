@@ -29,7 +29,7 @@ from Lobby.models import User, Profile, Game, GamePlayer
 from .common import create_bus_game
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
-from Lobby.gameViewHelpers import build_show_game_data
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 
 from Lobby.sharedFunctions.sharedFunctions import (
@@ -123,26 +123,7 @@ def showBusGame(request, game_id):
 
 @login_required()
 def saveNotes(request, game_id=None):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    presenter = cast("BusPresenter", currentGame.presenter())
-    seat = presenter.seatPosition(request.user.username)
-
-    if seat >= 0:
-        gp = currentGame.players.filter(seat_order=seat).first()
-        if gp:
-            gp.notes = jsonData["notes"]
-            gp.save()
-
-    return JsonResponse({"notePosted": True})
+    return shared_save_notes(request, "Bus")
 
 
 @login_required
@@ -630,60 +611,13 @@ def changeBusViewport(request):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode="Bus")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request, "Bus", gameID, gameData, bugDescription, currentGame.rewindData, ""
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "Bus")
 
 
 @login_required()
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _castVote(request)
-
-
-@login_required
-def _castVote(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"])
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    # Delegate all logic to the presenter
-    result = currentGame.presenter().processVoteLogic(
-        topic=jsonData["topic"],
-        username=request.user.username,
-        choice=True,
-    )
-
-    # If an action occurred that requires a user message, add it here
-    msg = result.get("message")
-    if isinstance(msg, str):  # This clarifies the type for the type checker
-        messages.success(request, msg)
-
-    return JsonResponse(result)
+    with db_mutex(str(jsonData["gameID"])):
+        return shared_cast_vote(request)
