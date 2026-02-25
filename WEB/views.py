@@ -33,6 +33,7 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 from Lobby.models import User, Profile, Game, GamePlayer
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, SHADOW_PLAYER_NAMES
+from Lobby.gameViewHelpers import build_show_game_data
 
 if TYPE_CHECKING:
     from Lobby.presenters import WebPresenter 
@@ -195,181 +196,65 @@ def createWEBgame(request):
 
 
 def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    try:
-        currentGame = (
-            Game.objects.select_related(
-                "host",
-                "creator",
-            )
-            .prefetch_related(
-                "players__player",
-                "invitedPlayers"
-            )
-            .get(id=game_id, gameCode='WEB')
-        )
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "WEB",
+        default_zoom=0, settings_debug_key="WEB_USE_SOURCE_CODE")
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
-    presenter = currentGame.presenter()
+    currentGame = result["game"]
+    presenter = result["presenter"]
+    all_players = result["all_players"]
+    user_gp = result["user_gp"]
 
-    if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
-
-    # Access the prefetch cache immediately to "warm" it
-    all_players = currentGame.players.exclude(is_kicked=True)
-    all_player_ids = {gp.player.id for gp in all_players if gp.player}
-    userObj = request.user
-    username = userObj.username
-
-    gameID = currentGame.id
-    gameName = presenter.getGameName()
-    gameData = currentGame.gameData
-    gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = (
-        json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    )
-    startingOptions = (
-        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    )
-
-    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat(False))
-
-    # Logged out
-    returnData = {
-        "gameID": gameID,
-        "gameName": gameName,
-        "gameData": gameData,
-        "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 0,
+    returnData = {**result["base_data"]}
+    returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
+    returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "startingOptions": startingOptions,
-        "allPlayerListBySeat": allPlayerListBySeat,
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
         "currentPlayers": ", ".join(presenter.getCurrentPlayersArray()),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredWEBoptions": [-1],
         "pov": -99,
         "turn": currentGame.turn,
-        "statsExcludeVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
-            )
-        ),
-        "deleteVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeat(True), False
-            )
-        ),
-        
-        "settingsDEBUG": config("WEB_USE_SOURCE_CODE", default=False, cast=bool),
-    }
+    })
 
-    if not request.user.is_authenticated:
+    if not result["is_authenticated"]:
         return render(request, "WEB/showWEBgame.html", returnData)
 
-    # Now you are logged in
-    user_id = userObj.id
-
-    user_profile = Profile.objects.get(user=userObj)
-    missing_player_ids = {gp.player.id for gp in all_players if gp.player and gp.is_missing}
-    chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
-
-    is_in_all = user_id in all_player_ids
-    is_missing = user_id in missing_player_ids
-    involvedPlayer = is_in_all and not is_missing
-    if username == "BotKickStarter":
-        involvedPlayer = True
-
-    chatData = currentGame.chatData
-
-    latestUpdate = currentGame.latestUpdate
-
-    ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={presenter.getGameCode()}"
-
-    # Get Chat notification
-    chatNotification = False
-    if user_id in chat_notify_ids:
-        chatNotification = True
-        user_gp = all_players.filter(player=userObj).first()
-        if user_gp:
-            user_gp.has_chat_notification = False
-            user_gp.save()
-
+    returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    returnData.update(
-        {
-            "name": username,
-            "chatData": chatData,
-            "latestUpdateLiteral": latestUpdate,
-            "nextURL": nextURL,
-            "chatNotification": chatNotification,
-        }
-    )
-
-    if not involvedPlayer:
+    if not result["is_involved"]:
         return render(request, "WEB/showWEBgame.html", returnData)
 
-    pov = presenter.seatPosition(request.user.username)
-    if request.user.username == "BotKickStarter":
-        pov = -1
-    secondsToNextKickout = presenter.getSecondsToNextKickout()
-
-    kickoutRequired = presenter.kickoutRequired()
-
-    myMove = presenter.isMyMove(request.user.username)
-
-    ## Get the Notes for the user
-    seat_position = presenter.seatPosition(request.user.username)
-    user_gp = all_players.filter(player=userObj).first()
-    notes = user_gp.notes if user_gp else ""
-
-    liveNotification = user_profile.liveNotification
-    myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
-
-    ## Involved Player
-    returnData["pov"] = pov
+    returnData.update(result["involved_data"])
 
     preferredWEBoptions = (
-        json.loads(user_profile.preferredWEBoptions)
-        if user_profile.preferredWEBoptions != ""
+        json.loads(result["user_profile"].preferredWEBoptions)
+        if result["user_profile"].preferredWEBoptions != ""
         else [-1]
     )
-
-    returnData.update(
-        {
-            "involvedPlayer": True,
-            "secondsToNextKickout": secondsToNextKickout,
-            "kickoutRequired": kickoutRequired,
-            "myMove": myMove,
-            "myZoomLevel": myZoomLevel,
-            "notes": notes,
-            "yourTurnAudioType": liveNotification,
-            "statsExcludedGame": currentGame.statsExcludedGame,
-            "preferredWEBoptions": preferredWEBoptions,
-        }
-    )
+    returnData["preferredWEBoptions"] = preferredWEBoptions
 
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeat():
-            creator_gp = all_players.filter(player=currentGame.creator).first()
+            creator_gp = next(
+                (gp for gp in all_players if gp.player and gp.player.id == currentGame.creator_id), None
+            )
             if creator_gp:
                 displayNames = creator_gp.notes
                 creator_gp.notes = ""
                 creator_gp.save()
-                if user_gp and user_gp.player == currentGame.creator:
-                    notes = ""
+                if user_gp and user_gp.player_id == currentGame.creator_id:
+                    returnData["notes"] = ""
             currentGame.save()
         allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
 
         returnData.update(
             {
-                "notes": notes,
                 "displayNames": displayNames,
                 "allPlayerListBySeat": allPlayerListBySeat,
             }

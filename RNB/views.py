@@ -35,6 +35,7 @@ from .common import create_rnb_game
 from Lobby.models import User, Profile, Game
 
 from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
+from Lobby.gameViewHelpers import build_show_game_data
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
@@ -73,181 +74,53 @@ def createRNBgame(request):
 
 
 def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    # ALLOWED_USERS = ["admin", "ha.steven", "massibull", "durendal", 'DodgerB', 'BotKickStarter','Rastko','Benkyo', 'vraid', "F1087", "krieg90", "gdc", "enavico", 'PhasingPlayer']
-    # ["admin", "ha.steven", "Kawlos", "Jasonbartfast", "Batch", "Juni", "TDUBZ", "BigBad", "massibull", "durendal", 'DodgerB', 'BotKickStarter', '33', 'Rastko', 'Burmer', 'phil', 'Benkyo', 'Steveth', "F1087", "krieg90", "gdc"]
-    #                 #'looogic', 'Burmer',
-    #                 #'pgh_gamer', , 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
-    ##print("******************************************************************************************************** IND ACCESS: =================================================:  " + request.user.username)
-    # ALLOWED_USERS = ['admin', 'DodgerB', 'durendal', 'Benkyo', 'vraid', 'JoshuaAcosta', "massibull", "phil", "timmymayes", "SaintJason"]
-
     if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")
 
-    try:
-        currentGame = (
-            Game.objects.select_related("host", "creator").prefetch_related("players__player", "invitedPlayers").get(id=game_id, gameCode="RNB")
-        )
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "RNB",
+        default_zoom=24, settings_debug_key="RNB_USE_SOURCE_CODE",
+        clear_chat_notification=False)
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
-    if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
-
+    currentGame = result["game"]
     presenter = cast("RnbPresenter", currentGame.presenter())
+    user_gp = result["user_gp"]
+    username = request.user.username
 
-    # Access the prefetch cache immediately to "warm" it
-    all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
-    userObj = request.user
-    username = userObj.username
-
-    # No2 it is a proper started game, so set up for not logged in
-    gameID = currentGame.id
-    gameName = presenter.getGameName()
-
-    # Encode to Base64 so it can travel safely in HTML
-    # gameDataB64 = base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
-    gameDataB64 = currentGame.gameData
-
-    gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-
-    allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, False)
-    # Logged out
-    returnData = {
-        "gameID": gameID,
-        "pov": -99,
-        "gameName": gameName,
-        "gameDataB64": gameDataB64,
-        "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 24,
+    returnData = {**result["base_data"]}
+    # RNB uses gameDataB64 instead of gameData
+    returnData["gameDataB64"] = returnData.pop("gameData")
+    returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "startingOptions": startingOptions,
-        "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
-        #"currentPlayers": presenter.getCurrentPlayersArray(),
+        "pov": -99,
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False, False)),
         "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
-        # "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
-        "statsExcludeVotesData": json.dumps(
-            presenter.getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC,
-                presenter.getAllPlayersOrderedySeat(True),
-                False,
-            )
-        ),
-        "deleteVotesData": json.dumps(presenter.getFullSetOfVoteResults(DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeat(True), False)),
-        "settingsDebug": config("RNB_USE_SOURCE_CODE", default=False, cast=bool),
-    }
+    })
 
-    if not request.user.is_authenticated:
+    if not result["is_authenticated"]:
         return render(request, "RNB/showRNBgame.html", returnData)
 
-    # Now you are logged in
-    user_id = userObj.id
+    returnData.update(result["auth_data"])
+    returnData["pov"] = -9
 
-    user_profile = Profile.objects.get(user=userObj)
-
-    # Get user game player object
-    user_gp = currentGame.players.filter(player=userObj).first()
-
-    is_in_all = user_gp is not None
-    is_missing = user_gp.is_missing if user_gp else False
-    involvedPlayer = is_in_all and not is_missing
-    if username == "BotKickStarter":
-        involvedPlayer = True
-
-    chatData = currentGame.chatData
-
-    latestUpdate = currentGame.latestUpdate
-
-    ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code=RNB"
-
-    # preferredAQYoptions = (
-    #    json.loads(user_profile.preferredAQYoptions)
-    #    if user_profile.preferredAQYoptions != ""
-    #    else [-1, 1, 0, 0, 1, 1, 0]
-    # )
-
-    # preferredAQYoptions
-    # colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes,showPollutionUnderRes, housesInNumberOrder
-
-    # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
-    ## Get Chat notification
-    chatNotification = False
+    # RNB uses presenter.removeChatNotification + currentGame.save()
     if user_gp and user_gp.has_chat_notification:
-        chatNotification = True
+        returnData["chatNotification"] = True
         presenter.removeChatNotification(request.user)
         currentGame.save()
 
-    returnData.update(
-        {
-            "name": username,
-            "pov": -9,
-            "chatData": chatData,
-            "latestUpdateLiteral": latestUpdate,
-            "nextURL": nextURL,
-            # "preferredAQYoptions": preferredAQYoptions,
-            "chatNotification": chatNotification,
-        }
-    )
-
-    if not involvedPlayer:
+    if not result["is_involved"]:
         return render(request, "RNB/showRNBgame.html", returnData)
 
-    pov = presenter.seatPosition(username)
-    if request.user.username == "BotKickStarter":
-        pov = -1
-    secondsToNextKickout = presenter.getSecondsToNextKickout()
-
-    kickoutRequired = presenter.kickoutRequired()
-
-    myMove = presenter.isMyMove(username)
-
-    ## Get the Notes for the user
-    notes = user_gp.notes if user_gp else ""
-
-    liveNotification = user_profile.liveNotification
-    myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
-
-    currentMove = presenter.getCurrentMoveData(username)
-    trade = currentGame.playerTradeData
-
-    ## Involved Player
-    returnData.update(
-        {
-            "involvedPlayer": True,
-            "pov": pov,
-            "secondsToNextKickout": secondsToNextKickout,
-            "kickoutRequired": kickoutRequired,
-            "myMove": myMove,
-            "myZoomLevel": myZoomLevel,
-            "notes": notes,
-            "yourTurnAudioType": liveNotification,
-            "statsExcludedGame": currentGame.statsExcludedGame,
-            "currentMove": currentMove,
-            "trade": trade,
-        }
-    )
-
-    ## pre move
-    # if (
-    #    currentGame.phase == 4
-    #    or currentGame.phase == 5
-    #    or currentGame.phase == 6
-    #    or currentGame.phase == 7
-    #    or currentGame.phase == 8
-    #    or currentGame.phase == 9
-    # ):
-    #    if presenter.getMoveDataTime(username) == "PRE_MOVE":
-    #        returnData.update({"preMove": presenter.getMoveData(username)})
-
-    # TODO: also send any current player pre moves in case action failed.
+    returnData.update(result["involved_data"])
+    returnData.update({
+        "currentMove": presenter.getCurrentMoveData(username),
+        "trade": currentGame.playerTradeData,
+    })
 
     ### NEW GAME
-    # if not currentGame.gameDataBLOB:
     if not currentGame.gameData or currentGame.gameData == "":
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeat():
@@ -255,18 +128,11 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             if user_gp:
                 user_gp.notes = ""
                 user_gp.save()
-            notes = ""
-        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeat())
+            returnData["notes"] = ""
         if currentGame.startingMap != "":
-            returnData.update({"startingMap": json.loads(currentGame.startingMap)})
+            returnData["startingMap"] = json.loads(currentGame.startingMap)
 
-        returnData.update(
-            {
-                "notes": notes,
-                "displayNames": displayNames,
-                # "allPlayerListBySeat": allPlayerListBySeat,
-            }
-        )
+        returnData["displayNames"] = displayNames
 
     return render(request, "RNB/showRNBgame.html", returnData)
 

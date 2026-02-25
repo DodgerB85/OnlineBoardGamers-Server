@@ -46,6 +46,7 @@ from Lobby.sharedFunctions.constants import (
     DELETE_VOTE_TOPIC,
     REWIND_CONSENT_VOTE_TOPIC,
 )
+from Lobby.gameViewHelpers import build_show_game_data
 
 if TYPE_CHECKING:
     from Lobby.presenters import FcmPresenter 
@@ -174,114 +175,55 @@ def createFCMgame(request):
 
 
 def showGame(request, game_id):
-    try:
-        currentGame = (
-            Game.objects.select_related("host")
-            .prefetch_related(
-                "players__player",
-                "invitedPlayers",
-            )
-            .get(id=game_id, gameCode='FCM')
-        )
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "FCM",
+        default_zoom=200, settings_debug_key="FCM_USE_SOURCE_CODE",
+        super_users=FCMsuperUsers,
+        clear_chat_notification=False)
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
+    currentGame = result["game"]
     presenter = cast('FcmPresenter', currentGame.presenter())
+    all_players = result["all_players"]
+    username = request.user.username
 
-    if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
+    # FCMtourneyAdmin super user check (needs game data)
+    if currentGame.relatedMainTournament and username == "FCMtourneyAdmin":
+        if "FCMtourneyAdmin" not in FCMsuperUsers:
+            FCMsuperUsers.append("FCMtourneyAdmin")
 
-    # Access the prefetch cache immediately to "warm" it
-    all_player_gps = list(currentGame.players.all().select_related("player"))
-    all_player_ids = {gp.player.id for gp in all_player_gps if gp.player}
-    # start_time = time.time()
-    user = request.user
-    user_id = user.id
-    # show_timestamps = user.username in ["admin", "DodgerB"]
-
-    # def print_timestamp(label):
-    #    if show_timestamps:
-    #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
-
-    finishedGame = False
-    if currentGame.gameStatus == "FINISHED":
-        finishedGame = True
-
-    # THIS IS STILL NEEDED TO DISPLAY OLD GAMES
-    USE_NEW_CODE = False
-    if int(currentGame.created) > 1744974000000:
-        USE_NEW_CODE = True
-
-    if currentGame.relatedMainTournament and request.user.username == "FCMtourneyAdmin":
-        FCMsuperUsers.append("FCMtourneyAdmin")
+    finishedGame = currentGame.gameStatus == "FINISHED"
+    USE_NEW_CODE = int(currentGame.created) > 1744974000000
 
     startingOptionsHTML = SR_getFCMstartingOptionsHTML(
         json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     )
-    gameCreationTimestamp = currentGame.created
 
-    KickoutFlexiDataArray = []
-    if currentGame.kickoutFlexiData:
-        KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
-
-    # print_timestamp("Step 1: initial setup done")
     OOBpreference = 0
-    # If not logged in, return now
-    if not request.user.is_authenticated:
-        return render(
-            request,
-            "FCM/GameTemplate.html",
-            {
-                "gameData": currentGame.gameData,
-                "gameID": game_id,
-                "showAssistance": "true",
-                "latestUpdateLiteral": currentGame.latestUpdate,
-                "involvedPlayer": False,
-                "gameName": presenter.getGameName(),
-                "myMove": False,
-                "startingOptionsHTML": startingOptionsHTML,
-                "gameCreationTimestamp": gameCreationTimestamp,
-                "KickoutFlexiDataArray": KickoutFlexiDataArray,
-                "USE_NEW_CODE": USE_NEW_CODE,
-                "finishedGame": finishedGame,
-                "startingOptionsLiteral": currentGame.startingOptions,
-                "startingMap": currentGame.startingMap,
-                "pov": -99,
-                "statsExcludeVotesData": json.dumps(
-                    presenter.getFullSetOfVoteResults(
-                        STATS_EXCLUDE_VOTE_TOPIC,
-                        presenter.getAllPlayersOrderedySeat(True),
-                        False,
-                    )
-                ),
-                "deleteVotesData": json.dumps(
-                    presenter.getFullSetOfVoteResults(
-                        DELETE_VOTE_TOPIC,
-                        presenter.getAllPlayersOrderedySeat(True),
-                        False,
-                    )
-                ),
-                "preferredColour": -1,
-                "settingsDebug": config(
-                    "FCM_USE_SOURCE_CODE", default=False, cast=bool
-                ),
-                "OOBpreference": OOBpreference,
-            },
-        )
 
-    # If person is logged in, may or may not be in game
-    user_profile = Profile.objects.get(user=request.user)
-    missing_player_ids = {gp.player.id for gp in all_player_gps if gp.player and gp.is_missing}
-    chat_notify_ids = {gp.player.id for gp in all_player_gps if gp.player and gp.has_chat_notification}
+    if not result["is_authenticated"]:
+        returnData = {**result["base_data"]}
+        returnData.update({
+            "gameID": game_id,
+            "showAssistance": "true",
+            "latestUpdateLiteral": currentGame.latestUpdate,
+            "involvedPlayer": False,
+            "myMove": False,
+            "startingOptionsHTML": startingOptionsHTML,
+            "USE_NEW_CODE": USE_NEW_CODE,
+            "finishedGame": finishedGame,
+            "startingOptionsLiteral": currentGame.startingOptions,
+            "startingMap": currentGame.startingMap,
+            "pov": -99,
+            "preferredColour": -1,
+            "OOBpreference": OOBpreference,
+        })
+        return render(request, "FCM/GameTemplate.html", returnData)
 
-    is_in_all = user_id in all_player_ids
-    is_missing = user_id in missing_player_ids
-    involvedPlayer = is_in_all and not is_missing
-    if request.user.username in FCMsuperUsers:
-        involvedPlayer = True
+    # Logged in
+    user_profile = result["user_profile"]
+    user_id = request.user.id
 
-    tournamentGame = False
     highContrastBoardItems = user_profile.highContrastBoardItems
     showAssistance = "true" if user_profile.showAssistance else "false"
     now = int(time.time()) * 1000
@@ -298,32 +240,35 @@ def showGame(request, game_id):
     allPlayerListBySeat = presenter.getAllPlayersOrderedySeat()
     kickoutRequired = 0
     chatNotification = False
-
     myMove = False
     myZoomLevel = 200
     liveNotification = 1
-
     rewindPanelType = 0
     rewindHostHTML = ""
     rewindHostPossible = False
     currentRewindConsent = 0
-    currentPlayers = presenter.getCurrentPlayersString(True) # for string MUST be single comma separated only
+    currentPlayers = presenter.getCurrentPlayersString(True)
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
+    tournamentGame = False
 
-    # Do Chat notification separately, as could be kicked out, and so not involoved
-    if is_in_all and user_id in chat_notify_ids:
+    # Chat notification separately (could be kicked out)
+    is_in_all = user_id in result["all_player_ids"]
+    chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
+    # Also check all players including kicked
+    all_gps_including_kicked = list(currentGame.players.select_related("player").all())
+    chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
+    if is_in_all and user_id in chat_notify_ids_all:
         chatNotification = True
         presenter.removeChatNotification(request.user)
 
-    # print_timestamp("Step 2: Before nextURL")
-
-    ## Get the next URL
     nextURL = f"/nextGame?current_id={game_id}&current_code=FCM"
 
-    # print_timestamp("Step 4: nextURL obtained")
+    involvedPlayer = result["is_involved"]
+    # Re-check involvement if FCMtourneyAdmin was added after helper ran
+    if not involvedPlayer and username in FCMsuperUsers:
+        involvedPlayer = True
 
-    # If person is logged in and in the game
     if involvedPlayer:
         if currentGame.relatedMainTournament:
             tournamentGame = True
@@ -333,43 +278,33 @@ def showGame(request, game_id):
             rewindHostPossible = presenter.getRewindHostPossible()
             rewindHostHTML = presenter.getRewindHostHTML()
 
-        if request.user.username in FCMsuperUsers:
+        if username in FCMsuperUsers:
             rewindPanelType = 2
             rewindHostPossible = True
             rewindHostHTML = presenter.getRewindHostHTML()
 
-        # print_timestamp("Step 4.5: Involved player")
-
-        pov = presenter.seatPosition(request.user.username)
-        if request.user.username in FCMsuperUsers:
-            involvedPlayer = True
-        currentRewindConsent = presenter.getCurrentRewindConsent(
-            request.user.username
-        )
+        pov = presenter.seatPosition(username)
+        currentRewindConsent = presenter.getCurrentRewindConsent(username)
 
         preferredRestaurantColour = user_profile.preferredRestaurantColour
         liveNotification = user_profile.liveNotification
 
         currentMove = ""
         if presenter.hasValidActualMoveData(
-            request.user.username
-        ) or presenter.hasValidActualCleanupPreset(request.user.username):
-            currentMove = presenter.getCompressedMoveArr(request.user.username, True)
+            username
+        ) or presenter.hasValidActualCleanupPreset(username):
+            currentMove = presenter.getCompressedMoveArr(username, True)
 
-        # print_timestamp("Step 4.6: currentMove obtained")
-
-        # Get notes from GamePlayer
-        player_gp = currentGame.players.filter(player=request.user).first()
+        player_gp = next(
+            (gp for gp in all_players if gp.player and gp.player.id == user_id), None
+        )
         currentNotes = player_gp.notes if player_gp else ""
 
-        # Check for kickout
         kickoutRequired = presenter.kickoutRequired()
-        # print_timestamp("Step 4.7: currentNotes obtained")
 
-        # Get OOBpreference
-        OOBpreference = presenter.getOOBpreference(request.user.username)
+        OOBpreference = presenter.getOOBpreference(username)
         allPlayerListBySeat = presenter.getAllPlayersOrderedySeat(False, False)
-        myMove = presenter.isMyMove(request.user.username)
+        myMove = presenter.isMyMove(username)
 
         myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3]
         if (
@@ -382,42 +317,27 @@ def showGame(request, game_id):
                 player_gp.save()
             currentNotes = ""
 
-    # print_timestamp("Step 5: involvedPlayer processing done")
-
-    #######
-    #   Check if SHADOW in currentGame.allPlayers
-    #   Check currentGame.involvedPlayer
-    #   Use currentGame.gameName
-    #   Use if currentGame.startingOptionsLiteral
-    #   Use currentGame.startingMap
-    #   use currentGame.gameID
-    #   Use currentGame.currentPlayers
-    #   Use currentGame.latestUpdateLiteral
-    #   Use currentGame.myMove to prevent self kickout
-    # tournamentGame = False
-
     return render(
         request,
         "FCM/GameTemplate.html",
         {
-            "gameCreationTimestamp": gameCreationTimestamp,
+            "gameCreationTimestamp": currentGame.created,
             "now": now,
             "gameData": currentGame.gameData,
             "pov": pov,
             "preferredColour": preferredRestaurantColour,
-            "name": request.user.username,
+            "name": username,
             "chatData": chatData,
             "showAssistance": showAssistance,
             "chatNotification": chatNotification,
             "moveData": currentMove,
-            # used for global.players AND if includes SHADOW
             "allPlayerListBySeat": allPlayerListBySeat,
             "currentNotes": currentNotes,
             "kickoutRequired": kickoutRequired,
             "involvedPlayer": involvedPlayer,
             "gameName": presenter.getGameName(),
-            "phase": currentGame.phase,  # Used for module draft to inject starting options
-            "gameID": getattr(currentGame, "id"),
+            "phase": currentGame.phase,
+            "gameID": currentGame.id,
             "currentPlayers": currentPlayers,
             "latestUpdateLiteral": currentGame.latestUpdate,
             "myMove": myMove,
@@ -435,28 +355,18 @@ def showGame(request, game_id):
             "statsExcludedGame": statsExcludedGame,
             "displayNames": displayNames,
             "nextURL": nextURL,
-            "KickoutFlexiDataArray": KickoutFlexiDataArray,
+            "KickoutFlexiDataArray": result["base_data"]["KickoutFlexiDataArray"],
             "USE_NEW_CODE": USE_NEW_CODE,
             "startingOptionsLiteral": currentGame.startingOptions,
             "startingMap": currentGame.startingMap,
             "OOBpreference": OOBpreference,
-            "statsExcludeVotesData": json.dumps(
-                presenter.getFullSetOfVoteResults(
-                    STATS_EXCLUDE_VOTE_TOPIC,
-                    presenter.getAllPlayersOrderedySeat(True),
-                    False,
-                )
-            ),
-            "deleteVotesData": json.dumps(
-                presenter.getFullSetOfVoteResults(
-                    DELETE_VOTE_TOPIC,
-                    presenter.getAllPlayersOrderedySeat(True),
-                    False,
-                )
-            ),
-            "settingsDebug": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),
+            "statsExcludeVotesData": result["base_data"]["statsExcludeVotesData"],
+            "deleteVotesData": result["base_data"]["deleteVotesData"],
+            "settingsDebug": result["base_data"]["settingsDebug"],
         },
     )
+
+
 
 
 @contextmanager
