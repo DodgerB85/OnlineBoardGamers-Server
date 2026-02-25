@@ -127,7 +127,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KickoutFlexiDataArray": KickoutFlexiDataArray,
         "startingOptions": startingOptions,
         "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
-        #"currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
+        # "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
         "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
         # "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
         "statsExcludeVotesData": json.dumps(
@@ -426,7 +426,7 @@ def _processRNBturn(request):
             currentGame.kickoutDuration,
         )
 
-        # First, add the conflict preset move
+        # First, ALWAYS add the conflict preset move
         if jsonData["conflictPresetData"] != "":
             conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
             conflictPresetMove["status"] = "pending"
@@ -435,7 +435,8 @@ def _processRNBturn(request):
         # If the client and server both agree that this person is first, then the browser will only allow valid moves
         # So it must be a valid move. So update the game with the ALREADY PROCESSED game data, and move on
         if jsonData["isCurrent"] == True and (
-            len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
+            currentGame.serverCurrentPlayerNamesInTurnOrder is not None
+            and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
             and currentGame.serverCurrentPlayerNamesInTurnOrder[0] == nameToUse
             and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"])
         ):
@@ -493,7 +494,8 @@ def _processRNBturn(request):
         # If you are current player on SERVER, the client must have missed an update
         # So return the mvoe for immediate client-side verification
         if (
-            len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
+            currentGame.serverCurrentPlayerNamesInTurnOrder is not None
+            and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
             and currentGame.serverCurrentPlayerNamesInTurnOrder[0] == nameToUse
             and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"])
         ):
@@ -564,7 +566,7 @@ def _processRNBturn(request):
         oldVer = db_latest_update
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
-        
+
         print(f"allcurrentplayers: {jsonData['allCurrentPlayers']}")
 
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayers"])
@@ -585,12 +587,7 @@ def _processRNBturn(request):
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             nextCurrentPlayer = jsonData["nextCurrentPlayer"]
-            if (
-                nextCurrentPlayer != ""
-                and nextCurrentPlayer != "RnbBot"
-                and jsonData["status"] != "FINISHED"
-                and 102 not in loadedStartingOptions
-            ):
+            if nextCurrentPlayer != "" and nextCurrentPlayer != "RnbBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
                 playerListToNotify = [nextCurrentPlayer]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -1214,6 +1211,7 @@ def RNBdata(request, dataType=1):
 
 
 def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
+    print(F'Adding move to player: {nameToUse} data: {newMoveEntry}')
     newMoveEntry["player"] = nameToUse
     gp_player = currentGame.players.only("moveDataJSON").get(player__username=nameToUse)
 
@@ -1274,5 +1272,7 @@ def getAllCurrentStackMoves(currentGame):
         for entry in gp_moveDataJSON:
             entry["player"] = gp.player.username
             currentStackMoves.append(entry)
+
+    print(currentStackMoves)
 
     return currentStackMoves
