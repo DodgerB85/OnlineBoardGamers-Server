@@ -498,6 +498,7 @@ def _processHCturn(request):
                                 request,
                                 f"Exception: {e} -- FCIATT: {FCIATT} -- FCNATT: {FCNATT} -- DBavailableComponents: {DBavailableComponents} j: {j} FCNATT[j]:",
                             )
+                            break
                     enoughComponents = True
                     for j in range(len(DBavailableComponents)):
                         if DBavailableComponents[j] < 0:
