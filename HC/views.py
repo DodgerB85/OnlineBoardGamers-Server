@@ -1007,9 +1007,10 @@ def showHCgame(request, game_id):
     rewindPanelType = 0
     rewindHostHTML = ""
     rewindHostPossible = False
+    # TODO: remove this
     currentRewindConsent = "0"
-    currentPlayers = presenter.getCurrentPlayersInOrderString()
-    if currentPlayers == "":
+    currentPlayers = presenter.getArrayOfIsCurrentPlayers()
+    if len(currentPlayers) == 0:
        currentPlayers = presenter.getAllPlayersOrderedySeatInArray()[0]
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""

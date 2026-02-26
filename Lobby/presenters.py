@@ -270,7 +270,7 @@ class GamePresenter:
         message_data["gameName"] = self.getGameName()
         message_data["gameCode"] = self.gameObj.gameCode
         message_data["username"] = request.user.username
-        message_data["currentPlayersString"] = self.getCurrentPlayersString()
+        message_data["currentPlayersString"] = ", ".join(self.getArrayOfIsCurrentPlayers())
         message_data["maxPlayers"] = self.gameObj.maxPlayers
         message_data["relatedMainTournamentID"] = self.gameObj.relatedMainTournament.id if self.gameObj.relatedMainTournament else 0
         message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
@@ -1003,7 +1003,7 @@ class INDpresenter(GamePresenter):
             playerListToNotify = [username for username in player_usernames if username != request.user.username]
             # The tournament sends out game start notifications
             self._sendStartGameNotification(request, playerListToNotify)
-            allPlayersL = self.getAllPlayersOrderedySeat()
+            allPlayersL = self.getAllPlayersOrderedySeatInArray()
             if request.user.username != allPlayersL[0]:
                 SN_sendNextTurnNotification(
                     request,
@@ -1221,7 +1221,7 @@ class BusPresenter(GamePresenter):
 
 
 class RNBpresenter(GamePresenter):
-    def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
+    def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
         if loggedInPlayerUsername == None:
             return False
@@ -2125,19 +2125,10 @@ class HCpresenter(GamePresenter):
             return False
 
         return (
-            not currentPlayers
-            or loggedInPlayerUsername in currentPlayers
-            or currentPlayers in SHADOW_USERNAMES
+            not currentPlayersArr
+            or loggedInPlayerUsername in currentPlayersArr
+            or currentPlayersArr[0] in SHADOW_USERNAMES
         )
-
-    def getCurrentPlayersArray(self):
-        currentPlayers = self.getCurrentPlayersInOrderString()
-        if not currentPlayers:
-            return [""]
-        if "," in currentPlayers:
-            return [player.strip() for player in currentPlayers.split(",")]
-        else:
-            return [currentPlayers]
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
