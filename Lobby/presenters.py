@@ -96,6 +96,8 @@ class GamePresenter:
         # This uses your existing logic that converts 'missing' players to strings
         playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
         try:
+            if (_username == "BotKickStarter"):
+                return -1
             print(f"NO PLAYER FOUND-1: {_username} gameCode: {self.gameObj.gameCode} playerList: {playerList} id: {self.gameObj.id}")
             return playerList.index(_username)
         except (ValueError, TypeError):
