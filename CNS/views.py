@@ -233,7 +233,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             creator_gp = next(
                 (gp for gp in all_players if gp.player and gp.player.id == currentGame.creator_id), None
             )

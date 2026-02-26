@@ -211,7 +211,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
         "currentPlayers": ", ".join(presenter.getCurrentPlayersArray()),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredWEBoptions": [-1],
@@ -240,7 +240,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             creator_gp = next(
                 (gp for gp in all_players if gp.player and gp.player.id == currentGame.creator_id), None
             )

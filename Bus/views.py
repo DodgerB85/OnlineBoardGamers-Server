@@ -107,7 +107,7 @@ def showBusGame(request, game_id):
                 user_gp.notes = ""
                 user_gp.save()
             returnData["notes"] = ""
-        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
 
         returnData.update(
             {

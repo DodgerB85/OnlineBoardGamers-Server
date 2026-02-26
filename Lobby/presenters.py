@@ -231,7 +231,7 @@ class GamePresenter:
             if gp.player:
                 gp.is_current = gp.player.username in current_players_array
                 to_update.append(gp)
-        if to_update:
+        if len(to_update) > 0:
             from Lobby.models import GamePlayer
             GamePlayer.objects.bulk_update(to_update, ["is_current"])
 

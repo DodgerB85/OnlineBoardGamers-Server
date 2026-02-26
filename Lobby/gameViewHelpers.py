@@ -79,14 +79,14 @@ def build_show_game_data(request, game_id, game_code, *,
         "statsExcludeVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
                 STATS_EXCLUDE_VOTE_TOPIC,
-                presenter.getAllPlayersOrderedySeat(True),
+                presenter.getAllPlayersOrderedySeatInArray(True),
                 False,
             )
         ),
         "deleteVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
                 DELETE_VOTE_TOPIC,
-                presenter.getAllPlayersOrderedySeat(True),
+                presenter.getAllPlayersOrderedySeatInArray(True),
                 False,
             )
         ),
