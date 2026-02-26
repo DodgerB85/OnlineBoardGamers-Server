@@ -53,7 +53,13 @@
 	}
 }
 
-@media only screen and (max-width: 790px) {
+@media only screen and (max-width: 1370px) {
+	#logoLoggedIn {
+		width: 320px;
+	}
+}
+
+@media only screen and (max-width: 590px) {
 	#logoLoggedIn {
 		display: none;
 	}
@@ -96,7 +102,7 @@
 
 .hamburgerMenu {
 	position: fixed;
-	top: -262px;
+	top: -307px;
 	gap: 0;
 	flex-direction: column;
 	background-color: #333;

@@ -1208,6 +1208,9 @@ class RNBpresenter(GamePresenter):
             return False
 
         currentPlayersList = self.gameObj.serverCurrentPlayerNamesInTurnOrder
+        
+        if not currentPlayersList:
+            return True
         # If you are front of the queue, it is your turn
         if currentPlayersList[0] == loggedInPlayerUsername:
             return True
