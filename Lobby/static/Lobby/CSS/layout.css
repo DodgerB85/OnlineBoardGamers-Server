@@ -5,12 +5,14 @@
 #logoLoggedOut {
 	padding: 0px;
 	margin-left: 10px;
-	width: 700px;
+	width: 100%; /* Let it take up the container */
+	max-width: 700px; /* But don't let it get bigger than 700px */
+	height: auto; /* Keep aspect ratio */
 }
 @media only screen and (max-width: 1475px) {
 	#logoLoggedOut {
-		width: 400px;
-		height: 27px;
+		max-width: 400px;
+		height: auto;
 		margin-top: 15px;
 	}
 }
@@ -28,9 +30,7 @@
 	#langSelectLoggedIn {
 		margin-right: 50px;
 	}
-
 }
-
 
 @media only screen and (max-width: 1100px) {
 	#rightLoggedOutHyperlinks {
@@ -41,7 +41,7 @@
 		display: block;
 		margin: 25px;
 	}
-	
+
 	#langSelectLoggedOut {
 		margin-right: 50px;
 	}
@@ -56,6 +56,8 @@
 @media only screen and (max-width: 1370px) {
 	#logoLoggedIn {
 		width: 320px;
+		max-width: 90vw;
+		height: auto; 
 	}
 }
 
@@ -271,8 +273,6 @@ body {
 }
 /** END TOP BAR */
 
-
-
 #loginForm {
 	display: flex;
 	padding: 10px;
@@ -298,6 +298,3 @@ body {
 html {
 	display: block;
 }
-
-
-
