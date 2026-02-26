@@ -79,7 +79,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
         "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
-        "currentPlayers": presenter.getCurrentPlayers(),
+        "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
     })
 
