@@ -212,7 +212,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
         "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
-        "currentPlayers": ", ".join(presenter.getCurrentPlayersArray()),
+        "currentPlayers": ", ".join(presenter.getArrayOfIsCurrentPlayers()),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredWEBoptions": [-1],
         "pov": -99,
