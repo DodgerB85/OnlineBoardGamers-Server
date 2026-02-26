@@ -151,8 +151,10 @@ def createCNSgame(request):
             creator_gp = newGame.players.get(player=request.user)
             creator_gp.notes = json.dumps(shadow_players)
             creator_gp.save()
+            
+            presenter = cast('CNSpresenter', newGame.presenter())
 
-            newGame.presenter().startGame(request)
+            presenter.startGame(request)
         else:
             usernamesToNotify = []
             for i in range(2, _maxPlayers + 1):
