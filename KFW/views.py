@@ -29,9 +29,10 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
-
+from Lobby.sharedFunctions.constants import SHADOW_PLAYER_NAMES
 
 from Lobby.models import Game, GamePlayer, User, Profile
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry
 
 if TYPE_CHECKING:
     from Lobby.presenters import KFWpresenter 
@@ -107,7 +108,7 @@ def createKFWgame(request):
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
-            shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
+            shadow_names = SHADOW_PLAYER_NAMES
             shadow_players = []
 
             for i in range(1, _maxPlayers):
@@ -191,170 +192,96 @@ def createKFWgame(request):
 
 
 def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    try:
-        currentGame = Game.objects.select_related(
-            "host", "creator"
-        ).prefetch_related(
-            "players__player",
-        ).get(id=game_id, gameCode='KFW')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "KFW",
+        default_zoom=0, settings_debug_key="KFW_USE_SOURCE_CODE",
+        super_users=KFW_SUPER_USERS,
+        clear_chat_notification=False)
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
-    if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
-
-    presenter = cast('KFWpresenter', currentGame.presenter())
-
-    # Access the prefetch cache immediately to "warm" it
-    all_game_players = list(currentGame.players.select_related("player").all())
-    all_player_ids = {gp.player.id for gp in all_game_players if gp.player}
-    missing_player_ids = {gp.player.id for gp in all_game_players if gp.player and gp.is_missing}
-    kicked_player_ids = {gp.player.id for gp in all_game_players if gp.player and gp.is_kicked}
-    chat_notify_ids = {gp.player.id for gp in all_game_players if gp.player and gp.has_chat_notification}
-
-    userObj = request.user
-    username = userObj.username
-
-    gameID = currentGame.id
-    gameName = presenter.getGameName()
-    gameData = currentGame.gameData
-    gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-
-    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray(False))
+    currentGame = result["game"]
+    presenter = cast('KfwPresenter', currentGame.presenter())
+    all_players = result["all_players"]
+    username = request.user.username
 
     gameData1 = (
-        presenter.getGameData1Compressed(request.user.username)
+        presenter.getGameData1Compressed(username)
         if request.user.is_authenticated
         else presenter.getGameData1Compressed("")
     )
-    gameData3 = presenter.getGameData3compressed()
 
-    # Logged out
-    returnData = {
-        "gameID": gameID,
-        "gameName": gameName,
-        "gameData": gameData,
-        "gameData1": gameData1,
-        "gameData3": gameData3,
-        "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 0,
+    returnData = {**result["base_data"]}
+    returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
+    returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "startingOptions": startingOptions,
-        "allPlayerListBySeat": allPlayerListBySeat,
+        "gameData1": gameData1,
+        "gameData3": presenter.getGameData3compressed(),
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
         "currentPlayers": presenter.getCurrentPlayers(),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredKFWoptions": [-1],
         "pov": -99,
         "move": "",
         "turn": currentGame.turn,
-        "settingsDEBUG": config("KFW_USE_SOURCE_CODE", default=False, cast=bool),
-    }
+    })
 
-    if not request.user.is_authenticated:
+    if not result["is_authenticated"]:
         return render(request, "KFW/showKFWgame.html", returnData)
 
-    # Now you are logged in
-    user_id = userObj.id
-
-    user_profile = Profile.objects.get(user=userObj)
-
-    is_in_all = user_id in all_player_ids
-    is_missing = user_id in missing_player_ids
-    is_kicked = user_id in kicked_player_ids
-    involvedPlayer = is_in_all and not is_missing and not is_kicked
-    if username in KFW_SUPER_USERS:
-        involvedPlayer = True
-
-    chatData = currentGame.chatData
-
-    latestUpdate = currentGame.latestUpdate
-
-    ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code=KFW"
-
-    # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
-    ## Get Chat notification
-    chatNotification = False
-    if user_id in chat_notify_ids:
-        chatNotification = True
-        presenter.removeChatNotification(request.user)
-
+    returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    returnData.update(
-        {
-            "name": username,
-            "chatData": chatData,
-            "latestUpdateLiteral": latestUpdate,
-            "nextURL": nextURL,
-            "chatNotification": chatNotification,
-        }
-    )
+    # KFW uses presenter.removeChatNotification instead of direct save
+    # Re-check for kicked players (KFW excludes kicked from involvement)
+    user_id = request.user.id
+    kicked_player_ids = {gp.player.id for gp in result["all_players"] if gp.player and gp.is_kicked}
+    # Override: also check all players (including kicked) for chat notify
+    all_gps_including_kicked = list(currentGame.players.select_related("player").all())
+    chat_notify_ids = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
+    if user_id in chat_notify_ids:
+        returnData["chatNotification"] = True
+        presenter.removeChatNotification(request.user)
 
-    if not involvedPlayer:
+    is_kicked = user_id in kicked_player_ids
+    is_involved = result["is_involved"] and not is_kicked
+
+    if not is_involved:
         return render(request, "KFW/showKFWgame.html", returnData)
 
-    pov = presenter.seatPosition(request.user.username)
+    returnData.update(result["involved_data"])
+
+    # KFW super users get pov=0 instead of -1
+    pov = result["pov"]
     if username in KFW_SUPER_USERS:
         pov = 0
-    secondsToNextKickout = presenter.getSecondsToNextKickout()
+        returnData["pov"] = pov
+        try:
+            returnData["myZoomLevel"] = json.loads(currentGame.zoomLevels)[pov]
+        except (json.JSONDecodeError, IndexError, TypeError):
+            pass
 
-    kickoutRequired = presenter.kickoutRequired()
-
-    myMove = presenter.isMyMove(request.user.username)
-
-    ## Get the Notes for the user
-    player_gp = currentGame.players.filter(player=request.user).first()
-    notes = player_gp.notes if player_gp else ""
-
-    liveNotification = user_profile.liveNotification
-    myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
-
-    ## Involved Player
-    returnData["pov"] = pov
-    returnData["move"] = presenter.getMoveData(request.user.username)
+    returnData["move"] = presenter.getMoveData(username)
 
     preferredKFWoptions = (
-        json.loads(user_profile.preferredKFWoptions) if user_profile.preferredKFWoptions != "" else [-1]
+        json.loads(result["user_profile"].preferredKFWoptions) if result["user_profile"].preferredKFWoptions != "" else [-1]
     )
-
-    returnData.update(
-        {
-            "involvedPlayer": True,
-            "secondsToNextKickout": secondsToNextKickout,
-            "kickoutRequired": kickoutRequired,
-            "myMove": myMove,
-            "myZoomLevel": myZoomLevel,
-            "notes": notes,
-            "yourTurnAudioType": liveNotification,
-            "statsExcludedGame": currentGame.statsExcludedGame,
-            "preferredKFWoptions": preferredKFWoptions,
-        }
-    )
+    returnData["preferredKFWoptions"] = preferredKFWoptions
 
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
-            # Display names are stored in the creator's notes (replaces player0notes)
-            creator_gp = currentGame.players.filter(player=currentGame.creator).first()
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            creator_gp = next(
+                (gp for gp in all_players if gp.player and gp.player.id == currentGame.creator_id), None
+            )
             displayNames = creator_gp.notes if creator_gp else ""
             if creator_gp:
                 creator_gp.notes = ""
                 creator_gp.save()
-            notes = ""
+            returnData["notes"] = ""
 
-        returnData.update(
-            {
-                "notes": notes,
-                "displayNames": displayNames,
-            }
-        )
+        returnData.update({"displayNames": displayNames})
 
     return render(request, "KFW/showKFWgame.html", returnData)
 
@@ -1062,35 +989,11 @@ def KFWdata(request, data_type=1):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode='KFW')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    extraInfo = (
-        "Options: "
-        + currentGame.startingOptions
-        + "ServerData: "
-        + currentGame.KFWserverData
-        + "  PlayersHiddenData: "
-        + currentGame.KFWplayersHiddenData
-        + "  PlayersMoveData: "
-        + currentGame.KFWplayersMoveData
-    )
-
-    # email data to myself
-    SN_sendBugReportEmail(request, "KFW", gameID, gameData, bugDescription, currentGame.rewindData, extraInfo)
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "KFW", extra_info_fn=lambda g:
+        "Options: " + g.startingOptions
+        + "ServerData: " + g.KFWserverData
+        + "  PlayersHiddenData: " + g.KFWplayersHiddenData
+        + "  PlayersMoveData: " + g.KFWplayersMoveData)
 
 
 @login_required()
@@ -1143,51 +1046,9 @@ def _sendChatMessage(request):
 
 @login_required()
 def saveNotes(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    game_id = jsonData["gameID"]
-    notes = jsonData["notes"]
-    try:
-        currentGame = Game.objects.get(id=game_id, gameCode='KFW')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    player_gp = currentGame.players.filter(player=request.user).first()
-    if player_gp:
-        player_gp.notes = notes
-        player_gp.save()
-
-    return JsonResponse({"notePosted": True})
+    return shared_save_notes(request, "KFW")
 
 
 @login_required
 def saveZoom(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    if jsonData["action"] == "zoom":
-        try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='KFW')
-        except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-        zoomLevels = json.loads(currentGame.zoomLevels)
-
-        if jsonData.get("allPlayers"):
-            for i in range(len(zoomLevels)):
-                zoomLevels[i] = int(jsonData["zoomLevel"])
-        else:
-            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
-
-        currentGame.zoomLevels = json.dumps(zoomLevels)
-        currentGame.save()
-        return JsonResponse(
-            {
-                "response": "ok",
-            }
-        )
-
-    return HttpResponse(status=204)  # No Content
+    return shared_save_zoom(request, "KFW")

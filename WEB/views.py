@@ -32,7 +32,8 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
-from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, SHADOW_PLAYER_NAMES
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:
     from Lobby.presenters import WEBpresenter 
@@ -111,7 +112,7 @@ def createWEBgame(request):
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
-            shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3"]
+            shadow_names = SHADOW_PLAYER_NAMES
             shadow_players = []
 
             for i in range(1, _maxPlayers):
@@ -195,181 +196,65 @@ def createWEBgame(request):
 
 
 def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    try:
-        currentGame = (
-            Game.objects.select_related(
-                "host",
-                "creator",
-            )
-            .prefetch_related(
-                "players__player",
-                "invitedPlayers"
-            )
-            .get(id=game_id, gameCode='WEB')
-        )
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "WEB",
+        default_zoom=0, settings_debug_key="WEB_USE_SOURCE_CODE")
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
-    presenter = currentGame.presenter()
+    currentGame = result["game"]
+    presenter = result["presenter"]
+    all_players = result["all_players"]
+    user_gp = result["user_gp"]
 
-    if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
-
-    # Access the prefetch cache immediately to "warm" it
-    all_players = currentGame.players.exclude(is_kicked=True)
-    all_player_ids = {gp.player.id for gp in all_players if gp.player}
-    userObj = request.user
-    username = userObj.username
-
-    gameID = currentGame.id
-    gameName = presenter.getGameName()
-    gameData = currentGame.gameData
-    gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = (
-        json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    )
-    startingOptions = (
-        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    )
-
-    allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray(False))
-
-    # Logged out
-    returnData = {
-        "gameID": gameID,
-        "gameName": gameName,
-        "gameData": gameData,
-        "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 0,
+    returnData = {**result["base_data"]}
+    returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
+    returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "startingOptions": startingOptions,
-        "allPlayerListBySeat": allPlayerListBySeat,
-        "currentPlayers": ", ".join(presenter.getArrayOfIsCurrentPlayers()),
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
+        "currentPlayers": ", ".join(presenter.getCurrentPlayersArray()),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredWEBoptions": [-1],
         "pov": -99,
         "turn": currentGame.turn,
-        "statsExcludeVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeatInArray(True), False
-            )
-        ),
-        "deleteVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC, currentGame.presenter().getAllPlayersOrderedySeatInArray(True), False
-            )
-        ),
-        
-        "settingsDEBUG": config("WEB_USE_SOURCE_CODE", default=False, cast=bool),
-    }
+    })
 
-    if not request.user.is_authenticated:
+    if not result["is_authenticated"]:
         return render(request, "WEB/showWEBgame.html", returnData)
 
-    # Now you are logged in
-    user_id = userObj.id
-
-    user_profile = Profile.objects.get(user=userObj)
-    missing_player_ids = {gp.player.id for gp in all_players if gp.player and gp.is_missing}
-    chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
-
-    is_in_all = user_id in all_player_ids
-    is_missing = user_id in missing_player_ids
-    involvedPlayer = is_in_all and not is_missing
-    if username == "BotKickStarter":
-        involvedPlayer = True
-
-    chatData = currentGame.chatData
-
-    latestUpdate = currentGame.latestUpdate
-
-    ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={presenter.getGameCode()}"
-
-    # Get Chat notification
-    chatNotification = False
-    if user_id in chat_notify_ids:
-        chatNotification = True
-        user_gp = all_players.filter(player=userObj).first()
-        if user_gp:
-            user_gp.has_chat_notification = False
-            user_gp.save()
-
+    returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    returnData.update(
-        {
-            "name": username,
-            "chatData": chatData,
-            "latestUpdateLiteral": latestUpdate,
-            "nextURL": nextURL,
-            "chatNotification": chatNotification,
-        }
-    )
-
-    if not involvedPlayer:
+    if not result["is_involved"]:
         return render(request, "WEB/showWEBgame.html", returnData)
 
-    pov = presenter.seatPosition(request.user.username)
-    if request.user.username == "BotKickStarter":
-        pov = -1
-    secondsToNextKickout = presenter.getSecondsToNextKickout()
-
-    kickoutRequired = presenter.kickoutRequired()
-
-    myMove = presenter.isMyMove(request.user.username)
-
-    ## Get the Notes for the user
-    seat_position = presenter.seatPosition(request.user.username)
-    user_gp = all_players.filter(player=userObj).first()
-    notes = user_gp.notes if user_gp else ""
-
-    liveNotification = user_profile.liveNotification
-    myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
-
-    ## Involved Player
-    returnData["pov"] = pov
+    returnData.update(result["involved_data"])
 
     preferredWEBoptions = (
-        json.loads(user_profile.preferredWEBoptions)
-        if user_profile.preferredWEBoptions != ""
+        json.loads(result["user_profile"].preferredWEBoptions)
+        if result["user_profile"].preferredWEBoptions != ""
         else [-1]
     )
-
-    returnData.update(
-        {
-            "involvedPlayer": True,
-            "secondsToNextKickout": secondsToNextKickout,
-            "kickoutRequired": kickoutRequired,
-            "myMove": myMove,
-            "myZoomLevel": myZoomLevel,
-            "notes": notes,
-            "yourTurnAudioType": liveNotification,
-            "statsExcludedGame": currentGame.statsExcludedGame,
-            "preferredWEBoptions": preferredWEBoptions,
-        }
-    )
+    returnData["preferredWEBoptions"] = preferredWEBoptions
 
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
-            creator_gp = all_players.filter(player=currentGame.creator).first()
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            creator_gp = next(
+                (gp for gp in all_players if gp.player and gp.player.id == currentGame.creator_id), None
+            )
             if creator_gp:
                 displayNames = creator_gp.notes
                 creator_gp.notes = ""
                 creator_gp.save()
-                if user_gp and user_gp.player == currentGame.creator:
-                    notes = ""
+                if user_gp and user_gp.player_id == currentGame.creator_id:
+                    returnData["notes"] = ""
             currentGame.save()
         allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
 
         returnData.update(
             {
-                "notes": notes,
                 "displayNames": displayNames,
                 "allPlayerListBySeat": allPlayerListBySeat,
             }
@@ -878,34 +763,8 @@ def WEBdata(request, dataType=1):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode='WEB')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    extraInfo = "Options: " + currentGame.startingOptions
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request,
-        "WEB",
-        gameID,
-        gameData,
-        bugDescription,
-        currentGame.rewindData,
-        extraInfo,
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "WEB",
+        extra_info_fn=lambda g: "Options: " + g.startingOptions)
 
 
 @login_required()
@@ -960,85 +819,18 @@ def _sendChatMessage(request):
 
 @login_required()
 def saveNotesWEB(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
+    return shared_save_notes(request, "WEB")
 
-    jsonData = json.loads(request.body)
-    game_id = jsonData["gameID"]
-    notes = jsonData["notes"]
-    try:
-        currentGame = Game.objects.get(id=game_id, gameCode='WEB')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    # This directly saves the notes
-    currentGame.players.filter(player=request.user).update(notes=notes)
-
-    return JsonResponse({"notePosted": True})
 
 @login_required
 def saveZoom(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    if jsonData["action"] == "zoom":
-        try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='WEB')
-        except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-        zoomLevels = json.loads(currentGame.zoomLevels)
-
-        if jsonData.get("allPlayers"):
-            for i in range(len(zoomLevels)):
-                zoomLevels[i] = int(jsonData["zoomLevel"])
-        else:
-            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
-
-        currentGame.zoomLevels = json.dumps(zoomLevels)
-        currentGame.save()
-        return JsonResponse(
-            {
-                "response": "ok",
-            }
-        )
-
-    return HttpResponse(status=204)  # No Content
+    return shared_save_zoom(request, "WEB")
 
 
 @login_required()
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _castVote(request)
-
-
-@login_required
-def _castVote(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"])
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    # Delegate all logic to the presenter
-    result = currentGame.presenter().processVoteLogic(
-        topic=jsonData["topic"],
-        username=request.user.username,
-        choice=True,
-    ) 
-
-    # If an action occurred that requires a user message, add it here
-    msg = result.get("message")
-    if isinstance(msg, str):  # This clarifies the type for the type checker
-        messages.success(request, msg)
-        
-    return JsonResponse(result)
+    with db_mutex(str(jsonData["gameID"])):
+        return shared_cast_vote(request)

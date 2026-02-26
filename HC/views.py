@@ -31,6 +31,7 @@ from Lobby.sharedFunctions.constants import (
     DELETE_VOTE_TOPIC,
     REWIND_CONSENT_VOTE_TOPIC,
 )
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
@@ -974,302 +975,169 @@ def endGame(request, _winner, _finalPositions, _gameID, currentGame):
 
 @login_required
 def showHCgame(request, game_id):
-    try:
-        currentGame = (
-            Game.objects.select_related("host")
-            .prefetch_related("players__player", "invitedPlayers")
-            .get(id=game_id, gameCode="HC")
-        )
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "HC",
+        default_zoom=200, settings_debug_key="HC_USE_SOURCE_CODE",
+        clear_chat_notification=False)
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
-    presenter = cast("HCpresenter", currentGame.presenter())
-
-    if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
-
-    KickoutFlexiDataArray = []
-    if currentGame.kickoutFlexiData:
-        KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
-
-    gameCreationTimestamp = currentGame.created
-
-    # If person is logged in, may or may not be in game
-    if request.user.is_authenticated:
-        all_players_gps = list(currentGame.players.all().select_related("player"))
-        all_player_ids = {gp.player.id for gp in all_players_gps if gp.player}
-        missing_player_ids = {
-            gp.player.id for gp in all_players_gps if gp.player and gp.is_missing
-        }
-        chat_notify_ids = {
-            gp.player.id
-            for gp in all_players_gps
-            if gp.player and gp.has_chat_notification
-        }
-
-        userObj = request.user
-        username = userObj.username
-        user_id = userObj.id
-
-        user_profile = Profile.objects.get(user=userObj)
-
-        is_in_all = user_id in all_player_ids
-        is_missing = user_id in missing_player_ids
-        involvedPlayer = is_in_all and not is_missing
-        if username == "BotKickStarter":
-            involvedPlayer = True
-        now = int(time.time()) * 1000
-        chatData = currentGame.chatData
-
-        c = bytes(chatData, "utf-8")
-        chatData = c.decode("unicode-escape")
-
-        currentMove = ""
-        currentNotes = ""
-        temporaryMove = ""
-        pov = None
-        preferredHCcolour = -1
-        allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray()
-        kickoutRequired = 0
-        chatNotification = False
-
-        myMove = False
-        # myZoomLevel = 200
-        liveNotification = 1
-        finishedGame = False
-        if currentGame.gameStatus == "FINISHED":
-            finishedGame = True
-        rewindPanelType = 0
-        rewindHostHTML = ""
-        rewindHostPossible = False
-        currentRewindConsent = "0"
-        currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
-        if len(currentPlayers) == 0:
-           currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
-        statsExcludedGame = currentGame.statsExcludedGame
-        displayNames = ""
-
-        # Do Chat notification separately, as could be kicked out, and so not involoved
-        if user_id in chat_notify_ids:
-            chatNotification = True
-            presenter.removeChatNotification(userObj)
-            currentGame.save()
-
-        ## Get the next URL
-        nextURL = (
-            f"/nextGame?current_id={game_id}&current_code={presenter.getGameCode()}"
-        )
-        # If person is logged in and in the game
-        if involvedPlayer:
-            rewindPanelType = 1
-            if (
-                currentGame.host == request.user
-                or request.user.username == "BotKickStarter"
-            ):
-                rewindPanelType = 2
-                rewindHostPossible = presenter.getRewindHostPossible()
-                if request.user.username == "BotKickStarter":
-                    rewindHostPossible = True
-                rewindHostHTML = presenter.getRewindHostHTML()
-
-            pov = presenter.seatPosition(username)
-            currentRewindConsent = presenter.getCurrentRewindConsent(username)
-
-            preferredHCcolour = user_profile.preferredHCcolour
-            liveNotification = user_profile.liveNotification
-            if presenter.hasMoveData(username, True):
-                currentMove = (
-                    '{"phase": '
-                    + str(currentGame.phase)
-                    + ',"turn": '
-                    + str(currentGame.turn)
-                    + ',"content": "'
-                    + presenter.getMoveData(username)
-                    + '"}'
-                )
-
-            if presenter.hasTemporaryMoveData(username):
-                temporaryMove = (
-                    '{"type": "'
-                    + presenter.hasTemporaryMoveData(username)[0]
-                    + '","content": "'
-                    + presenter.hasTemporaryMoveData(username)[1]
-                    + '"}'
-                )
-
-            # Get the Notes for the user
-            user_gp = next(
-                (gp for gp in all_players_gps if gp.player and gp.player.id == user_id),
-                None,
-            )
-            if user_gp:
-                currentNotes = user_gp.notes
-
-            # Check for kickout
-            kickoutRequired = presenter.kickoutRequired()
-
-            myMove = presenter.isMyMove(username)
-
-            if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
-                player_gp = next(
-                    (
-                        gp
-                        for gp in all_players_gps
-                        if gp.player and gp.player.id == user_id
-                    )
-                )
-                if player_gp:
-                    displayNames = player_gp.notes
-                    player_gp.notes = ""
-                    player_gp.save()
-                currentNotes = ""
-
-        #######
-        #   Check if SHADOW in currentGame.allPlayers
-        #   Check currentGame.involvedPlayer
-        #   Use currentGame.gameName
-        #   Use if currentGame.startingOptionsLiteral
-        #   Use currentGame.startingMap
-        #   use currentGame.gameID
-        #   Use currentGame.currentPlayers
-        #   Use currentGame.latestUpdateLiteral
-        #   Use currentGame.myMove to prevent self kickout
-        # tournamentGame = False
-        return render(
-            request,
-            "HC/HCtemplate.html",
-            {
-                "gameCreationTimestamp": gameCreationTimestamp,
-                "now": now,
-                "gameData": currentGame.gameData,
-                "pov": pov,
-                "preferredHCcolour": preferredHCcolour,
-                # "allPlayers": allPlayers,
-                "name": username,
-                "chatData": chatData,
-                "chatNotification": chatNotification,
-                "moveData": currentMove,  # Used for Move Data
-                "temporaryMoveData": temporaryMove,
-                # used for global.players AND if includes SHADOW
-                "allPlayerListBySeat": allPlayerListBySeat,
-                "currentNotes": currentNotes,
-                "kickoutRequired": kickoutRequired,
-                "involvedPlayer": involvedPlayer,
-                "gameName": presenter.getGameName(),
-                "startingOptionsLiteral": (
-                    json.loads(currentGame.startingOptions)
-                    if currentGame.startingOptions
-                    else []
-                ),
-                "gameID": getattr(currentGame, "id"),
-                "currentPlayers": currentPlayers,
-                "latestUpdateLiteral": currentGame.latestUpdate,
-                "myMove": myMove,
-                # "myZoomLevel": myZoomLevel,
-                "liveNotification": liveNotification,
-                "finishedGame": finishedGame,
-                "rewindPanelType": rewindPanelType,
-                "rewindHostHTML": rewindHostHTML,
-                "rewindHostPossible": rewindHostPossible,
-                "currentRewindConsent": int(currentRewindConsent),
-                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
-                # "startingOptionsHTML": startingOptionsHTML,
-                "statsExcludedGame": statsExcludedGame,
-                "displayNames": displayNames,
-                "nextURL": nextURL,
-                "KickoutFlexiDataArray": KickoutFlexiDataArray,
-                "settingsDebug": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
-                "statsExcludeVotesData": json.dumps(
-                    presenter.getFullSetOfVoteResults(
-                        STATS_EXCLUDE_VOTE_TOPIC,
-                        presenter.getAllPlayersOrderedySeatInArray(True),
-                        False,
-                    )
-                ),
-                "deleteVotesData": json.dumps(
-                    presenter.getFullSetOfVoteResults(
-                        DELETE_VOTE_TOPIC,
-                        presenter.getAllPlayersOrderedySeatInArray(True),
-                        False,
-                    )
-                ),
-            },
-        )
-
-    allPlayerListBySeat = [request.user.username, "Ross", "Rachel"]
+    currentGame = result["game"]
+    presenter = cast("HcPresenter", currentGame.presenter())
+    all_players = result["all_players"]
+    username = request.user.username
+    user_id = request.user.id
 
     now = int(time.time()) * 1000
+    chatData = currentGame.chatData
 
-    preferredColour = -1  # user_profile.preferredHCcolour
+    c = bytes(chatData, "utf-8")
+    chatData = c.decode("unicode-escape")
+
+    currentMove = ""
+    currentNotes = ""
+    temporaryMove = ""
+    pov = None
+    preferredHCcolour = -1
+    allPlayerListBySeat = presenter.getAllPlayersOrderedySeat()
+    kickoutRequired = 0
+    chatNotification = False
+    myMove = False
+    liveNotification = 1
+    finishedGame = currentGame.gameStatus == "FINISHED"
+    rewindPanelType = 0
+    rewindHostHTML = ""
+    rewindHostPossible = False
+    currentRewindConsent = "0"
+    currentPlayers = presenter.getCurrentPlayersInOrderString()
+    if currentPlayers == "":
+       currentPlayers = presenter.getAllPlayersOrderedySeat()[0]
+    statsExcludedGame = currentGame.statsExcludedGame
+    displayNames = ""
+
+    # Chat notification separately (could be kicked out)
+    chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
+    # Also check all players including kicked
+    all_gps_including_kicked = list(currentGame.players.select_related("player").all())
+    chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
+    if user_id in chat_notify_ids_all:
+        chatNotification = True
+        presenter.removeChatNotification(request.user)
+        currentGame.save()
+
+    nextURL = (
+        f"/nextGame?current_id={game_id}&current_code={presenter.getGameCode()}"
+    )
+
+    involvedPlayer = result["is_involved"]
+
+    if involvedPlayer:
+        rewindPanelType = 1
+        if (
+            currentGame.host == request.user
+            or username == "BotKickStarter"
+        ):
+            rewindPanelType = 2
+            rewindHostPossible = presenter.getRewindHostPossible()
+            if username == "BotKickStarter":
+                rewindHostPossible = True
+            rewindHostHTML = presenter.getRewindHostHTML()
+
+        pov = presenter.seatPosition(username)
+        currentRewindConsent = presenter.getCurrentRewindConsent(username)
+
+        preferredHCcolour = result["user_profile"].preferredHCcolour
+        liveNotification = result["user_profile"].liveNotification
+        if presenter.hasMoveData(username, True):
+            currentMove = (
+                '{"phase": '
+                + str(currentGame.phase)
+                + ',"turn": '
+                + str(currentGame.turn)
+                + ',"content": "'
+                + presenter.getMoveData(username)
+                + '"}'
+            )
+
+        if presenter.hasTemporaryMoveData(username):
+            temporaryMove = (
+                '{"type": "'
+                + presenter.hasTemporaryMoveData(username)[0]
+                + '","content": "'
+                + presenter.hasTemporaryMoveData(username)[1]
+                + '"}'
+            )
+
+        # Get the Notes for the user
+        user_gp = next(
+            (gp for gp in all_players if gp.player and gp.player.id == user_id),
+            None,
+        )
+        if user_gp:
+            currentNotes = user_gp.notes
+
+        kickoutRequired = presenter.kickoutRequired()
+        myMove = presenter.isMyMove(username)
+
+        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+            player_gp = next(
+                (gp for gp in all_players if gp.player and gp.player.id == user_id),
+                None,
+            )
+            if player_gp:
+                displayNames = player_gp.notes
+                player_gp.notes = ""
+                player_gp.save()
+            currentNotes = ""
 
     return render(
         request,
         "HC/HCtemplate.html",
         {
-            # "gameData": currentGame.gameData,
-            # "gameID": game_id,
-            "showAssistance": "true",
-            # "currentGame": currentGameJSON,
-            # "latestUpdateLiteral": currentGame.latestUpdate,
-            # "involvedPlayer": False,
-            #  "gameName": currentGame.gameName,
-            # "myMove": False,
-            "gameName": "Test Game",
-            "allPlayerListBySeat": allPlayerListBySeat,
-            "trainingGame": True,
-            "name": request.user.username,
-            "gameID": 1,
+            "gameCreationTimestamp": currentGame.created,
             "now": now,
-            "preferredColour": preferredColour,
-            "KickoutFlexiDataArray": KickoutFlexiDataArray,
-            "settingsDebug": config("HC_USE_SOURCE_CODE", default=False, cast=bool),
+            "gameData": currentGame.gameData,
+            "pov": pov,
+            "preferredHCcolour": preferredHCcolour,
+            "name": username,
+            "chatData": chatData,
+            "chatNotification": chatNotification,
+            "moveData": currentMove,
+            "temporaryMoveData": temporaryMove,
+            "allPlayerListBySeat": allPlayerListBySeat,
+            "currentNotes": currentNotes,
+            "kickoutRequired": kickoutRequired,
+            "involvedPlayer": involvedPlayer,
+            "gameName": presenter.getGameName(),
             "startingOptionsLiteral": (
                 json.loads(currentGame.startingOptions)
                 if currentGame.startingOptions
                 else []
             ),
-            "statsExcludeVotesData": json.dumps(
-                presenter.getFullSetOfVoteResults(
-                    STATS_EXCLUDE_VOTE_TOPIC,
-                    presenter.getAllPlayersOrderedySeatInArray(True),
-                    False,
-                )
-            ),
-            "deleteVotesData": json.dumps(
-                presenter.getFullSetOfVoteResults(
-                    DELETE_VOTE_TOPIC,
-                    presenter.getAllPlayersOrderedySeatInArray(True),
-                    False,
-                )
-            ),
+            "gameID": currentGame.id,
+            "currentPlayers": currentPlayers,
+            "latestUpdateLiteral": currentGame.latestUpdate,
+            "myMove": myMove,
+            "liveNotification": liveNotification,
+            "finishedGame": finishedGame,
+            "rewindPanelType": rewindPanelType,
+            "rewindHostHTML": rewindHostHTML,
+            "rewindHostPossible": rewindHostPossible,
+            "currentRewindConsent": int(currentRewindConsent),
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "statsExcludedGame": statsExcludedGame,
+            "displayNames": displayNames,
+            "nextURL": nextURL,
+            "KickoutFlexiDataArray": result["base_data"]["KickoutFlexiDataArray"],
+            "settingsDebug": result["base_data"]["settingsDebug"],
+            "statsExcludeVotesData": result["base_data"]["statsExcludeVotesData"],
+            "deleteVotesData": result["base_data"]["deleteVotesData"],
         },
     )
 
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode="HC")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request, "HC", gameID, gameData, bugDescription, currentGame.rewindData, ""
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "HC")
 
 
 def HChelp(request):
@@ -1368,111 +1236,15 @@ def chat(request):
 
 @login_required()
 def notes(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    user_gp = currentGame.players.filter(player=request.user).first()
-    if user_gp:
-        user_gp.notes = jsonData["note"]
-        user_gp.save()
-
-    return JsonResponse({"notePosted": True})
+    return shared_save_notes(request, "HC", json_key="note")
 
 
 @login_required()
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _castVote(request)
-
-
-# ALTER THIS ONCE FCM IS A GENERAL GAME -- COMPARE WITH EG CNS _CASEVOTE
-@login_required
-def _castVote(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='HC')
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    presenter = cast('HCpresenter', currentGame.presenter())
-
-    # player = request.user  # Assuming the logged-in user is voting
-    playerName = request.user.username  # Get the player's username
-    topic = jsonData["topic"]
-    choice = jsonData["choice"]
-
-    success = presenter.castVote(
-        topic, playerName, choice
-    )  # Pass playerName to addDeleteVote
-
-    if success:
-        currentGame.save()
-        # Check if all players have voted to delete
-        all_voted = True
-        votesData = presenter.getFullSetOfVoteResults(
-            topic, presenter.getAllPlayersOrderedySeatInArray(True), False
-        )
-
-        missingPlayers = presenter.getMissingPlayersNamesArray()
-        for player, vote in votesData.items():
-            if not vote and player not in missingPlayers:
-                all_voted = False
-                break
-
-        if all_voted:
-            votesData = json.dumps(
-                presenter.getFullSetOfVoteResults(
-                    topic, presenter.getAllPlayersOrderedySeatInArray(True), False
-                )
-            )
-            # Delete the game
-            if topic == DELETE_VOTE_TOPIC:
-                currentGame.delete()
-                # Add a success message
-                messages.success(request, gettext("Game successfully deleted"))
-
-            if topic == STATS_EXCLUDE_VOTE_TOPIC:
-                currentGame.statsExcludedGame = True
-                currentGame.save()
-                # Add a success message
-                messages.success(request, gettext("Game stats excluded"))
-
-            # Redirect to the index page
-            return JsonResponse(
-                {
-                    "voteChanged": True,
-                    "votesData": votesData,
-                    "redirect_url": reverse("index"),
-                }
-            )
-
-        return JsonResponse(
-            {
-                "voteChanged": True,
-                "votesData": json.dumps(
-                    presenter.getFullSetOfVoteResults(
-                        topic, presenter.getAllPlayersOrderedySeatInArray(True), False
-                    )
-                ),
-            },
-            safe=False,
-        )
-
-    return JsonResponse({"voteChanged": False})
+    with db_mutex(str(jsonData["gameID"])):
+        return shared_cast_vote(request)
 
 

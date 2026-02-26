@@ -36,6 +36,7 @@ from .common import create_aqy_game
 from Lobby.models import User, Profile, Game
 
 from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:
     from Lobby.presenters import AQYpresenter
@@ -62,155 +63,57 @@ def createAQYgame(request):
 
 
 def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    try:
-        currentGame = (
-            Game.objects.select_related("host", "creator").prefetch_related("players__player", "invitedPlayers").get(id=game_id, gameCode="AQY")
-        )
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    result = build_show_game_data(request, game_id, "AQY",
+        default_zoom=16, settings_debug_key="AQY_USE_SOURCE_CODE",
+        clear_chat_notification=False)
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
-    if currentGame.gameStatus not in ["ACTIVE", "FINISHED"]:
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
+    currentGame = result["game"]
+    presenter = cast('AqyPresenter', currentGame.presenter())
+    user_gp = result["user_gp"]
+    username = request.user.username
 
-    presenter = cast("AQYpresenter", currentGame.presenter())
-
-    # Access the prefetch cache immediately to "warm" it
-    #all_player_ids = {gp.player.id for gp in currentGame.players.all() if gp.player}
-    userObj = request.user
-    username = userObj.username
-
-    # No2 it is a proper started game, so set up for not logged in
-    gameID = currentGame.id
-    gameName = presenter.getGameName()
-    gameData = currentGame.gameData
-    gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-
-    allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray(False)
-
-    # Logged out
-    returnData = {
-        "gameID": gameID,
-        "gameName": gameName,
-        "gameData": gameData,
-        "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 16,
+    returnData = {**result["base_data"]}
+    returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "startingOptions": startingOptions,
-        "allPlayerListBySeat": json.dumps(allPlayerListBySeat),
-        "currentPlayers": presenter.getCurrentPlayersArrayAQY(),
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
+        "currentPlayers": presenter.getCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
-        "statsExcludeVotesData": json.dumps(
-            presenter.getFullSetOfVoteResults(STATS_EXCLUDE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeatInArray(True), False)
-        ),
-        "deleteVotesData": json.dumps(presenter.getFullSetOfVoteResults(DELETE_VOTE_TOPIC, presenter.getAllPlayersOrderedySeatInArray(True), False)),
-        "settingsDebug": config("AQY_USE_SOURCE_CODE", default=False, cast=bool),
-        # "settingsDebug": False,
-    }
+    })
 
-    if not request.user.is_authenticated:
+    if not result["is_authenticated"]:
         return render(request, "AQY/showAQYgame.html", returnData)
 
-    # Now you are logged in
-    user_id = userObj.id
+    returnData.update(result["auth_data"])
 
-    user_profile = Profile.objects.get(user=userObj)
-
-    # Get user game player object
-    user_gp = currentGame.players.filter(player=userObj).first()
-
-    is_in_all = user_gp is not None
-    is_missing = user_gp.is_missing if user_gp else False
-    involvedPlayer = is_in_all and not is_missing
-    if username == "BotKickStarter":
-        involvedPlayer = True
-
-    chatData = currentGame.chatData
-
-    latestUpdate = currentGame.latestUpdate
-
-    ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code=AQY"
-
-    preferredAQYoptions = json.loads(user_profile.preferredAQYoptions) if user_profile.preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0]
-
-    # preferredAQYoptions
-    # colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes,showPollutionUnderRes, housesInNumberOrder
-
-    # UPDATE CHAT NOTIFICATIONS HERE IN CASE OF BOT
-    ## Get Chat notification
-    chatNotification = False
+    # AQY uses presenter.removeChatNotification + currentGame.save()
     if user_gp and user_gp.has_chat_notification:
-        chatNotification = True
+        returnData["chatNotification"] = True
         presenter.removeChatNotification(request.user)
         currentGame.save()
 
-    returnData.update(
-        {
-            "name": username,
-            "chatData": chatData,
-            "latestUpdateLiteral": latestUpdate,
-            "nextURL": nextURL,
-            "preferredAQYoptions": preferredAQYoptions,
-            "chatNotification": chatNotification,
-        }
+    preferredAQYoptions = (
+        json.loads(result["user_profile"].preferredAQYoptions)
+        if result["user_profile"].preferredAQYoptions != ""
+        else [-1, 1, 0, 0, 1, 1, 0]
     )
+    returnData["preferredAQYoptions"] = preferredAQYoptions
 
-    if not involvedPlayer:
+    if not result["is_involved"]:
         return render(request, "AQY/showAQYgame.html", returnData)
 
-    pov = presenter.seatPosition(username)
-    if request.user.username == "BotKickStarter":
-        pov = -1
-    secondsToNextKickout = presenter.getSecondsToNextKickout()
-
-    kickoutRequired = presenter.kickoutRequired()
-
-    myMove = presenter.isMyMove(username)
-
-    ## Get the Notes for the user
-    notes = user_gp.notes if user_gp else ""
-
-    liveNotification = user_profile.liveNotification
-    myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
-
-    move = presenter.getMoveData(username)
-    trade = currentGame.playerTradeData
-
-    ## Involved Player
-    returnData.update(
-        {
-            "involvedPlayer": True,
-            "pov": pov,
-            "secondsToNextKickout": secondsToNextKickout,
-            "kickoutRequired": kickoutRequired,
-            "myMove": myMove,
-            "myZoomLevel": myZoomLevel,
-            "notes": notes,
-            "yourTurnAudioType": liveNotification,
-            "statsExcludedGame": currentGame.statsExcludedGame,
-            "move": move,
-            "trade": trade,
-        }
-    )
+    returnData.update(result["involved_data"])
+    returnData.update({
+        "move": presenter.getMoveData(username),
+        "trade": currentGame.playerTradeData,
+    })
 
     ## pre move
-    if (
-        currentGame.phase == 4
-        or currentGame.phase == 5
-        or currentGame.phase == 6
-        or currentGame.phase == 7
-        or currentGame.phase == 8
-        or currentGame.phase == 9
-    ):
+    if currentGame.phase in [4, 5, 6, 7, 8, 9]:
         if presenter.getMoveDataTime(username) == "PRE_MOVE":
-            returnData.update({"preMove": presenter.getMoveData(username)})
-
-    # TODO: also send any current player pre moves in case action failed.
+            returnData["preMove"] = presenter.getMoveData(username)
 
     ### NEW GAME
     if currentGame.gameData == "":
@@ -220,18 +123,11 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
             if user_gp:
                 user_gp.notes = ""
                 user_gp.save()
-            notes = ""
-        # allPlayerListBySeat = json.dumps(currentGame.getAllPlayersOrderedySeatInArray())
+            returnData["notes"] = ""
         if currentGame.startingMap != "":
-            returnData.update({"startingMap": json.loads(currentGame.startingMap)})
+            returnData["startingMap"] = json.loads(currentGame.startingMap)
 
-        returnData.update(
-            {
-                "notes": notes,
-                "displayNames": displayNames,
-                # "allPlayerListBySeat": allPlayerListBySeat,
-            }
-        )
+        returnData["displayNames"] = displayNames
 
     return render(request, "AQY/showAQYgame.html", returnData)
 
@@ -1131,32 +1027,8 @@ def AQYdata(request, dataType):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode="AQY")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request,
-        "AQY",
-        gameID,
-        gameData,
-        bugDescription,
-        currentGame.rewindData,
-        currentGame.startingMap,
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "AQY",
+        extra_info_fn=lambda g: g.startingMap)
 
 
 @login_required()
@@ -1215,94 +1087,21 @@ def _sendChatMessage(request):
 
 @login_required()
 def saveNotes(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    game_id = jsonData["gameID"]
-    notes = jsonData["notes"]
-    try:
-        currentGame = Game.objects.get(id=game_id, gameCode="AQY")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    # Get the player's GamePlayer instance
-    gp = currentGame.players.filter(player=request.user).first()
-    if gp:
-        gp.notes = notes
-        gp.save()
-
-    return JsonResponse({"notePosted": True})
+    return shared_save_notes(request, "AQY")
 
 
 @login_required
 def saveZoom(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    if jsonData["action"] == "zoom":
-        try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="AQY")
-        except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-        zoomLevels = json.loads(currentGame.zoomLevels)
-
-        if jsonData.get("allPlayers"):
-            for i in range(len(zoomLevels)):
-                zoomLevels[i] = int(jsonData["zoomLevel"])
-        else:
-            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
-
-        currentGame.zoomLevels = json.dumps(zoomLevels)
-        currentGame.save()
-        return JsonResponse(
-            {
-                "response": "ok",
-            }
-        )
-
-    return HttpResponse(status=204)  # No Content
+    return shared_save_zoom(request, "AQY")
 
 
 @login_required()
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _castVote(request)
-
-
-@login_required
-def _castVote(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="AQY")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    presenter = cast("AQYpresenter", currentGame.presenter())
-
-    # Delegate all logic to the presenter
-    result = presenter.processVoteLogic(
-        topic=jsonData["topic"],
-        username=request.user.username,
-        choice=True,
-    )
-
-    # If an action occurred that requires a user message, add it here
-    msg = result.get("message")
-    if isinstance(msg, str):  # This clarifies the type for the type checker
-        messages.success(request, msg)
-
-    return JsonResponse(result)
+    with db_mutex(str(jsonData["gameID"])):
+        return shared_cast_vote(request)
 
 
 @login_required
