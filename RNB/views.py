@@ -298,6 +298,9 @@ def _processRNBturn(request):
             conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
             conflictPresetMove["status"] = "pending"
             PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
+            
+        # Next, we can clear out old data
+        PclearPastMoveData(currentGame)
 
         # If the client and server both agree that this person is first, then the browser will only allow valid moves
         # So it must be a valid move. So update the game with the ALREADY PROCESSED game data, and move on
@@ -607,6 +610,9 @@ def _processRNBturn(request):
                 {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
+            
+        # Firstly, wipe all move Data
+        PwipeAllMoveData(currentGame)
 
         loadDatab64 = currentRewindDataArray.pop() if currentRewindDataArray else ""
 
@@ -1031,6 +1037,28 @@ def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
     gp_player.moveDataJSON = moves
     gp_player.save(update_fields=["moveDataJSON"])  # ONLY save this field
 
+
+def PclearPastMoveData(currentGame):
+    turn = currentGame.turn
+    phase = currentGame.phase
+    # .all() is needed after .only() to iterate
+    all_gp = currentGame.players.only("moveDataJSON") 
+    
+    for gp in all_gp:
+        moves = gp.moveDataJSON or []
+        
+        # Rebuild the list with ONLY the moves that are NOT in the past
+        gp.moveDataJSON = [
+            m for m in moves 
+            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase)
+        ]
+        
+        gp.save(update_fields=["moveDataJSON"])
+
+def PwipeAllMoveData(currentGame):
+    for gp in currentGame.players.all():
+        gp.moveDataJSON = None
+        gp.save(update_fields=["moveDataJSON"])    
 
 def PdecompressData(string_to_decompress):
     # return json.loads(gzip.decompress(base64.b64decode(string_to_decompress)).decode("utf-8"))
