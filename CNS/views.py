@@ -37,7 +37,7 @@ from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOT
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:
-    from Lobby.presenters import CannesPresenter 
+    from Lobby.presenters import CNSpresenter 
     
 CNS_DB_LOCK_NAME = "lockCNSgame_"
 
@@ -148,7 +148,7 @@ def createCNSgame(request):
                 shadow_players.append(display_name)
 
             # Store shadow player names in creator's notes
-            creator_gp = GamePlayer.objects.get(game=newGame, player=request.user)
+            creator_gp = newGame.players.get(player=request.user)
             creator_gp.notes = json.dumps(shadow_players)
             creator_gp.save()
 
@@ -242,7 +242,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
                 if user_gp and user_gp.player_id == currentGame.creator_id:
                     returnData["notes"] = ""
             currentGame.save()
-        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
 
         returnData.update(
             {
@@ -297,7 +297,7 @@ def _processCNSturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('CannesPresenter', currentGame.presenter())
+    presenter = cast('CNSpresenter', currentGame.presenter())
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -335,20 +335,12 @@ def _processCNSturn(request):
         next_player_usernames = (
             jsonData["nextPlayer"].split(",") if jsonData["nextPlayer"] else []
         )
-        # currentGame.players.exclude(is_kicked=True).update(is_current=False)
-        GamePlayer.objects.filter(game=currentGame).exclude(is_kicked=True).update(
-            is_current=False
-        )
-        # if next_player_usernames:
-        #    for username in next_player_usernames:
-        #        currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
-        # 2. Update specific players
+        currentGame.players.exclude(is_kicked=True).update(is_current=False)
+
         if next_player_usernames:
-            GamePlayer.objects.filter(
-                game=currentGame,
-                player__username__in=next_player_usernames,
-                is_kicked=False,
-            ).update(is_current=True)
+            for username in next_player_usernames:
+                currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
+
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
 
@@ -437,10 +429,7 @@ def _processCNSturn(request):
     elif jsonData["action"] == "resign":
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
-        # missing_gp = currentGame.players.filter(player=_missingPlayer).first()
-        missing_gp = GamePlayer.objects.filter(
-            game=currentGame, player=_missingPlayer
-        ).first()
+        missing_gp = currentGame.players.filter(player=_missingPlayer).first()
         if missing_gp:
             missing_gp.is_missing = True
             missing_gp.save()
@@ -515,23 +504,11 @@ def _processCNSturn(request):
         next_player_usernames = (
             jsonData["nextPlayer"].split(",") if jsonData["nextPlayer"] else []
         )
-        # currentGame.players.exclude(is_kicked=True).update(is_current=False)
-        # if next_player_usernames:
-        #    for username in next_player_usernames:
-        #        currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
-        # 1. Reset all non-kicked players for this game to is_current=False
-        GamePlayer.objects.filter(game=currentGame).exclude(is_kicked=True).update(
-            is_current=False
-        )
-
-        # 2. Update all next players in a single query (Optimized Method 3)
+        currentGame.players.exclude(is_kicked=True).update(is_current=False)
         if next_player_usernames:
-            GamePlayer.objects.filter(
-                game=currentGame,
-                player__username__in=next_player_usernames,
-                is_kicked=False,
-            ).update(is_current=True)
-
+            for username in next_player_usernames:
+                currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
+ 
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -579,10 +556,7 @@ def _processCNSturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
-        # missing_gp = currentGame.players.filter(player=_missingPlayer).first()
-        missing_gp = GamePlayer.objects.filter(
-            game=currentGame, player=_missingPlayer
-        ).first()
+        missing_gp = currentGame.players.filter(player=_missingPlayer).first()
         if missing_gp:
             missing_gp.is_missing = True
             missing_gp.is_kicked = True
@@ -655,7 +629,7 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True))
         currentGame.presenter().removeChatNotification(request.user)
         
         currentGame.save()
@@ -690,8 +664,7 @@ def CNSdata(request, dataType):
         )
     elif dataType == 2:
         # Remove user from notifications
-        #user_gp = currentGame.players.filter(player=request.user).first()
-        user_gp = GamePlayer.objects.filter(game=currentGame, player=request.user).first()
+        user_gp = currentGame.players.filter(player=request.user).first()
         if user_gp:
             user_gp.has_chat_notification = False
             user_gp.save()

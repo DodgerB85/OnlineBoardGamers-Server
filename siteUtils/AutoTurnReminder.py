@@ -67,11 +67,10 @@ for gameCode in GAME_CODES:
 
     allGames = Game.objects.filter(query).all()
     for singleGame in allGames:
-        # print(singleGame.id)
         timeRemaining = singleGame.presenter().getSecondsToNextKickout()
         if timeRemaining >= remaining_start_time and timeRemaining <= remaining_finish_time:
             print(f"{gameCode}: 2hr: {singleGame.id}")
-            playersToNotify = singleGame.presenter().getCurrentPlayersArrayForReminderEmail()
+            playersToNotify = singleGame.presenter().getArrayOfIsCurrentPlayers()
             for playerName in playersToNotify:
                 print(f"2hr Email: {playerName}")
                 SN_sendReminderEmail(playerName, gameCode, singleGame.id, singleGame.presenter().getGameName())
@@ -79,7 +78,7 @@ for gameCode in GAME_CODES:
         if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
             # print(singleGame.getCurrentPlayersArray())
             print(f"{gameCode}: exp: {singleGame.id}")
-            playersToNotify = singleGame.presenter().getCurrentPlayersArrayForReminderEmail()
+            playersToNotify = singleGame.presenter().getArrayOfIsCurrentPlayers()
             for playerName in playersToNotify:
                 print(f"Expired Email: {playerName}")
                 SN_sendReminderExpiredEmail(playerName, gameCode, singleGame.id, singleGame.presenter().getGameName())
@@ -88,7 +87,7 @@ for gameCode in GAME_CODES:
                 try:
                     message = "===========================\n"
                     message += "GAME EXPIRY AUTO-DETECTED\n"
-                    message += f"Player: {singleGame.presenter().getCurrentPlayersArrayForReminderEmail()}\n"
+                    message += f"Player: {singleGame.presenter().getArrayOfIsCurrentPlayers()}\n"
                     message += "[Click here to view the game](https://www.OnlineBoardGamers.com/FCM/" + str(singleGame.id) + "/)"
                     requests.post(f'https://discordapp.com/api/webhooks/{config("WEBHOOK_FCM_TOURNAMENT_ADMIN")}', data={"content": message})
                 except Exception as e:
@@ -98,7 +97,7 @@ for gameCode in GAME_CODES:
                 try:
                     message = "===========================\n"
                     message += "GAME EXPIRY AUTO-DETECTED\n"
-                    message += f"Player: {singleGame.presenter().getCurrentPlayersArrayForReminderEmail()}\n"
+                    message += f"Player: {singleGame.presenter().getArrayOfIsCurrentPlayers()}\n"
                     message += "[Click here to view the game](https://www.OnlineBoardGamers.com/TGZ/" + str(singleGame.id) + "/)"
                     requests.post(f'https://discordapp.com/api/webhooks/{config("WEBHOOK_TGZ_TOURNAMENT_ADMIN")}', data={"content": message})
                 except Exception as e:

@@ -37,7 +37,7 @@ from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOT
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:
-    from Lobby.presenters import IndPresenter
+    from Lobby.presenters import INDpresenter
 
 INDsuperUsers = ["BotKickStarter"]
 
@@ -165,7 +165,7 @@ def createINDgame(request):
                 user_gp.notes = json.dumps(shadow_players)
                 user_gp.save()
 
-            presenter = cast("IndPresenter", newGame.presenter())
+            presenter = cast("INDpresenter", newGame.presenter())
             presenter.startGame(request)
         else:
             usernamesToNotify = []
@@ -301,7 +301,8 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
+            # For shadow games, display names are stored in the first player's notes
             user_gp = currentGame.players.filter(player=userObj).first()
             if user_gp and user_gp.notes:
                 displayNames = user_gp.notes
@@ -357,7 +358,7 @@ def _processINDturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("IndPresenter", currentGame.presenter())
+    presenter = cast("INDpresenter", currentGame.presenter())
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -370,7 +371,7 @@ def _processINDturn(request):
             message = (
                 f"SYNC ERROR IN: IND save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -406,7 +407,7 @@ def _processINDturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -428,13 +429,13 @@ def _processINDturn(request):
                 else []
             )
             if (
-                jsonData["nextPlayer"] != ""
-                and jsonData["nextPlayer"] != "IndBot"
+                len(jsonData["nextPlayer"]) > 0
+                and jsonData["nextPlayer"][0] != "IndBot"
                 and jsonData["status"] != "FINISHED"
                 and 102 not in loadedStartingOptions
             ):
                 playerListToNotify = [
-                    player.strip() for player in jsonData["nextPlayer"].split(",")
+                    player.strip() for player in jsonData["nextPlayer"]
                 ]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -522,7 +523,7 @@ def _processINDturn(request):
             {
                 "latestUpdate": currentGame.latestUpdate,
                 # "secondsToNextKickout": currentGame.getSecondsToNextKickout(),
-                # "nextPlayer": presenter.getCurrentPlayersArray(),
+                # "nextPlayer": presenter.getArrayOfIsCurrentPlayers(),
             },
             safe=False,
         )
@@ -537,7 +538,7 @@ def _processINDturn(request):
             message = (
                 f"SYNC ERROR IN: IND loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -599,7 +600,7 @@ def _processINDturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -614,11 +615,11 @@ def _processINDturn(request):
             else []
         )
         if (
-            jsonData["nextPlayer"] != ""
-            and jsonData["nextPlayer"] != "IndBot"
+            len(jsonData["nextPlayer"]) > 0
+            and jsonData["nextPlayer"][0] != "IndBot"
             and 102 not in loadedStartingOptions
         ):
-            playerListToNotify = jsonData["nextPlayer"].split(",")
+            playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
@@ -652,7 +653,7 @@ def _processINDturn(request):
             message = (
                 f"SYNC ERROR IN: IND kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -695,7 +696,7 @@ def _processINDturn(request):
             message = (
                 f"SYNC ERROR IN: IND preTurn - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArray()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -743,7 +744,7 @@ def INDdata(request, dataType):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("IndPresenter", currentGame.presenter())
+    presenter = cast("INDpresenter", currentGame.presenter())
 
     if dataType == 1:
         returnData = {
@@ -873,7 +874,7 @@ def forkINDgame(request):
     # newGame.gameName = currentGame.gameName + " (fork)"
     # newGame.save()
     
-    old_presenter = cast("IndPresenter", source_game.presenter())
+    old_presenter = cast("INDpresenter", source_game.presenter())
     
     original_players = list(source_game.players.all())
 
