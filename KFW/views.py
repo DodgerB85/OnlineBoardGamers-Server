@@ -200,7 +200,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return result
 
     currentGame = result["game"]
-    presenter = cast('KfwPresenter', currentGame.presenter())
+    presenter = cast('KFWpresenter', currentGame.presenter())
     all_players = result["all_players"]
     username = request.user.username
 
@@ -217,7 +217,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "replayStep": replayStep,
         "gameData1": gameData1,
         "gameData3": presenter.getGameData3compressed(),
-        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
         "currentPlayers": presenter.getCurrentPlayers(),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredKFWoptions": [-1],
@@ -271,7 +271,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             creator_gp = next(
                 (gp for gp in all_players if gp.player and gp.player.id == currentGame.creator_id), None
             )

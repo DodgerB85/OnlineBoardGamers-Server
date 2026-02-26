@@ -70,7 +70,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return result
 
     currentGame = result["game"]
-    presenter = cast('AqyPresenter', currentGame.presenter())
+    presenter = cast('AQYpresenter', currentGame.presenter())
     user_gp = result["user_gp"]
     username = request.user.username
 
@@ -78,7 +78,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
         "currentPlayers": presenter.getCurrentPlayers(),
         "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
     })
