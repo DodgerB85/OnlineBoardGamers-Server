@@ -76,7 +76,7 @@ for gameCode in GAME_CODES:
                 SN_sendReminderEmail(playerName, gameCode, singleGame.id, singleGame.presenter().getGameName())
 
         if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
-            # print(singleGame.getCurrentPlayersArray())
+            # print(singleGame.getArrayOfIsCurrentPlayers())
             print(f"{gameCode}: exp: {singleGame.id}")
             playersToNotify = singleGame.presenter().getArrayOfIsCurrentPlayers()
             for playerName in playersToNotify:
