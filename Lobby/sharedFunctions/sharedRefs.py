@@ -587,27 +587,44 @@ def SR_currentTurnString(game, turn, phase):
     elif game == "RNB":
         currentTurnString = str(turn) + " - "
         if phase == 0:
-            currentTurnString +=  gettext("Conflict (Production)")
-        if phase == 2:
-            currentTurnString +=  gettext("Conflict (Movement)")
-        if phase == 4:
-            currentTurnString +=  gettext("Conflict (Building)")
-        if phase == 6:
-            currentTurnString +=  gettext("Conflict (Wonder)")
-        if phase == 1:
-            currentTurnString +=  gettext("Production")
-        if phase == 3:
-            currentTurnString +=  gettext("Movement")
-        if phase == 5:
-            currentTurnString +=  gettext("Building")
-        if phase == 7:
-            currentTurnString +=  gettext("Wonder")
-        if phase == 9:
-            currentTurnString =  gettext("Game End")
-        
+            currentTurnString += gettext("Conflict: Production Decision")
+        elif phase == 1:
+            currentTurnString += gettext("Conflict: Production Praying")
+        elif phase == 2:
+            currentTurnString += gettext("Conflict: Production Turn Order")
+        elif phase == 3:
+            currentTurnString += gettext("Production")
+        elif phase == 4:
+            currentTurnString += gettext("Conflict: Movement Decision")
+        elif phase == 5:
+            currentTurnString += gettext("Conflict: Movement Praying")
+        elif phase == 6:
+            currentTurnString += gettext("Conflict: Movement Turn Order")
+        elif phase == 7:
+            currentTurnString += gettext("Movement")
+        elif phase == 8:
+            currentTurnString += gettext("Conflict: Building Decision")
+        elif phase == 9:
+            currentTurnString += gettext("Conflict: Building Praying")
+        elif phase == 10:
+            currentTurnString += gettext("Conflict: Building Turn Order")
+        elif phase == 11:
+            currentTurnString += gettext("Building")
+        elif phase == 12:
+            currentTurnString += gettext("Conflict: Wonder Decision")
+        elif phase == 13:
+            currentTurnString += gettext("Conflict: Wonder Praying")
+        elif phase == 14:
+            currentTurnString += gettext("Conflict: Wonder Turn Order")
+        elif phase == 15:
+            currentTurnString += gettext("Wonder")
+        elif phase == 19:
+            currentTurnString += gettext("Game End")
+   
         return currentTurnString
+        
+        
 
-    return "NO CURRENT TURN STRING"
 
 
 def SR_gamePaceString(gamePace):
