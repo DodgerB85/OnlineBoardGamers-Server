@@ -1,6 +1,6 @@
 ## TODO:
 # Simplify seatPosition once all games converted
-# combine all isMyMove/quickIMM 
+# combine all isMyMove/quickIMM
 # Maybe unify end/start games, with flags?
 
 import base64
@@ -17,7 +17,13 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
 )
 
-from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, REWIND_CONSENT_VOTE_TOPIC, BLANK_MESSAGE_TEMPLATE, SHADOW_USERNAMES
+from Lobby.sharedFunctions.constants import (
+    STATS_EXCLUDE_VOTE_TOPIC,
+    DELETE_VOTE_TOPIC,
+    REWIND_CONSENT_VOTE_TOPIC,
+    BLANK_MESSAGE_TEMPLATE,
+    SHADOW_USERNAMES,
+)
 
 
 class GamePresenter:
@@ -27,9 +33,7 @@ class GamePresenter:
 
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-        allPlayersString = " / ".join(
-            gp.player.username for gp in all_players if gp.player
-        )
+        allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
         return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
 
     ####### THESE FUNCTIONS HAVE MINOR CHANGES DEPEDNGIN ON THE GAME
@@ -42,9 +46,7 @@ class GamePresenter:
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
 
-        return loggedInPlayerUsername in current_usernames or any(
-            username in SHADOW_USERNAMES for username in current_usernames
-        )
+        return loggedInPlayerUsername in current_usernames or any(username in SHADOW_USERNAMES for username in current_usernames)
 
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
@@ -63,9 +65,7 @@ class GamePresenter:
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
 
-        return loggedInPlayerUsername in current_usernames or any(
-            username in SHADOW_USERNAMES for username in current_usernames
-        )
+        return loggedInPlayerUsername in current_usernames or any(username in SHADOW_USERNAMES for username in current_usernames)
 
     ########### END OF FUNCTIONS THAT DEPEND ON THE GAME
 
@@ -213,9 +213,7 @@ class GamePresenter:
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
         self.gameObj.save()
 
-        game_players = list(self.gameObj.players.exclude(is_kicked=True).select_related(
-            "player"
-        ))
+        game_players = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
 
         to_update = []
         if self.gameObj.gameCode == "RNB":
@@ -233,6 +231,7 @@ class GamePresenter:
                 to_update.append(gp)
         if len(to_update) > 0:
             from Lobby.models import GamePlayer
+
             GamePlayer.objects.bulk_update(to_update, ["is_current"])
 
     def checkForHostChange(self, _missingUser):
@@ -257,6 +256,18 @@ class GamePresenter:
         self.gameObj.rewindTempData = ""
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.activeVotes = None
+        # TGZ
+        self.gameObj.autoMoves = None
+        # AQY
+        self.gameObj.playerTradeData = ""
+        # IND
+        self.gameObj.playersPreMoveData = ""
+        # FCM
+        self.gameObj.FCMplayersMoveData = ""
+        # HC
+        self.gameObj.currentPlayersInTurnOrder = None  # Check this doesn't crash game load if game ended
+        # RNB
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = None  # Check this doesn't crash game load if game ended
 
     def _sendStartGameNotification(self, request, playerListToNotify):
         """Send async game-start notification to other players."""
@@ -281,19 +292,6 @@ class GamePresenter:
             message_data,
         )
 
-        # TGZ
-        self.gameObj.autoMoves = None
-        # AQY
-        self.gameObj.playerTradeData = ""
-        # IND
-        self.gameObj.playersPreMoveData = ""
-        # FCM
-        self.gameObj.FCMplayersMoveData = ""
-        # HC
-        self.gameObj.currentPlayersInTurnOrder = None # Check this doesn't crash game load if game ended
-        # RNB
-        self.gameObj.serverCurrentPlayerNamesInTurnOrder = None # Check this doesn't crash game load if game ended
-        
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
         """
@@ -449,7 +447,7 @@ class CNSpresenter(GamePresenter):
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotification,
         )
-        
+
         self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
@@ -485,11 +483,7 @@ class CNSpresenter(GamePresenter):
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            playerListToNotify = [
-                gp.player.username
-                for gp in game_players
-                if gp.player and gp.player.username != request.user.username
-            ]
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
 
 
@@ -566,12 +560,9 @@ class WEBpresenter(GamePresenter):
             # self.gameObj.save()
 
             if not isTournamentGame:
-                playerListToNotify = [
-                    gp.player.username
-                    for gp in game_players
-                    if gp.player and gp.player.username != request.user.username
-                ]
+                playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
                 self._sendStartGameNotification(request, playerListToNotify)
+
 
 class AQYpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
@@ -662,11 +653,7 @@ class AQYpresenter(GamePresenter):
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            playerListToNotify = [
-                gp.player.username
-                for gp in game_players
-                if gp.player and gp.player.username != request.user.username
-            ]
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
 
     def getCurrentPlayersArrayAQY(self):
@@ -849,16 +836,14 @@ class AQYpresenter(GamePresenter):
 
 
 class TGZpresenter(GamePresenter):
-    def endGame(
-        self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
-    ):
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotification,
         )
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
         from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
-        
+
         self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
@@ -919,11 +904,7 @@ class TGZpresenter(GamePresenter):
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            playerListToNotify = [
-                gp.player.username
-                for gp in game_players
-                if gp.player and gp.player.username != request.user.username
-            ]
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
             if request.user.username != allPlayersL[0]:
                 SN_sendNextTurnNotification(
@@ -1111,16 +1092,14 @@ class INDpresenter(GamePresenter):
 
 
 class BusPresenter(GamePresenter):
-    def endGame(
-        self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
-    ):
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotification,
         )
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
         from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
-        
+
         self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
@@ -1238,11 +1217,7 @@ class RNBpresenter(GamePresenter):
                 if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
                     return False
 
-        return (
-            not currentPlayersList
-            or loggedInPlayerUsername in currentPlayersList
-            or currentPlayersList[0] in SHADOW_USERNAMES
-        )
+        return not currentPlayersList or loggedInPlayerUsername in currentPlayersList or currentPlayersList[0] in SHADOW_USERNAMES
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
@@ -1335,13 +1310,8 @@ class RNBpresenter(GamePresenter):
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            playerListToNotify = [
-                gp.player.username
-                for gp in game_players
-                if gp.player and gp.player.username != request.user.username
-            ]
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
-                    
 
     def getCurrentPlayers(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
@@ -1618,8 +1588,6 @@ class FCMpresenter(GamePresenter):
                 for playerName in allPlayers
             ]
 
-
-
     def hasAnyPlayerMovedThisPhase(self, phase):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         for playerMoveArr in playersMoveDataArr:
@@ -1887,7 +1855,6 @@ class FCMpresenter(GamePresenter):
                 gp.save()
         self.gameObj.save()
 
-
     def getCurrentSimulPlayersFCM(self):
         # ASSUME THAT self.currentPlayers IS THE LATEST JSON INCOMING
         # ASSUME THAT phase is the start of simul phase
@@ -1977,7 +1944,7 @@ class FCMpresenter(GamePresenter):
             SF_M_ProcessAnyTournamentEndGame,
         )
         from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
-        
+
         self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
@@ -2091,11 +2058,13 @@ class HCpresenter(GamePresenter):
         """Get current players as an array"""
         current_players_arr = (
             json.loads(self.gameObj.currentPlayersInTurnOrder)
-            if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder != None and self.gameObj.currentPlayersInTurnOrder != ""
+            if self.gameObj.currentPlayersInTurnOrder
+            and self.gameObj.currentPlayersInTurnOrder != None
+            and self.gameObj.currentPlayersInTurnOrder != ""
             else []
         )
-        #return ",".join(current_players_arr) if len(current_players_arr) > 0 and current_players_arr else ""
-        return current_players_arr 
+        # return ",".join(current_players_arr) if len(current_players_arr) > 0 and current_players_arr else ""
+        return current_players_arr
 
     def isMyMove(self, loggedInPlayerUsername=None):
         currentPlayers = self.getCurrentPlayersInOrderArrHC()
@@ -2124,11 +2093,7 @@ class HCpresenter(GamePresenter):
         if self.gameObj.phase == 3 and self.hasMoveData(loggedInPlayerUsername) and loggedInPlayerUsername != currentPlayersArr[0]:
             return False
 
-        return (
-            not currentPlayersArr
-            or loggedInPlayerUsername in currentPlayersArr
-            or currentPlayersArr[0] in SHADOW_USERNAMES
-        )
+        return not currentPlayersArr or loggedInPlayerUsername in currentPlayersArr or currentPlayersArr[0] in SHADOW_USERNAMES
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
@@ -2397,13 +2362,14 @@ class HCpresenter(GamePresenter):
                 rewind_votes[username] = 0
         self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
 
+
 class KFWpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotificationTieGame,
         )
-        
+
         self.clearGeneralDataOnGameEndWithoutSave()
 
         self.gameObj.rewindData = ""
