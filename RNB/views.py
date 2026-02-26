@@ -50,6 +50,7 @@ ALLOWED_USERS_RNB = [
     "timmymayes",
     "SaintJason",
     "h",
+    "Jungy"
 ]
 
 if TYPE_CHECKING:

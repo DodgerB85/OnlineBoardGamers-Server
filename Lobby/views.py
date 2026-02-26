@@ -153,6 +153,7 @@ ALLOWED_USERS_RNB = [
         "timmymayes",
         "SaintJason",
         "h",
+        "Jungy"
 ]
 
 ##########################
