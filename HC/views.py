@@ -491,7 +491,13 @@ def _processHCturn(request):
                 # check enough components (first will always be true -- unless processing a kickout!)
                 if i != 0 or useTheFirst:
                     for j in range(len(FCNATT)):
-                        DBavailableComponents[FCNATT[j]] -= 1
+                        try:
+                            DBavailableComponents[FCNATT[j]] -= 1
+                        except Exception as e:
+                            SN_sendAdminErrorMessage(
+                                request,
+                                f"Exception: {e} -- FCIATT: {FCIATT} -- FCNATT: {FCNATT} -- DBavailableComponents: {DBavailableComponents} j: {j} FCNATT[j]:",
+                            )
                     enoughComponents = True
                     for j in range(len(DBavailableComponents)):
                         if DBavailableComponents[j] < 0:
