@@ -48,7 +48,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.tournyGenerator import multiGamePlayers4p, multiGamePlayersRound2
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG, SHADOW_USERNAMES
 
 NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND = ["FCMtourneyAdmin", "TGZtourneyAdmin"]
 
@@ -158,8 +158,8 @@ def SF_fastSerializeGame(game, user):
     # 4. MyMove & Involved Logic
     is_my_move = False
     if user and game.gameStatus == "ACTIVE":
-        is_my_move = (not current_players_str or user.username in current_players_str or 
-                      any(s in current_players_str for s in ["SHADOW", "FcmAI"]))
+        is_my_move = (not current_players_str or user.username in current_players_str or
+                      any(s in current_players_str for s in SHADOW_USERNAMES))
         
         # For HC, if it is factory phase, AND you have submitted your move, set it back to false
         if game_code == "HC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
@@ -171,8 +171,7 @@ def SF_fastSerializeGame(game, user):
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
     # 5. Shadow/Delete Logic
-    shadow_names = {"SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"}
-    is_deleteable = any(name in all_usernames for name in shadow_names) and (user.id in all_ids if user else False)
+    is_deleteable = any(name in all_usernames for name in SHADOW_USERNAMES) and (user.id in all_ids if user else False)
 
     creator = game.creator.username 
     gameName = getattr(game, 'gameName', 'Unknown Game')
@@ -304,8 +303,7 @@ def SF_kickoutRequired(gameStatus, allPlayers, latestUpdate, kickoutDuration, ki
 
     if gameStatus != "ACTIVE":
         return 0
-    NO_KICKOUT_USERS = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5", "FcmAI"]
-    if any(username in allPlayers for username in NO_KICKOUT_USERS):
+    if any(username in allPlayers for username in SHADOW_USERNAMES):
         return 0
     secondsSinceUpdate = (int(time.time()) * 1000 - int(latestUpdate)) / 1000
 

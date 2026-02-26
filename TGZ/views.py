@@ -45,6 +45,7 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 from .common import create_tgz_game
 
 from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
+from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 
 if TYPE_CHECKING:
@@ -96,177 +97,116 @@ def db_mutex(name, timeout=10):
 
 
 def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
-    try:
-        currentGame = (
-            Game.objects.select_related("host", "creator", "relatedMainTournament")
-            .prefetch_related("players__player", "invitedPlayers")
-            .get(id=game_id, gameCode="TGZ")
-        )
-        presenter = cast("TGZpresenter", currentGame.presenter())
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+    # TGZ has TGZtourneyAdmin as additional super user
+    super_users = ["BotKickStarter"]
 
-    if currentGame.gameStatus != "ACTIVE" and currentGame.gameStatus != "FINISHED":
-        messages.error(request, gettext("The game is not Active"))
-        return HttpResponseRedirect(reverse("index"))
+    result = build_show_game_data(request, game_id, "TGZ",
+        default_zoom=240, settings_debug_key="TGZ_USE_SOURCE_CODE",
+        extra_select_related=["relatedMainTournament"],
+        super_users=super_users)
+    if isinstance(result, HttpResponseRedirect):
+        return result
 
-    # Access the prefetch cache immediately to "warm" it
-    all_players = currentGame.players.exclude(is_kicked=True)
-    all_player_ids = {gp.player.id for gp in all_players if gp.player}
+    currentGame = result["game"]
+    presenter = cast("TgzPresenter", currentGame.presenter())
+    user_gp = result["user_gp"]
+    username = request.user.username
 
-    userObj = request.user
-    username = userObj.username
-
-    # start_time = time.time()
-    # show_timestamps = username in ["admin", "DodgerB"]
-    # def print_timestamp(label):
-    #    if show_timestamps:
-    #        print(f"[TIMING] {label}: {time.time() - start_time:.4f}s | DB Hits: {len(connection.queries)}")
-
-    # Noe it is a proper started game, so set up for not logged in
-    gameID = getattr(currentGame, "id")
-
-    gameName = presenter.getGameName()
-
-    gameData = currentGame.gameData
-    gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = []
-    if currentGame.kickoutFlexiData:
-        KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData)
-
-    gameCode = presenter.getGameCode()
-
-    returnData = {
-        "gameID": gameID,
-        "gameName": gameName,
-        "gameData": gameData,
-        "gameCreationTimestamp": gameCreationTimestamp,
-        "myZoomLevel": 240,
+    returnData = {**result["base_data"]}
+    returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
+    # TGZ includes latestUpdateLiteral in base data
+    returnData["latestUpdateLiteral"] = currentGame.latestUpdate
+    returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "KickoutFlexiDataArray": KickoutFlexiDataArray,
-        "latestUpdateLiteral": currentGame.latestUpdate,
-        "settingsDEBUG": config("TGZ_USE_SOURCE_CODE", default=False, cast=bool),
-        "statsExcludeVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC,
-                currentGame.presenter().getAllPlayersOrderedySeatInArray(True),
-                False,
-            )
-        ),
-        "deleteVotesData": json.dumps(
-            currentGame.presenter().getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC,
-                currentGame.presenter().getAllPlayersOrderedySeatInArray(True),
-                False,
-            )
-        ),
-    }
+    })
 
-    # print_timestamp("After not logged in setup")
-
-    if not request.user.is_authenticated:
+    if not result["is_authenticated"]:
         return render(request, "TGZ/showTGZgame.html", returnData)
 
-    # Now you are logged in
-    user_id = userObj.id
-
-    user_profile = Profile.objects.get(user=userObj)
-
-    user_gp = all_players.filter(player=userObj).first()
-    is_in_all = user_id in all_player_ids
-    is_missing = user_gp.is_missing if user_gp else False
-
-    involvedPlayer = is_in_all and not is_missing
-    if username == "BotKickStarter":
-        involvedPlayer = True
+    # TGZtourneyAdmin involvement check
+    is_involved = result["is_involved"]
     if username == "TGZtourneyAdmin" and currentGame.relatedMainTournament is not None:
-        involvedPlayer = True
+        is_involved = True
 
-    preferredTGZcolour = user_profile.preferredTGZcolour
-    chatData = currentGame.chatData
+    returnData.update(result["auth_data"])
+    # TGZ has trailing / on nextURL
+    returnData["nextURL"] = f"/nextGame?current_id={currentGame.id}&current_code={presenter.getGameCode()}/"
+    returnData["TGZminimalText"] = result["user_profile"].TGZminimalText
 
-    ## Get the next URL
-    nextURL = f"/nextGame?current_id={gameID}&current_code={gameCode}/"
-
-    chatNotification = False
-    if user_gp and user_gp.has_chat_notification:
-        chatNotification = True
-        user_gp.has_chat_notification = False
-        user_gp.save()
-
-    returnData.update(
-        {
-            "name": username,
-            "chatData": chatData,
-            "nextURL": nextURL,
-            "TGZminimalText": user_profile.TGZminimalText,
-            "chatNotification": chatNotification,
-        }
-    )
-
-    if not involvedPlayer:
+    if not is_involved:
         return render(request, "TGZ/showTGZgame.html", returnData)
 
-    # print_timestamp("After not involvedPlayer")
+    if result["is_involved"]:
+        returnData.update(result["involved_data"])
+    else:
+        # TGZtourneyAdmin: helper didn't compute involved_data, do it here
+        pov = presenter.seatPosition(username)
+        notes = user_gp.notes if user_gp else ""
+        myZoomLevel = 240
+        try:
+            zoomLevels = json.loads(currentGame.zoomLevels)
+            if 0 <= pov < len(zoomLevels):
+                myZoomLevel = zoomLevels[pov]
+        except (json.JSONDecodeError, IndexError, TypeError):
+            pass
+        returnData.update({
+            "involvedPlayer": True,
+            "pov": pov,
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "kickoutRequired": presenter.kickoutRequired(),
+            "myMove": presenter.isMyMove(username),
+            "myZoomLevel": myZoomLevel,
+            "notes": notes,
+            "chatNotification": result["auth_data"]["chatNotification"],
+            "yourTurnAudioType": result["user_profile"].liveNotification,
+            "statsExcludedGame": currentGame.statsExcludedGame,
+        })
 
-    pov = presenter.seatPosition(username)
-
+    # TGZ: BotKickStarter gets pov=0
+    pov = result["pov"] if result["is_involved"] else returnData["pov"]
     if username == "BotKickStarter":
         pov = 0
-    # Check for external tournament game
-    is_external_tournament = presenter.isExternalTournamentGame()
+        returnData["pov"] = pov
 
+    is_external_tournament = presenter.isExternalTournamentGame()
     if username == "TGZtourneyAdmin" and is_external_tournament:
         pov = 0
+        returnData["pov"] = pov
 
-    secondsToNextKickout = presenter.getSecondsToNextKickout()
-    kickoutRequired = presenter.kickoutRequired()
-    myMove = presenter.isMyMove(username)
+    # Recalc zoom for overridden pov
+    if pov != result["pov"]:
+        try:
+            returnData["myZoomLevel"] = json.loads(currentGame.zoomLevels)[pov]
+        except (json.JSONDecodeError, IndexError, TypeError):
+            pass
 
-    # Get the Notes for the user
-    notes = user_gp.notes if user_gp else ""
-
-    # print_timestamp("After getting notes")
-
-    liveNotification = user_profile.liveNotification
-    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    myZoomLevel = json.loads(currentGame.zoomLevels)[pov]
+    startingOptions = (
+        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    )
+    returnData["startingOptions"] = startingOptions
+    returnData["preferredTGZcolour"] = result["user_profile"].preferredTGZcolour
 
     autoPass = "false"
     if hasattr(currentGame, "autoMoves") and currentGame.autoMoves is not None:
         autoMoves = json.loads(currentGame.autoMoves)
         if autoMoves[pov] == 1:
             autoPass = "true"
+    returnData["autoPass"] = autoPass
 
     experiencedPlayer = False
     if currentGame.turn == 0:
-        # Count finished games for user in Game model
-        if Game.objects.filter(gameCode="TGZ", players__player=request.user, gameStatus="FINISHED").distinct().count() >= 5:
+        if (
+            Game.objects.filter(
+                gameCode="TGZ", players__player=request.user, gameStatus="FINISHED"
+            )
+            .distinct()
+            .count()
+            >= 5
+        ):
             experiencedPlayer = True
-
-    # Determine external tournament game status
-    is_external_tournament = presenter.isExternalTournamentGame()
-
-    # Involved Player
-    returnData.update(
-        {
-            "involvedPlayer": True,
-            "pov": pov,
-            "secondsToNextKickout": secondsToNextKickout,
-            "kickoutRequired": kickoutRequired,
-            "myMove": myMove,
-            "myZoomLevel": myZoomLevel,
-            "notes": notes,
-            "yourTurnAudioType": liveNotification,
-            "startingOptions": startingOptions,
-            "preferredTGZcolour": preferredTGZcolour,
-            "autoPass": autoPass,
-            "statsExcludedGame": currentGame.statsExcludedGame,
-            "externalTournamentGame": is_external_tournament,
-            "experiencedPlayer": experiencedPlayer,
-        }
-    )
+    returnData["experiencedPlayer"] = experiencedPlayer
+    returnData["externalTournamentGame"] = is_external_tournament
 
     ## NEW GAME
     if currentGame.gameData == "":
@@ -276,14 +216,13 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             if user_gp:
                 user_gp.notes = ""
                 user_gp.save()
-            notes = ""
-        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
+            returnData["notes"] = ""
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
         if currentGame.startingMap != "":
-            returnData.update({"startingMap": json.loads(currentGame.startingMap)})
+            returnData["startingMap"] = json.loads(currentGame.startingMap)
 
         returnData.update(
             {
-                "notes": notes,
                 "displayNames": displayNames,
                 "allPlayerListBySeat": allPlayerListBySeat,
             }
@@ -741,53 +680,13 @@ def _processTGZturn(request):
 
 @login_required()
 def bugEntry(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    try:
-        currentGame = Game.objects.get(id=gameID, gameCode="TGZ")
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    gameData = jsonData["gameData"]
-    bugDescription = jsonData["description"]
-
-    # email data to myself
-    SN_sendBugReportEmail(
-        request,
-        "TGZ",
-        gameID,
-        gameData,
-        bugDescription,
-        currentGame.rewindData,
-        currentGame.startingMap,
-    )
-
-    return JsonResponse({"bugEntrySuccess": True})
+    return shared_bug_entry(request, "TGZ",
+        extra_info_fn=lambda g: g.startingMap)
 
 
 @login_required()
 def saveNotes(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-
-        user_gp = currentGame.players.filter(player=request.user).first()
-        if user_gp:
-            user_gp.notes = jsonData["notes"]
-            user_gp.save()
-            return JsonResponse({"notePosted": True})
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    return JsonResponse({"error": "No response found"}, status=400)
+    return shared_save_notes(request, "TGZ")
 
 
 @login_required()
@@ -912,32 +811,7 @@ def TGZdata(request, dataType):
 
 @login_required
 def changeTGZzoom(request):
-    if request.method != "PUT":
-        return JsonResponse({"error": "Wrong request."}, status=400)
-
-    jsonData = json.loads(request.body)
-
-    if jsonData["action"] == "zoom":
-        try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
-        except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-
-        zoomLevels = json.loads(currentGame.zoomLevels)
-        zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
-        if jsonData.get("allPlayers"):
-            for i in range(len(zoomLevels)):
-                zoomLevels[i] = int(jsonData["zoomLevel"])
-
-        currentGame.zoomLevels = json.dumps(zoomLevels)
-        currentGame.save()
-        return JsonResponse(
-            {
-                "response": "ok",
-            }
-        )
-
-    return JsonResponse({"error": "Wrong request."}, status=400)
+    return shared_save_zoom(request, "TGZ")
 
 
 @login_required
@@ -1214,34 +1088,6 @@ def TGZstatGames(request):
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID)):
-        return _castVote(request)
-
-
-@login_required
-def _castVote(request):
-    """Adds a delete vote for a player."""
-    jsonData = json.loads(request.body)
-
-    try:
-        currentGame = Game.objects.get(id=jsonData["gameID"])
-    except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
-
-    # Delegate all logic to the presenter
-    result = currentGame.presenter().processVoteLogic(
-        topic=jsonData["topic"],
-        username=request.user.username,
-        choice=True,
-    )
-
-    # If an action occurred that requires a user message, add it here
-    msg = result.get("message")
-    if isinstance(msg, str):  # This clarifies the type for the type checker
-        messages.success(request, msg)
-
-    return JsonResponse(result)
+    with db_mutex(str(jsonData["gameID"])):
+        return shared_cast_vote(request)
