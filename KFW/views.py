@@ -35,7 +35,7 @@ from Lobby.models import Game, GamePlayer, User, Profile
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry
 
 if TYPE_CHECKING:
-    from Lobby.presenters import KfwPresenter 
+    from Lobby.presenters import KFWpresenter 
     
 KFW_SUPER_USERS = ["BotKickStarter"]
 
@@ -132,7 +132,7 @@ def createKFWgame(request):
                 creator_gp.notes = json.dumps(shadow_players)
                 creator_gp.save()
 
-            presenter = cast('KfwPresenter', newGame.presenter())
+            presenter = cast('KFWpresenter', newGame.presenter())
             presenter.startGame(request)
         else:
             usernamesToNotify = []
@@ -329,7 +329,7 @@ def _processKFWturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('KfwPresenter', currentGame.presenter())
+    presenter = cast('KFWpresenter', currentGame.presenter())
 
     if jsonData["action"] == "getBoatMeeplesAndSkills":
         incomingData = presenter.decompressData(jsonData["gameData"])
@@ -361,7 +361,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW simpleSave - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -390,7 +390,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -426,7 +426,7 @@ def _processKFWturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # If it is boat collection phase, and there is a submitted village, then that player has no pending tiles
         if currentGame.phase == 1 or currentGame.phase == 2 and not presenter.isTrainingGame():
@@ -437,9 +437,9 @@ def _processKFWturn(request):
                     presenter.updateSingleMove(jsonData["BKSN"], jsonData["IPM"])
             # If you are saving INTO village expansion, check if the phase is complete
             if jsonData["phase"] == 2:
-                presenter.setCurrentPlayers(presenter.getCurrentSimulPlayers())
+                presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayers())
             # If there are no players, return the simul moves to move the game on
-            if presenter.getCurrentPlayersString() == "":
+            if len(presenter.getArrayOfIsCurrentPlayers()) == 0:
                 currentGame.save()
                 response_data = {
                     "latestUpdate": currentGame.latestUpdate,
@@ -467,14 +467,14 @@ def _processKFWturn(request):
         else:
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-            currentPlayersField = presenter.getCurrentPlayersString()
+            currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
             if (
-                currentPlayersField != ""
-                and currentPlayersField != "KfwBot"
+                len(currentPlayersArr) > 0
+                and "KfwBot" not in currentPlayersArr
                 and jsonData["status"] != "FINISHED"
                 and 102 not in loadedStartingOptions
             ):
-                playerListToNotify = [player.strip() for player in currentPlayersField.split(",")]
+                playerListToNotify = [player.strip() for player in currentPlayersArr]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if len(playerListToNotify) > 0:
@@ -556,7 +556,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW saveSimulMove - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -570,7 +570,7 @@ def _processKFWturn(request):
         else:
             presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
 
-        presenter.setCurrentPlayers(presenter.getCurrentPlayers())
+        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers())
 
         if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(
@@ -608,7 +608,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW saveFinalScoringMove - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -625,7 +625,7 @@ def _processKFWturn(request):
             # Otherwise, save according to the name sent by the game
             presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
 
-        presenter.setCurrentPlayers(presenter.getCurrentPlayers())
+        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers())
 
         if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(
@@ -660,7 +660,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -719,7 +719,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -740,7 +740,7 @@ def _processKFWturn(request):
             # This saves it anyway
             presenter.clearAllMoveData()
             # add all players back into currentPlayers
-            presenter.setCurrentPlayers(presenter.getCurrentSimulPlayers())
+            presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayers())
 
             if currentGame.rewindTempData != "":
                 loadDataArr = json.loads(currentGame.rewindTempData)
@@ -822,7 +822,7 @@ def _processKFWturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -867,7 +867,7 @@ def _processKFWturn(request):
             message = (
                 f"SYNC ERROR IN: KFW kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersString()}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -929,7 +929,7 @@ def KFWdata(request, data_type=1):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('KfwPresenter', currentGame.presenter())
+    presenter = cast('KFWpresenter', currentGame.presenter())
 
     if data_type == 1:
         gameData1 = (

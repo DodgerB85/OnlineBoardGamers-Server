@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CannesPresenter, WebPresenter, AqyPresenter, TgzPresenter, IndPresenter, BusPresenter, FcmPresenter, RnbPresenter, HcPresenter, KfwPresenter
+from .presenters import GamePresenter, CNSpresenter, WEBpresenter, AQYpresenter, TGZpresenter, INDpresenter, BusPresenter, FCMpresenter, RNBpresenter, HCpresenter, KFWpresenter
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -484,7 +484,7 @@ class Game(BaseGame):
     )
     
     # CURRENTLY RnB ONLY
-    serverCurrentPlayerNamesInTurnOrder = models.JSONField(default=list, blank=True)
+    serverCurrentPlayerNamesInTurnOrder = models.JSONField(default=list, blank=True, null=True)
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)

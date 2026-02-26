@@ -76,7 +76,7 @@ class GamePlayerInline(admin.TabularInline):
     # fields = ("player", "player_number", "status", "edit_link")
     # readonly_fields = ("edit_link",)
     show_change_link = True
-    fields = ("player", "seat_order", "winner", "is_current", "is_missing", "is_kicked", "moveDataJSON")
+    fields = ("player", "seat_order", "winner", "is_current", "is_missing", "is_kicked", "moveDataJSON", "currentMoveTime", "currentMoveData")
     autocomplete_fields = ["player"]
 
     # @admin.display(description="Edit")

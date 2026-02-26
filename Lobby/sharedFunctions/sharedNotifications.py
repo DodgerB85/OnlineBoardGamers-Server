@@ -1104,7 +1104,6 @@ def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _ga
                 + str(e)
             )
             continue
-        # profile = Profile.objects.get(id=user.id)
         try:
             profile = Profile.objects.get(user=user)
 
@@ -1188,7 +1187,6 @@ def SN_sendMiniTournamentInvite(
                 + str(e)
             )
             continue
-        # profile = Profile.objects.get(id=user.id)
         try:
             profile = Profile.objects.get(user=user)
 
@@ -1446,8 +1444,6 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
     relatedMainTournamentID = message_data["relatedMainTournamentID"]
     relatedMiniTournamentID = message_data["relatedMiniTournamentID"]
 
-    if gameCode == "CNS" or gameCode == "WEB":
-        print("This should be printing in the cluster")
     originalLang = get_language()
     for player in playerListToNotify:
         try:

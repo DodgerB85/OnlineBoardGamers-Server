@@ -436,7 +436,7 @@
     global.gameID = {{ gameID }};
     global.startingOptionsHTML = "{{ startingOptionsHTML|safe }}";
 
-    {% if currentPlayers %}global.currentPlayers = '{{ currentPlayers }}';{% endif %}
+    {% if currentPlayers %}global.currentPlayers = {{ currentPlayers | safe }};{% endif %}
 
     {% if preferredColour != -1 %}
     global.preferedColor = {{ preferredColour }};

@@ -24,7 +24,7 @@ from django.db import connection
 from django.db.models import Q
 
 
-from Lobby.models import User, Profile, Game, GamePlayer
+from Lobby.models import User, Profile, Game
 
 from .common import create_bus_game
 
@@ -34,10 +34,8 @@ from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, share
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
-    SF_getGameCreationJsonReturn,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
     SN_sendNextTurnNotification,
     SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
@@ -101,7 +99,7 @@ def showBusGame(request, game_id):
     ## NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             # Get display names from player0's notes
             user_gp = currentGame.players.filter(player=request.user).first()
             if user_gp:
@@ -273,7 +271,7 @@ def _processBusTurn(request):
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        currentPlayersArr = presenter.getCurrentPlayersArray()
+        currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(currentGame.latestUpdate):
@@ -319,7 +317,7 @@ def _processBusTurn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # Set current players via presenter
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -354,15 +352,14 @@ def _processBusTurn(request):
                 else []
             )
             if (
-                jsonData["nextPlayer"] != ""
-                and jsonData["nextPlayer"] != "HcBot"
+                len(jsonData["nextPlayer"]) > 0 
+                and "BusBot" not in jsonData["nextPlayer"] 
                 and not jsonData["status"] == "FINISHED"
                 and 102 not in starting_options
             ):
-                playerListToNotify = jsonData["nextPlayer"].split(",")
+                playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
-
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
                         request,
@@ -481,7 +478,7 @@ def _processBusTurn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -496,11 +493,11 @@ def _processBusTurn(request):
             else []
         )
         if (
-            jsonData["nextPlayer"] != ""
-            and jsonData["nextPlayer"] != "HcBot"
+            len(jsonData["nextPlayer"]) > 0
+            and "BusBot" not in jsonData["nextPlayer"] 
             and 102 not in starting_options
         ):
-            playerListToNotify = jsonData["nextPlayer"].split(",")
+            playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
@@ -523,7 +520,7 @@ def _processBusTurn(request):
         )
 
     elif jsonData["action"] == "saveGameDataAfterKickout":
-        currentPlayersArr = presenter.getCurrentPlayersArray()
+        currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(
             jsonData["latestUpdate"]
         ) != str(

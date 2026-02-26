@@ -36,7 +36,7 @@ from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOT
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:
-    from Lobby.presenters import WebPresenter 
+    from Lobby.presenters import WEBpresenter 
     
 WEB_DB_LOCK_NAME = "lockWEBgame_"
 
@@ -129,7 +129,7 @@ def createWEBgame(request):
                 shadow_players.append(display_name)
 
             # Store shadow player names in creator's notes
-            creator_gp = GamePlayer.objects.get(game=newGame, player=request.user)
+            creator_gp = newGame.players.get(player=request.user)
             creator_gp.notes = json.dumps(shadow_players)
             creator_gp.save()
             
@@ -251,7 +251,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
                 if user_gp and user_gp.player_id == currentGame.creator_id:
                     returnData["notes"] = ""
             currentGame.save()
-        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
 
         returnData.update(
             {
@@ -322,7 +322,7 @@ def _processWEBturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('WebPresenter', currentGame.presenter())
+    presenter = cast('WEBpresenter', currentGame.presenter())
 
     if jsonData["action"] == "simpleSave":
         # Check if old version is older than DB version, and if so, return
@@ -331,7 +331,7 @@ def _processWEBturn(request):
         ) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
-            current_players = ", ".join(presenter.getCurrentPlayersArray())
+            current_players = ", ".join(presenter.getArrayOfIsCurrentPlayers())
             message = (
                 f"SYNC ERROR IN: WEB simpleSave - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
@@ -369,7 +369,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {db_latest_update} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -390,7 +390,7 @@ def _processWEBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -411,7 +411,7 @@ def _processWEBturn(request):
                 if currentGame.startingOptions
                 else []
             )
-            current_players = presenter.getCurrentPlayersArray()
+            current_players = presenter.getArrayOfIsCurrentPlayers()
             if (
                 len(current_players) > 0
                 and not any(p.startswith("WEBBot") for p in current_players)
@@ -494,7 +494,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -558,7 +558,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -624,7 +624,7 @@ def _processWEBturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayers(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -638,10 +638,10 @@ def _processWEBturn(request):
             if currentGame.startingOptions
             else []
         )
-        next_players = jsonData["nextPlayer"].split(",")
+        next_players = jsonData["nextPlayer"]
         if (
-            jsonData["nextPlayer"] != ""
-            and not any(p.startswith("WEBBot") for p in next_players)
+            len(jsonData["nextPlayer"]) > 0 
+            and not any(p.startswith("WebBotot") for p in next_players)
             and 102 not in loadedStartingOptions
         ):
             playerListToNotify = next_players
@@ -678,7 +678,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getCurrentPlayersArray())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -807,7 +807,7 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user     
-        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeat(False, True))
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True))
         currentGame.presenter().removeChatNotification(request.user)
         
         currentGame.save()
