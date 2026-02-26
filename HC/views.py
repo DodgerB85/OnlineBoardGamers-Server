@@ -982,7 +982,7 @@ def showHCgame(request, game_id):
         return result
 
     currentGame = result["game"]
-    presenter = cast("HcPresenter", currentGame.presenter())
+    presenter = cast("HCpresenter", currentGame.presenter())
     all_players = result["all_players"]
     username = request.user.username
     user_id = request.user.id
@@ -998,7 +998,7 @@ def showHCgame(request, game_id):
     temporaryMove = ""
     pov = None
     preferredHCcolour = -1
-    allPlayerListBySeat = presenter.getAllPlayersOrderedySeat()
+    allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray()
     kickoutRequired = 0
     chatNotification = False
     myMove = False
@@ -1010,7 +1010,7 @@ def showHCgame(request, game_id):
     currentRewindConsent = "0"
     currentPlayers = presenter.getCurrentPlayersInOrderString()
     if currentPlayers == "":
-       currentPlayers = presenter.getAllPlayersOrderedySeat()[0]
+       currentPlayers = presenter.getAllPlayersOrderedySeatInArray()[0]
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
 
@@ -1078,7 +1078,7 @@ def showHCgame(request, game_id):
         kickoutRequired = presenter.kickoutRequired()
         myMove = presenter.isMyMove(username)
 
-        if "SHADOW" in presenter.getAllPlayersOrderedySeat():
+        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             player_gp = next(
                 (gp for gp in all_players if gp.player and gp.player.id == user_id),
                 None,

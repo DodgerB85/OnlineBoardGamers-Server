@@ -508,17 +508,17 @@ class Game(BaseGame):
         players: RelatedManager[GamePlayer]
 
     PRESENTER_MAP = {
-        "CNS": CannesPresenter, "WEB": WebPresenter, "AQY": AqyPresenter,
-        "TGZ": TgzPresenter, "IND": IndPresenter, "Bus": BusPresenter,
-        "FCM": FcmPresenter, "RNB": RnbPresenter, "HC": HcPresenter,
-        "KFW": KfwPresenter,
+        "CNS": CNSpresenter, "WEB": WEBpresenter, "AQY": AQYpresenter,
+        "TGZ": TGZpresenter, "IND": INDpresenter, "Bus": BusPresenter,
+        "FCM": FCMpresenter, "RNB": RNBpresenter, "HC": HCpresenter,
+        "KFW": KFWpresenter,
     }
 
     def presenter(self) -> GamePresenter:
         cls = self.PRESENTER_MAP.get(self.gameCode)
         if not cls:
             print("Unknown game code: " + self.gameCode)
-            return CannesPresenter(self)
+            return CNSpresenter(self)
         return cls(self)
 
     # This was causing a break not having this?

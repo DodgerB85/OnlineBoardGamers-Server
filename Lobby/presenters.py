@@ -443,7 +443,7 @@ class GamePresenter:
     # End voting methods
 
 
-class CannesPresenter(GamePresenter):
+class CNSpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -493,7 +493,7 @@ class CannesPresenter(GamePresenter):
             self._sendStartGameNotification(request, playerListToNotify)
 
 
-class WebPresenter(GamePresenter):
+class WEBpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -573,7 +573,7 @@ class WebPresenter(GamePresenter):
                 ]
                 self._sendStartGameNotification(request, playerListToNotify)
 
-class AqyPresenter(GamePresenter):
+class AQYpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -848,7 +848,7 @@ class AqyPresenter(GamePresenter):
         self.gameObj.gameData = base64.b64encode(gzip.compress(json.dumps(raw_data).encode("utf-8"))).decode("utf-8")
 
 
-class TgzPresenter(GamePresenter):
+class TGZpresenter(GamePresenter):
     def endGame(
         self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
     ):
@@ -945,7 +945,7 @@ class TgzPresenter(GamePresenter):
         return self.gameObj.externalTournamentGame
 
 
-class IndPresenter(GamePresenter):
+class INDpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
@@ -1220,7 +1220,7 @@ class BusPresenter(GamePresenter):
             self._sendStartGameNotification(request, playerListToNotify)
 
 
-class RnbPresenter(GamePresenter):
+class RNBpresenter(GamePresenter):
     def quickIsMyMove(self, loggedInPlayerUsername="NO_USER_LOGGED_IN"):
         # Return False if no username is provided
         if loggedInPlayerUsername == None:
@@ -1483,7 +1483,7 @@ class RnbPresenter(GamePresenter):
         return jsonResponse
 
 
-class FcmPresenter(GamePresenter):
+class FCMpresenter(GamePresenter):
     def startGame(self, request):
         from Lobby.models import GamePlayer
 
@@ -2406,27 +2406,7 @@ class HCpresenter(GamePresenter):
                 rewind_votes[username] = 0
         self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
 
-
-    def isTournamentRoundFinished(self, tournamentProgressionDataArray):
-        from Lobby.models import Game
-        return False
-
-        finishedGames = 0
-        for row in tournamentProgressionDataArray[-1]:
-            if row[0] == "BYEPLAYERS":
-                finishedGames += 1
-            else:
-                game = Game.objects.get(
-                    id=row[self.gameObj.relatedHCTournament.maxGamePlayers]
-                )
-                if game.gameStatus == "FINISHED":
-                    finishedGames += 1
-        if finishedGames == len(tournamentProgressionDataArray[-1]):
-            return True
-        return False
-
-
-class KfwPresenter(GamePresenter):
+class KFWpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (

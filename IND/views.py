@@ -240,7 +240,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return result
 
     currentGame = result["game"]
-    presenter = cast("IndPresenter", currentGame.presenter())
+    presenter = cast("INDpresenter", currentGame.presenter())
     user_gp = result["user_gp"]
     username = request.user.username
     userObj = request.user
@@ -250,7 +250,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update({
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
-        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False)),
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
         "currentPlayers": presenter.getCurrentPlayersString(True),
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "preferredINDoptions": [-1, 0, 0, 1, 1, 1],

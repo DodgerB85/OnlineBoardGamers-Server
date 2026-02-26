@@ -85,7 +85,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return result
 
     currentGame = result["game"]
-    presenter = cast("RnbPresenter", currentGame.presenter())
+    presenter = cast("RNBpresenter", currentGame.presenter())
     user_gp = result["user_gp"]
     username = request.user.username
 
@@ -96,7 +96,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
         "pov": -99,
-        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeat(False, False)),
+        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
         "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
     })
 

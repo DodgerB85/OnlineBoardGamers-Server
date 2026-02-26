@@ -108,7 +108,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         return result
 
     currentGame = result["game"]
-    presenter = cast("TgzPresenter", currentGame.presenter())
+    presenter = cast("TGZpresenter", currentGame.presenter())
     user_gp = result["user_gp"]
     username = request.user.username
 
@@ -217,7 +217,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
                 user_gp.notes = ""
                 user_gp.save()
             returnData["notes"] = ""
-        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeat())
+        allPlayerListBySeat = json.dumps(presenter.getAllPlayersOrderedySeatInArray())
         if currentGame.startingMap != "":
             returnData["startingMap"] = json.loads(currentGame.startingMap)
 

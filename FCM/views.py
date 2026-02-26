@@ -173,7 +173,7 @@ def showGame(request, game_id):
         return result
 
     currentGame = result["game"]
-    presenter = cast('FcmPresenter', currentGame.presenter())
+    presenter = cast('FCMpresenter', currentGame.presenter())
     all_players = result["all_players"]
     username = request.user.username
 
