@@ -133,7 +133,7 @@ def createWEBgame(request):
             creator_gp.notes = json.dumps(shadow_players)
             creator_gp.save()
             
-            presenter = newGame.presenter()
+            presenter = cast('WEBpresenter', newGame.presenter())
             presenter.startGame(request)
         else:
             usernamesToNotify = []
@@ -145,7 +145,7 @@ def createWEBgame(request):
                     newGame.invitedPlayers.add(newPlayer)
                     usernamesToNotify.append(newPlayer.username)
 
-            presenter = newGame.presenter()
+            presenter = cast('WEBpresenter', newGame.presenter())
             SN_sendInviteNotifications(
                 request,
                 usernamesToNotify,
@@ -720,7 +720,7 @@ def WEBdata(request, dataType=1):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = currentGame.presenter()
+    presenter = cast('WEBpresenter', currentGame.presenter())
 
     if dataType == 1:
         returnData = {
