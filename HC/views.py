@@ -1011,7 +1011,7 @@ def showHCgame(request, game_id):
     currentRewindConsent = "0"
     currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
     if len(currentPlayers) == 0:
-       currentPlayers = presenter.getAllPlayersOrderedySeatInArray()[0]
+       currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
 
