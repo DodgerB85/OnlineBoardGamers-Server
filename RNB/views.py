@@ -97,7 +97,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "replayStep": replayStep,
         "pov": -99,
         "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
-        "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
+        "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else presenter.getAllPlayersOrderedySeatInArray(False, True)[0],
     })
 
     if not result["is_authenticated"]:
