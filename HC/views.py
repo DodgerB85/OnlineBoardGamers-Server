@@ -1007,9 +1007,10 @@ def showHCgame(request, game_id):
     rewindPanelType = 0
     rewindHostHTML = ""
     rewindHostPossible = False
-    # TODO: remove this
-    currentRewindConsent = "0"
+    currentRewindConsent = 0 # NB needed in template for rewind panel
     currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
+    # This is an emergency check - also to serve end games where server turn order is null
+    # In game, it SHOULD be switching the CP to the winner. 
     if len(currentPlayers) == 0:
        currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
     statsExcludedGame = currentGame.statsExcludedGame
@@ -1044,7 +1045,7 @@ def showHCgame(request, game_id):
             rewindHostHTML = presenter.getRewindHostHTML()
 
         pov = presenter.seatPosition(username)
-        currentRewindConsent = presenter.getCurrentRewindConsent(username)
+        currentRewindConsent = presenter.getCurrentRewindConsent(username) # NB needed in template for rewind panel
 
         preferredHCcolour = result["user_profile"].preferredHCcolour
         liveNotification = result["user_profile"].liveNotification

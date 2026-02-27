@@ -236,7 +236,7 @@ def showGame(request, game_id):
     rewindPanelType = 0
     rewindHostHTML = ""
     rewindHostPossible = False
-    currentRewindConsent = 0
+    currentRewindConsent = 0 # NB needed in template for rewind panel
     currentPlayers = presenter.getArrayOfIsCurrentPlayers()
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
@@ -274,7 +274,7 @@ def showGame(request, game_id):
             rewindHostHTML = presenter.getRewindHostHTML()
 
         pov = presenter.seatPosition(username)
-        currentRewindConsent = presenter.getCurrentRewindConsent(username)
+        currentRewindConsent = presenter.getCurrentRewindConsent(username) # NB needed in template for rewind panel
 
         preferredRestaurantColour = user_profile.preferredRestaurantColour
         liveNotification = user_profile.liveNotification
