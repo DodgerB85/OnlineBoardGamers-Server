@@ -97,7 +97,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "replayStep": replayStep,
         "pov": -99,
         "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
-        "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else presenter.getAllPlayersOrderedySeatInArray(False, True)[0],
+        "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]],
     })
 
     if not result["is_authenticated"]:
@@ -233,11 +233,10 @@ def _processRNBturn(request):
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
-            current_players = ", ".join(presenter.getArrayOfIsCurrentPlayers())
             message = (
                 f"SYNC ERROR IN: RNB simpleSave - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {current_players}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": True}, safe=False)
