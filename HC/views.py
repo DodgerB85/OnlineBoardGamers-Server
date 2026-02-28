@@ -1011,7 +1011,8 @@ def showHCgame(request, game_id):
     currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
     # This is an emergency check - also to serve end games where server turn order is null
     # In game, it SHOULD be switching the CP to the winner. 
-    if len(currentPlayers) == 0:
+    # But if the game is NOT finished, need to be able to supply 0 players to kickstart factory hang ups
+    if len(currentPlayers) == 0 and currentGame.gameStatus == "FINISHED":
        currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""

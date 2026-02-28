@@ -2068,7 +2068,6 @@ class HCpresenter(GamePresenter):
             and self.gameObj.currentPlayersInTurnOrder != ""
             else []
         )
-        # return ",".join(current_players_arr) if len(current_players_arr) > 0 and current_players_arr else ""
         return current_players_arr
 
     def isMyMove(self, loggedInPlayerUsername=None):
