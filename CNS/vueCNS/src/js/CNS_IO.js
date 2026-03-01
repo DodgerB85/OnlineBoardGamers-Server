@@ -69,12 +69,12 @@ export async function saveGame(saveRewind, saveContext) {
 		gameID: personal.gameID,
 		saveRewind: saveRewind,
 	}
-	if (store.gameflow.turnOrder.length > 0) postData.nextPlayer = store.players[store.gameflow.turnOrder[0]].name
+	if (store.gameflow.turnOrder.length > 0) postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
 	// USED > goes to currentPlayers
 	else {
 		// THIS IS JUST AN EMERGENCY CHECK ??
 		store.gameflow.turnOrder.push(0)
-		postData.nextPlayer = store.players[store.gameflow.turnOrder[0]].name
+		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
 		alert("RE-EXPORT")
 		postData.data = funcs.exportModel()
 	}
@@ -336,7 +336,7 @@ async function updateDataFromLoadRewind() {
 			body: JSON.stringify({
 				action: "updateDataFromLoadRewind",
 				turn: store.gameflow.turn,
-				nextPlayer: store.players[store.gameflow.turnOrder[0]].name, // USED > goes to currentPlayers
+				nextPlayer: [store.players[store.gameflow.turnOrder[0]].name], // USED > goes to currentPlayers
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: funcs.exportModel(false),

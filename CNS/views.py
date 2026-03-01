@@ -335,7 +335,7 @@ def _processCNSturn(request):
 
         # Update current players
         next_player_usernames = (
-            jsonData["nextPlayer"].split(",") if jsonData["nextPlayer"] else []
+            jsonData["nextPlayer"] if jsonData["nextPlayer"] else []
         )
         currentGame.players.exclude(is_kicked=True).update(is_current=False)
 
@@ -363,12 +363,12 @@ def _processCNSturn(request):
                 else []
             )
             if (
-                jsonData["nextPlayer"] != ""
-                and jsonData["nextPlayer"] != "CnsBot"
+                len(jsonData["nextPlayer"]) > 0 
+                and "CnsBot" not in jsonData["nextPlayer"]
                 and jsonData["status"] != "FINISHED"
                 and 102 not in loadedStartingOptions
             ):
-                playerListToNotify = jsonData["nextPlayer"].split(",")
+                playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
 
@@ -504,7 +504,7 @@ def _processCNSturn(request):
 
         # Update current players
         next_player_usernames = (
-            jsonData["nextPlayer"].split(",") if jsonData["nextPlayer"] else []
+            jsonData["nextPlayer"] if jsonData["nextPlayer"] else []
         )
         currentGame.players.exclude(is_kicked=True).update(is_current=False)
         if next_player_usernames:
@@ -525,11 +525,11 @@ def _processCNSturn(request):
             else []
         )
         if (
-            jsonData["nextPlayer"] != ""
-            and jsonData["nextPlayer"] != "CnsBot"
+            len(jsonData["nextPlayer"]) > 0
+            and "CnsBot" not in jsonData["nextPlayer"]
             and 102 not in loadedStartingOptions
         ):
-            playerListToNotify = jsonData["nextPlayer"].split(",")
+            playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
