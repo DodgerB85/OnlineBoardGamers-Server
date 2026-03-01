@@ -464,7 +464,6 @@ def _processINDturn(request):
             # Need this as intially it is totally empty
             if currentGame.rewindData != "":
                 currentRewindData = json.loads(currentGame.rewindData)
-            # currentRewindDataArray = currentRewindData.split("'SPLIT'")
 
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
