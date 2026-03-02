@@ -651,6 +651,8 @@ def CNSdata(request, dataType):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="CNS")
     except Game.DoesNotExist:
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
     presenter = currentGame.presenter()

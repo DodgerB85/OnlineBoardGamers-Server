@@ -1251,3 +1251,74 @@ def castVote(request):
         return shared_cast_vote(request)
 
 
+@login_required
+def HCdata(request, dataType):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    try:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HC")
+    except Game.DoesNotExist:
+        # raise Http404(gettext("Game does not exist"))
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
+        raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: HC)")
+
+    presenter = cast("HCpresenter", currentGame.presenter())
+
+    # if dataType == 1:
+    # Send game data
+    #    return JsonResponse({"gameData": currentGame.gameData,
+    #                        "secondsToNextKickout": presenter.getSecondsToNextKickout()} )
+    if dataType == 2:
+        # Remove user from notifications
+        presenter.removeChatNotification(request.user)
+        currentGame.save()
+        return JsonResponse(
+            {
+                "chatData": currentGame.chatData
+                # }, safe=False)
+            },
+            safe=True,
+        )
+
+    # Check for update comparison, and update or do nothing
+    if dataType == 3:
+        try:
+            gameUpdate = int(jsonData["latestUpdate"])
+            latestUpdate = int(currentGame.latestUpdate)
+        except Exception as e:
+            SN_sendAdminErrorMessage(request, f"ERROR IN HCdata: gameID: {jsonData["gameID"]} Error: {e}")
+            # NB this might need to be changed if the above msg is getting triggered
+            specialData = False
+
+
+            return JsonResponse(
+                {
+                    "latest": False,
+                    "loadData": currentGame.gameData,
+                    # Not used at the moment, in // comment
+                    "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
+                    "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+                    "latestUpdate": currentGame.latestUpdate,
+                },
+                safe=False,
+            )
+        if gameUpdate == latestUpdate:
+            return JsonResponse({"latest": True}, safe=False)
+
+        return JsonResponse(
+            {
+                "latest": False,
+                "loadData": currentGame.gameData,
+                # Not used at the moment, in // comment
+                "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+                "latestUpdate": currentGame.latestUpdate,
+            },
+            safe=False,
+        )
+
+    return HttpResponse(status=204)  # No Content

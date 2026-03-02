@@ -962,6 +962,8 @@ def AQYdata(request, dataType):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="AQY")
     except Game.DoesNotExist:
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
     presenter = cast("AQYpresenter", currentGame.presenter())

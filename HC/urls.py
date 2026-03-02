@@ -30,5 +30,6 @@ urlpatterns = [
     path("chat/", views.chat, name="chat"),
     path("notes/", views.notes, name="notes"),
     path("castVote/", views.castVote, name="castVoteCNS"),
+    path("data/<int:dataType>/", views.HCdata, name="FCMdata"),
 
 ]

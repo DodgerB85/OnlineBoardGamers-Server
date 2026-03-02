@@ -952,6 +952,8 @@ def RNBdata(request, dataType=1):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="RNB")
     except Game.DoesNotExist:
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
     presenter = cast("RNBpresenter", currentGame.presenter())
