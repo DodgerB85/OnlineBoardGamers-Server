@@ -914,7 +914,7 @@ def _processKFWturn(request):
     return HttpResponse(status=204)  # No Content
 
 
-def KFWdata(request, data_type=1):
+def KFWdata(request, dataType=1):
     if not request.user.is_authenticated:
         # User is not logged in, redirect to login page
         return redirect(reverse("myLogin"))
@@ -927,11 +927,13 @@ def KFWdata(request, data_type=1):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='KFW')
     except Game.DoesNotExist:
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
     presenter = cast('KFWpresenter', currentGame.presenter())
 
-    if data_type == 1:
+    if dataType == 1:
         gameData1 = (
             presenter.getGameData1Compressed(request.user.username)
             if request.user.is_authenticated
@@ -949,7 +951,7 @@ def KFWdata(request, data_type=1):
         }
         # Send game data
         return JsonResponse(returnData)
-    elif data_type == 2:
+    elif dataType == 2:
         # Remove user from notifications
         presenter.removeChatNotification(request.user)
         currentGame.save()
@@ -960,7 +962,7 @@ def KFWdata(request, data_type=1):
             safe=True,
         )
     # Check for update comparison, and update or do nothing
-    if data_type == 3:
+    if dataType == 3:
         gameUpdate = int(jsonData["latestUpdate"])
         latestUpdate = int(currentGame.latestUpdate)
         if gameUpdate == latestUpdate:

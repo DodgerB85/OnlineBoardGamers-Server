@@ -741,6 +741,8 @@ def INDdata(request, dataType):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="IND")
     except Game.DoesNotExist:
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
     presenter = cast("INDpresenter", currentGame.presenter())

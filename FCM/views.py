@@ -1642,6 +1642,8 @@ def FCMdata(request, dataType):
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
     except Game.DoesNotExist:
         # raise Http404(gettext("Game does not exist"))
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
         raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: FCM)")
 
     presenter = cast("FCMpresenter", currentGame.presenter())

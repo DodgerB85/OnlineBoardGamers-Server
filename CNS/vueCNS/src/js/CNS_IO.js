@@ -486,6 +486,7 @@ export async function checkForLatestData() {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
+		if (data.gameDoesNotExist === true) location.reload()
 		if (data.latest === true) return
 		else {
 			funcs.importModel(data.gameData, false)

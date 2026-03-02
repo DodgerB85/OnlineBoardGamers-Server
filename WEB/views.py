@@ -718,6 +718,8 @@ def WEBdata(request, dataType=1):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='WEB')
     except Game.DoesNotExist:
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
     presenter = cast('WEBpresenter', currentGame.presenter())

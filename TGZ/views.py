@@ -765,6 +765,8 @@ def TGZdata(request, dataType):
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         presenter = cast("TGZpresenter", currentGame.presenter())
     except Game.DoesNotExist:
+        if dataType == 3:
+            return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
     if dataType == 1:
