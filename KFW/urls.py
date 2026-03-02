@@ -28,7 +28,7 @@ urlpatterns = [
     path("saveNotes/", views.saveNotes, name="saveNotes"),
 
     path("processKFWturn/", views.processKFWturn, name="processKFWturn"),
-    path('data/<int:data_type>/', views.KFWdata, name='KFWdata'),
+    path('data/<int:dataType>/', views.KFWdata, name='KFWdata'),
 
     path("saveZoom/", views.saveZoom, name="saveZoom"),
 ]
