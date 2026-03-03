@@ -56,18 +56,28 @@
       <div id="board"></div>
     </div>
     {% block script %}
-      {% compress js %}
-        <script src="{% static 'Lobby/createTGZmap.js' %}"></script>
-      {% endcompress %}
+     
       <script>
   document.addEventListener('DOMContentLoaded', function () {
+
     document.querySelectorAll(".playerCount").forEach((element) => element.addEventListener('click', changePlayerNumber));
     init();
   });
 
+    var initData = {};
+    {% if isSchismUser %}
+  initData.isSchismUser = true;
+  {% else %}
+  initData.isSchismUser = false;
+  {% endif %}
+
   {% if mapData %}
   boardTiles = {{ mapData }}
   {% endif %}
+
       </script>
+       {% compress js %}
+        <script src="{% static 'Lobby/createTGZmap.js' %}"></script>
+      {% endcompress %}
     {% endblock %}
   {% endblock %}
