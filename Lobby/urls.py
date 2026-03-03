@@ -130,8 +130,9 @@ urlpatterns = [
     path("DBO_deleteGame/<str:gameType>/", views.DBO_deleteGame, name="DBO_deleteGame"),
     path("userStats/", views.userStats, name="userStats"),
     path("sendAdminMessage/", views.sendAdminMessage, name="sendAdminMessage"),
+    
     # API Routes
-    # path("TG_webhook/", views.TG_webhook, name="TG_webhook"),
+    path('join_discord/', RedirectView.as_view(url='https://discord.gg/hCU7Fr77yV', permanent=False), name='discord-invite'),
     path(f'{config("TELEGRAM_WEBHOOK_PATH")}', views.telegram_bot_response),
     path("addTGid/<int:TGid>", views.addTGid, name="addTGid"),
     path("nextGame", views.next_game_redirect, name="next_game"),
