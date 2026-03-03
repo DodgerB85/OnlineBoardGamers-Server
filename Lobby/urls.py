@@ -132,7 +132,7 @@ urlpatterns = [
     path("sendAdminMessage/", views.sendAdminMessage, name="sendAdminMessage"),
     
     # API Routes
-    path('join_discord/', RedirectView.as_view(url='https://discord.gg/hCU7Fr77yV', permanent=False), name='discord-invite'),
+    path('join_discord/', RedirectView.as_view(url='https://discord.gg/hCU7Fr77yV', permanent=False), name='discordInviteLink'),
     path(f'{config("TELEGRAM_WEBHOOK_PATH")}', views.telegram_bot_response),
     path("addTGid/<int:TGid>", views.addTGid, name="addTGid"),
     path("nextGame", views.next_game_redirect, name="next_game"),
