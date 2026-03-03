@@ -2258,20 +2258,25 @@ class HCpresenter(GamePresenter):
         return ""
 
     def hasMoveData(self, name, includeIllegal=False):
+        from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
+
         seat = self.seatPosition(name)
         if 0 <= seat <= 4:
             gp = self.gameObj.players.filter(seat_order=seat).first()
             if gp:
                 move_time = gp.currentMoveTime
                 move_data = gp.currentMoveData
-                if str(move_time) == "ILLEGALMOVE" and not includeIllegal:
+                if str(move_time) == "ILLEGALMOVE"and not includeIllegal:
                     return False
                 if move_data == "":
                     return False
                 if str(move_time)[:6] != "NODATA":
                     return True
-
-            return True
+                
+            #SN_sendAdminErrorMessage("", f"HC FACTORY ISSUE!!!!!! hasMoveData ERROR - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - seat: {seat} -name: {name} ")
+            # NB you get here if you have SAVED a move without submitting it
+            # In PRESENTER, this keeps you in the "myMove" / currentPlayers lists
+            return False
 
         return False
 
@@ -2288,6 +2293,9 @@ class HCpresenter(GamePresenter):
                 move_data = gp.currentMoveData
                 if str(move_time)[:6] == "NODATA":
                     return [move_time, move_data]
+                # NO - an illegal move is NOT temporary - it is a FULLY submitted move that later needs to be done again
+                #if str(move_time)[:6] == "ILLEGALMOVE":
+                #    return [move_time, move_data]
         return ""
 
     def clearAllMoveData(self):
