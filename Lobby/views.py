@@ -1732,8 +1732,16 @@ def TGZmapEditor(request):
             request, "Lobby/TGZmapEditor.html", {"mapData": request.POST["mapDataTGZ"]}
         )
 
+
+
     else:
-        return render(request, "Lobby/TGZmapEditor.html")
+        isSchismUser = False
+        ALLOWED_SCHISM_USERS = ["admin"]
+        if request.user.username in ALLOWED_SCHISM_USERS:
+            isSchismUser = True
+        return render(request, "Lobby/TGZmapEditor.html", {
+            "isSchismUser": isSchismUser
+        })
 
 
 @login_required
