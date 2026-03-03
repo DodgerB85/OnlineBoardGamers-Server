@@ -22,13 +22,15 @@
 {% elif game == "RNB" %}
     {% url "RNB:showRNBgame" gameID as the_url %}
 {% endif %}
+    {% url 'discordInviteLink' as discord_url %}
+
 {% comment %}Translators: This is an email{% endcomment %}
-{% blocktranslate with profile_url=profile_url %}
+{% blocktranslate with profile_url=profile_url discord_link=discord_url game_url=the_url %}
 Hi {{ user }},<br/>
 <br/>
 Your tournament game of {{ boxName }} has started at Online Board Gamers!<br/>
 <br/>
-https://{{ domain }}{{ the_url }}<br/>
+https://{{ domain }}{{ game_url }}<br/>
 <br/>
 Game: {{ gameName }}<br/>
 Player Count: {{ maxPlayers }}<br/>
@@ -38,7 +40,7 @@ Starting Player: {{ currentPlayer }}<br/>
 Notification preferences can be changed in your <a href="https://{{ domain }}/profile/">Profile</a><br/>
 Use telegram/discord/slack webhooks for increased reliability<br/>
 <br/>
-Join us on the Discord! Click <a href="https://discord.gg/hCU7Fr77yV" target="_blank">Here</a> to join!<br/>
+Join us on the Discord! Click <a href="https://{{ domain }}{{ discord_link }}" target="_blank">Here</a> to join!<br/>
 <br/>
 Please do not reply to this email.<br/>
 To contact me please use: OnlineBoardGamers@gmail.com<br/>

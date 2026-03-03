@@ -206,23 +206,23 @@
                           <div id="bugReport">
                             <h2>{% translate "Bug Report" %}</h2>
                             <p>
-                              {% blocktranslate trimmed %}
-                                Please submit a bug report if you encounter any issues, giving as much detail as possbile.
+                              {% url 'discordInviteLink' as discord_url %}
+                              {% blocktranslate trimmed with url=discord_url %}
+                                Please submit a bug report if you encounter any issues, giving as much detail as possible.
                                 <br />
                                 The game data will be submitted along with your report.
                                 <br>
-                                You can also report it on the OBG discord. Click <a href="https://discord.gg/hCU7Fr77yV"
-    class="linkOther"
-    target="_blank">Here</a> to join
+                                You can also report it on the OBG discord. Click
+                                <a href="{{ url }}" class="linkOther" target="_blank">here</a> to join.
                               {% endblocktranslate %}
                             </p>
                             <div>
                               <textarea cols="150" rows="10" name="bugContent" id="bugContent"></textarea>
                             </div>
                             <div>
-                              <button id="submitBug">{% translate "Submit" %}</button>
+                              <button class="actionsLineButton" id="submitBug">{% translate "Submit" %}</button>
                               &nbsp;&nbsp;&nbsp;&nbsp;
-                              <button id="resetBug">{% translate "Cancel" %}</button>
+                              <button class="actionsLineButton" id="resetBug">{% translate "Cancel" %}</button>
                             </div>
                           </div>
                           <div id="notesBox">
