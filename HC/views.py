@@ -497,7 +497,7 @@ def _processHCturn(request):
                         except Exception as e:
                             SN_sendAdminErrorMessage(
                                 request,
-                                f"Exception: {e} -- FCIATT: {FCIATT} -- FCNATT: {FCNATT} -- DBavailableComponents: {DBavailableComponents} j: {j} FCNATT[j]:",
+                                f"Exception: {e} -- gameID: {game_id} -- FCIATT: {FCIATT} -- FCNATT: {FCNATT} -- DBavailableComponents: {DBavailableComponents} j: {j} FCNATT[j]:",
                             )
                             break
                     enoughComponents = True
@@ -593,8 +593,9 @@ def _processHCturn(request):
             gp = currentGame.players.filter(seat_order=seat).first()
 
             if gp:
-                gp.currentMoveTime = "ILLEGALMOVE"  # "NODATASFWET"
-                gp.save()
+                if gp.currentMoveTime != "NODATASFWET":
+                    gp.currentMoveTime = "ILLEGALMOVE"  # "NODATASFWET"
+                    gp.save()
             SN_sendFactoryAlertNotification(
                 request, newNameCurrent, jsonData["gameID"], currentGame
             )
@@ -1050,6 +1051,8 @@ def showHCgame(request, game_id):
 
         preferredHCcolour = result["user_profile"].preferredHCcolour
         liveNotification = result["user_profile"].liveNotification
+        # We need to include illegal moves here, to allow it to be fetched in the correct format
+        # should the move have been already submitted but become illegal
         if presenter.hasMoveData(username, True):
             currentMove = (
                 '{"phase": '
