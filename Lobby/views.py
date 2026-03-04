@@ -4480,6 +4480,7 @@ def MiniTournament(request, Mini_Tournament_id):
             openSlots.append(str(i))
         returnData.update(
             {
+                "startingPlayers": Mini_Tournament.startingPlayers.all().order_by('username'),
                 "openSlots": openSlots,
                 "isSignedUp": Mini_Tournament.isSignedUp(request.user),
                 "isInvitedPlayer": Mini_Tournament.isInvitedPlayer(request.user),
@@ -4904,6 +4905,7 @@ def MainTournament(request, Main_Tournament_id):
             openSlots.append(str(i))
         returnData.update(
             {
+                "startingPlayers": currentTournament.startingPlayers.all().order_by('username'),
                 "openSlots": openSlots,
                 "isSignedUp": currentTournament.isSignedUp(request.user),
             }
