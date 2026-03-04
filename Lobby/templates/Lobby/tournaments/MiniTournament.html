@@ -58,7 +58,7 @@
                 <th>#</th>
                 <th>{% translate "Current Players" %}</th>
               </tr>
-              {% for player in tournament.startingPlayers.all %}
+              {% for player in startingPlayers %}
                 <tr class="clickablePlayerRow"
                     id="playerRow{{ player.username }}"
                     onclick="window.location.href='/profile/{{ player.username }}';">
