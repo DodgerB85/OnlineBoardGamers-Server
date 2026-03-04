@@ -673,6 +673,7 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
     from Bus.common import create_bus_game
     from TGZ.common import create_tgz_game
     from AQY.common import create_aqy_game
+    from IND.common import create_ind_game
 
     # MG tournaments don't add next round players dynamically
     # End T check checks for not enough next round players
@@ -739,8 +740,12 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
             newGameID = create_tgz_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "AQY":
             newGameID = create_aqy_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "IND":
+            newGameID = create_ind_game(request, mainORmini, tournamentObj, tournamentGameName, currentPlayers)
         else:
             # LEGACY CODE FOR SEPERARTE TOURNAMENT MODELS
+            # THIS WILL FAIL! THIS FUNCTION NO LONGER EXISTS
+            # But leave it here to force a fail and alert me with a 500 error
             newGameID = tournamentObj.createTournamentGame(request, roundNumberString, currentPlayers)
         roundData.append([currentPlayers, newGameID, [], tournamentGameName])
 

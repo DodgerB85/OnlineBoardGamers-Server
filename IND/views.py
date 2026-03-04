@@ -29,6 +29,9 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
 )
+
+from .common import create_ind_game
+
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from Lobby.models import User, Profile, Game, GamePlayer
@@ -61,6 +64,8 @@ def createINDgame(request):
     # Creating a game must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
+
+    return create_ind_game(request)
 
     # if (
     #    "trainingGame" not in request.POST
