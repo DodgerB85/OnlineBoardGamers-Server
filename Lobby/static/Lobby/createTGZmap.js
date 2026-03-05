@@ -26,7 +26,7 @@ function init() {
 	window.addEventListener("mouseup", function (event) {
 		// do logic here
 		if (boardTileMoving) {
-			alert("IN INIT BTM")
+			//alert("IN INIT BTM")
 			//alert("rotate escape")
 			boardTileMoving.style.position = "relative"
 			boardTiles[parseInt(boardTileMoving.id.slice(9)) * 2 + 1] += 1
