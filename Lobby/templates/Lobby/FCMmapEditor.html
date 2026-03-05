@@ -39,6 +39,7 @@
         <input type="hidden" id="mapData" name="mapData" value="">
         <input type="button"
                onclick="createGameWithMap()"
+               class="actionsLineButton"
                value="{% translate " Create a game with this map" %}">
       </form>
     </div>
@@ -108,7 +109,7 @@
           <br />
         </div>
         <br />
-        <button id="BGHgenerateButton" onclick="generateBGHmap()">Generate Map</button>
+        <button class="actionsLineButton" id="BGHgenerateButton" onclick="generateBGHmap()">Generate Map</button>
         <div id="BGHspinnerDiv">
           <img src="{% static 'Lobby/images/spinner.gif' %}" id="BGHspinnerImg">
         </div>
@@ -158,15 +159,19 @@
     <div id="topButtons">
       <input type="button"
              onclick="fillMap(true)"
+             class="actionsLineButton"
              value="{% translate " Complete map with random tiles" %}">
       <input type="button"
              onclick="fillMap(false)"
+             class="actionsLineButton"
              value="{% translate "Complete map with random base game tiles only" %}">
       <input type="button"
              onclick="shuffleCurrentBoard()"
+             class="actionsLineButton"
              value="{% translate " Shuffle the current board" %}">
       <input type="button"
              onclick="clearMap()"
+             class="actionsLineButton"
              value="{% translate " Clear map" %}">
     </div>
     <span id="BGHnameSpan"></span>

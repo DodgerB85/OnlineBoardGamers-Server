@@ -35,6 +35,7 @@
         {% csrf_token %}
         <input type="hidden" id="mapData" name="mapData" value="">
         <input type="button"
+        class="actionsLineButton"
                onclick="createGameWithMap()"
                value="{% translate " Create a game with this map" %}">
       </form>
@@ -44,12 +45,15 @@
     <div id="topButtons">
       <input type="button"
              onclick="fillMap()"
+             class="actionsLineButton"
              value="{% translate " Complete map with random tiles" %}">
       <input type="button"
              onclick="shuffleCurrentBoard()"
+             class="actionsLineButton"
              value="{% translate " Shuffle the current board" %}">
       <input type="button"
              onclick="clearMap()"
+             class="actionsLineButton"
              value="{% translate " Clear map" %}">
     </div>
     <div id="boardArea">
