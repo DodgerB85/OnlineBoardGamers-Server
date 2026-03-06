@@ -794,7 +794,10 @@ def TGZdata(request, dataType):
         )
     # Check for update comparison, and update or do nothing
     if dataType == 3:
-        gameUpdate = int(jsonData["latestUpdate"])
+        gameUpdate = jsonData.get("latestUpdate")
+        if gameUpdate is None:
+            SN_sendAdminErrorMessage(None, f"latestUpdate key missing in TGZdata request: {request.body} for user: {request.user.username} gameID: {currentGame.id}")
+            return JsonResponse({"error": "latestUpdate key missing"}, status=400)
         latestUpdate = int(currentGame.latestUpdate)
         if gameUpdate == latestUpdate:
             return JsonResponse({"latest": True}, safe=False)
