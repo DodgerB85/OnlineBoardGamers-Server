@@ -214,7 +214,7 @@ def create_ind_game(
             maxPlayers=max_players,
             gameStatus=game_status,
             kickoutDuration=kickout_duration,
-            zoomLevels=json.dumps([16] * max_players),
+            zoomLevels=json.dumps([0] * max_players),
             statsExcludedGame=stats_exclude,
             startingMap=starting_map,
             startingOptions=json.dumps(starting_options),
