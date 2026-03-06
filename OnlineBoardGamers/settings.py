@@ -38,7 +38,7 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = False  # Handled by cloudflare
 
     CSRF_COOKIE_SECURE = True
-    CSRF_TRUSTED_ORIGINS = []
+    CSRF_TRUSTED_ORIGINS = ['https://www.onlineboardgamers.com', 'https://onlineboardgamers.com', 'https://webapp-1380192.pythonanywhere.com']
     USE_X_FORWARDED_HOST = False
 
     SESSION_ENGINE = (
