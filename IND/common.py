@@ -48,6 +48,14 @@ def create_ind_game(
     if not is_main_tournament and not is_mini_tournament and request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
     
+    def get_max_players(post_data):
+        """Determine max players based on playerNumber or tournament."""
+        if "playerNumber" in post_data:
+            return int(post_data.get("playerNumber", 2))
+        if tournamentObj != None and (is_main_tournament or is_mini_tournament):
+            return tournamentObj.maxGamePlayers
+        return 2
+    
     def validate_players(usernames, max_players, allow_creator=True):
         """Validate player usernames and return a list of User objects."""
         if not usernames:
@@ -99,7 +107,7 @@ def create_ind_game(
     all_players = []
     invited_usernames_objs = []
 
-    max_players = int(request.POST.get("playerNumber", "2"))
+    max_players = get_max_players(request.POST)
 
     # Setup Tournament Options
     if is_main_tournament or is_mini_tournament:
