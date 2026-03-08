@@ -19,6 +19,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
+from . import FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
@@ -35,30 +36,30 @@ def buildFCMstartingOptions(post_data):
     """
     optionsArr = []
     if "trainingGame" in post_data:
-        optionsArr.extend([101, int(post_data["trainingGame"])])
+        optionsArr.extend([rfFCM.SO_STRICT_PAYDAY_FRIDGE, int(post_data["trainingGame"])])
     if "fcmAI" in post_data:
-        optionsArr.extend([101, 102])
+        optionsArr.extend([rfFCM.SO_STRICT_PAYDAY_FRIDGE, rf.SO_TRAINING_GAME])
 
     if "enableAdvancedOptions" in post_data:
         if "randomModules" in post_data:
             if post_data["random_MS"] == "202":
-                optionsArr.append(21)
-            optionsArr.append(200)
+                optionsArr.append(rfFCM.SO_NEW_MS)
+            optionsArr.append(rfFCM.SO_RANDOM_MODULES)
             min_modules = post_data["minModules"].zfill(2)  # Pad to two digits
             max_modules = post_data["maxModules"].zfill(2)
-            minStr = f"210{min_modules}"
-            maxStr = f"211{max_modules}"
+            minStr = f"{rfFCM.SO_MIN_RANDOM_MODULES}{min_modules}"
+            maxStr = f"{rfFCM.SO_MAX_RANDOM_MODULES}{max_modules}"
             optionsArr.extend([int(minStr), int(maxStr)])
         if "draftModules" in post_data:
             if post_data["draft_MS"] == "302":
-                optionsArr.append(21)
+                optionsArr.append(rfFCM.SO_NEW_MS)
             if "newDistrictsDraft" in post_data:
-                optionsArr.append(18)
+                optionsArr.append(rfFCM.SO_NEW_DISTRICTS)
             if "newDistrictsAppDraft" in post_data:
-                optionsArr.append(181)
+                optionsArr.append(rfFCM.SO_NEW_DISTRICTS_APP)
             if "newDistrictsParkDraft" in post_data:
-                optionsArr.append(183)
-            optionsArr.append(300)
+                optionsArr.append(rfFCM.SO_NEW_DISTRICTS_PARK)
+            optionsArr.append(rfFCM.SO_DRAFT_MODULE_BREAKER)
 
     option_names = [
         "short",
@@ -132,13 +133,13 @@ def create_fcm_game(
     game_description = ""
     creator = None
     host = None
-    game_pace = 30
+    game_pace = rf.PACE_STANDARD
     created = SR_getTimeNow()
     player_Order_Seed = 0
     starting_options = []
     max_players = 2
     game_status = "AVAILABLE"
-    kickout_duration = 24
+    kickout_duration = rf.KICKOUT_1_DAY
     starting_map = ""
     stats_excluded_game = False
     shadowNameNotes = ""
@@ -157,8 +158,8 @@ def create_fcm_game(
         game_description = ""
         creator = User.objects.get(username="admin")
         host = creator
-        game_pace = 30
-        kickout_duration = 100
+        game_pace = rf.PACE_STANDARD
+        kickout_duration = rf.KICKOUT_1_DAY
         player_Order_Seed = randint(1000, 32767)
         # TODO
         starting_options = json.loads(tournamentObj.startingOptions) if tournamentObj.startingOptions else []
@@ -177,7 +178,7 @@ def create_fcm_game(
 
         # Now exclude stats if any china expansion is in starting options
         # Split the string into a list
-        if any(x in starting_options for x in [42, 43, 44, 45]):
+        if any(x in starting_options for x in [rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS]):
             stats_excluded_game = True
 
         all_players = [
@@ -242,7 +243,7 @@ def create_fcm_game(
             request.POST
         )  # Use the extracted function
         # Now exclude stats if any china expansion is in starting options
-        if any(x in starting_options for x in [42, 43, 44, 45]):
+        if any(x in starting_options for x in [rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS]):
             stats_excluded_game = True
         game_pace = request.POST["pace"]
         creator = request.user
