@@ -30,7 +30,7 @@ from .common import create_aqy_game
 
 from Lobby.models import User, Game
 
-import AQYconstants as rfAQY
+from . import AQYconstants as rfAQY
 import Lobby.sharedFunctions.constants as rf
 
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
