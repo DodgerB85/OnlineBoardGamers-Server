@@ -7,9 +7,9 @@ from django.urls import reverse
 from django.utils.translation import gettext
 
 from Lobby.models import Profile, Game
-from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
 from Lobby.sharedFunctions.sharedNotifications import SN_sendBugReportEmail
 
+import Lobby.sharedFunctions.constants as rf
 
 def build_show_game_data(request, game_id, game_code, *,
                          default_zoom=0,
@@ -78,14 +78,14 @@ def build_show_game_data(request, game_id, game_code, *,
         "settingsDebug": settings_debug,
         "statsExcludeVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
-                STATS_EXCLUDE_VOTE_TOPIC,
+                rf.STATS_EXCLUDE_VOTE_TOPIC,
                 presenter.getAllPlayersOrderedySeatInArray(True),
                 False,
             )
         ),
         "deleteVotesData": json.dumps(
             presenter.getFullSetOfVoteResults(
-                DELETE_VOTE_TOPIC,
+                rf.DELETE_VOTE_TOPIC,
                 presenter.getAllPlayersOrderedySeatInArray(True),
                 False,
             )

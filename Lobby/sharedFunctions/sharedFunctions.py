@@ -48,7 +48,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 from Lobby.sharedFunctions.tournyGenerator import multiGamePlayers4p, multiGamePlayersRound2
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG, SHADOW_USERNAMES
+import Lobby.sharedFunctions.constants as rf
 
 NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND = ["FCMtourneyAdmin", "TGZtourneyAdmin"]
 
@@ -159,7 +159,7 @@ def SF_fastSerializeGame(game, user):
     is_my_move = False
     if user and game.gameStatus == "ACTIVE":
         is_my_move = (not current_players_str or user.username in current_players_str or
-                      any(s in current_players_str for s in SHADOW_USERNAMES))
+                      any(s in current_players_str for s in rf.SHADOW_USERNAMES))
         
         # For HC, if it is factory phase, AND you have submitted your move, set it back to false
         if game_code == "HC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
@@ -171,7 +171,7 @@ def SF_fastSerializeGame(game, user):
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
     # 5. Shadow/Delete Logic
-    is_deleteable = any(name in all_usernames for name in SHADOW_USERNAMES) and (user.id in all_ids if user else False)
+    is_deleteable = any(name in all_usernames for name in rf.SHADOW_USERNAMES) and (user.id in all_ids if user else False)
 
     creator = game.creator.username 
     gameName = getattr(game, 'gameName', 'Unknown Game')
@@ -303,7 +303,7 @@ def SF_kickoutRequired(gameStatus, allPlayers, latestUpdate, kickoutDuration, ki
 
     if gameStatus != "ACTIVE":
         return 0
-    if any(username in allPlayers for username in SHADOW_USERNAMES):
+    if any(username in allPlayers for username in rf.SHADOW_USERNAMES):
         return 0
     secondsSinceUpdate = (int(time.time()) * 1000 - int(latestUpdate)) / 1000
 
@@ -544,7 +544,7 @@ def SF_TGZadvancedOptions(request):
 #
 ######################################
 def SF_startAnyTournament(request, mainORmini, tournamentObj):
-    if mainORmini == MINI_T_FLAG:
+    if mainORmini == rf.MINI_T_FLAG:
         tournamentObj.invitedPlayers.clear()
 
     gameCode = tournamentObj.gameCode
@@ -923,7 +923,7 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
 
         # Handle remaining players (>2 for MiniT -- Byes have been removed first)
         # MT just make games if possible
-        if tournamentType == MINI_T_FLAG and len(allPlayersList) >= 2:
+        if tournamentType == rf.MINI_T_FLAG and len(allPlayersList) >= 2:
             currentPlayers = allPlayersList[:]
             gamesPlayers.append(currentPlayers)
             allPlayersList.clear()
@@ -1203,7 +1203,7 @@ def SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winne
     for i in range(len(winnersData)):
         for player in winnersData[i]:
             # Award trophies only for main tournaments
-            if mainORmini == MAIN_T_FLAG:
+            if mainORmini == rf.MAIN_T_FLAG:
                 playerObject = User.objects.get(username=player)
                 relatedProfile = Profile.objects.get(user=playerObject)
                 FCMtournamentTrophies = json.loads(relatedProfile.FCMtournamentTrophies) if relatedProfile.FCMtournamentTrophies else []

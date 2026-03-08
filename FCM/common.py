@@ -1,5 +1,6 @@
 import json
 from random import randint
+from typing import TYPE_CHECKING, cast
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseRedirect
@@ -18,9 +19,11 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+import Lobby.sharedFunctions.constants as rf
 
-
+if TYPE_CHECKING:
+    from Lobby.presenters import FCMpresenter
+    
 def buildFCMstartingOptions(post_data):
     """Builds the starting options string for FCM games from POST data.
 
@@ -106,8 +109,8 @@ def create_fcm_game(
     current_players_usernames=None,
 ):
     is_tournament = mainORmini == "normT"
-    is_main_tournament = mainORmini == MAIN_T_FLAG
-    is_mini_tournament = mainORmini == MINI_T_FLAG
+    is_main_tournament = mainORmini == rf.MAIN_T_FLAG
+    is_mini_tournament = mainORmini == rf.MINI_T_FLAG
     """
     Creates a new FCM game for normal play or tournaments.
 
@@ -328,13 +331,14 @@ def create_fcm_game(
 
         if "trainingGame" in request.POST or is_main_tournament or is_mini_tournament or is_tournament:
             new_game.save()
-            new_game.presenter().startGame(request)
+            presenter = cast('FCMpresenter', new_game.presenter())
+            presenter.startGame(request)
 
         new_game.save()
 
     # Notifications and redirects
     if is_tournament or is_main_tournament or is_mini_tournament:
-        presenter = new_game.presenter()
+        presenter = cast('FCMpresenter', new_game.presenter())
         for username in usernames_to_notify:
             tournamentType = "normalTournament"
             if is_mini_tournament:

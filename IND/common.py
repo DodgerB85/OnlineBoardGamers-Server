@@ -18,7 +18,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
 )  # Replace 'somewhere' with actual module
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG, SHADOW_PLAYER_NAMES
+import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import INDpresenter 
@@ -31,8 +31,8 @@ def create_ind_game(
     tournamentGameName=None,
     current_players_usernames=None,
 ):
-    is_main_tournament = mainORmini == MAIN_T_FLAG
-    is_mini_tournament = mainORmini == MINI_T_FLAG
+    is_main_tournament = mainORmini == rf.MAIN_T_FLAG
+    is_mini_tournament = mainORmini == rf.MINI_T_FLAG
     """
     Create a AQY game, either for a tournament or regular play (training/non-training).
     Args:
@@ -190,7 +190,7 @@ def create_ind_game(
             starting_options.append(int(request.POST["trainingGame"]))
             game_status = "ACTIVE"
             stats_exclude = True
-            shadow_names = SHADOW_PLAYER_NAMES
+            shadow_names = rf.SHADOW_PLAYER_NAMES
             shadow_display = []
             for i in range(1, max_players):
                 all_players.append(User.objects.get(username=shadow_names[i - 1]))

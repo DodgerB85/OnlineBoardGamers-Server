@@ -34,7 +34,6 @@ from .common import create_rnb_game
 
 from Lobby.models import User, Profile, Game
 
-from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"

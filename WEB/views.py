@@ -32,8 +32,9 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
-from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC, SHADOW_PLAYER_NAMES
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
+
+import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import WEBpresenter 
@@ -112,7 +113,7 @@ def createWEBgame(request):
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
-            shadow_names = SHADOW_PLAYER_NAMES
+            shadow_names = rf.SHADOW_PLAYER_NAMES
             shadow_players = []
 
             for i in range(1, _maxPlayers):
