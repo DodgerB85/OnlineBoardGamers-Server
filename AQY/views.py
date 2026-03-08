@@ -5,21 +5,17 @@ import time
 import base64
 import gzip
 
-from decouple import config
 from typing import TYPE_CHECKING, cast
 
 from contextlib import contextmanager
 
-from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
 from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
-from django.urls import reverse
 from django.db import connection
-from django.db.models import Q
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
@@ -27,21 +23,22 @@ from Lobby.sharedFunctions.sharedFunctions import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
-    SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
 )
 
 from .common import create_aqy_game
 
-from Lobby.models import User, Profile, Game
+from Lobby.models import User, Game
 
-from Lobby.sharedFunctions.constants import DELETE_VOTE_TOPIC, STATS_EXCLUDE_VOTE_TOPIC
+import AQYconstants as rfAQY
+import Lobby.sharedFunctions.constants as rf
+
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:
     from Lobby.presenters import AQYpresenter
 
-AQYsuperUsers = ["BotKickStarter"]
+AQY_SUPER_USERS = ["BotKickStarter"]
 AQY_DB_LOCK_NAME = "lockAQYgame_"
 
 
@@ -55,10 +52,6 @@ def AQYhelp(request):
 
 @login_required
 def createAQYgame(request):
-    # Creating a game must be via POST
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
     return create_aqy_game(request)
 
 
@@ -111,7 +104,14 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
     })
 
     ## pre move
-    if currentGame.phase in [4, 5, 6, 7, 8, 9]:
+    if currentGame.phase in [
+        rfAQY.PHASE_COUNTRYSIDE_BUILDING,
+        rfAQY.PHASE_STORE_GOODS,
+        rfAQY.PHASE_HARVEST,
+        rfAQY.PHASE_EXPLORE,
+        rfAQY.PHASE_FAMINE,
+        rfAQY.PHASE_POLLUTION,
+    ]:
         if presenter.getMoveDataTime(username) == "PRE_MOVE":
             returnData["preMove"] = presenter.getMoveData(username)
 
@@ -223,7 +223,7 @@ def _processAQYturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
         currentGame.playerTradeData = ""
 
-        if currentGame.phase == 1 or currentGame.phase == 2:
+        if currentGame.phase == rfAQY.PHASE_ALL_RISE or currentGame.phase == rfAQY.PHASE_CITY_BUILDING:
             presenter.deleteAllPreMoves()
 
         # SAVE BEFORE NOTIFICATIONS
@@ -238,7 +238,7 @@ def _processAQYturn(request):
             # decompress the move data
             preTurnArray = json.loads(gzip.decompress(bytearray(base64.b64decode(moveData))).decode("utf-8"))
             preTurnIndex = next(
-                (index for index, entry in enumerate(preTurnArray) if entry.get("phase") == jsonData["phase"] + 10),
+                (index for index, entry in enumerate(preTurnArray) if entry.get("phase") == jsonData["phase"] + rfAQY.PRE_PHASE_OFFSET),
                 None,
             )
             if preTurnIndex is not None:
@@ -259,13 +259,14 @@ def _processAQYturn(request):
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             if (
                 len(jsonData["nextPlayer"]) > 0
-                and "AqyBot" not in jsonData["nextPlayer"] 
                 and jsonData["status"] != "FINISHED"
-                and 102 not in loadedStartingOptions
+                and rf.SO_TRAINING_GAME not in loadedStartingOptions
             ):
                 playerListToNotify = [player.strip() for player in jsonData["nextPlayer"]]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
+                if "AqyBot" in playerListToNotify:
+                    playerListToNotify.remove("AqyBot")
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
                         request,
@@ -333,7 +334,7 @@ def _processAQYturn(request):
         # Delete pre moves for current player
         presenter.updateSingleMove(jsonData["nextPlayer"][0], "", True)
 
-        if currentGame.phase == 1 or currentGame.phase == 2:
+        if currentGame.phase == rfAQY.PHASE_ALL_RISE or currentGame.phase == rfAQY.PHASE_CITY_BUILDING:
             presenter.deleteAllPreMoves()
 
         # SAVE BEFORE NOTIFICATIONS
@@ -342,13 +343,14 @@ def _processAQYturn(request):
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         if (
             len(jsonData["nextPlayer"]) > 0
-            and "AqyBot" not in jsonData["nextPlayer"] 
             and jsonData["status"] != "FINISHED"
-            and 102 not in loadedStartingOptions
+            and rf.SO_TRAINING_GAME not in loadedStartingOptions
         ):
             playerListToNotify = [player.strip() for player in jsonData["nextPlayer"]]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
+            if "AqyBot" in playerListToNotify:
+                    playerListToNotify.remove("AqyBot")
             if len(playerListToNotify) > 0:
                 SN_sendNextTurnNotification(
                     request,
@@ -624,13 +626,12 @@ def _processAQYturn(request):
         gameCreationTimestamp = int(currentGame.created) / 1000
         current_time_seconds = int(time.time())
         time_difference = int(current_time_seconds - gameCreationTimestamp)
-        HIST_CITY_PLAYER_TRADE = 13
         # [youIndece, opponentIndex, yourResources, yourPromise, opponentsResources, opponentsPromise, yourMoveData]
         entry3 = [
             ([entry[0], entry[2], entry[3]] if entry[3][0] != "" else [entry[0], entry[2]]),
             ([entry[1], entry[4], entry[5]] if entry[5][0] != "" else [entry[1], entry[4]]),
         ]
-        histEntry = [HIST_CITY_PLAYER_TRADE, -1, time_difference, entry3]
+        histEntry = [rfAQY.HIST_CITY_PLAYER_TRADE, -1, time_difference, entry3]
         playerTradeData["tradeHistory"].append(histEntry)
 
         # remove all trades involving either player
@@ -742,14 +743,14 @@ def _processAQYturn(request):
             return JsonResponse({"syncError": True}, safe=False)
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        if request.user.username not in AQYsuperUsers:
+        if request.user.username not in AQY_SUPER_USERS:
             presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
             presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
 
         presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayersArrayAQY())
 
-        if request.user.username in AQYsuperUsers:
+        if request.user.username in AQY_SUPER_USERS:
             SF_updateFlexiTime(
                 currentGame.kickoutFlexiData,
                 currentGame.latestUpdate,
@@ -891,10 +892,12 @@ def _processAQYturn(request):
 
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        if len(jsonData["nextPlayer"]) > 0 and "AqyBot" not in jsonData["nextPlayer"] and 102 not in loadedStartingOptions:
+        if len(jsonData["nextPlayer"]) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
             playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
+            if "AqyBot" in playerListToNotify:
+                    playerListToNotify.remove("AqyBot")
             if len(playerListToNotify) > 0:
                 SN_sendNextTurnNotification(
                     request,
@@ -975,14 +978,14 @@ def AQYdata(request, dataType):
             "latestUpdate": currentGame.latestUpdate,
         }
         # Check for any premoves
-        if (
-            currentGame.phase == 4
-            or currentGame.phase == 5
-            or currentGame.phase == 6
-            or currentGame.phase == 7
-            or currentGame.phase == 8
-            or currentGame.phase == 9
-        ):
+        if currentGame.phase in [
+            rfAQY.PHASE_COUNTRYSIDE_BUILDING,
+            rfAQY.PHASE_STORE_GOODS,
+            rfAQY.PHASE_HARVEST,
+            rfAQY.PHASE_EXPLORE,
+            rfAQY.PHASE_FAMINE,
+            rfAQY.PHASE_POLLUTION,
+        ]:
             if presenter.getMoveDataTime(request.user.username) == "PRE_MOVE":
                 returnData.update({"preMove": presenter.getMoveData(request.user.username)})
         # Send game data

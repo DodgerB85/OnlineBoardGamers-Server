@@ -28,7 +28,6 @@ from Lobby.models import User, Profile, Game
 
 from .common import create_bus_game
 
-from Lobby.sharedFunctions.constants import STATS_EXCLUDE_VOTE_TOPIC, DELETE_VOTE_TOPIC
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 

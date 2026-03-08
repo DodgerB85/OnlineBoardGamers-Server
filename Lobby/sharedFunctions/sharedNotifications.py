@@ -25,9 +25,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from django.conf import settings
-
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+import Lobby.sharedFunctions.constants as rf
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
@@ -1385,7 +1383,7 @@ def SN_M_T_sendTournamentWinNotification(
         activate(profile.profileLanguage)
         gameStrings = getGameStrings(_game)
         subject = gameStrings["tournamentWinSubject"]
-        if mainORmini == MINI_T_FLAG:
+        if mainORmini == rf.MINI_T_FLAG:
             subject = gameStrings["miniTournamentWinSubject"]
         boxName = gameStrings["boxName"]
 

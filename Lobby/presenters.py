@@ -17,13 +17,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
 )
 
-from Lobby.sharedFunctions.constants import (
-    STATS_EXCLUDE_VOTE_TOPIC,
-    DELETE_VOTE_TOPIC,
-    REWIND_CONSENT_VOTE_TOPIC,
-    BLANK_MESSAGE_TEMPLATE,
-    SHADOW_USERNAMES,
-)
+import Lobby.sharedFunctions.constants as rf
 
 
 class GamePresenter:
@@ -46,7 +40,7 @@ class GamePresenter:
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
 
-        return loggedInPlayerUsername in current_usernames or any(username in SHADOW_USERNAMES for username in current_usernames)
+        return loggedInPlayerUsername in current_usernames or any(username in rf.SHADOW_USERNAMES for username in current_usernames)
 
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
@@ -65,7 +59,7 @@ class GamePresenter:
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
 
-        return loggedInPlayerUsername in current_usernames or any(username in SHADOW_USERNAMES for username in current_usernames)
+        return loggedInPlayerUsername in current_usernames or any(username in rf.SHADOW_USERNAMES for username in current_usernames)
 
     ########### END OF FUNCTIONS THAT DEPEND ON THE GAME
 
@@ -278,7 +272,7 @@ class GamePresenter:
         if not playerListToNotify:
             return
 
-        message_data = BLANK_MESSAGE_TEMPLATE.copy()
+        message_data = rf.BLANK_MESSAGE_TEMPLATE.copy()
         message_data["gameID"] = self.gameObj.id
         message_data["gameName"] = self.getGameName()
         message_data["gameCode"] = self.gameObj.gameCode
@@ -346,11 +340,11 @@ class GamePresenter:
 
         # 4. Handle Terminal Actions
         if all_voted:
-            if topic == DELETE_VOTE_TOPIC:
+            if topic == rf.DELETE_VOTE_TOPIC:
                 self.gameObj.delete()
                 response_data["message"] = gettext("Game successfully deleted")
                 response_data["redirect_url"] = reverse("index")
-            elif topic == STATS_EXCLUDE_VOTE_TOPIC:
+            elif topic == rf.STATS_EXCLUDE_VOTE_TOPIC:
                 self.gameObj.statsExcludedGame = True
                 self.gameObj.save()
                 # response_data["message"] = gettext("Game stats excluded")
@@ -371,14 +365,14 @@ class GamePresenter:
         generalReturn = {username: default for username in usernames}
 
         # If the game is statsExcluded, and you are checking that vote, return True
-        if self.gameObj.statsExcludedGame and topic == STATS_EXCLUDE_VOTE_TOPIC:
+        if self.gameObj.statsExcludedGame and topic == rf.STATS_EXCLUDE_VOTE_TOPIC:
             # set all to True
             for username in usernames:
                 generalReturn[username] = True
             return generalReturn
 
         # If it is an FCM game with enabled rewinds, return 2 always
-        if self.gameObj.gameCode == "FCM" and topic == REWIND_CONSENT_VOTE_TOPIC:
+        if self.gameObj.gameCode == "FCM" and topic == rf.REWIND_CONSENT_VOTE_TOPIC:
             startingOptionsList = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
             if 99 in startingOptionsList:
                 for username in usernames:
@@ -575,7 +569,6 @@ class AQYpresenter(GamePresenter):
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
-        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -619,7 +612,7 @@ class AQYpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MAIN_T_FLAG,
+                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 winnerNamesArray,
@@ -629,7 +622,7 @@ class AQYpresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MINI_T_FLAG,
+                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 winnerNamesArray,
@@ -844,7 +837,6 @@ class TGZpresenter(GamePresenter):
             SN_M_sendEndGameNotification,
         )
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
-        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -866,7 +858,7 @@ class TGZpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MAIN_T_FLAG,
+                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -875,7 +867,7 @@ class TGZpresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MINI_T_FLAG,
+                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -1100,7 +1092,6 @@ class BusPresenter(GamePresenter):
             SN_M_sendEndGameNotification,
         )
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
-        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -1124,7 +1115,7 @@ class BusPresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MAIN_T_FLAG,
+                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -1133,7 +1124,7 @@ class BusPresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MINI_T_FLAG,
+                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -1166,7 +1157,6 @@ class BusPresenter(GamePresenter):
             GamePlayer.objects.bulk_update(game_players, ["is_current"])
 
         # Initialize rewind consent in activeVotes
-        from Lobby.sharedFunctions.constants import REWIND_CONSENT_VOTE_TOPIC
 
         rewind_votes = {}
         host_username = getattr(self.gameObj.host, "username") if self.gameObj.host else None
@@ -1185,7 +1175,7 @@ class BusPresenter(GamePresenter):
 
         if not self.gameObj.activeVotes:
             self.gameObj.activeVotes = {}
-        self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+        self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
 
         # required to send correct start player notification
         self.gameObj.save()
@@ -1222,7 +1212,7 @@ class RNBpresenter(GamePresenter):
                 if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
                     return False
 
-        return not currentPlayersList or loggedInPlayerUsername in currentPlayersList or currentPlayersList[0] in SHADOW_USERNAMES
+        return not currentPlayersList or loggedInPlayerUsername in currentPlayersList or currentPlayersList[0] in rf.SHADOW_USERNAMES
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
@@ -1232,7 +1222,6 @@ class RNBpresenter(GamePresenter):
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
-        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -1277,7 +1266,7 @@ class RNBpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MAIN_T_FLAG,
+                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 winnerNamesArray,
@@ -1287,7 +1276,7 @@ class RNBpresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MINI_T_FLAG,
+                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 winnerNamesArray,
@@ -1897,7 +1886,7 @@ class FCMpresenter(GamePresenter):
         if int(self.gameObj.created) > 1744974000000:
             USE_NEW_CODE = True
 
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
 
         rewindHTML = ""
 
@@ -1915,7 +1904,7 @@ class FCMpresenter(GamePresenter):
         # TODO - move this to new vote system
         if self.isTrainingGame():
             return True
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
         missingPlayerNames = self.getMissingPlayersNamesArray()
         hostUsername = getattr(self.gameObj.host, "username")
         possible = True
@@ -1926,16 +1915,16 @@ class FCMpresenter(GamePresenter):
         return possible
 
     def removeSingleRewindPermission(self):
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
         for player in rewindConsentVotes:
             if rewindConsentVotes[player] == 1:
                 rewindConsentVotes[player] = 0
 
-        self.setVoteResults(REWIND_CONSENT_VOTE_TOPIC, rewindConsentVotes)
+        self.setVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, rewindConsentVotes)
 
     def getCurrentRewindConsent(self, _username):
         # return 0,1, or 2
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
         if _username in rewindConsentVotes:
             return rewindConsentVotes[_username]
         else:
@@ -1948,7 +1937,6 @@ class FCMpresenter(GamePresenter):
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
-        from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -1976,7 +1964,7 @@ class FCMpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MAIN_T_FLAG,
+                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -1985,7 +1973,7 @@ class FCMpresenter(GamePresenter):
         elif self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                MINI_T_FLAG,
+                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -2097,7 +2085,7 @@ class HCpresenter(GamePresenter):
         if self.gameObj.phase == 3 and self.hasMoveData(loggedInPlayerUsername) and loggedInPlayerUsername != currentPlayersArr[0]:
             return False
 
-        return not currentPlayersArr or loggedInPlayerUsername in currentPlayersArr or currentPlayersArr[0] in SHADOW_USERNAMES
+        return not currentPlayersArr or loggedInPlayerUsername in currentPlayersArr or currentPlayersArr[0] in rf.SHADOW_USERNAMES
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
@@ -2141,7 +2129,7 @@ class HCpresenter(GamePresenter):
 
         if not self.gameObj.activeVotes:
             self.gameObj.activeVotes = {}
-        self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+        self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
 
         self.gameObj.save()
 
@@ -2306,11 +2294,11 @@ class HCpresenter(GamePresenter):
         seat = self.seatPosition(_username)
         if seat < 0:
             return 0
-        votes = self.gameObj.activeVotes.get(REWIND_CONSENT_VOTE_TOPIC, {}) if self.gameObj.activeVotes else {}
+        votes = self.gameObj.activeVotes.get(rf.REWIND_CONSENT_VOTE_TOPIC, {}) if self.gameObj.activeVotes else {}
         return votes.get(_username, 0)
 
     def setupRewindConsent(self):
-        if self.gameObj.activeVotes and REWIND_CONSENT_VOTE_TOPIC in self.gameObj.activeVotes:
+        if self.gameObj.activeVotes and rf.REWIND_CONSENT_VOTE_TOPIC in self.gameObj.activeVotes:
             return
         rewind_votes = {}
         all_players = self.getAllPlayersOrderedySeatInArray(True)
@@ -2322,7 +2310,7 @@ class HCpresenter(GamePresenter):
                 rewind_votes[player] = 0
         if not self.gameObj.activeVotes:
             self.gameObj.activeVotes = {}
-        self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+        self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
         self.gameObj.save()
 
     def getRewindHostPossible(self):
@@ -2335,23 +2323,23 @@ class HCpresenter(GamePresenter):
             for gp in self.gameObj.players.select_related("player"):
                 if gp.player:
                     rewind_votes[gp.player.username] = 2
-            self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+            self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
             self.gameObj.save()
 
-        if not self.gameObj.activeVotes or REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
+        if not self.gameObj.activeVotes or rf.REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
             return False
 
-        rewind_votes = self.gameObj.activeVotes.get(REWIND_CONSENT_VOTE_TOPIC, {})
+        rewind_votes = self.gameObj.activeVotes.get(rf.REWIND_CONSENT_VOTE_TOPIC, {})
         for consent in rewind_votes.values():
             if consent == 0:
                 return False
         return True
 
     def getRewindHostHTML(self):
-        if not self.gameObj.activeVotes or REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
+        if not self.gameObj.activeVotes or rf.REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
             self.setupRewindConsent()
 
-        rewindConsentVotes = self.getFullSetOfVoteResults(REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
+        rewindConsentVotes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
 
         rewindHTML = ""
 
@@ -2366,13 +2354,13 @@ class HCpresenter(GamePresenter):
         return rewindHTML
 
     def actionRewindAlterConsent(self):
-        if not self.gameObj.activeVotes or REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
+        if not self.gameObj.activeVotes or rf.REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
             return
-        rewind_votes = self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC]
+        rewind_votes = self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC]
         for username in rewind_votes:
             if rewind_votes[username] == 1:
                 rewind_votes[username] = 0
-        self.gameObj.activeVotes[REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+        self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
 
 
 class KFWpresenter(GamePresenter):

@@ -56,8 +56,6 @@ from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament,
 
 from Lobby.sharedFunctions.sharedFunctions import SF_endAnyTournament#(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore):
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
-
 
 allKFWgames = Game.objects.filter(gameCode='KFW')
 allMiniTs = Mini_Tournaments.objects.all()

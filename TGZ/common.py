@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, cast
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -16,9 +18,11 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedFunctions import SF_TGZadvancedOptions, SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow  # Replace 'somewhere' with actual module
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+import Lobby.sharedFunctions.constants as rf
 
-
+if TYPE_CHECKING:
+    from Lobby.presenters import TGZpresenter
+    
 @login_required()
 def create_tgz_game(
     request,
@@ -27,8 +31,8 @@ def create_tgz_game(
     tournamentGameName=None,
     current_players_usernames=None,
 ):
-    is_main_tournament = mainORmini == MAIN_T_FLAG
-    is_mini_tournament = mainORmini == MINI_T_FLAG
+    is_main_tournament = mainORmini == rf.MAIN_T_FLAG
+    is_mini_tournament = mainORmini == rf.MINI_T_FLAG
     """
     Create a TGZ game, either for a tournament or regular play (training/non-training).
     Args:
@@ -139,13 +143,15 @@ def create_tgz_game(
                             is_current=(idx == 0),
                         )
                         
+                        presenter = cast("TGZpresenter", new_game.presenter())
+                        
                         SN_M_T_sendTournamentGameStartNotification(
                             request,
                             "TGZ",
                             player.username,
                             max_players,
                             game_name,
-                            new_game.presenter().currentTurnString(),
+                            presenter.currentTurnString(),
                             getattr(new_game, "id"),
                             True,
                             "externalTournament",
@@ -420,7 +426,8 @@ def create_tgz_game(
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            new_game.presenter().startGame(request)
+            presenter = cast("TGZpresenter", new_game.presenter())
+            presenter.startGame(request)
 
         new_game.save()
 

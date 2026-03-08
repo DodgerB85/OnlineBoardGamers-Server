@@ -18,7 +18,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
 )  # Replace 'somewhere' with actual module
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
+import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter 
@@ -31,8 +31,8 @@ def create_rnb_game(
     tournamentGameName=None,
     current_players_usernames=None,
 ):
-    is_main_tournament = mainORmini == MAIN_T_FLAG
-    is_mini_tournament = mainORmini == MINI_T_FLAG
+    is_main_tournament = mainORmini == rf.MAIN_T_FLAG
+    is_mini_tournament = mainORmini == rf.MINI_T_FLAG
     """
     Create a AQY game, either for a tournament or regular play (training/non-training).
     Args:

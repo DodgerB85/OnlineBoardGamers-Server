@@ -56,8 +56,6 @@ from django.contrib.sites.models import Site
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament
 
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG
-
 #allMiniTs = Mini_Tournaments.objects.all()
 
 #game = HC_Game.objects.last()

@@ -134,8 +134,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getPointsForPosition,
 )
 
-from Lobby.sharedFunctions.constants import MAIN_T_FLAG, MINI_T_FLAG, SHADOW_USERNAMES
-
+import Lobby.sharedFunctions.constants as rf
 
 User = get_user_model()
 
@@ -1242,7 +1241,7 @@ def stats(request):
 
     # 2. Optimized ID exclusion (Avoids expensive NOT EXISTS subqueries)
     excluded_game_ids = GamePlayer.objects.filter(
-        player__username__in=SHADOW_USERNAMES
+        player__username__in=rf.SHADOW_USERNAMES
     ).values_list('game_id', flat=True)
 
     # 3. Batch Fetch ALL Counts (1 Query instead of 18)
@@ -4396,7 +4395,7 @@ def MiniTournament(request, Mini_Tournament_id):
                 Mini_Tournament.startingPlayers.count()
                 == Mini_Tournament.maxTournamentPlayers
             ):
-                SF_startAnyTournament(request, MINI_T_FLAG, Mini_Tournament)
+                SF_startAnyTournament(request, rf.MINI_T_FLAG, Mini_Tournament)
             messages.success(request, (gettext("You have joined the Tournament")))
         else:
             messages.error(request, gettext("The Tournament is already full"))
@@ -4833,7 +4832,7 @@ def MainTournament(request, Main_Tournament_id):
                 currentTournament.startingPlayers.count()
                 == currentTournament.maxTournamentPlayers
             ):
-                SF_startAnyTournament(request, MAIN_T_FLAG, currentTournament)
+                SF_startAnyTournament(request, rf.MAIN_T_FLAG, currentTournament)
             messages.success(request, (gettext("You have joined the Tournament")))
         else:
             messages.error(request, gettext("The Tournament is already full"))

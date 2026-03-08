@@ -41,11 +41,6 @@ from .common import create_fcm_game
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
-from Lobby.sharedFunctions.constants import (
-    STATS_EXCLUDE_VOTE_TOPIC,
-    DELETE_VOTE_TOPIC,
-    REWIND_CONSENT_VOTE_TOPIC,
-)
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, shared_bug_entry, shared_cast_vote
 
 if TYPE_CHECKING:

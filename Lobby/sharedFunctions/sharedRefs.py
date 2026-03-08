@@ -7,6 +7,8 @@ import math
 from django.utils.translation import gettext, gettext_lazy
 from collections import Counter
 
+import AQY.AQYconstants as rfAQY
+
 DISCORD = "DC"
 SLACK = "SL"
 TELEGRAM = "TG"
@@ -500,29 +502,29 @@ def SR_currentTurnString(game, turn, phase):
 
     elif game == "AQY":
         currentTurnString = str(turn)
-        if phase == 0:
+        if phase == rfAQY.PHASE_FIRST_CITY:
             currentTurnString += " - " + gettext("Place First City")
-        elif phase == 1:
+        elif phase == rfAQY.PHASE_ALL_RISE:
             currentTurnString += "." + gettext("All Rise")
-        elif phase == 2:
+        elif phase == rfAQY.PHASE_CITY_BUILDING:
             currentTurnString += "." + gettext("City Building")
-        elif phase == 3:
+        elif phase == rfAQY.PHASE_TURN_ORDER:
             currentTurnString += "." + gettext("Turn Order")
-        elif phase == 4:
+        elif phase == rfAQY.PHASE_COUNTRYSIDE_BUILDING:
             currentTurnString += "." + gettext("Countryside Building")
-        elif phase == 5:
+        elif phase == rfAQY.PHASE_STORE_GOODS:
             currentTurnString += "." + gettext("Storage")
-        elif phase == 6:
+        elif phase == rfAQY.PHASE_HARVEST:
             currentTurnString += "." + gettext("Harvest")
-        elif phase == 7:
+        elif phase == rfAQY.PHASE_EXPLORE:
             currentTurnString += "." + gettext("Explore")
-        elif phase == 8:
+        elif phase == rfAQY.PHASE_FAMINE:
             currentTurnString += "." + gettext("Famine")
-        elif phase == 9:
+        elif phase == rfAQY.PHASE_POLLUTION:
             currentTurnString += "." + gettext("Pollution")
-        elif phase == 10:
+        elif phase == rfAQY.PHASE_CHECK_VICTORY:
             currentTurnString += "." + gettext("Game End Check")
-        elif phase == 11:
+        elif phase == rfAQY.PHASE_GAME_OVER:
             currentTurnString += "." + gettext("Game End")
         return currentTurnString
 
