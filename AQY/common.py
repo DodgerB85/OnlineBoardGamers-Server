@@ -92,12 +92,12 @@ def create_aqy_game(
     game_description = ""
     creator = None
     host = None
-    game_pace = 30
+    game_pace = rf.PACE_STANDARD
     created_time = SR_getTimeNow()
     starting_options = []
     max_players = 2
     game_status = "AVAILABLE"
-    kickout_duration = 24
+    kickout_duration = rf.KICKOUT_1_DAY
     starting_map = ""
     shadowNameNotes = ""
     usernames_to_notify = []
@@ -119,8 +119,8 @@ def create_aqy_game(
         game_description = ""
         creator = User.objects.get(username="admin")
         host = creator
-        game_pace = 30
-        kickout_duration = 100
+        game_pace = rf.PACE_STANDARD
+        kickout_duration = rf.KICKOUT_1_DAY
         starting_options = (
             json.loads(tournamentObj.startingOptions)
             if tournamentObj.startingOptions != ""
@@ -146,8 +146,8 @@ def create_aqy_game(
         creator = request.user
         host = request.user
         starting_map = request.POST["mapData"] if "mapData" in request.POST else ""
-        game_pace = request.POST.get("pace", 40)
-        kickout_duration = request.POST.get("kickoutDuration", 100)
+        game_pace = request.POST.get("pace", rf.PACE_STANDARD)
+        kickout_duration = request.POST.get("kickoutDuration", rf.KICKOUT_1_DAY)
         invited_usernames = [
             request.POST.get(f"player{i}")
             for i in range(2, 6)
