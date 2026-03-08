@@ -8,6 +8,8 @@ from django.utils.translation import gettext, gettext_lazy
 from collections import Counter
 
 import AQY.AQYconstants as rfAQY
+import FCM.FCMconstants as rfFCM
+import Lobby.sharedFunctions.constants as rf
 
 DISCORD = "DC"
 SLACK = "SL"
@@ -393,35 +395,35 @@ def SR_getTournamentRoundsHTML(
 def SR_currentTurnString(game, turn, phase):
     if game == "FCM":
         currentTurnString = str(turn) + "."
-        if phase == 13:
+        if phase == rfFCM.PHASE_SETUP_MODULES:
             currentTurnString = gettext("Setup - Draft Modules")
-        if phase == 14:
+        if phase == rfFCM.PHASE_URBAN_PLANNING:
             currentTurnString = gettext("Setup - Urban Planning")
-        if phase == 0 or phase == 1:
+        if phase == rfFCM.PHASE_SETUP_RESTAURANT1 or phase == rfFCM.PHASE_SETUP_RESTAURANT2:
             currentTurnString = gettext("Setup - Restaurants")
-        if phase == 2:
+        if phase == rfFCM.PHASE_SETUP_RESERVE:
             currentTurnString = gettext("Setup - Reserve Cards")
-        if phase == 3:
+        if phase == rfFCM.PHASE_RESTRUCTURING:
             currentTurnString += gettext("1 - Restructuring")
-        if phase == 4:
+        if phase == rfFCM.PHASE_TURN_ORDER:
             currentTurnString += gettext("2 - Order of Business")
-        if phase == 5:
+        if phase == rfFCM.PHASE_WORKING_DAY:
             currentTurnString += gettext("3 - Working 9:00-5:00")
-        if phase == 6:
+        if phase == rfFCM.PHASE_DINNERTIME:
             currentTurnString += gettext("4 - Dinnertime")
-        if phase == 7:
+        if phase == rfFCM.PHASE_PAYDAY:
             currentTurnString += gettext("5 - Payday")
-        if phase == 8:
+        if phase == rfFCM.PHASE_MARKETING_CAMPAIGNS:
             currentTurnString += gettext("6 - Marketing Campaigns")
-        if phase == 9:
+        if phase == rfFCM.PHASE_CLEAN_UP:
             currentTurnString += gettext("7 - Clean up")
-        if phase == 10:
+        if phase == rfFCM.PHASE_GAME_OVER:
             currentTurnString += gettext("Game End")
-        if phase == 11:
+        if phase == rfFCM.PHASE_PIZZA_BOMB:
             currentTurnString += gettext("4 - Pizza Milestone")
-        if phase == 12:
+        if phase == rfFCM.PHASE_COFFE_SHOP_MS:
             currentTurnString += gettext("7 - Coffee Shop Milestone")
-        if phase == 15:
+        if phase == rfFCM.PHASE_CHOOSE_CEO_BONUS:
             currentTurnString += gettext("Choose CEO Bonus")
         return currentTurnString
 
@@ -1047,7 +1049,7 @@ def SR_getTGZstartingOptionsHTML(startingOptionsArr):
         return ""
     if len(startingOptionsArr) == 0:
         return ""
-    if startingOptionsArr[0] == 102:
+    if startingOptionsArr[0] == rf.SO_TRAINING_GAME:
         del startingOptionsArr[0]
     if len(startingOptionsArr) == 0:
         return ""

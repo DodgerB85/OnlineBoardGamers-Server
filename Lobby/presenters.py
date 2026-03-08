@@ -18,7 +18,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 
 import Lobby.sharedFunctions.constants as rf
-
+import FCM.FCMconstants as rfFCM
 
 class GamePresenter:
 
@@ -374,7 +374,7 @@ class GamePresenter:
         # If it is an FCM game with enabled rewinds, return 2 always
         if self.gameObj.gameCode == "FCM" and topic == rf.REWIND_CONSENT_VOTE_TOPIC:
             startingOptionsList = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-            if 99 in startingOptionsList:
+            if rfFCM.SO_AUTO_ENABLE_REWINDS in startingOptionsList:
                 for username in usernames:
                     generalReturn[username] = 2
                 return generalReturn
@@ -1477,11 +1477,11 @@ class FCMpresenter(GamePresenter):
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
 
         # need to add in possible new dist options
-        if 200 in starting_options:
-            availableModules = [20, 23, 18, 22, 19, 10, 11, 12, 9, 15, 13, 17, 14, 16]
+        if rfFCM.SO_RANDOM_MODULES in starting_options:
+            availableModules = [rfFCM.SO_KETCHUP_MS, rfFCM.SO_RESERVE_PRICE, rfFCM.SO_NEW_DISTRICTS, rfFCM.SO_LOBBYISTS, rfFCM.SO_COFFEE, rfFCM.SO_KIMCHI, rfFCM.SO_SUSHI, rfFCM.SO_NOODLES, rfFCM.SO_FRY_CHEFS, rfFCM.SO_MASS_MARKETERS, rfFCM.SO_GOURMET, rfFCM.SO_RURAL_MARKETERS, rfFCM.SO_MOVIE_STARS, rfFCM.SO_NIGHT_SHIFT]
             # Add hard choices only with original MS
-            if 21 not in starting_options:
-                availableModules.append(8)
+            if rfFCM.SO_NEW_MS not in starting_options:
+                availableModules.append(rfFCM.SO_HARD_CHOICES)
             selectedModules = []
             moduleRange = []
             for i in range(len(starting_options)):
@@ -1494,9 +1494,9 @@ class FCMpresenter(GamePresenter):
                 currentIndex = random.randrange(0, len(availableModules), 1)
                 selectedModules.append(availableModules.pop(currentIndex))
             # _tournamentType = random.choice(["RR", "KO", "TL"])
-            if 18 in selectedModules:
+            if rfFCM.SO_NEW_DISTRICTS in selectedModules:
                 currentIndex = random.randrange(0, 3, 1)
-                distOptions = [0, 181, 183]
+                distOptions = [0, rfFCM.SO_NEW_DISTRICTS_APP, rfFCM.SO_NEW_DISTRICTS_PARK]
                 chosenDistOption = distOptions[currentIndex]
                 if chosenDistOption > 0:
                     selectedModules.append(chosenDistOption)
@@ -1673,7 +1673,7 @@ class FCMpresenter(GamePresenter):
             return False
 
         # Res card is single array of length one, containing 1,2,or 3
-        if phase <= 2:
+        if phase <= rfFCM.PHASE_SETUP_RESERVE:
             data = moveArr[3]
             if not isinstance(data, list) or len(data) != 1 or data[0] not in [1, 2, 3]:
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase2 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
@@ -1682,7 +1682,7 @@ class FCMpresenter(GamePresenter):
             return True
 
         # Restruc is an arrayy, like [arr,arr,int]
-        if phase == 3:
+        if phase == rfFCM.PHASE_RESTRUCTURING:
             moveData = moveArr[3]
             # Make sure it's an array, Make sure it has a length of 3, Make sure the first element is an array, second element is an array, and third element is a single int of 0,1,2
             validData = True
@@ -1701,7 +1701,7 @@ class FCMpresenter(GamePresenter):
 
             return True
 
-        if phase == 4:
+        if phase == rfFCM.PHASE_TURN_ORDER:
             moveData = moveArr[3]
             # Make sure it's an array, Make sure it has a length of 3, Make sure the first element is an array, second element is an array, and third element is a single int of 0,1,2
             validData = True
@@ -1724,7 +1724,9 @@ class FCMpresenter(GamePresenter):
 
         # Now phase is 7 or 9, AND there is move data
         # moveData = [[[-9],[]],[-9]]
-        if phase in [5, 6, 7, 8, 9, 11, 12, 15]:
+        phases_arr = [rfFCM.PHASE_WORKING_DAY, rfFCM.PHASE_DINNERTIME, rfFCM.PHASE_PAYDAY, rfFCM.PHASE_MARKETING_CAMPAIGNS,rfFCM.PHASE_CLEAN_UP,rfFCM.PHASE_PIZZA_BOMB,  rfFCM.PHASE_COFFE_SHOP_MS, rfFCM.PHASE_CHOOSE_CEO_BONUS]
+
+        if phase in phases_arr:
             moveData = moveArr[3]
             # check the move array is a list with 2 items (one for each phase)
             if not isinstance(moveData, list) or len(moveData) != 2:
@@ -1748,9 +1750,9 @@ class FCMpresenter(GamePresenter):
                 return False
 
             # Now there is valid data, so check it is an ACTUAL move
-            if phase == 7 and moveData[0][0][0] == -9:
+            if phase == rfFCM.PHASE_PAYDAY and moveData[0][0][0] == -9:
                 return False
-            if phase == 9 and moveData[1][0] == -9:
+            if phase == rfFCM.PHASE_CLEAN_UP and moveData[1][0] == -9:
                 return False
 
             return True
@@ -1821,7 +1823,7 @@ class FCMpresenter(GamePresenter):
         }
         # Don't clear moves at end of payday to preserve fridge data
         # Actually, clearing moves can cause no turn order if the players browser doesn't respond
-        if self.gameObj.phase != 7 and self.gameObj.phase != 3:
+        if self.gameObj.phase != rfFCM.PHASE_PAYDAY and self.gameObj.phase != rfFCM.PHASE_RESTRUCTURING:
             # self.clearAllMoveDataV2()
             pass
 
@@ -2002,7 +2004,7 @@ class FCMpresenter(GamePresenter):
 
         # Finally, check it is valid
         if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr):
-            if self.gameObj.phase == 4:
+            if self.gameObj.phase == rfFCM.PHASE_TURN_ORDER:
                 return playerMoveArr[3][2]
 
         return 0
@@ -2028,7 +2030,7 @@ class FCMpresenter(GamePresenter):
             playerMoveArr[1] = [3, 4]
 
         # Finally, check it is valid
-        if self.gameObj.phase == 4:
+        if self.gameObj.phase == rfFCM.PHASE_TURN_ORDER:
             while len(playerMoveArr[3]) < 2:
                 playerMoveArr[3].append([])
             if len(playerMoveArr[3]) < 3:

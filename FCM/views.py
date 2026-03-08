@@ -39,6 +39,9 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from .common import create_fcm_game
 
+from . import FCMconstants as rfFCM
+import Lobby.sharedFunctions.constants as rf
+
 from Lobby.models import User, Profile, Game, GamePlayer
 
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, shared_bug_entry, shared_cast_vote
@@ -178,7 +181,7 @@ def showGame(request, game_id):
             FCMsuperUsers.append("FCMtourneyAdmin")
 
     finishedGame = currentGame.gameStatus == "FINISHED"
-    USE_NEW_CODE = int(currentGame.created) > 1744974000000
+    USE_NEW_CODE = int(currentGame.created) > rfFCM.TS_USE_NEW_CODE
 
     startingOptionsHTML = SR_getFCMstartingOptionsHTML(
         json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
@@ -514,7 +517,7 @@ def _processTurn(request):
         # This is the "new phase" you are just moving into
         # If moving into TO, don't clear the moves (save pre-selectiongs), EXCEPT on turn 1 when there's no pre-selection
         # If moving into cleanup, don't clear the moves
-        if phase == 9 or (phase == 4 and currentGame.turn != 1):
+        if phase == rfFCM.PHASE_CLEAN_UP or (phase == rfFCM.PHASE_TURN_ORDER and currentGame.turn != 1):
             return JsonResponse(
                 {
                     "result": 2,
@@ -562,7 +565,7 @@ def _processTurn(request):
         currentGame.startingMap = jsonData["tiles"]
 
         # If staying in module selection, don't save a rewind
-        if currentGame.phase == 14:
+        if currentGame.phase == rfFCM.PHASE_URBAN_PLANNING:
             currentGame.rewindData = ""
         else:
             # You are moving into the game proper
@@ -647,15 +650,15 @@ def _processTurn(request):
         starting_options.append(int(jsonData["SM"]))
 
         # If staying in module selection, don't save a rewind
-        if currentGame.phase == 13:
+        if currentGame.phase == rfFCM.PHASE_SETUP_MODULES:
             currentGame.rewindData = ""
         else:
             # You are moving into the game proper
             currentGame.rewindData = currentGame.gameData
             # Move '300' to the end
-            if 300 in starting_options:
-                starting_options.remove(300)
-                starting_options.append(300)
+            if rfFCM.SO_DRAFT_MODULE_BREAKER in starting_options:
+                starting_options.remove(rfFCM.SO_DRAFT_MODULE_BREAKER)
+                starting_options.append(rfFCM.SO_DRAFT_MODULE_BREAKER)
 
         currentGame.startingOptions = json.dumps(starting_options, separators=(",", ":"))
 
@@ -783,7 +786,7 @@ def _processTurn(request):
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
-        if oldPhase == 7 and jsonData["phase"] == 7 and 101 not in starting_options:
+        if oldPhase == rfFCM.PHASE_PAYDAY and jsonData["phase"] == rfFCM.PHASE_PAYDAY and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
             print("*********************************************** Key 'phase'  PHASE 7 ERROR   ")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
@@ -794,7 +797,7 @@ def _processTurn(request):
             )
             SN_sendAdminErrorMessage(request, message)
 
-        if oldPhase == 9 and jsonData["phase"] == 9 and 101 not in starting_options:
+        if oldPhase == rfFCM.PHASE_CLEAN_UP and jsonData["phase"] == rfFCM.PHASE_CLEAN_UP and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
             print("*********************************************** Key 'phase'  PHASE 9 ERROR   ")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
@@ -808,25 +811,25 @@ def _processTurn(request):
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         trainingGame = False
-        if 102 in starting_options:
+        if rf.SO_TRAINING_GAME in starting_options:
             trainingGame = True
 
         if jsonData["checksum"] or trainingGame:
             presenter.clearAllMoveDataV2()
 
         # If you are saving into turn order, return all players OOB preferences
-        if oldPhase == 4 and jsonData["phase"] == 4 and 101 not in starting_options:
+        if oldPhase == rfFCM.PHASE_TURN_ORDER and jsonData["phase"] == rfFCM.PHASE_TURN_ORDER and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
             returnOOBpreferences = True
 
         # If the stored game is not payday, and the new data IS payday, then we need to return payday preturns
-        if oldPhase != 7 and jsonData["phase"] == 7 and 101 not in starting_options:
+        if oldPhase != rfFCM.PHASE_PAYDAY and jsonData["phase"] == rfFCM.PHASE_PAYDAY and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
             returnPaydayPreturns = True
         # Same for cleanup
-        if oldPhase != 9 and jsonData["phase"] == 9 and 101 not in starting_options:
+        if oldPhase != rfFCM.PHASE_CLEAN_UP and jsonData["phase"] == rfFCM.PHASE_CLEAN_UP and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
             returnFridgePreturns = True
 
         # Remove move data at start of reatruc
-        if currentGame.phase != 3 and jsonData["phase"] == 3:
+        if currentGame.phase != rfFCM.PHASE_RESTRUCTURING and jsonData["phase"] == rfFCM.PHASE_RESTRUCTURING:
             presenter.clearAllMoveDataV2()
             # Emergency check; make sure all players except bots are in currentPlayers
             missing_players = set(currentGame.players.filter(is_missing=True).values_list("player__username", flat=True))
@@ -839,7 +842,7 @@ def _processTurn(request):
             currentGame.save()
 
         # Remove move data at start of working day
-        if currentGame.phase != 5 and jsonData["phase"] == 5:
+        if currentGame.phase != rfFCM.PHASE_WORKING_DAY and jsonData["phase"] == rfFCM.PHASE_WORKING_DAY:
             presenter.clearAllMoveDataV2()
 
         # Phase first otherwise MOVE payday skip overwrites with phase 7
@@ -848,16 +851,17 @@ def _processTurn(request):
         currentGame.save()
 
         # reset notifs - SAVE NORMAL
-        if jsonData["phase"] == 5 or oldPhase == 5:
+        if jsonData["phase"] == rfFCM.PHASE_WORKING_DAY or oldPhase == rfFCM.PHASE_WORKING_DAY:
             currentGame.FCMnotificationSuppression = "0" * currentGame.maxPlayers
 
         # If it WAS a working day save the side data (pre moves) - UNLESS it is now working day again
         # So also check you're not coming from Turn Order
-        if not trainingGame and nameToUse != "" and oldPhase != 4 and jsonData["phase"] != 3 and (jsonData["phase"] == 5 or oldPhase == 5):
+        if not trainingGame and nameToUse != "" and oldPhase != rfFCM.PHASE_TURN_ORDER and jsonData["phase"] != rfFCM.PHASE_RESTRUCTURING and (jsonData["phase"] == rfFCM.PHASE_WORKING_DAY or oldPhase == rfFCM.PHASE_WORKING_DAY):
             if jsonData["sideData"] and jsonData["sideData"] != "":
                 preMoveArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["sideData"]))).decode("utf-8"))
                 # currentGame.updateWholeMoveData(nameToUse, json.dumps(preMoveArray, separators=(",", ":")))
-                presenter.insertPlayerMoveData(nameToUse, [5, 6, 7, 8, 9, 11, 12, 15], preMoveArray)
+                phases = [rfFCM.PHASE_WORKING_DAY, rfFCM.PHASE_DINNERTIME, rfFCM.PHASE_PAYDAY, rfFCM.PHASE_MARKETING_CAMPAIGNS,rfFCM.PHASE_CLEAN_UP,rfFCM.PHASE_PIZZA_BOMB,  rfFCM.PHASE_COFFE_SHOP_MS, rfFCM.PHASE_CHOOSE_CEO_BONUS]
+                presenter.insertPlayerMoveData(nameToUse, phases, preMoveArray)
 
         # Use for rewind save check
         if nameToUse != "":
@@ -878,23 +882,25 @@ def _processTurn(request):
 
         # Before sending notifications, update the currentPlayers
         # If saving into phase 2/7/9, then update for simul players
-        if jsonData["phase"] == 2 or jsonData["phase"] == 7 or jsonData["phase"] == 9:
+        if jsonData["phase"] == rfFCM.PHASE_SETUP_RESERVE or jsonData["phase"] == rfFCM.PHASE_PAYDAY or jsonData["phase"] == rfFCM.PHASE_CLEAN_UP:
             presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM())
 
         # Send Notifications - payday/fridge with moves are already removd
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
         if (
             len(currentPlayersArr) > 0
-            and currentPlayersArr[0] != "FcmBot"
-            and currentPlayersArr[0] != "FcmAI"
             and not jsonData["status"] == "FINISHED"
         ):
             playerListToNotify = currentPlayersArr
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
+            if "FcmBot" in playerListToNotify:
+                playerListToNotify.remove("FcmBot")
+            if "FcmAI" in playerListToNotify:
+                playerListToNotify.remove("FcmAI")
 
             # If you are saving into phase 4, and the next player has OOB, remove them from notifications
-            if jsonData["phase"] == 4:
+            if jsonData["phase"] == rfFCM.PHASE_TURN_ORDER:
                 if presenter.hasValidActualMoveData(jsonData["nextPlayer"][0]):
                     playerListToNotify.remove(jsonData["nextPlayer"][0])
 
@@ -1021,18 +1027,18 @@ def _processTurn(request):
                     name_parts = nameToUpdate.split("/", 1)
                     nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUpdate
             phaseArr = [-1]
-            if currentGame.phase == 0 or currentGame.phase == 1 or currentGame.phase == 2:
-                phaseArr = [0, 1, 2]
-            elif currentGame.phase == 3:
-                phaseArr = [3, 4]
-            elif currentGame.phase in [5, 6, 7, 8, 9, 11, 12, 15]:
-                phaseArr = [5, 6, 7, 8, 9, 11, 12, 15]
+            if currentGame.phase == rfFCM.PHASE_SETUP_RESTAURANT1 or currentGame.phase == rfFCM.PHASE_SETUP_RESTAURANT2 or currentGame.phase == rfFCM.PHASE_SETUP_RESERVE:
+                phaseArr = [rfFCM.PHASE_SETUP_RESTAURANT1, rfFCM.PHASE_SETUP_RESTAURANT2, rfFCM.PHASE_SETUP_RESERVE]
+            elif currentGame.phase == rfFCM.PHASE_RESTRUCTURING:
+                phaseArr = [rfFCM.PHASE_RESTRUCTURING, rfFCM.PHASE_TURN_ORDER]
+            elif currentGame.phase in [rfFCM.PHASE_WORKING_DAY, rfFCM.PHASE_DINNERTIME, rfFCM.PHASE_PAYDAY, rfFCM.PHASE_MARKETING_CAMPAIGNS,rfFCM.PHASE_CLEAN_UP,rfFCM.PHASE_PIZZA_BOMB,  rfFCM.PHASE_COFFE_SHOP_MS, rfFCM.PHASE_CHOOSE_CEO_BONUS]:
+                phaseArr = [rfFCM.PHASE_WORKING_DAY, rfFCM.PHASE_DINNERTIME, rfFCM.PHASE_PAYDAY, rfFCM.PHASE_MARKETING_CAMPAIGNS,rfFCM.PHASE_CLEAN_UP,rfFCM.PHASE_PIZZA_BOMB,  rfFCM.PHASE_COFFE_SHOP_MS, rfFCM.PHASE_CHOOSE_CEO_BONUS]
             # Decompress the incoming data
             decompressedData = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["moveData"]))).decode("utf-8"))
 
             presenter.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
 
-            if currentGame.phase != 0 and currentGame.phase != 1:
+            if currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT1 and currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT2:
                 presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM())
 
             if request.user.username in FCMsuperUsers:
@@ -1079,7 +1085,8 @@ def _processTurn(request):
         preMoveArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
 
         # FIX THIS TO ALLOW NAME CHECK (or just don't do pre turns with FCMtA)
-        presenter.insertPlayerMoveData(request.user.username, [5, 6, 7, 8, 9, 11, 12, 15], preMoveArray)
+        phaseArr = [rfFCM.PHASE_WORKING_DAY, rfFCM.PHASE_DINNERTIME, rfFCM.PHASE_PAYDAY, rfFCM.PHASE_MARKETING_CAMPAIGNS,rfFCM.PHASE_CLEAN_UP,rfFCM.PHASE_PIZZA_BOMB,  rfFCM.PHASE_COFFE_SHOP_MS, rfFCM.PHASE_CHOOSE_CEO_BONUS]
+        presenter.insertPlayerMoveData(request.user.username, phaseArr, preMoveArray)
 
         currentGame.save()
 
@@ -1155,7 +1162,7 @@ def _processTurn(request):
         if not jsonData["noNotification"]:
             if (
                 len(jsonData["nextPlayer"]) > 0
-                and not jsonData["phase"] == 10
+                and not jsonData["phase"] == rfFCM.PHASE_GAME_OVER
             ):
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
@@ -1176,7 +1183,7 @@ def _processTurn(request):
                     )
 
         # End Game
-        if jsonData["phase"] == 10:
+        if jsonData["phase"] == rfFCM.PHASE_GAME_OVER:
             endGame(
                 request,
                 jsonData["winner"],
@@ -1229,7 +1236,7 @@ def _processTurn(request):
 
     elif jsonData["action"] == "loadRewind":
         # If working day, clear move data now, to get rid of pre-prepared SALARY phase
-        if jsonData["phase"] == 5:
+        if jsonData["phase"] == rfFCM.PHASE_WORKING_DAY:
             presenter.clearAllMoveDataV2()
         currentRewindData = currentGame.rewindData
         if len(currentRewindData) == 0:
@@ -1414,7 +1421,7 @@ def _processTurn(request):
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         trainingGame = False
-        if 102 in starting_options:
+        if rf.SO_TRAINING_GAME in starting_options:
             trainingGame = True
 
         # Send Notifications - and remove pre-data for players with illegal moves
@@ -1644,7 +1651,7 @@ def FCMdata(request, dataType):
     presenter = cast("FCMpresenter", currentGame.presenter())
 
     USE_NEW_CODE = False
-    if int(currentGame.created) > 1744974000000:
+    if int(currentGame.created) > rfFCM.TS_USE_NEW_CODE:
         USE_NEW_CODE = True
 
     # if dataType == 1:
