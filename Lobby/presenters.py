@@ -146,7 +146,7 @@ class GamePresenter:
 
     def isTrainingGame(self):
         startingOptions = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if 102 in startingOptions:
+        if rf.SO_TRAINING_GAME in startingOptions:
             return True
         return False
 

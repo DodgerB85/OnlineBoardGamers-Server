@@ -724,326 +724,84 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
     
     # Reorder Options to have a better order
     startingOptionsList = []
-    if 110 in startingOptionsArr:
-        startingOptionsList.append(110)  # learning Game
-    if 120 in startingOptionsArr:
-        startingOptionsList.append(120)  # Experienced Game
-    if 5 in startingOptionsArr:
-        startingOptionsList.append(5)  # Allow Surrender
-    if 1 in startingOptionsArr:
-        startingOptionsList.append(1)  # Short Game
-    if 2 in startingOptionsArr:
-        startingOptionsList.append(2)  # No MS
-    if 3 in startingOptionsArr:
-        startingOptionsList.append(3)  # No CEO
-    if 6 in startingOptionsArr:
-        startingOptionsList.append(6)  # No Radio
-    if 8 in startingOptionsArr:
-        startingOptionsList.append(8)  # Hard Choices
-    if 21 in startingOptionsArr:
-        startingOptionsList.append(21)  # New MS
-    if 20 in startingOptionsArr:
-        startingOptionsList.append(20)  # Ketchup MS (-1 dist)
-    if 23 in startingOptionsArr:
-        startingOptionsList.append(23)  # New Reserve
-    if 14 in startingOptionsArr:
-        startingOptionsList.append(14)  # Movie Stars
-    if 15 in startingOptionsArr:
-        startingOptionsList.append(15)  # Mass Marketers
-    if 13 in startingOptionsArr:
-        startingOptionsList.append(13)  # Gourmet Food Critics
-    if 17 in startingOptionsArr:
-        startingOptionsList.append(17)  # Rural Marketer
-    if 18 in startingOptionsArr:
-        startingOptionsList.append(18)  # New Districts
-    if 22 in startingOptionsArr:
-        startingOptionsList.append(22)  # Lobbyists
-    if 16 in startingOptionsArr:
-        startingOptionsList.append(16)  # NightShift
-    if 19 in startingOptionsArr:
-        startingOptionsList.append(19)  # Cofffee
-    if 9 in startingOptionsArr:
-        startingOptionsList.append(9)  # Fry Chef
-    if 10 in startingOptionsArr:
-        startingOptionsList.append(10)  # Kimchi
-    if 11 in startingOptionsArr:
-        startingOptionsList.append(11)  # Sushi
-    if 12 in startingOptionsArr:
-        startingOptionsList.append(12)  # Noodles
-    if 101 in startingOptionsArr:
-        startingOptionsList.append(101)  # Strict Pay / Fridge
-    if 200 in startingOptionsArr:
-        startingOptionsList.append(200)  # Random Mods
-    if 300 in startingOptionsArr:
-        startingOptionsList.append(300)  # Draft Mods
-    if 999 in startingOptionsArr:
-        startingOptionsList.append(999)  # Skip Module
-    if 103 in startingOptionsArr:
-        startingOptionsList.append(103)  # Sandbox Mode
-    if 40 in startingOptionsArr:
-        startingOptionsList.append(40)  # Urabn Planning
-    if 41 in startingOptionsArr:
-        startingOptionsList.append(41)  # Urabn Planning Plus
-    if 42 in startingOptionsArr:
-        startingOptionsList.append(42)  # jazz
-    if 43 in startingOptionsArr:
-        startingOptionsList.append(43)  # dumpling
-    if 44 in startingOptionsArr:
-        startingOptionsList.append(44)  # delivery
-    if 45 in startingOptionsArr:
-        startingOptionsList.append(45)  # hawker
-    # 99 is used to allow rewinds in mini tournaments
+    preferred_order = [
+        rf.SO_LEARNING_GAME, rf.SO_EXPERIENCED_GAME, rfFCM.SO_SHORT_GAME, 
+        rfFCM.SO_NO_MILESTONES, rfFCM.SO_NO_CEO_MILESTONE, rfFCM.SO_NO_RADIO_MILESTONE,
+        rfFCM.SO_HARD_CHOICES, rfFCM.SO_NEW_MS, rfFCM.SO_KETCHUP_MS,
+        rfFCM.SO_RESERVE_PRICE, rfFCM.SO_MOVIE_STARS, rfFCM.SO_MASS_MARKETERS,
+        rfFCM.SO_GOURMET, rfFCM.SO_RURAL_MARKETERS, rfFCM.SO_NEW_DISTRICTS,
+        rfFCM.SO_LOBBYISTS, rfFCM.SO_NIGHT_SHIFT, rfFCM.SO_COFFEE,
+        rfFCM.SO_FRY_CHEFS, rfFCM.SO_KIMCHI, rfFCM.SO_SUSHI, rfFCM.SO_NOODLES,
+        rfFCM.SO_STRICT_PAYDAY_FRIDGE, rfFCM.SO_RANDOM_MODULES, # Note 200 is here
+        rfFCM.SO_DRAFT_MODULE_BREAKER, rfFCM.SO_DRAFT_SKIP_MODULE,
+        rfFCM.SO_SANDBOX_MODE, rfFCM.SO_URBAN_PLANNING, rfFCM.SO_URBAN_PLANNING_PLUS,
+        rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS,
+    ]
+    startingOptionsList = [opt for opt in preferred_order if opt in startingOptionsArr]
+
+    options_map = {
+        rfFCM.SO_SHORT_GAME: ("so_shortGame.svg", "Short Game"),
+        rfFCM.SO_NO_MILESTONES: ("so_noMS.svg", "No Milestones"),
+        rfFCM.SO_NO_CEO_MILESTONE: ("so_noCEO.svg", "No CFO Milestone"),
+        rfFCM.SO_NO_RADIO_MILESTONE: ("so_noRadio.svg", "No Radio Milestone"),
+        rfFCM.SO_HARD_CHOICES: ("hardchoices2.jpg", "Hard Choices"),
+        rfFCM.SO_NEW_MS: ("so_newMS.svg", "New Milestones"),
+        rfFCM.SO_KETCHUP_MS: ("so_ketchupMS.svg", "Ketchup Milestone"),
+        rfFCM.SO_RESERVE_PRICE: ("so_reservePrice.jpg", "New Reserve Cards"),
+        rfFCM.SO_MOVIE_STARS: ("so_movieStars.svg", "Movie Stars"),
+        rfFCM.SO_MASS_MARKETERS: ("so_massMarketeers.jpg", "Mass Marketeers"),
+        rfFCM.SO_GOURMET: ("so_GFC.jpg", "Gourmet Food Critics"),
+        rfFCM.SO_RURAL_MARKETERS: ("so_rural.jpg", "Rural Marketeers"),
+        rfFCM.SO_NEW_DISTRICTS: ("map23.jpg", "New Districts"),
+        rfFCM.SO_LOBBYISTS: ("so_lobbyists.jpg", "Lobbyists"),
+        rfFCM.SO_NIGHT_SHIFT: ("so_nightShift.jpg", "Night Shift Manager"),
+        rfFCM.SO_COFFEE: ("so_coffee.svg", "Coffee"),
+        rfFCM.SO_FRY_CHEFS: ("so_fryChef.svg", "Fry Chef"),
+        rfFCM.SO_KIMCHI: ("so_kimchi.svg", "Kimchi"),
+        rfFCM.SO_SUSHI: ("so_sushi.svg", "Sushi"),
+        rfFCM.SO_NOODLES: ("so_noodles.svg", "Noodles"),
+        rfFCM.SO_URBAN_PLANNING: ("so_urbanPlanning.svg", "Urban Planning"),
+        rfFCM.SO_URBAN_PLANNING_PLUS: ("so_urbanPlanningPlus.svg", "Urban Planning Plus"),
+        rfFCM.SO_JAZZ_MUSICIANS: ("so_jazz.svg", "Jazz Musicians"),
+        rfFCM.SO_DUMPLINGS: ("so_dumplings.svg", "Dumplings"),
+        rfFCM.SO_DELIVERY_DRIVERS: ("so_delivery.svg", "Delivery Drivers"),
+        rfFCM.SO_HAWKERS: ("so_hawker.svg", "Hawkers"),
+        rfFCM.SO_STRICT_PAYDAY_FRIDGE: ("so_strict.svg", "Turn Order Payday/Fridge"),
+        rfFCM.SO_DRAFT_MODULE_BREAKER: ("so_draftMods.jpg", "Draft Modules"),
+        rfFCM.SO_DRAFT_SKIP_MODULE: ("so_skip.jpg", "Skip Module"),
+        rfFCM.SO_SANDBOX_MODE: ("so_sandbox.svg", "Sandbox Mode"),
+        # These two use the Lobby folder
+        rf.SO_LEARNING_GAME: ("so_learningGame.svg", "Learning Game", "/static/Lobby/images/startingOptions/"),
+        rf.SO_EXPERIENCED_GAME: ("so_experiencedGame.svg", "Experienced Game", "/static/Lobby/images/startingOptions/"),
+    }
 
     # startingOptionsHTML = "<div>"
     startingOptionsHTML = ""
-    # usedOptions = 0
-    for option in startingOptionsList:
-        # if option == 5:
-        #    #usedOptions += 1
-        #    startingOptionsHTML += "<img class ='startingOption' src='/static/FCM/images/so_surrender.svg' title='Allow Surrender'>"
-        if option == 1:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_shortGame.svg' title='"
-                + gettext("Short Game")
-                + "'>"
-            )
-        if option == 2:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_noMS.svg' title='"
-                + gettext("No Milestones")
-                + "'>"
-            )
-        if option == 3:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_noCEO.svg' title='"
-                + gettext("No CFO Milestone")
-                + "'>"
-            )
-        if option == 6:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_noRadio.svg' title='"
-                + gettext("No Radio Milestone")
-                + "'>"
-            )
-        if option == 8:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/hardchoices2.jpg' title='"
-                + gettext("Hard Choices")
-                + "'>"
-            )
-        if option == 21:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_newMS.svg' title='"
-                + gettext("New Milestones")
-                + "'>"
-            )
-        if option == 20:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_ketchupMS.svg' title='"
-                + gettext("Ketchup Milestone")
-                + "'>"
-            )
-        if option == 23:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_reservePrice.jpg' title='"
-                + gettext("New Reserve Cards")
-                + "'>"
-            )
-        if option == 14:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_movieStars.svg' title='"
-                + gettext("Movie Stars")
-                + "'>"
-            )
-        if option == 15:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_massMarketeers.jpg' title='"
-                + gettext("Mass Marketeers")
-                + "'>"
-            )
-        if option == 13:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_GFC.jpg' title='"
-                + gettext("Gourmet Food Critics")
-                + "'>"
-            )
-        if option == 17:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_rural.jpg' title='"
-                + gettext("Rural Marketeers")
-                + "'>"
-            )
-        if option == 18:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/map23.jpg' title='"
-                + gettext("New Districts")
-                + "'>"
-            )
-        if option == 22:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_lobbyists.jpg' title='"
-                + gettext("Lobbyists")
-                + "'>"
-            )
-        if option == 16:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_nightShift.jpg' title='"
-                + gettext("Night Shift Manager")
-                + "'>"
-            )
-        if option == 19:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_coffee.svg' title='" + gettext("Coffee") + "'>"
-            )
-        if option == 9:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_fryChef.svg' title='"
-                + gettext("Fry Chef")
-                + "'>"
-            )
-        if option == 10:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_kimchi.svg' title='" + gettext("Kimchi") + "'>"
-            )
-        if option == 11:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_sushi.svg' title='" + gettext("Sushi") + "'>"
-            )
-        if option == 12:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_noodles.svg' title='"
-                + gettext("Noodles")
-                + "'>"
-            )
-        if option == 40:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_urbanPlanning.svg' title='"
-                + gettext("Urban Planning")
-                + "'>"
-            )
-        if option == 41:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_urbanPlanningPlus.svg' title='"
-                + gettext("Urban Planning Plus")
-                + "'>"
-            )
-        if option == 42:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_jazz.svg' title='"
-                + gettext("Jazz Musicians")
-                + "'>"
-            )
-        if option == 43:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_dumplings.svg' title='"
-                + gettext("Dumplings")
-                + "'>"
-            )
-        if option == 44:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_delivery.svg' title='"
-                + gettext("Delivery Drivers")
-                + "'>"
-            )
-        if option == 45:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_hawkers.svg' title='"
-                + gettext("Hawker Marketeers")
-                + "'>"
-            )
-        if option == 101:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_strict.svg' title='"
-                + gettext("Turn Order Payday/Fridge")
-                + "'>"
-            )
-        if option == 200:
-            # usedOptions += 1
-            moduleRange = []
-            for i in range(len(startingOptionsArr)):
-                if startingOptionsArr[i] > 21000 and startingOptionsArr[i] < 21116:
-                    numStr = str(startingOptionsArr[i] % 100)
-                    moduleRange.append(numStr[-2:])
+    sorted_options = [opt for opt in preferred_order if opt in startingOptionsArr]
+
+    for opt in sorted_options:
+        # SPECIAL CASE: Random Modules (200)
+        if opt == rfFCM.SO_RANDOM_MODULES:
+            moduleRange = [str(x % 100).zfill(2) for x in startingOptionsArr if 21000 < x < 21116]
             if len(moduleRange) != 2:
                 moduleRange = ["??", "??"]
-            # for i in range(len(moduleRange)): moduleRange[i] = int(moduleRange[i][-2:])
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_randomMods.svg' title='"
-                + moduleRange[0]
-                + " - "
-                + moduleRange[1]
-                + " "
-                + gettext("Random Modules")
-                + "'>"
-            )
-        if option == 300:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_draftMods.jpg' title='"
-                + gettext("Draft Modules")
-                + "'>"
-            )
+            
+            title = f"{moduleRange[0]} - {moduleRange[1]} {gettext('Random Modules')}"
+            startingOptionsHTML += f"<img class='startingOption' src='/static/FCM/images/so_randomMods.svg' title='{title}'>"
+            continue
 
-        if option == 999:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_skip.jpg' title='"
-                + gettext("Skip Module")
-                + "'>"
-            )
-
-        if option == 103:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/FCM/images/so_sandbox.svg' title='"
-                + gettext("Sandbox Mode")
-                + "'>"
-            )
-        if option == 110:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
-        if option == 120:
-            # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
-        # if (usedOptions+1) % 7 == 0:
-        #    startingOptionsHTML += "<BR/>"
-    # startingOptionsHTML += "</div>"
-    # if startingOptionsHTML == "": startingOptionsHTML = "[None]"
-    if startingOptionsHTML == "":
-        startingOptionsHTML = "[None]"
-
-    return startingOptionsHTML
-
-
+        # STANDARD CASES: Dictionary Lookup
+        if opt in options_map:
+            mapping = options_map[opt]
+            img = mapping[0]
+            label = gettext(mapping[1])
+            folder = mapping[2] if len(mapping) > 2 else "/static/FCM/images/"
+            
+            startingOptionsHTML += f"<img class='startingOption' src='{folder}{img}' title='{label}'>"
+            
+    return startingOptionsHTML or "[None]"
+    # usedOptions = 0
+ 
 def SR_getTGZstartingOptionsHTML(startingOptionsArr):
     if startingOptionsArr == "":
         return ""
@@ -1394,13 +1152,13 @@ def SR_getAQYstartingOptionsHTML(startingOptionsArr):
         return ""
     startingOptionsHTML = ""
     for option in startingOptionsArr:
-        if option == 110:
+        if option == rf.SO_LEARNING_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
-        elif option == 120:
+        elif option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
