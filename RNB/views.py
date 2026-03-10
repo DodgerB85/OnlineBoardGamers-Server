@@ -38,20 +38,7 @@ from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
-ALLOWED_USERS_RNB = [
-    "admin",
-    "DodgerB",
-    "durendal",
-    "Benkyo",
-    "vraid",
-    "JoshuaAcosta",
-    "massibull",
-    "phil",
-    "timmymayes",
-    "SaintJason",
-    "h",
-    "Jungy"
-]
+ALLOWED_USERS_RNB = ["admin", "DodgerB", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy"]
 
 if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter
@@ -77,9 +64,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")
 
-    result = build_show_game_data(request, game_id, "RNB",
-        default_zoom=24, settings_debug_key="RNB_USE_SOURCE_CODE",
-        clear_chat_notification=False)
+    result = build_show_game_data(request, game_id, "RNB", default_zoom=24, settings_debug_key="RNB_USE_SOURCE_CODE", clear_chat_notification=False)
     if isinstance(result, HttpResponseRedirect):
         return result
 
@@ -91,13 +76,19 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData = {**result["base_data"]}
     # RNB uses gameDataB64 instead of gameData
     returnData["gameDataB64"] = returnData.pop("gameData")
-    returnData.update({
-        "spoilerFree": spoilerFree,
-        "replayStep": replayStep,
-        "pov": -99,
-        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
-        "currentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]],
-    })
+    returnData.update(
+        {
+            "spoilerFree": spoilerFree,
+            "replayStep": replayStep,
+            "pov": -99,
+            "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
+            "currentPlayers": (
+                currentGame.serverCurrentPlayerNamesInTurnOrder
+                if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0
+                else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]]
+            ),
+        }
+    )
 
     if not result["is_authenticated"]:
         return render(request, "RNB/showRNBgame.html", returnData)
@@ -115,10 +106,12 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "RNB/showRNBgame.html", returnData)
 
     returnData.update(result["involved_data"])
-    returnData.update({
-        "currentMove": presenter.getCurrentMoveData(username),
-        "trade": currentGame.playerTradeData,
-    })
+    returnData.update(
+        {
+            "currentMove": presenter.getCurrentMoveData(username),
+            "trade": currentGame.playerTradeData,
+        }
+    )
 
     ### NEW GAME
     if not currentGame.gameData or currentGame.gameData == "":
@@ -296,7 +289,7 @@ def _processRNBturn(request):
             conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
             conflictPresetMove["status"] = "pending"
             PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
-            
+
         # Next, we can clear out old data
         PclearPastMoveData(currentGame)
 
@@ -608,7 +601,7 @@ def _processRNBturn(request):
                 {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
-            
+
         # Firstly, wipe all move Data
         PwipeAllMoveData(currentGame)
 
@@ -923,8 +916,7 @@ def _sendChatMessageRNB(request):
 
 @login_required()
 def bugEntryRNB(request):
-    return shared_bug_entry(request, "RNB",
-        extra_info_fn=lambda g: "Options: " + g.startingOptions)
+    return shared_bug_entry(request, "RNB", extra_info_fn=lambda g: "Options: " + g.startingOptions)
 
 
 @login_required()
@@ -1018,7 +1010,7 @@ def RNBdata(request, dataType=1):
 
 
 def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
-    print(F'Adding move to player: {nameToUse} data: {newMoveEntry}')
+    print(f"Adding move to player: {nameToUse} data: {newMoveEntry}")
     newMoveEntry["player"] = nameToUse
     gp_player = currentGame.players.only("moveDataJSON").get(player__username=nameToUse)
 
@@ -1042,23 +1034,22 @@ def PclearPastMoveData(currentGame):
     turn = currentGame.turn
     phase = currentGame.phase
     # .all() is needed after .only() to iterate
-    all_gp = currentGame.players.only("moveDataJSON") 
-    
+    all_gp = currentGame.players.only("moveDataJSON")
+
     for gp in all_gp:
         moves = gp.moveDataJSON or []
-        
+
         # Rebuild the list with ONLY the moves that are NOT in the past
-        gp.moveDataJSON = [
-            m for m in moves 
-            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase)
-        ]
-        
+        gp.moveDataJSON = [m for m in moves if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase)]
+
         gp.save(update_fields=["moveDataJSON"])
+
 
 def PwipeAllMoveData(currentGame):
     for gp in currentGame.players.all():
         gp.moveDataJSON = None
-        gp.save(update_fields=["moveDataJSON"])    
+        gp.save(update_fields=["moveDataJSON"])
+
 
 def PdecompressData(string_to_decompress):
     # return json.loads(gzip.decompress(base64.b64decode(string_to_decompress)).decode("utf-8"))
