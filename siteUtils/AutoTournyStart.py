@@ -301,6 +301,10 @@ for gameCode in GAME_CODES:
     
     print("There is an open tourny, and day > 7")
     
+    # But if it's not an auto-tourny, continue
+    if gameCode in ["HC", "Bus", "TGZ",  "AQY", "IND"]:
+        continue
+    
     # Now we only hit the DB further if we actually have a candidate to start
     startTime = int(newTourny.created)
     now = int(time.time()) * 1000
