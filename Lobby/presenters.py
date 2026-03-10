@@ -20,6 +20,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 import Lobby.sharedFunctions.constants as rf
 import FCM.FCMconstants as rfFCM
 
+
 class GamePresenter:
 
     def __init__(self, gameObj):
@@ -90,7 +91,7 @@ class GamePresenter:
         # This uses your existing logic that converts 'missing' players to strings
         playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
         try:
-            if (_username == "BotKickStarter"):
+            if _username == "BotKickStarter":
                 return -1
             print(f"NO PLAYER FOUND-1: {_username} gameCode: {self.gameObj.gameCode} playerList: {playerList} id: {self.gameObj.id}")
             return playerList.index(_username)
@@ -921,7 +922,7 @@ class TGZpresenter(GamePresenter):
 
 
 class INDpresenter(GamePresenter):
-    def endGame(self, request, _winner, _finalPositions, _gameID):
+    def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
             SN_M_sendEndGameNotification,
@@ -934,7 +935,7 @@ class INDpresenter(GamePresenter):
         self.clearGeneralDataOnGameEndWithoutSave()
         self.clearAllPreMoveData()
 
-        winner_user = User.objects.get(username=_winner)
+        winner_user = User.objects.get(username=_winnerUseranme)
         winner_gp = self.gameObj.players.filter(player=winner_user).first()
         if winner_gp:
             winner_gp.winner = True
@@ -949,6 +950,26 @@ class INDpresenter(GamePresenter):
             finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
         # Now send winning notification
         SN_M_sendEndGameNotification(request, "IND", finalPositionsArr, _gameID, self.gameObj)
+
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                rf.MAIN_T_FLAG,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                [_winnerUseranme],
+                _tournamentData,
+            )
+
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                rf.MINI_T_FLAG,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                [_winnerUseranme],
+                _tournamentData,
+            )
 
     def startGame(self, request, isTournamentGame=False):
         from Lobby.models import GamePlayer
@@ -1198,7 +1219,7 @@ class RNBpresenter(GamePresenter):
             return False
 
         currentPlayersList = self.gameObj.serverCurrentPlayerNamesInTurnOrder
-        
+
         if not currentPlayersList:
             return True
         # If you are front of the queue, it is your turn
@@ -1478,7 +1499,22 @@ class FCMpresenter(GamePresenter):
 
         # need to add in possible new dist options
         if rfFCM.SO_RANDOM_MODULES in starting_options:
-            availableModules = [rfFCM.SO_KETCHUP_MS, rfFCM.SO_RESERVE_PRICE, rfFCM.SO_NEW_DISTRICTS, rfFCM.SO_LOBBYISTS, rfFCM.SO_COFFEE, rfFCM.SO_KIMCHI, rfFCM.SO_SUSHI, rfFCM.SO_NOODLES, rfFCM.SO_FRY_CHEFS, rfFCM.SO_MASS_MARKETERS, rfFCM.SO_GOURMET, rfFCM.SO_RURAL_MARKETERS, rfFCM.SO_MOVIE_STARS, rfFCM.SO_NIGHT_SHIFT]
+            availableModules = [
+                rfFCM.SO_KETCHUP_MS,
+                rfFCM.SO_RESERVE_PRICE,
+                rfFCM.SO_NEW_DISTRICTS,
+                rfFCM.SO_LOBBYISTS,
+                rfFCM.SO_COFFEE,
+                rfFCM.SO_KIMCHI,
+                rfFCM.SO_SUSHI,
+                rfFCM.SO_NOODLES,
+                rfFCM.SO_FRY_CHEFS,
+                rfFCM.SO_MASS_MARKETERS,
+                rfFCM.SO_GOURMET,
+                rfFCM.SO_RURAL_MARKETERS,
+                rfFCM.SO_MOVIE_STARS,
+                rfFCM.SO_NIGHT_SHIFT,
+            ]
             # Add hard choices only with original MS
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
@@ -1724,7 +1760,16 @@ class FCMpresenter(GamePresenter):
 
         # Now phase is 7 or 9, AND there is move data
         # moveData = [[[-9],[]],[-9]]
-        phases_arr = [rfFCM.PHASE_WORKING_DAY, rfFCM.PHASE_DINNERTIME, rfFCM.PHASE_PAYDAY, rfFCM.PHASE_MARKETING_CAMPAIGNS,rfFCM.PHASE_CLEAN_UP,rfFCM.PHASE_PIZZA_BOMB,  rfFCM.PHASE_COFFE_SHOP_MS, rfFCM.PHASE_CHOOSE_CEO_BONUS]
+        phases_arr = [
+            rfFCM.PHASE_WORKING_DAY,
+            rfFCM.PHASE_DINNERTIME,
+            rfFCM.PHASE_PAYDAY,
+            rfFCM.PHASE_MARKETING_CAMPAIGNS,
+            rfFCM.PHASE_CLEAN_UP,
+            rfFCM.PHASE_PIZZA_BOMB,
+            rfFCM.PHASE_COFFE_SHOP_MS,
+            rfFCM.PHASE_CHOOSE_CEO_BONUS,
+        ]
 
         if phase in phases_arr:
             moveData = moveArr[3]
@@ -2256,14 +2301,14 @@ class HCpresenter(GamePresenter):
             if gp:
                 move_time = gp.currentMoveTime
                 move_data = gp.currentMoveData
-                if str(move_time) == "ILLEGALMOVE"and not includeIllegal:
+                if str(move_time) == "ILLEGALMOVE" and not includeIllegal:
                     return False
                 if move_data == "":
                     return False
                 if str(move_time)[:6] != "NODATA":
                     return True
-                
-            #SN_sendAdminErrorMessage("", f"HC FACTORY ISSUE!!!!!! hasMoveData ERROR - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - seat: {seat} -name: {name} ")
+
+            # SN_sendAdminErrorMessage("", f"HC FACTORY ISSUE!!!!!! hasMoveData ERROR - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - seat: {seat} -name: {name} ")
             # NB you get here if you have SAVED a move without submitting it
             # In PRESENTER, this keeps you in the "myMove" / currentPlayers lists
             return False
@@ -2284,7 +2329,7 @@ class HCpresenter(GamePresenter):
                 if str(move_time)[:6] == "NODATA":
                     return [move_time, move_data]
                 # NO - an illegal move is NOT temporary - it is a FULLY submitted move that later needs to be done again
-                #if str(move_time)[:6] == "ILLEGALMOVE":
+                # if str(move_time)[:6] == "ILLEGALMOVE":
                 #    return [move_time, move_data]
         return ""
 
