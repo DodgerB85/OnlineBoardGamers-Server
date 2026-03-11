@@ -9,6 +9,7 @@ from collections import Counter
 
 import AQY.AQYconstants as rfAQY
 import FCM.FCMconstants as rfFCM
+import RNB.RNBconstants as rfRNB
 import Lobby.sharedFunctions.constants as rf
 
 DISCORD = "DC"
@@ -392,8 +393,8 @@ def SR_getTournamentRoundsHTML(
     return roundsHTML
 
 
-def SR_currentTurnString(game, turn, phase):
-    if game == "FCM":
+def SR_currentTurnString(gameCode, turn, phase):
+    if gameCode == "FCM":
         currentTurnString = str(turn) + "."
         if phase == rfFCM.PHASE_SETUP_MODULES:
             currentTurnString = gettext("Setup - Draft Modules")
@@ -427,7 +428,7 @@ def SR_currentTurnString(game, turn, phase):
             currentTurnString += gettext("Choose CEO Bonus")
         return currentTurnString
 
-    elif game == "HC":
+    elif gameCode == "HC":
         currentTurnString = str(turn) + "."
         if turn == 0:
             currentTurnString = gettext("Factory Setup")
@@ -450,7 +451,7 @@ def SR_currentTurnString(game, turn, phase):
 
         return currentTurnString
 
-    elif game == "Bus":
+    elif gameCode == "Bus":
         currentTurnString = str(turn)
         if phase == 0:
             currentTurnString += " - " + gettext("Setup Buildings")
@@ -479,7 +480,7 @@ def SR_currentTurnString(game, turn, phase):
 
         return currentTurnString
 
-    elif game == "TGZ":
+    elif gameCode == "TGZ":
         currentTurnString = str(turn)
         if phase == 0:
             currentTurnString += " - " + gettext("Place First Monument")
@@ -495,14 +496,14 @@ def SR_currentTurnString(game, turn, phase):
             currentTurnString += " - " + gettext("We have found the best mythology")
         return currentTurnString
 
-    elif game == "CNS":
+    elif gameCode == "CNS":
         if phase == 2:
             return gettext("Turn") + " " + str(turn) + " - " + gettext("Production")
         if phase == 4:
             return gettext("Turn") + " " + str(turn) + " - " + gettext("Move Pirates")
         return gettext("Turn") + " " + str(turn)
 
-    elif game == "AQY":
+    elif gameCode == "AQY":
         currentTurnString = str(turn)
         if phase == rfAQY.PHASE_FIRST_CITY:
             currentTurnString += " - " + gettext("Place First City")
@@ -530,7 +531,7 @@ def SR_currentTurnString(game, turn, phase):
             currentTurnString += "." + gettext("Game End")
         return currentTurnString
 
-    elif game == "IND":
+    elif gameCode == "IND":
         currentTurnString = str(turn)
         if phase == 0:
             currentTurnString += "." + gettext("New Era")
@@ -554,7 +555,7 @@ def SR_currentTurnString(game, turn, phase):
             currentTurnString += "." + gettext("Game End")
         return currentTurnString
 
-    elif game == "KFW":
+    elif gameCode == "KFW":
         currentTurnString = gettext("Winter")
         if turn == 0:
             currentTurnString = gettext("Spring")
@@ -584,45 +585,45 @@ def SR_currentTurnString(game, turn, phase):
 
         return currentTurnString
 
-    elif game == "WEB":
+    elif gameCode == "WEB":
         currentTurnString = gettext("Turn") + " - " + str(turn)
         return currentTurnString
 
-    elif game == "RNB":
+    elif gameCode == "RNB":
         currentTurnString = str(turn) + " - "
-        if phase == 0:
+        if phase == rfRNB.PHASE_CONFLICT_PRODUCTION_DECISION:
             currentTurnString += gettext("Conflict: Production Decision")
-        elif phase == 1:
+        elif phase == rfRNB.PHASE_CONFLICT_PRODUCTION_PRAYING:
             currentTurnString += gettext("Conflict: Production Praying")
-        elif phase == 2:
+        elif phase == rfRNB.PHASE_CONFLICT_PRODUCTION_TURN_ORDER:
             currentTurnString += gettext("Conflict: Production Turn Order")
-        elif phase == 3:
+        elif phase == rfRNB.PHASE_PRODUCTION_TO:
             currentTurnString += gettext("Production")
-        elif phase == 4:
+        elif phase == rfRNB.PHASE_CONFLICT_MOVEMENT_DECISION:
             currentTurnString += gettext("Conflict: Movement Decision")
-        elif phase == 5:
+        elif phase == rfRNB.PHASE_CONFLICT_MOVEMENT_PRAYING:
             currentTurnString += gettext("Conflict: Movement Praying")
-        elif phase == 6:
+        elif phase == rfRNB.PHASE_CONFLICT_MOVEMENT_TURN_ORDER:
             currentTurnString += gettext("Conflict: Movement Turn Order")
-        elif phase == 7:
+        elif phase == rfRNB.PHASE_MOVEMENT_TO:
             currentTurnString += gettext("Movement")
-        elif phase == 8:
+        elif phase == rfRNB.PHASE_CONFLICT_BUILDING_DECISION:
             currentTurnString += gettext("Conflict: Building Decision")
-        elif phase == 9:
+        elif phase == rfRNB.PHASE_CONFLICT_BUILDING_PRAYING:
             currentTurnString += gettext("Conflict: Building Praying")
-        elif phase == 10:
+        elif phase == rfRNB.PHASE_CONFLICT_BUILDING_TURN_ORDER:
             currentTurnString += gettext("Conflict: Building Turn Order")
-        elif phase == 11:
+        elif phase ==   rfRNB.PHASE_BUILDING_TO:
             currentTurnString += gettext("Building")
-        elif phase == 12:
+        elif phase == rfRNB.PHASE_CONFLICT_WONDER_DECISION:
             currentTurnString += gettext("Conflict: Wonder Decision")
-        elif phase == 13:
+        elif phase == rfRNB.PHASE_CONFLICT_WONDER_PRAYING:
             currentTurnString += gettext("Conflict: Wonder Praying")
-        elif phase == 14:
+        elif phase == rfRNB.PHASE_CONFLICT_WONDER_TURN_ORDER:
             currentTurnString += gettext("Conflict: Wonder Turn Order")
-        elif phase == 15:
+        elif phase == rfRNB.PHASE_WONDER_TO:
             currentTurnString += gettext("Wonder")
-        elif phase == 19:
+        elif phase == rfRNB.PHASE_GAME_OVER:
             currentTurnString += gettext("Game End")
    
         return currentTurnString
@@ -633,15 +634,15 @@ def SR_currentTurnString(game, turn, phase):
 
 def SR_gamePaceString(gamePace):
     gamePaceString = ""
-    if gamePace == 10:
+    if gamePace == rf.PACE_LIVE:
         gamePaceString = gettext("Live")
-    if gamePace == 20:
+    if gamePace == rf.PACE_FAST:
         gamePaceString = gettext("Fast<br/>(Several moves/day)")
-    if gamePace == 30:
+    if gamePace == rf.PACE_STANDARD:
         gamePaceString = gettext("Standard<br/>(1-2+ moves/day)")
-    if gamePace == 40:
+    if gamePace == rf.PACE_SLOW:
         gamePaceString = gettext("Slow<br/>(1 move/day)")
-    if gamePace == 50:
+    if gamePace == rf.PACE_CASUAL:
         gamePaceString = gettext("Casual")
     return gamePaceString
 
@@ -723,7 +724,6 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         return "[None]"
     
     # Reorder Options to have a better order
-    startingOptionsList = []
     preferred_order = [
         rf.SO_LEARNING_GAME, rf.SO_EXPERIENCED_GAME, rfFCM.SO_SHORT_GAME, 
         rfFCM.SO_NO_MILESTONES, rfFCM.SO_NO_CEO_MILESTONE, rfFCM.SO_NO_RADIO_MILESTONE,
@@ -737,7 +737,6 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_SANDBOX_MODE, rfFCM.SO_URBAN_PLANNING, rfFCM.SO_URBAN_PLANNING_PLUS,
         rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS,
     ]
-    startingOptionsList = [opt for opt in preferred_order if opt in startingOptionsArr]
 
     options_map = {
         rfFCM.SO_SHORT_GAME: ("so_shortGame.svg", "Short Game"),
@@ -826,7 +825,7 @@ def SR_getTGZstartingOptionsHTML(startingOptionsArr):
         elif isinstance(entry, list) and len(entry) > 0 and entry[0] == 92:
             requiresHTML = True
             specVR = copy.deepcopy(entry)  # Make a copy of the entry array
-        elif entry == 110 or entry == 120:
+        elif entry == rf.SO_LEARNING_GAME or entry == rf.SO_EXPERIENCED_GAME:
             requiresHTML = True
         #
         elif entry == 7 or entry == 8 or entry == 9:
@@ -878,13 +877,13 @@ def SR_getTGZstartingOptionsHTML(startingOptionsArr):
         retHTML += "<div class='TGZinfoPopup'>"
         retHTML += SR_getgodsVRoptionsHTML(startingOptionsArr)
         retHTML += "</div></div>"
-    if 110 in startingOptionsArr:
+    if rf.SO_LEARNING_GAME in startingOptionsArr:
         retHTML += (
             "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
             + gettext("Learning Game")
             + "'>"
         )
-    elif 120 in startingOptionsArr:
+    elif rf.SO_EXPERIENCED_GAME in startingOptionsArr:
         retHTML += (
             "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
             + gettext("Experienced Game")
@@ -1025,13 +1024,13 @@ def SR_getCNSstartingOptionsHTML(startingOptionsArr):
                 + gettext("High Junk")
                 + "'>"
             )
-        elif option == 110:
+        elif option == rf.SO_LEARNING_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
-        elif option == 120:
+        elif option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
@@ -1049,13 +1048,13 @@ def SR_getBUSstartingOptionsHTML(startingOptionsArr):
 
     startingOptionsHTML = ""
     for option in startingOptionsArr:
-        if option == 110:
+        if option == rf.SO_LEARNING_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
-        elif option == 120:
+        elif option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
@@ -1072,13 +1071,13 @@ def SR_getHCstartingOptionsHTML(startingOptionsArr):
         return ""
     startingOptionsHTML = ""
     for option in startingOptionsArr:
-        if option == 110:
+        if option == rf.SO_LEARNING_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
-        elif option == 120:
+        elif option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
@@ -1205,13 +1204,13 @@ def SR_getINDstartingOptionsHTML(startingOptionsArr):
                 + gettext("Use Shipping Subsidy")
                 + "'>"
             )
-        elif option == 110:
+        elif option == rf.SO_LEARNING_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
-        elif option == 120:
+        elif option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
@@ -1271,13 +1270,13 @@ def SR_getKFWstartingOptionsHTML(startingOptionsArr):
                 + gettext("Use Promo Tiles")
                 + "'>"
             )
-        if option == 110:
+        if option == rf.SO_LEARNING_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
             )
-        elif option == 120:
+        elif option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
                 + gettext("Experienced Game")
@@ -1294,14 +1293,14 @@ def SR_getWEBstartingOptionsHTML(startingOptionsArr):
         return ""
     startingOptionsHTML = ""
     for option in startingOptionsArr:
-        if option == 110:
+        if option == rf.SO_LEARNING_GAME:
             # usedOptions += 1
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
                 )
-        if option == 120:
+        if option == rf.SO_EXPERIENCED_GAME:
             # usedOptions += 1
             startingOptionsHTML += (
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"

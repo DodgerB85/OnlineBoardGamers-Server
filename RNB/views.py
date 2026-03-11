@@ -30,6 +30,8 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendFixNextTurnNotification,
 )
 
+import Lobby.sharedFunctions.constants as rf
+
 from .common import create_rnb_game
 
 from Lobby.models import User, Profile, Game
@@ -269,7 +271,7 @@ def _processRNBturn(request):
             phase = jsonData.get("phase", "N/A")
             message = f"RNB saveStackMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
             SN_sendAdminErrorMessage(request, message)
-            return JsonResponse({"syncError": "12345"}, safe=False)
+            return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
         if request.user.username == "BotKickStarter":
@@ -318,7 +320,7 @@ def _processRNBturn(request):
             newVer = (int(db_latest_update) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayers"])
+            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayersArr"])
 
             # SAVE BEFORE NOTIFICATIONS
             currentGame.save()
@@ -415,7 +417,7 @@ def _processRNBturn(request):
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
-            return JsonResponse({"syncError": "12345"}, safe=False)
+            return JsonResponse({"syncError": True}, safe=False)
 
         gameDataStr = jsonData["gameData"]
         # raw_binary = base64.b64decode(gameDataStr)
@@ -428,9 +430,7 @@ def _processRNBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        print(f"allcurrentplayers: {jsonData['allCurrentPlayers']}")
-
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayers"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayersArr"])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -440,6 +440,7 @@ def _processRNBturn(request):
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
+                (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
                 jsonData["gameID"],
             )
 
@@ -447,11 +448,13 @@ def _processRNBturn(request):
         else:
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-            nextCurrentPlayer = jsonData["nextCurrentPlayer"]
-            if nextCurrentPlayer != "" and nextCurrentPlayer != "RnbBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
-                playerListToNotify = [nextCurrentPlayer]
+            nextCurrentPlayerUsername = jsonData["nextCurrentPlayerUsername"]
+            if nextCurrentPlayerUsername != "" and nextCurrentPlayerUsername != "RnbBot" and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+                playerListToNotify = [nextCurrentPlayerUsername.strip()]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
+                if "RnbBot" in playerListToNotify:
+                    playerListToNotify.remove("RnbBot")
                 if len(playerListToNotify) > 0:
                     if jsonData["currentPlayerNeedsToFixMove"] == True:
                         SN_sendFixNextTurnNotification(
@@ -473,16 +476,17 @@ def _processRNBturn(request):
                             currentGame,
                             oldVer,
                         )
-            pendingPlayers = jsonData["pendingPlayers"]
+            pendingPlayersArr = jsonData["pendingPlayersArr"]
             if (
-                len(pendingPlayers) > 0
-                and not any(p.startswith("RnbBot") for p in pendingPlayers)
+                len(pendingPlayersArr) > 0
                 and jsonData["status"] != "FINISHED"
-                and 102 not in loadedStartingOptions
+                and rf.SO_TRAINING_GAME not in loadedStartingOptions
             ):
-                playerListToNotify = [player.strip() for player in pendingPlayers]
+                playerListToNotify = [player.strip() for player in pendingPlayersArr]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
+                if "RnbBot" in playerListToNotify:
+                    playerListToNotify.remove("RnbBot")
                 if len(playerListToNotify) > 0:
                     SN_sendPendingRNBturnNotification(
                         request,
@@ -511,49 +515,6 @@ def _processRNBturn(request):
         }
 
         return JsonResponse(response_data, safe=False)
-
-    elif jsonData["action"] == "saveEndGame":
-        # Check if old version is older than DB version, and if so, return
-        if str(latest_update) != str(currentGame.latestUpdate):
-            print(f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: RNB, save -- user: {request.user.username}")
-            turn = jsonData.get("turn", "N/A")
-            phase = jsonData.get("phase", "N/A")
-            message = (
-                f"SYNC ERROR IN: RNB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
-                f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
-            )
-            SN_sendAdminErrorMessage(request, message)
-            return JsonResponse({"syncError": "12345"}, safe=False)
-
-        # currentGame.gameDataBLOB = jsonData["data"]
-        currentGame.turn = jsonData["turn"]
-        currentGame.phase = jsonData["phase"]
-
-        oldVer = currentGame.latestUpdate
-        newVer = (int(oldVer) % 1000) + 1
-        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
-
-        # SAVE BEFORE NOTIFICATIONS
-        currentGame.save()
-
-        presenter.endGame(
-            request,
-            jsonData["winner"],
-            jsonData["finalPositions"],
-            jsonData["gameID"],
-        )
-
-        currentGame.save()
-
-        response_data = {
-            "latestUpdate": currentGame.latestUpdate,
-            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
-        }
-
-        return JsonResponse(response_data, safe=False)
-
-    # END SAVE END GAME
 
     elif jsonData["action"] == "resign":
         # Always do this
@@ -586,7 +547,7 @@ def _processRNBturn(request):
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
-            return JsonResponse({"syncError": "12345"}, safe=False)
+            return JsonResponse({"syncError": True}, safe=False)
 
         if not currentGame.rewindData or currentGame.rewindData == "[]" or len(currentGame.rewindData) == 0:
             return JsonResponse(
@@ -650,7 +611,7 @@ def _processRNBturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayers"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayersArr"])
 
         gameDataStr = jsonData["gameData"]
         # raw_binary = base64.b64decode(gameDataStr)
@@ -664,8 +625,8 @@ def _processRNBturn(request):
 
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        nextPlayersArr = jsonData["nextCurrentPlayers"]
-        if len(nextPlayersArr) > 0 and not any(p.startswith("RnbBot") for p in nextPlayersArr) and 102 not in loadedStartingOptions:
+        nextPlayersArr = jsonData["nextCurrentPlayersArr"]
+        if len(nextPlayersArr) > 0 and not any(p.startswith("RnbBot") for p in nextPlayersArr) and rf.SO_TRAINING_GAME not in loadedStartingOptions:
             playerListToNotify = [p for p in nextPlayersArr if p != request.user.username and p != "RnbBot"]
 
             if len(playerListToNotify) > 0:
@@ -698,7 +659,7 @@ def _processRNBturn(request):
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
-            return JsonResponse({"syncError": "12345"}, safe=False)
+            return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)
@@ -770,7 +731,7 @@ def performSaveGame(request, currentGame, jsonData):
             f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
         )
         SN_sendAdminErrorMessage(request, message)
-        return JsonResponse({"syncError": "12345"}, safe=False)
+        return JsonResponse({"syncError": True}, safe=False)
 
     gameDataStr = jsonData["gameData"]
     # raw_binary = base64.b64decode(gameDataStr)
@@ -791,7 +752,7 @@ def performSaveGame(request, currentGame, jsonData):
     newVer = (int(db_latest_update) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayers"])
+    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayersArr"])
 
     # SAVE BEFORE NOTIFICATIONS
     currentGame.save()
@@ -799,8 +760,9 @@ def performSaveGame(request, currentGame, jsonData):
     if jsonData["status"] == "FINISHED":
         presenter.endGame(
             request,
-            jsonData["winner"],
+            jsonData["winnerUsername"],
             jsonData["finalPositions"],
+            (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
             jsonData["gameID"],
         )
 
@@ -808,11 +770,13 @@ def performSaveGame(request, currentGame, jsonData):
     else:
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        nextCurrentPlayer = jsonData["nextCurrentPlayer"]
-        if len(nextCurrentPlayer) != "" and nextCurrentPlayer != "RnbBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
-            playerListToNotify = [nextCurrentPlayer]
+        nextCurrentPlayerUsername = jsonData["nextCurrentPlayerUsername"]
+        if nextCurrentPlayerUsername != "" and nextCurrentPlayerUsername != "RnbBot" and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+            playerListToNotify = [nextCurrentPlayerUsername]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
+            if "RnbBot" in playerListToNotify:
+                playerListToNotify.remove("RnbBot")
             if len(playerListToNotify) > 0:
                 SN_sendNextTurnNotification(
                     request,
@@ -823,16 +787,17 @@ def performSaveGame(request, currentGame, jsonData):
                     currentGame,
                     oldVer,
                 )
-        pendingPlayers = jsonData["pendingPlayers"]
+        pendingPlayersArr = jsonData["pendingPlayersArr"]
         if (
-            len(pendingPlayers) > 0
-            and not any(p.startswith("RnbBot") for p in pendingPlayers)
+            len(pendingPlayersArr) > 0
             and jsonData["status"] != "FINISHED"
-            and 102 not in loadedStartingOptions
+            and rf.SO_TRAINING_GAME not in loadedStartingOptions
         ):
-            playerListToNotify = [player.strip() for player in pendingPlayers]
+            playerListToNotify = [player.strip() for player in pendingPlayersArr]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
+            if "RnbBot" in playerListToNotify:
+                playerListToNotify.remove("RnbBot")
             if len(playerListToNotify) > 0:
                 SN_sendPendingRNBturnNotification(
                     request,
