@@ -42,6 +42,7 @@ def sync_js_to_py(js_file_path, py_output_path):
 # Example usage
 files_to_sync = [
     ("./AQY/vueAQY/src/js/AQYreference.js", "./AQY/AQYconstants.py"),
+    ("./RNB/vueRNB/src/js/RNBreference.js", "./RNB/RNBconstants.py"),
 ]
 
 if __name__ == "__main__":

@@ -1235,54 +1235,33 @@ class RNBpresenter(GamePresenter):
 
         return not currentPlayersList or loggedInPlayerUsername in currentPlayersList or currentPlayersList[0] in rf.SHADOW_USERNAMES
 
-    def endGame(self, request, _winner, _finalPositions, _gameID):
+    def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID):
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotificationTieGame,
+            SN_M_sendEndGameNotification,
         )
         from Lobby.sharedFunctions.sharedFunctions import (
+            # TODO: get this working
             SF_M_ProcessAnyTournamentEndGame,
         )
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        names = self.getAllPlayersOrderedySeatInArray(False)
-        winnerNamesArray = []
-        for playerIndex in _winner:
-            winner_user = User.objects.get(username=names[playerIndex])
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
-            winnerNamesArray.append(names[playerIndex])
+        winner_user = User.objects.get(username=_winnerUseranme)
+        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        if winner_gp:
+            winner_gp.winner = True
+            winner_gp.save()
 
         self.gameObj.save()
 
-        for i in range(len(_finalPositions)):
-            for j in range(len(_finalPositions[i])):
-                _finalPositions[i][j] = names[_finalPositions[i][j]]
-
-        # TODO - Fix this for RnB - NO TIES
-        finalResults = []
-        for i in range(len(_finalPositions)):
-            for j in range(len(_finalPositions[i])):
-                text = "Lost in Antiquity (POS ERROR)"
-                if i == 0 and len(_finalPositions[i]) == 1:
-                    text = "1st - Congratulations!"
-                elif i == 0 and len(_finalPositions[i]) > 1:
-                    text = "Joint 1st - Congratulations!"
-                elif i == 1 and len(_finalPositions[i]) == 1:
-                    text = "Runner Up"
-                elif i == 1 and len(_finalPositions[i]) > 1:
-                    text = "Joint Runner Up"
-                finalResults.append([_finalPositions[i][j], text, i])
-
-        new_names = [name for name in names if name not in [item for sublist in _finalPositions for item in sublist]]
-
-        for name in new_names:
-            finalResults.append([name, "Lost in Antiquity", 9])
-
-        SN_M_sendEndGameNotificationTieGame(request, "AQY", finalResults, _gameID, self.gameObj)
+        # _finalPositions is just an array of playerIndexes
+        # finalPositionsArr is an array of [pos, username]
+        finalPositionsArr = []
+        for seatPos in _finalPositions:
+            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
+        # Now send winning notification
+        SN_M_sendEndGameNotification(request, "IND", finalPositionsArr, _gameID, self.gameObj)
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -1290,8 +1269,8 @@ class RNBpresenter(GamePresenter):
                 rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                winnerNamesArray,
-                finalResults,
+                [_winnerUseranme],
+                _tournamentData,
             )
 
         if self.gameObj.relatedMiniTournament:
@@ -1300,8 +1279,8 @@ class RNBpresenter(GamePresenter):
                 rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                winnerNamesArray,
-                finalResults,
+                [_winnerUseranme],
+                _tournamentData,
             )
 
     def startGame(self, request, isTournamentGame=False):
