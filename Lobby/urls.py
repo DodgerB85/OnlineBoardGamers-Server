@@ -28,9 +28,7 @@ app_name = ""
 urlpatterns = [
     path("", views.index, name="index"),
     path("index/<str:listType>/", views.indexListType, name="indexListType"),
-    path(
-        "indexSpecialRedirect/", views.indexSpecialRedirect, name="indexSpecialRedirect"
-    ),
+    path("indexSpecialRedirect/", views.indexSpecialRedirect, name="indexSpecialRedirect"),
     path("login/", views.login_view, name="myLogin"),
     path("logout/", views.logout_view, name="myLogout"),
     path("profile/", views.profile, name="profile"),
@@ -107,7 +105,6 @@ urlpatterns = [
         views.TGZtournamentFixedSummer25,
         name="TGZtournamentFixedSummer25",
     ),
-   
     path("MiniTournaments/", views.MiniTournaments, name="MiniTournaments"),
     path(
         "MiniTournament/<int:Mini_Tournament_id>/",
@@ -130,21 +127,16 @@ urlpatterns = [
     path("DBO_deleteGame/<str:gameType>/", views.DBO_deleteGame, name="DBO_deleteGame"),
     path("userStats/", views.userStats, name="userStats"),
     path("sendAdminMessage/", views.sendAdminMessage, name="sendAdminMessage"),
-    
     # API Routes
-    path('join_discord/', RedirectView.as_view(url='https://discord.gg/hCU7Fr77yV', permanent=False), name='discordInviteLink'),
+    path("join_discord/", RedirectView.as_view(url="https://discord.gg/hCU7Fr77yV", permanent=False), name="discordInviteLink"),
     path(f'{config("TELEGRAM_WEBHOOK_PATH")}', views.telegram_bot_response),
     path("addTGid/<int:TGid>", views.addTGid, name="addTGid"),
     path("nextGame", views.next_game_redirect, name="next_game"),
     path("join/<str:joinGameLink>/", views.joinGameLink, name="joinGameLink"),
-    path(
-        "autoCompleteUsername/", views.autoCompleteUsername, name="autoCompleteUsername"
-    ),
+    path("autoCompleteUsername/", views.autoCompleteUsername, name="autoCompleteUsername"),
     path("joinGame/<str:gameType>/", views.joinGame, name="joinGame"),
     path("deleteGame/<str:gameType>/", views.deleteGame, name="deleteGame"),
-    path(
-        "addPlayerToMTinvites/", views.addPlayerToMTinvites, name="addPlayerToMTinvites"
-    ),
+    path("addPlayerToMTinvites/", views.addPlayerToMTinvites, name="addPlayerToMTinvites"),
     path("password_reset/", views.password_reset_request, name="password_reset"),
     path("testWebhook/", views.testWebhook, name="testWebhook"),
     path("blacklistPlayer/", views.blacklistPlayer, name="blacklistPlayer"),
@@ -156,9 +148,7 @@ urlpatterns = [
     path("setStopEmails/", views.setStopEmails),
     path("sendMTchatMessage/", views.sendMTchatMessage, name="sendMTchatMessage"),
     path("reloadMTchatData/", views.reloadMTchatData, name="reloadMTchatData"),
-    path(
-        "sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"
-    ),
+    path("sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"),
     path("reloadMainTchatData/", views.reloadMainTchatData, name="reloadMainTchatData"),
     # Icons
     re_path(

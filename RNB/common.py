@@ -34,7 +34,7 @@ def create_rnb_game(
     is_main_tournament = mainORmini == rf.MAIN_T_FLAG
     is_mini_tournament = mainORmini == rf.MINI_T_FLAG
     """
-    Create a AQY game, either for a tournament or regular play (training/non-training).
+    Create a RnB game, either for a tournament or regular play (training/non-training).
     Args:
         request: Django request object.
         is_main_tournament: Boolean indicating if this is a maintournament game.
@@ -160,7 +160,7 @@ def create_rnb_game(
             )
             # If no invited playerrs, get []. If error, get None
             if invited_usernames_objs is None:
-                return HttpResponseRedirect(reverse("createAQYpage"))
+                return HttpResponseRedirect(reverse("createRNBpage"))
 
             # invited_players = [get_object_or_404(User, username=username) for username in invited_usernames]
             if len(invited_usernames_objs) > 0:
@@ -245,7 +245,7 @@ def create_rnb_game(
     # Normal Game Notifications
     if usernames_to_notify:
         SN_sendInviteNotifications(
-            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "AQY"
+            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "RNB"
         )
 
     if "trainingGame" in request.POST:
@@ -256,7 +256,7 @@ def create_rnb_game(
 
     # Otherwise, return normal game creation
     messages.success(
-        request, SF_getGameCreationJsonReturn("AQY", new_game.id)
+        request, SF_getGameCreationJsonReturn("RNB", new_game.id)
     )
     return HttpResponseRedirect(
         reverse("indexListType", kwargs={"listType": "waiting"})
