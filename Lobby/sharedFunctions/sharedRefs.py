@@ -592,35 +592,35 @@ def SR_currentTurnString(gameCode, turn, phase):
     elif gameCode == "RNB":
         currentTurnString = str(turn) + " - "
         if phase == rfRNB.PHASE_CONFLICT_PRODUCTION_DECISION:
-            currentTurnString += gettext("Conflict: Production Decision")
+            currentTurnString += gettext("Conflict Decision: Production")
         elif phase == rfRNB.PHASE_CONFLICT_PRODUCTION_PRAYING:
-            currentTurnString += gettext("Conflict: Production Praying")
+            currentTurnString += gettext("Conflict Praying: Production")
         elif phase == rfRNB.PHASE_CONFLICT_PRODUCTION_TURN_ORDER:
-            currentTurnString += gettext("Conflict: Production Turn Order")
+            currentTurnString += gettext("Conflict Turn Order: Production")
         elif phase == rfRNB.PHASE_PRODUCTION_TO:
             currentTurnString += gettext("Production")
         elif phase == rfRNB.PHASE_CONFLICT_MOVEMENT_DECISION:
-            currentTurnString += gettext("Conflict: Movement Decision")
+            currentTurnString += gettext("Conflict Decision: Movement")
         elif phase == rfRNB.PHASE_CONFLICT_MOVEMENT_PRAYING:
-            currentTurnString += gettext("Conflict: Movement Praying")
+            currentTurnString += gettext("Conflict Praying: Movement")
         elif phase == rfRNB.PHASE_CONFLICT_MOVEMENT_TURN_ORDER:
-            currentTurnString += gettext("Conflict: Movement Turn Order")
+            currentTurnString += gettext("Conflict Turn Order: Movement")
         elif phase == rfRNB.PHASE_MOVEMENT_TO:
             currentTurnString += gettext("Movement")
         elif phase == rfRNB.PHASE_CONFLICT_BUILDING_DECISION:
-            currentTurnString += gettext("Conflict: Building Decision")
+            currentTurnString += gettext("Conflict Decision: Building")
         elif phase == rfRNB.PHASE_CONFLICT_BUILDING_PRAYING:
-            currentTurnString += gettext("Conflict: Building Praying")
+            currentTurnString += gettext("Conflict Praying: Building")
         elif phase == rfRNB.PHASE_CONFLICT_BUILDING_TURN_ORDER:
-            currentTurnString += gettext("Conflict: Building Turn Order")
+            currentTurnString += gettext("Conflict Turn Order: Building")
         elif phase ==   rfRNB.PHASE_BUILDING_TO:
             currentTurnString += gettext("Building")
         elif phase == rfRNB.PHASE_CONFLICT_WONDER_DECISION:
-            currentTurnString += gettext("Conflict: Wonder Decision")
+            currentTurnString += gettext("Conflict Decision: Wonder")
         elif phase == rfRNB.PHASE_CONFLICT_WONDER_PRAYING:
-            currentTurnString += gettext("Conflict: Wonder Praying")
+            currentTurnString += gettext("Conflict Praying: Wonder")
         elif phase == rfRNB.PHASE_CONFLICT_WONDER_TURN_ORDER:
-            currentTurnString += gettext("Conflict: Wonder Turn Order")
+            currentTurnString += gettext("Conflict Turn Order: Wonder")
         elif phase == rfRNB.PHASE_WONDER_TO:
             currentTurnString += gettext("Wonder")
         elif phase == rfRNB.PHASE_GAME_OVER:
