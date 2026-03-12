@@ -1411,9 +1411,9 @@ class RNBpresenter(GamePresenter):
     def getCurrentMoveData(self, name):
         seat = self.seatPosition(name)
         if seat == -1:
-            return {}
+            return []
         gp = self.gameObj.players.filter(seat_order=seat).first()
-        gp_move_data = gp.moveDataJSON if gp.moveDataJSON else []
+        gp_move_data = gp.moveDataJSON if gp and gp.moveDataJSON else []
         for entry in gp_move_data:
             if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
                 return entry
@@ -1421,7 +1421,7 @@ class RNBpresenter(GamePresenter):
                 return entry
             elif  entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase-rfRNB.PHASE_LOOKBACK_AMOUNT:
                 return entry
-        return {}
+        return []
 
     def getMoveDataTime(self, name):
         seat = self.seatPosition(name)
