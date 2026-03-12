@@ -1138,7 +1138,7 @@ def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _ga
             )
 
             # SEND WEBHOOKS
-            urlRaw = "https://www.OnlineBoardGamers.com/"
+            urlRaw = "https://www.OnlineBoardGamers.com/index/invitations/"
             if (
                 profile.webhooks != ""
                 and profile.webhooks is not None
