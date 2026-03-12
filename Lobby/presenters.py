@@ -1410,6 +1410,8 @@ class RNBpresenter(GamePresenter):
 
     def getCurrentMoveData(self, name):
         seat = self.seatPosition(name)
+        if seat == -1:
+            return {}
         gp = self.gameObj.players.filter(seat_order=seat).first()
         gp_move_data = gp.moveDataJSON if gp.moveDataJSON else []
         for entry in gp_move_data:
