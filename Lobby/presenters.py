@@ -19,7 +19,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 
 import Lobby.sharedFunctions.constants as rf
 import FCM.FCMconstants as rfFCM
-
+import RNB.RNBconstants as rfRNB
 
 class GamePresenter:
 
@@ -230,6 +230,24 @@ class GamePresenter:
             from Lobby.models import GamePlayer
 
             GamePlayer.objects.bulk_update(to_update, ["is_current"])
+
+    ### THIS IS CURRENTLY RNB ONLY -- BUT SHOULD BE GENERALLY USEFUL
+    # This takes in an array of names, and updates the current players for a STRICT SIMUL turn
+    # This is useful where the server has the "master" list of current players, but if
+    # for example player A makes a simul move that isn't picked up by player B, then player A
+    # will rempve themselves from is_current, and then when B sunmits thinking player A needs to move,
+    # it won't "reset" them as needing to move
+    def reduceCurrentPlayersUsingArray(self, current_players_array):
+        from Lobby.models import GamePlayer
+
+        game_players_active = self.gameObj.players.exclude(is_missing=True).select_related("player")
+        for gp in game_players_active:
+            # Only keep players who are currently active, AND are in the current_players_array
+            gp.is_current = gp.is_current and gp.player.username in current_players_array
+        
+        GamePlayer.objects.bulk_update(game_players_active, ["is_current"])
+
+
 
     def checkForHostChange(self, _missingUser):
         """Change host if current host is missing"""
@@ -1396,6 +1414,10 @@ class RNBpresenter(GamePresenter):
         gp_move_data = gp.moveDataJSON if gp.moveDataJSON else []
         for entry in gp_move_data:
             if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
+                return entry
+            elif  entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase-1:
+                return entry
+            elif  entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase-rfRNB.PHASE_LOOKBACK_AMOUNT:
                 return entry
         return {}
 
