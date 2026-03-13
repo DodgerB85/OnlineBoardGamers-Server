@@ -117,6 +117,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_getMiniTournamentCreationJsonReturn,
     SF_TGZadvancedOptions,
     SF_fastSerializeGame,
+    SF_serializeGame,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendDeclineEmail,
@@ -1435,14 +1436,14 @@ def index(request):
     # 2. Combine these IDs with the 'AVAILABLE' criteria in a single clean 'IN' clause
     # This avoids the messy JOIN logic in the main query
     games_query = Game.objects.filter(
-        Q(id__in=player_game_ids) | 
-        Q(id__in=invited_game_ids) | 
+        Q(id__in=player_game_ids) |
+        Q(id__in=invited_game_ids) |
         Q(gameStatus="AVAILABLE", created__gte=recent_cutoff)
     ).distinct().select_related("creator").prefetch_related(
         Prefetch(
-            "players", 
-            queryset=GamePlayer.objects.filter(is_missing=False).select_related("player"),
-            to_attr="active_players"
+            "players",
+            queryset=GamePlayer.objects.select_related("player"),
+            to_attr="prefetched_players"
         ),
         "invitedPlayers"
     ).defer("gameData", "rewindData", "rewindTempData", "chatData")
@@ -1496,19 +1497,25 @@ def index(request):
 #        # This saves CPU cycles on games the user won't see
 
 
-        # Use the cached '.active_players' list from our Prefetch object
-        # This replaces: game.players.exclude(is_kicked=True).all()
-        all_p_ids = {gp.player_id for gp in game.active_players}
+        # Use the cached '.prefetched_players' list from our Prefetch object
+        all_game_players = game.prefetched_players
+        active_players = [gp for gp in all_game_players if not gp.is_missing]
+        all_p_ids = {gp.player_id for gp in active_players}
         inv_p_ids = {p.id for p in game.invitedPlayers.all()}
-        miss_p_ids = {gp.player_id for gp in game.active_players if gp.is_missing}
+        miss_p_ids = {gp.player_id for gp in all_game_players if gp.is_missing}
 
-        is_involved = user_id in all_p_ids 
+        is_involved = user_id in all_p_ids
         is_invited = user_id in inv_p_ids
-        is_blacklisted_game = (game.creator_id in blacklisted_players_ids or 
+        is_blacklisted_game = (game.creator_id in blacklisted_players_ids or
                               game.creator_id in blocked_by_user_ids)
 
+        player_context = {
+            "all_game_players": all_game_players,
+            "invited_users": list(game.invitedPlayers.all()),
+        }
+
         try:
-            serialized = SF_fastSerializeGame(game, user)
+            serialized = SF_serializeGame(game, user, player_context)
         except Game.DoesNotExist:
             SN_sendAdminErrorMessage(
                 request,
