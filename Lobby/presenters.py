@@ -135,13 +135,13 @@ class GamePresenter:
 
     def isExperiencedGame(self):
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if 120 in starting_options:
+        if rf.SO_EXPERIENCED_GAME in starting_options:
             return True
         return False
 
     def isLearningGame(self):
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if 110 in starting_options:
+        if rf.SO_LEARNING_GAME in starting_options:
             return True
         return False
 

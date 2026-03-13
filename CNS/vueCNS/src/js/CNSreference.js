@@ -22,6 +22,7 @@ export const BLUE = 1
 export const RED = 2
 export const YELLOW = 3
 
+// EXTERNAL VARS
 /** PHASES */
 export const PHASE_PLACE_HEXES = 0
 export const PHASE_NETWORK = 1
@@ -30,6 +31,7 @@ export const PHASE_CONFIRM_PIRATE = 3
 export const PHASE_MOVE_PIRATE = 4
 export const PHASE_STORE_RES = 5
 export const PHASE_GAME_OVER = 6
+// END EXTERNAL VARSs
 
 /** ACTIONS */
 export const ACT_NONE = -1

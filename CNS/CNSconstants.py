@@ -1,0 +1,9 @@
+# Generated from ./CNS/vueCNS/src/js/CNSreference.js
+# Total blocks synced: 1
+PHASE_PLACE_HEXES = 0
+PHASE_NETWORK = 1
+PHASE_PRODUCTION = 2
+PHASE_CONFIRM_PIRATE = 3
+PHASE_MOVE_PIRATE = 4
+PHASE_STORE_RES = 5
+PHASE_GAME_OVER = 6
