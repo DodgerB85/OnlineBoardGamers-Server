@@ -114,42 +114,51 @@ def SF_getMiniTournamentCreationJsonReturn(MT_ID):
         + "</button>"
     )
 
-def SF_fastSerializeGame(game, user):
+def SF_buildGamePlayerContext(game):
     """
-    Zero-query serialization for any game model.
-    Dynamically identifies game type (FCM, TGZ, etc.)
+    Build player context from DB for a game. Returns a dict with:
+      - all_game_players: list of GamePlayer objects
+      - invited_users: list of User objects
+    Callers with prefetched data can skip this and build the dict directly.
     """
-    from Lobby.models import Game
-    
-    # --- 1. Identify Game Type ---
+    return {
+        "all_game_players": list(game.players.all().select_related('player')),
+        "invited_users": list(game.invitedPlayers.all()),
+    }
+
+
+def SF_serializeGame(game, user, player_context):
+    """
+    Pure serialization — no DB queries (except HC/RNB myMove edge cases).
+    Requires a player_context dict from SF_buildGamePlayerContext or equivalent.
+    """
     game_code = game.gameCode
 
-    # Game model - use GamePlayer
-    #all_game_players = list(game.players.exclude(is_missing=True).select_related('player'))
-    all_game_players = list(game.players.all().select_related('player'))
+    all_game_players = player_context["all_game_players"]
+    invited_usernames = [u.username for u in player_context["invited_users"]]
+
     all_players = [gp.player for gp in all_game_players if gp.player]
     all_usernames = [p.username for p in all_players]
-    invited_usernames = [u.username for u in game.invitedPlayers.all()]
     all_ids = {p.id for p in all_players}
     missing_ids = {gp.player.id for gp in all_game_players if gp.is_missing and gp.player}
     chat_notify_ids = {gp.player.id for gp in all_game_players if gp.has_chat_notification and gp.player}
-    
+
     # Get current players from is_current flag
     current_players_str = ", ".join([
-        gp.player.username for gp in all_game_players 
+        gp.player.username for gp in all_game_players
         if gp.is_current and gp.player
     ])
-    
+
     # Winner from GamePlayer
     winner_gp = next((gp for gp in all_game_players if gp.winner), None)
     winner_str = winner_gp.player.username if (winner_gp and winner_gp.player) else ""
-    
+
 
     # 3. Timing Calculation
     now = int(time.time())
     ref_time = int(game.latestUpdate) // 1000 if game.gameStatus == "ACTIVE" else int(game.created) // 1000
     elapsed = max(0, now - ref_time)
-    
+
     d, rem = divmod(elapsed, 86400)
     h, rem = divmod(rem, 3600)
     m, s = divmod(rem, 60)
@@ -160,20 +169,20 @@ def SF_fastSerializeGame(game, user):
     if user and game.gameStatus == "ACTIVE":
         is_my_move = (not current_players_str or user.username in current_players_str or
                       any(s in current_players_str for s in rf.SHADOW_USERNAMES))
-        
+
         # For HC, if it is factory phase, AND you have submitted your move, set it back to false
         if game_code == "HC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
             is_my_move = False
         if game_code == "RNB":
             if is_my_move and not game.presenter().quickIsMyMove(user.username):
                 is_my_move = False
-    
+
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
     # 5. Shadow/Delete Logic
     is_deleteable = any(name in all_usernames for name in rf.SHADOW_USERNAMES) and (user.id in all_ids if user else False)
 
-    creator = game.creator.username 
+    creator = game.creator.username
     gameName = getattr(game, 'gameName', 'Unknown Game')
     if gameName == "":
         gameName = f"[{creator}'s Game]"
@@ -199,7 +208,7 @@ def SF_fastSerializeGame(game, user):
         isLearningGame = True
     if 120 in startingOptionsArr:
         isExperiencedGame = True
-    
+
     startingOptionsHTML = ""
     if game_code == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(startingOptionsArr)
@@ -219,8 +228,17 @@ def SF_fastSerializeGame(game, user):
         startingOptionsHTML = SR_getKFWstartingOptionsHTML(startingOptionsArr)
     if game_code == "WEB":
         startingOptionsHTML = SR_getWEBstartingOptionsHTML(startingOptionsArr)
-    
-    kickoutRequiredNum = game.presenter().kickoutRequired()
+
+    # Compute kickout inline using already-extracted data to avoid extra queries
+    current_username = current_players_str.split(", ")[0] if current_players_str else ""
+    kickoutRequiredNum = SF_kickoutRequired(
+        game.gameStatus,
+        all_usernames,
+        game.latestUpdate,
+        game.kickoutDuration,
+        game.kickoutFlexiData,
+        current_username,
+    )
 
     return {
         "gameID": game.id,
@@ -247,9 +265,14 @@ def SF_fastSerializeGame(game, user):
         "pace": SR_gamePaceString(game.gamePace),
         "startingMap": game.startingMap if hasattr(game, 'startingMap') else "",
         "latestUpdate": game.latestUpdate,
-        "currentPlayers": current_players_str, 
+        "currentPlayers": current_players_str,
         "kickoutRequiredNum": kickoutRequiredNum,
     }
+
+
+def SF_fastSerializeGame(game, user):
+    """Convenience wrapper: builds player context from DB, then serializes."""
+    return SF_serializeGame(game, user, SF_buildGamePlayerContext(game))
             #"currentPlayers": self.currentPlayers,
             #"kickoutRequiredNum": kickoutRequiredNum,
             #"remainingPlayers": remainingPlayers,
