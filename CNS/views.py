@@ -36,6 +36,9 @@ from Lobby.models import User, Profile, Game, GamePlayer
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
 
+from . import CNSconstants as rfCNS
+import Lobby.sharedFunctions.constants as rf
+
 if TYPE_CHECKING:
     from Lobby.presenters import CNSpresenter 
     
@@ -111,7 +114,7 @@ def createCNSgame(request):
             host=request.user,
             gamePace=_pace,
             turn=1,
-            phase=0,
+            phase=rfCNS.PHASE_PLACE_HEXES,
             created=_created,
             latestUpdate=_created,
             maxPlayers=_maxPlayers,
@@ -364,14 +367,14 @@ def _processCNSturn(request):
             )
             if (
                 len(jsonData["nextPlayer"]) > 0 
-                and "CnsBot" not in jsonData["nextPlayer"]
                 and jsonData["status"] != "FINISHED"
-                and 102 not in loadedStartingOptions
+                and rf.SO_TRAINING_GAME not in loadedStartingOptions
             ):
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
-
+                if "CnsBot" in playerListToNotify:
+                    playerListToNotify.remove("CnsBot")
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
                         request,
@@ -526,12 +529,13 @@ def _processCNSturn(request):
         )
         if (
             len(jsonData["nextPlayer"]) > 0
-            and "CnsBot" not in jsonData["nextPlayer"]
-            and 102 not in loadedStartingOptions
+            and rf.SO_TRAINING_GAME not in loadedStartingOptions
         ):
             playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
+            if "CnsBot" in playerListToNotify:
+                playerListToNotify.remove("CnsBot")
             if len(playerListToNotify) > 0:
                 SN_sendNextTurnNotification(
                     request,
