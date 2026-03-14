@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0029_alter_changelog_timestamp'),
+        ("Lobby", "0029_alter_changelog_timestamp"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='TGZminimalText',
+            model_name="profile",
+            name="TGZminimalText",
             field=models.BooleanField(default=False),
         ),
     ]

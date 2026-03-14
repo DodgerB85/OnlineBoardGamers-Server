@@ -10,18 +10,18 @@ def migrate_bus_games(apps, schema_editor):
     Migrate all Bus_Game instances to the new unified Game model with gameCode='Bus'
     """
     # Get models - use apps.get_model to get the historical version
-    Bus_Game = apps.get_model('Bus', 'Bus_Game')
-    Game = apps.get_model('Lobby', 'Game')
-    GamePlayer = apps.get_model('Lobby', 'GamePlayer')
+    Bus_Game = apps.get_model("Bus", "Bus_Game")
+    Game = apps.get_model("Lobby", "Game")
+    GamePlayer = apps.get_model("Lobby", "GamePlayer")
 
     # Get all Bus games
     bus_games = Bus_Game.objects.all().prefetch_related(
-        'allPlayers',
-        'missingPlayers',
-        'kickedPlayers',
-        'invitedPlayers',
-        'playersWithChatNotification',
-        'relatedTournament'
+        "allPlayers",
+        "missingPlayers",
+        "kickedPlayers",
+        "invitedPlayers",
+        "playersWithChatNotification",
+        "relatedTournament",
     )
 
     print(f"\nMigrating {bus_games.count()} Bus games to unified Game model...")
@@ -31,9 +31,8 @@ def migrate_bus_games(apps, schema_editor):
     for bus_game in bus_games:
         # Create the new Game instance
         new_game = Game.objects.create(
-            gameCode='Bus',
+            gameCode="Bus",
             original_id=bus_game.id,
-
             # Copy BaseGame fields
             gameName=bus_game.gameName,
             gameDescription=bus_game.gameDescription,
@@ -53,18 +52,24 @@ def migrate_bus_games(apps, schema_editor):
             zoomLevels=bus_game.zoomLevels,
             latestUpdate=bus_game.latestUpdate,
             created=bus_game.created,
-            startingMap=bus_game.startingMap if hasattr(bus_game, 'startingMap') else "",
+            startingMap=bus_game.startingMap
+            if hasattr(bus_game, "startingMap")
+            else "",
             startingOptions=bus_game.startingOptions,
             statsExcludeConsent=bus_game.statsExcludeConsent,
-            deleteGameVotes=bus_game.deleteGameVotes if hasattr(bus_game, 'deleteGameVotes') else None,
-
+            deleteGameVotes=bus_game.deleteGameVotes
+            if hasattr(bus_game, "deleteGameVotes")
+            else None,
             # Copy foreign keys
             creator=bus_game.creator,
             host=bus_game.host,
-
             # Bus-specific fields
-            relatedBusTournament=bus_game.relatedTournament if hasattr(bus_game, 'relatedTournament') else None,
-            tournamentGame=bus_game.tournamentGame if hasattr(bus_game, 'tournamentGame') else False,
+            relatedBusTournament=bus_game.relatedTournament
+            if hasattr(bus_game, "relatedTournament")
+            else None,
+            tournamentGame=bus_game.tournamentGame
+            if hasattr(bus_game, "tournamentGame")
+            else False,
         )
 
         # Copy invited players M2M
@@ -86,18 +91,24 @@ def migrate_bus_games(apps, schema_editor):
 
         # Determine current player(s) from currentPlayers string
         # In Bus, currentPlayers is typically a single username but could be comma-separated
-        current_players_str = bus_game.currentPlayers if hasattr(bus_game, 'currentPlayers') else ""
+        current_players_str = (
+            bus_game.currentPlayers if hasattr(bus_game, "currentPlayers") else ""
+        )
         current_players_usernames = set()
         if current_players_str:
             # currentPlayers might be a comma-separated string or single username
             # Also handle special values like SHADOW, SHADOW_2, etc.
-            current_players_usernames = {cp.strip() for cp in current_players_str.split(',') if cp.strip()}
+            current_players_usernames = {
+                cp.strip() for cp in current_players_str.split(",") if cp.strip()
+            }
 
         # Determine winner
-        winner_user = bus_game.winner if hasattr(bus_game, 'winner') else None
+        winner_user = bus_game.winner if hasattr(bus_game, "winner") else None
 
         # Build rewind consent activeVotes from rewindConsent string
-        rewind_consent_str = bus_game.rewindConsent if hasattr(bus_game, 'rewindConsent') else ""
+        rewind_consent_str = (
+            bus_game.rewindConsent if hasattr(bus_game, "rewindConsent") else ""
+        )
         rewind_votes = {}
         if rewind_consent_str:
             for idx, player in enumerate(player_list):
@@ -124,15 +135,15 @@ def migrate_bus_games(apps, schema_editor):
             # Bus has player0notes through player4notes
             notes = ""
             player_seat = idx
-            if player_seat == 0 and hasattr(bus_game, 'player0notes'):
+            if player_seat == 0 and hasattr(bus_game, "player0notes"):
                 notes = bus_game.player0notes or ""
-            elif player_seat == 1 and hasattr(bus_game, 'player1notes'):
+            elif player_seat == 1 and hasattr(bus_game, "player1notes"):
                 notes = bus_game.player1notes or ""
-            elif player_seat == 2 and hasattr(bus_game, 'player2notes'):
+            elif player_seat == 2 and hasattr(bus_game, "player2notes"):
                 notes = bus_game.player2notes or ""
-            elif player_seat == 3 and hasattr(bus_game, 'player3notes'):
+            elif player_seat == 3 and hasattr(bus_game, "player3notes"):
                 notes = bus_game.player3notes or ""
-            elif player_seat == 4 and hasattr(bus_game, 'player4notes'):
+            elif player_seat == 4 and hasattr(bus_game, "player4notes"):
                 notes = bus_game.player4notes or ""
 
             game_player = GamePlayer(
@@ -162,20 +173,19 @@ def reverse_migration(apps, schema_editor):
     """
     Remove all migrated Bus games from the unified Game model
     """
-    Game = apps.get_model('Lobby', 'Game')
+    Game = apps.get_model("Lobby", "Game")
 
     # Delete all Bus games (cascade will delete GamePlayer instances)
-    deleted_count = Game.objects.filter(gameCode='Bus').count()
-    Game.objects.filter(gameCode='Bus').delete()
+    deleted_count = Game.objects.filter(gameCode="Bus").count()
+    Game.objects.filter(gameCode="Bus").delete()
 
     print(f"Removed {deleted_count} Bus games from unified Game model")
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0078_game_relatedbustournament'),
-        ('Bus', '0023_bus_game_automoves'),  # Ensure Bus app is available
+        ("Lobby", "0078_game_relatedbustournament"),
+        ("Bus", "0023_bus_game_automoves"),  # Ensure Bus app is available
     ]
 
     operations = [

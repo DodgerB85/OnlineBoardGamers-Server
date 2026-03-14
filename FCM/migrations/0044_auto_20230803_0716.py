@@ -4,25 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0043_auto_20230727_0436'),
+        ("FCM", "0043_auto_20230727_0436"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='gameDescription',
+            model_name="fcm_game",
+            name="gameDescription",
             field=models.CharField(blank=True, max_length=120),
         ),
         migrations.AlterField(
-            model_name='fcm_chat',
-            name='chatData',
-            field=models.TextField(default='{"name":"WelcomeBot","timestamp":1691046988000,"message":"Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'),
+            model_name="fcm_chat",
+            name="chatData",
+            field=models.TextField(
+                default='{"name":"WelcomeBot","timestamp":1691046988000,"message":"Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'
+            ),
         ),
         migrations.AlterField(
-            model_name='fcm_tournament',
-            name='created',
+            model_name="fcm_tournament",
+            name="created",
             field=models.CharField(default=1691046988000, max_length=30),
         ),
     ]

@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0038_alter_hc_game_gamepace_alter_hc_game_maxplayers_and_more'),
+        ("HC", "0038_alter_hc_game_gamepace_alter_hc_game_maxplayers_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='hc_game',
-            name='deleteGameVotes',
+            model_name="hc_game",
+            name="deleteGameVotes",
         ),
     ]

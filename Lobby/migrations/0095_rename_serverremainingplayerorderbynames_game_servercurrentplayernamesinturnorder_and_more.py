@@ -4,23 +4,22 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0094_gameplayer_movedatajson'),
+        ("Lobby", "0094_gameplayer_movedatajson"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='game',
-            old_name='serverRemainingPlayerOrderByNames',
-            new_name='serverCurrentPlayerNamesInTurnOrder',
+            model_name="game",
+            old_name="serverRemainingPlayerOrderByNames",
+            new_name="serverCurrentPlayerNamesInTurnOrder",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='deleteGameVotes',
+            model_name="game",
+            name="deleteGameVotes",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='statsExcludeConsent',
+            model_name="game",
+            name="statsExcludeConsent",
         ),
     ]

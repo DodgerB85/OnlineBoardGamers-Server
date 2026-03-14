@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('AQY', '0001_initial'),
+        ("AQY", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='aqy_game',
-            name='player0currentMoveTime',
+            model_name="aqy_game",
+            name="player0currentMoveTime",
             field=models.CharField(blank=True, max_length=15),
         ),
         migrations.AddField(
-            model_name='aqy_game',
-            name='player1currentMoveTime',
+            model_name="aqy_game",
+            name="player1currentMoveTime",
             field=models.CharField(blank=True, max_length=15),
         ),
         migrations.AddField(
-            model_name='aqy_game',
-            name='player2currentMoveTime',
+            model_name="aqy_game",
+            name="player2currentMoveTime",
             field=models.CharField(blank=True, max_length=15),
         ),
         migrations.AddField(
-            model_name='aqy_game',
-            name='player3currentMoveTime',
+            model_name="aqy_game",
+            name="player3currentMoveTime",
             field=models.CharField(blank=True, max_length=15),
         ),
     ]

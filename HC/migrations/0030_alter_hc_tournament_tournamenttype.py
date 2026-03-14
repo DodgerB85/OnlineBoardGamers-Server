@@ -4,15 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0029_alter_hc_game_gamestatus'),
+        ("HC", "0029_alter_hc_game_gamestatus"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='hc_tournament',
-            name='tournamentType',
-            field=models.CharField(choices=[('RR', 'Rounds'), ('KO', 'Knockout'), ('TL', 'Two Lives'), ('PT', 'Points')], default='RR', max_length=2),
+            model_name="hc_tournament",
+            name="tournamentType",
+            field=models.CharField(
+                choices=[
+                    ("RR", "Rounds"),
+                    ("KO", "Knockout"),
+                    ("TL", "Two Lives"),
+                    ("PT", "Points"),
+                ],
+                default="RR",
+                max_length=2,
+            ),
         ),
     ]

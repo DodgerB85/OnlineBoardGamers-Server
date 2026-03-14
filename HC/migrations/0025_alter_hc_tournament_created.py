@@ -5,15 +5,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0024_auto_20231227_0215'),
+        ("HC", "0024_auto_20231227_0215"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='hc_tournament',
-            name='created',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow, max_length=30),
+            model_name="hc_tournament",
+            name="created",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow,
+                max_length=30,
+            ),
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('WEB', '0007_alter_web_game_latestupdate'),
+        ("WEB", "0007_alter_web_game_latestupdate"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='web_game',
-            name='turn',
+            model_name="web_game",
+            name="turn",
             field=models.PositiveSmallIntegerField(default=0),
         ),
     ]

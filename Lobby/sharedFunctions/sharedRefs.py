@@ -134,7 +134,9 @@ def getCleanedAndSortedRoundData(roundData):
         normalized_row = [name, played, wins] + tb[:4]  # keep only top 4
         playersData.append(normalized_row)
 
-    playersData.sort(key=lambda r: (-r[2], -r[3][0], -r[4][0], -r[5][0], -r[6][0], r[0]))
+    playersData.sort(
+        key=lambda r: (-r[2], -r[3][0], -r[4][0], -r[5][0], -r[6][0], r[0])
+    )
 
     # Now remove the -inf's
     cleaned = []
@@ -144,7 +146,12 @@ def getCleanedAndSortedRoundData(roundData):
         clean_row = [
             item
             for item in row
-            if not (isinstance(item, list) and len(item) > 0 and math.isinf(item[0]) and item[0] < 0)
+            if not (
+                isinstance(item, list)
+                and len(item) > 0
+                and math.isinf(item[0])
+                and item[0] < 0
+            )
         ]
         # Alternative (shorter): row[:3] + [x for x in row[3:] if x != -float('inf')]
         cleaned.append(clean_row)
@@ -155,7 +162,6 @@ def getCleanedAndSortedRoundData(roundData):
 def SR_getAnyTournamentPlayersData(tournament):
     # Handle MG first, as this has players in rounds instead of just once
     if tournament.tournamentType == "MG":
-
         ######## START OF MAIN FUNCTION
         ret = {}
         allMGdata = []
@@ -167,7 +173,9 @@ def SR_getAnyTournamentPlayersData(tournament):
             playersData = []
             roundData.append(["Round " + str(i + 1)])
             if i == 0:
-                roundData.append(["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"])
+                roundData.append(
+                    ["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"]
+                )
 
                 cleanedData = getCleanedAndSortedRoundData(round)
                 playersData = cleanedData
@@ -180,10 +188,14 @@ def SR_getAnyTournamentPlayersData(tournament):
                 groupB = round[7:]
                 groupData = [[], []]
                 # groupData.append(["Group A"])
-                groupData[0].append(["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"])
+                groupData[0].append(
+                    ["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"]
+                )
                 groupData[0].append(getCleanedAndSortedRoundData(groupA))
                 # groupData.append(["Group B"])
-                groupData[1].append(["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"])
+                groupData[1].append(
+                    ["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"]
+                )
                 groupData[1].append(getCleanedAndSortedRoundData(groupB))
                 roundData.append(groupData)
                 allMGdata.append(roundData)
@@ -272,12 +284,21 @@ def SR_getAnyTournamentRoundsData(tournament):
 
 
 def SR_getTournamentRoundsHTML(
-    tournamentType, maxGamePlayers, tournamentProgressionData, tournamentPointsData, gameTypeString, tournamentObj
+    tournamentType,
+    maxGamePlayers,
+    tournamentProgressionData,
+    tournamentPointsData,
+    gameTypeString,
+    tournamentObj,
 ):
     TPDA = json.loads(tournamentProgressionData)
 
     roundsHTML = '<div id="tournamentRoundsContainerDiv">'
-    pointsList = sorted(json.loads(tournamentPointsData), key=lambda x: -x[1]) if tournamentPointsData != "" else []
+    pointsList = (
+        sorted(json.loads(tournamentPointsData), key=lambda x: -x[1])
+        if tournamentPointsData != ""
+        else []
+    )
     TL_sideData = []
     if tournamentType == "TL":
         sideData = json.loads(tournamentObj.tournamentSideData)
@@ -301,7 +322,11 @@ def SR_getTournamentRoundsHTML(
                 # if hasCompletedThisRound:
                 #    fullyCompletedRounds += 1
                 # lives = 2 - fullyCompletedRounds + pointsList[i][1]
-                lives = TL_sideData[pointsList[i][0]] if pointsList[i][0] in TL_sideData else 0
+                lives = (
+                    TL_sideData[pointsList[i][0]]
+                    if pointsList[i][0] in TL_sideData
+                    else 0
+                )
                 roundsHTML += "<th>" + pointsList[i][0] + " (" + str(lives) + ")</th>"
             roundsHTML += "<th>" + str(pointsList[i][1]) + "</th>"
             roundsHTML += "</tr>"
@@ -326,7 +351,11 @@ def SR_getTournamentRoundsHTML(
         for row in TPDA[i]:
             if row[0] != "BYEPLAYERS":
                 roundsHTML += (
-                    '<tr class="clickableGameRow ' + gameTypeString + '" id="gamesRow' + str(row[maxGamePlayers]) + '">'
+                    '<tr class="clickableGameRow '
+                    + gameTypeString
+                    + '" id="gamesRow'
+                    + str(row[maxGamePlayers])
+                    + '">'
                 )
                 j = 0
                 for j in range(len(row)):
@@ -335,18 +364,42 @@ def SR_getTournamentRoundsHTML(
                         lives = TL_sideData[row[j]] if row[j] in TL_sideData else 0
                         if j == 0:
                             roundsHTML += (
-                                '<td><a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
+                                '<td><a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + " ("
+                                + str(lives)
+                                + ")</a>"
                             )
                         elif j < maxGamePlayers:
                             roundsHTML += (
-                                ' VS <a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
+                                ' VS <a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + " ("
+                                + str(lives)
+                                + ")</a>"
                             )
                     # Else just add the names
                     else:
                         if j == 0:
-                            roundsHTML += '<td><a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                            roundsHTML += (
+                                '<td><a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + "</a>"
+                            )
                         elif j < maxGamePlayers:
-                            roundsHTML += ' VS <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                            roundsHTML += (
+                                ' VS <a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + "</a>"
+                            )
 
                 roundsHTML += "</td>"
                 roundsHTML += "<td>"
@@ -376,14 +429,30 @@ def SR_getTournamentRoundsHTML(
                                 + ")</a>"
                             )
                         elif j > 1:
-                            roundsHTML += ', <a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
+                            roundsHTML += (
+                                ', <a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + " ("
+                                + str(lives)
+                                + ")</a>"
+                            )
                     else:
                         if j == 1:
                             roundsHTML += (
-                                "<td>" + gettext("BYES:") + ' <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                                "<td>"
+                                + gettext("BYES:")
+                                + ' <a href="/profile/'
+                                + row[j]
+                                + '">'
+                                + row[j]
+                                + "</a>"
                             )
                         elif j > 1:
-                            roundsHTML += ', <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                            roundsHTML += (
+                                ', <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
+                            )
 
         roundsHTML += "</table>"
         roundsHTML += "</div>"
@@ -400,7 +469,10 @@ def SR_currentTurnString(gameCode, turn, phase):
             currentTurnString = gettext("Setup - Draft Modules")
         if phase == rfFCM.PHASE_URBAN_PLANNING:
             currentTurnString = gettext("Setup - Urban Planning")
-        if phase == rfFCM.PHASE_SETUP_RESTAURANT1 or phase == rfFCM.PHASE_SETUP_RESTAURANT2:
+        if (
+            phase == rfFCM.PHASE_SETUP_RESTAURANT1
+            or phase == rfFCM.PHASE_SETUP_RESTAURANT2
+        ):
             currentTurnString = gettext("Setup - Restaurants")
         if phase == rfFCM.PHASE_SETUP_RESERVE:
             currentTurnString = gettext("Setup - Reserve Cards")
@@ -613,7 +685,7 @@ def SR_currentTurnString(gameCode, turn, phase):
             currentTurnString += gettext("Conflict Praying: Building")
         elif phase == rfRNB.PHASE_CONFLICT_BUILDING_TURN_ORDER:
             currentTurnString += gettext("Conflict Turn Order: Building")
-        elif phase ==   rfRNB.PHASE_BUILDING_TO:
+        elif phase == rfRNB.PHASE_BUILDING_TO:
             currentTurnString += gettext("Building")
         elif phase == rfRNB.PHASE_CONFLICT_WONDER_DECISION:
             currentTurnString += gettext("Conflict Decision: Wonder")
@@ -625,11 +697,8 @@ def SR_currentTurnString(gameCode, turn, phase):
             currentTurnString += gettext("Wonder")
         elif phase == rfRNB.PHASE_GAME_OVER:
             currentTurnString += gettext("Game End")
-   
-        return currentTurnString
-        
-        
 
+        return currentTurnString
 
 
 def SR_gamePaceString(gamePace):
@@ -647,7 +716,7 @@ def SR_gamePaceString(gamePace):
     return gamePaceString
 
 
-#def SR_getKickoutHTML(kickoutDuration):
+# def SR_getKickoutHTML(kickoutDuration):
 #    HTML = ""
 #    # less than a day kickouts
 #    kickoutInDays = int(kickoutDuration / 100)
@@ -722,20 +791,42 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         return "[None]"
     if len(startingOptionsArr) == 0:
         return "[None]"
-    
+
     # Reorder Options to have a better order
     preferred_order = [
-        rf.SO_LEARNING_GAME, rf.SO_EXPERIENCED_GAME, rfFCM.SO_SHORT_GAME, 
-        rfFCM.SO_NO_MILESTONES, rfFCM.SO_NO_CEO_MILESTONE, rfFCM.SO_NO_RADIO_MILESTONE,
-        rfFCM.SO_HARD_CHOICES, rfFCM.SO_NEW_MS, rfFCM.SO_KETCHUP_MS,
-        rfFCM.SO_RESERVE_PRICE, rfFCM.SO_MOVIE_STARS, rfFCM.SO_MASS_MARKETERS,
-        rfFCM.SO_GOURMET, rfFCM.SO_RURAL_MARKETERS, rfFCM.SO_NEW_DISTRICTS,
-        rfFCM.SO_LOBBYISTS, rfFCM.SO_NIGHT_SHIFT, rfFCM.SO_COFFEE,
-        rfFCM.SO_FRY_CHEFS, rfFCM.SO_KIMCHI, rfFCM.SO_SUSHI, rfFCM.SO_NOODLES,
-        rfFCM.SO_STRICT_PAYDAY_FRIDGE, rfFCM.SO_RANDOM_MODULES, # Note 200 is here
-        rfFCM.SO_DRAFT_MODULE_BREAKER, rfFCM.SO_DRAFT_SKIP_MODULE,
-        rfFCM.SO_SANDBOX_MODE, rfFCM.SO_URBAN_PLANNING, rfFCM.SO_URBAN_PLANNING_PLUS,
-        rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS,
+        rf.SO_LEARNING_GAME,
+        rf.SO_EXPERIENCED_GAME,
+        rfFCM.SO_SHORT_GAME,
+        rfFCM.SO_NO_MILESTONES,
+        rfFCM.SO_NO_CEO_MILESTONE,
+        rfFCM.SO_NO_RADIO_MILESTONE,
+        rfFCM.SO_HARD_CHOICES,
+        rfFCM.SO_NEW_MS,
+        rfFCM.SO_KETCHUP_MS,
+        rfFCM.SO_RESERVE_PRICE,
+        rfFCM.SO_MOVIE_STARS,
+        rfFCM.SO_MASS_MARKETERS,
+        rfFCM.SO_GOURMET,
+        rfFCM.SO_RURAL_MARKETERS,
+        rfFCM.SO_NEW_DISTRICTS,
+        rfFCM.SO_LOBBYISTS,
+        rfFCM.SO_NIGHT_SHIFT,
+        rfFCM.SO_COFFEE,
+        rfFCM.SO_FRY_CHEFS,
+        rfFCM.SO_KIMCHI,
+        rfFCM.SO_SUSHI,
+        rfFCM.SO_NOODLES,
+        rfFCM.SO_STRICT_PAYDAY_FRIDGE,
+        rfFCM.SO_RANDOM_MODULES,  # Note 200 is here
+        rfFCM.SO_DRAFT_MODULE_BREAKER,
+        rfFCM.SO_DRAFT_SKIP_MODULE,
+        rfFCM.SO_SANDBOX_MODE,
+        rfFCM.SO_URBAN_PLANNING,
+        rfFCM.SO_URBAN_PLANNING_PLUS,
+        rfFCM.SO_JAZZ_MUSICIANS,
+        rfFCM.SO_DUMPLINGS,
+        rfFCM.SO_DELIVERY_DRIVERS,
+        rfFCM.SO_HAWKERS,
     ]
 
     options_map = {
@@ -760,7 +851,10 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_SUSHI: ("so_sushi.svg", "Sushi"),
         rfFCM.SO_NOODLES: ("so_noodles.svg", "Noodles"),
         rfFCM.SO_URBAN_PLANNING: ("so_urbanPlanning.svg", "Urban Planning"),
-        rfFCM.SO_URBAN_PLANNING_PLUS: ("so_urbanPlanningPlus.svg", "Urban Planning Plus"),
+        rfFCM.SO_URBAN_PLANNING_PLUS: (
+            "so_urbanPlanningPlus.svg",
+            "Urban Planning Plus",
+        ),
         rfFCM.SO_JAZZ_MUSICIANS: ("so_jazz.svg", "Jazz Musicians"),
         rfFCM.SO_DUMPLINGS: ("so_dumplings.svg", "Dumplings"),
         rfFCM.SO_DELIVERY_DRIVERS: ("so_delivery.svg", "Delivery Drivers"),
@@ -770,8 +864,16 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_DRAFT_SKIP_MODULE: ("so_skip.jpg", "Skip Module"),
         rfFCM.SO_SANDBOX_MODE: ("so_sandbox.svg", "Sandbox Mode"),
         # These two use the Lobby folder
-        rf.SO_LEARNING_GAME: ("so_learningGame.svg", "Learning Game", "/static/Lobby/images/startingOptions/"),
-        rf.SO_EXPERIENCED_GAME: ("so_experiencedGame.svg", "Experienced Game", "/static/Lobby/images/startingOptions/"),
+        rf.SO_LEARNING_GAME: (
+            "so_learningGame.svg",
+            "Learning Game",
+            "/static/Lobby/images/startingOptions/",
+        ),
+        rf.SO_EXPERIENCED_GAME: (
+            "so_experiencedGame.svg",
+            "Experienced Game",
+            "/static/Lobby/images/startingOptions/",
+        ),
     }
 
     # startingOptionsHTML = "<div>"
@@ -781,10 +883,12 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
     for opt in sorted_options:
         # SPECIAL CASE: Random Modules (200)
         if opt == rfFCM.SO_RANDOM_MODULES:
-            moduleRange = [str(x % 100).zfill(2) for x in startingOptionsArr if 21000 < x < 21116]
+            moduleRange = [
+                str(x % 100).zfill(2) for x in startingOptionsArr if 21000 < x < 21116
+            ]
             if len(moduleRange) != 2:
                 moduleRange = ["??", "??"]
-            
+
             title = f"{moduleRange[0]} - {moduleRange[1]} {gettext('Random Modules')}"
             startingOptionsHTML += f"<img class='startingOption' src='/static/FCM/images/so_randomMods.svg' title='{title}'>"
             continue
@@ -795,12 +899,15 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
             img = mapping[0]
             label = gettext(mapping[1])
             folder = mapping[2] if len(mapping) > 2 else "/static/FCM/images/"
-            
-            startingOptionsHTML += f"<img class='startingOption' src='{folder}{img}' title='{label}'>"
-            
+
+            startingOptionsHTML += (
+                f"<img class='startingOption' src='{folder}{img}' title='{label}'>"
+            )
+
     return startingOptionsHTML or "[None]"
     # usedOptions = 0
- 
+
+
 def SR_getTGZstartingOptionsHTML(startingOptionsArr):
     if startingOptionsArr == "":
         return ""
@@ -1010,7 +1117,9 @@ def SR_getCNSstartingOptionsHTML(startingOptionsArr):
             )
         elif option == 20:
             startingOptionsHTML += (
-                "<img class='startingOption' src='/static/CNS/images/so_junkS.svg' title='" + gettext("Low Junk") + "'>"
+                "<img class='startingOption' src='/static/CNS/images/so_junkS.svg' title='"
+                + gettext("Low Junk")
+                + "'>"
             )
         elif option == 21:
             startingOptionsHTML += (
@@ -1086,59 +1195,59 @@ def SR_getHCstartingOptionsHTML(startingOptionsArr):
         elif option == 3:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
-                    + gettext("Cars Only")
-                    + "'>"
+                + gettext("Cars Only")
+                + "'>"
             )
         elif option == 4:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_truck.jpg' title='"
-                    + gettext("Trucks Only")
-                    + "'>"
+                + gettext("Trucks Only")
+                + "'>"
             )
         elif option == 5:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_sports.jpg' title='"
-                    + gettext("Sports Only")
-                    + "'>"
+                + gettext("Sports Only")
+                + "'>"
             )
         elif option == 6:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
-                    + gettext("Include Cars")
-                    + "'>"
+                + gettext("Include Cars")
+                + "'>"
             )
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_truck.jpg' title='"
-                    + gettext("Include Trucks")
-                    + "'>"
+                + gettext("Include Trucks")
+                + "'>"
             )
         elif option == 7:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_car.jpg' title='"
-                    + gettext("Include Cars")
-                    + "'>"
+                + gettext("Include Cars")
+                + "'>"
             )
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_sports.jpg' title='"
-                    + gettext("Include Sports")
-                    + "'>"
+                + gettext("Include Sports")
+                + "'>"
             )
         elif option == 8:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_truck.jpg' title='"
-                    + gettext("Include Trucks")
-                    + "'>"
+                + gettext("Include Trucks")
+                + "'>"
             )
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/HC/images/s_sports.jpg' title='"
-                    + gettext("Include Sports")
-                    + "'>"
+                + gettext("Include Sports")
+                + "'>"
             )
         elif option == 9:
             startingOptionsHTML += (
                 "<img class='startingOption' src='/static/Lobby/images/startingOptions/HC_moreMainlines.svg' title='"
-                    + gettext("Extra Mainlines")
-                    + "'>"
+                + gettext("Extra Mainlines")
+                + "'>"
             )
 
     return startingOptionsHTML
@@ -1299,7 +1408,7 @@ def SR_getWEBstartingOptionsHTML(startingOptionsArr):
                 "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
                 + gettext("Learning Game")
                 + "'>"
-                )
+            )
         if option == rf.SO_EXPERIENCED_GAME:
             # usedOptions += 1
             startingOptionsHTML += (
@@ -1336,7 +1445,13 @@ def SR_getPointsForPosition(position, maxPlayers):
             return 13
 
     # Points schemas for 3, 4, 5, and 6 players
-    points_schemas = {2: [2,0], 3: [10, 7, 3], 4: [15, 11, 7, 3], 5: [20, 14, 10, 6, 2], 6: [25, 18, 13, 9, 5, 2]}
+    points_schemas = {
+        2: [2, 0],
+        3: [10, 7, 3],
+        4: [15, 11, 7, 3],
+        5: [20, 14, 10, 6, 2],
+        6: [25, 18, 13, 9, 5, 2],
+    }
 
     # Check if player_number is valid
     if maxPlayers not in points_schemas:

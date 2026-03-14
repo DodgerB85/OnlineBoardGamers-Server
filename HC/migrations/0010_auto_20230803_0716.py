@@ -4,25 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0009_auto_20230727_0436'),
+        ("HC", "0009_auto_20230727_0436"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='hc_game',
-            name='gameDescription',
+            model_name="hc_game",
+            name="gameDescription",
             field=models.CharField(blank=True, max_length=120),
         ),
         migrations.AlterField(
-            model_name='hc_game',
-            name='chatData',
-            field=models.TextField(default='{"name":"WelcomeBot","timestamp":1691046988000,"message":"Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'),
+            model_name="hc_game",
+            name="chatData",
+            field=models.TextField(
+                default='{"name":"WelcomeBot","timestamp":1691046988000,"message":"Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'
+            ),
         ),
         migrations.AlterField(
-            model_name='hc_tournament',
-            name='created',
+            model_name="hc_tournament",
+            name="created",
             field=models.CharField(default=1691046988000, max_length=30),
         ),
     ]

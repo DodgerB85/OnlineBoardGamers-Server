@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Bus', '0021_alter_bus_game_statsexcludeconsent_and_more'),
+        ("Bus", "0021_alter_bus_game_statsexcludeconsent_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='bus_game',
-            name='activeVotes',
+            model_name="bus_game",
+            name="activeVotes",
             field=models.JSONField(blank=True, default=dict, null=True),
         ),
     ]

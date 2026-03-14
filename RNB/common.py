@@ -21,8 +21,9 @@ from Lobby.sharedFunctions.sharedRefs import (
 import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
-    from Lobby.presenters import RNBpresenter 
- 
+    from Lobby.presenters import RNBpresenter
+
+
 @login_required()
 def create_rnb_game(
     request,
@@ -187,9 +188,8 @@ def create_rnb_game(
         all_players.append(request.user)
 
     with transaction.atomic():
-
         new_game = Game(
-            gameCode='RNB',
+            gameCode="RNB",
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -206,7 +206,7 @@ def create_rnb_game(
             statsExcludedGame=stats_exclude,
             startingMap=starting_map,
             startingOptions=json.dumps(starting_options),
-            #playerOrderSeed=player_order_seed,
+            # playerOrderSeed=player_order_seed,
         )
         if "privateGame" in request.POST:
             new_game.gameStatus = "PRIVATE"
@@ -228,13 +228,15 @@ def create_rnb_game(
                 game=new_game,
                 player=player,
                 seat_order=idx,
-                notes=shadowNameNotes if player==request.user else "",
+                notes=shadowNameNotes if player == request.user else "",
             )
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            presenter = cast('RNBpresenter', new_game.presenter())
-            presenter.startGame(request, isTournamentGame=(is_main_tournament or is_mini_tournament))
+            presenter = cast("RNBpresenter", new_game.presenter())
+            presenter.startGame(
+                request, isTournamentGame=(is_main_tournament or is_mini_tournament)
+            )
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
@@ -245,7 +247,11 @@ def create_rnb_game(
     # Normal Game Notifications
     if usernames_to_notify:
         SN_sendInviteNotifications(
-            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "RNB"
+            request,
+            usernames_to_notify,
+            new_game.presenter().getGameName(),
+            max_players,
+            "RNB",
         )
 
     if "trainingGame" in request.POST:
@@ -255,9 +261,7 @@ def create_rnb_game(
         )
 
     # Otherwise, return normal game creation
-    messages.success(
-        request, SF_getGameCreationJsonReturn("RNB", new_game.id)
-    )
+    messages.success(request, SF_getGameCreationJsonReturn("RNB", new_game.id))
     return HttpResponseRedirect(
         reverse("indexListType", kwargs={"listType": "waiting"})
     )

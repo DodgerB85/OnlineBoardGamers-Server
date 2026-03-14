@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('WEB', '0010_remove_web_game_deletegamevotes'),
+        ("WEB", "0010_remove_web_game_deletegamevotes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='web_game',
-            name='deleteGameVotes',
+            model_name="web_game",
+            name="deleteGameVotes",
             field=models.JSONField(blank=True, default=dict, null=True),
         ),
     ]

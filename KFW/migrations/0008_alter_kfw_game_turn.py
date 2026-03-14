@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('KFW', '0007_alter_kfw_game_latestupdate'),
+        ("KFW", "0007_alter_kfw_game_latestupdate"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='kfw_game',
-            name='turn',
+            model_name="kfw_game",
+            name="turn",
             field=models.PositiveSmallIntegerField(default=0),
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0015_alter_fcm_game_startingoptions'),
+        ("FCM", "0015_alter_fcm_game_startingoptions"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='fcm_game',
-            name='kickoutDuration',
+            model_name="fcm_game",
+            name="kickoutDuration",
             field=models.SmallIntegerField(default=200, null=True),
         ),
     ]

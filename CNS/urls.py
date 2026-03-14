@@ -35,5 +35,4 @@ urlpatterns = [
     path("saveNotes/", views.saveNotes, name="saveNotes"),
     path("changeCNSzoom/", views.changeCNSzoom, name="changeCNSzoom"),
     path("castVote/", views.castVote, name="castVoteCNS"),
-
 ]

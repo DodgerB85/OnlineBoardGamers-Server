@@ -21,8 +21,9 @@ from Lobby.sharedFunctions.sharedRefs import (
 import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
-    from Lobby.presenters import INDpresenter 
-    
+    from Lobby.presenters import INDpresenter
+
+
 @login_required()
 def create_ind_game(
     request,
@@ -47,7 +48,7 @@ def create_ind_game(
     """
     if not is_main_tournament and not is_mini_tournament and request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-    
+
     def get_max_players(post_data):
         """Determine max players based on playerNumber or tournament."""
         if "playerNumber" in post_data:
@@ -55,7 +56,7 @@ def create_ind_game(
         if tournamentObj != None and (is_main_tournament or is_mini_tournament):
             return tournamentObj.maxGamePlayers
         return 2
-    
+
     def validate_players(usernames, max_players, allow_creator=True):
         """Validate player usernames and return a list of User objects."""
         if not usernames:
@@ -135,9 +136,9 @@ def create_ind_game(
             if username
         ]
         # NB tournament games return before using this
-        #usernames_to_notify = [
+        # usernames_to_notify = [
         #    username for username in (current_players_usernames or []) if username
-        #]
+        # ]
 
     # Else setup normal Options
     else:
@@ -184,8 +185,6 @@ def create_ind_game(
         if "useShippingSubsidy" in request.POST:
             starting_options.append(int(request.POST["useShippingSubsidy"]))
 
-
-
         if "trainingGame" in request.POST:
             starting_options.append(int(request.POST["trainingGame"]))
             game_status = "ACTIVE"
@@ -207,9 +206,8 @@ def create_ind_game(
 
     # Create a game for Tournament OR normal, using the set options
     with transaction.atomic():
-
         new_game = Game(
-            gameCode='IND',
+            gameCode="IND",
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -249,13 +247,15 @@ def create_ind_game(
                 game=new_game,
                 player=player,
                 seat_order=idx,
-                notes=shadowNameNotes if player==request.user else "",
+                notes=shadowNameNotes if player == request.user else "",
             )
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            presenter = cast('INDpresenter', new_game.presenter())
-            presenter.startGame(request, isTournamentGame=(is_main_tournament or is_mini_tournament))
+            presenter = cast("INDpresenter", new_game.presenter())
+            presenter.startGame(
+                request, isTournamentGame=(is_main_tournament or is_mini_tournament)
+            )
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
@@ -266,7 +266,11 @@ def create_ind_game(
     # Normal Game Notifications
     if usernames_to_notify:
         SN_sendInviteNotifications(
-            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "IND"
+            request,
+            usernames_to_notify,
+            new_game.presenter().getGameName(),
+            max_players,
+            "IND",
         )
 
     if "trainingGame" in request.POST:
@@ -276,9 +280,7 @@ def create_ind_game(
         )
 
     # Otherwise, return normal game creation
-    messages.success(
-        request, SF_getGameCreationJsonReturn("IND", new_game.id)
-    )
+    messages.success(request, SF_getGameCreationJsonReturn("IND", new_game.id))
     return HttpResponseRedirect(
         reverse("indexListType", kwargs={"listType": "waiting"})
     )

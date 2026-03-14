@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("TGZ", "0025_alter_tgz_game_creator_alter_tgz_game_host"),
     ]

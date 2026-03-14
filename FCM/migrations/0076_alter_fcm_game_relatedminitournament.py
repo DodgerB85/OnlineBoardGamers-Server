@@ -5,16 +5,21 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0046_mini_tournaments_creator'),
-        ('FCM', '0075_auto_20250816_0740'),
+        ("Lobby", "0046_mini_tournaments_creator"),
+        ("FCM", "0075_auto_20250816_0740"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='fcm_game',
-            name='relatedMiniTournament',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='minitournamentFCM_relName', to='Lobby.mini_tournaments'),
+            model_name="fcm_game",
+            name="relatedMiniTournament",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="minitournamentFCM_relName",
+                to="Lobby.mini_tournaments",
+            ),
         ),
     ]

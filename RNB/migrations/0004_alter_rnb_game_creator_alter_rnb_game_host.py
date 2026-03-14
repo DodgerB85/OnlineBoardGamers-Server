@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("RNB", "0003_alter_rnb_game_gamestatus"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

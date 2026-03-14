@@ -5,15 +5,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0028_auto_20231227_0215'),
+        ("Lobby", "0028_auto_20231227_0215"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='changelog',
-            name='timestamp',
+            model_name="changelog",
+            name="timestamp",
             field=models.CharField(default="TEMP_PLACEHOLDER", max_length=30),
         ),
     ]

@@ -6,43 +6,63 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('FCM', '0001_initial'),
+        ("FCM", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='allPlayers',
-            field=models.ManyToManyField(related_name='allPlayersRelName', to=settings.AUTH_USER_MODEL),
+            model_name="fcm_game",
+            name="allPlayers",
+            field=models.ManyToManyField(
+                related_name="allPlayersRelName", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='creator',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='game_creator_relName', to=settings.AUTH_USER_MODEL),
+            model_name="fcm_game",
+            name="creator",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="game_creator_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='invitedPlayers',
-            field=models.ManyToManyField(blank=True, related_name='invitedPlayersRelName', to=settings.AUTH_USER_MODEL),
+            model_name="fcm_game",
+            name="invitedPlayers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="invitedPlayersRelName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='winner',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='game_winner_relName', to=settings.AUTH_USER_MODEL),
+            model_name="fcm_game",
+            name="winner",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="game_winner_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='fcm_chat',
-            name='relatedGame',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='FCM.fcm_game'),
+            model_name="fcm_chat",
+            name="relatedGame",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="FCM.fcm_game"
+            ),
         ),
         migrations.AddField(
-            model_name='fcm_bug',
-            name='relatedGame',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='FCM.fcm_game'),
+            model_name="fcm_bug",
+            name="relatedGame",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="FCM.fcm_game"
+            ),
         ),
     ]

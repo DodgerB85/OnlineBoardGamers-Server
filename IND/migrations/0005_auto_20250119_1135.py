@@ -6,21 +6,32 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('IND', '0004_auto_20250118_1514'),
+        ("IND", "0004_auto_20250118_1514"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ind_game',
-            name='creator',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='INDgame_creator_relName', to=settings.AUTH_USER_MODEL),
+            model_name="ind_game",
+            name="creator",
+            field=models.ForeignKey(
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="INDgame_creator_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='ind_game',
-            name='host',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='INDgame_host_relName', to=settings.AUTH_USER_MODEL),
+            model_name="ind_game",
+            name="host",
+            field=models.ForeignKey(
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="INDgame_host_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('AQY', '0020_aqy_game_deletegamevotes'),
+        ("AQY", "0020_aqy_game_deletegamevotes"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='aqy_game',
-            name='startingMap',
+            model_name="aqy_game",
+            name="startingMap",
             field=models.CharField(blank=True, max_length=190),
         ),
         migrations.AlterField(
-            model_name='aqy_game',
-            name='statsExcludeConsent',
+            model_name="aqy_game",
+            name="statsExcludeConsent",
             field=models.CharField(blank=True, max_length=40, null=True),
         ),
     ]

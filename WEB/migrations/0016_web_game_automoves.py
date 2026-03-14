@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('WEB', '0015_webgame'),
+        ("WEB", "0015_webgame"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='web_game',
-            name='autoMoves',
+            model_name="web_game",
+            name="autoMoves",
             field=models.CharField(blank=True, default=None, max_length=30, null=True),
         ),
     ]

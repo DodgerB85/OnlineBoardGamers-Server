@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0039_profile_blacklistedplayers'),
+        ("Lobby", "0039_profile_blacklistedplayers"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='preferredKFWoptions',
+            model_name="profile",
+            name="preferredKFWoptions",
             field=models.CharField(blank=True, max_length=30),
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='FCMtournamentTrophies',
-            field=models.CharField(default='[[0,0,0,0,0]]', max_length=100),
+            model_name="profile",
+            name="FCMtournamentTrophies",
+            field=models.CharField(default="[[0,0,0,0,0]]", max_length=100),
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='emailNotifications',
-            field=models.CharField(default='[1,1,1,1,1,1,1,1,1,1,1]', max_length=40),
+            model_name="profile",
+            name="emailNotifications",
+            field=models.CharField(default="[1,1,1,1,1,1,1,1,1,1,1]", max_length=40),
         ),
     ]

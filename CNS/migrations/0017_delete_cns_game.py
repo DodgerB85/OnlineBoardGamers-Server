@@ -4,13 +4,12 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('CNS', '0016_cns_game_automoves'),
+        ("CNS", "0016_cns_game_automoves"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='CNS_Game',
+            name="CNS_Game",
         ),
     ]

@@ -5,16 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('FCM', '0007_fcm_game_kickoutduration'),
+        ("FCM", "0007_fcm_game_kickoutduration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='missingPlayers',
-            field=models.ManyToManyField(blank=True, related_name='missingPlayersRelName', to=settings.AUTH_USER_MODEL),
+            model_name="fcm_game",
+            name="missingPlayers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="missingPlayersRelName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

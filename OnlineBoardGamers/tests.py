@@ -3,6 +3,7 @@ from http import HTTPStatus
 
 # Create your tests here.
 
+
 class RobotsTest(TestCase):
     def test_get(self):
         response = self.client.get("/robots.txt")

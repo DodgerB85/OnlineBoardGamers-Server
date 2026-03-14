@@ -7,41 +7,100 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('IND', '0003_alter_ind_game_gamestatus'),
+        ("IND", "0003_alter_ind_game_gamestatus"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ind_game',
-            name='tournamentGame',
+            model_name="ind_game",
+            name="tournamentGame",
             field=models.BooleanField(default=False),
         ),
         migrations.CreateModel(
-            name='IND_Tournament',
+            name="IND_Tournament",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tournamentName', models.CharField(max_length=120)),
-                ('tournamentStatus', models.CharField(choices=[('OP', 'Open'), ('IP', 'In Progress'), ('FN', 'Finished')], default='OP', max_length=2)),
-                ('tournamentType', models.CharField(choices=[('RR', 'Rounds'), ('KO', 'Knockout'), ('TL', 'Two Lives'), ('PT', 'Points')], default='RR', max_length=2)),
-                ('startingOptions', models.CharField(blank=True, default='', max_length=20)),
-                ('maxTournamentPlayers', models.PositiveSmallIntegerField()),
-                ('maxGamePlayers', models.PositiveSmallIntegerField()),
-                ('roundsBeforeKnockout', models.PositiveSmallIntegerField(default=4)),
-                ('winnersData', models.TextField(blank=True)),
-                ('created', models.CharField(default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow, max_length=30)),
-                ('tournamentProgressionData', models.TextField(blank=True)),
-                ('tournamentSideData', models.TextField(blank=True)),
-                ('tournamentPointsData', models.TextField(blank=True)),
-                ('nextRoundPlayers', models.ManyToManyField(blank=True, related_name='currentRoundPlayersRelName_IND', to=settings.AUTH_USER_MODEL)),
-                ('startingPlayers', models.ManyToManyField(blank=True, related_name='startingPlayersRelName_IND', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("tournamentName", models.CharField(max_length=120)),
+                (
+                    "tournamentStatus",
+                    models.CharField(
+                        choices=[
+                            ("OP", "Open"),
+                            ("IP", "In Progress"),
+                            ("FN", "Finished"),
+                        ],
+                        default="OP",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "tournamentType",
+                    models.CharField(
+                        choices=[
+                            ("RR", "Rounds"),
+                            ("KO", "Knockout"),
+                            ("TL", "Two Lives"),
+                            ("PT", "Points"),
+                        ],
+                        default="RR",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "startingOptions",
+                    models.CharField(blank=True, default="", max_length=20),
+                ),
+                ("maxTournamentPlayers", models.PositiveSmallIntegerField()),
+                ("maxGamePlayers", models.PositiveSmallIntegerField()),
+                ("roundsBeforeKnockout", models.PositiveSmallIntegerField(default=4)),
+                ("winnersData", models.TextField(blank=True)),
+                (
+                    "created",
+                    models.CharField(
+                        default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow,
+                        max_length=30,
+                    ),
+                ),
+                ("tournamentProgressionData", models.TextField(blank=True)),
+                ("tournamentSideData", models.TextField(blank=True)),
+                ("tournamentPointsData", models.TextField(blank=True)),
+                (
+                    "nextRoundPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="currentRoundPlayersRelName_IND",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "startingPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="startingPlayersRelName_IND",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='ind_game',
-            name='relatedTournament',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='tournament_relName_IND', to='IND.ind_tournament'),
+            model_name="ind_game",
+            name="relatedTournament",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="tournament_relName_IND",
+                to="IND.ind_tournament",
+            ),
         ),
     ]

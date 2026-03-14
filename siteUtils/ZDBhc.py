@@ -20,18 +20,19 @@ from unittest.mock import MagicMock
 from django.db import transaction
 
 from collections import defaultdict
-#import matplotlib.pyplot as plt
-#import plotly.graph_objects as go
+
+# import matplotlib.pyplot as plt
+# import plotly.graph_objects as go
 import codecs
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 
 # Because the live and dev servers are in different folder names, we need to go up one from that
-ROOT_DIR  = Path(__file__).resolve().parents[2]
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
 if DEBUG:
-    #os.environ["LOCAL_DB_NAME"] = "obg_db"
+    # os.environ["LOCAL_DB_NAME"] = "obg_db"
     os.environ["LOCAL_DB_NAME"] = "online_mirror_db"
     os.environ["LOCAL_DB_USER"] = "root"
     os.environ["LOCAL_DB_PWD"] = "onlineb0@rdgamers"
@@ -56,26 +57,26 @@ from django.contrib.sites.models import Site
 from Lobby.models import User, Profile, Mini_Tournaments, Game, Main_Tournament
 
 
-#allMiniTs = Mini_Tournaments.objects.all()
+# allMiniTs = Mini_Tournaments.objects.all()
 
-#game = HC_Game.objects.last()
-#for game in allTGZgames:
+# game = HC_Game.objects.last()
+# for game in allTGZgames:
 #    game.statsExcludeConsent = "0" * game.maxPlayers
 
 
-#games = ["hct"]
+# games = ["hct"]
 
-#reminder_start_time = int((datetime.now() - timedelta(minutes=118)).timestamp() * 1000)
-#reminder_finish_time = int((datetime.now() - timedelta(minutes=182)).timestamp() * 1000)
-remaining_start_time = 60 * 118 * 1 # 2hours
-remaining_finish_time = 60 * 182 * 1 # 3hours
+# reminder_start_time = int((datetime.now() - timedelta(minutes=118)).timestamp() * 1000)
+# reminder_finish_time = int((datetime.now() - timedelta(minutes=182)).timestamp() * 1000)
+remaining_start_time = 60 * 118 * 1  # 2hours
+remaining_finish_time = 60 * 182 * 1  # 3hours
 
-remaining_start_time_expired = -60 *60 * 24 * 365 * 5
-remaining_finish_time_expired = -60 *60 * 24 * 30 # Now
+remaining_start_time_expired = -60 * 60 * 24 * 365 * 5
+remaining_finish_time_expired = -60 * 60 * 24 * 30  # Now
 
 PRINT_TIME = True
 
-#LZD = lzstring.LZString()
+# LZD = lzstring.LZString()
 
 start_calc_time = time.perf_counter()
 count = 0
@@ -85,10 +86,11 @@ allUsers = User.objects.all()
 
 count = 0
 
+
 def transform_tpda(old_tpda_str, tournament_name):
     if not old_tpda_str:
         return ""
-    
+
     try:
         old_data = json.loads(old_tpda_str)
         new_data = []
@@ -105,39 +107,46 @@ def transform_tpda(old_tpda_str, tournament_name):
                 if isinstance(game, list) and len(game) >= 4:
                     # In Bus, the game ID is always the second to last element
                     game_id = game[-2] if isinstance(game[-2], int) else None
-                    
+
                     # The winner is the last element (if it exists)
-                    winner = game[-1] if isinstance(game[-1], str) and game[-1] != "" else None
-                    
+                    winner = (
+                        game[-1]
+                        if isinstance(game[-1], str) and game[-1] != ""
+                        else None
+                    )
+
                     # The players are everything before the game ID
                     players = game[:-2] if game_id is not None else game[:]
-                    
+
                     # Construct the nested Main format: [[players], id, [winner], label]
                     new_game = [
-                        players, 
-                        game_id, 
-                        [winner] if winner else [], 
-                        round_label
+                        players,
+                        game_id,
+                        [winner] if winner else [],
+                        round_label,
                     ]
                     new_round.append(new_game)
                 else:
                     # Handle BYEPLAYERS or malformed lists
                     new_round.append(game)
-            
+
             new_data.append(new_round)
-            
+
         return json.dumps(new_data)
     except Exception as e:
         print(f"Error converting data: {e}")
         return old_tpda_str
 
+
 def migrate_hc_to_main():
-    
+
     with transaction.atomic():
         for hct in hc_tourneys:
             # Apply the specific index transformation
-            converted_tpda = transform_tpda(hct.tournamentProgressionData, hct.tournamentName)
-            
+            converted_tpda = transform_tpda(
+                hct.tournamentProgressionData, hct.tournamentName
+            )
+
             main = Main_Tournament.objects.create(
                 gameCode="HC",
                 tournamentName=hct.tournamentName,
@@ -159,6 +168,7 @@ def migrate_hc_to_main():
             main.nextRoundPlayers.set(hct.nextRoundPlayers.all())
 
             print(f"Migrated and Formatted: {main.tournamentName}")
+
 
 if __name__ == "__main__":
     migrate_hc_to_main()

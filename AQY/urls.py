@@ -9,8 +9,8 @@ app_name = "AQY"
 
 def redirect_old_url(request, original_id):
     """Redirect from old /AQY/123/ URL to new /AQY/456/show/ URL"""
-    game = get_object_or_404(Game, gameCode='AQY', original_id=original_id)
-    return redirect('AQY:showAQYgame', game_id=game.id)
+    game = get_object_or_404(Game, gameCode="AQY", original_id=original_id)
+    return redirect("AQY:showAQYgame", game_id=game.id)
 
 
 urlpatterns = [

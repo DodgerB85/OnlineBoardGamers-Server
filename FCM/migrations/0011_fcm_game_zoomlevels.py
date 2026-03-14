@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0010_auto_20220723_1450'),
+        ("FCM", "0010_auto_20220723_1450"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='zoomLevels',
+            model_name="fcm_game",
+            name="zoomLevels",
             field=models.CharField(blank=True, max_length=30),
         ),
     ]

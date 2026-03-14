@@ -15,14 +15,20 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_M_T_sendTournamentGameStartNotification,
     SN_sendInviteNotifications,
 )
-from Lobby.sharedFunctions.sharedFunctions import SF_TGZadvancedOptions, SF_getGameCreationJsonReturn
-from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow  # Replace 'somewhere' with actual module
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_TGZadvancedOptions,
+    SF_getGameCreationJsonReturn,
+)
+from Lobby.sharedFunctions.sharedRefs import (
+    SR_getTimeNow,
+)  # Replace 'somewhere' with actual module
 
 import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import TGZpresenter
-    
+
+
 @login_required()
 def create_tgz_game(
     request,
@@ -65,14 +71,20 @@ def create_tgz_game(
         valid_players = []
         for username in usernames:
             if username not in existing_usernames:
-                messages.error(request, gettext(f"Error:Player '{username}' does not exist"))
+                messages.error(
+                    request, gettext(f"Error:Player '{username}' does not exist")
+                )
                 return None
             if not allow_creator and username == request.user.username:
                 messages.error(request, gettext("Error: You cannot add yourself"))
                 return None
             valid_players.append(get_object_or_404(User, username=username))
-        if len(valid_players) > max_players - 1:  # Account for creator in non-tournament games
-            messages.error(request, gettext(f"Error: Too many players for max {max_players}"))
+        if (
+            len(valid_players) > max_players - 1
+        ):  # Account for creator in non-tournament games
+            messages.error(
+                request, gettext(f"Error: Too many players for max {max_players}")
+            )
             return None
         return valid_players
 
@@ -97,22 +109,26 @@ def create_tgz_game(
             batch_lines = batch_game_data.splitlines()
             error_detected = False
             from Lobby.models import Game, GamePlayer
-            
+
             for line in batch_lines:
                 row = [entry.strip() for entry in line.split(",")]
                 if len(row) < 2:
                     continue
                 game_name, player_usernames = row[0], row[1 : max_players + 1]
-                players = validate_players(player_usernames, max_players, allow_creator=True)
+                players = validate_players(
+                    player_usernames, max_players, allow_creator=True
+                )
                 if players is None:
                     error_detected = True
-                    send_TGZ_server_discord_notification(f"****** GAME CREATION ERROR -- USER NOT FOUND -- Game: {row}")
+                    send_TGZ_server_discord_notification(
+                        f"****** GAME CREATION ERROR -- USER NOT FOUND -- Game: {row}"
+                    )
                     continue
 
                 with transaction.atomic():
                     created_time = SR_getTimeNow()
                     creator = request.user
-                    
+
                     new_game = Game(
                         gameCode="TGZ",
                         gameName=game_name,
@@ -128,7 +144,9 @@ def create_tgz_game(
                         kickoutDuration=100,
                         zoomLevels=json.dumps([240] * max_players),
                         startingOptions=json.dumps(
-                            SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else []
+                            SF_TGZadvancedOptions(request)
+                            if "enableAdvancedOptions" in request.POST
+                            else []
                         ),
                         externalTournamentGame=True,
                     )
@@ -142,9 +160,9 @@ def create_tgz_game(
                             seat_order=idx,
                             is_current=(idx == 0),
                         )
-                        
+
                         presenter = cast("TGZpresenter", new_game.presenter())
-                        
+
                         SN_M_T_sendTournamentGameStartNotification(
                             request,
                             "TGZ",
@@ -159,18 +177,21 @@ def create_tgz_game(
 
                     # Fix player order - find seed that matches input order
                     player_order_seed = random.randint(1000, 32767)
-                    player_list_raw = [gp.player.username if gp.player else "" for gp in new_game.players.all()]
+                    player_list_raw = [
+                        gp.player.username if gp.player else ""
+                        for gp in new_game.players.all()
+                    ]
                     player_name_order_input = player_usernames
-                    
+
                     for seed in range(1000, 32767):
                         player_list_test = player_list_raw.copy()
                         random.Random(seed).shuffle(player_list_test)
                         if player_list_test == player_name_order_input:
                             player_order_seed = seed
                             break
-                    
+
                     new_game.playerOrderSeed = player_order_seed
-                    
+
                     # Update seat order based on found seed
                     if player_order_seed != new_game.playerOrderSeed:
                         player_list_ordered = player_list_raw.copy()
@@ -178,16 +199,26 @@ def create_tgz_game(
                         for idx, username in enumerate(player_list_ordered):
                             gp = new_game.players.get(player__username=username)
                             gp.seat_order = idx
-                            gp.is_current = (idx == 0)
+                            gp.is_current = idx == 0
                             gp.save()
-                    
+
                     new_game.save()
 
-                    send_TGZ_server_discord_notification(f"Game Created -- Game: {row}", getattr(new_game, "id"))
+                    send_TGZ_server_discord_notification(
+                        f"Game Created -- Game: {row}", getattr(new_game, "id")
+                    )
 
-            message = "Game created and started. New Game Notifications sent [NO EMAILS SENT]"
+            message = (
+                "Game created and started. New Game Notifications sent [NO EMAILS SENT]"
+            )
             messages.success(
-                request, message + (". ERROR DETECTED. Check MR Moo" if error_detected else ". No errors detected")
+                request,
+                message
+                + (
+                    ". ERROR DETECTED. Check MR Moo"
+                    if error_detected
+                    else ". No errors detected"
+                ),
             )
             return HttpResponseRedirect(reverse("createTGZpage"))
 
@@ -199,7 +230,9 @@ def create_tgz_game(
                     messages.error(request, gettext(f"Error: player{i} is required"))
                     return HttpResponseRedirect(reverse("createTGZpage"))
                 if i > max_players and username:
-                    messages.error(request, gettext(f"Error: player{i} should be blank"))
+                    messages.error(
+                        request, gettext(f"Error: player{i} should be blank")
+                    )
                     return HttpResponseRedirect(reverse("createTGZpage"))
                 if username:
                     players.append(username)
@@ -209,13 +242,13 @@ def create_tgz_game(
                 return HttpResponseRedirect(reverse("createTGZpage"))
 
             from Lobby.models import Game, GamePlayer
-            
+
             with transaction.atomic():
                 created_time = SR_getTimeNow()
                 game_name = request.POST.get("gameName", "")
                 game_description = request.POST.get("gameDescription", "")
                 pace = request.POST.get("pace", 40)
-                
+
                 new_game = Game(
                     gameCode="TGZ",
                     gameName=game_name,
@@ -233,7 +266,9 @@ def create_tgz_game(
                     zoomLevels=json.dumps([240] * max_players),
                     startingMap=request.POST.get("mapData", ""),
                     startingOptions=json.dumps(
-                        SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else []
+                        SF_TGZadvancedOptions(request)
+                        if "enableAdvancedOptions" in request.POST
+                        else []
                     ),
                     playerOrderSeed=random.randint(1000, 32767),
                     externalTournamentGame=True,
@@ -248,7 +283,7 @@ def create_tgz_game(
                         seat_order=idx,
                         is_current=(idx == 0),
                     )
-                    
+
                     SN_M_T_sendTournamentGameStartNotification(
                         request,
                         "TGZ",
@@ -265,10 +300,14 @@ def create_tgz_game(
 
                 usernames = [player.username for player in players]
                 send_TGZ_server_discord_notification(
-                    f"New Tournament Game Started\nPlayers: {', '.join(usernames)}", getattr(new_game, "id")
+                    f"New Tournament Game Started\nPlayers: {', '.join(usernames)}",
+                    getattr(new_game, "id"),
                 )
 
-            messages.success(request, gettext("Game created and started. New Game Notifications sent"))
+            messages.success(
+                request,
+                gettext("Game created and started. New Game Notifications sent"),
+            )
             return HttpResponseRedirect(reverse("createTGZpage"))
 
     #############################################
@@ -295,21 +334,27 @@ def create_tgz_game(
     player_order_seed = random.randint(1000, 32767)
     all_players = []
     invited_usernames_objs = []
-    
+
     max_players = get_max_players(request.POST)
 
     # Setup Tournament Options
     if is_main_tournament or is_mini_tournament:
         if not tournament or not tournamentGameName:
-            raise ValueError("Tournament and tournamentGameName required for tournament games")
+            raise ValueError(
+                "Tournament and tournamentGameName required for tournament games"
+            )
         game_name = tournamentGameName
         game_description = ""
         creator = User.objects.get(username="admin")
         host = creator
         game_pace = 30
         kickout_duration = 100
-        starting_options = json.loads(tournament.startingOptions) if tournament.startingOptions != "" else []
-        
+        starting_options = (
+            json.loads(tournament.startingOptions)
+            if tournament.startingOptions != ""
+            else []
+        )
+
         # Set exclude stats if any schism in starting_options
         for option in starting_options:
             if option in [7, 8, 9]:
@@ -320,9 +365,13 @@ def create_tgz_game(
         game_status = "ACTIVE"
 
         all_players = [
-            User.objects.get(username=username) for username in (current_players_usernames or []) if username
+            User.objects.get(username=username)
+            for username in (current_players_usernames or [])
+            if username
         ]
-        usernames_to_notify = [username for username in (current_players_usernames or []) if username]
+        usernames_to_notify = [
+            username for username in (current_players_usernames or []) if username
+        ]
 
     # Else setup normal Options
     else:
@@ -333,13 +382,19 @@ def create_tgz_game(
         starting_map = request.POST["mapData"] if "mapData" in request.POST else ""
         game_pace = request.POST.get("pace", 40)
         kickout_duration = request.POST.get("kickoutDuration", 100)
-        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 6) if request.POST.get(f"player{i}")]
+        invited_usernames = [
+            request.POST.get(f"player{i}")
+            for i in range(2, 6)
+            if request.POST.get(f"player{i}")
+        ]
 
         if "trainingGame" not in request.POST:
-            invited_usernames_objs = validate_players(invited_usernames, max_players, allow_creator=False)
+            invited_usernames_objs = validate_players(
+                invited_usernames, max_players, allow_creator=False
+            )
             if invited_usernames_objs is None:
                 return HttpResponseRedirect(reverse("createTGZpage"))
-            
+
             if len(invited_usernames_objs) > 0:
                 game_status = "WAITING"
                 usernames_to_notify = [user.username for user in invited_usernames_objs]
@@ -370,14 +425,19 @@ def create_tgz_game(
             starting_options.extend(SF_TGZadvancedOptions(request))
             stats_exclude = True
             for entry in starting_options:
-                if isinstance(entry, list) and entry and entry[0] == 90 and any(12 <= num <= 23 for num in entry):
+                if (
+                    isinstance(entry, list)
+                    and entry
+                    and entry[0] == 90
+                    and any(12 <= num <= 23 for num in entry)
+                ):
                     starting_options.append(7)
                     break
-                
+
         all_players.append(request.user)
 
     from Lobby.models import Game, GamePlayer
-    
+
     with transaction.atomic():
         new_game = Game(
             gameCode="TGZ",
@@ -399,12 +459,12 @@ def create_tgz_game(
             startingOptions=json.dumps(starting_options),
             playerOrderSeed=player_order_seed,
         )
-        
+
         if is_main_tournament:
             new_game.relatedMainTournament = tournament
         if is_mini_tournament:
             new_game.relatedMiniTournament = tournament
-            
+
         if "privateGame" in request.POST:
             new_game.gameStatus = "PRIVATE"
 
@@ -417,9 +477,9 @@ def create_tgz_game(
                 player=player,
                 seat_order=idx,
                 is_current=(idx == 0 and game_status == "ACTIVE"),
-                notes=shadowNameNotes if player==request.user else "",
+                notes=shadowNameNotes if player == request.user else "",
             )
-        
+
         # Add invited players
         for player in invited_usernames_objs:
             new_game.invitedPlayers.add(player)
@@ -437,12 +497,24 @@ def create_tgz_game(
 
     # Normal Game Notifications
     if usernames_to_notify:
-        SN_sendInviteNotifications(request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "TGZ")
+        SN_sendInviteNotifications(
+            request,
+            usernames_to_notify,
+            new_game.presenter().getGameName(),
+            max_players,
+            "TGZ",
+        )
 
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has been started"))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
+        return HttpResponseRedirect(
+            reverse("indexListType", kwargs={"listType": "current"})
+        )
 
     # Otherwise, return normal game creation with Game model ID
-    messages.success(request, SF_getGameCreationJsonReturn("TGZ", getattr(new_game, "id")))
-    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+    messages.success(
+        request, SF_getGameCreationJsonReturn("TGZ", getattr(new_game, "id"))
+    )
+    return HttpResponseRedirect(
+        reverse("indexListType", kwargs={"listType": "waiting"})
+    )

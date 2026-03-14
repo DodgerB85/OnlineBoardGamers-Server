@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('AQY', '0008_alter_aqy_tournament_tournamenttype'),
+        ("AQY", "0008_alter_aqy_tournament_tournamenttype"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='aqy_game',
-            name='deleteGameVotes',
+            model_name="aqy_game",
+            name="deleteGameVotes",
             field=models.JSONField(blank=True, default=dict, null=True),
         ),
         migrations.AlterField(
-            model_name='aqy_game',
-            name='id',
+            model_name="aqy_game",
+            name="id",
             field=models.AutoField(primary_key=True, serialize=False),
         ),
         migrations.AlterField(
-            model_name='aqy_tournament',
-            name='id',
+            model_name="aqy_tournament",
+            name="id",
             field=models.AutoField(primary_key=True, serialize=False),
         ),
     ]

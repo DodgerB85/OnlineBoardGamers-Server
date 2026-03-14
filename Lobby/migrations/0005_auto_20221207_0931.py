@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0004_profile_livenotification'),
+        ("Lobby", "0004_profile_livenotification"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='discordWebhookURL',
+            model_name="profile",
+            name="discordWebhookURL",
             field=models.CharField(blank=True, max_length=200),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='sendDiscordWebhookNotificationOnTurn',
+            model_name="profile",
+            name="sendDiscordWebhookNotificationOnTurn",
             field=models.BooleanField(default=False),
         ),
     ]

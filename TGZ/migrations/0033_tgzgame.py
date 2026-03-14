@@ -4,25 +4,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0069_alter_game_relatedtournament'),
-        ('TGZ', '0032_tgz_game_activevotes'),
+        ("Lobby", "0069_alter_game_relatedtournament"),
+        ("TGZ", "0032_tgz_game_activevotes"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TGZgame',
-            fields=[
-            ],
+            name="TGZgame",
+            fields=[],
             options={
-                'verbose_name': 'TGZ_Game',
-                'verbose_name_plural': 'TGZ_Games',
-                'abstract': False,
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "TGZ_Game",
+                "verbose_name_plural": "TGZ_Games",
+                "abstract": False,
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('Lobby.game',),
+            bases=("Lobby.game",),
         ),
     ]

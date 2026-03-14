@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('KFW', '0002_auto_20250506_0833'),
+        ("KFW", "0002_auto_20250506_0833"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='kfw_game',
-            name='serverData',
-            field=models.TextField(blank=True, default='[[40, 40, 40, 0], [16, 16, 16]]'),
+            model_name="kfw_game",
+            name="serverData",
+            field=models.TextField(
+                blank=True, default="[[40, 40, 40, 0], [16, 16, 16]]"
+            ),
         ),
     ]

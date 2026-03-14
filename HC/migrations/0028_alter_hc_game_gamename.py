@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0027_hc_game_kickoutflexidata'),
+        ("HC", "0027_hc_game_kickoutflexidata"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='hc_game',
-            name='gameName',
-            field=models.CharField(blank=True, db_collation='utf8mb4_general_ci', max_length=120),
+            model_name="hc_game",
+            name="gameName",
+            field=models.CharField(
+                blank=True, db_collation="utf8mb4_general_ci", max_length=120
+            ),
         ),
     ]

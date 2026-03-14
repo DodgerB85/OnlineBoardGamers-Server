@@ -7,51 +7,121 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('AQY', '0005_aqy_game_startingmap'),
+        ("AQY", "0005_aqy_game_startingmap"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='aqy_game',
-            name='tournamentGame',
+            model_name="aqy_game",
+            name="tournamentGame",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='aqy_game',
-            name='creator',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='AQYgame_creator_relName', to=settings.AUTH_USER_MODEL),
+            model_name="aqy_game",
+            name="creator",
+            field=models.ForeignKey(
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="AQYgame_creator_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='aqy_game',
-            name='host',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='AQYgame_host_relName', to=settings.AUTH_USER_MODEL),
+            model_name="aqy_game",
+            name="host",
+            field=models.ForeignKey(
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="AQYgame_host_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.CreateModel(
-            name='AQY_Tournament',
+            name="AQY_Tournament",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tournamentName', models.CharField(max_length=120)),
-                ('tournamentStatus', models.CharField(choices=[('OP', 'Open'), ('IP', 'In Progress'), ('FN', 'Finished')], default='OP', max_length=2)),
-                ('tournamentType', models.CharField(choices=[('RR', 'Rounds'), ('KO', 'Knockout'), ('TL', 'Two Lives')], default='RR', max_length=2)),
-                ('startingOptions', models.CharField(blank=True, default='', max_length=20)),
-                ('maxTournamentPlayers', models.PositiveSmallIntegerField()),
-                ('maxGamePlayers', models.PositiveSmallIntegerField()),
-                ('roundsBeforeKnockout', models.PositiveSmallIntegerField(default=4)),
-                ('winnersData', models.TextField(blank=True)),
-                ('created', models.CharField(default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow, max_length=30)),
-                ('tournamentProgressionData', models.TextField(blank=True)),
-                ('tournamentSideData', models.TextField(blank=True)),
-                ('tournamentPointsData', models.TextField(blank=True)),
-                ('nextRoundPlayers', models.ManyToManyField(blank=True, related_name='currentRoundPlayersRelName_AQY', to=settings.AUTH_USER_MODEL)),
-                ('startingPlayers', models.ManyToManyField(blank=True, related_name='startingPlayersRelName_AQY', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("tournamentName", models.CharField(max_length=120)),
+                (
+                    "tournamentStatus",
+                    models.CharField(
+                        choices=[
+                            ("OP", "Open"),
+                            ("IP", "In Progress"),
+                            ("FN", "Finished"),
+                        ],
+                        default="OP",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "tournamentType",
+                    models.CharField(
+                        choices=[
+                            ("RR", "Rounds"),
+                            ("KO", "Knockout"),
+                            ("TL", "Two Lives"),
+                        ],
+                        default="RR",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "startingOptions",
+                    models.CharField(blank=True, default="", max_length=20),
+                ),
+                ("maxTournamentPlayers", models.PositiveSmallIntegerField()),
+                ("maxGamePlayers", models.PositiveSmallIntegerField()),
+                ("roundsBeforeKnockout", models.PositiveSmallIntegerField(default=4)),
+                ("winnersData", models.TextField(blank=True)),
+                (
+                    "created",
+                    models.CharField(
+                        default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow,
+                        max_length=30,
+                    ),
+                ),
+                ("tournamentProgressionData", models.TextField(blank=True)),
+                ("tournamentSideData", models.TextField(blank=True)),
+                ("tournamentPointsData", models.TextField(blank=True)),
+                (
+                    "nextRoundPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="currentRoundPlayersRelName_AQY",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "startingPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="startingPlayersRelName_AQY",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='aqy_game',
-            name='relatedTournament',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='tournament_relName_AQY', to='AQY.aqy_tournament'),
+            model_name="aqy_game",
+            name="relatedTournament",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="tournament_relName_AQY",
+                to="AQY.aqy_tournament",
+            ),
         ),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("KFW", "0005_alter_kfw_game_gamestatus"),
     ]

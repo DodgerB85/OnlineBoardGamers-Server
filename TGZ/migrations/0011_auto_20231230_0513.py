@@ -5,30 +5,35 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TGZ', '0010_auto_20231227_0215'),
+        ("TGZ", "0010_auto_20231227_0215"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tgz_game',
-            name='autoMoves',
+            model_name="tgz_game",
+            name="autoMoves",
             field=models.CharField(blank=True, default=None, max_length=30, null=True),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='created',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow, max_length=30),
+            model_name="tgz_game",
+            name="created",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow,
+                max_length=30,
+            ),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='gamePace',
+            model_name="tgz_game",
+            name="gamePace",
             field=models.PositiveSmallIntegerField(default=40),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='latestUpdate',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow, max_length=30),
+            model_name="tgz_game",
+            name="latestUpdate",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow,
+                max_length=30,
+            ),
         ),
     ]

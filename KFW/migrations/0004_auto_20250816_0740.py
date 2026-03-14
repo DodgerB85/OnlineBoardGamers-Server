@@ -5,20 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('KFW', '0003_alter_kfw_game_serverdata'),
+        ("KFW", "0003_alter_kfw_game_serverdata"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='kfw_game',
-            name='created',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15),
+            model_name="kfw_game",
+            name="created",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15
+            ),
         ),
         migrations.AlterField(
-            model_name='kfw_game',
-            name='latestUpdate',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15),
+            model_name="kfw_game",
+            name="latestUpdate",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15
+            ),
         ),
     ]

@@ -4,24 +4,22 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0081_alter_fcm_game_latestupdate'),
-        ('Lobby', '0055_alter_main_tournament_gamecode'),
+        ("FCM", "0081_alter_fcm_game_latestupdate"),
+        ("Lobby", "0055_alter_main_tournament_gamecode"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FCMMiniTournament',
-            fields=[
-            ],
+            name="FCMMiniTournament",
+            fields=[],
             options={
-                'verbose_name': 'FCM Mini Tournament',
-                'verbose_name_plural': 'FCM Mini Tournaments',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "FCM Mini Tournament",
+                "verbose_name_plural": "FCM Mini Tournaments",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('Lobby.mini_tournaments',),
+            bases=("Lobby.mini_tournaments",),
         ),
     ]

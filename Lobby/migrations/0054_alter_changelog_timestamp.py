@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0053_update_cross_game_views_v2_20251224_1518'),
+        ("Lobby", "0053_update_cross_game_views_v2_20251224_1518"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='changelog',
-            name='timestamp',
-            field=models.CharField(db_index=True, default="TEMP_PLACEHOLDER", max_length=30),
+            model_name="changelog",
+            name="timestamp",
+            field=models.CharField(
+                db_index=True, default="TEMP_PLACEHOLDER", max_length=30
+            ),
         ),
     ]

@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('IND', '0013_alter_ind_game_turn'),
+        ("IND", "0013_alter_ind_game_turn"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ind_game',
-            name='gamePace',
+            model_name="ind_game",
+            name="gamePace",
             field=models.PositiveSmallIntegerField(default=30),
         ),
         migrations.AlterField(
-            model_name='ind_game',
-            name='startingOptions',
+            model_name="ind_game",
+            name="startingOptions",
             field=models.CharField(blank=True, max_length=100),
         ),
     ]

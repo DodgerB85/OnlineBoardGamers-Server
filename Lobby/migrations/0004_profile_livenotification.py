@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0003_alter_profile_preferredrestaurantcolour'),
+        ("Lobby", "0003_alter_profile_preferredrestaurantcolour"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='liveNotification',
+            model_name="profile",
+            name="liveNotification",
             field=models.SmallIntegerField(default=1, null=True),
         ),
     ]

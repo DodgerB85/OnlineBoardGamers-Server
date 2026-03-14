@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0044_mini_tournaments_invitedplayers'),
+        ("Lobby", "0044_mini_tournaments_invitedplayers"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mini_tournaments',
-            name='created',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15),
+            model_name="mini_tournaments",
+            name="created",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15
+            ),
         ),
     ]

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("HC", "0036_alter_hc_game_id_alter_hc_tournament_id"),
     ]

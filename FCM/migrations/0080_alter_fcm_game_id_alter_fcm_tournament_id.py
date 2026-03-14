@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("FCM", "0079_alter_fcm_game_gamestatus"),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0032_profile_preferredaqyoptions'),
+        ("Lobby", "0032_profile_preferredaqyoptions"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='preferredINDoptions',
+            model_name="profile",
+            name="preferredINDoptions",
             field=models.CharField(blank=True, max_length=30),
         ),
     ]

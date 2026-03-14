@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('KFW', '0011_kfw_game_startingmap'),
+        ("KFW", "0011_kfw_game_startingmap"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='kfw_game',
-            name='statsExcludeConsent',
+            model_name="kfw_game",
+            name="statsExcludeConsent",
             field=models.CharField(blank=True, max_length=40, null=True),
         ),
         migrations.AlterField(
-            model_name='kfw_game',
-            name='zoomLevels',
-            field=models.CharField(default='[16, 16, 16, 16]', max_length=30),
+            model_name="kfw_game",
+            name="zoomLevels",
+            field=models.CharField(default="[16, 16, 16, 16]", max_length=30),
         ),
     ]

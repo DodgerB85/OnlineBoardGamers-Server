@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0088_alter_fcm_game_statsexcludeconsent_and_more'),
+        ("FCM", "0088_alter_fcm_game_statsexcludeconsent_and_more"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='fcm_game',
-            old_name='seatOffset',
-            new_name='playerOrderSeed',
+            model_name="fcm_game",
+            old_name="seatOffset",
+            new_name="playerOrderSeed",
         ),
     ]

@@ -5,21 +5,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('FCM', '0022_alter_fcm_chat_chatdata'),
+        ("FCM", "0022_alter_fcm_chat_chatdata"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='kickedPlayers',
-            field=models.ManyToManyField(blank=True, related_name='kickedPlayersRelName', to=settings.AUTH_USER_MODEL),
+            model_name="fcm_game",
+            name="kickedPlayers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="kickedPlayersRelName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='fcm_chat',
-            name='chatData',
-            field=models.TextField(default='{"name":"WelcomeBot","timestamp":1672021980000,"message":"Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'),
+            model_name="fcm_chat",
+            name="chatData",
+            field=models.TextField(
+                default='{"name":"WelcomeBot","timestamp":1672021980000,"message":"Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'
+            ),
         ),
     ]

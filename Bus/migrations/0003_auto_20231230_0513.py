@@ -5,25 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Bus', '0002_auto_20231227_0215'),
+        ("Bus", "0002_auto_20231227_0215"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='bus_game',
-            name='created',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow, max_length=30),
+            model_name="bus_game",
+            name="created",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow,
+                max_length=30,
+            ),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='latestUpdate',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow, max_length=30),
+            model_name="bus_game",
+            name="latestUpdate",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow,
+                max_length=30,
+            ),
         ),
         migrations.AlterField(
-            model_name='bus_tournament',
-            name='created',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow, max_length=30),
+            model_name="bus_tournament",
+            name="created",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedFunctions.SF_getTimeNow,
+                max_length=30,
+            ),
         ),
     ]

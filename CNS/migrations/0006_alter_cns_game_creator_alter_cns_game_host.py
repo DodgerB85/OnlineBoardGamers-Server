@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("CNS", "0005_alter_cns_game_gamestatus"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

@@ -4,15 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('IND', '0006_auto_20250719_0727'),
+        ("IND", "0006_auto_20250719_0727"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ind_tournament',
-            name='tournamentStatus',
-            field=models.CharField(choices=[('OP', 'Open'), ('PR', 'Private'), ('IP', 'In Progress'), ('FN', 'Finished')], default='OP', max_length=2),
+            model_name="ind_tournament",
+            name="tournamentStatus",
+            field=models.CharField(
+                choices=[
+                    ("OP", "Open"),
+                    ("PR", "Private"),
+                    ("IP", "In Progress"),
+                    ("FN", "Finished"),
+                ],
+                default="OP",
+                max_length=2,
+            ),
         ),
     ]

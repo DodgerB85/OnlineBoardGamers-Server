@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0042_mini_tournaments'),
+        ("Lobby", "0042_mini_tournaments"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mini_tournaments',
-            name='tournamentDescription',
-            field=models.CharField(blank=True, db_collation='utf8mb4_general_ci', max_length=120),
+            model_name="mini_tournaments",
+            name="tournamentDescription",
+            field=models.CharField(
+                blank=True, db_collation="utf8mb4_general_ci", max_length=120
+            ),
         ),
     ]

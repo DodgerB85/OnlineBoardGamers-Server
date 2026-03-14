@@ -9,19 +9,19 @@ def migrate_ind_games(apps, schema_editor):
     Migrate all IND_Game instances to the new unified Game model with gameCode='IND'
     """
     # Get models - use apps.get_model to get the historical version
-    IND_Game = apps.get_model('IND', 'IND_Game')
-    Game = apps.get_model('Lobby', 'Game')
-    GamePlayer = apps.get_model('Lobby', 'GamePlayer')
-    User = apps.get_model('Lobby', 'User')
+    IND_Game = apps.get_model("IND", "IND_Game")
+    Game = apps.get_model("Lobby", "Game")
+    GamePlayer = apps.get_model("Lobby", "GamePlayer")
+    User = apps.get_model("Lobby", "User")
 
     # Get all IND games
     ind_games = IND_Game.objects.all().prefetch_related(
-        'allPlayers',
-        'missingPlayers',
-        'kickedPlayers',
-        'invitedPlayers',
-        'playersWithChatNotification',
-        'relatedTournament'
+        "allPlayers",
+        "missingPlayers",
+        "kickedPlayers",
+        "invitedPlayers",
+        "playersWithChatNotification",
+        "relatedTournament",
     )
 
     print(f"\nMigrating {ind_games.count()} IND games to unified Game model...")
@@ -31,9 +31,8 @@ def migrate_ind_games(apps, schema_editor):
     for ind_game in ind_games:
         # Create the new Game instance
         new_game = Game.objects.create(
-            gameCode='IND',
+            gameCode="IND",
             original_id=ind_game.id,
-
             # Copy BaseGame fields
             gameName=ind_game.gameName,
             gameDescription=ind_game.gameDescription,
@@ -56,17 +55,25 @@ def migrate_ind_games(apps, schema_editor):
             startingMap=ind_game.startingMap,
             startingOptions=ind_game.startingOptions,
             statsExcludeConsent=ind_game.statsExcludeConsent,
-            deleteGameVotes=ind_game.deleteGameVotes if hasattr(ind_game, 'deleteGameVotes') else None,
-            activeVotes=ind_game.activeVotes if hasattr(ind_game, 'activeVotes') else None,
-
+            deleteGameVotes=ind_game.deleteGameVotes
+            if hasattr(ind_game, "deleteGameVotes")
+            else None,
+            activeVotes=ind_game.activeVotes
+            if hasattr(ind_game, "activeVotes")
+            else None,
             # Copy foreign keys
             creator=ind_game.creator,
             host=ind_game.host,
-
             # IND-specific fields
-            playersPreMoveData=ind_game.playersPreMoveData if hasattr(ind_game, 'playersPreMoveData') else "",
-            relatedINDTournament=ind_game.relatedTournament if hasattr(ind_game, 'relatedTournament') else None,
-            tournamentGame=ind_game.tournamentGame if hasattr(ind_game, 'tournamentGame') else False,
+            playersPreMoveData=ind_game.playersPreMoveData
+            if hasattr(ind_game, "playersPreMoveData")
+            else "",
+            relatedINDTournament=ind_game.relatedTournament
+            if hasattr(ind_game, "relatedTournament")
+            else None,
+            tournamentGame=ind_game.tournamentGame
+            if hasattr(ind_game, "tournamentGame")
+            else False,
         )
 
         # Copy invited players M2M
@@ -93,10 +100,12 @@ def migrate_ind_games(apps, schema_editor):
         if current_players_str:
             # currentPlayers might be a comma-separated string or single username
             # Also handle special values like SHADOW, SHADOW_2, etc.
-            current_players_usernames = {cp.strip() for cp in current_players_str.split(',') if cp.strip()}
+            current_players_usernames = {
+                cp.strip() for cp in current_players_str.split(",") if cp.strip()
+            }
 
         # Determine winner
-        winner_user = ind_game.winner if hasattr(ind_game, 'winner') else None
+        winner_user = ind_game.winner if hasattr(ind_game, "winner") else None
 
         # Create GamePlayer instances for each player
         game_players = []
@@ -111,15 +120,15 @@ def migrate_ind_games(apps, schema_editor):
             # IND has player0notes through player4notes
             notes = ""
             player_seat = idx
-            if player_seat == 0 and hasattr(ind_game, 'player0notes'):
+            if player_seat == 0 and hasattr(ind_game, "player0notes"):
                 notes = ind_game.player0notes
-            elif player_seat == 1 and hasattr(ind_game, 'player1notes'):
+            elif player_seat == 1 and hasattr(ind_game, "player1notes"):
                 notes = ind_game.player1notes
-            elif player_seat == 2 and hasattr(ind_game, 'player2notes'):
+            elif player_seat == 2 and hasattr(ind_game, "player2notes"):
                 notes = ind_game.player2notes
-            elif player_seat == 3 and hasattr(ind_game, 'player3notes'):
+            elif player_seat == 3 and hasattr(ind_game, "player3notes"):
                 notes = ind_game.player3notes
-            elif player_seat == 4 and hasattr(ind_game, 'player4notes'):
+            elif player_seat == 4 and hasattr(ind_game, "player4notes"):
                 notes = ind_game.player4notes
 
             game_player = GamePlayer(
@@ -149,20 +158,19 @@ def reverse_migration(apps, schema_editor):
     """
     Remove all migrated IND games from the unified Game model
     """
-    Game = apps.get_model('Lobby', 'Game')
+    Game = apps.get_model("Lobby", "Game")
 
     # Delete all IND games (cascade will delete GamePlayer instances)
-    deleted_count = Game.objects.filter(gameCode='IND').count()
-    Game.objects.filter(gameCode='IND').delete()
+    deleted_count = Game.objects.filter(gameCode="IND").count()
+    Game.objects.filter(gameCode="IND").delete()
 
     print(f"Removed {deleted_count} IND games from unified Game model")
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0075_game_playerspremovedata_game_relatedindtournament'),
-        ('IND', '0021_indgame'),  # Ensure IND app is available
+        ("Lobby", "0075_game_playerspremovedata_game_relatedindtournament"),
+        ("IND", "0021_indgame"),  # Ensure IND app is available
     ]
 
     operations = [

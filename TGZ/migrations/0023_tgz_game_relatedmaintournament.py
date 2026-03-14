@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("Lobby", "0048_alter_mini_tournaments_tournamenttype_and_more"),
         ("TGZ", "0022_tgz_game_relatedminitournament"),

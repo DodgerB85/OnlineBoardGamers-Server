@@ -24,7 +24,8 @@ import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
-    
+
+
 def buildFCMstartingOptions(post_data):
     """Builds the starting options string for FCM games from POST data.
 
@@ -36,7 +37,9 @@ def buildFCMstartingOptions(post_data):
     """
     optionsArr = []
     if "trainingGame" in post_data:
-        optionsArr.extend([rfFCM.SO_STRICT_PAYDAY_FRIDGE, int(post_data["trainingGame"])])
+        optionsArr.extend(
+            [rfFCM.SO_STRICT_PAYDAY_FRIDGE, int(post_data["trainingGame"])]
+        )
     if "fcmAI" in post_data:
         optionsArr.extend([rfFCM.SO_STRICT_PAYDAY_FRIDGE, rf.SO_TRAINING_GAME])
 
@@ -98,8 +101,9 @@ def buildFCMstartingOptions(post_data):
         "allowRewind",
     ]
     optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)
-    #return ",".join(options) if options else ""
+    # return ",".join(options) if options else ""
     return optionsArr
+
 
 @login_required()
 def create_fcm_game(
@@ -125,7 +129,12 @@ def create_fcm_game(
     Returns:
         HttpResponseRedirect for normal games, or game ID for tournament games.
     """
-    if not is_tournament and not is_main_tournament and not is_mini_tournament and request.method != "POST":
+    if (
+        not is_tournament
+        and not is_main_tournament
+        and not is_mini_tournament
+        and request.method != "POST"
+    ):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     # Initialize game parameters
@@ -162,7 +171,11 @@ def create_fcm_game(
         kickout_duration = rf.KICKOUT_1_DAY
         player_Order_Seed = randint(1000, 32767)
         # TODO
-        starting_options = json.loads(tournamentObj.startingOptions) if tournamentObj.startingOptions else []
+        starting_options = (
+            json.loads(tournamentObj.startingOptions)
+            if tournamentObj.startingOptions
+            else []
+        )
         notificationSuppression = "0" * max_players
         # If it's a mini tournemnt, check for auto enable rewinds
         # MiniT games could also have max_players LESS than tournamentObj.maxGamePlayers
@@ -178,7 +191,15 @@ def create_fcm_game(
 
         # Now exclude stats if any china expansion is in starting options
         # Split the string into a list
-        if any(x in starting_options for x in [rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS]):
+        if any(
+            x in starting_options
+            for x in [
+                rfFCM.SO_JAZZ_MUSICIANS,
+                rfFCM.SO_DUMPLINGS,
+                rfFCM.SO_DELIVERY_DRIVERS,
+                rfFCM.SO_HAWKERS,
+            ]
+        ):
             stats_excluded_game = True
 
         all_players = [
@@ -243,7 +264,15 @@ def create_fcm_game(
             request.POST
         )  # Use the extracted function
         # Now exclude stats if any china expansion is in starting options
-        if any(x in starting_options for x in [rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS]):
+        if any(
+            x in starting_options
+            for x in [
+                rfFCM.SO_JAZZ_MUSICIANS,
+                rfFCM.SO_DUMPLINGS,
+                rfFCM.SO_DELIVERY_DRIVERS,
+                rfFCM.SO_HAWKERS,
+            ]
+        ):
             stats_excluded_game = True
         game_pace = request.POST["pace"]
         creator = request.user
@@ -291,7 +320,7 @@ def create_fcm_game(
     # Database operations
     with transaction.atomic():
         new_game = Game(
-            gameCode='FCM',
+            gameCode="FCM",
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -302,7 +331,7 @@ def create_fcm_game(
             created=created,
             latestUpdate=created,
             playerOrderSeed=player_Order_Seed,
-            startingOptions=json.dumps(starting_options, separators=(',', ':')),
+            startingOptions=json.dumps(starting_options, separators=(",", ":")),
             maxPlayers=max_players,
             gameStatus=game_status,
             kickoutDuration=kickout_duration,
@@ -324,22 +353,27 @@ def create_fcm_game(
                 game=new_game,
                 player=player,
                 seat_order=idx,
-                notes=shadowNameNotes if player==request.user else "",
+                notes=shadowNameNotes if player == request.user else "",
             )
 
         for player in invited_players:
             new_game.invitedPlayers.add(player)
 
-        if "trainingGame" in request.POST or is_main_tournament or is_mini_tournament or is_tournament:
+        if (
+            "trainingGame" in request.POST
+            or is_main_tournament
+            or is_mini_tournament
+            or is_tournament
+        ):
             new_game.save()
-            presenter = cast('FCMpresenter', new_game.presenter())
+            presenter = cast("FCMpresenter", new_game.presenter())
             presenter.startGame(request)
 
         new_game.save()
 
     # Notifications and redirects
     if is_tournament or is_main_tournament or is_mini_tournament:
-        presenter = cast('FCMpresenter', new_game.presenter())
+        presenter = cast("FCMpresenter", new_game.presenter())
         for username in usernames_to_notify:
             tournamentType = "normalTournament"
             if is_mini_tournament:
@@ -360,7 +394,11 @@ def create_fcm_game(
     # Now handle normal games
     if usernames_to_notify:
         SN_sendInviteNotifications(
-            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "FCM"
+            request,
+            usernames_to_notify,
+            new_game.presenter().getGameName(),
+            max_players,
+            "FCM",
         )
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has been started"))

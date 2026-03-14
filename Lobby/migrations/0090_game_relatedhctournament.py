@@ -5,21 +5,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0049_hcgame'),
-        ('Lobby', '0089_alter_changelog_timestamp_and_more'),
+        ("HC", "0049_hcgame"),
+        ("Lobby", "0089_alter_changelog_timestamp_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='game',
-            name='relatedHCTournament',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='hctournamentGEN_relName', to='HC.hc_tournament'),
+            model_name="game",
+            name="relatedHCTournament",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="hctournamentGEN_relName",
+                to="HC.hc_tournament",
+            ),
         ),
         migrations.AddField(
-            model_name='game',
-            name='currentPlayersInTurnOrder',
+            model_name="game",
+            name="currentPlayersInTurnOrder",
             field=models.CharField(blank=True, null=True, default=None, max_length=150),
         ),
     ]

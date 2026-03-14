@@ -6,7 +6,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,42 +14,123 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='TGZ_Game',
+            name="TGZ_Game",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('gameName', models.CharField(blank=True, default='[TGZ Game]', max_length=120)),
-                ('gameDescription', models.CharField(blank=True, max_length=120)),
-                ('gameStatus', models.CharField(choices=[('AVAILABLE', 'AVAILABLE'), ('WAITING', 'WAITING'), ('ACTIVE', 'ACTIVE'), ('FINISHED', 'FINISHED')], default='AVAILABLE', max_length=30)),
-                ('latestUpdate', models.CharField(max_length=30)),
-                ('startingOptions', models.CharField(blank=True, max_length=70)),
-                ('currentPlayers', models.CharField(blank=True, max_length=100)),
-                ('playerOrderSeed', models.PositiveSmallIntegerField(default=0)),
-                ('maxPlayers', models.PositiveSmallIntegerField(default=2)),
-                ('turn', models.PositiveSmallIntegerField(default=0)),
-                ('phase', models.PositiveSmallIntegerField(default=0)),
-                ('kickoutDuration', models.PositiveSmallIntegerField(default=200)),
-                ('gamePace', models.PositiveSmallIntegerField(default=20)),
-                ('created', models.CharField(max_length=30)),
-                ('zoomLevels', models.CharField(default='[240, 240]', max_length=30)),
-                ('chatData', models.TextField(blank=True)),
-                ('player0notes', models.TextField(blank=True)),
-                ('player1notes', models.TextField(blank=True)),
-                ('player2notes', models.TextField(blank=True)),
-                ('player3notes', models.TextField(blank=True)),
-                ('player4notes', models.TextField(blank=True)),
-                ('gameData', models.TextField(blank=True)),
-                ('rewindData', models.TextField(blank=True)),
-                ('rewindTempData', models.TextField(blank=True)),
-                ('tournamentGame', models.BooleanField(default=False)),
-                ('statsExcludedGame', models.BooleanField(default=False)),
-                ('allPlayers', models.ManyToManyField(related_name='TGZallPlayersRelName', to=settings.AUTH_USER_MODEL)),
-                ('creator', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='TGZgame_creator_relName', to=settings.AUTH_USER_MODEL)),
-                ('host', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='TGZgame_host_relName', to=settings.AUTH_USER_MODEL)),
-                ('invitedPlayers', models.ManyToManyField(blank=True, related_name='TGZinvitedPlayersRelName', to=settings.AUTH_USER_MODEL)),
-                ('kickedPlayers', models.ManyToManyField(blank=True, related_name='TGZkickedPlayersRelName', to=settings.AUTH_USER_MODEL)),
-                ('missingPlayers', models.ManyToManyField(blank=True, related_name='TGZmissingPlayersRelName', to=settings.AUTH_USER_MODEL)),
-                ('playersWithChatNotification', models.ManyToManyField(blank=True, related_name='TGZplayersWithChatNotificationName', to=settings.AUTH_USER_MODEL)),
-                ('winner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='TGZgame_winner_relName', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "gameName",
+                    models.CharField(blank=True, default="[TGZ Game]", max_length=120),
+                ),
+                ("gameDescription", models.CharField(blank=True, max_length=120)),
+                (
+                    "gameStatus",
+                    models.CharField(
+                        choices=[
+                            ("AVAILABLE", "AVAILABLE"),
+                            ("WAITING", "WAITING"),
+                            ("ACTIVE", "ACTIVE"),
+                            ("FINISHED", "FINISHED"),
+                        ],
+                        default="AVAILABLE",
+                        max_length=30,
+                    ),
+                ),
+                ("latestUpdate", models.CharField(max_length=30)),
+                ("startingOptions", models.CharField(blank=True, max_length=70)),
+                ("currentPlayers", models.CharField(blank=True, max_length=100)),
+                ("playerOrderSeed", models.PositiveSmallIntegerField(default=0)),
+                ("maxPlayers", models.PositiveSmallIntegerField(default=2)),
+                ("turn", models.PositiveSmallIntegerField(default=0)),
+                ("phase", models.PositiveSmallIntegerField(default=0)),
+                ("kickoutDuration", models.PositiveSmallIntegerField(default=200)),
+                ("gamePace", models.PositiveSmallIntegerField(default=20)),
+                ("created", models.CharField(max_length=30)),
+                ("zoomLevels", models.CharField(default="[240, 240]", max_length=30)),
+                ("chatData", models.TextField(blank=True)),
+                ("player0notes", models.TextField(blank=True)),
+                ("player1notes", models.TextField(blank=True)),
+                ("player2notes", models.TextField(blank=True)),
+                ("player3notes", models.TextField(blank=True)),
+                ("player4notes", models.TextField(blank=True)),
+                ("gameData", models.TextField(blank=True)),
+                ("rewindData", models.TextField(blank=True)),
+                ("rewindTempData", models.TextField(blank=True)),
+                ("tournamentGame", models.BooleanField(default=False)),
+                ("statsExcludedGame", models.BooleanField(default=False)),
+                (
+                    "allPlayers",
+                    models.ManyToManyField(
+                        related_name="TGZallPlayersRelName", to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "creator",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="TGZgame_creator_relName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "host",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="TGZgame_host_relName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "invitedPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="TGZinvitedPlayersRelName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "kickedPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="TGZkickedPlayersRelName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "missingPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="TGZmissingPlayersRelName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "playersWithChatNotification",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="TGZplayersWithChatNotificationName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "winner",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="TGZgame_winner_relName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

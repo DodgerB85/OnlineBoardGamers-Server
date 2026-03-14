@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0037_alter_hc_game_latestupdate'),
+        ("HC", "0037_alter_hc_game_latestupdate"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='hc_game',
-            name='gamePace',
+            model_name="hc_game",
+            name="gamePace",
             field=models.PositiveSmallIntegerField(default=30),
         ),
         migrations.AlterField(
-            model_name='hc_game',
-            name='maxPlayers',
+            model_name="hc_game",
+            name="maxPlayers",
             field=models.PositiveSmallIntegerField(default=2),
         ),
         migrations.AlterField(
-            model_name='hc_game',
-            name='startingOptions',
+            model_name="hc_game",
+            name="startingOptions",
             field=models.CharField(blank=True, max_length=100),
         ),
     ]

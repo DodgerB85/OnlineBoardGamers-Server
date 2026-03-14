@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0071_auto_20250711_1136'),
+        ("FCM", "0071_auto_20250711_1136"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='preMoveData',
+            model_name="fcm_game",
+            name="preMoveData",
         ),
     ]

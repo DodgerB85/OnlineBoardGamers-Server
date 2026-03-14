@@ -26,7 +26,12 @@ from django.db import connection
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
-from Lobby.gameViewHelpers import build_show_game_data, shared_save_notes, shared_bug_entry, shared_cast_vote
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_save_notes,
+    shared_bug_entry,
+    shared_cast_vote,
+)
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
@@ -519,9 +524,9 @@ def _processHCturn(request):
                 # store the length of FCNATT, and subtract that from the length of facComp to get index. Or store current length
                 # 3 = players           X = select player                       0 =fac
                 # THIS LINE WAS REMOVED FOR BEING USELESS
-                #DBgameDataRaw[3][presenter.seatPosition(currentPlayersList[0])][0][4]
-                
-                #DBgameDataRaw[3][seatPosition][0][4]
+                # DBgameDataRaw[3][presenter.seatPosition(currentPlayersList[0])][0][4]
+
+                # DBgameDataRaw[3][seatPosition][0][4]
 
                 DBgameDataRaw[15].append(
                     [
@@ -599,7 +604,7 @@ def _processHCturn(request):
             {
                 "VFFFP": True,
                 "latestUpdate": currentGame.latestUpdate,
-                #"currentPlayers": presenter.getCurrentPlayersInOrderArrHC(),
+                # "currentPlayers": presenter.getCurrentPlayersInOrderArrHC(),
                 # !!!!!!!!!!!!!!!!!! Need to allow a return of 0 names to process phase !!!!!!!!!!!!!!!!!!!
                 "currentPlayers": currentPlayersList,
                 "gameData": currentGame.gameData,
@@ -674,10 +679,7 @@ def _processHCturn(request):
             )
         else:
             # Send Notifications
-            if (
-                len(jsonData["nextPlayer"]) > 0 
-                and not jsonData["status"] == "FINISHED"
-            ):
+            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED":
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -928,10 +930,7 @@ def _processHCturn(request):
             )
         else:
             # Send Notifications
-            if (
-                len(jsonData["nextPlayer"]) > 0 
-                and not jsonData["status"] == "FINISHED"
-            ):
+            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED":
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -971,9 +970,14 @@ def endGame(request, _winner, _finalPositions, _gameID, currentGame):
 
 @login_required
 def showHCgame(request, game_id):
-    result = build_show_game_data(request, game_id, "HC",
-        default_zoom=200, settings_debug_key="HC_USE_SOURCE_CODE",
-        clear_chat_notification=False)
+    result = build_show_game_data(
+        request,
+        game_id,
+        "HC",
+        default_zoom=200,
+        settings_debug_key="HC_USE_SOURCE_CODE",
+        clear_chat_notification=False,
+    )
     if isinstance(result, HttpResponseRedirect):
         return result
 
@@ -1003,38 +1007,39 @@ def showHCgame(request, game_id):
     rewindPanelType = 0
     rewindHostHTML = ""
     rewindHostPossible = False
-    currentRewindConsent = 0 # NB needed in template for rewind panel
+    currentRewindConsent = 0  # NB needed in template for rewind panel
     currentPlayers = presenter.getCurrentPlayersInOrderArrHC()
     # This is an emergency check - also to serve end games where server turn order is null
-    # In game, it SHOULD be switching the CP to the winner. 
+    # In game, it SHOULD be switching the CP to the winner.
     # But if the game is NOT finished, need to be able to supply 0 players to kickstart factory hang ups
     if len(currentPlayers) == 0 and currentGame.gameStatus == "FINISHED":
-       currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
+        currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
 
     # Chat notification separately (could be kicked out)
-    chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
+    chat_notify_ids = {
+        gp.player.id for gp in all_players if gp.player and gp.has_chat_notification
+    }
     # Also check all players including kicked
     all_gps_including_kicked = list(currentGame.players.select_related("player").all())
-    chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
+    chat_notify_ids_all = {
+        gp.player.id
+        for gp in all_gps_including_kicked
+        if gp.player and gp.has_chat_notification
+    }
     if user_id in chat_notify_ids_all:
         chatNotification = True
         presenter.removeChatNotification(request.user)
         currentGame.save()
 
-    nextURL = (
-        f"/nextGame?current_id={game_id}&current_code={presenter.getGameCode()}"
-    )
+    nextURL = f"/nextGame?current_id={game_id}&current_code={presenter.getGameCode()}"
 
     involvedPlayer = result["is_involved"]
 
     if involvedPlayer:
         rewindPanelType = 1
-        if (
-            currentGame.host == request.user
-            or username == "BotKickStarter"
-        ):
+        if currentGame.host == request.user or username == "BotKickStarter":
             rewindPanelType = 2
             rewindHostPossible = presenter.getRewindHostPossible()
             if username == "BotKickStarter":
@@ -1042,7 +1047,9 @@ def showHCgame(request, game_id):
             rewindHostHTML = presenter.getRewindHostHTML()
 
         pov = presenter.seatPosition(username)
-        currentRewindConsent = presenter.getCurrentRewindConsent(username) # NB needed in template for rewind panel
+        currentRewindConsent = presenter.getCurrentRewindConsent(
+            username
+        )  # NB needed in template for rewind panel
 
         preferredHCcolour = result["user_profile"].preferredHCcolour
         liveNotification = result["user_profile"].liveNotification
@@ -1288,10 +1295,11 @@ def HCdata(request, dataType):
             gameUpdate = int(jsonData["latestUpdate"])
             latestUpdate = int(currentGame.latestUpdate)
         except Exception as e:
-            SN_sendAdminErrorMessage(request, f"ERROR IN HCdata: gameID: {jsonData["gameID"]} Error: {e}")
+            SN_sendAdminErrorMessage(
+                request, f"ERROR IN HCdata: gameID: {jsonData['gameID']} Error: {e}"
+            )
             # NB this might need to be changed if the above msg is getting triggered
             specialData = False
-
 
             return JsonResponse(
                 {

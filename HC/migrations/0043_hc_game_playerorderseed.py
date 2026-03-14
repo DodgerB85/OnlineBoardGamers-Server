@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0042_hc_game_zoomlevels_alter_hc_game_statsexcludeconsent'),
+        ("HC", "0042_hc_game_zoomlevels_alter_hc_game_statsexcludeconsent"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='hc_game',
-            name='playerOrderSeed',
+            model_name="hc_game",
+            name="playerOrderSeed",
             field=models.PositiveSmallIntegerField(default=0),
         ),
     ]

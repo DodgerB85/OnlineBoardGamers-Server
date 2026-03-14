@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TGZ', '0013_tgz_game_statsexcludeconsent'),
+        ("TGZ", "0013_tgz_game_statsexcludeconsent"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tgz_game',
-            name='statsExcludeConsent',
-            field=models.CharField(default='00000', max_length=5),
+            model_name="tgz_game",
+            name="statsExcludeConsent",
+            field=models.CharField(default="00000", max_length=5),
         ),
     ]

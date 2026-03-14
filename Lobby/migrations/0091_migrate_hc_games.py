@@ -1,18 +1,21 @@
 from django.db import migrations
 import json
 
-def migrate_hc_games(apps, schema_editor):
-    HC_Game = apps.get_model('HC', 'HC_Game')
-    Game = apps.get_model('Lobby', 'Game')
-    GamePlayer = apps.get_model('Lobby', 'GamePlayer')
 
-    print(f"\nMigrating {HC_Game.objects.all().count()} HC games to unified Game model...")
+def migrate_hc_games(apps, schema_editor):
+    HC_Game = apps.get_model("HC", "HC_Game")
+    Game = apps.get_model("Lobby", "Game")
+    GamePlayer = apps.get_model("Lobby", "GamePlayer")
+
+    print(
+        f"\nMigrating {HC_Game.objects.all().count()} HC games to unified Game model..."
+    )
 
     migrated_count = 0
 
     for old_game in HC_Game.objects.all():
         new_game = Game.objects.create(
-            gameCode='HC',
+            gameCode="HC",
             original_id=old_game.id,
             gameName=old_game.gameName,
             gameDescription=old_game.gameDescription,
@@ -58,21 +61,24 @@ def migrate_hc_games(apps, schema_editor):
         current_player_names = set()
         if current_players_str:
             current_player_names = {
-                name.strip() for name in current_players_str.split(",")
-                if name.strip()
+                name.strip() for name in current_players_str.split(",") if name.strip()
             }
 
         # Get missing, kicked, and chat notification player sets
-        missing_player_ids = set(old_game.missingPlayers.values_list('id', flat=True))
-        kicked_player_ids = set(old_game.kickedPlayers.values_list('id', flat=True))
-        chat_notify_ids = set(old_game.playersWithChatNotification.values_list('id', flat=True))
+        missing_player_ids = set(old_game.missingPlayers.values_list("id", flat=True))
+        kicked_player_ids = set(old_game.kickedPlayers.values_list("id", flat=True))
+        chat_notify_ids = set(
+            old_game.playersWithChatNotification.values_list("id", flat=True)
+        )
 
         # Get winner id
         winner_id = old_game.winner_id if old_game.winner_id else None
-        
+
         # Convery the currentPlayers
         currentPlayersString = old_game.currentPlayers
-        current_players_arr = currentPlayersString.split(',') if currentPlayersString else []
+        current_players_arr = (
+            currentPlayersString.split(",") if currentPlayersString else []
+        )
         new_game.currentPlayersInTurnOrder = json.dumps(current_players_arr)
         new_game.save()
 
@@ -113,7 +119,9 @@ def migrate_hc_games(apps, schema_editor):
             consent_dict = {}
             for seat_idx, player in enumerate(player_list):
                 if seat_idx < len(old_game.rewindConsent):
-                    consent_dict[player.username] = int(old_game.rewindConsent[seat_idx])
+                    consent_dict[player.username] = int(
+                        old_game.rewindConsent[seat_idx]
+                    )
             new_game.activeVotes = {"rewind_consent": consent_dict}
             new_game.save()
 
@@ -125,15 +133,14 @@ def migrate_hc_games(apps, schema_editor):
 
 
 def reverse_migration(apps, schema_editor):
-    Game = apps.get_model('Lobby', 'Game')
-    Game.objects.filter(gameCode='HC').delete()
+    Game = apps.get_model("Lobby", "Game")
+    Game.objects.filter(gameCode="HC").delete()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0090_game_relatedhctournament'),
-        ('HC', '0047_hc_game_automoves'),
+        ("Lobby", "0090_game_relatedhctournament"),
+        ("HC", "0047_hc_game_automoves"),
     ]
 
     operations = [

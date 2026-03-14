@@ -138,11 +138,11 @@ def get_won_games(game_code, time_limit=None, player_count=None):
     Counts total wins per user by querying GamePlayer entries where winner=True.
     """
     query = Q(
-        game__gameCode=game_code, 
-        game__gameStatus="FINISHED", 
-        winner=True # BooleanField on GamePlayer
+        game__gameCode=game_code,
+        game__gameStatus="FINISHED",
+        winner=True,  # BooleanField on GamePlayer
     ) & ~Q(game__statsExcludedGame=True)
-    
+
     if player_count:
         query &= Q(game__maxPlayers=player_count)
     if time_limit:
@@ -155,6 +155,7 @@ def get_won_games(game_code, time_limit=None, player_count=None):
         .annotate(total_wins=Count("id"))
     )
 
+
 # First, calculate each game serperately, and save the data
 for gameCode in GAME_CODES:
     game_start_calc_time = time.perf_counter()
@@ -166,7 +167,7 @@ for gameCode in GAME_CODES:
             game__gameCode=gameCode,
             game__gameStatus="FINISHED",
             game__latestUpdate__gte=one_year_ago,
-            is_kicked=True # BooleanField on GamePlayer
+            is_kicked=True,  # BooleanField on GamePlayer
         )
         .exclude(player__username__in=EXCLUDE_USERS)
         .values("player__id", "player__username")

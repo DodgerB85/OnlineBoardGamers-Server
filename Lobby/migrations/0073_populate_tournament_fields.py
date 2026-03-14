@@ -9,54 +9,55 @@ def populate_tournament_fields(apps, schema_editor):
     For TGZ games that were migrated, copy the values from the original TGZ_Game model.
     For other games (CNS, WEB, AQY), set tournamentGame based on tournament relations.
     """
-    Game = apps.get_model('Lobby', 'Game')
-    
+    Game = apps.get_model("Lobby", "Game")
+
     # Try to get TGZ_Game model - it may not exist if already deleted
     try:
-        TGZ_Game = apps.get_model('TGZ', 'TGZ_Game')
+        TGZ_Game = apps.get_model("TGZ", "TGZ_Game")
         has_tgz_model = True
     except LookupError:
         has_tgz_model = False
         TGZ_Game = None
-    
+
     print("\nPopulating tournament fields...")
-    
+
     # For TGZ games, copy values from original TGZ_Game if it exists
     if has_tgz_model:
-        tgz_games = Game.objects.filter(gameCode='TGZ', original_id__isnull=False)
+        tgz_games = Game.objects.filter(gameCode="TGZ", original_id__isnull=False)
         updated_count = 0
-        
+
         for game in tgz_games:
             try:
                 original = TGZ_Game.objects.get(id=game.original_id)
                 game.tournamentGame = original.tournamentGame
                 game.externalTournamentGame = original.externalTournamentGame
-                game.save(update_fields=['tournamentGame', 'externalTournamentGame'])
+                game.save(update_fields=["tournamentGame", "externalTournamentGame"])
                 updated_count += 1
             except TGZ_Game.DoesNotExist:
                 # Original game doesn't exist, skip
                 pass
-        
+
         print(f"  Copied tournament fields from TGZ_Game for {updated_count} TGZ games")
     else:
         print("  TGZ_Game model not found, skipping TGZ game population")
-    
+
     # For non-TGZ games (CNS, WEB, AQY), set tournamentGame based on relations
-    games_with_main_tournament = Game.objects.filter(
-        relatedMainTournament__isnull=False
-    ).exclude(
-        gameCode='TGZ'
-    ).update(tournamentGame=True)
-    
-    print(f"  Set tournamentGame=True for {games_with_main_tournament} non-TGZ games with main tournament")
-    
+    games_with_main_tournament = (
+        Game.objects.filter(relatedMainTournament__isnull=False)
+        .exclude(gameCode="TGZ")
+        .update(tournamentGame=True)
+    )
+
+    print(
+        f"  Set tournamentGame=True for {games_with_main_tournament} non-TGZ games with main tournament"
+    )
+
     print("Tournament fields population complete\n")
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0072_add_tournament_fields'),
+        ("Lobby", "0072_add_tournament_fields"),
     ]
 
     operations = [

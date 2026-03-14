@@ -43,9 +43,9 @@ except Exception as e:
 # Delete old backup files
 try:
     list_files = os.listdir(backup_dir)
-    back_date = (datetime.datetime.now() - datetime.timedelta(days=DAYS_TO_KEEP_BACKUP)).strftime(
-        FILE_SUFFIX_DATE_FORMAT
-    )
+    back_date = (
+        datetime.datetime.now() - datetime.timedelta(days=DAYS_TO_KEEP_BACKUP)
+    ).strftime(FILE_SUFFIX_DATE_FORMAT)
     length = len(FILE_PREFIX)
 
     for f in list_files:
@@ -65,7 +65,9 @@ try:
     gauth = GoogleAuth()
     gauth.LoadCredentialsFile(CREDS_FILE)
     if gauth.credentials is None:
-        print(f"Issue: Attempting to Auth. Credentials file not found or invalid: {CREDS_FILE}")
+        print(
+            f"Issue: Attempting to Auth. Credentials file not found or invalid: {CREDS_FILE}"
+        )
         gauth.LocalWebserverAuth()
     elif gauth.access_token_expired:
         print("Issue: Access token expired, attempting to refresh")
@@ -74,18 +76,16 @@ try:
         print("Credentials valid, authorizing")
         gauth.Authorize()
 
-
     # CRITICAL: Save credentials for the next run!
     gauth.SaveCredentialsFile(CREDS_FILE)
     print(f"Credentials saved/updated in: {CREDS_FILE}")
-
 
     drive = GoogleDrive(gauth)
 
     # Set file metadata
     file_metadata = {
-        'title': f"{FILE_PREFIX}{timestamp}.sql",
-        'parents': [{'id': GOOGLE_DRIVE_FOLDER_ID}]
+        "title": f"{FILE_PREFIX}{timestamp}.sql",
+        "parents": [{"id": GOOGLE_DRIVE_FOLDER_ID}],
     }
 
     # Create and upload the file

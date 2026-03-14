@@ -9,19 +9,19 @@ def migrate_fcm_games(apps, schema_editor):
     """
     Migrate all FCM_Game instances to the new unified Game model with gameCode='FCM'
     """
-    FCM_Game = apps.get_model('FCM', 'FCM_Game')
-    Game = apps.get_model('Lobby', 'Game')
-    GamePlayer = apps.get_model('Lobby', 'GamePlayer')
+    FCM_Game = apps.get_model("FCM", "FCM_Game")
+    Game = apps.get_model("Lobby", "Game")
+    GamePlayer = apps.get_model("Lobby", "GamePlayer")
 
     fcm_games = FCM_Game.objects.all().prefetch_related(
-        'allPlayers',
-        'missingPlayers',
-        'kickedPlayers',
-        'invitedPlayers',
-        'playersWithChatNotification',
-        'relatedTournament',
-        'relatedMainTournament',
-        'relatedMiniTournament',
+        "allPlayers",
+        "missingPlayers",
+        "kickedPlayers",
+        "invitedPlayers",
+        "playersWithChatNotification",
+        "relatedTournament",
+        "relatedMainTournament",
+        "relatedMiniTournament",
     )
 
     print(f"\nMigrating {fcm_games.count()} FCM games to unified Game model...")
@@ -30,9 +30,8 @@ def migrate_fcm_games(apps, schema_editor):
 
     for fcm_game in fcm_games:
         new_game = Game.objects.create(
-            gameCode='FCM',
+            gameCode="FCM",
             original_id=fcm_game.id,
-
             # Copy BaseGame fields
             gameName=fcm_game.gameName,
             gameDescription=fcm_game.gameDescription,
@@ -52,25 +51,36 @@ def migrate_fcm_games(apps, schema_editor):
             zoomLevels=fcm_game.zoomLevels,
             latestUpdate=fcm_game.latestUpdate,
             created=fcm_game.created,
-            startingMap=fcm_game.startingMap if hasattr(fcm_game, 'startingMap') else "",
+            startingMap=fcm_game.startingMap
+            if hasattr(fcm_game, "startingMap")
+            else "",
             startingOptions=fcm_game.startingOptions,
             statsExcludeConsent=fcm_game.statsExcludeConsent,
-            deleteGameVotes=fcm_game.deleteGameVotes if hasattr(fcm_game, 'deleteGameVotes') else None,
-            activeVotes=fcm_game.activeVotes if hasattr(fcm_game, 'activeVotes') else None,
-            autoMoves=fcm_game.autoMoves if hasattr(fcm_game, 'autoMoves') else None,
-
+            deleteGameVotes=fcm_game.deleteGameVotes
+            if hasattr(fcm_game, "deleteGameVotes")
+            else None,
+            activeVotes=fcm_game.activeVotes
+            if hasattr(fcm_game, "activeVotes")
+            else None,
+            autoMoves=fcm_game.autoMoves if hasattr(fcm_game, "autoMoves") else None,
             # Copy foreign keys
             creator=fcm_game.creator,
             host=fcm_game.host,
-
             # FCM-specific fields
             FCMplayersMoveData=fcm_game.playersMoveData or "",
             FCMnotificationSuppression=fcm_game.notificationSuppression or "000000",
-            relatedFCMTournament=fcm_game.relatedTournament if hasattr(fcm_game, 'relatedTournament') else None,
-            relatedMainTournament=fcm_game.relatedMainTournament if hasattr(fcm_game, 'relatedMainTournament') else None,
-            relatedMiniTournament=fcm_game.relatedMiniTournament if hasattr(fcm_game, 'relatedMiniTournament') else None,
-
-            tournamentGame=fcm_game.tournamentGame if hasattr(fcm_game, 'tournamentGame') else False,
+            relatedFCMTournament=fcm_game.relatedTournament
+            if hasattr(fcm_game, "relatedTournament")
+            else None,
+            relatedMainTournament=fcm_game.relatedMainTournament
+            if hasattr(fcm_game, "relatedMainTournament")
+            else None,
+            relatedMiniTournament=fcm_game.relatedMiniTournament
+            if hasattr(fcm_game, "relatedMiniTournament")
+            else None,
+            tournamentGame=fcm_game.tournamentGame
+            if hasattr(fcm_game, "tournamentGame")
+            else False,
         )
 
         # Copy invited players M2M
@@ -91,14 +101,14 @@ def migrate_fcm_games(apps, schema_editor):
         player_list_for_ordering = [
             p for p in all_players if p.username != "FCMtourneyAdmin"
         ]
-        fcm_tourney_admin = [
-            p for p in all_players if p.username == "FCMtourneyAdmin"
-        ]
+        fcm_tourney_admin = [p for p in all_players if p.username == "FCMtourneyAdmin"]
 
         if USE_NEW_CODE:
             # New code: shuffle with seed
             if fcm_game.playerOrderSeed > 0:
-                random.Random(fcm_game.playerOrderSeed).shuffle(player_list_for_ordering)
+                random.Random(fcm_game.playerOrderSeed).shuffle(
+                    player_list_for_ordering
+                )
         else:
             # Old code: rotation algorithm
             if fcm_game.playerOrderSeed > 0:
@@ -109,13 +119,17 @@ def migrate_fcm_games(apps, schema_editor):
         player_list_for_ordering.extend(fcm_tourney_admin)
 
         # Determine current player(s) from currentPlayers string
-        current_players_str = fcm_game.currentPlayers if hasattr(fcm_game, 'currentPlayers') else ""
+        current_players_str = (
+            fcm_game.currentPlayers if hasattr(fcm_game, "currentPlayers") else ""
+        )
         current_players_usernames = set()
         if current_players_str:
-            current_players_usernames = {cp.strip() for cp in current_players_str.split(',') if cp.strip()}
+            current_players_usernames = {
+                cp.strip() for cp in current_players_str.split(",") if cp.strip()
+            }
 
         # Determine winner
-        winner_user = fcm_game.winner if hasattr(fcm_game, 'winner') else None
+        winner_user = fcm_game.winner if hasattr(fcm_game, "winner") else None
 
         # Create GamePlayer instances for each player
         game_players = []
@@ -130,17 +144,17 @@ def migrate_fcm_games(apps, schema_editor):
             # FCM has player0notes through player5notes (from GeneralGame + FCM_Game)
             notes = ""
             player_seat = idx
-            if player_seat == 0 and hasattr(fcm_game, 'player0notes'):
+            if player_seat == 0 and hasattr(fcm_game, "player0notes"):
                 notes = fcm_game.player0notes or ""
-            elif player_seat == 1 and hasattr(fcm_game, 'player1notes'):
+            elif player_seat == 1 and hasattr(fcm_game, "player1notes"):
                 notes = fcm_game.player1notes or ""
-            elif player_seat == 2 and hasattr(fcm_game, 'player2notes'):
+            elif player_seat == 2 and hasattr(fcm_game, "player2notes"):
                 notes = fcm_game.player2notes or ""
-            elif player_seat == 3 and hasattr(fcm_game, 'player3notes'):
+            elif player_seat == 3 and hasattr(fcm_game, "player3notes"):
                 notes = fcm_game.player3notes or ""
-            elif player_seat == 4 and hasattr(fcm_game, 'player4notes'):
+            elif player_seat == 4 and hasattr(fcm_game, "player4notes"):
                 notes = fcm_game.player4notes or ""
-            elif player_seat == 5 and hasattr(fcm_game, 'player5notes'):
+            elif player_seat == 5 and hasattr(fcm_game, "player5notes"):
                 notes = fcm_game.player5notes or ""
 
             game_player = GamePlayer(
@@ -170,20 +184,19 @@ def reverse_migration(apps, schema_editor):
     """
     Remove all migrated FCM games from the unified Game model
     """
-    Game = apps.get_model('Lobby', 'Game')
+    Game = apps.get_model("Lobby", "Game")
 
     # Delete all FCM games (cascade will delete GamePlayer instances)
-    deleted_count = Game.objects.filter(gameCode='FCM').count()
-    Game.objects.filter(gameCode='FCM').delete()
+    deleted_count = Game.objects.filter(gameCode="FCM").count()
+    Game.objects.filter(gameCode="FCM").delete()
 
     print(f"Removed {deleted_count} FCM games from unified Game model")
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0081_game_fcm_fields'),
-        ('FCM', '0092_fcm_game_automoves'),
+        ("Lobby", "0081_game_fcm_fields"),
+        ("FCM", "0092_fcm_game_automoves"),
     ]
 
     operations = [

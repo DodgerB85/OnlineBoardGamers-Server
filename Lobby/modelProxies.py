@@ -19,6 +19,7 @@ class TGZMiniTournament(Mini_Tournaments):
 
 ################### Register game objects to specific app
 
+
 # CNS
 class CNSgame(Game):
     class Meta(Game.Meta):
@@ -26,6 +27,7 @@ class CNSgame(Game):
         app_label = "CNS"
         verbose_name = "CNS_Game"
         verbose_name_plural = "CNS_Games"
+
 
 # WEB
 class WEBgame(Game):
@@ -35,6 +37,7 @@ class WEBgame(Game):
         verbose_name = "WEB_Game"
         verbose_name_plural = "WEB_Games"
 
+
 # AQY
 class AQYgame(Game):
     class Meta(Game.Meta):
@@ -42,6 +45,7 @@ class AQYgame(Game):
         app_label = "AQY"
         verbose_name = "AQY_Game"
         verbose_name_plural = "AQY_Games"
+
 
 # TGZ
 class TGZgame(Game):
@@ -51,6 +55,7 @@ class TGZgame(Game):
         verbose_name = "TGZ_Game"
         verbose_name_plural = "TGZ_Games"
 
+
 # IND
 class INDgame(Game):
     class Meta(Game.Meta):
@@ -58,6 +63,7 @@ class INDgame(Game):
         app_label = "IND"
         verbose_name = "IND_Game"
         verbose_name_plural = "IND_Games"
+
 
 # Bus
 class Busgame(Game):
@@ -67,6 +73,7 @@ class Busgame(Game):
         verbose_name = "Bus_Game"
         verbose_name_plural = "Bus_Games"
 
+
 # FCM
 class FCMgame(Game):
     class Meta(Game.Meta):
@@ -74,7 +81,8 @@ class FCMgame(Game):
         app_label = "FCM"
         verbose_name = "FCM_Game"
         verbose_name_plural = "FCM_Games"
-        
+
+
 # RNB
 class RNBgame(Game):
     class Meta(Game.Meta):
@@ -83,6 +91,7 @@ class RNBgame(Game):
         verbose_name = "RNB_Game"
         verbose_name_plural = "RNB_Games"
 
+
 # HC
 class HCgame(Game):
     class Meta(Game.Meta):
@@ -90,6 +99,7 @@ class HCgame(Game):
         app_label = "HC"
         verbose_name = "HC_Game"
         verbose_name_plural = "HC_Games"
+
 
 # KFW
 class KFWgame(Game):

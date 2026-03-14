@@ -5,20 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TGZ', '0028_tgzminitournament'),
+        ("TGZ", "0028_tgzminitournament"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tgz_game',
-            name='gamePace',
+            model_name="tgz_game",
+            name="gamePace",
             field=models.PositiveSmallIntegerField(default=30),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='latestUpdate',
-            field=models.CharField(db_index=True, default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15),
+            model_name="tgz_game",
+            name="latestUpdate",
+            field=models.CharField(
+                db_index=True,
+                default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow,
+                max_length=15,
+            ),
         ),
     ]

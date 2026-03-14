@@ -7,7 +7,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -16,41 +15,142 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='WEB_Game',
+            name="WEB_Game",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('gameName', models.CharField(blank=True, db_collation='utf8mb4_general_ci', max_length=120)),
-                ('gameDescription', models.CharField(blank=True, db_collation='utf8mb4_general_ci', max_length=120)),
-                ('gameStatus', models.CharField(choices=[('AVAILABLE', 'AVAILABLE'), ('WAITING', 'WAITING'), ('PRIVATE', 'PRIVATE'), ('ACTIVE', 'ACTIVE'), ('FINISHED', 'FINISHED')], default='AVAILABLE', max_length=9)),
-                ('latestUpdate', models.CharField(default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15)),
-                ('startingOptions', models.CharField(blank=True, max_length=20)),
-                ('currentPlayers', models.CharField(blank=True, max_length=100)),
-                ('playerOrderSeed', models.PositiveSmallIntegerField(default=0)),
-                ('maxPlayers', models.PositiveSmallIntegerField(default=2)),
-                ('turn', models.PositiveSmallIntegerField(default=1)),
-                ('phase', models.PositiveSmallIntegerField(default=0)),
-                ('kickoutDuration', models.PositiveSmallIntegerField(default=200)),
-                ('gamePace', models.PositiveSmallIntegerField(default=40)),
-                ('created', models.CharField(default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15)),
-                ('zoomLevels', models.CharField(default='[]', max_length=30)),
-                ('chatData', models.TextField(blank=True)),
-                ('player0notes', models.TextField(blank=True)),
-                ('player1notes', models.TextField(blank=True)),
-                ('player2notes', models.TextField(blank=True)),
-                ('player3notes', models.TextField(blank=True)),
-                ('gameData', models.TextField(blank=True)),
-                ('rewindData', models.TextField(blank=True)),
-                ('rewindTempData', models.TextField(blank=True)),
-                ('statsExcludedGame', models.BooleanField(default=False)),
-                ('kickoutFlexiData', models.TextField(blank=True)),
-                ('allPlayers', models.ManyToManyField(related_name='WEBallPlayersRelName', to=settings.AUTH_USER_MODEL)),
-                ('creator', models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='WEBgame_creator_relName', to=settings.AUTH_USER_MODEL)),
-                ('host', models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='WEBgame_host_relName', to=settings.AUTH_USER_MODEL)),
-                ('invitedPlayers', models.ManyToManyField(blank=True, related_name='WEBinvitedPlayersRelName', to=settings.AUTH_USER_MODEL)),
-                ('kickedPlayers', models.ManyToManyField(blank=True, related_name='WEBkickedPlayersRelName', to=settings.AUTH_USER_MODEL)),
-                ('missingPlayers', models.ManyToManyField(blank=True, related_name='WEBmissingPlayersRelName', to=settings.AUTH_USER_MODEL)),
-                ('playersWithChatNotification', models.ManyToManyField(blank=True, related_name='WEBplayersWithChatNotificationName', to=settings.AUTH_USER_MODEL)),
-                ('winner', models.ManyToManyField(blank=True, related_name='WEBgame_winner_relName', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "gameName",
+                    models.CharField(
+                        blank=True, db_collation="utf8mb4_general_ci", max_length=120
+                    ),
+                ),
+                (
+                    "gameDescription",
+                    models.CharField(
+                        blank=True, db_collation="utf8mb4_general_ci", max_length=120
+                    ),
+                ),
+                (
+                    "gameStatus",
+                    models.CharField(
+                        choices=[
+                            ("AVAILABLE", "AVAILABLE"),
+                            ("WAITING", "WAITING"),
+                            ("PRIVATE", "PRIVATE"),
+                            ("ACTIVE", "ACTIVE"),
+                            ("FINISHED", "FINISHED"),
+                        ],
+                        default="AVAILABLE",
+                        max_length=9,
+                    ),
+                ),
+                (
+                    "latestUpdate",
+                    models.CharField(
+                        default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow,
+                        max_length=15,
+                    ),
+                ),
+                ("startingOptions", models.CharField(blank=True, max_length=20)),
+                ("currentPlayers", models.CharField(blank=True, max_length=100)),
+                ("playerOrderSeed", models.PositiveSmallIntegerField(default=0)),
+                ("maxPlayers", models.PositiveSmallIntegerField(default=2)),
+                ("turn", models.PositiveSmallIntegerField(default=1)),
+                ("phase", models.PositiveSmallIntegerField(default=0)),
+                ("kickoutDuration", models.PositiveSmallIntegerField(default=200)),
+                ("gamePace", models.PositiveSmallIntegerField(default=40)),
+                (
+                    "created",
+                    models.CharField(
+                        default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow,
+                        max_length=15,
+                    ),
+                ),
+                ("zoomLevels", models.CharField(default="[]", max_length=30)),
+                ("chatData", models.TextField(blank=True)),
+                ("player0notes", models.TextField(blank=True)),
+                ("player1notes", models.TextField(blank=True)),
+                ("player2notes", models.TextField(blank=True)),
+                ("player3notes", models.TextField(blank=True)),
+                ("gameData", models.TextField(blank=True)),
+                ("rewindData", models.TextField(blank=True)),
+                ("rewindTempData", models.TextField(blank=True)),
+                ("statsExcludedGame", models.BooleanField(default=False)),
+                ("kickoutFlexiData", models.TextField(blank=True)),
+                (
+                    "allPlayers",
+                    models.ManyToManyField(
+                        related_name="WEBallPlayersRelName", to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "creator",
+                    models.ForeignKey(
+                        default=None,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="WEBgame_creator_relName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "host",
+                    models.ForeignKey(
+                        default=None,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="WEBgame_host_relName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "invitedPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="WEBinvitedPlayersRelName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "kickedPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="WEBkickedPlayersRelName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "missingPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="WEBmissingPlayersRelName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "playersWithChatNotification",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="WEBplayersWithChatNotificationName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "winner",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="WEBgame_winner_relName",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

@@ -5,26 +5,49 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0042_mini_tournaments'),
-        ('FCM', '0073_fcm_game_deletegamevotes'),
+        ("Lobby", "0042_mini_tournaments"),
+        ("FCM", "0073_fcm_game_deletegamevotes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='relatedMiniTournament',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='minitournament_relName', to='Lobby.mini_tournaments'),
+            model_name="fcm_game",
+            name="relatedMiniTournament",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="minitournament_relName",
+                to="Lobby.mini_tournaments",
+            ),
         ),
         migrations.AlterField(
-            model_name='fcm_tournament',
-            name='tournamentStatus',
-            field=models.CharField(choices=[('OP', 'Open'), ('PR', 'Private'), ('IP', 'In Progress'), ('FN', 'Finished')], default='OP', max_length=2),
+            model_name="fcm_tournament",
+            name="tournamentStatus",
+            field=models.CharField(
+                choices=[
+                    ("OP", "Open"),
+                    ("PR", "Private"),
+                    ("IP", "In Progress"),
+                    ("FN", "Finished"),
+                ],
+                default="OP",
+                max_length=2,
+            ),
         ),
         migrations.AlterField(
-            model_name='fcm_tournament',
-            name='tournamentType',
-            field=models.CharField(choices=[('RR', 'Rounds'), ('KO', 'Knockout'), ('TL', 'Two Lives'), ('PT', 'Points')], default='RR', max_length=2),
+            model_name="fcm_tournament",
+            name="tournamentType",
+            field=models.CharField(
+                choices=[
+                    ("RR", "Rounds"),
+                    ("KO", "Knockout"),
+                    ("TL", "Two Lives"),
+                    ("PT", "Points"),
+                ],
+                default="RR",
+                max_length=2,
+            ),
         ),
     ]
