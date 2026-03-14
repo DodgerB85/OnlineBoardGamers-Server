@@ -129,7 +129,7 @@
     initData.trade = '{{ trade }}';
     
     initData.secondsToNextKickout = {{ secondsToNextKickout }};
-    {% if kickoutRequired > 0 and not myMove %}
+    {% if kickoutRequired > 0 %}
     initData.kickoutRequired = {{kickoutRequired}};
     {% endif %}
     initData.notes = '{{ notes | safe }}';

@@ -9,11 +9,6 @@ import base64
 import gzip
 from django.core.cache import cache
 
-
-import json
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-
 # from telegram import Update
 # from telegram.ext import Application, CommandHandler, ContextTypes
 from decouple import config
@@ -22,7 +17,6 @@ from decouple import config
 # import urllib
 
 # from random import randint
-from itertools import chain  # , islice
 from datetime import timedelta
 from collections import Counter
 
@@ -113,7 +107,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_hasRequiredExperience,
     SF_startAnyTournament,
     SF_getRequiredExp,
-    SF_startAnyTournament,
     SF_getMiniTournamentCreationJsonReturn,
     SF_TGZadvancedOptions,
     SF_fastSerializeGame,
@@ -233,7 +226,7 @@ def telegram_bot_response(request):
             chat_id = message["chat"]["id"]
             chat_type = message["chat"]["type"]
             text = message.get("text")
-            user = message.get("from", {})
+            #user = message.get("from", {})
 
             # Handle Commands
             if text and text.startswith("/start"):
@@ -927,8 +920,8 @@ def handler500(request, exception=None, *_, **_k):
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                 data={"content": str(e)},
             )
-        except:
-            print("DOUBLE FAILURE in 500")
+        except Exception as e:
+            print(f"DOUBLE FAILURE in 500: {str(e)}")
 
     return render(
         request,
@@ -1564,7 +1557,7 @@ def index(request):
     # print_timestamp("Step 4: MT fetched")
 
     # --- Step 5: Caching Tournament Availability ---
-    cache_key = f"lobby_main_tournaments_check"
+    cache_key = "lobby_main_tournaments_check"
     available_tournaments = cache.get(cache_key)
     if available_tournaments is None:
         main_tours = list(
@@ -1628,7 +1621,7 @@ def login_view(request):
             try:
                 body_sample = request.body.decode('utf-8')[:500]
                 debug_info["Raw_Body_Sample"] = body_sample
-            except:
+            except Exception:
                 debug_info["Raw_Body_Status"] = "Not decodable"
 
             formatted_data = json.dumps(debug_info, indent=2)
@@ -2346,7 +2339,7 @@ def createWEBpage(request, gameID=0):
             currentGame = Game.objects.get(id=gameID, gameCode="WEB")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
-        presenter = currentGame.presenter()
+        #presenter = currentGame.presenter()
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
@@ -2388,7 +2381,7 @@ def createRNBpage(request, gameID=0):
             currentGame = Game.objects.get(id=gameID, gameCode="RNB")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
-        presenter = currentGame.presenter()
+        #presenter = currentGame.presenter()
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
 
@@ -2885,7 +2878,7 @@ def playerInfo(request, usernameToProfile):
         )
         gameArr.extend([model_total_finished, model_total_won, all_pct])
         allGamesArr.append(gameArr)
-        post_loop_hits = len(connection.queries)
+        #post_loop_hits = len(connection.queries)
 
     # Final calculations
     jointWinTotal = str(total_wins_joint)
@@ -3129,12 +3122,9 @@ def checkJoinGame(request, gameType, gameID):
     if jsonData.get("source") == "ajax":
         ajaxReturn = True
 
-    gameModel = None
 
     # CHECK VALID gameType
-    if gameType in GAME_NAMES_MODELS:
-        gameModel = GAME_NAMES_MODELS[gameType]
-    else:
+    if gameType not in GAME_NAMES_MODELS:
         messages.error(request, (gettext("Invalid Game Join Link")))
         if ajaxReturn:
             return JsonResponse(
@@ -3143,6 +3133,7 @@ def checkJoinGame(request, gameType, gameID):
                 }
             )
         return
+        
     # CHECK GAME EXISTS
     try:
         currentGame = Game.objects.prefetch_related(
@@ -3415,7 +3406,7 @@ def deleteGame(request, gameType):
         if gameModel is None:
             return JsonResponse({"noGame": True}, safe=False)
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameType)
-    except:
+    except Game.DoesNotExist:
         return JsonResponse({"noGame": True}, safe=False)
 
     # Delete Training Game // Can never really fail

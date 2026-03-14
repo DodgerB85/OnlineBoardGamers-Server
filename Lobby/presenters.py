@@ -10,7 +10,6 @@ import json
 import random
 
 from django.utils.translation import gettext
-from django.db.models import Q
 from django.urls import reverse
 
 from Lobby.sharedFunctions.sharedRefs import (
@@ -770,7 +769,6 @@ class AQYpresenter(GamePresenter):
 
     def getJsonMoveResponse(self):
         import time
-        import json
 
         readyPlayers = []
         jsonResponse = []
@@ -1231,9 +1229,26 @@ class BusPresenter(GamePresenter):
 
 
 class RNBpresenter(GamePresenter):
+    def getStrictIsMyMove(self, loggedInPlayerUsername=None):
+        if loggedInPlayerUsername is None:
+            return False
+
+        currentPlayersList = self.gameObj.serverCurrentPlayerNamesInTurnOrder
+
+        if not currentPlayersList:
+            return False
+        # If you are front of the queue, it is your turn
+        if currentPlayersList[0] == loggedInPlayerUsername:
+            return True
+        # If it is a simul turn, and you are ANYWHERE in the list, it is your move
+        if self.gameObj.phase in rfRNB.ALL_PHASE_CONFLICT_DECISIONS:
+            return True
+
+        return False
+
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
-        if loggedInPlayerUsername == None:
+        if loggedInPlayerUsername is None:
             return False
 
         currentPlayersList = self.gameObj.serverCurrentPlayerNamesInTurnOrder
@@ -1325,19 +1340,19 @@ class RNBpresenter(GamePresenter):
             playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def getCurrentPlayers(self):
-        all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
-
-        _currentPlayers = []
-        for gp in all_players:
-            if gp.player:
-                if self.hasMoveEndData(gp.player.username):
-                    pass
-                elif gp.player.username != "RnbBot":
-                    _currentPlayers.append(gp.player.username)
-
-        return ", ".join(_currentPlayers)
-
+    #def getCurrentPlayers(self):
+    #    all_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+#
+    #    _currentPlayers = []
+    #    for gp in all_players:
+    #        if gp.player:
+    #            if self.hasMoveEndData(gp.player.username):
+    #                pass
+    #            elif gp.player.username != "RnbBot":
+    #                _currentPlayers.append(gp.player.username)
+#
+    #    return ", ".join(_currentPlayers)
+#
     # TODO fix this for RNB
     def hasMoveEndData(self, name):
         seat = self.seatPosition(name)
@@ -1436,7 +1451,6 @@ class RNBpresenter(GamePresenter):
 
     def getJsonMoveResponse(self):
         import time
-        import json
 
         readyPlayers = []
         jsonResponse = []
@@ -1932,10 +1946,6 @@ class FCMpresenter(GamePresenter):
 
     # NEEDS TO HANDLE OLD CODE TO DISPLAY FINISHED GAMES
     def getRewindHostHTML(self):
-        USE_NEW_CODE = False
-        if int(self.gameObj.created) > 1744974000000:
-            USE_NEW_CODE = True
-
         rewindConsentVotes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
 
         rewindHTML = ""
@@ -2102,7 +2112,7 @@ class HCpresenter(GamePresenter):
         current_players_arr = (
             json.loads(self.gameObj.currentPlayersInTurnOrder)
             if self.gameObj.currentPlayersInTurnOrder
-            and self.gameObj.currentPlayersInTurnOrder != None
+            and self.gameObj.currentPlayersInTurnOrder is not None
             and self.gameObj.currentPlayersInTurnOrder != ""
             else []
         )
@@ -2128,7 +2138,7 @@ class HCpresenter(GamePresenter):
 
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
-        if loggedInPlayerUsername == None:
+        if loggedInPlayerUsername is None:
             return False
 
         currentPlayersArr = self.getCurrentPlayersInOrderArrHC()
@@ -2296,8 +2306,6 @@ class HCpresenter(GamePresenter):
         return ""
 
     def hasMoveData(self, name, includeIllegal=False):
-        from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
-
         seat = self.seatPosition(name)
         if 0 <= seat <= 4:
             gp = self.gameObj.players.filter(seat_order=seat).first()
