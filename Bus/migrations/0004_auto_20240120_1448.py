@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Bus', '0003_auto_20231230_0513'),
+        ("Bus", "0003_auto_20231230_0513"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='bus_game',
-            name='gameDescription',
-            field=models.CharField(blank=True, db_collation='utf8mb4_general_ci', max_length=120),
+            model_name="bus_game",
+            name="gameDescription",
+            field=models.CharField(
+                blank=True, db_collation="utf8mb4_general_ci", max_length=120
+            ),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='gameName',
-            field=models.CharField(db_collation='utf8mb4_general_ci', default='[Bus Game]', max_length=120),
+            model_name="bus_game",
+            name="gameName",
+            field=models.CharField(
+                db_collation="utf8mb4_general_ci", default="[Bus Game]", max_length=120
+            ),
         ),
     ]

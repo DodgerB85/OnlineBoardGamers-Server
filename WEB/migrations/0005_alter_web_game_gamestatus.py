@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("WEB", "0004_web_game_deletegamevotes"),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0030_profile_tgzminimaltext'),
+        ("Lobby", "0030_profile_tgzminimaltext"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='preferredCNScolour',
+            model_name="profile",
+            name="preferredCNScolour",
             field=models.PositiveSmallIntegerField(blank=True, default=None, null=True),
         ),
     ]

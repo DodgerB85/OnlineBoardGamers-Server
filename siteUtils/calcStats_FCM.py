@@ -124,7 +124,8 @@ query_new_code = (
 )
 
 base_queryset = (
-    Game.objects.filter(gameCode="FCM").prefetch_related(winner_prefetch)
+    Game.objects.filter(gameCode="FCM")
+    .prefetch_related(winner_prefetch)
     # .select_related("winner")
     .only("id", "gameData", "startingOptions", "turn", "gameStatus")
 ).distinct()
@@ -146,16 +147,16 @@ def filter_by_starting_options(queryset, new_ms_value, include):
     # 2. At the start: [10,
     # 3. In the middle: , 10,
     # 4. At the end: , 10]
-    
+
     q = (
-        Q(startingOptions__contains=f"[{new_ms_value}]") |
-        Q(startingOptions__contains=f"[{new_ms_value},") |
-        Q(startingOptions__contains=f", {new_ms_value},") |
-        Q(startingOptions__contains=f",{new_ms_value},") |
-        Q(startingOptions__contains=f", {new_ms_value}]") |
-        Q(startingOptions__contains=f",{new_ms_value}]")
+        Q(startingOptions__contains=f"[{new_ms_value}]")
+        | Q(startingOptions__contains=f"[{new_ms_value},")
+        | Q(startingOptions__contains=f", {new_ms_value},")
+        | Q(startingOptions__contains=f",{new_ms_value},")
+        | Q(startingOptions__contains=f", {new_ms_value}]")
+        | Q(startingOptions__contains=f",{new_ms_value}]")
     )
-    
+
     return queryset.filter(q) if include else queryset.exclude(q)
     # This regex looks for your value:
     # 1. After a bracket or comma: [\[,]
@@ -164,7 +165,7 @@ def filter_by_starting_options(queryset, new_ms_value, include):
     # 4. Followed by optional whitespace: \s*
     # 5. Followed by a comma or closing bracket: [,\\]]
 
-    #pattern = rf"[\[,]\s*{new_ms_value}\s*[,\\]]"
+    # pattern = rf"[\[,]\s*{new_ms_value}\s*[,\\]]"
 
     # q = (
     #    Q(startingOptions=str(new_ms_value))
@@ -176,9 +177,9 @@ def filter_by_starting_options(queryset, new_ms_value, include):
     #    return queryset.filter(q)
     # else:
     #    return queryset.exclude(q)
-    #if include:
+    # if include:
     #    return queryset.filter(startingOptions__iregex=pattern)
-    #else:
+    # else:
     #    return queryset.exclude(startingOptions__iregex=pattern)
 
 
@@ -278,14 +279,14 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
         # Since we use Prefetch(to_attr="winner_record"), it's a list on the game object.
         winner_gp_list = getattr(game, "winner_record", [])
         winner_gp = winner_gp_list[0] if winner_gp_list else None
-        
+
         if not winner_gp or not winner_gp.player:
             print(f"NO WINNER:: {getattr(game, 'id')}")
             continue
-            
+
         winner_username = winner_gp.player.username
         # -------------------------------
-        
+
         raw_data = []
         try:
             byte_array = bytearray(base64.b64decode(game.gameData))

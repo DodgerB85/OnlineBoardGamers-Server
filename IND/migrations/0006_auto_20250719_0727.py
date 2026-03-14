@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('IND', '0005_auto_20250119_1135'),
+        ("IND", "0005_auto_20250119_1135"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ind_game',
-            name='deleteGameVotes',
+            model_name="ind_game",
+            name="deleteGameVotes",
             field=models.JSONField(blank=True, default=dict, null=True),
         ),
         migrations.AddField(
-            model_name='ind_game',
-            name='playersPreMoveData',
+            model_name="ind_game",
+            name="playersPreMoveData",
             field=models.TextField(blank=True),
         ),
     ]

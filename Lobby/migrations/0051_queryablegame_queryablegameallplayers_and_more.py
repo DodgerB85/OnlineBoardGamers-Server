@@ -4,75 +4,126 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0050_remove_main_tournament_creator'),
+        ("Lobby", "0050_remove_main_tournament_creator"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='QueryableGame',
+            name="QueryableGame",
             fields=[
-                ('game', models.CharField(max_length=255)),
-                ('id', models.PositiveIntegerField()),
-                ('pk', models.CompositePrimaryKey('game', 'id', blank=True, editable=False, primary_key=True, serialize=False)),
-                ('gameName', models.CharField(max_length=255)),
-                ('gameDescription', models.CharField(max_length=255)),
-                ('gameStatus', models.CharField(max_length=255)),
-                ('latestUpdate', models.CharField(max_length=255)),
-                ('startingOptions', models.CharField(max_length=255)),
-                ('currentPlayers', models.CharField(max_length=255)),
-                ('maxPlayers', models.PositiveIntegerField()),
-                ('turn', models.PositiveIntegerField()),
-                ('phase', models.PositiveIntegerField()),
-                ('kickoutDuration', models.PositiveIntegerField()),
-                ('gamePace', models.PositiveIntegerField()),
-                ('created', models.DateField()),
+                ("game", models.CharField(max_length=255)),
+                ("id", models.PositiveIntegerField()),
+                (
+                    "pk",
+                    models.CompositePrimaryKey(
+                        "game",
+                        "id",
+                        blank=True,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("gameName", models.CharField(max_length=255)),
+                ("gameDescription", models.CharField(max_length=255)),
+                ("gameStatus", models.CharField(max_length=255)),
+                ("latestUpdate", models.CharField(max_length=255)),
+                ("startingOptions", models.CharField(max_length=255)),
+                ("currentPlayers", models.CharField(max_length=255)),
+                ("maxPlayers", models.PositiveIntegerField()),
+                ("turn", models.PositiveIntegerField()),
+                ("phase", models.PositiveIntegerField()),
+                ("kickoutDuration", models.PositiveIntegerField()),
+                ("gamePace", models.PositiveIntegerField()),
+                ("created", models.DateField()),
             ],
             options={
-                'db_table': 'Lobby_all_games',
-                'managed': False,
+                "db_table": "Lobby_all_games",
+                "managed": False,
             },
         ),
         migrations.CreateModel(
-            name='QueryableGameAllPlayers',
+            name="QueryableGameAllPlayers",
             fields=[
-                ('pk', models.CompositePrimaryKey('game', 'id', 'player_id', blank=True, editable=False, primary_key=True, serialize=False)),
-                ('game', models.CharField(max_length=255)),
-                ('id', models.PositiveIntegerField()),
+                (
+                    "pk",
+                    models.CompositePrimaryKey(
+                        "game",
+                        "id",
+                        "player_id",
+                        blank=True,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("game", models.CharField(max_length=255)),
+                ("id", models.PositiveIntegerField()),
             ],
             options={
-                'db_table': 'Lobby_all_games_all_players',
-                'managed': False,
+                "db_table": "Lobby_all_games_all_players",
+                "managed": False,
             },
         ),
         migrations.CreateModel(
-            name='QueryableGameInvitedPlayers',
+            name="QueryableGameInvitedPlayers",
             fields=[
-                ('pk', models.CompositePrimaryKey('game', 'id', 'invited_player', blank=True, editable=False, primary_key=True, serialize=False)),
-                ('game', models.CharField(max_length=255)),
-                ('id', models.PositiveIntegerField()),
+                (
+                    "pk",
+                    models.CompositePrimaryKey(
+                        "game",
+                        "id",
+                        "invited_player",
+                        blank=True,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("game", models.CharField(max_length=255)),
+                ("id", models.PositiveIntegerField()),
             ],
             options={
-                'db_table': 'Lobby_all_games_invited_players',
-                'managed': False,
+                "db_table": "Lobby_all_games_invited_players",
+                "managed": False,
             },
         ),
         migrations.CreateModel(
-            name='QueryableGameWinners',
+            name="QueryableGameWinners",
             fields=[
-                ('pk', models.CompositePrimaryKey('game', 'game_id', 'winner_id', blank=True, editable=False, primary_key=True, serialize=False)),
-                ('game', models.CharField(max_length=255)),
-                ('game_id', models.PositiveIntegerField(db_column='id')),
+                (
+                    "pk",
+                    models.CompositePrimaryKey(
+                        "game",
+                        "game_id",
+                        "winner_id",
+                        blank=True,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("game", models.CharField(max_length=255)),
+                ("game_id", models.PositiveIntegerField(db_column="id")),
             ],
             options={
-                'db_table': 'Lobby_all_games_winners',
-                'managed': False,
+                "db_table": "Lobby_all_games_winners",
+                "managed": False,
             },
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='profileLanguage',
-            field=models.CharField(choices=[('en-gb', 'English (United Kingdom)'), ('zh-hans', '简体中文'), ('es', 'Spanish (Spain)'), ('de', 'Deutsche')], default='en-gb', max_length=10),
+            model_name="profile",
+            name="profileLanguage",
+            field=models.CharField(
+                choices=[
+                    ("en-gb", "English (United Kingdom)"),
+                    ("zh-hans", "简体中文"),
+                    ("es", "Spanish (Spain)"),
+                    ("de", "Deutsche"),
+                ],
+                default="en-gb",
+                max_length=10,
+            ),
         ),
     ]

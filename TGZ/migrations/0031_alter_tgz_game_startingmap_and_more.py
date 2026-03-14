@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TGZ', '0030_tgz_game_deletegamevotes'),
+        ("TGZ", "0030_tgz_game_deletegamevotes"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tgz_game',
-            name='startingMap',
+            model_name="tgz_game",
+            name="startingMap",
             field=models.CharField(blank=True, max_length=190),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='statsExcludeConsent',
+            model_name="tgz_game",
+            name="statsExcludeConsent",
             field=models.CharField(blank=True, max_length=40, null=True),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='zoomLevels',
-            field=models.CharField(default='[16, 16, 16, 16]', max_length=30),
+            model_name="tgz_game",
+            name="zoomLevels",
+            field=models.CharField(default="[16, 16, 16, 16]", max_length=30),
         ),
     ]

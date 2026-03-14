@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("TGZ", "0026_alter_tgz_game_id"),
     ]

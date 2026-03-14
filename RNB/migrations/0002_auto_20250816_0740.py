@@ -5,25 +5,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('RNB', '0001_initial'),
+        ("RNB", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='rnb_game',
-            name='created',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15),
+            model_name="rnb_game",
+            name="created",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15
+            ),
         ),
         migrations.AlterField(
-            model_name='rnb_game',
-            name='gameStatus',
-            field=models.CharField(choices=[('AVAILABLE', 'AVAILABLE'), ('WAITING', 'WAITING'), ('PRIVATE', 'PRIVATE'), ('ACTIVE', 'ACTIVE'), ('FINISHED', 'FINISHED')], default='AVAILABLE', max_length=9),
+            model_name="rnb_game",
+            name="gameStatus",
+            field=models.CharField(
+                choices=[
+                    ("AVAILABLE", "AVAILABLE"),
+                    ("WAITING", "WAITING"),
+                    ("PRIVATE", "PRIVATE"),
+                    ("ACTIVE", "ACTIVE"),
+                    ("FINISHED", "FINISHED"),
+                ],
+                default="AVAILABLE",
+                max_length=9,
+            ),
         ),
         migrations.AlterField(
-            model_name='rnb_game',
-            name='latestUpdate',
-            field=models.CharField(default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15),
+            model_name="rnb_game",
+            name="latestUpdate",
+            field=models.CharField(
+                default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15
+            ),
         ),
     ]

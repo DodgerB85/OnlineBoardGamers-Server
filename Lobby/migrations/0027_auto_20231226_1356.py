@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0026_auto_20231226_1337'),
+        ("Lobby", "0026_auto_20231226_1337"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='changelog',
-            name='timestamp',
+            model_name="changelog",
+            name="timestamp",
             field=models.CharField(default=1703598969000, max_length=30),
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='FCMtournamentTrophies',
-            field=models.CharField(default='[[0, 0, 0]]', max_length=30),
+            model_name="profile",
+            name="FCMtournamentTrophies",
+            field=models.CharField(default="[[0, 0, 0]]", max_length=30),
         ),
     ]

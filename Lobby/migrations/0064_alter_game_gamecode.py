@@ -4,15 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0063_migrate_web_games'),
+        ("Lobby", "0063_migrate_web_games"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='game',
-            name='gameCode',
-            field=models.CharField(choices=[('FCM', 'Food Chain Magnate'), ('HC', 'Horseless Carriage'), ('Bus', 'Bus'), ('TGZ', 'The Great Zimbabwe'), ('CNS', 'Cannes'), ('AQY', 'Antiquity'), ('IND', 'Indonesia'), ('KFW', 'Keyflower'), ('WEB', 'Web'), ('RNB', 'Roads & Boats')], db_column='gameCode', default='FCM', max_length=3),
+            model_name="game",
+            name="gameCode",
+            field=models.CharField(
+                choices=[
+                    ("FCM", "Food Chain Magnate"),
+                    ("HC", "Horseless Carriage"),
+                    ("Bus", "Bus"),
+                    ("TGZ", "The Great Zimbabwe"),
+                    ("CNS", "Cannes"),
+                    ("AQY", "Antiquity"),
+                    ("IND", "Indonesia"),
+                    ("KFW", "Keyflower"),
+                    ("WEB", "Web"),
+                    ("RNB", "Roads & Boats"),
+                ],
+                db_column="gameCode",
+                default="FCM",
+                max_length=3,
+            ),
         ),
     ]

@@ -81,16 +81,21 @@ active_games_query = (
 
 # 2. Use select_related inside prefetch_related for maximum efficiency
 # This fetches the GamePlayer and the User (player) in one go for each game.
-#allActiveGames = list(
+# allActiveGames = list(
 #    Game.objects.filter(active_games_query)
 #    .prefetch_related("players__player")
 #    .distinct()
-#)
+# )
 allActiveGames = list(
     Game.objects.filter(active_games_query)
     .prefetch_related(
         # Only prefetch the specific player whose turn it is
-        Prefetch('players', queryset=GamePlayer.objects.filter(is_current=True).select_related('player'))
+        Prefetch(
+            "players",
+            queryset=GamePlayer.objects.filter(is_current=True).select_related(
+                "player"
+            ),
+        )
     )
     .distinct()
 )

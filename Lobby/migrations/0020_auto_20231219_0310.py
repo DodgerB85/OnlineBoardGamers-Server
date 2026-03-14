@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0019_alter_changelog_timestamp'),
+        ("Lobby", "0019_alter_changelog_timestamp"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='preferredTGZcolour',
+            model_name="profile",
+            name="preferredTGZcolour",
             field=models.SmallIntegerField(default=-1),
         ),
         migrations.AlterField(
-            model_name='changelog',
-            name='timestamp',
+            model_name="changelog",
+            name="timestamp",
             field=models.CharField(default=1702955399000, max_length=30),
         ),
     ]

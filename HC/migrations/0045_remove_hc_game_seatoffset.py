@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0044_remove_hc_game_serverturnorder'),
+        ("HC", "0044_remove_hc_game_serverturnorder"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='hc_game',
-            name='seatOffset',
+            model_name="hc_game",
+            name="seatOffset",
         ),
     ]

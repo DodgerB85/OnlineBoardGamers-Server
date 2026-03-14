@@ -13,7 +13,20 @@ from .models import (
     Game,
     GamePlayer,
 )
-from .modelProxies import FCMMiniTournament, TGZMiniTournament, CNSgame, WEBgame, AQYgame, TGZgame, INDgame, Busgame, FCMgame, RNBgame, HCgame, KFWgame
+from .modelProxies import (
+    FCMMiniTournament,
+    TGZMiniTournament,
+    CNSgame,
+    WEBgame,
+    AQYgame,
+    TGZgame,
+    INDgame,
+    Busgame,
+    FCMgame,
+    RNBgame,
+    HCgame,
+    KFWgame,
+)
 
 from django.conf import settings
 from django import forms
@@ -76,7 +89,17 @@ class GamePlayerInline(admin.TabularInline):
     # fields = ("player", "player_number", "status", "edit_link")
     # readonly_fields = ("edit_link",)
     show_change_link = True
-    fields = ("player", "seat_order", "winner", "is_current", "is_missing", "is_kicked", "moveDataJSON", "currentMoveTime", "currentMoveData")
+    fields = (
+        "player",
+        "seat_order",
+        "winner",
+        "is_current",
+        "is_missing",
+        "is_kicked",
+        "moveDataJSON",
+        "currentMoveTime",
+        "currentMoveData",
+    )
     autocomplete_fields = ["player"]
 
     # @admin.display(description="Edit")
@@ -270,8 +293,9 @@ class GameAdmin(admin.ModelAdmin):
     # search_fields = ("gameName", "creator__username")
     search_fields = ("gameName", "gameDescription", "gameCode")
 
-    readonly_fields = ("ind_premove_display",)#, "gameDataBLOB")
-    @admin.display(description='IND premove')
+    readonly_fields = ("ind_premove_display",)  # , "gameDataBLOB")
+
+    @admin.display(description="IND premove")
     def ind_premove_display(self, obj):
         return obj.playersPreMoveData
 
@@ -352,7 +376,7 @@ class GameAdmin(admin.ModelAdmin):
                 "classes": ("collapse",),
                 "fields": (
                     "gameData",
-                    #"gameDataBLOB",
+                    # "gameDataBLOB",
                     "rewindData",
                     "rewindTempData",
                     "chatData",
@@ -413,6 +437,7 @@ class CNSgameAdmin(GameAdmin):
     class Meta:
         app_label = "CNS"
 
+
 @admin.register(WEBgame)
 class WEBgameAdmin(GameAdmin):
     def get_queryset(self, request):
@@ -420,6 +445,7 @@ class WEBgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "WEB"
+
 
 @admin.register(TGZgame)
 class TGZgameAdmin(GameAdmin):
@@ -429,14 +455,15 @@ class TGZgameAdmin(GameAdmin):
     class Meta:
         app_label = "TGZ"
 
+
 ################### END Register game objects to specific app
 @admin.register(AQYgame)
 class AQYgameAdmin(GameAdmin):
     # Copy parent fieldsets and convert to list to allow modification
-    #new_fieldsets = list(GameAdmin.fieldsets)
-#
+    # new_fieldsets = list(GameAdmin.fieldsets)
+    #
     ## Define your specific section
-    #player_moves_section = (
+    # player_moves_section = (
     #    "Player Moves",
     #    {
     #        "classes": ("collapse",),
@@ -447,17 +474,18 @@ class AQYgameAdmin(GameAdmin):
     #            ("player3currentMoveTime", "player3currentMoveData"),
     #        ),
     #    },
-    #)
-#
+    # )
+    #
     ## Insert it at index 2 (after 'Main Game Details')
-    #new_fieldsets.insert(2, player_moves_section) # type: ignore
-    #fieldsets = tuple(new_fieldsets)
-    
+    # new_fieldsets.insert(2, player_moves_section) # type: ignore
+    # fieldsets = tuple(new_fieldsets)
+
     def get_queryset(self, request):
         return super().get_queryset(request).filter(gameCode="AQY")
 
     class Meta:
         app_label = "AQY"
+
 
 @admin.register(INDgame)
 class INDgameAdmin(GameAdmin):
@@ -467,6 +495,7 @@ class INDgameAdmin(GameAdmin):
     class Meta:
         app_label = "IND"
 
+
 @admin.register(Busgame)
 class BusgameAdmin(GameAdmin):
     def get_queryset(self, request):
@@ -475,6 +504,7 @@ class BusgameAdmin(GameAdmin):
     class Meta:
         app_label = "Bus"
 
+
 @admin.register(FCMgame)
 class FCMgameAdmin(GameAdmin):
     def get_queryset(self, request):
@@ -482,7 +512,8 @@ class FCMgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "FCM"
-        
+
+
 @admin.register(RNBgame)
 class RNBgameAdmin(GameAdmin):
     def get_queryset(self, request):
@@ -490,6 +521,7 @@ class RNBgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "RNB"
+
 
 @admin.register(HCgame)
 class HCgameAdmin(GameAdmin):
@@ -499,6 +531,7 @@ class HCgameAdmin(GameAdmin):
     class Meta:
         app_label = "HC"
 
+
 @admin.register(KFWgame)
 class KFWgameAdmin(GameAdmin):
     def get_queryset(self, request):
@@ -506,5 +539,6 @@ class KFWgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "KFW"
+
 
 ################### END Register game objects to specific app

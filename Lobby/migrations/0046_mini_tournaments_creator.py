@@ -6,15 +6,19 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0045_alter_mini_tournaments_created'),
+        ("Lobby", "0045_alter_mini_tournaments_created"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mini_tournaments',
-            name='creator',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='MT_creator_relName', to=settings.AUTH_USER_MODEL),
+            model_name="mini_tournaments",
+            name="creator",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="MT_creator_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

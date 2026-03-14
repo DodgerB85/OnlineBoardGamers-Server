@@ -4,19 +4,25 @@ from django.db import migrations
 
 
 def migrate_kfw_games(apps, schema_editor):
-    KFW_Game = apps.get_model('KFW', 'KFW_Game')
-    Game = apps.get_model('Lobby', 'Game')
-    GamePlayer = apps.get_model('Lobby', 'GamePlayer')
+    KFW_Game = apps.get_model("KFW", "KFW_Game")
+    Game = apps.get_model("Lobby", "Game")
+    GamePlayer = apps.get_model("Lobby", "GamePlayer")
 
-    print(f"\nMigrating {KFW_Game.objects.all().count()} KFW games to unified Game model...")
+    print(
+        f"\nMigrating {KFW_Game.objects.all().count()} KFW games to unified Game model..."
+    )
     migrated_count = 0
 
     for old_game in KFW_Game.objects.all().prefetch_related(
-        'allPlayers', 'missingPlayers', 'kickedPlayers',
-        'invitedPlayers', 'playersWithChatNotification', 'winner'
+        "allPlayers",
+        "missingPlayers",
+        "kickedPlayers",
+        "invitedPlayers",
+        "playersWithChatNotification",
+        "winner",
     ):
         new_game = Game.objects.create(
-            gameCode='KFW',
+            gameCode="KFW",
             original_id=old_game.id,
             gameName=old_game.gameName,
             gameDescription=old_game.gameDescription,
@@ -36,7 +42,9 @@ def migrate_kfw_games(apps, schema_editor):
             zoomLevels=old_game.zoomLevels,
             latestUpdate=old_game.latestUpdate,
             created=old_game.created,
-            startingMap=old_game.startingMap if hasattr(old_game, 'startingMap') else "",
+            startingMap=old_game.startingMap
+            if hasattr(old_game, "startingMap")
+            else "",
             startingOptions=old_game.startingOptions,
             creator=old_game.creator,
             host=old_game.host,
@@ -63,25 +71,28 @@ def migrate_kfw_games(apps, schema_editor):
         current_player_names = set()
         if current_players_str:
             current_player_names = {
-                name.strip() for name in current_players_str.split(",")
-                if name.strip()
+                name.strip() for name in current_players_str.split(",") if name.strip()
             }
 
         # Get missing, kicked, and chat notification player sets
-        missing_player_ids = set(old_game.missingPlayers.values_list('id', flat=True))
-        kicked_player_ids = set(old_game.kickedPlayers.values_list('id', flat=True))
-        chat_notify_ids = set(old_game.playersWithChatNotification.values_list('id', flat=True))
+        missing_player_ids = set(old_game.missingPlayers.values_list("id", flat=True))
+        kicked_player_ids = set(old_game.kickedPlayers.values_list("id", flat=True))
+        chat_notify_ids = set(
+            old_game.playersWithChatNotification.values_list("id", flat=True)
+        )
 
         # Get winner ids (KFW winner is M2M)
-        winner_ids = set(old_game.winner.values_list('id', flat=True))
+        winner_ids = set(old_game.winner.values_list("id", flat=True))
 
         # Save currentPlayersInTurnOrder
-        current_players_arr = current_players_str.split(',') if current_players_str else []
+        current_players_arr = (
+            current_players_str.split(",") if current_players_str else []
+        )
         new_game.currentPlayersInTurnOrder = json.dumps(current_players_arr)
         new_game.save()
 
         # Build rewind consent activeVotes if present
-        rewind_consent_str = getattr(old_game, 'rewindConsent', '') or ''
+        rewind_consent_str = getattr(old_game, "rewindConsent", "") or ""
         if rewind_consent_str and len(player_list) > 0:
             consent_dict = {}
             for seat_idx, player in enumerate(player_list):
@@ -93,17 +104,17 @@ def migrate_kfw_games(apps, schema_editor):
         for idx, player in enumerate(player_list):
             notes = ""
             if idx == 0:
-                notes = getattr(old_game, 'player0notes', '') or ""
+                notes = getattr(old_game, "player0notes", "") or ""
             elif idx == 1:
-                notes = getattr(old_game, 'player1notes', '') or ""
+                notes = getattr(old_game, "player1notes", "") or ""
             elif idx == 2:
-                notes = getattr(old_game, 'player2notes', '') or ""
+                notes = getattr(old_game, "player2notes", "") or ""
             elif idx == 3:
-                notes = getattr(old_game, 'player3notes', '') or ""
+                notes = getattr(old_game, "player3notes", "") or ""
             elif idx == 4:
-                notes = getattr(old_game, 'player4notes', '') or ""
+                notes = getattr(old_game, "player4notes", "") or ""
             elif idx == 5:
-                notes = getattr(old_game, 'player5notes', '') or ""
+                notes = getattr(old_game, "player5notes", "") or ""
 
             GamePlayer.objects.create(
                 game=new_game,
@@ -125,15 +136,14 @@ def migrate_kfw_games(apps, schema_editor):
 
 
 def reverse_migration(apps, schema_editor):
-    Game = apps.get_model('Lobby', 'Game')
-    Game.objects.filter(gameCode='KFW').delete()
+    Game = apps.get_model("Lobby", "Game")
+    Game.objects.filter(gameCode="KFW").delete()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0096_game_kfw_fields'),
-        ('KFW', '0015_kfw_game_gamedatablob'),
+        ("Lobby", "0096_game_kfw_fields"),
+        ("KFW", "0015_kfw_game_gamedatablob"),
     ]
 
     operations = [

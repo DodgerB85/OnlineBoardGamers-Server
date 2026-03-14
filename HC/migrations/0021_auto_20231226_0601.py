@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0020_auto_20231226_0527'),
+        ("HC", "0020_auto_20231226_0527"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='hc_game',
-            name='chatData',
+            model_name="hc_game",
+            name="chatData",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='hc_tournament',
-            name='created',
+            model_name="hc_tournament",
+            name="created",
             field=models.CharField(default=1703570502000, max_length=30),
         ),
     ]

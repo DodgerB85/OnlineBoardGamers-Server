@@ -20,12 +20,18 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
 
 # Because the live and dev servers are in different folder names, we need to go up one from that
-ROOT_DIR  = Path(__file__).resolve().parents[2]
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
 if DEBUG:
-    os.environ["LOCAL_DB_NAME"] = str(config("LOCAL_DB_NAME", default="password", cast=str))
-    os.environ["LOCAL_DB_USER"] = str(config("LOCAL_DB_USER", default="password", cast=str))
-    os.environ["LOCAL_DB_PWD"] = str(config("LOCAL_DB_PWD", default="password", cast=str))
+    os.environ["LOCAL_DB_NAME"] = str(
+        config("LOCAL_DB_NAME", default="password", cast=str)
+    )
+    os.environ["LOCAL_DB_USER"] = str(
+        config("LOCAL_DB_USER", default="password", cast=str)
+    )
+    os.environ["LOCAL_DB_PWD"] = str(
+        config("LOCAL_DB_PWD", default="password", cast=str)
+    )
     os.environ["LOCAL_DB_HOST"] = "127.0.0.1"
 
 BASE_DIR = ROOT_DIR / "OnlineBoardGamers"
@@ -46,7 +52,7 @@ start_calc_time = time.perf_counter()
 from Lobby.models import User, Main_Tournament
 
 from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
-from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen 
+from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen
 
 
 # HC 3-5 players
@@ -60,18 +66,18 @@ dayNumber = myDate.day
 monthNumber = myDate.month
 monthName = myDate.strftime("%B")
 
-#_tournamentType = random.choice(["RR", "KO", "TL"])
-#_tournamentType = random.choice(["RR", "TL"])
+# _tournamentType = random.choice(["RR", "KO", "TL"])
+# _tournamentType = random.choice(["RR", "TL"])
 
 ############# HARD CODE NEXT TOURNY
-#_maxGamePlayers = 4
-#_tournamentType = "TL"
+# _maxGamePlayers = 4
+# _tournamentType = "TL"
 ############# HARD CODE NEXT TOURNY
 
-MONTHS_FOR_AQY = [2,8]
-MONTHS_FOR_IND = [3,9]
-MONTHS_FOR_HC = [4,10]
-MONTHS_FOR_BUS = [5,11]
+MONTHS_FOR_AQY = [2, 8]
+MONTHS_FOR_IND = [3, 9]
+MONTHS_FOR_HC = [4, 10]
+MONTHS_FOR_BUS = [5, 11]
 
 
 ############################################
@@ -87,8 +93,15 @@ current_date_plus_7d = current_date + datetime.timedelta(days=7)
 if current_date.month != current_date_plus_7d.month:
     days_until_next_month = (current_date_plus_7d.replace(day=1) - current_date).days
     next_month_number = current_date_plus_7d.month
-    if days_until_next_month == 7 and (next_month_number in MONTHS_FOR_AQY or next_month_number in MONTHS_FOR_IND or next_month_number in MONTHS_FOR_HC or next_month_number in MONTHS_FOR_BUS):
-        print(f"It is 7 days until the next month starts. Next mo num: {next_month_number}")
+    if days_until_next_month == 7 and (
+        next_month_number in MONTHS_FOR_AQY
+        or next_month_number in MONTHS_FOR_IND
+        or next_month_number in MONTHS_FOR_HC
+        or next_month_number in MONTHS_FOR_BUS
+    ):
+        print(
+            f"It is 7 days until the next month starts. Next mo num: {next_month_number}"
+        )
         # Send message to Discord
         box_name = "Antiquity"
         game = "AQY"
@@ -109,16 +122,29 @@ if current_date.month != current_date_plus_7d.month:
             f"[Click here to Play](https://www.OnlineBoardGamers.com/)"
         )
         if settings.DEBUG:
-            requests.post(f'https://discordapp.com/api/webhooks/{config("WEBHOOK_ADMIN_ERROR_MSG")}', data={'content': message})
+            requests.post(
+                f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                data={"content": message},
+            )
         else:
-            requests.post(f'https://discordapp.com/api/webhooks/{config("WEBHOOK_DISCORD_TOURNAMENTS")}', data={'content': message})
+            requests.post(
+                f"https://discordapp.com/api/webhooks/{config('WEBHOOK_DISCORD_TOURNAMENTS')}",
+                data={"content": message},
+            )
 else:
-    print(f"Next month is the same month as the current month - NOT sending notification. Current mo num: {current_date_plus_7d.month}")     
-        
+    print(
+        f"Next month is the same month as the current month - NOT sending notification. Current mo num: {current_date_plus_7d.month}"
+    )
+
 ############################################
 #   OPEN NEW TOURNMENT
 ############################################
-if dayNumber == 1 and (monthNumber in MONTHS_FOR_AQY or monthNumber in MONTHS_FOR_IND or monthNumber in MONTHS_FOR_HC or monthNumber in MONTHS_FOR_BUS):
+if dayNumber == 1 and (
+    monthNumber in MONTHS_FOR_AQY
+    or monthNumber in MONTHS_FOR_IND
+    or monthNumber in MONTHS_FOR_HC
+    or monthNumber in MONTHS_FOR_BUS
+):
     box_name = "box_name"
     maxGamePlayers = random.randrange(3, 5, 1)
     gameCode = "AQY"
@@ -139,13 +165,12 @@ if dayNumber == 1 and (monthNumber in MONTHS_FOR_AQY or monthNumber in MONTHS_FO
         maxGamePlayers = random.randrange(3, 6, 1)
         gameCode = "BUS"
 
-        
     tournamentType = random.choice(["RR", "TL"])
     if maxGamePlayers >= 3:
-        tournamentType = random.choice(["RR", "TL"])#, "PT"])
-        
+        tournamentType = random.choice(["RR", "TL"])  # , "PT"])
+
     # 2,3,5, 6 players
-    maxTournamentPlayers= 30
+    maxTournamentPlayers = 30
     # 4p
     if maxGamePlayers == 4:
         maxTournamentPlayers = 32
@@ -155,9 +180,9 @@ if dayNumber == 1 and (monthNumber in MONTHS_FOR_AQY or monthNumber in MONTHS_FO
         tournamentName=monthName + " Tournament",
         maxTournamentPlayers=maxTournamentPlayers,
         maxGamePlayers=maxGamePlayers,
-        tournamentType=tournamentType
+        tournamentType=tournamentType,
     )
-        
+
     new_tournament.save()
 
     # Add message to Discord
@@ -180,10 +205,16 @@ if dayNumber == 1 and (monthNumber in MONTHS_FOR_AQY or monthNumber in MONTHS_FO
         f"[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{getattr(new_tournament, 'id')}/)"
     )
     if settings.DEBUG:
-        requests.post(f'https://discordapp.com/api/webhooks/{config("WEBHOOK_ADMIN_ERROR_MSG")}', data={'content': message})
+        requests.post(
+            f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+            data={"content": message},
+        )
     else:
-        requests.post(f'https://discordapp.com/api/webhooks/{config("WEBHOOK_DISCORD_TOURNAMENTS")}', data={'content': message})
-        
+        requests.post(
+            f"https://discordapp.com/api/webhooks/{config('WEBHOOK_DISCORD_TOURNAMENTS')}",
+            data={"content": message},
+        )
+
     SN_sendTournamentOpen(new_tournament, gameCode)
 else:
     print(f"It is not day 1, or not a tournament month, NOT opening a tourny")
@@ -191,30 +222,30 @@ else:
 ############################################
 #   START NEW TOURNMENT
 ############################################
-#TOURNAMENT_MODELS = [HC_Tournament, Bus_Tournament, AQY_Tournament, IND_Tournament]
+# TOURNAMENT_MODELS = [HC_Tournament, Bus_Tournament, AQY_Tournament, IND_Tournament]
 ## CHECK FOR TOURNY START
-#for tournament_model in TOURNAMENT_MODELS:
+# for tournament_model in TOURNAMENT_MODELS:
 #
 #    box_name = "box_name"
 #    INNER_URL = "URL"
 #    gameCode = "XXX"
-#    if tournament_model == HC_Tournament: 
+#    if tournament_model == HC_Tournament:
 #        box_name = "Horseless Carriage"
 #        INNER_URL = "HCtournament/HC"
 #        gameCode = "HC"
-#    if tournament_model == Bus_Tournament: 
+#    if tournament_model == Bus_Tournament:
 #        box_name = "Bus"
 #        INNER_URL = "Bustournament/Bus"
 #        gameCode = "Bus"
-#    if tournament_model == AQY_Tournament: 
+#    if tournament_model == AQY_Tournament:
 #        box_name = "Antiquity"
 #        INNER_URL = "AQYtournament/AQY"
 #        gameCode = "AQY"
-#    if tournament_model == IND_Tournament: 
+#    if tournament_model == IND_Tournament:
 #        box_name = "Indonesia"
 #        INNER_URL = "INDtournament/IND"
 #        gameCode = "IND"
-#        
+#
 #    if tournament_model.objects.exists():
 #        newTourny = tournament_model.objects.order_by('-id').first()
 #    else:
@@ -248,20 +279,20 @@ else:
 #                print(f"{box_name}: Not enough players")
 #            elif minimumPlayers:
 #                print(f"{box_name}: Minimum Players met - setting maxPlayers")
-#                
+#
 #                # Calculate the smallest multiple of maxGamePlayers >= totalPlayers
 #                maxGamePlayers = newTourny.maxGamePlayers
 #                if maxGamePlayers == 0:
 #                    print(f"{box_name}: Error - maxGamePlayers is 0")
 #                    exit()
-#                
+#
 #                # Use ceiling division to get the next multiple
 #                next_highest_multiple = ((totalPlayers + maxGamePlayers - 1) // maxGamePlayers) * maxGamePlayers
-#                
+#
 #                # Set maxTournamentPlayers
 #                newTourny.maxTournamentPlayers = next_highest_multiple
 #                newTourny.save()
-#                
+#
 #                # Start a Tourny
 #                if newTourny.maxTournamentPlayers == totalPlayers:
 #                    print(f"{box_name}: Starting Tournament, multiple matches total")
@@ -269,7 +300,7 @@ else:
 #                    #request = requests.Request('POST', url, data=data)
 #                    request = HttpRequest()
 #                    # Create a user object
-#                    user = User.objects.get(username='admin') 
+#                    user = User.objects.get(username='admin')
 #
 #                    # Assign the user object to the request's user attribute
 #                    request.user = user
@@ -280,45 +311,49 @@ else:
 #                    SF_startTournament(request, newTourny, gameCode)
 #                    newTourny.save()
 
-#TOURNAMENT_CONFIG = {
+# TOURNAMENT_CONFIG = {
 #    HC_Tournament: {"name": "Horseless Carriage", "url": "HCtournament/HC", "code": "HC"},
 #    Bus_Tournament: {"name": "Bus", "url": "Bustournament/Bus", "code": "Bus"},
 #    #AQY_Tournament: {"name": "Antiquity", "url": "AQYtournament/AQY", "code": "AQY"},
 #    IND_Tournament: {"name": "Indonesia", "url": "INDtournament/IND", "code": "IND"},
-#}
+# }
 
 GAME_CODES = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
-#for model, config in TOURNAMENT_CONFIG.items():
+# for model, config in TOURNAMENT_CONFIG.items():
 for gameCode in GAME_CODES:
     # 1. OPTIMIZATION: Filter for "OP" status immediately in the DB.
     # If no open tournament exists, this returns None and skips the rest of the hits.
-    newTourny = Main_Tournament.objects.filter(tournamentStatus="OP", gameCode=gameCode).order_by('-id').first()
+    newTourny = (
+        Main_Tournament.objects.filter(tournamentStatus="OP", gameCode=gameCode)
+        .order_by("-id")
+        .first()
+    )
 
     # 2. Add an early exit check for dayNumber
     if not newTourny or dayNumber < 7:
         continue
-    
+
     print("There is an open tourny, and day > 7")
-    
+
     # But if it's not an auto-tourny, continue
-    if gameCode in ["HC", "Bus", "TGZ",  "AQY", "IND"]:
+    if gameCode in ["HC", "Bus", "TGZ", "AQY", "IND"]:
         continue
-    
+
     # Now we only hit the DB further if we actually have a candidate to start
     startTime = int(newTourny.created)
     now = int(time.time()) * 1000
     diff_in_s = (now - startTime) // 1000
 
     # Must have been open at least 7 days
-    if diff_in_s > 604800: # Note: 7 days is 604800, not 60400
+    if diff_in_s > 604800:  # Note: 7 days is 604800, not 60400
         # 3. OPTIMIZATION: Cache the count to avoid re-querying it later
         totalPlayers = newTourny.startingPlayers.count()
-        
+
         # Determine minimumPlayers logic
         maxGP = newTourny.maxGamePlayers
-        
-        # Determine the "Threshold Multiple" 
+
+        # Determine the "Threshold Multiple"
         # This is the smallest perfect multiple that satisfies min players
         threshold = 0
         if totalPlayers > 25:
@@ -326,7 +361,7 @@ for gameCode in GAME_CODES:
         elif totalPlayers >= (maxGP * maxGP) - maxGP + 1:
             threshold = (maxGP * maxGP) - maxGP + 1
         elif newTourny.tournamentType in ["TL", "RR", "PT"]:
-            threshold = (maxGP * (3 if newTourny.tournamentType == "TL" else 2))
+            threshold = maxGP * (3 if newTourny.tournamentType == "TL" else 2)
         elif dayNumber >= 28:
             threshold = maxGP
 
@@ -335,30 +370,34 @@ for gameCode in GAME_CODES:
         if threshold > 0:
             # Round the threshold UP to the nearest multiple of maxGP
             target_start_size = ((threshold + maxGP - 1) // maxGP) * maxGP
-            
+
             if totalPlayers > target_start_size:
                 target_start_size = ((totalPlayers + maxGP - 1) // maxGP) * maxGP
-                    
+
             newTourny.maxTournamentPlayers = target_start_size
             newTourny.save()
-            
+
             # START TRIGGER: Only if we hit that specific perfect multiple
             if totalPlayers >= target_start_size and totalPlayers % maxGP == 0:
-                print(f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}")
+                print(
+                    f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}"
+                )
                 # Use the admin ID directly if possible to avoid a User.objects.get hit
                 # Or fetch once outside the 'for' loop to save 4 hits
-                admin_user = User.objects.get(username='admin') 
-                
+                admin_user = User.objects.get(username="admin")
+
                 request = HttpRequest()
                 request.user = admin_user
-                request.META['HTTP_HOST'] = 'www.onlineboardgamers.com'
+                request.META["HTTP_HOST"] = "www.onlineboardgamers.com"
 
                 # Set and Start
                 newTourny.maxTournamentPlayers = totalPlayers
                 SF_startAnyTournament(request, newTourny, gameCode)
                 newTourny.save()
             else:
-                print(f"{gameCode}: Not starting tournament, not at perfect multiple total - max Players set to: {target_start_size}")
+                print(
+                    f"{gameCode}: Not starting tournament, not at perfect multiple total - max Players set to: {target_start_size}"
+                )
 
 print(f"DB hits: {len(connection.queries)}")
 
@@ -366,6 +405,3 @@ print(f"DB hits: {len(connection.queries)}")
 if PRINT_TIME:
     calc_time = time.perf_counter() - start_calc_time
     print("****** calc time: " + str(calc_time))
-
-
-

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("AQY", "0013_alter_aqy_game_gamestatus"),
     ]

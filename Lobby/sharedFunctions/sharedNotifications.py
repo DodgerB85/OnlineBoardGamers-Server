@@ -6,8 +6,8 @@ import time
 import urllib.parse
 from decouple import config
 
-#from django.db import close_old_connections
-#from django.core.mail import send_mail
+# from django.db import close_old_connections
+# from django.core.mail import send_mail
 from django.utils.translation import gettext, activate, get_language
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
@@ -594,7 +594,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
             )
 
             requests.post(
-                f"https://discordapp.com/api/webhooks/{config("WEBHOOK_ADMIN_ERROR_MSG")}",
+                f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                 data={"content": message},
             )
         elif (
@@ -849,7 +849,9 @@ def SN_sendFixNextTurnNotification(
                 messageText = (
                     user.username
                     + ": "
-                    + gettext("Other players have intefered with your move at OnlineBoardGamers")
+                    + gettext(
+                        "Other players have intefered with your move at OnlineBoardGamers"
+                    )
                     + " - "
                     + boxName
                     + "\n"
@@ -880,7 +882,6 @@ def SN_sendFixNextTurnNotification(
                             },
                         )
                         SN_sendEmail("yourTurn", subject, message, user.email)
-                      
 
                     except Exception as e:
                         print(
@@ -910,6 +911,7 @@ def SN_sendFixNextTurnNotification(
                 print(e)
 
     activate(originalLang)
+
 
 def SN_sendPendingRNBturnNotification(
     request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate
@@ -1858,7 +1860,6 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
         # Prepare game details for the email
         games_info = []
         for game, days_since_last_move in allPlayerMyMoveGamesList:
-
             presenter = game.presenter()
             gameName = presenter.getGameName()
 
@@ -1974,7 +1975,7 @@ def SN_sendTournamentOpen(new_tournament, gameCode):
 
 
 def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
-    #OBG_IDX = 0
+    # OBG_IDX = 0
     OBG_TURN_1_IDX = 1
     OBG_TURN_2_IDX = 2
     OBG_TURN_3_IDX = 3

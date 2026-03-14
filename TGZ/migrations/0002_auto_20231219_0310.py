@@ -6,36 +6,47 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('TGZ', '0001_initial'),
+        ("TGZ", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tgz_game',
-            name='created',
-            field=models.CharField(default='1702955400000', max_length=30),
+            model_name="tgz_game",
+            name="created",
+            field=models.CharField(default="1702955400000", max_length=30),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='creator',
-            field=models.ForeignKey(default='admin', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='TGZgame_creator_relName', to=settings.AUTH_USER_MODEL),
+            model_name="tgz_game",
+            name="creator",
+            field=models.ForeignKey(
+                default="admin",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="TGZgame_creator_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='host',
-            field=models.ForeignKey(default='admin', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='TGZgame_host_relName', to=settings.AUTH_USER_MODEL),
+            model_name="tgz_game",
+            name="host",
+            field=models.ForeignKey(
+                default="admin",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="TGZgame_host_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='latestUpdate',
-            field=models.CharField(default='1702955400000', max_length=30),
+            model_name="tgz_game",
+            name="latestUpdate",
+            field=models.CharField(default="1702955400000", max_length=30),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='zoomLevels',
-            field=models.CharField(default='[240, 240, 240, 240, 240]', max_length=30),
+            model_name="tgz_game",
+            name="zoomLevels",
+            field=models.CharField(default="[240, 240, 240, 240, 240]", max_length=30),
         ),
     ]

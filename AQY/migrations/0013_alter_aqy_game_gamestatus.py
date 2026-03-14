@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("AQY", "0012_alter_aqy_tournament_tournamenttype"),
     ]

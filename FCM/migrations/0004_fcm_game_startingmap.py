@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0003_alter_fcm_game_startingoptions'),
+        ("FCM", "0003_alter_fcm_game_startingoptions"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='startingMap',
+            model_name="fcm_game",
+            name="startingMap",
             field=models.CharField(blank=True, max_length=150),
         ),
     ]

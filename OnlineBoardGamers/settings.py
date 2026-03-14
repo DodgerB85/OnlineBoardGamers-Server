@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+
 import socket
 from decouple import config, Csv
 import os
@@ -38,7 +39,11 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = False  # Handled by cloudflare
 
     CSRF_COOKIE_SECURE = True
-    CSRF_TRUSTED_ORIGINS = ['https://www.onlineboardgamers.com', 'https://onlineboardgamers.com', 'https://webapp-1380192.pythonanywhere.com']
+    CSRF_TRUSTED_ORIGINS = [
+        "https://www.onlineboardgamers.com",
+        "https://onlineboardgamers.com",
+        "https://webapp-1380192.pythonanywhere.com",
+    ]
     USE_X_FORWARDED_HOST = False
 
     SESSION_ENGINE = (
@@ -62,7 +67,11 @@ if LOCAL_USER and DEBUG:
     ALLOWED_HOSTS = ["localhost", "192.168.1.2"]
 else:
     # ALLOWED_HOSTS = ['pythonanywhere']
-    ALLOWED_HOSTS = ["www.onlineboardgamers.com", "onlineboardgamers.com", "webapp-1380192.pythonanywhere.com"]
+    ALLOWED_HOSTS = [
+        "www.onlineboardgamers.com",
+        "onlineboardgamers.com",
+        "webapp-1380192.pythonanywhere.com",
+    ]
 
 if LOCAL_USER:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -97,7 +106,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.sitemaps",
     "compressor",
-    'django_q', 
+    "django_q",
     "FCM",
     "Lobby",
     "user_visit",
@@ -158,9 +167,9 @@ WSGI_APPLICATION = "OnlineBoardGamers.wsgi.application"
 
 # JS Minifier settings
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder', # Add this
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",  # Add this
 )
 # Enable compression for production (even if DEBUG is False)
 COMPRESS_ENABLED = True
@@ -174,28 +183,27 @@ if DEBUG:
 
 # ASYNC SETTINGS
 Q_CLUSTER = {
-    'name': 'obg_cluster',
-    'workers': 1,          # Keep this at 1 on PythonAnywhere
-    'recycle': 500,
-    'timeout': 60,         # Process timeout
+    "name": "obg_cluster",
+    "workers": 1,  # Keep this at 1 on PythonAnywhere
+    "recycle": 500,
+    "timeout": 60,  # Process timeout
     #'compress': True, # DO NOT USE - Instead pass minimal data as args to async tasks
-    'retry': 120,
-    'queue_limit': 10,
-    'orm': 'default',      # Or your database alias
-    'save_limit': 100,      # Only keep the last 50 successful tasks
-    'gc_interval': 3600,   # Run the garbage collector every hour (3600 seconds)
-    'label': 'Django Q',   # Admin label
-    'ack_failures': True,  # Cleanup failed tasks
-    
+    "retry": 120,
+    "queue_limit": 10,
+    "orm": "default",  # Or your database alias
+    "save_limit": 100,  # Only keep the last 50 successful tasks
+    "gc_interval": 3600,  # Run the garbage collector every hour (3600 seconds)
+    "label": "Django Q",  # Admin label
+    "ack_failures": True,  # Cleanup failed tasks
     # --- CRITICAL CPU SAVING SETTINGS ---
-    'sleeptime': 30,       # Wait 30 seconds before checking for new tasks
-    'bulking': 10,         # Process up to 10 tasks at once to reduce overhead
-    'sync': False,
-    'guard_cycle': 5.0,    # MOST IMPORTANT: Idle sleep time in seconds (default is 0.5)
+    "sleeptime": 30,  # Wait 30 seconds before checking for new tasks
+    "bulking": 10,  # Process up to 10 tasks at once to reduce overhead
+    "sync": False,
+    "guard_cycle": 5.0,  # MOST IMPORTANT: Idle sleep time in seconds (default is 0.5)
 }
 
 # NB this oculd kill very long DB connections
-#socket.setdefaulttimeout(120) 
+# socket.setdefaulttimeout(120)
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases

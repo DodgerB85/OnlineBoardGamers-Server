@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0038_alter_profile_emailnotifications'),
+        ("Lobby", "0038_alter_profile_emailnotifications"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='blacklistedPlayers',
-            field=models.ManyToManyField(blank=True, related_name='blacklistedPlayers_relName', to=settings.AUTH_USER_MODEL),
+            model_name="profile",
+            name="blacklistedPlayers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="blacklistedPlayers_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

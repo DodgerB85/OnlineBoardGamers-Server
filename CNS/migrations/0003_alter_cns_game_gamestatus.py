@@ -4,15 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('CNS', '0002_auto_20240320_0612'),
+        ("CNS", "0002_auto_20240320_0612"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cns_game',
-            name='gameStatus',
-            field=models.CharField(choices=[('AVAILABLE', 'AVAILABLE'), ('WAITING', 'WAITING'), ('PRIVATE', 'PRIVATE'), ('ACTIVE', 'ACTIVE'), ('FINISHED', 'FINISHED')], default='AVAILABLE', max_length=9),
+            model_name="cns_game",
+            name="gameStatus",
+            field=models.CharField(
+                choices=[
+                    ("AVAILABLE", "AVAILABLE"),
+                    ("WAITING", "WAITING"),
+                    ("PRIVATE", "PRIVATE"),
+                    ("ACTIVE", "ACTIVE"),
+                    ("FINISHED", "FINISHED"),
+                ],
+                default="AVAILABLE",
+                max_length=9,
+            ),
         ),
     ]

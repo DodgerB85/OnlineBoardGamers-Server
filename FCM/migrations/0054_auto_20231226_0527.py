@@ -4,18 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0053_auto_20231226_0516'),
+        ("FCM", "0053_auto_20231226_0516"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='fcm_tournament',
-            name='created',
+            model_name="fcm_tournament",
+            name="created",
             field=models.CharField(default=1703568468000, max_length=30),
         ),
         migrations.DeleteModel(
-            name='FCM_Chat',
+            name="FCM_Chat",
         ),
     ]

@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('KFW', '0001_initial'),
+        ("KFW", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='kfw_game',
-            name='playersHiddenData',
+            model_name="kfw_game",
+            name="playersHiddenData",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='kfw_game',
-            name='playersMoveData',
+            model_name="kfw_game",
+            name="playersMoveData",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='kfw_game',
-            name='serverData',
-            field=models.TextField(default='[[40, 40, 40, 0], [16, 16, 16]]'),
+            model_name="kfw_game",
+            name="serverData",
+            field=models.TextField(default="[[40, 40, 40, 0], [16, 16, 16]]"),
         ),
     ]

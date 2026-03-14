@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0092_remove_queryable_game_models'),
+        ("Lobby", "0092_remove_queryable_game_models"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='game',
-            name='relatedHCTournament',
+            model_name="game",
+            name="relatedHCTournament",
         ),
         migrations.RemoveField(
-            model_name='gameplayer',
-            name='moveDataJSON',
+            model_name="gameplayer",
+            name="moveDataJSON",
         ),
     ]

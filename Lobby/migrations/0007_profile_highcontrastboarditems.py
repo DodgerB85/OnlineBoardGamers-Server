@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0006_profile_sendslackwebhooknotificationonturn_and_more'),
+        ("Lobby", "0006_profile_sendslackwebhooknotificationonturn_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='highContrastBoardItems',
+            model_name="profile",
+            name="highContrastBoardItems",
             field=models.BooleanField(default=False),
         ),
     ]

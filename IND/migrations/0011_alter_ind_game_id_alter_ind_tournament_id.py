@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("IND", "0010_alter_ind_game_gamestatus"),
     ]

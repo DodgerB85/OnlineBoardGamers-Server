@@ -5,20 +5,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0088_game_serverremainingplayerorderbynames'),
+        ("Lobby", "0088_game_serverremainingplayerorderbynames"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='changelog',
-            name='timestamp',
-            field=models.CharField(db_index=True, default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=30),
+            model_name="changelog",
+            name="timestamp",
+            field=models.CharField(
+                db_index=True,
+                default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow,
+                max_length=30,
+            ),
         ),
         migrations.AlterField(
-            model_name='main_tournament',
-            name='gameCode',
-            field=models.CharField(choices=[('FCM', 'Food Chain Magnate'), ('HC', 'Horseless Carriage'), ('Bus', 'Bus'), ('TGZ', 'The Great Zimbabwe'), ('CNS', 'Cannes'), ('AQY', 'Antiquity'), ('IND', 'Indonesia'), ('KFW', 'Keyflower'), ('WEB', 'Web'), ('RNB', 'Roads & Boats')], default='FCM', max_length=3),
+            model_name="main_tournament",
+            name="gameCode",
+            field=models.CharField(
+                choices=[
+                    ("FCM", "Food Chain Magnate"),
+                    ("HC", "Horseless Carriage"),
+                    ("Bus", "Bus"),
+                    ("TGZ", "The Great Zimbabwe"),
+                    ("CNS", "Cannes"),
+                    ("AQY", "Antiquity"),
+                    ("IND", "Indonesia"),
+                    ("KFW", "Keyflower"),
+                    ("WEB", "Web"),
+                    ("RNB", "Roads & Boats"),
+                ],
+                default="FCM",
+                max_length=3,
+            ),
         ),
     ]

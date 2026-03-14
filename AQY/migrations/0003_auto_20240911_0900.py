@@ -5,20 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('AQY', '0002_auto_20240611_0944'),
+        ("AQY", "0002_auto_20240611_0944"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='aqy_game',
-            name='winner',
+            model_name="aqy_game",
+            name="winner",
         ),
         migrations.AddField(
-            model_name='aqy_game',
-            name='winner',
-            field=models.ManyToManyField(blank=True, related_name='AQYgame_winner_relName', to=settings.AUTH_USER_MODEL),
+            model_name="aqy_game",
+            name="winner",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="AQYgame_winner_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

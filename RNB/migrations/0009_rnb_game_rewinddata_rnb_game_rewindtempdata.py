@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('RNB', '0008_alter_rnb_game_gamepace_and_more'),
+        ("RNB", "0008_alter_rnb_game_gamepace_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='rnb_game',
-            name='rewindData',
+            model_name="rnb_game",
+            name="rewindData",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='rnb_game',
-            name='rewindTempData',
+            model_name="rnb_game",
+            name="rewindTempData",
             field=models.TextField(blank=True),
         ),
     ]

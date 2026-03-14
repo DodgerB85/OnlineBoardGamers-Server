@@ -7,12 +7,25 @@ from typing import Union, TYPE_CHECKING
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
-#from django.db.models.manager import RelatedManager
+
+# from django.db.models.manager import RelatedManager
 from django.dispatch import receiver
 from django.conf import settings
 from django.utils.translation import gettext_lazy
 
-from .presenters import GamePresenter, CNSpresenter, WEBpresenter, AQYpresenter, TGZpresenter, INDpresenter, BusPresenter, FCMpresenter, RNBpresenter, HCpresenter, KFWpresenter
+from .presenters import (
+    GamePresenter,
+    CNSpresenter,
+    WEBpresenter,
+    AQYpresenter,
+    TGZpresenter,
+    INDpresenter,
+    BusPresenter,
+    FCMpresenter,
+    RNBpresenter,
+    HCpresenter,
+    KFWpresenter,
+)
 
 from Lobby.sharedFunctions.sharedRefs import (
     SR_TOURNAMENT_STATUS_CHOICES,
@@ -30,7 +43,8 @@ from .sharedFunctions.sharedRefs import (
 
 if TYPE_CHECKING:
     from django.db.models.manager import RelatedManager
-    from .models import GamePlayer # Import your GamePlayer model
+    from .models import GamePlayer  # Import your GamePlayer model
+
 
 class User(AbstractUser):
     # Fields that you are not obliged to implement
@@ -42,6 +56,7 @@ class User(AbstractUser):
         # return f"{self.username} : {field_names}"
         activeString = "" if self.is_active else " :A NOT AN ACTIVE USER"
         return f"{self.username} {activeString}"
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
@@ -111,6 +126,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
 
 class changelog(models.Model):
     update = models.CharField(max_length=120)
@@ -201,9 +217,13 @@ class Main_Tournament(models.Model):
         createdTS = str(self.created)
         startingOptionsHTML = "[None]"
         if self.gameCode == "FCM":
-            startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+            startingOptionsHTML = SR_getFCMstartingOptionsHTML(
+                json.loads(self.startingOptions) if self.startingOptions else []
+            )
         if self.gameCode == "TGZ":
-            startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+            startingOptionsHTML = SR_getTGZstartingOptionsHTML(
+                json.loads(self.startingOptions) if self.startingOptions else []
+            )
 
         if startingOptionsHTML == "":
             startingOptionsHTML = "[None]"
@@ -326,9 +346,13 @@ class Mini_Tournaments(models.Model):
         createdTS = str(self.created)
         startingOptionsHTML = "[None]"
         if self.gameCode == "FCM":
-            startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+            startingOptionsHTML = SR_getFCMstartingOptionsHTML(
+                json.loads(self.startingOptions) if self.startingOptions else []
+            )
         if self.gameCode == "TGZ":
-            startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+            startingOptionsHTML = SR_getTGZstartingOptionsHTML(
+                json.loads(self.startingOptions) if self.startingOptions else []
+            )
 
         return {
             "Mini_Tournament_id": self.id,
@@ -386,7 +410,7 @@ class BaseGame(models.Model):
     chatData = models.TextField(blank=True)
 
     gameData = models.TextField(blank=True)
-    #gameDataBLOB = models.BinaryField(null=True, blank=True)
+    # gameDataBLOB = models.BinaryField(null=True, blank=True)
     rewindData = models.TextField(blank=True)
     rewindTempData = models.TextField(blank=True)
 
@@ -423,9 +447,10 @@ class BaseGame(models.Model):
     class Meta:
         abstract = True
 
+
 class Game(BaseGame):
     # Add this line to help the linter (type checking only)
-    #if typing.TYPE_CHECKING:
+    # if typing.TYPE_CHECKING:
     #    players: RelatedManager["GamePlayer"]
 
     gameCode = models.CharField(
@@ -475,16 +500,15 @@ class Game(BaseGame):
         blank=True,
         related_name="minitournamentGEN_relName",
     )
-    
+
     currentPlayersInTurnOrder = models.CharField(
-        max_length=150, 
-        blank=True, 
-        null=True, 
-        default=None
+        max_length=150, blank=True, null=True, default=None
     )
-    
+
     # CURRENTLY RnB ONLY
-    serverCurrentPlayerNamesInTurnOrder = models.JSONField(default=list, blank=True, null=True)
+    serverCurrentPlayerNamesInTurnOrder = models.JSONField(
+        default=list, blank=True, null=True
+    )
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
@@ -494,10 +518,14 @@ class Game(BaseGame):
 
     # FCM-specific fields
     FCMplayersMoveData = models.TextField(blank=True)
-    FCMnotificationSuppression = models.CharField(max_length=30, blank=False, default="000000")
+    FCMnotificationSuppression = models.CharField(
+        max_length=30, blank=False, default="000000"
+    )
 
     # KFW-specific fields
-    KFWserverData = models.TextField(blank=True, default=json.dumps([[40, 40, 40, 0], [16, 16, 16]]))
+    KFWserverData = models.TextField(
+        blank=True, default=json.dumps([[40, 40, 40, 0], [16, 16, 16]])
+    )
     KFWplayersHiddenData = models.TextField(blank=True)
     KFWplayersMoveData = models.TextField(blank=True)
 
@@ -508,9 +536,15 @@ class Game(BaseGame):
         players: RelatedManager[GamePlayer]
 
     PRESENTER_MAP = {
-        "CNS": CNSpresenter, "WEB": WEBpresenter, "AQY": AQYpresenter,
-        "TGZ": TGZpresenter, "IND": INDpresenter, "Bus": BusPresenter,
-        "FCM": FCMpresenter, "RNB": RNBpresenter, "HC": HCpresenter,
+        "CNS": CNSpresenter,
+        "WEB": WEBpresenter,
+        "AQY": AQYpresenter,
+        "TGZ": TGZpresenter,
+        "IND": INDpresenter,
+        "Bus": BusPresenter,
+        "FCM": FCMpresenter,
+        "RNB": RNBpresenter,
+        "HC": HCpresenter,
         "KFW": KFWpresenter,
     }
 
@@ -526,8 +560,9 @@ class Game(BaseGame):
         return self.gameCode
 
     ############### THESE NEED TO BE HERE FORE NOW TO STOP THINGS BREAKING
-    #def currentTurnString(self):
+    # def currentTurnString(self):
     #    return SR_currentTurnString(self.gameCode, self.turn, self.phase)
+
 
 class GamePlayer(models.Model):
     game = models.ForeignKey(
@@ -564,5 +599,3 @@ class GamePlayer(models.Model):
                 fields=["game", "player"], name="unique_game_player"
             )
         ]
-
-

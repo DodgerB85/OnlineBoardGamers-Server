@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0016_auto_20230923_1225'),
+        ("Lobby", "0016_auto_20230923_1225"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='preferredBusBoard',
+            model_name="profile",
+            name="preferredBusBoard",
             field=models.SmallIntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='preferredBusColour',
+            model_name="profile",
+            name="preferredBusColour",
             field=models.SmallIntegerField(default=-1),
         ),
         migrations.AlterField(
-            model_name='changelog',
-            name='timestamp',
+            model_name="changelog",
+            name="timestamp",
             field=models.CharField(default=1696329419000, max_length=30),
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='preferredHCcolour',
+            model_name="profile",
+            name="preferredHCcolour",
             field=models.SmallIntegerField(default=-1),
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='preferredRestaurantColour',
+            model_name="profile",
+            name="preferredRestaurantColour",
             field=models.SmallIntegerField(default=-1),
         ),
     ]

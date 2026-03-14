@@ -32,13 +32,19 @@ from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from Lobby.models import User, Profile, Game, GamePlayer
 
-from Lobby.gameViewHelpers import build_show_game_data, shared_save_zoom, shared_save_notes, shared_bug_entry, shared_cast_vote
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_save_zoom,
+    shared_save_notes,
+    shared_bug_entry,
+    shared_cast_vote,
+)
 
 import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
-    from Lobby.presenters import WEBpresenter 
-    
+    from Lobby.presenters import WEBpresenter
+
 WEB_DB_LOCK_NAME = "lockWEBgame_"
 
 
@@ -87,7 +93,7 @@ def createWEBgame(request):
 
     with transaction.atomic():
         newGame = Game(
-            gameCode='WEB',
+            gameCode="WEB",
             gameDescription=_gameDescription,
             creator=request.user,
             host=request.user,
@@ -106,10 +112,7 @@ def createWEBgame(request):
             newGame.gameName = _gameName
 
         # Create GamePlayer for the creator
-        GamePlayer.objects.create(
-            game=newGame,
-            player=request.user
-        )
+        GamePlayer.objects.create(game=newGame, player=request.user)
 
         if "trainingGame" in request.POST:
             newGame.gameStatus = "ACTIVE"
@@ -118,10 +121,7 @@ def createWEBgame(request):
 
             for i in range(1, _maxPlayers):
                 shadow_player = User.objects.get(username=f"{shadow_names[i - 1]}")
-                GamePlayer.objects.create(
-                    game=newGame,
-                    player=shadow_player
-                )
+                GamePlayer.objects.create(game=newGame, player=shadow_player)
 
                 if request.POST[f"player{i + 1}"]:
                     display_name = request.POST[f"player{i + 1}"]
@@ -133,8 +133,8 @@ def createWEBgame(request):
             creator_gp = newGame.players.get(player=request.user)
             creator_gp.notes = json.dumps(shadow_players)
             creator_gp.save()
-            
-            presenter = cast('WEBpresenter', newGame.presenter())
+
+            presenter = cast("WEBpresenter", newGame.presenter())
             presenter.startGame(request)
         else:
             usernamesToNotify = []
@@ -146,7 +146,7 @@ def createWEBgame(request):
                     newGame.invitedPlayers.add(newPlayer)
                     usernamesToNotify.append(newPlayer.username)
 
-            presenter = cast('WEBpresenter', newGame.presenter())
+            presenter = cast("WEBpresenter", newGame.presenter())
             SN_sendInviteNotifications(
                 request,
                 usernamesToNotify,
@@ -197,8 +197,13 @@ def createWEBgame(request):
 
 
 def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    result = build_show_game_data(request, game_id, "WEB",
-        default_zoom=0, settings_debug_key="WEB_USE_SOURCE_CODE")
+    result = build_show_game_data(
+        request,
+        game_id,
+        "WEB",
+        default_zoom=0,
+        settings_debug_key="WEB_USE_SOURCE_CODE",
+    )
     if isinstance(result, HttpResponseRedirect):
         return result
 
@@ -209,16 +214,20 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     returnData = {**result["base_data"]}
     returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
-    returnData.update({
-        "spoilerFree": spoilerFree,
-        "replayStep": replayStep,
-        "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
-        "currentPlayers": ", ".join(presenter.getArrayOfIsCurrentPlayers()),
-        "finishedGame": currentGame.gameStatus == "FINISHED",
-        "preferredWEBoptions": [-1],
-        "pov": -99,
-        "turn": currentGame.turn,
-    })
+    returnData.update(
+        {
+            "spoilerFree": spoilerFree,
+            "replayStep": replayStep,
+            "allPlayerListBySeat": json.dumps(
+                presenter.getAllPlayersOrderedySeatInArray(False)
+            ),
+            "currentPlayers": ", ".join(presenter.getArrayOfIsCurrentPlayers()),
+            "finishedGame": currentGame.gameStatus == "FINISHED",
+            "preferredWEBoptions": [-1],
+            "pov": -99,
+            "turn": currentGame.turn,
+        }
+    )
 
     if not result["is_authenticated"]:
         return render(request, "WEB/showWEBgame.html", returnData)
@@ -243,7 +252,12 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             creator_gp = next(
-                (gp for gp in all_players if gp.player and gp.player.id == currentGame.creator_id), None
+                (
+                    gp
+                    for gp in all_players
+                    if gp.player and gp.player.id == currentGame.creator_id
+                ),
+                None,
             )
             if creator_gp:
                 displayNames = creator_gp.notes
@@ -319,11 +333,11 @@ def _processWEBturn(request):
     latest_update = str(jsonData.get("latestUpdate", 0))
 
     try:
-        currentGame = Game.objects.get(id=game_id, gameCode='WEB')
+        currentGame = Game.objects.get(id=game_id, gameCode="WEB")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('WEBpresenter', currentGame.presenter())
+    presenter = cast("WEBpresenter", currentGame.presenter())
 
     if jsonData["action"] == "simpleSave":
         # Check if old version is older than DB version, and if so, return
@@ -370,7 +384,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {db_latest_update} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -419,9 +433,7 @@ def _processWEBturn(request):
                 and jsonData["status"] != "FINISHED"
                 and 102 not in loadedStartingOptions
             ):
-                playerListToNotify = [
-                    player.strip() for player in current_players
-                ]
+                playerListToNotify = [player.strip() for player in current_players]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if len(playerListToNotify) > 0:
@@ -495,7 +507,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -559,7 +571,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -641,7 +653,7 @@ def _processWEBturn(request):
         )
         next_players = jsonData["nextPlayer"]
         if (
-            len(jsonData["nextPlayer"]) > 0 
+            len(jsonData["nextPlayer"]) > 0
             and not any(p.startswith("WebBotot") for p in next_players)
             and 102 not in loadedStartingOptions
         ):
@@ -679,7 +691,7 @@ def _processWEBturn(request):
             message = (
                 f"SYNC ERROR IN: WEB kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {", ".join(presenter.getArrayOfIsCurrentPlayers())}"
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
             )
             SN_sendAdminErrorMessage(request, message)
             return JsonResponse({"syncError": "12345"}, safe=False)
@@ -717,13 +729,13 @@ def WEBdata(request, dataType=1):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode='WEB')
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="WEB")
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast('WEBpresenter', currentGame.presenter())
+    presenter = cast("WEBpresenter", currentGame.presenter())
 
     if dataType == 1:
         returnData = {
@@ -766,8 +778,9 @@ def WEBdata(request, dataType=1):
 
 @login_required()
 def bugEntry(request):
-    return shared_bug_entry(request, "WEB",
-        extra_info_fn=lambda g: "Options: " + g.startingOptions)
+    return shared_bug_entry(
+        request, "WEB", extra_info_fn=lambda g: "Options: " + g.startingOptions
+    )
 
 
 @login_required()
@@ -793,7 +806,7 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = Game.objects.get(id=game_id, gameCode='WEB')
+        currentGame = Game.objects.get(id=game_id, gameCode="WEB")
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
@@ -809,10 +822,12 @@ def _sendChatMessage(request):
 
         currentGame.chatData = compressedChatData
 
-        # Now add notifications to everyone except request.user     
-        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True))
+        # Now add notifications to everyone except request.user
+        currentGame.presenter().addChatNotifications(
+            currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True)
+        )
         currentGame.presenter().removeChatNotification(request.user)
-        
+
         currentGame.save()
 
         return JsonResponse({"chatData": compressedChatData})

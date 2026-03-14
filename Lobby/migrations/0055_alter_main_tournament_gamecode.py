@@ -4,15 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0054_alter_changelog_timestamp'),
+        ("Lobby", "0054_alter_changelog_timestamp"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='main_tournament',
-            name='gameCode',
-            field=models.CharField(choices=[('FCM', 'Food Chain Magnate'), ('HC', 'Horseless Carriage'), ('Bus', 'Bus'), ('TGZ', 'The Great Zimbabwe'), ('CNS', 'Cannes'), ('AQY', 'Antiquity'), ('IND', 'Indonesia'), ('KFW', 'Keyflower')], default='FCM', max_length=3),
+            model_name="main_tournament",
+            name="gameCode",
+            field=models.CharField(
+                choices=[
+                    ("FCM", "Food Chain Magnate"),
+                    ("HC", "Horseless Carriage"),
+                    ("Bus", "Bus"),
+                    ("TGZ", "The Great Zimbabwe"),
+                    ("CNS", "Cannes"),
+                    ("AQY", "Antiquity"),
+                    ("IND", "Indonesia"),
+                    ("KFW", "Keyflower"),
+                ],
+                default="FCM",
+                max_length=3,
+            ),
         ),
     ]

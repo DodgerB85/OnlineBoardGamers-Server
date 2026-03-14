@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("CNS", "0006_alter_cns_game_creator_alter_cns_game_host"),
     ]

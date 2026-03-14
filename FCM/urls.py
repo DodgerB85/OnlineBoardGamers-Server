@@ -14,12 +14,12 @@ app_name = "FCM"
 def redirect_old_url(request, original_id):
     """Redirect old FCM_Game URLs to new Game Game URLs"""
     try:
-        game = Game.objects.get(gameCode='FCM', original_id=original_id)
-        return redirect('FCM:showFCMgame', game_id=game.id)
+        game = Game.objects.get(gameCode="FCM", original_id=original_id)
+        return redirect("FCM:showFCMgame", game_id=game.id)
     except Game.DoesNotExist:
         # If not found by original_id, try by direct id (might already be a new game)
-        game = get_object_or_404(Game, id=original_id, gameCode='FCM')
-        return redirect('FCM:showFCMgame', game_id=game.id)
+        game = get_object_or_404(Game, id=original_id, gameCode="FCM")
+        return redirect("FCM:showFCMgame", game_id=game.id)
 
 
 urlpatterns = [

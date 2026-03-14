@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0009_profile_preferredhccolour'),
+        ("Lobby", "0009_profile_preferredhccolour"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='discordWebhookUserID',
+            model_name="profile",
+            name="discordWebhookUserID",
             field=models.CharField(blank=True, max_length=50),
         ),
     ]

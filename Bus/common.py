@@ -21,8 +21,9 @@ from Lobby.sharedFunctions.sharedRefs import (
 import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
-    from Lobby.presenters import BusPresenter 
- 
+    from Lobby.presenters import BusPresenter
+
+
 @login_required()
 def create_bus_game(
     request,
@@ -187,9 +188,8 @@ def create_bus_game(
         all_players.append(request.user)
 
     with transaction.atomic():
-
         new_game = Game(
-            gameCode='Bus',
+            gameCode="Bus",
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -228,13 +228,15 @@ def create_bus_game(
                 game=new_game,
                 player=player,
                 seat_order=idx,
-                notes=shadowNameNotes if player==request.user else "",
+                notes=shadowNameNotes if player == request.user else "",
             )
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            presenter = cast('BusPresenter', new_game.presenter())
-            presenter.startGame(request, isTournamentGame=(is_main_tournament or is_mini_tournament))
+            presenter = cast("BusPresenter", new_game.presenter())
+            presenter.startGame(
+                request, isTournamentGame=(is_main_tournament or is_mini_tournament)
+            )
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
@@ -245,7 +247,11 @@ def create_bus_game(
     # Normal Game Notifications
     if usernames_to_notify:
         SN_sendInviteNotifications(
-            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "Bus"
+            request,
+            usernames_to_notify,
+            new_game.presenter().getGameName(),
+            max_players,
+            "Bus",
         )
 
     if "trainingGame" in request.POST:
@@ -255,9 +261,7 @@ def create_bus_game(
         )
 
     # Otherwise, return normal game creation
-    messages.success(
-        request, SF_getGameCreationJsonReturn("Bus", new_game.id)
-    )
+    messages.success(request, SF_getGameCreationJsonReturn("Bus", new_game.id))
     return HttpResponseRedirect(
         reverse("indexListType", kwargs={"listType": "waiting"})
     )

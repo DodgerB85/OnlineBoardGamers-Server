@@ -5,30 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Bus', '0016_alter_bus_game_latestupdate'),
+        ("Bus", "0016_alter_bus_game_latestupdate"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='bus_game',
-            name='gamePace',
+            model_name="bus_game",
+            name="gamePace",
             field=models.PositiveSmallIntegerField(default=30),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='latestUpdate',
-            field=models.CharField(db_index=True, default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=15),
+            model_name="bus_game",
+            name="latestUpdate",
+            field=models.CharField(
+                db_index=True,
+                default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow,
+                max_length=15,
+            ),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='maxPlayers',
+            model_name="bus_game",
+            name="maxPlayers",
             field=models.PositiveSmallIntegerField(default=2),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='startingOptions',
+            model_name="bus_game",
+            name="startingOptions",
             field=models.CharField(blank=True, max_length=100),
         ),
     ]

@@ -4,40 +4,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('HC', '0003_auto_20230215_0724'),
+        ("HC", "0003_auto_20230215_0724"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='hc_game',
-            name='chatData',
-            field=models.TextField(default='{"name":"WelcomeBot","timestamp":1676455222000,"message":"Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'),
+            model_name="hc_game",
+            name="chatData",
+            field=models.TextField(
+                default='{"name":"WelcomeBot","timestamp":1676455222000,"message":"Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'
+            ),
         ),
         migrations.AlterField(
-            model_name='hc_game',
-            name='player0currentMoveData',
+            model_name="hc_game",
+            name="player0currentMoveData",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='hc_game',
-            name='player1currentMoveData',
+            model_name="hc_game",
+            name="player1currentMoveData",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='hc_game',
-            name='player2currentMoveData',
+            model_name="hc_game",
+            name="player2currentMoveData",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='hc_game',
-            name='player3currentMoveData',
+            model_name="hc_game",
+            name="player3currentMoveData",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='hc_game',
-            name='player4currentMoveData',
+            model_name="hc_game",
+            name="player4currentMoveData",
             field=models.TextField(blank=True),
         ),
     ]

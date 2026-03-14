@@ -4,15 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0063_fcm_game_premovedata'),
+        ("FCM", "0063_fcm_game_premovedata"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='fcm_game',
-            name='gameStatus',
-            field=models.CharField(choices=[('AVAILABLE', 'AVAILABLE'), ('WAITING', 'WAITING'), ('PRIVATE', 'PRIVATE'), ('ACTIVE', 'ACTIVE'), ('FINISHED', 'FINISHED')], default='AVAILABLE', max_length=9),
+            model_name="fcm_game",
+            name="gameStatus",
+            field=models.CharField(
+                choices=[
+                    ("AVAILABLE", "AVAILABLE"),
+                    ("WAITING", "WAITING"),
+                    ("PRIVATE", "PRIVATE"),
+                    ("ACTIVE", "ACTIVE"),
+                    ("FINISHED", "FINISHED"),
+                ],
+                default="AVAILABLE",
+                max_length=9,
+            ),
         ),
     ]

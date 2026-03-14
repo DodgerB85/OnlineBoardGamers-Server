@@ -5,21 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('FCM', '0009_auto_20220718_2210'),
+        ("FCM", "0009_auto_20220718_2210"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_bug',
-            name='submittingUser',
-            field=models.ManyToManyField(related_name='submittingUserRelName', to=settings.AUTH_USER_MODEL),
+            model_name="fcm_bug",
+            name="submittingUser",
+            field=models.ManyToManyField(
+                related_name="submittingUserRelName", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='rewindTempData',
+            model_name="fcm_game",
+            name="rewindTempData",
             field=models.TextField(blank=True),
         ),
     ]

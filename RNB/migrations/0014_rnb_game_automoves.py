@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('RNB', '0013_rnb_game_activevotes'),
+        ("RNB", "0013_rnb_game_activevotes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='rnb_game',
-            name='autoMoves',
+            model_name="rnb_game",
+            name="autoMoves",
             field=models.CharField(blank=True, default=None, max_length=30, null=True),
         ),
     ]

@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('CNS', '0012_cns_game_startingmap'),
+        ("CNS", "0012_cns_game_startingmap"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cns_game',
-            name='statsExcludeConsent',
+            model_name="cns_game",
+            name="statsExcludeConsent",
             field=models.CharField(blank=True, max_length=40, null=True),
         ),
         migrations.AlterField(
-            model_name='cns_game',
-            name='zoomLevels',
-            field=models.CharField(default='[16, 16, 16, 16]', max_length=30),
+            model_name="cns_game",
+            name="zoomLevels",
+            field=models.CharField(default="[16, 16, 16, 16]", max_length=30),
         ),
     ]

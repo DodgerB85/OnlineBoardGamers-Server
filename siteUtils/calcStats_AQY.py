@@ -20,9 +20,15 @@ PRINT_TIME = True
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
 if DEBUG:
-    os.environ["LOCAL_DB_NAME"] = str(config("LOCAL_DB_NAME", default="password", cast=str))
-    os.environ["LOCAL_DB_USER"] = str(config("LOCAL_DB_USER", default="password", cast=str))
-    os.environ["LOCAL_DB_PWD"] = str(config("LOCAL_DB_PWD", default="password", cast=str))
+    os.environ["LOCAL_DB_NAME"] = str(
+        config("LOCAL_DB_NAME", default="password", cast=str)
+    )
+    os.environ["LOCAL_DB_USER"] = str(
+        config("LOCAL_DB_USER", default="password", cast=str)
+    )
+    os.environ["LOCAL_DB_PWD"] = str(
+        config("LOCAL_DB_PWD", default="password", cast=str)
+    )
     os.environ["LOCAL_DB_HOST"] = "127.0.0.1"
 
 BASE_DIR = ROOT_DIR / "OnlineBoardGamers"
@@ -164,7 +170,7 @@ def analyze_games(player_count_index):
 
     query = Q(
         gameStatus="FINISHED",
-        statsExcludedGame=False,  
+        statsExcludedGame=False,
         turn__gte=4,
         maxPlayers=playerCount,
         gameCode="AQY",  # Added directly here
@@ -172,7 +178,6 @@ def analyze_games(player_count_index):
     # (use ~ separately for clarity)
     query &= ~Q(players__player__username="SHADOW")
     query &= ~Q(players__is_missing=True)
-    
 
     # if player_count_index == 4.5:
     #    query = query & Q(externalTournamentGame=True)

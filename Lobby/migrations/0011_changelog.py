@@ -4,18 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0010_profile_discordwebhookuserid'),
+        ("Lobby", "0010_profile_discordwebhookuserid"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='changelog',
+            name="changelog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('update', models.CharField(max_length=120)),
-                ('timestamp', models.CharField(default=1678853163000, max_length=30)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("update", models.CharField(max_length=120)),
+                ("timestamp", models.CharField(default=1678853163000, max_length=30)),
             ],
         ),
     ]

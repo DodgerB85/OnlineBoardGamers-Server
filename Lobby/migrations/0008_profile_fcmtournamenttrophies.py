@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0007_profile_highcontrastboarditems'),
+        ("Lobby", "0007_profile_highcontrastboarditems"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='FCMtournamentTrophies',
-            field=models.CharField(default='000', max_length=3),
+            model_name="profile",
+            name="FCMtournamentTrophies",
+            field=models.CharField(default="000", max_length=3),
         ),
     ]

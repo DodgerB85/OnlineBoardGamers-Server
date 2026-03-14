@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0090_fcm_game_activevotes'),
+        ("FCM", "0090_fcm_game_activevotes"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='rewindConsent',
+            model_name="fcm_game",
+            name="rewindConsent",
         ),
     ]

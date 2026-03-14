@@ -4,25 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0017_alter_fcm_chat_chatdata'),
+        ("FCM", "0017_alter_fcm_chat_chatdata"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='fcm_chat',
-            name='chatData',
-            field=models.TextField(default='{"name":"WelcomeBot","timestamp":1662742481000,"message":"Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'),
+            model_name="fcm_chat",
+            name="chatData",
+            field=models.TextField(
+                default='{"name":"WelcomeBot","timestamp":1662742481000,"message":"Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"},'
+            ),
         ),
         migrations.AlterField(
-            model_name='fcm_game',
-            name='gamePace',
+            model_name="fcm_game",
+            name="gamePace",
             field=models.PositiveSmallIntegerField(default=20),
         ),
         migrations.AlterField(
-            model_name='fcm_game',
-            name='kickoutDuration',
+            model_name="fcm_game",
+            name="kickoutDuration",
             field=models.PositiveSmallIntegerField(default=200),
         ),
     ]

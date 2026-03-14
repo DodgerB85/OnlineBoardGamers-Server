@@ -6,20 +6,25 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('WEB', '0001_initial'),
+        ("WEB", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='web_game',
-            name='winner',
+            model_name="web_game",
+            name="winner",
         ),
         migrations.AddField(
-            model_name='web_game',
-            name='winner',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='WEBgame_winner_relName', to=settings.AUTH_USER_MODEL),
+            model_name="web_game",
+            name="winner",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="WEBgame_winner_relName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

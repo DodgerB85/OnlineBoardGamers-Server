@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0004_fcm_game_startingmap'),
+        ("FCM", "0004_fcm_game_startingmap"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='rewindData',
+            model_name="fcm_game",
+            name="rewindData",
             field=models.TextField(blank=True),
         ),
     ]

@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TGZ', '0015_tgz_game_externaltournamentgame'),
+        ("TGZ", "0015_tgz_game_externaltournamentgame"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tgz_game',
-            name='gameName',
-            field=models.CharField(blank=True, db_collation='utf8mb4_general_ci', default='[TGZ Game]', max_length=120),
+            model_name="tgz_game",
+            name="gameName",
+            field=models.CharField(
+                blank=True,
+                db_collation="utf8mb4_general_ci",
+                default="[TGZ Game]",
+                max_length=120,
+            ),
         ),
     ]

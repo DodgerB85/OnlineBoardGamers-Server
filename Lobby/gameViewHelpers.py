@@ -11,12 +11,18 @@ from Lobby.sharedFunctions.sharedNotifications import SN_sendBugReportEmail
 
 import Lobby.sharedFunctions.constants as rf
 
-def build_show_game_data(request, game_id, game_code, *,
-                         default_zoom=0,
-                         extra_select_related=None,
-                         settings_debug_key=None,
-                         super_users=("BotKickStarter",),
-                         clear_chat_notification=True):
+
+def build_show_game_data(
+    request,
+    game_id,
+    game_code,
+    *,
+    default_zoom=0,
+    extra_select_related=None,
+    settings_debug_key=None,
+    super_users=("BotKickStarter",),
+    clear_chat_notification=True,
+):
     """
     Common logic for all showXXXgame views.
 
@@ -30,8 +36,7 @@ def build_show_game_data(request, game_id, game_code, *,
 
     try:
         currentGame = (
-            Game.objects
-            .select_related(*select_related)
+            Game.objects.select_related(*select_related)
             .prefetch_related("players__player", "invitedPlayers")
             .get(id=game_id, gameCode=game_code)
         )
@@ -266,8 +271,13 @@ def shared_bug_entry(request, game_code, extra_info_fn=None):
     extra_info = extra_info_fn(currentGame) if extra_info_fn else ""
 
     SN_sendBugReportEmail(
-        request, game_code, gameID, jsonData["gameData"], jsonData["description"],
-        currentGame.rewindData, extra_info,
+        request,
+        game_code,
+        gameID,
+        jsonData["gameData"],
+        jsonData["description"],
+        currentGame.rewindData,
+        extra_info,
     )
 
     return JsonResponse({"bugEntrySuccess": True})

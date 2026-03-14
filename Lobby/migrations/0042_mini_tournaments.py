@@ -6,32 +6,93 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0041_alter_profile_user'),
+        ("Lobby", "0041_alter_profile_user"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Mini_Tournaments',
+            name="Mini_Tournaments",
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('gameCode', models.CharField(choices=[('FCM', 'Food Chain Magnate'), ('HC', 'Horseless Carriage'), ('TGZ', 'The Great Zimbabwe'), ('CNS', 'Cannes'), ('AQY', 'Antiquity'), ('IND', 'Indonesia'), ('KFW', 'Keyflower')], default='FCM', max_length=3)),
-                ('tournamentName', models.CharField(max_length=120)),
-                ('tournamentStatus', models.CharField(choices=[('OP', 'Open'), ('PR', 'Private'), ('IP', 'In Progress'), ('FN', 'Finished')], default='OP', max_length=2)),
-                ('tournamentType', models.CharField(choices=[('RR', 'Rounds'), ('KO', 'Knockout'), ('TL', 'Two Lives'), ('PT', 'Points')], default='RR', max_length=2)),
-                ('startingOptions', models.CharField(blank=True, default='', max_length=80)),
-                ('maxTournamentPlayers', models.PositiveSmallIntegerField()),
-                ('maxGamePlayers', models.PositiveSmallIntegerField()),
-                ('roundsBeforeKnockout', models.PositiveSmallIntegerField(default=4)),
-                ('winnersData', models.TextField(blank=True)),
-                ('created', models.CharField(default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow, max_length=30)),
-                ('tournamentProgressionData', models.TextField(blank=True)),
-                ('tournamentSideData', models.TextField(blank=True)),
-                ('tournamentPointsData', models.TextField(blank=True)),
-                ('chatData', models.TextField(blank=True)),
-                ('nextRoundPlayers', models.ManyToManyField(blank=True, related_name='currentRoundPlayersRelName_MT', to=settings.AUTH_USER_MODEL)),
-                ('startingPlayers', models.ManyToManyField(blank=True, related_name='startingPlayersRelName_MT', to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "gameCode",
+                    models.CharField(
+                        choices=[
+                            ("FCM", "Food Chain Magnate"),
+                            ("HC", "Horseless Carriage"),
+                            ("TGZ", "The Great Zimbabwe"),
+                            ("CNS", "Cannes"),
+                            ("AQY", "Antiquity"),
+                            ("IND", "Indonesia"),
+                            ("KFW", "Keyflower"),
+                        ],
+                        default="FCM",
+                        max_length=3,
+                    ),
+                ),
+                ("tournamentName", models.CharField(max_length=120)),
+                (
+                    "tournamentStatus",
+                    models.CharField(
+                        choices=[
+                            ("OP", "Open"),
+                            ("PR", "Private"),
+                            ("IP", "In Progress"),
+                            ("FN", "Finished"),
+                        ],
+                        default="OP",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "tournamentType",
+                    models.CharField(
+                        choices=[
+                            ("RR", "Rounds"),
+                            ("KO", "Knockout"),
+                            ("TL", "Two Lives"),
+                            ("PT", "Points"),
+                        ],
+                        default="RR",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "startingOptions",
+                    models.CharField(blank=True, default="", max_length=80),
+                ),
+                ("maxTournamentPlayers", models.PositiveSmallIntegerField()),
+                ("maxGamePlayers", models.PositiveSmallIntegerField()),
+                ("roundsBeforeKnockout", models.PositiveSmallIntegerField(default=4)),
+                ("winnersData", models.TextField(blank=True)),
+                (
+                    "created",
+                    models.CharField(
+                        default=Lobby.sharedFunctions.sharedRefs.SR_getTimeNow,
+                        max_length=30,
+                    ),
+                ),
+                ("tournamentProgressionData", models.TextField(blank=True)),
+                ("tournamentSideData", models.TextField(blank=True)),
+                ("tournamentPointsData", models.TextField(blank=True)),
+                ("chatData", models.TextField(blank=True)),
+                (
+                    "nextRoundPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="currentRoundPlayersRelName_MT",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "startingPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="startingPlayersRelName_MT",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

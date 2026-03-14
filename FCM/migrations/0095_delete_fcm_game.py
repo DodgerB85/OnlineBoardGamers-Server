@@ -4,13 +4,12 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0094_remove_fcm_game_relatedtournament_and_more'),
+        ("FCM", "0094_remove_fcm_game_relatedtournament_and_more"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='FCM_Game',
+            name="FCM_Game",
         ),
     ]

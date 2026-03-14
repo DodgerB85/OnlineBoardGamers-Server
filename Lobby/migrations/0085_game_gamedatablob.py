@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0084_game_serverremainingplayerorderbynames'),
+        ("Lobby", "0084_game_serverremainingplayerorderbynames"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='game',
-            name='gameDataBLOB',
+            model_name="game",
+            name="gameDataBLOB",
             field=models.BinaryField(blank=True, null=True),
         ),
     ]

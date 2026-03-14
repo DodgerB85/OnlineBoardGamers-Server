@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TGZ', '0003_auto_20231220_0304'),
+        ("TGZ", "0003_auto_20231220_0304"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tgz_game',
-            name='created',
-            field=models.CharField(default='1703563512000', max_length=30),
+            model_name="tgz_game",
+            name="created",
+            field=models.CharField(default="1703563512000", max_length=30),
         ),
         migrations.AlterField(
-            model_name='tgz_game',
-            name='latestUpdate',
-            field=models.CharField(default='1703563512000', max_length=30),
+            model_name="tgz_game",
+            name="latestUpdate",
+            field=models.CharField(default="1703563512000", max_length=30),
         ),
     ]

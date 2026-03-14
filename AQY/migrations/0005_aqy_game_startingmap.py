@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('AQY', '0004_aqy_game_playertradedata'),
+        ("AQY", "0004_aqy_game_playertradedata"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='aqy_game',
-            name='startingMap',
+            model_name="aqy_game",
+            name="startingMap",
             field=models.CharField(blank=True, max_length=80),
         ),
     ]

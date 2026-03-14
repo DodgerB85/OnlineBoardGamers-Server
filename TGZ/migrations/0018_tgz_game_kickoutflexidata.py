@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TGZ', '0017_alter_tgz_game_gamedescription'),
+        ("TGZ", "0017_alter_tgz_game_gamedescription"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tgz_game',
-            name='kickoutFlexiData',
+            model_name="tgz_game",
+            name="kickoutFlexiData",
             field=models.TextField(blank=True),
         ),
     ]

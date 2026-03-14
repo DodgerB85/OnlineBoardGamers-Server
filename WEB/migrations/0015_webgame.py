@@ -4,25 +4,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0064_alter_game_gamecode'),
-        ('WEB', '0014_web_game_activevotes'),
+        ("Lobby", "0064_alter_game_gamecode"),
+        ("WEB", "0014_web_game_activevotes"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WEBgame',
-            fields=[
-            ],
+            name="WEBgame",
+            fields=[],
             options={
-                'verbose_name': 'WEB_Game',
-                'verbose_name_plural': 'WEB_Games',
-                'abstract': False,
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "WEB_Game",
+                "verbose_name_plural": "WEB_Games",
+                "abstract": False,
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('Lobby.game',),
+            bases=("Lobby.game",),
         ),
     ]

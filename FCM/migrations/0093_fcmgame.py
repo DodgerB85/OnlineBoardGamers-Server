@@ -4,25 +4,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0092_fcm_game_automoves'),
-        ('Lobby', '0082_migrate_fcm_games'),
+        ("FCM", "0092_fcm_game_automoves"),
+        ("Lobby", "0082_migrate_fcm_games"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FCMgame',
-            fields=[
-            ],
+            name="FCMgame",
+            fields=[],
             options={
-                'verbose_name': 'FCM_Game',
-                'verbose_name_plural': 'FCM_Games',
-                'abstract': False,
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "FCM_Game",
+                "verbose_name_plural": "FCM_Games",
+                "abstract": False,
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('Lobby.game',),
+            bases=("Lobby.game",),
         ),
     ]

@@ -5,16 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('FCM', '0005_fcm_game_rewinddata'),
+        ("FCM", "0005_fcm_game_rewinddata"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='playersWithChatNotification',
-            field=models.ManyToManyField(blank=True, related_name='playersWithChatNotificationName', to=settings.AUTH_USER_MODEL),
+            model_name="fcm_game",
+            name="playersWithChatNotification",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="playersWithChatNotificationName",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

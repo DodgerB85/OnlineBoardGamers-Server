@@ -535,9 +535,7 @@ def generate_stats_data(schism_games=False):
         seat_wins_4p_ids,
         seat_wins_4pT,
         seat_wins_4pT_ids,
-    ) = analyze_games(
-        4, schism_games, external_tournament=True
-    )  # Always 4 player
+    ) = analyze_games(4, schism_games, external_tournament=True)  # Always 4 player
 
     G_STATS_DATA, S_STATS_DATA = calculate_stats(
         G_AVAILABLE,

@@ -4,40 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0068_auto_20250504_0725'),
+        ("FCM", "0068_auto_20250504_0725"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='fcm_game',
-            name='player0currentMoveData',
+            model_name="fcm_game",
+            name="player0currentMoveData",
             field=models.CharField(blank=True, max_length=180),
         ),
         migrations.AlterField(
-            model_name='fcm_game',
-            name='player1currentMoveData',
+            model_name="fcm_game",
+            name="player1currentMoveData",
             field=models.CharField(blank=True, max_length=180),
         ),
         migrations.AlterField(
-            model_name='fcm_game',
-            name='player2currentMoveData',
+            model_name="fcm_game",
+            name="player2currentMoveData",
             field=models.CharField(blank=True, max_length=180),
         ),
         migrations.AlterField(
-            model_name='fcm_game',
-            name='player3currentMoveData',
+            model_name="fcm_game",
+            name="player3currentMoveData",
             field=models.CharField(blank=True, max_length=180),
         ),
         migrations.AlterField(
-            model_name='fcm_game',
-            name='player4currentMoveData',
+            model_name="fcm_game",
+            name="player4currentMoveData",
             field=models.CharField(blank=True, max_length=180),
         ),
         migrations.AlterField(
-            model_name='fcm_game',
-            name='player5currentMoveData',
+            model_name="fcm_game",
+            name="player5currentMoveData",
             field=models.CharField(blank=True, max_length=180),
         ),
     ]

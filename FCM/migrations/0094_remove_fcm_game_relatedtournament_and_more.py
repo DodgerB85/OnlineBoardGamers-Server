@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0093_fcmgame'),
-        ('Lobby', '0083_remove_game_relatedfcmtournament'),
+        ("FCM", "0093_fcmgame"),
+        ("Lobby", "0083_remove_game_relatedfcmtournament"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='relatedTournament',
+            model_name="fcm_game",
+            name="relatedTournament",
         ),
         migrations.DeleteModel(
-            name='FCM_Tournament',
+            name="FCM_Tournament",
         ),
     ]

@@ -1,5 +1,6 @@
 import random
 
+
 def create_game_schedule(players, max_retries=1000):
     """
     Creates a game schedule for a given list of players, ensuring that:
@@ -22,7 +23,9 @@ def create_game_schedule(players, max_retries=1000):
     num_games_per_player = 4
     games = []
     player_games = {player: [] for player in players}  # Track games each player is in
-    player_pairings = {player: set() for player in players} # Track who each player has played with
+    player_pairings = {
+        player: set() for player in players
+    }  # Track who each player has played with
 
     def is_valid_game(potential_game):
         """
@@ -80,14 +83,16 @@ def create_game_schedule(players, max_retries=1000):
                     for p in players:
                         if len(player_games[p]) < num_games_per_player:
                             player = p
-                            break # Restart with a player that needs more games
+                            break  # Restart with a player that needs more games
                     else:
-                        #If all players have the required number of games, but we still have games to generate,
-                        #it means there's no valid schedule with the current constraints.
-                        print("Warning: Could not generate a valid schedule after backtracking.")
+                        # If all players have the required number of games, but we still have games to generate,
+                        # it means there's no valid schedule with the current constraints.
+                        print(
+                            "Warning: Could not generate a valid schedule after backtracking."
+                        )
                         return None
-                    retries = 0 #Reset retries after backtracking
-                    continue # Restart the outer loop
+                    retries = 0  # Reset retries after backtracking
+                    continue  # Restart the outer loop
 
                 else:
                     print("Warning: Could not generate a valid schedule.")
@@ -95,28 +100,31 @@ def create_game_schedule(players, max_retries=1000):
 
             # Find potential players for the game
             eligible_players = [
-                p for p in players
-                if p != player and
-                   len(player_games[p]) < num_games_per_player and
-                   p not in player_pairings[player]
+                p
+                for p in players
+                if p != player
+                and len(player_games[p]) < num_games_per_player
+                and p not in player_pairings[player]
             ]
 
             if not eligible_players:
                 retries += 1
-                continue #Retry
+                continue  # Retry
 
             # Determine the game size.  We'll aim for games of 3-5 players.
-            game_size = random.randint(3, min(5, len(eligible_players) + 1)) # +1 to account for the original player
+            game_size = random.randint(
+                3, min(5, len(eligible_players) + 1)
+            )  # +1 to account for the original player
 
             # Create a potential game
             potential_game = [player] + random.sample(eligible_players, game_size - 1)
 
             if is_valid_game(potential_game):
                 add_game(potential_game)
-                retries = 0 # Reset retries on success
+                retries = 0  # Reset retries on success
             else:
-                retries += 1 #Increment retries on failure
-                continue # Retry with a different set of players
+                retries += 1  # Increment retries on failure
+                continue  # Retry with a different set of players
 
     # Verification (optional, but good practice)
     for player in players:
@@ -132,20 +140,23 @@ def create_game_schedule(players, max_retries=1000):
                     if player in game and other_player in game:
                         count += 1
                 if count > 1:
-                    print(f"Error: {player} and {other_player} played together {count} times.")
+                    print(
+                        f"Error: {player} and {other_player} played together {count} times."
+                    )
                     return None
 
     return games
 
+
 # Example Usage:
 num_players = 15
-player_list = [f"Player {i+1}" for i in range(num_players)]
+player_list = [f"Player {i + 1}" for i in range(num_players)]
 
 schedule = create_game_schedule(player_list)
 
 if schedule:
     print("Game Schedule:")
     for i, game in enumerate(schedule):
-        print(f"Game {i+1}: {game}")
+        print(f"Game {i + 1}: {game}")
 else:
     print("Could not generate a valid game schedule.")

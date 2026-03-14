@@ -29,33 +29,37 @@ def multiGamePlayers4p(players):
         games.append(game_players)
 
         # Optional: verify no repeats (will pass when design exists)
-        for a, b in __import__('itertools').combinations(sorted(game), 2):
+        for a, b in __import__("itertools").combinations(sorted(game), 2):
             pair = tuple(sorted((a, b)))
             if pair in seen_pairs:
-                print(f"Warning: repeat detected at offset {offset}: {pair} -- len(players): {len(players)}")
+                print(
+                    f"Warning: repeat detected at offset {offset}: {pair} -- len(players): {len(players)}"
+                )
             seen_pairs.add(pair)
 
     # Final check
     from collections import Counter
+
     count = Counter(p for game in games for p in game)
     if any(count.get(p, 0) != 4 for p in players):
         return [2, "Balance failed!"]
 
     return games
 
+
 # You must pass in 14 players from round 1
 # First 7 should be in group A, second 7 should be in group B
 def multiGamePlayersRound2(players):
 
     assert len(players) == 14
-    
+
     # Snake into two groups of 7
-    #A = players[0::2]   # 0,2,4,6,8,10,12
-    #B = players[1::2]   # 1,3,5,7,9,11,13
+    # A = players[0::2]   # 0,2,4,6,8,10,12
+    # B = players[1::2]   # 1,3,5,7,9,11,13
     # Split into 2 groups of 7
     A = players[:7]
     B = players[7:]
-    
+
     games = [
         # Group A
         [A[0], A[1], A[2], A[4]],
@@ -74,8 +78,9 @@ def multiGamePlayersRound2(players):
         [B[1], B[3], B[4], B[6]],
         [B[2], B[3], B[4], B[5]],
     ]
-    
+
     return games
+
 
 def show_pair_counts(schedule, players):
     """
@@ -83,35 +88,39 @@ def show_pair_counts(schedule, players):
     Perfect for checking balance in 4-player games.
     """
     pair_count = Counter()
-    
+
     # Count every pair in every game
     for game in schedule:
         # All unique pairs in this game (there are C(4,2)=6 per game)
         for p1, p2 in itertools.combinations(sorted(game), 2):
             pair_count[(p1, p2)] += 1
-    
+
     # Print nicely
     print(f"\nPAIR FREQUENCY (out of {len(schedule)} games):")
     print("-" * 50)
-    
+
     # Group by frequency
     freq = Counter(pair_count.values())
     for times in sorted(freq):
         count = freq[times]
         print(f"{times} time(s) together → {count} pairs")
-    
+
     print("-" * 50)
-    
+
     # Optional: show worst/best cases
     if pair_count:
         max_times = max(pair_count.values())
         min_times = min(pair_count.values())
-        max_pairs = [f"{a}-{b}" for (a,b), c in pair_count.items() if c == max_times]
-        min_pairs = [f"{a}-{b}" for (a,b), c in pair_count.items() if c == min_times]
-        
-        print(f"Most frequent together ({max_times}x): {', '.join(max_pairs[:5])}{'...' if len(max_pairs)>5 else ''}")
-        print(f"Least frequent together ({min_times}x): {', '.join(min_pairs[:5])}{'...' if len(min_pairs)>5 else ''}")
-    
+        max_pairs = [f"{a}-{b}" for (a, b), c in pair_count.items() if c == max_times]
+        min_pairs = [f"{a}-{b}" for (a, b), c in pair_count.items() if c == min_times]
+
+        print(
+            f"Most frequent together ({max_times}x): {', '.join(max_pairs[:5])}{'...' if len(max_pairs) > 5 else ''}"
+        )
+        print(
+            f"Least frequent together ({min_times}x): {', '.join(min_pairs[:5])}{'...' if len(min_pairs) > 5 else ''}"
+        )
+
     return pair_count
 
 
@@ -133,14 +142,14 @@ if __name__ == "__main__":
             print(schedule[1])
             break
 
-    #print("\n14-Player Perfect Schedule:\n")
-    #for i, game in enumerate(schedule, 1):
+    # print("\n14-Player Perfect Schedule:\n")
+    # for i, game in enumerate(schedule, 1):
     #    print(f"Table {i:2d}: {', '.join(game)}")
 
     # Verification
-    #count = Counter()
-    #for game in schedule:
+    # count = Counter()
+    # for game in schedule:
     #    count.update(game)
-    #print("\nVerification — all must be 4:")
-    #for p in sorted(count):
+    # print("\nVerification — all must be 4:")
+    # for p in sorted(count):
     #    print(f"{p}: {count[p]}")

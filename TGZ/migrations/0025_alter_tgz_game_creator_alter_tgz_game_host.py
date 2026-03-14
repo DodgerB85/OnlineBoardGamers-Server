@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("TGZ", "0024_alter_tgz_game_gamestatus"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

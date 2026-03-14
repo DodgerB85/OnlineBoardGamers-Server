@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0008_profile_fcmtournamenttrophies'),
+        ("Lobby", "0008_profile_fcmtournamenttrophies"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='preferredHCcolour',
+            model_name="profile",
+            name="preferredHCcolour",
             field=models.SmallIntegerField(default=-1, null=True),
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0033_profile_preferredindoptions'),
+        ("Lobby", "0033_profile_preferredindoptions"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='stopEmailsUntil',
+            model_name="profile",
+            name="stopEmailsUntil",
             field=models.PositiveIntegerField(null=True),
         ),
     ]

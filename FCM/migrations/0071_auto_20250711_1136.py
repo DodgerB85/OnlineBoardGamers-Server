@@ -4,58 +4,57 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0070_fcm_game_playersmovedata'),
+        ("FCM", "0070_fcm_game_playersmovedata"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player0currentMoveData',
+            model_name="fcm_game",
+            name="player0currentMoveData",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player0currentMoveTime',
+            model_name="fcm_game",
+            name="player0currentMoveTime",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player1currentMoveData',
+            model_name="fcm_game",
+            name="player1currentMoveData",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player1currentMoveTime',
+            model_name="fcm_game",
+            name="player1currentMoveTime",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player2currentMoveData',
+            model_name="fcm_game",
+            name="player2currentMoveData",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player2currentMoveTime',
+            model_name="fcm_game",
+            name="player2currentMoveTime",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player3currentMoveData',
+            model_name="fcm_game",
+            name="player3currentMoveData",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player3currentMoveTime',
+            model_name="fcm_game",
+            name="player3currentMoveTime",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player4currentMoveData',
+            model_name="fcm_game",
+            name="player4currentMoveData",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player4currentMoveTime',
+            model_name="fcm_game",
+            name="player4currentMoveTime",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player5currentMoveData',
+            model_name="fcm_game",
+            name="player5currentMoveData",
         ),
         migrations.RemoveField(
-            model_name='fcm_game',
-            name='player5currentMoveTime',
+            model_name="fcm_game",
+            name="player5currentMoveTime",
         ),
     ]

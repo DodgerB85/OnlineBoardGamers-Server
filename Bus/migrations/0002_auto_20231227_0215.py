@@ -6,66 +6,118 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('Bus', '0001_initial'),
+        ("Bus", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='bus_game',
-            name='created',
-            field=models.CharField(default='1703643330000', max_length=30),
+            model_name="bus_game",
+            name="created",
+            field=models.CharField(default="1703643330000", max_length=30),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='gameName',
-            field=models.CharField(default='[Bus Game]', max_length=120),
+            model_name="bus_game",
+            name="gameName",
+            field=models.CharField(default="[Bus Game]", max_length=120),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='latestUpdate',
-            field=models.CharField(default='1703643330000', max_length=30),
+            model_name="bus_game",
+            name="latestUpdate",
+            field=models.CharField(default="1703643330000", max_length=30),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='rewindConsent',
-            field=models.CharField(default='00000', max_length=10),
+            model_name="bus_game",
+            name="rewindConsent",
+            field=models.CharField(default="00000", max_length=10),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='statsExcludeConsent',
-            field=models.CharField(default='00000', max_length=10),
+            model_name="bus_game",
+            name="statsExcludeConsent",
+            field=models.CharField(default="00000", max_length=10),
         ),
         migrations.AlterField(
-            model_name='bus_game',
-            name='zoomLevels',
-            field=models.CharField(default='[120, 120, 120, 120, 120]', max_length=30),
+            model_name="bus_game",
+            name="zoomLevels",
+            field=models.CharField(default="[120, 120, 120, 120, 120]", max_length=30),
         ),
         migrations.CreateModel(
-            name='Bus_Tournament',
+            name="Bus_Tournament",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tournamentName', models.CharField(max_length=120)),
-                ('tournamentStatus', models.CharField(choices=[('OP', 'Open'), ('IP', 'In Progress'), ('FN', 'Finished')], default='OP', max_length=2)),
-                ('tournamentType', models.CharField(choices=[('RR', 'Rounds'), ('KO', 'Knockout'), ('TL', 'Two Lives')], default='RR', max_length=2)),
-                ('startingOptions', models.CharField(blank=True, default='', max_length=70)),
-                ('maxTournamentPlayers', models.PositiveSmallIntegerField()),
-                ('maxGamePlayers', models.PositiveSmallIntegerField()),
-                ('roundsBeforeKnockout', models.PositiveSmallIntegerField(default=4)),
-                ('winnersData', models.TextField(blank=True)),
-                ('created', models.CharField(default=1703643330000, max_length=30)),
-                ('tournamentProgressionData', models.TextField(blank=True)),
-                ('tournamentSideData', models.TextField(blank=True)),
-                ('tournamentPointsData', models.TextField(blank=True)),
-                ('nextRoundPlayers', models.ManyToManyField(blank=True, related_name='currentRoundPlayersRelName_Bus', to=settings.AUTH_USER_MODEL)),
-                ('startingPlayers', models.ManyToManyField(blank=True, related_name='startingPlayersRelName_Bus', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("tournamentName", models.CharField(max_length=120)),
+                (
+                    "tournamentStatus",
+                    models.CharField(
+                        choices=[
+                            ("OP", "Open"),
+                            ("IP", "In Progress"),
+                            ("FN", "Finished"),
+                        ],
+                        default="OP",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "tournamentType",
+                    models.CharField(
+                        choices=[
+                            ("RR", "Rounds"),
+                            ("KO", "Knockout"),
+                            ("TL", "Two Lives"),
+                        ],
+                        default="RR",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "startingOptions",
+                    models.CharField(blank=True, default="", max_length=70),
+                ),
+                ("maxTournamentPlayers", models.PositiveSmallIntegerField()),
+                ("maxGamePlayers", models.PositiveSmallIntegerField()),
+                ("roundsBeforeKnockout", models.PositiveSmallIntegerField(default=4)),
+                ("winnersData", models.TextField(blank=True)),
+                ("created", models.CharField(default=1703643330000, max_length=30)),
+                ("tournamentProgressionData", models.TextField(blank=True)),
+                ("tournamentSideData", models.TextField(blank=True)),
+                ("tournamentPointsData", models.TextField(blank=True)),
+                (
+                    "nextRoundPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="currentRoundPlayersRelName_Bus",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "startingPlayers",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="startingPlayersRelName_Bus",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='bus_game',
-            name='relatedTournament',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='tournament_relName_Bus', to='Bus.bus_tournament'),
+            model_name="bus_game",
+            name="relatedTournament",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="tournament_relName_Bus",
+                to="Bus.bus_tournament",
+            ),
         ),
     ]

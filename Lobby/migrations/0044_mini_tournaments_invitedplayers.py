@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0043_mini_tournaments_tournamentdescription'),
+        ("Lobby", "0043_mini_tournaments_tournamentdescription"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mini_tournaments',
-            name='invitedPlayers',
-            field=models.ManyToManyField(blank=True, related_name='invitedPlayersRelName_MT', to=settings.AUTH_USER_MODEL),
+            model_name="mini_tournaments",
+            name="invitedPlayers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="invitedPlayersRelName_MT",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

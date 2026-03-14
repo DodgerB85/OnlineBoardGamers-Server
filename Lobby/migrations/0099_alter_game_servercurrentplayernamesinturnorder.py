@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0098_remove_game_gamedatablob'),
+        ("Lobby", "0098_remove_game_gamedatablob"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='game',
-            name='serverCurrentPlayerNamesInTurnOrder',
+            model_name="game",
+            name="serverCurrentPlayerNamesInTurnOrder",
             field=models.JSONField(blank=True, default=list, null=True),
         ),
     ]

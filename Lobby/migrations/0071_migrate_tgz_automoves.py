@@ -4,24 +4,23 @@ from django.db import migrations
 
 
 def migrate_tgz_automoves(apps, schema_editor):
-    Game = apps.get_model('Lobby', 'Game')
-    TGZ_Game = apps.get_model('TGZ', 'TGZ_Game')
-    
+    Game = apps.get_model("Lobby", "Game")
+    TGZ_Game = apps.get_model("TGZ", "TGZ_Game")
+
     # Find all TGZ games that have been migrated to unified Game model
     for tgz_game in TGZ_Game.objects.filter(autoMoves__isnull=False):
         try:
-            unified_game = Game.objects.get(gameCode='TGZ', original_id=tgz_game.id)
+            unified_game = Game.objects.get(gameCode="TGZ", original_id=tgz_game.id)
             unified_game.autoMoves = tgz_game.autoMoves
-            unified_game.save(update_fields=['autoMoves'])
+            unified_game.save(update_fields=["autoMoves"])
         except Game.DoesNotExist:
             pass
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0070_game_automoves'),
-        ('TGZ', '__first__'),
+        ("Lobby", "0070_game_automoves"),
+        ("TGZ", "__first__"),
     ]
 
     operations = [

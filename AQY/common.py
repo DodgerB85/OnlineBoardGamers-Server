@@ -10,19 +10,17 @@ from django.utils.translation import gettext
 import json
 import random
 from Lobby.models import User, Game, GamePlayer
-from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
-)
+from Lobby.sharedFunctions.sharedNotifications import SN_sendInviteNotifications
+
 from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
-from Lobby.sharedFunctions.sharedRefs import (
-    SR_getTimeNow,
-)  # Replace 'somewhere' with actual module
+from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
-    from Lobby.presenters import AQYpresenter 
- 
+    from Lobby.presenters import AQYpresenter
+
+
 @login_required()
 def create_aqy_game(
     request,
@@ -187,9 +185,8 @@ def create_aqy_game(
         all_players.append(request.user)
 
     with transaction.atomic():
-
         new_game = Game(
-            gameCode='AQY',
+            gameCode="AQY",
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -228,13 +225,15 @@ def create_aqy_game(
                 game=new_game,
                 player=player,
                 seat_order=idx,
-                notes=shadowNameNotes if player==request.user else "",
+                notes=shadowNameNotes if player == request.user else "",
             )
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            presenter = cast('AQYpresenter', new_game.presenter())
-            presenter.startGame(request, isTournamentGame=(is_main_tournament or is_mini_tournament))
+            presenter = cast("AQYpresenter", new_game.presenter())
+            presenter.startGame(
+                request, isTournamentGame=(is_main_tournament or is_mini_tournament)
+            )
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
@@ -245,7 +244,11 @@ def create_aqy_game(
     # Normal Game Notifications
     if usernames_to_notify:
         SN_sendInviteNotifications(
-            request, usernames_to_notify, new_game.presenter().getGameName(), max_players, "AQY"
+            request,
+            usernames_to_notify,
+            new_game.presenter().getGameName(),
+            max_players,
+            "AQY",
         )
 
     if "trainingGame" in request.POST:
@@ -255,9 +258,7 @@ def create_aqy_game(
         )
 
     # Otherwise, return normal game creation
-    messages.success(
-        request, SF_getGameCreationJsonReturn("AQY", new_game.id)
-    )
+    messages.success(request, SF_getGameCreationJsonReturn("AQY", new_game.id))
     return HttpResponseRedirect(
         reverse("indexListType", kwargs={"listType": "waiting"})
     )

@@ -4,40 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0008_fcm_game_missingplayers'),
+        ("FCM", "0008_fcm_game_missingplayers"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='player0notes',
+            model_name="fcm_game",
+            name="player0notes",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='player1notes',
+            model_name="fcm_game",
+            name="player1notes",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='player2notes',
+            model_name="fcm_game",
+            name="player2notes",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='player3notes',
+            model_name="fcm_game",
+            name="player3notes",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='player4notes',
+            model_name="fcm_game",
+            name="player4notes",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='fcm_game',
-            name='player5notes',
+            model_name="fcm_game",
+            name="player5notes",
             field=models.TextField(blank=True),
         ),
     ]

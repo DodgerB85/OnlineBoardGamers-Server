@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0037_auto_20250214_1240'),
+        ("Lobby", "0037_auto_20250214_1240"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='profile',
-            name='emailNotifications',
-            field=models.CharField(default='[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]', max_length=40),
+            model_name="profile",
+            name="emailNotifications",
+            field=models.CharField(
+                default="[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]", max_length=40
+            ),
         ),
     ]

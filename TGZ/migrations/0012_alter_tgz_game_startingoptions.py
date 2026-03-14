@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TGZ', '0011_auto_20231230_0513'),
+        ("TGZ", "0011_auto_20231230_0513"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tgz_game',
-            name='startingOptions',
+            model_name="tgz_game",
+            name="startingOptions",
             field=models.CharField(blank=True, max_length=100),
         ),
     ]

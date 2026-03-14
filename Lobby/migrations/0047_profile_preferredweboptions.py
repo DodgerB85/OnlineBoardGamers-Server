@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0046_mini_tournaments_creator'),
+        ("Lobby", "0046_mini_tournaments_creator"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='preferredWEBoptions',
+            model_name="profile",
+            name="preferredWEBoptions",
             field=models.CharField(blank=True, max_length=30),
         ),
     ]

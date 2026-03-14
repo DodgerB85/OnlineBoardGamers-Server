@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('KFW', '0015_kfw_game_gamedatablob'),
+        ("KFW", "0015_kfw_game_gamedatablob"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='kfw_game',
-            name='deleteGameVotes',
+            model_name="kfw_game",
+            name="deleteGameVotes",
         ),
         migrations.RemoveField(
-            model_name='kfw_game',
-            name='statsExcludeConsent',
+            model_name="kfw_game",
+            name="statsExcludeConsent",
         ),
     ]

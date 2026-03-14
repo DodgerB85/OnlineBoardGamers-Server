@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0005_auto_20221207_0931'),
+        ("Lobby", "0005_auto_20221207_0931"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='sendSlackWebhookNotificationOnTurn',
+            model_name="profile",
+            name="sendSlackWebhookNotificationOnTurn",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='slackWebhookURL',
+            model_name="profile",
+            name="slackWebhookURL",
             field=models.CharField(blank=True, max_length=200),
         ),
     ]

@@ -4,20 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0012_auto_20230331_0342'),
+        ("Lobby", "0012_auto_20230331_0342"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='changelog',
-            name='timestamp',
+            model_name="changelog",
+            name="timestamp",
             field=models.CharField(default=1690432606000, max_length=30),
         ),
         migrations.AlterField(
-            model_name='profile',
-            name='profileLanguage',
-            field=models.CharField(choices=[('en-gb', 'English (United Kingdom)'), ('zh-hans', '简体中文')], default='en-gb', max_length=10),
+            model_name="profile",
+            name="profileLanguage",
+            field=models.CharField(
+                choices=[
+                    ("en-gb", "English (United Kingdom)"),
+                    ("zh-hans", "简体中文"),
+                ],
+                default="en-gb",
+                max_length=10,
+            ),
         ),
     ]

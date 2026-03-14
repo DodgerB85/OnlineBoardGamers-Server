@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0071_migrate_tgz_automoves'),
+        ("Lobby", "0071_migrate_tgz_automoves"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='game',
-            name='externalTournamentGame',
+            model_name="game",
+            name="externalTournamentGame",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='game',
-            name='tournamentGame',
+            model_name="game",
+            name="tournamentGame",
             field=models.BooleanField(default=False),
         ),
     ]

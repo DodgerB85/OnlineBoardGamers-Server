@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0002_profile_showassistance'),
+        ("Lobby", "0002_profile_showassistance"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='profile',
-            name='preferredRestaurantColour',
+            model_name="profile",
+            name="preferredRestaurantColour",
             field=models.SmallIntegerField(default=-1, null=True),
         ),
     ]

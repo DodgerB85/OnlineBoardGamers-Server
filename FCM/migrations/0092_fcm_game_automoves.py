@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('FCM', '0091_remove_fcm_game_rewindconsent'),
+        ("FCM", "0091_remove_fcm_game_rewindconsent"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fcm_game',
-            name='autoMoves',
+            model_name="fcm_game",
+            name="autoMoves",
             field=models.CharField(blank=True, default=None, max_length=30, null=True),
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0035_alter_profile_stopemailsuntil'),
+        ("Lobby", "0035_alter_profile_stopemailsuntil"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='webhooks',
+            model_name="profile",
+            name="webhooks",
             field=models.TextField(blank=True, null=True),
         ),
     ]

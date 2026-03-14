@@ -4,35 +4,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('Lobby', '0036_profile_webhooks'),
+        ("Lobby", "0036_profile_webhooks"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='profile',
-            name='discordWebhookURL',
+            model_name="profile",
+            name="discordWebhookURL",
         ),
         migrations.RemoveField(
-            model_name='profile',
-            name='discordWebhookUserID',
+            model_name="profile",
+            name="discordWebhookUserID",
         ),
         migrations.RemoveField(
-            model_name='profile',
-            name='sendDiscordWebhookNotificationOnTurn',
+            model_name="profile",
+            name="sendDiscordWebhookNotificationOnTurn",
         ),
         migrations.RemoveField(
-            model_name='profile',
-            name='sendSlackWebhookNotificationOnTurn',
+            model_name="profile",
+            name="sendSlackWebhookNotificationOnTurn",
         ),
         migrations.RemoveField(
-            model_name='profile',
-            name='slackWebhookURL',
+            model_name="profile",
+            name="slackWebhookURL",
         ),
         migrations.AddField(
-            model_name='profile',
-            name='emailNotifications',
-            field=models.CharField(default='[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]', max_length=40),
+            model_name="profile",
+            name="emailNotifications",
+            field=models.CharField(
+                default="[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]", max_length=40
+            ),
         ),
     ]
