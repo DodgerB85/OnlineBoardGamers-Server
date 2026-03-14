@@ -6,8 +6,8 @@ import time
 import urllib.parse
 from decouple import config
 
-from django.db import close_old_connections
-from django.core.mail import send_mail
+#from django.db import close_old_connections
+#from django.core.mail import send_mail
 from django.utils.translation import gettext, activate, get_language
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
@@ -1974,7 +1974,7 @@ def SN_sendTournamentOpen(new_tournament, gameCode):
 
 
 def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
-    OBG_IDX = 0
+    #OBG_IDX = 0
     OBG_TURN_1_IDX = 1
     OBG_TURN_2_IDX = 2
     OBG_TURN_3_IDX = 3

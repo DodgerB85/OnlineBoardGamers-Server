@@ -1,15 +1,8 @@
 import time
 import itertools
-import gzip
-import base64
 from collections import defaultdict
-from decouple import config
-
-import requests
 import json
 
-from django.conf import settings
-from django.db.models import Q
 from django.utils.translation import gettext  # , activate, get_language
 
 # from django.template.loader import render_to_string
@@ -31,7 +24,6 @@ from Lobby.models import User, Profile
 
 from Lobby.sharedFunctions.sharedNotifications import SN_M_T_sendTournamentWinNotification
 from Lobby.sharedFunctions.sharedRefs import (
-    SR_isThisMultiiWinnersGame,
     SR_getPointsForPosition,
     getCleanedAndSortedRoundData,
     SR_currentTurnString,
@@ -570,8 +562,6 @@ def SF_startAnyTournament(request, mainORmini, tournamentObj):
     if mainORmini == rf.MINI_T_FLAG:
         tournamentObj.invitedPlayers.clear()
 
-    gameCode = tournamentObj.gameCode
-
     ######### COMMON TO ALL TOURNYS ##########
     tournamentObj.tournamentStatus = "IP"
     allPlayersList = list(tournamentObj.startingPlayers.all().order_by("?").values_list("username", flat=True))
@@ -704,7 +694,7 @@ def start_next_any_tournament_round(request, mainORmini, tournamentObj, _current
     if tournamentObj.tournamentType == "MG":
         setNextRoundMultiGamePlayers(tournamentObj)
         
-    if SF_checkForAnyTournamentEnd(tournamentObj, mainORmini) == True:
+    if SF_checkForAnyTournamentEnd(tournamentObj, mainORmini) is True:
         SF_endAnyTournament(request, mainORmini, tournamentObj, _currentGame, _winnerArray, _finalPositionNamesAndScore)
         tournamentObj.save()
         return
