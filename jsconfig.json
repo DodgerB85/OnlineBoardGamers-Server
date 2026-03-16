@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "checkJs": false,      // <--- CHANGE THIS TO FALSE
+    "strict": false,       // <--- CHANGE THIS TO FALSE
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "vueCompilerOptions": {
+    "strictTemplates": true  // <--- KEEP THIS TRUE
+  },
+    "include": ["**/vue*/*", "**/*.vue"],
+  "exclude": [    
+    "node_modules",
+    "**/node_modules/*",
+    "dist",
+    ".venv",
+    "**/.venv/*",
+    "bower_components",
+    "tmp",
+    "vendor",
+    ".git"
+  ]
+}
+
+
