@@ -19,6 +19,7 @@ module.exports = [
     },
     rules: {
       "no-dupe-else-if": "error", // Force this rule on
+        "vue/no-undef-properties": "error", // <--- ADD THIS
     }
   },
 ];
