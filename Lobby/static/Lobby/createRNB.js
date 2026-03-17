@@ -125,6 +125,10 @@ function validateOptions(change) {
             document.getElementById('player3').disabled = false;
             document.getElementById('player4').value = "";
             document.getElementById('player4').disabled = false;
+            document.getElementById('player5').value = "";
+            document.getElementById('player5').disabled = false;
+            document.getElementById('player6').value = "";
+            document.getElementById('player6').disabled = false;
             selectPlayers();
         }
     }
@@ -207,17 +211,25 @@ function selectPlayers() {
         case '2':
             document.getElementById("selPlayer3").style.display = "none";
             document.getElementById("selPlayer4").style.display = "none";
+            document.getElementById("selPlayer5").style.display = "none";
+            document.getElementById("selPlayer6").style.display = "none";
 
             document.getElementById("player3").value = "";
             document.getElementById("player4").value = "";
+            document.getElementById("player5").value = "";
+            document.getElementById("player6").value = "";
 
             if (document.getElementById('trainingGame').checked) document.getElementById('player2').value = "SHADOW";
             break;
         case '3':
             document.getElementById("selPlayer3").style.display = "flex";
             document.getElementById("selPlayer4").style.display = "none";
+            document.getElementById("selPlayer5").style.display = "none";
+            document.getElementById("selPlayer6").style.display = "none";
 
             document.getElementById("player4").value = "";
+            document.getElementById("player5").value = "";
+            document.getElementById("player6").value = "";
 
             if (document.getElementById('trainingGame').checked) {
                 document.getElementById('player2').value = "SHADOW";
@@ -227,11 +239,45 @@ function selectPlayers() {
         case '4':
             document.getElementById("selPlayer3").style.display = "flex";
             document.getElementById("selPlayer4").style.display = "flex";
+            document.getElementById("selPlayer5").style.display = "none";
+            document.getElementById("selPlayer6").style.display = "none";
+
+            document.getElementById("player5").value = "";
+            document.getElementById("player6").value = "";
 
             if (document.getElementById('trainingGame').checked) {
                 document.getElementById('player2').value = "SHADOW";
                 document.getElementById('player3').value = "SHADOW_2";
                 document.getElementById('player4').value = "SHADOW_3";
+            }
+            break;
+        case '5':
+            document.getElementById("selPlayer3").style.display = "flex";
+            document.getElementById("selPlayer4").style.display = "flex";
+            document.getElementById("selPlayer5").style.display = "flex";
+            document.getElementById("selPlayer6").style.display = "none";
+
+            document.getElementById("player6").value = "";
+
+            if (document.getElementById('trainingGame').checked) {
+                document.getElementById('player2').value = "SHADOW";
+                document.getElementById('player3').value = "SHADOW_2";
+                document.getElementById('player4').value = "SHADOW_3";
+                document.getElementById('player5').value = "SHADOW_4";
+            }
+            break;
+        case '6':
+            document.getElementById("selPlayer3").style.display = "flex";
+            document.getElementById("selPlayer4").style.display = "flex";
+            document.getElementById("selPlayer5").style.display = "flex";
+            document.getElementById("selPlayer6").style.display = "flex";
+
+            if (document.getElementById('trainingGame').checked) {
+                document.getElementById('player2').value = "SHADOW";
+                document.getElementById('player3').value = "SHADOW_2";
+                document.getElementById('player4').value = "SHADOW_3";
+                document.getElementById('player5').value = "SHADOW_4";
+                document.getElementById('player6').value = "SHADOW_5";
             }
             break;
     }
