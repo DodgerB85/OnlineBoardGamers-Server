@@ -242,11 +242,6 @@ span.live {
 	width: 100px;
 }
 
-.resources .card {
-	margin: 0 10px;
-	width: 75px;
-}
-
 div.milestones {
 	background-color: #94e2fa;
 	border-radius: 5px;
@@ -686,7 +681,7 @@ div.badge span {
 	background-color: #b492c4;
 }
 .delivery {
-	background-color: #E98D2A;
+	background-color: #e98d2a;
 }
 
 span.compact {
@@ -1083,6 +1078,29 @@ span.campaign_duration {
 	font-size: 35px;
 }
 
+.resources .card {
+	margin: 0 10px;
+	width: 75px;
+}
+
+.playerDetailResourceDiv {
+	display: flex;
+	justify-content: center;
+	align-items: center; /* This centers everything vertically */
+	gap: 5px; /* Adds a little space between number and image */
+	flex-wrap: wrap; /* Keeps them from breaking if there are many */
+}
+
+.playerDetailResourceDiv .card {
+	margin: 0 10px;
+	width: 75px;
+}
+
+.playerDetailResourceNumber {
+	font-size: 35px;
+	font-weight: bolder;
+}
+
 .r0M {
 	-webkit-transform: scaleX(-1);
 	transform: scaleX(-1);
@@ -1467,7 +1485,7 @@ body.noassistance #assistancePlayers {
 	font-size: 45px;
 }
 
-/* Haker Marketing tokens */ 
+/* Haker Marketing tokens */
 #assistance #hawkerMarketerActiveDisplay {
 	/*text-align: center;*/
 	width: 392px;
@@ -2326,7 +2344,8 @@ input.radio {
 	vertical-align: middle;
 }
 
-#excludeDiv, #deleteDiv {
+#excludeDiv,
+#deleteDiv {
 	align-items: center;
 	justify-content: center;
 	text-align: center;
