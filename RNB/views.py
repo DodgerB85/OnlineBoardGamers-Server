@@ -297,9 +297,20 @@ def _processRNBturn(request):
 
         # First, ALWAYS add the conflict preset move
         if jsonData["conflictPresetData"] != "":
-            conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
-            conflictPresetMove["status"] = "pending"
-            PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
+            conflictPresetMoves = PdecompressData(jsonData["conflictPresetData"])
+            for conflictPresetMove in conflictPresetMoves:
+                conflictPresetMove["status"] = "pending"
+                PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
+
+        # Next, ALWAYS add in any phase skips
+        for mainPhaseSkipData in jsonData["mainPhaseSkipsData"]:
+            newMoveEntry = {
+                "turn": mainPhaseSkipData[0],
+                "phase": mainPhaseSkipData[1],
+                "actionStack": "",
+                "status": "pending",
+            }
+            PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
         # Next, we can clear out old data
         PclearPastMoveData(currentGame)
