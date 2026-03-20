@@ -185,21 +185,22 @@ if DEBUG:
 Q_CLUSTER = {
     "name": "obg_cluster",
     "workers": 1,  # Keep this at 1 on PythonAnywhere
-    "recycle": 500,
     "timeout": 60,  # Process timeout
     #'compress': True, # DO NOT USE - Instead pass minimal data as args to async tasks
     "retry": 120,
     "queue_limit": 10,
     "orm": "default",  # Or your database alias
-    "save_limit": 100,  # Only keep the last 50 successful tasks
     "gc_interval": 3600,  # Run the garbage collector every hour (3600 seconds)
     "label": "Django Q",  # Admin label
     "ack_failures": True,  # Cleanup failed tasks
     # --- CRITICAL CPU SAVING SETTINGS ---
-    "sleeptime": 30,  # Wait 30 seconds before checking for new tasks
     "bulking": 10,  # Process up to 10 tasks at once to reduce overhead
     "sync": False,
-    "guard_cycle": 5.0,  # MOST IMPORTANT: Idle sleep time in seconds (default is 0.5)
+    # --- END CPU SAVING SETTINGS ---
+    "guard_cycle": 60.0,   # Wake up once a minute instead of every 5 seconds
+    "recycle": 0,          # Stop the CPU-heavy process-restarting cycle
+    "save_limit": 0,       # Stop writing success logs to the DB
+    "sleeptime": 60,       # Match your guard cycle for consistency
 }
 
 # NB this oculd kill very long DB connections
