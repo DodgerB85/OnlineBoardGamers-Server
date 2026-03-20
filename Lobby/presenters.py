@@ -358,6 +358,8 @@ class GamePresenter:
         """Send async game-start notification to other players."""
         from django_q.tasks import async_task
 
+        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
+
         if not playerListToNotify:
             return
 
@@ -381,11 +383,12 @@ class GamePresenter:
             else 0
         )
 
-        async_task(
-            "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-            playerListToNotify,
-            message_data,
-        )
+        #async_task(
+        #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+        #    playerListToNotify,
+        #    message_data,
+        #)
+        SN_M_sendGameStartNotification(playerListToNotify, message_data)
 
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
