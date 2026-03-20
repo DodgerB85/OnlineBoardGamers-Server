@@ -1476,7 +1476,7 @@ class RNBpresenter(GamePresenter):
             gp = self.gameObj.players.filter(
                 player__username=loggedInPlayerUsername
             ).first()
-            presetMoves = gp.moveDataJSON
+            presetMoves = gp.moveDataJSON if gp and gp.moveDataJSON else []
             for entry in presetMoves:
                 if (
                     entry["turn"] == self.gameObj.turn

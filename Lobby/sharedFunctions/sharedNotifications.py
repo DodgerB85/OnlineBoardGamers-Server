@@ -2150,11 +2150,17 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
             w_id = webhookData[2]
 
             try:
+                ## Discord
+                #if w_type == "DC":
+                #    mention = f"<@{w_id}>\n" if w_id else ""
+                #    content = f"{mention}{messageText}\n[{urlText}]({urlRaw})"
+                #    session.post(w_url, data={"content": content}, timeout=10)
                 # Discord
                 if w_type == "DC":
                     mention = f"<@{w_id}>\n" if w_id else ""
-                    content = f"{mention}{messageText}\n[{urlText}]({urlRaw})"
-                    session.post(w_url, data={"content": content}, timeout=10)
+                    # Wrap urlRaw in < > to suppress the auto-embed
+                    content = f"{mention}{messageText}\n[{urlText}](<{urlRaw}>)"
+                    session.post(w_url, json={"content": content}, timeout=10)
                 # Slack
                 elif w_type == "SL":
                     mention = f"<@{w_id}>\n" if w_id else ""
