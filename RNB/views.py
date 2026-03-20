@@ -60,6 +60,7 @@ ALLOWED_USERS_RNB = [
     "SaintJason",
     "h",
     "Jungy",
+    "BotKickStarter"
 ]
 
 if TYPE_CHECKING:
