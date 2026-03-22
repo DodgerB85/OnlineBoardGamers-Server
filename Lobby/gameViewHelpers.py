@@ -1,4 +1,5 @@
 import json
+from socket import gaierror
 
 from decouple import config
 from django.contrib import messages
@@ -227,9 +228,15 @@ def shared_save_zoom(request, game_code):
 
         if jsonData.get("allPlayers"):
             for i in range(len(zoomLevels)):
-                zoomLevels[i] = int(jsonData["zoomLevel"])
+                if game_code == "RNB":
+                    zoomLevels[i] = round(float(jsonData["zoomLevel"]), 1)
+                else:
+                    zoomLevels[i] = int(jsonData["zoomLevel"])
         else:
-            zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
+            if game_code == "RNB":
+                zoomLevels[jsonData["playerNumber"]] = round(float(jsonData["zoomLevel"]), 1)
+            else:
+                zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
 
         currentGame.zoomLevels = json.dumps(zoomLevels)
         currentGame.save()
