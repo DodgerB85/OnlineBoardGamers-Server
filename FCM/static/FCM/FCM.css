@@ -2408,3 +2408,9 @@ input.radio {
 .currentPhaseGlow {
 	background-color: lightgreen;
 }
+
+.resourceGroup {
+    display: inline-block;
+    white-space: nowrap;
+    margin-right: 3px; /* Optional: adds space between different resource types */
+}
