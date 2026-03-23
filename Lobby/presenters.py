@@ -383,12 +383,12 @@ class GamePresenter:
             else 0
         )
 
-        async_task(
-            "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-            playerListToNotify,
-            message_data,
-        )
-        #SN_M_sendGameStartNotification(playerListToNotify, message_data)
+        #async_task(
+        #    "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+        #    playerListToNotify,
+        #    message_data,
+        #)
+        SN_M_sendGameStartNotification(playerListToNotify, message_data)
 
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
