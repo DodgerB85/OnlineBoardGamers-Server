@@ -27,15 +27,9 @@ PRINT_TIME = True
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 if DEBUG:
-    os.environ["LOCAL_DB_NAME"] = str(
-        config("LOCAL_DB_NAME", default="password", cast=str)
-    )
-    os.environ["LOCAL_DB_USER"] = str(
-        config("LOCAL_DB_USER", default="password", cast=str)
-    )
-    os.environ["LOCAL_DB_PWD"] = str(
-        config("LOCAL_DB_PWD", default="password", cast=str)
-    )
+    os.environ["LOCAL_DB_NAME"] = str(config("LOCAL_DB_NAME", default="password", cast=str))
+    os.environ["LOCAL_DB_USER"] = str(config("LOCAL_DB_USER", default="password", cast=str))
+    os.environ["LOCAL_DB_PWD"] = str(config("LOCAL_DB_PWD", default="password", cast=str))
     os.environ["LOCAL_DB_HOST"] = "127.0.0.1"
 
 sys.path.append(os.path.join(BASE_DIR, "OnlineBoardGamers"))
@@ -72,20 +66,12 @@ for gameCode in GAME_CODES:
 
     # Query the game_in_use_model to get the players who will timeout within the specified time range
     # players = game_in_use_model.objects.filter(timeout__gt=timeout_threshold_start, timeout__lt=timeout_threshold_end)
-    query = (
-        Q(gameCode=gameCode)
-        & Q(gameStatus="ACTIVE")
-        & ~Q(players__player__username="SHADOW")
-        & ~Q(players__player__username="FcmAI")
-    )
+    query = Q(gameCode=gameCode) & Q(gameStatus="ACTIVE") & ~Q(players__player__username="SHADOW") & ~Q(players__player__username="FcmAI")
 
     allGames = Game.objects.filter(query).all()
     for singleGame in allGames:
         timeRemaining = singleGame.presenter().getSecondsToNextKickout()
-        if (
-            timeRemaining >= remaining_start_time
-            and timeRemaining <= remaining_finish_time
-        ):
+        if timeRemaining >= remaining_start_time and timeRemaining <= remaining_finish_time:
             print(f"{gameCode}: 2hr: {singleGame.id}")
             playersToNotify = singleGame.presenter().getArrayOfIsCurrentPlayers()
             for playerName in playersToNotify:
@@ -97,10 +83,7 @@ for gameCode in GAME_CODES:
                     singleGame.presenter().getGameName(),
                 )
 
-        if (
-            timeRemaining >= remaining_start_time_expired
-            and timeRemaining <= remaining_finish_time_expired
-        ):
+        if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
             # print(singleGame.getArrayOfIsCurrentPlayers())
             print(f"{gameCode}: exp: {singleGame.id}")
             playersToNotify = singleGame.presenter().getArrayOfIsCurrentPlayers()
@@ -118,11 +101,7 @@ for gameCode in GAME_CODES:
                     message = "===========================\n"
                     message += "GAME EXPIRY AUTO-DETECTED\n"
                     message += f"Player: {singleGame.presenter().getArrayOfIsCurrentPlayers()}\n"
-                    message += (
-                        "[Click here to view the game](https://www.OnlineBoardGamers.com/FCM/"
-                        + str(singleGame.id)
-                        + "/)"
-                    )
+                    message += "[Click here to view the game](https://www.OnlineBoardGamers.com/FCM/" + str(singleGame.id) + "/)"
                     requests.post(
                         f"https://discordapp.com/api/webhooks/{config('WEBHOOK_FCM_TOURNAMENT_ADMIN')}",
                         data={"content": message},
@@ -135,11 +114,7 @@ for gameCode in GAME_CODES:
                     message = "===========================\n"
                     message += "GAME EXPIRY AUTO-DETECTED\n"
                     message += f"Player: {singleGame.presenter().getArrayOfIsCurrentPlayers()}\n"
-                    message += (
-                        "[Click here to view the game](https://www.OnlineBoardGamers.com/TGZ/"
-                        + str(singleGame.id)
-                        + "/)"
-                    )
+                    message += "[Click here to view the game](https://www.OnlineBoardGamers.com/TGZ/" + str(singleGame.id) + "/)"
                     requests.post(
                         f"https://discordapp.com/api/webhooks/{config('WEBHOOK_TGZ_TOURNAMENT_ADMIN')}",
                         data={"content": message},
@@ -150,14 +125,7 @@ for gameCode in GAME_CODES:
     calc_time = time.perf_counter() - start_calc_time
     game_calc_time = time.perf_counter() - game_start_calc_time
     if PRINT_TIME:
-        print(
-            "****** "
-            + gameCode
-            + " calc time: "
-            + str(game_calc_time)
-            + "   TOTAL: "
-            + str(calc_time)
-        )
+        print("****** " + gameCode + " calc time: " + str(game_calc_time) + "   TOTAL: " + str(calc_time))
 
 calc_time = time.perf_counter() - start_calc_time
 

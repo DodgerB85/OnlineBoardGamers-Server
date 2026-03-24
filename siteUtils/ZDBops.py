@@ -101,56 +101,6 @@ count = 0
 TARGET_CODE = "HC"
 
 
-def update_ids_recursive(data, id_map):
-    """Recursively wanders through lists to replace old IDs with new ones."""
-    if isinstance(data, list):
-        for i, item in enumerate(data):
-            # If item is an integer and exists in our map, swap it
-            if isinstance(item, int) and item in id_map:
-                data[i] = id_map[item]
-            else:
-                update_ids_recursive(item, id_map)
-
-
-# 1. Collect all old IDs across all relevant tournaments
-tournamentsToConvert = Main_Tournament.objects.filter(gameCode=TARGET_CODE, id__gte=0)
-old_ids = set()
-
-for tourny in tournamentsToConvert:
-    try:
-        data = json.loads(tourny.tournamentProgressionData)
-
-        # Flatten the list to find all integers
-        def extract_ints(lst):
-            for x in lst:
-                if isinstance(x, int):
-                    old_ids.add(x)
-                elif isinstance(x, list):
-                    extract_ints(x)
-
-        extract_ints(data)
-    except (json.JSONDecodeError, TypeError):
-        continue
-
-# 2. Build the Mapping {original_id: new_id} in one query
-id_map = {
-    g.original_id: g.id
-    for g in Game.objects.filter(original_id__in=old_ids, gameCode=TARGET_CODE).only(
-        "id", "original_id"
-    )
-}
-
-print(f"id_map: {id_map}")
-
-# 3. Update and Save
-for tourny in tournamentsToConvert:
-    data = json.loads(tourny.tournamentProgressionData)
-    update_ids_recursive(data, id_map)
-
-    tourny.tournamentProgressionData = json.dumps(data)
-    tourny.save()
-
-print(f"Successfully updated {len(tournamentsToConvert)} tournaments.")
 
 # for game in allFCMgames:
 #    if game.allPlayers.all().count() == game.maxPlayers:
