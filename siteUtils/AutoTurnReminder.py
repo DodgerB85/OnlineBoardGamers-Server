@@ -15,6 +15,9 @@ import requests
 # from datetime import datetime, timedelta
 # from django.contrib.auth.models import User
 
+start_calc_time = time.perf_counter()
+
+
 DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
 
@@ -63,7 +66,6 @@ remaining_finish_time = 60 * 182 * 1  # 3hours
 remaining_start_time_expired = 60 * -61  # * 69120000  # -1hr
 remaining_finish_time_expired = 0  # Now
 
-start_calc_time = time.perf_counter()
 
 for gameCode in GAME_CODES:
     game_start_calc_time = time.perf_counter()
