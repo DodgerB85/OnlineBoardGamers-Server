@@ -155,10 +155,13 @@ LOCALE_PATHS = [
 def gettext_noop(x):
     return x
 
-# Ensure this folder exists on your server!
-JINJA2_CACHE_DIR = BASE_DIR / "jinja2_cache"
+# 1. Make sure this folder name matches exactly what you created
+JINJA2_CACHE_DIR = BASE_DIR / "jinja2_cache" 
+
+# 2. Force the creation of the folder if it's missing
 if not JINJA2_CACHE_DIR.exists():
-    os.makedirs(JINJA2_CACHE_DIR)
+    import os
+    os.makedirs(JINJA2_CACHE_DIR, exist_ok=True)
 
 # Auto-discover Jinja2 template directories for all apps
 JINJA2_TEMPLATE_DIRS = [BASE_DIR / "Lobby/jinja2"]
@@ -184,11 +187,10 @@ TEMPLATES = [
             "translation_engine": "django.utils.translation",
             ## Optimized Jinja2 Bytecode Cache settings
             "bytecode_cache": {
-                "name": "jinja2",
+                "name": "jinja2_cache",
                 "enabled": True, # <--- CRITICAL
                 "backend": "jinja2.FileSystemBytecodeCache",
-                "dir": str(JINJA2_CACHE_DIR),
-
+                "dir": str(JINJA2_CACHE_DIR), # Use the absolute path
                 #"auto_reload": not DEBUG,  # Cache templates in production
             },
         },
