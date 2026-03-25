@@ -39,8 +39,8 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getKFWstartingOptionsHTML,
     SR_getWEBstartingOptionsHTML,
     SR_gamePaceString,
+    SR_getFCMstartingOptionsHTML,
 )
-from Lobby.sharedFunctions.optimizedRefs import SR_getFCMstartingOptionsHTML
 from Lobby.sharedFunctions.tournyGenerator import (
     multiGamePlayers4p,
     multiGamePlayersRound2,
