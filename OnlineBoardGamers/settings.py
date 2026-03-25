@@ -166,11 +166,11 @@ TEMPLATES = [
             "auto_reload": DEBUG,
             "translation_engine": "django.utils.translation",
             ## Correct Jinja2 Bytecode Cache settings
-            # "bytecode_cache": {
-            #    "enabled": True,
-            #    "backend": "jinja2.FileSystemBytecodeCache",
-            #    "dir": str(JINJA2_CACHE_DIR),
-            # },
+            "bytecode_cache": {
+                "name": "jinja2",
+                "backend": "jinja2.FileSystemBytecodeCache",
+                "directory": str(JINJA2_CACHE_DIR),
+            },
         },
     },
     {
