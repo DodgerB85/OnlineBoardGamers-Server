@@ -1,0 +1,17 @@
+{% if kickoutDuration == 200 %}
+<img class="startingOption" src="{{ static('Lobby/images/kickout200.svg') }}" title="{{ gettext('Kickout after 2 days') }}" alt="2 day kickout" width="40" height="40" />
+{% elif kickoutDuration == 100 %}
+<img class="startingOption" src="{{ static('Lobby/images/kickout100.svg') }}" title="{{ gettext('Kickout after 1 day') }}" alt="1 day kickout" width="40" height="40" />
+{% elif kickoutDuration == 500 %}
+<img class="startingOption" src="{{ static('Lobby/images/kickout500.svg') }}" title="{{ gettext('Kickout after 5 days') }}" alt="5 day kickout" width="40" height="40" />
+{% elif kickoutDuration == 300 %}
+<img class="startingOption" src="{{ static('Lobby/images/kickout300.svg') }}" title="{{ gettext('Kickout after 3 days') }}" alt="3 day kickout" width="40" height="40" />
+{% elif kickoutDuration == 50 %}
+<img class="startingOption" src="{{ static('Lobby/images/kickout50.svg') }}" title="{{ gettext('Kickout after 12 hours') }}" alt="12 hour kickout" width="40" height="40" />
+{% elif kickoutDuration == 20 %}
+<img class="startingOption" src="{{ static('Lobby/images/kickout20.svg') }}" title="{{ gettext('Kickout after 20 minutes') }}" alt="20 minute kickout" width="40" height="40" />
+{% elif kickoutDuration == 10 %}
+<img class="startingOption" src="{{ static('Lobby/images/kickout10.svg') }}" title="{{ gettext('Kickout after 10 minutes') }}" alt="10 minute kickout" width="40" height="40" />
+{% elif kickoutDuration == 5 %}
+<img class="startingOption" src="{{ static('Lobby/images/kickout5.svg') }}" title="{{ gettext('Kickout after 5 minutes') }}" alt="5 minute kickout" width="40" height="40" />
+{% else %} {{ kickoutDuration }} {% endif %}
