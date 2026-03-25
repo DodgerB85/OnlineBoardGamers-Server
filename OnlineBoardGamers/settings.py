@@ -132,6 +132,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "pyinstrument.middleware.ProfilerMiddleware",  # <--- Put it here BELOW auth
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "user_visit.middleware.UserVisitMiddleware",
 ]
@@ -144,7 +145,7 @@ if not JINJA2_CACHE_DIR.exists():
     os.makedirs(JINJA2_CACHE_DIR)
 
 # Auto-discover Jinja2 template directories for all apps
-JINJA2_TEMPLATE_DIRS = [BASE_DIR / "Lobby/jinja2"] 
+JINJA2_TEMPLATE_DIRS = [BASE_DIR / "Lobby/jinja2"]
 
 TEMPLATES = [
     {
@@ -481,3 +482,12 @@ if DEBUG:
         "debug_toolbar.panels.redirects.RedirectsPanel",
         "debug_toolbar.panels.profiling.ProfilingPanel",
     ]
+
+
+def show_pyinstrument(request):
+    # Only run the profiler if the user is logged in and their username is in your list
+    allowed_usernames = ["admin", "h"]  # <--- Put your username here
+    return request.user.is_authenticated and request.user.username in allowed_usernames
+
+
+PYINSTRUMENT_SHOW_CALLBACK = show_pyinstrument
