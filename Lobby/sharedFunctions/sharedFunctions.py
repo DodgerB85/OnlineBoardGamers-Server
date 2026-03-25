@@ -30,7 +30,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getPointsForPosition,
     getCleanedAndSortedRoundData,
     SR_currentTurnString,
-    SR_getFCMstartingOptionsHTML,
     SR_getHCstartingOptionsHTML,
     SR_getBUSstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
@@ -41,6 +40,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getWEBstartingOptionsHTML,
     SR_gamePaceString,
 )
+from Lobby.sharedFunctions.optimizedRefs import SR_getFCMstartingOptionsHTML
 from Lobby.sharedFunctions.tournyGenerator import (
     multiGamePlayers4p,
     multiGamePlayersRound2,
