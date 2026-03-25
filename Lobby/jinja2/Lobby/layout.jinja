@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+        html {
+          display: none;
+        }
+        </style>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XVXK8Q50KN"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-XVXK8Q50KN');
+        </script>
+        <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Board Gamers",
+  "operatingSystem": "WEB",
+  "applicationCategory": "GameApplication"
+}
+</script>
+        <title>
+            {% block title %}
+            {% if user.is_authenticated %}
+                {% if myMoveGames %}({{ myMoveGames }}){% endif %}
+                Online Board Gamers
+            {% else %}
+            Online Board Gamers - Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!
+             {% endif %}
+            {% endblock %}
+        </title>
+        <meta name="title" content="Online Board Gamers">
+        {% block description %}
+            <meta name="description"
+                  content="Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!">
+        {% endblock %}
+        <meta name="keywords"
+              content="Food,Chain,Magnate,Online,Play,Board,Game,Games,Gamers,Horseless,Carriage,Bus,Great,Zimbabwe,Cannes,Antiquity,Indonesia,Keyflower,Web">
+        <meta name="robots" content="index, follow">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="language" content="English">
+        <meta name="revisit-after" content="2 days">
+        <meta name="author" content="Online Board Gamers">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:image"
+              content="https://www.onlineboardgamers.com{{ static('Lobby/favicon.jpg') }}" />
+        <!--<link rel="preload"
+      href="/static/Lobby/Lobby.css"
+      as="style"
+      onload="this.rel='stylesheet'">-->
+        <link rel="icon" type="image/jpg" href="{{ static('Lobby/favicon.jpg') }}" />
+        <link rel="apple-touch-icon-precomposed"
+              href="{{ static('Lobby/favicon.jpg') }}">
+        <link rel="apple-touch-icon" href="{{ static('Lobby/favicon.jpg') }}">
+        <link rel="apple-touch-icon-precomposed"
+              sizes="57x57 72x72 76x76 114x114 120x120 144x144 152x152"
+              href="{{ static('Lobby/favicon.jpg') }}">
+        <link rel="apple-touch-icon"
+              sizes="57x57 72x72 76x76 114x114 120x120 144x144 152x152"
+              href="{{ static('Lobby/favicon.jpg') }}">
+        <link rel="shortcut icon" href="{{ static('Lobby/favicon.ico') }}" />
+        {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com/">{% endblock %}
+        <link href="{{ static('Lobby/CSS/layout.css') }}" rel="stylesheet">
+        {% block head %}{% endblock %}
+    </head>
+    <body>
+        <div class="topBar">
+            {% if user.is_authenticated %}
+                <!-- LOGGED IN TOP BAR -->
+                <div id="leftLoggedInLinks">
+                    <div>
+                        <a class="topBarLink" href="{{ url('index') }}">{{ gettext("Home") }}</a> |
+                        <a class="topBarLink" href="{{ url('profile') }}">{{ gettext("Profile") }}</a> |
+                        <a class="topBarLink" href="{{ url('myLogout') }}">{{ gettext("Log Out") }}</a>
+                        <br />
+                        <span id="leftLoggedInAsInfo">{{ gettext("Logged in as") }}: {{ user.username }}</span>
+                    </div>
+                    <a href="{{ url('indexSpecialRedirect') }}">
+                        <img id="logoLoggedIn"
+                             src="{{ static('Lobby/images/Logo1.png') }}"
+                             width="400px"
+                             height="30px"
+                             alt="Online Board Gamers">
+                    </a>
+                </div>
+                <div id="rightLinksLoggedIn">
+                    <div id="rightLoggedInHyperlinks">
+                        <a class="topBarLink" href="{{ url('newGamesPage') }}">{{ gettext("New Game") }}</a> |
+                        <a class="topBarLink"
+                           href="{{ url('playerInfo', kwargs={'usernameToProfile': user.username}) }}">{{ gettext("My Games") }}</a> |
+                        <a class="topBarLink" href="{{ url('AllTournaments') }}">{{ gettext("Tournaments") }}</a> |
+                        <a class="topBarLink" href="{{ url('stats') }}">{{ gettext("Stats") }}</a> |
+                        <a class="topBarLink" id="helpLink" href="{{ url('lobbyHelp') }}">{{ gettext("Help") }}</a> |
+                        <a class="topBarLink" href="{{ url('changelog') }}">{{ gettext("Updates") }}</a> |
+                        <a class="topBarLink" href="{{ url('donate') }}">{{ gettext("Support") }}</a> |
+                        <a class="topBarLink" id="aboutLink" href="{{ url('about') }}">{{ gettext("About") }}</a>
+                        <!--<a class="topBarLink" id="contactLink" href="{{ url('contact') }}">{{ gettext("Contact") }}</a>-->
+                    </div>
+                    <div id="langSelectLoggedIn">
+                        <form action="{{ url('set_language_custom') }}" method="post">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.path }}">
+                            <select name="language" onchange="this.form.submit()">
+                                <option value="en-gb" {% if request.LANGUAGE_CODE == 'en-gb' %}selected{% endif %}>English</option>
+                                <option value="zh-hans" {% if request.LANGUAGE_CODE == 'zh-hans' %}selected{% endif %}>简体中文</option>
+                                <option value="es" {% if request.LANGUAGE_CODE == 'es' %}selected{% endif %}>Spanish</option>
+                                <option value="de" {% if request.LANGUAGE_CODE == 'de' %}selected{% endif %}>Deutsche</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="hamburger">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Not logged in TOP BAR -->
+                <div id="loginForm">
+                    <form action="{{ url('myLogin') }}" method="post">
+                        {% csrf_token %}
+                        <input class="loginInput"
+                               type="text"
+                               name="username"
+                               placeholder="{{ gettext(' Username') }}"
+                               required>
+                        <input class="loginInput"
+                               type="password"
+                               name="password"
+                               placeholder="{{ gettext(' Password') }}"
+                               required>
+                        <input type="hidden" name="next" value="{{ request.GET.next }}" />
+                        <input type="submit" value="{{ gettext(' Login') }}">
+                    </form>
+                    <a href="{{ url('index') }}">
+                        <img id="logoLoggedOut"
+                             width="800px"
+                             height="54px"
+                             src="{{ static('Lobby/images/Logo1.png') }}"
+                             alt="Online Board Gamers">
+                    </a>
+                </div>
+                <div id="registerLink">
+                    <a class="topBarLink" href="{{ url('register') }}">
+                        <span id="registerLinkTextLong">{{ gettext("Register New Account") }}</span>
+                        <span id="registerLinkTextShort">{{ gettext("Register") }}</span>
+                    </a>|
+                    <a class="topBarLink"
+                       id="forgotPwdLink"
+                       href="{{ url('password_reset') }}">{{ gettext("Forgot Password?") }}</a>
+                </div>
+                <div id="rightLinksLoggedOut">
+                    <div id="rightLoggedOutHyperlinks">
+                        <a class="topBarLink" id="homeLink" href="{{ url('index') }}">{{ gettext("Home") }}</a>
+                        <a class="topBarLink" id="helpLink" href="{{ url('lobbyHelp') }}">{{ gettext("Help") }}</a>
+                        <a class="topBarLink" id="aboutLink" href="{{ url('about') }}">{{ gettext("About") }}</a>
+                        <a class="topBarLink" id="contactLink" href="{{ url('contact') }}">{{ gettext("Contact") }}</a>
+                    </div>
+                    <div id="langSelectLoggedOut">
+                        <form action="{{ url('set_language_custom') }}" method="post">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.path }}">
+                            <select name="language" onchange="this.form.submit()">
+                                <option value="en-gb" {% if request.LANGUAGE_CODE == 'en-gb' %}selected{% endif %}>English</option>
+                                <option value="zh-hans" {% if request.LANGUAGE_CODE == 'zh-hans' %}selected{% endif %}>简体中文</option>
+                                <option value="es" {% if request.LANGUAGE_CODE == 'es' %}selected{% endif %}>Spanish</option>
+                                <option value="de" {% if request.LANGUAGE_CODE == 'de' %}selected{% endif %}>Deutsche</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="hamburger">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        {% if user.is_authenticated %}
+            <!-- Hamburger logged in -->
+            <div class="hamburgerMenu">
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('newGamesPage') }}">{{ gettext("New Game") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink"
+                       href="{{ url('playerInfo', kwargs={'usernameToProfile': user.username}) }}">{{ gettext("My Games") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('AllTournaments') }}">{{ gettext("Tournaments") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('stats') }}">{{ gettext("Stats") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('lobbyHelp') }}">{{ gettext("Help") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('changelog') }}">{{ gettext("Updates") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('donate') }}">{{ gettext("Support") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('about') }}">{{ gettext("About") }}</a>
+                </div>
+                <!--<div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('contact') }}">{{ gettext("Contact") }}</a>
+                </div>-->
+            </div>
+        {% else %}
+            <!-- Hamburger not logged in -->
+            <div class="hamburgerMenu">
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('index') }}">{{ gettext("Home") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('lobbyHelp') }}">{{ gettext("Help") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('about') }}">{{ gettext("About") }}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{{ url('contact') }}">{{ gettext("Contact") }}</a>
+                </div>
+            </div>
+        {% endif %}
+        <div class="mainLayout">
+            {% block body %}{% endblock %}
+        </div>
+        <div class="footer">
+            <div class="content">
+                <p>
+                    Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, and Indonesia are board games by Jeroen Doumen
+                    and Joris Wiersinga, published by
+                    <a href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>. Permission Provided.
+                </p>
+                <p>
+                    Summary icons from <a href="https://game-icons.net/">game-icons.net</a>
+                </p>
+            </div>
+        </div>
+    </body>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const hamburger = document.querySelector(".hamburger");
+        const hamburgerMenu = document.querySelector(".hamburgerMenu");
+        //const langSelectLoggedOut = document.getElementById("langSelectLoggedOut")
+
+        hamburger.addEventListener("click", () => {
+            hamburger.classList.toggle("active");
+            hamburgerMenu.classList.toggle("active");
+        })
+
+        var winX = window.clientWidth;// + window.outerWidth;
+        winX = document.documentElement.clientWidth;
+        winX -= 75;
+        //alert(winX)
+        hamburger.style.position = 'fixed';
+        hamburger.style.left = "" + String(winX) + "px"
+        hamburger.style.top = "0px"
+
+
+        //hamburgerMenu.style.width = "" + String(document.documentElement.clientWidth) + "px";
+        hamburgerMenu.style.left = "" + String(document.documentElement.clientWidth - 200) + "px";
+        //alert(winX)
+
+       // langSelectLoggedOut.style.position = 'fixed';
+        //langSelectSmallScreen.style.left = "" + String(winX) + "px"
+       // langSelectLoggedOut.style.top = "0px"
+     //   langSelectLoggedOut.style.left = "" + String(document.documentElement.clientWidth - 175) + "px";
+
+        addEventListener("resize", (event) => {
+            winX = document.documentElement.clientWidth;
+            winX -= 75;
+            hamburger.style.position = 'fixed';
+            hamburger.style.left = "" + String(winX) + "px"
+            hamburger.style.top = "0px"
+
+            //hamburgerMenu.style.width = "" + String(document.documentElement.clientWidth) + "px";
+            hamburgerMenu.style.left = "" + String(document.documentElement.clientWidth - 200) + "px";
+
+           // langSelectLoggedOut.style.position = 'fixed';
+            //langSelectSmallScreen.style.left = "" + String(winX) + "px"
+          //  langSelectLoggedOut.style.top = "0px"
+          //  langSelectLoggedOut.style.left = "" + String(document.documentElement.clientWidth - 175) + "px";
+
+        });
+
+    });
+    </script>
+</html>

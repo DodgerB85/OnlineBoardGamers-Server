@@ -1,0 +1,259 @@
+{% extends "Lobby/layout.jinja" %}
+{% block head %}
+    <link href="{{ static('Lobby/CSS/mainSite.css') }}" rel="stylesheet">
+    <link href="{{ static('Lobby/CSS/stats.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body %}
+    <script src="{{ static('Lobby/playerInfo.js') }}"></script>
+    <script src="{{ static('Lobby/common.js') }}"></script>
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div id="playerInfoNameDiv">
+            <h1>{{ usernameToProfile }}</h1>
+            {{ trophyHTML|safe }}
+        </div>
+        {{ trophyDetailHTML|safe }}
+        <h2>{{ gettext("Player Stats") }}</h2>
+        <div class="tab">
+            <button class="tablinks" id="FCM">
+                <img src="{{ static('FCM/images/burger_board.png') }}"
+                     alt="FCM game"
+                     title="FCM Game"
+                     class="statsIMG" />
+            </button>
+            <button class="tablinks" id="HC">
+                <img src="{{ static('HC/images/icon_car.png') }}"
+                     alt="HC game"
+                     title="HC Game"
+                     class="statsIMG" />
+            </button>
+            <button class="tablinks" id="Bus">
+                <img src="{{ static('Bus/images/bus_icon.png') }}"
+                     alt="Bus game"
+                     title="Bus Game"
+                     class="statsIMG" />
+            </button>
+            <button class="tablinks" id="TGZ">
+                <img src="{{ static('TGZ/images/tgz_icon.png') }}"
+                     alt="TGZ game"
+                     title="TGZ Game"
+                     class="statsIMG" />
+            </button>
+            <button class="tablinks" id="CNS">
+                <img src="{{ static('CNS/images/cns_icon.png') }}"
+                     alt="CNS game"
+                     title="CNS Game"
+                     class="statsIMG" />
+            </button>
+            <button class="tablinks" id="AQY">
+                <img src="{{ static('AQY/images/aqy_icon.png') }}"
+                     alt="AQY game"
+                     title="AQY Game"
+                     class="statsIMG" />
+            </button>
+            <button class="tablinks" id="IND">
+                <img src="{{ static('IND/images/ind_icon.png') }}"
+                     alt="IND game"
+                     title="IND Game"
+                     class="statsIMG" />
+            </button>
+            <button class="tablinks" id="KFW">
+                <img src="{{ static('KFW/images/kfw_icon.png') }}"
+                     alt="KFW game"
+                     title="KFW Game"
+                     class="statsIMG" />
+            </button>
+            <button class="tablinks" id="WEB">
+                <img src="{{ static('WEB/images/web_icon.png') }}"
+                     alt="WEB game"
+                     title="WEB Game"
+                     class="statsIMG" />
+            </button>
+        </div>
+     
+        <div class="playerInfoStatsContainer largeTableContainer">
+            {% for game in allGamesArr %}
+                <div id="playerStatsDiv{{ loop.index0 }}" class="playerStatsDiv">
+                    <table class="generalTable">
+                        <tr>
+                            <th>{{ gettext("Players") }}</th>
+                            <th>{{ gettext("Games") }}</th>
+                            <th>{{ gettext("Wins") }}</th>
+                            <th>{{ gettext("Win Percent") }}</th>
+                        </tr>
+                        <tr class="clickablePlayerRow222 players2">
+                            <td>2</td>
+                            <td>{{ game.0 }}</td>
+                            <td>{{ game.1 }}</td>
+                            <td>{{ game.2 }}%</td>
+                        </tr>
+                        <tr class="clickablePlayerRow222 players3">
+                            <td>3</td>
+                            <td>{{ game.3 }}</td>
+                            <td>{{ game.4 }}</td>
+                            <td>{{ game.5 }}%</td>
+                        </tr>
+                        <tr class="clickablePlayerRow222 players4">
+                            <td>4</td>
+                            <td>{{ game.6 }}</td>
+                            <td>{{ game.7 }}</td>
+                            <td>{{ game.8 }}%</td>
+                        </tr>
+                        <tr class="clickablePlayerRow222 players5">
+                            <td>5</td>
+                            <td>{{ game.9 }}</td>
+                            <td>{{ game.10 }}</td>
+                            <td>{{ game.11 }}%</td>
+                        </tr>
+                        <tr class="clickablePlayerRow222 players6">
+                            <td>6</td>
+                            <td>{{ game.12 }}</td>
+                            <td>{{ game.13 }}</td>
+                            <td>{{ game.14 }}%</td>
+                        </tr>
+                        <tr class="clickablePlayerRow222 playersAll">
+                            <td>All</td>
+                            <td>{{ game.15 }}</td>
+                            <td>{{ game.16 }}</td>
+                            <td>{{ game.17 }}%</td>
+                        </tr>
+                    </table>
+                </div>
+            {% endfor %}
+            <h3>{{ gettext("Kickouts in last year") }}: {{ kickedOutGamesLastYear }}</h3>
+            <h3>{{ gettext("Fair Play rating for last year") }}: {{ fairPlayLastYear }}%</h3>
+        </div>
+        <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapData" name="mapData" value="">
+        </form>
+        <form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
+        </form>
+        <form id="openInMapEditorFormAQY" action="/AQYmapEditor/" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="">
+        </form>
+        {% if activeJointGames or finishedJointGames %}
+            <h1>Joint Games</h1>
+            {% if activeJointGames %}
+                <h2>{{ gettext("Joint Current Games") }} ({{ activeJointGames|length }})</h2>
+                <div class="largeTableContainer">
+                    <div class="tableOnlyDiv">
+                        <table class="gamesTable">
+                            <thead>
+                                <tr class="headingRow">
+                                    <td class="nameHeaderCurrent">{{ gettext("Name") }}</td>
+                                    <td class="creatorHeader">{{ gettext("Creator") }}</td>
+                                    <td class="playersHeader">{{ gettext("Players") }}</td>
+                                    <td class="currentPlayersHeader">{{ gettext("Current Players") }}</td>
+                                    <td class="currentTurnHeader">{{ gettext("Current Turn") }}</td>
+                                    <!--<td class="createdHeader">Created</td>-->
+                                    <td class="speedHeader">{{ gettext("Speed") }}</td>
+                                    <td class="lastActivityHeader">{{ gettext("Last Turn") }}</td>
+                                </tr>
+                            </thead>
+                            {% for game in activeJointGames %}
+                                {% set game = game %}
+                                {% include 'Lobby/gameDisplay/currentGameRow.jinja' %}
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <h2>{{ gettext("No Joint Current Games") }}</h2>
+            {% endif %}
+            {% if finishedJointGames %}
+                <h2>
+                    {{ gettext("Joint Finished Games") }} ({{ finishedJointGames|length }}) - Wins: {{ jointWinTotal }}/{{ finishedJointGames|length }}  ({{ jointWinPercentage }}%)
+                </h2>
+                {% for gameRow in jointGameStats %}
+                    {% set game = gameRow.0 %}
+                    {% include 'Lobby/gameDisplay/gameIcons.jinja' %}
+                    {{ gameRow.1 }}/{{ gameRow.2 }} ({{ gameRow.3 }}%)
+                {% endfor %}
+                <div class="largeTableContainer">
+                    <div class="tableOnlyDiv">
+                        <table class="gamesTable">
+                            <thead>
+                                <tr class="headingRow">
+                                    <td class="nameHeaderCurrent">{{ gettext("Name") }}</td>
+                                    <td class="playersHeader">{{ gettext("Players") }}</td>
+                                    <td class="currentPlayersHeader">{{ gettext("All Players") }}</td>
+                                    <td class="createdHeader">{{ gettext("Created") }}</td>
+                                    <td class="lastActivityHeader">{{ gettext("Last Activity") }}</td>
+                                    <td class="winnerHeader">{{ gettext("Winner") }}</td>
+                                </tr>
+                            </thead>
+                            {% for game in finishedJointGames %}
+                                {% set game = game %}
+                                {% include 'Lobby/gameDisplay/finishedGameRow.jinja' %}
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <h2>{{ gettext("No Joint Finished Games") }}</h2>
+            {% endif %}
+        {% endif %}
+        {% if activeOtherGames %}
+            <h2>{{ gettext("Current Games") }} ({{ activeOtherGames|length }})</h2>
+            <div class="largeTableContainer">
+                <div class="tableOnlyDiv">
+                    <table class="gamesTable">
+                        <thead>
+                            <tr class="headingRow">
+                                <td class="nameHeaderCurrent">{{ gettext("Name") }}</td>
+                                <td class="creatorHeader">{{ gettext("Creator") }}</td>
+                                <td class="playersHeader">{{ gettext("Players") }}</td>
+                                <td class="currentPlayersHeader">{{ gettext("Current Players") }}</td>
+                                <td class="currentTurnHeader">{{ gettext("Current Turn") }}</td>
+                                <!--<td class="createdHeader">Created</td>-->
+                                <td class="speedHeader">{{ gettext("Speed") }}</td>
+                                <td class="lastActivityHeader">{{ gettext("Last Turn") }}</td>
+                            </tr>
+                        </thead>
+                        {% for game in activeOtherGames %}
+                                {% set game = game %}
+                                {% include 'Lobby/gameDisplay/currentGameRow.jinja' %}
+                            {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <h2>{{ gettext("No Current Games") }}</h2>
+        {% endif %}
+        {% if finishedOtherGames %}
+            <h2>{{ gettext("Finished Games") }} ({{ finishedOtherGames|length }})</h2>
+            <div class="largeTableContainer">
+                <div class="tableOnlyDiv">
+                    <table class="gamesTable">
+                        <thead>
+                            <tr class="headingRow">
+                                <td class="nameHeaderCurrent">{{ gettext("Name") }}</td>
+                                <td class="playersHeader">{{ gettext("Players") }}</td>
+                                <td class="currentPlayersHeader">{{ gettext("All Players") }}</td>
+                                <td class="createdHeader">{{ gettext("Created") }}</td>
+                                <td class="lastActivityHeader">{{ gettext("Last Activity") }}</td>
+                                <td class="winnerHeader">{{ gettext("Winner") }}</td>
+                            </tr>
+                        </thead>
+                        {% for game in finishedOtherGames %}
+                                {% set game = game %}
+                                {% include 'Lobby/gameDisplay/finishedGameRow.jinja' %}
+                            {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <h2>{{ gettext("No Finished Games") }}</h2>
+        {% endif %}
+    </div>
+{% endblock %}

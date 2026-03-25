@@ -2483,7 +2483,7 @@ def playerInfo(request, usernameToProfile):
         userToProfile = User.objects.select_related("profile").get(username=usernameToProfile)
     except User.DoesNotExist:
         messages.error(request, gettext("Player does not exist"))
-        return render(request, "Lobby/playerInfo.html")
+        return render(request, "Lobby/playerInfo.jinja")
 
     profileOfUser = getattr(userToProfile, "profile")
     FCMtournamentTrophies = json.loads(profileOfUser.FCMtournamentTrophies)
@@ -2737,7 +2737,7 @@ def playerInfo(request, usernameToProfile):
 
     response = render(
         request,
-        "Lobby/playerInfo.html",
+        "Lobby/playerInfo.jinja",
         {
             "trophyHTML": trophyHTML,
             "trophyDetailHTML": trophyDetailHTML,
@@ -2754,6 +2754,7 @@ def playerInfo(request, usernameToProfile):
             "jointWinPercentage": jointWinPercentage,
             "jointGameStats": jointGameStats,
         },
+        using="jinja2"
     )
 
     return response
