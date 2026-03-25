@@ -139,6 +139,22 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "OnlineBoardGamers.urls"
 
+# Enable translation caching for better performance
+USE_L10N = True
+LANGUAGE_CODE = 'en'
+LANGUAGES = [
+    ('en', 'English'),
+]
+
+# Translation cache settings
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
+# Enable Django's built-in translation caching
+def gettext_noop(x):
+    return x
+
 # Ensure this folder exists on your server!
 JINJA2_CACHE_DIR = BASE_DIR / "jinja2_cache"
 if not JINJA2_CACHE_DIR.exists():
@@ -164,14 +180,16 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
-            "auto_reload": not DEBUG,  # Disable auto-reload in production for better performance
+            "auto_reload": DEBUG,  # Always disable for performance
             "translation_engine": "django.utils.translation",
             ## Optimized Jinja2 Bytecode Cache settings
             "bytecode_cache": {
                 "name": "jinja2",
+                "enabled": True, # <--- CRITICAL
                 "backend": "jinja2.FileSystemBytecodeCache",
-                "directory": str(JINJA2_CACHE_DIR),
-                "auto_reload": not DEBUG,  # Cache templates in production
+                "dir": str(JINJA2_CACHE_DIR),
+
+                #"auto_reload": not DEBUG,  # Cache templates in production
             },
         },
     },
