@@ -2818,7 +2818,15 @@ def playerInfo(request, usernameToProfile):
     for game_name, game_model in GAME_NAMES_MODELS.items():
         all_games = list(
             Game.objects.filter(gameCode=game_name, players__player_id=target_id)
-            .prefetch_related("players__player")
+            .select_related("creator")
+            .prefetch_related(
+                Prefetch(
+                    "players",
+                    queryset=GamePlayer.objects.select_related("player"),
+                    to_attr="prefetched_players",
+                ),
+                "invitedPlayers",
+            )
             .distinct()
         )
 
@@ -2833,21 +2841,22 @@ def playerInfo(request, usernameToProfile):
 
         for game in all_games:
             status = game.gameStatus
+            all_game_players = game.prefetched_players
 
             # Optimization: Use sets for membership checks
-            all_p_ids = {gp.player.id for gp in game.players.all() if gp.player}
+            all_p_ids = {gp.player.id for gp in all_game_players if gp.player}
             is_joint = req_user_id in all_p_ids
 
             # --- Win Calculation ---
             winner_ids = [
-                gp.player.id for gp in game.players.all() if gp.player and gp.winner
+                gp.player.id for gp in all_game_players if gp.player and gp.winner
             ]
 
             if status == "FINISHED":
                 # General Stats Logic
                 has_shadow = any(
                     gp.player.username == "SHADOW"
-                    for gp in game.players.all()
+                    for gp in all_game_players
                     if gp.player
                 )
 
@@ -2875,7 +2884,7 @@ def playerInfo(request, usernameToProfile):
                         gp.player.id == target_id and gp.is_kicked
                         if gp.player
                         else False
-                        for gp in game.players.all()
+                        for gp in all_game_players
                     ):
                         kickedOutGamesLastYear += 1
 
@@ -2945,21 +2954,21 @@ def playerInfo(request, usernameToProfile):
             "trophyHTML": trophyHTML,
             "trophyDetailHTML": trophyDetailHTML,
             "activeJointGames": [
-                SF_fastSerializeGame(g, request.user)
+                SF_serializeGame(g, request.user, {"all_game_players": g.prefetched_players, "invited_users": list(g.invitedPlayers.all())})
                 for g in sorted(activeJoint, key=lambda x: x.latestUpdate, reverse=True)
             ],
             "activeOtherGames": [
-                SF_fastSerializeGame(g, request.user)
+                SF_serializeGame(g, request.user, {"all_game_players": g.prefetched_players, "invited_users": list(g.invitedPlayers.all())})
                 for g in sorted(activeOther, key=lambda x: x.latestUpdate, reverse=True)
             ],
             "finishedJointGames": [
-                SF_fastSerializeGame(g, request.user)
+                SF_serializeGame(g, request.user, {"all_game_players": g.prefetched_players, "invited_users": list(g.invitedPlayers.all())})
                 for g in sorted(
                     finishedJoint, key=lambda x: x.latestUpdate, reverse=True
                 )
             ],
             "finishedOtherGames": [
-                SF_fastSerializeGame(g, request.user)
+                SF_serializeGame(g, request.user, {"all_game_players": g.prefetched_players, "invited_users": list(g.invitedPlayers.all())})
                 for g in sorted(
                     finishedOther, key=lambda x: x.latestUpdate, reverse=True
                 )
