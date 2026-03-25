@@ -10,8 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-import socket
-from decouple import config, Csv
+from decouple import config
 import os
 from os.path import join
 from pathlib import Path
@@ -46,15 +45,9 @@ if not DEBUG:
     ]
     USE_X_FORWARDED_HOST = False
 
-    SESSION_ENGINE = (
-        "django.contrib.sessions.backends.db"  # Or cached_db, or file, etc.
-    )
-    SESSION_COOKIE_SECURE = (
-        True  # Only send the session cookie over HTTPS in production
-    )
-    SESSION_COOKIE_HTTPONLY = (
-        True  # Prevents JavaScript from accessing the session cookie
-    )
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Or cached_db, or file, etc.
+    SESSION_COOKIE_SECURE = True  # Only send the session cookie over HTTPS in production
+    SESSION_COOKIE_HTTPONLY = True  # Prevents JavaScript from accessing the session cookie
     SESSION_COOKIE_SAMESITE = "Lax"  # Or 'Strict', depending on your needs
 
     SECURE_HSTS_SECONDS = 60
@@ -145,33 +138,61 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "OnlineBoardGamers.urls"
 
+# Ensure this folder exists on your server!
+JINJA2_CACHE_DIR = BASE_DIR / "jinja2_cache"
+if not JINJA2_CACHE_DIR.exists():
+    os.makedirs(JINJA2_CACHE_DIR)
 
 TEMPLATES = [
-        {
-            "BACKEND": "django.template.backends.django.DjangoTemplates",
-            "DIRS": [BASE_DIR / "templates"],
-            "APP_DIRS": False,  # Must be False when using custom loaders
-            "OPTIONS": {
-                "context_processors": [
-                    "django.template.context_processors.debug",
-                    "django.template.context_processors.request",
-                    "django.contrib.auth.context_processors.auth",
-                    "django.contrib.messages.context_processors.messages",
-                    "django.template.context_processors.i18n",
-                ],
-                # Enable template caching for massive performance boost
-                "loaders": [
-                    (
-                        "django.template.loaders.cached.Loader",
-                        [
-                            "django.template.loaders.filesystem.Loader",
-                            "django.template.loaders.app_directories.Loader",
-                        ],
-                    ),
-                ],
+    {
+        # --- JINJA2 (Using django-jinja for compatibility) ---
+        "BACKEND": "django_jinja.backend.Jinja2",
+        "DIRS": [BASE_DIR / "jinja2_templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            # This allows {{ request }}, {{ user }}, etc. in Jinja
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+            "environment": "OnlineBoardGamers.jinja2.environment",
+            "auto_reload": DEBUG,
+            "translation_engine": "django.utils.translation",
+            
+            # Correct Jinja2 Bytecode Cache settings
+            "bytecode_cache": {
+                "enabled": True,
+                "backend": "jinja2.FileSystemBytecodeCache",
+                "dir": str(JINJA2_CACHE_DIR),
             },
         },
-    ]
+    },
+    {
+        # --- STANDARD DJANGO (With RAM Caching) ---
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": False, # Must be False to use the 'loaders' below
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+            "loaders": [
+                (
+                    "django.template.loaders.cached.Loader",
+                    [
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                    ],
+                ),
+            ],
+        },
+    },
+]
 
 WSGI_APPLICATION = "OnlineBoardGamers.wsgi.application"
 
@@ -207,10 +228,10 @@ Q_CLUSTER = {
     "bulking": 10,  # Process up to 10 tasks at once to reduce overhead
     "sync": False,
     # --- END CPU SAVING SETTINGS ---
-    "guard_cycle": 60.0,   # Wake up once a minute instead of every 5 seconds
-    "recycle": 0,          # Stop the CPU-heavy process-restarting cycle
-    "save_limit": 0,       # Stop writing success logs to the DB
-    "sleeptime": 60,       # Match your guard cycle for consistency
+    "guard_cycle": 60.0,  # Wake up once a minute instead of every 5 seconds
+    "recycle": 0,  # Stop the CPU-heavy process-restarting cycle
+    "save_limit": 0,  # Stop writing success logs to the DB
+    "sleeptime": 60,  # Match your guard cycle for consistency
 }
 
 # NB this oculd kill very long DB connections
@@ -332,9 +353,7 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = []
 
 # Output folder for collectstatic (separate from source!)
-STATIC_ROOT = os.path.join(
-    BASE_DIR, "staticfiles"
-)  # → /home/OnlineGaming/.virtualenvs/OnlineGaming/staticfiles/
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # → /home/OnlineGaming/.virtualenvs/OnlineGaming/staticfiles/
 
 STORAGES = {
     "default": {
@@ -434,9 +453,27 @@ LOGGING = {
 if DEBUG:
     # Add to installed apps
     INSTALLED_APPS += ["debug_toolbar"]
+    INSTALLED_APPS += ["template_profiler_panel"]
 
     # Add to middleware (must be near the top, but after GZipMiddleware)
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
     # Required for the toolbar to show on localhost
     INTERNAL_IPS = ["127.0.0.1"]
+
+    DEBUG_TOOLBAR_PANELS = [
+        "debug_toolbar.panels.history.HistoryPanel",
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        "template_profiler_panel.panels.template.TemplateProfilerPanel",  # <— Add this line
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+    ]
