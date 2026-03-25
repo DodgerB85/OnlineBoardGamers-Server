@@ -164,13 +164,14 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
-            "auto_reload": DEBUG,
+            "auto_reload": not DEBUG,  # Disable auto-reload in production for better performance
             "translation_engine": "django.utils.translation",
-            ## Correct Jinja2 Bytecode Cache settings
+            ## Optimized Jinja2 Bytecode Cache settings
             "bytecode_cache": {
                 "name": "jinja2",
                 "backend": "jinja2.FileSystemBytecodeCache",
                 "directory": str(JINJA2_CACHE_DIR),
+                "auto_reload": not DEBUG,  # Cache templates in production
             },
         },
     },
