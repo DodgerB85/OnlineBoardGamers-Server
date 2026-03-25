@@ -490,7 +490,7 @@ def _processTurn(request):
         # Add turn/phase validation to prevent backward saves
         if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
             SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            #return JsonResponse({"syncError": True}, safe=False)
+            # return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
         presenter.deleteSinglePlayersMove(request.user.username)
@@ -729,7 +729,7 @@ def _processTurn(request):
         # Add turn/phase validation to prevent backward saves
         if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
             SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            #return JsonResponse({"syncError": True}, safe=False)
+            # return JsonResponse({"syncError": True}, safe=False)
 
         if currentGame.gameStatus == "FINISHED":
             return JsonResponse({"syncError": True}, safe=False)
@@ -974,7 +974,7 @@ def _processTurn(request):
 
             # If no rewind data, then start it with this data
             if len(currentRewindDataArray) == 0:
-                currentRewindDataArray = [currentGame.gameData]    
+                currentRewindDataArray = [currentGame.gameData]
             else:
                 # else check last one isn't same as cufrent, and if not then add
                 if currentRewindDataArray[-1] != currentGame.gameData:
@@ -983,7 +983,7 @@ def _processTurn(request):
                     while len(currentRewindDataArray) > 20:
                         currentRewindDataArray.pop(0)
                 # MAYBE ADD AN INDENT TO THIS LINE????
-                #currentRewindData = json.dumps(currentRewindDataArray)
+                # currentRewindData = json.dumps(currentRewindDataArray)
             currentGame.rewindData = json.dumps(currentRewindDataArray)
 
         ################ END REWIND EVERY SAVE #######################
@@ -1037,7 +1037,7 @@ def _processTurn(request):
         # Add turn/phase validation to prevent backward saves
         if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
             SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            #return JsonResponse({"syncError": True}, safe=False)
+            # return JsonResponse({"syncError": True}, safe=False)
 
         if not continueFromStalledGame:
             currentGame.turn = jsonData["turn"]
@@ -1194,7 +1194,7 @@ def _processTurn(request):
         # Add turn/phase validation to prevent backward saves
         if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
             SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            #return JsonResponse({"syncError": True}, safe=False)
+            # return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
         # Phase first otherwise MOVE payday skip overwrites with phase 7
@@ -1273,7 +1273,7 @@ def _processTurn(request):
         # Add turn/phase validation to prevent backward saves
         if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
             SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            #return JsonResponse({"syncError": True}, safe=False)
+            # return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)
@@ -1332,7 +1332,7 @@ def _processTurn(request):
             ####################################
             # But this load data needs to be moved to temp
             # SKIP FIX ATTEMPT
-            #currentRewindDataArray.append(loadData)
+            # currentRewindDataArray.append(loadData)
             currentGame.rewindData = json.dumps(currentRewindDataArray)
             ####################################
 
@@ -1364,7 +1364,7 @@ def _processTurn(request):
 
         # currentGame.rewindTempData = loadData
         # SKIP FIX ATTEMPT
-        #currentRewindDataArray.append(loadData)
+        # currentRewindDataArray.append(loadData)
 
         currentGame.rewindData = json.dumps(currentRewindDataArray)
 
@@ -1791,6 +1791,7 @@ def castVote(request):
     with db_mutex(str(jsonData["gameID"])):
         return shared_cast_vote(request)
 
+
 ######### Temp functions to handle data change
 def load_rewind_data(currentGame):
     """Load rewind data: supports both JSON arrays and 'SPLIT' strings"""
@@ -1803,7 +1804,7 @@ def load_rewind_data(currentGame):
         clean_data = str(data).strip()
 
         # 2. Check if it's a JSON array (starts with '[')
-        if clean_data.startswith('['):
+        if clean_data.startswith("["):
             try:
                 parsed = json.loads(clean_data)
                 if isinstance(parsed, list):
@@ -1819,4 +1820,3 @@ def load_rewind_data(currentGame):
     except Exception as e:
         print(f"CRITICAL ERROR loading rewind data: {e}")
         return []
-
