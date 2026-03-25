@@ -163,7 +163,7 @@
                                 </tr>
                             </thead>
                             {% for game in activeJointGames %}
-                                {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+                                {{ game.preRenderedHTML|safe }}
                             {% endfor %}
                         </table>
                     </div>
@@ -193,7 +193,7 @@
                                 </tr>
                             </thead>
                             {% for game in finishedJointGames %}
-                                {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                                {{ game.preRenderedHTML|safe }}
                             {% endfor %}
                         </table>
                     </div>
@@ -220,8 +220,8 @@
                             </tr>
                         </thead>
                         {% for game in activeOtherGames %}
-                            {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
-                        {% endfor %}
+                                {{ game.preRenderedHTML|safe }}
+                            {% endfor %}
                     </table>
                 </div>
             </div>
@@ -244,8 +244,8 @@
                             </tr>
                         </thead>
                         {% for game in finishedOtherGames %}
-                            {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
-                        {% endfor %}
+                                {{ game.preRenderedHTML|safe }}
+                            {% endfor %}
                     </table>
                 </div>
             </div>
