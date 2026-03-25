@@ -10,5 +10,8 @@
     "javascriptreact",
     "vue"
   ],
-  "eslint.run": "onSave"
+  "eslint.run": "onSave",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.activateInCurrentTerminal": true
 }
