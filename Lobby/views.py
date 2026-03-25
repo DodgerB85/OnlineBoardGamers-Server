@@ -2676,8 +2676,6 @@ def playerInfo(request, usernameToProfile):
 
             # --- Categorization for Lists ---
             if status == "ACTIVE":
-                # Pre-render HTML in Python to avoid template includes
-
                 serialized_game = SF_serializeGame(
                     game,
                     request.user,
@@ -2686,18 +2684,11 @@ def playerInfo(request, usernameToProfile):
                         "invited_users": [],
                     },
                 )
-
-                # Add pre-rendered HTML
-                from Lobby.sharedFunctions.optimizedGameDisplay import render_current_game_row_html
-
-                serialized_game["preRenderedHTML"] = render_current_game_row_html(serialized_game)
-
                 if is_joint and not is_self:
                     activeJoint.append(serialized_game)
                 else:
                     activeOther.append(serialized_game)
             elif status == "FINISHED":
-                # Pre-render HTML in Python to avoid template includes
                 serialized_game = SF_serializeGame(
                     game,
                     request.user,
@@ -2706,12 +2697,6 @@ def playerInfo(request, usernameToProfile):
                         "invited_users": [],
                     },
                 )
-
-                # Add pre-rendered HTML
-                from Lobby.sharedFunctions.optimizedGameDisplay import render_finished_game_row_html
-
-                serialized_game["preRenderedHTML"] = render_finished_game_row_html(serialized_game)
-
                 if is_joint and not is_self:
                     finishedJoint.append(serialized_game)
                 else:
