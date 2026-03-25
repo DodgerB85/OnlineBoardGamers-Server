@@ -147,32 +147,31 @@ ROOT_URLCONF = "OnlineBoardGamers.urls"
 
 
 TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-           # "APP_DIRS": False,  # Must be False when using custom loaders
-           "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-                "django.template.context_processors.i18n",
-            ],
-            #    # Enable template caching for massive performance boost
-            #    "loaders": [
-            #        (
-            #            "django.template.loaders.cached.Loader",
-            #            [
-            #                "django.template.loaders.filesystem.Loader",
-            #                "django.template.loaders.app_directories.Loader",
-            #            ],
-            #        ),
-            #    ],
+        {
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "DIRS": [BASE_DIR / "templates"],
+            "APP_DIRS": False,  # Must be False when using custom loaders
+            "OPTIONS": {
+                "context_processors": [
+                    "django.template.context_processors.debug",
+                    "django.template.context_processors.request",
+                    "django.contrib.auth.context_processors.auth",
+                    "django.contrib.messages.context_processors.messages",
+                    "django.template.context_processors.i18n",
+                ],
+                # Enable template caching for massive performance boost
+                "loaders": [
+                    (
+                        "django.template.loaders.cached.Loader",
+                        [
+                            "django.template.loaders.filesystem.Loader",
+                            "django.template.loaders.app_directories.Loader",
+                        ],
+                    ),
+                ],
             },
-    },
-]
+        },
+    ]
 
 WSGI_APPLICATION = "OnlineBoardGamers.wsgi.application"
 
