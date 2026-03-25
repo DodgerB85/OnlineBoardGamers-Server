@@ -1522,7 +1522,7 @@ class RNBpresenter(GamePresenter):
             finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
         # Now send winning notification
         SN_M_sendEndGameNotification(
-            request, "IND", finalPositionsArr, _gameID, self.gameObj
+            request, "RNB", finalPositionsArr, _gameID, self.gameObj
         )
 
         if self.gameObj.relatedMainTournament:
