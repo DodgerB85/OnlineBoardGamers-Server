@@ -7,7 +7,7 @@
                  title="New Chat Message">
         {% endif %}
 
-        {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
+        {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
 
         <a href="/{{game.gameCode}}/{{game.id}}">{{ game.gameName }}</a>
         {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}

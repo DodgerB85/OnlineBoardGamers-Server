@@ -94,15 +94,15 @@ count = 0
 
 TARGET_CODE = "Bus" 
 
-allGames = Game.objects.filter(gameCode=TARGET_CODE)
+allMainTournaments = Main_Tournament.objects.filter(gameCode=TARGET_CODE)
 
 # print the number of games
-print(f"Number of games: {allGames.count()}")
+print(f"Number of games: {allMainTournaments.count()}")
 
-for game in allGames:
-    game.gameCode = "BUS"
-    game.save()
-    print(game.id)
+for tournament in allMainTournaments:
+    tournament.gameCode = "BUS"
+    tournament.save()
+    print(tournament.id)
 
 
 

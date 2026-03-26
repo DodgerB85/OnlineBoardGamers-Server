@@ -14,7 +14,7 @@
         </span>
         {% endif %}
         
-        {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
+        {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
 
         {{ game.gameName }}{% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}
     </td>

@@ -70,7 +70,7 @@
                        src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
                        title="New Chat Message">
                 {% endif %}
-                {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
+                {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
                 <a target="_blank"
                    {% if game.gameCode == "FCM" %} href="{% url 'FCM:showFCMgame' game_id=game.gameID %}" {% elif game.gameCode == "HC" %} href="{% url 'HC:showHCgame' game_id=game.gameID %}" {% elif game.gameCode == "Bus" %} href="{% url 'Bus:showBusGame' game_id=game.gameID %}" {% elif game.gameCode == "TGZ" %} href="{% url 'TGZ:showTGZgame' game_id=game.gameID %}" {% elif game.gameCode == "CNS" %} href="{% url 'CNS:showCNSgame' game_id=game.gameID %}" {% elif game.gameCode == "AQY" %} href="{% url 'AQY:showAQYgame' game_id=game.gameID %}" {% elif game.gameCode == "IND" %} href="{% url 'IND:showINDgame' game_id=game.gameID %}" {% elif game.gameCode == "KFW" %} href="{% url 'KFW:showKFWgame' game_id=game.gameID %}" {% elif game.gameCode == "WEB" %} href="{% url 'WEB:showWEBgame' game_id=game.gameID %}" {% endif %}>
                   {{ game.gameName }} ID: {{ game.gameID }}

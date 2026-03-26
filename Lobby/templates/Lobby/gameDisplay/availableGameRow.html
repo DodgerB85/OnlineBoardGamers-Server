@@ -34,7 +34,7 @@
     {% endif %}
     {% if game.learningGame %}<span class="learningGameSpan">[Learning Game]</span>{% endif %}
     {% if game.experiencedGame %}<span class="learningGameSpan">[Experienced Game]</span>{% endif %}
-    {% include 'Lobby/gameDisplay/gameIcons.html' with game=game.gameCode %}
+    {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
     {{ game.gameName }}
     {% if game.gameDescription %}- <i>{{ game.gameDescription }}</i>{% endif %}
   </td>
