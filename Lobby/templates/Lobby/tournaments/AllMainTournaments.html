@@ -20,19 +20,19 @@ If anything does happen then I will keep the tournament going if at all possible
 -->
     <h1>{% translate "Tournaments" %}</h1>
     <p class="size25text">
-      {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
+      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HC" %}
       Horseless Carrige,
-      {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
+      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HC" %}
       Bus,
-      {% include 'Lobby/gameDisplay/gameIcons.html' with game="BUS" %}
+      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %}
       Indonesia, and
-      {% include 'Lobby/gameDisplay/gameIcons.html' with game="AQY" %}
+      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %}
       Antiquity Tournaments run at regular intervals
       <br />
-      {% include 'Lobby/gameDisplay/gameIcons.html' with game="FCM" %}
+      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %}
       {% translate "Food Chain Magnate Tournaments will run at regular intervals" %}
       <br />
-      {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
+      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}
       {% translate "The Great Zimbabwe Tournaments will run at regular intervals" %}
       <br />
       {% translate "For more information on tournaments, see" %} <a class="linkOther" id="helpLink2" href="{% url 'helpTournaments' %}">Tournaments Help</a> and check the Discord!
@@ -57,17 +57,17 @@ If anything does happen then I will keep the tournament going if at all possible
             <tr onclick="window.location.href='{{ tourny.tournamentLink }}';">
               <td>
                 {% if tourny.gameCode == 'FCM' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="FCM" %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %}
                 {% elif tourny.gameCode == 'HC' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="HC" %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HC" %}
                 {% elif tourny.gameCode == 'BUS' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="BUS" %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %}
                 {% elif tourny.gameCode == 'TGZ' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}
                 {% elif tourny.gameCode == 'AQY' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="AQY" %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %}
                 {% elif tourny.gameCode == 'IND' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with game="IND" %}
+                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="IND" %}
                 {% endif %}
               </td>
               <td>{{ tourny.tournamentName }}</td>
@@ -85,7 +85,7 @@ If anything does happen then I will keep the tournament going if at all possible
       </div>
     </div>
     <p class="size25text">
-      {% include 'Lobby/gameDisplay/gameIcons.html' with game="TGZ" %}
+      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}
       Old TGZ Tournaments were run externally. View them on the <a href="{% url 'TGZtournaments' %}" class="linkOther">Old TGZ Tournaments Page</a>
     </p>
     <br />

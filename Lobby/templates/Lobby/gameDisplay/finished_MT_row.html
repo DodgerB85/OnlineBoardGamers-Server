@@ -4,7 +4,7 @@
      onclick="window.location.href='/MiniTournament/{{ Mini_Tournament.Mini_Tournament_id }}/';"
      >
         <td>
-        {% include 'Lobby/gameDisplay/gameIcons.html' with game=Mini_Tournament.gameCode %}
+        {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=Mini_Tournament.gameCode %}
         </td>
         <td class="nameTDavailable">{{ Mini_Tournament.tournamentName }}{% if Mini_Tournament.tournamentDescription %}<br/><i>{{ Mini_Tournament.tournamentDescription }}</i>{% endif %}</td>
         <td>{{ Mini_Tournament.maxTournamentPlayers }} </td>

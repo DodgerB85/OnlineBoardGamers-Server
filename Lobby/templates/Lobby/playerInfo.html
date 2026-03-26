@@ -176,7 +176,7 @@
                     {% translate "Joint Finished Games" %} ({{ finishedJointGames|length }}) - Wins: {{ jointWinTotal }}/{{ finishedJointGames|length }}  ({{ jointWinPercentage }}%)
                 </h2>
                 {% for gameRow in jointGameStats %}
-                    {% include 'Lobby/gameDisplay/gameIcons.html' with game=gameRow.0 %}
+                    {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=gameRow.0 %}
                     {{ gameRow.1 }}/{{ gameRow.2 }} ({{ gameRow.3 }}%)
                 {% endfor %}
                 <div class="largeTableContainer">
