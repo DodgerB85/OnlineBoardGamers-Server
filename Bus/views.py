@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext  # , get_language
 
 # from django.utils import translation
-
+# fore change comment
 from django.db import connection
 
 from Lobby.models import User, Profile, Game
