@@ -1,16 +1,15 @@
 # Generated manually on 2026-02-10
 
 import random
-import json
 from django.db import migrations
 
 
 def migrate_bus_games(apps, schema_editor):
     """
-    Migrate all Bus_Game instances to the new unified Game model with gameCode='Bus'
+    Migrate all Bus_Game instances to the new unified Game model with gameCode='BUS'
     """
     # Get models - use apps.get_model to get the historical version
-    Bus_Game = apps.get_model("Bus", "Bus_Game")
+    Bus_Game = apps.get_model("BUS", "Bus_Game")
     Game = apps.get_model("Lobby", "Game")
     GamePlayer = apps.get_model("Lobby", "GamePlayer")
 
@@ -31,7 +30,7 @@ def migrate_bus_games(apps, schema_editor):
     for bus_game in bus_games:
         # Create the new Game instance
         new_game = Game.objects.create(
-            gameCode="Bus",
+            gameCode="BUS",
             original_id=bus_game.id,
             # Copy BaseGame fields
             gameName=bus_game.gameName,
@@ -176,16 +175,16 @@ def reverse_migration(apps, schema_editor):
     Game = apps.get_model("Lobby", "Game")
 
     # Delete all Bus games (cascade will delete GamePlayer instances)
-    deleted_count = Game.objects.filter(gameCode="Bus").count()
-    Game.objects.filter(gameCode="Bus").delete()
+    deleted_count = Game.objects.filter(gameCode="BUS").count()
+    Game.objects.filter(gameCode="BUS").delete()
 
-    print(f"Removed {deleted_count} Bus games from unified Game model")
+    print(f"Removed {deleted_count} BUS games from unified Game model")
 
 
 class Migration(migrations.Migration):
     dependencies = [
         ("Lobby", "0078_game_relatedbustournament"),
-        ("Bus", "0023_bus_game_automoves"),  # Ensure Bus app is available
+        ("BUS", "0023_bus_game_automoves"),  # Ensure BUS app is available
     ]
 
     operations = [

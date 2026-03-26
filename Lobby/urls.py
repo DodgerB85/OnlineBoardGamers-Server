@@ -52,8 +52,8 @@ urlpatterns = [
     ),
     path("createHCpage/", views.createHCpage, name="createHCpage"),
     path("createHCpage/<int:gameID>/", views.createHCpage, name="createHCpage"),
-    path("createBusPage/", views.createBusPage, name="createBusPage"),
-    path("createBusPage/<int:gameID>/", views.createBusPage, name="createBusPage"),
+    path("createBUSpage/", views.createBUSpage, name="createBUSpage"),
+    path("createBUSpage/<int:gameID>/", views.createBUSpage, name="createBUS[age"),
     path("createTGZpage/", views.createTGZpage, name="createTGZpage"),
     path(
         "createTGZminiTournament/",

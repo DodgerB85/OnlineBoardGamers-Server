@@ -11,7 +11,7 @@ class ForceTrailingSlashMiddleware:
         app_prefixes = (
             "/FCM",
             "/HC",
-            "/Bus",
+            "/BUS",
             "/TGZ",
             "/CNS",
             "/AQY",

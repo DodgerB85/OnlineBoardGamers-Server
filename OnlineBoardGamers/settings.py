@@ -103,7 +103,7 @@ INSTALLED_APPS = [
     "FCM",
     "Lobby",
     "user_visit",
-    "Bus",
+    "BUS",
     "HC",
     "TGZ",
     "CNS",

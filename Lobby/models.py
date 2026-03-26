@@ -1,8 +1,7 @@
-import time
 import json
 
 from decouple import config
-from typing import Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -20,7 +19,7 @@ from .presenters import (
     AQYpresenter,
     TGZpresenter,
     INDpresenter,
-    BusPresenter,
+    BUSpresenter,
     FCMpresenter,
     RNBpresenter,
     HCpresenter,
@@ -541,7 +540,7 @@ class Game(BaseGame):
         "AQY": AQYpresenter,
         "TGZ": TGZpresenter,
         "IND": INDpresenter,
-        "Bus": BusPresenter,
+        "BUS": BUSpresenter,
         "FCM": FCMpresenter,
         "RNB": RNBpresenter,
         "HC": HCpresenter,

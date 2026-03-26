@@ -7,11 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon"
           type="image/png"
-          href="{% static 'Bus/images/bus_icon.png' %}" />
-    <meta name="title" content="Online Board Gamers - Bus">
+          href="{% static 'BUS/images/bus_icon.png' %}" />
+    <meta name="title" content="Online Board Gamers - BUS">
     <meta name="description"
-          content="Play Splotter's Bus Online for free with others, or solo!">
-    <meta name="keywords" content="Bus,Online,Play,Board,Game,Games,Gamers">
+          content="Play Splotter's BUS Online for free with others, or solo!">
+    <meta name="keywords" content="BUS,Online,Play,Board,Game,Games,Gamers">
     <meta name="robots" content="index, follow">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="language" content="English">
@@ -63,10 +63,10 @@
       <script type="module" src="http://localhost:3000/static/@vite/client"></script>
       <script type="module" src="http://localhost:3000/static/main.js"></script>
     {% else %}
-      <link href="{% static 'Bus/Busvuedist/main.css' %}?" rel="stylesheet" />
+      <link href="{% static 'BUS/BUSvuedist/main.css' %}?" rel="stylesheet" />
       <script type="module"
               crossorigin=""
-              src="{% static 'Bus/Busvuedist/main.js' %}"></script>
+              src="{% static 'BUS/BUSvuedist/main.js' %}"></script>
     {% endif %}
   </head>
   <body>
@@ -74,10 +74,10 @@
       <strong>Please enable Javascript to continue.</strong>
     </noscript>
     <div id="app">
-      <div id="loadingText">Bus is loading.........</div>
+      <div id="loadingText">BUS is loading.........</div>
       <div>
         <img id="busLoadingImg"
-             src="{% static 'Bus/images/bus_icon.png' %}"
+             src="{% static 'BUS/images/bus_icon.png' %}"
              width="300"
              height="300"
              alt="VROOOMM" />
@@ -104,6 +104,7 @@
     initData.name = '{{ name }}'; 
     initData.chatData = "{{ chatData }}";
     initData.preferredBusBoard = {{ preferredBusBoard }};
+
     initData.nextURL = '{{ nextURL|safe }}';
     {% endif %}
 
@@ -121,6 +122,7 @@
     initData.chatNotification = true;
     {% endif %}
     initData.preferredBusColour = {{ preferredBusColour }};
+
     initData.yourTurnAudioType = {{yourTurnAudioType}};
 
     /////////////////////

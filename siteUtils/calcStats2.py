@@ -88,7 +88,7 @@ win1mArr6p_E = []
 GAME_CODES = [
     "FCM",
     "HC",
-    "Bus",
+    "BUS",
     "TGZ",
     "CNS",
     "AQY",

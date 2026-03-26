@@ -144,7 +144,7 @@ class GamePresenter:
         game_code_map = {
             "FCM": "Fcm",
             "HC": "Hc",
-            "Bus": "Bus",
+            "BUS": "Bus",
             "TGZ": "Tgz",
             "CNS": "Cns",
             "AQY": "Aqy",
@@ -1326,7 +1326,7 @@ class INDpresenter(GamePresenter):
         return len(playersPreMoveDataArr[arrIdx][3]) > 0
 
 
-class BusPresenter(GamePresenter):
+class BUSpresenter(GamePresenter):
     def endGame(
         self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID
     ):
@@ -1356,7 +1356,7 @@ class BusPresenter(GamePresenter):
 
         # Now send winning notification
         SN_M_sendEndGameNotification(
-            request, "Bus", _finalPositions, _gameID, self.gameObj
+            request, "BUS", _finalPositions, _gameID, self.gameObj
         )
 
         if self.gameObj.relatedMainTournament:

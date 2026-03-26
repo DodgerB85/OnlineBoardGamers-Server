@@ -3,7 +3,6 @@ import time
 import lzstring
 
 # import requests
-from decouple import config
 from typing import TYPE_CHECKING, cast
 
 from contextlib import contextmanager
@@ -18,11 +17,7 @@ from django.utils.translation import gettext  # , get_language
 
 # from django.utils import translation
 
-from django.urls import reverse
-from django.contrib import messages
 from django.db import connection
-from django.db.models import Q
-
 
 from Lobby.models import User, Profile, Game
 
@@ -41,13 +36,11 @@ from Lobby.sharedFunctions.sharedFunctions import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
-    SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
 )
-from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 if TYPE_CHECKING:
-    from Lobby.presenters import BusPresenter
+    from Lobby.presenters import BUSpresenter
 
 BUS_DB_LOCK_NAME = "lockTGZgame_"
 
@@ -56,18 +49,18 @@ def index(request):
     return HttpResponse("Hello Geeks")
 
 
-def BusHelp(request):
-    return render(request, "Bus/BusHelp.html")
+def BUShelp(request):
+    return render(request, "BUS/BUShelp.html")
 
 
 def redirect_old_url(request, original_id):
-    """Redirect old Bus_Game URLs to new Game Game URLs"""
-    game = get_object_or_404(Game, gameCode="Bus", original_id=original_id)
-    return redirect("Bus:showBusGame", game_id=game.id)
+    """Redirect old BUS_Game URLs to new Game Game URLs"""
+    game = get_object_or_404(Game, gameCode="BUS", original_id=original_id)
+    return redirect("BUS:showBUSgame", game_id=game.id)
 
 
 @login_required()
-def createBusGame(request):
+def createBUSgame(request):
     # Creating a game must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -75,11 +68,11 @@ def createBusGame(request):
     return create_bus_game(request)
 
 
-def showBusGame(request, game_id):
+def showBUSgame(request, game_id):
     result = build_show_game_data(
         request,
         game_id,
-        "Bus",
+        "BUS",
         default_zoom=120,
         settings_debug_key="BUS_USE_SOURCE_CODE",
     )
@@ -95,13 +88,13 @@ def showBusGame(request, game_id):
     returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
 
     if not result["is_authenticated"]:
-        return render(request, "Bus/showBusGame.html", returnData)
+        return render(request, "BUS/showBUSgame.html", returnData)
 
     returnData.update(result["auth_data"])
     returnData["preferredBusBoard"] = result["user_profile"].preferredBusBoard
 
     if not result["is_involved"]:
-        return render(request, "Bus/showBusGame.html", returnData)
+        return render(request, "BUS/showBUSgame.html", returnData)
 
     returnData.update(result["involved_data"])
     returnData["preferredBusColour"] = result["user_profile"].preferredBusColour
@@ -126,12 +119,12 @@ def showBusGame(request, game_id):
             }
         )
 
-    return render(request, "Bus/showBusGame.html", returnData)
+    return render(request, "BUS/showBUSgame.html", returnData)
 
 
 @login_required()
 def saveNotes(request, game_id=None):
-    return shared_save_notes(request, "Bus")
+    return shared_save_notes(request, "BUS")
 
 
 @login_required
@@ -142,13 +135,13 @@ def busData(request, dataType):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("BusPresenter", currentGame.presenter())
+    presenter = cast("BUSpresenter", currentGame.presenter())
 
     if dataType == 2:
         # Send game data
@@ -211,8 +204,8 @@ def _sendChatMessage(request):
     jsonData = json.loads(request.body)
 
     if jsonData["action"] == "sendChatMessage":
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
-        presenter = cast("BusPresenter", currentGame.presenter())
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
+        presenter = cast("BUSpresenter", currentGame.presenter())
 
         # Remove chat notification for current user
         presenter.removeChatNotification(request.user)
@@ -255,7 +248,7 @@ def _sendChatMessage(request):
 
 
 @login_required()
-def processBusTurn(request):
+def processBUSturn(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -263,11 +256,11 @@ def processBusTurn(request):
     gameID = jsonData["gameID"]
 
     with db_mutex("processTurn_" + str(gameID)):
-        return _processBusTurn(request)
+        return _processBUSturn(request)
 
 
 @login_required()
-def _processBusTurn(request):
+def _processBUSturn(request):
     # processing a turn must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -275,11 +268,11 @@ def _processBusTurn(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
-    presenter = cast("BusPresenter", currentGame.presenter())
+    presenter = cast("BUSpresenter", currentGame.presenter())
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -375,7 +368,7 @@ def _processBusTurn(request):
                 if len(playerListToNotify) > 0:
                     SN_sendNextTurnNotification(
                         request,
-                        "Bus",
+                        "BUS",
                         playerListToNotify,
                         jsonData["gameID"],
                         presenter.getGameName(),
@@ -515,7 +508,7 @@ def _processBusTurn(request):
             if len(playerListToNotify) > 0:
                 SN_sendNextTurnNotification(
                     request,
-                    "Bus",
+                    "BUS",
                     playerListToNotify,
                     jsonData["gameID"],
                     presenter.getGameName(),
@@ -570,7 +563,7 @@ def _processBusTurn(request):
 
 
 @login_required
-def changeBusViewport(request):
+def changeBUSviewport(request):
     if request.method != "PUT":
         return JsonResponse({"error": "Wrong request."}, status=400)
 
@@ -596,7 +589,7 @@ def changeBusViewport(request):
 
     elif jsonData["action"] == "zoom":
         try:
-            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="Bus")
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         zoomLevels = json.loads(currentGame.zoomLevels)
@@ -618,7 +611,7 @@ def changeBusViewport(request):
 
 @login_required()
 def bugEntry(request):
-    return shared_bug_entry(request, "Bus")
+    return shared_bug_entry(request, "BUS")
 
 
 @login_required()

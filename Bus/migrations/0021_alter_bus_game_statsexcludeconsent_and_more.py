@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("Bus", "0020_bus_game_startingmap"),
+        ("BUS", "0020_bus_game_startingmap"),
     ]
 
     operations = [

@@ -123,7 +123,7 @@ def getGameStrings(game):
                 "Horseless Carriage - Mini Tournament Invitation Received"
             ),
         }
-    elif game == "Bus":
+    elif game == "BUS":
         return {
             "boxName": gettext("Bus"),
             "finishedSubject": gettext("Your Bus game has finished"),
