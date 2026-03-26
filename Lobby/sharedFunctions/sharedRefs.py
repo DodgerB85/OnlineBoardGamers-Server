@@ -20,7 +20,7 @@ OTHER = "OT"
 SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("FCM", gettext_lazy("Food Chain Magnate")),
     ("HC", gettext_lazy("Horseless Carriage")),
-    ("Bus", gettext_lazy("Bus")),
+    ("BUS", gettext_lazy("BUS")),
     ("TGZ", gettext_lazy("The Great Zimbabwe")),
     ("CNS", gettext_lazy("Cannes")),
     ("AQY", gettext_lazy("Antiquity")),
@@ -523,7 +523,7 @@ def SR_currentTurnString(gameCode, turn, phase):
 
         return currentTurnString
 
-    elif gameCode == "Bus":
+    elif gameCode == "BUS":
         currentTurnString = str(turn)
         if phase == 0:
             currentTurnString += " - " + gettext("Setup Buildings")

@@ -92,7 +92,7 @@ LZD = lzstring.LZString()
 start_calc_time = time.perf_counter()
 count = 0
 
-# games = ["FCM", "HC", "Bus", "TGZ"]
+# games = ["FCM", "HC", "BUS", "TGZ"]
 
 allUsers = User.objects.all()
 

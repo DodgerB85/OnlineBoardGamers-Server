@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 
-admin.site.unregister(Group)
 
 # Register your models here.
 from .models import (
@@ -21,7 +20,7 @@ from .modelProxies import (
     AQYgame,
     TGZgame,
     INDgame,
-    Busgame,
+    BUSgame,
     FCMgame,
     RNBgame,
     HCgame,
@@ -32,6 +31,8 @@ from django.conf import settings
 from django import forms
 from django.utils.html import format_html
 from django.urls import reverse
+
+admin.site.unregister(Group)
 
 
 @admin.register(User)
@@ -496,13 +497,13 @@ class INDgameAdmin(GameAdmin):
         app_label = "IND"
 
 
-@admin.register(Busgame)
-class BusgameAdmin(GameAdmin):
+@admin.register(BUSgame)
+class BUSgameAdmin(GameAdmin):
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(gameCode="Bus")
+        return super().get_queryset(request).filter(gameCode="BUS")
 
     class Meta:
-        app_label = "Bus"
+        app_label = "BUS"
 
 
 @admin.register(FCMgame)

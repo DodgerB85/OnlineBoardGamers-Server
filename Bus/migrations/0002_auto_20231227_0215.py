@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("Bus", "0001_initial"),
+        ("BUS", "0001_initial"),
     ]
 
     operations = [
@@ -117,7 +117,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="tournament_relName_Bus",
-                to="Bus.bus_tournament",
+                to="BUS.bus_tournament",
             ),
         ),
     ]

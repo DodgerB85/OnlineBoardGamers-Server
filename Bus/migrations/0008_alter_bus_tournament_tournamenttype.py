@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("Bus", "0007_alter_bus_game_gamestatus"),
+        ("BUS", "0007_alter_bus_game_gamestatus"),
     ]
 
     operations = [

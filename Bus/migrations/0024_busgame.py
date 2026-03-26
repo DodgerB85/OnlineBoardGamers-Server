@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("Bus", "0023_bus_game_automoves"),
+        ("BUS", "0023_bus_game_automoves"),
         ("Lobby", "0079_migrate_bus_games"),
     ]
 

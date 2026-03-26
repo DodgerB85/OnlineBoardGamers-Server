@@ -60,7 +60,7 @@ def SF_getRequiredExp(gameCode):
         return 2
     if gameCode == "HC":
         return 1
-    if gameCode == "Bus":
+    if gameCode == "BUS":
         return 1
     if gameCode == "TGZ":
         return 2
@@ -232,7 +232,7 @@ def SF_serializeGame(game, user, player_context):
     isLearningGame = False
     isExperiencedGame = False
 
-    # Check for both string and integer values (FCM/HC/Bus use strings, others use integers)
+    # Check for both string and integer values (FCM/HC/BUS use strings, others use integers)
     if 110 in startingOptionsArr:
         isLearningGame = True
     if 120 in startingOptionsArr:
@@ -243,7 +243,7 @@ def SF_serializeGame(game, user, player_context):
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(startingOptionsArr)
     if game_code == "HC":
         startingOptionsHTML = SR_getHCstartingOptionsHTML(startingOptionsArr)
-    if game_code == "Bus":
+    if game_code == "BUS":
         startingOptionsHTML = SR_getBUSstartingOptionsHTML(startingOptionsArr)
     if game_code == "TGZ":
         startingOptionsHTML = SR_getTGZstartingOptionsHTML(startingOptionsArr)
@@ -782,7 +782,7 @@ def start_next_any_tournament_round(
     _finalPositionNamesAndScore,
 ):
     from FCM.common import create_fcm_game
-    from Bus.common import create_bus_game
+    from BUS.common import create_bus_game
     from TGZ.common import create_tgz_game
     from AQY.common import create_aqy_game
     from IND.common import create_ind_game
@@ -872,7 +872,7 @@ def start_next_any_tournament_round(
             newGameID = create_fcm_game(
                 request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
             )
-        elif tournamentObj.gameCode == "Bus":
+        elif tournamentObj.gameCode == "BUS":
             newGameID = create_bus_game(
                 request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
             )
@@ -980,7 +980,7 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
 
     else:  # MiniT logic
         remainder = num_players % max_p
-        if tournamentObj.gameCode in ["HC", "Bus"]:
+        if tournamentObj.gameCode in ["HC", "BUS"]:
             # If 3+ remain, they form a game. If 1 or 2 remain, they get byes.
             if remainder > 0 and remainder < 3:
                 byesRequired = remainder
@@ -1466,7 +1466,7 @@ def SF_endAnyTournament(
                     baseIndex = 1
                 if gameCode == "HC":
                     baseIndex = 2
-                if gameCode == "Bus":
+                if gameCode == "BUS":
                     baseIndex = 3
                 if gameCode == "TGZ":
                     baseIndex = 4

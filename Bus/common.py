@@ -21,7 +21,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
-    from Lobby.presenters import BusPresenter
+    from Lobby.presenters import BUSpresenter
 
 
 @login_required()
@@ -53,7 +53,7 @@ def create_bus_game(
         """Determine max players based on playerNumber or tournament."""
         if "playerNumber" in post_data:
             return int(post_data.get("playerNumber", 3))
-        if tournamentObj != None and (is_main_tournament or is_mini_tournament):
+        if tournamentObj is not None and (is_main_tournament or is_mini_tournament):
             return tournamentObj.maxGamePlayers
         return 3
 
@@ -161,7 +161,7 @@ def create_bus_game(
             )
             # If no invited playerrs, get []. If error, get None
             if invited_usernames_objs is None:
-                return HttpResponseRedirect(reverse("createBusPage"))
+                return HttpResponseRedirect(reverse("createBUSpage"))
 
             # invited_players = [get_object_or_404(User, username=username) for username in invited_usernames]
             if len(invited_usernames_objs) > 0:
@@ -189,7 +189,7 @@ def create_bus_game(
 
     with transaction.atomic():
         new_game = Game(
-            gameCode="Bus",
+            gameCode="BUS",
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -233,7 +233,7 @@ def create_bus_game(
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            presenter = cast("BusPresenter", new_game.presenter())
+            presenter = cast("BUSpresenter", new_game.presenter())
             presenter.startGame(
                 request, isTournamentGame=(is_main_tournament or is_mini_tournament)
             )
@@ -251,7 +251,7 @@ def create_bus_game(
             usernames_to_notify,
             new_game.presenter().getGameName(),
             max_players,
-            "Bus",
+            "BUS",
         )
 
     if "trainingGame" in request.POST:
@@ -261,7 +261,7 @@ def create_bus_game(
         )
 
     # Otherwise, return normal game creation
-    messages.success(request, SF_getGameCreationJsonReturn("Bus", new_game.id))
+    messages.success(request, SF_getGameCreationJsonReturn("BUS", new_game.id))
     return HttpResponseRedirect(
         reverse("indexListType", kwargs={"listType": "waiting"})
     )

@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
                 choices=[
                     ("FCM", "Food Chain Magnate"),
                     ("HC", "Horseless Carriage"),
-                    ("Bus", "Bus"),
+                    ("BUS", "BUS"),
                     ("TGZ", "The Great Zimbabwe"),
                     ("CNS", "Cannes"),
                     ("AQY", "Antiquity"),
