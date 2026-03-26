@@ -35,7 +35,8 @@ Lobby/sharedFunctions/emailCounter.txt
 # Exclude any folder found anywhere in subdirectories
 vueTGZ/
 vueAQY/
-busvue/
+vusBUS/
+/Bus/vueBUS/
 vueIND/
 vueKFW/
 vueRNB/
