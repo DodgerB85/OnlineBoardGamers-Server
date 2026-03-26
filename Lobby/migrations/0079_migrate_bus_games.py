@@ -184,7 +184,7 @@ def reverse_migration(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("Lobby", "0078_game_relatedbustournament"),
-        ("BUS", "0023_bus_game_automoves"),  # Ensure BUS app is available
+       # ("BUS", "0023_bus_game_automoves"),  # Ensure BUS app is available
     ]
 
     operations = [
