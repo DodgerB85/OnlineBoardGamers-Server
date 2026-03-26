@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import include, path
 from django.contrib.auth import views as auth_views  # import this
 
 # from django.conf.urls import handler403
@@ -58,7 +58,7 @@ urlpatterns = [
     ),  # add the robots.txt file
     path("", include("Lobby.urls")),
     path("FCM/", include("FCM.urls")),
-    path("Bus/", include("Bus.urls")),
+    path("BUS/", include("BUS.urls")),
     path("HC/", include("HC.urls")),
     path("TGZ/", include("TGZ.urls")),
     path("CNS/", include("CNS.urls")),

@@ -20,7 +20,7 @@
         <div id="allOptions">
             <span class="topOfNewGameSpan">{% translate "New to Bus? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
             <form autocomplete="off"
-                  action="{% url 'Bus:createBusGame' %}"
+                  action="{% url 'BUS:createBUSgame' %}"
                   method="post"
                   id="gameCreationForm">
                 {% csrf_token %}
@@ -202,7 +202,7 @@
 </div>
 {% block script %}
     {% compress js %}
-        <script src="{% static 'Lobby/createBus.js' %}"></script>
+        <script src="{% static 'Lobby/createBUS.js' %}"></script>
     {% endcompress %}
     <script>
     var global = {};

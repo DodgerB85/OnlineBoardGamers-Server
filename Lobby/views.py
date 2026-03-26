@@ -386,7 +386,7 @@ def addTGid(request, TGid):
 GAME_NAMES_MODELS = {
     "FCM": "FCM",
     "HC": "HC",
-    "Bus": "Bus",
+    "BUS": "BUS",
     "TGZ": "TGZ",
     "CNS": "CNS",
     "AQY": "AQY",
@@ -655,7 +655,7 @@ def DBO_deleteGame(request, game_type):
     model_map = {
         "FCM": Game,
         "HC": Game,
-        "Bus": Game,
+        "BUS": Game,
         "TGZ": Game,
         "CNS": Game,
         "AQY": Game,
@@ -998,7 +998,7 @@ def csrf_failure(request, reason=""):
 #    GAME_META = {
 #        "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
 #        "HC": {"name": "Horseless Carriage", "gameCode": "HC"},
-#        "Bus": {"name": "Bus", "gameCode": "Bus"},
+#        "BUS": {"name": "Bus", "gameCode": "BUS"},
 #        "TGZ": {"name": "The Great Zimbabwe", "gameCode": "TGZ"},
 #        "CNS": {"name": "CNS", "gameCode": "CNS"},
 #        "AQY": {"name": "Antiquity", "gameCode": "AQY"},
@@ -1018,7 +1018,7 @@ def csrf_failure(request, reason=""):
 #    stats_map = {}  # Using a dict temporarily to collect data
 #
 #    # Split Game model by gameCode
-#    for game_code in ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]:
+#    for game_code in ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]:
 #        counts_key = f"counts_Game_{game_code}"
 #        counts = cache.get(counts_key)
 #
@@ -1105,7 +1105,7 @@ def csrf_failure(request, reason=""):
 #        p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
 #        p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
 #
-#    games = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
+#    games = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
 #
 #    return render(
 #        request,
@@ -1147,7 +1147,7 @@ def stats(request):
     excluded_game_ids = GamePlayer.objects.filter(player__username__in=rf.SHADOW_USERNAMES).values_list("game_id", flat=True)
 
     # 3. Batch Fetch ALL Counts (1 Query instead of 18)
-    game_codes = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]
+    game_codes = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]
 
     all_counts = (
         Game.objects.filter(gameCode__in=game_codes)
@@ -1171,7 +1171,7 @@ def stats(request):
     GAME_META = {
         "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
         "HC": {"name": "Horseless Carriage", "gameCode": "HC"},
-        "Bus": {"name": "Bus", "gameCode": "Bus"},
+        "BUS": {"name": "Bus", "gameCode": "BUS"},
         "TGZ": {"name": "The Great Zimbabwe", "gameCode": "TGZ"},
         "CNS": {"name": "CNS", "gameCode": "CNS"},
         "AQY": {"name": "Antiquity", "gameCode": "AQY"},
@@ -1906,14 +1906,14 @@ def profileIND(request):
 
 
 @login_required
-def createBusPage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "Bus", Game)
+def createBUSpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "BUS", Game)
     if request.method != "POST" and gameID == 0:
-        return render(request, "Lobby/createBus.html", {"experienced": experienced})
+        return render(request, "Lobby/createBUS.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = Game.objects.get(id=gameID, gameCode="Bus")
+            currentGame = Game.objects.get(id=gameID, gameCode="BUS")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
@@ -1925,7 +1925,7 @@ def createBusPage(request, gameID=0):
         messages.success(request, (gettext("Game creation for rematch")))
         return render(
             request,
-            "Lobby/createBus.html",
+            "Lobby/createBUS.html",
             {
                 "fillData": True,
                 "gameName": currentGame.presenter().getGameName(),
@@ -2495,7 +2495,7 @@ def playerInfo(request, usernameToProfile):
     game_names = {
         1: "FCM",
         2: "HC",
-        3: "Bus",
+        3: "BUS",
         4: "TGZ",
         5: "AQY",
         6: "IND",
@@ -2505,7 +2505,7 @@ def playerInfo(request, usernameToProfile):
     image_urls = {
         1: "/static/FCM/images/burger_board.png",
         2: "/static/HC/images/icon_car.png",
-        3: "/static/Bus/images/bus_icon.png",
+        3: "/static/BUS/images/bus_icon.png",
         4: "/static/TGZ/images/tgz_icon.png",
         5: "/static/AQY/images/aqy_icon.png",
         6: "/static/IND/images/ind_icon.png",
@@ -2790,8 +2790,7 @@ def joinGameLink(request, joinGameLink):
     # CHCEK FOR gameCode/NUMBERS
     if match:
         gameCode = match.group(1)
-        if gameCode != "Bus":
-            letters = gameCode.upper()
+        #letters = gameCode.upper()
         numbers = int(match.group(2))
     else:
         messages.error(request, (gettext("Invalid Game Join Link")))

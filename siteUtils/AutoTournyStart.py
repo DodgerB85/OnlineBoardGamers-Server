@@ -217,7 +217,7 @@ if dayNumber == 1 and (
 
     SN_sendTournamentOpen(new_tournament, gameCode)
 else:
-    print(f"It is not day 1, or not a tournament month, NOT opening a tourny")
+    print("It is not day 1, or not a tournament month, NOT opening a tourny")
 
 ############################################
 #   START NEW TOURNMENT
@@ -233,10 +233,10 @@ else:
 #        box_name = "Horseless Carriage"
 #        INNER_URL = "HCtournament/HC"
 #        gameCode = "HC"
-#    if tournament_model == Bus_Tournament:
-#        box_name = "Bus"
-#        INNER_URL = "Bustournament/Bus"
-#        gameCode = "Bus"
+#    if tournament_model == BUS_Tournament:
+#        box_name = "BUS"
+#        INNER_URL = "BUStournament/BUS"
+#        gameCode = "BUS"
 #    if tournament_model == AQY_Tournament:
 #        box_name = "Antiquity"
 #        INNER_URL = "AQYtournament/AQY"
@@ -311,14 +311,7 @@ else:
 #                    SF_startTournament(request, newTourny, gameCode)
 #                    newTourny.save()
 
-# TOURNAMENT_CONFIG = {
-#    HC_Tournament: {"name": "Horseless Carriage", "url": "HCtournament/HC", "code": "HC"},
-#    Bus_Tournament: {"name": "Bus", "url": "Bustournament/Bus", "code": "Bus"},
-#    #AQY_Tournament: {"name": "Antiquity", "url": "AQYtournament/AQY", "code": "AQY"},
-#    IND_Tournament: {"name": "Indonesia", "url": "INDtournament/IND", "code": "IND"},
-# }
-
-GAME_CODES = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+GAME_CODES = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 # for model, config in TOURNAMENT_CONFIG.items():
 for gameCode in GAME_CODES:
@@ -337,7 +330,7 @@ for gameCode in GAME_CODES:
     print("There is an open tourny, and day > 7")
 
     # But if it's not an auto-tourny, continue
-    if gameCode in ["HC", "Bus", "TGZ", "AQY", "IND"]:
+    if gameCode in ["HC", "BUS", "TGZ", "AQY", "IND"]:
         continue
 
     # Now we only hit the DB further if we actually have a candidate to start

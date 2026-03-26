@@ -1073,7 +1073,7 @@ a {
 }
 
 .bgImgBus:before {
-	background-image: url("/static/Bus/images/bus_icon.png");
+	background-image: url("/static/BUS/images/bus_icon.png");
 }
 
 .bgImgTGZ:before {

@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	document.querySelector("#FCM").addEventListener("click", () => show_playerStatsTab("FCM"))
 	document.querySelector("#HC").addEventListener("click", () => show_playerStatsTab("HC"))
-	document.querySelector("#Bus").addEventListener("click", () => show_playerStatsTab("Bus"))
+	document.querySelector("#BUS").addEventListener("click", () => show_playerStatsTab("BUS"))
 	document.querySelector("#TGZ").addEventListener("click", () => show_playerStatsTab("TGZ"))
 	document.querySelector("#CNS").addEventListener("click", () => show_playerStatsTab("CNS"))
 	document.querySelector("#AQY").addEventListener("click", () => show_playerStatsTab("AQY"))
@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			} else if (this.parentNode.parentNode.id.slice(0, 2) === "HC") {
 				_gameID = parseInt(this.parentNode.parentNode.id.slice(10))
 				URLstring = "HC"
-			} else if (this.parentNode.parentNode.id.slice(0, 3) === "Bus") {
+			} else if (this.parentNode.parentNode.id.slice(0, 3) === "BUS") {
 				_gameID = parseInt(this.parentNode.parentNode.id.slice(11))
-				URLstring = "Bus"
+				URLstring = "BUS"
 			} else if (this.parentNode.parentNode.id.slice(0, 3) === "TGZ") {
 				_gameID = parseInt(this.parentNode.parentNode.id.slice(11))
 				URLstring = "TGZ"
@@ -123,7 +123,7 @@ function show_playerStatsTab(game) {
 		document.getElementsByClassName("players2")[1].style.display = "none"
 		document.getElementsByClassName("players6")[1].style.display = "none"
 		document.getElementById(game).classList.add("active")
-	} else if (game === "Bus") {
+	} else if (game === "BUS") {
 		document.getElementsByClassName("players2")[2].style.display = "none"
 		document.getElementsByClassName("players6")[2].style.display = "none"
 		document.getElementById(game).classList.add("active")
@@ -152,7 +152,7 @@ function show_playerStatsTab(game) {
 	var divToDisplay = "playerStatsDiv"
 	if (game === "FCM") divToDisplay += "0"
 	else if (game === "HC") divToDisplay += "1"
-	else if (game === "Bus") divToDisplay += "2"
+	else if (game === "BUS") divToDisplay += "2"
 	else if (game === "TGZ") divToDisplay += "3"
 	else if (game === "CNS") divToDisplay += "4"
 	else if (game === "AQY") divToDisplay += "5"
