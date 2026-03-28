@@ -488,8 +488,8 @@ def _processTurn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-            SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
@@ -727,8 +727,8 @@ def _processTurn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-            SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         if currentGame.gameStatus == "FINISHED":
@@ -1035,8 +1035,8 @@ def _processTurn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-            SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         if not continueFromStalledGame:
@@ -1192,8 +1192,8 @@ def _processTurn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-            SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -1271,8 +1271,8 @@ def _processTurn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-            SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
