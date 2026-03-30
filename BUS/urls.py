@@ -20,4 +20,5 @@ urlpatterns = [
     path("saveNotes/", views.saveNotes, name="saveNotes"),
     path("changeBUSviewport/", views.changeBUSviewport, name="changeBUSviewport"),
     path("castVote/", views.castVote, name="castVoteWEB"),
+    path("updateFinishedGameDataFormat/", views.updateFinishedGameDataFormat, name="updateFinishedGameDataFormat"),
 ]

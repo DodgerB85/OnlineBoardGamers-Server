@@ -622,3 +622,45 @@ def castVote(request):
     jsonData = json.loads(request.body)
     with db_mutex(str(jsonData["gameID"])):
         return shared_cast_vote(request)
+
+
+@login_required()
+def updateFinishedGameDataFormat(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+    
+    jsonData = json.loads(request.body)
+    
+    # Validate required fields
+    if jsonData.get("action") != "updateFinishedGameDataFormat":
+        return JsonResponse({"error": "Invalid action."}, status=400)
+    
+    if not jsonData.get("gameID"):
+        return JsonResponse({"error": "Game ID required."}, status=400)
+    
+    if not jsonData.get("gameData"):
+        return JsonResponse({"error": "Game data required."}, status=400)
+    
+    try:
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+    
+    # Verify game is finished
+    if currentGame.gameStatus != "FINISHED":
+        return JsonResponse({"error": "Game is not finished."}, status=400)
+    
+    # Update game data with new compressed format
+    currentGame.gameData = jsonData["gameData"]
+    currentGame.save()
+    
+    # Find the next highest ID of a finished BUS game after the requested gameID
+    next_game = Game.objects.filter(
+        gameCode="BUS", 
+        gameStatus="FINISHED",
+        id__gt=jsonData["gameID"]
+    ).order_by('id').first()
+    
+    next_game_id = next_game.id if next_game else None
+    
+    return JsonResponse({"nextGameID": next_game_id})
