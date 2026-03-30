@@ -34,6 +34,24 @@ from django.views.generic import RedirectView
 
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
+from Lobby.models import Game
+
+
+def redirect_hc_to_hlc(request, game_id):
+    """Redirect old HC URLs to HLC"""
+    try:
+        # Try to find the game by original_id
+        game = Game.objects.get(gameCode="HLC", original_id=game_id)
+        return redirect(f"/HLC/{game.id}/show/")
+    except Game.DoesNotExist:
+        # If not found by original_id, try by direct ID
+        try:
+            game = Game.objects.get(id=game_id, gameCode="HLC")
+            return redirect(f"/HLC/{game.id}/show/")
+        except Game.DoesNotExist:
+            # If game not found, redirect to lobby
+            return redirect("/")
 
 
 sitemaps = {
@@ -56,6 +74,7 @@ urlpatterns = [
             template_name="Lobby/robots.txt", content_type="text/plain"
         ),
     ),  # add the robots.txt file
+    path("HC/<int:game_id>/show/", redirect_hc_to_hlc, name="redirect_hc_to_hlc"),
     path("", include("Lobby.urls")),
     path("FCM/", include("FCM.urls")),
     path("BUS/", include("BUS.urls")),
