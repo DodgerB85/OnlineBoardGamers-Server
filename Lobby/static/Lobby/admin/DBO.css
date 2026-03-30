@@ -185,7 +185,7 @@ td {
     display: inline-block;
 }
 
-.favHCchoice {
+.favHLCchoice {
     display: inline-block;
 }
 
@@ -830,7 +830,7 @@ html {
     padding: 0px;
 }
 
-.HCsummaryGraph {
+.HLCsummaryGraph {
     /*style="width:100%;min-width:400px"*/
     min-width: 500px;
     max-width: 500px;
@@ -851,7 +851,7 @@ html {
 }
 
 #changelogPage,
-#HCgameSummaryPage {
+#HLCgameSummaryPage {
     font-size: 1.3em;
 }
 

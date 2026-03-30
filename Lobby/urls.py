@@ -50,8 +50,8 @@ urlpatterns = [
         views.createFCMminiTournament,
         name="createFCMminiTournament",
     ),
-    path("createHCpage/", views.createHCpage, name="createHCpage"),
-    path("createHCpage/<int:gameID>/", views.createHCpage, name="createHCpage"),
+    path("createHLCpage/", views.createHLCpage, name="createHLCpage"),
+    path("createHLCpage/<int:gameID>/", views.createHLCpage, name="createHLCpage"),
     path("createBUSpage/", views.createBUSpage, name="createBUSpage"),
     path("createBUSpage/<int:gameID>/", views.createBUSpage, name="createBUS[age"),
     path("createTGZpage/", views.createTGZpage, name="createTGZpage"),
@@ -143,7 +143,7 @@ urlpatterns = [
         "autoCompleteUsername/", views.autoCompleteUsername, name="autoCompleteUsername"
     ),
     path("joinGame/<str:gameType>/", views.joinGame, name="joinGame"),
-    path("deleteGame/<str:gameType>/", views.deleteGame, name="deleteGame"),
+    path("deleteGame/<str:gameCode>/", views.deleteGame, name="deleteGame"),
     path(
         "addPlayerToMTinvites/", views.addPlayerToMTinvites, name="addPlayerToMTinvites"
     ),

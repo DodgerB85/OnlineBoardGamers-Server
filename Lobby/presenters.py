@@ -143,7 +143,7 @@ class GamePresenter:
         # Map gameCode to Bot Name Prefix
         game_code_map = {
             "FCM": "Fcm",
-            "HC": "Hc",
+            "HLC": "Hc",
             "BUS": "Bus",
             "TGZ": "Tgz",
             "CNS": "Cns",
@@ -267,8 +267,7 @@ class GamePresenter:
         to_update = []
         if self.gameObj.gameCode == "RNB":
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
-        elif self.gameObj.gameCode == "HC":
-            print(current_players_array)
+        elif self.gameObj.gameCode == "HLC":
             self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
         self.gameObj.save()
 
@@ -345,7 +344,7 @@ class GamePresenter:
         self.gameObj.playersPreMoveData = ""
         # FCM
         self.gameObj.FCMplayersMoveData = ""
-        # HC
+        # HLC
         self.gameObj.currentPlayersInTurnOrder = (
             None  # Check this doesn't crash game load if game ended
         )
@@ -2512,7 +2511,7 @@ class FCMpresenter(GamePresenter):
         return False
 
 
-class HCpresenter(GamePresenter):
+class HLCpresenter(GamePresenter):
     def __str__(self):
         all_players = self.gameObj.players.exclude(is_kicked=True).select_related(
             "player"
@@ -2522,7 +2521,7 @@ class HCpresenter(GamePresenter):
         )
         return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
 
-    def getCurrentPlayersInOrderArrHC(self):
+    def getCurrentPlayersInOrderArrHLC(self):
         """Get current players as an array"""
         current_players_arr = (
             json.loads(self.gameObj.currentPlayersInTurnOrder)
@@ -2534,7 +2533,7 @@ class HCpresenter(GamePresenter):
         return current_players_arr
 
     def isMyMove(self, loggedInPlayerUsername=None):
-        currentPlayers = self.getCurrentPlayersInOrderArrHC()
+        currentPlayers = self.getCurrentPlayersInOrderArrHLC()
         if len(currentPlayers) == 0:
             return True
         currentPlayerrsList = currentPlayers
@@ -2560,7 +2559,7 @@ class HCpresenter(GamePresenter):
         if loggedInPlayerUsername is None:
             return False
 
-        currentPlayersArr = self.getCurrentPlayersInOrderArrHC()
+        currentPlayersArr = self.getCurrentPlayersInOrderArrHLC()
         if (
             self.gameObj.phase == 3
             and self.hasMoveData(loggedInPlayerUsername)
@@ -2596,11 +2595,11 @@ class HCpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
-            gp.is_current = True  # HC starts with all players as current
+            gp.is_current = True  # HLC starts with all players as current
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
 
-        # NOTE: Old HC_Game had `if self.startingOptions == 102:` which was dead code
+        # NOTE: Old HLC_Game had `if self.startingOptions == 102:` which was dead code
         # (string field compared to int, always False in Python 3).
         # Keeping it commented out to preserve old behavior.
         # starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
@@ -2656,10 +2655,10 @@ class HCpresenter(GamePresenter):
 
         # Now send winning notification
         SN_M_sendEndGameNotification(
-            request, "HC", _finalPositions, _gameID, self.gameObj
+            request, "HLC", _finalPositions, _gameID, self.gameObj
         )
 
-    def getCurrentPlayersHC(self):
+    def getCurrentPlayersHLC(self):
         _currentPlayers = []
         all_players_gps = list(
             self.gameObj.players.select_related("player").order_by("seat_order")
@@ -2762,7 +2761,7 @@ class HCpresenter(GamePresenter):
                 if str(move_time)[:6] != "NODATA":
                     return True
 
-            # SN_sendAdminErrorMessage("", f"HC FACTORY ISSUE!!!!!! hasMoveData ERROR - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - seat: {seat} -name: {name} ")
+            # SN_sendAdminErrorMessage("", f"HLC FACTORY ISSUE!!!!!! hasMoveData ERROR - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - seat: {seat} -name: {name} ")
             # NB you get here if you have SAVED a move without submitting it
             # In PRESENTER, this keeps you in the "myMove" / currentPlayers lists
             return False

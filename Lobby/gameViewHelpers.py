@@ -66,7 +66,6 @@ def build_show_game_data(
     startingOptions = (
         json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     )
-
     settings_debug = (
         config(settings_debug_key, default=False, cast=bool)
         if settings_debug_key

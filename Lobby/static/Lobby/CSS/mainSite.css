@@ -815,7 +815,7 @@ a {
 #TGZstatsPage,
 #AQYstatsPage,
 #changelogPage,
-#HCgameSummaryage {
+#HLCgameSummaryage {
 	font-size: 20px;
 }
 
@@ -986,9 +986,9 @@ a {
 }
 /** END INDIVIDUAL TOURNAMENT PAGE **/
 
-/** HC SUMMARY PAGE **/
+/** HLC SUMMARY PAGE **/
 
-.HCsummaryGraph {
+.HLCsummaryGraph {
 	/*style="width:100%;min-width:400px"*/
 	min-width: 500px;
 	max-width: 500px;
@@ -1001,7 +1001,7 @@ a {
 	margin: 0 auto;
 	/*background-color: #04AA6D;*/
 }
-/** END HC SUMMARY PAGE **/
+/** END HLC SUMMARY PAGE **/
 
 /** SQ GAMES PAGE **/
 /* Sq games */
@@ -1058,7 +1058,7 @@ a {
 }
 
 .bgImgFCM,
-.bgImgHC,
+.bgImgHLC,
 .bgImgBus,
 .bgImgTGZ {
 	position: relative;
@@ -1068,8 +1068,8 @@ a {
 	background-image: url("/static/FCM/images/burger_board.png");
 }
 
-.bgImgHC:before {
-	background-image: url("/static/HC/images/icon_car.png");
+.bgImgHLC:before {
+	background-image: url("/static/HLC/images/icon_car.png");
 }
 
 .bgImgBus:before {
@@ -1081,7 +1081,7 @@ a {
 }
 
 .bgImgFCM:before,
-.bgImgHC:before,
+.bgImgHLC:before,
 .bgImgBus:before,
 .bgImgTGZ:before {
 	content: "";

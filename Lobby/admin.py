@@ -23,7 +23,7 @@ from .modelProxies import (
     BUSgame,
     FCMgame,
     RNBgame,
-    HCgame,
+    HLCgame,
     KFWgame,
 )
 
@@ -524,13 +524,13 @@ class RNBgameAdmin(GameAdmin):
         app_label = "RNB"
 
 
-@admin.register(HCgame)
-class HCgameAdmin(GameAdmin):
+@admin.register(HLCgame)
+class HLCgameAdmin(GameAdmin):
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(gameCode="HC")
+        return super().get_queryset(request).filter(gameCode="HLC")
 
     class Meta:
-        app_label = "HC"
+        app_label = "HLC"
 
 
 @admin.register(KFWgame)

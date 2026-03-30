@@ -586,7 +586,7 @@ body {
 }
 
 #createNewFCM,
-#createNewHC,
+#createNewHLC,
 #createNewBus,
 #createNewTGZ,
 #createNewAQY,
@@ -604,7 +604,7 @@ body {
 }
 
 #createNewFCM img,
-#createNewHC img,
+#createNewHLC img,
 #createNewAQY img,
 #createNewTGZ img {
 	height: 200px;
@@ -619,7 +619,7 @@ body {
 }
 
 #createNewFCM:hover,
-#createNewHC:hover,
+#createNewHLC:hover,
 #createNewBus:hover,
 #createNewTGZ:hover,
 #createNewAQY:hover,
@@ -894,7 +894,7 @@ td {
 }
 
 .favRestChoice,
-.favHCchoice,
+.favHLCchoice,
 .favBusColour,
 .favBusMap,
 .favTGZchoice,
@@ -1607,7 +1607,7 @@ html {
 	padding: 0px;
 }
 
-.HCsummaryGraph {
+.HLCsummaryGraph {
 	/*style="width:100%;min-width:400px"*/
 	min-width: 500px;
 	max-width: 500px;
@@ -1627,7 +1627,7 @@ html {
 }
 
 #changelogPage,
-#HCgameSummaryPage {
+#HLCgameSummaryPage {
 	font-size: 1.3em;
 }
 
@@ -2079,7 +2079,7 @@ html {
 }
 
 .bgImgFCM,
-.bgImgHC,
+.bgImgHLC,
 .bgImgBus,
 .bgImgTGZ {
 	position: relative;
@@ -2089,8 +2089,8 @@ html {
 	background-image: url("/static/FCM/images/burger_board.png");
 }
 
-.bgImgHC:before {
-	background-image: url("/static/HC/images/icon_car.png");
+.bgImgHLC:before {
+	background-image: url("/static/HLC/images/icon_car.png");
 }
 
 .bgImgBus:before {
@@ -2102,7 +2102,7 @@ html {
 }
 
 .bgImgFCM:before,
-.bgImgHC:before,
+.bgImgHLC:before,
 .bgImgBus:before,
 .bgImgTGZ:before {
 	content: "";

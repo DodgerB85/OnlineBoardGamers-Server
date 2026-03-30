@@ -193,7 +193,7 @@ label {
 }
 
 .bgImgFCM,
-.bgImgHC,
+.bgImgHLC,
 .bgImgBus,
 .bgImgTGZ {
 	position: relative;
@@ -203,8 +203,8 @@ label {
 	background-image: url("/static/FCM/images/burger_board.png");
 }
 
-.bgImgHC:before {
-	background-image: url("/static/HC/images/icon_car.png");
+.bgImgHLC:before {
+	background-image: url("/static/HLC/images/icon_car.png");
 }
 
 .bgImgBus:before {
@@ -216,7 +216,7 @@ label {
 }
 
 .bgImgFCM:before,
-.bgImgHC:before,
+.bgImgHLC:before,
 .bgImgBus:before,
 .bgImgTGZ:before {
 	content: "";

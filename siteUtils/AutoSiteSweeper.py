@@ -64,7 +64,7 @@ from Lobby.models import (
 )  # Unused; consider removing unless needed
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
-GAME_CODES = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 start_calc_time = time.perf_counter()
 deleted_games = 0  # Unused; consider removing unless used elsewhere

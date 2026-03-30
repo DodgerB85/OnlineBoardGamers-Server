@@ -1,6 +1,6 @@
 
 document.addEventListener("DOMContentLoaded", function () {
-	let ALL_GAMES = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+	let ALL_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 	// Add click to Join Game
 	var _gameID

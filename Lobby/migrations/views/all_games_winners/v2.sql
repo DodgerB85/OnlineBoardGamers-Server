@@ -5,10 +5,10 @@ CREATE OR REPLACE VIEW Lobby_all_games_winners AS (
   FROM FCM_fcm_game
   WHERE winner_id IS NOT NULL
   UNION ALL
-  SELECT 'HC' AS gameCode,
+  SELECT 'HLC' AS gameCode,
          id,
          winner_id
-  FROM HC_hc_game
+  FROM HlC_hlc_game
   WHERE winner_id IS NOT NULL
   UNION ALL
   SELECT 'BUS' AS gameCode,

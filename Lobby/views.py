@@ -386,7 +386,7 @@ def addTGid(request, TGid):
 
 GAME_NAMES_MODELS = {
     "FCM": "FCM",
-    "HC": "HC",
+    "HLC": "HLC",
     "BUS": "BUS",
     "TGZ": "TGZ",
     "CNS": "CNS",
@@ -655,7 +655,7 @@ def DBO_deleteGame(request, game_type):
     # 2. Map game types to Models
     model_map = {
         "FCM": Game,
-        "HC": Game,
+        "HLC": Game,
         "BUS": Game,
         "TGZ": Game,
         "CNS": Game,
@@ -998,7 +998,7 @@ def csrf_failure(request, reason=""):
 #    # Define metadata once to keep logic DRY
 #    GAME_META = {
 #        "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
-#        "HC": {"name": "Horseless Carriage", "gameCode": "HC"},
+#        "HLC": {"name": "Horseless Carriage", "gameCode": "HLC"},
 #        "BUS": {"name": "Bus", "gameCode": "BUS"},
 #        "TGZ": {"name": "The Great Zimbabwe", "gameCode": "TGZ"},
 #        "CNS": {"name": "CNS", "gameCode": "CNS"},
@@ -1019,7 +1019,7 @@ def csrf_failure(request, reason=""):
 #    stats_map = {}  # Using a dict temporarily to collect data
 #
 #    # Split Game model by gameCode
-#    for game_code in ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]:
+#    for game_code in ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]:
 #        counts_key = f"counts_Game_{game_code}"
 #        counts = cache.get(counts_key)
 #
@@ -1106,7 +1106,7 @@ def csrf_failure(request, reason=""):
 #        p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
 #        p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
 #
-#    games = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
+#    games = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]  # , "RNB"]
 #
 #    return render(
 #        request,
@@ -1148,7 +1148,7 @@ def stats(request):
     excluded_game_ids = GamePlayer.objects.filter(player__username__in=rf.SHADOW_USERNAMES).values_list("game_id", flat=True)
 
     # 3. Batch Fetch ALL Counts (1 Query instead of 18)
-    game_codes = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]
+    game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]
 
     all_counts = (
         Game.objects.filter(gameCode__in=game_codes)
@@ -1171,7 +1171,7 @@ def stats(request):
     # 5. Build the Game Stats List
     GAME_META = {
         "FCM": {"name": "Food Chain Magnate", "gameCode": "FCM"},
-        "HC": {"name": "Horseless Carriage", "gameCode": "HC"},
+        "HLC": {"name": "Horseless Carriage", "gameCode": "HLC"},
         "BUS": {"name": "Bus", "gameCode": "BUS"},
         "TGZ": {"name": "The Great Zimbabwe", "gameCode": "TGZ"},
         "CNS": {"name": "CNS", "gameCode": "CNS"},
@@ -1734,9 +1734,9 @@ def profile(request):
         favColour = profile.preferredRestaurantColour
         if favColour == "":
             favColour = -1
-        favHCcolour = profile.preferredHCcolour
-        if favHCcolour == "":
-            favHCcolour = -1
+        favHLCcolour = profile.preferredHCcolour
+        if favHLCcolour == "":
+            favHLCcolour = -1
         highContrastBoardItems = profile.highContrastBoardItems
 
         preferredCNScolour = profile.preferredCNScolour if profile.preferredCNScolour is not None else -1
@@ -1782,7 +1782,7 @@ def profile(request):
                 "form": profile_form,
                 "form2": passwordResetForm,
                 "favColour": favColour,
-                "favHCcolour": favHCcolour,
+                "favHLCcolour": favHLCcolour,
                 "highContrastBoardItems": highContrastBoardItems,
                 "sendEmails": sendEmails,
                 "liveNotification": liveNotification,
@@ -2271,14 +2271,14 @@ def showTGZoptions(request, gameID):
 
 
 @login_required
-def createHCpage(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "HC", Game)
+def createHLCpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "HLC", Game)
     if request.method != "POST" and gameID == 0:
-        return render(request, "Lobby/createHC.html", {"experienced": experienced})
+        return render(request, "Lobby/createHLC.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
-            currentGame = Game.objects.get(id=gameID, gameCode="HC")
+            currentGame = Game.objects.get(id=gameID, gameCode="HLC")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
 
@@ -2290,7 +2290,7 @@ def createHCpage(request, gameID=0):
         messages.success(request, (gettext("Game creation for rematch")))
         return render(
             request,
-            "Lobby/createHC.html",
+            "Lobby/createHLC.html",
             {
                 "fillData": True,
                 "gameName": currentGame.gameName,
@@ -2495,7 +2495,7 @@ def playerInfo(request, usernameToProfile):
     # Game names and image URLs
     game_names = {
         1: "FCM",
-        2: "HC",
+        2: "HLC",
         3: "BUS",
         4: "TGZ",
         5: "AQY",
@@ -2505,7 +2505,7 @@ def playerInfo(request, usernameToProfile):
     }
     image_urls = {
         1: "/static/FCM/images/burger_board.png",
-        2: "/static/HC/images/icon_car.png",
+        2: "/static/HLC/images/icon_car.png",
         3: "/static/BUS/images/bus_icon.png",
         4: "/static/TGZ/images/tgz_icon.png",
         5: "/static/AQY/images/aqy_icon.png",
@@ -2788,7 +2788,7 @@ def joinGameLink(request, joinGameLink):
 
     match = re.match(r"([A-Za-z]{2,3})(\d+)$", joinGameLink)
 
-    # CHCEK FOR gameCode/NUMBERS
+    # CHECK FOR gameCode/NUMBERS
     if match:
         gameCode = match.group(1)
         #letters = gameCode.upper()
@@ -3024,7 +3024,7 @@ def checkJoinGame(request, gameType, gameID):
                 (
                     mark_safe(
                         gettext(
-                            'Not enough Experience. Plese see <a class="linkOther" href="/help/#navGameType">Help</a><br/>Current Experience Requirements:<br/><br/>FCM: 2 Games<br/>HC: 1 Game<br/>Bus: 1 Game<br/>TGZ: 2 Games<br/>Cannes:2 Games<br/>Antiquity:2 Games<br/><br/>You may start your own game <a class="linkOther" href="/newGames/">Here</a>'
+                            'Not enough Experience. Plese see <a class="linkOther" href="/help/#navGameType">Help</a><br/>Current Experience Requirements:<br/><br/>FCM: 2 Games<br/>HLC: 1 Game<br/>Bus: 1 Game<br/>TGZ: 2 Games<br/>Cannes:2 Games<br/>Antiquity:2 Games<br/><br/>You may start your own game <a class="linkOther" href="/newGames/">Here</a>'
                         )
                     )
                 ),
@@ -3159,18 +3159,18 @@ def checkJoinGame(request, gameType, gameID):
 
 
 @login_required()
-def deleteGame(request, gameType):
+def deleteGame(request, gameCode):
     # Joining a game must be via POST
     if request.method != "DELETE":
         return JsonResponse({"error": "Invalid Request"}, status=400)
 
     jsonData = json.loads(request.body)
 
-    gameModel = GAME_NAMES_MODELS.get(gameType)
+    gameModel = GAME_NAMES_MODELS.get(gameCode)
     try:
         if gameModel is None:
             return JsonResponse({"noGame": True}, safe=False)
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameType)
+        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameCode)
     except Game.DoesNotExist:
         return JsonResponse({"noGame": True}, safe=False)
 
@@ -3182,7 +3182,7 @@ def deleteGame(request, gameType):
             currentGame.delete()
             return JsonResponse(
                 {
-                    "gameType": gameType,
+                    "gameType": gameCode,
                     "gameID": jsonData["gameID"],
                     "gameStatus": gameStatus,
                 },

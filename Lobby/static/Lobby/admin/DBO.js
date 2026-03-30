@@ -24,9 +24,9 @@ document.addEventListener('DOMContentLoaded', function () {
         gameName = "FCM";
 
       }
-      else if (this.parentNode.parentNode.id.slice(0, 2) === "HC") {
-        _gameID = parseInt(this.parentNode.parentNode.id.slice(10));
-        gameName = "HC";
+      else if (this.parentNode.parentNode.id.slice(0, 3) === "HLC") {
+        _gameID = parseInt(this.parentNode.parentNode.id.slice(11));
+        gameName = "HLC";
       }
       else if (this.parentNode.parentNode.id.slice(0, 3) === "BUS") {
         _gameID = parseInt(this.parentNode.parentNode.id.slice(11));
@@ -255,11 +255,11 @@ function fadeOutAndRemove(element) {
     
     const allGames = [
       { name: 'FCM', practice: true, lastUpdated: '2023-10-01' },
-      { name: 'HC', practice: false, lastUpdated: '2023-11-15' },
+      { name: 'HLC', practice: false, lastUpdated: '2023-11-15' },
       { name: 'BUS', practice: true, lastUpdated: '2023-08-20' },
       { name: 'TGZ', practice: true, lastUpdated: '2023-11-30' },
       { name: 'FCM', practice: false, lastUpdated: '2023-09-05' },
-      { name: 'HC', practice: true, lastUpdated: '2023-10-28' },
+      { name: 'HLC', practice: true, lastUpdated: '2023-10-28' },
       { name: 'BUS', practice: false, lastUpdated: '2023-07-10' },
       { name: 'TGZ', practice: false, lastUpdated: '2023-11-01' }
     ];

@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	autocomplete(document.getElementById("blacklistPlayer"))
 
-	//let ALL_GAMES = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "RNB"]
+	//let ALL_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "RNB"]
 
 	document.querySelectorAll(".yourTurnTR td").forEach((td) => {
 		td.addEventListener("click", () => {

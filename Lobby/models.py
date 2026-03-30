@@ -22,7 +22,7 @@ from .presenters import (
     BUSpresenter,
     FCMpresenter,
     RNBpresenter,
-    HCpresenter,
+    HLCpresenter,
     KFWpresenter,
 )
 
@@ -248,7 +248,7 @@ class Mini_Tournaments(models.Model):
 
     MINI_TOURNAMENT_GAME_CHOICES = [
         ("FCM", gettext_lazy("Food Chain Magnate")),
-        ("HC", gettext_lazy("Horseless Carriage")),
+        ("HLC", gettext_lazy("Horseless Carriage")),
         ("TGZ", gettext_lazy("The Great Zimbabwe")),
         ("CNS", gettext_lazy("Cannes")),
         ("AQY", gettext_lazy("Antiquity")),
@@ -543,7 +543,7 @@ class Game(BaseGame):
         "BUS": BUSpresenter,
         "FCM": FCMpresenter,
         "RNB": RNBpresenter,
-        "HC": HCpresenter,
+        "HLC": HLCpresenter,
         "KFW": KFWpresenter,
     }
 

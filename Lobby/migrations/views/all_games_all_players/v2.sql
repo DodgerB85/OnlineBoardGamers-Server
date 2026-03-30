@@ -10,7 +10,7 @@ CREATE OR REPLACE VIEW Lobby_all_games_all_players AS (
          ) AS hasChatNotification
   FROM FCM_fcm_game_allPlayers
   UNION ALL
-  SELECT 'HC' AS gameCode,
+  SELECT 'HLC' AS gameCode,
          hc_game_id AS id,
          user_id,
          EXISTS(

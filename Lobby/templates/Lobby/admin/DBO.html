@@ -11,7 +11,7 @@
     <label for="gameSelect">Select a game:</label>
     <select id="gameSelect">
       <option value="FCM">FCM</option>
-      <option value="HC">HC</option>
+      <option value="HLC">HLC</option>
       <option value="Bus">Bus</option>
       <option value="TGZ">TGZ</option>
     </select>
@@ -72,7 +72,7 @@
                 {% endif %}
                 {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
                 <a target="_blank"
-                   {% if game.gameCode == "FCM" %} href="{% url 'FCM:showFCMgame' game_id=game.gameID %}" {% elif game.gameCode == "HC" %} href="{% url 'HC:showHCgame' game_id=game.gameID %}" {% elif game.gameCode == "Bus" %} href="{% url 'Bus:showBusGame' game_id=game.gameID %}" {% elif game.gameCode == "TGZ" %} href="{% url 'TGZ:showTGZgame' game_id=game.gameID %}" {% elif game.gameCode == "CNS" %} href="{% url 'CNS:showCNSgame' game_id=game.gameID %}" {% elif game.gameCode == "AQY" %} href="{% url 'AQY:showAQYgame' game_id=game.gameID %}" {% elif game.gameCode == "IND" %} href="{% url 'IND:showINDgame' game_id=game.gameID %}" {% elif game.gameCode == "KFW" %} href="{% url 'KFW:showKFWgame' game_id=game.gameID %}" {% elif game.gameCode == "WEB" %} href="{% url 'WEB:showWEBgame' game_id=game.gameID %}" {% endif %}>
+                   {% if game.gameCode == "FCM" %} href="{% url 'FCM:showFCMgame' game_id=game.gameID %}" {% elif game.gameCode == "HLC" %} href="{% url 'HLC:showHLCgame' game_id=game.gameID %}" {% elif game.gameCode == "Bus" %} href="{% url 'Bus:showBusGame' game_id=game.gameID %}" {% elif game.gameCode == "TGZ" %} href="{% url 'TGZ:showTGZgame' game_id=game.gameID %}" {% elif game.gameCode == "CNS" %} href="{% url 'CNS:showCNSgame' game_id=game.gameID %}" {% elif game.gameCode == "AQY" %} href="{% url 'AQY:showAQYgame' game_id=game.gameID %}" {% elif game.gameCode == "IND" %} href="{% url 'IND:showINDgame' game_id=game.gameID %}" {% elif game.gameCode == "KFW" %} href="{% url 'KFW:showKFWgame' game_id=game.gameID %}" {% elif game.gameCode == "WEB" %} href="{% url 'WEB:showWEBgame' game_id=game.gameID %}" {% endif %}>
                   {{ game.gameName }} ID: {{ game.gameID }}
                   {% if game.gameDescription %}- <i>{{ game.gameDescription }}</i>{% endif %}
                 i={{ forloop.counter }}</a>

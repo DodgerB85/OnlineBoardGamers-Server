@@ -1,0 +1,61 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+{% endblock %}
+{% block body %}
+    <div class="container" id="HLCgameSummaryPage">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <h1>{% translate "Horseless Carriage Game Summary" %}</h1>
+        <a class="linkOther" href="/HLC/{{ gameID }}/">Back to Game</a>
+        <br />
+        <br />
+        <!--<b>NOTE: GAMES CREATED BEFORE 11 MARCH MIGHT HAVE MISSING OR INCOMPLETE INFORMATION</b><br /><br />-->
+        <div class="centeredDiv">
+            <canvas id="gameMoneySummary" class="HLCsummaryGraph"></canvas>
+            <canvas id="gameIncomeSummary" class="HLCsummaryGraph"></canvas>
+        </div>
+        {% include 'Lobby/donate/donateBanner.html' %}
+        {% include 'Lobby/common/homeButton.html' %}
+    </div>
+    <script>
+	var global = {};
+
+	global.gameName = '{{ gameName }}';
+
+	{% if gameData %}global.load = '{{ gameData|safe }}';{% endif %}
+
+	global.HLCgameSummary = true;
+    </script>
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'HLC/JS/lib/jquery-2.1.4.min.js' %}"></script>
+    <script src="{% static 'HLC/JS/lib/lodash.min.js' %}"></script>
+    {% compress js %}
+        <script src="{% static 'HLC/HLCgameSummary.js' %}"></script>
+    {% endcompress %}
+    {% if settingsDEBUG %}
+        <script src="/static/HLC/JS/Roger.js"></script>
+        <script src="/static/HLC/JS/HLCutils.js"></script>
+        <script src="/static/HLC/JS/HLCreference.js"></script>
+        <script src="/static/HLC/JS/HLCplayer.js"></script>
+        <script src="/static/HLC/JS/HLCrules.js"></script>
+        <script src="/static/HLC/JS/HLCfactory.js"></script>
+        <script src="/static/HLC/JS/HLCmodel.js"></script>
+        <script src="/static/HLC/JS/HLCview.js"></script>
+        <script src="/static/HLC/JS/HLCcontroller.js"></script>
+        <script src="/static/HLC/JS/HLChistory.js"></script>
+        <script src="/static/HLC/JS/HLCio.js"></script>
+        <script src="/static/HLC/JS/HLCbot.js"></script>
+        <script src="/static/HLC/JS/HLCwebsocket.js"></script>
+        <script src="/static/HLC/JS/HLCmain.js"></script>
+    {% else %}
+        <script src="{% static 'HLC/JS/HLCmain.js' %}"></script>
+    {% endif %}
+{% endblock %}

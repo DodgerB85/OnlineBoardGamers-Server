@@ -50,7 +50,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 # sys.exit()
-GAME_CODES = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 # reminder_start_time = int((datetime.now() - timedelta(minutes=118)).timestamp() * 1000)
 # reminder_finish_time = int((datetime.now() - timedelta(minutes=182)).timestamp() * 1000)

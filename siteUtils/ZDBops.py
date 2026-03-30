@@ -71,7 +71,7 @@ from Lobby.models import (
 #allKFWgames = Game.objects.filter(gameCode="KFW")
 #$allMiniTs = Mini_Tournaments.objects.all()
 
-# game = HC_Game.objects.last()
+# game = HLC_Game.objects.last()
 # for game in allTGZgames:
 #    game.statsExcludeConsent = "0" * game.maxPlayers
 
