@@ -147,7 +147,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			let csrftoken = getCookie("csrftoken")
 			var action = "deleteTrgGame"
-			alert(`gameCode: ${gameCode}, id: ${_gameID}`)
 
 			fetch("/deleteGame/" + gameCode + "/", {
 				method: "DELETE",
