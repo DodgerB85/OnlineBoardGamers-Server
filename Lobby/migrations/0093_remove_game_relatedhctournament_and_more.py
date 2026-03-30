@@ -10,10 +10,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(
-            model_name="game",
-            name="relatedHCTournament",
-        ),
-        migrations.RemoveField(
             model_name="gameplayer",
             name="moveDataJSON",
         ),

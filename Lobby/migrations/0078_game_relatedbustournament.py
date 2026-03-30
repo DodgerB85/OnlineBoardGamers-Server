@@ -11,15 +11,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="game",
-            name="relatedBusTournament",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                related_name="bustournamentGEN_relName",
-                to="BUS.Bus_Tournament",
-            ),
-        ),
+
     ]

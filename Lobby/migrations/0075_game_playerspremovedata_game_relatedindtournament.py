@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("IND", "0021_indgame"),
         ("Lobby", "0074_remove_game_relatedtournament"),
     ]
 
@@ -16,15 +15,5 @@ class Migration(migrations.Migration):
             name="playersPreMoveData",
             field=models.TextField(blank=True),
         ),
-        migrations.AddField(
-            model_name="game",
-            name="relatedINDTournament",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                related_name="unified_tournament_games_IND",
-                to="IND.ind_tournament",
-            ),
-        ),
+        
     ]

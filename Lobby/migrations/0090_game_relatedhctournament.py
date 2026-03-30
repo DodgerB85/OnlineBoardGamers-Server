@@ -12,17 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="game",
-            name="relatedHCTournament",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                related_name="hctournamentGEN_relName",
-                to="HLC.hc_tournament",
-            ),
-        ),
-        migrations.AddField(
-            model_name="game",
             name="currentPlayersInTurnOrder",
             field=models.CharField(blank=True, null=True, default=None, max_length=150),
         ),

@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[
                     ("FCM", "Food Chain Magnate"),
-                    ("HC", "Horseless Carriage"),
+                    ("HLC", "Horseless Carriage"),
                     ("BUS", "BUS"),
                     ("TGZ", "The Great Zimbabwe"),
                     ("CNS", "Cannes"),
