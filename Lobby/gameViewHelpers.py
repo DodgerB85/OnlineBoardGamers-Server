@@ -75,6 +75,7 @@ def build_show_game_data(
 
     base_data = {
         "gameID": gameID,
+        "finishedGame": currentGame.gameStatus == "FINISHED",
         "gameName": gameName,
         "gameData": currentGame.gameData,
         "gameCreationTimestamp": gameCreationTimestamp,
