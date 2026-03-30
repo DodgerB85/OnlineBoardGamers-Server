@@ -141,6 +141,7 @@ ALLOWED_USERS_RNB = [
     "SaintJason",
     "h",
     "Jungy",
+    "Dycu",
 ]
 
 ##########################
