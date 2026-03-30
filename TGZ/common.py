@@ -92,7 +92,7 @@ def create_tgz_game(
         """Send a notification to Discord webhook."""
         try:
             if game_id:
-                message += f"\n[Click here to view the game](https://www.OnlineBoardGamers.com/TGZ/{game_id}/)"
+                message += f"\n[Click here to view the game](https://www.OnlineBoardGamers.com/TGZ/{game_id}/show/)"
             requests.post(
                 "https://discord.com/api/webhooks/1197726435369029713/WJz5fJ0KsJnUM1bH4Czn7ELBSTzL_Bng6ZMO52IuRHa1A-FyJcDsZZhdbQYORKDwvehS",
                 data={"content": message},
