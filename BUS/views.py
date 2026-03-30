@@ -148,6 +148,7 @@ def busData(request, dataType):
         return JsonResponse(
             {
                 "gameData": currentGame.gameData,
+                "finishedGame": currentGame.gameStatus == "FINISHED",
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
             }

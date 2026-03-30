@@ -47,7 +47,7 @@ from Lobby.gameViewHelpers import (
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
-ALLOWED_USERS_RNB = ["admin", "DodgerB", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy", "BotKickStarter"]
+ALLOWED_USERS_RNB = ["admin", "DodgerB", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy", "BotKickStarter", "Dycu"]
 
 if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter

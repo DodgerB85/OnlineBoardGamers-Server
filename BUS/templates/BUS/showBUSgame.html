@@ -101,6 +101,10 @@
     initData.deleteVotesData = {{ deleteVotesData | safe }};
     initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
 
+    {% if finishedGame %}
+    initData.finishedGame = true
+    {% endif %}
+
     ///////////////////////
     {% if user.is_authenticated %}
     initData.name = '{{ name }}'; 
