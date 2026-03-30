@@ -101,7 +101,7 @@ for gameCode in GAME_CODES:
                     message = "===========================\n"
                     message += "GAME EXPIRY AUTO-DETECTED\n"
                     message += f"Player: {singleGame.presenter().getArrayOfIsCurrentPlayers()}\n"
-                    message += "[Click here to view the game](https://www.OnlineBoardGamers.com/FCM/" + str(singleGame.id) + "/)"
+                    message += "[Click here to view the game](https://www.OnlineBoardGamers.com/FCM/" + str(singleGame.id) + "/show/)"
                     requests.post(
                         f"https://discordapp.com/api/webhooks/{config('WEBHOOK_FCM_TOURNAMENT_ADMIN')}",
                         data={"content": message},
@@ -114,7 +114,7 @@ for gameCode in GAME_CODES:
                     message = "===========================\n"
                     message += "GAME EXPIRY AUTO-DETECTED\n"
                     message += f"Player: {singleGame.presenter().getArrayOfIsCurrentPlayers()}\n"
-                    message += "[Click here to view the game](https://www.OnlineBoardGamers.com/TGZ/" + str(singleGame.id) + "/)"
+                    message += "[Click here to view the game](https://www.OnlineBoardGamers.com/TGZ/" + str(singleGame.id) + "/show/)"
                     requests.post(
                         f"https://discordapp.com/api/webhooks/{config('WEBHOOK_TGZ_TOURNAMENT_ADMIN')}",
                         data={"content": message},
