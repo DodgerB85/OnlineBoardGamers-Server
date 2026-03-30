@@ -90,13 +90,13 @@ def getGameStrings(game):
                 "Food Chain Magnate - Mini Tournament Invitation Received"
             ),
         }
-    elif game == "HC":
+    elif game == "HLC":
         return {
             "boxName": gettext("Horseless Carriage"),
             "finishedSubject": gettext("Your Horseless Carriage game has finished"),
             "yourTurnSubject": gettext("It is your turn at Horseless Carriage"),
             "clickHereToPlayText": gettext("Click here to play Horseless Carriage"),
-            "bugReportSubject": gettext("HC Bug Report"),
+            "bugReportSubject": gettext("HLC Bug Report"),
             "inviteSubject": gettext("Horseless Carriage - Invitation Received"),
             "tournamentGameStartSubject": gettext(
                 "Horseless Carriage - Tournament Game Started"
@@ -590,7 +590,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                 + str(pos + 1)
                 + "\n[Click here to see game](https://www.OnlineBoardGamers.com/FCM/"
                 + str(currentGame.id)
-                + "/)"
+                + "/show/)"
             )
 
             requests.post(
@@ -1025,7 +1025,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
         profile = Profile.objects.get(user=user)
         activate(profile.profileLanguage)
 
-        gameStrings = getGameStrings("HC")
+        gameStrings = getGameStrings("HLC")
         urlText = gameStrings["clickHereToPlayText"]
 
         presenter = currentGame.presenter()
@@ -1050,7 +1050,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
                     "It is your turn at Horseless Carriage - Factory Building"
                 )
                 message = render_to_string(
-                    "HC/yourTurnEmailFactory.html",
+                    "HLC/yourTurnEmailFactory.html",
                     {
                         "user": user.username,
                         "domain": current_site.domain,
@@ -1069,7 +1069,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
                 )
 
         # SEND WEBHOOKS
-        urlRaw = f"https://www.OnlineBoardGamers.com/HC/{str(gameID)}/show/"
+        urlRaw = f"https://www.OnlineBoardGamers.com/HLC/{str(gameID)}/show/"
         if (
             profile.webhooks != ""
             and profile.webhooks is not None

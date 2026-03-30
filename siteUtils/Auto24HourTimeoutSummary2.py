@@ -53,7 +53,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_send24HourTimedOutReminderEmail,
 )  # noqa: E402
 
-GAME_CODES = ["FCM", "HC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+GAME_CODES = ["FCM", "HLC", "Bus", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 start_calc_time = time.perf_counter()
 email_counter = 0

@@ -59,7 +59,7 @@ urlpatterns = [
     path("", include("Lobby.urls")),
     path("FCM/", include("FCM.urls")),
     path("BUS/", include("BUS.urls")),
-    path("HC/", include("HC.urls")),
+    path("HLC/", include("HLC.urls")),
     path("TGZ/", include("TGZ.urls")),
     path("CNS/", include("CNS.urls")),
     path("AQY/", include("AQY.urls")),

@@ -30,7 +30,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getPointsForPosition,
     getCleanedAndSortedRoundData,
     SR_currentTurnString,
-    SR_getHCstartingOptionsHTML,
+    SR_getHLCstartingOptionsHTML,
     SR_getBUSstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
     SR_getCNSstartingOptionsHTML,
@@ -58,7 +58,7 @@ def SF_getTimeNow():
 def SF_getRequiredExp(gameCode):
     if gameCode == "FCM":
         return 2
-    if gameCode == "HC":
+    if gameCode == "HLC":
         return 1
     if gameCode == "BUS":
         return 1
@@ -133,7 +133,7 @@ def SF_buildGamePlayerContext(game):
 
 def SF_serializeGame(game, user, player_context):
     """
-    Pure serialization — no DB queries (except HC/RNB myMove edge cases).
+    Pure serialization — no DB queries (except HLC/RNB myMove edge cases).
     Requires a player_context dict from SF_buildGamePlayerContext or equivalent.
     """
     game_code = game.gameCode
@@ -187,9 +187,9 @@ def SF_serializeGame(game, user, player_context):
             or any(s in current_players_str for s in rf.SHADOW_USERNAMES)
         )
 
-        # For HC, if it is factory phase, AND you have submitted your move, set it back to false
+        # For HLC, if it is factory phase, AND you have submitted your move, set it back to false
         if (
-            game_code == "HC"
+            game_code == "HLC"
             and is_my_move
             and game.phase == 3
             and game.presenter().hasMoveData(user.username)
@@ -232,7 +232,7 @@ def SF_serializeGame(game, user, player_context):
     isLearningGame = False
     isExperiencedGame = False
 
-    # Check for both string and integer values (FCM/HC/BUS use strings, others use integers)
+    # Check for both string and integer values (FCM/HLC/BUS use strings, others use integers)
     if 110 in startingOptionsArr:
         isLearningGame = True
     if 120 in startingOptionsArr:
@@ -241,8 +241,8 @@ def SF_serializeGame(game, user, player_context):
     startingOptionsHTML = ""
     if game_code == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(startingOptionsArr)
-    if game_code == "HC":
-        startingOptionsHTML = SR_getHCstartingOptionsHTML(startingOptionsArr)
+    if game_code == "HLC":
+        startingOptionsHTML = SR_getHLCstartingOptionsHTML(startingOptionsArr)
     if game_code == "BUS":
         startingOptionsHTML = SR_getBUSstartingOptionsHTML(startingOptionsArr)
     if game_code == "TGZ":
@@ -980,7 +980,7 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
 
     else:  # MiniT logic
         remainder = num_players % max_p
-        if tournamentObj.gameCode in ["HC", "BUS"]:
+        if tournamentObj.gameCode in ["HLC", "BUS"]:
             # If 3+ remain, they form a game. If 1 or 2 remain, they get byes.
             if remainder > 0 and remainder < 3:
                 byesRequired = remainder
@@ -1464,7 +1464,7 @@ def SF_endAnyTournament(
                 baseIndex = 0
                 if gameCode == "FCM":
                     baseIndex = 1
-                if gameCode == "HC":
+                if gameCode == "HLC":
                     baseIndex = 2
                 if gameCode == "BUS":
                     baseIndex = 3

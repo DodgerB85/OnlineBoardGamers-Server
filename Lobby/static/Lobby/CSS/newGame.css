@@ -21,7 +21,7 @@
 }
 
 #createNewFCM,
-#createNewHC,
+#createNewHLC,
 #createNewBus,
 #createNewTGZ,
 #createNewAQY,
@@ -54,7 +54,7 @@
 }
 
 #createNewFCM img,
-#createNewHC img,
+#createNewHLC img,
 #createNewAQY img,
 #createNewTGZ img {
 	height: 200px;
@@ -65,7 +65,7 @@
 }
 #createNewWEB img {
 	height: 200px;
-	widtH: 136px;
+	width: 136px;
 }
 
 #createNewKFW img,
@@ -78,7 +78,7 @@
 }
 
 #createNewFCM:hover,
-#createNewHC:hover,
+#createNewHLC:hover,
 #createNewBus:hover,
 #createNewTGZ:hover,
 #createNewAQY:hover,

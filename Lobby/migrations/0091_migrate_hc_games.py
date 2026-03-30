@@ -3,19 +3,19 @@ import json
 
 
 def migrate_hc_games(apps, schema_editor):
-    HC_Game = apps.get_model("HC", "HC_Game")
+    HC_Game = apps.get_model("HLC", "HLCgame")
     Game = apps.get_model("Lobby", "Game")
     GamePlayer = apps.get_model("Lobby", "GamePlayer")
 
     print(
-        f"\nMigrating {HC_Game.objects.all().count()} HC games to unified Game model..."
+        f"\nMigrating {HC_Game.objects.all().count()} HLC games to unified Game model..."
     )
 
     migrated_count = 0
 
     for old_game in HC_Game.objects.all():
         new_game = Game.objects.create(
-            gameCode="HC",
+            gameCode="HLC",
             original_id=old_game.id,
             gameName=old_game.gameName,
             gameDescription=old_game.gameDescription,
@@ -129,18 +129,17 @@ def migrate_hc_games(apps, schema_editor):
         if migrated_count % 100 == 0:
             print(f"  Migrated {migrated_count} games...")
 
-    print(f"Successfully migrated {migrated_count} HC games!")
+    print(f"Successfully migrated {migrated_count} HLC games!")
 
 
 def reverse_migration(apps, schema_editor):
     Game = apps.get_model("Lobby", "Game")
-    Game.objects.filter(gameCode="HC").delete()
+    Game.objects.filter(gameCode="HLC").delete()
 
 
 class Migration(migrations.Migration):
     dependencies = [
         ("Lobby", "0090_game_relatedhctournament"),
-        ("HC", "0047_hc_game_automoves"),
     ]
 
     operations = [

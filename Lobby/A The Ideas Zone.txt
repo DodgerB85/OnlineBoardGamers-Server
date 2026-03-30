@@ -8,9 +8,9 @@ Sentry - free tier to monitor stuff?
 TO DO LIST
 ********
 all games mutual delete option
-HC - change popup aka fcm, add backgrounds to "also on TT"
+HLC - change popup aka fcm, add backgrounds to "also on TT"
 Change bus scoring as per rules?
-FCM stats - split to All - no ms, OG, OG HC, new
+FCM stats - split to All - no ms, OG, OG HLC, new
 
 ********
 general

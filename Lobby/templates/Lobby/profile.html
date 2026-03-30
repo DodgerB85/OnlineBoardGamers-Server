@@ -503,70 +503,70 @@
         <br />
         <label class="preferenceTitle">{% translate "Favourite Horseless Carriage Colour" %}</label>
         <div>
-            <div class="favHCchoice">
+            <div class="favHLCchoice">
                 <label for="hcRadM1">{% translate "None" %}</label>
                 <br />
                 <input type="radio"
                        id="hcRadM1"
                        name="hcColour"
                        value="-1"
-                       {% if favHCcolour == -1 %}checked{% endif %}
-                       {% if not favHCcolour %}checked{% endif %} />
+                       {% if favHLCcolour == -1 %}checked{% endif %}
+                       {% if not favHLCcolour %}checked{% endif %} />
             </div>
-            <div class="favHCchoice">
+            <div class="favHLCchoice">
                 <label for="hcRad0">
-                    <img src="{% static 'HC/images/piece_R.png' %} " />
+                    <img src="{% static 'HLC/images/piece_R.png' %} " />
                 </label>
                 <br />
                 <input type="radio"
                        id="hcRad0"
                        name="hcColour"
                        value="0"
-                       {% if favHCcolour == 0 %}checked{% endif %} />
+                       {% if favHLCcolour == 0 %}checked{% endif %} />
             </div>
-            <div class="favHCchoice">
+            <div class="favHLCchoice">
                 <label for="hcRad1">
-                    <img src="{% static 'HC/images/piece_G.png' %} " />
+                    <img src="{% static 'HLC/images/piece_G.png' %} " />
                 </label>
                 <br />
                 <input type="radio"
                        id="hcRad1"
                        name="hcColour"
                        value="1"
-                       {% if favHCcolour == 1 %}checked{% endif %} />
+                       {% if favHLCcolour == 1 %}checked{% endif %} />
             </div>
-            <div class="favHCchoice">
+            <div class="favHLCchoice">
                 <label for="hcRad2">
-                    <img src="{% static 'HC/images/piece_P.png' %} " />
+                    <img src="{% static 'HLC/images/piece_P.png' %} " />
                 </label>
                 <br />
                 <input type="radio"
                        id="hcRad2"
                        name="hcColour"
                        value="2"
-                       {% if favHCcolour == 2 %}checked{% endif %} />
+                       {% if favHLCcolour == 2 %}checked{% endif %} />
             </div>
-            <div class="favHCchoice">
+            <div class="favHLCchoice">
                 <label for="hcRad3">
-                    <img src="{% static 'HC/images/piece_B.png' %} " />
+                    <img src="{% static 'HLC/images/piece_B.png' %} " />
                 </label>
                 <br />
                 <input type="radio"
                        id="hcRad3"
                        name="hcColour"
                        value="3"
-                       {% if favHCcolour == 3 %}checked{% endif %} />
+                       {% if favHLCcolour == 3 %}checked{% endif %} />
             </div>
-            <div class="favHCchoice">
+            <div class="favHLCchoice">
                 <label for="hcRad4">
-                    <img src="{% static 'HC/images/piece_Y.png' %} " />
+                    <img src="{% static 'HLC/images/piece_Y.png' %} " />
                 </label>
                 <br />
                 <input type="radio"
                        id="hcRad4"
                        name="hcColour"
                        value="4"
-                       {% if favHCcolour == 4 %}checked{% endif %} />
+                       {% if favHLCcolour == 4 %}checked{% endif %} />
             </div>
         </div>
         <label class="preferenceTitle">{% translate "Favourite Bus Colour and Board" %}</label>
@@ -579,7 +579,7 @@
                        name="busColour"
                        value="-1"
                        {% if preferredBusColour == -1 %}checked{% endif %}
-                       {% if not favHCcolour %}checked{% endif %} />
+                       {% if not favHLCcolour %}checked{% endif %} />
             </div>
             <div class="favBusColour">
                 <label for="busRad0">

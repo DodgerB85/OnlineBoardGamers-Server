@@ -4,7 +4,7 @@ CREATE OR REPLACE VIEW Lobby_all_games_invited_players AS (
          user_id
   FROM FCM_fcm_game_invitedPlayers
   UNION ALL
-  SELECT 'HC' AS gameCode,
+  SELECT 'HLC' AS gameCode,
          hc_game_id AS id,
          user_id
   FROM HC_hc_game_invitedPlayers

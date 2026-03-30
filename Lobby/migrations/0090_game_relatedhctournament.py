@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("HC", "0049_hcgame"),
         ("Lobby", "0089_alter_changelog_timestamp_and_more"),
     ]
 
@@ -19,7 +18,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="hctournamentGEN_relName",
-                to="HC.hc_tournament",
+                to="HLC.hc_tournament",
             ),
         ),
         migrations.AddField(

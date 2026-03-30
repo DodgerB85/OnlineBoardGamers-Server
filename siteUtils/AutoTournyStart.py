@@ -55,7 +55,7 @@ from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
 from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen
 
 
-# HC 3-5 players
+# HLC 3-5 players
 # Bus 3-5 players
 # AQY 2-4 players
 # IND 3-4 players
@@ -76,7 +76,7 @@ monthName = myDate.strftime("%B")
 
 MONTHS_FOR_AQY = [2, 8]
 MONTHS_FOR_IND = [3, 9]
-MONTHS_FOR_HC = [4, 10]
+MONTHS_FOR_HLC = [4, 10]
 MONTHS_FOR_BUS = [5, 11]
 
 
@@ -96,7 +96,7 @@ if current_date.month != current_date_plus_7d.month:
     if days_until_next_month == 7 and (
         next_month_number in MONTHS_FOR_AQY
         or next_month_number in MONTHS_FOR_IND
-        or next_month_number in MONTHS_FOR_HC
+        or next_month_number in MONTHS_FOR_HLC
         or next_month_number in MONTHS_FOR_BUS
     ):
         print(
@@ -111,9 +111,9 @@ if current_date.month != current_date_plus_7d.month:
         if next_month_number in MONTHS_FOR_IND:
             box_name = "Indonesia"
             game = "IND"
-        if next_month_number in MONTHS_FOR_HC:
+        if next_month_number in MONTHS_FOR_HLC:
             box_name = "Horseless Carriage"
-            game = "HC"
+            game = "HLC"
         if next_month_number in MONTHS_FOR_BUS:
             box_name = "Bus"
             game = "BUS"
@@ -142,7 +142,7 @@ else:
 if dayNumber == 1 and (
     monthNumber in MONTHS_FOR_AQY
     or monthNumber in MONTHS_FOR_IND
-    or monthNumber in MONTHS_FOR_HC
+    or monthNumber in MONTHS_FOR_HLC
     or monthNumber in MONTHS_FOR_BUS
 ):
     box_name = "box_name"
@@ -156,10 +156,10 @@ if dayNumber == 1 and (
         box_name = "Indonesia"
         maxGamePlayers = random.randrange(3, 5, 1)
         gameCode = "IND"
-    if monthNumber in MONTHS_FOR_HC:
+    if monthNumber in MONTHS_FOR_HLC:
         box_name = "Horseless Carriage"
         maxGamePlayers = random.randrange(3, 6, 1)
-        gameCode = "HC"
+        gameCode = "HLC"
     if monthNumber in MONTHS_FOR_BUS:
         box_name = "Bus"
         maxGamePlayers = random.randrange(3, 6, 1)
@@ -222,17 +222,17 @@ else:
 ############################################
 #   START NEW TOURNMENT
 ############################################
-# TOURNAMENT_MODELS = [HC_Tournament, Bus_Tournament, AQY_Tournament, IND_Tournament]
+# TOURNAMENT_MODELS = [HLC_Tournament, Bus_Tournament, AQY_Tournament, IND_Tournament]
 ## CHECK FOR TOURNY START
 # for tournament_model in TOURNAMENT_MODELS:
 #
 #    box_name = "box_name"
 #    INNER_URL = "URL"
 #    gameCode = "XXX"
-#    if tournament_model == HC_Tournament:
+#    if tournament_model == HLC_Tournament:
 #        box_name = "Horseless Carriage"
-#        INNER_URL = "HCtournament/HC"
-#        gameCode = "HC"
+#        INNER_URL = "HLCtournament/HLC"
+#        gameCode = "HLC"
 #    if tournament_model == BUS_Tournament:
 #        box_name = "BUS"
 #        INNER_URL = "BUStournament/BUS"
@@ -311,7 +311,7 @@ else:
 #                    SF_startTournament(request, newTourny, gameCode)
 #                    newTourny.save()
 
-GAME_CODES = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 # for model, config in TOURNAMENT_CONFIG.items():
 for gameCode in GAME_CODES:
@@ -330,7 +330,7 @@ for gameCode in GAME_CODES:
     print("There is an open tourny, and day > 7")
 
     # But if it's not an auto-tourny, continue
-    if gameCode in ["HC", "BUS", "TGZ", "AQY", "IND"]:
+    if gameCode in ["HLC", "BUS", "TGZ", "AQY", "IND"]:
         continue
 
     # Now we only hit the DB further if we actually have a candidate to start

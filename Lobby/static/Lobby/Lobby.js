@@ -5,7 +5,7 @@ var displayType = "tables"
 var global = {}
 
 document.addEventListener("DOMContentLoaded", function () {
-	let ALL_GAMES = ["FCM", "HC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+	let ALL_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
 	//var forcerefresh;
 
@@ -142,18 +142,14 @@ document.addEventListener("DOMContentLoaded", function () {
 			event.cancelBubble = true
 			event.preventDefault()
 			event.stopPropagation()
-			let gameName = this.parentNode.parentNode.id.slice(0, 2)
-			if (ALL_GAMES.includes(gameName)) {
-				_gameID = parseInt(this.parentNode.parentNode.id.slice(10))
-			} else {
-				gameName = this.parentNode.parentNode.id.slice(0, 3)
-				_gameID = parseInt(this.parentNode.parentNode.id.slice(11))
-			}
+			let gameCode = this.parentNode.parentNode.id.slice(0, 3)
+			_gameID = parseInt(this.parentNode.parentNode.id.slice(11))
 
 			let csrftoken = getCookie("csrftoken")
 			var action = "deleteTrgGame"
+			alert(`gameCode: ${gameCode}, id: ${_gameID}`)
 
-			fetch("/deleteGame/" + gameName + "/", {
+			fetch("/deleteGame/" + gameCode + "/", {
 				method: "DELETE",
 				body: JSON.stringify({
 					gameID: _gameID,
@@ -395,42 +391,41 @@ document.addEventListener("DOMContentLoaded", function () {
 }*/
 
 async function checkLobbyUpdates() {
-    let csrftoken = getCookie("csrftoken");
+	let csrftoken = getCookie("csrftoken")
 
-    try {
-        const response = await fetch("/dataCheck/", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": csrftoken,
-                "Content-Type": "application/json", // Important: Specify content type
-                "If-None-Match": global.etag // Send the ETag
-            },
-            body: JSON.stringify({
-                myMoveCount: global.myMoveCount,
-                availableCount: global.availableCount,
-                invitationsCount: global.invitationsCount,
-            }),
-        });
+	try {
+		const response = await fetch("/dataCheck/", {
+			method: "POST",
+			headers: {
+				"X-CSRFToken": csrftoken,
+				"Content-Type": "application/json", // Important: Specify content type
+				"If-None-Match": global.etag, // Send the ETag
+			},
+			body: JSON.stringify({
+				myMoveCount: global.myMoveCount,
+				availableCount: global.availableCount,
+				invitationsCount: global.invitationsCount,
+			}),
+		})
 
-        if (!response.ok) {
-            if (response.status === 304) {
-                // Not Modified - No need to reload
-                return;
-            } else {
-                throw new Error("Network response was not ok");
-            }
-        }
+		if (!response.ok) {
+			if (response.status === 304) {
+				// Not Modified - No need to reload
+				return
+			} else {
+				throw new Error("Network response was not ok")
+			}
+		}
 
-        const data = await response.json();
+		const data = await response.json()
 
-        if (data.latest === false) {
+		if (data.latest === false) {
 			location.reload()
-        }
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    }
+		}
+	} catch (error) {
+		console.error("Error fetching data:", error)
+	}
 }
-
 
 function joinGame(gameName, _gameID) {
 	let csrftoken = getCookie("csrftoken")

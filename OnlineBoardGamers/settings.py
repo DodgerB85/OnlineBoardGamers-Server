@@ -104,7 +104,7 @@ INSTALLED_APPS = [
     "Lobby",
     "user_visit",
     "BUS",
-    "HC",
+    "HLC",
     "TGZ",
     "CNS",
     "AQY",
@@ -360,7 +360,7 @@ LANGUAGE_CODE = "en-gb"
 LOCALE_PATHS = [
     join(BASE_DIR, "Lobby", "locale"),
     join(BASE_DIR, "FCM", "locale"),
-    join(BASE_DIR, "HC", "locale"),
+    join(BASE_DIR, "HLC", "locale"),
 ]
 
 # TIME_ZONE = 'Asia/Hong_Kong'

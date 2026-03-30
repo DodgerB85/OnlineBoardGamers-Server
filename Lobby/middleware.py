@@ -10,7 +10,7 @@ class ForceTrailingSlashMiddleware:
         # List of prefixes that we know should have trailing slashes
         app_prefixes = (
             "/FCM",
-            "/HC",
+            "/HLC",
             "/BUS",
             "/TGZ",
             "/CNS",
