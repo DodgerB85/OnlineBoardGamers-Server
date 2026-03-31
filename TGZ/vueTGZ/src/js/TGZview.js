@@ -79,7 +79,7 @@ export function getImage(image) {
 	if (image === "icon-house") return new URL(`../../../static/TGZ/images/icon-house.svg`, import.meta.url).href
 	else if (image === "icon-nextGame") return new URL(`../../../static/TGZ/images/icon-nextGame.svg`, import.meta.url).href
 	else if (image === "icon-rulebook") return new URL(`../../../static/TGZ/images/icon-rulebook.svg`, import.meta.url).href
-	else if (image === "icon-info") return new URL(`../../../static/TGZ/images/icon-info.svg`, import.meta.url).href
+	//else if (image === "icon-info") return new URL(`../../../static/TGZ/images/icon-info.svg`, import.meta.url).href
 	else if (image === "icon-rewind") return new URL(`../../../static/TGZ/images/icon-rewind.svg`, import.meta.url).href
 	else if (image === "icon-chat") return new URL(`../../../static/TGZ/images/icon-chat.svg`, import.meta.url).href
 	else if (image === "icon-stop") return new URL(`../../../static/TGZ/images/icon-stop.svg`, import.meta.url).href
