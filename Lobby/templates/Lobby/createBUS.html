@@ -3,7 +3,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
     {{ request.user.username|json_script:"username" }}
@@ -18,7 +18,7 @@
         <!--<p><span style="font-size: 2em; background-color: yellow; color: darkred;">Want to play in person? Check out <a href="https://splottercon.com/" target="_blank">Splotter Con 2024</a>! Pittsburgh from Aug 30</span></p>
 -->
         <div id="allOptions">
-            <span class="topOfNewGameSpan">{% translate "New to Bus? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
+            <span class="topOfNewGameSpan">{% translate "New to Bus? For Rules, How to Play, and Game Guide, please see " %}<a class="linkOther" href="{% url 'BUS:BUShelp' %}">{% translate "Help" %}</a></span>
             <form autocomplete="off"
                   action="{% url 'BUS:createBUSgame' %}"
                   method="post"
@@ -196,8 +196,8 @@
                    class="registerbtn createNewGameButton"
                    value="{% translate "Create Bus Game" %}">
         </form>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/splotterconSponsor.html' %}
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/splotterconSponsor.html" %}
     </div>
 </div>
 {% block script %}
@@ -259,5 +259,5 @@
 });
 
     </script>
-{% endblock %}
-{% endblock %}
+{% endblock script %}
+{% endblock body %}

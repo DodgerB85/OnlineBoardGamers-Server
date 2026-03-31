@@ -94,6 +94,11 @@ def showRNBmap(request, game_id=0):
     
     return render(request, "RNB/showRNBmapPage.html", returnData)
 
+def RNBmapEditor(request, game_id=0):
+    if request.user.username not in ALLOWED_USERS_RNB:
+        return redirect("index")
+    
+    return render(request, "RNB/RNBmapEditor.html", {"gameID": game_id})
 
 def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if request.user.username not in ALLOWED_USERS_RNB:

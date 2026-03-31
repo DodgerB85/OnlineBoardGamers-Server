@@ -29,7 +29,22 @@
                 {% endfor %}
             </div>
         {% endif %}
-        {% include "RNB/showRNBmap.html" %}
+        <script type="module" src="http://localhost:3042/static/@vite/client"></script>
+        <script type="module" src="http://localhost:3042/static/main.js"></script>
+        <div>
+            <noscript>
+                <strong>Please enable Javascript to continue.</strong>
+            </noscript>
+            <div id="app">
+                <div id="loadingText">Loading Map Editor........</div>
+            </div>
+        </div>
+        <script>
+var initData = {};
+  
+///////////////////////
+initData.mapEditor = true;
+        </script>
         {% include "Lobby/common/homeButton.html" %}
     </div>
 {% endblock body %}

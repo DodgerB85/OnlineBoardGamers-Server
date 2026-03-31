@@ -18,7 +18,7 @@
         <!--<p><span style="font-size: 2em; background-color: yellow; color: darkred;">Want to play in person? Check out <a href="https://splottercon.com/" target="_blank">Splotter Con 2024</a>! Pittsburgh from Aug 30</span></p>
 -->
         <div id="allOptions">
-            <span class="topOfNewGameSpan">{% translate "New to Antiquity? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
+            <span class="topOfNewGameSpan">{% translate "New to Antiquity? For Rules, How to Play, and Game Guide, please see " %}<a class="linkOther" href="{% url 'AQY:AQYhelp' %}">{% translate "Help" %}</a></span>
             <form id="gameCreationForm"
                   autocomplete="off"
                   action="{% url 'AQY:createAQYgame' %}"
@@ -283,5 +283,5 @@
 
 
         </script>
-    {% endblock %}
-{% endblock %}
+    {% endblock script %}
+{% endblock body %}

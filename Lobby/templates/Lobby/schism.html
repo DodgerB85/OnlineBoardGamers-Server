@@ -3,13 +3,15 @@
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/schism.js' %}"></script>
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
-  <form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
+  <form id="openInMapEditorFormTGZ"
+        action="{% url 'TGZmapEditor' %}"
+        method="post">
     {% csrf_token %}
     <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
   </form>
@@ -41,7 +43,7 @@
             </tr>
           </thead>
           {% for game in availableGames %}
-            {% include 'Lobby/gameDisplay/availableGameRow.html' with game=game %}
+            {% include "Lobby/gameDisplay/availableGameRow.html" with game=game %}
           {% endfor %}
         </table>
       </div>
@@ -64,7 +66,7 @@
             </tr>
           </thead>
           {% for game in activeGames %}
-            {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+            {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
           {% endfor %}
         </table>
       </div>
@@ -76,7 +78,7 @@
       <div class="pagination">
         <span class="step-links">
           {% if finished_current_page > 1 %}
-            <a href="#" onclick="submitForm('1')">&laquo; first</a>
+            <a href="#" onclick="submitForm('1')">« first</a>
             <a href="#" onclick="submitForm('{{ finished_current_page|add:'-1' }}')">previous</a>
           {% endif %}
           <span class="current">
@@ -85,7 +87,7 @@
           </span>
           {% if finished_current_page < finished_paginator.num_pages %}
             <a href="#" onclick="submitForm('{{ finished_current_page|add:'1' }}')">next</a>
-            <a href="#" onclick="submitForm('{{ finished_paginator.num_pages }}')">last &raquo;</a>
+            <a href="#" onclick="submitForm('{{ finished_paginator.num_pages }}')">last »</a>
           {% endif %}
         </span>
       </div>
@@ -102,13 +104,13 @@
             </tr>
           </thead>
           {% for game in finishedGames %}
-            {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+            {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
           {% endfor %}
         </table>
         <div class="pagination">
           <span class="step-links">
             {% if finished_current_page > 1 %}
-              <a href="#" onclick="submitForm('1')">&laquo; first</a>
+              <a href="#" onclick="submitForm('1')">« first</a>
               <a href="#" onclick="submitForm('{{ finished_current_page|add:'-1' }}')">previous</a>
             {% endif %}
             <span class="current">
@@ -117,7 +119,7 @@
             </span>
             {% if finished_current_page < finished_paginator.num_pages %}
               <a href="#" onclick="submitForm('{{ finished_current_page|add:'1' }}')">next</a>
-              <a href="#" onclick="submitForm('{{ finished_paginator.num_pages }}')">last &raquo;</a>
+              <a href="#" onclick="submitForm('{{ finished_paginator.num_pages }}')">last »</a>
             {% endif %}
           </span>
         </div>
@@ -138,6 +140,6 @@
     {% else %}
       <h2>{% translate "No Finished Games" %}</h2>
     {% endif %}
-    {% include 'Lobby/common/homeButton.html' %}
+    {% include "Lobby/common/homeButton.html" %}
   </div>
-{% endblock %}
+{% endblock body %}

@@ -3,7 +3,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
     <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet" />
-{% endblock %}
+{% endblock head %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }} {{ request.user.username|json_script:"username" }}
     <div class="container">
@@ -18,7 +18,7 @@
     -->
         <div id="FCMallOptions">
             <span class="topOfNewGameSpan">
-                {% translate 'New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see <a class="linkOther" href="/help/">Help</a>' %}
+                {% translate "New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see " %}<a class="linkOther" href="{% url 'FCM:FCMhelp' %}">{% translate "Help" %}</a>
             </span>
             {% if MT_Creation %}
                 <form autocomplete="off"
@@ -58,7 +58,7 @@
                                                size="30"
                                                id="tournamentDescription"
                                                class="textInput"
-                                               placeholder="{% translate 'Optional, eg fast EST time zone' %}"
+                                               placeholder="{% translate "Optional, eg fast EST time zone" %}"
                                                maxlength="100" />
                                     </div>
                                 </div>
@@ -517,7 +517,7 @@
                                     <div class="optionSelectionText">
                                         <div class="autocomplete">
                                             <input type="text"
-                                                   placeholder="{% translate 'Player Username' %}"
+                                                   placeholder="{% translate "Player Username" %}"
                                                    id="playerToInviteMT"
                                                    class="textInput playerInput"
                                                    name="playerToInviteMT"
@@ -1038,8 +1038,8 @@
                 </form>
             {% endif %}
         </div>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/splotterconSponsor.html' %}
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/splotterconSponsor.html" %}
     </div>
     {% block script %}
         {% compress js %}
