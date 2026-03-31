@@ -30,18 +30,17 @@ Lobby/sharedFunctions/emailCounter.txt
 
 # Exclude specific static directories
 /FCM/static/FCM/JS/
-/HC/static/HC/JS/
 
 # Exclude any folder found anywhere in subdirectories
-vueTGZ/
 vueAQY/
 vusBUS/
-/Bus/vueBUS/
+/BUS/vueBUS/
 vueIND/
 vueKFW/
 vueRNB/
 vueWEB/
 vuePPF/
+vueBUS/
 
 staticfiles/
 
@@ -50,10 +49,10 @@ staticfiles/
 /Lobby/stats/*
 /AQY/AQYstats/*
 /BOB/BOBstats/*
-/Bus/Busstats/*
+/BUS/BUSstats/*
 /CNS/CNSstats/*
 /FCM/FCMstats/*
-/HC/HCstats/*
+/HLC/HLCstats/*
 /IND/INDstats/*
 /KFW/KFWstats/*
 /RNB/RNBstats/*
@@ -63,10 +62,10 @@ staticfiles/
 !/Lobby/stats/.gitkeep
 !/AQY/AQYstats/.gitkeep
 !/BOB/BOBstats/.gitkeep
-!/Bus/Busstats/.gitkeep
+!/BUS/BUSstats/.gitkeep
 !/CNS/CNSstats/.gitkeep
 !/FCM/FCMstats/.gitkeep
-!/HC/HCstats/.gitkeep
+!/HLC/HLCstats/.gitkeep
 !/IND/INDstats/.gitkeep
 !/KFW/KFWstats/.gitkeep
 !/RNB/RNBstats/.gitkeep
