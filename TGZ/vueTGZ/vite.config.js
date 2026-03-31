@@ -89,16 +89,21 @@ export default defineConfig(({ command, mode }) => ({
       usePolling: true,
       disableGlobbing: false,
       interval: 1000,   // Check every 1000ms (1 second)
-    }
+    },
+    fs: {
+			allow: [
+				// Search up for workspace root
+				"..",
+				// Or be explicit by pointing to the project root
+				"C:/Roger/Programming/OnlineBoardGamers/TGZ/",
+			],
+		},
   },
 
 
-    resolve: {
-    alias:
-      command === 'serve'
-        ? [{ find: '@static', replacement: fileURLToPath(new URL('./src', import.meta.url)) }]
-        : [{ find: '@static', replacement: fileURLToPath(new URL('../static', import.meta.url)) }]
-  },
+ resolve: {
+		alias: command === "serve" ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }] : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }],
+	},
    base: command === 'serve' ? '/static/' : 'https://www.onlineboardgamers.com/static/TGZ',
   build: {
     outDir: resolve('../static/TGZ/TGZvuedist'),

@@ -206,14 +206,14 @@ function adminBKSbutton() {
 		<div id="menu">
 			<a href="/">
 				<span class="topMenuItem">
-					<img src="@static/TGZ/images/icon-house.svg" />
+					<img :src="view.getImage('icon-house')" />
 					<span>Home</span>
 				</span>
 			</a>
 
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" class="topMenuItem" id="menuButtonNext" @click="nextGame">
-				<img src="@static/TGZ/images/icon-nextGame.svg" />
+				<img :src="view.getImage('icon-nextGame')" />
 				<span>Next</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
@@ -222,13 +222,13 @@ function adminBKSbutton() {
 
 			<a href="/TGZ/help/" target="_blank">
 				<span class="topMenuItem">
-					<img src="@static/TGZ/images/icon-rulebook.svg" />
+					<img :src="view.getImage('icon-rulebook')" />
 					<span>Rules</span>
 				</span>
 			</a>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
-				<img src="@static/TGZ/images/icon-box.svg" />
+				<img :src="view.getImage('icon-box')" />
 				<span>Reserve</span>
 			</span>
 
@@ -236,7 +236,7 @@ function adminBKSbutton() {
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]" @click="loadRewind()">
-				<img src="@static/TGZ/images/icon-rewind.svg" />
+				<img :src="view.getImage('icon-rewind')" />
 				<span>Rewind</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
@@ -245,13 +245,13 @@ function adminBKSbutton() {
 
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat" @click="toggleChat">
-				<img src="@static/TGZ/images/icon-chat.svg" />
+				<img :src="view.getImage('icon-chat')" />
 				<span>Chat</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]" id="menuButtonBug" @click="toggleBug">
-				<img src="@static/TGZ/images/icon-stop.svg" />
+				<img :src="view.getImage('icon-stop')" />
 				<span>Bug</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
@@ -260,20 +260,20 @@ function adminBKSbutton() {
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, , { topMenuItemSelected: store.topMenuViews.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
-				<img src="@static/TGZ/images/icon-notebook.svg" />
+				<img :src="view.getImage('icon-notebook')" />
 				<span>Notes</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
-				<img src="@static/TGZ/images/icon-scroll.svg" />
+				<img :src="view.getImage('icon-scroll')" />
 				<span>History</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span class="topMenuItem" @click="toggleReplay">
-				<img src="@static/TGZ/images/icon-replay.svg" />
+				<img :src="view.getImage('icon-replay')" />
 				<span>Replay</span>
 			</span>
 		</div>

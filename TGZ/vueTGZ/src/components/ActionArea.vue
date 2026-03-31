@@ -1321,9 +1321,9 @@ function failedToJustPlaceCraftsmanFlag() {
 			<template v-if="store.context.action === rf.ACT_BUILD_WATER">
 				<b>Place a water tile on any free area</b>
 				<div id="itemBeingAddedDiv">
-					<img class="rot_img rot_img_enabled" @click="rotateNewTile(-1)" src="@static/TGZ/images/rot_anticlockwise.svg" />
+					<img class="rot_img rot_img_enabled" @click="rotateNewTile(-1)" :src="view.getImage('rot_anticlockwise')" />
 					<img class="newTileImg newTileWater" :src="view.getImage('res' + String(store.context.itemBeingAdded))" :class="'r' + String(store.context.itemBeingAddedRotation)" />
-					<img class="rot_img rot_img_enabled" @click="rotateNewTile(1)" src="@static/TGZ/images/rot_clockwise.svg" />
+					<img class="rot_img rot_img_enabled" @click="rotateNewTile(1)" :src="view.getImage('rot_clockwise')" />
 				</div>
 				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
 			</template>
@@ -1392,9 +1392,9 @@ function failedToJustPlaceCraftsmanFlag() {
 				</template>
 				<template v-else>(to the common stock)</template>
 				<div id="itemBeingAddedDiv">
-					<img class="rot_img" :class="rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewTile(-1)" src="@static/TGZ/images/rot_anticlockwise.svg" />
+					<img class="rot_img" :class="rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewTile(-1)" :src="view.getImage('rot_anticlockwise')" />
 					<img class="newTileImg newTileCraftsman" :src="view.getImage('craftsman' + String(store.context.itemBeingAdded))" :class="'r' + String(store.context.itemBeingAddedRotation)" alt="Craftsman" />
-					<img class="rot_img" :class="rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewTile(1)" src="@static/TGZ/images/rot_clockwise.svg" />
+					<img class="rot_img" :class="rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewTile(1)" :src="view.getImage('rot_clockwise')" />
 				</div>
 				<br />
 				Hubs Used:

@@ -296,7 +296,7 @@ function localCastVote(topic) {
 			<br />
 
 			<span class="topMenuItem" @click="loadRewind">
-				<img src="@static/TGZ/images/icon-rewind.svg" />
+				<img :src="view.getImage('icon-rewind')" />
 				<span>Rewind</span>
 			</span>
 

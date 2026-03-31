@@ -373,7 +373,7 @@ function getSplitUIleftMinWidth() {
 					<div v-if="store.topMenuViews.showLoader" id="fLoadingBar">
 						Saving Game.... Please Wait....
 						<br />
-						<img src="@static/TGZ/images/loading-bar-black.gif" />
+						<img :src="view.getImage('loading-bar-black')" />
 					</div>
 					<!-- SPLIT SCREEN REPLAY UI -->
 					<template v-if="store.topMenuViews.replayUIlocation === 2 && store.topMenuViews.showReplay">
