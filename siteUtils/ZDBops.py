@@ -93,37 +93,32 @@ LZD = lzstring.LZString()
 start_calc_time = time.perf_counter()
 count = 0
 
-#TARGET_CODE = "Bus" 
-#
-#allBusFinishedGames = Game.objects.filter(gameCode="BUS", gameStatus="FINISHED")
-#
-## print the number of games
-#print(f"Number of games: {allBusFinishedGames.count()}")
-#
-#errorCount = 0
-#for game in allBusFinishedGames:
-#    try:
-#        # 1. Decode the Base64 string back to binary
-#        compressed_bytes = base64.b64decode(game.gameData)
-#
-#        # 2. Decompress the Gzip binary data
-#        # gzip.decompress is the modern, direct way to do this in Python 3
-#        msgpacked_data = gzip.decompress(compressed_bytes)
-#
-#        # 3. Unpack the MessagePack binary into a Python object
-#        # raw=False ensures strings are decoded as UTF-8 instead of bytes
-#        original_data = msgpack.unpackb(msgpacked_data, raw=False)
-#    except Exception as e:
-#        errorCount += 1
-#
-#print(f"Error count: {errorCount}")
+TARGET_CODE = "Bus" 
+
+allBusFinishedGames = Game.objects.filter(gameCode="BUS", gameStatus="FINISHED")
+
+# print the number of games
+print(f"Number of games: {allBusFinishedGames.count()}")
+
+errorCount = 0
+for game in allBusFinishedGames:
+    try:
+        # 1. Decode the Base64 string back to binary
+        compressed_bytes = base64.b64decode(game.gameData)
+
+        # 2. Decompress the Gzip binary data
+        # gzip.decompress is the modern, direct way to do this in Python 3
+        msgpacked_data = gzip.decompress(compressed_bytes)
+
+        # 3. Unpack the MessagePack binary into a Python object
+        # raw=False ensures strings are decoded as UTF-8 instead of bytes
+        original_data = msgpack.unpackb(msgpacked_data, raw=False)
+    except Exception as e:
+        errorCount += 1
+
+print(f"Error count: {errorCount}")
 
 
-allHCgames = Game.objects.filter(gameCode="HC")
-for game in allHCgames:
-    game.gameCode = "HLC"
-    print(game.id)
-    game.save()
 
 
 
