@@ -298,16 +298,6 @@
      width="400"
      height="30">
 </div>
-<div class="container signin">
-  <input class="homeButton"
-         type="button"
-         data-url="{% url 'index' %}"
-         value="{% translate 'Home' %}" />
-</div>
-<script>
-  document.querySelector('.homeButton').addEventListener('click', function() {
-    window.location.href = this.getAttribute('data-url');
-  });
-</script>
+{% include 'Lobby/common/homeButton.html' %}
 </div>
 {% endblock %}

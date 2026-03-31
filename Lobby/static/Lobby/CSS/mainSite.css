@@ -770,6 +770,25 @@ a {
 
 /** END LOBBY MAIN PAGE **/
 
+/* RNB INFO */
+.RNBinfoContainer {
+	display: inline-block;
+}
+
+.RNBinfoPopup {
+	display: none;
+	position: absolute;
+	background: white;
+	border: 2px solid #333;
+	border-radius: 8px;
+	padding: 10px;
+	box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+	z-index: 1000;
+	width: 600px;
+	height: 400px;
+	overflow: hidden;
+}
+
 /* TGZ INFO */
 .TGZinfoContainer {
 	display: inline-block;

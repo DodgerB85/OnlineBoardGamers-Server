@@ -3,7 +3,7 @@ import time
 import base64
 import gzip
 
-# from decouple import config
+from decouple import config
 from typing import TYPE_CHECKING, cast
 
 from contextlib import contextmanager
@@ -67,6 +67,32 @@ def createRNBgame(request):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     return create_rnb_game(request)
+
+
+def showRNBmap(request, game_id=0):
+    if request.user.username not in ALLOWED_USERS_RNB:
+        return redirect("index")
+    
+    try:
+        currentGame = Game.objects.get(id=game_id, gameCode="RNB")
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist"))
+    
+    settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
+    
+    # Get map data from the game
+    map_data = ""
+    if currentGame.startingMap:
+        map_data = currentGame.startingMap
+    
+    returnData = {
+        "settingsDebug": settings_debug,
+        "gameData": map_data,  # Pass map data directly
+        "gameID": game_id,
+        "gameName": currentGame.gameName if currentGame.gameName else f"RNB Game {game_id}",
+    }
+    
+    return render(request, "RNB/showRNBmapPage.html", returnData)
 
 
 def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):

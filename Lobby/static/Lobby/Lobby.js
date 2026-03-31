@@ -199,6 +199,11 @@ document.addEventListener("DOMContentLoaded", function () {
 				document.getElementById("mapDataAQY").value = this.getAttribute("data-map")
 				form = document.getElementById("openInMapEditorFormAQY")
 			}
+			if (this.getAttribute("data-game") === "RNB") {
+				// Go to /RNB/showRNBmap/{gameID}
+				window.location.href = "/RNB/" + this.getAttribute("data-gameID") + "/maponly/"
+				return
+			}
 			form.submit()
 		}
 		/*customMapImages[i].onmouseenter = function () {
@@ -262,6 +267,60 @@ document.addEventListener("DOMContentLoaded", function () {
 			this.style.opacity = ""
 			const TGZinfoPopup = this.querySelector(".TGZinfoPopup")
 			TGZinfoPopup.style.display = "none"
+		}
+	}
+
+	// Add TGZ info
+	let customRNBinfos = document.querySelectorAll(".RNBinfoContainer")
+	for (let i = 0; i < customRNBinfos.length; i++) {
+		customRNBinfos[i].onclick = function (e) {
+			e.stopPropagation() // stops the browser from redirecting.
+			e.preventDefault()
+			window.location.href = "/showRNBoptions/" + this.parentNode.parentNode.id.slice(11) // Replace 'another_page' with the actual URL name or path for the destination page
+		}
+
+		customRNBinfos[i].addEventListener("contextmenu", function (event) {
+			event.preventDefault()
+		})
+
+		customRNBinfos[i].addEventListener("touchstart", function (event) {
+			event.preventDefault()
+			const RNBinfoPopup = this.querySelector(".RNBinfoPopup")
+			// Calculate the left position of the pop-up
+			const popupWidth = 625
+			const screenWidth = window.innerWidth
+			const cursorX = event.clientX
+			const leftPosition = cursorX + popupWidth > screenWidth ? screenWidth - popupWidth - 200 : cursorX
+
+			// Set the left position of the pop-up
+			RNBinfoPopup.style.left = leftPosition + "px"
+
+			// Show the pop-up
+			RNBinfoPopup.style.display = "block"
+		})
+
+		customRNBinfos[i].onmouseenter = function (event) {
+			this.style.opacity = "0.9"
+			this.style.cursor = "pointer"
+
+			const RNBinfoPopup = this.querySelector(".RNBinfoPopup")
+			// Calculate the left position of the pop-up
+			const popupWidth = 625
+			const screenWidth = window.innerWidth
+			const cursorX = event.clientX
+			const leftPosition = cursorX + popupWidth > screenWidth ? screenWidth - popupWidth - 200 : cursorX
+
+			// Set the left position of the pop-up
+			RNBinfoPopup.style.left = leftPosition + "px"
+
+			// Show the pop-up
+			RNBinfoPopup.style.display = "block"
+		}
+
+		customRNBinfos[i].onmouseleave = function () {
+			this.style.opacity = ""
+			const RNBinfoPopup = this.querySelector(".RNBinfoPopup")
+			RNBinfoPopup.style.display = "none"
 		}
 	}
 

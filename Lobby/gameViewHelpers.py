@@ -36,11 +36,7 @@ def build_show_game_data(
         select_related.extend(extra_select_related)
 
     try:
-        currentGame = (
-            Game.objects.select_related(*select_related)
-            .prefetch_related("players__player", "invitedPlayers")
-            .get(id=game_id, gameCode=game_code)
-        )
+        currentGame = Game.objects.select_related(*select_related).prefetch_related("players__player", "invitedPlayers").get(id=game_id, gameCode=game_code)
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
 
@@ -60,17 +56,9 @@ def build_show_game_data(
     gameID = currentGame.id
     gameName = presenter.getGameName()
     gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = (
-        json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
-    )
-    startingOptions = (
-        json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    )
-    settings_debug = (
-        config(settings_debug_key, default=False, cast=bool)
-        if settings_debug_key
-        else False
-    )
+    KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
+    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    settings_debug = config(settings_debug_key, default=False, cast=bool) if settings_debug_key else False
 
     base_data = {
         "gameID": gameID,
@@ -118,9 +106,7 @@ def build_show_game_data(
     user_id = userObj.id
     user_profile = Profile.objects.get(user=userObj)
 
-    user_gp = next(
-        (gp for gp in all_players if gp.player and gp.player.id == user_id), None
-    )
+    user_gp = next((gp for gp in all_players if gp.player and gp.player.id == user_id), None)
 
     is_in_all = user_id in all_player_ids
     is_missing = user_gp.is_missing if user_gp else False

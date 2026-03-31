@@ -45,6 +45,20 @@
            data-map="{{ game.startingMap }}"
            data-game="AQY">
     {% endif %}
+    {% if game.startingMap and game.gameCode == "RNB" %}
+      <div class="RNBinfoContainer">
+        <img class="startingOption startingMap"
+             alt="Map"
+             width="50"
+             height="50"
+             src="{% static "Lobby/images/createMapRNB.jpg" %}"
+             title="Click to View Map"
+             data-map="{{ game.startingMap }}"
+             data-game="RNB"
+             data-gameID="{{ game.gameID }}" />
+        <div class="RNBinfoPopup">{% include 'RNB/showRNBmap.html' %}</div>
+      </div>
+    {% endif %}
     {{ game.startingOptionsHTML|safe }}
   </td>
   <td>

@@ -10,6 +10,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     # path("RNB/", views.showRNBgame, name="showRNBgame"),
     path("<int:game_id>/show/", views.showRNBgame, name="showRNBgame"),
+    path("<int:game_id>/maponly/", views.showRNBmap, name="showRNBmap"),
     path("help/", views.RNBhelp, name="RNBhelp"),
     ## API routes
     path("createRNBgame/", views.createRNBgame, name="createRNBgame"),

@@ -1,0 +1,29 @@
+{% extends "Lobby/layout.html" %} {% load static %} {% load i18n %} {% block head %}
+<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+<style>
+	/* Ensure topBar stays on top of map */
+	.topBar {
+		z-index: 1000 !important;
+	}
+
+	/* Map container should be below topBar */
+	#hexDIV {
+		z-index: 1;
+	}
+
+	/* Any map-specific elements should be below topBar */
+	/*.map-container, .map-canvas, .map-svg {
+		z-index: 1 !important;
+	}*/
+</style>
+{% endblock %} {% block body %}
+<div class="container">
+	{% if messages %}
+	<div class="messages">
+		{% for message in messages %}
+		<div {% if message.tags %}class="{{ message.tags }}" {% endif %}>{{ message }}</div>
+		{% endfor %}
+	</div>
+	{% endif %} {% include 'RNB/showRNBmap.html' %} {% include 'Lobby/common/homeButton.html' %}
+</div>
+{% endblock %}

@@ -1,107 +1,107 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block description %}
-  <meta name="description"
-        content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}">
+    <meta name="description"
+          content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
 {% endblock %}
 {% block canonical %}
-  <link rel="canonical"
-        href="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}">
-  <meta property="og:url"
-        content="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}/" />
-  <meta property="og:type" content="Online Board Gamers" />
-  <meta property="og:title" content="Online Board Gamers" />
-  <meta property="og:image"
-        content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
-  <meta property="og:description"
-        content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
+    <link rel="canonical"
+          href="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}" />
+    <meta property="og:url"
+          content="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}/" />
+    <meta property="og:type" content="Online Board Gamers" />
+    <meta property="og:title" content="Online Board Gamers" />
+    <meta property="og:image"
+          content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
+    <meta property="og:description"
+          content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
 {% endblock %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
 {% endblock %}
 {% block body %}
-  {% compress js %}
-    <script src="{% static 'Lobby/Lobby.js' %}"></script>
-    <script src="{% static 'Lobby/common.js' %}"></script>
-  {% endcompress %}
-  <div class="container" id="lobbyPage">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
-      {% csrf_token %}
-      <input type="hidden" id="mapData" name="mapData" value="">
-    </form>
-    <form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
-      {% csrf_token %}
-      <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
-    </form>
-    <form id="openInMapEditorFormAQY" action="/AQYmapEditor/" method="post">
-      {% csrf_token %}
-      <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="">
-    </form>
-    <!----------------------------------------------------------------->
-    <div id="learningGameConfirmDiv">
-      <b>Note:</b> The creator has requested a Learning Game.
-      <br />
-      You will be expected to help / teach the other player.
-      <br />
-      This game will be excluded from stats.
-      <br />
-      <br />
-      Are you sure you want to join?
-      <br />
-      <div id="learningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</div>
-      <div id="learningCancel"
-           class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
-    </div>
-    <div class="largeTableContainer">
-      <h2>{% translate "The link allows you to join the following game:" %}</h2>
-      <!-- AVAILABLE GAMES TABLE  -->
-      <div id="availableGamesListView">
-        {% if availableGamesList %}
-          <div class="tableOnlyDiv">
-            <table class="gamesTable">
-              <thead>
-                <tr class="headingRow">
-                  <td class="joinHeader"></td>
-                  <td class="nameHeader">{% translate "Name" %}</td>
-                  <td class="creatorHeader">{% translate "Creator" %}</td>
-                  <td class="playersHeader">{% translate "Players" %}</td>
-                  <td class="speedHeader">{% translate "Speed" %}</td>
-                  <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                  <td class="createdHeader">{% translate "Created" %}</td>
-                  <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
-                </tr>
-              </thead>
-              {% for gameEntry in availableGamesList %}
-                {% include 'Lobby/gameDisplay/availableGameRow.html' with game=gameEntry %}
-              {% endfor %}
-            </table>
-          </div>
-        {% else %}
-          <h1>{% translate "No Available Games" %}</h1>
-          {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+    {% compress js %}
+        <script src="{% static 'Lobby/Lobby.js' %}"></script>
+        <script src="{% static 'Lobby/common.js' %}"></script>
+    {% endcompress %}
+    <div class="container" id="lobbyPage">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
         {% endif %}
-        {% url "lobbyHelp" as the_url %}
-        {% blocktranslate trimmed %}
-          For icon explanations see <a class="linkOther" href="{{ the_url }}">Help</a>
-        {% endblocktranslate %}
-      </div>
+        <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapData" name="mapData" value="" />
+        </form>
+        <form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="" />
+        </form>
+        <form id="openInMapEditorFormAQY" action="/AQYmapEditor/" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="" />
+        </form>
+        <!----------------------------------------------------------------->
+        <div id="learningGameConfirmDiv">
+            <b>Note:</b>
+            The creator has requested a Learning Game.
+            <br />
+            You will be expected to help / teach the other player.
+            <br />
+            This game will be excluded from stats.
+            <br />
+            <br />
+            Are you sure you want to join?
+            <br />
+            <div id="learningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</div>
+            <div id="learningCancel"
+                 class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
+        </div>
+        <div class="largeTableContainer">
+            <h2>{% translate "The link allows you to join the following game:" %}</h2>
+            <!-- AVAILABLE GAMES TABLE  -->
+            <div id="availableGamesListView">
+                {% if availableGamesList %}
+                    <div class="tableOnlyDiv">
+                        <table class="gamesTable">
+                            <thead>
+                                <tr class="headingRow">
+                                    <td class="joinHeader"></td>
+                                    <td class="nameHeader">{% translate "Name" %}</td>
+                                    <td class="creatorHeader">{% translate "Creator" %}</td>
+                                    <td class="playersHeader">{% translate "Players" %}</td>
+                                    <td class="speedHeader">{% translate "Speed" %}</td>
+                                    <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+                                    <td class="createdHeader">{% translate "Created" %}</td>
+                                    <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
+                                </tr>
+                            </thead>
+                            {% for gameEntry in availableGamesList %}
+                                {% include 'Lobby/gameDisplay/availableGameRow.html' with game=gameEntry %}
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% else %}
+                    <h1>{% translate "No Available Games" %}</h1>
+                    {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+                {% endif %}
+                {% url "lobbyHelp" as the_url %}
+                {% blocktranslate trimmed %}
+                    For icon explanations see
+                    <a class="linkOther" href="{{ the_url }}">Help</a>
+                {% endblocktranslate %}
+            </div>
+        </div>
+        {% include 'Lobby/donate/donateBanner.html' %}
+        {% include 'Lobby/splotterconSponsor.html' %}
     </div>
-    {% include 'Lobby/donate/donateBanner.html' %}
-    {% include 'Lobby/splotterconSponsor.html' %}
-  </div>
-  {% block script %}
-    <script>
-  var global = {};
-  global.joinGameLink = true
-
-
-    </script>
-  {% endblock %}
+    {% block script %}
+        <script>
+	var global = {}
+	global.joinGameLink = true
+        </script>
+    {% endblock %}
 {% endblock %}
