@@ -2,7 +2,7 @@
 {% load static i18n compress %}
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/common.js' %}"></script>
@@ -35,7 +35,7 @@
       <br />
       <br />
     {% endfor %}
-    {% include 'Lobby/donate/donateBanner.html' %}
+    {% include "Lobby/donate/donateBanner.html" %}
   </div>
-  {% include 'Lobby/common/homeButton.html' %}
-{% endblock %}
+  {% include "Lobby/common/homeButton.html" %}
+{% endblock body %}

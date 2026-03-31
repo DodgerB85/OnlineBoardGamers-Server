@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   <div class="container" id="contactPage">
     <p>
@@ -18,7 +18,7 @@
     <p class="contactPtext">
       {% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
     </p>
-    {% include 'Lobby/donate/donateBanner.html' %}
+    {% include "Lobby/donate/donateBanner.html" %}
   </div>
-  {% include 'Lobby/common/homeButton.html' %}
-{% endblock %}
+  {% include "Lobby/common/homeButton.html" %}
+{% endblock body %}

@@ -3,7 +3,7 @@
 {% block description %}
     <meta name="description"
           content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
-{% endblock %}
+{% endblock description %}
 {% block canonical %}
     <link rel="canonical"
           href="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}" />
@@ -15,10 +15,10 @@
           content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
     <meta property="og:description"
           content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
-{% endblock %}
+{% endblock canonical %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
-{% endblock %}
+{% endblock head %}
 {% block body %}
     {% compress js %}
         <script src="{% static 'Lobby/Lobby.js' %}"></script>
@@ -32,15 +32,21 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
+        <form id="openInMapEditorForm"
+              action="{% url 'FCMmapEditor' %}"
+              method="post">
             {% csrf_token %}
             <input type="hidden" id="mapData" name="mapData" value="" />
         </form>
-        <form id="openInMapEditorFormTGZ" action="/TGZmapEditor/" method="post">
+        <form id="openInMapEditorFormTGZ"
+              action="{% url 'TGZmapEditor' %}"
+              method="post">
             {% csrf_token %}
             <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="" />
         </form>
-        <form id="openInMapEditorFormAQY" action="/AQYmapEditor/" method="post">
+        <form id="openInMapEditorFormAQY"
+              action="{% url 'AQYmapEditor' %}"
+              method="post">
             {% csrf_token %}
             <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="" />
         </form>
@@ -80,13 +86,13 @@
                                 </tr>
                             </thead>
                             {% for gameEntry in availableGamesList %}
-                                {% include 'Lobby/gameDisplay/availableGameRow.html' with game=gameEntry %}
+                                {% include "Lobby/gameDisplay/availableGameRow.html" with game=gameEntry %}
                             {% endfor %}
                         </table>
                     </div>
                 {% else %}
                     <h1>{% translate "No Available Games" %}</h1>
-                    {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
                 {% endif %}
                 {% url "lobbyHelp" as the_url %}
                 {% blocktranslate trimmed %}
@@ -95,13 +101,13 @@
                 {% endblocktranslate %}
             </div>
         </div>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/splotterconSponsor.html' %}
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/splotterconSponsor.html" %}
     </div>
     {% block script %}
         <script>
 	var global = {}
 	global.joinGameLink = true
         </script>
-    {% endblock %}
-{% endblock %}
+    {% endblock script %}
+{% endblock body %}

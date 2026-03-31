@@ -3,7 +3,7 @@
 {% block head %}
        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
        <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
        <svg id="patternsSVG">
               <pattern id="tile--1" height="100%" width="100%" patternContentUnits="objectBoundingBox">
@@ -161,7 +161,7 @@
                    height="50px">
        </div>
        <div id="topButtons">
-              <form id="mapSubmit" action="/createAQYpage/" method="post">
+              <form id="mapSubmit" action="{% url 'createAQYpage' %}" method="post">
                      {% csrf_token %}
                      <input type="hidden" id="mapData" name="mapData" value="">
                      <input type="button"
@@ -217,5 +217,5 @@
   boardTiles = {{ mapData }}
   {% endif %}
        </script>
-{% endblock %}
-{% endblock %}
+{% endblock script %}
+{% endblock body %}

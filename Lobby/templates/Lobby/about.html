@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   <div class="container" id="aboutPage">
     {% blocktranslate trimmed %}
@@ -92,7 +92,7 @@ Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/Food
          alt="Email Address"
          width="400"
          height="30">
-    {% include 'Lobby/donate/donateBanner.html' %}
-    {% include 'Lobby/common/homeButton.html' %}
+    {% include "Lobby/donate/donateBanner.html" %}
+    {% include "Lobby/common/homeButton.html" %}
   </div>
-{% endblock %}
+{% endblock body %}

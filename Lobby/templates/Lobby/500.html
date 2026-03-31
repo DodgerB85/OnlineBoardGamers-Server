@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     <div class="container">
         {% if messages %}
@@ -36,4 +36,4 @@
         <br />
         <a href="{% url 'index' %}">{% translate "Home" %}</a>
     </div>
-{% endblock %}
+{% endblock body %}

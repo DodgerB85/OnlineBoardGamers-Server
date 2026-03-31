@@ -3,7 +3,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
     {{ request.user.username|json_script:"username" }}
@@ -218,8 +218,8 @@
                        value="{% translate "Create Antiquity Game" %}">
             </div>
         </form>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/splotterconSponsor.html' %}
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/splotterconSponsor.html" %}
     </div>
     {% block script %}
         {% compress js %}
