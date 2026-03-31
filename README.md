@@ -17,25 +17,26 @@ NOTE: iF you don't want to use docker / have issues with it / don't hace access 
 
 1) Make sure you have a working Docker installation.
 2) Pull the code from github. `git clone --depth 1 https://github.com/DodgerB85/OnlineBoardGamers-Server`
-2) Copy .env.docker and rename it to just .env -- Also ensure all docker files for LF line endings, not CRLF.
-3) Navigate to the root of the repo and run `docker compose up --build` (MySQL port is mapped to 3307 so as not to conflict if you're running your own MySQL server)
+3) Copy .env.docker and rename it to just .env 
+4) IMPORTANT: Ensure all docker files have "LF" line endings, not CRLF. Open in eg vs code and change the option at the bottom. (Docker, .yml, .sh files)
+5) Navigate to the root of the repo and run `docker compose up --build` (MySQL port is mapped to 3307 so as not to conflict if you're running your own MySQL server)
 
 Now browse `http://localhost:8000/` and check there are no errors
 You should be able to browsr around the logged-out pages, eg about, help, etc.
 (Or you might get some sort of database error). 
 
-4) Exit back to the command prompt. Confirm containers are running using: `docker compose up -d`
-5) Run this intial DB setup inside the container using `./setup_db.bat` or `docker-compose exec obs sh ./setup_db_script.sh`
-7) To fix migrate errors saying a table doesn't exist, try migrating that specific table, eg `docker-compose exec obs python manage.py migrate WEB`
+6) Exit back to the command prompt. Confirm containers are running using: `docker compose up -d`
+7) Run this intial DB setup inside the container using `./setup_db.bat` or `docker-compose exec obs sh ./setup_db_script.sh`
+8) To fix migrate errors saying a table doesn't exist, try migrating that specific table, eg `docker-compose exec obs python manage.py migrate WEB`
 
 The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). All the pre-built users have their password set to their username - however the hash will be incorrect so in practive you'll need to edit in a pasxword in the admin panel, although in practice you won't ever really need to login as any of these users anyway.
 
-5) Go back to the website, and create a normal user for yourself (Eg "DodgerB") using the "Register New Account" link
-6) Now test your admin access; go to `http://localhost:8000/admin/` and login with the superuser. Find the user you made and tick them active in the User DB. Also tick Email Confirmed in their profile.
-7) Back on the website, login with your new user to check it is working.
-8) Before creating a game, check the admin panel to maker sure all the util users (EG "SHADOW" through to "SHADOW_5") are there.
-9) On the website, create a 2-player Cannes game. It should display in the lobby. Join the game as another user.
-10) Now try opening the game of Cannes - if everything works, you've made it! :)
+9) Go back to the website, and create a normal user for yourself (Eg "DodgerB") using the "Register New Account" link
+10) Now test your admin access; go to `http://localhost:8000/admin/` and login with the superuser. Find the user you made and tick them active in the User DB. Also tick Email Confirmed in their profile.
+11) Back on the website, login with your new user to check it is working.
+12) Before creating a game, check the admin panel to maker sure all the util users (EG "SHADOW" through to "SHADOW_5") are there.
+13) On the website, create a 2-player Cannes game. It should display in the lobby. Join the game as another user.
+114) Now try opening the game of Cannes - if everything works, you've made it! :)
 
 For subsequent starts, use
 
@@ -44,3 +45,5 @@ For subsequent starts, use
 NOTE: If you see errors involving a colon : or quotes " try opening start.sh in VS code or similar and deleting and pasting back in the bottom line. 
 The issue might be to do with line end characters in linux vs windows. 
 Make sure your docker files have LF and not CRLF
+
+NOTE: You aren't required to use docker; especially if it is slow on Windows. As an alternatice, you can create a venv and install the requirements.txt files. Then run the python server and django servers inside the venv. 
