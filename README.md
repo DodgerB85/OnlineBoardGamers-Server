@@ -36,7 +36,7 @@ The compose has also created a superuser for the server - "admin" - "password" a
 11) Back on the website, login with your new user to check it is working.
 12) Before creating a game, check the admin panel to maker sure all the util users (EG "SHADOW" through to "SHADOW_5") are there.
 13) On the website, create a 2-player Cannes game. It should display in the lobby. Join the game as another user.
-114) Now try opening the game of Cannes - if everything works, you've made it! :)
+14) Now try opening the game of Cannes - if everything works, you've made it! :)
 
 For subsequent starts, use
 
