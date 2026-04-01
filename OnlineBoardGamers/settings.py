@@ -242,22 +242,25 @@ if DEBUG:
 Q_CLUSTER = {
     "name": "obg_cluster",
     "workers": 1,  # Keep this at 1 on PythonAnywhere
-    "timeout": 60,  # Process timeout
+    "timeout": 90,  # Process timeout
     #'compress': True, # DO NOT USE - Instead pass minimal data as args to async tasks
-    "retry": 120,
-    "queue_limit": 10,
+    "retry": 180,
+    "queue_limit": 1,
     "orm": "default",  # Or your database alias
-    "gc_interval": 3600,  # Run the garbage collector every hour (3600 seconds)
-    "label": "Django Q",  # Admin label
+    "gc_interval": 7200,  # Run garbage collector every 2 hours instead of 1 hour
+    "label": None,  # Admin label
     "ack_failures": True,  # Cleanup failed tasks
     # --- CRITICAL CPU SAVING SETTINGS ---
-    "bulking": 10,  # Process up to 10 tasks at once to reduce overhead
+    "bulking": 1,  # Process up to 10 tasks at once to reduce overhead
     "sync": False,
     # --- END CPU SAVING SETTINGS ---
-    "guard_cycle": 60.0,  # Wake up once a minute instead of every 5 seconds
-    "recycle": 0,  # Stop the CPU-heavy process-restarting cycle
+    "guard_cycle": 180.0,  # Wake up every 5 minutes instead of every 3 minutes
+    "recycle": 1000,  # Even less process restarting
     "save_limit": 0,  # Stop writing success logs to the DB
-    "sleeptime": 60,  # Match your guard cycle for consistency
+    "sleeptime": 180,  # Match guard cycle for consistency
+    "heartbeat": None,     # Disable CPU-heavy status checks
+    "max_attempts": 1,  # Don't retry failed tasks multiple times
+    "catch_up": False,  # Don't try to catch up on missed tasks
 }
 
 # NB this oculd kill very long DB connections
