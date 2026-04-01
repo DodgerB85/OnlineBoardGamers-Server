@@ -7,20 +7,8 @@ function StartWebSocket() {
 	}
 
 	var ChannelNumber = global.gameID
-	//ChannelNumber = 255
 
-	//wsUri = "wss://connect.websocket.in/v3/" + ChannelNumber + "?apiKey=***REMOVED***";
-	//wsUri = "wss://socketsbay.com/wss/v2/10/5c77d2bb57dcf99bd4bdea1584117526/";
-	// var wsUri = "wss://socketsbay.com/wss/v2/" + String(ChannelNumber) + "/5c77d2bb57dcf99bd4bdea1584117526/";
-	//FCMwebSocket.close();
-	//var wsUri = "wss://wss.s3.sitereview.io/ws/allFCMchannels/";
 	var wsUri = "wss://wss.s3.sitereview.io/ws/HomeHLCchannel" + String(ChannelNumber) + "/"
-
-	//wss://wss.s3.sitereview.io/ws/anythingyoulikehere/
-
-	// Alternate Jonny Server
-
-	// wss://wsserver.fly.dev/ws/yourchannelhere/
 
 	HLCwebSocket = new WebSocket(wsUri)
 

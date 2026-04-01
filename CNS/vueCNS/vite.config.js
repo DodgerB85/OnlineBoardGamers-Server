@@ -2,6 +2,10 @@ import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
 import { resolve } from "path"
 import { fileURLToPath, URL } from "node:url"
+import dotenv from "dotenv"
+
+// Load environment variables from root .env
+dotenv.config({ path: resolve("../../.env") })
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
