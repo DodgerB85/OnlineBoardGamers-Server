@@ -5,7 +5,7 @@ This project is licensed under a custom **Source Available** license.
 - ❌ **Commercial Use:** Prohibited without permission.
 - ❌ **Public Hosting:** Prohibited without permission.
 
-See the [LICENSE](LICENSE) file for the full legal text.
+See the [LICENSE](LICENSE.md) file for the full legal text.
 
 ## Setup & Install
 I find it quite frustrating when I want to try out a project, only to find out it requires an obfuscated ton of setup, including setting up weird paid AWS services and pushing to remote server.
