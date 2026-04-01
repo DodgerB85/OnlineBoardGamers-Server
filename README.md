@@ -47,3 +47,9 @@ The issue might be to do with line end characters in linux vs windows.
 Make sure your docker files have LF and not CRLF
 
 NOTE: You aren't required to use docker; especially if it is slow on Windows. As an alternatice, you can create a venv and install the requirements.txt files. Then run the python server and django servers inside the venv. 
+
+## Deployment
+There is currently no automated testing, and deployments are done manually by running a batch script to do a git pull / collectstatic / etc.
+
+## Production
+PA runs the Django server; there's a qcluster for async tasks (not currently used due technical limitations on PA that I'm in the process of working around), and the scripts in ./siteUtils generally run once a day to perform upkeep / notification emails.

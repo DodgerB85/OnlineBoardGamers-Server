@@ -1981,7 +1981,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
     OBG_TURN_3_IDX = 3
     # OBG_TURN_4_IDX = 4
     OBG_MAILER_IDX = 5
-    MAIL_RELAY_IDX = 6
+    MAIN_EMAIL_IDX = 6
     # Start by defining all the outgoing options
     ADDRESSES = [
         "OnlineBoardGamers@gmail.com",  # 0
@@ -2000,7 +2000,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         "smtp.gmail.com",  # 3
         "smtp.gmail.com",  # 4
         "smtp.gmail.com",  # 5
-        "smtp1.s.ipzmarketing.com",  # 6
+        config("MAIN_EMAIL_SERVER"),  # 6
     ]
 
     LOGINS = [
@@ -2010,7 +2010,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         "OnlineBoardGamers.turn3@gmail.com",  # 3
         "OnlineBoardGamers.turn4@gmail.com",  # 4
         "OnlineBoardGamers.mailer@gmail.com",  # 5
-        config("MAIL_RELAY_LOGIN"),  # 6
+        config("MAIN_EMAIL_LOGIN"),  # 6
     ]
 
     PASSWORDS = [
@@ -2020,7 +2020,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         config("OBG_TURN3_EMAIL_APP_PWD", default="", cast=str),  # 3
         config("OBG_TURN4_EMAIL_APP_PWD", default="", cast=str),  # 4
         config("OBG_MAILER_EMAIL_APP_PWD", default="", cast=str),  # 5
-        config("MAIL_RELAY_PWD", default="", cast=str),  # 6
+        config("MAIN_EMAIL_PWD", default="", cast=str),  # 6
     ]
 
     idx = 0
@@ -2033,21 +2033,21 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
     elif emailTypeFlag == "gameEnd":
         idx = OBG_MAILER_IDX
     elif emailTypeFlag == "2hourReminder":
-        idx = MAIL_RELAY_IDX
+        idx = MAIN_EMAIL_IDX
     elif emailTypeFlag == "turnExpired":
-        idx = MAIL_RELAY_IDX
+        idx = MAIN_EMAIL_IDX
     elif emailTypeFlag == "24hrReminder":
-        idx = MAIL_RELAY_IDX
+        idx = MAIN_EMAIL_IDX
     elif emailTypeFlag == "tournamentGameStart":
         idx = OBG_MAILER_IDX
     elif emailTypeFlag == "tournamentWin":
         idx = OBG_MAILER_IDX
     elif emailTypeFlag == "tournamentOpen":
-        idx = MAIL_RELAY_IDX
+        idx = MAIN_EMAIL_IDX
     elif emailTypeFlag == "MTinvite":
         idx = OBG_MAILER_IDX
     elif emailTypeFlag == "yourTurnFactoryFix":
-        idx = MAIL_RELAY_IDX
+        idx = MAIN_EMAIL_IDX
     elif emailTypeFlag == "yourTurn":
         counter = 0
         try:
@@ -2069,7 +2069,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         if counter > 800:
             idx = OBG_TURN_3_IDX
         if counter > 1200:
-            idx = MAIL_RELAY_IDX
+            idx = MAIN_EMAIL_IDX
         if counter > 1600:
             counter = 0
         # if counter > 675:
@@ -2078,7 +2078,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         #    idx = 0
 
     # HARD CODE IDX HERE
-    idx = MAIL_RELAY_IDX
+    idx = MAIN_EMAIL_IDX
 
     fromEmail = ADDRESSES[idx]
     # Validate and assert password type
@@ -2101,7 +2101,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
             msg["Subject"] = subject
             msg.attach(MIMEText(message, "html"))
 
-            # ADDED TIMEOUT=15: This stops the 184-second hang if Mailrelay is slow
+            # ADDED TIMEOUT=15: This stops the 184-second hang if Main Email is slow
             server = smtplib.SMTP(serverAddress, 587, timeout=30)
             server.starttls()
             server.login(loginUsername, fromPassword)
@@ -2110,7 +2110,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
 
         except Exception as e:
             # Logs the error so you know why it failed without hanging the cluster
-            error_msg = f"❌ Mailrelay Failure for {toEmail}: {e}"
+            error_msg = f"❌ Main Email Failure for {toEmail}: {e}"
             print(error_msg)
             SN_sendAdminErrorMessage(None, error_msg)
 

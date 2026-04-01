@@ -73,7 +73,7 @@ else:
     EMAIL_HOST = "smtp.gmail.com"
     EMAIL_USE_TLS = True
     EMAIL_PORT = 587
-    EMAIL_HOST_USER = "OnlineBoardGamers@gmail.com"
+    EMAIL_HOST_USER = config("OBG_EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = config("OBG_EMAIL_APP_PWD")
 
 EMAIL_TIMEOUT = 20  # This protects your CPU budget
