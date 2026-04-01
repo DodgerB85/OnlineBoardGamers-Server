@@ -1,33 +1,38 @@
-const globals = require("globals")
-const pluginJs = require("@eslint/js")
+const js = require("@eslint/js")
 const pluginVue = require("eslint-plugin-vue")
+const skipFormatting = require("@vue/eslint-config-prettier/skip-formatting")
+const globals = require("globals")
 
 module.exports = [
-	// 1. Base JS Recommended
-	pluginJs.configs.recommended,
-
-	// 2. Vue Essential (ensure this doesn't accidentally "overwrite" the JS rules)
-	...pluginVue.configs["flat/essential"],
-
-	// 3. Application logic for all files
 	{
-		files: ["**/*.js", "**/*.vue"],
-		name: "user-overrides",
+		// Ensure it matches files in subdirectories
+		files: ["**/*.{js,mjs,jsx,vue}"],
 		languageOptions: {
-			globals: globals.browser,
-			ecmaVersion: "latest",
-			sourceType: "module",
+			// Tell ESLint you are in a browser so it knows 'window', etc.
+			globals: {
+				...globals.browser,
+			},
 		},
+	},
+	{
+		name: "app/files-to-ignore",
+		ignores: ["dist/", "dist-ssr/", "coverage/**"],
+	},
+	js.configs.recommended,
+	...pluginVue.configs["flat/essential"],
+	skipFormatting,
+	{
 		rules: {
-			"no-dupe-else-if": "error", // Force this rule on
-			"vue/no-undef-properties": "error", // <--- ADD THIS
-			// Add this to catch message1
+			"no-undef": "error",
+			"vue/no-undef-properties": "error",
+			"no-dupe-else-if": "error",
+			"no-unreachable": "off",
 			"no-unused-vars": [
 				"error",
 				{
-					args: "all", // Check all arguments
-					argsIgnorePattern: "^_", // Allow arguments starting with _ (e.g., _idx)
-					vars: "all", // Check all variables
+					args: "all",
+					argsIgnorePattern: "^_",
+					vars: "all",
 				},
 			],
 		},

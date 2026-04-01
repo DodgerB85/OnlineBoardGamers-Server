@@ -4,6 +4,11 @@ logs
 *.pyc
 .setup_complete
 __pycache__/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
 db.sqlite3
 db.sqlite3-journal
 media
