@@ -936,7 +936,7 @@ def password_reset_request(request):
                         send_mail(
                             subject,
                             email,
-                            "OnlineBoardGamers@gmail.com",
+                            config("OBG_EMAIL_HOST_USER"),
                             [user.email],
                             fail_silently=False,
                         )
@@ -2419,7 +2419,7 @@ class registerView(View):
                 send_mail(
                     subject,
                     emailText,
-                    "OnlineBoardGamers@gmail.com",
+                    config("OBG_EMAIL_HOST_USER"),
                     [user.email],
                     fail_silently=False,
                 )
