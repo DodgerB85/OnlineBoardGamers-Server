@@ -564,34 +564,34 @@ function renderBoard(playerCount) {
 function changePlayerNumberGraphics(playerNumber) {
     switch (playerCount) {
         case 2:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
             break;
         case 3:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
-            document.getElementById("3player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("3player").src = "/static/Lobby/images/playerFilled.svg";
             break;
         case 4:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
-            document.getElementById("3player").src = "/static/Lobby/images/player.png";
-            document.getElementById("4player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("3player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("4player").src = "/static/Lobby/images/playerFilled.svg";
             break;
         case 5:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
-            document.getElementById("3player").src = "/static/Lobby/images/player.png";
-            document.getElementById("4player").src = "/static/Lobby/images/player.png";
-            document.getElementById("5player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("3player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("4player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("5player").src = "/static/Lobby/images/playerFilled.svg";
             break;
         case 6:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
-            document.getElementById("3player").src = "/static/Lobby/images/player.png";
-            document.getElementById("4player").src = "/static/Lobby/images/player.png";
-            document.getElementById("5player").src = "/static/Lobby/images/player.png";
-            document.getElementById("6player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("3player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("4player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("5player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("6player").src = "/static/Lobby/images/playerFilled.svg";
             break;
     }
 }
@@ -601,40 +601,40 @@ function changePlayerNumber() {
     availableTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
     switch (playerCount) {
         case 2:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
             boardTiles = [-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0];
             //boardTiles = [20, 0, 20, 0, 20, 0, 20, 0, 20, 0, 20, 0, 20, 0, 20, 0, 20, 0];
             break;
         case 3:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
-            document.getElementById("3player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("3player").src = "/static/Lobby/images/playerFilled.svg";
             boardTiles = [-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0];
             break;
         case 4:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
-            document.getElementById("3player").src = "/static/Lobby/images/player.png";
-            document.getElementById("4player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("3player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("4player").src = "/static/Lobby/images/playerFilled.svg";
             boardTiles = [-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0];
             break;
         case 5:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
-            document.getElementById("3player").src = "/static/Lobby/images/player.png";
-            document.getElementById("4player").src = "/static/Lobby/images/player.png";
-            document.getElementById("5player").src = "/static/Lobby/images/player.png";
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("3player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("4player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("5player").src = "/static/Lobby/images/playerFilled.svg";
             boardTiles = [-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0];
             break;
         case 6:
-            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerNone.png");
-            document.getElementById("2player").src = "/static/Lobby/images/player.png";
-            document.getElementById("3player").src = "/static/Lobby/images/player.png";
-            document.getElementById("4player").src = "/static/Lobby/images/player.png";
-            document.getElementById("5player").src = "/static/Lobby/images/player.png";
-            document.getElementById("6player").src = "/static/Lobby/images/player.png";
-            boardTiles = [-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0];
+            document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
+            document.getElementById("2player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("3player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("4player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("5player").src = "/static/Lobby/images/playerFilled.svg";
+            document.getElementById("6player").src = "/static/Lobby/images/playerFilled.svg";
+            boardTiles = [-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0];
             break;
     }
     document.getElementById('BGHstatsContainer').style.display = 'none';

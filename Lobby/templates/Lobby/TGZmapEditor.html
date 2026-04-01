@@ -15,19 +15,19 @@
     {% endif %}
     <div id="playerNumberArea">
       <img class="playerCountFixed"
-           src="{% static 'Lobby/images/player.png' %}"
+           src="{% static 'Lobby/images/playerFilled.svg' %}"
            id="1player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/player.png' %}"
+           src="{% static 'Lobby/images/playerFilled.svg' %}"
            id="2player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/playerNone.png' %}"
+           src="{% static 'Lobby/images/playerOutline.svg' %}"
            id="3player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/playerNone.png' %}"
+           src="{% static 'Lobby/images/playerOutline.svg' %}"
            id="4player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/playerNone.png' %}"
+           src="{% static 'Lobby/images/playerOutline.svg' %}"
            id="5player">
     </div>
     <div id="topButtons">
@@ -35,7 +35,7 @@
         {% csrf_token %}
         <input type="hidden" id="mapData" name="mapData" value="">
         <input type="button"
-        class="actionsLineButton"
+               class="actionsLineButton"
                onclick="createGameWithMap()"
                value="{% translate " Create a game with this map" %}">
       </form>
@@ -60,7 +60,6 @@
       <div id="board"></div>
     </div>
     {% block script %}
-     
       <script>
   document.addEventListener('DOMContentLoaded', function () {
 
@@ -80,7 +79,7 @@
   {% endif %}
 
       </script>
-       {% compress js %}
+      {% compress js %}
         <script src="{% static 'Lobby/createTGZmap.js' %}"></script>
       {% endcompress %}
     {% endblock %}

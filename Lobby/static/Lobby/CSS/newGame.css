@@ -487,6 +487,20 @@
 /** FCM Map Editor Page **/
 #playerNumberArea {
 	height: 50px;
+	display: inline-block;
+	align-items: center;
+	gap: 4px;
+	margin: auto;
+}
+
+.playerCount {
+	display: inline-block;
+	height: 50px;
+}
+
+.playerCountFixed {
+	display: inline-block;
+	height: 50px;
 }
 
 #topButtons {

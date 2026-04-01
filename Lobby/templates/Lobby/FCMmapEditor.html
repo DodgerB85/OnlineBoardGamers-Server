@@ -3,7 +3,7 @@
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   <div class="container">
     {% if messages %}
@@ -15,26 +15,26 @@
     {% endif %}
     <div id="playerNumberArea">
       <img class="playerCountFixed"
-           src="{% static 'Lobby/images/player.png' %}"
+           src="{% static 'Lobby/images/playerFilled.svg' %}"
            id="1player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/player.png' %}"
+           src="{% static 'Lobby/images/playerFilled.svg' %}"
            id="2player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/playerNone.png' %}"
+           src="{% static 'Lobby/images/playerOutline.svg' %}"
            id="3player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/playerNone.png' %}"
+           src="{% static 'Lobby/images/playerOutline.svg' %}"
            id="4player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/playerNone.png' %}"
+           src="{% static 'Lobby/images/playerOutline.svg' %}"
            id="5player">
       <img class="playerCount"
-           src="{% static 'Lobby/images/playerNone.png' %}"
+           src="{% static 'Lobby/images/playerOutline.svg' %}"
            id="6player">
     </div>
     <div id="topButtons">
-      <form id="mapSubmit" action="/createFCMpage/" method="post">
+      <form id="mapSubmit" action="{% url 'createFCMpage' %}" method="post">
         {% csrf_token %}
         <input type="hidden" id="mapData" name="mapData" value="">
         <input type="button"
@@ -109,7 +109,9 @@
           <br />
         </div>
         <br />
-        <button class="actionsLineButton" id="BGHgenerateButton" onclick="generateBGHmap()">Generate Map</button>
+        <button class="actionsLineButton"
+                id="BGHgenerateButton"
+                onclick="generateBGHmap()">Generate Map</button>
         <div id="BGHspinnerDiv">
           <img src="{% static 'Lobby/images/spinner.gif' %}" id="BGHspinnerImg">
         </div>
@@ -178,11 +180,12 @@
     <div id="boardArea">
       <div id="board"></div>
     </div>
-    {% block script %}
-      {% compress js %}
-        <script src="{% static 'Lobby/createFCMmap.js' %}"></script>
-      {% endcompress %}
-      <script>
+  </div>
+  {% block script %}
+    {% compress js %}
+      <script src="{% static 'Lobby/createFCMmap.js' %}"></script>
+    {% endcompress %}
+    <script>
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll(".playerCount").forEach((element) => element.addEventListener('click', changePlayerNumber));
     init();
@@ -202,6 +205,6 @@
    {% else %}
    global.listType = "current";
    {% endif %}*/
-      </script>
-    {% endblock %}
-  {% endblock %}
+    </script>
+  {% endblock script %}
+{% endblock body %}
