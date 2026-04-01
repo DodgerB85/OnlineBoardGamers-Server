@@ -1822,8 +1822,15 @@ span.campaign_duration.inverted {
 }
 
 .zoomButton {
-	font-weight: bolder;
-	font-size: 1.5em;
+	font-weight: 900;
+	font-size: 15px;
+	margin-left: 5px;
+	min-width: 20px;
+	text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
 }
 
 #historyToggleDiv {

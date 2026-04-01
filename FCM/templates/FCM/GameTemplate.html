@@ -114,11 +114,9 @@
               </div>
               <div id="testDiv"></div>
               <div id="zoomDiv">
-                <label id="zoomLabel">{% translate "ZOOM" %}</label>
-                <br />
-                <input class="zoomButton" type="button" value="+" onclick="V.doZoom(1)">
+                <button class="zoomButton" onclick="V.doZoom(1)">🔍+</button>
                 &nbsp;
-                <input class="zoomButton" type="button" value="-" onclick="V.doZoom(-1)">
+                <button class="zoomButton" onclick="V.doZoom(-1)">🔍-</button>
                 {% if rewindPanelType == 1 and not finishedGame %}
                   <br />
                   <div id="dropdownContainer">

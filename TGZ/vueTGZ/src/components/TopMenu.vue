@@ -284,9 +284,8 @@ function adminBKSbutton() {
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br />
 			</div>
-			<label @click="zoomClick">Zoom</label>
-			<input class="zoomButton" type="button" value="+" @click="doZoom(1)" />
-			<input class="zoomButton" type="button" value="-" @click="doZoom(-1)" />
+			<button class="zoomButton" @click="doZoom(1)">🔍+</button>
+			<button class="zoomButton" @click="doZoom(-1)">🔍-</button>
 			<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 				<br />
 				<span id="kickoutTimerSpan">

@@ -239,11 +239,9 @@ function toggleReserve() {
 			</div>
 
 			<div id="zoomDiv">
-				<label id="zoomLabel">Zoom</label>
-				<input class="tableZoomButton" type="button"
-					:value="store.topMenuViews.showWholeTable ? 'Map' : 'Table'" @click="tableZoom()" />
-				<input class="zoomButton" type="button" value="+" @click="doZoom(1)" />
-				<input class="zoomButton" type="button" value="-" @click="doZoom(-1)" />
+				<button class="tableZoomButton" @click="tableZoom()">🔍{{ store.topMenuViews.showWholeTable ? 'Map' : 'Table' }}</button>
+				<button class="zoomButton" @click="doZoom(1)">🔍+</button>
+				<button class="zoomButton" @click="doZoom(-1)">🔍-</button>
 			</div>
 		</div>
 
