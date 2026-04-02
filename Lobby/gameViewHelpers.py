@@ -3,6 +3,7 @@ from socket import gaierror
 
 from decouple import config
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext
@@ -198,7 +199,7 @@ def build_show_game_data(
         "involved_data": involved_data,
     }
 
-
+@login_required
 def shared_save_zoom(request, game_code):
     if request.method != "PUT":
         return JsonResponse({"error": "Wrong request."}, status=400)
@@ -210,6 +211,17 @@ def shared_save_zoom(request, game_code):
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=game_code)
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
+        
+        # If you are not an invovled player, don't save the zoom
+        user_id = request.user.id
+        all_players = [gp for gp in currentGame.players.all() if not gp.is_kicked]
+        all_player_ids = {gp.player.id for gp in all_players if gp.player}
+        user_gp = next((gp for gp in all_players if gp.player and gp.player.id == user_id), None)
+        is_in_all = user_id in all_player_ids
+        is_missing = user_gp.is_missing if user_gp else False
+        if is_missing or not is_in_all:
+            return JsonResponse({"response": "ok"})
+
         zoomLevels = json.loads(currentGame.zoomLevels)
 
         if jsonData.get("allPlayers"):
