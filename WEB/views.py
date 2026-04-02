@@ -3,7 +3,6 @@ import time
 import base64
 import gzip
 
-from decouple import config
 from typing import TYPE_CHECKING, cast
 
 from contextlib import contextmanager
@@ -16,7 +15,6 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.db import transaction, connection
-from django.db.models import Q
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
@@ -25,12 +23,11 @@ from Lobby.sharedFunctions.sharedFunctions import (
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendInviteNotifications,
     SN_sendNextTurnNotification,
-    SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
-from Lobby.models import User, Profile, Game, GamePlayer
+from Lobby.models import User, Game, GamePlayer
 
 from Lobby.gameViewHelpers import (
     build_show_game_data,

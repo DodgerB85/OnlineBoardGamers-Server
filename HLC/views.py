@@ -1,30 +1,22 @@
-from cmath import phase
 import json
 import time
 
 # from datetime import datetime
-import requests
 import re
 import lzstring
-from random import randint
 
 from decouple import config
 from typing import TYPE_CHECKING, cast
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.sites.shortcuts import get_current_site
-from django.contrib import messages
-from django.template.loader import render_to_string
-from django.urls import reverse
-from django.db.models import Q
 
 from contextlib import contextmanager
 
 from django.db import connection
 
-from Lobby.models import User, Profile, Game, GamePlayer
+from Lobby.models import User, Game
 
 from Lobby.gameViewHelpers import (
     build_show_game_data,
@@ -35,19 +27,14 @@ from Lobby.gameViewHelpers import (
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
-    SF_getGameCreationJsonReturn,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
-    SN_sendBugReportEmail,
     SN_sendNextTurnNotification,
     SN_sendFactoryAlertNotification,
     SN_sendAdminErrorMessage,
 )
-from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
-from django.utils.translation import gettext, get_language
-from django.utils import translation
+from django.utils.translation import gettext
 
 if TYPE_CHECKING:
     from Lobby.presenters import HLCpresenter
@@ -81,178 +68,8 @@ def HLCgameSummary(request, game_id):
 
 @login_required()
 def createHLCgame(request):
-    # Creating a game must be via POST
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    # Check Not You
-    if "trainingGame" not in request.POST:
-        # if request.user.username in [request.POST["player2"], request.POST["player3"], request.POST["player4"], request.POST["player5"]]:
-        if request.user.username in [
-            request.POST.get("player3"),
-            request.POST.get("player4"),
-            request.POST.get("player5"),
-        ]:
-            messages.error(
-                request, gettext("You cannot add yourself as another player")
-            )
-            return HttpResponseRedirect(reverse("createHLCpage"))
-
-        # CHECK APPROPRIATE NUMBER OF ENTERED USERS ARE REAL AND UNIQUE
-        if request.POST["player2"] != "":
-            try:
-                User.objects.get(username=request.POST["player2"])
-            except User.DoesNotExist:
-                messages.error(request, gettext("Error: Player 2 does not exist"))
-                return HttpResponseRedirect(reverse("createHLCpage"))
-        if request.POST["player3"] != "":
-            try:
-                User.objects.get(username=request.POST["player3"])
-            except User.DoesNotExist:
-                messages.error(request, gettext("Error: Player 3 does not exist"))
-                return HttpResponseRedirect(reverse("createHLCpage"))
-        if request.POST["player4"] != "":
-            try:
-                User.objects.get(username=request.POST["player4"])
-            except User.DoesNotExist:
-                messages.error(request, gettext("Error: Player 4 does not exist"))
-                return HttpResponseRedirect(reverse("createHLCpage"))
-        if request.POST["player5"] != "":
-            try:
-                User.objects.get(username=request.POST["player5"])
-            except User.DoesNotExist:
-                messages.error(request, gettext("Error: Player 5 does not exist"))
-                return HttpResponseRedirect(reverse("createHLCpage"))
-
-    _gameName = request.POST["gameName"]
-
-    _gameDescription = request.POST["gameDescription"]
-
-    _maxPlayers = 3
-    if "playerNumber" in request.POST:
-        _maxPlayers = int(request.POST["playerNumber"])
-
-    _player_order_seed = randint(0, _maxPlayers - 1)
-    statsExcludedGame = False
-
-    _startingOptions = []
-    if "trainingGame" in request.POST:
-        _startingOptions.append(int(request.POST["trainingGame"]))
-    if "experiencedGame" in request.POST:
-        _startingOptions.append(int(request.POST["experiencedGame"]))
-
-    if "limitVehicles" in request.POST:
-        # Exclude from stats
-        statsExcludedGame = True
-        if "vehicleLimitRadio" in request.POST:
-            _startingOptions.append(int(request.POST["vehicleLimitRadio"]))
-        if "increaseMainlines" in request.POST:
-            _startingOptions.append(int(request.POST["increaseMainlines"]))
-
-    _created = SR_getTimeNow()
-    _pace = request.POST["pace"]
-
-    newGame = Game(
-        gameCode="HLC",
-        gameName=_gameName,
-        gameDescription=_gameDescription,
-        creator=request.user,
-        host=request.user,
-        gamePace=_pace,
-        turn=0,
-        phase=0,
-        created=_created,
-        latestUpdate=_created,
-        playerOrderSeed=_player_order_seed,
-        startingOptions=json.dumps(_startingOptions, separators=(",", ":")),
-        maxPlayers=_maxPlayers,
-        gameStatus="AVAILABLE",
-        statsExcludedGame=statsExcludedGame,
-    )
-    newGame.save()
-
-    _player1 = request.user
-    GamePlayer.objects.create(game=newGame, player=_player1, seat_order=0)
-
-    if "trainingGame" in request.POST:
-        newGame.gameStatus = "ACTIVE"
-        _newPlayer1 = User.objects.get(username="SHADOW")
-        GamePlayer.objects.create(game=newGame, player=_newPlayer1, seat_order=1)
-        displayNames = ""
-        if request.POST["player2"] != "":
-            displayNames = request.POST["player2"] + ","
-        else:
-            displayNames = "SHADOW,"
-        if _maxPlayers >= 3:
-            _newPlayer2 = User.objects.get(username="SHADOW_2")
-            GamePlayer.objects.create(game=newGame, player=_newPlayer2, seat_order=2)
-            if request.POST["player3"] != "":
-                displayNames += request.POST["player3"] + ","
-            else:
-                displayNames += "SHADOW_2,"
-        if _maxPlayers >= 4:
-            _newPlayer3 = User.objects.get(username="SHADOW_3")
-            GamePlayer.objects.create(game=newGame, player=_newPlayer3, seat_order=3)
-            if request.POST["player4"] != "":
-                displayNames += request.POST["player4"] + ","
-            else:
-                displayNames += "SHADOW_3,"
-        if _maxPlayers >= 5:
-            _newPlayer4 = User.objects.get(username="SHADOW_4")
-            GamePlayer.objects.create(game=newGame, player=_newPlayer4, seat_order=4)
-            if request.POST["player5"] != "":
-                displayNames += request.POST["player5"] + ","
-            else:
-                displayNames += "SHADOW_4,"
-
-        displayNames = displayNames[:-1]
-        # Store displayNames in player0's notes
-        player_gp = newGame.players.filter(player=request.user).first()
-        if player_gp:
-            player_gp.notes = displayNames
-            player_gp.save()
-        presenter = cast("HLCpresenter", newGame.presenter())
-        presenter.startGame(request)
-    else:
-        usernamesToNotify = []
-        for i in range(2, _maxPlayers + 1):
-            player_username = request.POST.get(f"player{i}", "")
-            if player_username:
-                newPlayer = get_object_or_404(User, username=player_username)
-                newGame.gameStatus = "WAITING"
-                newGame.invitedPlayers.add(newPlayer)
-                usernamesToNotify.append(newPlayer.username)
-
-        SN_sendInviteNotifications(
-            request,
-            usernamesToNotify,
-            newGame.presenter().getGameName(),
-            _maxPlayers,
-            "HLC",
-        )
-
-    newGame.kickoutDuration = request.POST["kickoutDuration"]
-
-    if "trainingGame" in request.POST:
-        newGame.statsExcludedGame = True
-
-    if "privateGame" in request.POST:
-        newGame.gameStatus = "PRIVATE"
-
-    newGame.save()
-
-    if "trainingGame" in request.POST:
-        messages.success(request, (gettext("Your Practice game has started")))
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "current"})
-        )
-    else:
-        messages.success(
-            request, (SF_getGameCreationJsonReturn("HLC", getattr(newGame, "id")))
-        )
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "waiting"})
-        )
+    from HLC.common import create_hlc_game
+    return create_hlc_game(request)
 
 
 def processHLCturn(request):
@@ -1017,10 +834,6 @@ def showHLCgame(request, game_id):
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ""
 
-    # Chat notification separately (could be kicked out)
-    chat_notify_ids = {
-        gp.player.id for gp in all_players if gp.player and gp.has_chat_notification
-    }
     # Also check all players including kicked
     all_gps_including_kicked = list(currentGame.players.select_related("player").all())
     chat_notify_ids_all = {
@@ -1299,7 +1112,7 @@ def HLCdata(request, dataType):
                 request, f"ERROR IN HLCdata: gameID: {jsonData['gameID']} Error: {e}"
             )
             # NB this might need to be changed if the above msg is getting triggered
-            specialData = False
+            #specialData = False
 
             return JsonResponse(
                 {

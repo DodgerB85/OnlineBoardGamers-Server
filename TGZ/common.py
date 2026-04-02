@@ -9,10 +9,8 @@ from django.db import transaction
 from django.utils.translation import gettext
 import json
 import random
-import requests
 from Lobby.models import User
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_M_T_sendTournamentGameStartNotification,
     SN_sendInviteNotifications,
 )
 from Lobby.sharedFunctions.sharedFunctions import (
@@ -107,7 +105,7 @@ def create_tgz_game(
     starting_map = ""
     shadowNameNotes = ""
     usernames_to_notify = []
-    invited_players = []
+    #invited_players = []
     stats_exclude = False
     player_order_seed = random.randint(1000, 32767)
     all_players = []
@@ -250,7 +248,7 @@ def create_tgz_game(
 
         # Add players using GamePlayer
         for idx, player in enumerate(all_players):
-            gp = GamePlayer.objects.create(
+            GamePlayer.objects.create(
                 game=new_game,
                 player=player,
                 seat_order=idx,

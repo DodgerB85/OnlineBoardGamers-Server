@@ -66,20 +66,14 @@ def create_bus_game(
         valid_players = []
         for username in usernames:
             if username not in existing_usernames:
-                messages.error(
-                    request, gettext(f"Error:Player '{username}' does not exist")
-                )
+                messages.error(request, gettext(f"Error:Player '{username}' does not exist"))
                 return None
             if not allow_creator and username == request.user.username:
                 messages.error(request, gettext("Error: You cannot add yourself"))
                 return None
             valid_players.append(get_object_or_404(User, username=username))
-        if (
-            len(valid_players) > max_players - 1
-        ):  # Account for creator in non-tournament games
-            messages.error(
-                request, gettext(f"Error: Too many players for max {max_players}")
-            )
+        if len(valid_players) > max_players - 1:  # Account for creator in non-tournament games
+            messages.error(request, gettext(f"Error: Too many players for max {max_players}"))
             return None
         return valid_players
 
@@ -113,32 +107,20 @@ def create_bus_game(
     # Setup Tournament Options
     if is_main_tournament or is_mini_tournament:
         if not tournamentObj or not tournamentGameName:
-            raise ValueError(
-                "Tournament and tournamentGameName required for tournament games"
-            )
+            raise ValueError("Tournament and tournamentGameName required for tournament games")
         game_name = tournamentGameName
         game_description = ""
         creator = User.objects.get(username="admin")
         host = creator
         game_pace = 30
         kickout_duration = 100
-        starting_options = (
-            json.loads(tournamentObj.startingOptions)
-            if tournamentObj.startingOptions != ""
-            else []
-        )
+        starting_options = json.loads(tournamentObj.startingOptions) if tournamentObj.startingOptions != "" else []
 
         game_status = "ACTIVE"
 
-        all_players = [
-            User.objects.get(username=username)
-            for username in (current_players_usernames or [])
-            if username
-        ]
+        all_players = [User.objects.get(username=username) for username in (current_players_usernames or []) if username]
         # NB tournament games return before using this
-        usernames_to_notify = [
-            username for username in (current_players_usernames or []) if username
-        ]
+        usernames_to_notify = [username for username in (current_players_usernames or []) if username]
 
     # Else setup normal Options
     else:
@@ -149,16 +131,10 @@ def create_bus_game(
         starting_map = request.POST["mapData"] if "mapData" in request.POST else ""
         game_pace = request.POST.get("pace", 40)
         kickout_duration = request.POST.get("kickoutDuration", 100)
-        invited_usernames = [
-            request.POST.get(f"player{i}")
-            for i in range(2, 6)
-            if request.POST.get(f"player{i}")
-        ]
+        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 6) if request.POST.get(f"player{i}")]
 
         if "trainingGame" not in request.POST:
-            invited_usernames_objs = validate_players(
-                invited_usernames, max_players, allow_creator=False
-            )
+            invited_usernames_objs = validate_players(invited_usernames, max_players, allow_creator=False)
             # If no invited playerrs, get []. If error, get None
             if invited_usernames_objs is None:
                 return HttpResponseRedirect(reverse("createBUSpage"))
@@ -234,9 +210,7 @@ def create_bus_game(
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
             presenter = cast("BUSpresenter", new_game.presenter())
-            presenter.startGame(
-                request, isTournamentGame=(is_main_tournament or is_mini_tournament)
-            )
+            presenter.startGame(request)
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
@@ -256,12 +230,8 @@ def create_bus_game(
 
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has started"))
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "current"})
-        )
+        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
 
     # Otherwise, return normal game creation
     messages.success(request, SF_getGameCreationJsonReturn("BUS", new_game.id))
-    return HttpResponseRedirect(
-        reverse("indexListType", kwargs={"listType": "waiting"})
-    )
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))

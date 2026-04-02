@@ -782,6 +782,7 @@ def start_next_any_tournament_round(
     _finalPositionNamesAndScore,
 ):
     from FCM.common import create_fcm_game
+    from HLC.common import create_hlc_game
     from BUS.common import create_bus_game
     from TGZ.common import create_tgz_game
     from AQY.common import create_aqy_game
@@ -870,6 +871,10 @@ def start_next_any_tournament_round(
 
         if tournamentObj.gameCode == "FCM":
             newGameID = create_fcm_game(
+                request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
+            )
+        elif tournamentObj.gameCode == "HLC":
+            newGameID = create_hlc_game(
                 request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
             )
         elif tournamentObj.gameCode == "BUS":

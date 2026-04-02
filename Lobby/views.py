@@ -1265,7 +1265,7 @@ def index(request):
     # show_timestamps = user.username in ["admin", "DodgerB"]
     recent_cutoff = (timezone.now() - timedelta(days=15)).timestamp() * 1000
 
-    start_time = time.time()
+    #start_time = time.time()
 
     # def print_timestamp(label):
     #    if show_timestamps:

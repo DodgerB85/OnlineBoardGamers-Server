@@ -248,7 +248,7 @@ Q_CLUSTER = {
     "queue_limit": 1,
     "orm": "default",  # Or your database alias
     "gc_interval": 7200,  # Run garbage collector every 2 hours instead of 1 hour
-    "label": None,  # Admin label
+    "label": "Django Q",  # Admin label
     "ack_failures": True,  # Cleanup failed tasks
     # --- CRITICAL CPU SAVING SETTINGS ---
     "bulking": 1,  # Process up to 10 tasks at once to reduce overhead
