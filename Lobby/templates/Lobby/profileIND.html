@@ -3,7 +3,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     <script src="{% url 'javascript-catalog' %}"></script>
     <div class="container formsPage">
@@ -339,15 +339,13 @@
                              alt="3rd Edition" />
                     </label>
                     <br />
-                    <b>3rd Edition
-                        <br />
-                    Coming Soon</b>
+                    <b>3rd Edition</b>
                     <br />
                     <input type="radio"
                            id="indMap05"
                            name="mapType"
-                           value="0"
-                           {% if mapType == 1 %}checked{% endif %} />
+                           value="4"
+                           {% if mapType == 4 %}checked{% endif %} />
                 </div>
                 <div class="favRestChoice">
                     <label for="indMap1">
@@ -516,12 +514,12 @@
                 <button type="submit" class="updateProfilebtn">{% translate "Update Indonesia Preferences" %}</button>
             </form>
         </div>
-        {% include 'Lobby/common/homeButton.html' %}
+        {% include "Lobby/common/homeButton.html" %}
     </div>
     {% block script %}
         <script>
     var global = {};
     global.halt = true;
         </script>
-    {% endblock %}
-{% endblock %}
+    {% endblock script %}
+{% endblock body %}
