@@ -230,7 +230,9 @@ def create_hlc_game(
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
             presenter = cast("HLCpresenter", new_game.presenter())
-            presenter.startGame(request)
+            presenter.startGame(
+                request, isTournamentGame=(is_main_tournament or is_mini_tournament)
+            )
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
