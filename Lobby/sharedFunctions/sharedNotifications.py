@@ -1434,6 +1434,7 @@ def SN_M_T_sendTournamentWinNotification(
 
 
 def SN_M_sendGameStartNotification(playerListToNotify, message_data):
+    print(f"Sending game start notification to {playerListToNotify}")
     errorUsername = message_data["username"]
     gameCode = message_data["gameCode"]
     gameID = message_data["gameID"]
