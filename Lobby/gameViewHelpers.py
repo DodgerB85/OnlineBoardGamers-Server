@@ -1,5 +1,4 @@
 import json
-from socket import gaierror
 
 from decouple import config
 from django.contrib import messages
