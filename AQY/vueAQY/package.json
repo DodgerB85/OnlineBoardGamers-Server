@@ -1,0 +1,31 @@
+{
+  "name": "antiquity-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "doctrine": "^3.0.0",
+    "dotenv": "^17.3.1",
+    "fast-copy": "^3.0.2",
+    "pinia": "^2.1.7",
+    "prettier-eslint": "^16.3.0",
+    "vue": "^3.4.21",
+    "vue-eslint-parser": "^9.4.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.1.1",
+    "@rushstack/eslint-patch": "^1.10.2",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "eslint": "^9.1.1",
+    "eslint-plugin-vue": "^9.25.0",
+    "globals": "^15.1.0",
+    "prettier": "^3.2.5",
+    "terser": "^5.44.1",
+    "vite": "^7.3.0"
+  }
+}

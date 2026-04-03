@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            body {
+                margin: 0px !important;
+                background-color: #d4eafd;
+                font-family: Arial, sans-serif;
+            }
+
+            #loadingText {
+                transform: translate(-50%, 0%);
+                position: absolute;
+                font-size: 40px;
+                margin-top: 20px;
+                left: 50%;
+                white-space: nowrap;
+            }
+        </style>
+        <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+
+        <title>Antiquity</title>
+    </head>
+    <body>
+        <noscript>
+            <strong>Please enable Javascript to continue.</strong>
+        </noscript>
+        <div id="app">
+            <div id="loadingText">Antiquity is loading.........</div>
+        </div>
+        <script type="module" src="/src/main.js"></script>
+    </body>
+    <!--<script src="https://unpkg.com/fast-copy@2.0.6/dist/index.js"></script>-->
+    <script>
+        var initData = {};
+
+        ///////////////////////
+        initData.gameID = 0;
+        initData.gameName = "Test Name";
+        initData.gameData = "";
+        initData.gameCreationTimestamp = 1712906318;
+        initData.myZoomLevel = 2400;
+        initData.KickoutFlexiDataArray = [];
+        initData.startingOptions = [];
+
+        //initData.spoilerFree = true;
+        //initData.replayStep = {{replayStep}}-1;
+
+        ///////////////////////
+        initData.name = "Ross";
+        initData.chatData = "";
+        initData.latestUpdate = 1712906318;
+        initData.nextURL = "";
+
+        ///////////////////////
+        initData.myStatsExcludeConsent = 0;
+        initData.statsExcludedGame = false;
+        initData.pov = 0;
+
+        initData.secondsToNextKickout = 50000;
+
+        initData.kickoutRequired = false;
+
+        initData.notes = "NOTES test";
+
+        //    initData.chatNotification = true;
+
+        initData.preferredAQYcolour = 1;
+        initData.yourTurnAudioType = 1;
+
+        /////////////////////
+
+    // Use this to adjust player count
+    //initData.playerNames = ["Ross", "Rachel"]//, "Joey", "Phoebe"];
+    //initData.playerNames = ["Ross", "Rachel", "Joey"]//, "Phoebe"];
+    initData.playerNames = ["Ross", "Rachel", "Joey", "Phoebe"];
+
+        // Just leave this. Excess names are ignored
+        initData.displayNames = ["Ross", "Rachel", "Joey", "Phoebe"];
+    </script>
+</html>

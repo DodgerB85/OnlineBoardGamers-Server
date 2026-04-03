@@ -20,7 +20,7 @@ echo Virtual environment activated.
 REM --- Set Local Environment Variables for Django-decouple ---
 REM These values will override any existing .env file settings when Django runs.
 REM Add any other variables you need here:
-REM ALLOWED_HOSTS=127.0.0.1,localhost
+set ALLOWED_HOSTS=127.0.0.1,localhost
 REM DEBUG=yes
 REM LOCAL_DB_NAME=xx
 REM LOCAL_DB_USER=xx

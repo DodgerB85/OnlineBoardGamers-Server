@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+    body {
+      margin: 0px !important;
+      background-color: #d4eafd;
+      font-family: Arial, sans-serif;
+    }
+
+    #loadingText {
+      transform: translate(-50%, 0%);
+      position: absolute;
+      font-size: 40px;
+      margin-top: 20px;
+      left: 50%;
+      white-space: nowrap;
+    }
+
+    </style>
+    <script src="/src/pakoLib.js"></script>
+    <title>Keyflower App - no backend</title>
+  </head>
+  <body>
+      <noscript>
+      <strong>Please enable Javascript to continue.</strong>
+    </noscript>
+    <div id="app">      
+	<div id="loadingText">Keyflower is loading.........</div>
+</div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+   <script>
+    var initData = {};
+  
+    ///////////////////////
+    initData.gameID = 0;
+    initData.gameName = "Test Name";
+    initData.gameData = '';
+    initData.gameCreationTimestamp = 1732602985000;
+    initData.myZoomLevel = 0;
+    initData.KickoutFlexiDataArray = [];
+    initData.startingOptions = [102];
+    
+    //initData.spoilerFree = true;
+    //initData.replayStep = {{replayStep}}-1;
+
+    ///////////////////////
+    initData.name = 'Ross';
+    initData.chatData = "";
+    initData.latestUpdate = 1732602985000;
+    initData.nextURL = '';
+  
+    ///////////////////////
+    initData.myStatsExcludeConsent = 0;
+    initData.statsExcludedGame = false;
+    initData.pov = 1;
+    
+    initData.secondsToNextKickout = 50000;
+
+    initData.kickoutRequired = false;
+	
+    initData.notes = 'NOTES test';
+
+//    initData.chatNotification = true;
+
+    // preferredColour
+    initData.preferredKFWoptions = [1];
+
+    initData.yourTurnAudioType = 1;
+
+    /////////////////////
+		// Use this to adjust player count
+		//initData.playerNames = ["Rachel", "Ross"] //, "Joey", "Phoebe"];
+		initData.playerNames = ["Ross", "Rachel", "Joey"]//, "Phoebe"];
+		//initData.playerNames = ["Ross", "Rachel", "Joey", "Phoebe"]
+    //initData.playerNames = ["Ross", "Rachel", "Joey", "Phoebe", "Chandler"];
+    //initData.playerNames = ["Ross", "Rachel", "Joey", "Phoebe", "Chandler", "Monica"];
+
+    //initData.displayNames = ["Ross", "Rachel", "Joey", "Phoebe"];
+ 
+  </script>
+</html>
