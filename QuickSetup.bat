@@ -38,50 +38,32 @@ python -c "import fileinput; import sys; [print(line.replace('LOCAL_USER_SQLITE3
 REM Install Vue dependencies for all games
 echo Installing Vue dependencies...
 if exist "AQY\vueAQY\package.json" (
-    cd AQY\vueAQY
-    npm install
-    cd ..\..
-)
+    cd AQY\vueAQY && call npm install && cd ..\..
+) || echo Warning: npm install failed for AQY
 if exist "BUS\vueBUS\package.json" (
-    cd BUS\vueBUS
-    npm install
-    cd ..\..
-)
+    cd BUS\vueBUS && call npm install && cd ..\..
+) || echo Warning: npm install failed for BUS
 if exist "CNS\vueCNS\package.json" (
-    cd CNS\vueCNS
-    npm install
-    cd ..\..
-)
+    cd CNS\vueCNS && call npm install && cd ..\..
+) || echo Warning: npm install failed for CNS
 REM if exist "IND\vueIND\package.json" (
-REM     cd IND\vueIND
-REM     npm install
-REM     cd ..\..
-REM )
+REM     cd IND\vueIND && call npm install && cd ..\..
+REM ) || echo Warning: npm install failed for IND
 if exist "KFW\vueKFW\package.json" (
-    cd KFW\vueKFW
-    npm install
-    cd ..\..
-)
+    cd KFW\vueKFW && call npm install && cd ..\..
+) || echo Warning: npm install failed for KFW
 REM if exist "PPF\vuePPF\package.json" (
-REM     cd PPF\vuePPF
-REM     npm install
-REM     cd ..\..
-REM )
+REM     cd PPF\vuePPF && call npm install && cd ..\..
+REM ) || echo Warning: npm install failed for PPF
 REM if exist "RNB\vueRNB\package.json" (
-REM     cd RNB\vueRNB
-REM     npm install
-REM     cd ..\..
-REM )
+REM     cd RNB\vueRNB && call npm install && cd ..\..
+REM ) || echo Warning: npm install failed for RNB
 REM if exist "TGZ\vueTGZ\package.json" (
-REM     cd TGZ\vueTGZ
-REM     npm install
-REM     cd ..\..
-REM )
+REM     cd TGZ\vueTGZ && call npm install && cd ..\..
+REM ) || echo Warning: npm install failed for TGZ
 if exist "WEB\vueWEB\package.json" (
-    cd WEB\vueWEB
-    npm install
-    cd ..\..
-)
+    cd WEB\vueWEB && call npm install && cd ..\..
+) || echo Warning: npm install failed for WEB
 
 REM Run database migrations
 echo Running database migrations...
