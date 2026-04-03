@@ -69,6 +69,16 @@ REM Run database migrations
 echo Running database migrations...
 python manage.py migrate
 
+REM Create superuser automatically
+echo Creating superuser...
+set DJANGO_SUPERUSER_USERNAME=admin
+set DJANGO_SUPERUSER_EMAIL=admin@example.com
+python manage.py createsuperuser --noinput --username %DJANGO_SUPERUSER_USERNAME% --email %DJANGO_SUPERUSER_EMAIL% || echo Superuser may already exist
+
+REM Load initial users
+echo Loading initial users...
+python manage.py loaddata initial_users.json
+
 echo.
 echo ==================================================
 echo Quick setup complete!
