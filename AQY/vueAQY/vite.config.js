@@ -82,7 +82,7 @@ import dotenv from "dotenv"
 dotenv.config({ path: resolve("../../.env") })
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => ({
+export default defineConfig(({ command }) => ({
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {
@@ -98,8 +98,14 @@ export default defineConfig(({ command, mode }) => ({
 			allow: [
 				// Search up for workspace root
 				"..",
+				"../..",
+				// Static directory for Docker mount
+				"/static",
+				// Allow access to parent static directory
+				resolve("../static"),
+				resolve("../../static"),
 				// Or be explicit by pointing to the project root
-				"C:/Roger/Programming/OnlineBoardGamers/AQY/",
+				resolve("../../"),
 			],
 		},
 	},
