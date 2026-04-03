@@ -72,8 +72,12 @@ python manage.py migrate
 REM Create superuser automatically
 echo Creating superuser...
 set DJANGO_SUPERUSER_USERNAME=admin
-set DJANGO_SUPERUSER_EMAIL=admin@example.com
+set DJANGO_SUPERUSER_EMAIL=admin@admin.com
 python manage.py createsuperuser --noinput --username %DJANGO_SUPERUSER_USERNAME% --email %DJANGO_SUPERUSER_EMAIL% || echo Superuser may already exist
+
+REM Set password for admin user
+echo Setting admin password...
+python -c "from django.contrib.auth import get_user_model; User = get_user_model(); admin = User.objects.get(username='admin'); admin.set_password('password'); admin.save()"
 
 REM Load initial users
 echo Loading initial users...
