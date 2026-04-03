@@ -391,11 +391,8 @@ def test(request):
 
 #    currentGame.endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["gameID"], currentGame)
 def endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID, currentGame):
-    with db_mutex(str(_gameID), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return currentGame.presenter().endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    # Remove mutex - already locked by processTurn to prevent deadlock
+    return currentGame.presenter().endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID)
 
 
 def processTurn(request):

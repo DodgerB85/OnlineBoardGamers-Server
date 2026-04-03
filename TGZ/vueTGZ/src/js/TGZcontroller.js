@@ -56,7 +56,7 @@ export function startPlayerTurn() {
 	// Bid phase
 	else if (store.gameflow.phase === rf.PHASE_BID) {
 		store.context.action = rf.ACT_BID
-	} else if (store.gameflow.phase === rf.PHASE_BUILD && currentPlayerObj().god[0] === rf.DZIVA) {
+	} else if (store.gameflow.phase === rf.PHASE_BUILD && model.hasGod(currentPlayerObj(), rf.DZIVA)) {
 		store.context.action = rf.ACT_SET_PRICES
 		store.context.choosingPrices = [...currentPlayerObj().craftsmenPrices]
 	}
@@ -68,7 +68,7 @@ export function startPlayerTurn() {
 export function ajaPlayerHasJustFreePassed() {
 	const store = useModelStore()
 
-	if (currentPlayerObj().god[0] !== rf.AJA) return false
+	if (!model.hasGod(currentPlayerObj(), rf.AJA)) return false
 	// NOTE: The HISTORY is placed BETWEEN the first and second check.
 
 	let index = store.history.length - 1
@@ -82,7 +82,7 @@ export function ajaPlayerHasJustFreePassed() {
 /*export function ajaPlayerCanFreePass() {
 	const store = useModelStore()
 
-	if (currentPlayerObj().god[0] !== rf.AJA) return false
+	if (!model.hasGod(currentPlayerObj(), rf.AJA)) return false
 	// NOTE: The HISTORY is placed BETWEEN the first and second check.
 
 	let entriesToIgnore = [rf.HIST_REWIND, rf.HIST_RESIGN, rf.HIST_KICKOUT]
@@ -117,7 +117,7 @@ export function endPlayerTurn() {
 	if (store.gameflow.phase === rf.PHASE_BID) {
 		// If player passed, add them to newTurnOrder
 		// DEFUNCT SCHISM AJA
-		/*if (currentPlayerObj().god[0] === rf.AJA && ajaPlayerHasJustFreePassed()) {
+		/*if (model.getPlayerPrimaryGod(currentPlayerObj())[0] === rf.AJA && ajaPlayerHasJustFreePassed()) {
 			store.gameflow.turnOrder.push(store.gameflow.turnOrder.shift())
 		} else*/ 
 		if (store.context.selectedBid === 0) store.gameflow.turnOrder.shift()
@@ -170,15 +170,15 @@ export function endPlayerTurn() {
 export function currentPlayerMustPass() {
 	const store = useModelStore()
 
-	if (currentPlayerObj().god[0] === rf.ELEGUA) {
+	if (model.hasGod(currentPlayerObj(), rf.ELEGUA)) {
 		if (model.eleguaAvailable() && currentPlayerObj().cows + 3 > store.ongoingVars.currentBid) return false
 		if (currentPlayerObj().cows > store.ongoingVars.currentBid) return false
 		return true
 	}
 
-	//if (currentPlayerObj().god[0] === rf.AJA && ajaPlayerCanFreePass()) return false
+	//if (model.getPlayerPrimaryGod(currentPlayerObj())[0] === rf.AJA && ajaPlayerCanFreePass()) return false
 
-	if (currentPlayerObj().god[0] !== rf.ELEGUA && currentPlayerObj().cows <= store.ongoingVars.currentBid) return true
+	if (!model.hasGod(currentPlayerObj(), rf.ELEGUA) && currentPlayerObj().cows <= store.ongoingVars.currentBid) return true
 	return false
 }
 

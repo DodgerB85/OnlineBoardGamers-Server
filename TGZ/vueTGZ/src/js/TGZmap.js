@@ -273,7 +273,7 @@ export function getSpacesForResource() {
 export function expandWater(index) {
 	const store = useModelStore()
 	let validWaterSqs = [rf.WATER_SQ]
-	//if (controller.currentPlayerObj().god[0] === rf.OLOKUN) validWaterSqs = validWaterSqs.concat(rf.CRAFTSMEN_SQS).concat(rf.RESOURCE_SQS)
+	//if (getPlayerPrimaryGod(controller.currentPlayerObj())[0] === rf.OLOKUN) validWaterSqs = validWaterSqs.concat(rf.CRAFTSMEN_SQS).concat(rf.RESOURCE_SQS)
 	if (!validWaterSqs.includes(store.coords[index])) return []
 	let res = [index]
 	let toExplo = [index]
@@ -351,13 +351,13 @@ export function getAllSquaresWithinRangeOfZone(zone, range, returnRanges) {
 		}
 		// Now have all unique squares at thisRange, so expand for water
 		let validWaterSqs = [rf.WATER_SQ]
-		//if (controller.currentPlayerObj().god[0] === rf.OLOKUN) validWaterSqs = validWaterSqs.concat(rf.CRAFTSMEN_SQS).concat(rf.RESOURCE_SQS)
+		//if (model.getPlayerPrimaryGod(controller.currentPlayerObj())[0] === rf.OLOKUN) validWaterSqs = validWaterSqs.concat(rf.CRAFTSMEN_SQS).concat(rf.RESOURCE_SQS)
 		let waterSqs = []
 		for (let j = 0; j < thisRange.length; j++) {
 			if (validWaterSqs.includes(store.coords[thisRange[j]]) && !waterSqs.includes(thisRange[j])) waterSqs = waterSqs.concat(expandWater(thisRange[j]))
 		}
 		// Expand for Simbi
-		if (controller.currentPlayerObj().god[0] === rf.SIMBI) {
+		if (model.hasGod(controller.currentPlayerObj(), rf.SIMBI)) {
 			let simbiSqs = []
 			for (let j = 0; j < thisRange.length; j++) {
 				if (rf.VALID_SIMBI_SQS.includes(store.coords[thisRange[j]]) && !simbiSqs.includes(thisRange[j])) simbiSqs = simbiSqs.concat(expandArryaOfSqs(thisRange[j], rf.VALID_SIMBI_SQS))
@@ -694,13 +694,13 @@ export function getAllSquaresAndHubsWithinRangeOfZone(zone, range) {
 
 		// Now have all unique squares at thisRange, so expand for water
 		let validWaterSqs = [rf.WATER_SQ]
-		//if (controller.currentPlayerObj().god[0] === rf.OLOKUN) validWaterSqs = validWaterSqs.concat(rf.CRAFTSMEN_SQS).concat(rf.RESOURCE_SQS)
+		//if (model.getPlayerPrimaryGod(controller.currentPlayerObj())[0] === rf.OLOKUN) validWaterSqs = validWaterSqs.concat(rf.CRAFTSMEN_SQS).concat(rf.RESOURCE_SQS)
 		let waterSqs = []
 		for (let j = 0; j < thisRange.length; j++) {
 			if (validWaterSqs.includes(store.coords[thisRange[j]]) && !waterSqs.includes(thisRange[j])) waterSqs = waterSqs.concat(expandWater(thisRange[j]))
 		}
 		// Expand for Simbi
-		if (controller.currentPlayerObj().god[0] === rf.SIMBI) {
+		if (model.hasGod(controller.currentPlayerObj(), rf.SIMBI)) {
 			let simbiSqs = []
 			for (let j = 0; j < thisRange.length; j++) {
 				if (rf.VALID_SIMBI_SQS.includes(store.coords[thisRange[j]]) && !simbiSqs.includes(thisRange[j])) simbiSqs = simbiSqs.concat(expandArryaOfSqs(thisRange[j], rf.VALID_SIMBI_SQS))
@@ -755,7 +755,7 @@ export function getAllSquaresAndHubsWithinRangeOfZoneWithoutWater(zone, range) {
 			if (store.coords[thisRange[j]] === rf.WATER_SQ && !waterSqs.includes(thisRange[j])) waterSqs = waterSqs.concat(expandWater(thisRange[j]))
 		}
 		// Expand for Simbi
-		if (controller.currentPlayerObj().god[0] === rf.SIMBI) {
+		if (model.hasGod(controller.currentPlayerObj(), rf.SIMBI)) {
 			let simbiSqs = []
 			for (let j = 0; j < thisRange.length; j++) {
 				if (rf.VALID_SIMBI_SQS.includes(store.coords[thisRange[j]]) && !simbiSqs.includes(thisRange[j])) simbiSqs = simbiSqs.concat(expandArryaOfSqs(thisRange[j], rf.VALID_SIMBI_SQS))
@@ -903,13 +903,13 @@ export function getAllUndepletedResourceSquaresToHighlight(craftsmanData, range,
 		}
 	}
 
-	if (controller.currentPlayerObj().god[0] === rf.AGWU_NSI) {
+	if (model.hasGod(controller.currentPlayerObj(), rf.AGWU_NSI)) {
 		allRes = getAllSquaresOfTypesWithinRangeOfZone(getCraftsmanZoneFromData(craftsmanData), range, [rf.WOOD_SQ, rf.CLAY_SQ, rf.IVORY_SQ, rf.DIAMOND_SQ])
 	}
 
 	for (let i = allRes.length - 1; i >= 0; i--) {
-		if (controller.currentPlayerObj().god[0] !== rf.ATETE && store.depletedResources.includes(allRes[i])) allRes.splice(i, 1)
-		else if (controller.currentPlayerObj().god[0] === rf.ATETE && duplicateElements.includes(allRes[i])) allRes.splice(i, 1)
+		if (!model.hasGod(controller.currentPlayerObj(), rf.ATETE) && store.depletedResources.includes(allRes[i])) allRes.splice(i, 1)
+		else if (model.hasGod(controller.currentPlayerObj(), rf.ATETE) && duplicateElements.includes(allRes[i])) allRes.splice(i, 1)
 	}
 	return allRes
 }
@@ -924,13 +924,13 @@ export function getAllUndepletedResourceSquaresToHighlightWithoutWater(craftsman
 	let allRes = getAllSquaresOfTypesWithinRangeOfZoneWithoutWater(getCraftsmanZoneFromData(craftsmanData), range, [rf.getPrimaryResourceSqs(craftsmanData[1])[0]])
 	// FIX OGUN
 	if (craftsmanData[1] === rf.BLACKSMITH_TILE) allRes = getAllSquaresOfTypesWithinRangeOfZoneWithoutWater(getCraftsmanZoneFromData(craftsmanData), range, [rf.WOOD_SQ, rf.CLAY_SQ, rf.IVORY_SQ])
-	if (controller.currentPlayerObj().god[0] === rf.AGWU_NSI) {
+	if (model.hasGod(controller.currentPlayerObj(), rf.AGWU_NSI)) {
 		allRes = getAllSquaresOfTypesWithinRangeOfZoneWithoutWater(getCraftsmanZoneFromData(craftsmanData), range, [rf.WOOD_SQ, rf.CLAY_SQ, rf.IVORY_SQ, rf.DIAMOND_SQ])
 	}
 
 	for (let i = allRes.length - 1; i >= 0; i--) {
-		if (controller.currentPlayerObj().god[0] !== rf.ATETE && store.depletedResources.includes(allRes[i])) allRes.splice(i, 1)
-		else if (controller.currentPlayerObj().god[0] === rf.ATETE && duplicateElements.includes(allRes[i])) allRes.splice(i, 1)
+		if (!model.hasGod(controller.currentPlayerObj(), rf.ATETE) && store.depletedResources.includes(allRes[i])) allRes.splice(i, 1)
+		else if (model.hasGod(controller.currentPlayerObj(), rf.ATETE) && duplicateElements.includes(allRes[i])) allRes.splice(i, 1)
 	}
 	return allRes
 }

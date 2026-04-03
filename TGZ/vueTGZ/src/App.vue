@@ -220,7 +220,7 @@ async function initGame() {
 					monuments: [],
 					craftsmen: [],
 					craftsmenPrices: [0, 0, 0, 0, 0, 0, 0],
-					god: [rf.NO_god, 0],
+					god: [[rf.NO_god, 0]],
 					specialists: [],
 					techs: [],
 					maxVR: 20 + 0.1 * i,

@@ -6,6 +6,59 @@ import * as controller from "./TGZcontroller"
 import { useModelStore } from "../stores/TGZstore.js"
 import { usePersonalStore } from "../stores/TGZpersonal"
 
+// Helper functions for multi-god support
+export function getPlayerGods(player) {
+	return player.god || []
+}
+
+/*export function getPlayerPrimaryGod(player) {
+	const gods = getPlayerGods(player)
+	return gods.length > 0 ? gods[0] : [rf.NO_god, 0]
+}*/
+
+export function hasGod(player, godType) {
+	const gods = getPlayerGods(player)
+	return gods.some(god => god[0] === godType)
+}
+
+export function getGodData(player, godType) {
+	const gods = getPlayerGods(player)
+	const god = gods.find(g => g[0] === godType)
+	return god || [rf.NO_god, 0]
+}
+
+export function addGodToPlayer(player, godType, data = 0) {
+	if (!player.god) player.god = []
+	// Check if god already exists
+	const existingIndex = player.god.findIndex(g => g[0] === godType)
+	if (existingIndex === -1) {
+		// Check if first god is NO_god, replace it instead of pushing
+		if (player.god.length > 0 && player.god[0][0] === rf.NO_god) {
+			player.god[0] = [godType, data]
+		} else {
+			player.god.push([godType, data])
+		}
+	} else {
+		player.god[existingIndex][1] = data
+	}
+}
+
+export function removeGodFromPlayer(player, godType) {
+	if (!player.god) return
+	const index = player.god.findIndex(g => g[0] === godType)
+	if (index !== -1) {
+		player.god.splice(index, 1)
+	}
+}
+
+export function updateGodData(player, godType, newData) {
+	const gods = getPlayerGods(player)
+	const godIndex = gods.findIndex(g => g[0] === godType)
+	if (godIndex !== -1) {
+		player.god[godIndex][1] = newData
+	}
+}
+
 /**
  * getPriceForCraftsman
  * getPlayerForCraftsmanPriIndex
@@ -42,7 +95,7 @@ export function setupPlaceMonument() {
 
 	store.context.action = rf.ACT_BUILD_MON
 	store.context.monumentsToPlace = 1
-	if (controller.currentPlayerObj().god[0] === rf.OBATALA) store.context.monumentsToPlace = 2
+	if (hasGod(controller.currentPlayerObj(), rf.OBATALA)) store.context.monumentsToPlace = 2
 	store.context.indexesToHighlightClick.splice(0)
 	store.context.indexesToHighlightClick = map.getSpacesForMonument(hasNomads(controller.currentPlayerObj()), false)
 	if (store.context.indexesToHighlightClick.length === 0) store.context.actionError = "No Space Left for Any Monuments"
@@ -123,7 +176,7 @@ export function setupUseSingleSpec(spec) {
 		}
 		store.context.action = rf.ACT_BUILD_RES
 		if (store.context.itemBeingAdded !== -1) store.context.indexesToHighlightClick = map.getSpacesForResource()
-		if (controller.currentPlayerObj().god[0] === rf.ESHU) store.context.range = 6
+		if (hasGod(controller.currentPlayerObj(), rf.ESHU)) store.context.range = 6
 
 		let data = map.getAllCraftsmanDataWithinRangeOfZoneAndOutOfRange([0], 18, rf.RES_TILE_TO_SQ[store.context.itemBeingAdded])
 		store.context.craftsmanDataToPipRed = data[0]
@@ -164,13 +217,13 @@ export function setupRaiseMonument(keepReset) {
 	}
 	store.topMenuViews.hubRangesToHighlight.splice(0)
 
-	if (controller.currentPlayerObj().god[0] !== rf.YEMOJA) {
+	if (!hasGod(controller.currentPlayerObj(), rf.YEMOJA)) {
 		for (let i = 0; i < controller.currentPlayerObj().monuments.length; i++) {
 			if (canSelectRaiseMonument(controller.currentPlayerObj().monuments[i], false)) {
 				if (!store.context.canSelectRaiseMonument.includes(controller.currentPlayerObj().monuments[i][0])) store.context.canSelectRaiseMonument.push(controller.currentPlayerObj().monuments[i][0])
 			}
 		}
-	} else if (controller.currentPlayerObj().god[0] === rf.YEMOJA) {
+	} else if (hasGod(controller.currentPlayerObj(), rf.YEMOJA)) {
 		for (let i = 0; i < store.players.length; i++) {
 			for (let j = 0; j < store.players[i].monuments.length; j++) {
 				if (canSelectRaiseMonument(store.players[i].monuments[j], false)) {
@@ -188,7 +241,7 @@ export function setupRaiseMonument(keepReset) {
 
 	store.context.action = rf.ACT_RAISE_MON
 	store.context.range = 3
-	if (controller.currentPlayerObj().god[0] === rf.ESHU) store.context.range = 6
+	if (hasGod(controller.currentPlayerObj(), rf.ESHU)) store.context.range = 6
 
 	store.lastMonumentResetData = funcs.exportModel(true)
 }
@@ -357,7 +410,7 @@ export function hasNomads(player) {
 export function eleguaAvailable() {
 	const store = useModelStore()
 
-	if (controller.currentPlayerObj().god[0] === rf.ELEGUA) {
+	if (hasGod(controller.currentPlayerObj(), rf.ELEGUA)) {
 		// go back in history until you hit new turn. Count entires. If bid entries < no. players, return true
 		let bidEntires = 0
 		let idx = store.history.length - 1
@@ -372,7 +425,7 @@ export function eleguaAvailable() {
 }
 
 export function hasTechForCman(cman) {
-	if (cman === rf.BLACKSMITH_TILE && controller.currentPlayerObj().god[0] === rf.OGUN) return true
+	if (cman === rf.BLACKSMITH_TILE && hasGod(controller.currentPlayerObj(), rf.OGUN)) return true
 	for (let i = 0; i < controller.currentPlayerObj().techs.length; i++) {
 		if (controller.currentPlayerObj().techs[i][0] === cman * 2) return true
 		if (controller.currentPlayerObj().techs[i][0] === cman * 2 + 1) return true
@@ -398,7 +451,7 @@ export function getAvailableTechs(cman) {
 }
 
 export function getPriceForCraftsman(player, craftsmanTile, checkForAnansi) {
-	if (checkForAnansi && controller.currentPlayerObj().god[0] === rf.ANANSI) return 1
+	if (checkForAnansi && hasGod(controller.currentPlayerObj(), rf.ANANSI)) return 1
 	else if (craftsmanTile === rf.BLACKSMITH_TILE) return player.craftsmenPrices[7]
 	return player.craftsmenPrices[craftsmanTile]
 }
@@ -436,8 +489,8 @@ export function revenues_core() {
 
 	// Add cows to ENGAI
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.ENGAI) {
-			store.players[i].god[1] = 2
+		if (hasGod(store.players[i], rf.ENGAI)) {
+			updateGodData(store.players[i], rf.ENGAI, 2)
 			break
 		}
 	}
@@ -450,7 +503,7 @@ export function revenues_core() {
 				let totalCows = store.players[i].techs[j][1]
 				if (totalCows >= 6) {
 					let half_rounded_up = Math.ceil(totalCows / 2)
-					store.players[ajakaPlayerIndex].god[1] += half_rounded_up
+					updateGodData(store.players[ajakaPlayerIndex], rf.AJAKA, getGodData(store.players[ajakaPlayerIndex], rf.AJAKA)[1] + half_rounded_up)
 					store.players[i].techs[j][1] -= half_rounded_up
 				}
 			}
@@ -474,9 +527,12 @@ export function revenues_core() {
 	for (let i = 0; i < store.players.length; i++) {
 		let income = [0, 0, 0, 0, 0]
 		// add from god cards
-		if (store.players[i].god[0] !== rf.EKWENSU) {
-			income[0] = store.players[i].god[1]
-			store.players[i].god[1] = 0
+		const gods = getPlayerGods(store.players[i])
+		for (let g = 0; g < gods.length; g++) {
+			if (gods[g][0] !== rf.EKWENSU) {
+				income[0] += gods[g][1]
+				gods[g][1] = 0
+			}
 		}
 		// add from spec cards
 		for (let j = 0; j < store.players[i].specialists.length; j++) {
@@ -521,7 +577,7 @@ export function newTurn_core() {
 	// Move Nyami-Nyami to the front
 	/*if (anyoneHasNYAMI(false)) {
 		for (let i = 0; i < temp.length; i++) {
-			if (temp[i].god[0] === rf.NYAMI_NYAMI) {
+			if (hasGod(temp[i], rf.NYAMI_NYAMI)) {
 				const NyamiNyamiPlayer = temp[i]
 				temp.splice(i, 1)
 				temp.unshift(NyamiNyamiPlayer)
@@ -560,7 +616,7 @@ export function canSelectRaiseMonument(monument) {
 	const store = useModelStore()
 
 	if (monument[1] === 5) return false
-	if (controller.currentPlayerObj().god[0] === rf.ALA && monument[1] === 2) return false
+	if (hasGod(controller.currentPlayerObj(), rf.ALA) && monument[1] === 2) return false
 	if (store.context.upgradingMonumentProcess.length > 0) return false
 
 	// Do this first to prevent already raised mons from displaying the bar
@@ -572,7 +628,7 @@ export function canSelectRaiseMonument(monument) {
 		}
 	}
 
-	if ((controller.currentPlayerObj().god[0] !== rf.TIURAKH && getValidCraftsmenToRaiseMonument([monument[0]], true).length < monument[1]) || (controller.currentPlayerObj().god[0] === rf.TIURAKH && getValidCraftsmenToRaiseMonument([monument[0]], true).length < monument[1] - 1)) {
+	if ((!hasGod(controller.currentPlayerObj(), rf.TIURAKH) && getValidCraftsmenToRaiseMonument([monument[0]], true).length < monument[1]) || (hasGod(controller.currentPlayerObj(), rf.TIURAKH) && getValidCraftsmenToRaiseMonument([monument[0]], true).length < monument[1] - 1)) {
 		if (!store.context.monumentsToShowNotEnoughCraftsmen.includes(monument[0])) store.context.monumentsToShowNotEnoughCraftsmen.push(monument[0])
 		return false
 	}
@@ -585,7 +641,7 @@ function canAffordCraftsman(craftsmanCost, hubCost, craftsmanData) {
 	let totalCost = craftsmanCost + hubCost
 	let craftsmanPlayer = getPlayerForCraftsmanPriIndex(craftsmanData[0])
 	// AS pays 0 for pri when using their sec
-	if (controller.currentPlayerObj().god[0] === rf.AJE_SHALUGA && store.context.currentRitualGood.length > 0) {
+	if (hasGod(controller.currentPlayerObj(), rf.AJE_SHALUGA) && store.context.currentRitualGood.length > 0) {
 		let secCmanData = map.getCraftsmanDataFromAnySq(store.context.currentRitualGood[0][0], true)
 		// If you have the cman index, then you pay 0
 		if (controller.currentPlayerObj().craftsmen.some((cman) => cman[0] === secCmanData[0] && cman[1] === secCmanData[1] && cman[2] === secCmanData[2])) {
@@ -595,12 +651,12 @@ function canAffordCraftsman(craftsmanCost, hubCost, craftsmanData) {
 	}
 	if (controller.currentPlayerObj().cows >= totalCost) return true
 	// This code allos Ekwensu player to play OTHER cmen
-	/*else if (controller.currentPlayerObj().god[0] === rf.EKWENSU && controller.currentPlayerIndex() !== getPlayerIndexForCraftsmanPriIndex(craftsmanData[0])) {
-		let EKWENSUcows = Math.min(controller.currentPlayerObj().god[1], craftsmanCost)
+	/*else if (getPlayerPrimaryGod(controller.currentPlayerObj())[0] === rf.EKWENSU && controller.currentPlayerIndex() !== getPlayerIndexForCraftsmanPriIndex(craftsmanData[0])) {
+		let EKWENSUcows = Math.min(getPlayerPrimaryGod(controller.currentPlayerObj())[1], craftsmanCost)
 		let netCost = craftsmanCost - EKWENSUcows
 		if (controller.currentPlayerObj().cows >= netCost + hubCost) return true
-	}*/ else if (craftsmanPlayer.god[0] === rf.EKWENSU && controller.currentPlayerIndex() !== getPlayerIndexForCraftsmanPriIndex(craftsmanData[0])) {
-		let EKWENSUcows = Math.min(craftsmanPlayer.god[1], craftsmanCost)
+	}*/ else if (hasGod(craftsmanPlayer, rf.EKWENSU) && controller.currentPlayerIndex() !== getPlayerIndexForCraftsmanPriIndex(craftsmanData[0])) {
+		let EKWENSUcows = Math.min(getGodData(craftsmanPlayer, rf.EKWENSU)[1], craftsmanCost)
 		let netCost = craftsmanCost - EKWENSUcows
 		if (controller.currentPlayerObj().cows >= netCost + hubCost) return true
 	}
@@ -613,7 +669,7 @@ export function getValidCraftsmenToRaiseMonument(startingZone, simulateOnly) {
 
 	let validCraftsmenWithMultipleTG = []
 	// UPDATE RANGE HERE
-	if (controller.currentPlayerObj().god[0] === rf.ESHU) store.context.range = 6
+	if (hasGod(controller.currentPlayerObj(), rf.ESHU)) store.context.range = 6
 	else if (store.context.action === rf.ACT_OYA_RUITUALGOOD) store.context.range = 17
 	else store.context.range = 3
 
@@ -639,7 +695,7 @@ export function getValidCraftsmenToRaiseMonument(startingZone, simulateOnly) {
 			}
 		}
 		// AJE_SHALUGA DOESN't REQUIRE RES FOR THEIR SEC CMAN
-		if (availableResources.length > 0 || (controller.currentPlayerObj().god[0] === rf.AJE_SHALUGA_OLD && rf.SEC_CRAFTSMEN.includes(map.getCraftsmanDataFromAnySq(allPossibleCraftsmenSqs[i], true)[1]))) {
+		if (availableResources.length > 0 || (hasGod(controller.currentPlayerObj(), rf.AJE_SHALUGA_OLD) && rf.SEC_CRAFTSMEN.includes(map.getCraftsmanDataFromAnySq(allPossibleCraftsmenSqs[i], true)[1]))) {
 			resFound = true
 			// If it has resources, check you have enough money
 			let craftsmanData = map.getCraftsmanDataFromAnySq(allPossibleCraftsmenSqs[i], true)
@@ -648,7 +704,7 @@ export function getValidCraftsmenToRaiseMonument(startingZone, simulateOnly) {
 			//let totalCost = hubCost + craftsmanCost
 			console.log(`canaford: ${canAffordCraftsman(craftsmanCost, hubCost, craftsmanData)}`)
 			if (canAffordCraftsman(craftsmanCost, hubCost, craftsmanData)) {
-				if (controller.currentPlayerObj().god[0] === rf.TSUI_GOAB) {
+				if (hasGod(controller.currentPlayerObj(), rf.TSUI_GOAB)) {
 					for (let j = 0; j < availableResources.length; j++) validCraftsmenWithMultipleTG.push(allPossibleCraftsmenSqs[i])
 				} else validCraftsmenWithMultipleTG.push(allPossibleCraftsmenSqs[i])
 			} else {
@@ -664,7 +720,7 @@ export function getValidCraftsmenToRaiseMonument(startingZone, simulateOnly) {
 
 	// RE-UPDATE RANGE HERE
 	if (store.context.action === rf.ACT_OYA_RUITUALGOOD) {
-		if (controller.currentPlayerObj().god[0] === rf.ESHU) store.context.range = 6
+		if (hasGod(controller.currentPlayerObj(), rf.ESHU)) store.context.range = 6
 		else store.context.range = 3
 	}
 
@@ -689,7 +745,7 @@ export function getAllowedSqsForMonRaise() {
 		}
 	}
 	// If first ritual good, or has TG, then can do any available
-	if (store.context.upgradingMonumentProcess.length === 1 || controller.currentPlayerObj().god[0] === rf.TSUI_GOAB) {
+	if (store.context.upgradingMonumentProcess.length === 1 || hasGod(controller.currentPlayerObj(), rf.TSUI_GOAB)) {
 		return allowedSqs
 	}
 	// Otherwise you can use a craftsman NOT already used
@@ -720,7 +776,7 @@ export function hasActiveBuilder(playerIndex) {
 export function anyoneHasSHADIPINYI(returnIndex) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.SHADIPINYI) {
+		if (hasGod(store.players[i], rf.SHADIPINYI)) {
 			if (returnIndex) return i
 			else return true
 		}
@@ -730,7 +786,7 @@ export function anyoneHasSHADIPINYI(returnIndex) {
 export function anyoneHasALAJIRE(returnIndex) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.ALAJIRE) {
+		if (hasGod(store.players[i], rf.ALAJIRE)) {
 			if (returnIndex) return i
 			else return true
 		}
@@ -742,7 +798,7 @@ export function anyoneHasALAJIRE(returnIndex) {
 export function anyoneHasYEMOJA(returnIndex) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.YEMOJA) {
+		if (hasGod(store.players[i], rf.YEMOJA)) {
 			if (returnIndex) return i
 			else return true
 		}
@@ -754,7 +810,7 @@ export function anyoneHasYEMOJA(returnIndex) {
 export function anyoneHasAJAKA(returnIndex) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.AJAKA) {
+		if (hasGod(store.players[i], rf.AJAKA)) {
 			if (returnIndex) return i
 			else return true
 		}
@@ -766,7 +822,7 @@ export function anyoneHasAJAKA(returnIndex) {
 export function anyoneHasWATERTOLL(returnIndex) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.WATERTOLL) {
+		if (hasGod(store.players[i], rf.WATERTOLL)) {
 			if (returnIndex) return i
 			else return true
 		}
@@ -778,7 +834,7 @@ export function anyoneHasWATERTOLL(returnIndex) {
 export function anyoneHasNYAMI(returnIndex) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.NYAMI_NYAMI) {
+		if (hasGod(store.players[i], rf.NYAMI_NYAMI)) {
 			if (returnIndex) return i
 			else return true
 		}
@@ -790,7 +846,7 @@ export function anyoneHasNYAMI(returnIndex) {
 export function anyoneHasEKWENSU(returnIndex) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.EKWENSU) {
+		if (hasGod(store.players[i], rf.EKWENSU)) {
 			if (returnIndex) return i
 			else return true
 		}
@@ -806,7 +862,7 @@ export function needToPayWATERTOLL(craftsmanCheck, data) {
 	// Don't need to pay if anyone has it
 	if (!anyoneHasWATERTOLL(false)) return false
 	// if YOU have WATERTOLL, don't need to pay
-	if (controller.currentPlayerObj().god[0] === rf.WATERTOLL) return false
+	if (hasGod(controller.currentPlayerObj(), rf.WATERTOLL)) return false
 	// If it is set to 2, then you have already paid
 	if (store.context.WATERTOLLpaymentStatus >= 2) return false
 
@@ -887,9 +943,7 @@ export function getCowsOnPlaque(pos, bidAmount) {
 export function setgod(god) {
 	const store = useModelStore()
 	// VR check
-	controller.currentPlayerObj().god[0] = god
 	if (getVR(controller.currentPlayerObj()) > 40) {
-		controller.currentPlayerObj().god[0] = rf.NO_god
 		store.clearVars()
 		store.context.actionError = "Doing this would increase your VR over 40"
 		return
@@ -899,7 +953,7 @@ export function setgod(god) {
 	// history
 	addHistory(rf.HIST_CHOOSE_god, controller.currentPlayerIndex(), 0, [god])
 	// reset action
-	if (controller.currentPlayerObj().god[0] === rf.DZIVA) {
+	if (hasGod(controller.currentPlayerObj(), rf.DZIVA)) {
 		store.context.action = rf.ACT_SET_PRICES
 		store.context.choosingPrices = [...controller.currentPlayerObj().craftsmenPrices]
 		if (controller.currentPlayerObj().craftsmen.length === 0) {
@@ -907,7 +961,7 @@ export function setgod(god) {
 			store.context.action = rf.ACT_NONE
 			store.context.actionError = "You have chosen Dziva, but have no craftsmen to change prices for"
 		}
-	} else if (controller.currentPlayerObj().god[0] === rf.ANYANWU) {
+	} else if (hasGod(controller.currentPlayerObj(), rf.ANYANWU)) {
 		store.context.action = rf.ACT_CHOOSE_ANYANWU_MON
 		for (let i = 0; i < controller.currentPlayerObj().monuments.length; i++) {
 			if (controller.currentPlayerObj().monuments[i][1] <= 3) store.context.canSelectRaiseMonument.push(controller.currentPlayerObj().monuments[i][0])
@@ -926,7 +980,7 @@ export function setgod(god) {
 
 export function setgod_core(god) {
 	const store = useModelStore()
-	controller.currentPlayerObj().god[0] = god
+	addGodToPlayer(controller.currentPlayerObj(), god)
 	let idx = store.availablegods.indexOf(god)
 	store.availablegods.splice(idx, 1)
 	store.context.actionsTaken.push(rf.ACT_CHOOSE_god)
@@ -962,7 +1016,7 @@ export function setgod_core(god) {
 		controller.currentPlayerObj().techs.push([rf.BLACKSMITH_TECH, 0])
 		controller.currentPlayerObj().craftsmenPrices.push(0)
 	} else if (god === rf.EKWENSU) {
-		controller.currentPlayerObj().god[1] = 12
+		updateGodData(controller.currentPlayerObj(), rf.EKWENSU, 12)
 	}
 	adjustMaxVR(controller.currentPlayerObj())
 	if (god === rf.ALAJIRE) {
@@ -1054,7 +1108,7 @@ function processYEMOJAdifference(playerIndex, score) {
 
 			if (playerOwningMonIndex !== -1 && playerDoingTheRaiseIndex !== playerOwningMonIndex) {
 				// With mismatching players, if YOU have yemoja, YOU must get the extra score
-				if (playerObj.god[0] === rf.YEMOJA) {
+				if (hasGod(playerObj, rf.YEMOJA)) {
 					score += rf.MONUMENT_SCORE[store.history[i][3][0][1]] - rf.MONUMENT_SCORE[store.history[i][3][0][1] - 1]
 				}
 				// Otherwise, if YOU own the monument, YOU lose the score
@@ -1093,14 +1147,19 @@ export function getTurnEndCows(playerIndex, incomeType) {
 	let income = 0
 	if (incomeType === 0 || incomeType === 9) {
 		// Add cows to ENGAI
-		if (playerObj.god[0] === rf.ENGAI) {
+		if (hasGod(playerObj, rf.ENGAI)) {
 			income += 2
 		}
 		// add from god cards
-		if (playerObj.god[0] !== rf.EKWENSU) income += playerObj.god[1]
+		const gods = getPlayerGods(playerObj)
+		for (let g = 0; g < gods.length; g++) {
+			if (gods[g][0] !== rf.EKWENSU) {
+				income += gods[g][1]
+			}
+		}
 
 		// Get amount to go on AJAKA
-		if (playerObj.god[0] === rf.AJAKA) {
+		if (hasGod(playerObj, rf.AJAKA)) {
 			for (let i = 0; i < store.players.length; i++) {
 				for (let j = 0; j < store.players[i].techs.length; j++) {
 					let totalCows = store.players[i].techs[j][1]
@@ -1153,17 +1212,20 @@ export function getVR(playerObj, withoutClamping = false) {
 
 	if (playerObj.displayName === rf.BOT_NAME) return 41
 	// OLD EDITION
-	//if (playerObj.god[0] === rf.ANYANWU) return 40
+	//if (getPlayerPrimaryGod(playerObj)[0] === rf.ANYANWU) return 40
 	let VR = 20
 	// add god
-	if (playerObj.god[0] !== rf.NO_god) VR += rf.gods_VR[playerObj.god[0]]
+	const gods = getPlayerGods(playerObj)
+	for (let g = 0; g < gods.length; g++) {
+		if (gods[g][0] !== rf.NO_god) VR += rf.gods_VR[gods[g][0]]
+	}
 	// Add Specs
 	for (let i = 0; i < playerObj.specialists.length; i++) {
 		VR += rf.SPEC_VR[playerObj.specialists[i][0]]
 	}
 	// Add Techs
 	for (let i = 0; i < playerObj.techs.length; i++) {
-		if (playerObj.god[0] === rf.GU) VR++
+		if (hasGod(playerObj, rf.GU)) VR++
 		else VR += rf.TECH_VR[playerObj.techs[i][0]]
 	}
 	// Add ALIJIRE penalty
@@ -1204,8 +1266,8 @@ export function endGame_core(simulateOnly) {
     if (a[0] !== b[0]) return b[0] - a[0];
 
     // Tiebreaker 2: XANGO (at most one player has it)
-    const aIsXango = store.players[a[1]].god[0] === rf.XANGO;
-    const bIsXango = store.players[b[1]].god[0] === rf.XANGO;
+    const aIsXango = hasGod(store.players[a[1]], rf.XANGO);
+    const bIsXango = hasGod(store.players[b[1]], rf.XANGO);
     if (aIsXango && !bIsXango) return -1;
     if (!aIsXango && bIsXango) return 1;
 
@@ -1244,7 +1306,7 @@ export function endGame_core(simulateOnly) {
       // Tiebreaker 2: XANGO (at most one player)
       let xangoAssigned = false;
       for (let j = startIdx; j <= endIdx; j++) {
-        if (store.players[overshoot[j][1]].god[0] === rf.XANGO) {
+        if (hasGod(store.players[overshoot[j][1]], rf.XANGO)) {
           overshoot[j].push(2); // XANGO wins tied group
           xangoAssigned = true;
           break;
@@ -1336,7 +1398,7 @@ export function endGame_core(simulateOnly) {
 			}
 			// Now loop the indexes, and if XANGO is found, move them to the start
 			for (let j = startIdx; j <= endIdx; j++) {
-				if (store.players[overshoot[j][1]].god[0] === rf.XANGO) {
+				if (hasGod(store.players[overshoot[j][1]], rf.XANGO)) {
 					//overshoot[j].push(2)
 					;[overshoot[startIdx], overshoot[j]] = [overshoot[j], overshoot[startIdx]]
 					overshoot[startIdx].push(2)

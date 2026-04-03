@@ -782,13 +782,10 @@ def _processHLCturn(request):
 
 # def endGame(request, _winner, _finalScores, _gameID, currentGame):
 def endGame(request, _winner, _finalPositions, _gameID, currentGame):
-    with db_mutex("endGame", timeout=5, ttl=60) as acquired:
-        if acquired:
-            return currentGame.presenter().endGame(
-                request, _winner, _finalPositions, _gameID
-            )
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    # Remove mutex - already locked by processTurn to prevent race conditions
+    return currentGame.presenter().endGame(
+        request, _winner, _finalPositions, _gameID
+    )
 
 
 @login_required

@@ -130,14 +130,14 @@ function clickedMonument(monument) {
 			break
 		}
 	}
-	if (!currentMonnument && controller.currentPlayerObj().god[0] !== rf.YEMOJA) return
+	if (!currentMonnument && !model.hasGod(controller.currentPlayerObj(), rf.YEMOJA)) return
 
 	if (!model.canSelectRaiseMonument(monument)) return
 
 	store.context.canSelectRaiseMonument.splice(0)
 	store.context.upgradingMonumentProcess = [monument] // THIS IS A POINTER
 	model.getValidCraftsmenToRaiseMonument([monument[0]], false)
-	store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([monument[0]], controller.currentPlayerObj().god[0] === rf.ESHU ? 6 : 3, 0)
+	store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([monument[0]], model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
 	store.context.itemsInMonumentUpgrade.push(monument[0])
 }
 
@@ -194,7 +194,7 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 		store.context.resourceIndexesToHighlight = map.getAllUndepletedResourceSquaresToHighlight(craftsmanData, store.context.range, [])
 		store.topMenuViews.hubRangesToHighlight.splice(0)
 		// Highlight range 3 from craftsman
-		store.topMenuViews.hubRangesToHighlight.push(map.getAllSquaresWithinRangeOfZone(map.getCraftsmanZoneFromData(craftsmanData), controller.currentPlayerObj().god[0] === rf.ESHU ? 6 : 3, false))
+		store.topMenuViews.hubRangesToHighlight.push(map.getAllSquaresWithinRangeOfZone(map.getCraftsmanZoneFromData(craftsmanData), model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, false))
 
 		store.context.itemsInMonumentUpgrade.push(craftsmanData[0])
 		return
@@ -225,7 +225,7 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 	let craftsmanCost = model.getPriceForCraftsman(craftsmanPlayer, craftsmanData[1], true)
 
 	// AS pays 0 for pri when using their sec
-	if (controller.currentPlayerObj().god[0] === rf.AJE_SHALUGA && store.context.currentRitualGood.length > 0) {
+	if (model.hasGod(controller.currentPlayerObj(), rf.AJE_SHALUGA) && store.context.currentRitualGood.length > 0) {
 		let secCmanData = map.getCraftsmanDataFromAnySq(store.context.currentRitualGood[0][0], true)
 		// If you have the cman index, then you pay 0
 		if (controller.currentPlayerObj().craftsmen.some((cman) => cman[0] === secCmanData[0] && cman[1] === secCmanData[1] && cman[2] === secCmanData[2])) {
@@ -236,7 +236,7 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 	// Get Cman payment
 	let addWATERTOLLHist = false
 	// CHECK WHETHER EKWENSU IS POSSIBLE - you can't EKWENSU yourself
-	if (craftsmanCost > 0 && controller.currentPlayerIndex() !== model.getPlayerIndexForCraftsmanPriIndex(craftsmanData[0]) && (/*(controller.currentPlayerObj().god[0] === rf.EKWENSU && controller.currentPlayerObj().god[1] > 0) ||*/ (craftsmanPlayer.god[0] === rf.EKWENSU && craftsmanPlayer.god[1] > 0))) {
+	if (craftsmanCost > 0 && controller.currentPlayerIndex() !== model.getPlayerIndexForCraftsmanPriIndex(craftsmanData[0]) && (/*(model.hasGod(controller.currentPlayerObj(), rf.EKWENSU) && model.getGodData(controller.currentPlayerObj(), rf.EKWENSU)[1] > 0) ||*/ (model.hasGod(craftsmanPlayer, rf.EKWENSU) && model.getGodData(craftsmanPlayer, rf.EKWENSU)[1] > 0))) {
 		// Now we know EKWENSU is available. If the decision has already been made, then process it.
 		// But first show the popup if no decision has been made
 		if (store.context.EKWENSUdecision === -1) {
@@ -246,7 +246,7 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 			EKWENSUdata.playerIndex = playerIndex
 			EKWENSUdata.showEKWENSUpopup = 1
 			EKWENSUdata.craftsmanCost = craftsmanCost
-			EKWENSUdata.EKWENSUcowsAvailable = store.players.find((player) => player.god[0] === rf.EKWENSU).god[1]
+			EKWENSUdata.EKWENSUcowsAvailable = model.getGodData(store.players.find((player) => model.hasGod(player, rf.EKWENSU)), rf.EKWENSU)[1]
 			EKWENSUdata.EKWENSUcowsSelected = Math.min(EKWENSUdata.EKWENSUcowsAvailable, craftsmanCost)
 			EKWENSUdata.hubsUsed = hubsUsed
 			return
@@ -254,8 +254,8 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 			let totalCraftsmanCost = craftsmanCost
 			let EKWENSUcows = 0
 			let desiredEKWENSUcows = Math.min(store.context.EKWENSUdecision, totalCraftsmanCost)
-			if (controller.currentPlayerObj().god[0] === rf.EKWENSU) EKWENSUcows = Math.min(controller.currentPlayerObj().god[1], desiredEKWENSUcows)
-			else if (craftsmanPlayer.god[0] === rf.EKWENSU) EKWENSUcows = Math.min(craftsmanPlayer.god[1], desiredEKWENSUcows)
+			if (model.hasGod(controller.currentPlayerObj(), rf.EKWENSU)) EKWENSUcows = Math.min(model.getGodData(controller.currentPlayerObj(), rf.EKWENSU)[1], desiredEKWENSUcows)
+			else if (model.hasGod(craftsmanPlayer, rf.EKWENSU)) EKWENSUcows = Math.min(model.getGodData(craftsmanPlayer, rf.EKWENSU)[1], desiredEKWENSUcows)
 
 			let netCraftsmanCost = totalCraftsmanCost - EKWENSUcows
 
@@ -273,8 +273,8 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 				return
 			}
 
-			if (controller.currentPlayerObj().god[0] === rf.EKWENSU) controller.currentPlayerObj().god[1] -= EKWENSUcows
-			else if (craftsmanPlayer.god[0] === rf.EKWENSU) craftsmanPlayer.god[1] -= EKWENSUcows
+			if (model.hasGod(controller.currentPlayerObj(), rf.EKWENSU)) model.updateGodData(controller.currentPlayerObj(), rf.EKWENSU, model.getGodData(controller.currentPlayerObj(), rf.EKWENSU)[1] - EKWENSUcows)
+			else if (model.hasGod(craftsmanPlayer, rf.EKWENSU)) model.updateGodData(craftsmanPlayer, rf.EKWENSU, model.getGodData(craftsmanPlayer, rf.EKWENSU)[1] - EKWENSUcows)
 			// Pay the costs and hub costs
 			controller.currentPlayerObj().cows -= netCraftsmanCost
 			controller.currentPlayerObj().cows -= hubsUsed
@@ -293,7 +293,7 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 				controller.currentPlayerObj().cows -= rf.WATERTOLLCowToll
 				addWATERTOLLHist = true
 				let WATERTOLLplayerIndex = model.anyoneHasWATERTOLL(true)
-				store.players[WATERTOLLplayerIndex].god[1] += rf.WATERTOLLCowToll
+				model.updateGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL, model.getGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL)[1] + rf.WATERTOLLCowToll)
 				showWATERTOLLpopup.value = 2
 			}
 		} // END processing EKWENSU cows
@@ -328,7 +328,7 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 			controller.currentPlayerObj().cows -= rf.WATERTOLLCowToll
 			addWATERTOLLHist = true
 			let WATERTOLLplayerIndex = model.anyoneHasWATERTOLL(true)
-			store.players[WATERTOLLplayerIndex].god[1] += rf.WATERTOLLCowToll
+			model.updateGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL, model.getGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL)[1] + rf.WATERTOLLCowToll)
 			store.context.WATERTOLLpaymentStatus = 2
 			showWATERTOLLpopup.value = 2
 		}
@@ -339,15 +339,15 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 	for (let i = 0; i < store.players[playerIndex].techs.length; i++) {
 		if (craftsmanData[1] === rf.BLACKSMITH_TILE) {
 			if (store.players[playerIndex].techs[i][0] === rf.BLACKSMITH_TECH) {
-				if (controller.currentPlayerObj().god[0] === rf.OVIA) {
-					controller.currentPlayerObj().god[1] += 1
+				if (model.hasGod(controller.currentPlayerObj(), rf.OVIA)) {
+					model.updateGodData(controller.currentPlayerObj(), rf.OVIA, model.getGodData(controller.currentPlayerObj(), rf.OVIA)[1] + 1)
 					store.players[playerIndex].techs[i][1] += craftsmanCost - 1
 				} else store.players[playerIndex].techs[i][1] += craftsmanCost
 				break
 			}
 		} else if (store.players[playerIndex].techs[i][0] === craftsmanData[1] * 2 || store.players[playerIndex].techs[i][0] === craftsmanData[1] * 2 + 1) {
-			if (controller.currentPlayerObj().god[0] === rf.OVIA) {
-				controller.currentPlayerObj().god[1] += 1
+			if (model.hasGod(controller.currentPlayerObj(), rf.OVIA)) {
+				model.updateGodData(controller.currentPlayerObj(), rf.OVIA, model.getGodData(controller.currentPlayerObj(), rf.OVIA)[1] + 1)
 				store.players[playerIndex].techs[i][1] += craftsmanCost - 1
 			} else store.players[playerIndex].techs[i][1] += craftsmanCost
 			break
@@ -355,8 +355,8 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 	}
 	// Add cows to QAMATA
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] === rf.QAMATA) {
-			store.players[i].god[1] += hubsUsed
+		if (model.hasGod(store.players[i], rf.QAMATA)) {
+			model.updateGodData(store.players[i], rf.QAMATA, model.getGodData(store.players[i], rf.QAMATA)[1] + hubsUsed)
 			break
 		}
 	}
@@ -368,7 +368,7 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 	store.context.resourceIndexesToHighlight = map.getAllUndepletedResourceSquaresToHighlight(craftsmanData, store.context.range, [])
 	store.topMenuViews.hubRangesToHighlight.splice(0)
 	// Highlight range 3 from craftsman
-	store.topMenuViews.hubRangesToHighlight.push(map.getAllSquaresWithinRangeOfZone(map.getCraftsmanZoneFromData(craftsmanData), controller.currentPlayerObj().god[0] === rf.ESHU ? 6 : 3, false))
+	store.topMenuViews.hubRangesToHighlight.push(map.getAllSquaresWithinRangeOfZone(map.getCraftsmanZoneFromData(craftsmanData), model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, false))
 
 	store.context.itemsInMonumentUpgrade.push(craftsmanData[0])
 
@@ -383,7 +383,7 @@ function isRitualGoodComplete(craftsmanSq) {
 	if (rf.PRI_CRAFFTSMAN_SQS.includes(craftsmanSq) && craftsmanSq !== rf.BLACKSMITH_SQ) return true
 	if (craftsmanSq === rf.BLACKSMITH_SQ && store.context.selectedResourcesForCraftsmen.length === 2) return true
 	if (store.context.currentRitualGood.length === 3) return true
-	if (!store.context.ignoreAjeShaluga && controller.currentPlayerObj().god[0] === rf.AJE_SHALUGA_OLD && model.getPlayerIndexForCraftsmanPriIndex(store.context.currentRitualGood[0][0]) === controller.currentPlayerIndex()) {
+	if (!store.context.ignoreAjeShaluga && model.hasGod(controller.currentPlayerObj(), rf.AJE_SHALUGA_OLD) && model.getPlayerIndexForCraftsmanPriIndex(store.context.currentRitualGood[0][0]) === controller.currentPlayerIndex()) {
 		return true
 	}
 	return false
@@ -414,7 +414,7 @@ function clickedResource(index) {
 		// Add WATERTOLL history
 		addWATERTOLLHistAfterIndex = true
 		let WATERTOLLplayerIndex = model.anyoneHasWATERTOLL(true)
-		store.players[WATERTOLLplayerIndex].god[1] += rf.WATERTOLLCowToll
+		model.updateGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL, model.getGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL)[1] + rf.WATERTOLLCowToll)
 		store.context.WATERTOLLpaymentStatus = 2
 		popupPosition.value = { x: event.clientX, y: event.clientY - 80 }
 		clearTimeout(popupInterval)
@@ -445,7 +445,7 @@ function clickedResource(index) {
 		store.context.selectedResourcesForCraftsmen.splice(0)
 
 		// Check if Raise complete
-		if (store.context.action === rf.ACT_OYA_RUITUALGOOD || store.context.upgradingMonumentProcess.length === store.context.upgradingMonumentProcess[0][1] + 1 || (controller.currentPlayerObj().god[0] === rf.TIURAKH && store.context.upgradingMonumentProcess.length === store.context.upgradingMonumentProcess[0][1])) {
+		if (store.context.action === rf.ACT_OYA_RUITUALGOOD || store.context.upgradingMonumentProcess.length === store.context.upgradingMonumentProcess[0][1] + 1 || (model.hasGod(controller.currentPlayerObj(), rf.TIURAKH) && store.context.upgradingMonumentProcess.length === model.getGodData(controller.currentPlayerObj(), rf.TIURAKH)[1])) {
 			// Raise complete!
 
 			// Clear vars and end Raise
@@ -466,7 +466,7 @@ function clickedResource(index) {
 				// Check if Ekwensu was used
 				if (store.context.EKWENSUcowsUsed > 0) store.context.upgradingMonumentProcess = store.context.upgradingMonumentProcess.concat([[-1, store.context.EKWENSUcowsUsed]])
 				// Check if Oya was used
-				if (controller.currentPlayerObj().god[0] === rf.OVIA) {
+				if (model.hasGod(controller.currentPlayerObj(), rf.OVIA)) {
 					store.context.upgradingMonumentProcess = store.context.upgradingMonumentProcess.concat([[-2]])
 				}
 				model.addHistory(rf.HIST_RAISE_MON, controller.currentPlayerIndex(), 0, [...store.context.upgradingMonumentProcess])
@@ -480,7 +480,7 @@ function clickedResource(index) {
 			model.getValidCraftsmenToRaiseMonument([store.context.upgradingMonumentProcess[0][0]], false)
 			// Set up hub highlight from monument
 			store.topMenuViews.hubRangesToHighlight.splice(0)
-			store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([store.context.upgradingMonumentProcess[0][0]], controller.currentPlayerObj().god[0] === rf.ESHU ? 6 : 3, 0)
+			store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([store.context.upgradingMonumentProcess[0][0]], model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
 		} // END set up for next good
 	} // END complete ritual good
 	// Check if blacksmith and need 2nd res
@@ -490,7 +490,7 @@ function clickedResource(index) {
 		store.context.resourceIndexesToHighlight = map.getAllUndepletedResourceSquaresToHighlight(craftsmanData, store.context.range, [store.coords[index]])
 		store.topMenuViews.hubRangesToHighlight.splice(0)
 		// Highlight range 3 from craftsman
-		store.topMenuViews.hubRangesToHighlight.push(map.getAllSquaresWithinRangeOfZone(map.getCraftsmanZoneFromData(craftsmanData), controller.currentPlayerObj().god[0] === rf.ESHU ? 6 : 3, false))
+		store.topMenuViews.hubRangesToHighlight.push(map.getAllSquaresWithinRangeOfZone(map.getCraftsmanZoneFromData(craftsmanData), model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, false))
 	} else {
 		// Otherwise, need to select the related PRIMARY craftsman and resource
 		store.context.currentRitualGood.push([...store.context.selectedResourcesForCraftsmen])
@@ -500,12 +500,12 @@ function clickedResource(index) {
 		let craftsmanZone = map.getCraftsmanZoneFromData(map.getCraftsmanDataFromAnySq(store.context.currentRitualGood[0][0], true))
 		//store.context.craftsmenIndexesToHighlight = map.getPossibleCraftsmenWithRangeToRaiseMonument(craftsmanZone, store.context.range)[0]
 		model.getValidCraftsmenToRaiseMonument(craftsmanZone)
-		store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs(craftsmanZone, controller.currentPlayerObj().god[0] === rf.ESHU ? 6 : 3, 0)
+		store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs(craftsmanZone, model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
 	}
 }
 
 function shouldCmanShowInMonProcessBorder(craftsmanData) {
-	if (controller.currentPlayerObj().god[0] === rf.TSUI_GOAB) {
+	if (model.hasGod(controller.currentPlayerObj(), rf.TSUI_GOAB)) {
 		if (store.context.itemsInMonumentUpgrade.length % 2 === 0 && store.context.itemsInMonumentUpgrade.includes(craftsmanData[0])) return true
 		return false
 	}

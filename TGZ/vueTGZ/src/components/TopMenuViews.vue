@@ -3,6 +3,7 @@ import * as refFuncs from "../js/TGZfuncs"
 import * as IO from "../js/TGZ_IO"
 import * as view from "../js/TGZview"
 import * as rf from "../js/TGZreference"
+import * as model from "../js/TGZmodel"
 
 import PlayerBiddingLine from "./PlayerBiddingLine.vue"
 
@@ -63,9 +64,12 @@ function loadRewind() {
 function anyoneHasgod(retArr) {
 	let res = []
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] !== rf.NO_god) {
-			if (!retArr) return true
-			else res.push([store.players[i].god[0], i])
+		const gods = model.getPlayerGods(store.players[i])
+		for (let g = 0; g < gods.length; g++) {
+			if (gods[g][0] !== rf.NO_god) {
+				if (!retArr) return true
+				else res.push([gods[g][0], i])
+			}
 		}
 	}
 	if (retArr) return res
@@ -120,7 +124,10 @@ function parseMessage(message) {
 function getMissinggods() {
 	let all = [...store.availablegods]
 	for (let i = 0; i < store.players.length; i++) {
-		if (store.players[i].god[0] !== rf.NO_god) all.push(store.players[i].god[0])
+		const gods = model.getPlayerGods(store.players[i])
+		for (let g = 0; g < gods.length; g++) {
+			if (gods[g][0] !== rf.NO_god) all.push(gods[g][0])
+		}
 	}
 	let missing = []
 	for (let i = 0; i < 12; i++) {
@@ -165,14 +172,14 @@ function getRewindPanelLeft() {
 
 function getTechsArray() {
 	let res = JSON.parse(JSON.stringify(rf.ALL_TECHS_RES_DISPLAY))
-	if (store.availablegods.includes(rf.OGUN) || store.players.some((player) => player.god[0] === rf.OGUN)) {
+	if (store.availablegods.includes(rf.OGUN) || store.players.some((player) => model.hasGod(player, rf.OGUN))) {
 		res.push([rf.BLACKSMITH_TECH])
 	}
 	return res
 }
 function getTilesArray() {
 	let res = JSON.parse(JSON.stringify(rf.ALL_TILES))
-	if (store.availablegods.includes(rf.OGUN) || store.players.some((player) => player.god[0] === rf.OGUN)) {
+	if (store.availablegods.includes(rf.OGUN) || store.players.some((player) => model.hasGod(player, rf.OGUN))) {
 		res.splice(7, 0, rf.BLACKSMITH_TILE);
 	}
 	if (!rf.CRAFTSMEN_TILES.includes(rf.BLACKSMITH_TILE)) rf.CRAFTSMEN_TILES.push([rf.BLACKSMITH_TILE])

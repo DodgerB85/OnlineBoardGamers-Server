@@ -142,18 +142,16 @@ function clickedLoggedInDiv() {
 		store.gameName = String(personal.pov) + "  :  " + store.players[personal.pov].name
 		controller.startPlayerTurn()
 	}
-	else if (personal.trainingGame) {
+	/*else if (personal.trainingGame) {
 		personal.aidText = true
 		store.availablegods = [...rf.EVERYTHING_gods]
-	}
-	/*else {
+	}*/
+	else {
 		nameClickCounter.value++
-		alert(nameClickCounter.value)
 		if (nameClickCounter.value >= 5) {
-			alert(11111)
 			store.allowMultiple_gods = true
 		}
-	}*/
+	}
 	/*if (personal.trainingGame && !rf.SCHISM_MAKERS.includes(personal.name)) {
 		personal.aidText = true
 		store.availablegods = [rf.AGWU_NSI, rf.ALA, rf.ALAJIRE, rf.ANYANWU, rf.IGWEKALA, rf.ORISHA_AJE, rf.TIURAKH, rf.OGUN]

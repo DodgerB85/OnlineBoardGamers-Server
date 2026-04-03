@@ -1,13 +1,15 @@
 <script setup>
 import * as view from "../js/TGZview"
 import * as rf from "../js/TGZreference"
+import * as model from "../js/TGZmodel"
 
 import { useModelStore } from "../stores/TGZstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/TGZpersonal.js"
 const personal = usePersonalStore()
 
-defineProps(["playerIndex"])
+import { defineProps } from 'vue'
+const props = defineProps(["playerIndex"])
 
 function getRemainigItems(tech0) {
 	if (tech0 === rf.BLACKSMITH_TECH) return store.remainingItems[rf.BLACKSMITH_TILE]
@@ -54,30 +56,36 @@ function getStatsFor_god(god) {
 			'background-color': personal.getCorrectedColourHex(store.players[playerIndex].colour),
 			color: personal.getCorrectedColour(store.players[playerIndex].colour) === rf.WHITE || personal.getCorrectedColour(store.players[playerIndex].colour) === rf.YELLOW ? 'black' : 'white',
 		}">
-		<!-- god -->
-		<div
-			:class="[personal.aidText ? 'cardDiv' : 'cardDivNoText', { no_god: store.players[playerIndex].god[0] === rf.NO_god }]"
-			:style="{
-				'border-color': personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white' : 'black',
-			}">
-			<template v-if="store.players[playerIndex].god[0] !== rf.NO_god">
-				<img class="godImg" :src="view.getImage('god' + store.players[playerIndex].god[0])" alt="god" />
-				<div v-if="rf.gods_WITH_COWS.includes(store.players[playerIndex].god[0]) || (store.players[playerIndex].god[0] === rf.ENGAI && store.statsModeData.statsMode > 0)|| (store.players[playerIndex].god[0] === rf.SHADIPINYI && store.statsModeData.statsMode > 0)" class="cowOnCardDiv">
+		<!-- gods -->
+		<template v-for="(godData, godIndex) in model.getPlayerGods(store.players[playerIndex])" :key="godIndex">
+			<div v-if="godData[0] !== rf.NO_god"
+				:class="[personal.aidText ? 'cardDiv' : 'cardDivNoText']"
+				:style="{
+					'border-color': personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white' : 'black',
+				}">
+				<img class="godImg" :src="view.getImage('god' + godData[0])" alt="god" />
+				<div v-if="rf.gods_WITH_COWS.includes(godData[0]) || (godData[0] === rf.ENGAI && store.statsModeData.statsMode > 0)|| (godData[0] === rf.SHADIPINYI && store.statsModeData.statsMode > 0)" class="cowOnCardDiv">
 					<img :src="view.getImage('cows1_bid')" alt="Cows" />
 					<div class="cowsOnCardNumber">
-            
-            <span v-if="store.statsModeData.statsMode > 0">{{ getStatsFor_god(store.players[playerIndex].god[0]) }}</span>
-					<span v-else>{{ store.players[playerIndex].god[1] }}</span>
-          </div>
+        
+						<span v-if="store.statsModeData.statsMode > 0">{{ getStatsFor_god(godData[0]) }}</span>
+						<span v-else>{{ godData[1] }}</span>
+			</div>
 				</div>
 				<template v-if="personal.aidText">
 					<br />
-					{{ rf.god_TEXT[store.players[playerIndex].god[0]] }}
+					{{ rf.god_TEXT[godData[0]] }}
 				</template>
 				<br />
-				<span v-if="rf.isVRchanged(store.players[playerIndex].god[0]) || personal.aidText" :class="{ changedVR: rf.isVRchanged(store.players[playerIndex].god[0]) }">VR: {{ rf.gods_VR[store.players[playerIndex].god[0]] }}</span>
-			</template>
-			<template v-else>No god</template>
+				<span v-if="rf.isVRchanged(godData[0]) || personal.aidText" :class="{ changedVR: rf.isVRchanged(godData[0]) }">VR: {{ rf.gods_VR[godData[0]] }}</span>
+			</div>
+		</template>
+		<div v-if="model.getPlayerGods(store.players[playerIndex]).every(god => god[0] === rf.NO_god)"
+			:class="[personal.aidText ? 'cardDiv' : 'cardDivNoText', { no_god: true }]"
+			:style="{
+				'border-color': personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white' : 'black',
+			}">
+			No god
 		</div>
 
 		<!-- SPECIALISTS -->

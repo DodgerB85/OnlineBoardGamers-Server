@@ -17,6 +17,7 @@
 //import { brotliCompress, brotliDecompress } from 'zlib';
 
 import * as rf from "./TGZreference"
+import * as model from "./TGZmodel"
 
 import { useModelStore } from "../stores/TGZstore.js"
 
@@ -148,7 +149,10 @@ function anyVRchanged() {
 	if (rf.gods_VR[11] !== -2) return true*/
 	let godsArray = [...store.availablegods]
 	for (let i=0;i<store.players.length;i++) {
-		if (store.players[i].god[0] !== rf.NO_god) godsArray.push(store.players[i].god[0])
+		const gods = model.getPlayerGods(store.players[i])
+		for (let g = 0; g < gods.length; g++) {
+			if (gods[g][0] !== rf.NO_god) godsArray.push(gods[g][0])
+		}
 	}
 	for (let i=0;i<godsArray.length;i++) {
 		if (rf.isVRchanged(godsArray[i])) return true
@@ -304,7 +308,7 @@ export function importModel(input, includeContext) {
   var inputModel = JSON.parse(step1)*/
 
 	//let compressedData = Uint8Array.from(atob(input), c => c.charCodeAt(0));
-	// eslint-disable-next-line no-undef
+	 
 	//let decompressedData = pako.ungzip(compressedData, { to: 'string' });
 	//let inputModel = JSON.parse(decompressedData)
 
