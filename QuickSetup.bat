@@ -77,7 +77,8 @@ python manage.py createsuperuser --noinput --username %DJANGO_SUPERUSER_USERNAME
 
 REM Set password for admin user
 echo Setting admin password...
-python -c "from django.contrib.auth import get_user_model; User = get_user_model(); admin = User.objects.get(username='admin'); admin.set_password('password'); admin.save()"
+set DJANGO_SETTINGS_MODULE=OnlineBoardGamers.settings
+python -c "import os; os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'OnlineBoardGamers.settings'); import django; django.setup(); from Lobby.models import User; admin = User.objects.get(username='admin'); admin.set_password('password'); admin.save()"
 
 REM Load initial users
 echo Loading initial users...
