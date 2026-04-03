@@ -7,15 +7,12 @@ import gzip
 
 from typing import TYPE_CHECKING, cast
 
-from contextlib import contextmanager
-
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
 from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
-from django.db import connection
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
@@ -25,6 +22,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
     SN_sendAdminErrorMessage,
 )
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 from .common import create_aqy_game
 
@@ -147,22 +145,6 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         returnData["displayNames"] = displayNames
 
     return render(request, "AQY/showAQYgame.html", returnData)
-
-
-@contextmanager
-def db_mutex(name, timeout=10):
-    mutex_name = AQY_DB_LOCK_NAME + name
-    cursor = connection.cursor()
-    # timeout returns with error
-    cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-    ((got,),) = cursor.fetchall()
-    if got:
-        yield
-        cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-        cursor.fetchall()
-    else:
-        # time out or can't open?
-        print("ERROR-AQY: Not running, %s mutex not available" % (mutex_name))
 
 
 @login_required()

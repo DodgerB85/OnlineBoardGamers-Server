@@ -4115,31 +4115,6 @@ def MiniTournament(request, Mini_Tournament_id):
     return render(request, "Lobby/tournaments/MiniTournament.html")
 
 
-@contextmanager
-def db_mutex(name, timeout=10):
-    mutex_name = "dbmutex_" + name
-    cursor = connection.cursor()
-    got_lock = False  # Initialize got_lock to False
-    try:
-        # timeout returns with error
-        cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-        ((got,),) = cursor.fetchall()
-        got_lock = bool(got)  # Convert to boolean for clarity
-
-        if got_lock:
-            yield  # Execute the code within the 'with' block
-        else:
-            # time out or can't open?
-            print("ERROR: Not running, %s mutex not available" % (mutex_name))
-            return  # Important: Exit the context manager if the lock wasn't acquired
-    finally:
-        # Ensure the lock is ALWAYS released, even if there's an exception
-        if got_lock:  # Check if the lock was acquired before releasing
-            try:
-                cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-                cursor.fetchall()
-            except Exception as e:
-                print(f"ERROR: Failed to release lock {mutex_name}: {e}")  # Log error
 
 
 @login_required()
