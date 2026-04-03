@@ -37,15 +37,15 @@ python -c "import fileinput; import sys; [print(line.replace('LOCAL_USER_SQLITE3
 
 REM Install Vue dependencies for all games
 echo Installing Vue dependencies...
-cd AQY\vueAQY && npm install && cd ..\..
-cd BUS\vueBUS && npm install && cd ..\..
-cd CNS\vueCNS && npm install && cd ..\..
-REM cd IND\vueIND && npm install && cd ..\..
-cd KFW\vueKFW && npm install && cd ..\..
-REM cd PPF\vuePPF && npm install && cd ..\..
-REM cd RNB\vueRNB && npm install && cd ..\..
-REM cd TGZ\vueTGZ && npm install && cd ..\..
-cd WEB\vueWEB && npm install && cd ..\..
+if exist "AQY\vueAQY\package.json" cd AQY\vueAQY && npm install && cd ..\..
+if exist "BUS\vueBUS\package.json" cd BUS\vueBUS && npm install && cd ..\..
+if exist "CNS\vueCNS\package.json" cd CNS\vueCNS && npm install && cd ..\..
+REM if exist "IND\vueIND\package.json" cd IND\vueIND && npm install && cd ..\..
+if exist "KFW\vueKFW\package.json" cd KFW\vueKFW && npm install && cd ..\..
+REM if exist "PPF\vuePPF\package.json" cd PPF\vuePPF && npm install && cd ..\..
+REM if exist "RNB\vueRNB\package.json" cd RNB\vueRNB && npm install && cd ..\..
+REM if exist "TGZ\vueTGZ\package.json" cd TGZ\vueTGZ && npm install && cd ..\..
+if exist "WEB\vueWEB\package.json" cd WEB\vueWEB && npm install && cd ..\..
 
 REM Run database migrations
 echo Running database migrations...
