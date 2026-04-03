@@ -22,9 +22,9 @@
 ## Setup & Install
 
 ### Quick setup - see below for full dockerised setup
-- Get the source code
-- Run QuickSetup.bat
-- After this is done, and for future runs just run QuickStart.bat
+- Get the source code (`git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`)
+- Run `QuickSetup.bat`
+- After this is done, and for future runs just run `QuickStart.bat`
 
 ### Full dockerised setup
 I find it quite frustrating when I want to try out a project, only to find out it requires an obfuscated ton of setup, including setting up weird paid AWS services and pushing to remote server.
@@ -35,7 +35,7 @@ If you get stuck, paste the error into AI and it should help you on to the next 
 NOTE: iF you don't want to use docker / have issues with it / don't hace access to fast linux, you can use the "instructions_legacy.txt" to setup this project. 
 
 1) Make sure you have a working Docker installation.
-2) Pull the code from github. `git clone --depth 1 https://github.com/DodgerB85/OnlineBoardGamers-Server`
+2) Pull the code from github. `git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`
 3) Copy .env.docker and rename it to just .env 
 4) IMPORTANT: Ensure all docker files have "LF" line endings, not CRLF. Open in eg vs code and change the option at the bottom. (Docker, .yml, .sh files)
 5) Navigate to the root of the repo and run `docker compose up --build` (MySQL port is mapped to 3307 so as not to conflict if you're running your own MySQL server)
