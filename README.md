@@ -1,13 +1,32 @@
-## License
-This project is licensed under a custom **Source Available** license. 
-- ✅ **Private Use:** Permitted.
-- ✅ **Contributions:** Welcome via Pull Requests.
-- ❌ **Commercial Use:** Prohibited without permission.
-- ❌ **Public Hosting:** Prohibited without permission.
+# Welcome to the Online Board Gamers Git!
 
-See the [LICENSE](LICENSE.md) file for the full legal text.
+- Everyone is welcome to contribute to the project. 
+- Download and setup the source code, make.a change to something you’d like to improve, and submit a PR.
+- Check out the goals/git issues for ideas on where specific help is needed.
+
+    ✅ Graphic design/art
+    ✅ Backend programmers
+    ✅ Website design and layout
+    ✅ Anything you’d like to improve
+
+## Short term goals
+- Improve design/readability of the site; try to replace some text with icons
+- Add unit testing
+- Improve layout/design of the lobby / game lists / etc
+
+## Long term goals
+- More Games!
+- Look at potentially moving the backend to JS to match the front end
+- Look at moving hosts; carefully balance performance / costs
 
 ## Setup & Install
+
+### Quick setup - see below for full dockerised setup
+- Get the source code
+- Run QuickSetup.bat
+- After this is done, and for future runs just run QuickStart.bat
+
+### Full dockerised setup
 I find it quite frustrating when I want to try out a project, only to find out it requires an obfuscated ton of setup, including setting up weird paid AWS services and pushing to remote server.
 On the plus side, this project is totally free, and WILL run fine on your home computer.
 On the down side, it does involve multiple steps, but each is quite small and easy, and should be easy to do if you are familiar with these tools.
@@ -53,3 +72,12 @@ There is currently no automated testing, and deployments are done manually by ru
 
 ## Production
 PA runs the Django server; there's a qcluster for async tasks (not currently used due technical limitations on PA that I'm in the process of working around), and the scripts in ./siteUtils generally run once a day to perform upkeep / notification emails.
+
+## License
+This project is licensed under a custom **Source Available** license. 
+- ✅ **Private Use:** Permitted.
+- ✅ **Contributions:** Welcome via Pull Requests.
+- ❌ **Commercial Use:** Prohibited without permission.
+- ❌ **Public Hosting:** Prohibited without permission.
+
+See the [LICENSE](LICENSE.md) file for the full legal text.
