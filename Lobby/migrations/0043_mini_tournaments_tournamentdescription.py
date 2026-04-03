@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
             model_name="mini_tournaments",
             name="tournamentDescription",
             field=models.CharField(
-                blank=True, db_collation="utf8mb4_general_ci", max_length=120
+                blank=True, max_length=120
             ),
         ),
     ]

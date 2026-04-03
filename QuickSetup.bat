@@ -33,7 +33,7 @@ if exist ".env.docker" (
 
 REM Set SQLite3 flag for local development
 echo Setting SQLite3 configuration...
-echo LOCAL_USER_SQLITE3=True>>.env
+python -c "import fileinput; import sys; [print(line.replace('LOCAL_USER_SQLITE3=False', 'LOCAL_USER_SQLITE3=True'), end='') for line in fileinput.input('.env', inplace=True)]"
 
 REM Run database migrations
 echo Running database migrations...

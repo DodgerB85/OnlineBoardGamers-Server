@@ -162,7 +162,7 @@ class Main_Tournament(models.Model):
 
     tournamentName = models.CharField(max_length=120)
     tournamentDescription = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+        max_length=120, blank=True
     )
 
     tournamentStatus = models.CharField(
@@ -278,7 +278,7 @@ class Mini_Tournaments(models.Model):
 
     tournamentName = models.CharField(max_length=120)
     tournamentDescription = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+        max_length=120, blank=True
     )
 
     tournamentStatus = models.CharField(
@@ -391,10 +391,10 @@ class BaseGame(models.Model):
     id = models.AutoField(primary_key=True)
 
     gameName = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+        max_length=120, blank=True
     )
     gameDescription = models.CharField(
-        max_length=120, blank=True, db_collation="utf8mb4_general_ci"
+        max_length=120, blank=True
     )
     gameStatus = models.CharField(
         max_length=9,

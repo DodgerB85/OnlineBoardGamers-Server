@@ -19,13 +19,13 @@ class Migration(migrations.Migration):
                 (
                     "gameName",
                     models.CharField(
-                        blank=True, db_collation="utf8mb4_general_ci", max_length=120
+                        blank=True, max_length=120
                     ),
                 ),
                 (
                     "gameDescription",
                     models.CharField(
-                        blank=True, db_collation="utf8mb4_general_ci", max_length=120
+                        blank=True, max_length=120
                     ),
                 ),
                 (
