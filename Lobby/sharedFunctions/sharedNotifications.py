@@ -1684,7 +1684,8 @@ def SN_sendBugReportEmail(
         f"BUG REPORT for game {game} (ID: {gameID}).\n"
         f"User: {request.user.username}\n"
         f"Bug Description: {bugDescription}\n"
-        # f"Game Data: {gameData}\n"
+        f"URL: <https://www.OnlineBoardGamers.com/{game}/{gameID}/show/>" # Added brackets here
+       # f"Game Data: {gameData}\n"
         # f"Rewind Data: {rewindData}\n"
         # f"Starting Map: {startingMap}"
     )
