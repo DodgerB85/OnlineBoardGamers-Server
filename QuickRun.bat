@@ -37,7 +37,7 @@ echo Django server started.
 REM --- Start Vue development servers in separate command prompt windows ---
 REM Using the /D flag with the variable to change directory for each 'start' command
 
-start "Vue Bus" /D "%OBG_HOME%\BUS\busvue" cmd /c "call npm run dev"
+start "Vue Bus" /D "%OBG_HOME%\BUS\vueBUS" cmd /c "call npm run dev"
 echo Bus server started.
 
 start "Vue Cns" /D "%OBG_HOME%\CNS\vueCNS" cmd /c "call npm run dev"
