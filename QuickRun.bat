@@ -52,8 +52,8 @@ echo KFW server started.
 start "Vue WEB" /D "%OBG_HOME%\WEB\vueWEB" cmd /c "call npm run dev"
 echo WEB server started.
 
-REM start "Vue RNB" /D "%OBG_HOME%\RNB\vueRNB" npm run dev
-REM echo RNB server started.
+start "Vue TGZ" /D "%OBG_HOME%\TGZ\vueTGZ" npm run dev
+echo TGZ server started.
 
 echo.
 echo ==================================================

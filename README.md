@@ -1,7 +1,7 @@
 # Welcome to the Online Board Gamers Git!
 
 - Everyone is welcome to contribute to the project. 
-- Download and setup the source code, make.a change to something you’d like to improve, and submit a PR.
+- Download and setup the source code, make a change to something you’d like to improve, and submit a PR.
 - Check out the goals/git issues for ideas on where specific help is needed.
 
     ✅ Graphic design/art
@@ -19,15 +19,15 @@
 - Look at potentially moving the backend to JS to match the front end
 - Look at moving hosts; carefully balance performance / costs
 
-## Setup & Install
+# Setup & Install
 
-### Quick setup - see below for full dockerised setup
-This will allow you to easily setup and run a home server. You can login with "admin" and "password". The easiest way to create a new user is in the Django admin panel - copy the hashed password from the "admin" user and use it to create a new user.
+## Quick setup - see below for full dockerised setup
+This will allow you to easily setup and run a home server. You can login with `admin` and `password`. The easiest way to create a new user is in the Django admin panel - copy the hashed password from the `admin` user and use it to create a new user.
 - Get the source code (`git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`)
 - Run `QuickSetup.bat`
 - After this is done, and for future runs just run `QuickStart.bat`
 
-### Full dockerised setup
+## Full dockerised setup
 I find it quite frustrating when I want to try out a project, only to find out it requires an obfuscated ton of setup, including setting up weird paid AWS services and pushing to remote server.
 On the plus side, this project is totally free, and WILL run fine on your home computer.
 On the down side, it does involve multiple steps, but each is quite small and easy, and should be easy to do if you are familiar with these tools.
@@ -69,7 +69,7 @@ Make sure your docker files have LF and not CRLF
 NOTE: You aren't required to use docker; especially if it is slow on Windows. As an alternatice, you can create a venv and install the requirements.txt files. Then run the python server and django servers inside the venv. 
 
 ## Deployment
-There is currently no automated testing, and deployments are done manually by running a batch script to do a git pull / collectstatic / etc.
+There is currently no automated testing (please help with this if you can!), and deployments are done manually by running a batch script to do a git pull / collectstatic / etc.
 
 ## Production
 PA runs the Django server; there's a qcluster for async tasks (not currently used due technical limitations on PA that I'm in the process of working around), and the scripts in ./siteUtils generally run once a day to perform upkeep / notification emails.

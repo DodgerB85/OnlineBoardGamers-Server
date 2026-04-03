@@ -23,6 +23,7 @@ htmlcov/
 db.sqlite3
 db.sqlite3-journal
 media
+.env
 
 jinja2_cache/
 local_settings.py

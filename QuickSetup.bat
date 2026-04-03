@@ -58,9 +58,9 @@ REM ) || echo Warning: npm install failed for PPF
 REM if exist "RNB\vueRNB\package.json" (
 REM     cd RNB\vueRNB && call npm install && cd ..\..
 REM ) || echo Warning: npm install failed for RNB
-REM if exist "TGZ\vueTGZ\package.json" (
-REM     cd TGZ\vueTGZ && call npm install && cd ..\..
-REM ) || echo Warning: npm install failed for TGZ
+if exist "TGZ\vueTGZ\package.json" (
+    cd TGZ\vueTGZ && call npm install && cd ..\..
+) || echo Warning: npm install failed for TGZ
 if exist "WEB\vueWEB\package.json" (
     cd WEB\vueWEB && call npm install && cd ..\..
 ) || echo Warning: npm install failed for WEB
