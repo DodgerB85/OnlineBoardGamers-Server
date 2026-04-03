@@ -5,7 +5,7 @@ import gzip
 
 from typing import TYPE_CHECKING, cast
 
-from contextlib import contextmanager
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 from django.contrib import messages
 
@@ -14,7 +14,7 @@ from django.utils.translation import gettext
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.db import transaction, connection
+from django.db import transaction
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
@@ -275,33 +275,6 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     return render(request, "WEB/showWEBgame.html", returnData)
 
 
-@contextmanager
-def db_mutex(name, timeout=10):
-    mutex_name = WEB_DB_LOCK_NAME + name
-    cursor = connection.cursor()
-    got_lock = False  # Initialize got_lock to False
-    try:
-        # timeout returns with error
-        cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-        ((got,),) = cursor.fetchall()
-        got_lock = bool(got)  # Convert to boolean for clarity
-
-        if got_lock:
-            yield  # Execute the code within the 'with' block
-        else:
-            # time out or can't open?
-            print("ERROR-WEB: Not running, %s mutex not available" % (mutex_name))
-            return  # Important: Exit the context manager if the lock wasn't acquired
-    finally:
-        # Ensure the lock is ALWAYS released, even if there's an exception
-        if got_lock:  # Check if the lock was acquired before releasing
-            try:
-                cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-                cursor.fetchall()
-            except Exception as e:
-                print(
-                    f"ERROR-WEB: Failed to release lock {mutex_name}: {e}"
-                )  # Log error
 
 
 def processWEBturn(request):
@@ -312,11 +285,11 @@ def processWEBturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        # get rid of decorator on processTurn
-        # do more stuff
-        # return render(request, "somefile.html")
-        return _processWEBturn(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _processWEBturn(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -788,8 +761,11 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _sendChatMessage(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendChatMessage(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -847,5 +823,8 @@ def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
     jsonData = json.loads(request.body)
-    with db_mutex(str(jsonData["gameID"])):
-        return shared_cast_vote(request)
+    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return shared_cast_vote(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)

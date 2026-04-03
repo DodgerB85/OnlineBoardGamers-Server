@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 
-from contextlib import contextmanager
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 from django.db import connection
 
@@ -79,8 +79,11 @@ def processHLCturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("processTurn_" + str(gameID)):
-        return _processHLCturn(request)
+    with db_mutex("processTurn_" + str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _processHLCturn(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -779,10 +782,13 @@ def _processHLCturn(request):
 
 # def endGame(request, _winner, _finalScores, _gameID, currentGame):
 def endGame(request, _winner, _finalPositions, _gameID, currentGame):
-    with db_mutex("endGame"):
-        return currentGame.presenter().endGame(
-            request, _winner, _finalPositions, _gameID
-        )
+    with db_mutex("endGame", timeout=5, ttl=60) as acquired:
+        if acquired:
+            return currentGame.presenter().endGame(
+                request, _winner, _finalPositions, _gameID
+            )
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required
@@ -965,20 +971,6 @@ def HLChelp(request):
     return render(request, "HLC/HLChelp.html")
 
 
-@contextmanager
-def db_mutex(name, timeout=10):
-    mutex_name = "dbmutex_" + name
-    cursor = connection.cursor()
-    # timeout returns with error
-    cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-    ((got,),) = cursor.fetchall()
-    if got:
-        yield
-        cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-        cursor.fetchall()
-    else:
-        # time out or can't open?
-        print("ERROR-HLC: Not running, %s mutex not available" % (mutex_name))
 
 
 @login_required()
@@ -1065,8 +1057,11 @@ def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
     jsonData = json.loads(request.body)
-    with db_mutex(str(jsonData["gameID"])):
-        return shared_cast_vote(request)
+    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return shared_cast_vote(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required

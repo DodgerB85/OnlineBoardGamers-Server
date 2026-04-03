@@ -21,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 LOCAL_USER = config("LOCAL_USER", default=False, cast=bool)
+LOCAL_USER_SQLITE3 = config("LOCAL_USER_SQLITE3", default=False, cast=bool)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -271,7 +272,14 @@ Q_CLUSTER = {
 
 
 # if os.environ["DJANGO_DEBUG"] == True:
-if LOCAL_USER:
+if LOCAL_USER_SQLITE3:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+elif LOCAL_USER:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",

@@ -5,7 +5,7 @@ import lzstring
 # import requests
 from typing import TYPE_CHECKING, cast
 
-from contextlib import contextmanager
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
@@ -167,20 +167,6 @@ def busData(request, dataType):
     return HttpResponse(status=204)  # No Content
 
 
-@contextmanager
-def db_mutex(name, timeout=10):
-    mutex_name = "dbmutex_" + name
-    cursor = connection.cursor()
-    # timeout returns with error
-    cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-    ((got,),) = cursor.fetchall()
-    if got:
-        yield
-        cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-        cursor.fetchall()
-    else:
-        # time out or can't open?
-        print("ERROR: Not running, %s mutex not available" % (mutex_name))
 
 
 @login_required()
@@ -191,8 +177,11 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("sendChatMessage_" + str(gameID)):
-        return _sendChatMessage(request)
+    with db_mutex("sendChatMessage_" + str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendChatMessage(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
     return HttpResponse(status=204)  # No Content
 
@@ -256,8 +245,11 @@ def processBUSturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("processTurn_" + str(gameID)):
-        return _processBUSturn(request)
+    with db_mutex("processTurn_" + str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _processBUSturn(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -620,8 +612,11 @@ def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
     jsonData = json.loads(request.body)
-    with db_mutex(str(jsonData["gameID"])):
-        return shared_cast_vote(request)
+    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return shared_cast_vote(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()

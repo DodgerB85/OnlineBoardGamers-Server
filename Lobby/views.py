@@ -9,6 +9,8 @@ import base64
 import gzip
 from django.core.cache import cache
 
+from Lobby.sharedFunctions.db_mutex import db_mutex
+
 # from telegram import Update
 # from telegram.ext import Application, CommandHandler, ContextTypes
 from decouple import config
@@ -4148,8 +4150,11 @@ def sendMTchatMessage(request):
     jsonData = json.loads(request.body)
     MT_ID = jsonData["MT_ID"]
 
-    with db_mutex("lockMT_" + str(MT_ID)):
-        return _sendMTchatMessage(request)
+    with db_mutex("lockMT_" + str(MT_ID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendMTchatMessage(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -4488,8 +4493,11 @@ def sendMainTchatMessage(request):
     jsonData = json.loads(request.body)
     MainT_ID = jsonData["MainT_ID"]
 
-    with db_mutex("lockMainT_" + str(MainT_ID)):
-        return _sendMainTchatMessage(request)
+    with db_mutex("lockMainT_" + str(MainT_ID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendMainTchatMessage(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()

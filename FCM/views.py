@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from django.urls import reverse
-from random import randint
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 from contextlib import contextmanager
 
@@ -359,31 +359,6 @@ def showGame(request, game_id):
     )
 
 
-@contextmanager
-def db_mutex(gameID, timeout=10):
-    mutex_name = FCM_DB_LOCK_NAME + str(gameID)
-    cursor = connection.cursor()
-    got_lock = False  # Initialize got_lock to False
-    try:
-        # timeout returns with error
-        cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-        ((got,),) = cursor.fetchall()
-        got_lock = bool(got)  # Convert to boolean for clarity
-
-        if got_lock:
-            yield  # Execute the code within the 'with' block
-        else:
-            # time out or can't open?
-            print("ERROR-FCM: Not running, %s mutex not available" % (mutex_name))
-            return  # Important: Exit the context manager if the lock wasn't acquired
-    finally:
-        # Ensure the lock is ALWAYS released, even if there's an exception
-        if got_lock:  # Check if the lock was acquired before releasing
-            try:
-                cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-                cursor.fetchall()
-            except Exception as e:
-                print(f"ERROR-FCM: Failed to release lock {mutex_name}: {e}")  # Log error
 
 
 # This is used for HTMX update
@@ -416,8 +391,11 @@ def test(request):
 
 #    currentGame.endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["gameID"], currentGame)
 def endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID, currentGame):
-    with db_mutex(str(_gameID)):
-        return currentGame.presenter().endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID)
+    with db_mutex(str(_gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return currentGame.presenter().endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 def processTurn(request):
@@ -429,8 +407,11 @@ def processTurn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _processTurn(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _processTurn(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @transaction.atomic
@@ -1568,8 +1549,11 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _sendChatMessage(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendChatMessage(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -1788,8 +1772,11 @@ def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
     jsonData = json.loads(request.body)
-    with db_mutex(str(jsonData["gameID"])):
-        return shared_cast_vote(request)
+    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return shared_cast_vote(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 ######### Temp functions to handle data change

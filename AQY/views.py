@@ -173,8 +173,11 @@ def processAQYturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _processAQYturn(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _processAQYturn(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -1209,8 +1212,11 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _sendChatMessage(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendChatMessage(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -1272,8 +1278,11 @@ def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
     jsonData = json.loads(request.body)
-    with db_mutex(str(jsonData["gameID"])):
-        return shared_cast_vote(request)
+    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return shared_cast_vote(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required

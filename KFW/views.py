@@ -5,7 +5,7 @@ import gzip
 
 from typing import TYPE_CHECKING, cast
 
-from contextlib import contextmanager
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 from django.contrib import messages
 
@@ -317,20 +317,6 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     return render(request, "KFW/showKFWgame.html", returnData)
 
 
-@contextmanager
-def db_mutex(name, timeout=10):
-    mutex_name = "dbmutex_" + name
-    cursor = connection.cursor()
-    # timeout returns with error
-    cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-    ((got,),) = cursor.fetchall()
-    if got:
-        yield
-        cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-        cursor.fetchall()
-    else:
-        # time out or can't open?
-        print("ERROR-KFW: Not running, %s mutex not available" % (mutex_name))
 
 
 @login_required()
@@ -341,8 +327,11 @@ def processKFWturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("processTurn_" + str(gameID)):
-        return _processKFWturn(request)
+    with db_mutex("processTurn_" + str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _processKFWturn(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -1090,8 +1079,11 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex("sendChatMessage_" + str(gameID)):
-        return _sendChatMessage(request)
+    with db_mutex("sendChatMessage_" + str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendChatMessage(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()

@@ -4,7 +4,7 @@ import time
 import requests
 import random
 
-from contextlib import contextmanager
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 from decouple import config
 from typing import TYPE_CHECKING, cast
@@ -87,20 +87,6 @@ def createTGZgame(request):
     return create_tgz_game(request)
 
 
-@contextmanager
-def db_mutex(name, timeout=10):
-    mutex_name = TGZ_DB_LOCK_NAME + name
-    cursor = connection.cursor()
-    # timeout returns with error
-    cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-    ((got,),) = cursor.fetchall()
-    if got:
-        yield
-        cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-        cursor.fetchall()
-    else:
-        # time out or can't open?
-        print("ERROR-TGZ: Not running, %s mutex not available" % (mutex_name))
 
 
 def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
@@ -257,8 +243,11 @@ def processTGZturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _processTGZturn(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _processTGZturn(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -769,8 +758,11 @@ def sendChatMessage(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _sendChatMessage(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendChatMessage(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -1191,5 +1183,8 @@ def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
     jsonData = json.loads(request.body)
-    with db_mutex(str(jsonData["gameID"])):
-        return shared_cast_vote(request)
+    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return shared_cast_vote(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)

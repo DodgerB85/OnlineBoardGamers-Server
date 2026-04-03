@@ -1,4 +1,6 @@
 import json
+from django.utils import timezone
+from datetime import timedelta
 
 from decouple import config
 from typing import TYPE_CHECKING
@@ -56,6 +58,18 @@ class User(AbstractUser):
         activeString = "" if self.is_active else " :A NOT AN ACTIVE USER"
         return f"{self.username} {activeString}"
 
+# 1. THE MODEL
+class Lock(models.Model):
+    name = models.CharField(max_length=255, primary_key=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self, ttl_seconds):
+        return timezone.now() > self.created_at + timedelta(seconds=ttl_seconds)
+
+    class Meta:
+        # This ensures it shows up in your migrations
+        verbose_name = "Database Lock"
+        verbose_name_plural = "Database Locks"
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")

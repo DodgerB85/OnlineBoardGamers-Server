@@ -6,7 +6,7 @@ import gzip
 from decouple import config
 from typing import TYPE_CHECKING, cast
 
-from contextlib import contextmanager
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 # from django.contrib import messages
 # from django.conf import settings
@@ -182,31 +182,6 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     return render(request, "RNB/showRNBgame.html", returnData)
 
 
-@contextmanager
-def db_mutex(name, timeout=10):
-    mutex_name = RNB_DB_LOCK_NAME + name
-    cursor = connection.cursor()
-    got_lock = False  # Initialize got_lock to False
-    try:
-        # timeout returns with error
-        cursor.execute("SELECT GET_LOCK(%s, %s)", (mutex_name, timeout))
-        ((got,),) = cursor.fetchall()
-        got_lock = bool(got)  # Convert to boolean for clarity
-
-        if got_lock:
-            yield  # Execute the code within the 'with' block
-        else:
-            # time out or can't open?
-            print("ERROR-RNB: Not running, %s mutex not available" % (mutex_name))
-            return  # Important: Exit the context manager if the lock wasn't acquired
-    finally:
-        # Ensure the lock is ALWAYS released, even if there's an exception
-        if got_lock:  # Check if the lock was acquired before releasing
-            try:
-                cursor.execute("SELECT RELEASE_LOCK(%s)", (mutex_name,))
-                cursor.fetchall()
-            except Exception as e:
-                print(f"ERROR-RNB: Failed to release lock {mutex_name}: {e}")  # Log error
 
 
 def processRNBturn(request):
@@ -217,8 +192,11 @@ def processRNBturn(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _processRNBturn(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _processRNBturn(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
@@ -942,8 +920,11 @@ def sendChatMessageRNB(request):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
-    with db_mutex(str(gameID)):
-        return _sendChatMessageRNB(request)
+    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return _sendChatMessageRNB(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
 
 
 @login_required()
