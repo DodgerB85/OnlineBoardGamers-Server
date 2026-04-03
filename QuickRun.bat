@@ -37,25 +37,19 @@ echo Django server started.
 REM --- Start Vue development servers in separate command prompt windows ---
 REM Using the /D flag with the variable to change directory for each 'start' command
 
-start "Vue Bus" /D "%OBG_HOME%\Bus\busvue" npm run dev
+start "Vue Bus" /D "%OBG_HOME%\BUS\busvue" cmd /c "call npm run dev"
 echo Bus server started.
 
-REM start "Vue TGZ" /D "%OBG_HOME%\TGZ\vueTGZ" npm run dev
-REM echo TGZ server started.
-
-start "Vue Cns" /D "%OBG_HOME%\CNS\vueCNS" npm run dev
+start "Vue Cns" /D "%OBG_HOME%\CNS\vueCNS" cmd /c "call npm run dev"
 echo CNS server started.
 
-start "Vue AQY" /D "%OBG_HOME%\AQY\vueAQY" npm run dev
+start "Vue AQY" /D "%OBG_HOME%\AQY\vueAQY" cmd /c "call npm run dev"
 echo AQY server started.
 
-REM start "Vue IND" /D "%OBG_HOME%\IND\vueIND" npm run dev
-REM echo IND server started.
-
-start "Vue KFW" /D "%OBG_HOME%\KFW\vueKFW" npm run dev
+start "Vue KFW" /D "%OBG_HOME%\KFW\vueKFW" cmd /c "call npm run dev"
 echo KFW server started.
 
-start "Vue WEB" /D "%OBG_HOME%\WEB\vueWEB" npm run dev
+start "Vue WEB" /D "%OBG_HOME%\WEB\vueWEB" cmd /c "call npm run dev"
 echo WEB server started.
 
 REM start "Vue RNB" /D "%OBG_HOME%\RNB\vueRNB" npm run dev
