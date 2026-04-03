@@ -40,8 +40,8 @@ REM Using the /D flag with the variable to change directory for each 'start' com
 start "Vue Bus" /D "%OBG_HOME%\Bus\busvue" npm run dev
 echo Bus server started.
 
-start "Vue TGZ" /D "%OBG_HOME%\TGZ\vueTGZ" npm run dev
-echo TGZ server started.
+REM start "Vue TGZ" /D "%OBG_HOME%\TGZ\vueTGZ" npm run dev
+REM echo TGZ server started.
 
 start "Vue Cns" /D "%OBG_HOME%\CNS\vueCNS" npm run dev
 echo CNS server started.
@@ -49,8 +49,8 @@ echo CNS server started.
 start "Vue AQY" /D "%OBG_HOME%\AQY\vueAQY" npm run dev
 echo AQY server started.
 
-start "Vue IND" /D "%OBG_HOME%\IND\vueIND" npm run dev
-echo IND server started.
+REM start "Vue IND" /D "%OBG_HOME%\IND\vueIND" npm run dev
+REM echo IND server started.
 
 start "Vue KFW" /D "%OBG_HOME%\KFW\vueKFW" npm run dev
 echo KFW server started.
@@ -58,8 +58,8 @@ echo KFW server started.
 start "Vue WEB" /D "%OBG_HOME%\WEB\vueWEB" npm run dev
 echo WEB server started.
 
-start "Vue RNB" /D "%OBG_HOME%\RNB\vueRNB" npm run dev
-echo RNB server started.
+REM start "Vue RNB" /D "%OBG_HOME%\RNB\vueRNB" npm run dev
+REM echo RNB server started.
 
 echo.
 echo ==================================================
