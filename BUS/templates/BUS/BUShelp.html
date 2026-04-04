@@ -4,7 +4,7 @@
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   <div class="container">
     {% if messages %}
@@ -29,6 +29,7 @@
         <b><u>{% translate "Playing the Game" %}</u></b>
         <br />
         <ul>
+          {% url 'profile' as profile_url %}
           {% blocktranslate trimmed %}
             <li>
               Check your connection to the live update server by looking at the circle next to your name in the upper right.
@@ -37,7 +38,7 @@
             </li>
             <li>The active player has a green background in the Players table</li>
             <li>
-              In addition, after actions have been chosen the current move is highlighted in green in the action selection area
+              In addition, after actions have been chosen, the current move is highlighted in green in the action selection area
             </li>
             <li>During the "Choose Actions" phase, any player that has passed will have an orange background</li>
             <li>
@@ -59,7 +60,7 @@
             <li>Score is calculated as you play - Time Stone deductions happen immediately, not at the end</li>
             <li>Any player can rewind at any time. Please be courteous. Misuse will result in alteration of this feature</li>
             <li>
-              You can change which board you are playing on from the menu. Select a preference in your <a class="linkOther" href="/profile">Profile</a>
+              You can change which board you are playing on from the menu. Select a preference in your <a class="linkOther" href="{{ profile_url }}">Profile</a>
               <br />
               <b>NOTE: THE CHANGE IS COSMETIC ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS
                 <br />
@@ -90,6 +91,11 @@
           <br />
           <br />
         </div>
+        <div class="BusHelpSection">
+          <b><u>{% translate "When can I resign?" %}</u></b>
+          <br />
+          {% translate "You can resign during your &quot;Choose Actions&quot; phase." %}
+        </div>
       </div>
       <br />
       <br />
@@ -100,7 +106,7 @@
            width="400"
            height="30">
     </div>
-    {% include 'Lobby/donate/donateBanner.html' %}
-    {% include 'Lobby/common/homeButton.html' %}
+    {% include "Lobby/donate/donateBanner.html" %}
+    {% include "Lobby/common/homeButton.html" %}
   </div>
-{% endblock %}
+{% endblock body %}

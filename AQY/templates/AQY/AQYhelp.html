@@ -4,7 +4,7 @@
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   <div class="container">
     {% if messages %}
@@ -104,7 +104,7 @@
         <br />
         <br />
         Don't forget to set your
-        <a class="linkOther" href="/profileAQY" target="_blank">Antiquity Preferences</a>!
+        <a class="linkOther" href="{% url 'profileAQY' %}" target="_blank">Antiquity Preferences</a>!
         <br />
         <br />
         <b>{% translate "Rewind" %}</b>
@@ -191,6 +191,12 @@
           Cathedrals with graves on will stop your saint power and prevent you from winning
           <br />
         {% endblocktranslate %}
+        <h3>
+          <b><u>{% translate "When can I resign?" %}</u></b>
+        </h3>
+        {% blocktranslate trimmed %}
+          You can resign during your "City Build" phase.
+        {% endblocktranslate %}
       </div>
       <br />
       <br />
@@ -201,12 +207,14 @@
            width="400"
            height="30">
     </div>
-                {% include 'Lobby/donate/donateBanner.html' %}
-                {% include 'Lobby/common/homeButton.html' %}
-    <script>
+    {% include "Lobby/donate/donateBanner.html" %}
+    {% include "Lobby/common/homeButton.html" %}
+  </div>
+</div>
+<script>
   document.querySelector('.homeButton').addEventListener('click', function() {
     window.location.href = this.getAttribute('data-url');
   });
-    </script>
-  </div>
-{% endblock %}
+</script>
+</div>
+{% endblock body %}

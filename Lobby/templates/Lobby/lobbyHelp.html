@@ -381,33 +381,39 @@
                   <b><u>Cannes</b></u>: You can resign during your "place tiles" phase.
                     <br />
                     <b><u>Antiquity</b></u>: You can resign during your "City Build" phase.
-                    {% endblocktranslate %}
-                    <br />
-                    <br />
-                    <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
-                    <br />
-                    {% blocktranslate trimmed %}
-                      Please note that although resigning is discourageed in 3p+ games, at Online Board Gamers players will never be penalised
-                      if they choose to resign.
-                      Sometimes it is a valid (and best!) option. It will count as a loss.
-                    {% endblocktranslate %}
-                    <br />
-                    <br />
-                  </div>
-                  <h2>{% translate "Tournaments" %}</h2>
-                  <div class="lobbyHelpSection">
-                    See <a class="linkOther" href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %}</a> page
-                  </div>
-                  <br />
-                  <br />
-                  {% translate "For further help contact" %}
-                  <img id="contactEmailImg"
-                       src="{% static 'Lobby/email.png' %}"
-                       alt="Email Address"
-                       width="400"
-                       height="30">
-                </div>
-                {% include 'Lobby/donate/donateBanner.html' %}
-                {% include 'Lobby/common/homeButton.html' %}
-              </div>
-            {% endblock %}
+                      <br />
+                      <b><u>Indonesia</b></u>: You can resign during your "Turn Order Bid" phase.
+                        <br />
+                        <b><u>Keyflower</b></u>: You can resign during your "Bidding and Actions" phase, as long as at least one other player hasn't passed yet.
+                          <br />
+                          <b><u>Web</b></u>: You can resign before adding a tile to the grid.
+                          {% endblocktranslate %}
+                          <br />
+                          <br />
+                          <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
+                          <br />
+                          {% blocktranslate trimmed %}
+                            Please note that although resigning is discourageed in 3p+ games, at Online Board Gamers players will never be penalised
+                            if they choose to resign.
+                            Sometimes it is a valid (and best!) option. It will count as a loss.
+                          {% endblocktranslate %}
+                          <br />
+                          <br />
+                        </div>
+                        <h2>{% translate "Tournaments" %}</h2>
+                        <div class="lobbyHelpSection">
+                          See <a class="linkOther" href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %}</a> page
+                        </div>
+                        <br />
+                        <br />
+                        {% translate "For further help contact" %}
+                        <img id="contactEmailImg"
+                             src="{% static 'Lobby/email.png' %}"
+                             alt="Email Address"
+                             width="400"
+                             height="30">
+                      </div>
+                      {% include 'Lobby/donate/donateBanner.html' %}
+                      {% include 'Lobby/common/homeButton.html' %}
+                    </div>
+                  {% endblock %}
