@@ -253,6 +253,7 @@ Q_CLUSTER = {
     "queue_limit": 1,
     "orm": "default",  # Or your database alias
     # --- THE CPU SAVERS ---
+    "cpu_affinity": 1,  # Forces the worker to stay on one core (Saves credits)
     "sleeptime": 300,  # Wait 5 minutes between checks if queue is empty
     "guard_cycle": 300,  # Match sleeptime to prevent the "Guard" from waking up early
     "bulking": 10,  # Process up to 10 tasks in one go to minimize overhead
@@ -264,6 +265,7 @@ Q_CLUSTER = {
     "catch_up": False,  # Don't try to catch up on missed tasks
     "heartbeat": None,  # Disable CPU-heavy status checks
     "recycle": 5000,  # High number to avoid expensive process restarts
+    "benchmark": False,  # Disable performance testing
     # --- CRITICAL CPU SAVING SETTINGS ---
     "sync": False,
     "gc_interval": 7200,  # Run garbage collector every 2 hours instead of 1 hour
