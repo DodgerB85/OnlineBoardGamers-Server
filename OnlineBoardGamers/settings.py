@@ -267,6 +267,8 @@ Q_CLUSTER = {
     # --- CRITICAL CPU SAVING SETTINGS ---
     "sync": False,
     "gc_interval": 7200,  # Run garbage collector every 2 hours instead of 1 hour
+    "daemon": True,  # Helps PythonAnywhere manage the sub-processes
+    "multiprocessing_method": "spawn",  # More stable for virtualenv mixing
 }
 
 # NB this oculd kill very long DB connections
