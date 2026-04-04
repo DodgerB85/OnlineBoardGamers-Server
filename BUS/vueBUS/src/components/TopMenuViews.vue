@@ -6,13 +6,13 @@ import * as view from "../js/BUSview.js"
 
 import HistoryEntry from "./HistoryEntry.vue"
 
-import { ref } from "vue"
-
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
+
+import { ref } from "vue"
 
 const chatMessage = ref("")
 

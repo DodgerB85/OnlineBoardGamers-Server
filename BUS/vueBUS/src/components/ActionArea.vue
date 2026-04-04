@@ -176,20 +176,16 @@ function passKickout() {
 				</h2>
 				<div id="listDiv">
 					<ul class="centreList">
-						<li>Place buildings, lines, and passengers directly on the board. Vrrooomm by selecting
-							passengers and destinations on the board</li>
+						<li>Place buildings, lines, and passengers directly on the board. Vrrooomm by selecting passengers and destinations on the board</li>
 						<li>Choose your actions in the upper right area or next to the board</li>
 						<li>Both action selection areas display the same information, just in a different format</li>
-						<li>To view another player's actions, open the "History" tab and select a "board" action to
-							highlight that move</li>
-						<li>Score is calculated as you play - Time Stone deductions happen immediately, not at the end
-						</li>
+						<li>To view another player's actions, open the "History" tab and select a "board" action to highlight that move</li>
+						<li>Score is calculated as you play - Time Stone deductions happen immediately, not at the end</li>
 						<li>Rewind is always available</li>
 						<li>
 							The Player Table is in order of the "Choose Actions" phase. So top player picks first.
 							<br />
-							&nbsp;&nbsp;&nbsp;&nbsp;If no one chooses the "Starting Player" choice, then the player on
-							the 2nd line will become the new start player.
+							&nbsp;&nbsp;&nbsp;&nbsp;If no one chooses the "Starting Player" choice, then the player on the 2nd line will become the new start player.
 						</li>
 						<li>
 							You can change which board you are playing on from the menu. Select a preference in your
@@ -208,8 +204,7 @@ function passKickout() {
 					<br />
 					Each rewind will move the game back by one step.
 				</h3>
-				Submit a bug report to report errors and game data to the webmaster. You can also use the bug report to
-				submit suggestions or improvements. Thanks!
+				Submit a bug report to report errors and game data to the webmaster. You can also use the bug report to submit suggestions or improvements. Thanks!
 				<br />
 				<br />
 			</template>
@@ -221,25 +216,34 @@ function passKickout() {
 					{{ store.context.turnEndingErrorMessage }}
 				</span>
 
-				<template
-					v-if="(store.gameflow.phase === rf.PHASE_SETUP_BLDGS || store.gameflow.phase === rf.PHASE_ADD_BLDGS) && store.context.buildingsLeftToPlace > 0">
+				<template v-if="(store.gameflow.phase === rf.PHASE_SETUP_BLDGS || store.gameflow.phase === rf.PHASE_ADD_BLDGS) && store.context.buildingsLeftToPlace > 0">
 					<br />
 					<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE">
 						<template v-for="i in [1, 2, 3]" v-bind:key="i">
-							<img class="buildingOptionImg" :id="'buildingOptionImg' + String(i)"
-								:src="view.getImage('building' + String(i))" alt="buildingOption"
-								@mouseover="highlight($event, i, true)" @mouseleave="highlight($event, i, false)"
-								@click="clickedSelectBuilding(i)" :style="{
+							<img
+								class="buildingOptionImg"
+								:id="'buildingOptionImg' + String(i)"
+								:src="view.getImage('building' + String(i))"
+								alt="buildingOption"
+								@mouseover="highlight($event, i, true)"
+								@mouseleave="highlight($event, i, false)"
+								@click="clickedSelectBuilding(i)"
+								:style="{
 									border: getBuildingImgBorder(i),
 								}" />
 						</template>
 					</template>
 					<template v-if="personal.selectedBoard === rf.BOARD_OG">
 						<template v-for="i in [1, 2, 3]" v-bind:key="i">
-							<img class="buildingOptionImg_orig" :id="'buildingOptionImg' + String(i)"
-								:src="view.getImage('building' + String(i) + '_orig')" alt="buildingOption"
-								@mouseover="highlight($event, i, true)" @mouseleave="highlight($event, i, false)"
-								@click="clickedSelectBuilding(i)" :style="{
+							<img
+								class="buildingOptionImg_orig"
+								:id="'buildingOptionImg' + String(i)"
+								:src="view.getImage('building' + String(i) + '_orig')"
+								alt="buildingOption"
+								@mouseover="highlight($event, i, true)"
+								@mouseleave="highlight($event, i, false)"
+								@click="clickedSelectBuilding(i)"
+								:style="{
 									border: getBuildingImgBorder(i),
 								}" />
 						</template>
@@ -262,9 +266,7 @@ function passKickout() {
 				<button class="actionsLineButton" @click="endTurnAndPass()">End Turn & Pass Next Turn</button>
 			</template>
 
-			<button v-if="personal.canEndTurn()" class="actionsLineButton"
-				@click="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS ? controller.endPlayerChooseActionTurn() : controller.endPlayerTurn()">End
-				Turn</button>
+			<button v-if="personal.canEndTurn()" class="actionsLineButton" @click="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS ? controller.endPlayerChooseActionTurn() : controller.endPlayerTurn()">End Turn</button>
 
 			<!-- Phase STOP TIME -->
 			<template v-if="store.gameflow.phase === rf.PHASE_ALTER_TIME && !store.context.confirmEndTurn">
@@ -336,8 +338,7 @@ function passKickout() {
 		</div>
 	</template>
 
-	<template
-		v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
+	<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 		<div v-if="personal.kickoutRequired === 1" id="kickoutDiv">
 			Player
 			<b>{{ controller.currentPlayerObj().name }}</b>
@@ -358,11 +359,9 @@ function passKickout() {
 			<br />
 			<br />
 			<br />
-			<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
-					more time</button></span>
+			<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 			<span>
-				<button class="actionsLineButton" id="confirmKickoutButton"
-					@click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
+				<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
 			</span>
 		</div>
 		<div v-if="personal.kickoutRequired === 3" id="kickoutDiv">

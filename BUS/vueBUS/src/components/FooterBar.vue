@@ -1,7 +1,5 @@
 <script setup>
-//import { useModelStore } from '../stores/BUSstore.js'
 import * as view from '../js/BUSview.js'
-//const store = useModelStore()
 </script>
 
 <template>

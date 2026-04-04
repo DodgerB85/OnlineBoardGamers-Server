@@ -3,15 +3,15 @@ import { motion } from "motion-v"
 import * as view from "../js/BUSview.js"
 //import * as funcs from "../js/BUSfuncs.js"
 import * as rf from "../js/BUSreference.js"
+import * as controller from "../js/BUScontroller.js"
+import * as model from "../js/BUSmodel.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
-import * as controller from "../js/BUScontroller.js"
-import * as model from "../js/BUSmodel.js"
 
-import { ref, onMounted, watch, nextTick, computed } from "vue"
+import { ref, computed } from "vue"
 
 // Track animated lines to avoid re-animating existing lines
 const animatedLines = ref(new Set())
@@ -174,13 +174,7 @@ const lineEndCircles = computed(() => {
 
 		<!-- Add Line End circles -->
 		<!-- Add Line End circles -->
-		<motion.g
-    v-for="(circle, index) in lineEndCircles"
-    :key="`${circle.id}-${circle.x}-${circle.y}`"
-    :initial="{ transform: `translate(${circle.startX - circle.x}px, ${circle.startY - circle.y}px)` }"
-    :animate="{ transform: 'translate(0px, 0px)' }"
-    :transition="{ duration: 2.0, ease: 'circOut' }"
->
+		<motion.g v-for="(circle, index) in lineEndCircles" :key="`${circle.id}-${circle.x}-${circle.y}`" :initial="{ transform: `translate(${circle.startX - circle.x}px, ${circle.startY - circle.y}px)` }" :animate="{ transform: 'translate(0px, 0px)' }" :transition="{ duration: 2.0, ease: 'circOut' }">
 			<circle :cx="circle.x" :cy="circle.y" :r="(store.refSize * 7) / 100" :fill="rf.getColourNameFromNumber(personal.getCorrectedColour(circle.colour))" stroke="black" stroke-width="2" />
 			<!-- Arrow uses circle.x and circle.y for center -->
 			<path

@@ -1,12 +1,12 @@
 <script setup>
 import * as rf from "../js/BUSreference.js"
+import * as controller from "../js/BUScontroller.js"
+import * as model from "../js/BUSmodel.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
-import * as controller from "../js/BUScontroller.js"
-import * as model from "../js/BUSmodel.js"
 
 import { computed } from "vue"
 
@@ -80,8 +80,7 @@ function clickedActionOption(action, index) {
 		else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index < model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
 		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
-	}
-	else if (action === 3) {
+	} else if (action === 3) {
 		if (store.actionAreaData[1][0] !== -1 && index - 4 + model.maxBusesWithNewBus() <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
 		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
@@ -98,26 +97,26 @@ function clickedActionOption(action, index) {
 				</tr>
 			</thead>
 			<tbody>
-			<tr>
-				<template v-for="(marker, index) in store.actionAreaData[0]" v-bind:key="index">
-					<!-- Add a marker -->
-					<td
-						v-if="marker !== -1"
-						:class="{
-							currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length,
-						}">
-						<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedReverseCharsLineExpansion[index] }}</div>
-					</td>
+				<tr>
+					<template v-for="(marker, index) in store.actionAreaData[0]" v-bind:key="index">
+						<!-- Add a marker -->
+						<td
+							v-if="marker !== -1"
+							:class="{
+								currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length,
+							}">
+							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedReverseCharsLineExpansion[index] }}</div>
+						</td>
 
-					<!-- Else IF action time, add a circle -->
-					<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[0][index + 1] !== -1)">
-						<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(0, index)">{{ computedReverseCharsLineExpansion[index] }}</div>
-					</td>
+						<!-- Else IF action time, add a circle -->
+						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[0][index + 1] !== -1)">
+							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(0, index)">{{ computedReverseCharsLineExpansion[index] }}</div>
+						</td>
 
-					<!-- Else add a letter-->
-					<td v-else>{{ computedReverseCharsLineExpansion[index] }}</td>
-				</template>
-			</tr>
+						<!-- Else add a letter-->
+						<td v-else>{{ computedReverseCharsLineExpansion[index] }}</td>
+					</template>
+				</tr>
 			</tbody>
 		</table>
 
@@ -128,22 +127,22 @@ function clickedActionOption(action, index) {
 				</tr>
 			</thead>
 			<tbody>
-			<tr>
-				<template v-for="(marker, index) in store.actionAreaData[1]" v-bind:key="index">
-					<!-- Add a marker -->
-					<td v-if="marker !== -1">
-						<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
-					</td>
+				<tr>
+					<template v-for="(marker, index) in store.actionAreaData[1]" v-bind:key="index">
+						<!-- Add a marker -->
+						<td v-if="marker !== -1">
+							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
+						</td>
 
-					<!-- Else IF action time, add a circle -->
-					<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[1][index] === -1">
-						<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(1, index)"></div>
-					</td>
+						<!-- Else IF action time, add a circle -->
+						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[1][index] === -1">
+							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(1, index)"></div>
+						</td>
 
-					<!-- Else add a letter-->
-					<td v-else>A</td>
-				</template>
-			</tr>
+						<!-- Else add a letter-->
+						<td v-else>A</td>
+					</template>
+				</tr>
 			</tbody>
 		</table>
 
@@ -154,26 +153,26 @@ function clickedActionOption(action, index) {
 				</tr>
 			</thead>
 			<tbody>
-			<tr>
-				<template v-for="(marker, index) in store.actionAreaData[2]" v-bind:key="index">
-					<!-- Add a marker -->
-					<td
-						v-if="marker !== -1"
-						:class="{
-							currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_PAX && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length,
-						}">
-						<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedForwardChars[index] }}</div>
-					</td>
+				<tr>
+					<template v-for="(marker, index) in store.actionAreaData[2]" v-bind:key="index">
+						<!-- Add a marker -->
+						<td
+							v-if="marker !== -1"
+							:class="{
+								currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_PAX && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length,
+							}">
+							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedForwardChars[index] }}</div>
+						</td>
 
-					<!-- Else IF action time, add a circle -->
-					<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[2][0] === -1) || (store.actionAreaData[2][index] === -1 && store.actionAreaData[2][index - 1] !== -1))">
-						<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(2, index)">{{ computedForwardChars[index] }}</div>
-					</td>
+						<!-- Else IF action time, add a circle -->
+						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[2][0] === -1) || (store.actionAreaData[2][index] === -1 && store.actionAreaData[2][index - 1] !== -1))">
+							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(2, index)">{{ computedForwardChars[index] }}</div>
+						</td>
 
-					<!-- Else add a letter-->
-					<td v-else>{{ computedForwardChars[index] }}</td>
-				</template>
-			</tr>
+						<!-- Else add a letter-->
+						<td v-else>{{ computedForwardChars[index] }}</td>
+					</template>
+				</tr>
 			</tbody>
 		</table>
 
@@ -184,26 +183,26 @@ function clickedActionOption(action, index) {
 				</tr>
 			</thead>
 			<tbody>
-			<tr>
-				<template v-for="(marker, index) in store.actionAreaData[3]" v-bind:key="index">
-					<!-- Add a marker -->
-					<td
-						v-if="marker !== -1"
-						:class="{
-							currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS && index === 6 - store.gameflow.turnOrder.length,
-						}">
-						<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedReverseChars[index] }}</div>
-					</td>
+				<tr>
+					<template v-for="(marker, index) in store.actionAreaData[3]" v-bind:key="index">
+						<!-- Add a marker -->
+						<td
+							v-if="marker !== -1"
+							:class="{
+								currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS && index === 6 - store.gameflow.turnOrder.length,
+							}">
+							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedReverseChars[index] }}</div>
+						</td>
 
-					<!-- Else IF action time, add a circle -->
-					<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[3][index + 1] !== -1)">
-						<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(3, index)">{{ computedReverseChars[index] }}</div>
-					</td>
+						<!-- Else IF action time, add a circle -->
+						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[3][index + 1] !== -1)">
+							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(3, index)">{{ computedReverseChars[index] }}</div>
+						</td>
 
-					<!-- Else add a letter-->
-					<td v-else>{{ computedReverseChars[index] }}</td>
-				</template>
-			</tr>
+						<!-- Else add a letter-->
+						<td v-else>{{ computedReverseChars[index] }}</td>
+					</template>
+				</tr>
 			</tbody>
 		</table>
 
@@ -214,22 +213,22 @@ function clickedActionOption(action, index) {
 				</tr>
 			</thead>
 			<tbody>
-			<tr>
-				<template v-for="(marker, index) in store.actionAreaData[4]" v-bind:key="index">
-					<!-- Add a marker -->
-					<td v-if="marker !== -1" :class="{ currentPlayerGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME }">
-						<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
-					</td>
+				<tr>
+					<template v-for="(marker, index) in store.actionAreaData[4]" v-bind:key="index">
+						<!-- Add a marker -->
+						<td v-if="marker !== -1" :class="{ currentPlayerGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME }">
+							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
+						</td>
 
-					<!-- Else IF action time, add a circle -->
-					<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[4][index] === -1">
-						<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(4, index)"></div>
-					</td>
+						<!-- Else IF action time, add a circle -->
+						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[4][index] === -1">
+							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(4, index)"></div>
+						</td>
 
-					<!-- Else add a letter-->
-					<td v-else>A</td>
-				</template>
-			</tr>
+						<!-- Else add a letter-->
+						<td v-else>A</td>
+					</template>
+				</tr>
 			</tbody>
 		</table>
 
@@ -240,26 +239,26 @@ function clickedActionOption(action, index) {
 				</tr>
 			</thead>
 			<tbody>
-			<tr>
-				<template v-for="(marker, index) in store.actionAreaData[5]" v-bind:key="index">
-					<!-- Add a marker -->
-					<td
-						v-if="marker !== -1"
-						:class="{
-							currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length,
-						}">
-						<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
-					</td>
+				<tr>
+					<template v-for="(marker, index) in store.actionAreaData[5]" v-bind:key="index">
+						<!-- Add a marker -->
+						<td
+							v-if="marker !== -1"
+							:class="{
+								currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length,
+							}">
+							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
+						</td>
 
-					<!-- Else IF action time, add a circle -->
-					<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[5][0] === -1) || (store.actionAreaData[5][index] === -1 && store.actionAreaData[5][index - 1] !== -1))">
-						<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(5, index)">{{ controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0) }}</div>
-					</td>
+						<!-- Else IF action time, add a circle -->
+						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[5][0] === -1) || (store.actionAreaData[5][index] === -1 && store.actionAreaData[5][index - 1] !== -1))">
+							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(5, index)">{{ controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0) }}</div>
+						</td>
 
-					<!-- Else add a letter-->
-					<td v-else>{{ forwardChars[index] }}</td>
-				</template>
-			</tr>
+						<!-- Else add a letter-->
+						<td v-else>{{ forwardChars[index] }}</td>
+					</template>
+				</tr>
 			</tbody>
 		</table>
 
@@ -270,55 +269,55 @@ function clickedActionOption(action, index) {
 				</tr>
 			</thead>
 			<tbody>
-			<tr>
-				<template v-for="(marker, index) in store.actionAreaData[6]" v-bind:key="index">
-					<!-- Add a marker -->
-					<td v-if="marker !== -1">
-						<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
-					</td>
+				<tr>
+					<template v-for="(marker, index) in store.actionAreaData[6]" v-bind:key="index">
+						<!-- Add a marker -->
+						<td v-if="marker !== -1">
+							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
+						</td>
 
-					<!-- Else IF action time, add a circle -->
-					<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[6][index] === -1">
-						<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(6, index)"></div>
-					</td>
+						<!-- Else IF action time, add a circle -->
+						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[6][index] === -1">
+							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(6, index)"></div>
+						</td>
 
-					<!-- Else add a letter-->
-					<td v-else>A</td>
-				</template>
-			</tr>
+						<!-- Else add a letter-->
+						<td v-else>A</td>
+					</template>
+				</tr>
 			</tbody>
 		</table>
 
 		<table class="remainingTable">
 			<tbody>
-			<tr>
-				<td>
-					Remaining Passengers:
-					<span :class="{ noMoreLeft: store.remainingPassengers === 0 }">
-						{{ store.remainingPassengers }}
-					</span>
-					<br />
-					Remaining Time Stones:
-					<span :class="{ noMoreLeft: store.remainingTimeStones === 0 }">{{ store.remainingTimeStones }}</span>
-					<br />
-					Max Buses:
-					<span>{{ model.maxBuses() }}</span>
-				</td>
-			</tr>
+				<tr>
+					<td>
+						Remaining Passengers:
+						<span :class="{ noMoreLeft: store.remainingPassengers === 0 }">
+							{{ store.remainingPassengers }}
+						</span>
+						<br />
+						Remaining Time Stones:
+						<span :class="{ noMoreLeft: store.remainingTimeStones === 0 }">{{ store.remainingTimeStones }}</span>
+						<br />
+						Max Buses:
+						<span>{{ model.maxBuses() }}</span>
+					</td>
+				</tr>
 			</tbody>
 		</table>
 
 		<table class="remainingTable">
 			<tbody>
-			<tr>
-				<td>
-					Building Spots:
-					<br />
-					<br />
-					{{ model.getEmptyBuildingSpotsByNumberTotal(1) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(2) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(3) }} /
-					{{ model.getEmptyBuildingSpotsByNumberTotal(4) }}
-				</td>
-			</tr>
+				<tr>
+					<td>
+						Building Spots:
+						<br />
+						<br />
+						{{ model.getEmptyBuildingSpotsByNumberTotal(1) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(2) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(3) }} /
+						{{ model.getEmptyBuildingSpotsByNumberTotal(4) }}
+					</td>
+				</tr>
 			</tbody>
 		</table>
 	</div>

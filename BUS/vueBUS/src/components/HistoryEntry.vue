@@ -2,12 +2,11 @@
 import * as funcs from "../js/BUSfuncs.js"
 import * as rf from "../js/BUSreference.js"
 import * as replay from "../js/BUSreplay"
-
 import * as view from "../js/BUSview.js"
+import * as model from "../js/BUSmodel.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
-import * as model from "../js/BUSmodel.js"
 
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()

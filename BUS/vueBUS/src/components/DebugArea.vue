@@ -1,144 +1,156 @@
 <script setup>
-import * as WS from '../backend/BUSwebsocket'
-import * as funcs from '../js/BUSfuncs.js'
+import * as WS from "../backend/BUSwebsocket"
+import * as funcs from "../js/BUSfuncs.js"
+import * as rf from "../js/BUSreference.js"
+import * as model from "../js/BUSmodel.js"
 
-//import { storeToRefs } from 'pinia'
-import { useModelStore } from "../stores/BUSstore.js";
+import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
-//const modelRefs = storeToRefs(model);
 
-import { usePersonalStore } from "../stores/BUSpersonal.js";
+import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
-import * as rf from '../js/BUSreference.js'
-import * as model from '../js/BUSmodel.js'
-
 function test() {
-  alert(store.players[0].name)
- let res   = model.getJunctionsReachableFromJunction(0, 25)
-  alert(JSON.stringify(res))
+	alert(store.players[0].name)
+	let res = model.getJunctionsReachableFromJunction(0, 25)
+	alert(JSON.stringify(res))
 }
 function test2() {
-  //store.increaseScore(store.players[0])
-  for (let i=0;i<store.players.length;i++) {
-    store.players[i].passActionsFlag = false
-  }
+	//store.increaseScore(store.players[0])
+	for (let i = 0; i < store.players.length; i++) {
+		store.players[i].passActionsFlag = false
+	}
 }
 
 function swapPlayerOrder() {
-  //store.gameflow.turnOrder.unshift(store.gameflow.turnOrder.pop())
-  store.increaseScore(store.players[1])
+	//store.gameflow.turnOrder.unshift(store.gameflow.turnOrder.pop())
+	store.increaseScore(store.players[1])
 }
 
 function highlightBuildingOptions() {
-  store.increaseScore(store.players[1])
-  store.getVromBuildings()
+	store.increaseScore(store.players[1])
+	store.getVromBuildings()
 }
 function removePax() {
-  store.moveAllPassengersOntoJunctions()
+	store.moveAllPassengersOntoJunctions()
 }
 function addPax(bldgNumber) {
-  store.moveAllPassengersOntoCorrectBuilding(bldgNumber)
+	store.moveAllPassengersOntoCorrectBuilding(bldgNumber)
 }
 
 function removeAllBuildings() {
-  for (let i = 0; i < store.junctions.length; i++) {
-    for (let j = 0; j < store.junctions[i].length; j++) {
-      if (store.junctions[i][j] > 0) store.junctions[i][j] = 0
-    }
-  }
+	for (let i = 0; i < store.junctions.length; i++) {
+		for (let j = 0; j < store.junctions[i].length; j++) {
+			if (store.junctions[i][j] > 0) store.junctions[i][j] = 0
+		}
+	}
 }
 function exportLoc() {
-  //store.desiredBuilding = 1
+	//store.desiredBuilding = 1
 }
 function importLoc() {
-
-
-
-
-
-  //store.canPlayerVrom()
+	//store.canPlayerVrom()
 }
-
-
-
 </script>
 
 <template>
+	{{ funcs.exportBUSmodel(false, false).length }} // {{ funcs.exportModel(false, false).length }}
+	<br />
+	{{ store.actionAreaData }}
+	<br />
+	<br />
+	{{ store.lines }}
+	<br />
 
+	<br />
+	{{ model.getWinnerName(true) }}
+	<br />
+	<button @click="store.increaseScore(store.players[0])">P0 +</button>
+	<button
+		@click="
+			store.decreaseScore(store.players[0])
+			store.players[0].timeStones++
+		">
+		P0 -
+	</button>
 
+	<button @click="store.increaseScore(store.players[1])">P1 +</button>
+	<button
+		@click="
+			store.decreaseScore(store.players[1])
+			store.players[1].timeStones++
+		">
+		P1 -
+	</button>
 
-{{  funcs.exportBUSmodel(false, false).length  }} // {{  funcs.exportModel(false, false).length }}
-<br/> {{ store.actionAreaData }}
-<br/>
-<br/> {{ store.lines }}
-<br/>
+	<button @click="store.increaseScore(store.players[2])">P2 +</button>
+	<button
+		@click="
+			store.decreaseScore(store.players[2])
+			store.players[2].timeStones++
+		">
+		P2 -
+	</button>
 
-<br/> {{ model.getWinnerName(true) }}
-<br/>
-  <button @click="store.increaseScore(store.players[0])">P0 + </button>
-  <button @click="store.decreaseScore(store.players[0]); store.players[0].timeStones++">P0 - </button>
+	<button @click="store.gameflow.gameEnded = 0">Play</button>
+	<button @click="store.gameflow.gameEnded = 1">End</button>
 
-  <button @click="store.increaseScore(store.players[1])">P1 + </button>
-  <button @click="store.decreaseScore(store.players[1]);  store.players[1].timeStones++">P1 - </button>
-
-  
-  <button @click="store.increaseScore(store.players[2])">P2 + </button>
-  <button @click="store.decreaseScore(store.players[2]);  store.players[2].timeStones++">P2 - </button>
-  
-  <button @click="store.gameflow.gameEnded = 0">Play </button>
-  <button @click="store.gameflow.gameEnded = 1">End </button>
-
-  <button class="actionsLineButton" @click="test">Test </button>
-  <button @click="test2">Test2 </button>
-  <button @click="swapPlayerOrder">swap players</button>
-  <button @click="highlightBuildingOptions(1)">Highligh Bldg Options</button>
-  <button @click="removeAllBuildings()">Remove All Bldgs</button>
-  <button @click="removePax()">Remove Pax</button>
-  <button @click="addPax(1)">Add Pax</button>
-  <button @click="exportLoc()">export</button>
-  <button @click="importLoc()">import</button>
+	<button class="actionsLineButton" @click="test">Test</button>
+	<button @click="test2">Test2</button>
+	<button @click="swapPlayerOrder">swap players</button>
+	<button @click="highlightBuildingOptions(1)">Highligh Bldg Options</button>
+	<button @click="removeAllBuildings()">Remove All Bldgs</button>
+	<button @click="removePax()">Remove Pax</button>
+	<button @click="addPax(1)">Add Pax</button>
+	<button @click="exportLoc()">export</button>
+	<button @click="importLoc()">import</button>
 </template>
 
 <style scoped>
-body {overflow: hidden; background: #212121}
-input {position: absolute; display: none}
+body {
+	overflow: hidden;
+	background: #212121;
+}
+input {
+	position: absolute;
+	display: none;
+}
 
 * {
-  margin: 0px;
-  padding: 0px;
-  list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+	list-style-type: none;
 }
 
 body {
-  background: #003366;
+	background: #003366;
 }
 
 #container {
-  width: 1000px;
-  margin: 0px auto;
+	width: 1000px;
+	margin: 0px auto;
 }
 
 #elements {
-  width: 100%;
+	width: 100%;
 }
 
 #elements li {
-  display: inline-block;
-  width: 50px;
-  margin: 5px;
-  background: #FFF;
-  color: #003366;
-  box-shadow: 10px 10px 0px #222;
-  user-select: none;
+	display: inline-block;
+	width: 50px;
+	margin: 5px;
+	background: #fff;
+	color: #003366;
+	box-shadow: 10px 10px 0px #222;
+	user-select: none;
 }
 
 #elements li h1,
 h3 {
-  padding: 1px;
+	padding: 1px;
 }
 
 #elements li h1 {
-  cursor: pointer;
+	cursor: pointer;
 }
 </style>

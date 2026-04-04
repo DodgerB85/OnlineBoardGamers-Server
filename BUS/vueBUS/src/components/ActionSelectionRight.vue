@@ -1,14 +1,13 @@
 <script setup>
 import * as rf from "../js/BUSreference.js"
-
 import * as view from "../js/BUSview.js"
+import * as controller from "../js/BUScontroller.js"
+import * as model from "../js/BUSmodel.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
-import * as controller from "../js/BUScontroller.js"
-import * as model from "../js/BUSmodel.js"
 
 import { computed } from "vue"
 
@@ -91,7 +90,7 @@ function getPointerRotation() {
 			<div
 				v-if="marker !== -1"
 				class="actionDisc"
-				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length, }]"
+				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length }]"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -106,14 +105,16 @@ function getPointerRotation() {
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
-          'font-size': (store.refSize * 110) / 500 + 'px',
+					'font-size': (store.refSize * 110) / 500 + 'px',
 					top: (store.refSize * 300) / 400 + 'px',
 					left: (store.refSize * (5 + index * 141)) / 400 + 'px',
 					border: (store.refSize * 20) / 400 + 'px solid yellow',
 				}"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
-				@click="clickedActionOption(0, index)">{{ computedReverseCharsLineExpansion[index] }}</div>
+				@click="clickedActionOption(0, index)">
+				{{ computedReverseCharsLineExpansion[index] }}
+			</div>
 		</template>
 
 		<!-- NEW BUS -->
@@ -136,7 +137,7 @@ function getPointerRotation() {
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
-        'font-size': (store.refSize * 110) / 500 + 'px',
+				'font-size': (store.refSize * 110) / 500 + 'px',
 				top: (store.refSize * 500) / 400 + 'px',
 				left: (store.refSize * 859) / 400 + 'px',
 				border: (store.refSize * 20) / 400 + 'px solid yellow',
@@ -166,14 +167,16 @@ function getPointerRotation() {
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
-          'font-size': (store.refSize * 110) / 500 + 'px',
+					'font-size': (store.refSize * 110) / 500 + 'px',
 					top: (store.refSize * 1226) / 400 + 'px',
 					left: (store.refSize * (5 + index * 141)) / 400 + 'px',
 					border: (store.refSize * 20) / 400 + 'px solid yellow',
 				}"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
-				@click="clickedActionOption(2, index)">{{ computedForwardChars[index] }}</div>
+				@click="clickedActionOption(2, index)">
+				{{ computedForwardChars[index] }}
+			</div>
 		</template>
 
 		<!-- ADD BUILDING -->
@@ -182,11 +185,11 @@ function getPointerRotation() {
 			<div
 				v-if="marker !== -1"
 				class="actionDisc"
-				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS && index === 6 - store.gameflow.turnOrder.length, }]"
+				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS && index === 6 - store.gameflow.turnOrder.length }]"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
-          'font-size': (store.refSize * 110) / 500 + 'px',
+					'font-size': (store.refSize * 110) / 500 + 'px',
 					top: (store.refSize * 1566) / 400 + 'px',
 					left: (store.refSize * (5 + index * 141.4)) / 400 + 'px',
 					border: (store.refSize * 20) / 400 + 'px solid black',
@@ -198,14 +201,16 @@ function getPointerRotation() {
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
-          'font-size': (store.refSize * 110) / 500 + 'px',
+					'font-size': (store.refSize * 110) / 500 + 'px',
 					top: (store.refSize * 1566) / 400 + 'px',
 					left: (store.refSize * (5 + index * 141)) / 400 + 'px',
 					border: (store.refSize * 20) / 400 + 'px solid yellow',
 				}"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
-				@click="clickedActionOption(3, index)">{{ computedReverseChars[index] }}</div>
+				@click="clickedActionOption(3, index)">
+				{{ computedReverseChars[index] }}
+			</div>
 		</template>
 
 		<!-- ALTER TIME -->
@@ -217,7 +222,7 @@ function getPointerRotation() {
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
-        'font-size': (store.refSize * 110) / 500 + 'px',
+				'font-size': (store.refSize * 110) / 500 + 'px',
 				top: (store.refSize * 1766) / 400 + 'px',
 				left: (store.refSize * 859) / 400 + 'px',
 				border: (store.refSize * 20) / 400 + 'px solid black',
@@ -229,7 +234,7 @@ function getPointerRotation() {
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
-        'font-size': (store.refSize * 110) / 500 + 'px',
+				'font-size': (store.refSize * 110) / 500 + 'px',
 				top: (store.refSize * 1766) / 400 + 'px',
 				left: (store.refSize * 859) / 400 + 'px',
 				border: (store.refSize * 20) / 400 + 'px solid yellow',
@@ -244,7 +249,7 @@ function getPointerRotation() {
 			<div
 				v-if="marker !== -1"
 				class="actionDisc"
-				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length, }]"
+				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length }]"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -259,14 +264,16 @@ function getPointerRotation() {
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
-          'font-size': (store.refSize * 110) / 500 + 'px',
+					'font-size': (store.refSize * 110) / 500 + 'px',
 					top: (store.refSize * 2393) / 400 + 'px',
 					left: (store.refSize * (5 + index * 141)) / 400 + 'px',
 					border: (store.refSize * 20) / 400 + 'px solid yellow',
 				}"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
-				@click="clickedActionOption(5, index)">{{ controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0)  }}</div>
+				@click="clickedActionOption(5, index)">
+				{{ controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0) }}
+			</div>
 		</template>
 
 		<!-- STARTING PLAYER -->
@@ -490,10 +497,9 @@ function getPointerRotation() {
 .actionDiscOption {
 	position: absolute;
 	border-radius: 100%;
-  background-color: black;
-  color: white;
-  font-weight: 900;
-  
+	background-color: black;
+	color: white;
+	font-weight: 900;
 }
 .actionDiscOption:hover {
 	cursor: pointer;

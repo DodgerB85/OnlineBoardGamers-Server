@@ -319,7 +319,6 @@ function toggleStatsExcludeDropdown() {
 	</transition>
 </template>
 
-
 <style scoped>
 #infoSpan {
 	white-space: nowrap;
