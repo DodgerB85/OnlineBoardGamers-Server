@@ -99,7 +99,7 @@ function importLoc() {
 function setupPlaceMonument() {
 	store.context.action = rf.ACT_BUILD_MON
 	store.context.monumentsToPlace = 1
-	if (model.hasGod(controller.currentPlayerObj(), rf.OBATALA)) store.context.monumentsToPlace = 2
+	if (model.has_god(controller.currentPlayerObj(), rf.OBATALA)) store.context.monumentsToPlace = 2
 	store.context.indexesToHighlightClick.splice(0)
 	store.context.indexesToHighlightClick = map.getSpacesForMonument(model.hasNomads(controller.currentPlayerObj()), false)
 }
@@ -136,7 +136,7 @@ function setupPlacePriCraftsman(craftsman) {
 	store.context.itemBeingAddedRotation = 0
 	if (rf.ROTATABLE_TILES.includes(craftsman)) store.context.itemBeingAddedRotation = 1
 	store.context.indexesToHighlightClick.splice(0)
-	store.context.range = model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3
+	store.context.range = model.has_god(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3
 	//  return [validSquares, availableResourcesSquares, takenResourcesSquares]
 	let craftsmanPlacingInfo = map.getAllowedIndexesToPlacePriCraftsman(craftsman, store.context.range, store.context.itemBeingAddedRotation)
 	store.context.indexesToHighlightClick = craftsmanPlacingInfo[0]
@@ -155,7 +155,7 @@ function setupPlaceSecCraftsman(craftsman) {
 	store.context.itemBeingAddedRotation = 0
 	if (rf.ROTATABLE_TILES.includes(craftsman)) store.context.itemBeingAddedRotation = 1
 	store.context.indexesToHighlightClick.splice(0)
-	store.context.range = model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3
+	store.context.range = model.has_god(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3
 	let craftsmanPlacingInfo = map.getAllowedIndexesToPlaceSecCraftsman(craftsman, store.context.range, store.context.itemBeingAddedRotation)
 	store.context.indexesToHighlightClick = craftsmanPlacingInfo[0]
 	//store.context.indexesToHighlightGreen = craftsmanPlacingInfo[1]
@@ -173,8 +173,8 @@ function setupSetPrices() {
 	store.context.choosingPrices = [...controller.currentPlayerObj().craftsmenPrices]
 }
 
-function setDebugGod(godType) {
-	model.addGodToPlayer(controller.currentPlayerObj(), godType)
+function setDebug_god(godType) {
+	model.add_godToPlayer(controller.currentPlayerObj(), godType)
 }
 
 function swapTile(item, index) {
@@ -305,24 +305,24 @@ function newMap(num) {
 		<div class="optionsDiv">
 			<b>god</b>
 			<br />
-			<button @click="setDebugGod(rf.SHADIPINYI)">SHADIPINYI</button>
+			<button @click="setDebug_god(rf.SHADIPINYI)">SHADIPINYI</button>
 			<br />
-			<button @click="setDebugGod(rf.ELEGUA)">ELEGUA</button>
-			<button @click="setDebugGod(rf.DZIVA)">DZIVA</button>
+			<button @click="setDebug_god(rf.ELEGUA)">ELEGUA</button>
+			<button @click="setDebug_god(rf.DZIVA)">DZIVA</button>
 			<br />
-			<button @click="setDebugGod(rf.ESHU)">ESHU</button>
-			<button @click="setDebugGod(rf.GU)">GU</button>
+			<button @click="setDebug_god(rf.ESHU)">ESHU</button>
+			<button @click="setDebug_god(rf.GU)">GU</button>
 			<br />
-			<button @click="setDebugGod(rf.OBATALA)">OBATALA</button>
-			<button @click="setDebugGod(rf.ATETE)">ATETE</button>
+			<button @click="setDebug_god(rf.OBATALA)">OBATALA</button>
+			<button @click="setDebug_god(rf.ATETE)">ATETE</button>
 			<br />
-			<button @click="setDebugGod(rf.TSUI_GOAB)">TSUI_GOAB</button>
+			<button @click="setDebug_god(rf.TSUI_GOAB)">TSUI_GOAB</button>
 			<br />
-			<button @click="setDebugGod(rf.ANANSI)">ANANSI</button>
-			<button @click="setDebugGod(rf.QAMATA)">QAMATA</button>
+			<button @click="setDebug_god(rf.ANANSI)">ANANSI</button>
+			<button @click="setDebug_god(rf.QAMATA)">QAMATA</button>
 			<br />
-			<button @click="setDebugGod(rf.ENGAI)">ENGAI</button>
-			<button @click="setDebugGod(rf.XANGO)">XANGO</button>
+			<button @click="setDebug_god(rf.ENGAI)">ENGAI</button>
+			<button @click="setDebug_god(rf.XANGO)">XANGO</button>
 			<br />
 		</div>
 

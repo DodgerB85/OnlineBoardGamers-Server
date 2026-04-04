@@ -86,7 +86,7 @@ function changeGhost(event, index, add) {
 		ghostDivRef.value.style.left = view.getIndexPos(index)[1] + (1.5 * store.refSize) / 240 + "px"
 		ghostDivRef.value.style["border-width"] = (store.refSize * 3) / 240 + "px"
 		ghostDivRef.value.style["background-color"] = personal.getCorrectedColourHex(store.players[store.gameflow.turnOrder[0]].colour)
-		store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([index], model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
+		store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([index], model.has_god(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
 	}
 	// PLACING RESOURCE
 	else if (store.context.action === rf.ACT_BUILD_RES || store.context.action === rf.ACT_BUILD_WATER) {
@@ -110,11 +110,11 @@ function changeGhost(event, index, add) {
 		ghostImgRef.value.style["border-width"] = (store.refSize * 3) / 240 + "px"
 
 		if (store.context.itemBeingAdded !== rf.WATER_TILE) {
-			let data = map.getAllCraftsmanDataWithinRangeOfZoneAndOutOfRange([index], model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, rf.RES_TILE_TO_SQ[store.context.itemBeingAdded])
+			let data = map.getAllCraftsmanDataWithinRangeOfZoneAndOutOfRange([index], model.has_god(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, rf.RES_TILE_TO_SQ[store.context.itemBeingAdded])
 			store.context.craftsmanDataToPipGreen = data[0]
 			store.context.craftsmanDataToPipRed = data[1]
 			store.topMenuViews.hubRangesToHighlight.splice(0)
-			store.topMenuViews.hubRangesToHighlight.push(map.getAllSquaresWithinRangeOfZone([index], model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, false))
+			store.topMenuViews.hubRangesToHighlight.push(map.getAllSquaresWithinRangeOfZone([index], model.has_god(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, false))
 		}
 	}
 	// PLACING CRAFTSMAN
@@ -172,7 +172,7 @@ function changeGhost(event, index, add) {
       zone.push(index + (map.getSw()*2))
     }*/
 		store.topMenuViews.hubRangesToHighlight.splice(0)
-		store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs(zone, model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
+		store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs(zone, model.has_god(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
 	}
 }
 

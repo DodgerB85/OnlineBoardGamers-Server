@@ -389,10 +389,6 @@ def test(request):
     return render(request, "FCM/test.html", {"gameID": 21})
 
 
-#    currentGame.endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["gameID"], currentGame)
-def endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID, currentGame):
-    # Remove mutex - already locked by processTurn to prevent deadlock
-    return currentGame.presenter().endGame(request, _winnerUsername, _finalScores, _tournamentData, _gameID)
 
 
 def processTurn(request):
@@ -967,13 +963,12 @@ def _processTurn(request):
         ################ END REWIND EVERY SAVE #######################
 
         if jsonData["status"] == "FINISHED":
-            endGame(
+            currentGame.presenter().endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalScores"],
                 jsonData["tournamentData"],
                 jsonData["gameID"],
-                currentGame,
             )
 
         presenter.removeSingleRewindPermission()
@@ -1218,13 +1213,12 @@ def _processTurn(request):
 
         # End Game
         if jsonData["phase"] == rfFCM.PHASE_GAME_OVER:
-            endGame(
+            currentGame.presenter().endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalScores"],
                 jsonData["tournamentData"],
                 jsonData["gameID"],
-                currentGame,
             )
 
         return JsonResponse(

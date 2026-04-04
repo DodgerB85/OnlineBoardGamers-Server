@@ -13,7 +13,7 @@ async function resetDataForReplay() {
 
 	// reform availablegods
 	for (let i = 0; i < store.players.length; i++) {
-		const gods = model.getPlayerGods(store.players[i])
+		const gods = model.getPlayer_gods(store.players[i])
 		for (let g = 0; g < gods.length; g++) {
 			if (gods[g][0] !== rf.NO_god) store.availablegods.push(gods[g][0])
 		}
@@ -77,7 +77,7 @@ function replayBid(historyIndex, playerIndex, entry3) {
 		// Check for elegua used; refund if +ve
 		if (entry3.length > 2 && entry3[2] > 0) controller.currentPlayerObj().cows += entry3[2]
 		// if aja used, move cows to god not bid
-		if (entry3.length > 2 && entry3[2] === -1) model.updateGodData(controller.currentPlayerObj(), rf.AJA, entry3[0])
+		if (entry3.length > 2 && entry3[2] === -1) model.update_godData(controller.currentPlayerObj(), rf.AJA, entry3[0])
 		// Otherwise Add cows to the bid
 		else store.ongoingVars.totalBids += parseInt(entry3[0])
 		store.ongoingVars.currentBid = parseInt(entry3[0])
@@ -209,7 +209,7 @@ function replayRaiseMonument(historyIndex, playerIndex, entry3) {
 		})
 		.indexOf(monumentSq)
 
-	if (monumentIndex === -1 && model.hasGod(store.players[playerIndex], rf.YEMOJA)) {
+	if (monumentIndex === -1 && model.has_god(store.players[playerIndex], rf.YEMOJA)) {
 		for (let i = 0; i < store.players.length; i++) {
 			monumentIndex = store.players[i].monuments
 				.map(function (el) {
@@ -263,9 +263,9 @@ function replayRaiseMonument(historyIndex, playerIndex, entry3) {
 							if (store.players[cmanOwnerIndex].techs[i][0] === rf.BLACKSMITH_TECH) {
 								if (OVIAused) {
 									store.players[cmanOwnerIndex].techs[i][1] += cmanCost - 1
-									if (model.hasGod(store.players[playerIndex], rf.OVIA)) {
-										const oviaData = model.getGodData(store.players[playerIndex], rf.OVIA)
-										model.updateGodData(store.players[playerIndex], rf.OVIA, oviaData[1] + 1)
+									if (model.has_god(store.players[playerIndex], rf.OVIA)) {
+										const oviaData = model.get_godData(store.players[playerIndex], rf.OVIA)
+										model.update_godData(store.players[playerIndex], rf.OVIA, oviaData[1] + 1)
 									}
 								} else store.players[cmanOwnerIndex].techs[i][1] += cmanCost
 								break
@@ -273,9 +273,9 @@ function replayRaiseMonument(historyIndex, playerIndex, entry3) {
 						} else if (store.players[cmanOwnerIndex].techs[i][0] === cmanData[1] * 2 || store.players[cmanOwnerIndex].techs[i][0] === cmanData[1] * 2 + 1) {
 							if (OVIAused) {
 								store.players[cmanOwnerIndex].techs[i][1] += cmanCost - 1
-								if (model.hasGod(store.players[playerIndex], rf.OVIA)) {
-									const oviaData = model.getGodData(store.players[playerIndex], rf.OVIA)
-									model.updateGodData(store.players[playerIndex], rf.OVIA, oviaData[1] + 1)
+								if (model.has_god(store.players[playerIndex], rf.OVIA)) {
+									const oviaData = model.get_godData(store.players[playerIndex], rf.OVIA)
+									model.update_godData(store.players[playerIndex], rf.OVIA, oviaData[1] + 1)
 								}
 							} else store.players[cmanOwnerIndex].techs[i][1] += cmanCost
 							break
@@ -284,9 +284,9 @@ function replayRaiseMonument(historyIndex, playerIndex, entry3) {
 
 					// Add cows to Qamata
 					for (let i = 0; i < store.players.length; i++) {
-						if (model.hasGod(store.players[i], rf.QAMATA)) {
-							const qamataData = model.getGodData(store.players[i], rf.QAMATA)
-							model.updateGodData(store.players[i], rf.QAMATA, qamataData[1] + hubCost)
+						if (model.has_god(store.players[i], rf.QAMATA)) {
+							const qamataData = model.get_godData(store.players[i], rf.QAMATA)
+							model.update_godData(store.players[i], rf.QAMATA, qamataData[1] + hubCost)
 						}
 					}
 
@@ -297,8 +297,8 @@ function replayRaiseMonument(historyIndex, playerIndex, entry3) {
 					if (entry3[i][j].length > 3 && entry3[i][j][3] === -3) {
 						controller.currentPlayerObj().cows -= rf.WATERTOLLCowToll
 						let WATERTOLLplayerIndex = model.anyoneHasWATERTOLL(true)
-						const waterTollData = model.getGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL)
-						model.updateGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL, waterTollData[1] + rf.WATERTOLLCowToll)
+						const waterTollData = model.get_godData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL)
+						model.update_godData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL, waterTollData[1] + rf.WATERTOLLCowToll)
 					}
 				} else if (j % 2 === 1) {
 					// Just deplete the res
@@ -309,8 +309,8 @@ function replayRaiseMonument(historyIndex, playerIndex, entry3) {
 								// WATERTOLL toll paid
 								controller.currentPlayerObj().cows -= rf.WATERTOLLCowToll
 								let WATERTOLLplayerIndex = model.anyoneHasWATERTOLL(true)
-								const waterTollData = model.getGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL)
-								model.updateGodData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL, waterTollData[1] + rf.WATERTOLLCowToll)
+								const waterTollData = model.get_godData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL)
+								model.update_godData(store.players[WATERTOLLplayerIndex], rf.WATERTOLL, waterTollData[1] + rf.WATERTOLLCowToll)
 							}
 						}
 					} else store.depletedResources.push(entry3[i][j])
@@ -323,7 +323,7 @@ function replayRaiseMonument(historyIndex, playerIndex, entry3) {
 		// each entry3[i] is length 2 or 4. First is Cman, second Res
 		if (entry3[i][0] === -1) {
 			// Remove cows from EKWENSU
-			model.updateGodData(store.players[model.anyoneHasEKWENSU(true)], rf.EKWENSU, model.getGodData(store.players[model.anyoneHasEKWENSU(true)], rf.EKWENSU)[1] - entry3[i][1])
+			model.update_godData(store.players[model.anyoneHasEKWENSU(true)], rf.EKWENSU, model.get_godData(store.players[model.anyoneHasEKWENSU(true)], rf.EKWENSU)[1] - entry3[i][1])
 			// Refund to the actioning player
 			player.cows += entry3[i][1]
 		}
@@ -379,7 +379,7 @@ function replayBuildOyaMon(historyIndex, playerIndex, entry3) {
 				}
 				// Add cows to Qamata
 				for (let i = 0; i < store.players.length; i++) {
-					if (model.hasGod(store.players[i], rf.QAMATA)) model.updateGodData(store.players[i], rf.QAMATA, model.getGodData(store.players[i], rf.QAMATA)[1] + hubCost)
+					if (model.has_god(store.players[i], rf.QAMATA)) model.update_godData(store.players[i], rf.QAMATA, model.get_godData(store.players[i], rf.QAMATA)[1] + hubCost)
 				}
 
 				player.cows -= hubCost

@@ -96,7 +96,7 @@ function getArrowDirection(circleObj) {
 	// Safety check for position data
 	if (!fromPos || !toPos) return 0
 
-	// getBuildingPos usually returns [top, left] -> [y, x]
+	// view.getBuildingPos usually returns [top, left] -> [y, x]
 	const deltaY = toPos[0] - fromPos[0]
 	const deltaX = toPos[1] - fromPos[1]
 
@@ -206,8 +206,8 @@ const lineEndCircles = computed(() => {
 			v-for="junction in store.context.endJunctionsOptions[1]"
 			v-bind:key="junction"
 			:style="{
-				top: getBuildingPos(junction, -1, true)[0] + 'px',
-				left: getBuildingPos(junction, -1, true)[1] + 'px',
+				top: view.getBuildingPos(junction, -1, true)[0] + 'px',
+				left: view.getBuildingPos(junction, -1, true)[1] + 'px',
 				width: (store.refSize * 32) / 100 + 'px',
 				height: (store.refSize * 32) / 100 + 'px',
 				border: String((store.refSize * 5) / 100) + 'px solid yellow',

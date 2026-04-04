@@ -64,7 +64,7 @@ function loadRewind() {
 function anyoneHasgod(retArr) {
 	let res = []
 	for (let i = 0; i < store.players.length; i++) {
-		const gods = model.getPlayerGods(store.players[i])
+		const gods = model.getPlayer_gods(store.players[i])
 		for (let g = 0; g < gods.length; g++) {
 			if (gods[g][0] !== rf.NO_god) {
 				if (!retArr) return true
@@ -124,7 +124,7 @@ function parseMessage(message) {
 function getMissinggods() {
 	let all = [...store.availablegods]
 	for (let i = 0; i < store.players.length; i++) {
-		const gods = model.getPlayerGods(store.players[i])
+		const gods = model.getPlayer_gods(store.players[i])
 		for (let g = 0; g < gods.length; g++) {
 			if (gods[g][0] !== rf.NO_god) all.push(gods[g][0])
 		}
@@ -172,14 +172,14 @@ function getRewindPanelLeft() {
 
 function getTechsArray() {
 	let res = JSON.parse(JSON.stringify(rf.ALL_TECHS_RES_DISPLAY))
-	if (store.availablegods.includes(rf.OGUN) || store.players.some((player) => model.hasGod(player, rf.OGUN))) {
+	if (store.availablegods.includes(rf.OGUN) || store.players.some((player) => model.has_god(player, rf.OGUN))) {
 		res.push([rf.BLACKSMITH_TECH])
 	}
 	return res
 }
 function getTilesArray() {
 	let res = JSON.parse(JSON.stringify(rf.ALL_TILES))
-	if (store.availablegods.includes(rf.OGUN) || store.players.some((player) => model.hasGod(player, rf.OGUN))) {
+	if (store.availablegods.includes(rf.OGUN) || store.players.some((player) => model.has_god(player, rf.OGUN))) {
 		res.splice(7, 0, rf.BLACKSMITH_TILE);
 	}
 	if (!rf.CRAFTSMEN_TILES.includes(rf.BLACKSMITH_TILE)) rf.CRAFTSMEN_TILES.push([rf.BLACKSMITH_TILE])

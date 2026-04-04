@@ -490,12 +490,11 @@ def _processHLCturn(request):
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            endGame(
+            currentGame.presenter().endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
                 jsonData["gameID"],
-                currentGame,
             )
         else:
             # Send Notifications
@@ -740,13 +739,11 @@ def _processHLCturn(request):
         currentGame.save()
 
         if jsonData["status"] == "FINISHED":
-            # endGame(request, jsonData["winner"], jsonData["finalScores"], jsonData["gameID"], currentGame)
-            endGame(
+            currentGame.presenter().endGame(
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
                 jsonData["gameID"],
-                currentGame,
             )
         else:
             # Send Notifications
@@ -780,12 +777,6 @@ def _processHLCturn(request):
     return HttpResponse(status=204)  # No Content
 
 
-# def endGame(request, _winner, _finalScores, _gameID, currentGame):
-def endGame(request, _winner, _finalPositions, _gameID, currentGame):
-    # Remove mutex - already locked by processTurn to prevent race conditions
-    return currentGame.presenter().endGame(
-        request, _winner, _finalPositions, _gameID
-    )
 
 
 @login_required

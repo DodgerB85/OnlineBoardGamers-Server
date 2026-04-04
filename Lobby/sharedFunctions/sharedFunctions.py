@@ -838,6 +838,10 @@ def start_next_any_tournament_round(
     gamesPlayers = ret["gamesPlayers"]
     ### MOVE TO RET ????
     roundNumberString = ret["roundNumberString"]
+    # Remove existing tournament name prefix to prevent duplication
+    # TODO: remove this hack. Check what 
+    if roundNumberString.startswith(f"[{tournamentObj.tournamentName}] "):
+        roundNumberString = roundNumberString[len(f"[{tournamentObj.tournamentName}] "):]
     tournamentGameName = f"[{tournamentObj.tournamentName}] {roundNumberString}"
     for i, currentPlayers in enumerate(gamesPlayers):
         if tournamentObj.tournamentType == "MG":

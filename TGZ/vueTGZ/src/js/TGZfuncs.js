@@ -149,7 +149,7 @@ function anyVRchanged() {
 	if (rf.gods_VR[11] !== -2) return true*/
 	let godsArray = [...store.availablegods]
 	for (let i=0;i<store.players.length;i++) {
-		const gods = model.getPlayerGods(store.players[i])
+		const gods = model.getPlayer_gods(store.players[i])
 		for (let g = 0; g < gods.length; g++) {
 			if (gods[g][0] !== rf.NO_god) godsArray.push(gods[g][0])
 		}

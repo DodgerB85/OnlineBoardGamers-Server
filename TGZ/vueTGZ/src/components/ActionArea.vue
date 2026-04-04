@@ -103,7 +103,7 @@ function getCurrentCows(bidAmount) {
 	if (model.anyoneHasSHADIPINYI()) pos++
 	cows += model.getCowsOnPlaque(pos, bidAmount)
 
-	if (model.hasGod(controller.currentPlayerObj(), rf.SHADIPINYI)) cows += model.getCowsOnPlaque(0, bidAmount)
+	if (model.has_god(controller.currentPlayerObj(), rf.SHADIPINYI)) cows += model.getCowsOnPlaque(0, bidAmount)
 	return cows
 }
 
@@ -114,9 +114,9 @@ function confirmFreeAjaPass() {
 }*/
 
 function confirmAjaBid(cowCost) {
-	if (!model.hasGod(controller.currentPlayerObj(), rf.AJA) || model.getGodData(controller.currentPlayerObj(), rf.AJA)[1] !== 0) return
+	if (!model.has_god(controller.currentPlayerObj(), rf.AJA) || model.get_godData(controller.currentPlayerObj(), rf.AJA)[1] !== 0) return
 	model.confirmBid_core(cowCost) // This just deducts cows
-	model.updateGodData(controller.currentPlayerObj(), rf.AJA, cowCost)
+	model.update_godData(controller.currentPlayerObj(), rf.AJA, cowCost)
 
 	store.ongoingVars.totalBids -= cowCost
 
@@ -175,7 +175,7 @@ function cmanDisplayInfo(cman, flag) {
 	// Display the option at all. So either has a tech, or one available. Sec must already have a pri
 	if (flag === 0) {
 		// Has Ogun
-		if (model.hasGod(controller.currentPlayerObj(), rf.OGUN) && cman === rf.BLACKSMITH_TILE) return true
+		if (model.has_god(controller.currentPlayerObj(), rf.OGUN) && cman === rf.BLACKSMITH_TILE) return true
 		// Has Tech
 		if (model.hasTechForCman(cman)) return true
 		// If no pri from prior turns, then no
@@ -209,7 +209,7 @@ function cmanDisplayInfo(cman, flag) {
 function localSetupPlaceResource(resource) {
 	if (store.remainingItems[resource] <= 0) return
 	store.context.itemBeingAdded = resource
-	if (model.hasGod(controller.currentPlayerObj(), rf.ESHU)) store.context.range = 6
+	if (model.has_god(controller.currentPlayerObj(), rf.ESHU)) store.context.range = 6
 
 	let data = map.getAllCraftsmanDataWithinRangeOfZoneAndOutOfRange([0], 18, rf.RES_TILE_TO_SQ[store.context.itemBeingAdded])
 	store.context.craftsmanDataToPipRed = data[0]
@@ -237,11 +237,11 @@ function localSetupPlaceCraftsman(cman) {
 		let techs = model.getAvailableTechs(-1)
 		let techCard = cman * 2 + 1
 		if (techs.includes(cman * 2)) techCard = cman * 2
-		if (!model.hasGod(controller.currentPlayerObj(), rf.GU) && model.getVR(controller.currentPlayerObj()) + rf.TECH_VR[techCard] > 40) {
+		if (!model.has_god(controller.currentPlayerObj(), rf.GU) && model.getVR(controller.currentPlayerObj()) + rf.TECH_VR[techCard] > 40) {
 			store.context.actionError = "Taking Tech would increase VR over 40"
 			return
 		}
-		if (model.hasGod(controller.currentPlayerObj(), rf.GU) && model.getVR(controller.currentPlayerObj()) + 1 > 40) {
+		if (model.has_god(controller.currentPlayerObj(), rf.GU) && model.getVR(controller.currentPlayerObj()) + 1 > 40) {
 			store.context.actionError = "Taking Tech would increase VR over 40"
 			return
 		}
@@ -262,7 +262,7 @@ function localSetupPlaceCraftsman(cman) {
 	store.context.itemBeingAddedRotation = 0
 	if (rf.ROTATABLE_TILES.includes(cman)) store.context.itemBeingAddedRotation = 1
 	store.context.indexesToHighlightClick.splice(0)
-	store.context.range = model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3
+	store.context.range = model.has_god(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3
 	//  return [validSquares, availableResourcesSquares, takenResourcesSquares]
 	let craftsmanPlacingInfo = []
 	if (rf.PRI_CRAFFTSMAN.includes(cman)) {
@@ -464,7 +464,7 @@ function skipResource() {
 	// THIS NEEDS TO START FROM THE RELATED CRAFTSMAN AREA
 	let craftsmanZone = map.getCraftsmanZoneFromData(map.getCraftsmanDataFromAnySq(store.context.currentRitualGood[0][0], true))
 	model.getValidCraftsmenToRaiseMonument(craftsmanZone)
-	store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs(craftsmanZone, model.hasGod(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
+	store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs(craftsmanZone, model.has_god(controller.currentPlayerObj(), rf.ESHU) ? 6 : 3, 0)
 }
 
 function cancelRaising() {
@@ -474,7 +474,7 @@ function cancelRaising() {
 
 function localConfirmRaising() {
 	store.clearVars(true)
-	if (model.hasGod(controller.currentPlayerObj(), rf.OYA)) {
+	if (model.has_god(controller.currentPlayerObj(), rf.OYA)) {
 		model.setupPlaceMonument()
 	}
 }
@@ -787,9 +787,9 @@ function failedToJustPlaceCraftsmanFlag() {
 			Winning Kingdom:
 			<img class="winningTribeImg" :src="view.getPlayerTribeImage(personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][0][1]].colour))" alt="Tribe" />
 			Best Mythology:
-			<template v-if="model.getPlayerPrimaryGod(store.players[store.history[store.history.length - 1][3][0][1]])[0] !== rf.NO_god">
-				<template v-for="(godData, index) in model.getPlayerGods(store.players[store.history[store.history.length - 1][3][0][1]])" :key="index">
-					<img v-if="godData[0] !== rf.NO_god" :src="view.getImage('god' + godData[0])" alt="God" class="winningMythImg" />
+			<template v-if="model.getPlayerPrimary_god(store.players[store.history[store.history.length - 1][3][0][1]])[0] !== rf.NO_god">
+				<template v-for="(godData, index) in model.getPlayer_gods(store.players[store.history[store.history.length - 1][3][0][1]])" :key="index">
+					<img v-if="godData[0] !== rf.NO_god" :src="view.getImage('god' + godData[0])" alt="god" class="winningMythImg" />
 				</template>
 			</template>
 			<span v-else>None</span>
@@ -879,7 +879,7 @@ function failedToJustPlaceCraftsmanFlag() {
 				<template v-if="store.context.action === rf.ACT_BID">
 					<b>Provide a gift, or Pass</b>
 					<br />
-					<span v-if="model.hasGod(controller.currentPlayerObj(), rf.AJA) && model.getGodData(controller.currentPlayerObj(), rf.AJA)[1] === 0">
+					<span v-if="model.has_god(controller.currentPlayerObj(), rf.AJA) && model.get_godData(controller.currentPlayerObj(), rf.AJA)[1] === 0">
 						To place your bid on Aja, select a bid amount and then use "Confirm Bid to Aja"
 						<br />
 					</span>
@@ -922,7 +922,7 @@ function failedToJustPlaceCraftsmanFlag() {
 					<br />
 
 					<!--DEFUNCT SCHISM AJA <button v-if="controller.ajaPlayerCanFreePass()" class="actionsLineButton" @click="confirmFreeAjaPass">Confirm Free Pass with Aja</button>-->
-					<button v-if="store.context.selectedBid > 0 && model.hasGod(controller.currentPlayerObj(), rf.AJA) && model.getGodData(controller.currentPlayerObj(), rf.AJA)[1] === 0" class="actionsLineButton" @click="confirmAjaBid(store.context.selectedBid)">Confirm Bid to Aja</button>
+					<button v-if="store.context.selectedBid > 0 && model.has_god(controller.currentPlayerObj(), rf.AJA) && model.get_godData(controller.currentPlayerObj(), rf.AJA)[1] === 0" class="actionsLineButton" @click="confirmAjaBid(store.context.selectedBid)">Confirm Bid to Aja</button>
 
 					<button class="actionsLineButton" @click="confirmBid(store.context.selectedBid)">
 						Confirm
@@ -1021,9 +1021,9 @@ function failedToJustPlaceCraftsmanFlag() {
 						</button>
 					</span>
 				</fieldset>
-				<fieldset class="optionsGroup" v-if="store.availableSpecialists.length > 0 || model.hasGod(controller.currentPlayerObj(), rf.NO_god)">
+				<fieldset class="optionsGroup" v-if="store.availableSpecialists.length > 0 || model.has_god(controller.currentPlayerObj(), rf.NO_god)">
 					<legend class="optionsHeader">Pick One</legend>
-					<span v-if="(model.hasGod(controller.currentPlayerObj(), rf.NO_god) || store.allowMultiple_gods) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_god) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_SPEC)">
+					<span v-if="(model.has_god(controller.currentPlayerObj(), rf.NO_god) || store.allowMultiple_gods) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_god) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_SPEC)">
 						<button class="actionsLineButton mainActionButton" @click="model.setupChoosegod">
 							Choose
 							<br />
@@ -1031,11 +1031,11 @@ function failedToJustPlaceCraftsmanFlag() {
 						</button>
 						<br />
 					</span>
-					<span v-else-if="!model.hasGod(controller.currentPlayerObj(), rf.NO_god)">
+					<span v-else-if="!model.has_god(controller.currentPlayerObj(), rf.NO_god)">
 						You adore: 
-						<template v-for="(godData, index) in model.getPlayerGods(controller.currentPlayerObj())" :key="index">
+						<template v-for="(godData, index) in model.getPlayer_gods(controller.currentPlayerObj())" :key="index">
 							<span v-if="godData[0] !== rf.NO_god">
-								{{ rf.god_NAMES[godData[0]] }}<span v-if="index < model.getPlayerGods(controller.currentPlayerObj()).filter(g => g[0] !== rf.NO_god).length - 1">, </span>
+								{{ rf.god_NAMES[godData[0]] }}<span v-if="index < model.getPlayer_gods(controller.currentPlayerObj()).filter(g => g[0] !== rf.NO_god).length - 1">, </span>
 							</span>
 						</template>
 						<br />
@@ -1103,7 +1103,7 @@ function failedToJustPlaceCraftsmanFlag() {
 					<br />
 					<template v-if="model.anyoneHasAJAKA(false) && controller.currentPlayerObj().techs.some((t) => t[1] >= 6)">
 						<!-- YOU DO NOT HAVE AJAKA - SO YOU ARE LOSING COWS -->
-						<template v-if="!model.hasGod(controller.currentPlayerObj(), rf.AJAKA)">
+						<template v-if="!model.has_god(controller.currentPlayerObj(), rf.AJAKA)">
 							<span class="orangeText">
 								Ajaka is taking half the cows from your tech cards that have 6+ cows
 								<br />
@@ -1295,7 +1295,7 @@ function failedToJustPlaceCraftsmanFlag() {
 					<br />
 					You may not build adjacent to any existing monument
 				</span>
-				<span v-if="model.hasGod(controller.currentPlayerObj(), rf.OBATALA)">
+				<span v-if="model.has_god(controller.currentPlayerObj(), rf.OBATALA)">
 					<br />
 					Monuments to place: {{ store.context.monumentsToPlace }}
 				</span>
@@ -1308,7 +1308,7 @@ function failedToJustPlaceCraftsmanFlag() {
 				</span>
 				<br />
 				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
-				<button v-if="model.hasGod(controller.currentPlayerObj(), rf.OBATALA) && store.context.monumentsToPlace === 1" class="actionsLineButton" @click="onlyPlaceOneMonument">Only Place 1 Monument</button>
+				<button v-if="model.has_god(controller.currentPlayerObj(), rf.OBATALA) && store.context.monumentsToPlace === 1" class="actionsLineButton" @click="onlyPlaceOneMonument">Only Place 1 Monument</button>
 			</template>
 
 			<!-- ADD RESOURCE -->
@@ -1427,8 +1427,8 @@ function failedToJustPlaceCraftsmanFlag() {
 						">
 						<img class="priceTileImg" :src="view.getImage('craftsman' + String(craftsmanTile) + (rf.ROTATABLE_TILES.includes(craftsmanTile) ? '_v' : ''))" alt="Craftsman" />
 						<br />
-						<img v-if="model.getPriceForCraftsman(controller.currentPlayerObj(), craftsmanTile, false) === 1 || model.hasGod(controller.currentPlayerObj(), rf.DZIVA)" :src="view.getImage('cows1')" :class="{ cowPriceChosenImg: localGetPrice(craftsmanTile) === 1 }" class="cowPriceImg" alt="1 cow" @click="localSetPrice(craftsmanTile, 1)" />
-						<img v-if="model.getPriceForCraftsman(controller.currentPlayerObj(), craftsmanTile, false) <= 2 || model.hasGod(controller.currentPlayerObj(), rf.DZIVA)" :src="view.getImage('cows2')" :class="{ cowPriceChosenImg: localGetPrice(craftsmanTile) === 2 }" class="cowPriceImg" alt="1 cow" @click="localSetPrice(craftsmanTile, 2)" />
+						<img v-if="model.getPriceForCraftsman(controller.currentPlayerObj(), craftsmanTile, false) === 1 || model.has_god(controller.currentPlayerObj(), rf.DZIVA)" :src="view.getImage('cows1')" :class="{ cowPriceChosenImg: localGetPrice(craftsmanTile) === 1 }" class="cowPriceImg" alt="1 cow" @click="localSetPrice(craftsmanTile, 1)" />
+						<img v-if="model.getPriceForCraftsman(controller.currentPlayerObj(), craftsmanTile, false) <= 2 || model.has_god(controller.currentPlayerObj(), rf.DZIVA)" :src="view.getImage('cows2')" :class="{ cowPriceChosenImg: localGetPrice(craftsmanTile) === 2 }" class="cowPriceImg" alt="1 cow" @click="localSetPrice(craftsmanTile, 2)" />
 						<img v-if="model.getPriceForCraftsman(controller.currentPlayerObj(), craftsmanTile, false) <= 3" :src="view.getImage('cows3')" :class="{ cowPriceChosenImg: localGetPrice(craftsmanTile) === 3 }" class="cowPriceImg" alt="1 cow" @click="localSetPrice(craftsmanTile, 3)" />
 					</div>
 				</template>
@@ -1445,15 +1445,15 @@ function failedToJustPlaceCraftsmanFlag() {
 			<template v-if="store.context.action === rf.ACT_RAISE_MON">
 				<template v-if="store.context.upgradingMonumentProcess.length === 0">
 					Select a Monument to Raise
-					<span v-if="model.hasGod(controller.currentPlayerObj(), rf.TSUI_GOAB)">
+					<span v-if="model.has_god(controller.currentPlayerObj(), rf.TSUI_GOAB)">
 						<br />
 						Tsui-Goab allows you to upgrade monuments with any combination of goods
 					</span>
-					<span v-if="model.hasGod(controller.currentPlayerObj(), rf.ATETE)">
+					<span v-if="model.has_god(controller.currentPlayerObj(), rf.ATETE)">
 						<br />
 						Atete allows you to use each resource twice
 					</span>
-					<span v-if="model.hasGod(controller.currentPlayerObj(), rf.OYA) && 1 === 2">
+					<span v-if="model.has_god(controller.currentPlayerObj(), rf.OYA) && 1 === 2">
 						<br />
 						Oya allows you to place a monument after making one extra ritual good
 						<br />
@@ -1481,7 +1481,7 @@ function failedToJustPlaceCraftsmanFlag() {
 						<br />
 						<br />
 						Choose a resource
-						<template v-if="!store.context.ignoreAjeShaluga && model.hasGod(controller.currentPlayerObj(), rf.AJE_SHALUGA_OLD) && model.getPlayerIndexForCraftsmanPriIndex(store.context.currentRitualGood[0][0]) === controller.currentPlayerIndex()">
+						<template v-if="!store.context.ignoreAjeShaluga && model.has_god(controller.currentPlayerObj(), rf.AJE_SHALUGA_OLD) && model.getPlayerIndexForCraftsmanPriIndex(store.context.currentRitualGood[0][0]) === controller.currentPlayerIndex()">
 							to skip a primary ritual good, or
 							<button class="actionsLineButton" @click="skipResource">Skip this resource</button>
 							instead, or

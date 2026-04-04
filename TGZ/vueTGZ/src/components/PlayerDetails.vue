@@ -57,7 +57,7 @@ function getStatsFor_god(god) {
 			color: personal.getCorrectedColour(store.players[playerIndex].colour) === rf.WHITE || personal.getCorrectedColour(store.players[playerIndex].colour) === rf.YELLOW ? 'black' : 'white',
 		}">
 		<!-- gods -->
-		<template v-for="(godData, godIndex) in model.getPlayerGods(store.players[playerIndex])" :key="godIndex">
+		<template v-for="(godData, godIndex) in model.getPlayer_gods(store.players[playerIndex])" :key="godIndex">
 			<div v-if="godData[0] !== rf.NO_god"
 				:class="[personal.aidText ? 'cardDiv' : 'cardDivNoText']"
 				:style="{
@@ -80,7 +80,7 @@ function getStatsFor_god(god) {
 				<span v-if="rf.isVRchanged(godData[0]) || personal.aidText" :class="{ changedVR: rf.isVRchanged(godData[0]) }">VR: {{ rf.gods_VR[godData[0]] }}</span>
 			</div>
 		</template>
-		<div v-if="model.getPlayerGods(store.players[playerIndex]).every(god => god[0] === rf.NO_god)"
+		<div v-if="model.getPlayer_gods(store.players[playerIndex]).every(god => god[0] === rf.NO_god)"
 			:class="[personal.aidText ? 'cardDiv' : 'cardDivNoText', { no_god: true }]"
 			:style="{
 				'border-color': personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white' : 'black',

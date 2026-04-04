@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import { getBuildingPos } from '../js/BUSview.js'
 import * as rf from '../js/BUSreference.js'
 
 import * as view from '../js/BUSview.js'
@@ -24,8 +23,8 @@ function ghostBuilding(e, junction, building, add) {
         if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) {
             ghostBuildingRef.value.src = view.getImage('building' + String(store.context.selectedBuildingType))
             ghostBuildingRef.value.style.display = 'block'
-            ghostBuildingRef.value.style.top = getBuildingPos(junction, building)[0] + 'px'
-            ghostBuildingRef.value.style.left = getBuildingPos(junction, building)[1] + 'px'
+            ghostBuildingRef.value.style.top = view.getBuildingPos(junction, building)[0] + 'px'
+            ghostBuildingRef.value.style.left = view.getBuildingPos(junction, building)[1] + 'px'
 
             ghostBuildingRef.value.style.width = store.refSize * getBuildingRadius() / 100 + 'px'
             ghostBuildingRef.value.style.height = store.refSize * getBuildingRadius() / 100 + 'px'
@@ -33,11 +32,11 @@ function ghostBuilding(e, junction, building, add) {
         else if (personal.selectedBoard === rf.BOARD_OG) {
             ghostBuildingRef.value.src = view.getImage('building' + String(store.context.selectedBuildingType) + '_orig')
             ghostBuildingRef.value.style.display = 'block'
-            ghostBuildingRef.value.style.top = getBuildingPos(junction, building)[0] + 'px'
-            ghostBuildingRef.value.style.left = getBuildingPos(junction, building)[1] + 'px'
+            ghostBuildingRef.value.style.top = view.getBuildingPos(junction, building)[0] + 'px'
+            ghostBuildingRef.value.style.left = view.getBuildingPos(junction, building)[1] + 'px'
             ghostBuildingRef.value.style.width = store.refSize * 30 / 100 + 'px'
             ghostBuildingRef.value.style.height = store.refSize * 30 / 100 + 'px'
-            ghostBuildingRef.value.style.transform = 'rotate(' + getBuildingPos(junction, building)[2] + 'deg)'
+            ghostBuildingRef.value.style.transform = 'rotate(' + view.getBuildingPos(junction, building)[2] + 'deg)'
         }
         if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) e.target.style.border = String(store.refSize * 5 / 100) + 'px solid lightgreen'
         if (personal.selectedBoard === rf.BOARD_OG) e.target.style.border = String(store.refSize * 3 / 100) + 'px solid lightgreen'
@@ -123,8 +122,8 @@ function getBuildingRadius() {
     <template v-if="personal.canPlay() && (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE)">
         <template v-for="(line, index) in model.getEmptyBuildingSpots()" v-bind:key="index">
             <div class="buildingSpotDiv" v-for="(building, index) in line[1]" v-bind:key="index" :style="{
-                'top': getBuildingPos(line[0], building, true)[0] + 'px',
-                'left': getBuildingPos(line[0], building, true)[1] + 'px',
+                'top': view.getBuildingPos(line[0], building, true)[0] + 'px',
+                'left': view.getBuildingPos(line[0], building, true)[1] + 'px',
                 border: String(store.refSize * 5 / 100) + 'px solid yellow',
                 width: store.refSize * getBuildingRadius() / 100 + 'px',
                 height: store.refSize * getBuildingRadius() / 100 + 'px',
@@ -138,8 +137,8 @@ function getBuildingRadius() {
     <template v-if="(personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE)">
         <template v-for="(line, index) in model.getBuildingsToDisplay()" v-bind:key="index">
             <div class="buildingDiv" v-for="(building, index) in line[1]" v-bind:key="index" :style="{
-                'top': getBuildingPos(line[0], building[0])[0] + 'px',
-                'left': getBuildingPos(line[0], building[0])[1] + 'px',
+                'top': view.getBuildingPos(line[0], building[0])[0] + 'px',
+                'left': view.getBuildingPos(line[0], building[0])[1] + 'px',
                 width: store.refSize * getBuildingRadius() / 100 + 'px',
                 height: store.refSize * getBuildingRadius() / 100 + 'px',
             }">
@@ -160,8 +159,8 @@ function getBuildingRadius() {
     <!-- Add pax to junctions -->
     <template v-for="(junction, index) in store.junctions" v-bind:key="index">
         <div v-if="junction[rf.paxIdx] > 0" :style="{
-            'top': getBuildingPos(index, -1)[0] + 'px',
-            'left': getBuildingPos(index, -1)[1] + 'px',
+            'top': view.getBuildingPos(index, -1)[0] + 'px',
+            'left': view.getBuildingPos(index, -1)[1] + 'px',
             width: store.refSize * 32 / 100 + 'px',
             height: store.refSize * 32 / 100 + 'px',
         }" class="paxJunc">
@@ -200,8 +199,8 @@ function getBuildingRadius() {
     <template v-if="(personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE)">
         <template v-for="(line, index) in model.getVromBuildings()" v-bind:key="index">
             <div class="buildingSpotDiv" v-for="(building, index) in line[1]" v-bind:key="index" :style="{
-                'top': getBuildingPos(line[0], building, true)[0] + 'px',
-                'left': getBuildingPos(line[0], building, true)[1] + 'px',
+                'top': view.getBuildingPos(line[0], building, true)[0] + 'px',
+                'left': view.getBuildingPos(line[0], building, true)[1] + 'px',
                 border: String(store.refSize * 5 / 100) + 'px solid yellow',
                 width: store.refSize * getBuildingRadius() / 100 + 'px',
                 height: store.refSize * getBuildingRadius() / 100 + 'px',
@@ -216,8 +215,8 @@ function getBuildingRadius() {
     <!-- Add highlight circles for pax placement -->
     <template v-if="store.context.passengersLeftToPlace > 0 && store.remainingPassengers > 0 && personal.canPlay()">
         <div ref="junction10" :style="{
-            'top': getBuildingPos(10, -1, true)[0] + 'px',
-            'left': getBuildingPos(10, -1, true)[1] + 'px',
+            'top': view.getBuildingPos(10, -1, true)[0] + 'px',
+            'left': view.getBuildingPos(10, -1, true)[1] + 'px',
             width: store.refSize * 32 / 100 + 'px',
             height: store.refSize * 32 / 100 + 'px',
             border: String(store.refSize * 5 / 100) + 'px solid yellow',
@@ -225,8 +224,8 @@ function getBuildingRadius() {
             @click="addPassengerToJunction(10)">
         </div>
         <div ref="junction25" :style="{
-            'top': getBuildingPos(25, -1, true)[0] + 'px',
-            'left': getBuildingPos(25, -1, true)[1] + 'px',
+            'top': view.getBuildingPos(25, -1, true)[0] + 'px',
+            'left': view.getBuildingPos(25, -1, true)[1] + 'px',
             width: store.refSize * 32 / 100 + 'px',
             height: store.refSize * 32 / 100 + 'px',
             border: String(store.refSize * 5 / 100) + 'px solid yellow',
@@ -241,8 +240,8 @@ function getBuildingRadius() {
     <template v-if="(personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE)">
         <template v-for="(line, index) in store.historyHelpers.buildingsToHighlight" v-bind:key="index">
             <div class="history_buildingSpotDiv" :style="{
-                'top': getBuildingPos(line[1], line[2], true)[0] + 'px',
-                'left': getBuildingPos(line[1], line[2], true)[1] + 'px',
+                'top': view.getBuildingPos(line[1], line[2], true)[0] + 'px',
+                'left': view.getBuildingPos(line[1], line[2], true)[1] + 'px',
                 border: String(store.refSize * 5 / 100) + 'px solid yellow',
                 width: store.refSize * getBuildingRadius() / 100 + 'px',
                 height: store.refSize * getBuildingRadius() / 100 + 'px',
@@ -254,8 +253,8 @@ function getBuildingRadius() {
     <!-- HISTORY HELPER -- JUNCTIONS VROM FROM -->
     <template v-for="(junction, index) in store.historyHelpers.junctionsToHighlight" v-bind:key="index">
         <div :style="{
-            'top': getBuildingPos(junction, -1, true)[0] + 'px',
-            'left': getBuildingPos(junction, -1, true)[1] + 'px',
+            'top': view.getBuildingPos(junction, -1, true)[0] + 'px',
+            'left': view.getBuildingPos(junction, -1, true)[1] + 'px',
             width: store.refSize * getBuildingRadius() / 100 + 'px',
             height: store.refSize * getBuildingRadius() / 100 + 'px',
             border: String(store.refSize * 5 / 100) + 'px solid yellow',
@@ -273,13 +272,13 @@ function getBuildingRadius() {
     <template v-if="personal.canPlay() && personal.selectedBoard === rf.BOARD_OG">
         <template v-for="(line, index) in model.getEmptyBuildingSpots()" v-bind:key="index">
             <div class="buildingSpotDiv_orig" v-for="(building, index) in line[1]" v-bind:key="index" :style="{
-                'top': getBuildingPos(line[0], building, true)[0] + 'px',
-                'left': getBuildingPos(line[0], building, true)[1] + 'px',
+                'top': view.getBuildingPos(line[0], building, true)[0] + 'px',
+                'left': view.getBuildingPos(line[0], building, true)[1] + 'px',
                 border: String(store.refSize * 12 / 400) + 'px solid yellow',
                 /*'background-color': 'red',*/
                 width: store.refSize * 30 / 100 + 'px',
                 height: store.refSize * 30 / 100 + 'px',
-                transform: 'rotate(' + getBuildingPos(line[0], building, true)[2] + 'deg)',
+                transform: 'rotate(' + view.getBuildingPos(line[0], building, true)[2] + 'deg)',
             }" @mouseover="ghostBuilding($event, line[0], building, true)"
                 @mouseleave="ghostBuilding($event, line[0], building, false)" @click="clickedBldg(line[0], building)">
             </div>
@@ -290,12 +289,12 @@ function getBuildingRadius() {
     <template v-if="personal.selectedBoard === rf.BOARD_OG">
         <template v-for="(line, index) in model.getVromBuildings()" v-bind:key="index">
             <div class="buildingSpotDiv_orig" v-for="(building, index) in line[1]" v-bind:key="index" :style="{
-                'top': getBuildingPos(line[0], building, true)[0] + 'px',
-                'left': getBuildingPos(line[0], building, true)[1] + 'px',
+                'top': view.getBuildingPos(line[0], building, true)[0] + 'px',
+                'left': view.getBuildingPos(line[0], building, true)[1] + 'px',
                 border: String(store.refSize * 12 / 400) + 'px solid yellow',
                 width: store.refSize * 30 / 100 + 'px',
                 height: store.refSize * 30 / 100 + 'px',
-                transform: 'rotate(' + getBuildingPos(line[0], building, true)[2] + 'deg)',
+                transform: 'rotate(' + view.getBuildingPos(line[0], building, true)[2] + 'deg)',
             }" @mouseover="mouseOverVromBuilding($event, line[0], true)"
                 @mouseleave="mouseOverVromBuilding($event, line[0], false)" @click="clickedVromBldg(line[0], building)">
             </div>
@@ -306,11 +305,11 @@ function getBuildingRadius() {
     <template v-if="personal.selectedBoard === rf.BOARD_OG">
         <template v-for="(line, index) in model.getBuildingsToDisplay()" v-bind:key="index">
             <div class="buildingDiv" v-for="(building, index) in line[1]" v-bind:key="index" :style="{
-                'top': getBuildingPos(line[0], building[0])[0] + 'px',
-                'left': getBuildingPos(line[0], building[0])[1] + 'px',
+                'top': view.getBuildingPos(line[0], building[0])[0] + 'px',
+                'left': view.getBuildingPos(line[0], building[0])[1] + 'px',
                 width: store.refSize * 30 / 100 + 'px',
                 height: store.refSize * 30 / 100 + 'px',
-                transform: 'rotate(' + getBuildingPos(line[0], building[0], true)[2] + 'deg)',
+                transform: 'rotate(' + view.getBuildingPos(line[0], building[0], true)[2] + 'deg)',
             }">
                 <!-- Draw the building -->
                 <img class="buildingImg" :src="view.getImage('building' + String(building[1] % 10) + '_orig')"
@@ -331,12 +330,12 @@ function getBuildingRadius() {
     <template v-if="personal.selectedBoard === rf.BOARD_OG">
         <template v-for="(line, index) in store.historyHelpers.buildingsToHighlight" v-bind:key="index">
             <div class="history_buildingSpotDiv_orig" :style="{
-                'top': getBuildingPos(line[1], line[2], true)[0] + 'px',
-                'left': getBuildingPos(line[1], line[2], true)[1] + 'px',
+                'top': view.getBuildingPos(line[1], line[2], true)[0] + 'px',
+                'left': view.getBuildingPos(line[1], line[2], true)[1] + 'px',
                 border: String(store.refSize * 3 / 100) + 'px solid yellow',
                 width: store.refSize * 30 / 100 + 'px',
                 height: store.refSize * 30 / 100 + 'px',
-                transform: 'rotate(' + getBuildingPos(line[1], line[2], true)[2] + 'deg)',
+                transform: 'rotate(' + view.getBuildingPos(line[1], line[2], true)[2] + 'deg)',
             }">
             </div>
         </template>

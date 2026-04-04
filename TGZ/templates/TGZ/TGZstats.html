@@ -124,7 +124,7 @@ var bar_chart = new Chart(bar_ctx, {
       if (item.length > 0) {
         var clickedItem = item[0];
         var clickedIndex = clickedItem._index;
-        var clickedGod = this.data.labels[clickedIndex];
+        var clicked_god = this.data.labels[clickedIndex];
 
         var clickX = evt.offsetX;
         var clickY = evt.offsetY;
@@ -150,12 +150,12 @@ var bar_chart = new Chart(bar_ctx, {
         }
 
         if (clickedSegmentLabel === 'Picked and Won') {
-          gameIds = {{ row.god_stats|safe }}[clickedGod].won_game_ids || [];
+          gameIds = {{ row.god_stats|safe }}[clicked_god].won_game_ids || [];
         } else if (clickedSegmentLabel === 'Picked and Lost') {
-          var pickedGameIds = {{ row.god_stats|safe }}[clickedGod].picked_game_ids || [];
-          var wonGameIds = {{ row.god_stats|safe }}[clickedGod].won_game_ids || [];
+          var pickedGameIds = {{ row.god_stats|safe }}[clicked_god].picked_game_ids || [];
+          var wonGameIds = {{ row.god_stats|safe }}[clicked_god].won_game_ids || [];
 
-          if (clickedGod === 'None') {
+          if (clicked_god === 'None') {
             // For the "None" column, exclude IDs in wonGameIds from pickedGameIds
             gameIds = pickedGameIds.filter(function(gameId) {
               return !wonGameIds.includes(gameId);
@@ -173,9 +173,9 @@ var bar_chart = new Chart(bar_ctx, {
             });
           }
         } else if (clickedSegmentLabel === 'Not Picked') {
-          var availableGameIds = {{ row.god_stats|safe }}[clickedGod].available_game_ids || [];
-          var pickedGameIds = {{ row.god_stats|safe }}[clickedGod].picked_game_ids || [];
-          var wonGameIds = {{ row.god_stats|safe }}[clickedGod].won_game_ids || [];
+          var availableGameIds = {{ row.god_stats|safe }}[clicked_god].available_game_ids || [];
+          var pickedGameIds = {{ row.god_stats|safe }}[clicked_god].picked_game_ids || [];
+          var wonGameIds = {{ row.god_stats|safe }}[clicked_god].won_game_ids || [];
 
           // Exclude picked and won game IDs
           gameIds = availableGameIds.filter(function(gameId) {
@@ -183,7 +183,7 @@ var bar_chart = new Chart(bar_ctx, {
           });
         }
 
-        console.log('Clicked OG God:', clickedGod);
+        console.log('Clicked OG god:', clicked_god);
         console.log('Clicked Segment:', clickedSegmentLabel);
         console.log('Clicked Count:', gameIds.length);
         console.log('Game IDs:', gameIds);
