@@ -246,33 +246,25 @@ if DEBUG:
 Q_CLUSTER = {
     "name": "obg_cluster",
     "label": "Django Q",  # Label in the admin panel
-    "workers": 1,  # Keep this at 1 on PythonAnywhere
-    "timeout": 90,  # Process timeout
-    #'compress': True, # DO NOT USE - Instead pass minimal data as args to async tasks
+    "workers": 1,
+    "timeout": 90, # Process timeout - max time on task
     "retry": 180,
-    "queue_limit": 1,
-    "orm": "default",  # Or your database alias
-    # --- THE CPU SAVERS ---
+    "orm": "default", # Or your database alias
+    "poll": 60,        # Check DB every 60 seconds (replaces your 'sleeptime' idea)
+    "guard_cycle": 60, # Max allowed value (replaces 300)
     "cpu_affinity": 1,  # Forces the worker to stay on one core (Saves credits)
-    "sleeptime": 300,  # Wait 5 minutes between checks if queue is empty
-    "guard_cycle": 300,  # Match sleeptime to prevent the "Guard" from waking up early
-    "bulking": 10,  # Process up to 10 tasks in one go to minimize overhead
-    "save_limit": 0,  # Stop writing to the database on success
-    # --- END CPU SAVING SETTINGS ---
-    # --- REDUCE DB OVERHEAD ---
+    "bulking": 10, # Process up to 10 tasks in one go to minimize overhead
+    "save_limit": 50, # 0 is unlimited
     "ack_failures": True,  # Cleanup failed tasks
-    "max_attempts": 1,  # Don't retry failed tasks multiple times
-    "catch_up": False,  # Don't try to catch up on missed tasks
-    "heartbeat": None,  # Disable CPU-heavy status checks
-    "recycle": 5000,  # High number to avoid expensive process restarts
-    "benchmark": False,  # Disable performance testing
-    # --- CRITICAL CPU SAVING SETTINGS ---
+    "max_attempts": 1, # Don't retry failed tasks multiple times
+    "catch_up": False, # Don't try to catch up on missed tasks
+    "scheduler": False, # Disables the scheduler loop entirely
+    "recycle": 500,
     "sync": False,
-    "gc_interval": 7200,  # Run garbage collector every 2 hours instead of 1 hour
-    "daemon": False,  # Helps PythonAnywhere manage the sub-processes
-    "multiprocessing_method": "spawn",  # More stable for virtualenv mixing
-    "poll": 10,  # Only check the database every 10 seconds (default is 0.2s!)
-    "scheduler": False,    # Since you have no scheduled tasks, turn the scheduler OFF
+    "benchmark": False,  # Disable performance testing
+
+    ############################################
+    "queue_limit": 1,
 }
 
 # NB this oculd kill very long DB connections
