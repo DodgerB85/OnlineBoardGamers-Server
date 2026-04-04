@@ -198,26 +198,6 @@ body {
 	font-family: Arial, sans-serif;
 }
 
-.blue {
-	color: blue;
-}
-
-.green {
-	color: green;
-}
-
-.purple {
-	color: purple;
-}
-
-.red {
-	color: red;
-}
-
-.yellow {
-	color: yellow;
-}
-
 #middle {
 	width: 100%;
 	min-width: 970px;
@@ -253,24 +233,25 @@ body {
 }
 
 .mainEntryPlayer0 {
-	background-color: #3474a9;
+	background-color: #0C64AE /* 3474a9 */;
 }
 
 .mainEntryPlayer1 {
-	background-color: #456334;
+	background-color: #0E7964; /* 456334 */
 }
 
 .mainEntryPlayer2 {
 	/*background-color: #51365F;*/
-	background-color: #aa79ae;
+	background-color: #6E365E; /* aa79ae */
 }
 
 .mainEntryPlayer3 {
-	background-color: #a12529;
+	background-color: #EB2E0F; /* a12529 */
 }
 
 .mainEntryPlayer4 {
-	background-color: #c28727;
+	background-color: #FB9907; /* c28727 */
+	color: black !important;
 }
 
 .actionsLineButton {

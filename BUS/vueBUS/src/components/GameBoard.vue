@@ -579,27 +579,27 @@ function getCorrectedBusIndex(position) {
 
 .actionDisc0 {
 	/*background-color: blue;*/
-	background-color: #3474a9;
+	background-color: #0C64AE;
 }
 
 .actionDisc1 {
 	/*background-color: green;*/
-	background-color: #456334;
+	background-color: #0E7964;
 }
 
 .actionDisc2 {
 	/*background-color: purple;*/
-	background-color: #aa79ae;
+	background-color: #6E365E;
 }
 
 .actionDisc3 {
 	/*background-color: red;*/
-	background-color: #a12529;
+	background-color: #EB2E0F;
 }
 
 .actionDisc4 {
 	/*background-color: yellow;*/
-	background-color: #c28727;
+	background-color: #FB9907;
 }
 
 .currentPlayerGlow {

@@ -245,6 +245,7 @@ if DEBUG:
 # ASYNC SETTINGS
 Q_CLUSTER = {
     "name": "obg_cluster",
+    "label": "Django Q",  # Label in the admin panel
     "workers": 1,  # Keep this at 1 on PythonAnywhere
     "timeout": 90,  # Process timeout
     #'compress': True, # DO NOT USE - Instead pass minimal data as args to async tasks
@@ -256,7 +257,6 @@ Q_CLUSTER = {
     "guard_cycle": 300,  # Match sleeptime to prevent the "Guard" from waking up early
     "bulking": 10,  # Process up to 10 tasks in one go to minimize overhead
     "save_limit": 0,  # Stop writing to the database on success
-    "label": "Django Q",
     # --- END CPU SAVING SETTINGS ---
     # --- REDUCE DB OVERHEAD ---
     "ack_failures": True,  # Cleanup failed tasks

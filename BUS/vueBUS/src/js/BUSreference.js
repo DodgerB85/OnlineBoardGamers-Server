@@ -62,15 +62,15 @@ export function getColourNameFromNumber(colour) {
 	if (colour === 2) return "purple";
 	if (colour === 3) return "red";
 	if (colour === 4) return "yellow";*/
-	if (colour === 0) return "#3474A9"
+	if (colour === 0) return "#0C64AE"
 	if (colour === 1) {
 		//if (personal.selectedBoard === BOARD_OG) return "rgb(113,164,85)"
 		if (personal.selectedBoard === BOARD_OG) return "rgb(102,200,91)"
-		return "#456334"
+		return "#0E7964"
 	}
-	if (colour === 2) return "#AA79AE"
-	if (colour === 3) return "#A12529"
-	if (colour === 4) return "#C28727"
+	if (colour === 2) return "#6E365E"
+	if (colour === 3) return "#EB2E0F"
+	if (colour === 4) return "#FB9907"
 	alert("GCNFN: " + colour)
 	return "none"
 }
