@@ -58,7 +58,7 @@ if not DEBUG:
 LOGIN_URL = "myLogin"
 
 if LOCAL_USER and DEBUG:
-    ALLOWED_HOSTS = ["localhost", "192.168.1.2"]
+    ALLOWED_HOSTS = ["localhost", "192.168.1.2", "127.0.0.1"]
 else:
     # ALLOWED_HOSTS = ['pythonanywhere']
     ALLOWED_HOSTS = [
@@ -269,7 +269,7 @@ Q_CLUSTER = {
     # --- CRITICAL CPU SAVING SETTINGS ---
     "sync": False,
     "gc_interval": 7200,  # Run garbage collector every 2 hours instead of 1 hour
-    "daemon": True,  # Helps PythonAnywhere manage the sub-processes
+    "daemon": False,  # Helps PythonAnywhere manage the sub-processes
     "multiprocessing_method": "spawn",  # More stable for virtualenv mixing
 }
 
