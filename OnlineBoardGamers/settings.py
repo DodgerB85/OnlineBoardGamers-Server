@@ -142,26 +142,29 @@ ROOT_URLCONF = "OnlineBoardGamers.urls"
 
 # Enable translation caching for better performance
 USE_L10N = True
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = "en"
 LANGUAGES = [
-    ('en', 'English'),
+    ("en", "English"),
 ]
 
 # Translation cache settings
 LOCALE_PATHS = [
-    BASE_DIR / 'locale',
+    BASE_DIR / "locale",
 ]
+
 
 # Enable Django's built-in translation caching
 def gettext_noop(x):
     return x
 
+
 # 1. Make sure this folder name matches exactly what you created
-JINJA2_CACHE_DIR = BASE_DIR / "jinja2_cache" 
+JINJA2_CACHE_DIR = BASE_DIR / "jinja2_cache"
 
 # 2. Force the creation of the folder if it's missing
 if not JINJA2_CACHE_DIR.exists():
     import os
+
     os.makedirs(JINJA2_CACHE_DIR, exist_ok=True)
 
 # Auto-discover Jinja2 template directories for all apps
@@ -189,10 +192,10 @@ TEMPLATES = [
             ## Optimized Jinja2 Bytecode Cache settings
             "bytecode_cache": {
                 "name": "jinja2_cache",
-                "enabled": True, # <--- CRITICAL
+                "enabled": True,  # <--- CRITICAL
                 "backend": "jinja2.FileSystemBytecodeCache",
-                "dir": str(JINJA2_CACHE_DIR), # Use the absolute path
-                #"auto_reload": not DEBUG,  # Cache templates in production
+                "dir": str(JINJA2_CACHE_DIR),  # Use the absolute path
+                # "auto_reload": not DEBUG,  # Cache templates in production
             },
         },
     },
@@ -248,20 +251,22 @@ Q_CLUSTER = {
     "retry": 180,
     "queue_limit": 1,
     "orm": "default",  # Or your database alias
-    "gc_interval": 7200,  # Run garbage collector every 2 hours instead of 1 hour
-    "label": "Django Q",  # Admin label
-    "ack_failures": True,  # Cleanup failed tasks
-    # --- CRITICAL CPU SAVING SETTINGS ---
-    "bulking": 1,  # Process up to 10 tasks at once to reduce overhead
-    "sync": False,
+    # --- THE CPU SAVERS ---
+    "sleeptime": 300,  # Wait 5 minutes between checks if queue is empty
+    "guard_cycle": 300,  # Match sleeptime to prevent the "Guard" from waking up early
+    "bulking": 10,  # Process up to 10 tasks in one go to minimize overhead
+    "save_limit": 0,  # Stop writing to the database on success
+    "label": "Django Q",
     # --- END CPU SAVING SETTINGS ---
-    "guard_cycle": 180.0,  # Wake up every 5 minutes instead of every 3 minutes
-    "recycle": 1000,  # Even less process restarting
-    "save_limit": 0,  # Stop writing success logs to the DB
-    "sleeptime": 180,  # Match guard cycle for consistency
-    "heartbeat": None,     # Disable CPU-heavy status checks
+    # --- REDUCE DB OVERHEAD ---
+    "ack_failures": True,  # Cleanup failed tasks
     "max_attempts": 1,  # Don't retry failed tasks multiple times
     "catch_up": False,  # Don't try to catch up on missed tasks
+    "heartbeat": None,  # Disable CPU-heavy status checks
+    "recycle": 5000,  # High number to avoid expensive process restarts
+    # --- CRITICAL CPU SAVING SETTINGS ---
+    "sync": False,
+    "gc_interval": 7200,  # Run garbage collector every 2 hours instead of 1 hour
 }
 
 # NB this oculd kill very long DB connections
