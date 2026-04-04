@@ -1,6 +1,5 @@
 import json
 import time
-import re
 import base64
 
 import gzip
@@ -14,26 +13,19 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 
-from django.contrib import messages
 
-from django.urls import reverse
 from Lobby.sharedFunctions.db_mutex import db_mutex
 
-from contextlib import contextmanager
-
-from django.db import connection, transaction
-from django.db.models import Q  # , Avg
+from django.db import transaction
 from django.utils.translation import gettext  # , get_language
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
-    SF_getGameCreationJsonReturn,
     SF_fastSerializeGame,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
-    SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
 )
 
@@ -252,7 +244,7 @@ def showGame(request, game_id):
 
     # Chat notification separately (could be kicked out)
     is_in_all = user_id in result["all_player_ids"]
-    chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
+    #chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
     # Also check all players including kicked
     all_gps_including_kicked = list(currentGame.players.select_related("player").all())
     chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
@@ -1460,7 +1452,7 @@ def _processTurn(request):
 
     elif jsonData["action"] == "saveAndUpdateNotifictions":
         currentGame.gameData = jsonData["data"]
-        referringPhase = jsonData["referringPhase"]
+        #referringPhase = jsonData["referringPhase"]
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         trainingGame = False
@@ -1658,9 +1650,9 @@ def gameAdminGetMoveData(request):
     except Game.DoesNotExist:
         return render(request, "FCM/gameAdmin.html", {"gameID": 21})
 
-    presenter = cast("FCMpresenter", currentGame.presenter())
+    #presenter = cast("FCMpresenter", currentGame.presenter())
 
-    names = presenter.getAllPlayersOrderedySeatInArray(True)
+    #names = presenter.getAllPlayersOrderedySeatInArray(True)
 
     playersMoveDataArr = json.loads(currentGame.FCMplayersMoveData) if currentGame.FCMplayersMoveData else []
 
@@ -1688,10 +1680,6 @@ def FCMdata(request, dataType):
         raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: FCM)")
 
     presenter = cast("FCMpresenter", currentGame.presenter())
-
-    USE_NEW_CODE = False
-    if int(currentGame.created) > rfFCM.TS_USE_NEW_CODE:
-        USE_NEW_CODE = True
 
     # if dataType == 1:
     # Send game data

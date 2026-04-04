@@ -6,8 +6,6 @@ import * as rf from "../js/BUSreference.js"
 //import * as model from "../js/BUSmodel.js"
 
 import { ref, reactive } from "vue"
-import * as view from "../js/BUSview.js"
-
 import { defineStore } from "pinia"
 
 //import { storeToRefs } from 'pinia'

@@ -24,11 +24,11 @@ function test2() {
 
 function swapPlayerOrder() {
 	//store.gameflow.turnOrder.unshift(store.gameflow.turnOrder.pop())
-	store.increaseScore(store.players[1])
+	modifyPlayerScore(1, 'increase')
 }
 
 function highlightBuildingOptions() {
-	store.increaseScore(store.players[1])
+	modifyPlayerScore(1, 'increase')
 	store.getVromBuildings()
 }
 function removePax() {
@@ -51,6 +51,15 @@ function exportLoc() {
 function importLoc() {
 	//store.canPlayerVrom()
 }
+
+function modifyPlayerScore(playerIndex, operation) {
+	if (operation === 'increase') {
+		model.increaseScore(store.players[playerIndex])
+	} else if (operation === 'decrease') {
+		model.decreaseScore(store.players[playerIndex])
+		store.players[playerIndex].timeStones++
+	}
+}
 </script>
 
 <template>
@@ -65,32 +74,14 @@ function importLoc() {
 	<br />
 	{{ model.getWinnerName(true) }}
 	<br />
-	<button @click="store.increaseScore(store.players[0])">P0 +</button>
-	<button
-		@click="
-			store.decreaseScore(store.players[0])
-			store.players[0].timeStones++
-		">
-		P0 -
-	</button>
+	<button @click="modifyPlayerScore(0, 'increase')">P0 +</button>
+	<button @click="modifyPlayerScore(0, 'decrease')">P0 -</button>
 
-	<button @click="store.increaseScore(store.players[1])">P1 +</button>
-	<button
-		@click="
-			store.decreaseScore(store.players[1])
-			store.players[1].timeStones++
-		">
-		P1 -
-	</button>
+	<button @click="modifyPlayerScore(1, 'increase')">P1 +</button>
+	<button @click="modifyPlayerScore(1, 'decrease')">P1 -</button>
 
-	<button @click="store.increaseScore(store.players[2])">P2 +</button>
-	<button
-		@click="
-			store.decreaseScore(store.players[2])
-			store.players[2].timeStones++
-		">
-		P2 -
-	</button>
+	<button @click="modifyPlayerScore(2, 'increase')">P2 +</button>
+	<button @click="modifyPlayerScore(2, 'decrease')">P2 -</button>
 
 	<button @click="store.gameflow.gameEnded = 0">Play</button>
 	<button @click="store.gameflow.gameEnded = 1">End</button>

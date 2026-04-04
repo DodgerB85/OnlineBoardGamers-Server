@@ -14,8 +14,6 @@ from django.contrib.auth.decorators import login_required
 
 from Lobby.sharedFunctions.db_mutex import db_mutex
 
-from django.db import connection
-
 from Lobby.models import User, Game
 
 from Lobby.gameViewHelpers import (
