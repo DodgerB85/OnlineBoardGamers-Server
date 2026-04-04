@@ -272,7 +272,6 @@ Q_CLUSTER = {
     "daemon": False,  # Helps PythonAnywhere manage the sub-processes
     "multiprocessing_method": "spawn",  # More stable for virtualenv mixing
     "poll": 10,  # Only check the database every 10 seconds (default is 0.2s!)
-    #force update
 }
 
 # NB this oculd kill very long DB connections
