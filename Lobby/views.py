@@ -3806,6 +3806,7 @@ def discord_callback(request):
         "client_secret": client_secret,
         "grant_type": "authorization_code",
         "code": code,
+        "redirect_uri": "https://www.onlineboardgamers.com/discord/callback/",
     }
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
