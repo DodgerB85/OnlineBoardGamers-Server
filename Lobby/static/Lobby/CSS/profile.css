@@ -105,6 +105,15 @@
 	display: none;
 }
 
+.discord-icon {
+	vertical-align: middle;
+	margin-right: 5px;
+	transition: fill 0.3s ease;
+}
+.webhookButton.testWebhookButton:hover .discord-icon {
+	fill: white;
+}
+
 .webhookButton {
 	background-color: #04aa6d; /* Green */
 	border: none;
