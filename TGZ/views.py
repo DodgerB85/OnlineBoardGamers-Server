@@ -1,12 +1,9 @@
 import json
 import lzstring
 import time
-import requests
-import random
 
 from Lobby.sharedFunctions.db_mutex import db_mutex
 
-from decouple import config
 from typing import TYPE_CHECKING, cast
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -18,26 +15,15 @@ from django.contrib.auth.decorators import login_required
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.template.loader import render_to_string
 from django.utils.translation import gettext  # , get_language
-from django.contrib import messages
 from django.urls import reverse
-from django.db import connection, transaction
-from django.shortcuts import get_object_or_404
 
-from django.db.models import Q
-
-from Lobby.models import User, Profile, Game
+from Lobby.models import User, Game
 
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_TGZadvancedOptions,
-    SF_getGameCreationJsonReturn,
     SF_updateFlexiTime,
     SF_fastSerializeGame,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_M_T_sendTournamentGameStartNotification,
-    SN_sendBugReportEmail,
-    SN_sendNextTurnNotification,
-    SN_sendInviteNotifications,
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
@@ -517,8 +503,7 @@ def _processTGZturn(request):
                     playerListToNotify.remove(request.user.username)
 
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "TGZ",
                         playerListToNotify,
                         getattr(currentGame, "id"),
@@ -672,8 +657,7 @@ def _processTGZturn(request):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "TGZ",
                     playerListToNotify,
                     getattr(currentGame, "id"),

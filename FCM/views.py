@@ -25,7 +25,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendNextTurnNotification,
     SN_sendAdminErrorMessage,
 )
 
@@ -566,8 +565,7 @@ def _processTurn(request):
                     currentGame.FCMnotificationSuppression = currentGame.FCMnotificationSuppression[:ppov] + "0" + currentGame.FCMnotificationSuppression[ppov + 1 :]
 
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "FCM",
                     playerListToNotify,
                     jsonData["gameID"],
@@ -655,8 +653,7 @@ def _processTurn(request):
                     currentGame.FCMnotificationSuppression = currentGame.FCMnotificationSuppression[:ppov] + "0" + currentGame.FCMnotificationSuppression[ppov + 1 :]
 
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "FCM",
                     playerListToNotify,
                     jsonData["gameID"],
@@ -890,8 +887,7 @@ def _processTurn(request):
                     playerListToNotify.remove(jsonData["nextPlayer"][0])
 
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "FCM",
                     playerListToNotify,
                     jsonData["gameID"],
@@ -1193,8 +1189,7 @@ def _processTurn(request):
                 if "FcmAI" in playerListToNotify:
                     playerListToNotify.remove("FcmAI")
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "FCM",
                         playerListToNotify,
                         jsonData["gameID"],
@@ -1375,8 +1370,7 @@ def _processTurn(request):
             if "FcmAI" in playerListToNotify:
                 playerListToNotify.remove("FcmAI")
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "FCM",
                     playerListToNotify,
                     jsonData["gameID"],
@@ -1491,8 +1485,7 @@ def _processTurn(request):
                 currentGame.FCMnotificationSuppression = currentGame.FCMnotificationSuppression[:ppov] + "0" + currentGame.FCMnotificationSuppression[ppov + 1 :]
 
         if len(playerListToNotify) > 0:
-            SN_sendNextTurnNotification(
-                request,
+            presenter.sendYourTurnNotification(
                 "FCM",
                 playerListToNotify,
                 jsonData["gameID"],

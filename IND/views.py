@@ -2,39 +2,28 @@ import json
 import time
 import base64
 import gzip
-import copy
 
 from Lobby.sharedFunctions.db_mutex import db_mutex
 
-from decouple import config
 from typing import TYPE_CHECKING, cast
 
-from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.db import transaction, connection
-from django.db.models import Q
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
-    SF_getGameCreationJsonReturn,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
-    SN_sendNextTurnNotification,
-    SN_sendBugReportEmail,
     SN_sendAdminErrorMessage,
 )
 
 from .common import create_ind_game
 
-from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
-from Lobby.models import User, Profile, Game, GamePlayer
+from Lobby.models import User, Game, GamePlayer
 
 from Lobby.gameViewHelpers import (
     build_show_game_data,
@@ -288,8 +277,7 @@ def _processINDturn(request):
                 ):
                     playerListToNotify.remove(playerListToNotify[0])
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "IND",
                         playerListToNotify,
                         currentGame.id,
@@ -463,8 +451,7 @@ def _processINDturn(request):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "IND",
                     playerListToNotify,
                     currentGame.id,

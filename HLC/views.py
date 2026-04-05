@@ -27,7 +27,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendNextTurnNotification,
     SN_sendFactoryAlertNotification,
     SN_sendAdminErrorMessage,
 )
@@ -504,8 +503,7 @@ def _processHLCturn(request):
                     playerListToNotify.remove("HcBot")
 
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "HLC",
                         playerListToNotify,
                         jsonData["gameID"],
@@ -689,8 +687,7 @@ def _processHLCturn(request):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "HLC",
                     playerListToNotify,
                     jsonData["gameID"],
@@ -753,8 +750,7 @@ def _processHLCturn(request):
                     playerListToNotify.remove("HcBot")
 
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "HLC",
                         playerListToNotify,
                         jsonData["gameID"],

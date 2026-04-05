@@ -19,7 +19,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendNextTurnNotification,
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.db_mutex import db_mutex
@@ -288,8 +287,7 @@ def _processAQYturn(request):
                 if "AqyBot" in playerListToNotify:
                     playerListToNotify.remove("AqyBot")
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "AQY",
                         playerListToNotify,
                         currentGame.id,
@@ -379,8 +377,7 @@ def _processAQYturn(request):
             if "AqyBot" in playerListToNotify:
                 playerListToNotify.remove("AqyBot")
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "AQY",
                     playerListToNotify,
                     currentGame.id,
@@ -1044,8 +1041,7 @@ def _processAQYturn(request):
             if "AqyBot" in playerListToNotify:
                 playerListToNotify.remove("AqyBot")
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "AQY",
                     playerListToNotify,
                     currentGame.id,

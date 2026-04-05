@@ -17,7 +17,6 @@ from django.shortcuts import render, redirect  # get_object_or_404,
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 
 # from django.urls import reverse
-from django.db import connection  # , transaction
 # from django.db.models import Q
 
 from Lobby.sharedFunctions.sharedFunctions import (
@@ -25,7 +24,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendPendingRNBturnNotification,
-    SN_sendNextTurnNotification,
     SN_sendAdminErrorMessage,
     SN_sendFixNextTurnNotification,
 )
@@ -558,8 +556,7 @@ def _processRNBturn(request):
                             oldVer,
                         )
                     else:
-                        SN_sendNextTurnNotification(
-                            request,
+                        presenter.sendYourTurnNotification(
                             "RNB",
                             playerListToNotify,
                             getattr(currentGame, "id"),
@@ -717,8 +714,7 @@ def _processRNBturn(request):
             playerListToNotify = [p for p in nextPlayersArr if p != request.user.username and p != "RnbBot"]
 
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "RNB",
                     playerListToNotify,
                     getattr(currentGame, "id"),
@@ -865,8 +861,7 @@ def performSaveGame(request, currentGame, jsonData):
             if "RnbBot" in playerListToNotify:
                 playerListToNotify.remove("RnbBot")
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "RNB",
                     playerListToNotify,
                     getattr(currentGame, "id"),

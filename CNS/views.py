@@ -4,7 +4,6 @@ import time
 import base64
 import gzip
 
-from decouple import config
 from typing import TYPE_CHECKING, cast
 
 from Lobby.sharedFunctions.db_mutex import db_mutex
@@ -17,21 +16,15 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
-from django.db import transaction, connection
-from django.db.models import Q
+from django.db import transaction
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getGameCreationJsonReturn,
     SF_updateFlexiTime,
 )
-from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
-    SN_sendNextTurnNotification,
-    SN_sendBugReportEmail,
-)
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
-from Lobby.models import User, Profile, Game, GamePlayer
+from Lobby.models import User, Game, GamePlayer
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
@@ -43,7 +36,6 @@ from Lobby.gameViewHelpers import (
 )
 
 from . import CNSconstants as rfCNS
-import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import CNSpresenter
@@ -175,8 +167,7 @@ def createCNSgame(request):
                     newGame.invitedPlayers.add(newPlayer)
                     usernamesToNotify.append(newPlayer.username)
 
-            SN_sendInviteNotifications(
-                request,
+            newGame.presenter().sendInviteNotifications(
                 usernamesToNotify,
                 newGame.presenter().getGameName(),
                 _maxPlayers,
@@ -386,8 +377,7 @@ def _processCNSturn(request):
                 if "CnsBot" in playerListToNotify:
                     playerListToNotify.remove("CnsBot")
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "CNS",
                         playerListToNotify,
                         currentGame.id,
@@ -547,8 +537,7 @@ def _processCNSturn(request):
             if "CnsBot" in playerListToNotify:
                 playerListToNotify.remove("CnsBot")
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "CNS",
                     playerListToNotify,
                     currentGame.id,

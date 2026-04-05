@@ -3846,13 +3846,8 @@ def discord_callback(request):
     # This sends the "Join" request to Discord
     requests.put(join_url, json=join_data, headers=join_headers)
 
-    new_join_message = (
-        "👋 **Welcome to the OnlineBoardGamers Discord Bot!**\n\n"
-        "🔔 You'll receive game notifications here\n\n"
-        "⚙️ You can turn off messages at any time from your profile:\n"
-        "https://onlineboardgamers.com/profile/"
-    )
-    SN_sendDiscordDM(discord_user_id, new_join_message)
+    new_join_message = "👋 **Welcome to the OnlineBoardGamers Discord Bot!**\n\n🔔 You'll receive game notifications here\n\n⚙️ You can turn off messages at any time from your profile"
+    SN_sendDiscordDM(discord_user_id, new_join_message, "https://onlineboardgamers.com/profile/", "https://onlineboardgamers.com/profile/")
 
     #########
 

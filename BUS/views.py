@@ -17,7 +17,6 @@ from django.utils.translation import gettext  # , get_language
 
 # from django.utils import translation
 # fore change comment
-from django.db import connection
 
 from Lobby.models import User, Profile, Game
 
@@ -35,7 +34,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendNextTurnNotification,
     SN_sendAdminErrorMessage,
 )
 
@@ -359,8 +357,7 @@ def _processBUSturn(request):
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "BUS",
                         playerListToNotify,
                         jsonData["gameID"],
@@ -499,8 +496,7 @@ def _processBUSturn(request):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "BUS",
                     playerListToNotify,
                     jsonData["gameID"],

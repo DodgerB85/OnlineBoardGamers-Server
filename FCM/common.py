@@ -9,12 +9,10 @@ from django.utils.translation import gettext
 from django.urls import reverse
 from django.contrib import messages
 from django.db import transaction
-from django.contrib.auth.models import User
 
 from Lobby.models import User, Game, GamePlayer
 from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
     SN_M_T_sendTournamentGameStartNotification,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
@@ -393,8 +391,8 @@ def create_fcm_game(
 
     # Now handle normal games
     if usernames_to_notify:
-        SN_sendInviteNotifications(
-            request,
+        presenter = cast("FCMpresenter", new_game.presenter())
+        presenter.sendInviteNotifications(
             usernames_to_notify,
             new_game.presenter().getGameName(),
             max_players,

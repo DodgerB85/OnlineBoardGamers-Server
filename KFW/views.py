@@ -14,15 +14,13 @@ from django.utils.translation import gettext
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.db import transaction, connection
+from django.db import transaction
 
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
     SF_getGameCreationJsonReturn,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
-    SN_sendNextTurnNotification,
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
@@ -146,9 +144,9 @@ def createKFWgame(request):
                     newGame.gameStatus = "WAITING"
                     newGame.invitedPlayers.add(newPlayer)
                     usernamesToNotify.append(newPlayer.username)
-
-            SN_sendInviteNotifications(
-                request,
+                    
+            presenter = cast("KFWpresenter", newGame.presenter())
+            presenter.sendInviteNotifications(
                 usernamesToNotify,
                 newGame.presenter().getGameName(),
                 _maxPlayers,
@@ -516,8 +514,7 @@ def _processKFWturn(request):
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if len(playerListToNotify) > 0:
-                    SN_sendNextTurnNotification(
-                        request,
+                    presenter.sendYourTurnNotification(
                         "KFW",
                         playerListToNotify,
                         getattr(currentGame, "id"),
@@ -903,8 +900,7 @@ def _processKFWturn(request):
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
-                SN_sendNextTurnNotification(
-                    request,
+                presenter.sendYourTurnNotification(
                     "KFW",
                     playerListToNotify,
                     getattr(currentGame, "id"),

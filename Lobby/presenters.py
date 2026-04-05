@@ -284,11 +284,30 @@ class GamePresenter:
         # RNB
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = None  # Check this doesn't crash game load if game ended
 
+    def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
+        from django_q.tasks import async_task
+        async_task(
+           "Lobby.sharedFunctions.sharedNotifications.SN_sendInviteNotifications",
+           playerNames, _gameName, _maxPlayers, _gameCode
+        )
+
+    def sendYourTurnNotification(self, gameCode, playerListToNotify, gameID, gameName, gameObj, oldVer):
+        from django_q.tasks import async_task
+
+        #def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate):
+        currentGameTurnString = self.currentTurnString()
+        currentGamePace = gameObj.gamePace
+
+        async_task(
+           "Lobby.sharedFunctions.sharedNotifications.SN_sendNextTurnNotification",
+           gameCode, playerListToNotify, gameID, gameName, currentGameTurnString, currentGamePace, oldVer
+        )
+
     def _sendStartGameNotification(self, request, playerListToNotify):
         """Send async game-start notification to other players."""
         from django_q.tasks import async_task
 
-        from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
+        #from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
 
         if not playerListToNotify:
             return
@@ -896,9 +915,6 @@ class TGZpresenter(GamePresenter):
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_sendNextTurnNotification,
-        )
 
         self.gameObj.gameStatus = "ACTIVE"
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
@@ -921,8 +937,7 @@ class TGZpresenter(GamePresenter):
             playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
             if request.user.username != allPlayersL[0]:
-                SN_sendNextTurnNotification(
-                    request,
+                self.sendYourTurnNotification(
                     "TGZ",
                     [allPlayersL[0]],
                     getattr(self.gameObj, "id"),
@@ -992,9 +1007,6 @@ class INDpresenter(GamePresenter):
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_sendNextTurnNotification,
-        )
 
         self.gameObj.gameStatus = "ACTIVE"
         # Only do this if no gameData ie not a form -- WHAT DOES THIS MEAN??
@@ -1020,8 +1032,7 @@ class INDpresenter(GamePresenter):
             self._sendStartGameNotification(request, playerListToNotify)
             allPlayersL = self.getAllPlayersOrderedySeatInArray()
             if request.user.username != allPlayersL[0]:
-                SN_sendNextTurnNotification(
-                    request,
+                self.sendYourTurnNotification(
                     "IND",
                     [allPlayersL[0]],
                     getattr(self.gameObj, "id"),

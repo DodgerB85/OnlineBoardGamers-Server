@@ -10,9 +10,6 @@ from django.utils.translation import gettext
 import json
 import random
 from Lobby.models import User
-from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendInviteNotifications,
-)
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_TGZadvancedOptions,
     SF_getGameCreationJsonReturn,
@@ -273,8 +270,8 @@ def create_tgz_game(
 
     # Normal Game Notifications
     if usernames_to_notify:
-        SN_sendInviteNotifications(
-            request,
+        presenter = cast("TGZpresenter", new_game.presenter())
+        presenter.sendInviteNotifications(
             usernames_to_notify,
             new_game.presenter().getGameName(),
             max_players,

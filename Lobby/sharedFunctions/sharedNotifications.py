@@ -272,7 +272,7 @@ def getGameStrings(game):
     }
 
 
-def shouldSendEmail(emailType, username, profile, currentGame, oldLatestUpdate):
+def shouldSendEmail(emailType, username, profile, currentGamePace, oldLatestUpdate):
     if username in USERNAMES_NOT_TO_NOTIFY:
         return False
     if not profile.email_confirmed:
@@ -314,7 +314,7 @@ def shouldSendEmail(emailType, username, profile, currentGame, oldLatestUpdate):
         if profile.stopEmailsUntil is not None:
             return False
         # If live then don't email
-        if currentGame.gamePace == 10:
+        if currentGamePace == 10:
             return False
         # if currentGame.gamePace == 20:
         #    # str((int(time.time()) * 1000) + newVer)
@@ -422,7 +422,7 @@ def SN_M_sendEndGameNotificationTieGame(request, game, finalPositions, gameID, c
                 gameName = presenter.getGameName()
 
                 # SEND EMAIL
-                if shouldSendEmail("gameEnd", user.username, profile, currentGame, 0):
+                if shouldSendEmail("gameEnd", user.username, profile, currentGame.gamePace, 0):
                     current_site = get_current_site(request)
 
                     message = render_to_string(
@@ -456,6 +456,11 @@ def SN_M_sendEndGameNotificationTieGame(request, game, finalPositions, gameID, c
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+                # SEND DISCORD DM
+
+                if profile.discord_id != "" and profile.discord_id is not None:
+                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
             print(request.user.username + " Error: SN_M_sendEndGameNotificationTieGame -- game end error: " + game + " /// " + str(entry) + " /// " + str(e))
@@ -515,7 +520,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                 gameName = presenter.getGameName()
 
                 # SEND EMAIL
-                if shouldSendEmail("gameEnd", user.username, profile, currentGame, 0):
+                if shouldSendEmail("gameEnd", user.username, profile, currentGame.gamePace, 0):
                     current_site = get_current_site(request)
 
                     message = render_to_string(
@@ -549,6 +554,11 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
+                # SEND DISCORD DM
+
+                if profile.discord_id != "" and profile.discord_id is not None:
+                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
+
             except Exception as e:
                 print(request.user.username + " Error: SN_M_sendEndGameNotification -- game end error: " + game + " /// " + username)
                 print(e)
@@ -556,7 +566,8 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
     activate(originalLang)
 
 
-def SN_sendNextTurnNotification(request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate):
+def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate):
+    print("Sending next turn notif - should be in cluster")
     originalLang = get_language()
     for player in playerList:
         if player not in USERNAMES_NOT_TO_NOTIFY:
@@ -572,31 +583,29 @@ def SN_sendNextTurnNotification(request, game, playerList, gameID, gameName, cur
                 profile = Profile.objects.get(user=user)
                 activate(profile.profileLanguage)
                 # Set up language vars
-                currentTurnString = currentGame.presenter().currentTurnString()
 
-                gameStrings = getGameStrings(game)
+                gameStrings = getGameStrings(gameCode)
                 subject = gameStrings["yourTurnSubject"]
                 boxName = gameStrings["boxName"]
                 urlText = gameStrings["clickHereToPlayText"]
 
                 # messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers!\n%(gameName)s - %(currentTurnString)s.") % {"gameName": gameName, "currentTurnString": currentTurnString}
 
-                messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentTurnString
+                messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentGameTurnString
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGame, oldLatestUpdate):
+                if shouldSendEmail("yourTurn", player, profile, currentGamePace, oldLatestUpdate):
                     try:
-                        current_site = get_current_site(request)
 
                         message = render_to_string(
                             "Lobby/gameEmails/yourTurnEmail.html",
                             {
-                                "game": game,
+                                "game": gameCode,
                                 "user": user.username,
-                                "domain": current_site.domain,
+                                "domain": "www.onlineboardgamers.com",
                                 "gameID": gameID,
                                 "gameName": gameName,
-                                "currentTurnString": currentTurnString,
+                                "currentTurnString": currentGameTurnString,
                                 "boxName": boxName,
                             },
                         )
@@ -634,12 +643,17 @@ def SN_sendNextTurnNotification(request, game, playerList, gameID, gameName, cur
                         print(user.username)
                         print(user)
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
+                # SEND DISCORD DM
+
+                if profile.discord_id != "" and profile.discord_id is not None:
+                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
+
             except Exception as e:
-                print(request.user.username + " /// ended the turn. SF " + game + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
+                print(player + " /// ended the turn. SF " + gameCode + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
                 print(e)
 
     activate(originalLang)
@@ -673,7 +687,7 @@ def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, 
                 messageText = user.username + ": " + gettext("Other players have intefered with your move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentTurnString + "\n" + gettext("You will need to redo your move")
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGame, oldLatestUpdate):
+                if shouldSendEmail("yourTurn", player, profile, currentGame.gamePace, oldLatestUpdate):
                     try:
                         current_site = get_current_site(request)
 
@@ -701,6 +715,11 @@ def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, 
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+                # SEND DISCORD DM
+
+                if profile.discord_id != "" and profile.discord_id is not None:
+                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
             except Exception as e:
                 print(request.user.username + " /// ended the turn. SF " + game + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
@@ -737,7 +756,7 @@ def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameNam
                 messageText = user.username + ": " + gettext("You can move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentTurnString
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGame, oldLatestUpdate):
+                if shouldSendEmail("yourTurn", player, profile, currentGame.gamePace, oldLatestUpdate):
                     try:
                         current_site = get_current_site(request)
 
@@ -765,6 +784,11 @@ def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameNam
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+                # SEND DISCORD DM
+
+                if profile.discord_id != "" and profile.discord_id is not None:
+                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
             except Exception as e:
                 print(request.user.username + " /// ended the turn. SF " + game + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
@@ -804,7 +828,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
         )
 
         # SEND EMAIL
-        if shouldSendEmail("yourTurnFactoryFix", player, profile, currentGame, 0):
+        if shouldSendEmail("yourTurnFactoryFix", player, profile, currentGame.gamePace, 0):
             try:
                 current_site = get_current_site(request)
                 subject = gettext("It is your turn at Horseless Carriage - Factory Building")
@@ -827,6 +851,11 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
         if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
             SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
+        # SEND DISCORD DM
+
+        if profile.discord_id != "" and profile.discord_id is not None:
+            SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
+
     except Exception as e:
         print(request.user.username + " /// ended the turn. SF " + " sendNextTurnNotificationFACTORY.  Error no profile/other error trying to email /// " + player)
         print(e)
@@ -834,7 +863,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
     activate(originalLang)
 
 
-def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _game):
+def SN_sendInviteNotifications(playerNames, _gameName, _maxPlayers, _gameCode):
     for player in playerNames:
         try:
             user = User.objects.get(username=player)
@@ -850,19 +879,18 @@ def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _ga
             originalLang = get_language()
             activate(profile.profileLanguage)
 
-            current_site = get_current_site(request)
-            gameStrings = getGameStrings(_game)
+            gameStrings = getGameStrings(_gameCode)
             subject = gameStrings["inviteSubject"]
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
 
             # SEND EMAIL
-            if shouldSendEmail("gameInvite", player, profile, None, 0):
+            if shouldSendEmail("gameInvite", player, profile, -1, 0):
                 message = render_to_string(
                     "Lobby/email/gameInvite.html",
                     {
                         "user": user.username,
-                        "domain": current_site.domain,
+                        "domain": "www.onlineboardgamers.com",
                         "gameName": _gameName,
                         "maxPlayers": _maxPlayers,
                         "box_name": boxName,
@@ -877,10 +905,15 @@ def SN_sendInviteNotifications(request, playerNames, _gameName, _maxPlayers, _ga
             if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
+            # SEND DISCORD DM
+
+            if profile.discord_id != "" and profile.discord_id is not None:
+                SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
+
             activate(originalLang)
 
         except Exception as e:
-            print(request.user.username + ": Error sending invite. Game: " + _gameName + "  Player: " + player + " " + str(e))
+            print(player + ": Error sending invite. Game: " + _gameName + "  Player: " + player + " " + str(e))
 
 
 def SN_sendMiniTournamentInvite(
@@ -915,10 +948,10 @@ def SN_sendMiniTournamentInvite(
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
 
-            print(f"should send email: {shouldSendEmail('MTinvite', player, profile, None, 0)}")
+            print(f"should send email: {shouldSendEmail('MTinvite', player, profile, -1, 0)}")
 
             # SEND EMAIL
-            if shouldSendEmail("MTinvite", player, profile, None, 0):
+            if shouldSendEmail("MTinvite", player, profile, -1, 0):
                 message = render_to_string(
                     "Lobby/email/MTinvite.html",
                     {
@@ -954,6 +987,11 @@ def SN_sendMiniTournamentInvite(
             urlRaw = "https://www.OnlineBoardGamers.com/MiniTournament/" + str(MT_ID) + "/"
             if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+            # SEND DISCORD DM
+
+            if profile.discord_id != "" and profile.discord_id is not None:
+                SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
             activate(originalLang)
 
@@ -997,7 +1035,7 @@ def SN_M_T_sendTournamentGameStartNotification(
         current_site = get_current_site(request)
         gameStrings = getGameStrings(_game)
 
-        if not stopEmail and shouldSendEmail("tournamentGameStart", _player, profile, None, 0):
+        if not stopEmail and shouldSendEmail("tournamentGameStart", _player, profile, -1, 0):
             subject = gameStrings["tournamentGameStartSubject"]
             if is_miniTournament:
                 subject = gameStrings["miniTournamentGameStartSubject"]
@@ -1023,6 +1061,11 @@ def SN_M_T_sendTournamentGameStartNotification(
         urlRaw = f"https://www.OnlineBoardGamers.com/{_game}/{str(_gameID)}/show/"
         if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
             SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+        # SEND DISCORD DM
+
+        if profile.discord_id != "" and profile.discord_id is not None:
+            SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
         print(request.user.username + " SN_M_T_sendTournamentGameStartNotification Error. Player: " + _player)
@@ -1051,7 +1094,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
         boxName = gameStrings["boxName"]
 
         # SEND EMAIL
-        if shouldSendEmail("tournamentWin", _player, profile, None, 0):
+        if shouldSendEmail("tournamentWin", _player, profile, -1, 0):
             current_site = get_current_site(request)
             message = render_to_string(
                 "Lobby/email/tournamentWonGeneral.html",
@@ -1071,6 +1114,10 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
         urlRaw = "https://www.OnlineBoardGamers.com/"
         if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
             SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+        # SEND DISCORD DM
+        if profile.discord_id != "" and profile.discord_id is not None:
+            SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
         print(request.user.username + " Error SN_M_T_sendTournamentWinNotification. Notifying: " + _player)
@@ -1157,7 +1204,7 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
                         }
                     )
 
-                if shouldSendEmail("tournamentGameStart", player, profile, None, 0):
+                if shouldSendEmail("tournamentGameStart", player, profile, -1, 0):
                     message = render_to_string(
                         "Lobby/gameEmails/tournamentGameStart.html",
                         {
@@ -1179,10 +1226,15 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
+                # SEND DISCORD DM
+
+                if profile.discord_id != "" and profile.discord_id is not None:
+                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
+
             # Otherwise, starting NON tourny game
             else:
                 # SEND EMAIL
-                if shouldSendEmail("gameStart", player, profile, None, 0):
+                if shouldSendEmail("gameStart", player, profile, -1, 0):
                     message = render_to_string(
                         "Lobby/gameEmails/gameStartEmail.html",
                         {
@@ -1201,6 +1253,11 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
                 urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+                # SEND DISCORD DM
+
+                if profile.discord_id != "" and profile.discord_id is not None:
+                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
             print(errorUsername + " Error. SN_M_sendGameStartNotification. Notifying " + gameCode + " Game Start: " + player)
@@ -1227,7 +1284,7 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
         presenter = currentGame.presenter()
         gameName = presenter.getGameName()
 
-        if shouldSendEmail("gameDecline", currentGame.creator.username, profile, None, 0):
+        if shouldSendEmail("gameDecline", currentGame.creator.username, profile, None-1, 0):
             subject = gameStrings["gameDeclineSubject"]
             message = render_to_string(
                 "Lobby/email/gameDeclineEmail.html",
@@ -1259,6 +1316,11 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
         urlRaw = "https://www.OnlineBoardGamers.com/"
         if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
             SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+        # SEND DISCORD DM
+
+        if profile.discord_id != "" and profile.discord_id is not None:
+            SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
         print(request.user.username + " Error. SN_sendDeclineEmail. Notifying " + currentGame.creator.username)
@@ -1323,7 +1385,7 @@ def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
             box_name = gameStrings["boxName"]
             urlText = gameStrings["clickHereToPlayText"]
             # SEND EMAIL
-            if shouldSendEmail("2hourReminder", playerName, profile, None, 0):
+            if shouldSendEmail("2hourReminder", playerName, profile, -1, 0):
                 subject = gameStrings["lessThan2hoursSubject"]
                 message = render_to_string(
                     "Lobby/email/gameReminderEmail.html",
@@ -1344,6 +1406,11 @@ def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
             urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
             if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+            # SEND DISCORD DM
+
+            if profile.discord_id != "" and profile.discord_id is not None:
+                SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
             print(playerName + " Error. SN_sendReminderEmail. Notifying " + playerName)
@@ -1373,7 +1440,7 @@ def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
             urlText = gameStrings["clickHereToPlayText"]
 
             # SEND EMAIL
-            if shouldSendEmail("turnExpired", playerName, profile, None, 0):
+            if shouldSendEmail("turnExpired", playerName, profile, -1, 0):
                 subject = gameStrings["turnExpiredSubject"]
                 message = render_to_string(
                     "Lobby/email/gameReminderExpiredEmail.html",
@@ -1394,6 +1461,10 @@ def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
             urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
             if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+            # SEND DISCORD DM
+            if profile.discord_id != "" and profile.discord_id is not None:
+                SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
             print(playerName + " Error. SN_sendReminderExpiredEmail. Notifying " + playerName)
@@ -1434,7 +1505,7 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
             games_info.append(game_info)
 
         # SEND EMAIL
-        if shouldSendEmail("24hrReminder", username, profile_obj, None, 0):
+        if shouldSendEmail("24hrReminder", username, profile_obj, -1, 0):
             subject = gettext("It is Your Turn at OnlineBoardGamers.com")
             message = render_to_string(
                 "Lobby/email/gameReminder24HrsExpiredEmail.html",
@@ -1452,6 +1523,9 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
         urlRaw = "https://www.OnlineBoardGamers.com/"
         if profile_obj.webhooks != "" and profile_obj.webhooks is not None and profile_obj.webhooks != "[]":
             SN_sendWebhooks(profile_obj, messageText, urlText, urlRaw)
+        # SEND DISCORD DM
+        if profile_obj.discord_id != "" and profile_obj.discord_id is not None:
+            SN_sendDiscordDM(profile_obj.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
         print(username + " Error. SN_send24HourTimedOutReminderEmail. Notifying " + username)
@@ -1485,7 +1559,7 @@ def SN_sendTournamentOpen(new_tournament, gameCode):
             urlText = "Click here to view Tournaments"
 
             # SEND EMAIL
-            if shouldSendEmail("tournamentOpen", user.username, profile, None, 0):
+            if shouldSendEmail("tournamentOpen", user.username, profile, -1, 0):
                 subject = gameStrings["tournmentOpenSubject"]
                 message = render_to_string(
                     "Lobby/gameEmails/tournamentOpenEmail.html",
@@ -1507,6 +1581,11 @@ def SN_sendTournamentOpen(new_tournament, gameCode):
             urlRaw = "https://www.OnlineBoardGamers.com/AllTournaments/"
             if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                 SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+            # SEND DISCORD DM
+
+            if profile.discord_id != "" and profile.discord_id is not None:
+                SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
             print(user.username + " Error. SN_sendTournamentAnnounce. Notifying " + user.username)
@@ -1727,8 +1806,11 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
                 print(f"Webhook failed ({w_type}): {e}")
 
 
-def SN_sendDiscordDM(discordID, message_text):
-    bot_token = config('DISCORD_BOT_TOKEN')
+def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
+    bot_token = config("DISCORD_BOT_TOKEN")
+    
+    complete_message = f"{message_text}\n[{urlText}](<{urlRaw}>)"
+
     # 1. SETUP
     headers = {"Authorization": f"Bot {bot_token}", "Content-Type": "application/json"}
 
@@ -1739,7 +1821,7 @@ def SN_sendDiscordDM(discordID, message_text):
         channel_id = channel_resp.json()["id"]
 
         # 3. SEND THE MESSAGE
-        requests.post(f"https://discord.com/api/v10/channels/{channel_id}/messages", json={"content": message_text}, headers=headers)
+        requests.post(f"https://discord.com/api/v10/channels/{channel_id}/messages", json={"content": complete_message}, headers=headers)
     else:
         SN_sendAdminErrorMessage(
             None,
