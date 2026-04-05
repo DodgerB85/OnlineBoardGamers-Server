@@ -1739,14 +1739,12 @@ def SN_sendDiscordDM(discordID, message_text):
         channel_id = channel_resp.json()["id"]
 
         # 3. SEND THE MESSAGE
-        requests.post(f"https://discord.com/api/v10/channels/{channel_id}/messages", json={"content": "{message_text}"}, headers=headers)
-        print("Success! Check your Discord DMs.")
+        requests.post(f"https://discord.com/api/v10/channels/{channel_id}/messages", json={"content": message_text}, headers=headers)
     else:
         SN_sendAdminErrorMessage(
             None,
             f"Discord DM failed for id: ({discordID}): {channel_resp.text}",
         )
-        print(f"Failed Discord DM: {channel_resp.text}")
 
 
 def SN_sendAdminErrorMessage(request, message):
