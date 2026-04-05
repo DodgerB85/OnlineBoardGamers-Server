@@ -80,6 +80,10 @@ echo Setting admin password...
 set DJANGO_SETTINGS_MODULE=OnlineBoardGamers.settings
 python -c "import os; os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'OnlineBoardGamers.settings'); import django; django.setup(); from Lobby.models import User; admin = User.objects.get(username='admin'); admin.set_password('password'); admin.save()"
 
+REM Update initial users with admin password hash
+echo Updating initial users password...
+python quick_setup_update_user_passwords.py
+
 REM Load initial users
 echo Loading initial users...
 python manage.py loaddata initial_users.json
