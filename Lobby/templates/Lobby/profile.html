@@ -85,6 +85,13 @@
                         onclick="window.location.href='https://discord.com/api/oauth2/authorize?client_id={{ discord_client_id }}&redirect_uri=https%3A%2F%2Fwww.onlineboardgamers.com%2Fdiscord%2Fcallback%2F&response_type=code&scope=identify%20guilds.join'">
                     {% translate "Add Discord DM's" %}
                 </button>
+                {% if discord_id %}
+                    <button type="button"
+                            class="webhookButton deleteWebhookButton"
+                            onclick="window.location.href='{% url 'stop_discord_dms' %}'">
+                        {% translate "Stop Discord DMs" %}
+                    </button>
+                {% endif %}
                 <br />
                 <label class="preferenceTitle">{% translate "Browser Notifications" %}</label>
                 <br />

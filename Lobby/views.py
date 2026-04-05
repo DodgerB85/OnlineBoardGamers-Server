@@ -1814,6 +1814,7 @@ def profile(request):
                 "blacklistedPlayers": blacklisted_players,
                 "stop_emails_until": stop_emails_until,  # -1 if not set
                 "discord_client_id": config("DISCORD_CLIENT_ID"),
+                "discord_id": profile.discord_id,
             },
         )
 
@@ -3846,8 +3847,8 @@ def discord_callback(request):
     requests.put(join_url, json=join_data, headers=join_headers)
 
     new_join_message = (
-        "👋 **Welcome to the OnlineBoardGamers Discord Bot!** 🎲\n\n"
-        "🔔 You'll receive turn notifications here to keep the game moving!\n\n"
+        "👋 **Welcome to the OnlineBoardGamers Discord Bot!**\n\n"
+        "🔔 You'll receive game notifications here\n\n"
         "⚙️ You can turn off messages at any time from your profile:\n"
         "https://onlineboardgamers.com/profile/"
     )
@@ -3855,7 +3856,16 @@ def discord_callback(request):
 
     #########
 
-    messages.success(request, f"Linked as {discord_data['username']}! You'll now get turn notifications.")
+    messages.success(request, f"Linked as {discord_data['username']}! You'll now get Discord DM notifications.")
+    return redirect("profile")
+
+
+@login_required()
+def stop_discord_dms(request):
+    profile = Profile.objects.get(user=request.user)
+    profile.discord_id = None
+    profile.save()
+    messages.success(request, "Discord DM notifications have been stopped")
     return redirect("profile")
 
 
