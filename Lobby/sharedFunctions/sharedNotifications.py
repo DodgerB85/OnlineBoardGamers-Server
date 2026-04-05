@@ -1,4 +1,5 @@
 # import time
+from hashlib import new
 import requests
 import json
 import random
@@ -272,7 +273,7 @@ def getGameStrings(game):
     }
 
 
-def shouldSendEmail(emailType, username, profile, currentGamePace, oldLatestUpdate):
+def shouldSendEmail(emailType, username, profile, currentGamePace):
     if username in USERNAMES_NOT_TO_NOTIFY:
         return False
     if not profile.email_confirmed:
@@ -422,7 +423,7 @@ def SN_M_sendEndGameNotificationTieGame(request, game, finalPositions, gameID, c
                 gameName = presenter.getGameName()
 
                 # SEND EMAIL
-                if shouldSendEmail("gameEnd", user.username, profile, currentGame.gamePace, 0):
+                if shouldSendEmail("gameEnd", user.username, profile, currentGame.gamePace):
                     current_site = get_current_site(request)
 
                     message = render_to_string(
@@ -520,7 +521,7 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
                 gameName = presenter.getGameName()
 
                 # SEND EMAIL
-                if shouldSendEmail("gameEnd", user.username, profile, currentGame.gamePace, 0):
+                if shouldSendEmail("gameEnd", user.username, profile, currentGame.gamePace):
                     current_site = get_current_site(request)
 
                     message = render_to_string(
@@ -566,7 +567,54 @@ def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentG
     activate(originalLang)
 
 
-def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate):
+def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase, expected_players, oldLatestUpdate):
+    """
+    Send next turn notification with game state validation.
+    Only sends notification if current game state matches expected state from when task was queued.
+    """
+    try:
+        from Lobby.models import Game
+
+        # Get current game state
+        try:
+            current_game = Game.objects.get(id=gameID, gameCode=gameCode)
+        except Game.DoesNotExist:
+            print(f"Game {gameID} not found for validation check")
+            return
+
+        # Validate game state
+        current_turn = current_game.turn
+        current_phase = current_game.phase
+        current_latest_update = current_game.latestUpdate
+
+        # Check if game state matches expected state (quick checks)
+        if expected_latestUpdate == current_latest_update and current_turn == expected_turn and current_phase == expected_phase:
+            # Check the player(s) still need to be notified
+            current_game_usernames = [
+                gp.player.username
+                for gp in current_game.players.all()
+                if gp.is_current
+                and gp.player
+                and gp.player.username not in rf.SHADOW_USERNAMES
+            ]
+            newPlayerList = []
+            for username in current_game_usernames:
+                if username in playerList:
+                    newPlayerList.append(username)
+            # Game state matches, proceed with notification
+            if len(newPlayerList) > 0:
+                currentGameTurnString = current_game.presenter().currentTurnString()
+                currentGamePace = current_game.gamePace
+                print(f"Notification needs to be sent! Notifying: {newPlayerList}")
+                SN_sendNextTurnNotification(gameCode, newPlayerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate)
+        else:
+            print(f"Game state changed, skipping notification. Game: {gameID}, Expected: LU{expected_latestUpdate}T{expected_turn}/P{expected_phase}, Current: LU:{current_latest_update}T{current_turn}/P{current_phase}")
+
+    except Exception as e:
+        print(f"Error in SN_sendNextTurnNotificationWithValidation: {e}")
+
+
+def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate=0):
     print("Sending next turn notif - should be in cluster")
     originalLang = get_language()
     for player in playerList:
@@ -594,9 +642,8 @@ def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentG
                 messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentGameTurnString
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGamePace, oldLatestUpdate):
+                if shouldSendEmail("yourTurn", player, profile, currentGamePace):
                     try:
-
                         message = render_to_string(
                             "Lobby/gameEmails/yourTurnEmail.html",
                             {
@@ -687,7 +734,7 @@ def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, 
                 messageText = user.username + ": " + gettext("Other players have intefered with your move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentTurnString + "\n" + gettext("You will need to redo your move")
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGame.gamePace, oldLatestUpdate):
+                if shouldSendEmail("yourTurn", player, profile, currentGame.gamePace):
                     try:
                         current_site = get_current_site(request)
 
@@ -756,7 +803,7 @@ def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameNam
                 messageText = user.username + ": " + gettext("You can move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentTurnString
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGame.gamePace, oldLatestUpdate):
+                if shouldSendEmail("yourTurn", player, profile, currentGame.gamePace):
                     try:
                         current_site = get_current_site(request)
 
@@ -828,7 +875,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
         )
 
         # SEND EMAIL
-        if shouldSendEmail("yourTurnFactoryFix", player, profile, currentGame.gamePace, 0):
+        if shouldSendEmail("yourTurnFactoryFix", player, profile, currentGame.gamePace):
             try:
                 current_site = get_current_site(request)
                 subject = gettext("It is your turn at Horseless Carriage - Factory Building")
@@ -885,7 +932,7 @@ def SN_sendInviteNotifications(playerNames, _gameName, _maxPlayers, _gameCode):
             boxName = gameStrings["boxName"]
 
             # SEND EMAIL
-            if shouldSendEmail("gameInvite", player, profile, -1, 0):
+            if shouldSendEmail("gameInvite", player, profile, -1):
                 message = render_to_string(
                     "Lobby/email/gameInvite.html",
                     {
@@ -948,10 +995,10 @@ def SN_sendMiniTournamentInvite(
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
 
-            print(f"should send email: {shouldSendEmail('MTinvite', player, profile, -1, 0)}")
+            print(f"should send email: {shouldSendEmail('MTinvite', player, profile, -1)}")
 
             # SEND EMAIL
-            if shouldSendEmail("MTinvite", player, profile, -1, 0):
+            if shouldSendEmail("MTinvite", player, profile, -1):
                 message = render_to_string(
                     "Lobby/email/MTinvite.html",
                     {
@@ -1035,7 +1082,7 @@ def SN_M_T_sendTournamentGameStartNotification(
         current_site = get_current_site(request)
         gameStrings = getGameStrings(_game)
 
-        if not stopEmail and shouldSendEmail("tournamentGameStart", _player, profile, -1, 0):
+        if not stopEmail and shouldSendEmail("tournamentGameStart", _player, profile, -1):
             subject = gameStrings["tournamentGameStartSubject"]
             if is_miniTournament:
                 subject = gameStrings["miniTournamentGameStartSubject"]
@@ -1094,7 +1141,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
         boxName = gameStrings["boxName"]
 
         # SEND EMAIL
-        if shouldSendEmail("tournamentWin", _player, profile, -1, 0):
+        if shouldSendEmail("tournamentWin", _player, profile, -1):
             current_site = get_current_site(request)
             message = render_to_string(
                 "Lobby/email/tournamentWonGeneral.html",
@@ -1204,7 +1251,7 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
                         }
                     )
 
-                if shouldSendEmail("tournamentGameStart", player, profile, -1, 0):
+                if shouldSendEmail("tournamentGameStart", player, profile, -1):
                     message = render_to_string(
                         "Lobby/gameEmails/tournamentGameStart.html",
                         {
@@ -1234,7 +1281,7 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
             # Otherwise, starting NON tourny game
             else:
                 # SEND EMAIL
-                if shouldSendEmail("gameStart", player, profile, -1, 0):
+                if shouldSendEmail("gameStart", player, profile, -1):
                     message = render_to_string(
                         "Lobby/gameEmails/gameStartEmail.html",
                         {
@@ -1284,7 +1331,7 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
         presenter = currentGame.presenter()
         gameName = presenter.getGameName()
 
-        if shouldSendEmail("gameDecline", currentGame.creator.username, profile, None-1, 0):
+        if shouldSendEmail("gameDecline", currentGame.creator.username, profile, -1):
             subject = gameStrings["gameDeclineSubject"]
             message = render_to_string(
                 "Lobby/email/gameDeclineEmail.html",
@@ -1385,7 +1432,7 @@ def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
             box_name = gameStrings["boxName"]
             urlText = gameStrings["clickHereToPlayText"]
             # SEND EMAIL
-            if shouldSendEmail("2hourReminder", playerName, profile, -1, 0):
+            if shouldSendEmail("2hourReminder", playerName, profile, -1):
                 subject = gameStrings["lessThan2hoursSubject"]
                 message = render_to_string(
                     "Lobby/email/gameReminderEmail.html",
@@ -1440,7 +1487,7 @@ def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
             urlText = gameStrings["clickHereToPlayText"]
 
             # SEND EMAIL
-            if shouldSendEmail("turnExpired", playerName, profile, -1, 0):
+            if shouldSendEmail("turnExpired", playerName, profile, -1):
                 subject = gameStrings["turnExpiredSubject"]
                 message = render_to_string(
                     "Lobby/email/gameReminderExpiredEmail.html",
@@ -1505,7 +1552,7 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
             games_info.append(game_info)
 
         # SEND EMAIL
-        if shouldSendEmail("24hrReminder", username, profile_obj, -1, 0):
+        if shouldSendEmail("24hrReminder", username, profile_obj, -1):
             subject = gettext("It is Your Turn at OnlineBoardGamers.com")
             message = render_to_string(
                 "Lobby/email/gameReminder24HrsExpiredEmail.html",
@@ -1559,7 +1606,7 @@ def SN_sendTournamentOpen(new_tournament, gameCode):
             urlText = "Click here to view Tournaments"
 
             # SEND EMAIL
-            if shouldSendEmail("tournamentOpen", user.username, profile, -1, 0):
+            if shouldSendEmail("tournamentOpen", user.username, profile, -1):
                 subject = gameStrings["tournmentOpenSubject"]
                 message = render_to_string(
                     "Lobby/gameEmails/tournamentOpenEmail.html",
@@ -1808,7 +1855,7 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
 
 def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
     bot_token = config("DISCORD_BOT_TOKEN")
-    
+
     complete_message = f"{message_text}\n[{urlText}](<{urlRaw}>)"
 
     # 1. SETUP

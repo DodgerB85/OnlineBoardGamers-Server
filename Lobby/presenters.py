@@ -292,16 +292,36 @@ class GamePresenter:
         )
 
     def sendYourTurnNotification(self, gameCode, playerListToNotify, gameID, gameName, gameObj, oldVer):
-        from django_q.tasks import async_task
+        #from django_q.tasks import async_task
+        from django_q.tasks import schedule
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        # Store current game state for validation
+        current_turn = gameObj.turn
+        current_phase = gameObj.phase
+        current_latest_update = gameObj.latestUpdate
+        current_players = getattr(gameObj, 'currentPlayers', '')
+       
+        # Schedule task to run in 2 minutes (120 seconds)
+        # Calculate the start time (2 minutes from now)
+        start_time = timezone.now() + timedelta(minutes=2)
 
-        #def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate):
-        currentGameTurnString = self.currentTurnString()
-        currentGamePace = gameObj.gamePace
-
-        async_task(
-           "Lobby.sharedFunctions.sharedNotifications.SN_sendNextTurnNotification",
-           gameCode, playerListToNotify, gameID, gameName, currentGameTurnString, currentGamePace, oldVer
+        schedule(
+            "Lobby.sharedFunctions.sharedNotifications.SN_sendNextTurnNotificationWithValidation",
+            gameCode, playerListToNotify, gameID, gameName, current_latest_update,
+            current_turn, current_phase, current_players, oldVer,
+            next_run=start_time,
+            repeats=1  # Important: ensures it only runs once
         )
+
+        #currentGameTurnString = self.currentTurnString()
+        #currentGamePace = gameObj.gamePace
+
+        #async_task(
+        #   "Lobby.sharedFunctions.sharedNotifications.SN_sendNextTurnNotification",
+        #   gameCode, playerListToNotify, gameID, gameName, currentGameTurnString, currentGamePace, oldVer
+        #)
 
     def _sendStartGameNotification(self, request, playerListToNotify):
         """Send async game-start notification to other players."""
