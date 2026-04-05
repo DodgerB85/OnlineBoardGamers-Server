@@ -3,7 +3,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     <script src="{% url 'javascript-catalog' %}"></script>
     {% compress js %}
@@ -69,6 +69,23 @@
                                {% if liveNotification == 2 %}checked{% endif %} />
                     </div>
                 </div>
+                <label class="preferenceTitle">{% translate "Discord DM Notifications" %}</label>
+                <br />
+                <b>
+                    {% blocktranslate trimmed %}
+                        This will add you to the OBG discord server (if you haven't already joined)
+                        and add the OnlineBoardGamers Notification Bot to your DM's.
+                        <br />
+                        You can also stop the notifications if you no longer wish to receive them
+                    {% endblocktranslate %}
+                </b>
+                <br />
+                <button type="button"
+                        class="webhookButton testWebhookButton"
+                        onclick="window.location.href='https://discord.com/api/oauth2/authorize?client_id={{ discord_client_id }}&redirect_uri=https%3A%2F%2Fwww.onlineboardgamers.com%2Fdiscord%2Fcallback%2F&response_type=code&scope=identify%20guilds.join'">
+                    {% translate "Add Discord DM's" %}
+                </button>
+                <br />
                 <label class="preferenceTitle">{% translate "Browser Notifications" %}</label>
                 <br />
                 <b>
@@ -594,7 +611,7 @@
             </div>
             <div class="favBusColour">
                 <label for="busRad1">
-                    <img src="{% static 'Lobby/images/bus_green.png' %} " />
+                    <img src="{% static 'Lobby/images/bus_green.png' %} " alt="Green Bus" />
                 </label>
                 <br />
                 <input type="radio"
@@ -605,7 +622,7 @@
             </div>
             <div class="favBusColour">
                 <label for="busRad2">
-                    <img src="{% static 'Lobby/images/bus_purple.png' %} " />
+                    <img src="{% static 'Lobby/images/bus_purple.png' %} " alt="Purple Bus" />
                 </label>
                 <br />
                 <input type="radio"
@@ -616,7 +633,7 @@
             </div>
             <div class="favBusColour">
                 <label for="busRad3">
-                    <img src="{% static 'Lobby/images/bus_red.png' %} " />
+                    <img src="{% static 'Lobby/images/bus_red.png' %} " alt="Red Bus" />
                 </label>
                 <br />
                 <input type="radio"
@@ -627,7 +644,7 @@
             </div>
             <div class="favBusColour">
                 <label for="busRad4">
-                    <img src="{% static 'Lobby/images/bus_yellow.png' %} " />
+                    <img src="{% static 'Lobby/images/bus_yellow.png' %} " alt="Yellow Bus" />
                 </label>
                 <br />
                 <input type="radio"
@@ -1013,13 +1030,13 @@
                        name="blacklistPlayer"
                        id="blacklistPlayer"
                        class="textInput"
-                       placeholder="{% translate 'Enter player name' %}"
+                       placeholder='{% translate "Enter player name" %}'
                        autocomplete="off" />
             </div>
             <button type="submit"
                     id="addBlacklistButton"
                     onclick="event.preventDefault(); addPlayerToBlacklist();">
-                {% translate 'Blacklist player' %}
+                {% translate "Blacklist player" %}
             </button>
         </div>
         <div class="blacklistedPlayers">
@@ -1039,12 +1056,12 @@
         </div>
     </div>
 </div>
-{% include 'Lobby/common/homeButton.html' %}
+{% include "Lobby/common/homeButton.html" %}
 </div>
 {% block script %}
     <script>
     global = {}
     global.stop_emails_until = {{stop_emails_until}};
     </script>
-{% endblock %}
-{% endblock %}
+{% endblock script %}
+{% endblock body %}

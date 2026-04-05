@@ -82,6 +82,7 @@ class Profile(models.Model):
     stopEmailsUntil = models.PositiveIntegerField(null=True, blank=True)
 
     webhooks = models.TextField(blank=True, null=True)
+    discord_id = models.CharField(max_length=100, blank=True, null=True)
 
     preferredRestaurantColour = models.SmallIntegerField(
         null=False, blank=False, default=-1

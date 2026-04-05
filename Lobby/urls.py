@@ -130,6 +130,7 @@ urlpatterns = [
     path("userStats/", views.userStats, name="userStats"),
     path("sendAdminMessage/", views.sendAdminMessage, name="sendAdminMessage"),
     # API Routes
+    path('discord/callback/', views.discord_callback, name='discord_callback'),
     path(
         "join_discord/",
         RedirectView.as_view(url="https://discord.gg/hCU7Fr77yV", permanent=False),

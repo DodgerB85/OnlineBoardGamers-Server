@@ -112,6 +112,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendDeclineEmail,
     SN_sendAdminErrorMessage,
     SN_sendMiniTournamentInvite,
+    SN_sendDiscordDM
 )
 from Lobby.sharedFunctions.sharedRefs import (
     SR_WEBHOOK_CHOICES,
@@ -1267,7 +1268,7 @@ def index(request):
     # show_timestamps = user.username in ["admin", "DodgerB"]
     recent_cutoff = (timezone.now() - timedelta(days=15)).timestamp() * 1000
 
-    #start_time = time.time()
+    # start_time = time.time()
 
     # def print_timestamp(label):
     #    if show_timestamps:
@@ -1724,6 +1725,7 @@ def profile(request):
             return redirect(to="profile")
     else:
         profile = Profile.objects.get(user=request.user)
+
         if profile.stopEmailsUntil is not None:
             now_minutes = round(time.time() / 60)
             if profile.stopEmailsUntil <= now_minutes:
@@ -1811,6 +1813,7 @@ def profile(request):
                 "tournamentOpenEmail": tournamentOpenEmail,
                 "blacklistedPlayers": blacklisted_players,
                 "stop_emails_until": stop_emails_until,  # -1 if not set
+                "discord_client_id": config("DISCORD_CLIENT_ID"),
             },
         )
 
@@ -2757,7 +2760,7 @@ def playerInfo(request, usernameToProfile):
             "jointWinPercentage": jointWinPercentage,
             "jointGameStats": jointGameStats,
         },
-        using="jinja2"
+        using="jinja2",
     )
 
     return response
@@ -2793,7 +2796,7 @@ def joinGameLink(request, joinGameLink):
     # CHECK FOR gameCode/NUMBERS
     if match:
         gameCode = match.group(1)
-        #letters = gameCode.upper()
+        # letters = gameCode.upper()
         numbers = int(match.group(2))
     else:
         messages.error(request, (gettext("Invalid Game Join Link")))
@@ -3786,6 +3789,75 @@ def dataCheck(request):
     return JsonResponse({"latest": True})
 
 
+@login_required
+def discord_callback(request):
+    code = request.GET.get("code")
+    if not code:
+        return redirect("profile")
+
+
+    # Use config to get secrets from your .env file
+    client_id = config("DISCORD_CLIENT_ID")
+    client_secret = config("DISCORD_CLIENT_SECRET")
+
+
+    data = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "grant_type": "authorization_code",
+        "code": code,
+    }
+
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+    response = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers)
+    credentials = response.json()
+    access_token = credentials.get("access_token")
+
+    if not access_token:
+        messages.error(request, "Failed to link Discord: No access token received.")
+        return redirect("profile")
+
+    
+    bot_token = config('DISCORD_BOT_TOKEN')
+
+    # 2. GET THE USER ID
+    user_headers = {"Authorization": f"Bearer {access_token}"}
+    user_resp = requests.get("https://discord.com/api/users/@me", headers=user_headers)
+    discord_data = user_resp.json()
+    discord_user_id = discord_data["id"]
+
+    # 3. SAVE TO YOUR MODEL
+    profile = Profile.objects.get(user=request.user)
+    profile.discord_id = discord_user_id
+    profile.save()
+
+    # 4. FORCE-JOIN YOUR SERVER
+    # This makes the user and bot share a server so DMs are possible
+    guild_id = "1049719964208222279"
+    join_url = f"https://discord.com/api/v10/guilds/{guild_id}/members/{discord_user_id}"
+
+    join_headers = {"Authorization": f"Bot {bot_token}"}
+    join_data = {"access_token": access_token}
+
+    # This 'PUT' request actually adds the user to the server
+    # This sends the "Join" request to Discord
+    requests.put(join_url, json=join_data, headers=join_headers)
+
+    new_join_message = (
+        "👋 **Welcome to the OnlineBoardGamers Discord Bot!** 🎲\n\n"
+        "🔔 You'll receive turn notifications here to keep the game moving!\n\n"
+        "⚙️ You can turn off messages at any time from your profile:\n"
+        "https://onlineboardgamers.com/profile/"
+    )
+    SN_sendDiscordDM(discord_user_id, new_join_message)
+
+    #########
+
+    messages.success(request, f"Linked as {discord_data['username']}! You'll now get turn notifications.")
+    return redirect("profile")
+
+
 @login_required()
 def addWebhook(request):
     # Joining a game must be via POST
@@ -4113,8 +4185,6 @@ def MiniTournament(request, Mini_Tournament_id):
 
     # Un-needed default return
     return render(request, "Lobby/tournaments/MiniTournament.html")
-
-
 
 
 @login_required()
