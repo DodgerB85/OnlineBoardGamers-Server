@@ -1716,7 +1716,10 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
     elif emailTypeFlag == "yourTurn":
         counter = 0
         try:
-            with open("./Lobby/sharedFunctions/emailCounter.txt", "r+") as file:
+            import os
+            # Use absolute path to ensure file is found regardless of working directory
+            counter_file_path = os.path.join(os.path.dirname(__file__), "emailCounter.txt")
+            with open(counter_file_path, "r+") as file:
                 counter = int(file.read())
                 counter += 1
                 if counter > 1600:
