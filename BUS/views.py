@@ -564,12 +564,7 @@ def changeBUSviewport(request):
             profile.preferredBusBoard = jsonData["boardNumber"]
             profile.save()
         except Exception as e:
-            print(
-                "**************************************************** CHANGE BUS BOARD ERROR:  "
-                + str(e)
-                + "    "
-                + request.user.username
-            )
+            print(f"* * * * * CHANGE BUS BOARD ERROR:  {str(e)} {request.user.username}")
         return JsonResponse(
             {
                 "response": "ok",

@@ -467,24 +467,10 @@ def indexSpecialRedirect(request):
     # "Jasonbartfast", "Kawlos", "Batch", "Juni", "TDUBZ", "BigBad",   '33',  'Steveth', ]
     #'looogic',
     #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
-    # print("******************************************************************************************************** TGZ ACCESS: =================================================:  " + request.user.username)
-    print(f"Db htis: {len(connection.queries)}")
 
     # for game in results:
     #    players = game.allPlayers.all()
 
-    # for item in results:
-    # This will hit the DB for each loop unless you used select_related('player')
-    #    print(item.player.username)
-
-    # first_game = results[0]
-    # print(dir(first_game))
-
-    # Or check the __dict__ to see the data stored
-    # print(first_game.__dict__)
-
-    # print(f"Db htis: {len(connection.queries)}")
-    print(f"Db htis: {len(connection.queries)}")
 
     if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")

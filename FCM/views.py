@@ -756,18 +756,12 @@ def _processTurn(request):
         ###########
 
         if "phase" not in jsonData:
-            print("*********************************************** Key 'phase' not found in jsonData. jsonData contents:")
-            print(jsonData["gameID"])
-            print(f"DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} ")
-            print(f" -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}")
-            print(jsonData)
             message = f"******** PHASE NOT FOUND IN JSONDATA ********* - jsonData: {jsonData} - User: {request.user.username} - - DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn}  -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             SN_sendAdminErrorMessage(message)
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
         if oldPhase == rfFCM.PHASE_PAYDAY and jsonData["phase"] == rfFCM.PHASE_PAYDAY and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
-            print("*********************************************** Key 'phase'  PHASE 7 ERROR   ")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -778,7 +772,6 @@ def _processTurn(request):
             SN_sendAdminErrorMessage(message)
 
         if oldPhase == rfFCM.PHASE_CLEAN_UP and jsonData["phase"] == rfFCM.PHASE_CLEAN_UP and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
-            print("*********************************************** Key 'phase'  PHASE 9 ERROR   ")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -1501,10 +1494,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    print("***************************************************************************************************** ERROR")
-    print(jsonData["action"])
-    print(currentGame.gameName)
-    print(getattr(currentGame, "id"))
+    print(f"* * * ERROR: {jsonData['action']} -- Game: {currentGame.gameName} -- ID: {getattr(currentGame, 'id')}")
     return HttpResponse(status=204)  # No Content
 
 
@@ -1589,7 +1579,7 @@ def changeAssistance(request):
             profile.showAssistance = jsonData["changeAssistance"]
             profile.save()
         except Exception:
-            print("**************************************************** CHANGE ASSISTANCE ERROR:  " + request.user.username)
+            print(f"* * * CHANGE ASSISTANCE ERROR:  {request.user.username}")
         return JsonResponse(
             {
                 "response": "ok",

@@ -323,7 +323,6 @@ def _processWEBturn(request):
         db_latest_update = currentGame.latestUpdate
         # Check if old version is older than DB version, and if so, return
         if str(latest_update) != str(db_latest_update):
-            print(f"Sync Error: {latest_update} != {db_latest_update} Game: WEB, save -- user: {request.user.username}")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -429,7 +428,6 @@ def _processWEBturn(request):
     elif jsonData["action"] == "saveEndGame":
         # Check if old version is older than DB version, and if so, return
         if latest_update != "9999999999999" and str(latest_update) != str(currentGame.latestUpdate):
-            print(f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: WEB, save -- user: {request.user.username}")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -491,7 +489,6 @@ def _processWEBturn(request):
 
     elif jsonData["action"] == "loadRewind":
         if str(latest_update) != str(currentGame.latestUpdate):
-            print(f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: WEB, loadRewind -- user: {request.user.username}")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -586,7 +583,6 @@ def _processWEBturn(request):
 
     elif jsonData["action"] == "kickout":
         if str(latest_update) != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
-            print(f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: WEB, kickout -- user: {request.user.username}")
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (

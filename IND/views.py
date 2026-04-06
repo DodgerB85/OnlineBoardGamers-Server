@@ -44,9 +44,7 @@ def index(request):
 
 
 def showINDgameOLD(request):
-    return HttpResponse(
-        "Link defunct. Click logo in lobby, or use: https://www.onlineboardgamers.com/createINDpage/"
-    )
+    return HttpResponse("Link defunct. Click logo in lobby, or use: https://www.onlineboardgamers.com/createINDpage/")
 
 
 def INDhelp(request):
@@ -81,9 +79,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         {
             "spoilerFree": spoilerFree,
             "replayStep": replayStep,
-            "allPlayerListBySeat": json.dumps(
-                presenter.getAllPlayersOrderedySeatInArray(False)
-            ),
+            "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
             "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
             "preferredINDoptions": [-1, 0, 0, 1, 1, 1],
@@ -99,11 +95,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    preferredINDoptions = (
-        json.loads(result["user_profile"].preferredINDoptions)
-        if result["user_profile"].preferredINDoptions != ""
-        else [-1, 0, 0, 1, 1, 1]
-    )
+    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1]
     if len(preferredINDoptions) < 6:
         preferredINDoptions.extend([1] * (6 - len(preferredINDoptions)))
     returnData["preferredINDoptions"] = preferredINDoptions
@@ -151,8 +143,6 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     return render(request, "IND/showINDgame.html", returnData)
 
 
-
-
 @login_required()
 def processINDturn(request):
     if request.method != "POST":
@@ -188,9 +178,6 @@ def _processINDturn(request):
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
         if str(latest_update) != str(currentGame.latestUpdate):
-            print(
-                f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: IND, save -- user: {request.user.username}"
-            )
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -242,39 +229,20 @@ def _processINDturn(request):
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
-                (
-                    jsonData.get("tournamentData")
-                    if jsonData.get("tournamentData")
-                    else []
-                ),
+                (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
                 jsonData["gameID"],
             )
 
         # Only notify if game still running
         else:
             # Send Notifications
-            loadedStartingOptions = (
-                json.loads(currentGame.startingOptions)
-                if currentGame.startingOptions
-                else []
-            )
-            if (
-                len(jsonData["nextPlayer"]) > 0
-                and jsonData["nextPlayer"][0] != "IndBot"
-                and jsonData["status"] != "FINISHED"
-                and 102 not in loadedStartingOptions
-            ):
-                playerListToNotify = [
-                    player.strip() for player in jsonData["nextPlayer"]
-                ]
+            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            if len(jsonData["nextPlayer"]) > 0 and jsonData["nextPlayer"][0] != "IndBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
+                playerListToNotify = [player.strip() for player in jsonData["nextPlayer"]]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 # Also remove the player if it is R&D phase and they have a pre move
-                if (
-                    len(playerListToNotify) > 0
-                    and jsonData["phase"] == 6
-                    and presenter.doesPlayerHavePreMove(playerListToNotify[0])
-                ):
+                if len(playerListToNotify) > 0 and jsonData["phase"] == 6 and presenter.doesPlayerHavePreMove(playerListToNotify[0]):
                     playerListToNotify.remove(playerListToNotify[0])
                 if len(playerListToNotify) > 0:
                     presenter.sendYourTurnNotification(
@@ -296,10 +264,7 @@ def _processINDturn(request):
 
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
-                if len(currentRewindData) == 0 or (
-                    currentRewindData[-1] != currentGame.rewindTempData
-                    and jsonData["data"] != currentGame.rewindTempData
-                ):
+                if len(currentRewindData) == 0 or (currentRewindData[-1] != currentGame.rewindTempData and jsonData["data"] != currentGame.rewindTempData):
                     # add to RWdata and RWdata[]
                     currentRewindData.append(currentGame.rewindTempData)
                 currentGame.rewindTempData = ""
@@ -358,9 +323,6 @@ def _processINDturn(request):
 
     elif jsonData["action"] == "loadRewind":
         if str(latest_update) != str(currentGame.latestUpdate):
-            print(
-                f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: IND, loadRewind -- user: {request.user.username}"
-            )
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -373,22 +335,14 @@ def _processINDturn(request):
 
         if len(currentGame.rewindData) == 0:
             return JsonResponse(
-                {
-                    "errorMessage": gettext(
-                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
-                    )
-                },
+                {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
 
         currentRewindDataArray = json.loads(currentGame.rewindData)
         if len(currentRewindDataArray) == 0:
             return JsonResponse(
-                {
-                    "errorMessage": gettext(
-                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
-                    )
-                },
+                {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
 
@@ -437,16 +391,8 @@ def _processINDturn(request):
         currentGame.save()
 
         # Send Notifications
-        loadedStartingOptions = (
-            json.loads(currentGame.startingOptions)
-            if currentGame.startingOptions
-            else []
-        )
-        if (
-            len(jsonData["nextPlayer"]) > 0
-            and jsonData["nextPlayer"][0] != "IndBot"
-            and 102 not in loadedStartingOptions
-        ):
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        if len(jsonData["nextPlayer"]) > 0 and jsonData["nextPlayer"][0] != "IndBot" and 102 not in loadedStartingOptions:
             playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
@@ -469,12 +415,7 @@ def _processINDturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        if str(latest_update) != str(
-            currentGame.latestUpdate
-        ):  # and not jsonData["ignoreSync"]:
-            print(
-                f"Sync Error: {latest_update} != {currentGame.latestUpdate} Game: IND, kickout -- user: {request.user.username}"
-            )
+        if str(latest_update) != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -514,12 +455,8 @@ def _processINDturn(request):
     elif jsonData["action"] == "preTurn":
         # Check if old version is older than DB version, and if so, return
         if latest_update != str(currentGame.latestUpdate):
-            turn = jsonData.get(
-                "turn", "N/A"
-            )  # Get the value for 'turn' or 'N/A' if not present
-            phase = jsonData.get(
-                "phase", "N/A"
-            )  # Get the value for 'phase' or 'N/A' if not present
+            turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
+            phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
                 f"SYNC ERROR IN: IND preTurn - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
@@ -534,18 +471,14 @@ def _processINDturn(request):
 
         # First, check for deletion
         if len(moveDataArray) == 0:
-            presenter.insertPlayerPreMoveData(
-                request.user.username, jsonData["prePhase"], moveDataArray
-            )
+            presenter.insertPlayerPreMoveData(request.user.username, jsonData["prePhase"], moveDataArray)
         else:
             # If turns don't match, replace with no data
             if moveDataArray[0] != currentGame.turn:
                 moveDataArray = []
 
             # add / replace the current phase move data. # recompress and save.
-            presenter.insertPlayerPreMoveData(
-                request.user.username, jsonData["prePhase"], moveDataArray
-            )
+            presenter.insertPlayerPreMoveData(request.user.username, jsonData["prePhase"], moveDataArray)
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
@@ -667,9 +600,7 @@ def _sendChatMessage(request):
         currentGame.save()
 
         # Now add notifications to everyone except request.user
-        currentGame.players.exclude(player=request.user).update(
-            has_chat_notification=True
-        )
+        currentGame.players.exclude(player=request.user).update(has_chat_notification=True)
 
         return JsonResponse({"chatData": compressedChatData})
 

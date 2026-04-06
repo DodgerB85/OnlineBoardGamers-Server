@@ -646,7 +646,7 @@ def _processHLCturn(request):
 
     elif jsonData["action"] == "saveAfterKickout":
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate) and not jsonData["ignoreSync"]:
-            print("HLC: Sync Error Kickout Save " + str(jsonData["gameID"]))
+            print(f"* * * * * HLC: Sync Error Kickout Save {jsonData['gameID']}")
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]

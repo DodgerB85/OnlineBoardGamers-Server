@@ -457,8 +457,7 @@ def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, curren
                 SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
-            print(userObj.username + " Error: SN_M_sendEndGameNotificationTieGame -- game end error: " + gameCode + " /// " + str(entry) + " /// " + str(e))
-            print(e)
+            print(f"{userObj.username} Error: SN_M_sendEndGameNotificationTieGame -- game end error: {gameCode} /// {entry} /// {e}")
         # finally:
         #    # Reset to system default so the next user starts clean
         #    deactivate()
@@ -498,7 +497,6 @@ def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, game
             if len(newPlayerList) > 0:
                 currentGameTurnString = current_game.presenter().currentTurnString()
                 currentGamePace = current_game.gamePace
-                print(f"Notification needs to be sent! Notifying: {newPlayerList}")
                 SN_sendNextTurnNotification(gameCode, newPlayerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate)
         else:
             print(f"Game state changed, skipping notification. Game: {gameID}, Expected: LU{expected_latestUpdate}T{expected_turn}/P{expected_phase}, Current: LU:{current_latest_update}T{current_turn}/P{current_phase}")
@@ -509,7 +507,6 @@ def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, game
 
 # This is used by the function above to ACTUALY send the notification
 def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate=0):
-    print("Sending next turn notif - should be in cluster")
     for player in playerList:
         if player not in USERNAMES_NOT_TO_NOTIFY:
             try:
@@ -577,11 +574,7 @@ def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentG
                         #    print("SN_sendNextTurnNotification counter Exception: " + str(e))
 
                     except Exception as e:
-                        print("************************************ EMAIL ERROR - Send Next Turn Notification ******************")
-                        print(str(e))
-                        print(user.email)
-                        print(user.username)
-                        print(user)
+                        print(f"* * * EMAIL ERROR - Send Next Turn Notification ****************** {user.username} - {user.email} - {gameCode} - {gameID} - Error: {e}")
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
@@ -593,8 +586,7 @@ def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentG
                     SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
             except Exception as e:
-                print(player + " /// ended the turn. SF " + gameCode + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
-                print(e)
+                print(f"{player} /// ended the turn. SF {gameCode} sendNextTurnNotification.  Error no profile/other error trying to email /// {player} // {e}")
 
 
 # TODO ASYNC
@@ -645,11 +637,7 @@ def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, 
                         SN_sendEmail("yourTurn", subject, message, user.email)
 
                     except Exception as e:
-                        print("************************************ EMAIL ERROR - Send Next Turn Notification ******************")
-                        print(str(e))
-                        print(user.email)
-                        print(user.username)
-                        print(user)
+                        print(f"* * * * * EMAIL ERROR - Send Next Turn Notification ****************** {user.username} - {user.email} - {game} - {gameID} - Error: {e}")
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
@@ -661,8 +649,7 @@ def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, 
                     SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
             except Exception as e:
-                print(request.user.username + " /// ended the turn. SF " + game + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
-                print(e)
+                print(f"{request.user.username} /// ended the turn. SF {game} sendNextTurnNotification.  Error no profile/other error trying to email /// {player} // {e}")
 
     activate(originalLang)
 
@@ -714,11 +701,7 @@ def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameNam
                         SN_sendEmail("yourTurn", subject, message, user.email)
 
                     except Exception as e:
-                        print("************************************ EMAIL ERROR - Send Next Turn Notification ******************")
-                        print(str(e))
-                        print(user.email)
-                        print(user.username)
-                        print(user)
+                        print(f"* * * * * EMAIL ERROR - Send Next Turn Notification ******************{str(e)} - {user.email} - {user.username} - {user} Error: {e}")
                 # SEND WEBHOOKS
                 urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
@@ -730,8 +713,9 @@ def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameNam
                     SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
             except Exception as e:
-                print(request.user.username + " /// ended the turn. SF " + game + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
-                print(e)
+                print(f"{request.user.username} /// ended the turn. SF {game} sendNextTurnNotification. Error no profile/other error trying to email. Player: {player}. Error: {e}")
+
+    #activate(originalLang)
 
 
 # TODO async
@@ -795,8 +779,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
             SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(request.user.username + " /// ended the turn. SF " + " sendNextTurnNotificationFACTORY.  Error no profile/other error trying to email /// " + player)
-        print(e)
+        print(f"{request.user.username} /// ended the turn. SF sendNextTurnNotificationFACTORY. Error no profile/other error trying to email. Player: {player}. Error: {e}")
 
     activate(originalLang)
 
@@ -874,8 +857,6 @@ def SN_sendMiniTournamentInvite(playerNames, _gameCode, _MTname, _MTdescription,
             subject = gameStrings["MTinviteSubject"]
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
-
-            print(f"should send email: {shouldSendEmail('MTinvite', player, profile, -1)}")
 
             # SEND EMAIL
             if shouldSendEmail("MTinvite", player, profile, -1):
@@ -996,8 +977,7 @@ def SN_M_T_sendTournamentGameStartNotification(
             SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(request.user.username + " SN_M_T_sendTournamentGameStartNotification Error. Player: " + _player)
-        print(e)
+        print(f"{request.user.username} SN_M_T_sendTournamentGameStartNotification Error. Player: {_player}. Error: {e}")
     activate(originalLang)
 
 
@@ -1049,14 +1029,12 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
             SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(request.user.username + " Error SN_M_T_sendTournamentWinNotification. Notifying: " + _player)
-        print(e)
+        print(f"{request.user.username} Error SN_M_T_sendTournamentWinNotification. Notifying: {_player}. Error: {e}")
 
     activate(originalLang)
 
 
 def SN_M_sendGameStartNotification(playerListToNotify, message_data):
-    print(f"Sending game start notification to {playerListToNotify}")
     errorUsername = message_data["username"]
     gameCode = message_data["gameCode"]
     gameID = message_data["gameID"]
@@ -1189,8 +1167,7 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
                     SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
-            print(errorUsername + " Error. SN_M_sendGameStartNotification. Notifying " + gameCode + " Game Start: " + player)
-            print(e)
+            print(f"{errorUsername} Error. SN_M_sendGameStartNotification. Notifying {gameCode} Game Start: {player}. Error: {e}")
 
     activate(originalLang)
 
@@ -1251,8 +1228,7 @@ def SN_sendDeclineEmail(declinerUsername, creatorUsername, gameCode, gameName, g
             SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(declinerUsername + " Error. SN_sendDeclineEmail. Notifying " + creatorUsername)
-        print(e)
+        print(f"{declinerUsername} Error. SN_sendDeclineEmail. Notifying {creatorUsername}. Error: {e}")
 
     activate(originalLang)
 
@@ -1340,8 +1316,7 @@ def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
                 SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
-            print(playerName + " Error. SN_sendReminderEmail. Notifying " + playerName)
-            print(e)
+            print(f"{playerName} Error. SN_sendReminderEmail. Notifying {playerName}. Error: {e}")
 
     activate(originalLang)
 
@@ -1394,8 +1369,7 @@ def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
                 SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
-            print(playerName + " Error. SN_sendReminderExpiredEmail. Notifying " + playerName)
-            print(e)
+            print(f"{playerName} Error. SN_sendReminderExpiredEmail. Notifying {playerName}. Error: {e}")
 
     activate(originalLang)
 
@@ -1455,8 +1429,7 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
             SN_sendDiscordDM(profile_obj.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(username + " Error. SN_send24HourTimedOutReminderEmail. Notifying " + username)
-        print(e)
+        print(f"{username} Error. SN_send24HourTimedOutReminderEmail. Notifying {username}. Error: {e}")
 
     activate(originalLang)
 
@@ -1515,8 +1488,7 @@ def SN_sendTournamentOpen(new_tournament, gameCode):
                 SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
-            print(user.username + " Error. SN_sendTournamentAnnounce. Notifying " + user.username)
-            print(e)
+            print(f"{user.username} Error. SN_sendTournamentAnnounce. Notifying {user.username}. Error: {e}")
 
 
 def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
@@ -1598,6 +1570,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         try:
             import os
 
+            print(f"os.path.dirname(__file__): {os.path.dirname(__file__)}")
             # Use absolute path to ensure file is found regardless of working directory
             counter_file_path = os.path.join(os.path.dirname(__file__), "emailCounter.txt")
             with open(counter_file_path, "r+") as file:
@@ -1660,7 +1633,6 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         except Exception as e:
             # Logs the error so you know why it failed without hanging the cluster
             error_msg = f"❌ Main Email Failure for {toEmail}: {e}"
-            print(error_msg)
             SN_sendAdminErrorMessage(error_msg)
 
 

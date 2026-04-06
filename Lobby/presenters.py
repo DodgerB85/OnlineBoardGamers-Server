@@ -314,7 +314,8 @@ class GamePresenter:
             current_players,
             oldVer,
             next_run=start_time,
-            repeats=1,  # Important: ensures it only runs once
+            repeats=-1, # Neg repeats for delete
+            schedule_type='O'
         )
 
         # currentGameTurnString = self.currentTurnString()
