@@ -87,9 +87,35 @@ function clickedActionOption(action, index) {
 }
 
 function getPointerRotation() {
-	if (store.desiredBuilding === 1) return [1815, 3336, -109]
-	if (store.desiredBuilding === 2) return [1805, 3340, 11]
-	if (store.desiredBuilding === 3) return [1814, 3350, 130]
+	const currentRotation = store.pointerRotation || 0
+	let targetRotation
+	
+	if (store.desiredBuilding === 1) targetRotation = -109
+	else if (store.desiredBuilding === 2) targetRotation = 11
+	else if (store.desiredBuilding === 3) targetRotation = 130
+	else return [1815, 3336, 0] // default position
+	
+	// Calculate shortest rotation path
+	let rotationDiff = targetRotation - currentRotation
+	
+	// Normalize to range [-180, 180]
+	while (rotationDiff > 180) rotationDiff -= 360
+	while (rotationDiff < -180) rotationDiff += 360
+	
+	// Calculate new rotation (current + shortest path)
+	let newRotation = currentRotation + rotationDiff
+	
+	// Normalize to [0, 360) range for display
+	while (newRotation >= 360) newRotation -= 360
+	while (newRotation < 0) newRotation += 360
+	
+	store.pointerRotation = newRotation
+	
+	// Return position array with new rotation
+	if (store.desiredBuilding === 1) return [1815, 3336, newRotation]
+	else if (store.desiredBuilding === 2) return [1805, 3340, newRotation]
+	else if (store.desiredBuilding === 3) return [1814, 3350, newRotation]
+	else return [1815, 3336, newRotation]
 }
 function getCorrectedBusIndex(position) {
 	if (position === 0) return 1
@@ -538,6 +564,7 @@ function getCorrectedBusIndex(position) {
 .busDiv,
 .pointerDiv {
 	position: absolute;
+	transition: transform 0.5s ease-in-out;
 }
 .timestoneDiv {
 	position: absolute;

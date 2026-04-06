@@ -103,6 +103,7 @@ function resetPlayerTurn() {
 }
 function passChooseAction() {
 	store.context.confirmEndTurn = true
+	localEndPlayerTurn()
 }
 function confirmResign() {
 	store.context.confirmResign = true
@@ -257,7 +258,7 @@ function passKickout() {
 					</template>
 					<button class="actionsLineButton" @click="resetPlayerTurn()">Reset</button>
 					<template v-if="controller.currentPlayerCanPass() && !store.context.actionChosen">
-						<button class="actionsLineButton" @click="passChooseAction()">Pass Choose Actions Phase</button>
+						<button class="actionsLineButton" @click="passChooseAction()">Pass Choose Actions Phase - End Turn</button>
 					</template>
 				</template>
 			</template>

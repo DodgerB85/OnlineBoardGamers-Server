@@ -453,6 +453,7 @@ function getPointerRotation() {
 .busDiv,
 .pointerDiv {
 	position: absolute;
+	transition: transform 0.5s ease-in-out;
 }
 
 .timestoneDiv {
@@ -483,7 +484,7 @@ function getPointerRotation() {
 	border-bottom: 3px solid black;
 	border-right: 3px solid black;
 	border-radius: 0 25px 25px 0;
-	background-color: #0C64AE;
+	background-color: #0c64ae;
 	float: right;
 }
 
@@ -512,27 +513,27 @@ function getPointerRotation() {
 
 .actionDisc0 {
 	/*background-color: blue;*/
-	background-color: #0C64AE;
+	background-color: #0c64ae;
 }
 
 .actionDisc1 {
 	/*background-color: green;*/
-	background-color: #0E7964;
+	background-color: #0e7964;
 }
 
 .actionDisc2 {
 	/*background-color: purple;*/
-	background-color: #6E365E;
+	background-color: #6e365e;
 }
 
 .actionDisc3 {
 	/*background-color: red;*/
-	background-color: #EB2E0F;
+	background-color: #eb2e0f;
 }
 
 .actionDisc4 {
 	/*background-color: yellow;*/
-	background-color: #FB9907;
+	background-color: #fb9907;
 }
 
 .noMoreLeft {

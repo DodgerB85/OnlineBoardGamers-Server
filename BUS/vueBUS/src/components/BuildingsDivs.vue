@@ -12,6 +12,7 @@ const personal = usePersonalStore()
 import { ref } from "vue"
 
 const ghostBuildingRef = ref(null)
+const plopAnimationRef = ref(null)
 
 function ghostBuilding(e, junction, building, add) {
 	if (!add) {
@@ -50,6 +51,64 @@ function mouseOverVromBuilding(e, junction, add) {
 	}
 }
 
+function playPlopAnimation(junction, building) {
+	let position
+	let buildingImage
+	let buildingWidth, buildingHeight
+	
+	if (personal.selectedBoard === rf.BOARD_OG) {
+		position = view.getBuildingPos(junction, building, false)
+		buildingImage = `building${String(store.context.selectedBuildingType % 10)}_orig`
+		// OG board uses fixed square dimensions
+		buildingWidth = (store.refSize * 30) / 100
+		buildingHeight = (store.refSize * 30) / 100
+	} else {
+		position = view.getBuildingPos(junction, building, false)
+		buildingImage = `building${String(store.context.selectedBuildingType)}`
+		// Other boards use circle radius
+		const buildingRadius = getBuildingRadius()
+		buildingWidth = (store.refSize * buildingRadius) / 100
+		buildingHeight = (store.refSize * buildingRadius) / 100
+	}
+	
+	// Set up the animation element with building image
+	plopAnimationRef.value.style.backgroundImage = `url(${view.getImage(buildingImage)})`
+	plopAnimationRef.value.style.backgroundSize = 'contain'
+	plopAnimationRef.value.style.backgroundRepeat = 'no-repeat'
+	plopAnimationRef.value.style.backgroundPosition = 'center'
+	plopAnimationRef.value.style.top = position[0] + 'px'
+	plopAnimationRef.value.style.left = position[1] + 'px'
+	plopAnimationRef.value.style.width = buildingWidth + 'px'
+	plopAnimationRef.value.style.height = buildingHeight + 'px'
+	
+	// Add rotation for OG board
+	let baseTransform = ''
+	let rotationDeg = '0deg'
+	if (personal.selectedBoard === rf.BOARD_OG) {
+		const rotationPos = view.getBuildingPos(junction, building, true)
+		if (rotationPos.length > 2) {
+			rotationDeg = `${rotationPos[2]}deg`
+			baseTransform = `rotate(${rotationDeg})`
+		}
+	}
+	plopAnimationRef.value.style.transform = baseTransform
+	plopAnimationRef.value.style.setProperty('--base-rotation', rotationDeg)
+	
+	// Show and play animation
+	plopAnimationRef.value.style.display = 'block'
+	plopAnimationRef.value.classList.remove('plop-animation')
+	// Force reflow to restart animation
+	void plopAnimationRef.value.offsetWidth
+	plopAnimationRef.value.classList.add('plop-animation')
+	
+	// Hide after animation completes
+	setTimeout(() => {
+		plopAnimationRef.value.style.display = 'none'
+		plopAnimationRef.value.style.backgroundImage = ''
+		plopAnimationRef.value.style.transform = ''
+	}, 600)
+}
+
 // Clicked free building spot to add building
 function clickedBldg(junction, building) {
 	// Remove ghost
@@ -61,10 +120,43 @@ function clickedBldg(junction, building) {
 
 	// Add bldg to junction
 	store.junctions[junction][building] = store.context.selectedBuildingType
+	// Play plop animation
+	playPlopAnimation(junction, building)
 }
 function highlight(e, entering) {
 	if (entering) e.target.style.border = String((store.refSize * 5) / 100) + "px solid lightgreen"
 	else e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
+}
+
+function playPassengerPlopAnimation(junction) {
+	const position = view.getBuildingPos(junction, -1)
+	
+	// Set up the animation element with passenger image at same position as pax number
+	plopAnimationRef.value.style.backgroundImage = `url(${view.getImage('passenger')})`
+	plopAnimationRef.value.style.backgroundSize = 'contain'
+	plopAnimationRef.value.style.backgroundRepeat = 'no-repeat'
+	plopAnimationRef.value.style.backgroundPosition = 'center'
+	plopAnimationRef.value.style.top = position[0] + 'px'
+	plopAnimationRef.value.style.left = position[1] + 'px'
+	plopAnimationRef.value.style.width = (store.refSize * 32) / 100 + 'px'
+	plopAnimationRef.value.style.height = (store.refSize * 32) / 100 + 'px'
+	
+	// Reset rotation for passengers
+	plopAnimationRef.value.style.transform = ''
+	plopAnimationRef.value.style.setProperty('--base-rotation', '0deg')
+	
+	// Show and play animation
+	plopAnimationRef.value.style.display = 'block'
+	plopAnimationRef.value.classList.remove('plop-animation')
+	// Force reflow to restart animation
+	void plopAnimationRef.value.offsetWidth
+	plopAnimationRef.value.classList.add('plop-animation')
+	
+	// Hide after animation completes
+	setTimeout(() => {
+		plopAnimationRef.value.style.display = 'none'
+		plopAnimationRef.value.style.backgroundImage = ''
+	}, 600)
 }
 
 function addPassengerToJunction(junction) {
@@ -73,6 +165,9 @@ function addPassengerToJunction(junction) {
 	store.context.passengersLeftToPlace--
 	store.remainingPassengers--
 	store.context.historyObj.push(junction)
+
+	// Play passenger plop animation
+	playPassengerPlopAnimation(junction)
 
 	if (store.remainingPassengers === 0) {
 		store.context.turnEndingErrorMessage = "No More Passengers"
@@ -268,6 +363,9 @@ function getBuildingRadius() {
 	</template>
 
 	<img class="ghostImg" ref="ghostBuildingRef" src="" alt="GI Image" />
+	
+	<!-- Plop animation element -->
+	<div class="plop-animation" ref="plopAnimationRef"></div>
 
 	<!-- HISTORY HELPER -- BUILDINGS (ADD BLDG / VROM TO) -->
 	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE">
@@ -353,8 +451,8 @@ function getBuildingRadius() {
 				v-for="(building, index) in line[1]"
 				v-bind:key="index"
 				:style="{
-					top: view.getBuildingPos(line[0], building[0])[0] + 'px',
-					left: view.getBuildingPos(line[0], building[0])[1] + 'px',
+					top: view.getBuildingPos(line[0], building[0], false)[0] + 'px',
+					left: view.getBuildingPos(line[0], building[0], false)[1] + 'px',
 					width: (store.refSize * 30) / 100 + 'px',
 					height: (store.refSize * 30) / 100 + 'px',
 					transform: 'rotate(' + view.getBuildingPos(line[0], building[0], true)[2] + 'deg)',
@@ -451,7 +549,7 @@ function getBuildingRadius() {
 .paxJuncNum {
 	position: absolute;
 	color: white;
-	z-index: 10;
+	z-index: 12;
 	filter: drop-shadow(1px 0 0 black) drop-shadow(0 1px 0 black) drop-shadow(-1px 0 0 black) drop-shadow(0 -1px 0 black);
 	cursor: default;
 }
@@ -517,5 +615,28 @@ function getBuildingRadius() {
 
 .buildingSpotDiv:hover {
 	cursor: pointer;
+}
+
+.plop-animation {
+	position: absolute;
+	display: none;
+	z-index: 5;
+}
+
+.plop-animation.plop-animation {
+	animation: bouncePlace 0.4s ease-out;
+	--base-rotation: 0deg;
+}
+
+@keyframes bouncePlace {
+	0% {
+		transform: rotate(var(--base-rotation)) scale(0.8);
+	}
+	40% {
+		transform: rotate(var(--base-rotation)) scale(1.3);
+	}
+	100% {
+		transform: rotate(var(--base-rotation)) scale(1);
+	}
 }
 </style>
