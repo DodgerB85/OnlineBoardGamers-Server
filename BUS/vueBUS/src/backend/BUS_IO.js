@@ -17,11 +17,6 @@ export async function saveGame(saveRewind) {
 
 	store.topMenuViews.showLoader = true
 
-	if (personal.liveWS && WS.BUSwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
-
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (personal.latestUpdate == undefined) personal.latestUpdate = "9999999999999"
@@ -83,7 +78,13 @@ export async function saveGame(saveRewind) {
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 
+		store.topMenuViews.showLoader = false
+		controller.startPlayerTurn()
+
 		// Broadcast update
+		if (personal.liveWS && (!WS.BUSwebSocket || WS.BUSwebSocket.readyState > 1)) {
+			await WS.StartWebSocket()
+		}
 		if (WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
 		else if (personal.liveWS) {
 			await WS.StartWebSocket()
@@ -91,9 +92,6 @@ export async function saveGame(saveRewind) {
 			if (personal.liveWS && WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
 			else console.log("2xTO: " + WS.BUSwebSocket.readyState)
 		}
-
-		store.topMenuViews.showLoader = false
-		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		alert("Error saving the game")
@@ -352,16 +350,22 @@ async function updateDataFromLoadRewind() {
 		const data = await response.json()
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
-		if (WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else if (personal.liveWS && WS.BUSwebSocket.readyState === 0) {
-			funcs.sleepPause(1000)
-			if (personal.liveWS && WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		}
 		store.topMenuViews.showLoader = false
 		store.performingRewind = false
 		Bot.actionAnyBotMooves()
 		store.resetVarsOnTurnEnd()
 		controller.startPlayerTurn()
+
+		// BroadcasT UpDATE
+		if (personal.liveWS && (!WS.BUSwebSocket || WS.BUSwebSocket.readyState > 1)) {
+			await WS.StartWebSocket()
+		}
+		if (WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+		else if (personal.liveWS && WS.BUSwebSocket.readyState === 0) {
+			funcs.sleepPause(1000)
+			if (personal.liveWS && WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+		}
+
 	} catch (error) {
 		console.error("Error updating data:", error)
 		alert("Error updating the game")
