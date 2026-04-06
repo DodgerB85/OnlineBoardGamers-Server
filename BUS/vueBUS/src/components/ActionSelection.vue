@@ -74,14 +74,15 @@ function clickedActionOption(action, index) {
 
 	if (action === 0 && index - 5 + model.maxBuses() + expansionBonus <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 	else if (action === 2) {
-		if (store.actionAreaData[1][0] !== -1 && model.maxBusesWithNewBus() - index <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index === model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index < model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		if (store.actionAreaData[1][0] !== -1 && model.maxBusesWithNewBus() - index <= 0) {
+			store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		} else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
+		//else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index === model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		//else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index < model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		//else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
+		else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 	} else if (action === 3) {
-		if (store.actionAreaData[1][0] !== -1 && index - 4 + model.maxBusesWithNewBus() <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		if (store.actionAreaData[1][0] !== -1 && index - 5 + model.maxBusesWithNewBus() <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
 		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 	}
@@ -352,27 +353,27 @@ function clickedActionOption(action, index) {
 
 .actionDisc0 {
 	/*background-color: blue;*/
-	background-color: #0C64AE;
+	background-color: #0c64ae;
 }
 
 .actionDisc1 {
 	/*background-color: green;*/
-	background-color: #0E7964;
+	background-color: #0e7964;
 }
 
 .actionDisc2 {
 	/*background-color: purple;*/
-	background-color: #6E365E;
+	background-color: #6e365e;
 }
 
 .actionDisc3 {
 	/*background-color: red;*/
-	background-color: #EB2E0F;
+	background-color: #eb2e0f;
 }
 
 .actionDisc4 {
 	/*background-color: yellow;*/
-	background-color: #FB9907;
+	background-color: #fb9907;
 }
 
 .noMoreLeft {

@@ -16,6 +16,48 @@ import { ref, computed } from "vue"
 // Track animated lines to avoid re-animating existing lines
 const animatedLines = ref(new Set())
 
+function getAnimatedLinePolygon(circle, progress = 0.5) {
+    const strokeWidth =  store.refSize/12; // Get your 2 or 3px width
+    const halfWidth = strokeWidth / 2;
+
+    // 1. Calculate the target point based on progress
+    // We draw from Start toward the current circle position (x, y)
+    const currentTargetX = circle.startX + (circle.x - circle.startX) * progress;
+    const currentTargetY = circle.startY + (circle.y - circle.startY) * progress;
+
+    // 2. Calculate the direction vector of the line
+    const dx = currentTargetX - circle.startX;
+    const dy = currentTargetY - circle.startY;
+    const len = Math.hypot(dx, dy);
+
+    // Safety check: if line is 0 length, return a tiny stub or empty string
+    if (len < 0.1) return `${circle.startX},${circle.startY}`;
+
+    // 3. Calculate the Perpendicular Vector (the "width" direction)
+    // We rotate the vector 90 degrees and normalize it to 1px
+    const nx = (-dy / len) * halfWidth;
+    const ny = (dx / len) * halfWidth;
+
+    // 4. Create the 4 corners of the polygon
+    // Start side (Points 1 and 2)
+    const p1x = circle.startX + nx;
+    const p1y = circle.startY + ny;
+    const p2x = circle.startX - nx;
+    const p2y = circle.startY - ny;
+
+    // End side (Points 3 and 4)
+    const p3x = currentTargetX - nx;
+    const p3y = currentTargetY - ny;
+    const p4x = currentTargetX + nx;
+    const p4y = currentTargetY + ny;
+
+    // 5. Return the points string for the <polygon>
+    return `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y} ${p4x},${p4y}`;
+}
+
+
+
+
 // Check if a line is new (for animation)
 function isNewLine(lineID, lineIndex) {
 	const lineKey = `${lineID}-${lineIndex}`
@@ -41,6 +83,12 @@ function resetFillColor(e) {
 function addNewLine(lineID) {
 	store.context.historyObj.push([lineID, store.lines[lineID].length])
 	store.context.linesLeftToPlace--
+
+	// Remove .new-line class from all existing lines
+	const existingLines = document.querySelectorAll('.new-line')
+	existingLines.forEach(line => {
+		line.classList.remove('new-line')
+	})
 
 	let startedEqual = model.addLine_core(controller.currentPlayerIndex(), lineID)
 
@@ -141,6 +189,9 @@ const lineEndCircles = computed(() => {
 				startY: startCorrectedY,
 				fromJunction: junctions[startJunctionIndex],
 				toJunction: junctions[targetJuncIndex],
+				fromJunctionIndex: startJunctionIndex,
+				toJunctionIndex: targetJuncIndex,
+				endLineID: endLine, // Add this to match index1
 			})
 		}
 	}
@@ -156,20 +207,36 @@ const lineEndCircles = computed(() => {
 
 		<!-- render the played lines -->
 		<g v-for="(lines, index1) in store.lines" v-bind:key="`lines-${index1}`">
-			<polygon
-				v-for="(line, index2) in lines"
-				v-bind:key="`${index1}-${index2}-${line}`"
-				:data-line-key="`${index1}-${index2}`"
-				:data-line-id="index1"
-				:data-line-index="index2"
-				:class="{ 'new-line': isNewLine(index1, index2) }"
-				:points="view.getLineSVGpoints(index1, index2)"
-				:style="{
-					stroke: getStrokeColourForBusLine(line),
-					'stroke-width': getStrokeWidthForBusLine(),
-					fill: rf.getColourNameFromNumber(personal.getCorrectedColour(line)),
-					//fill: url(#outerPattern),
-				}"></polygon>
+			<g v-for="(line, index2) in lines" v-bind:key="`${index1}-${index2}-${line}`">
+				<!-- Render the actual line -->
+				<polygon
+					:data-line-key="`${index1}-${index2}`"
+					:data-line-id="index1"
+					:data-line-index="index2"
+					:class="{ 'new-line': isNewLine(index1, index2) }"
+					:points="view.getLineSVGpoints(index1, index2)"
+					:style="{
+						stroke: getStrokeColourForBusLine(line),
+						'stroke-width': getStrokeWidthForBusLine(),
+						fill: rf.getColourNameFromNumber(personal.getCorrectedColour(line)),
+						//fill: url(#outerPattern),
+					}"></polygon>
+				<!-- Add animated growing line for new lines -->
+				<g v-for="circle in lineEndCircles" :key="`${circle.id}-${circle.x}-${circle.y}`">
+					<motion.polygon
+						v-if="isNewLine(index1, index2)  && circle.endLineID === index1"
+						:points="getAnimatedLinePolygon(circle, 0.1)"
+						:initial="{ }"
+						:animate="{ points: getAnimatedLinePolygon(circle, 1) }"
+						:transition="{ duration: 2.0, ease: 'circOut' }"
+						:style="{
+							stroke: 'black',
+							'stroke-width': 2,
+							fill: rf.getColourNameFromNumber(personal.getCorrectedColour(circle.colour)),
+							'pointer-events': 'none',
+						}"></motion.polygon>
+				</g>
+			</g>
 		</g>
 
 		<!-- Add Line End circles -->
@@ -247,17 +314,22 @@ const lineEndCircles = computed(() => {
 	stroke-width: 30;
 }
 
-/* Simple fade-in animation for new lines */
 .new-line {
-	animation: fadeIn 0.5s ease-in-out;
+    opacity: 0;
+    /* 
+       0.01s: The duration of the 'show' (makes it feel like a snap)
+       2.0s:  MATCHES your motion.g transition duration
+       forwards: Ensures it stays visible after the animation ends
+    */
+    animation: showFullLine 0.01s linear 2.0s forwards;
 }
 
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
+@keyframes showFullLine {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 </style>

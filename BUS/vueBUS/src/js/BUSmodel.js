@@ -151,7 +151,7 @@ export function maxBuses() {
 
 export function maxBusesWithNewBus() {
 	const store = useModelStore()
-	if (store.actionAreaData[1][0] !== -1) return maxBuses()
+	if (store.actionAreaData[1][0] === -1) return maxBuses()
 	return Math.max(maxBuses(), controller.getPlayerByColour(store.actionAreaData[1][0]).buses + 1)
 }
 
