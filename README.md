@@ -22,8 +22,8 @@
 # Setup & Install
 
 ## Quick setup - see below for full dockerised setup
-This will allow you to easily setup and run a home server. You can login with `admin` and `password`. The easiest way to create a new user is in the Django admin panel - copy the hashed password from the `admin` user and use it to create a new user.
-- Get the source code (`git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`)
+This will allow you to easily setup and run a home server. You can login with `admin` (super-user) or `user1` (normal user) and `password`. The easiest way to create a new user is in the Django admin panel - copy the hashed password from the `admin` user.
+- Get the source code `git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`
 - Run `QuickSetup.bat`
 - After this is done, and for future runs just run `QuickStart.bat`
 
@@ -32,8 +32,6 @@ I find it quite frustrating when I want to try out a project, only to find out i
 On the plus side, this project is totally free, and WILL run fine on your home computer.
 On the down side, it does involve multiple steps, but each is quite small and easy, and should be easy to do if you are familiar with these tools.
 If you get stuck, paste the error into AI and it should help you on to the next step.
-
-NOTE: iF you don't want to use docker / have issues with it / don't hace access to fast linux, you can use the "instructions_legacy.txt" to setup this project. 
 
 1) Make sure you have a working Docker installation.
 2) Pull the code from github. `git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`

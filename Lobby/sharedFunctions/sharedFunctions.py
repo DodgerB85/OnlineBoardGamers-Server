@@ -208,7 +208,7 @@ def SF_serializeGame(game, user, player_context):
 
     creator = game.creator.username if game.creator else "Unknown Creator"
     if creator == "Unknown Creator":
-        SN_sendAdminErrorMessage(None, f"Unknown creator for game {game.gameCode} {game.id}")
+        SN_sendAdminErrorMessage(f"Unknown creator for game {game.gameCode} {game.id}")
         
     gameName = getattr(game, "gameName", "Unknown Game")
     if gameName == "":

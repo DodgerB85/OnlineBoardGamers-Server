@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 
 # from itertools import chain
-from django.db.models import Count, Q, IntegerField, Case, When
+from django.db.models import Count, Q
 from unittest.mock import MagicMock
 from decouple import config  # , Csv
 from django.db import OperationalError, transaction
@@ -142,7 +142,7 @@ for gameCode in GAME_CODES:
             mock_request.site = Site.objects.get_current()
             message = f"NO CP: {gameCode} - ID: {game.id}"
             print(message)
-            SN_sendAdminErrorMessage(mock_request, message)
+            SN_sendAdminErrorMessage(message)
 
     # BULK DELETE: One query for all old games in this model
     if ids_to_delete and ACTUALLY_DELETE_ITEMS:

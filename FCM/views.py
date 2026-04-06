@@ -449,12 +449,12 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
         #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
@@ -478,7 +478,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
@@ -517,7 +517,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -597,7 +597,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -686,12 +686,12 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
         #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         if currentGame.gameStatus == "FINISHED":
@@ -708,7 +708,7 @@ def _processTurn(request):
                     f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                     f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
                 )
-                SN_sendAdminErrorMessage(request, message)
+                SN_sendAdminErrorMessage(message)
                 return JsonResponse({"syncError": True}, safe=False)
             for i in range(len(incomingTiles)):
                 if incomingTiles[i] != currentTiles[i]:
@@ -719,7 +719,7 @@ def _processTurn(request):
                         f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                         f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
                     )
-                    SN_sendAdminErrorMessage(request, message)
+                    SN_sendAdminErrorMessage(message)
                     return JsonResponse(
                         {"syncError": True},
                         safe=False,
@@ -762,7 +762,7 @@ def _processTurn(request):
             print(f" -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}")
             print(jsonData)
             message = f"******** PHASE NOT FOUND IN JSONDATA ********* - jsonData: {jsonData} - User: {request.user.username} - - DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn}  -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
@@ -775,7 +775,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
 
         if oldPhase == rfFCM.PHASE_CLEAN_UP and jsonData["phase"] == rfFCM.PHASE_CLEAN_UP and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
             print("*********************************************** Key 'phase'  PHASE 9 ERROR   ")
@@ -786,7 +786,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
         ###########
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
@@ -992,12 +992,12 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
         #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         if not continueFromStalledGame:
@@ -1084,7 +1084,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # decompress the move data array
@@ -1149,12 +1149,12 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
         #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -1226,12 +1226,12 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
         #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-        #    SN_sendAdminErrorMessage(request, f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
+        #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
             # return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
@@ -1396,7 +1396,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
@@ -1696,7 +1696,7 @@ def FCMdata(request, dataType):
             gameUpdate = int(jsonData["latestUpdate"])
             latestUpdate = int(currentGame.latestUpdate)
         except Exception as e:
-            SN_sendAdminErrorMessage(request, f"ERROR IN FCMdata: gameID: {jsonData['gameID']} Error: {e}")
+            SN_sendAdminErrorMessage(f"ERROR IN FCMdata: gameID: {jsonData['gameID']} Error: {e}")
             # NB this might need to be changed if the above msg is getting triggered
             specialData = False
 

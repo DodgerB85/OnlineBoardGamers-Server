@@ -51,10 +51,7 @@ class GamePresenter:
         current_players = self.gameObj.players.filter(is_current=True).select_related("player")
 
         if not current_players.exists():
-            SN_sendAdminErrorMessage(
-                None,
-                f"*****************************************************************************quickIsMyMove: no current players - gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id} - loggedInPlayerUsername: {loggedInPlayerUsername}",
-            )
+            SN_sendAdminErrorMessage(f"* * * * * * * * quickIsMyMove: no current players - gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id} - loggedInPlayerUsername: {loggedInPlayerUsername}")
             return True
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
@@ -286,48 +283,53 @@ class GamePresenter:
 
     def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
         from django_q.tasks import async_task
-        async_task(
-           "Lobby.sharedFunctions.sharedNotifications.SN_sendInviteNotifications",
-           playerNames, _gameName, _maxPlayers, _gameCode
-        )
+
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_sendInviteNotifications", playerNames, _gameName, _maxPlayers, _gameCode)
 
     def sendYourTurnNotification(self, gameCode, playerListToNotify, gameID, gameName, gameObj, oldVer):
-        #from django_q.tasks import async_task
+        # from django_q.tasks import async_task
         from django_q.tasks import schedule
         from django.utils import timezone
         from datetime import timedelta
-        
+
         # Store current game state for validation
         current_turn = gameObj.turn
         current_phase = gameObj.phase
         current_latest_update = gameObj.latestUpdate
-        current_players = getattr(gameObj, 'currentPlayers', '')
-       
+        current_players = getattr(gameObj, "currentPlayers", "")
+
         # Schedule task to run in 2 minutes (120 seconds)
         # Calculate the start time (2 minutes from now)
         start_time = timezone.now() + timedelta(minutes=2)
 
         schedule(
             "Lobby.sharedFunctions.sharedNotifications.SN_sendNextTurnNotificationWithValidation",
-            gameCode, playerListToNotify, gameID, gameName, current_latest_update,
-            current_turn, current_phase, current_players, oldVer,
+            gameCode,
+            playerListToNotify,
+            gameID,
+            gameName,
+            current_latest_update,
+            current_turn,
+            current_phase,
+            current_players,
+            oldVer,
             next_run=start_time,
-            repeats=1  # Important: ensures it only runs once
+            repeats=1,  # Important: ensures it only runs once
         )
 
-        #currentGameTurnString = self.currentTurnString()
-        #currentGamePace = gameObj.gamePace
+        # currentGameTurnString = self.currentTurnString()
+        # currentGamePace = gameObj.gamePace
 
-        #async_task(
+        # async_task(
         #   "Lobby.sharedFunctions.sharedNotifications.SN_sendNextTurnNotification",
         #   gameCode, playerListToNotify, gameID, gameName, currentGameTurnString, currentGamePace, oldVer
-        #)
+        # )
 
     def _sendStartGameNotification(self, request, playerListToNotify):
         """Send async game-start notification to other players."""
         from django_q.tasks import async_task
 
-        #from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
+        # from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
 
         if not playerListToNotify:
             return
@@ -343,11 +345,11 @@ class GamePresenter:
         message_data["relatedMiniTournamentID"] = self.gameObj.relatedMiniTournament.id if self.gameObj.relatedMiniTournament else 0
 
         async_task(
-           "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
-           playerListToNotify,
-           message_data,
+            "Lobby.sharedFunctions.sharedNotifications.SN_M_sendGameStartNotification",
+            playerListToNotify,
+            message_data,
         )
-        #SN_M_sendGameStartNotification(playerListToNotify, message_data)
+        # SN_M_sendGameStartNotification(playerListToNotify, message_data)
 
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
@@ -501,9 +503,7 @@ class GamePresenter:
 class CNSpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotification,
-        )
+        from django_q.tasks import async_task
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -520,7 +520,27 @@ class CNSpresenter(GamePresenter):
 
         self.gameObj.save()
 
-        SN_M_sendEndGameNotification(request, "CNS", _finalPositions, _gameID, self.gameObj)
+        # Convert _finalPositions from simple list to list of lists format
+        convertedFinalPositions = []
+        for pos, username in enumerate(_finalPositions):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+
+            convertedFinalPositions.append([username, posText, pos])
+
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "CNS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
@@ -547,9 +567,7 @@ class CNSpresenter(GamePresenter):
 class WEBpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotificationTieGame,
-        )
+        from django_q.tasks import async_task
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -588,7 +606,8 @@ class WEBpresenter(GamePresenter):
         for name in new_names:
             finalResults.append([name, "Trapped in a dot matrix", 9])
 
-        SN_M_sendEndGameNotificationTieGame(request, "WEB", finalResults, _gameID, self.gameObj)
+        # def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, currentGamePace, currentGameName):
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "WEB", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
@@ -623,12 +642,8 @@ class WEBpresenter(GamePresenter):
 class AQYpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotificationTieGame,
-        )
-        from Lobby.sharedFunctions.sharedFunctions import (
-            SF_M_ProcessAnyTournamentEndGame,
-        )
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
+        from django_q.tasks import async_task
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -667,7 +682,7 @@ class AQYpresenter(GamePresenter):
         for name in new_names:
             finalResults.append([name, "Lost in Antiquity", 9])
 
-        SN_M_sendEndGameNotificationTieGame(request, "AQY", finalResults, _gameID, self.gameObj)
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "AQY", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -890,9 +905,7 @@ class AQYpresenter(GamePresenter):
 class TGZpresenter(GamePresenter):
     def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotification,
-        )
+        from django_q.tasks import async_task
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -912,7 +925,27 @@ class TGZpresenter(GamePresenter):
 
         self.gameObj.save()
 
-        SN_M_sendEndGameNotification(request, "TGZ", _finalPositions, _gameID, self.gameObj)
+        # Convert _finalPositions from simple list to list of lists format
+        convertedFinalPositions = []
+        for pos, username in enumerate(_finalPositions):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+
+            convertedFinalPositions.append([username, posText, pos])
+
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "TGZ", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -978,9 +1011,7 @@ class TGZpresenter(GamePresenter):
 class INDpresenter(GamePresenter):
     def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotification,
-        )
+        from django_q.tasks import async_task
         from Lobby.sharedFunctions.sharedFunctions import (
             # TODO: get this working
             SF_M_ProcessAnyTournamentEndGame,
@@ -1002,8 +1033,29 @@ class INDpresenter(GamePresenter):
         finalPositionsArr = []
         for seatPos in _finalPositions:
             finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
+
+        # Convert finalPositionsArr from simple list to list of lists format
+        convertedFinalPositions = []
+        for pos, username in enumerate(finalPositionsArr):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+
+            convertedFinalPositions.append([username, posText, pos])
+
         # Now send winning notification
-        SN_M_sendEndGameNotification(request, "IND", finalPositionsArr, _gameID, self.gameObj)
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "IND", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -1159,9 +1211,7 @@ class INDpresenter(GamePresenter):
 class BUSpresenter(GamePresenter):
     def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotification,
-        )
+        from django_q.tasks import async_task
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -1182,8 +1232,28 @@ class BUSpresenter(GamePresenter):
         # Need to save here, so it is FN for tournament
         self.gameObj.save()
 
+        # Convert _finalPositions from simple list to list of lists format
+        convertedFinalPositions = []
+        for pos, username in enumerate(_finalPositions):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+
+            convertedFinalPositions.append([username, posText, pos])
+
         # Now send winning notification
-        SN_M_sendEndGameNotification(request, "BUS", _finalPositions, _gameID, self.gameObj)
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "BUS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -1302,9 +1372,7 @@ class RNBpresenter(GamePresenter):
 
     def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotification,
-        )
+        from django_q.tasks import async_task
         from Lobby.sharedFunctions.sharedFunctions import (
             # TODO: get this working
             SF_M_ProcessAnyTournamentEndGame,
@@ -1325,8 +1393,29 @@ class RNBpresenter(GamePresenter):
         finalPositionsArr = []
         for seatPos in _finalPositions:
             finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
+
+        # Convert finalPositionsArr from simple list to list of lists format
+        convertedFinalPositions = []
+        for pos, username in enumerate(finalPositionsArr):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+
+            convertedFinalPositions.append([username, posText, pos])
+
         # Now send winning notification
-        SN_M_sendEndGameNotification(request, "RNB", finalPositionsArr, _gameID, self.gameObj)
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "RNB", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -1650,10 +1739,7 @@ class FCMpresenter(GamePresenter):
             data = json.loads(self.gameObj.FCMplayersMoveData)
             # For some reason we need to check both here. A kickout can apparently result in missing data
             if len(data) != self.gameObj.maxPlayers:  # and len(data) != self.gameObj.maxPlayers - len(missing_players):
-                SN_sendAdminErrorMessage(
-                    None,
-                    f"Invalid number of players - getOrScaffoldAllMoveData - FCM pres {self.gameObj.id}",
-                )
+                SN_sendAdminErrorMessage(f"Invalid number of players - getOrScaffoldAllMoveData - FCM pres {self.gameObj.id}")
 
                 raise ValueError("Invalid number of players")
             return data
@@ -1751,7 +1837,7 @@ class FCMpresenter(GamePresenter):
         # Check the game phase is in the move phase array
         if phase not in moveArr[1]:
             message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase1 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
-            SN_sendAdminErrorMessage("", message)
+            SN_sendAdminErrorMessage(message)
             return False
 
         # Now we have move data that should match the phase. So just check it is valid
@@ -1763,7 +1849,7 @@ class FCMpresenter(GamePresenter):
             data = moveArr[3]
             if not isinstance(data, list) or len(data) != 1 or data[0] not in [1, 2, 3]:
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase2 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
-                SN_sendAdminErrorMessage("", message)
+                SN_sendAdminErrorMessage(message)
                 return False
             return True
 
@@ -1782,7 +1868,7 @@ class FCMpresenter(GamePresenter):
             # If the daya is not valid, delete it and return false
             if not validData:
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase3 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
-                SN_sendAdminErrorMessage("", message)
+                SN_sendAdminErrorMessage(message)
                 return False
 
             return True
@@ -1800,7 +1886,7 @@ class FCMpresenter(GamePresenter):
 
             if not validData:
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase3.4 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
-                SN_sendAdminErrorMessage("", message)
+                SN_sendAdminErrorMessage(message)
                 return False
 
             if moveData[2] == 1 or moveData[2] == 2:
@@ -1826,22 +1912,22 @@ class FCMpresenter(GamePresenter):
             # check the move array is a list with 2 items (one for each phase)
             if not isinstance(moveData, list) or len(moveData) != 2:
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase4 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
-                SN_sendAdminErrorMessage("", message)
+                SN_sendAdminErrorMessage(message)
                 return False
             # check there are 2 arrays, one for each phase
             if not isinstance(moveData[0], list) or not isinstance(moveData[1], list):
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase5 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
-                SN_sendAdminErrorMessage("", message)
+                SN_sendAdminErrorMessage(message)
                 return False
             # First arr must be an arr then an arr
             if not isinstance(moveData[0][0], list) or not isinstance(moveData[0][1], list):
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase6 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
-                SN_sendAdminErrorMessage("", message)
+                SN_sendAdminErrorMessage(message)
                 return False
             # Second arr must just contain at least one int
             if len(moveData[1]) < 1 or not isinstance(moveData[1][0], int):
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase7 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
-                SN_sendAdminErrorMessage("", message)
+                SN_sendAdminErrorMessage(message)
                 return False
 
             # Now there is valid data, so check it is an ACTUAL move
@@ -2022,9 +2108,7 @@ class FCMpresenter(GamePresenter):
     # Takes in self, request, and then 3 JSON[""] pieces of string data
     def endGame(self, request, _winnerUsername, _finalScores, _tournamentData, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotification,
-        )
+        from django_q.tasks import async_task
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -2050,7 +2134,28 @@ class FCMpresenter(GamePresenter):
         finalPositions = []
         for i in range(len(_finalScores)):
             finalPositions.append(_finalScores[i][0])
-        SN_M_sendEndGameNotification(request, "FCM", finalPositions, _gameID, self.gameObj)
+
+        # Convert finalPositions from simple list to list of lists format
+        convertedFinalPositions = []
+        for pos, username in enumerate(finalPositions):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+
+            convertedFinalPositions.append([username, posText, pos])
+
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "FCM", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -2223,9 +2328,7 @@ class HLCpresenter(GamePresenter):
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotification,
-        )
+        from django_q.tasks import async_task
 
         self.clearGeneralDataOnGameEndWithoutSave()
         self.clearAllMoveData()
@@ -2238,8 +2341,28 @@ class HLCpresenter(GamePresenter):
 
         self.gameObj.save()
 
+        # Convert _finalPositions from simple list to list of lists format
+        convertedFinalPositions = []
+        for pos, username in enumerate(_finalPositions):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+
+            convertedFinalPositions.append([username, posText, pos])
+
         # Now send winning notification
-        SN_M_sendEndGameNotification(request, "HLC", _finalPositions, _gameID, self.gameObj)
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "HLC", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
     def getCurrentPlayersHLC(self):
         _currentPlayers = []
@@ -2338,7 +2461,7 @@ class HLCpresenter(GamePresenter):
                 if str(move_time)[:6] != "NODATA":
                     return True
 
-            # SN_sendAdminErrorMessage("", f"HLC FACTORY ISSUE!!!!!! hasMoveData ERROR - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - seat: {seat} -name: {name} ")
+            # SN_sendAdminErrorMessage(f"HLC FACTORY ISSUE!!!!!! hasMoveData ERROR - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - seat: {seat} -name: {name} ")
             # NB you get here if you have SAVED a move without submitting it
             # In PRESENTER, this keeps you in the "myMove" / currentPlayers lists
             return False
@@ -2443,9 +2566,7 @@ class HLCpresenter(GamePresenter):
 class KFWpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedNotifications import (
-            SN_M_sendEndGameNotificationTieGame,
-        )
+        from django_q.tasks import async_task
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -2494,7 +2615,7 @@ class KFWpresenter(GamePresenter):
             finalResults.append([name, "Out to sea", 9])
 
         # Now send winning notification
-        SN_M_sendEndGameNotificationTieGame(request, "KFW", finalResults, _gameID, self.gameObj)
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "KFW", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
 
     def startGame(self, request):
         from Lobby.models import GamePlayer

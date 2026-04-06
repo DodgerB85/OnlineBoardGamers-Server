@@ -191,7 +191,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         if "mapTiles" in jsonData:
@@ -410,7 +410,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # decompress the move data array
@@ -450,7 +450,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         opponentsPlayerIndex = jsonData["selectedOpponent"]
@@ -581,7 +581,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         BKSN = jsonData["BKSN"]
@@ -768,7 +768,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         BKSN = jsonData["BKSN"]
@@ -800,7 +800,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         BKSN = jsonData["BKSN"]
@@ -861,7 +861,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
@@ -956,7 +956,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         if len(currentGame.rewindData) == 0:
@@ -1073,7 +1073,7 @@ def _processAQYturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])

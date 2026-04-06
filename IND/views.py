@@ -198,7 +198,7 @@ def _processINDturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         # If saving into >= operations, delete all pre-moves
@@ -368,7 +368,7 @@ def _processINDturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         if len(currentGame.rewindData) == 0:
@@ -482,7 +482,7 @@ def _processINDturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
@@ -525,7 +525,7 @@ def _processINDturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # decompress the move data array

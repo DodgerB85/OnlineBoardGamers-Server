@@ -284,7 +284,7 @@ def _processBUSturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentPlayersArr}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -525,7 +525,7 @@ def _processBUSturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentPlayersArr}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])

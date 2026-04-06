@@ -66,6 +66,7 @@ def HLCgameSummary(request, game_id):
 @login_required()
 def createHLCgame(request):
     from HLC.common import create_hlc_game
+
     return create_hlc_game(request)
 
 
@@ -100,9 +101,7 @@ def _processHLCturn(request):
     presenter = cast("HLCpresenter", currentGame.presenter())
 
     if jsonData["action"] == "turn0move":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
-            jsonData["latestUpdate"]
-        ) != str(currentGame.latestUpdate):
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             return JsonResponse({"syncError": True}, safe=False)
         # save move data
         nameToUse = request.user.username
@@ -124,9 +123,7 @@ def _processHLCturn(request):
         else:
             # open up the game data.
             x = lzstring.LZString()
-            raw_game_data = x.decompressFromEncodedURIComponent(
-                currentGame.gameData or "{}"
-            )
+            raw_game_data = x.decompressFromEncodedURIComponent(currentGame.gameData or "{}")
             # Fallback to "{}" if decompression returns None
             gameDataString = raw_game_data if raw_game_data is not None else "{}"
             rawModel = json.loads(gameDataString)
@@ -136,13 +133,9 @@ def _processHLCturn(request):
             for i in range(currentGame.maxPlayers):
                 move_data_raw = all_gps[i].currentMoveData if i < len(all_gps) else ""
 
-                decompressed_move = x.decompressFromEncodedURIComponent(
-                    move_data_raw or ""
-                )
+                decompressed_move = x.decompressFromEncodedURIComponent(move_data_raw or "")
                 # Fallback to "{}" if decompression fails
-                rawModel[3][i][0] = json.loads(
-                    decompressed_move if decompressed_move is not None else "{}"
-                )
+                rawModel[3][i][0] = json.loads(decompressed_move if decompressed_move is not None else "{}")
 
             # subtract components
             # 0 = availComponents # 5 = dept_res 6 = dept_plan
@@ -194,16 +187,10 @@ def _processHLCturn(request):
             name = jsonData["BKSN"]
 
         # Use a fallback string if decompression returns None
-        incomingFactoryDataRaw = json.loads(
-            LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}"
-        )
-        DBgameDataRaw = json.loads(
-            LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]"
-        )
+        incomingFactoryDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}")
+        DBgameDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]")
         DBavailableComponents = DBgameDataRaw[0].copy() if DBgameDataRaw else []
-        other = json.loads(
-            LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]"
-        )
+        other = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]")
 
         FDBE = other[0]
         FCIATT = other[1]
@@ -239,9 +226,7 @@ def _processHLCturn(request):
                 # (DBavailableComponents)
                 # Get FacDataBeforeExp back out into that players name
                 # along with FCIATT
-                retRaw = LZS.compressToEncodedURIComponent(
-                    json.dumps([FDBE, FCIATT, DBavailableComponents])
-                )
+                retRaw = LZS.compressToEncodedURIComponent(json.dumps([FDBE, FCIATT, DBavailableComponents]))
                 return JsonResponse(
                     {
                         "invalid": True,
@@ -254,9 +239,7 @@ def _processHLCturn(request):
 
         # Now it is valid for this time, so store the data
         dataToInsert = [FDBE, FCIATT, FCNATT, incomingFactoryDataRaw]
-        presenter.updateSingleMove(
-            name, LZS.compressToEncodedURIComponent(json.dumps(dataToInsert))
-        )
+        presenter.updateSingleMove(name, LZS.compressToEncodedURIComponent(json.dumps(dataToInsert)))
 
         currentGame.save()
 
@@ -283,22 +266,13 @@ def _processHLCturn(request):
 
         for i in range(10):
             if i == 9:
-                message = (
-                    f"************ Max 'i' hit in HLC - gameID: {game_id} - User: {request.user.username}  "
-                    f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
-                    f"--- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersInOrderArrHLC()}"
-                )
-                SN_sendAdminErrorMessage(request, message)
+                message = f"************ Max 'i' hit in HLC - gameID: {game_id} - User: {request.user.username}  - DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} --- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersInOrderArrHLC()}"
+                SN_sendAdminErrorMessage(message)
             if len(currentPlayersList) == 0:
                 break
             # THIS WILL ALWAYS BE TRUE ONCE, AS NOW CURRENT PLAYER IS FIRST
             if presenter.hasMoveData(currentPlayersList[0]):
-                moveData = json.loads(
-                    LZS.decompressFromEncodedURIComponent(
-                        presenter.getSingleMoveForName(currentPlayersList[0]) or ""
-                    )
-                    or "[]"
-                )
+                moveData = json.loads(LZS.decompressFromEncodedURIComponent(presenter.getSingleMoveForName(currentPlayersList[0]) or "") or "[]")
                 FDBE = moveData[0]
                 FCIATT = moveData[1]
                 FCNATT = moveData[2]
@@ -312,10 +286,7 @@ def _processHLCturn(request):
                         try:
                             DBavailableComponents[FCNATT[j]] -= 1
                         except Exception as e:
-                            SN_sendAdminErrorMessage(
-                                request,
-                                f"Exception: {e} -- gameID: {game_id} -- FCIATT: {FCIATT} -- FCNATT: {FCNATT} -- DBavailableComponents: {DBavailableComponents} j: {j} FCNATT[j]:",
-                            )
+                            SN_sendAdminErrorMessage(f"Exception: {e} -- gameID: {game_id} -- FCIATT: {FCIATT} -- FCNATT: {FCNATT} -- DBavailableComponents: {DBavailableComponents} j: {j} FCNATT[j]:")
                             break
                     enoughComponents = True
                     for j in range(len(DBavailableComponents)):
@@ -351,19 +322,12 @@ def _processHLCturn(request):
                         13,
                         [
                             len(FCNATT),
-                            len(
-                                DBgameDataRaw[3][
-                                    presenter.seatPosition(currentPlayersList[0])
-                                ][0][4]
-                            ),
+                            len(DBgameDataRaw[3][presenter.seatPosition(currentPlayersList[0])][0][4]),
                         ],
                     ]
                 )
                 # DBgameDataRaw[16].append((int(time.time())*1000 - (2*len(currentPlayersList)) )- DBgameDataRaw[15][0])
-                DBgameDataRaw[16].append(
-                    DBgameDataRaw[16][len(DBgameDataRaw[16]) - 1]
-                    + (15 - len(currentPlayersList))
-                )
+                DBgameDataRaw[16].append(DBgameDataRaw[16][len(DBgameDataRaw[16]) - 1] + (15 - len(currentPlayersList)))
 
                 # end the first players turn
                 currentPlayersList.pop(0)
@@ -377,9 +341,7 @@ def _processHLCturn(request):
         # End loop of 6
 
         # repack game and save
-        currentGame.gameData = LZS.compressToEncodedURIComponent(
-            json.dumps(DBgameDataRaw)
-        )
+        currentGame.gameData = LZS.compressToEncodedURIComponent(json.dumps(DBgameDataRaw))
         # remove name from current players
         presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersList)
 
@@ -390,7 +352,7 @@ def _processHLCturn(request):
         #        f"- DB_LU: {currentGame.latestUpdate}  -- DB_turn: {currentGame.turn} "
         #        f"--- DB_phase: {currentGame.phase} -- currentP: {presenter.getArr()}"
         #    )
-        #    SN_sendAdminErrorMessage(request, message)
+        #    SN_sendAdminErrorMessage(message)
 
         currentGame.kickoutFlexiData = SF_updateFlexiTime(
             currentGame.kickoutFlexiData,
@@ -413,9 +375,7 @@ def _processHLCturn(request):
                 if gp.currentMoveTime != "NODATASFWET":
                     gp.currentMoveTime = "ILLEGALMOVE"  # "NODATASFWET"
                     gp.save()
-            SN_sendFactoryAlertNotification(
-                request, newNameCurrent, jsonData["gameID"], currentGame
-            )
+            SN_sendFactoryAlertNotification(request, newNameCurrent, jsonData["gameID"], currentGame)
 
         return JsonResponse(
             {
@@ -450,9 +410,7 @@ def _processHLCturn(request):
 
     elif jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
-            jsonData["latestUpdate"]
-        ) != str(currentGame.latestUpdate):
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -520,14 +478,9 @@ def _processHLCturn(request):
 
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
-                if (
-                    currentRewindDataArray[-1] != currentGame.rewindTempData
-                    and jsonData["data"] != currentGame.rewindTempData
-                ):
+                if currentRewindDataArray[-1] != currentGame.rewindTempData and jsonData["data"] != currentGame.rewindTempData:
                     # add to RWdata and RWdata[]
-                    currentRewindData = (
-                        currentRewindData + "'SPLIT'" + currentGame.rewindTempData
-                    )
+                    currentRewindData = currentRewindData + "'SPLIT'" + currentGame.rewindTempData
                     # currentRewindDataArray = currentRewindData.split("'SPLIT'")
                     currentRewindDataArray.append(currentGame.rewindTempData)
 
@@ -581,23 +534,12 @@ def _processHLCturn(request):
         currentRewindData = currentGame.rewindData
         if len(currentRewindData) == 0:
             return JsonResponse(
-                {
-                    "message": gettext(
-                        "<b>No rewind data. Rewind limit reached. Please play on to generate more rewind data </b>"
-                    )
-                },
+                {"message": gettext("<b>No rewind data. Rewind limit reached. Please play on to generate more rewind data </b>")},
                 safe=False,
             )
-        if (
-            not presenter.getRewindHostPossible()
-            and request.user.username != "BotKickStarter"
-        ):
+        if not presenter.getRewindHostPossible() and request.user.username != "BotKickStarter":
             return JsonResponse(
-                {
-                    "message": gettext(
-                        "<b>Permissions missing. Please reload the page and check again</b>"
-                    )
-                },
+                {"message": gettext("<b>Permissions missing. Please reload the page and check again</b>")},
                 safe=False,
             )
 
@@ -635,9 +577,7 @@ def _processHLCturn(request):
             )
 
         # ELSE if there is not any current move data
-        loadData = (
-            currentRewindDataArray.pop() if len(currentRewindDataArray) > 0 else ""
-        )
+        loadData = currentRewindDataArray.pop() if len(currentRewindDataArray) > 0 else ""
 
         while loadData == currentGame.gameData and len(currentRewindDataArray) > 0:
             loadData = currentRewindDataArray.pop()
@@ -705,11 +645,7 @@ def _processHLCturn(request):
         )
 
     elif jsonData["action"] == "saveAfterKickout":
-        if (
-            str(jsonData["latestUpdate"]) != "9999999999999"
-            and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate)
-            and not jsonData["ignoreSync"]
-        ):
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate) and not jsonData["ignoreSync"]:
             print("HLC: Sync Error Kickout Save " + str(jsonData["gameID"]))
             return JsonResponse({"syncError": True}, safe=False)
 
@@ -771,8 +707,6 @@ def _processHLCturn(request):
     return HttpResponse(status=204)  # No Content
 
 
-
-
 @login_required
 def showHLCgame(request, game_id):
     result = build_show_game_data(
@@ -824,11 +758,7 @@ def showHLCgame(request, game_id):
 
     # Also check all players including kicked
     all_gps_including_kicked = list(currentGame.players.select_related("player").all())
-    chat_notify_ids_all = {
-        gp.player.id
-        for gp in all_gps_including_kicked
-        if gp.player and gp.has_chat_notification
-    }
+    chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
     if user_id in chat_notify_ids_all:
         chatNotification = True
         presenter.removeChatNotification(request.user)
@@ -848,33 +778,17 @@ def showHLCgame(request, game_id):
             rewindHostHTML = presenter.getRewindHostHTML()
 
         pov = presenter.seatPosition(username)
-        currentRewindConsent = presenter.getCurrentRewindConsent(
-            username
-        )  # NB needed in template for rewind panel
+        currentRewindConsent = presenter.getCurrentRewindConsent(username)  # NB needed in template for rewind panel
 
         preferredHLCcolour = result["user_profile"].preferredHCcolour
         liveNotification = result["user_profile"].liveNotification
         # We need to include illegal moves here, to allow it to be fetched in the correct format
         # should the move have been already submitted but become illegal
         if presenter.hasMoveData(username, True):
-            currentMove = (
-                '{"phase": '
-                + str(currentGame.phase)
-                + ',"turn": '
-                + str(currentGame.turn)
-                + ',"content": "'
-                + presenter.getMoveData(username)
-                + '"}'
-            )
+            currentMove = '{"phase": ' + str(currentGame.phase) + ',"turn": ' + str(currentGame.turn) + ',"content": "' + presenter.getMoveData(username) + '"}'
 
         if presenter.hasTemporaryMoveData(username):
-            temporaryMove = (
-                '{"type": "'
-                + presenter.hasTemporaryMoveData(username)[0]
-                + '","content": "'
-                + presenter.hasTemporaryMoveData(username)[1]
-                + '"}'
-            )
+            temporaryMove = '{"type": "' + presenter.hasTemporaryMoveData(username)[0] + '","content": "' + presenter.hasTemporaryMoveData(username)[1] + '"}'
 
         # Get the Notes for the user
         user_gp = next(
@@ -917,11 +831,7 @@ def showHLCgame(request, game_id):
             "kickoutRequired": kickoutRequired,
             "involvedPlayer": involvedPlayer,
             "gameName": presenter.getGameName(),
-            "startingOptionsLiteral": (
-                json.loads(currentGame.startingOptions)
-                if currentGame.startingOptions
-                else []
-            ),
+            "startingOptionsLiteral": (json.loads(currentGame.startingOptions) if currentGame.startingOptions else []),
             "gameID": currentGame.id,
             "currentPlayers": currentPlayers,
             "latestUpdateLiteral": currentGame.latestUpdate,
@@ -951,8 +861,6 @@ def bugEntry(request):
 
 def HLChelp(request):
     return render(request, "HLC/HLChelp.html")
-
-
 
 
 @login_required()
@@ -992,11 +900,7 @@ def chat(request):
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="HLC")
         presenter = cast("HLCpresenter", currentGame.presenter())
         # Add chat notifications for all players except current user
-        all_player_usernames = [
-            gp.player.username
-            for gp in currentGame.players.all().select_related("player")
-            if gp.player
-        ]
+        all_player_usernames = [gp.player.username for gp in currentGame.players.all().select_related("player") if gp.player]
         other_players = [u for u in all_player_usernames if u != request.user.username]
         presenter.addChatNotifications(other_players)
         currentGame.save()
@@ -1011,15 +915,7 @@ def chat(request):
         playerName = playerName.encode("unicode-escape").decode("ASCII")
 
         now = str(int(time.time()) * 1000)
-        newChatString = (
-            '{"name":"'
-            + playerName
-            + '","timestamp":'
-            + str(now)
-            + ',"message":"'
-            + newMessage
-            + '"},'
-        )
+        newChatString = '{"name":"' + playerName + '","timestamp":' + str(now) + ',"message":"' + newMessage + '"},'
         currentChatData = newChatString + currentChatData
         currentGame.chatData = currentChatData
         currentGame.save()
@@ -1085,11 +981,9 @@ def HLCdata(request, dataType):
             gameUpdate = int(jsonData["latestUpdate"])
             latestUpdate = int(currentGame.latestUpdate)
         except Exception as e:
-            SN_sendAdminErrorMessage(
-                request, f"ERROR IN HLCdata: gameID: {jsonData['gameID']} Error: {e}"
-            )
+            SN_sendAdminErrorMessage(request, f"ERROR IN HLCdata: gameID: {jsonData['gameID']} Error: {e}")
             # NB this might need to be changed if the above msg is getting triggered
-            #specialData = False
+            # specialData = False
 
             return JsonResponse(
                 {

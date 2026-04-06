@@ -108,12 +108,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_serializeGame,
 )
-from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendDeclineEmail,
-    SN_sendAdminErrorMessage,
-    SN_sendMiniTournamentInvite,
-    SN_sendDiscordDM
-)
+from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage, SN_sendDiscordDM
 from Lobby.sharedFunctions.sharedRefs import (
     SR_WEBHOOK_CHOICES,
     SR_getAnyTournamentPlayersData,
@@ -1409,10 +1404,7 @@ def index(request):
         try:
             serialized = SF_serializeGame(game, user, player_context)
         except Game.DoesNotExist:
-            SN_sendAdminErrorMessage(
-                request,
-                f"Game {game.getGameCode() if hasattr(game, 'getGameCode') else game.gameCode} {game.id} does not exist - trying to serialize in lobby",
-            )
+            SN_sendAdminErrorMessage(f"Game {game.getGameCode() if hasattr(game, 'getGameCode') else game.gameCode} {game.id} does not exist - trying to serialize in lobby")
             continue
 
         if is_involved:
@@ -1515,7 +1507,7 @@ def login_view(request):
             content = f"**!!! LOGIN ATTEMPT: Missing Fields !!!**\n```json\n{formatted_data[:1800]}\n```"
 
             # Send to Discord
-            SN_sendAdminErrorMessage(request, content)
+            SN_sendAdminErrorMessage(content)
 
             messages.error(request, gettext("Username and password are required."))
             return render(request, "Lobby/login.html")
@@ -2432,7 +2424,7 @@ class registerView(View):
             except Exception as e:
                 adminMessage = f"Failed to send activation email to username: {user.username} and email {user.email}: {str(e)}"
                 print("****************************************************************************** EMAIL SIGNUP ERROR **************")
-                SN_sendAdminErrorMessage(request, adminMessage)
+                SN_sendAdminErrorMessage(adminMessage)
                 return HttpResponse("Invalid header found.")
             message = gettext("Please check %(emailAddress)s to confirm your email address and complete registration") % {"emailAddress": user.email}
             messages.success(request, (message))
@@ -2914,7 +2906,21 @@ def joinGame(request, gameType):
 
         # Send an email to the creator, telling them who has declined and why
         reason = jsonData.get("reason", "None Given")
-        SN_sendDeclineEmail(request, request.user, gameType, currentGame, reason)
+
+        # def SN_sendDeclineEmail(declinerUsername, creatorUsername, gameCode, gameName, gameDescription, reason):
+
+        from django_q.tasks import async_task
+
+        async_task(
+            "Lobby.sharedFunctions.sharedNotifications.SN_sendDeclineEmail",
+            request.user.username,
+            currentGame.creator.username,
+            currentGame.gameCode,
+            currentGame.presenter().getGameName,
+            currentGame.gameDescription,
+            reason,
+        )
+
         currentGame.save()
         return JsonResponse(["AVAILABLE"], safe=False)
     # Else must be join?
@@ -3158,7 +3164,7 @@ def checkJoinGame(request, gameType, gameID):
             return response
     except Exception as e:
         # Logic if the lock fails or an error occurs (the transaction will auto-rollback)
-        SN_sendAdminErrorMessage(request, f"Error during join: {e}")
+        SN_sendAdminErrorMessage(f"Error during join: {e}")
         if ajaxReturn:
             return JsonResponse({"error": "Could not join game"}, status=400)
         return
@@ -3796,11 +3802,9 @@ def discord_callback(request):
     if not code:
         return redirect("profile")
 
-
     # Use config to get secrets from your .env file
     client_id = config("DISCORD_CLIENT_ID")
     client_secret = config("DISCORD_CLIENT_SECRET")
-
 
     data = {
         "client_id": client_id,
@@ -3820,8 +3824,7 @@ def discord_callback(request):
         messages.error(request, "Failed to link Discord: No access token received.")
         return redirect("profile")
 
-    
-    bot_token = config('DISCORD_BOT_TOKEN')
+    bot_token = config("DISCORD_BOT_TOKEN")
 
     # 2. GET THE USER ID
     user_headers = {"Authorization": f"Bearer {access_token}"}
@@ -3983,7 +3986,7 @@ def sendAdminMessage(request):
         message = data.get("message")
 
         if message:  # Check if webhook URL is available
-            SN_sendAdminErrorMessage(request, message)  # Call your existing function
+            SN_sendAdminErrorMessage(message)  # Call your existing function
             return JsonResponse({"status": "success"}, status=200)
         else:
             return JsonResponse(
@@ -4300,8 +4303,10 @@ def createFCMminiTournament(request):
 
         newTournament.save()
 
-    SN_sendMiniTournamentInvite(
-        request,
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
         invitedPlayers,
         newTournament.gameCode,
         newTournament.tournamentName,
@@ -4364,8 +4369,10 @@ def createTGZminiTournament(request):
 
         newTournament.save()
 
-    SN_sendMiniTournamentInvite(
-        request,
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
         invitedPlayers,
         newTournament.gameCode,
         newTournament.tournamentName,

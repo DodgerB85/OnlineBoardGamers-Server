@@ -385,7 +385,7 @@ def _processKFWturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -416,7 +416,7 @@ def _processKFWturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         # Process any end of turn actions
@@ -597,7 +597,7 @@ def _processKFWturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Don't update these in case saving during the pre-village phase
@@ -653,7 +653,7 @@ def _processKFWturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Process any end of turn actions
@@ -709,7 +709,7 @@ def _processKFWturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -770,7 +770,7 @@ def _processKFWturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         if len(currentGame.rewindData) == 0:
@@ -931,7 +931,7 @@ def _processKFWturn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(request, message)
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])

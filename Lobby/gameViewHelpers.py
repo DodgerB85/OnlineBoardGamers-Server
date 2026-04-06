@@ -8,7 +8,6 @@ from django.urls import reverse
 from django.utils.translation import gettext
 
 from Lobby.models import Profile, Game
-from Lobby.sharedFunctions.sharedNotifications import SN_sendBugReportEmail
 
 import Lobby.sharedFunctions.constants as rf
 
@@ -261,6 +260,8 @@ def shared_save_notes(request, game_code, json_key="notes"):
 
 
 def shared_bug_entry(request, game_code, extra_info_fn=None):
+    from django_q.tasks import async_task
+
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -274,8 +275,9 @@ def shared_bug_entry(request, game_code, extra_info_fn=None):
 
     extra_info = extra_info_fn(currentGame) if extra_info_fn else ""
 
-    SN_sendBugReportEmail(
-        request,
+    async_task("Lobby.sharedFunctions.sharedNotifications.SN_sendBugReportEmail", 
+        request.user.username,
+        request.user.email,
         game_code,
         gameID,
         jsonData["gameData"],
@@ -283,6 +285,7 @@ def shared_bug_entry(request, game_code, extra_info_fn=None):
         currentGame.rewindData,
         extra_info,
     )
+
 
     return JsonResponse({"bugEntrySuccess": True})
 

@@ -1,5 +1,4 @@
 # import time
-from hashlib import new
 import requests
 import json
 import random
@@ -391,12 +390,12 @@ def shouldSendEmail(emailType, username, profile, currentGamePace):
     return True
 
 
-def SN_M_sendEndGameNotificationTieGame(request, game, finalPositions, gameID, currentGame):
-    originalLang = get_language()
+def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, currentGamePace, currentGameName):
+    # originalLang = get_language()
     for entry in finalPositions:
         # user = None
         try:
-            user = User.objects.get(username=entry[0])
+            userObj = User.objects.get(username=entry[0])
         except User.DoesNotExist:
             print(f"Error: could not find user object for username '{entry[0]}' in SN_M_sendEndGameNotificationTieGame")
             continue
@@ -404,167 +403,67 @@ def SN_M_sendEndGameNotificationTieGame(request, game, finalPositions, gameID, c
             print(f"Unexpected error in SN_M_sendEndGameNotificationTieGame for username '{entry[0]}': {e}")
             continue
         try:
-            if user.username != request.user.username:
-                profile = Profile.objects.get(user=user)
+            profile = Profile.objects.get(user=userObj)
 
-                activate(profile.profileLanguage)
+            activate(profile.profileLanguage)
 
-                posText = entry[1]
+            posText = entry[1]
 
-                gameStrings = getGameStrings(game)
+            gameStrings = getGameStrings(gameCode)
 
-                box_name = gameStrings["boxName"]
-                subject = gameStrings["finishedSubject"]
+            box_name = gameStrings["boxName"]
+            subject = gameStrings["finishedSubject"]
 
-                if entry[2] == 0:
-                    subject += ". " + gettext("Congratulations!") + ""
+            if entry[2] == 0:
+                subject += ". " + gettext("Congratulations!") + ""
 
-                presenter = currentGame.presenter()
-                gameName = presenter.getGameName()
-
-                # SEND EMAIL
-                if shouldSendEmail("gameEnd", user.username, profile, currentGame.gamePace):
-                    current_site = get_current_site(request)
-
-                    message = render_to_string(
-                        "Lobby/gameEmails/gameEndEmail.html",
-                        {
-                            "user": user.username,
-                            "domain": current_site.domain,
-                            "gameID": gameID,
-                            "gameName": gameName,
-                            "box_name": box_name,
-                            "position": posText,
-                            "game": game,
-                        },
-                    )
-
-                    SN_sendEmail("gameEnd", subject, message, user.email)
-
-                messageText = (
-                    user.username
-                    + ": "
-                    + gettext("%(box_name)s Game Finished!\n In %(gameName)s you came: %(result)s.")
-                    % {
+            # SEND EMAIL
+            if shouldSendEmail("gameEnd", userObj.username, profile, currentGamePace):
+                message = render_to_string(
+                    "Lobby/gameEmails/gameEndEmail.html",
+                    {
+                        "user": userObj.username,
+                        "domain": "www.OnlineBoardGamers.com",
+                        "gameID": gameID,
+                        "gameName": currentGameName,
                         "box_name": box_name,
-                        "gameName": gameName,
-                        "result": posText,
-                    }
+                        "position": posText,
+                        "game": gameCode,
+                    },
                 )
-                urlText = gettext("Click here to view the game")
 
-                # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
-                if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
-                    SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+                SN_sendEmail("gameEnd", subject, message, userObj.email)
 
-                # SEND DISCORD DM
+            messageText = (
+                userObj.username
+                + ": "
+                + gettext("%(box_name)s Game Finished!\n In %(gameName)s you came: %(result)s.")
+                % {
+                    "box_name": box_name,
+                    "gameName": currentGameName,
+                    "result": posText,
+                }
+            )
+            urlText = gettext("Click here to view the game")
 
-                if profile.discord_id != "" and profile.discord_id is not None:
-                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
+            # SEND WEBHOOKS
+            urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
+            if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
+                SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+
+            # SEND DISCORD DM
+
+            if profile.discord_id != "" and profile.discord_id is not None:
+                SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
         except Exception as e:
-            print(request.user.username + " Error: SN_M_sendEndGameNotificationTieGame -- game end error: " + game + " /// " + str(entry) + " /// " + str(e))
+            print(userObj.username + " Error: SN_M_sendEndGameNotificationTieGame -- game end error: " + gameCode + " /// " + str(entry) + " /// " + str(e))
             print(e)
+        # finally:
+        #    # Reset to system default so the next user starts clean
+        #    deactivate()
 
-    activate(originalLang)
-
-
-def SN_M_sendEndGameNotification(request, game, finalPositions, gameID, currentGame):
-    originalLang = get_language()
-    for pos, username in enumerate(finalPositions):
-        if username == "FcmAI":
-            message = ""
-            if pos == 0:
-                message += "Win for FcmAI\n"
-            message += "FcmAI Game Over. Pos: " + str(pos + 1) + "\n[Click here to see game](https://www.OnlineBoardGamers.com/FCM/" + str(currentGame.id) + "/show/)"
-
-            requests.post(
-                f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
-                data={"content": message},
-            )
-        elif username != request.user.username:  # and username not in USERNAMES_NOT_TO_NOTIFY
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                print(f"Error: could not find user object for username '{username}' in SN_M_sendEndGameNotification")
-                continue  # Skip to next entry if user not found
-            except Exception as e:
-                print(f"Unexpected error in SN_M_sendEndGameNotification for username '{username}': {e}")
-                continue
-            try:
-                profile = Profile.objects.get(user=user)
-
-                activate(profile.profileLanguage)
-
-                posText = "Last"
-                if pos == 0:
-                    posText = "1st - Congratulations!"
-                if pos == 1:
-                    posText = "2nd"
-                if pos == 2:
-                    posText = "3rd"
-                if pos == 3:
-                    posText = "4th"
-                if pos == 4:
-                    posText = "5th"
-                if pos == 5:
-                    posText = "6th"
-
-                box_name = getGameStrings(game)["boxName"]
-                subject = getGameStrings(game)["finishedSubject"]
-
-                if pos == 0:
-                    subject += ". " + gettext("Congratulations!") + ""
-
-                presenter = currentGame.presenter()
-                gameName = presenter.getGameName()
-
-                # SEND EMAIL
-                if shouldSendEmail("gameEnd", user.username, profile, currentGame.gamePace):
-                    current_site = get_current_site(request)
-
-                    message = render_to_string(
-                        "Lobby/gameEmails/gameEndEmail.html",
-                        {
-                            "user": user.username,
-                            "domain": current_site.domain,
-                            "gameID": gameID,
-                            "gameName": gameName,
-                            "box_name": box_name,
-                            "position": posText,
-                            "game": game,
-                        },
-                    )
-                    SN_sendEmail("gameEnd", subject, message, user.email)
-
-                messageText = (
-                    user.username
-                    + ": "
-                    + gettext("%(box_name)s Game Finished!\n In %(gameName)s you came: %(result)s.")
-                    % {
-                        "box_name": box_name,
-                        "gameName": gameName,
-                        "result": posText,
-                    }
-                )
-                urlText = gettext("Click here to view the game")
-
-                # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
-                if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
-                    SN_sendWebhooks(profile, messageText, urlText, urlRaw)
-
-                # SEND DISCORD DM
-
-                if profile.discord_id != "" and profile.discord_id is not None:
-                    SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
-
-            except Exception as e:
-                print(request.user.username + " Error: SN_M_sendEndGameNotification -- game end error: " + game + " /// " + username)
-                print(e)
-
-    activate(originalLang)
+    # activate(originalLang)
 
 
 def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase, expected_players, oldLatestUpdate):
@@ -590,13 +489,7 @@ def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, game
         # Check if game state matches expected state (quick checks)
         if expected_latestUpdate == current_latest_update and current_turn == expected_turn and current_phase == expected_phase:
             # Check the player(s) still need to be notified
-            current_game_usernames = [
-                gp.player.username
-                for gp in current_game.players.all()
-                if gp.is_current
-                and gp.player
-                and gp.player.username not in rf.SHADOW_USERNAMES
-            ]
+            current_game_usernames = [gp.player.username for gp in current_game.players.all() if gp.is_current and gp.player and gp.player.username not in rf.SHADOW_USERNAMES]
             newPlayerList = []
             for username in current_game_usernames:
                 if username in playerList:
@@ -614,9 +507,9 @@ def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, game
         print(f"Error in SN_sendNextTurnNotificationWithValidation: {e}")
 
 
+# This is used by the function above to ACTUALY send the notification
 def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate=0):
     print("Sending next turn notif - should be in cluster")
-    originalLang = get_language()
     for player in playerList:
         if player not in USERNAMES_NOT_TO_NOTIFY:
             try:
@@ -703,9 +596,8 @@ def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentG
                 print(player + " /// ended the turn. SF " + gameCode + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
                 print(e)
 
-    activate(originalLang)
 
-
+# TODO ASYNC
 def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate):
     originalLang = get_language()
     for player in playerList:
@@ -775,8 +667,8 @@ def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, 
     activate(originalLang)
 
 
+# TODO async
 def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate):
-    originalLang = get_language()
     for player in playerList:
         if player not in USERNAMES_NOT_TO_NOTIFY:
             try:
@@ -841,9 +733,8 @@ def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameNam
                 print(request.user.username + " /// ended the turn. SF " + game + " sendNextTurnNotification.  Error no profile/other error trying to email /// " + player)
                 print(e)
 
-    activate(originalLang)
 
-
+# TODO async
 def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
     if player in USERNAMES_NOT_TO_NOTIFY:
         return
@@ -963,17 +854,7 @@ def SN_sendInviteNotifications(playerNames, _gameName, _maxPlayers, _gameCode):
             print(player + ": Error sending invite. Game: " + _gameName + "  Player: " + player + " " + str(e))
 
 
-def SN_sendMiniTournamentInvite(
-    request,
-    playerNames,
-    _game,
-    _MTname,
-    _MTdescription,
-    _maxPlayers,
-    _gamePlayers,
-    _format,
-    MT_ID,
-):
+def SN_sendMiniTournamentInvite(playerNames, _gameCode, _MTname, _MTdescription, _maxPlayers, _gamePlayers, _format, MT_ID):
     for player in playerNames:
         try:
             user = User.objects.get(username=player)
@@ -989,8 +870,7 @@ def SN_sendMiniTournamentInvite(
             originalLang = get_language()
             activate(profile.profileLanguage)
 
-            current_site = get_current_site(request)
-            gameStrings = getGameStrings(_game)
+            gameStrings = getGameStrings(_gameCode)
             subject = gameStrings["MTinviteSubject"]
             urlText = gameStrings["clickHereToPlayText"]
             boxName = gameStrings["boxName"]
@@ -1003,7 +883,7 @@ def SN_sendMiniTournamentInvite(
                     "Lobby/email/MTinvite.html",
                     {
                         "user": user.username,
-                        "domain": current_site.domain,
+                        "domain": "www.OnlineBoardGamers.com",
                         "MTname": _MTname,
                         "MTdescription": _MTdescription,
                         "maxPlayers": _maxPlayers,
@@ -1043,9 +923,10 @@ def SN_sendMiniTournamentInvite(
             activate(originalLang)
 
         except Exception as e:
-            print(request.user.username + ": Error sending Mini Tournament invite. Game: " + _game + "  Player: " + player + " " + str(e))
+            print(player + ": Error sending Mini Tournament invite. Game: " + _gameCode + "  Player: " + player + " " + str(e))
 
 
+# TODO: remove and put in general game start notification
 def SN_M_T_sendTournamentGameStartNotification(
     request,
     _game,
@@ -1120,6 +1001,7 @@ def SN_M_T_sendTournamentGameStartNotification(
     activate(originalLang)
 
 
+# TODO: async
 def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, mainORmini):
     originalLang = get_language()
     try:
@@ -1313,47 +1195,46 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
     activate(originalLang)
 
 
-def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
+def SN_sendDeclineEmail(declinerUsername, creatorUsername, gameCode, gameName, gameDescription, reason):
     originalLang = get_language()
     try:
-        profile = Profile.objects.get(user=currentGame.creator)
+        creatorObj = User.objects.get(username=creatorUsername)
+        profile = Profile.objects.get(user=creatorObj)
+
+        declinerObj = User.objects.get(username=declinerUsername)
 
         activate(profile.profileLanguage)
 
-        box_name = getGameStrings(_game)["boxName"]
+        box_name = getGameStrings(gameCode)["boxName"]
 
-        gameDescription = currentGame.gameDescription
+        gameDescription = gameDescription
         if gameDescription:
             gameDescription = f"({gameDescription})"
-        current_site = get_current_site(request)
-        gameStrings = getGameStrings(_game)
+        gameStrings = getGameStrings(gameCode)
 
-        presenter = currentGame.presenter()
-        gameName = presenter.getGameName()
-
-        if shouldSendEmail("gameDecline", currentGame.creator.username, profile, -1):
+        if shouldSendEmail("gameDecline", creatorUsername, profile, -1):
             subject = gameStrings["gameDeclineSubject"]
             message = render_to_string(
                 "Lobby/email/gameDeclineEmail.html",
                 {
-                    "creatorUsername": currentGame.creator.username,
+                    "creatorUsername": creatorUsername,
                     "declinerUsername": declinerObj.username,
-                    "domain": current_site.domain,
-                    "gameName": gameName,
+                    "domain": "www.OnlineBoardGamers.com",
+                    "gameName": box_name,
                     "gameDescription": gameDescription,
                     "box_name": box_name,
                     "reason": reason,
                 },
             )
-            SN_sendEmail("gameDecline", subject, message, currentGame.creator.email)
+            SN_sendEmail("gameDecline", subject, message, creatorObj.email)
 
         messageText = (
-            currentGame.creator.username
+            creatorUsername
             + ": "
             + gettext("A Player has declined your invitation\n%(gameName)s %(gameDescription)s\nPlayer: %(declinerUsername)s\nReason: %(reason)s")
             % {
                 "gameName": gameName,
-                "gameDescription": currentGame.gameDescription,
+                "gameDescription": gameDescription,
                 "declinerUsername": declinerObj.username,
                 "reason": reason,
             }
@@ -1370,45 +1251,44 @@ def SN_sendDeclineEmail(request, declinerObj, _game, currentGame, reason):
             SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(request.user.username + " Error. SN_sendDeclineEmail. Notifying " + currentGame.creator.username)
+        print(declinerUsername + " Error. SN_sendDeclineEmail. Notifying " + creatorUsername)
         print(e)
 
     activate(originalLang)
 
 
-def SN_sendBugReportEmail(request, game, gameID, gameData, bugDescription, rewindData, startingMap):
-    current_site = get_current_site(request)
-    subject = getGameStrings(game)["bugReportSubject"]
+def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gameData, bugDescription, rewindData, startingMap):
+    subject = getGameStrings(gameCode)["bugReportSubject"]
     adminUser = User.objects.get(username="admin")
     message = render_to_string(
         "Lobby/gameEmails/email_bug.html",
         {
-            "game": game,
-            "username": request.user.username,
-            "domain": current_site.domain,
+            "game": gameCode,
+            "username": reporterUsername,
+            "domain": "www.OnlineBoardGamers.com",
             "gameID": gameID,
             "gameData": gameData,
             "bugDescription": bugDescription,
-            "userEmail": request.user.email,
+            "userEmail": reporterEmail,
             "rewindData": rewindData,
             "startingMap": startingMap,
         },
     )
     bug_message = (
-        f"BUG REPORT for game {game} (ID: {gameID}).\n"
-        f"User: {request.user.username}\n"
+        f"BUG REPORT for game {gameCode} (ID: {gameID}).\n"
+        f"User: {reporterUsername}\n"
         f"Bug Description: {bugDescription}\n"
-        f"URL: <https://www.OnlineBoardGamers.com/{game}/{gameID}/show/>"  # Added brackets here
+        f"URL: <https://www.OnlineBoardGamers.com/{gameCode}/{gameID}/show/>"  # Added brackets here
         # f"Game Data: {gameData}\n"
         # f"Rewind Data: {rewindData}\n"
         # f"Starting Map: {startingMap}"
     )
-    SN_sendAdminErrorMessage(request, bug_message)
+    SN_sendAdminErrorMessage(bug_message)
     try:
         adminUser.email_user(subject, message)
     except Exception as e:
-        error_message = f"BUG REPORT EMAIL SEND FAILED for game {game} (ID: {gameID}).\nUser: {request.user.username}\nError: {e}"
-        SN_sendAdminErrorMessage(request, error_message)
+        error_message = f"BUG REPORT EMAIL SEND FAILED for game {gameCode} (ID: {gameID}).\nUser: {reporterUsername}\nError: {e}"
+        SN_sendAdminErrorMessage(error_message)
 
 
 def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
@@ -1717,6 +1597,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         counter = 0
         try:
             import os
+
             # Use absolute path to ensure file is found regardless of working directory
             counter_file_path = os.path.join(os.path.dirname(__file__), "emailCounter.txt")
             with open(counter_file_path, "r+") as file:
@@ -1780,7 +1661,7 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
             # Logs the error so you know why it failed without hanging the cluster
             error_msg = f"❌ Main Email Failure for {toEmail}: {e}"
             print(error_msg)
-            SN_sendAdminErrorMessage(None, error_msg)
+            SN_sendAdminErrorMessage(error_msg)
 
 
 def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
@@ -1848,10 +1729,7 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
                     session.post(tg_url, timeout=10)
 
             except requests.exceptions.RequestException as e:
-                SN_sendAdminErrorMessage(
-                    None,
-                    f"Webhook failed ({w_type}): {e} User: {profile.user.username}",
-                )
+                SN_sendAdminErrorMessage(f"Webhook failed ({w_type}): {e} User: {profile.user.username}")
                 # Log the specific webhook failure without stopping the loop
                 print(f"Webhook failed ({w_type}): {e}")
 
@@ -1873,13 +1751,10 @@ def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
         # 3. SEND THE MESSAGE
         requests.post(f"https://discord.com/api/v10/channels/{channel_id}/messages", json={"content": complete_message}, headers=headers)
     else:
-        SN_sendAdminErrorMessage(
-            None,
-            f"Discord DM failed for id: ({discordID}): {channel_resp.text}",
-        )
+        SN_sendAdminErrorMessage(f"Discord DM failed for id: ({discordID}): {channel_resp.text}")
 
 
-def SN_sendAdminErrorMessage(request, message):
+def SN_sendAdminErrorMessage(message):
     try:
         requests.post(
             f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
