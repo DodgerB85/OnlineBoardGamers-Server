@@ -89,34 +89,37 @@ function clickedActionOption(action, index) {
 function getPointerRotation() {
 	const currentRotation = store.pointerRotation || 0
 	let targetRotation
-	
+
+	// 1. Define base angles
 	if (store.desiredBuilding === 1) targetRotation = -109
 	else if (store.desiredBuilding === 2) targetRotation = 11
 	else if (store.desiredBuilding === 3) targetRotation = 130
-	else return [1815, 3336, 0] // default position
-	
-	// Calculate shortest rotation path
-	let rotationDiff = targetRotation - currentRotation
-	
-	// Normalize to range [-180, 180]
-	while (rotationDiff > 180) rotationDiff -= 360
-	while (rotationDiff < -180) rotationDiff += 360
-	
-	// Calculate new rotation (current + shortest path)
-	let newRotation = currentRotation + rotationDiff
-	
-	// Normalize to [0, 360) range for display
-	while (newRotation >= 360) newRotation -= 360
-	while (newRotation < 0) newRotation += 360
-	
-	store.pointerRotation = newRotation
-	
-	// Return position array with new rotation
-	if (store.desiredBuilding === 1) return [1815, 3336, newRotation]
-	else if (store.desiredBuilding === 2) return [1805, 3340, newRotation]
-	else if (store.desiredBuilding === 3) return [1814, 3350, newRotation]
-	else return [1815, 3336, newRotation]
+	else return [1815, 3336, 0]
+
+	// 2. Normalize the target relative to the current rotation
+	// to find the shortest displacement
+	let rotationDiff = (targetRotation - currentRotation) % 360
+
+	if (rotationDiff > 180) rotationDiff -= 360
+	if (rotationDiff < -180) rotationDiff += 360
+
+	// 3. Calculate the absolute new rotation
+	// DO NOT NORMALIZE THIS. If it's 371, leave it at 371.
+	const finalRotation = currentRotation + rotationDiff
+
+	store.pointerRotation = finalRotation
+
+	// 4. Return position array
+	const coords = {
+		1: [1815, 3336],
+		2: [1805, 3340],
+		3: [1814, 3350],
+	}
+
+	const [x, y] = coords[store.desiredBuilding] || [1815, 3336]
+	return [x, y, finalRotation]
 }
+
 function getCorrectedBusIndex(position) {
 	if (position === 0) return 1
 	if (position === 1) return 2
@@ -606,27 +609,27 @@ function getCorrectedBusIndex(position) {
 
 .actionDisc0 {
 	/*background-color: blue;*/
-	background-color: #0C64AE;
+	background-color: #0c64ae;
 }
 
 .actionDisc1 {
 	/*background-color: green;*/
-	background-color: #0E7964;
+	background-color: #0e7964;
 }
 
 .actionDisc2 {
 	/*background-color: purple;*/
-	background-color: #6E365E;
+	background-color: #6e365e;
 }
 
 .actionDisc3 {
 	/*background-color: red;*/
-	background-color: #EB2E0F;
+	background-color: #eb2e0f;
 }
 
 .actionDisc4 {
 	/*background-color: yellow;*/
-	background-color: #FB9907;
+	background-color: #fb9907;
 }
 
 .currentPlayerGlow {

@@ -67,9 +67,37 @@ function getActionSelectionWidth() {
 }
 
 function getPointerRotation() {
-	if (store.desiredBuilding === 1) return [1886, 264, -120]
-	if (store.desiredBuilding === 2) return [1880, 260, 0]
-	if (store.desiredBuilding === 3) return [1888, 265, 120]
+    // 1. Get the current cumulative rotation from the store (default to 0)
+    const currentRotation = store.pointerRotation || 0;
+    
+    // 2. Define the base targets and coordinates
+    let targetBaseAngle = 0;
+    let coords = [1880, 260];
+
+    if (store.desiredBuilding === 1) {
+        targetBaseAngle = -120;
+        coords = [1886, 264];
+    } else if (store.desiredBuilding === 2) {
+        targetBaseAngle = 0;
+        coords = [1880, 260];
+    } else if (store.desiredBuilding === 3) {
+        targetBaseAngle = 120;
+        coords = [1888, 265];
+    }
+
+    // 3. Calculate the shortest difference
+    // This formula finds the quickest way to the new angle (-180 to 180 range)
+    let diff = (targetBaseAngle - currentRotation) % 360;
+    
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+
+    // 4. Update the store with the NEW cumulative rotation
+    const newRotation = currentRotation + diff;
+    store.pointerRotation = newRotation;
+
+    // 5. Return the array with the non-normalized rotation
+    return [coords[0], coords[1], newRotation];
 }
 </script>
 
