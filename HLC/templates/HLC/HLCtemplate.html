@@ -329,12 +329,12 @@
 ////////////////////////////////
 
 //////////////////////////
-{%if not gameData %}global.displayNames = "{{ displayNames }}";{% endif %}
+{%if not gameData %}global.displayNames = {{ displayNames|safe }};{% endif %}
 ////////////////////////
 
     global.chat = { "chat": [{{ chatData | safe }}], "testInfo": [] };
 
-    {% if gameData %}global.load = '{{ gameData|safe }}';{% endif %}
+    {% if gameData %}global.load = [{{ gameData|safe }}];{% endif %}
 
     {% if now %}global.now = {{ now }};{% endif %}
 

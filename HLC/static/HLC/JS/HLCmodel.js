@@ -162,7 +162,7 @@ Model = function () {
 				var d = undefined
 				if (this.trainingGame) {
 					let displayNames = global.displayNames
-					let displayNamesArr = displayNames.split(/,/)
+					let displayNamesArr = displayNames//displayNames.split(/,/)
 					if (playersName[i] === "SHADOW") d = displayNamesArr[0]
 					if (playersName[i] === "SHADOW_2") d = displayNamesArr[1]
 					if (playersName[i] === "SHADOW_3") d = displayNamesArr[2]

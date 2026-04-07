@@ -2292,15 +2292,6 @@ class HLCpresenter(GamePresenter):
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
 
-        # NOTE: Old HLC_Game had `if self.startingOptions == 102:` which was dead code
-        # (string field compared to int, always False in Python 3).
-        # Keeping it commented out to preserve old behavior.
-        # starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        # if 102 in starting_options:
-        #     for gp in game_players:
-        #         gp.is_current = (gp.seat_order == 0)
-        #     GamePlayer.objects.bulk_update(game_players, ["is_current"])
-
         # Initialize rewind consent in activeVotes
         rewind_votes = {}
         host_username = getattr(self.gameObj.host, "username") if self.gameObj.host else None

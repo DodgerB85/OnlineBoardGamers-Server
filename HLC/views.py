@@ -754,7 +754,7 @@ def showHLCgame(request, game_id):
     if len(currentPlayers) == 0 and currentGame.gameStatus == "FINISHED":
         currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
     statsExcludedGame = currentGame.statsExcludedGame
-    displayNames = ""
+    displayNames = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4"]
 
     # Also check all players including kicked
     all_gps_including_kicked = list(currentGame.players.select_related("player").all())
