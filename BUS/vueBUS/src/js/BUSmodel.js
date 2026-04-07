@@ -149,6 +149,7 @@ export function maxBuses() {
 	return busArr.reduce((a, b) => Math.max(a, b), -Infinity)
 }
 
+
 export function maxBusesWithNewBus() {
 	const store = useModelStore()
 	if (store.actionAreaData[1][0] === -1) return maxBuses()

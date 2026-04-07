@@ -26,8 +26,9 @@ const computedReverseChars = computed(() => {
 	if (store.gameflow.phase !== rf.PHASE_CHOOSE_ACTIONS) return reverseChars
 	let chars = []
 	for (let i = 0; i < store.actionAreaData[0].length; i++) {
-		if (store.actionAreaData[1][0] !== -1 && controller.currentPlayerObj().buses + 1 > model.maxBuses()) chars.unshift(Math.max(0, controller.currentPlayerObj().buses + 1 - i))
-		else chars.unshift(Math.max(0, model.maxBuses() - i))
+		//if (store.actionAreaData[1][0] !== -1 && controller.currentPlayerObj().buses + 1 > model.maxBuses()) chars.unshift(Math.max(0, controller.currentPlayerObj().buses + 1 - i))
+		//else chars.unshift(Math.max(0, model.maxBuses() - i))
+		chars.unshift(Math.max(0, model.maxBusesWithNewBus() - i))
 	}
 	return chars
 })
@@ -36,8 +37,10 @@ const computedForwardChars = computed(() => {
 	if (store.gameflow.phase !== rf.PHASE_CHOOSE_ACTIONS) return forwardChars
 	let chars = []
 	for (let i = 0; i < store.actionAreaData[0].length; i++) {
-		if (store.actionAreaData[1][0] !== -1 && controller.getPlayerByColour(store.actionAreaData[1][0]).buses + 1 > model.maxBuses()) chars.push(Math.max(0, controller.getPlayerByColour(store.actionAreaData[1][0]).buses + 1 - i))
-		else chars.push(Math.max(0, model.maxBuses() - i))
+		//if (store.actionAreaData[1][0] !== -1 && controller.getPlayerByColour(store.actionAreaData[1][0]).buses + 1 > model.maxBuses()) chars.push(Math.max(0, controller.getPlayerByColour(store.actionAreaData[1][0]).buses + 1 - i))
+		//else chars.push(Math.max(0, model.maxBuses() - i))
+		chars.push(Math.max(0, model.maxBusesWithNewBus() - i))
+		
 	}
 	return chars
 })

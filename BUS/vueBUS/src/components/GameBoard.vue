@@ -271,13 +271,13 @@ function getCorrectedBusIndex(position) {
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
 									'font-size': (store.refSize * 70) / 500 + 'px',
-									top: (store.refSize * 35014) / 400 + 'px',
+									top: (store.refSize * 1534) / 400 + 'px',
 									left: (store.refSize * (3296 + index * 87.4)) / 400 + 'px', //3730
 									border: (store.refSize * 20) / 400 + 'px solid yellow',
 								}"
 								@mouseover="highlight($event, true)"
 								@mouseleave="highlight($event, false)"
-								@click="clickedActionOption(5, index)">
+								@click="clickedActionOption(3, index)">
 								{{ computedReverseChars[index] }}
 							</div>
 						</template>
