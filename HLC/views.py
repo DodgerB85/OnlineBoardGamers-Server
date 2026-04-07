@@ -801,16 +801,17 @@ def showHLCgame(request, game_id):
         kickoutRequired = presenter.kickoutRequired()
         myMove = presenter.isMyMove(username)
 
-        if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
-            player_gp = next(
-                (gp for gp in all_players if gp.player and gp.player.id == user_id),
-                None,
-            )
-            if player_gp:
-                displayNames = player_gp.notes
-                player_gp.notes = ""
-                player_gp.save()
-            currentNotes = ""
+        ### NEW GAME
+        if currentGame.gameData == "":
+            displayNames = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4"]
+            if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
+                displayNames = user_gp.notes if user_gp else ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4"]
+                if user_gp:
+                    user_gp.notes = ""
+                    user_gp.save()
+                currentNotes = ""
+                if displayNames == "":
+                    displayNames = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4"]
 
     return render(
         request,
