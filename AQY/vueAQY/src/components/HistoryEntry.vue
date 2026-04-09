@@ -66,13 +66,27 @@ function getGraveRemovedText(entry34) {
 	if (totalRemoved !== 1) return ` ${totalRemoved} Graves`
 	else return ` 1 Grave`
 }
+
+function getNewPhaseText(entry3) {
+	const histAction = entry3[0]
+	if (histAction === rf.HIST_FIRST_CITY) return "Setup"
+	if (histAction === rf.HIST_PHASE_CITY_BUILDING) return "City Building"
+	if (histAction === rf.HIST_NEW_TURN_ORDER) return "New Turn Order"
+	if (histAction === rf.HIST_PHASE_COUNTRYSIDE_BUILDING) return "Countryside Building"
+	if (histAction === rf.HIST_PHASE_GOODS_STORAGE) return "Goods Storage"
+	if (histAction === rf.HIST_PHASE_HARVEST) return "Harvest"
+	if (histAction === rf.HIST_PHASE_EXPLORE) return "Explore"
+	if (histAction === rf.HIST_PHASE_FAMINE) return "Famine: Level " + entry3[1]
+	if (histAction === rf.HIST_PHASE_POLLUTION) return "Pollution"
+	return "UNKNOWN"
+}
 </script>
 
 <template>
 	<!-- *********************************************************** -->
 	<!-- *********************** NON PLAYER ENTRIES **************** -->
 	<!-- New Game -->
-	 <span v-if="personal.name === 'admin'">{{ entry[3] }}</span>
+	<span v-if="personal.name === 'admin'">{{ entry[3] }}</span>
 	<template v-if="entry[0] === rf.HIST_NEW_GAME">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
@@ -91,7 +105,22 @@ function getGraveRemovedText(entry34) {
 			<div class="new_turn">
 				Start of turn {{ entry[3][0] }}
 				<br />
+				Famine level: {{ entry[3][1] }}
 			</div>
+		</div>
+	</template>
+
+	<!-- New Phase -->
+	<template v-if="entry[0] === rf.HIST_NEW_PHASE">
+		<div class="newPhaseDiv">
+			{{ getNewPhaseText(entry[3]) }}
+		</div>
+	</template>
+
+	<!-- Famine Increase -->
+	<template v-if="entry[0] === rf.HIST_FAMINE_INCREASE">
+		<div class="newPhaseDiv">
+			Famine level increases to {{ entry[3][0] }}
 		</div>
 	</template>
 
@@ -500,7 +529,7 @@ function getGraveRemovedText(entry34) {
 				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1]))" />
 				<span v-if="rf.RES_FOODS.includes(entry[3][1])">
 					<br />
-					Famine level increases
+					Famine level increases to {{ entry[3][2] }}
 				</span>
 			</div>
 		</div>
@@ -852,5 +881,15 @@ function getGraveRemovedText(entry34) {
 	position: absolute;
 	right: -10px;
 	top: -10.5px;
+}
+
+.newPhaseDiv {
+	margin: 5px;
+	border: #000 1px solid;
+	padding: 3px 3px 3px 3px;
+	background-color: #000;
+	text-align: center;
+	color: #fff;
+	font-weight: bolder;
 }
 </style>

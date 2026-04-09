@@ -138,14 +138,6 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 			let differencesOutgoing = compareArraysOfArrays(relevantOutgoingTradesCopy, store.context.relevantOutgoingTrades)
 			let differencesIrrelevant = compareArraysOfArrays(irrelevantTradesCopy, store.context.irrelevantTrades)
 			let newHistoryLength = store.history.length
-			//console.log("==> tradeDataCopy: " + JSON.stringify(tradeDataCopy))
-			//console.log("==> store.context.playerTrades: " + JSON.stringify(store.context.playerTrades))
-			/*console.log(JSON.stringify(differencesIncoming))
-			console.log(JSON.stringify(differencesOutgoing))
-			console.log(JSON.stringify(differencesIrrelevant))
-			console.log(differencesIncoming.length)
-			console.log(differencesOutgoing.length)
-			console.log(differencesIrrelevant.length)*/
 			store.clearMessages()
 
 			if (differencesIncoming.length === 0 && differencesOutgoing.length === 0 && differencesIrrelevant.length !== 0) {

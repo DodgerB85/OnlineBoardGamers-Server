@@ -29,96 +29,36 @@ export function hexToPixel(hex) {
 
 export function generateMap() {
 	const store = useModelStore()
-
-	//let logging = false
-
 	let index = 0
 	const results = []
 	const explorerTiles = []
 
-	/*const counts_pre = {}
-	rf.MAP_TILES.forEach((tb) => {
-		counts_pre["[" + tb[0].name + ", " + tb[1].name + "]"] = counts_pre["[" + tb[0].name + ", " + tb[1].name + "]"] + 1 || 1
-	})
-	if (logging) console.log("Tiles STARTING in the bag:", counts_pre)*/
-
 	const seed = []
 
-	//let local_MAP_TILES = [...rf.MAP_TILES]
 	let local_MAP_TILE_BAG_V2 = [...rf.MAP_TILE_BAG_V2]
 
-	/*function pullTileFromTheBag() {
-		const tileSide = funcs.generateRandomInt(0, 1)
-		//const tileBag = rf.MAP_TILES.sort(() => 0.5 - Math.random())
-		const tileBag = local_MAP_TILES.sort(() => 0.5 - Math.random())
-		const tile = tileBag.shift(0, 1)
-		if (logging) console.log("%c Tile generated: " + tile[0].name + ", " + tile[1].name, "background: #222; color: #bada55")
-		if (logging) console.log("%c Tile side used: " + tile[tileSide].name, "background: #222; color: yellow")
-		//console.log(tileBag)
-		return tile[tileSide]
-	}*/
-
-	/*function removeMirroredTileFromTheBag(tile) {
-		const name = tile.name
-		let target = ""
-		if (name.includes("M")) {
-			target = name.replace("M", "")
-		} else {
-			target = name + "M"
-		}
-
-		const mirroredTileIndex = local_MAP_TILES.findIndex((t) => t[0].name === target || t[1].name === target)
-		const t = local_MAP_TILES.splice(mirroredTileIndex, 1)
-		if (logging) console.log("%c Removed mirrored tile from the bag: " + t[0][0].name + ", " + t[0][1].name, "background: #222; color: red")
-	}*/
-
-	//const layout = rf.MAP_LAYOUTS.find((l) => l.players === store.players.length)
 	const layout = store.currentLayout
 
 	for (let x = 0; x < layout.tiles; x++) {
-		//console.log(`length of local_MAP_TILE_BAG_V2: #${local_MAP_TILE_BAG_V2.length}`)
-		//const tile = pullTileFromTheBag()
-		//removeMirroredTileFromTheBag(tile)
-		//console.log(`AFTER length of local_MAP_TILES: #${local_MAP_TILES.length}`)
-
-		const mainIndex = Math.floor(Math.random() * local_MAP_TILE_BAG_V2.length);
-		const subIndex = Math.floor(Math.random() * local_MAP_TILE_BAG_V2[mainIndex].length);
+		const mainIndex = Math.floor(Math.random() * local_MAP_TILE_BAG_V2.length)
+		const subIndex = Math.floor(Math.random() * local_MAP_TILE_BAG_V2[mainIndex].length)
 		const tile = local_MAP_TILE_BAG_V2[mainIndex][subIndex]
 
-		local_MAP_TILE_BAG_V2.splice(mainIndex, 1);
-
+		local_MAP_TILE_BAG_V2.splice(mainIndex, 1)
 
 		const offset = layout.tileOffsets[x]
 
 		const tileRotation = Math.floor(Math.random() * 6)
-		//const tileRotation = 0
 
-		// usedTiles IS NO LONGER USED ANYWHERE. REPLACED BY seed
-		/*usedTiles.push({ 
-					name: tile.name,
-					rotation: tileRotation,
-					image: tile.img,
-					imageOffset: layout.imageOffsets[x],
-				})*/
 		seed.push([tile.id, tileRotation])
 
-		//generateTile(offset[0], offset[1], tile.terrain, tileRotation)
-		// THIS HAS ERROR ????
-		index = generateSmallHexesFromSingleSeed(offset[0], offset[1], tile.terrain, tileRotation, results, explorerTiles, index)
-		//index = generateSmallHexesFromSingleSeed(offset[0], offset[1], tile, tileRotation, results, explorerTiles, index)
-	}
 
-	/*const counts = {}
-	local_MAP_TILES.forEach((tb) => {
-		counts["[" + tb[0].name + ", " + tb[1].name + "]"] = counts["[" + tb[0].name + ", " + tb[1].name + "]"] + 1 || 1
-	})
-	if (logging) console.log("Tiles left in the bag:", counts)*/
+		index = generateSmallHexesFromSingleSeed(offset[0], offset[1], tile.terrain, tileRotation, results, explorerTiles, index)
+	}
 
 	store.mapData = {
 		hexes: results,
 		seed: seed,
-		//usedTiles: usedTiles,
-		//hexId: QRSArray,
 		grass: [],
 		pollution: [],
 		explorers: explorerTiles,
@@ -134,7 +74,6 @@ export function generateMapFromSeed(seed) {
 	store.mapData = {}
 
 	// load the layout data
-	//const layout = rf.MAP_LAYOUTS.find((l) => l.tiles === seed.length)
 	const layout = store.currentLayout
 
 	let index = 0
@@ -197,10 +136,6 @@ export function generateSmallHexesFromSingleSeed(offsetQ, offsetR, tile, rotatio
 			})
 
 			if (tile[i] > 9) {
-				/*explorerTiles.push({
-					id: index,
-					...hex,
-				})*/
 				explorerTiles.push(index)
 			}
 
@@ -233,33 +168,12 @@ export function setNeighbours() {
 
 function isNeighbour(hex1, hex2) {
 	for (let i = 0; i < 6; i++) {
-		if (hex1.q === hex2.q + directionVectors[i][0] &&
-			hex1.r === hex2.r + directionVectors[i][1] &&
-			hex1.s === hex2.s + directionVectors[i][2]) {
+		if (hex1.q === hex2.q + directionVectors[i][0] && hex1.r === hex2.r + directionVectors[i][1] && hex1.s === hex2.s + directionVectors[i][2]) {
 			return true
 		}
 	}
 	return false
 }
-
-/*export function setNeighbours() {
-	const store = useModelStore()
-	store.mapNeighbours.splice(0)
-	store.mapData.hexes.forEach((mapHex1) => {
-		store.mapData.hexes.forEach((mapHex2) => {
-			if (mapHex1.id === mapHex2.id) return
-			//TODO check if neighbour exists, if yes skip this step
-			directionVectors.forEach((dv) => {
-				if (mapHex1.hex.q === mapHex2.hex.q + dv[0] && mapHex1.hex.r === mapHex2.hex.r + dv[1] && mapHex1.hex.s === mapHex2.hex.s + dv[2]) {
-					if (!store.mapNeighbours[mapHex1.id]) {
-						store.mapNeighbours[mapHex1.id] = []
-					}
-					store.mapNeighbours[mapHex1.id].push(mapHex2.id)
-				}
-			})
-		})
-	})
-}*/
 
 export function getHexDataFromID(ID) {
 	const store = useModelStore()
@@ -277,18 +191,6 @@ export function getHexDataFromID(ID) {
 
 export function getIDfromHex(hex) {
 	const store = useModelStore()
-	/* OLD METHOS
-	let q = hex.q
-	let r = hex.r
-	let s = hex.s
-	for (const item of store.mapData.hexes) {
-		if (item.hex.q === q && item.hex.r === r && item.hex.s === s) {
-			return item.id
-		}
-	}
-	return -1
-	*/
-
 	// IMPROVED OLD METHOD
 	const { q, r, s } = hex
 	const index = store.mapData.hexes.findIndex((item) => item.hex.q === q && item.hex.r === r && item.hex.s === s)
@@ -397,9 +299,6 @@ export function shouldShowPollution(pollutionID) {
 
 	if (!store.mapData.pollution.includes(pollutionID)) return 0
 
-	// If showing pollution under res, always show
-	//if (store.permanentSettings.showPollutionUnderRes) return true
-
 	const hasResOnTile = store.players.some((player) => {
 		if (player.countrysideBuildings) {
 			return player.countrysideBuildings.some((building) => {
@@ -420,17 +319,11 @@ export function shouldShowPollution(pollutionID) {
 	return 2 // 2 is pollution on its own
 }
 
-/*export function getLayout() {
-	const store = useModelStore()
-	return rf.MAP_LAYOUTS.find((l) => l.players === store.players.length)
-}*/
-
 export function getHexPoints(forSelection) {
 	const store = useModelStore()
 
 	let hexSideLength = store.refSize * 6 // Adjust this value based on the desired hex size in pixels
 	if (forSelection) hexSideLength -= store.refSize
-	//if (forHighlight) hexSideLength += 400
 	const canvasSize = store.canvasSize // Adjust this value based on the size of the container
 
 	const flatPoints = [
@@ -614,8 +507,6 @@ export function getCityD() {
 	return path
 }
 
-
-
 export function findCommonSide(hex1, hex2) {
 	// Start at hex1, going TO hex 2
 	// Sides are numbered 0-5. Side ZERO is on the TOP
@@ -643,11 +534,6 @@ export function getPathBetweenHexIDs(zocID, outsideID) {
 	let hexDown = hexHeight / 2 // aka apothem = 55
 	let hexSide = (hexDown / 1.732) * 2 //* Math.sqrt(3/2) *  63.5 = hexDown / tan60 * 2
 	let hexAcross = hexSide / 2 //31.75
-
-	// Set up data -- THIS USES HEX INSIDE ZOC AND HEX OUTSIDE ZOC
-	/*let zocData = getHexDataFromID(zocID)
-	let outsideData = getHexDataFromID(outsideID)
-	let commonSide = findCommonSide(zocData.hex, outsideData.hex)*/
 
 	// Set up data using higher/lower IDs
 	// This allows us to see common ZOC sides, even when they have different in/out ZOC hexes

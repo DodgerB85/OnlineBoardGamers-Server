@@ -20,7 +20,7 @@ import * as rf from "../js/AQYreference"
 
 import { defineStore } from "pinia"
 
-import { ref, reactive } from "vue"
+import { ref, reactive, computed } from "vue"
 //import * as refFuncs from '../js/TGZfuncs'
 //import * as map from '../js/TGZmap'
 
@@ -402,21 +402,80 @@ export const useModelStore = defineStore("store", () => {
 
 	/*******************END TEMP VARS */
 
-	/*************************************************************** */
-	/*************************************************************** */
-	/*************************************************************** */
-	/*************************************************************** */
-	/*************************************************************** */
+	const computedHistory = computed(() => {
+		const result = []
+		let oldPhaseNumber = -1
+		let currentFamineLevel = 0 // Local tracker for this calculation
 
-	/*function getPlayerByColour(colour) {
-    return players.find((players) => players.colour === colour)
-  }
-  function getPlayerIndexFromColour(colour) {
-    let index = players.findIndex((object) => {
-      return object.colour === colour
-    })
-    return index
-  }*/
+		// 1. Start with the New Game entry if needed
+		if (history.length === 0 || history[0][0] !== rf.HIST_NEW_GAME) {
+			result.push([rf.HIST_NEW_GAME, -1, 0, []])
+		}
+
+		// 2. Process existing history
+		for (const rawEntry of history) {
+			// Deep clone the entry so we don't mutate the original Store data
+			const entry = JSON.parse(JSON.stringify(rawEntry))
+			const histAction = entry[0]
+			const entry3 = entry[3]
+
+			// Logic: Insert NEW_PHASE before FIRST_CITY
+			if (oldPhaseNumber === -1 && histAction === rf.HIST_FIRST_CITY) {
+				oldPhaseNumber = rf.HIST_FIRST_CITY
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_FIRST_CITY]])
+			}
+			else if (oldPhaseNumber !== rf.HIST_PHASE_CITY_BUILDING && rf.HIST_CITY_ACTIONS.includes(histAction)) {
+				oldPhaseNumber = rf.HIST_PHASE_CITY_BUILDING
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_PHASE_CITY_BUILDING]])
+			}
+			else if (oldPhaseNumber !== rf.HIST_PHASE_NEW_TURN_ORDER && histAction === rf.HIST_NEW_TURN_ORDER) {
+				oldPhaseNumber = rf.HIST_PHASE_NEW_TURN_ORDER
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_NEW_TURN_ORDER]])
+			}
+			else if (oldPhaseNumber !== rf.HIST_PHASE_COUNTRYSIDE_BUILDING && rf.HIST_COUNTRY_ACTIONS.includes(histAction)) {
+				oldPhaseNumber = rf.HIST_PHASE_COUNTRYSIDE_BUILDING
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_PHASE_COUNTRYSIDE_BUILDING]])
+			}
+			else if (oldPhaseNumber !== rf.HIST_PHASE_GOODS_STORAGE && rf.HIST_STORAGE_ACTIONS.includes(histAction)) {
+				oldPhaseNumber = rf.HIST_PHASE_GOODS_STORAGE
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_PHASE_GOODS_STORAGE]])
+			}
+			else if (oldPhaseNumber !== rf.HIST_PHASE_HARVEST && rf.HIST_HARVEST_ACTIONS.includes(histAction)) {
+				oldPhaseNumber = rf.HIST_PHASE_HARVEST
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_PHASE_HARVEST]])
+			}
+			else if (oldPhaseNumber !== rf.HIST_PHASE_EXPLORE && rf.HIST_EXPLORE_ACTIONS.includes(histAction)) {
+				oldPhaseNumber = rf.HIST_PHASE_EXPLORE
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_PHASE_EXPLORE]])
+			}
+			else if (oldPhaseNumber !== rf.HIST_PHASE_FAMINE && rf.HIST_FAMINE_ACTIONS.includes(histAction)) {
+				oldPhaseNumber = rf.HIST_PHASE_FAMINE
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_PHASE_FAMINE, currentFamineLevel]])
+			}
+			else if (oldPhaseNumber !== rf.HIST_PHASE_POLLUTION && rf.HIST_POLLUTION_ACTIONS.includes(histAction)) {
+				currentFamineLevel++
+				result.push([rf.HIST_FAMINE_INCREASE, -1, 0, [currentFamineLevel]])
+				oldPhaseNumber = rf.HIST_PHASE_POLLUTION
+				result.push([rf.HIST_NEW_PHASE, -1, 0, [rf.HIST_PHASE_POLLUTION]])
+			}
+
+
+			// Logic: Famine Level tracking
+			if (histAction === rf.HIST_NEW_TURN) {
+				//currentFamineLevel++
+				entry3.push(currentFamineLevel)
+			} else if (histAction === rf.HIST_EXPLORE) {
+				if (rf.RES_FOODS.includes(entry3[1])) {
+					currentFamineLevel++
+					entry3.push(currentFamineLevel)
+				}
+			}
+
+			result.push(entry)
+		}
+
+		return result
+	})
 
 	return {
 		gameflow,
@@ -470,5 +529,6 @@ export const useModelStore = defineStore("store", () => {
 		prePhaseResetData,
 		deleteVotesData,
 		statsExcludeVotesData,
+		computedHistory,
 	}
 })

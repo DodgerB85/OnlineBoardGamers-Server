@@ -1115,7 +1115,6 @@ export async function castVote(topic) {
 		const data = await response.json()
 
 		store.topMenuViews.showLoader = false
-		console.log(data)
 		if (data.voteChanged === true) {
 			store.topMenuViews.tradeSuccessText = "Vote Saved"
 			

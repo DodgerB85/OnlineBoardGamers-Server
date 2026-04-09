@@ -27,9 +27,8 @@ export function currentPlayerObj() {
 	}
 	if (store.gameflow.turnOrder.length > 0) return store.players[store.gameflow.turnOrder[0]]
 	else {
-		if (!store.topMenuViews.showReplay & (personal.pov != undefined)) {
-			console.log("CP() Error")
-			console.log(store.gameflow.turnOrder)
+		if (!store.topMenuViews.showReplay && personal.pov != undefined) {
+			console.log(`CP() Error - turnOrder: ${store.gameflow.turnOrder}`)
 		}
 		return store.players[0]
 	}
@@ -45,9 +44,8 @@ export function currentPlayerIndex() {
 	}
 	if (store.gameflow.turnOrder.length > 0) return store.gameflow.turnOrder[0]
 	else {
-		if (!store.topMenuViews.showReplay & (personal.pov != undefined)) {
-			console.log("CPI() Error")
-			console.log(store.gameflow.turnOrder)
+		if (!store.topMenuViews.showReplay && personal.pov != undefined) {
+			console.log(`CPI() Error - turnOrder: ${store.gameflow.turnOrder}`)
 		}
 		return 0
 	}

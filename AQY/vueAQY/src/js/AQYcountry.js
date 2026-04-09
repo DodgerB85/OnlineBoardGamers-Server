@@ -466,7 +466,6 @@ export function getExpectedHarvestResources(playerIndex, ismannedForcedLabour) {
 			}
 		}
 	}
-	//console.log(expectedHarvestResources);
 	// Convert to flat array
 	let res = []
 	for (let i = 0; i < expectedHarvestResources.length; i++) {
@@ -2047,10 +2046,8 @@ export function placeBuilding_core(playerIndex, hex, newBuilding, resource) {
 
 		/*// Check if hex has decided goods
 		if (store.mapData.hexes[hex.id].mountainType != rf.MOUNTAIN_NONE && goodsToBeProduced == -1) {
-			//console.log("Debug: No Good Selected, Mountain Type Selected")
 			goodsToBeProduced = store.mapData.hexes[hex.id].mountainType === rf.MOUNTAIN_STONE ? rf.RES_STONE : rf.RES_GOLD
 		} else if (store.mapData.hexes[hex.id].mountainType === rf.MOUNTAIN_NONE && goodsToBeProduced == -1) {
-			//console.log("Debug: No Goods Selected for Mine");
 			store.context.hexSelectedForMine = hex
 			store.context.noReset = true
 			newBuilding == rf.COUNTRYSIDE_BLDG_MINE

@@ -17,7 +17,7 @@ import * as rf from "./AQYreference"
 import { useModelStore } from "../stores/AQYstore.js"
 import { nextTick } from "vue"
 
-export async function setupHistoryHighlight(action, entry3, entry_id) {
+export async function setupHistoryHighlight(action, entry3, entry_id, useBaseHistory=false) {
 	const store = useModelStore()
 	store.clearHistoryHelpers()
 	store.clearVars()
@@ -34,10 +34,10 @@ export async function setupHistoryHighlight(action, entry3, entry_id) {
 		}
 	} else if (action === rf.HIST_CITY_BUILD) {
 		// Add the indexes
-		let playerIndex = store.history[entry_id][1]
+		let playerIndex = store.computedHistory[entry_id][1]
+		if (useBaseHistory) playerIndex = store.history[entry_id][1]
 		store.topMenuViews.showingPlayerIndex = playerIndex
 
-		let player = store.players[playerIndex]
 		// Entries 0,1,2 == built, moved, manned -- SO JUST DO BUILT AND MANNED
 		// BUILT HISTORY
 		for (let i = 0; i < entry3[0].length; i++) {
@@ -110,7 +110,8 @@ export async function setupHistoryHighlight(action, entry3, entry_id) {
 			store.historyHelpers.hexesToHighlightYellow.push(map.getHexDataFromID(entry3[0][i]))
 		}
 		// Add the indexes
-		let playerIndex = store.history[entry_id][1]
+		let playerIndex = store.computedHistory[entry_id][1]
+		if (useBaseHistory) playerIndex = store.history[entry_id][1]
 		//store.topMenuViews.showingPlayerIndex = playerIndex
 
 		for (let i = 0; i < entry3[1].length; i++) {
@@ -194,7 +195,8 @@ export async function setupHistoryHighlight(action, entry3, entry_id) {
 	// Famine
 	else if (action === rf.HIST_FAMINE) {
 		// Add the indexes
-		let playerIndex = store.history[entry_id][1]
+		let playerIndex = store.computedHistory[entry_id][1]
+		if (useBaseHistory) playerIndex = store.history[entry_id][1]
 		store.topMenuViews.showingPlayerIndex = playerIndex
 
 		for (let i = 0; i < entry3.length; i++) {

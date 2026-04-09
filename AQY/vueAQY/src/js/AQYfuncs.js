@@ -185,9 +185,6 @@ export function decompressTradeData(data, forceAnyUpdate) {
 	store.context.irrelevantTrades = [...irrelevantTrades]
 
 	// Add any history
-	/*for (let i = 0; i < tradeData.tradeHistory.length; i++) {
-		store.history.push(tradeData.tradeHistory[i])
-	}*/
 	for (let i = 0; i < tradeData.tradeHistory.length; i++) {
 		const trade = tradeData.tradeHistory[i]
 
@@ -420,8 +417,11 @@ export async function simpleImportWholeModel(input) {
 	Object.assign(store.context, inputModel[3])
 
 	// 4
-	store.history.splice(0)
-	Object.assign(store.history, inputModel[4])
+	//store.history.splice(0)
+	//Object.assign(store.history, inputModel[4])
+	// 1. Clear the array
+	// 2. Insert all new items from inputModel[4]
+	store.history.splice(0, store.history.length, ...inputModel[4])
 
 	// 5
 	store.famineLevel = inputModel[5]
@@ -669,12 +669,11 @@ function grassInitialCityWater() {
 	// Grass the water under initial cities. Can add any city, as subsequent won't have water anyway.
 	let cityCentreHexes = country.getCityTiles()
 	let cityIDs = []
-	for (let i=0; i<cityCentreHexes.length; i++) {
+	for (let i = 0; i < cityCentreHexes.length; i++) {
 		cityIDs.push(map.getIDfromHex(cityCentreHexes[i]))
 	}
 	//let neighbourIDs = []
-	for (let i = cityIDs.length-1; i >= 0; i--) {
-		
+	for (let i = cityIDs.length - 1; i >= 0; i--) {
 		cityIDs = cityIDs.concat(store.mapNeighbours[cityIDs[i]])
 	}
 
@@ -833,8 +832,11 @@ export async function importModel(input, includeContext, keepNeighbours) {
 
 	// 3 - history
 	//store.context = {};
-	store.history.splice(0)
-	store.history = JSON.parse(JSON.stringify(inputModel[3]))
+	//store.history.splice(0)
+	//store.history = JSON.parse(JSON.stringify(inputModel[3]))
+	// 1. Clear the array
+	// 2. Insert all new items from inputModel[4]
+	store.history.splice(0, store.history.length, ...inputModel[3])
 
 	// 4 - famine level
 	store.famineLevel = inputModel[4]

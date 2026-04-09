@@ -17,7 +17,7 @@ export function goToReplayStep(step) {
 	funcs.importModel(store.replayData[store.replayStep], false, true)
 	//map.calculateCanvasSize()
 
-	history.setupHistoryHighlight(store.history[store.replayStep][0], store.history[store.replayStep][3], store.replayStep) // ADD STEP???
+	history.setupHistoryHighlight(store.history[store.replayStep][0], store.history[store.replayStep][3], store.replayStep, true) // ADD STEP???
 	if (store.topMenuViews.showingPlayerIndex !== -1) store.topMenuViews.showingPlayerIndex = controller.currentPlayerIndex()
 }
 
@@ -53,7 +53,7 @@ export function performStep(amount) {
 
 	funcs.importModel(store.replayData[store.replayStep], false, true)
 
-	history.setupHistoryHighlight(store.history[store.replayStep][0], store.history[store.replayStep][3], store.replayStep) // ADD STEP??
+	history.setupHistoryHighlight(store.history[store.replayStep][0], store.history[store.replayStep][3], store.replayStep, true) // ADD STEP??
 	if (store.topMenuViews.showingPlayerIndex !== -1) store.topMenuViews.showingPlayerIndex = store.history[store.replayStep][1]
 }
 

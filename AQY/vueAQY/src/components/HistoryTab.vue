@@ -28,31 +28,32 @@ function historyToggle() {
 }
 
 function newPhaseText(index) {
-	let entry = store.history[index]
+	 return "NONE"
+	let entry = store.computedHistory[index]
 	// Non-player, don't add marker
 	//if (entry[1] < 0) return "NONE"
 	if (index === 0) return "NONE"
 	// Find the previous player action
 	let prevIndex = index
 
-	while (prevIndex > 0 && (store.history[prevIndex][1] === entry[1] || rf.ENTRIES_TO_IGNORE.includes(store.history[prevIndex][0]))) {
+	while (prevIndex > 0 && (store.computedHistory[prevIndex][1] === entry[1] || rf.ENTRIES_TO_IGNORE.includes(store.computedHistory[prevIndex][0]))) {
 		prevIndex--
-		let oldEntry = store.history[prevIndex]
+		let oldEntry = store.computedHistory[prevIndex]
 		if (oldEntry[0] === rf.HIST_NEW_TURN && entry[0] === rf.HIST_CITY_PLAYER_TRADE && index-prevIndex === 1 ) return "City Building"
 		// If going back one and staying in countryside phase, don't need a bar
-		if (prevIndex === index - 1 && store.history[prevIndex][1] === entry[1] && rf.HIST_COUNTRY_ACTIONS.includes(entry[0]) && rf.HIST_COUNTRY_ACTIONS.includes(store.history[prevIndex][0])) return "NONE"
+		if (prevIndex === index - 1 && store.computedHistory[prevIndex][1] === entry[1] && rf.HIST_COUNTRY_ACTIONS.includes(entry[0]) && rf.HIST_COUNTRY_ACTIONS.includes(store.computedHistory[prevIndex][0])) return "NONE"
 		// If going back one and staying in HARVEST phase, don't need a bar
-		if (prevIndex === index - 1 && store.history[prevIndex][1] === entry[1] && rf.HIST_HARVEST_ACTIONS.includes(entry[0]) && rf.HIST_HARVEST_ACTIONS.includes(store.history[prevIndex][0])) return "NONE"
+		if (prevIndex === index - 1 && store.computedHistory[prevIndex][1] === entry[1] && rf.HIST_HARVEST_ACTIONS.includes(entry[0]) && rf.HIST_HARVEST_ACTIONS.includes(store.computedHistory[prevIndex][0])) return "NONE"
 	}
 
-	let oldEntry = store.history[prevIndex]
-	if (oldEntry[0] === rf.HIST_NEW_GAME && entry[0] === rf.HIST_FIRST_CITY) return "Setup"
+	let oldEntry = store.computedHistory[prevIndex]
+	//if (oldEntry[0] === rf.HIST_NEW_GAME && entry[0] === rf.HIST_FIRST_CITY) return "Setup"
 	// Go from first city to city build
-	if (oldEntry[0] === rf.HIST_FIRST_CITY && entry[0] === rf.HIST_CITY_BUILD) return "City Building"
-	if (oldEntry[0] === rf.HIST_NEW_TURN && entry[0] === rf.HIST_CITY_BUILD ) return "City Building"
+	//if (oldEntry[0] === rf.HIST_FIRST_CITY && entry[0] === rf.HIST_CITY_BUILD) return "City Building"
+	//if (oldEntry[0] === rf.HIST_NEW_TURN && entry[0] === rf.HIST_CITY_BUILD ) return "City Building"
 	//if (oldEntry[0] === rf.HIST_NEW_TURN_ORDER && entry[0] === rf.HIST_SKIP_COUNTRY_TURN) return "Countryside Building"
 	//if (oldEntry[0] === rf.HIST_NEW_TURN_ORDER && rf.HIST_COUNTRY_ACTIONS.includes(entry[0])) return "Countryside Building"
-	if (oldEntry[0] === rf.HIST_CITY_BUILD && entry[0] === rf.HIST_NEW_TURN_ORDER) return "Turn Order"
+	if (oldEntry[0] === rf.HIST_CITY_BUILD && entry[0] === rf.HIST_NEW_TURN_ORDER) return "New Turn Order"
 	if (oldEntry[0] === rf.HIST_NEW_TURN_ORDER && rf.HIST_COUNTRY_ACTIONS.includes(entry[0])) return "Countryside Building"
 	if (rf.HIST_COUNTRY_ACTIONS.includes(oldEntry[0]) && rf.HIST_STORAGE_ACTIONS.includes(entry[0])) return "Goods Storage"
 	if (rf.HIST_STORAGE_ACTIONS.includes(oldEntry[0]) && rf.HIST_HARVEST_ACTIONS.includes(entry[0])) return "Harvest"
@@ -79,7 +80,7 @@ function newPhaseText(index) {
 			<div v-if="store.topMenuViews.showReplay"><b>Replay Mode - click an entry to jump to that point in time</b></div>
 
 			<div id="historyMainDiv" class="reverseHistory">
-				<template v-for="(entry, index1) in store.history" :key="index1">
+				<template v-for="(entry, index1) in store.computedHistory" :key="index1">
 					<!-- New Phase Marker -->
 					<template v-if="newPhaseText(index1) !== 'NONE'">
 						<div class="newPhaseDiv">

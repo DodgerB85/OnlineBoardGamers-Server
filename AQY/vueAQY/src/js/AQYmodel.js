@@ -37,7 +37,10 @@ export function addHistory(event, playerIndex, timeOffset, params) {
 	const store = useModelStore()
 
 	let time = Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp + timeOffset)
+	console.log("addHistory called with event:", event, "playerIndex:", playerIndex, "params:", params)
 	store.history.push([event, playerIndex, time, [...params]])
+	console.log("History now has length:", store.history.length)
+	console.log("Last entry:", store.history[store.history.length - 1])
 }
 
 export function initiateGameVars(forReplay = false) {
@@ -118,7 +121,7 @@ export function initiateGameVars(forReplay = false) {
 	})
 	funcs.shuffle(store.mapData.availableExplorerResources)
 
-	if (!forReplay) addHistory(rf.HIST_NEW_GAME, -1, 0, [[...store.gameflow.fullTurnOrder]])
+	//if (!forReplay) addHistory(rf.HIST_NEW_GAME, -1, 0, [[...store.gameflow.fullTurnOrder]])
 }
 
 export function updateCountryBuildCalclation(playerIndex, updatecachedZOCtiles) {
