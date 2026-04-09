@@ -1780,11 +1780,21 @@ def changeAssistance(request):
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
-        if len(currentGame.zoomLevels) < 3 * currentGame.maxPlayers:
+        
+        playerNumber = int(jsonData["playerNumber"])
+        requiredLength = 3 * currentGame.maxPlayers
+        
+        # Ensure zoomLevels string is long enough
+        if len(currentGame.zoomLevels) < requiredLength:
             currentGame.zoomLevels = "200" * currentGame.maxPlayers
-        currentGame.zoomLevels = currentGame.zoomLevels[: jsonData["playerNumber"] * 3] + jsonData["zoomLevel"] + currentGame.zoomLevels[jsonData["playerNumber"] * 3 + 3 :]
+        
+        # Ensure we have enough space for the player's zoom level
+        while len(currentGame.zoomLevels) < (playerNumber + 1) * 3:
+            currentGame.zoomLevels += "200"
+        
+        currentGame.zoomLevels = currentGame.zoomLevels[: playerNumber * 3] + jsonData["zoomLevel"] + currentGame.zoomLevels[playerNumber * 3 + 3 :]
         if jsonData["allPlayers"]:
-            currentGame.zoomLevels = jsonData["zoomLevel"] * 2
+            currentGame.zoomLevels = jsonData["zoomLevel"] * (len(currentGame.zoomLevels) // 3)
         currentGame.save()
         return JsonResponse(
             {

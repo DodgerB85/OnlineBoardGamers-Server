@@ -229,10 +229,15 @@ def shared_save_zoom(request, game_code):
                 else:
                     zoomLevels[i] = int(jsonData["zoomLevel"])
         else:
+            playerNumber = int(jsonData["playerNumber"])
+            # Ensure zoomLevels array is long enough
+            while len(zoomLevels) <= playerNumber:
+                zoomLevels.append(0)  # Add default zoom level for new players
+            
             if game_code == "RNB":
-                zoomLevels[jsonData["playerNumber"]] = round(float(jsonData["zoomLevel"]), 1)
+                zoomLevels[playerNumber] = round(float(jsonData["zoomLevel"]), 1)
             else:
-                zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
+                zoomLevels[playerNumber] = int(jsonData["zoomLevel"])
 
         currentGame.zoomLevels = json.dumps(zoomLevels)
         currentGame.save()

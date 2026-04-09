@@ -12,9 +12,6 @@ from django.db import transaction
 
 from Lobby.models import User, Game, GamePlayer
 from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
-from Lobby.sharedFunctions.sharedNotifications import (
-    SN_M_T_sendTournamentGameStartNotification,
-)
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from . import FCMconstants as rfFCM
@@ -370,24 +367,24 @@ def create_fcm_game(
         new_game.save()
 
     # Notifications and redirects
-    if is_tournament or is_main_tournament or is_mini_tournament:
-        presenter = cast("FCMpresenter", new_game.presenter())
-        for username in usernames_to_notify:
-            tournamentType = "normalTournament"
-            if is_mini_tournament:
-                tournamentType = "MiniTournament"
-            SN_M_T_sendTournamentGameStartNotification(
-                request,
-                "FCM",
-                username,
-                new_game.maxPlayers,
-                new_game.gameName,
-                presenter.currentTurnString(),
-                getattr(new_game, "id"),
-                False,
-                tournamentType,
-            )
-        return getattr(new_game, "id")
+    #if is_tournament or is_main_tournament or is_mini_tournament:
+    #    presenter = cast("FCMpresenter", new_game.presenter())
+    #    for username in usernames_to_notify:
+    #        tournamentType = "normalTournament"
+    #        if is_mini_tournament:
+    #            tournamentType = "MiniTournament"
+    #        SN_M_T_sendTournamentGameStartNotification(
+    #            request,
+    #            "FCM",
+    #            username,
+    #            new_game.maxPlayers,
+    #            new_game.gameName,
+    #            presenter.currentTurnString(),
+    #            getattr(new_game, "id"),
+    #            False,
+    #            tournamentType,
+    #        )
+    #    return getattr(new_game, "id")
 
     # Now handle normal games
     if usernames_to_notify:

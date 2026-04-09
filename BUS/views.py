@@ -526,7 +526,12 @@ def changeBUSviewport(request):
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist"))
         zoomLevels = json.loads(currentGame.zoomLevels)
-        zoomLevels[jsonData["playerNumber"]] = int(jsonData["zoomLevel"])
+        playerNumber = int(jsonData["playerNumber"])
+        # Ensure zoomLevels array is long enough
+        while len(zoomLevels) <= playerNumber:
+            zoomLevels.append(120)  # Add default zoom level for new players
+        
+        zoomLevels[playerNumber] = int(jsonData["zoomLevel"])
         if jsonData["allPlayers"]:
             for i in range(len(zoomLevels)):
                 zoomLevels[i] = int(jsonData["zoomLevel"])

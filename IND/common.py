@@ -225,6 +225,14 @@ def create_ind_game(
                 notes=shadowNameNotes if player == request.user else "",
             )
 
+        # Fix zoomLevels array size to match actual number of players
+        actual_player_count = len(all_players)
+        current_zoom_levels = json.loads(new_game.zoomLevels)
+        if len(current_zoom_levels) != actual_player_count:
+            # Resize zoomLevels to match actual player count
+            new_game.zoomLevels = json.dumps([0] * actual_player_count)
+            new_game.save()
+
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
             presenter = cast("INDpresenter", new_game.presenter())
