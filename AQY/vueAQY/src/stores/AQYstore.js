@@ -470,6 +470,9 @@ export const useModelStore = defineStore("store", () => {
 					entry3.push(currentFamineLevel)
 				}
 			}
+			else if (histAction === rf.HIST_CITY_FOUNTAINS) {
+				currentFamineLevel = entry3[1] // This is already stored directy, so sync up here
+			}
 
 			result.push(entry)
 		}
