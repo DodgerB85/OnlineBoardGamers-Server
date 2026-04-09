@@ -471,7 +471,8 @@ export const useModelStore = defineStore("store", () => {
 				}
 			}
 			else if (histAction === rf.HIST_CITY_FOUNTAINS) {
-				currentFamineLevel = entry3[1] // This is already stored directy, so sync up here
+				currentFamineLevel -= entry3[0] // Reduce one level PER fountain
+				entry3.push(currentFamineLevel)
 			}
 
 			result.push(entry)

@@ -397,7 +397,7 @@ function replayCityFountains(historyIndex, playerIndex, entry3) {
 
 	let newFountains = entry3[0]
 	store.famineLevel -= newFountains
-	if (store.famineLevel !== entry3[1]) alert("Famine Level Mismatch")
+	//if (store.famineLevel !== entry3[1]) alert("Famine Level Mismatch")
 }
 
 function replayNewTurnOrder(historyIndex, playerIndex, entry3) {

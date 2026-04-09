@@ -27,41 +27,6 @@ function historyToggle() {
 	}, 400)
 }
 
-function newPhaseText(index) {
-	 return "NONE"
-	let entry = store.computedHistory[index]
-	// Non-player, don't add marker
-	//if (entry[1] < 0) return "NONE"
-	if (index === 0) return "NONE"
-	// Find the previous player action
-	let prevIndex = index
-
-	while (prevIndex > 0 && (store.computedHistory[prevIndex][1] === entry[1] || rf.ENTRIES_TO_IGNORE.includes(store.computedHistory[prevIndex][0]))) {
-		prevIndex--
-		let oldEntry = store.computedHistory[prevIndex]
-		if (oldEntry[0] === rf.HIST_NEW_TURN && entry[0] === rf.HIST_CITY_PLAYER_TRADE && index-prevIndex === 1 ) return "City Building"
-		// If going back one and staying in countryside phase, don't need a bar
-		if (prevIndex === index - 1 && store.computedHistory[prevIndex][1] === entry[1] && rf.HIST_COUNTRY_ACTIONS.includes(entry[0]) && rf.HIST_COUNTRY_ACTIONS.includes(store.computedHistory[prevIndex][0])) return "NONE"
-		// If going back one and staying in HARVEST phase, don't need a bar
-		if (prevIndex === index - 1 && store.computedHistory[prevIndex][1] === entry[1] && rf.HIST_HARVEST_ACTIONS.includes(entry[0]) && rf.HIST_HARVEST_ACTIONS.includes(store.computedHistory[prevIndex][0])) return "NONE"
-	}
-
-	let oldEntry = store.computedHistory[prevIndex]
-	//if (oldEntry[0] === rf.HIST_NEW_GAME && entry[0] === rf.HIST_FIRST_CITY) return "Setup"
-	// Go from first city to city build
-	//if (oldEntry[0] === rf.HIST_FIRST_CITY && entry[0] === rf.HIST_CITY_BUILD) return "City Building"
-	//if (oldEntry[0] === rf.HIST_NEW_TURN && entry[0] === rf.HIST_CITY_BUILD ) return "City Building"
-	//if (oldEntry[0] === rf.HIST_NEW_TURN_ORDER && entry[0] === rf.HIST_SKIP_COUNTRY_TURN) return "Countryside Building"
-	//if (oldEntry[0] === rf.HIST_NEW_TURN_ORDER && rf.HIST_COUNTRY_ACTIONS.includes(entry[0])) return "Countryside Building"
-	if (oldEntry[0] === rf.HIST_CITY_BUILD && entry[0] === rf.HIST_NEW_TURN_ORDER) return "New Turn Order"
-	if (oldEntry[0] === rf.HIST_NEW_TURN_ORDER && rf.HIST_COUNTRY_ACTIONS.includes(entry[0])) return "Countryside Building"
-	if (rf.HIST_COUNTRY_ACTIONS.includes(oldEntry[0]) && rf.HIST_STORAGE_ACTIONS.includes(entry[0])) return "Goods Storage"
-	if (rf.HIST_STORAGE_ACTIONS.includes(oldEntry[0]) && rf.HIST_HARVEST_ACTIONS.includes(entry[0])) return "Harvest"
-	if (rf.HIST_HARVEST_ACTIONS.includes(oldEntry[0]) && rf.HIST_EXPLORE_ACTIONS.includes(entry[0])) return "Explore"
-	if (rf.HIST_EXPLORE_ACTIONS.includes(oldEntry[0]) && rf.HIST_FAMINE_ACTIONS.includes(entry[0])) return "Famine"
-	if (rf.HIST_FAMINE_ACTIONS.includes(oldEntry[0]) && rf.HIST_POLLUTION_ACTIONS.includes(entry[0])) return "Pollution"
-	return "NONE"
-}
 </script>
 
 <template>
@@ -81,12 +46,6 @@ function newPhaseText(index) {
 
 			<div id="historyMainDiv" class="reverseHistory">
 				<template v-for="(entry, index1) in store.computedHistory" :key="index1">
-					<!-- New Phase Marker -->
-					<template v-if="newPhaseText(index1) !== 'NONE'">
-						<div class="newPhaseDiv">
-							{{ newPhaseText(index1) }}
-						</div>
-					</template>
 					<HistoryEntry :entry="entry" :entry_-i-d="index1" />
 				</template>
 			</div>

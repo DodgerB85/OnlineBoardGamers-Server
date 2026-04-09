@@ -1426,7 +1426,7 @@ export function generateCityBuildHistoryEntry(playerIndex, timestamp) {
 	if (personal.trainingGame) {
 		if (fountainsBuilt > 0) {
 			store.famineLevel = Math.max(store.famineLevel - fountainsBuilt, 0)
-			model.addHistory(rf.HIST_CITY_FOUNTAINS, -1, 0, [fountainsBuilt, store.famineLevel])
+			model.addHistory(rf.HIST_CITY_FOUNTAINS, -1, 0, [fountainsBuilt])
 		}
 		/*if (cathedralsBuilt > 0) {
 			const needCathedralHistory = store.players.some((player) => player.saint === rf.SAINT_NICOLO || player.saint === rf.SAINT_MARIA)
@@ -1452,7 +1452,7 @@ export function processEndOfSimulTurn(timestamps) {
 	}
 	if (fountainsBuilt > 0) {
 		store.famineLevel = Math.max(store.famineLevel - fountainsBuilt, 0)
-		model.addHistory(rf.HIST_CITY_FOUNTAINS, -1, 0, [fountainsBuilt, store.famineLevel])
+		model.addHistory(rf.HIST_CITY_FOUNTAINS, -1, 0, [fountainsBuilt])
 	}
 	if (cathedralsBuilt > 0) {
 		const needCathedralHistory = store.players.some((player) => player.saint === rf.SAINT_NICOLO || player.saint === rf.SAINT_MARIA)
