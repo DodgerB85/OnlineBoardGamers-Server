@@ -1,0 +1,315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="title" content="Online Board Gamers - Food Chain Magnate">
+    <meta name="description"
+          content="Play Food Chain Magnate Online for free with others, or solo!">
+    <meta name="keywords"
+          content="Food,Chain,Magnate,Online,Play,Board,Game,Games,Gamers,Splotter">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="200 days">
+    <meta name="author" content="Online Board Gamers">
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'FCM/images/fcm_icon.png' %}" />
+    <title>OBG - {{ gameName }}</title>
+    <style>
+    body {
+      margin: 0px !important;
+      background-color: #8B7355;
+      font-family: Arial, sans-serif;
+      box-sizing: border-box; /* Ensure padding/margins are included in width */
+    }
+
+    #loadingText {
+      transform: translate(-50%, 0%);
+      position: absolute;
+      font-size: 40px;
+      margin-top: 20px;
+      left: 50%;
+      white-space: nowrap;
+      z-index: 10; /* Ensure text is above animation */
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+
+    /* Container for the loading animation */
+    #loadingContainer {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5px; /* 5px gap from screen edges on small screens */
+      box-sizing: border-box; /* Ensure padding is included in width */
+    }
+
+    /* Left image (restaurant) */
+    #restaurantImage {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      left: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Right image container for farms, houses, etc. */
+    #rightImageContainer {
+      position: absolute;
+      right: 5px; /* Ensure 5px gap from right edge */
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100px;
+      height: 100px;
+    }
+
+    /* Right images with animation */
+    .rightImage {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      opacity: 0;
+      animation: cycleRightImages 1s infinite ease-in-out;
+    }
+
+    #farmImage { animation-delay: 0s; }
+    #houseImage { animation-delay: 0.25s; }
+    #marketImage { animation-delay: 0.5s; }
+    #warehouseImage { animation-delay: 0.75s; }
+
+    @keyframes cycleRightImages {
+      0%, 25% { opacity: 1; }
+      25.01%, 100% { opacity: 0; }
+    }
+
+    /* Roads container to fill space between images */
+    #roadsContainer {
+      position: absolute;
+      left: 110px; /* restaurant width (100px) + 5px gap + 5px padding */
+      right: 110px; /* farms-houses width (100px) + 5px gap */
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Individual roads */
+    .road {
+      height: 10px; /* Thickness of the road */
+      background-color: #654321; /* Road color */
+      border: 1px solid #333; /* Border */
+      opacity: 0;
+      flex: 1; /* Equal width for each road */
+      max-width: 100px; /* Maximum width for each road */
+      margin: 0 2px; /* Small gap between roads */
+    }
+
+    #road1 { animation: showRoad1 1s infinite ease-in-out;}
+    #road2 { animation: showRoad2 1s infinite ease-in-out;}
+    #road3 { animation: showRoad3 1s infinite ease-in-out;}
+    #road4 { animation: showRoad4 1s infinite ease-in-out;}
+
+    @keyframes showRoad1 {
+      0% { opacity: 0; }
+      0.01%, 10% { opacity: 1; } /* Visible from delay until 2s */
+      99% { opacity: 1; }
+       99.01%, 100% { opacity: 0; } /* Hidden at cycle end */
+    }
+
+    @keyframes showRoad2 {
+      0%, 25% { opacity: 0; }
+      25.01%, 35% { opacity: 1; } /* Visible from delay until 2s */
+      99% { opacity: 1; }
+       99.01%, 100% { opacity: 0; } /* Hidden at cycle end */
+    }
+
+    @keyframes showRoad3 {
+      0%, 50% { opacity: 0; }
+      50.01%, 60% { opacity: 1; } /* Visible from delay until 2s */
+      99% { opacity: 1; }
+       99.01%, 100% { opacity: 0; } /* Hidden at cycle end */
+    }
+
+    @keyframes showRoad4 {
+      0%, 75% { opacity: 0; }
+      75.01%, 85% { opacity: 1; } /* Visible from delay until 2s */
+      99% { opacity: 1; }
+       99.01%, 100% { opacity: 0; } /* Hidden at cycle end */
+    }
+
+    /* For screens wider than 600px: Center the animation */
+    @media (min-width: 600.001px) {
+      #loadingContainer {
+        width: 528px; /* 100px (restaurant) + 5px + 4x100px (roads) + 8px (gaps) + 100px (farms-houses) + 5px */
+        margin: 0 auto; /* Center horizontally */
+        padding: 0; /* Remove padding */
+      }
+      #restaurantImage {
+        left: 5px; /* 5px gap from left of #loadingContainer */
+      }
+      #rightImageContainer {
+        right: 5px; /* 5px gap from right of #loadingContainer */
+      }
+      #roadsContainer {
+        left: 110px; /* restaurant width (100px) + 5px gap + 5px padding */
+        right: 110px; /* farms-houses width (100px) + 5px gap */
+      }
+    }
+
+    /* For screens 600px or narrower: Stretch roads, keep images at edges */
+    @media (max-width: 600px) {
+      #loadingContainer {
+        width: 100%;
+        padding: 0 5px;
+        box-sizing: border-box; /* Ensure padding is included in width */
+      }
+      #restaurantImage {
+        left: 5px;
+      }
+      #rightImageContainer {
+        right: 5px; /* Ensure 5px gap from right edge */
+      }
+      #roadsContainer {
+        left: 110px; /* restaurant width (100px) + 5px gap + 5px padding */
+        right: 110px; /* farms-houses width (100px) + 5px gap */
+      }
+      .road {
+        max-width: none; /* Allow roads to shrink */
+      }
+    }
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if settingsDEBUG %}
+      <script type="module" src="http://localhost:3048/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3048/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'FCM/FCMvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module"
+              crossorigin=""
+              src="{% static 'FCM/FCMvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>Please enable Javascript to continue.</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">Food Chain Magnate is loading........</div>
+      <div id="loadingContainer">
+        <img id="restaurantImage"
+             src="{% static 'FCM/images/restaurant.jpg' %}"
+             alt="Restaurant" />
+        <div id="roadsContainer">
+          <div id="road1" class="road"></div>
+          <div id="road2" class="road"></div>
+          <div id="road3" class="road"></div>
+          <div id="road4" class="road"></div>
+        </div>
+        <div id="rightImageContainer">
+          <img id="farmImage"
+               class="rightImage"
+               src="{% static 'FCM/images/farm.jpg' %}"
+               alt="Farm" />
+          <img id="houseImage"
+               class="rightImage"
+               src="{% static 'FCM/images/house.jpg' %}"
+               alt="House" />
+          <img id="marketImage"
+               class="rightImage"
+               src="{% static 'FCM/images/market.jpg' %}"
+               alt="Market" />
+          <img id="warehouseImage"
+               class="rightImage"
+               src="{% static 'FCM/images/warehouse.jpg' %}"
+               alt="Warehouse" />
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+  var initData = {};
+  
+  // Core game data
+  initData.gameID = {{ gameID }};
+  initData.gameName = "{{ gameName }}";
+  initData.gameData = '{{ gameData|safe }}';
+  initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+  initData.myZoomLevel = {{ myZoomLevel }};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+  initData.startingOptions = {{startingOptions}};
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  initData.currentPlayers = '{{ currentPlayers }}'
+  initData.preferredFCMOptions = {{ preferredFCMOptions }};
+  initData.pov = {{ pov }};
+  initData.turn = {{turn}};
+  initData.deleteVotesData = {{ deleteVotesData | safe }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+  
+  // Game state
+  {% if finishedGame %}
+  initData.finishedGame = true
+  {% endif %}
+
+  {% if spoilerFree %}
+  initData.spoilerFree = true;
+  initData.replayStep = {{replayStep}}-1;
+  {% endif %}
+
+  // User data
+  {% if user.is_authenticated %}
+  initData.name = '{{ name }}';
+  initData.chatData = "{{ chatData }}";
+  initData.latestUpdate = {{ latestUpdateLiteral }};
+  initData.nextURL = '{{ nextURL|safe }}';
+  {% if chatNotification %}
+  initData.chatNotification = true;
+  {% endif %}
+  {% endif %}
+
+  // Player involvement data
+  {% if involvedPlayer %}
+  initData.secondsToNextKickout = {{ secondsToNextKickout }};
+  {% if kickoutRequired > 0 and not myMove %}
+  initData.kickoutRequired = {{kickoutRequired}};
+  {% endif %}
+  initData.notes = '{{ notes | safe }}';
+  initData.yourTurnAudioType = {{ yourTurnAudioType }};
+  {% if not gameData %}
+  {% if displayNames %}
+  initData.displayNames = {{ displayNames | safe }};
+  {% endif %}
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  {% endif %}
+  {% endif %}
+
+  // Additional variables from original GameTemplate.html
+  {% if gameData and phase == 13 %}initData.startingOptions = {{ startingOptionsLiteral }};{% endif %}
+  initData.assistance = {{ showAssistance }};
+  {% if currentPlayers %}initData.currentPlayersArray = {{ currentPlayers | safe }};{% endif %}
+  {% if preferredColour != -1 %}initData.preferedColor = {{ preferredColour }};{% endif %}
+  {% if highContrastBoardItems %}initData.highContrastBoardItems = true;{% endif %}
+  {% if secondsToNextKickout %}initData.secondsToNextKickout = {{ secondsToNextKickout }};{% endif %}
+  {% if currentNotes %}initData.currentNotes = '{{ currentNotes | safe }}';{% endif %}
+  {% if nextURL %}initData.nextURLGlobal = "{{ nextURL|safe }}";{% endif %}
+  {% if chatNotification %}initData.notification = true;{% endif %}
+  {% if kickoutRequired > 0 and not myMove %}initData.kickoutRequiredGlobal = {{kickoutRequired}};{% endif %}
+  {% if myZoomLevel %}initData.zoomLevel = {{ myZoomLevel }};{% endif %}
+  {% if liveNotification %}initData.liveNotification = {{ liveNotification }};{% endif %}
+  {% if tournamentGame %}initData.tournamentGame = true;{% endif %}
+  
+  // Static initialization variables
+  initData.saveRewind = true;
+  initData.historyOrder = 0;
+  initData.assistance = true; // Override to true as in original
+  </script>
+</html>

@@ -30,6 +30,7 @@ urlpatterns = [
     path("test/", views.test, name="test"),
     path("gameAdmin/", views.gameAdmin, name="gameAdmin"),
     path("<int:game_id>/show/", views.showGame, name="showFCMgame"),
+    path("<int:game_id>/vue/", views.showGameVue, name="showFCMgameVue"),
     path("<int:original_id>/", redirect_old_url, name="redirect_old_url"),
     path("FCMstats/", views.FCMstats, name="FCMstats"),
     path("FCMstatGames/", views.FCMstatGames, name="FCMstatGames"),

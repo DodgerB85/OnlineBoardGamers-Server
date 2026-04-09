@@ -46,6 +46,7 @@ Lobby/sharedFunctions/emailCounter.txt
 vueIND/
 vueRNB/
 vuePPF/
+vueFCM/
 staticfiles/
 
 # Handle stats carefully and specifically

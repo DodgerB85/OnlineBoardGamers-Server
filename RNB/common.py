@@ -89,7 +89,7 @@ def create_rnb_game(
     starting_options = []
     max_players = 2
     game_status = "AVAILABLE"
-    kickout_duration = 24
+    kickout_duration = 100
     starting_map = ""
     shadowNameNotes = ""
     usernames_to_notify = []

@@ -351,6 +351,195 @@ def showGame(request, game_id):
 
 
 
+def showGameVue(request, game_id):
+    result = build_show_game_data(
+        request,
+        game_id,
+        "FCM",
+        default_zoom=200,
+        settings_debug_key="FCM_USE_SOURCE_CODE",
+        super_users=FCMsuperUsers,
+        clear_chat_notification=False,
+    )
+    if isinstance(result, HttpResponseRedirect):
+        return result
+
+    currentGame = result["game"]
+    presenter = cast("FCMpresenter", currentGame.presenter())
+    all_players = result["all_players"]
+    username = request.user.username
+
+    # FCMtourneyAdmin super user check (needs game data)
+    if currentGame.relatedMainTournament and username == "FCMtourneyAdmin":
+        if "FCMtourneyAdmin" not in FCMsuperUsers:
+            FCMsuperUsers.append("FCMtourneyAdmin")
+
+    finishedGame = currentGame.gameStatus == "FINISHED"
+    USE_NEW_CODE = int(currentGame.created) > rfFCM.TS_USE_NEW_CODE
+
+    startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(currentGame.startingOptions) if currentGame.startingOptions else [])
+
+    OOBpreference = 0
+
+    if not result["is_authenticated"]:
+        returnData = {**result["base_data"]}
+        returnData.update(
+            {
+                "gameID": game_id,
+                "showAssistance": "true",
+                "latestUpdateLiteral": currentGame.latestUpdate,
+                "involvedPlayer": False,
+                "myMove": False,
+                "startingOptionsHTML": startingOptionsHTML,
+                "USE_NEW_CODE": USE_NEW_CODE,
+                "finishedGame": finishedGame,
+                "startingOptionsLiteral": currentGame.startingOptions,
+                "startingMap": currentGame.startingMap,
+                "pov": -99,
+                "preferredColour": -1,
+                "OOBpreference": OOBpreference,
+            }
+        )
+        return render(request, "FCM/gameTemplateVue.html", returnData)
+
+    # Logged in - same logic as original showGame but for Vue template
+    user_profile = result["user_profile"]
+    user_id = request.user.id
+
+    highContrastBoardItems = user_profile.highContrastBoardItems
+    showAssistance = "true" if user_profile.showAssistance else "false"
+    now = int(time.time()) * 1000
+
+    chatData = currentGame.chatData
+    if not USE_NEW_CODE:
+        c = bytes(chatData, "utf-8")
+        chatData = c.decode("unicode-escape")
+
+    currentMove = ""
+    currentNotes = ""
+    pov = -9
+    preferredRestaurantColour = -1
+    allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray()
+    kickoutRequired = 0
+    chatNotification = False
+    myMove = False
+    myZoomLevel = 200
+    liveNotification = 1
+    rewindPanelType = 0
+    rewindHostHTML = ""
+    rewindHostPossible = False
+    currentRewindConsent = 0  # NB needed in template for rewind panel
+    currentPlayers = presenter.getArrayOfIsCurrentPlayers()
+    statsExcludedGame = currentGame.statsExcludedGame
+    displayNames = ""
+    tournamentGame = False
+
+    # Chat notification separately (could be kicked out)
+    is_in_all = user_id in result["all_player_ids"]
+    all_gps_including_kicked = list(currentGame.players.select_related("player").all())
+    chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
+    if is_in_all and user_id in chat_notify_ids_all:
+        chatNotification = True
+        presenter.removeChatNotification(request.user)
+
+    nextURL = f"/nextGame?current_id={game_id}&current_code=FCM"
+
+    involvedPlayer = result["is_involved"]
+    # Re-check involvement if FCMtourneyAdmin was added after helper ran
+    if not involvedPlayer and username in FCMsuperUsers:
+        involvedPlayer = True
+
+    if involvedPlayer:
+        if currentGame.relatedMainTournament:
+            tournamentGame = True
+        rewindPanelType = 1
+        if currentGame.host == request.user:
+            rewindPanelType = 2
+            rewindHostPossible = presenter.getRewindHostPossible()
+            rewindHostHTML = presenter.getRewindHostHTML()
+
+        if username in FCMsuperUsers:
+            rewindPanelType = 2
+            rewindHostPossible = True
+            rewindHostHTML = presenter.getRewindHostHTML()
+
+        pov = presenter.seatPosition(username)
+        currentRewindConsent = presenter.getCurrentRewindConsent(username)
+
+        preferredRestaurantColour = user_profile.preferredRestaurantColour
+        liveNotification = user_profile.liveNotification
+
+        currentMove = ""
+        if presenter.hasValidActualMoveData(username) or presenter.hasValidActualCleanupPreset(username):
+            currentMove = presenter.getCompressedMoveArr(username, True)
+
+        player_gp = next((gp for gp in all_players if gp.player and gp.player.id == user_id), None)
+        currentNotes = player_gp.notes if player_gp else ""
+
+        kickoutRequired = presenter.kickoutRequired()
+
+        # Get OOBpreference
+        OOBpreference = presenter.getOOBpreference(request.user.username)
+        allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray(False, False)
+        myMove = presenter.isMyMove(request.user.username)
+
+        myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3]
+        if currentGame.gameData == "" and "SHADOW" in presenter.getAllPlayersOrderedySeatInArray(False, False):
+            displayNames = player_gp.notes if player_gp else ""
+            if player_gp:
+                player_gp.notes = ""
+                player_gp.save()
+            currentNotes = ""
+
+    return render(
+        request,
+        "FCM/gameTemplateVue.html",
+        {
+            "gameCreationTimestamp": currentGame.created,
+            "now": now,
+            "gameData": currentGame.gameData,
+            "pov": pov,
+            "preferredColour": preferredRestaurantColour,
+            "name": username,
+            "chatData": chatData,
+            "showAssistance": showAssistance,
+            "chatNotification": chatNotification,
+            "moveData": currentMove,
+            "allPlayerListBySeat": allPlayerListBySeat,
+            "currentNotes": currentNotes,
+            "kickoutRequired": kickoutRequired,
+            "involvedPlayer": involvedPlayer,
+            "gameName": presenter.getGameName(),
+            "phase": currentGame.phase,
+            "gameID": currentGame.id,
+            "currentPlayers": currentPlayers,
+            "latestUpdateLiteral": currentGame.latestUpdate,
+            "myMove": myMove,
+            "myZoomLevel": myZoomLevel,
+            "liveNotification": liveNotification,
+            "finishedGame": finishedGame,
+            "rewindPanelType": rewindPanelType,
+            "rewindHostHTML": rewindHostHTML,
+            "rewindHostPossible": rewindHostPossible,
+            "currentRewindConsent": currentRewindConsent,
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "tournamentGame": tournamentGame,
+            "highContrastBoardItems": highContrastBoardItems,
+            "startingOptionsHTML": startingOptionsHTML,
+            "statsExcludedGame": statsExcludedGame,
+            "displayNames": displayNames,
+            "nextURL": nextURL,
+            "KickoutFlexiDataArray": result["base_data"]["KickoutFlexiDataArray"],
+            "USE_NEW_CODE": USE_NEW_CODE,
+            "startingOptionsLiteral": currentGame.startingOptions,
+            "startingMap": currentGame.startingMap,
+            "OOBpreference": OOBpreference,
+            "statsExcludeVotesData": result["base_data"]["statsExcludeVotesData"],
+            "deleteVotesData": result["base_data"]["deleteVotesData"],
+            "settingsDebug": result["base_data"]["settingsDebug"],
+        },
+    )
+
 
 # This is used for HTMX update
 def checkNewData(request, game_id):

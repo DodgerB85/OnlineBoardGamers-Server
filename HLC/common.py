@@ -95,7 +95,7 @@ def create_hlc_game(
     starting_options = []
     max_players = 3
     game_status = "AVAILABLE"
-    kickout_duration = 24
+    kickout_duration = 100
     shadowNameNotes = ""
     usernames_to_notify = []
     invited_usernames = []
@@ -117,7 +117,7 @@ def create_hlc_game(
         creator = User.objects.get(username="admin")
         host = creator
         game_pace = 30
-        kickout_duration = 24
+        kickout_duration = 100
         starting_options = (
             json.loads(tournamentObj.startingOptions)
             if tournamentObj.startingOptions != ""
