@@ -33,6 +33,8 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from django.utils.translation import gettext
 
+import Lobby.sharedFunctions.constants as rf
+
 if TYPE_CHECKING:
     from Lobby.presenters import HLCpresenter
 
@@ -452,13 +454,16 @@ def _processHLCturn(request):
                 jsonData["gameID"],
             )
         else:
+            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             # Send Notifications
-            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED":
+            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if "HcBot" in playerListToNotify:
                     playerListToNotify.remove("HcBot")
+                if "HlcBot" in playerListToNotify:
+                    playerListToNotify.remove("HlcBot")
 
                 if len(playerListToNotify) > 0:
                     presenter.sendYourTurnNotification(
@@ -622,8 +627,14 @@ def _processHLCturn(request):
         currentGame.save()
 
         # Send Notifications
-        if len(jsonData["nextPlayer"]) > 0 and jsonData["nextPlayer"][0] != "HcBot":
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        # Send Notifications
+        if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
             playerListToNotify = jsonData["nextPlayer"]
+            if "HcBot" in playerListToNotify:
+                playerListToNotify.remove("HcBot")
+            if "HlcBot" in playerListToNotify:
+                playerListToNotify.remove("HlcBot")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
@@ -678,12 +689,16 @@ def _processHLCturn(request):
             )
         else:
             # Send Notifications
-            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED":
+            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            # Send Notifications
+            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if "HcBot" in playerListToNotify:
                     playerListToNotify.remove("HcBot")
+                if "HlcBot" in playerListToNotify:
+                    playerListToNotify.remove("HlcBot")
 
                 if len(playerListToNotify) > 0:
                     presenter.sendYourTurnNotification(

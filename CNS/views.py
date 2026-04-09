@@ -191,14 +191,10 @@ def createCNSgame(request):
 
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has started"))
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "current"})
-        )
+        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
     else:
         messages.success(request, (SF_getGameCreationJsonReturn("CNS", newGame.id)))
-        return HttpResponseRedirect(
-            reverse("indexListType", kwargs={"listType": "waiting"})
-        )
+        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
 def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
@@ -233,11 +229,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
 
     returnData.update(result["involved_data"])
 
-    preferredCNScolour = (
-        result["user_profile"].preferredCNScolour
-        if result["user_profile"].preferredCNScolour is not None
-        else -1
-    )
+    preferredCNScolour = result["user_profile"].preferredCNScolour if result["user_profile"].preferredCNScolour is not None else -1
     returnData["preferredCNScolour"] = preferredCNScolour
 
     ## NEW GAME
@@ -245,11 +237,7 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         displayNames = ""
         if "SHADOW" in presenter.getAllPlayersOrderedySeatInArray():
             creator_gp = next(
-                (
-                    gp
-                    for gp in all_players
-                    if gp.player and gp.player.id == currentGame.creator_id
-                ),
+                (gp for gp in all_players if gp.player and gp.player.id == currentGame.creator_id),
                 None,
             )
             if creator_gp:
@@ -269,8 +257,6 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         )
 
     return render(request, "CNS/showCNSgame.html", returnData)
-
-
 
 
 @login_required()
@@ -307,9 +293,7 @@ def _processCNSturn(request):
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if latest_update != "9999999999999" and latest_update != str(
-            currentGame.latestUpdate
-        ):
+        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -343,9 +327,7 @@ def _processCNSturn(request):
 
         if next_player_usernames:
             for username in next_player_usernames:
-                currentGame.players.filter(
-                    player__username=username, is_kicked=False
-                ).update(is_current=True)
+                currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -361,16 +343,8 @@ def _processCNSturn(request):
         # Don't notify if auto-passing
         else:
             # Send Notifications
-            loadedStartingOptions = (
-                json.loads(currentGame.startingOptions)
-                if currentGame.startingOptions
-                else []
-            )
-            if (
-                len(jsonData["nextPlayer"]) > 0
-                and jsonData["status"] != "FINISHED"
-                and rf.SO_TRAINING_GAME not in loadedStartingOptions
-            ):
+            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            if len(jsonData["nextPlayer"]) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -396,10 +370,7 @@ def _processCNSturn(request):
 
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
-                if len(currentRewindData) == 0 or (
-                    currentRewindData[-1] != currentGame.rewindTempData
-                    and jsonData["data"] != currentGame.rewindTempData
-                ):
+                if len(currentRewindData) == 0 or (currentRewindData[-1] != currentGame.rewindTempData and jsonData["data"] != currentGame.rewindTempData):
                     # add to RWdata and RWdata[]
                     currentRewindData.append(currentGame.rewindTempData)
                 currentGame.rewindTempData = ""
@@ -449,29 +420,19 @@ def _processCNSturn(request):
         )
 
     elif jsonData["action"] == "loadRewind":
-        if latest_update != "9999999999999" and latest_update != str(
-            currentGame.latestUpdate
-        ):
+        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
             return JsonResponse({"syncError": True}, safe=False)
 
         if len(currentGame.rewindData) == 0:
             return JsonResponse(
-                {
-                    "errorMessage": gettext(
-                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
-                    )
-                },
+                {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
 
         currentRewindDataArray = json.loads(currentGame.rewindData)
         if len(currentRewindDataArray) == 0:
             return JsonResponse(
-                {
-                    "errorMessage": gettext(
-                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
-                    )
-                },
+                {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
 
@@ -510,9 +471,7 @@ def _processCNSturn(request):
         currentGame.players.exclude(is_kicked=True).update(is_current=False)
         if next_player_usernames:
             for username in next_player_usernames:
-                currentGame.players.filter(
-                    player__username=username, is_kicked=False
-                ).update(is_current=True)
+                currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
 
         currentGame.gameData = jsonData["gameData"]
 
@@ -522,15 +481,8 @@ def _processCNSturn(request):
         currentGame.save()
 
         # Send Notifications
-        loadedStartingOptions = (
-            json.loads(currentGame.startingOptions)
-            if currentGame.startingOptions
-            else []
-        )
-        if (
-            len(jsonData["nextPlayer"]) > 0
-            and rf.SO_TRAINING_GAME not in loadedStartingOptions
-        ):
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        if len(jsonData["nextPlayer"]) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
             playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
@@ -555,9 +507,7 @@ def _processCNSturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        if latest_update != "9999999999999" and latest_update != str(
-            currentGame.latestUpdate
-        ):  # and not jsonData["ignoreSync"]:
+        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
@@ -637,9 +587,7 @@ def _sendChatMessage(request):
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        currentGame.presenter().addChatNotifications(
-            currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True)
-        )
+        currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True))
         currentGame.presenter().removeChatNotification(request.user)
 
         currentGame.save()

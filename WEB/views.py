@@ -367,10 +367,12 @@ def _processWEBturn(request):
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             current_players = presenter.getArrayOfIsCurrentPlayers()
-            if len(current_players) > 0 and not any(p.startswith("WEBBot") for p in current_players) and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
+            if len(current_players) > 0 and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
                 playerListToNotify = [player.strip() for player in current_players]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
+                if "WebBot" in playerListToNotify:
+                    playerListToNotify.remove("WebBot")
                 if len(playerListToNotify) > 0:
                     presenter.sendYourTurnNotification(
                         "WEB",
@@ -559,10 +561,12 @@ def _processWEBturn(request):
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         next_players = jsonData["nextPlayer"]
-        if len(jsonData["nextPlayer"]) > 0 and not any(p.startswith("WebBotot") for p in next_players) and 102 not in loadedStartingOptions:
+        if len(jsonData["nextPlayer"]) > 0 and 102 not in loadedStartingOptions:
             playerListToNotify = next_players
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
+            if "WebBot" in playerListToNotify:
+                playerListToNotify.remove("WebBot")
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
                     "WEB",

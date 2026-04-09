@@ -165,8 +165,6 @@ def busData(request, dataType):
     return HttpResponse(status=204)  # No Content
 
 
-
-
 @login_required()
 def sendChatMessage(request):
     if request.method != "POST":
@@ -199,9 +197,7 @@ def _sendChatMessage(request):
         presenter.removeChatNotification(request.user)
 
         LZS = lzstring.LZString()
-        chat_data = (
-            currentGame.chatData or ""
-        )  # Ensure chat_data is at least an empty string
+        chat_data = currentGame.chatData or ""  # Ensure chat_data is at least an empty string
         decompressed_data = LZS.decompressFromEncodedURIComponent(chat_data)
         currentChatData = json.loads(decompressed_data) if decompressed_data else []
 
@@ -211,20 +207,12 @@ def _sendChatMessage(request):
         currentChatData.insert(0, jsonData["newEntry"])
 
         # save chat data.
-        compressedChatData = LZS.compressToEncodedURIComponent(
-            json.dumps(currentChatData)
-        )
+        compressedChatData = LZS.compressToEncodedURIComponent(json.dumps(currentChatData))
 
         currentGame.chatData = compressedChatData
 
         # Now add notifications to everyone except request.user
-        all_usernames = [
-            gp.player.username
-            for gp in currentGame.players.exclude(is_kicked=True).select_related(
-                "player"
-            )
-            if gp.player
-        ]
+        all_usernames = [gp.player.username for gp in currentGame.players.exclude(is_kicked=True).select_related("player") if gp.player]
         usernames_to_notify = [u for u in all_usernames if u != request.user.username]
         presenter.addChatNotifications(usernames_to_notify)
 
@@ -268,21 +256,13 @@ def _processBUSturn(request):
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
-            jsonData["latestUpdate"]
-        ) != str(currentGame.latestUpdate):
-            turn = jsonData.get(
-                "turn", "N/A"
-            )  # Get the value for 'turn' or 'N/A' if not present
-            phase = jsonData.get(
-                "phase", "N/A"
-            )  # Get the value for 'phase' or 'N/A' if not present
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+            turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
+            phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             gameID = jsonData["gameID"]
             latestUpdate = jsonData["latestUpdate"]
             message = (
-                f"SYNC ERROR IN: Bus save - gameID: {gameID} - User: {request.user.username} - JSON_LU: {latestUpdate} "
-                f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentPlayersArr}"
+                f"SYNC ERROR IN: Bus save - gameID: {gameID} - User: {request.user.username} - JSON_LU: {latestUpdate} - DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} -- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {currentPlayersArr}"
             )
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -326,11 +306,7 @@ def _processBUSturn(request):
                 request,
                 jsonData["winner"],
                 jsonData["finalPositions"],
-                (
-                    jsonData.get("tournamentData")
-                    if jsonData.get("tournamentData")
-                    else []
-                ),  # NB THIS DOES NOT EXIST
+                (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),  # NB THIS DOES NOT EXIST
                 jsonData["gameID"],
             )
             # presenter.endGame(
@@ -342,18 +318,11 @@ def _processBUSturn(request):
 
         else:
             # Send Notifications
-            starting_options = (
-                json.loads(currentGame.startingOptions)
-                if currentGame.startingOptions
-                else []
-            )
-            if (
-                len(jsonData["nextPlayer"]) > 0
-                and "BusBot" not in jsonData["nextPlayer"]
-                and not jsonData["status"] == "FINISHED"
-                and 102 not in starting_options
-            ):
+            starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED" and 102 not in starting_options:
                 playerListToNotify = jsonData["nextPlayer"]
+                if "BusBot" in playerListToNotify:
+                    playerListToNotify.remove("BusBot")
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if len(playerListToNotify) > 0:
@@ -376,10 +345,7 @@ def _processBUSturn(request):
 
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             if len(currentGame.rewindTempData) > 0:
-                if len(currentRewindData) == 0 or (
-                    currentRewindData[-1] != currentGame.rewindTempData
-                    and jsonData["data"] != currentGame.rewindTempData
-                ):
+                if len(currentRewindData) == 0 or (currentRewindData[-1] != currentGame.rewindTempData and jsonData["data"] != currentGame.rewindTempData):
                     # add to RWdata and RWdata[]
                     currentRewindData.append(currentGame.rewindTempData)
                 currentGame.rewindTempData = ""
@@ -389,10 +355,7 @@ def _processBUSturn(request):
                 currentRewindData.append(jsonData["data"])
             else:
                 # else check last one isn't same as cufrent, and if not then add
-                if (
-                    len(currentRewindData) == 0
-                    or currentRewindData[-1] != jsonData["data"]
-                ):
+                if len(currentRewindData) == 0 or currentRewindData[-1] != jsonData["data"]:
                     currentRewindData.append(jsonData["data"])
                     # Limit to 20 rewind points by removing oldest
                     while len(currentRewindData) > 20:
@@ -429,16 +392,10 @@ def _processBUSturn(request):
         )
 
     elif jsonData["action"] == "loadRewind":
-        currentRewindDataArray = (
-            json.loads(currentGame.rewindData) if currentGame.rewindData else []
-        )
+        currentRewindDataArray = json.loads(currentGame.rewindData) if currentGame.rewindData else []
         if len(currentRewindDataArray) == 0:
             return JsonResponse(
-                {
-                    "errorMessage": gettext(
-                        "No rewind data. Rewind limit reached. Please play on to generate more rewind data"
-                    )
-                },
+                {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
 
@@ -482,17 +439,11 @@ def _processBUSturn(request):
         currentGame.save()
 
         # Send Notifications
-        starting_options = (
-            json.loads(currentGame.startingOptions)
-            if currentGame.startingOptions
-            else []
-        )
-        if (
-            len(jsonData["nextPlayer"]) > 0
-            and "BusBot" not in jsonData["nextPlayer"]
-            and 102 not in starting_options
-        ):
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        if len(jsonData["nextPlayer"]) > 0 and 102 not in starting_options:
             playerListToNotify = jsonData["nextPlayer"]
+            if "BusBot" in playerListToNotify:
+                playerListToNotify.remove("BusBot")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:
@@ -515,9 +466,7 @@ def _processBUSturn(request):
 
     elif jsonData["action"] == "saveGameDataAfterKickout":
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(
-            jsonData["latestUpdate"]
-        ) != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -614,39 +563,35 @@ def castVote(request):
 def updateFinishedGameDataFormat(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-    
+
     jsonData = json.loads(request.body)
-    
+
     # Validate required fields
     if jsonData.get("action") != "updateFinishedGameDataFormat":
         return JsonResponse({"error": "Invalid action."}, status=400)
-    
+
     if not jsonData.get("gameID"):
         return JsonResponse({"error": "Game ID required."}, status=400)
-    
+
     if not jsonData.get("gameData"):
         return JsonResponse({"error": "Game data required."}, status=400)
-    
+
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    
+
     # Verify game is finished
     if currentGame.gameStatus != "FINISHED":
         return JsonResponse({"error": "Game is not finished."}, status=400)
-    
+
     # Update game data with new compressed format
     currentGame.gameData = jsonData["gameData"]
     currentGame.save()
-    
+
     # Find the next highest ID of a finished BUS game after the requested gameID
-    next_game = Game.objects.filter(
-        gameCode="BUS", 
-        gameStatus="FINISHED",
-        id__gt=jsonData["gameID"]
-    ).order_by('id').first()
-    
+    next_game = Game.objects.filter(gameCode="BUS", gameStatus="FINISHED", id__gt=jsonData["gameID"]).order_by("id").first()
+
     next_game_id = next_game.id if next_game else None
-    
+
     return JsonResponse({"nextGameID": next_game_id})

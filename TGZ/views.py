@@ -444,7 +444,8 @@ def _processTGZturn(request):
         # Don't notify if auto-passing
         elif not autoPass and not firstSave:
             # Send Notifications
-            if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "HcBot" and not jsonData["status"] == "FINISHED" and currentGame.startingOptions != "102":
+            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "TgzBot" and not jsonData["status"] == "FINISHED" and 102 not in loadedStartingOptions:
                 playerListToNotify = jsonData["nextPlayer"].split(",")
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -581,7 +582,8 @@ def _processTGZturn(request):
         currentGame.save()
 
         # Send Notifications
-        if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "TGZbot" and currentGame.startingOptions != "102":
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "TgzBot" and 102 not in loadedStartingOptions:
             playerListToNotify = jsonData["nextPlayer"].split(",")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)

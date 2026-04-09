@@ -453,10 +453,12 @@ def _processKFWturn(request):
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
-            if len(currentPlayersArr) > 0 and "KfwBot" not in currentPlayersArr and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
+            if len(currentPlayersArr) > 0 and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
                 playerListToNotify = [player.strip() for player in currentPlayersArr]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
+                if "KfwBot" in playerListToNotify:
+                    playerListToNotify.remove("KfwBot")
                 if len(playerListToNotify) > 0:
                     presenter.sendYourTurnNotification(
                         "KFW",
@@ -790,10 +792,12 @@ def _processKFWturn(request):
 
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "KfwBot" and 102 not in loadedStartingOptions:
+        if jsonData["nextPlayer"] != "" and 102 not in loadedStartingOptions:
             playerListToNotify = jsonData["nextPlayer"]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
+            if "KfwBot" in playerListToNotify:
+                playerListToNotify.remove("KfwBot")
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
                     "KFW",
