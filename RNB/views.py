@@ -135,6 +135,9 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
     elif currentGame.phase in rfRNB.ALL_PHASE_CONFLICTS:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
+
+    startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
+
     returnData.update(
         {
             "spoilerFree": spoilerFree,
@@ -142,6 +145,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "pov": -99,
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
             "currentPlayers": currentPlayersArr,
+            "startingMap": startingMap
         }
     )
 
@@ -169,7 +173,6 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     )
 
     # returnData.strictMyMove = presenter.getStrictIsMyMove(username)
-    returnData["startingMap"] = json.loads(currentGame.startingMap) if currentGame.startingMap else []
 
     ### NEW GAME
     if not currentGame.gameData or currentGame.gameData == "":
