@@ -459,6 +459,7 @@ function populateMapDropdown(maps) {
 		option.value = JSON.stringify({
 			id: map.id,
 			name: map.name,
+			description: map.description,
 			hexData: map.hexData,
 			playerCount: map.playerCount,
 		})
@@ -475,6 +476,9 @@ function onMapSelectionChange() {
 	const mapDataInput = document.getElementById("mapData")
 	const mapPreviewPlaceholder = document.getElementById("mapPreviewPlaceholder")
 	const mapPreviewContent = document.getElementById("mapPreviewContent")
+	const mapInfoDisplay = document.getElementById("mapInfoDisplay")
+	const selectedMapName = document.getElementById("selectedMapName")
+	const selectedMapDescription = document.getElementById("selectedMapDescription")
 
 	if (mapSelect.value) {
 		try {
@@ -498,7 +502,14 @@ function onMapSelectionChange() {
 				console.error("Vue Store not initialized yet")
 			}
 
-			// 3. Show the Vue container
+			// 3. Show map info
+			if (mapInfoDisplay) {
+				mapInfoDisplay.style.display = "block"
+				selectedMapName.textContent = selectedMap.name
+				selectedMapDescription.textContent = selectedMap.description || "No description available"
+			}
+
+			// 4. Show the Vue container
 			mapPreviewPlaceholder.style.display = "none"
 			mapPreviewContent.style.display = "block"
 		} catch (error) {
@@ -509,9 +520,48 @@ function onMapSelectionChange() {
 		mapPreviewPlaceholder.style.display = "block"
 		mapPreviewContent.style.display = "none"
 
+		// Hide map info
+		if (mapInfoDisplay) {
+			mapInfoDisplay.style.display = "none"
+		}
+
 		// Clear the hidden mapData input when default is selected
 		if (mapDataInput) {
 			mapDataInput.value = ""
 		}
+	}
+}
+
+function clearMapSelection() {
+	const mapSelect = document.getElementById("mapSelection")
+	const mapDataInput = document.getElementById("mapData")
+	const mapPreviewPlaceholder = document.getElementById("mapPreviewPlaceholder")
+	const mapPreviewContent = document.getElementById("mapPreviewContent")
+	const mapInfoDisplay = document.getElementById("mapInfoDisplay")
+	const selectedMapName = document.getElementById("selectedMapName")
+	const selectedMapDescription = document.getElementById("selectedMapDescription")
+	
+	// Reset map selection to default
+	mapSelect.value = ""
+	
+	// Hide map preview and show placeholder
+	mapPreviewPlaceholder.style.display = "block"
+	mapPreviewContent.style.display = "none"
+	
+	// Hide map info
+	if (mapInfoDisplay) {
+		mapInfoDisplay.style.display = "none"
+		selectedMapName.textContent = ""
+		selectedMapDescription.textContent = ""
+	}
+	
+	// Clear the hidden mapData input
+	if (mapDataInput) {
+		mapDataInput.value = ""
+	}
+	
+	// Update Vue store if available
+	if (window.mapStore) {
+		window.mapStore.mapData.externalMapData = null
 	}
 }

@@ -275,13 +275,16 @@
                             <div class="optionSelection">
                                 <select name="mapSelection"
                                         id="mapSelection"
-                                        onchange="onMapSelectionChange();">
+                                        onchange="onMapSelectionChange();"
+                                        required>
                                     <option value="">Select Map</option>
                                 </select>
                                 <br />
                                 <div class="mapFilterToggle">
                                     <label class="checkboxLabel">
-                                        <input type="checkbox" id="isOfficialToggle" onchange="loadMaps();">
+                                        <input type="checkbox"
+                                               id="isOfficialToggle"
+                                               onchange="clearMapSelection(); loadMaps();">
                                         {% translate "Official maps only" %}
                                     </label>
                                 </div>
@@ -289,8 +292,18 @@
                         </div>
                         <!-- Map Preview -->
                         <div class="singleChoiceDiv">
-                            <label class="choiceLabel">{% translate "Map Preview" %}</label>
                             <div class="optionSelection">
+                                <!-- Map Info Display -->
+                                <div id="mapInfoDisplay" style="display: none; margin-bottom: 10px;">
+                                    <div style="font-weight: bold;
+                                                font-size: 16px;
+                                                margin-bottom: 5px"
+                                         id="selectedMapName"></div>
+                                    <div style="color: #666;
+                                                font-size: 14px;
+                                                line-height: 1.4"
+                                         id="selectedMapDescription"></div>
+                                </div>
                                 <div id="mapPreviewContainer"
                                      style="min-height: 300px;
                                             border: 1px solid #ccc;
