@@ -107,6 +107,7 @@
     initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
     initData.deleteVotesData = {{ deleteVotesData | safe }};
     initData.pov = {{ pov }};
+    initData.startingMap = {{ startingMap|safe }};
 
     {% if spoilerFree %}
     initData.spoilerFree = true;
@@ -142,9 +143,7 @@
     {% endif %}
     /////////////////////
     {% if not gameData %}
-    {% if startingMap %}
-  initData.startingMap = {{ startingMap }};
-  {% endif %}
+
     {% if displayNames %}
     initData.displayNames = {{ displayNames | safe }};
     {% endif %}

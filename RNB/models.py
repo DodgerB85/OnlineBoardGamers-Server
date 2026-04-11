@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 
 class RNBmap(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
@@ -6,9 +6,12 @@ class RNBmap(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     
+    class Meta:
+        verbose_name = "RNB Map"
+        verbose_name_plural = "RNB Maps"
+    
     # Player counts
-    min_players = models.PositiveSmallIntegerField(default=1)
-    max_players = models.PositiveSmallIntegerField(default=6)
+    playerCount = models.PositiveSmallIntegerField(default=2)
     
     # All map data (tiles, starting positions, etc.)
     # Note: Requires a database that supports JSON (like PostgreSQL or SQLite 3.9+)
@@ -20,6 +23,23 @@ class RNBmap(models.Model):
 
     # Manual checkbox for verified maps to be part of the official collection
     isOfficial = models.BooleanField(default=False)
+
+    map_number = models.PositiveIntegerField(
+        unique=True, 
+        editable=False, 
+        help_text="Permanent unique ID for this map across all installations."
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.map_number:
+            # Atomic transaction to prevent two maps getting the same number
+            with transaction.atomic():
+                last_map = RNBmap.objects.select_for_update().order_by('-map_number').first()
+                if last_map:
+                    self.map_number = last_map.map_number + 1
+                else:
+                    self.map_number = 1  # Start at 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.description})"

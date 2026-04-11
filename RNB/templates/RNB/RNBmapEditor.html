@@ -29,8 +29,15 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <script type="module" src="http://localhost:3042/static/@vite/client"></script>
-        <script type="module" src="http://localhost:3042/static/main.js"></script>
+        {% if settingsDebug %}
+            <script type="module" src="http://localhost:3042/static/@vite/client"></script>
+            <script type="module" src="http://localhost:3042/static/main.js"></script>
+        {% else %}
+            <link href="{% static 'RNB/RNBvuedist/main.css' %}?" rel="stylesheet" />
+            <script type="module"
+                    crossorigin=""
+                    src="{% static 'RNB/RNBvuedist/main.js' %}"></script>
+        {% endif %}
         <div>
             <noscript>
                 <strong>Please enable Javascript to continue.</strong>

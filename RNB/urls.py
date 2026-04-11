@@ -1,7 +1,5 @@
 from django.urls import path
 
-from Lobby.models import Game
-
 from . import views
 
 app_name = "RNB"
@@ -21,5 +19,7 @@ urlpatterns = [
     path("processRNBturn/", views.processRNBturn, name="processRNBturn"),
     path("data/<int:dataType>/", views.RNBdata, name="RNBdata"),
     path("saveZoomRNB/", views.saveZoomRNB, name="saveZoomRNB"),
+    path("saveRNBmap/", views.saveRNBmap, name="saveRNBmap"),
+    path("getRNBmaps/", views.getRNBmaps, name="getRNBmaps"),
     # path("castVote/", views.castVote, name="castVoteRNB"),
 ]

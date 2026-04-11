@@ -5,6 +5,7 @@ import gzip
 
 from decouple import config
 from typing import TYPE_CHECKING, cast
+from django.db import transaction
 
 from Lobby.sharedFunctions.db_mutex import db_mutex
 
@@ -35,6 +36,7 @@ from .common import create_rnb_game
 from . import RNBconstants as rfRNB
 
 from Lobby.models import User, Game
+from .models import RNBmap
 
 from Lobby.gameViewHelpers import (
     build_show_game_data,
@@ -70,33 +72,40 @@ def createRNBgame(request):
 def showRNBmap(request, game_id=0):
     if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")
-    
+
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="RNB")
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist"))
-    
+
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
-    
+
     # Get map data from the game
-    map_data = ""
-    if currentGame.startingMap:
-        map_data = currentGame.startingMap
-    
+    startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
+
     returnData = {
         "settingsDebug": settings_debug,
-        "gameData": map_data,  # Pass map data directly
+        "startingMap": startingMap,  # Pass map data directly
         "gameID": game_id,
         "gameName": currentGame.gameName if currentGame.gameName else f"RNB Game {game_id}",
     }
-    
+
     return render(request, "RNB/showRNBmapPage.html", returnData)
+
 
 def RNBmapEditor(request, game_id=0):
     if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")
-    
-    return render(request, "RNB/RNBmapEditor.html", {"gameID": game_id})
+
+    return render(
+        request,
+        "RNB/RNBmapEditor.html",
+        {
+            "gameID": game_id,
+            "settingsDebug": config("RNB_USE_SOURCE_CODE", default=False, cast=bool),
+        },
+    )
+
 
 def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if request.user.username not in ALLOWED_USERS_RNB:
@@ -160,6 +169,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     )
 
     # returnData.strictMyMove = presenter.getStrictIsMyMove(username)
+    returnData["startingMap"] = json.loads(currentGame.startingMap) if currentGame.startingMap else []
 
     ### NEW GAME
     if not currentGame.gameData or currentGame.gameData == "":
@@ -170,14 +180,10 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
                 user_gp.notes = ""
                 user_gp.save()
             returnData["notes"] = ""
-        if currentGame.startingMap != "":
-            returnData["startingMap"] = json.loads(currentGame.startingMap)
 
         returnData["displayNames"] = displayNames
 
     return render(request, "RNB/showRNBgame.html", returnData)
-
-
 
 
 def processRNBturn(request):
@@ -329,7 +335,7 @@ def _processRNBturn(request):
             currentGame.save()
 
             # time.sleep(10)
-            #print(f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}")
+            # print(f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}")
 
             # Now get the NEXT set of moves -- and set the next player's stack to current
             if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
@@ -964,6 +970,77 @@ def saveNotesRNB(request):
 @login_required
 def saveZoomRNB(request):
     return shared_save_zoom(request, "RNB")
+
+
+@login_required
+def saveRNBmap(request):
+    """
+    Save RNB map data to database
+    Expects POST request with map name, description, and map data
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
+
+    try:
+        # Get map data from request
+        data = json.loads(request.body)
+        map_name = data.get("mapName", "")
+        map_description = data.get("mapDescription", "")
+        map_data = data.get("mapData", {})
+        map_playerCount = data.get("playerCount", 2)
+
+        # Validate required fields
+        # if not map_name:
+        #    return JsonResponse({'error': 'Map name is required'}, status=400)
+
+        # Use transaction for atomic database operations
+        with transaction.atomic():
+            new_map = RNBmap.objects.create(
+                name=map_name,
+                description=map_description,
+                playerCount=map_playerCount,
+                hexData=map_data,
+                customElements=None,  # Can be populated later if needed
+                highscores=None,  # Empty list for new maps
+                isOfficial=False,  # Default to not official
+            )
+
+        return JsonResponse({"success": True, "message": f'Map "{map_name}" saved successfully', "map_id": new_map.id})
+
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+
+
+@login_required
+def getRNBmaps(request):
+    """
+    Get RNB maps from database with optional isOfficial filter
+    """
+    if request.method != "GET":
+        return JsonResponse({"error": "GET method required"}, status=405)
+
+    try:
+        # Get filter parameters
+        is_official = request.GET.get("isOfficial", "all")
+
+        # Query maps based on filter
+        maps_queryset = RNBmap.objects.all()
+
+        if is_official == "true":
+            maps_queryset = maps_queryset.filter(isOfficial=True)
+        elif is_official == "false":
+            maps_queryset = maps_queryset.filter(isOfficial=False)
+        # 'all' means no filtering
+
+        # Format response
+        maps_data = []
+        for map_obj in maps_queryset:
+            maps_data.append({"id": map_obj.id, "name": map_obj.name, "description": map_obj.description, "playerCount": map_obj.playerCount, "isOfficial": map_obj.isOfficial, "hexData": map_obj.hexData})
+
+        return JsonResponse({"success": True, "maps": maps_data})
+
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
 
 
 @login_required()

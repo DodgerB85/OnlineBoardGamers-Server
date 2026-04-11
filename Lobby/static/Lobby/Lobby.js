@@ -270,8 +270,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	}
 
-	// Add TGZ info
-	let customRNBinfos = document.querySelectorAll(".RNBinfoContainer")
+	// Add RNB info
+	/*let customRNBinfos = document.querySelectorAll(".RNBinfoContainer")
 	for (let i = 0; i < customRNBinfos.length; i++) {
 		customRNBinfos[i].onclick = function (e) {
 			e.stopPropagation() // stops the browser from redirecting.
@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			const RNBinfoPopup = this.querySelector(".RNBinfoPopup")
 			RNBinfoPopup.style.display = "none"
 		}
-	}
+	}*/
 
 	// Add click to open all games button
 	if (!global.joinGameLink) {

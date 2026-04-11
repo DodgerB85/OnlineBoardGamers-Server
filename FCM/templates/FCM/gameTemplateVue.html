@@ -189,7 +189,7 @@
     }
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
-    {% if settingsDEBUG %}
+    {% if settingsDebug %}
       <script type="module" src="http://localhost:3048/static/@vite/client"></script>
       <script type="module" src="http://localhost:3048/static/main.js"></script>
     {% else %}
@@ -246,10 +246,9 @@
   initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
   initData.myZoomLevel = {{ myZoomLevel }};
   initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
-  initData.startingOptions = {{startingOptions}};
+  initData.startingOptions = {{startingOptionsLiteral}};
   initData.playerNames = {{ allPlayerListBySeat | safe }};
   initData.currentPlayers = '{{ currentPlayers }}'
-  initData.preferredFCMOptions = {{ preferredFCMOptions }};
   initData.pov = {{ pov }};
   initData.turn = {{turn}};
   initData.deleteVotesData = {{ deleteVotesData | safe }};
@@ -283,7 +282,6 @@
   initData.kickoutRequired = {{kickoutRequired}};
   {% endif %}
   initData.notes = '{{ notes | safe }}';
-  initData.yourTurnAudioType = {{ yourTurnAudioType }};
   {% if not gameData %}
   {% if displayNames %}
   initData.displayNames = {{ displayNames | safe }};

@@ -3,7 +3,54 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
-{% endblock %}
+    <style>
+        /* Ensure topBar stays on top of map */
+        .topBar {
+            z-index: 1000 !important;
+        }
+        
+        /* Map container should be below topBar */
+        #hexDIV {
+            z-index: 1;
+        }
+        
+        /* Map preview container styles */
+        #mapPreviewContainer {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #mapPreviewContent {
+            position: relative;
+            min-height: 300px;
+        }
+        
+        /* Hide map preview elements that might interfere */
+        #mapPreviewContent .loading-text {
+            display: none;
+        }
+    </style>
+    {% if settingsDebug %}
+        <script type="module" src="http://localhost:3042/static/@vite/client"></script>
+        <script type="module" src="http://localhost:3042/static/main.js"></script>
+    {% else %}
+        <link href="{% static 'RNB/RNBvuedist/main.css' %}?" rel="stylesheet" />
+        <script type="module"
+                crossorigin=""
+                src="{% static 'RNB/RNBvuedist/main.js' %}"></script>
+    {% endif %}
+    {% compress js %}
+        <script src="{% static 'Lobby/createRNB.js' %}"></script>
+    {% endcompress %}
+    <script>
+    window.initData = {
+        showMapOnly: true,
+        gameID: -1,
+        startingMap: [],
+        gameName: '{{ gameName }}'
+    };
+    </script>
+{% endblock head %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
     {{ request.user.username|json_script:"username" }}
@@ -18,7 +65,7 @@
         <!--<p><span style="font-size: 2em; background-color: yellow; color: darkred;">Want to play in person? Check out <a href="https://splottercon.com/" target="_blank">Splotter Con 2024</a>! Pittsburgh from Aug 30</span></p>
 -->
         <div id="allOptions">
-            <span class="topOfNewGameSpan">{% translate "New to Roads & Boats? For Rules, How to Play, and Game Guide, please see <a class='linkOther' href='/help/'>Help</a>" %}</span>
+            <span class="topOfNewGameSpan">{% translate "New to Roads & Boats? For Rules, How to Play, and Game Guide, please see " %}<a class="linkOther" href="{% url 'RNB:RNBhelp' %}">{% translate "Help" %}</a></span>
             <form autocomplete="off"
                   action="{% url 'RNB:createRNBgame' %}"
                   method="post"
@@ -223,11 +270,48 @@
                     </fieldset>
                     <fieldset id="basicOptions" class="optionsGroupTop">
                         <legend class="optionsHeader">{% translate "Game Options" %}</legend>
-                        ETC
-                        <br />
+                        <div class="singleChoiceDiv">
+                            <label class="choiceLabel" for="mapSelection">{% translate "Select Map" %}</label>
+                            <div class="optionSelection">
+                                <select name="mapSelection"
+                                        id="mapSelection"
+                                        onchange="onMapSelectionChange();">
+                                    <option value="">Select Map</option>
+                                </select>
+                                <br />
+                                <div class="mapFilterToggle">
+                                    <label class="checkboxLabel">
+                                        <input type="checkbox" id="isOfficialToggle" onchange="loadMaps();">
+                                        {% translate "Official maps only" %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Map Preview -->
+                        <div class="singleChoiceDiv">
+                            <label class="choiceLabel">{% translate "Map Preview" %}</label>
+                            <div class="optionSelection">
+                                <div id="mapPreviewContainer"
+                                     style="min-height: 300px;
+                                            border: 1px solid #ccc;
+                                            background-color: #f9f9f9;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center">
+                                    <div id="mapPreviewPlaceholder">{% translate "Select a map to preview" %}</div>
+                                    <div id="mapPreviewContent"
+                                         style="display: none;
+                                                width: 100%;
+                                                height: 100%">
+                                        <div id="app" style="width: 100%; height: 100%;">
+                                            <div id="loadingText">Loading Map.ssssss.......</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </fieldset>
                 </div>
-                <br />
             </div>
             <div>
                 <input type="submit"
@@ -235,13 +319,10 @@
                        value="{% translate "Create Roads & Boats Game" %}">
             </div>
         </form>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/splotterconSponsor.html' %}
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/splotterconSponsor.html" %}
     </div>
     {% block script %}
-        {% compress js %}
-            <script src="{% static 'Lobby/createRNB.js' %}"></script>
-        {% endcompress %}
         <script>
     var global = {};
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';
@@ -277,6 +358,9 @@
         autocomplete(document.getElementById("player2"));
         autocomplete(document.getElementById("player3"));
         autocomplete(document.getElementById("player4"));
+        
+        // Load maps when page loads
+        loadMaps();
 
     {% if fillData %}
     //alert("Filling Data")
@@ -295,6 +379,7 @@
 });
 
 
+   
         </script>
-    {% endblock %}
-{% endblock %}
+    {% endblock script %}
+{% endblock body %}

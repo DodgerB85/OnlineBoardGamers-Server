@@ -61,6 +61,8 @@ def build_show_game_data(
 
     base_data = {
         "gameID": gameID,
+        "turn": currentGame.turn,
+        "phase": currentGame.phase,
         "finishedGame": currentGame.gameStatus == "FINISHED",
         "gameName": gameName,
         "gameData": currentGame.gameData,

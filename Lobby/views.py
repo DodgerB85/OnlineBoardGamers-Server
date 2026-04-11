@@ -2161,8 +2161,13 @@ def createRNBpage(request, gameID=0):
     if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")
     experienced = SF_hasRequiredExperience(request, "RNB", Game)
+    # Get settings debug flag for RNB map rendering
+    settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
     if request.method != "POST" and gameID == 0:
-        return render(request, "Lobby/createRNB.html", {"experienced": experienced})
+        return render(request, "Lobby/createRNB.html", {
+            "experienced": experienced,
+            "settingsDebug": settings_debug
+        })
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
@@ -2189,6 +2194,7 @@ def createRNBpage(request, gameID=0):
                 "kickoutDuration": currentGame.kickoutDuration,
                 "startingOptions": loadedStartingOptions,
                 "experienced": experienced,
+                "settingsDebug": settings_debug,
             },
         )
 
