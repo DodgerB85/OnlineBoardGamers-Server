@@ -511,6 +511,43 @@
                 </div>
                 <br />
                 <br />
+                <label class="preferenceTitle">{% translate "Player Table Style" %}</label>
+                <br />
+                <br />
+                <div class="favRestChoice">
+                    <label for="playerTableStyle0">
+                        <img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon_outline.jpg' %}"
+                             width="230"
+                             height="152"
+                             alt="Solid Colour" />
+                    </label>
+                    <br />
+                    <b>Icons</b>
+                    <br />
+                    <input type="radio"
+                           id="playerTableStyle0"
+                           name="playerTableStyle"
+                           value="0"
+                           {% if playerTableStyle == 0 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="playerTableStyle1">
+                        <img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}"
+                             width="230"
+                             height="152"
+                             alt="Solid Colour" />
+                    </label>
+                    <br />
+                    <b>Text</b>
+                    <br />
+                    <input type="radio"
+                           id="playerTableStyle1"
+                           name="playerTableStyle"
+                           value="1"
+                           {% if playerTableStyle == 1 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
                 <button type="submit" class="updateProfilebtn">{% translate "Update Indonesia Preferences" %}</button>
             </form>
         </div>

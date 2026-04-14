@@ -82,7 +82,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
             "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
-            "preferredINDoptions": [-1, 0, 0, 1, 1, 1],
+            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0],
             "pov": -99,
             "preMoves": "",
             "sideData": "",
@@ -95,9 +95,10 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1]
-    if len(preferredINDoptions) < 6:
-        preferredINDoptions.extend([1] * (6 - len(preferredINDoptions)))
+    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
+    if len(preferredINDoptions) < 7:
+        preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
+        preferredINDoptions[6] = 1
     returnData["preferredINDoptions"] = preferredINDoptions
 
     if not result["is_involved"]:
