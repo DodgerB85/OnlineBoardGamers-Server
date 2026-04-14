@@ -637,7 +637,7 @@ def _processHLCturn(request):
                 playerListToNotify.remove("HlcBot")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
-            if len(playerListToNotify) > 0:
+            if len(playerListToNotify) > 0: 
                 presenter.sendYourTurnNotification(
                     "HLC",
                     playerListToNotify,
