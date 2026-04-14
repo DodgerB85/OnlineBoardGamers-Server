@@ -179,7 +179,7 @@ def create_rnb_game(
             statsExcludedGame=stats_exclude,
             startingMap=starting_map,
             startingOptions=json.dumps(starting_options),
-            # playerOrderSeed=player_order_seed,
+            playerOrderSeed=player_order_seed,
         )
         if "privateGame" in request.POST:
             new_game.gameStatus = "PRIVATE"
