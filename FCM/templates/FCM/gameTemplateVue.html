@@ -253,7 +253,10 @@
   initData.turn = {{turn}};
   initData.deleteVotesData = {{ deleteVotesData | safe }};
   initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
-  
+  initData.startingMap = {{ startingMap }}
+  initData.moveData = {{ moveData }}
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+
   // Game state
   {% if finishedGame %}
   initData.finishedGame = true
@@ -286,7 +289,6 @@
   {% if displayNames %}
   initData.displayNames = {{ displayNames | safe }};
   {% endif %}
-  initData.playerNames = {{ allPlayerListBySeat | safe }};
   {% endif %}
   {% endif %}
 

@@ -629,7 +629,7 @@ def _processHLCturn(request):
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         # Send Notifications
-        if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+        if len(jsonData["nextPlayer"]) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
             playerListToNotify = jsonData["nextPlayer"]
             if "HcBot" in playerListToNotify:
                 playerListToNotify.remove("HcBot")

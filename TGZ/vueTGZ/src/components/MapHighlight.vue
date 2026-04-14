@@ -214,7 +214,7 @@ function hubRangeSqRightBorder(hubRange, index) {
 <template>
 	<!-- HIGHLIGHT SQUARES TO CLICK -->
 	<template v-if="personal.canPlay()">
-		<template v-for="(index, indexCount) in store.context.indexesToHighlightClick" v-bind:key="indexCount">
+		<template v-for="(index, indexCount) in store.context.indexesToHighlightClick" :key="indexCount">
 			<svg
 				class="higlightSquareToClick"
 				:style="{

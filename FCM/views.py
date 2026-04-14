@@ -205,6 +205,7 @@ def showGame(request, game_id):
                 "pov": -99,
                 "preferredColour": -1,
                 "OOBpreference": OOBpreference,
+                "moveData": "",
             }
         )
         return render(request, "FCM/GameTemplate.html", returnData)
@@ -394,10 +395,11 @@ def showGameVue(request, game_id):
                 "USE_NEW_CODE": USE_NEW_CODE,
                 "finishedGame": finishedGame,
                 "startingOptionsLiteral": currentGame.startingOptions if currentGame.startingOptions else [],
-                "startingMap": currentGame.startingMap,
+                "startingMap": currentGame.startingMap if currentGame.startingMap else [],
                 "pov": -99,
                 "preferredColour": -1,
                 "OOBpreference": OOBpreference,
+                "moveData": "",
             }
         )
         return render(request, "FCM/gameTemplateVue.html", returnData)
@@ -415,7 +417,7 @@ def showGameVue(request, game_id):
         c = bytes(chatData, "utf-8")
         chatData = c.decode("unicode-escape")
 
-    currentMove = ""
+    moveData = ""
     currentNotes = ""
     pov = -9
     preferredRestaurantColour = -1
@@ -469,9 +471,9 @@ def showGameVue(request, game_id):
         preferredRestaurantColour = user_profile.preferredRestaurantColour
         liveNotification = user_profile.liveNotification
 
-        currentMove = ""
+        moveData = ""
         if presenter.hasValidActualMoveData(username) or presenter.hasValidActualCleanupPreset(username):
-            currentMove = presenter.getCompressedMoveArr(username, True)
+            moveData = presenter.getCompressedMoveArr(username, True)
 
         player_gp = next((gp for gp in all_players if gp.player and gp.player.id == user_id), None)
         currentNotes = player_gp.notes if player_gp else ""
@@ -505,7 +507,7 @@ def showGameVue(request, game_id):
             "chatData": chatData,
             "showAssistance": showAssistance,
             "chatNotification": chatNotification,
-            "moveData": currentMove,
+            "moveData": moveData,
             "allPlayerListBySeat": allPlayerListBySeat,
             "currentNotes": currentNotes,
             "kickoutRequired": kickoutRequired,
@@ -533,7 +535,7 @@ def showGameVue(request, game_id):
             "KickoutFlexiDataArray": result["base_data"]["KickoutFlexiDataArray"],
             "USE_NEW_CODE": USE_NEW_CODE,
             "startingOptionsLiteral": currentGame.startingOptions if currentGame.startingOptions else [],
-            "startingMap": currentGame.startingMap,
+            "startingMap": currentGame.startingMap if currentGame.startingMap else [],
             "OOBpreference": OOBpreference,
             "statsExcludeVotesData": result["base_data"]["statsExcludeVotesData"],
             "deleteVotesData": result["base_data"]["deleteVotesData"],
@@ -623,7 +625,7 @@ def _processTurn(request):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "specialData": currentMove,
                 "latestUpdate": currentGame.latestUpdate,
-                "startingMap": currentGame.startingMap,
+                "startingMap": currentGame.startingMap if currentGame.startingMap else [],
                 "OOBpreference": OOBpreference,
             },
             safe=False,
