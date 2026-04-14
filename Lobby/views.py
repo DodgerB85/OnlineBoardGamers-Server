@@ -1856,6 +1856,7 @@ def profileIND(request):
         INDoptions.append(int(request.POST["indOutline"]))
         INDoptions.append(int(request.POST["goodsIcon"]))
         INDoptions.append(int(request.POST["shipIcon"]))
+        INDoptions.append(int(request.POST["playerTableStyle"]))
 
         profile.preferredINDoptions = json.dumps(INDoptions, separators=(",", ":"))
 
@@ -1869,12 +1870,13 @@ def profileIND(request):
 
     else:
         profile = Profile.objects.get(user=request.user)
-        preferredINDoptions = json.loads(request.user.profile.preferredINDoptions) if request.user.profile.preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1]
+        preferredINDoptions = json.loads(request.user.profile.preferredINDoptions) if request.user.profile.preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
 
-        if len(preferredINDoptions) < 6:
-            preferredINDoptions.extend([1] * (6 - len(preferredINDoptions)))
+        if len(preferredINDoptions) < 7:
+            preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
+            preferredINDoptions[6] = 0
 
-        # [colour, mapType, citySizeColour, indOutline]
+        # [colour, mapType, citySizeColour, indOutline, goodsIcon, shipIcon, playerTableStyle]
 
         return render(
             request,
@@ -1886,6 +1888,7 @@ def profileIND(request):
                 "indOutline": preferredINDoptions[3],
                 "goodsIcon": preferredINDoptions[4],
                 "shipIcon": preferredINDoptions[5],
+                "playerTableStyle": preferredINDoptions[6],
             },
         )
 

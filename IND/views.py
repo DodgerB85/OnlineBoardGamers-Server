@@ -98,7 +98,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
     if len(preferredINDoptions) < 7:
         preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
-        preferredINDoptions[6] = 1
+        preferredINDoptions[6] = 0
     returnData["preferredINDoptions"] = preferredINDoptions
 
     if not result["is_involved"]:
