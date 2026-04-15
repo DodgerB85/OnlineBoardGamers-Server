@@ -49,10 +49,13 @@ function localEndTurn() {
  * Player Choose Saint
  */
 function clickedSaint(saintID) {
-	store.players[props.playerIndexProp].saint = saintID
+	// DO NOT USE props.playerIndexProp or it will give the saint to the city YOU ARE LOOKING AT
+	let saintPlayerIndex = personal.pov
+	if (personal.trainingGame) saintPlayerIndex = controller.currentPlayerIndex()
+	store.players[saintPlayerIndex].saint = saintID
 	store.gameflow.subPhase = rf.SUB_PHASE_ADD_BUILDINGS
 	// Add history
-	store.players[props.playerIndexProp].cityHistory.saintChosen = saintID
+	store.players[saintPlayerIndex].cityHistory.saintChosen = saintID
 
 	store.clearVars()
 
