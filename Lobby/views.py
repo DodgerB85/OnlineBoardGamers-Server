@@ -1848,13 +1848,13 @@ def profileIND(request):
         profile = Profile.objects.get(user=request.user)
 
         INDoptions = []
-        INDoptions.append(int(request.POST["indColour"]))
-        INDoptions.append(int(request.POST["mapType"]))
-        INDoptions.append(int(request.POST["citySizeColour"]))
-        INDoptions.append(int(request.POST["indOutline"]))
-        INDoptions.append(int(request.POST["goodsIcon"]))
-        INDoptions.append(int(request.POST["shipIcon"]))
-        INDoptions.append(int(request.POST["playerTableStyle"]))
+        INDoptions.append(int(request.POST.get("indColour", -1)))
+        INDoptions.append(int(request.POST.get("mapType", 0)))
+        INDoptions.append(int(request.POST.get("citySizeColour", 0)))
+        INDoptions.append(int(request.POST.get("indOutline", 1)))
+        INDoptions.append(int(request.POST.get("goodsIcon", 1)))
+        INDoptions.append(int(request.POST.get("shipIcon", 1)))
+        INDoptions.append(int(request.POST.get("playerTableStyle", 0)))
 
         profile.preferredINDoptions = json.dumps(INDoptions, separators=(",", ":"))
 
