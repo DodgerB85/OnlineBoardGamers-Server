@@ -3,6 +3,8 @@ import time
 import base64
 import gzip
 
+from datetime import timedelta
+
 from decouple import config
 from typing import TYPE_CHECKING, cast
 from django.db import transaction
@@ -13,7 +15,9 @@ from Lobby.sharedFunctions.db_mutex import db_mutex
 # from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
+from django_q.tasks import schedule
 from django.utils.translation import gettext
+from django.utils import timezone
 from django.shortcuts import render, redirect  # get_object_or_404,
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 
@@ -24,9 +28,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendPendingRNBturnNotification,
     SN_sendAdminErrorMessage,
-    SN_sendFixNextTurnNotification,
 )
 
 import Lobby.sharedFunctions.constants as rf
@@ -138,16 +140,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
 
-    returnData.update(
-        {
-            "spoilerFree": spoilerFree,
-            "replayStep": replayStep,
-            "pov": -99,
-            "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
-            "currentPlayers": currentPlayersArr,
-            "startingMap": startingMap
-        }
-    )
+    returnData.update({"spoilerFree": spoilerFree, "replayStep": replayStep, "pov": -99, "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)), "currentPlayers": currentPlayersArr, "startingMap": startingMap})
 
     if not result["is_authenticated"]:
         return render(request, "RNB/showRNBgame.html", returnData)
@@ -167,7 +160,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["involved_data"])
     returnData.update(
         {
-            "currentMove": presenter.getCurrentMoveData(username),
+            "currentMoveData": presenter.getCurrentMoveDataForPlayer(username),
+            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(username),
             "trade": currentGame.playerTradeData,
         }
     )
@@ -295,7 +289,7 @@ def _processRNBturn(request):
             newMoveEntry = {
                 "turn": mainPhaseSkipData[0],
                 "phase": mainPhaseSkipData[1],
-                "actionStack": "",
+                "actionStack": "SKIP",
                 "status": "pending",
             }
             PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
@@ -539,6 +533,7 @@ def _processRNBturn(request):
         # Only notify if game still running
         else:
             # Send Notifications
+            # Next player either needs to move OR fix a move
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             nextCurrentPlayerUsername = jsonData["nextCurrentPlayerUsername"]
             if nextCurrentPlayerUsername != "" and nextCurrentPlayerUsername != "RnbBot" and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
@@ -549,14 +544,20 @@ def _processRNBturn(request):
                     playerListToNotify.remove("RnbBot")
                 if len(playerListToNotify) > 0:
                     if jsonData["currentPlayerNeedsToFixMove"]:
-                        SN_sendFixNextTurnNotification(
-                            request,
+                        #start_time = timezone.now() + timedelta(minutes=2)
+                        start_time = timezone.now() + timedelta(seconds=10) # For debug
+                        schedule(
+                            "Lobby.sharedFunctions.sharedNotifications.SN_sendFixNextTurnNotificationWithValidation",
                             "RNB",
-                            playerListToNotify,
+                            playerListToNotify[0],
                             getattr(currentGame, "id"),
                             presenter.getGameName(),
-                            currentGame,
-                            oldVer,
+                            currentGame.latestUpdate,
+                            currentGame.turn,
+                            currentGame.phase,
+                            next_run=start_time,
+                            repeats=-1,  # Neg repeats for delete
+                            schedule_type="O",
                         )
                     else:
                         presenter.sendYourTurnNotification(
@@ -567,22 +568,40 @@ def _processRNBturn(request):
                             currentGame,
                             oldVer,
                         )
+            # Pending players CAN pre-move -- but DON'T notify if a premove is already set
             pendingPlayersArr = jsonData["pendingPlayersArr"]
             if len(pendingPlayersArr) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+                # 1. Clean the list (strip whitespace)
                 playerListToNotify = [player.strip() for player in pendingPlayersArr]
+                # 2. Remove the current user and the Bot
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if "RnbBot" in playerListToNotify:
                     playerListToNotify.remove("RnbBot")
+
+                # 3. Remove players who have a PreMove saved
+                # This keeps only players where playerHasPreMove returns False
+                # Debug print
+                for pName in playerListToNotify:
+                    if presenter.playerHasPreMove(pName):
+                        print(f"{pName}: has premove: {presenter.getCurrentMoveDataForPlayer(pName)}")
+                playerListToNotify = [pName for pName in playerListToNotify if not presenter.playerHasPreMove(pName)]
+
                 if len(playerListToNotify) > 0:
-                    SN_sendPendingRNBturnNotification(
-                        request,
+                    #start_time = timezone.now() + timedelta(minutes=2)
+                    start_time = timezone.now() + timedelta(seconds=10) # For debug
+                    schedule(
+                        "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
                         "RNB",
                         playerListToNotify,
                         getattr(currentGame, "id"),
                         presenter.getGameName(),
-                        currentGame,
-                        oldVer,
+                        currentGame.latestUpdate,
+                        currentGame.turn,
+                        currentGame.phase,
+                        next_run=start_time,
+                        repeats=-1,  # Neg repeats for delete
+                        schedule_type="O",
                     )
 
         ################ REWIND EVERY SAVE #######################
@@ -877,15 +896,22 @@ def performSaveGame(request, currentGame, jsonData):
             if "RnbBot" in playerListToNotify:
                 playerListToNotify.remove("RnbBot")
             if len(playerListToNotify) > 0:
-                SN_sendPendingRNBturnNotification(
-                    request,
+                #start_time = timezone.now() + timedelta(minutes=2)
+                start_time = timezone.now() + timedelta(seconds=10) # For debug
+                schedule(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
                     "RNB",
                     playerListToNotify,
                     getattr(currentGame, "id"),
                     presenter.getGameName(),
-                    currentGame,
-                    oldVer,
+                    currentGame.latestUpdate,
+                    currentGame.turn,
+                    currentGame.phase,
+                    next_run=start_time,
+                    repeats=-1,  # Neg repeats for delete
+                    schedule_type="O",
                 )
+
 
     ################ REWIND EVERY SAVE #######################
 
@@ -1068,13 +1094,13 @@ def RNBdata(request, dataType=1):
         # 2. Encode to Base64 so it can travel safely in HTML
         # gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
         gameDataB64 = currentGame.gameData
-        currentMove = presenter.getCurrentMoveData(request.user.username)
         returnData = {
             "gameDataB64": gameDataB64,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
             "latestUpdate": currentGame.latestUpdate,
-            "currentMove": currentMove,
+            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
         }
         # Send game data
         return JsonResponse(returnData)
@@ -1101,14 +1127,14 @@ def RNBdata(request, dataType=1):
         # 2. Encode to Base64 so it can travel safely in HTML
         # gameDataB64 = base64.b64encode(raw_blob).decode("utf-8")
         gameDataB64 = currentGame.gameData
-        currentMove = presenter.getCurrentMoveData(request.user.username)
         return JsonResponse(
             {
                 "latest": False,
                 "gameDataB64": gameDataB64,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
-                "currentMove": currentMove,
+                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
             }
         )
 

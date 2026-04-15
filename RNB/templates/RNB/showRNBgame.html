@@ -89,67 +89,61 @@
   //const yearInterval = setInterval(updateYear, duration / (startYear - endYear));
 
   
-    var initData = {};
-  
-    ///////////////////////
-    initData.gameID = {{ gameID }};
-    initData.gameName = "{{ gameName }}";
-    initData.gameDataB64  = '{{ gameDataB64 | safe }}';
+  var initData = {};
+  // V2
+  initData.gameID = {{ gameID }};
+  initData.gameName = "{{ gameName }}";
+  initData.gameDataB64  = '{{ gameDataB64 | safe }}';
+  initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+  initData.myZoomLevel = {{ myZoomLevel }};
+  initData.startingOptions = {{startingOptions}};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  initData.currentPlayers = {{ currentPlayers | safe }};
+  //initData.preferredRNBoptions = {{ preferredRNBoptions }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+  initData.deleteVotesData = {{ deleteVotesData | safe }};
+  initData.pov = {{ pov }};
+  initData.startingMap = {{ startingMap|safe }};
+  initData.turn = {{turn}};
 
+  // Finished Game
+  initData.finishedGame = {{finishedGame|lower}};
 
-    initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
-    initData.myZoomLevel = {{ myZoomLevel }};
-    initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
-    initData.startingOptions = {{startingOptions}};
-    initData.playerNames = {{ allPlayerListBySeat | safe }};
-    initData.currentPlayers = {{ currentPlayers|safe }};
-    //initData.preferredRNBoptions = {{ preferredRNBoptions }};
-    initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
-    initData.deleteVotesData = {{ deleteVotesData | safe }};
-    initData.pov = {{ pov }};
-    initData.startingMap = {{ startingMap|safe }};
+  {% if spoilerFree %}
+  initData.spoilerFree = true;
+  initData.replayStep = {{replayStep}}-1;
+  {% endif %}
 
-    {% if spoilerFree %}
-    initData.spoilerFree = true;
-    initData.replayStep = {{replayStep}}-1;
-    {% endif %}
+  ///////////////////////
+  {% if user.is_authenticated %}
+  initData.name = '{{ name }}';
+  initData.chatData = "{{ chatData }}";
+  initData.latestUpdate = {{ latestUpdateLiteral }};
+  initData.nextURL = '{{ nextURL|safe }}';
+  initData.chatNotification = {{chatNotification|lower}};
+  {% endif %}
 
-    ///////////////////////
-    {% if user.is_authenticated %}
-    initData.name = '{{ name }}';
-    initData.chatData = "{{ chatData }}";
-    initData.latestUpdate = {{ latestUpdateLiteral }};
-    initData.nextURL = '{{ nextURL|safe }}';
-    {% if chatNotification %}initData.chatNotification = true;{% endif %}
-    {% endif %}
-  
-    ///////////////////////
-    {% if involvedPlayer %}
-    initData.statsExcludedGame = {{ statsExcludedGame|lower }};
-    initData.currentMove = {{ currentMove | safe }};
-    initData.trade = '{{ trade }}';
-    
-    initData.secondsToNextKickout = {{ secondsToNextKickout }};
-    {% if kickoutRequired > 0 %}
-    initData.kickoutRequired = {{kickoutRequired}};
-    {% endif %}
-    initData.notes = '{{ notes | safe }}';
-    initData.yourTurnAudioType = {{ yourTurnAudioType }};
-
-    {% if preMove %}
-    initData.preMove = "{{preMove}}";
-    {% else %}
-    initData.preMove = "";
-    {% endif %}
-    /////////////////////
-    {% if not gameData %}
-
-    {% if displayNames %}
-    initData.displayNames = {{ displayNames | safe }};
-    {% endif %}
-    initData.playerNames = {{ allPlayerListBySeat | safe }};
-    {% endif %}
-    {% endif %}
+  ///////////////////////
+  {% if involvedPlayer %}
+  initData.currentMoveData = {{ currentMoveData | safe }};
+  initData.allMyMoveData = {{ allMyMoveData|safe  }};
+  initData.statsExcludedGame = {{ statsExcludedGame|lower }};
+  initData.secondsToNextKickout = {{ secondsToNextKickout }};
+  initData.trade = '{{ trade }}';
+  {% if kickoutRequired > 0  %}
+  initData.kickoutRequired = {{kickoutRequired}};
+  {% endif %}
+  initData.notes = '{{ notes | safe }}';
+  initData.yourTurnAudioType = {{ yourTurnAudioType }};
+initData.preMove = "{{preMove}}";
+  /////////////////////
+  {% if not gameData %}
+  {% if displayNames %}
+  initData.displayNames = {{ displayNames | safe }};
+  {% endif %}
+  {% endif %}
+  {% endif %}
 
   </script>
 </html>

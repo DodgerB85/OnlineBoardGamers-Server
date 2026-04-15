@@ -663,6 +663,8 @@ def SR_currentTurnString(gameCode, turn, phase):
 
     elif gameCode == "RNB":
         currentTurnString = str(turn) + " - "
+        if phase == rfRNB.PHASE_CHOOSE_HOME_TILE:
+            currentTurnString += gettext("Choose Home Tile")
         if phase == rfRNB.PHASE_CONFLICT_PRODUCTION_DECISION:
             currentTurnString += gettext("Conflict Decision: Production")
         elif phase == rfRNB.PHASE_CONFLICT_PRODUCTION_PRAYING:

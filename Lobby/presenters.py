@@ -12,6 +12,7 @@ import random
 from django.utils.translation import gettext
 from django.urls import reverse
 
+
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
 )
@@ -1475,21 +1476,15 @@ class RNBpresenter(GamePresenter):
     #
     #    return ", ".join(_currentPlayers)
     #
-    # TODO fix this for RNB
-    def hasMoveEndData(self, name):
-        seat = self.seatPosition(name)
-        gp = self.gameObj.players.filter(seat_order=seat).first()
-        if not gp:
-            return False
-        return bool(gp.currentMoveData != "" and gp.currentMoveTime != "MID_PHASE" and gp.currentMoveTime != "PRE_MOVE")
-
-    def hasMoveMidData(self, name):
-        seat = self.seatPosition(name)
-        gp = self.gameObj.players.filter(seat_order=seat).first()
-        if not gp:
-            return False
-        return bool(gp.currentMoveData != "" and gp.currentMoveTime == "MID_PHASE")
-
+    
+    def playerHasPreMove(self, name):
+        # This calls getCurrentMoveDataForPlayer
+        currentMove = self.getCurrentMoveDataForPlayer(name)
+        
+        # In Python, {} is falsy. 
+        # This returns True if data exists, False if it is {}
+        return bool(currentMove) 
+        
     def updateSingleMove(self, name, data, deleteMove=False):
         import time
 
@@ -1545,10 +1540,10 @@ class RNBpresenter(GamePresenter):
                 gp.currentMoveData = ""
                 gp.save()
 
-    def getCurrentMoveData(self, name):
+    def getCurrentMoveDataForPlayer(self, name):
         seat = self.seatPosition(name)
         if seat == -1:
-            return []
+            return {}
         gp = self.gameObj.players.filter(seat_order=seat).first()
         gp_move_data = gp.moveDataJSON if gp and gp.moveDataJSON else []
         for entry in gp_move_data:
@@ -1558,7 +1553,19 @@ class RNBpresenter(GamePresenter):
                 return entry
             elif entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase - rfRNB.PHASE_LOOKBACK_AMOUNT:
                 return entry
-        return []
+        return {}
+
+    def getAllMyMoveDataForPlayer(self, name):
+        seat = self.seatPosition(name)
+        if seat == -1:
+            return []
+        allMoves = []
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        gp_move_data = gp.moveDataJSON if gp and gp.moveDataJSON else []
+        for entry in gp_move_data:
+            if entry["turn"] >= self.gameObj.turn:
+                allMoves.append(entry)
+        return allMoves      
 
     def getMoveDataTime(self, name):
         seat = self.seatPosition(name)

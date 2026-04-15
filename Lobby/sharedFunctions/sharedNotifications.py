@@ -466,40 +466,32 @@ def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, curren
 
 
 def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase, expected_players, oldLatestUpdate):
-    """
-    Send next turn notification with game state validation.
-    Only sends notification if current game state matches expected state from when task was queued.
-    """
     try:
         from Lobby.models import Game
 
-        # Get current game state
+        # 1. Use .only() or .get() to fetch the game
         try:
             current_game = Game.objects.get(id=gameID, gameCode=gameCode)
         except Game.DoesNotExist:
-            print(f"Game {gameID} not found for validation check")
             return
 
-        # Validate game state
-        current_turn = current_game.turn
-        current_phase = current_game.phase
-        current_latest_update = current_game.latestUpdate
+        # 2. Early Exit: Validate state before doing any player logic
+        if not (expected_latestUpdate == current_game.latestUpdate and expected_turn == current_game.turn and expected_phase == current_game.phase):
+            print(f"{gameCode}: {gameID} has mismatched state. Skipping.")
+            return
 
-        # Check if game state matches expected state (quick checks)
-        if expected_latestUpdate == current_latest_update and current_turn == expected_turn and current_phase == expected_phase:
-            # Check the player(s) still need to be notified
-            current_game_usernames = [gp.player.username for gp in current_game.players.all() if gp.is_current and gp.player and gp.player.username not in rf.SHADOW_USERNAMES]
-            newPlayerList = []
-            for username in current_game_usernames:
-                if username in playerList:
-                    newPlayerList.append(username)
-            # Game state matches, proceed with notification
-            if len(newPlayerList) > 0:
-                currentGameTurnString = current_game.presenter().currentTurnString()
-                currentGamePace = current_game.gamePace
-                SN_sendNextTurnNotification(gameCode, newPlayerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate)
-        else:
-            print(f"Game state changed, skipping notification. Game: {gameID}, Expected: LU{expected_latestUpdate}T{expected_turn}/P{expected_phase}, Current: LU:{current_latest_update}T{current_turn}/P{current_phase}")
+        # 3. Efficient Player Fetch:
+        # Use values_list to get usernames in a SINGLE query without hitting the User model separately
+        current_game_usernames = set(current_game.players.filter(is_current=True).exclude(player__username__in=rf.SHADOW_USERNAMES).values_list("player__username", flat=True))
+
+        # 4. Use Set Intersection for speed
+        # This replaces the 'for username in current_game_usernames' loop
+        newPlayerList = list(current_game_usernames.intersection(playerList))
+
+        # 5. Final Notification
+        if newPlayerList:
+            turn_string = current_game.presenter().currentTurnString()
+            SN_sendNextTurnNotification(gameCode, newPlayerList, gameID, gameName, turn_string, current_game.gamePace, oldLatestUpdate)
 
     except Exception as e:
         print(f"Error in SN_sendNextTurnNotificationWithValidation: {e}")
@@ -589,8 +581,36 @@ def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentG
                 print(f"{player} /// ended the turn. SF {gameCode} sendNextTurnNotification.  Error no profile/other error trying to email /// {player} // {e}")
 
 
-# TODO ASYNC
-def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate):
+def SN_sendFixNextTurnNotificationWithValidation(gameCode, playerName, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase):
+    try:
+        from Lobby.models import Game
+
+        # 1. Use .only() or .get() to fetch the game
+        try:
+            current_game = Game.objects.get(id=gameID, gameCode=gameCode)
+        except Game.DoesNotExist:
+            return
+
+        # 2. Early Exit: Validate state before doing any player logic
+        if not (expected_latestUpdate == current_game.latestUpdate and expected_turn == current_game.turn and expected_phase == current_game.phase):
+            print(f"{gameCode}: {gameID} has mismatched state. Skipping.")
+            return
+
+        # 3. Check if the player is still isCurrent
+        if not current_game.players.filter(player__username=playerName, is_current=True).exists():
+            print(f"{gameCode}: {gameID} - {playerName} is not current. Skipping.")
+            return
+
+        # 5. Final Notification
+        if playerName:
+            turn_string = current_game.presenter().currentTurnString()
+            SN_sendFixNextTurnNotification(gameCode, [playerName], gameID, gameName, turn_string, current_game.gamePace)
+
+    except Exception as e:
+        print(f"Error in SN_sendFixNextTurnNotificationWithValidation: {e}")
+
+
+def SN_sendFixNextTurnNotification(gameCode, playerList, gameID, gameName, turn_string, gamePace):
     originalLang = get_language()
     for player in playerList:
         if player not in USERNAMES_NOT_TO_NOTIFY:
@@ -606,40 +626,37 @@ def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, 
                 profile = Profile.objects.get(user=user)
                 activate(profile.profileLanguage)
                 # Set up language vars
-                currentTurnString = currentGame.presenter().currentTurnString()
 
-                gameStrings = getGameStrings(game)
+                gameStrings = getGameStrings(gameCode)
                 subject = gameStrings["yourTurnFixSubject"]
                 boxName = gameStrings["boxName"]
                 urlText = gameStrings["clickHereToPlayText"]
 
                 # messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers!\n%(gameName)s - %(currentTurnString)s.") % {"gameName": gameName, "currentTurnString": currentTurnString}
 
-                messageText = user.username + ": " + gettext("Other players have intefered with your move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentTurnString + "\n" + gettext("You will need to redo your move")
+                messageText = user.username + ": " + gettext("Other players have intefered with your move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + turn_string + "\n" + gettext("You will need to redo your move")
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGame.gamePace):
+                if shouldSendEmail("yourTurn", player, profile, gamePace):
                     try:
-                        current_site = get_current_site(request)
-
                         message = render_to_string(
                             "Lobby/gameEmails/yourTurnFixRNBemail.html",
                             {
-                                "game": game,
+                                "game": gameCode,
                                 "user": user.username,
-                                "domain": current_site.domain,
+                                "domain": "www.onlineboardgamers.com",
                                 "gameID": gameID,
                                 "gameName": gameName,
-                                "currentTurnString": currentTurnString,
+                                "currentTurnString": turn_string,
                                 "boxName": boxName,
                             },
                         )
                         SN_sendEmail("yourTurn", subject, message, user.email)
 
                     except Exception as e:
-                        print(f"* * * * * EMAIL ERROR - Send Next Turn Notification ****************** {user.username} - {user.email} - {game} - {gameID} - Error: {e}")
+                        print(f"* * * * * EMAIL ERROR - Send Next Turn FIX Notification ****************** {user.username} - {user.email} - {gameCode} - {gameID} - Error: {e}")
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
@@ -649,13 +666,44 @@ def SN_sendFixNextTurnNotification(request, game, playerList, gameID, gameName, 
                     SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
             except Exception as e:
-                print(f"{request.user.username} /// ended the turn. SF {game} sendNextTurnNotification.  Error no profile/other error trying to email /// {player} // {e}")
+                print(f"{user.username} /// ended the turn. SF {gameCode} sendNextTurn_FIX_Notification.  Error no profile/other error trying to email /// {player} // {e}")
 
     activate(originalLang)
 
 
-# TODO async
-def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameName, currentGame, oldLatestUpdate):
+def SN_sendPendingRNBturnNotificationWithValidation(gameCode, playerList, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase):
+    try:
+        from Lobby.models import Game
+
+        # 1. Use .only() or .get() to fetch the game
+        try:
+            current_game = Game.objects.get(id=gameID, gameCode=gameCode)
+        except Game.DoesNotExist:
+            return
+
+        # 2. Early Exit: Validate state before doing any player logic
+        if not (expected_latestUpdate == current_game.latestUpdate and expected_turn == current_game.turn and expected_phase == current_game.phase):
+            print(f"{gameCode}: {gameID} has mismatched state. Skipping.")
+            return
+
+        # 3. Efficient Player Fetch:
+        # Use values_list to get usernames in a SINGLE query without hitting the User model separately
+        current_game_usernames = set(current_game.players.filter(is_current=True).exclude(player__username__in=rf.SHADOW_USERNAMES).values_list("player__username", flat=True))
+
+        # 4. Use Set Intersection for speed
+        # This replaces the 'for username in current_game_usernames' loop
+        newPlayerList = list(current_game_usernames.intersection(playerList))
+
+        # 5. Final Notification
+        if newPlayerList:
+            turn_string = current_game.presenter().currentTurnString()
+            SN_sendPendingRNBturnNotification(gameCode, newPlayerList, gameID, gameName, turn_string, current_game.gamePace)
+
+    except Exception as e:
+        print(f"Error in SN_sendPendingRNBturnNotificationWithValidation: {e}")
+
+
+def SN_sendPendingRNBturnNotification(gameCode, playerList, gameID, gameName, turn_string, gamePace):
     for player in playerList:
         if player not in USERNAMES_NOT_TO_NOTIFY:
             try:
@@ -670,40 +718,37 @@ def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameNam
                 profile = Profile.objects.get(user=user)
                 activate(profile.profileLanguage)
                 # Set up language vars
-                currentTurnString = currentGame.presenter().currentTurnString()
 
-                gameStrings = getGameStrings(game)
+                gameStrings = getGameStrings(gameCode)
                 subject = gameStrings["yourPendingTurnSubject"]
                 boxName = gameStrings["boxName"]
                 urlText = gameStrings["clickHereToPlayText"]
 
                 # messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers!\n%(gameName)s - %(currentTurnString)s.") % {"gameName": gameName, "currentTurnString": currentTurnString}
 
-                messageText = user.username + ": " + gettext("You can move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentTurnString
+                messageText = user.username + ": " + gettext("You can move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + turn_string
 
                 # SEND EMAIL
-                if shouldSendEmail("yourTurn", player, profile, currentGame.gamePace):
+                if shouldSendEmail("yourTurn", player, profile, gamePace):
                     try:
-                        current_site = get_current_site(request)
-
                         message = render_to_string(
                             "Lobby/gameEmails/yourPendingTurnEmail.html",
                             {
-                                "game": game,
+                                "game": gameCode,
                                 "user": user.username,
-                                "domain": current_site.domain,
+                                "domain": "www.onlineboardgamers.com",
                                 "gameID": gameID,
                                 "gameName": gameName,
-                                "currentTurnString": currentTurnString,
+                                "currentTurnString": turn_string,
                                 "boxName": boxName,
                             },
                         )
                         SN_sendEmail("yourTurn", subject, message, user.email)
 
                     except Exception as e:
-                        print(f"* * * * * EMAIL ERROR - Send Next Turn Notification ******************{str(e)} - {user.email} - {user.username} - {user} Error: {e}")
+                        print(f"* * * * * EMAIL ERROR - Send Next Turn PENDING Notification ******************{str(e)} - {user.email} - {user.username} - {user} Error: {e}")
                 # SEND WEBHOOKS
-                urlRaw = f"https://www.OnlineBoardGamers.com/{game}/{str(gameID)}/show/"
+                urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
                 if profile.webhooks != "" and profile.webhooks is not None and profile.webhooks != "[]":
                     SN_sendWebhooks(profile, messageText, urlText, urlRaw)
 
@@ -713,9 +758,9 @@ def SN_sendPendingRNBturnNotification(request, game, playerList, gameID, gameNam
                     SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
             except Exception as e:
-                print(f"{request.user.username} /// ended the turn. SF {game} sendNextTurnNotification. Error no profile/other error trying to email. Player: {player}. Error: {e}")
+                print(f"{user.username} /// ended the turn. SF {gameCode} sendNextTurnPENDINGNotification. Error no profile/other error trying to email. Player: {player}. Error: {e}")
 
-    #activate(originalLang)
+    # activate(originalLang)
 
 
 # TODO async
@@ -905,6 +950,7 @@ def SN_sendMiniTournamentInvite(playerNames, _gameCode, _MTname, _MTdescription,
 
         except Exception as e:
             print(player + ": Error sending Mini Tournament invite. Game: " + _gameCode + "  Player: " + player + " " + str(e))
+
 
 # TODO: async
 def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, mainORmini):
@@ -1495,7 +1541,6 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
         try:
             import os
 
-            print(f"os.path.dirname(__file__): {os.path.dirname(__file__)}")
             # Use absolute path to ensure file is found regardless of working directory
             counter_file_path = os.path.join(os.path.dirname(__file__), "emailCounter.txt")
             with open(counter_file_path, "r+") as file:
