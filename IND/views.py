@@ -99,6 +99,9 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if len(preferredINDoptions) < 7:
         preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
         preferredINDoptions[6] = 0
+    # Option 4 (goods icon) must be 1 or 2, for the edition. Check it hasn't slipped to 0.
+    if preferredINDoptions[4] == 0:
+            preferredINDoptions[4] = 1
     returnData["preferredINDoptions"] = preferredINDoptions
 
     if not result["is_involved"]:
