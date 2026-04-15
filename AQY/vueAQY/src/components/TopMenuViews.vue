@@ -162,8 +162,6 @@ function getRewindPanelLeft() {
 	return document.getElementById("menuButtonRewindPos").getBoundingClientRect().left + document.getElementById("menuButtonRewindPos").getBoundingClientRect().width / 2 - 200
 }
 
-
-
 function getStatsExcludeVotes(returnPlayers = false) {
 	let votes = 0
 	let players = "None"
@@ -226,8 +224,7 @@ function localCastVote(topic) {
 				If your cathedral has graves on it, you lose your Saint Power
 			</p>
 
-			<div><textarea cols="150" rows="10" name="bugContent" id="bugContent" v-model="bugReportText"></textarea>
-			</div>
+			<div><textarea cols="150" rows="10" name="bugContent" id="bugContent" v-model="bugReportText"></textarea></div>
 			<div>
 				<button class="actionsLineButton" id="submitBug" @click="submitBug" :disabled="submittingBug">
 					<span v-if="submittingBug">Submitting Bug Report...</span>
@@ -264,7 +261,7 @@ function localCastVote(topic) {
 			<div id="chatBox">
 				<h2>Send a message</h2>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button @click="sendChatMessage()">Send</button></div>
+				<div><button class="actionsLineButton" @click="sendChatMessage()">Send</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -282,13 +279,15 @@ function localCastVote(topic) {
 
 	<!-- REWIND PANEL -->
 	<transition name="fade">
-		<div id="rewindPanel" v-if="store.topMenuViews.showRewindPanel" :style="{
-			left: getRewindPanelLeft() + 'px',
-		}">
+		<div
+			id="rewindPanel"
+			v-if="store.topMenuViews.showRewindPanel"
+			:style="{
+				left: getRewindPanelLeft() + 'px',
+			}">
 			Any player can rewind the game at any time.
 			<br />
-			Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other
-			players.
+			Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other players.
 			<br />
 			Misuse of this feature will result in rewinds requiring permission from all players.
 
@@ -305,20 +304,14 @@ function localCastVote(topic) {
 				<br />
 				Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
 				<br />
-				<button v-if="!personal.votedToExclude" class="actionsLineButton"
-					@click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to
-					Exclude
-					Game from Stats</button>
+				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to Exclude Game from Stats</button>
 			</div>
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
 				If all players agree, this game will be deleted
 				<br />
 				Votes: {{ getDeleteVotes(false) }} - Players: {{ getDeleteVotes(true) }}
 				<br />
-				<button v-if="!personal.votedToDelete" class="actionsLineButton"
-					@click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote to
-					Delete
-					Game</button>
+				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote to Delete Game</button>
 			</div>
 		</div>
 	</transition>
@@ -328,8 +321,7 @@ function localCastVote(topic) {
 		<div id="reserve" v-if="store.topMenuViews.showReserve">
 			<h2>Saints</h2>
 
-			<div v-for="(saintNum, idx) in [rf.SAINT_GIORGIO, rf.SAINT_BARBARA, rf.SAINT_CHRISTOFORI, rf.SAINT_NICOLO, rf.SAINT_MARIA]"
-				:key="idx" class="saintContainerContainer">
+			<div v-for="(saintNum, idx) in [rf.SAINT_GIORGIO, rf.SAINT_BARBARA, rf.SAINT_CHRISTOFORI, rf.SAINT_NICOLO, rf.SAINT_MARIA]" :key="idx" class="saintContainerContainer">
 				<div class="saintContainer">
 					<div class="saintImage">
 						<img :src="view.getImage('saint_' + String(saintNum))" />
@@ -358,9 +350,10 @@ function localCastVote(topic) {
 				</thead>
 				<tr v-for="(player, playerIndex) in store.players" :key="playerIndex">
 					<td :class="{ winCondMet: model.status_nicolo_20houses(playerIndex) }">{{ player.displayName }}</td>
-					<td :style="{
-						color: model.data_nicolo_20houses(playerIndex) == 0 ? 'green' : 'red',
-					}">
+					<td
+						:style="{
+							color: model.data_nicolo_20houses(playerIndex) == 0 ? 'green' : 'red',
+						}">
 						{{ 20 - model.data_nicolo_20houses(playerIndex) }} / 20
 					</td>
 				</tr>
@@ -397,11 +390,8 @@ function localCastVote(topic) {
 				</thead>
 				<tbody>
 					<tr v-for="(player, playerIndex) in store.players" :key="playerIndex">
-						<td :class="{ winCondMet: model.status_barbara_buildings(playerIndex) }">{{ player.displayName
-						}}
-						</td>
-						<td v-for="(building, idx) in model.data_barbara_buildings(playerIndex)" :key="idx"
-							:style="{ backgroundColor: getBuildingBackgroundColor(building) }"></td>
+						<td :class="{ winCondMet: model.status_barbara_buildings(playerIndex) }">{{ player.displayName }}</td>
+						<td v-for="(building, idx) in model.data_barbara_buildings(playerIndex)" :key="idx" :style="{ backgroundColor: getBuildingBackgroundColor(building) }"></td>
 					</tr>
 				</tbody>
 			</table>
@@ -424,9 +414,7 @@ function localCastVote(topic) {
 							{{ city.getBarabaraCostToGo(playerIndex)[1] }} x
 							<img class="buildSummaryRes" :src="view.getImage('res_' + String(rf.RES_STONE))" />
 							&nbsp;&nbsp;
-							<template v-if="city.hasWorkingUniqueBuilding(playerIndex, rf.BLDG_PHILOSOPHY, false)">{{
-								city.getBarabaraCostToGo(playerIndex)[2] + 2 * city.getBarabaraCostToGo(playerIndex)[3]
-							}} x Luxury Goods</template>
+							<template v-if="city.hasWorkingUniqueBuilding(playerIndex, rf.BLDG_PHILOSOPHY, false)">{{ city.getBarabaraCostToGo(playerIndex)[2] + 2 * city.getBarabaraCostToGo(playerIndex)[3] }} x Luxury Goods</template>
 							<template v-else>
 								{{ city.getBarabaraCostToGo(playerIndex)[2] }} x Luxury &nbsp;&nbsp;
 								<span v-if="city.getBarabaraCostToGo(playerIndex)[3] > 0">2 x Different Luxury</span>
@@ -453,9 +441,10 @@ function localCastVote(topic) {
 				</thead>
 				<tbody>
 					<tr v-for="(player, playerIndex) in store.players" :key="playerIndex">
-						<td :class="{ winCondMet: model.status_christo_3foodLux(playerIndex) }">{{ player.displayName }}
-						</td>
-						<td v-for="(res, playerIndex) in model.data_christo_3foodLux(playerIndex)" :key="playerIndex"
+						<td :class="{ winCondMet: model.status_christo_3foodLux(playerIndex) }">{{ player.displayName }}</td>
+						<td
+							v-for="(res, playerIndex) in model.data_christo_3foodLux(playerIndex)"
+							:key="playerIndex"
 							:style="{
 								color: res >= 3 ? 'green' : 'red',
 							}">
@@ -474,12 +463,9 @@ function localCastVote(topic) {
 				</thead>
 				<tbody>
 					<tr v-for="(player, playerIndex) in store.players" :key="playerIndex">
-						<td :class="{ winCondMet: model.status_giorgio_enclosing(playerIndex) }">{{ player.displayName
-						}}
-						</td>
+						<td :class="{ winCondMet: model.status_giorgio_enclosing(playerIndex) }">{{ player.displayName }}</td>
 						<td v-for="(targetPlayer, targetIdx) in store.players" :key="targetIdx">
-							<span v-if="playerIndex !== targetIdx"
-								:style="{ color: model.data_giorgio_enclosing(playerIndex, targetIdx) === 0 ? 'green' : 'red' }">
+							<span v-if="playerIndex !== targetIdx" :style="{ color: model.data_giorgio_enclosing(playerIndex, targetIdx) === 0 ? 'green' : 'red' }">
 								{{ model.data_giorgio_enclosing(playerIndex, targetIdx) }}
 							</span>
 							<template v-else>--</template>
@@ -506,8 +492,7 @@ function localCastVote(topic) {
 			<!-- FLEXI-TIMES -->
 			<div id="timesDiv">
 				Flexi-Times:
-				<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{
-					getFlexiTimeString(player.name) }}&nbsp;&nbsp;&nbsp;</span>
+				<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{ getFlexiTimeString(player.name) }}&nbsp;&nbsp;&nbsp;</span>
 				&nbsp;&nbsp;&nbsp;
 			</div>
 		</div>

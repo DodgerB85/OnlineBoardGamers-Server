@@ -46,7 +46,7 @@ function debugButton() {
 	//IO.saveGame(false, false)
 	//alert(JSON.stringify(store.gameflow))
 	//store.players[1].availableResources= [6, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-	store.history[store.history.length-1][3][0] = rf.GAME_WIN_LAST_UNGRAVED
+	store.players[1].saint = rf.SAINT_GIORGIO
 	IO.saveGame(false, false)
 }
 
