@@ -469,7 +469,6 @@ def indexSpecialRedirect(request):
     # for game in results:
     #    players = game.allPlayers.all()
 
-
     if request.user.username not in ALLOWED_USERS_RNB:
         return redirect("index")
 
@@ -1873,7 +1872,9 @@ def profileIND(request):
         if len(preferredINDoptions) < 7:
             preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
             preferredINDoptions[6] = 0
-
+        # Option 4 (goods icon) must be 1 or 2, for the edition. Check it hasn't slipped to 0.
+        if preferredINDoptions[4] == 0:
+            preferredINDoptions[4] = 1
         # [colour, mapType, citySizeColour, indOutline, goodsIcon, shipIcon, playerTableStyle]
 
         return render(
@@ -2165,10 +2166,7 @@ def createRNBpage(request, gameID=0):
     # Get settings debug flag for RNB map rendering
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
     if request.method != "POST" and gameID == 0:
-        return render(request, "Lobby/createRNB.html", {
-            "experienced": experienced,
-            "settingsDebug": settings_debug
-        })
+        return render(request, "Lobby/createRNB.html", {"experienced": experienced, "settingsDebug": settings_debug})
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:
