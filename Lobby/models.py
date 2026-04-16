@@ -447,7 +447,7 @@ class BaseGame(models.Model):
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
     # Change to JSON field?
-    startingMap = models.CharField(max_length=190, blank=True)
+    startingMap = models.TextField(blank=True, default='')
 
     # The longest was 100 chars, so i set it to that.
     # Not sure if that's inefficient?
