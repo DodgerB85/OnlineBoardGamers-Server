@@ -7,14 +7,11 @@ from .models import (
     User,
     Profile,
     changelog,
-    Mini_Tournaments,
-    Main_Tournament,
+    Tournament,
     Game,
     GamePlayer,
 )
 from .modelProxies import (
-    FCMMiniTournament,
-    TGZMiniTournament,
     CNSgame,
     WEBgame,
     AQYgame,
@@ -45,43 +42,14 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ["user__username", "email_confirmed"]
 
 
-@admin.register(Main_Tournament)
-class Main_TournamentAdmin(admin.ModelAdmin):
+@admin.register(Tournament)
+class TournamentAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
-    filter_horizontal = ("startingPlayers", "nextRoundPlayers")
-    search_fields = ["tournamentName"]
-
-
-@admin.register(Mini_Tournaments)
-class Mini_TournamentsAdmin(admin.ModelAdmin):
-    save_on_top = True
-    save_as = True
-    filter_horizontal = ("startingPlayers", "nextRoundPlayers")
+    filter_horizontal = ("startingPlayers", "nextRoundPlayers", "invitedPlayers")
     autocomplete_fields = ("creator",)
     search_fields = ["tournamentName"]
-
-
-# The FCM specific link
-@admin.register(FCMMiniTournament)
-class FCMMiniTournamentAdmin(admin.ModelAdmin):
-    def get_queryset(self, request):
-        # Only show FCM games in this view
-        return super().get_queryset(request).filter(gameCode="FCM")
-
-    # This moves it to the FCM section in the sidebar
-    class Meta:
-        app_label = "FCM"
-
-
-# The TGZ specific link
-@admin.register(TGZMiniTournament)
-class TGZMiniTournamentAdmin(admin.ModelAdmin):
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter(gameCode="TGZ")
-
-    class Meta:
-        app_label = "TGZ"
+    list_filter = ("tournamentCategory", "gameCode", "tournamentStatus")
 
 
 class GamePlayerInline(admin.TabularInline):

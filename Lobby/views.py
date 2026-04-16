@@ -89,8 +89,7 @@ from .models import (
     GamePlayer,
     Profile,
     changelog,
-    Mini_Tournaments,
-    Main_Tournament,
+    Tournament,
 )
 
 from user_visit.models import UserVisit
@@ -1414,10 +1413,10 @@ def index(request):
 
     # --- Step 4: Mini Tournaments (Use select_related to save hits) ---
     # Combine these or use more prefetching if serialize() hits related objects
-    available_MT_qs = Mini_Tournaments.objects.filter(tournamentStatus="OP").select_related("creator").order_by("-created")
+    available_MT_qs = Tournament.objects.filter(tournamentStatus="OP", tournamentCategory="Mini").select_related("creator").order_by("-created")
     available_MT = [item.serialize() for item in available_MT_qs]
 
-    current_MT_qs = Mini_Tournaments.objects.filter(tournamentStatus="IP", startingPlayers=user).select_related("creator")
+    current_MT_qs = Tournament.objects.filter(tournamentStatus="IP", tournamentCategory="Mini", startingPlayers=user).select_related("creator")
     current_MT = [item.serialize() for item in current_MT_qs]
 
     # print_timestamp("Step 4: MT fetched")
@@ -1426,7 +1425,7 @@ def index(request):
     cache_key = "lobby_main_tournaments_check"
     available_tournaments = cache.get(cache_key)
     if available_tournaments is None:
-        main_tours = list(Main_Tournament.objects.filter(tournamentStatus="OP").values_list("gameCode", flat=True))
+        main_tours = list(Tournament.objects.filter(tournamentStatus="OP", tournamentCategory="Main").values_list("gameCode", flat=True))
         available_tournaments = list(set(main_tours))
         cache.set(cache_key, available_tournaments, 60)  # Cache for 1 minute
 
@@ -2752,7 +2751,7 @@ def playerInfo(request, usernameToProfile):
 
 @login_required()
 def AllTournaments(request):
-    tournaments_MAIN = Main_Tournament.objects.order_by("-id").all()
+    tournaments_MAIN = Tournament.objects.filter(tournamentCategory="Main").order_by("-id").all()
 
     tournaments = sorted(
         tournaments_MAIN,
@@ -2897,8 +2896,6 @@ def joinGame(request, gameType):
 
         # Send an email to the creator, telling them who has declined and why
         reason = jsonData.get("reason", "None Given")
-
-        # def SN_sendDeclineEmail(declinerUsername, creatorUsername, gameCode, gameName, gameDescription, reason):
 
         from django_q.tasks import async_task
 
@@ -3753,7 +3750,7 @@ def dataCheck(request):
         return JsonResponse({"error": "Invalid JSON data."}, status=400)
 
     # 1. Check Available Count First (Lightest Queries)
-    available_count = Mini_Tournaments.objects.filter(tournamentStatus="OP").count()
+    available_count = Tournament.objects.filter(tournamentStatus="OP", tournamentCategory="Mini").count()
 
     available_count += Game.objects.filter(gameStatus="AVAILABLE").count()
 
@@ -4036,9 +4033,9 @@ def addPlayerToMTinvites(request):
 
 @login_required()
 def MiniTournaments(request):
-    available_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="OP").order_by("-created")
-    current_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="IP").order_by("-created")
-    finished_MT_raw = Mini_Tournaments.objects.filter(tournamentStatus="FN").order_by("-created")
+    available_MT_raw = Tournament.objects.filter(tournamentStatus="OP", tournamentCategory="Mini").order_by("-created")
+    current_MT_raw = Tournament.objects.filter(tournamentStatus="IP", tournamentCategory="Mini").order_by("-created")
+    finished_MT_raw = Tournament.objects.filter(tournamentStatus="FN", tournamentCategory="Mini").order_by("-created")
     available_MT = [available_MT_raw_item.serialize() for available_MT_raw_item in available_MT_raw]
     current_MT = [current_MT_raw_item.serialize() for current_MT_raw_item in current_MT_raw]
     finished_MT = [finished_MT_raw_item.serialize() for finished_MT_raw_item in finished_MT_raw]
@@ -4057,12 +4054,12 @@ def MiniTournaments(request):
 def MiniTournament(request, Mini_Tournament_id):
     if request.method == "POST":
         try:
-            Mini_Tournament = Mini_Tournaments.objects.get(id=Mini_Tournament_id)
+            Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
         except Exception:
             raise Http404(gettext("Tournament does not exist"))
         # First check if it is a person declining an invite
         if "declineInvite" in request.POST and request.POST["declineInvite"] == "true":
-            Mini_Tournament = Mini_Tournaments.objects.get(id=Mini_Tournament_id)
+            Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
             Mini_Tournament.startingPlayers.remove(request.user)
             Mini_Tournament.invitedPlayers.remove(request.user)
             Mini_Tournament.save()
@@ -4087,7 +4084,7 @@ def MiniTournament(request, Mini_Tournament_id):
         return HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
 
     try:
-        Mini_Tournament = Mini_Tournaments.objects.get(id=Mini_Tournament_id)
+        Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
     except Exception:
         raise Http404(gettext("Tournament does not exist"))
 
@@ -4213,7 +4210,7 @@ def _sendMTchatMessage(request):
     new_entry = jsonData["newEntry"]
     new_entry.insert(0, request.user.username)
 
-    currentMT = Mini_Tournaments.objects.get(id=MT_ID)
+    currentMT = Tournament.objects.get(id=MT_ID, tournamentCategory="Mini")
 
     currentChatData = []
     base64_data = currentMT.chatData if currentMT.chatData else ""
@@ -4242,8 +4239,8 @@ def reloadMTchatData(request):
     jsonData = json.loads(request.body)
 
     try:
-        Mini_Tournament = Mini_Tournaments.objects.get(id=jsonData["MT_ID"])
-    except Mini_Tournaments.DoesNotExist:
+        Mini_Tournament = Tournament.objects.get(id=jsonData["MT_ID"], tournamentCategory="Mini")
+    except Tournament.DoesNotExist:
         raise Http404(gettext("Mini Tournament does not exist"))
 
     return JsonResponse(
@@ -4272,7 +4269,8 @@ def createFCMminiTournament(request):
         startgOptions.append(99)
 
     with transaction.atomic():
-        newTournament = Mini_Tournaments.objects.create(
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
             gameCode="FCM",
             tournamentName=request.POST["tournamentName"],
             tournamentDescription=request.POST["tournamentDescription"],
@@ -4338,7 +4336,8 @@ def createTGZminiTournament(request):
     invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
 
     with transaction.atomic():
-        newTournament = Mini_Tournaments.objects.create(
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
             gameCode="TGZ",
             tournamentName=request.POST["tournamentName"],
             tournamentDescription=request.POST["tournamentDescription"],
@@ -4385,9 +4384,9 @@ def createTGZminiTournament(request):
 #####################################
 @login_required()
 def MainTournaments(request):
-    available_MainT_raw = Main_Tournament.objects.filter(tournamentStatus="OP").order_by("-created")
-    current_MainT_raw = Main_Tournament.objects.filter(tournamentStatus="IP").order_by("-created")
-    finished_MainT_raw = Main_Tournament.objects.filter(tournamentStatus="FN").order_by("-created")
+    available_MainT_raw = Tournament.objects.filter(tournamentStatus="OP", tournamentCategory="Main").order_by("-created")
+    current_MainT_raw = Tournament.objects.filter(tournamentStatus="IP", tournamentCategory="Main").order_by("-created")
+    finished_MainT_raw = Tournament.objects.filter(tournamentStatus="FN", tournamentCategory="Main").order_by("-created")
     available_MainT = [available_MainT_raw_item.serialize() for available_MainT_raw_item in available_MainT_raw]
     current_MainT = [current_MainT_raw_item.serialize() for current_MainT_raw_item in current_MainT_raw]
     finished_MainT = [finished_MainT_raw_item.serialize() for finished_MainT_raw_item in finished_MainT_raw]
@@ -4406,8 +4405,8 @@ def MainTournaments(request):
 def MainTournament(request, Main_Tournament_id):
     if request.method == "POST":
         try:
-            currentTournament = Main_Tournament.objects.get(id=Main_Tournament_id)
-        except Main_Tournament.DoesNotExist:
+            currentTournament = Tournament.objects.get(id=Main_Tournament_id, tournamentCategory="Main")
+        except Tournament.DoesNotExist:
             raise Http404(gettext("Tournament does not exist"))
 
         if "understand_movement" not in request.POST:
@@ -4425,8 +4424,8 @@ def MainTournament(request, Main_Tournament_id):
         return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
 
     try:
-        currentTournament = Main_Tournament.objects.get(id=Main_Tournament_id)
-    except Main_Tournament.DoesNotExist:
+        currentTournament = Tournament.objects.get(id=Main_Tournament_id, tournamentCategory="Main")
+    except Tournament.DoesNotExist:
         raise Http404(gettext("Tournament does not exist"))
 
     # Common items
@@ -4560,7 +4559,7 @@ def _sendMainTchatMessage(request):
     new_entry = jsonData["newEntry"]
     new_entry.insert(0, request.user.username)
 
-    currentMainT = Main_Tournament.objects.get(id=MainT_ID)
+    currentMainT = Tournament.objects.get(id=MainT_ID, tournamentCategory="Main")
 
     currentChatData = []
     base64_data = currentMainT.chatData if currentMainT.chatData else ""
@@ -4589,8 +4588,8 @@ def reloadMainTchatData(request):
     jsonData = json.loads(request.body)
 
     try:
-        currentTournament = Main_Tournament.objects.get(id=jsonData["MainT_ID"])
-    except Main_Tournament.DoesNotExist:
+        currentTournament = Tournament.objects.get(id=jsonData["MainT_ID"], tournamentCategory="Main")
+    except Tournament.DoesNotExist:
         raise Http404(gettext("Main Tournament does not exist"))
 
     return JsonResponse(
@@ -4614,15 +4613,16 @@ def createTGZmainTournament(request):
     startingOptions = json.dumps(SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else [])
 
     with transaction.atomic():
-        newTournament = Main_Tournament.objects.create(
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Main",
             gameCode="TGZ",
             tournamentName=request.POST["tournamentName"],
             tournamentDescription=request.POST["tournamentDescription"],
             tournamentStatus="OP",
             tournamentType=request.POST["tournamentFormat"],
             startingOptions=startingOptions,
-            maxTournamentPlayers=request.POST["totalPlayersMainT"],
-            maxGamePlayers=request.POST["playersPerGameMainT"],
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
             roundsBeforeKnockout=4,
         )
         newTournament.startingPlayers.add(request.user)

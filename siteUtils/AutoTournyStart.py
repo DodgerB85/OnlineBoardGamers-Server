@@ -49,7 +49,7 @@ print(BASE_DIR)
 django.setup()
 start_calc_time = time.perf_counter()
 
-from Lobby.models import User, Main_Tournament
+from Lobby.models import User, Tournament
 
 from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
 from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen
@@ -74,150 +74,140 @@ monthName = myDate.strftime("%B")
 # _tournamentType = "TL"
 ############# HARD CODE NEXT TOURNY
 
-MONTHS_FOR_AQY = [2, 8]
-MONTHS_FOR_IND = [3, 9]
-MONTHS_FOR_HLC = [4, 10]
-MONTHS_FOR_BUS = [5, 11]
+# Unified tournament schedule with dates (month, day) and game config
+TOURNAMENT_SCHEDULE = [
+    {
+        "gameCode": "AQY",
+        "boxName": "Antiquity",
+        "dates": [(2, 1), (8, 1)],
+        "minPlayers": 2,
+        "maxPlayers": 4,
+    },
+    {
+        "gameCode": "IND",
+        "boxName": "Indonesia",
+        "dates": [(3, 1), (9, 1)],
+        "minPlayers": 3,
+        "maxPlayers": 5,
+    },
+    {
+        "gameCode": "HLC",
+        "boxName": "Horseless Carriage",
+        "dates": [(4, 1), (10, 1)],
+        "minPlayers": 3,
+        "maxPlayers": 5,
+    },
+    {
+        "gameCode": "BUS",
+        "boxName": "Bus",
+        "dates": [(5, 1), (11, 1)],
+        "minPlayers": 3,
+        "maxPlayers": 5,
+    },
+    {
+        "gameCode": "FCM",
+        "boxName": "Food Chain Magnate",
+        "dates": [(5, 15), (10, 15), (12, 1)],
+        "minPlayers": 3,
+        "maxPlayers": 5,
+    },
+]
 
 
 ############################################
 #   ANNOUNCE NEW TOURNMENT
 ############################################
 
-# First, send message to Discord if tournament start in 7 days:
-# Get the current date
+# Send message to Discord if tournament start in 7 days
 current_date = datetime.datetime.now()
 # Calculate the date 7 days from now
 current_date_plus_7d = current_date + datetime.timedelta(days=7)
-# Check if the next month is different
-if current_date.month != current_date_plus_7d.month:
-    days_until_next_month = (current_date_plus_7d.replace(day=1) - current_date).days
-    next_month_number = current_date_plus_7d.month
-    if days_until_next_month == 7 and (
-        next_month_number in MONTHS_FOR_AQY
-        or next_month_number in MONTHS_FOR_IND
-        or next_month_number in MONTHS_FOR_HLC
-        or next_month_number in MONTHS_FOR_BUS
-    ):
-        print(
-            f"It is 7 days until the next month starts. Next mo num: {next_month_number}"
-        )
-        # Send message to Discord
-        box_name = "Antiquity"
-        game = "AQY"
-        if next_month_number in MONTHS_FOR_AQY:
-            box_name = "Antiquity"
-            game = "AQY"
-        if next_month_number in MONTHS_FOR_IND:
-            box_name = "Indonesia"
-            game = "IND"
-        if next_month_number in MONTHS_FOR_HLC:
-            box_name = "Horseless Carriage"
-            game = "HLC"
-        if next_month_number in MONTHS_FOR_BUS:
-            box_name = "Bus"
-            game = "BUS"
-        message = (
-            f"New {box_name} Tournament Opens for Signup in 7 days!\n"
-            f"[Click here to Play](https://www.OnlineBoardGamers.com/)"
-        )
-        if settings.DEBUG:
-            requests.post(
-                f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
-                data={"content": message},
+
+for tournament in TOURNAMENT_SCHEDULE:
+    for tournament_month, tournament_day in tournament["dates"]:
+        tournament_date = datetime.datetime(current_date.year, tournament_month, tournament_day)
+        days_until = (tournament_date - current_date).days
+        if days_until == 7:
+            print(f"It is 7 days until {tournament['boxName']} tournament on {tournament_day}/{tournament_month}")
+            message = (
+                f"New {tournament['boxName']} Tournament Opens for Signup in 7 days!\n"
+                "[Click here to Play](https://www.OnlineBoardGamers.com/)"
             )
-        else:
-            requests.post(
-                f"https://discordapp.com/api/webhooks/{config('WEBHOOK_DISCORD_TOURNAMENTS')}",
-                data={"content": message},
-            )
-else:
-    print(
-        f"Next month is the same month as the current month - NOT sending notification. Current mo num: {current_date_plus_7d.month}"
-    )
+            if settings.DEBUG:
+                requests.post(
+                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                    data={"content": message},
+                )
+            else:
+                requests.post(
+                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_DISCORD_TOURNAMENTS')}",
+                    data={"content": message},
+                )
 
 ############################################
 #   OPEN NEW TOURNMENT
 ############################################
-if dayNumber == 1 and (
-    monthNumber in MONTHS_FOR_AQY
-    or monthNumber in MONTHS_FOR_IND
-    or monthNumber in MONTHS_FOR_HLC
-    or monthNumber in MONTHS_FOR_BUS
-):
-    box_name = "box_name"
-    maxGamePlayers = random.randrange(3, 5, 1)
-    gameCode = "AQY"
-    if monthNumber in MONTHS_FOR_AQY:
-        box_name = "Antiquity"
-        maxGamePlayers = random.randrange(2, 5, 1)
-        gameCode = "AQY"
-    if monthNumber in MONTHS_FOR_IND:
-        box_name = "Indonesia"
-        maxGamePlayers = random.randrange(3, 5, 1)
-        gameCode = "IND"
-    if monthNumber in MONTHS_FOR_HLC:
-        box_name = "Horseless Carriage"
-        maxGamePlayers = random.randrange(3, 6, 1)
-        gameCode = "HLC"
-    if monthNumber in MONTHS_FOR_BUS:
-        box_name = "Bus"
-        maxGamePlayers = random.randrange(3, 6, 1)
-        gameCode = "BUS"
+for tournament in TOURNAMENT_SCHEDULE:
+    for tournament_month, tournament_day in tournament["dates"]:
+        if dayNumber == tournament_day and monthNumber == tournament_month:
+            print(f"Today is {tournament_day}/{tournament_month} - Creating {tournament['gameCode']} tournament")
+            box_name = tournament["boxName"]
+            gameCode = tournament["gameCode"]
+            maxGamePlayers = random.randrange(tournament["minPlayers"], tournament["maxPlayers"] + 1, 1)
 
-    tournamentType = random.choice(["RR", "TL"])
-    if maxGamePlayers >= 3:
-        tournamentType = random.choice(["RR", "TL"])  # , "PT"])
+            tournamentType = random.choice(["RR", "TL"])
+            if maxGamePlayers >= 3:
+                tournamentType = random.choice(["RR", "TL"])
 
-    # 2,3,5, 6 players
-    maxTournamentPlayers = 30
-    # 4p
-    if maxGamePlayers == 4:
-        maxTournamentPlayers = 32
+            maxTournamentPlayers = 30
+            if maxGamePlayers == 4:
+                maxTournamentPlayers = 32
 
-    new_tournament = Main_Tournament.objects.create(
-        gameCode=gameCode,
-        tournamentName=monthName + " Tournament",
-        maxTournamentPlayers=maxTournamentPlayers,
-        maxGamePlayers=maxGamePlayers,
-        tournamentType=tournamentType,
-    )
+            tournament_name = f"{monthName} {current_date.year} {gameCode} Tournament"
 
-    new_tournament.save()
+            new_tournament = Tournament.objects.create(
+                gameCode=gameCode,
+                tournamentName=tournament_name,
+                maxTournamentPlayers=maxTournamentPlayers,
+                maxGamePlayers=maxGamePlayers,
+                tournamentType=tournamentType,
+            )
 
-    # Add message to Discord
-    tournament_type_string = "Rounds"
-    if tournamentType == "KO":
-        tournament_type_string = "Knockout"
-    if tournamentType == "TL":
-        tournament_type_string = "Two Lives"
-    if tournamentType == "PT":
-        tournament_type_string = "Points"
-    if tournamentType == "RR":
-        tournament_type_string = "Rounds"
+            new_tournament.save()
 
-    message = (
-        f"New {box_name} Tournament!\n"
-        "================================\n"
-        f"Name: {monthName} Tournament\n"
-        f"Players per Game: {maxGamePlayers}\n"
-        f"Format: {tournament_type_string}\n"
-        f"[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{getattr(new_tournament, 'id')}/)"
-    )
-    if settings.DEBUG:
-        requests.post(
-            f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
-            data={"content": message},
-        )
-    else:
-        requests.post(
-            f"https://discordapp.com/api/webhooks/{config('WEBHOOK_DISCORD_TOURNAMENTS')}",
-            data={"content": message},
-        )
+            # Add message to Discord
+            tournament_type_string = "Rounds"
+            if tournamentType == "KO":
+                tournament_type_string = "Knockout"
+            if tournamentType == "TL":
+                tournament_type_string = "Two Lives"
+            if tournamentType == "PT":
+                tournament_type_string = "Points"
+            if tournamentType == "RR":
+                tournament_type_string = "Rounds"
+            if tournamentType == "MG":
+                tournament_type_string = "Multi-Game"
 
-    SN_sendTournamentOpen(new_tournament, gameCode)
-else:
-    print("It is not day 1, or not a tournament month, NOT opening a tourny")
+            message = (
+                f"New {box_name} Tournament!\n"
+                "================================\n"
+                f"Name: {tournament_name}\n"
+                f"Players per Game: {maxGamePlayers}\n"
+                f"Format: {tournament_type_string}\n"
+                f"[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{getattr(new_tournament, 'id')}/)"
+            )
+            if settings.DEBUG:
+                requests.post(
+                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                    data={"content": message},
+                )
+            else:
+                requests.post(
+                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_DISCORD_TOURNAMENTS')}",
+                    data={"content": message},
+                )
+
+            SN_sendTournamentOpen(new_tournament, gameCode)
 
 ############################################
 #   START NEW TOURNMENT
@@ -318,7 +308,7 @@ for gameCode in GAME_CODES:
     # 1. OPTIMIZATION: Filter for "OP" status immediately in the DB.
     # If no open tournament exists, this returns None and skips the rest of the hits.
     newTourny = (
-        Main_Tournament.objects.filter(tournamentStatus="OP", gameCode=gameCode)
+        Tournament.objects.filter(tournamentStatus="OP", gameCode=gameCode)
         .order_by("-id")
         .first()
     )

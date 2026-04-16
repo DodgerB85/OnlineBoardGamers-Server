@@ -60,7 +60,7 @@ from django.conf import settings
 
 from Lobby.models import (
     Game,
-    Mini_Tournaments,
+    Tournament,
 )  # Unused; consider removing unless needed
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
@@ -172,8 +172,8 @@ for gameCode in GAME_CODES:
 mt_cutoff = (
     cutoff_ms  # Assuming 'created' is also in MS; adjust if it's a DateTimeField
 )
-old_tournaments = Mini_Tournaments.objects.filter(
-    tournamentStatus__in=["OP", "PR"], created__lt=mt_cutoff
+old_tournaments = Tournament.objects.filter(
+    tournamentStatus__in=["OP", "PR"], tournamentCategory="Mini", created__lt=mt_cutoff
 )
 
 deleted_tournaments = old_tournaments.count()

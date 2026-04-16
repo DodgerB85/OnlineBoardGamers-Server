@@ -152,8 +152,19 @@ class changelog(models.Model):
         return f"{self.timestamp}: {self.update}"
 
 
-class Main_Tournament(models.Model):
+class Tournament(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
+
+    TOURNAMENT_CATEGORY_CHOICES = [
+        ("Main", gettext_lazy("Main Tournament")),
+        ("Mini", gettext_lazy("Mini Tournament")),
+    ]
+
+    tournamentCategory = models.CharField(
+        max_length=4,
+        choices=TOURNAMENT_CATEGORY_CHOICES,
+        default="Main",
+    )
 
     gameCode = models.CharField(
         max_length=3,
@@ -178,140 +189,29 @@ class Main_Tournament(models.Model):
         default="RR",
     )
 
-    startingOptions = models.CharField(max_length=80, blank=True, default="")
-    startingPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="startingPlayersRelName_MainT",
-        blank=True,
-    )
-    nextRoundPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="currentRoundPlayersRelName_MainT",
-        blank=True,
-    )
-
-    maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
-    maxGamePlayers = models.PositiveSmallIntegerField(blank=False)
-    roundsBeforeKnockout = models.PositiveSmallIntegerField(blank=False, default=4)
-
-    winnersData = models.TextField(blank=True)
-
-    created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-    tournamentProgressionData = models.TextField(blank=True)
-    tournamentSideData = models.TextField(blank=True)
-    tournamentPointsData = models.TextField(blank=True)
-
-    chatData = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"MainT {getattr(self, 'id')}: {self.tournamentName} : {self.tournamentType} : {self.tournamentStatus}"
-
-    def isSignedUp(self, loggedInUser):
-        if loggedInUser in self.startingPlayers.all():
-            return True
-        return False
-
-    def getByedPlayersList(self):
-        TPDA = json.loads(self.tournamentProgressionData)
-        return [
-            player
-            for round in TPDA
-            for row in round
-            if row[0] == "BYEPLAYERS"
-            for player in row[1:]
-        ]
-
-    def get_tournamentType_display(self):
-        return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
-
-    def serialize(self, loggedInUser=None):
-        # Used for Finished Games
-        winnerHTML = SR_getTournamentWinnerHTML(self.tournamentStatus, self.winnersData)
-
-        createdTS = str(self.created)
-        startingOptionsHTML = "[None]"
-        if self.gameCode == "FCM":
-            startingOptionsHTML = SR_getFCMstartingOptionsHTML(
-                json.loads(self.startingOptions) if self.startingOptions else []
-            )
-        if self.gameCode == "TGZ":
-            startingOptionsHTML = SR_getTGZstartingOptionsHTML(
-                json.loads(self.startingOptions) if self.startingOptions else []
-            )
-
-        if startingOptionsHTML == "":
-            startingOptionsHTML = "[None]"
-
-        return {
-            "Main_Tournament_id": self.id,
-            "tournamentName": self.tournamentName,
-            "tournamentDescription": self.tournamentDescription,
-            "tournamentType": self.get_tournamentType_display(),
-            "maxTournamentPlayers": self.maxTournamentPlayers,
-            "maxGamePlayers": self.maxGamePlayers,
-            "startingOptionsHTML": startingOptionsHTML,
-            "winnerHTML": winnerHTML,
-            "createdTS": createdTS,
-            "gameCode": self.gameCode,
-            "tournamentID": self.id,
-            "tournamentLink": f"/MainTournament/{self.id}/",
-        }
-
-
-class Mini_Tournaments(models.Model):
-    id = models.AutoField(primary_key=True)  # Explicitly define the id field
-
-    MINI_TOURNAMENT_GAME_CHOICES = [
-        ("FCM", gettext_lazy("Food Chain Magnate")),
-        ("HLC", gettext_lazy("Horseless Carriage")),
-        ("TGZ", gettext_lazy("The Great Zimbabwe")),
-        ("CNS", gettext_lazy("Cannes")),
-        ("AQY", gettext_lazy("Antiquity")),
-        ("IND", gettext_lazy("Indonesia")),
-        ("KFW", gettext_lazy("Keyflower")),
-    ]
-
-    gameCode = models.CharField(
-        max_length=3,
-        choices=MINI_TOURNAMENT_GAME_CHOICES,
-        default="FCM",
-    )
-
-    tournamentName = models.CharField(max_length=120)
-    tournamentDescription = models.CharField(
-        max_length=120, blank=True
-    )
-
-    tournamentStatus = models.CharField(
-        max_length=2,
-        choices=SR_TOURNAMENT_STATUS_CHOICES,
-        default="OP",
-    )
-
-    tournamentType = models.CharField(
-        max_length=2,
-        choices=SR_TOURNAMENT_TYPE_CHOICES,
-        default="RR",
-    )
-
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name="MT_creator_relName",
+        blank=True,
+        related_name="tournament_creator_relName",
     )
 
     startingOptions = models.CharField(max_length=80, blank=True, default="")
     startingPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="startingPlayersRelName_MT", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="startingPlayersRelName_Tournament",
+        blank=True,
     )
     nextRoundPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        related_name="currentRoundPlayersRelName_MT",
+        related_name="currentRoundPlayersRelName_Tournament",
         blank=True,
     )
     invitedPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="invitedPlayersRelName_MT", blank=True
+        settings.AUTH_USER_MODEL,
+        related_name="invitedPlayersRelName_Tournament",
+        blank=True,
     )
 
     maxTournamentPlayers = models.PositiveSmallIntegerField(blank=False)
@@ -328,7 +228,7 @@ class Mini_Tournaments(models.Model):
     chatData = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{getattr(self, 'id')}: {self.tournamentName} : {self.tournamentType} : {self.tournamentStatus}"
+        return f"Tournament {getattr(self, 'id')}: {self.tournamentName} : {self.tournamentType} : {self.tournamentStatus}"
 
     def isSignedUp(self, loggedInUser):
         if loggedInUser in self.startingPlayers.all():
@@ -368,17 +268,23 @@ class Mini_Tournaments(models.Model):
                 json.loads(self.startingOptions) if self.startingOptions else []
             )
 
+        if startingOptionsHTML == "":
+            startingOptionsHTML = "[None]"
+
         return {
-            "Mini_Tournament_id": self.id,
+            "Tournament_id": self.id,
             "tournamentName": self.tournamentName,
             "tournamentDescription": self.tournamentDescription,
             "tournamentType": self.get_tournamentType_display(),
+            "tournamentCategory": self.tournamentCategory,
             "maxTournamentPlayers": self.maxTournamentPlayers,
             "maxGamePlayers": self.maxGamePlayers,
             "startingOptionsHTML": startingOptionsHTML,
             "winnerHTML": winnerHTML,
             "createdTS": createdTS,
             "gameCode": self.gameCode,
+            "tournamentID": self.id,
+            "tournamentLink": f"/MainTournament/{self.id}/",
         }
 
 
@@ -500,7 +406,7 @@ class Game(BaseGame):
     )
 
     relatedMainTournament = models.ForeignKey(
-        Main_Tournament,
+        "Tournament",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -508,7 +414,7 @@ class Game(BaseGame):
     )
 
     relatedMiniTournament = models.ForeignKey(
-        Mini_Tournaments,
+        "Tournament",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

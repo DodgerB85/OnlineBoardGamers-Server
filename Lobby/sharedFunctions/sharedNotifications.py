@@ -389,7 +389,7 @@ def shouldSendEmail(emailType, username, profile, currentGamePace):
     # Final return
     return True
 
-
+# This is async
 def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, currentGamePace, currentGameName):
     # originalLang = get_language()
     
@@ -466,7 +466,7 @@ def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, curren
 
     # activate(originalLang)
 
-
+# This is async schedule
 def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase, expected_players, oldLatestUpdate):
     try:
         from Lobby.models import Game
@@ -582,7 +582,7 @@ def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentG
         except Exception as e:
             print(f"{player} /// ended the turn. SF {gameCode} sendNextTurnNotification.  Error no profile/other error trying to email /// {player} // {e}")
 
-
+# This is async schedule
 def SN_sendFixNextTurnNotificationWithValidation(gameCode, playerName, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase):
     try:
         from Lobby.models import Game
@@ -611,7 +611,7 @@ def SN_sendFixNextTurnNotificationWithValidation(gameCode, playerName, gameID, g
     except Exception as e:
         print(f"Error in SN_sendFixNextTurnNotificationWithValidation: {e}")
 
-
+# Used by above function to ACTUALLY send notifiation
 def SN_sendFixNextTurnNotification(gameCode, playerList, gameID, gameName, turn_string, gamePace):
     originalLang = get_language()
     
@@ -673,7 +673,7 @@ def SN_sendFixNextTurnNotification(gameCode, playerList, gameID, gameName, turn_
 
     activate(originalLang)
 
-
+# This is async schedule
 def SN_sendPendingRNBturnNotificationWithValidation(gameCode, playerList, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase):
     try:
         from Lobby.models import Game
@@ -706,6 +706,7 @@ def SN_sendPendingRNBturnNotificationWithValidation(gameCode, playerList, gameID
         print(f"Error in SN_sendPendingRNBturnNotificationWithValidation: {e}")
 
 
+# Used by above function to ACTUALLY send notifiation
 def SN_sendPendingRNBturnNotification(gameCode, playerList, gameID, gameName, turn_string, gamePace):
     for player in playerList:
         if player not in USERNAMES_NOT_TO_NOTIFY:
@@ -831,7 +832,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
 
     activate(originalLang)
 
-
+# This is async
 def SN_sendInviteNotifications(playerNames, _gameName, _maxPlayers, _gameCode):
     # Pre-fetch users and profiles to avoid N+1 queries
     users = User.objects.filter(username__in=playerNames).select_related('profile')
@@ -885,6 +886,7 @@ def SN_sendInviteNotifications(playerNames, _gameName, _maxPlayers, _gameCode):
             print(player + ": Error sending invite. Game: " + _gameName + "  Player: " + player + " " + str(e))
 
 
+# This is async
 def SN_sendMiniTournamentInvite(playerNames, _gameCode, _MTname, _MTdescription, _maxPlayers, _gamePlayers, _format, MT_ID):
     for player in playerNames:
         try:
@@ -1007,7 +1009,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
 
     activate(originalLang)
 
-
+# This is async
 def SN_M_sendGameStartNotification(playerListToNotify, message_data):
     errorUsername = message_data["username"]
     gameCode = message_data["gameCode"]
@@ -1145,7 +1147,7 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
 
     activate(originalLang)
 
-
+# This is async
 def SN_sendDeclineEmail(declinerUsername, creatorUsername, gameCode, gameName, gameDescription, reason):
     originalLang = get_language()
     try:
@@ -1206,7 +1208,7 @@ def SN_sendDeclineEmail(declinerUsername, creatorUsername, gameCode, gameName, g
 
     activate(originalLang)
 
-
+# This is async
 def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gameData, bugDescription, rewindData, startingMap):
     subject = getGameStrings(gameCode)["bugReportSubject"]
     adminUser = User.objects.get(username="admin")
@@ -1240,7 +1242,7 @@ def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gam
         error_message = f"BUG REPORT EMAIL SEND FAILED for game {gameCode} (ID: {gameID}).\nUser: {reporterUsername}\nError: {e}"
         SN_sendAdminErrorMessage(error_message)
 
-
+# This is not async, but is only run from a script
 def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
     originalLang = get_language()
     if playerName not in USERNAMES_NOT_TO_NOTIFY:
@@ -1294,7 +1296,7 @@ def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
 
     activate(originalLang)
 
-
+# This is not async, but is only run from a script
 def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
     originalLang = get_language()
     if playerName not in USERNAMES_NOT_TO_NOTIFY:
@@ -1347,7 +1349,7 @@ def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
 
     activate(originalLang)
 
-
+# This is not async, but is only run from a script
 def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGamesList):
     username = user_obj.username
     originalLang = get_language()
@@ -1407,7 +1409,7 @@ def SN_send24HourTimedOutReminderEmail(user_obj, profile_obj, allPlayerMyMoveGam
 
     activate(originalLang)
 
-
+# This is not async, but is only run from a script
 def SN_sendTournamentOpen(new_tournament, gameCode):
     tournament_type_string = "Rounds"
     if new_tournament.tournamentType == "KO":

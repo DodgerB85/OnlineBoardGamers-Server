@@ -319,19 +319,9 @@ class GamePresenter:
             schedule_type='O'
         )
 
-        # currentGameTurnString = self.currentTurnString()
-        # currentGamePace = gameObj.gamePace
-
-        # async_task(
-        #   "Lobby.sharedFunctions.sharedNotifications.SN_sendNextTurnNotification",
-        #   gameCode, playerListToNotify, gameID, gameName, currentGameTurnString, currentGamePace, oldVer
-        # )
-
     def _sendStartGameNotification(self, request, playerListToNotify):
         """Send async game-start notification to other players."""
         from django_q.tasks import async_task
-
-        # from Lobby.sharedFunctions.sharedNotifications import SN_M_sendGameStartNotification
 
         if not playerListToNotify:
             return
@@ -351,7 +341,6 @@ class GamePresenter:
             playerListToNotify,
             message_data,
         )
-        # SN_M_sendGameStartNotification(playerListToNotify, message_data)
 
     ###### VOTING METHODS #######
     def castVote(self, topic, username, choice):
@@ -608,7 +597,6 @@ class WEBpresenter(GamePresenter):
         for name in new_names:
             finalResults.append([name, "Trapped in a dot matrix", 9])
 
-        # def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, currentGamePace, currentGameName):
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "WEB", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
 
     def startGame(self, request):

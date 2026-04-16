@@ -1,20 +1,26 @@
-from Lobby.models import Mini_Tournaments, Game
+from Lobby.models import Tournament, Game
 
 
-class FCMMiniTournament(Mini_Tournaments):
-    class Meta:
-        proxy = True
-        app_label = "FCM"
-        verbose_name = "FCM Mini Tournament"
-        verbose_name_plural = "FCM Mini Tournaments"
-
-
-class TGZMiniTournament(Mini_Tournaments):
-    class Meta:
-        proxy = True
-        app_label = "TGZ"
-        verbose_name = "TGZ Mini Tournament"
-        verbose_name_plural = "TGZ Mini Tournaments"
+#class FCMMiniTournament(Tournament):
+#    class Meta:
+#        proxy = True
+#        app_label = "FCM"
+#        verbose_name = "FCM Mini Tournament"
+#        verbose_name_plural = "FCM Mini Tournaments"
+#
+#    def get_queryset(self, request):
+#        return super().get_queryset(request).filter(gameCode="FCM", tournamentCategory="Mini")
+#
+#
+#class TGZMiniTournament(Tournament):
+#    class Meta:
+#        proxy = True
+#        app_label = "TGZ"
+#        verbose_name = "TGZ Mini Tournament"
+#        verbose_name_plural = "TGZ Mini Tournaments"
+#
+#    def get_queryset(self, request):
+#        return super().get_queryset(request).filter(gameCode="TGZ", tournamentCategory="Mini")
 
 
 ################### Register game objects to specific app

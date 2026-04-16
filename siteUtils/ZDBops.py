@@ -57,10 +57,8 @@ from django.contrib.sites.models import Site
 from Lobby.models import (
     User,
     Profile,
-    Mini_Tournaments,
+    Tournament,
     Game,
-    Main_Tournament,
-    Mini_Tournaments,
 )
 
 #from Lobby.sharedFunctions.sharedFunctions import (
