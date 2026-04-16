@@ -31,6 +31,7 @@ REM LOCAL_DB_HOST=xx
 REM --- Start Django runserver in a separate command prompt window ---
 REM This command runs from the root directory defined by OBG_HOME
 start "Django Server" /D "%OBG_HOME%" cmd /k python manage.py runserver
+start "Django cluster" /D "%OBG_HOME%" cmd /k python manage.py qcluster
 
 echo Django server started.
 
