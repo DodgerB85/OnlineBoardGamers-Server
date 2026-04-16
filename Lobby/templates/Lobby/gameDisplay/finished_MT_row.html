@@ -1,7 +1,7 @@
 {% load static i18n %}
 <tr class="clickableGameRow {{ Mini_Tournament.gameCode }}"
-    id="tournamentRow{{ Mini_Tournament.Mini_Tournament_id }}"
-    onclick="window.location.href='/MiniTournament/{{ Mini_Tournament.Mini_Tournament_id }}/';">
+    id="tournamentRow{{ Mini_Tournament.Tournament_id }}"
+    onclick="window.location.href='/MiniTournament/{{ Mini_Tournament.Tournament_id }}/';">
   <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=Mini_Tournament.gameCode %}</td>
   <td class="nameTDavailable">
     {{ Mini_Tournament.tournamentName }}

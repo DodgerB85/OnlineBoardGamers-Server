@@ -24,13 +24,12 @@ if TYPE_CHECKING:
 @login_required()
 def create_ind_game(
     request,
-    mainORmini="",
     tournamentObj=None,
     tournamentGameName=None,
     current_players_usernames=None,
 ):
-    is_main_tournament = mainORmini == rf.MAIN_T_FLAG
-    is_mini_tournament = mainORmini == rf.MINI_T_FLAG
+    is_main_tournament = tournamentObj and tournamentObj.tournamentCategory == "Main"
+    is_mini_tournament = tournamentObj and tournamentObj.tournamentCategory == "Mini"
     """
     Create an IND game, either for a tournament or regular play (training/non-training).
     Args:

@@ -54,7 +54,6 @@ from Lobby.models import User, Tournament
 from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
 from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen
 
-
 # HLC 3-5 players
 # Bus 3-5 players
 # AQY 2-4 players
@@ -375,7 +374,7 @@ for gameCode in GAME_CODES:
 
                 # Set and Start
                 newTourny.maxTournamentPlayers = totalPlayers
-                SF_startAnyTournament(request, newTourny, gameCode)
+                SF_startAnyTournament(request, newTourny)
                 newTourny.save()
             else:
                 print(

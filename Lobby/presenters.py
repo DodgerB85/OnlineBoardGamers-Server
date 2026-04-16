@@ -677,7 +677,6 @@ class AQYpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 winnerNamesArray,
@@ -687,7 +686,6 @@ class AQYpresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 winnerNamesArray,
@@ -940,7 +938,6 @@ class TGZpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -949,7 +946,6 @@ class TGZpresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -1050,7 +1046,6 @@ class INDpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 [_winnerUseranme],
@@ -1060,7 +1055,6 @@ class INDpresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 [_winnerUseranme],
@@ -1248,7 +1242,6 @@ class BUSpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -1257,7 +1250,6 @@ class BUSpresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -1410,7 +1402,6 @@ class RNBpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 [_winnerUseranme],
@@ -1420,7 +1411,6 @@ class RNBpresenter(GamePresenter):
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 [_winnerUseranme],
@@ -2156,7 +2146,6 @@ class FCMpresenter(GamePresenter):
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MAIN_T_FLAG,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
                 [_winnerUsername],
@@ -2165,7 +2154,6 @@ class FCMpresenter(GamePresenter):
         elif self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
-                rf.MINI_T_FLAG,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
                 [_winnerUsername],

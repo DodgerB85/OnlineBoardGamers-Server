@@ -623,8 +623,8 @@ def SF_TGZadvancedOptions(request):
 #   MAIN/MINI TOURNAMENTS COMMON FUNCTIONS
 #
 ######################################
-def SF_startAnyTournament(request, mainORmini, tournamentObj):
-    if mainORmini == rf.MINI_T_FLAG:
+def SF_startAnyTournament(request, tournamentObj):
+    if tournamentObj.tournamentCategory == "Mini":
         tournamentObj.invitedPlayers.clear()
 
     ######### COMMON TO ALL TOURNYS ##########
@@ -678,7 +678,7 @@ def SF_startAnyTournament(request, mainORmini, tournamentObj):
         else:
             tournamentObj.tournamentPointsData = json.dumps(pointsList)
 
-    start_next_any_tournament_round(request, mainORmini, tournamentObj, None, [], [])
+    start_next_any_tournament_round(request, tournamentObj, None, [], [])
 
     tournamentObj.save()
     return
@@ -775,7 +775,6 @@ def setNextRoundMultiGamePlayers(tournamentObj):
 
 def start_next_any_tournament_round(
     request,
-    mainORmini,
     tournamentObj,
     _currentGame,
     _winnerArray,
@@ -794,10 +793,9 @@ def start_next_any_tournament_round(
     if tournamentObj.tournamentType == "MG":
         setNextRoundMultiGamePlayers(tournamentObj)
 
-    if SF_checkForAnyTournamentEnd(tournamentObj, mainORmini) is True:
+    if SF_checkForAnyTournamentEnd(tournamentObj) is True:
         SF_endAnyTournament(
             request,
-            mainORmini,
             tournamentObj,
             _currentGame,
             _winnerArray,
@@ -806,7 +804,7 @@ def start_next_any_tournament_round(
         tournamentObj.save()
         return
 
-    ret = SF_createNextRoundGamesSetup(tournamentObj, mainORmini)
+    ret = SF_createNextRoundGamesSetup(tournamentObj)
 
     # Clear nextRoundPlayers for the end of the next round
     # -- gamePlayers have now been returned in ret
@@ -875,27 +873,27 @@ def start_next_any_tournament_round(
 
         if tournamentObj.gameCode == "FCM":
             newGameID = create_fcm_game(
-                request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
+                request, tournamentObj, tournamentGameName, currentPlayers
             )
         elif tournamentObj.gameCode == "HLC":
             newGameID = create_hlc_game(
-                request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
+                request, tournamentObj, tournamentGameName, currentPlayers
             )
         elif tournamentObj.gameCode == "BUS":
             newGameID = create_bus_game(
-                request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
+                request, tournamentObj, tournamentGameName, currentPlayers
             )
         elif tournamentObj.gameCode == "TGZ":
             newGameID = create_tgz_game(
-                request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
+                request, tournamentObj, tournamentGameName, currentPlayers
             )
         elif tournamentObj.gameCode == "AQY":
             newGameID = create_aqy_game(
-                request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
+                request, tournamentObj, tournamentGameName, currentPlayers
             )
         elif tournamentObj.gameCode == "IND":
             newGameID = create_ind_game(
-                request, mainORmini, tournamentObj, tournamentGameName, currentPlayers
+                request, tournamentObj, tournamentGameName, currentPlayers
             )
         else:
             # LEGACY CODE FOR SEPERARTE TOURNAMENT MODELS
@@ -920,7 +918,7 @@ def start_next_any_tournament_round(
 
 
 # Pass in a tournament. Returns an object of { gamesPlayers: [[p1, p2...], [p5,p6...]], byePlayers: [p3, p4] }
-def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
+def SF_createNextRoundGamesSetup(tournamentObj):
     ret = {}
     byePlayers = []
     gamesPlayers = []
@@ -983,7 +981,7 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
     max_p = tournamentObj.maxGamePlayers
     byesRequired = 0
 
-    if mainORmini == "MainT":  # Replace with your MAIN_T_FLAG
+    if tournamentObj.tournamentCategory == "Main":
         # Main: Everyone who doesn't fit into a full group gets a bye
         byesRequired = num_players % max_p
 
@@ -1114,7 +1112,7 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
 
         # Handle remaining players (>2 for MiniT -- Byes have been removed first)
         # MT just make games if possible
-        if tournamentType == rf.MINI_T_FLAG and len(allPlayersList) >= 2:
+        if tournamentObj.tournamentCategory == "Mini" and len(allPlayersList) >= 2:
             currentPlayers = allPlayersList[:]
             gamesPlayers.append(currentPlayers)
             allPlayersList.clear()
@@ -1126,7 +1124,7 @@ def SF_createNextRoundGamesSetup(tournamentObj, mainORmini):
     return ret
 
 
-def SF_checkForAnyTournamentEnd(tournamentObj, mainORmini):
+def SF_checkForAnyTournamentEnd(tournamentObj):
     # For a rounds tournament, if it's in KO, then ALL WINNERS get addded to the next round.
     # So we need to filter them here to remove people on less than max points
     # Switch to knockout mode for RR after roundsBeforeKnockout
@@ -1153,7 +1151,6 @@ def SF_checkForAnyTournamentEnd(tournamentObj, mainORmini):
 # NB THE FIRST ENTRY IS AN ARRAY OF (MULTIPLE) WINNER(S)
 def SF_M_ProcessAnyTournamentEndGame(
     request,
-    mainORmini,
     tournamanetObj,
     _currentGame,
     _winnerArray,
@@ -1350,7 +1347,6 @@ def SF_M_ProcessAnyTournamentEndGame(
     if tournamentRoundFinished:
         start_next_any_tournament_round(
             request,
-            mainORmini,
             tournamanetObj,
             _currentGame,
             _winnerArray,
@@ -1363,7 +1359,6 @@ def SF_M_ProcessAnyTournamentEndGame(
 # This could be tidied up by removing _finalPositionNamesAndScore input and getting it from tournamentObj directly
 def SF_endAnyTournament(
     request,
-    mainORmini,
     tournamentObj,
     _currentGame,
     _winnerArray,
@@ -1460,7 +1455,7 @@ def SF_endAnyTournament(
     for i in range(len(winnersData)):
         for player in winnersData[i]:
             # Award trophies only for main tournaments
-            if mainORmini == rf.MAIN_T_FLAG:
+            if tournamentObj.tournamentCategory == "Main":
                 playerObject = User.objects.get(username=player)
                 relatedProfile = Profile.objects.get(user=playerObject)
                 FCMtournamentTrophies = (
@@ -1489,7 +1484,7 @@ def SF_endAnyTournament(
             # In all cases, notify the winner(s)
             if i == 0:
                 SN_M_T_sendTournamentWinNotification(
-                    tournamentObj, request, player, gameCode, mainORmini
+                    tournamentObj, request, player, gameCode
                 )
 
 

@@ -103,21 +103,19 @@ def buildFCMstartingOptions(post_data):
 @login_required()
 def create_fcm_game(
     request,
-    mainORmini="",
     tournamentObj=None,
     round_number_string=None,
     current_players_usernames=None,
 ):
-    is_tournament = mainORmini == "normT"
-    is_main_tournament = mainORmini == rf.MAIN_T_FLAG
-    is_mini_tournament = mainORmini == rf.MINI_T_FLAG
+    is_tournament = tournamentObj is not None
+    is_main_tournament = tournamentObj and tournamentObj.tournamentCategory == "Main"
+    is_mini_tournament = tournamentObj and tournamentObj.tournamentCategory == "Mini"
     """
     Creates a new FCM game for normal play or tournaments.
 
     Args:
         request: The HTTP request object.
-        is_tournament (bool): Whether the game is part of a tournament.
-        tournament: Tournament object (required if is_tournament=True).
+        tournamentObj: Tournament object (required if is_tournament=True).
         round_number_string (str): Round identifier for tournament games.
         current_players_usernames (list): List of usernames for tournament players.
 
@@ -126,8 +124,6 @@ def create_fcm_game(
     """
     if (
         not is_tournament
-        and not is_main_tournament
-        and not is_mini_tournament
         and request.method != "POST"
     ):
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -366,25 +362,25 @@ def create_fcm_game(
 
         new_game.save()
 
-    # Notifications and redirects
-    #if is_tournament or is_main_tournament or is_mini_tournament:
-    #    presenter = cast("FCMpresenter", new_game.presenter())
-    #    for username in usernames_to_notify:
-    #        tournamentType = "normalTournament"
-    #        if is_mini_tournament:
-    #            tournamentType = "MiniTournament"
-    #        SN_M_T_sendTournamentGameStartNotification(
-    #            request,
-    #            "FCM",
-    #            username,
-    #            new_game.maxPlayers,
-    #            new_game.gameName,
-    #            presenter.currentTurnString(),
-    #            getattr(new_game, "id"),
-    #            False,
-    #            tournamentType,
-    #        )
-    #    return getattr(new_game, "id")
+            # Notifications and redirects
+    if is_tournament or is_main_tournament or is_mini_tournament:
+        #presenter = cast("FCMpresenter", new_game.presenter())
+        #for username in usernames_to_notify:
+        #    tournamentType = "normalTournament"
+        #    if is_mini_tournament:
+        #        tournamentType = "MiniTournament"
+        #    SN_M_T_sendTournamentGameStartNotification(
+        #        request,
+        #        "FCM",
+        #        username,
+        #        new_game.maxPlayers,
+        #        new_game.gameName,
+        #        presenter.currentTurnString(),
+        #        getattr(new_game, "id"),
+        #        False,
+        #        tournamentType,
+        #    )
+        return getattr(new_game, "id")
 
     # Now handle normal games
     if usernames_to_notify:
@@ -395,6 +391,9 @@ def create_fcm_game(
             max_players,
             "FCM",
         )
+    
+
+
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has been started"))
         return HttpResponseRedirect(

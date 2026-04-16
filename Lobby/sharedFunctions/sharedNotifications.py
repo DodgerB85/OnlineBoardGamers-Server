@@ -958,7 +958,7 @@ def SN_sendMiniTournamentInvite(playerNames, _gameCode, _MTname, _MTdescription,
 
 
 # TODO: async
-def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, mainORmini):
+def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game):
     originalLang = get_language()
     try:
         user = User.objects.get(username=_player)
@@ -974,7 +974,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game, ma
         activate(profile.profileLanguage)
         gameStrings = getGameStrings(_game)
         subject = gameStrings["tournamentWinSubject"]
-        if mainORmini == rf.MINI_T_FLAG:
+        if tournament.tournamentCategory == "Mini":
             subject = gameStrings["miniTournamentWinSubject"]
         boxName = gameStrings["boxName"]
 

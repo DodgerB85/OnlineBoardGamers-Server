@@ -1,8 +1,5 @@
 from typing import Final
 
-MINI_T_FLAG: Final = "MiniT"
-MAIN_T_FLAG: Final = "MainT"
-
 # Ordered list of shadow player usernames (used when creating training games)
 SHADOW_PLAYER_NAMES = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
 # Full set of bot/shadow usernames for membership checks (is-my-move, kickout, etc.)

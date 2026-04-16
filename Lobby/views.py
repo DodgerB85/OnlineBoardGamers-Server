@@ -4077,7 +4077,7 @@ def MiniTournament(request, Mini_Tournament_id):
             Mini_Tournament.startingPlayers.add(request.user)
             Mini_Tournament.save()
             if Mini_Tournament.startingPlayers.count() == Mini_Tournament.maxTournamentPlayers:
-                SF_startAnyTournament(request, rf.MINI_T_FLAG, Mini_Tournament)
+                SF_startAnyTournament(request, Mini_Tournament)
             messages.success(request, (gettext("You have joined the Tournament")))
         else:
             messages.error(request, gettext("The Tournament is already full"))
@@ -4417,7 +4417,7 @@ def MainTournament(request, Main_Tournament_id):
             currentTournament.startingPlayers.add(request.user)
             currentTournament.save()
             if currentTournament.startingPlayers.count() == currentTournament.maxTournamentPlayers:
-                SF_startAnyTournament(request, rf.MAIN_T_FLAG, currentTournament)
+                SF_startAnyTournament(request, currentTournament)
             messages.success(request, (gettext("You have joined the Tournament")))
         else:
             messages.error(request, gettext("The Tournament is already full"))
