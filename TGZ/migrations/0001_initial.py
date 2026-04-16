@@ -26,17 +26,5 @@ class Migration(migrations.Migration):
             },
             bases=('Lobby.game',),
         ),
-        migrations.CreateModel(
-            name='TGZMiniTournament',
-            fields=[
-            ],
-            options={
-                'verbose_name': 'TGZ Mini Tournament',
-                'verbose_name_plural': 'TGZ Mini Tournaments',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
-            },
-            bases=('Lobby.mini_tournaments',),
-        ),
+       
     ]

@@ -10,7 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='TGZMiniTournament',
-        ),
+        # Leave this list empty! This used to remove TGZ_miniT based on Lobby.miniT
     ]

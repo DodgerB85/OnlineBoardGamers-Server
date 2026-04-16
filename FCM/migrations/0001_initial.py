@@ -26,17 +26,4 @@ class Migration(migrations.Migration):
             },
             bases=('Lobby.game',),
         ),
-        migrations.CreateModel(
-            name='FCMMiniTournament',
-            fields=[
-            ],
-            options={
-                'verbose_name': 'FCM Mini Tournament',
-                'verbose_name_plural': 'FCM Mini Tournaments',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
-            },
-            bases=('Lobby.mini_tournaments',),
-        ),
     ]

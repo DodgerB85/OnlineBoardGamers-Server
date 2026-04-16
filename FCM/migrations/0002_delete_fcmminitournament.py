@@ -10,7 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='FCMMiniTournament',
-        ),
+        # Leave this list empty! This used to remove FCM_miniT based on Lobby.miniT
     ]
