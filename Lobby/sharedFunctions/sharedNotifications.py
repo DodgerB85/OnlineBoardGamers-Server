@@ -691,11 +691,11 @@ def SN_sendPendingRNBturnNotificationWithValidation(gameCode, playerList, gameID
 
         # 3. Efficient Player Fetch:
         # Use values_list to get usernames in a SINGLE query without hitting the User model separately
-        current_game_usernames = set(current_game.players.filter(is_current=True).exclude(player__username__in=rf.SHADOW_USERNAMES).values_list("player__username", flat=True))
+        #current_game_usernames = set(current_game.players.filter(is_current=True).exclude(player__username__in=rf.SHADOW_USERNAMES).values_list("player__username", flat=True))
+        current_game_usernames = current_game.serverCurrentPlayerNamesInTurnOrder
 
-        # 4. Use Set Intersection for speed
-        # This replaces the 'for username in current_game_usernames' loop
-        newPlayerList = list(current_game_usernames.intersection(playerList))
+        # 4. Only send notifications to names in current_game_usernames, but NOT current_game_usernames[0] (the presenter)
+        newPlayerList = [username for username in playerList if username in current_game_usernames and username != current_game_usernames[0]]
 
         # 5. Final Notification
         if newPlayerList:

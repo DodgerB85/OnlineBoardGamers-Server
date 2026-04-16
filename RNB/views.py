@@ -484,8 +484,6 @@ def _processRNBturn(request):
 
             return JsonResponse(response_data, safe=False)
 
-            return JsonResponse(response_data, safe=False)
-
     # End conflict move
 
     elif jsonData["action"] == "saveAndUpdateNotifictionsAfterStack":
@@ -604,9 +602,9 @@ def _processRNBturn(request):
                         schedule_type="O",
                     )
 
-        ################ REWIND EVERY SAVE #######################
+            ################ REWIND EVERY SAVE #######################
 
-        doSaveRewind(currentGame, jsonData)
+            doSaveRewind(currentGame, jsonData)
 
         ################ END REWIND EVERY SAVE #######################
 
