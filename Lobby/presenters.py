@@ -495,6 +495,7 @@ class CNSpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from django_q.tasks import async_task
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -533,6 +534,25 @@ class CNSpresenter(GamePresenter):
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "CNS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
+        # Tournament processing
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                [_winner],
+                convertedFinalPositions,
+            )
+
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                [_winner],
+                convertedFinalPositions,
+            )
+
     def startGame(self, request):
         from Lobby.models import GamePlayer
 
@@ -559,6 +579,7 @@ class WEBpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from django_q.tasks import async_task
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -598,6 +619,25 @@ class WEBpresenter(GamePresenter):
             finalResults.append([name, "Trapped in a dot matrix", 9])
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "WEB", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
+
+        # Tournament processing
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                winnerNamesArray,
+                finalResults,
+            )
+
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                winnerNamesArray,
+                finalResults,
+            )
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
@@ -2304,6 +2344,7 @@ class HLCpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from django_q.tasks import async_task
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
         self.clearAllMoveData()
@@ -2338,6 +2379,25 @@ class HLCpresenter(GamePresenter):
 
         # Now send winning notification
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "HLC", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+
+        # Tournament processing
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                [_winner],
+                convertedFinalPositions,
+            )
+
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                [_winner],
+                convertedFinalPositions,
+            )
 
     def getCurrentPlayersHLC(self):
         _currentPlayers = []
@@ -2542,6 +2602,7 @@ class KFWpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from Lobby.models import User
         from django_q.tasks import async_task
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -2591,6 +2652,27 @@ class KFWpresenter(GamePresenter):
 
         # Now send winning notification
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "KFW", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
+
+        # Tournament processing
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                winnerNamesArray,
+                finalResults,
+            )
+
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                winnerNamesArray,
+                finalResults,
+            )
+
+
 
     def startGame(self, request):
         from Lobby.models import GamePlayer

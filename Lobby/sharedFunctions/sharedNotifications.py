@@ -957,42 +957,40 @@ def SN_sendMiniTournamentInvite(playerNames, _gameCode, _MTname, _MTdescription,
             print(player + ": Error sending Mini Tournament invite. Game: " + _gameCode + "  Player: " + player + " " + str(e))
 
 
-# TODO: async
-def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game):
+def SN_M_T_sendTournamentWinNotification(tournamentCategory, tournamentName, _playerName, _gameCode):
     originalLang = get_language()
     try:
-        user = User.objects.get(username=_player)
+        user = User.objects.get(username=_playerName)
     except User.DoesNotExist:
-        print(f"Error: could not find user object in SN_M_T_sendTournamentWinNotification: {_player}")
+        print(f"Error: could not find user object in SN_M_T_sendTournamentWinNotification: {_playerName}")
         return
     except Exception as e:
-        print(f"Error: could not find user object {_player} in SN_M_T_sendTournamentWinNotification" + str(e))
+        print(f"Error: could not find user object {_playerName} in SN_M_T_sendTournamentWinNotification" + str(e))
         return
     try:
         profile = Profile.objects.get(user=user)
 
         activate(profile.profileLanguage)
-        gameStrings = getGameStrings(_game)
+        gameStrings = getGameStrings(_gameCode)
         subject = gameStrings["tournamentWinSubject"]
-        if tournament.tournamentCategory == "Mini":
+        if tournamentCategory == "Mini":
             subject = gameStrings["miniTournamentWinSubject"]
         boxName = gameStrings["boxName"]
 
         # SEND EMAIL
-        if shouldSendEmail("tournamentWin", _player, profile, -1):
-            current_site = get_current_site(request)
+        if shouldSendEmail("tournamentWin", _playerName, profile, -1):
             message = render_to_string(
                 "Lobby/email/tournamentWonGeneral.html",
                 {
                     "user": user.username,
-                    "domain": current_site.domain,
-                    "tournamentName": tournament.tournamentName,
+                    "domain": "www.OnlineBoardGamers.com",
+                    "tournamentName": tournamentName,
                     "boxName": boxName,
                 },
             )
             SN_sendEmail("tournamentWin", subject, message, user.email)
 
-        messageText = user.username + ": " + gettext("You have won a %(full_game_name)s tournament! \n%(tournamentName)s") % {"full_game_name": boxName, "tournamentName": tournament.tournamentName}
+        messageText = user.username + ": " + gettext("You have won a %(full_game_name)s tournament! \n%(tournamentName)s") % {"full_game_name": boxName, "tournamentName": tournamentName}
         urlText = gettext("Click here to savour in your victory")
 
         # SEND WEBHOOKS
@@ -1005,7 +1003,7 @@ def SN_M_T_sendTournamentWinNotification(tournament, request, _player, _game):
             SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
 
     except Exception as e:
-        print(f"{request.user.username} Error SN_M_T_sendTournamentWinNotification. Notifying: {_player}. Error: {e}")
+        print(f"{_playerName} Error SN_M_T_sendTournamentWinNotification. Notifying: {_playerName}. Error: {e}")
 
     activate(originalLang)
 

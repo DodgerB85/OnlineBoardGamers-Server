@@ -23,7 +23,6 @@ from Lobby.models import User, Profile
 # from django.conf import settings
 
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_M_T_sendTournamentWinNotification,
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import (
@@ -82,13 +81,7 @@ def SF_hasRequiredExperience(request, gameCode, gameModel):
     experienced = False
 
     # For Game model, query through GamePlayer
-    model_games_involved = (
-        Game.objects.filter(
-            gameCode=gameCode, gameStatus="FINISHED", players__player=request.user
-        )
-        .exclude(players__player=shadowUser)
-        .distinct()
-    )
+    model_games_involved = Game.objects.filter(gameCode=gameCode, gameStatus="FINISHED", players__player=request.user).exclude(players__player=shadowUser).distinct()
 
     exp = model_games_involved.count()
     if exp >= SF_getRequiredExp(gameCode):
@@ -98,9 +91,7 @@ def SF_hasRequiredExperience(request, gameCode, gameModel):
 
 def SF_getGameCreationJsonReturn(gameCode, gameID):
     return mark_safe(
-        gettext(
-            "Your game has been created and is waiting for players<br/>Invite Link: "
-        )
+        gettext("Your game has been created and is waiting for players<br/>Invite Link: ")
         + f"<a href='https://www.onlineboardgamers.com/join/{gameCode}{gameID}/'>https://www.onlineboardgamers.com/join/{gameCode}{gameID}/</a> <button class='copyGameLinkButton' onclick='copyToClipboard(`https://www.onlineboardgamers.com/join/{gameCode}{gameID}/`, event)'>"
         + gettext("Copy Link")
         + "</button>"
@@ -109,9 +100,7 @@ def SF_getGameCreationJsonReturn(gameCode, gameID):
 
 def SF_getMiniTournamentCreationJsonReturn(MT_ID):
     return mark_safe(
-        gettext(
-            "Your Mini Tournament has been created and is waiting for players<br/>Invite Link: "
-        )
+        gettext("Your Mini Tournament has been created and is waiting for players<br/>Invite Link: ")
         + f"<a href='https://www.onlineboardgamers.com/MiniTournament/{MT_ID}/'>https://www.onlineboardgamers.com/MiniTournament/{MT_ID}/</a> <button class='copyGameLinkButton' onclick='copyToClipboard(`https://www.onlineboardgamers.com/MiniTournament/{MT_ID}/`, event)'>"
         + gettext("Copy Link")
         + "</button>"
@@ -144,19 +133,11 @@ def SF_serializeGame(game, user, player_context):
     all_players = [gp.player for gp in all_game_players if gp.player]
     all_usernames = [p.username for p in all_players]
     all_ids = {p.id for p in all_players}
-    missing_ids = {
-        gp.player.id for gp in all_game_players if gp.is_missing and gp.player
-    }
-    chat_notify_ids = {
-        gp.player.id
-        for gp in all_game_players
-        if gp.has_chat_notification and gp.player
-    }
+    missing_ids = {gp.player.id for gp in all_game_players if gp.is_missing and gp.player}
+    chat_notify_ids = {gp.player.id for gp in all_game_players if gp.has_chat_notification and gp.player}
 
     # Get current players from is_current flag
-    current_players_str = ", ".join(
-        [gp.player.username for gp in all_game_players if gp.is_current and gp.player]
-    )
+    current_players_str = ", ".join([gp.player.username for gp in all_game_players if gp.is_current and gp.player])
 
     # Winner from GamePlayer
     winner_gp = next((gp for gp in all_game_players if gp.winner), None)
@@ -164,36 +145,21 @@ def SF_serializeGame(game, user, player_context):
 
     # 3. Timing Calculation
     now = int(time.time())
-    ref_time = (
-        int(game.latestUpdate) // 1000
-        if game.gameStatus == "ACTIVE"
-        else int(game.created) // 1000
-    )
+    ref_time = int(game.latestUpdate) // 1000 if game.gameStatus == "ACTIVE" else int(game.created) // 1000
     elapsed = max(0, now - ref_time)
 
     d, rem = divmod(elapsed, 86400)
     h, rem = divmod(rem, 3600)
     m, s = divmod(rem, 60)
-    elapsed_str = (
-        f"{f'{d}d ' if d else ''}{f'{h}h ' if h else ''}{f'{m}m ' if m else ''}{s}s"
-    )
+    elapsed_str = f"{f'{d}d ' if d else ''}{f'{h}h ' if h else ''}{f'{m}m ' if m else ''}{s}s"
 
     # 4. MyMove & Involved Logic
     is_my_move = False
     if user and game.gameStatus == "ACTIVE":
-        is_my_move = (
-            not current_players_str
-            or user.username in current_players_str
-            or any(s in current_players_str for s in rf.SHADOW_USERNAMES)
-        )
+        is_my_move = not current_players_str or user.username in current_players_str or any(s in current_players_str for s in rf.SHADOW_USERNAMES)
 
         # For HLC, if it is factory phase, AND you have submitted your move, set it back to false
-        if (
-            game_code == "HLC"
-            and is_my_move
-            and game.phase == 3
-            and game.presenter().hasMoveData(user.username)
-        ):
+        if game_code == "HLC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
             is_my_move = False
         if game_code == "RNB":
             if is_my_move and not game.presenter().quickIsMyMove(user.username):
@@ -202,14 +168,12 @@ def SF_serializeGame(game, user, player_context):
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
     # 5. Shadow/Delete Logic
-    is_deleteable = any(name in all_usernames for name in rf.SHADOW_USERNAMES) and (
-        user.id in all_ids if user else False
-    )
+    is_deleteable = any(name in all_usernames for name in rf.SHADOW_USERNAMES) and (user.id in all_ids if user else False)
 
     creator = game.creator.username if game.creator else "Unknown Creator"
     if creator == "Unknown Creator":
         SN_sendAdminErrorMessage(f"Unknown creator for game {game.gameCode} {game.id}")
-        
+
     gameName = getattr(game, "gameName", "Unknown Game")
     if gameName == "":
         gameName = f"[{creator}'s Game]"
@@ -221,9 +185,7 @@ def SF_serializeGame(game, user, player_context):
         except (json.JSONDecodeError, ValueError):
             # Legacy format: comma-separated string like "21,200,21001"
             try:
-                startingOptionsArr = [
-                    int(x.strip()) for x in game.startingOptions.split(",") if x.strip()
-                ]
+                startingOptionsArr = [int(x.strip()) for x in game.startingOptions.split(",") if x.strip()]
             except (ValueError, AttributeError):
                 startingOptionsArr = []
     else:
@@ -307,9 +269,7 @@ def SF_fastSerializeGame(game, user):
     # "remainingPlayers": remainingPlayers,
 
 
-def SF_updateFlexiTime(
-    kickoutFlexiData, latestUpdate, now, currentUsername, kickoutDuration
-):
+def SF_updateFlexiTime(kickoutFlexiData, latestUpdate, now, currentUsername, kickoutDuration):
     secondsSinceUpdate = int((now - int(latestUpdate)) / 1000)
     ##### DEBUG #######
     # secondsSinceUpdate += 24*60*60
@@ -398,16 +358,9 @@ def SF_kickoutRequired(
 
     if individualCheckRequired:
         # Any extra 24hrs must be a kickout
-        if (
-            kickoutDuration == 50
-            and secondsSinceUpdate > (12 * 60 * 60) + FLEXI_SECONDS
-        ):
+        if kickoutDuration == 50 and secondsSinceUpdate > (12 * 60 * 60) + FLEXI_SECONDS:
             return 2
-        elif (
-            kickoutDuration >= 100
-            and secondsSinceUpdate
-            > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS
-        ):
+        elif kickoutDuration >= 100 and secondsSinceUpdate > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:
             return 2
         # Otherwise, need to interrogate the array
         KickoutFlexiDataArray = []
@@ -422,16 +375,9 @@ def SF_kickoutRequired(
                     break
         # So need to check whether used seconds + difference
         total_elasped_time = secondsSinceUpdate + usedSeconds
-        if (
-            kickoutDuration == 50
-            and total_elasped_time > (12 * 60 * 60) + FLEXI_SECONDS
-        ):
+        if kickoutDuration == 50 and total_elasped_time > (12 * 60 * 60) + FLEXI_SECONDS:
             return 2
-        elif (
-            kickoutDuration >= 100
-            and total_elasped_time
-            > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS
-        ):
+        elif kickoutDuration >= 100 and total_elasped_time > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:
             return 2
         return 1
 
@@ -629,11 +575,7 @@ def SF_startAnyTournament(request, tournamentObj):
 
     ######### COMMON TO ALL TOURNYS ##########
     tournamentObj.tournamentStatus = "IP"
-    allPlayersList = list(
-        tournamentObj.startingPlayers.all()
-        .order_by("?")
-        .values_list("username", flat=True)
-    )
+    allPlayersList = list(tournamentObj.startingPlayers.all().order_by("?").values_list("username", flat=True))
 
     # Add everyone to nextRoundPlayers
     for player in allPlayersList:
@@ -643,27 +585,14 @@ def SF_startAnyTournament(request, tournamentObj):
     tournamentObj.tournamentPointsData = json.dumps([])
 
     if tournamentObj.tournamentType == "TL":
-        allPlayersList = list(
-            tournamentObj.startingPlayers.all()
-            .order_by("?")
-            .values_list("username", flat=True)
-        )
+        allPlayersList = list(tournamentObj.startingPlayers.all().order_by("?").values_list("username", flat=True))
         livesList = []
         for playerName in allPlayersList:
             livesList.append([playerName, 2])
         tournamentObj.tournamentSideData = json.dumps(livesList)
 
-    if (
-        tournamentObj.tournamentType == "RR"
-        or tournamentObj.tournamentType == "TL"
-        or tournamentObj.tournamentType == "PT"
-        or tournamentObj.tournamentType == "MG"
-    ):
-        allPlayersList = list(
-            tournamentObj.startingPlayers.all()
-            .order_by("?")
-            .values_list("username", flat=True)
-        )
+    if tournamentObj.tournamentType == "RR" or tournamentObj.tournamentType == "TL" or tournamentObj.tournamentType == "PT" or tournamentObj.tournamentType == "MG":
+        allPlayersList = list(tournamentObj.startingPlayers.all().order_by("?").values_list("username", flat=True))
         pointsList = []
         for playerName in allPlayersList:
             if tournamentObj.tournamentType == "MG":
@@ -688,11 +617,7 @@ def SF_startAnyTournament(request, tournamentObj):
 # until all TB's and results are in, we cannot add players as we go.
 # Therefore, next round players need to be added here JUST BEFORE starting the next round
 def setNextRoundMultiGamePlayers(tournamentObj):
-    allPlayersList = list(
-        tournamentObj.nextRoundPlayers.all()
-        .order_by("?")
-        .values_list("username", flat=True)
-    )
+    allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
     # First round has ALREADY added everyone. Just return
     if len(allPlayersList) > 0:
         return
@@ -712,15 +637,11 @@ def setNextRoundMultiGamePlayers(tournamentObj):
             tb += [[-float("inf"), -1]] * (4 - len(tb))  # pad if needed (optional)
             normalized_row = [name, played, wins] + tb[:4]  # keep only top 4
             playersData.append(normalized_row)
-        playersData.sort(
-            key=lambda r: (-r[2], -r[3][0], -r[4][0], -r[5][0], -r[6][0], r[0])
-        )
+        playersData.sort(key=lambda r: (-r[2], -r[3][0], -r[4][0], -r[5][0], -r[6][0], r[0]))
 
         playersData = playersData[:14]
         for i in range(14):
-            tournamentObj.nextRoundPlayers.add(
-                User.objects.get(username=playersData[i][0])
-            )
+            tournamentObj.nextRoundPlayers.add(User.objects.get(username=playersData[i][0]))
 
         # Set up the points data for Round 2
         tournamentPointsData = json.loads(tournamentObj.tournamentPointsData)
@@ -837,9 +758,9 @@ def start_next_any_tournament_round(
     ### MOVE TO RET ????
     roundNumberString = ret["roundNumberString"]
     # Remove existing tournament name prefix to prevent duplication
-    # TODO: remove this hack. Check what 
+    # TODO: remove this hack. Check what
     if roundNumberString.startswith(f"[{tournamentObj.tournamentName}] "):
-        roundNumberString = roundNumberString[len(f"[{tournamentObj.tournamentName}] "):]
+        roundNumberString = roundNumberString[len(f"[{tournamentObj.tournamentName}] ") :]
     tournamentGameName = f"[{tournamentObj.tournamentName}] {roundNumberString}"
     for i, currentPlayers in enumerate(gamesPlayers):
         if tournamentObj.tournamentType == "MG":
@@ -864,55 +785,35 @@ def start_next_any_tournament_round(
                     "B6",
                     "B7",
                 ]
-                tournamentGameName = (
-                    f"[{tournamentObj.tournamentName}] R2 - {gameNames[i]}"
-                )
+                tournamentGameName = f"[{tournamentObj.tournamentName}] R2 - {gameNames[i]}"
             else:
                 tournamentGameName = f"[{tournamentObj.tournamentName}] R1 - {i + 1}"
         ## END MOVE TO RET???
 
         if tournamentObj.gameCode == "FCM":
-            newGameID = create_fcm_game(
-                request, tournamentObj, tournamentGameName, currentPlayers
-            )
+            newGameID = create_fcm_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "HLC":
-            newGameID = create_hlc_game(
-                request, tournamentObj, tournamentGameName, currentPlayers
-            )
+            newGameID = create_hlc_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "BUS":
-            newGameID = create_bus_game(
-                request, tournamentObj, tournamentGameName, currentPlayers
-            )
+            newGameID = create_bus_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "TGZ":
-            newGameID = create_tgz_game(
-                request, tournamentObj, tournamentGameName, currentPlayers
-            )
+            newGameID = create_tgz_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "AQY":
-            newGameID = create_aqy_game(
-                request, tournamentObj, tournamentGameName, currentPlayers
-            )
+            newGameID = create_aqy_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "IND":
-            newGameID = create_ind_game(
-                request, tournamentObj, tournamentGameName, currentPlayers
-            )
+            newGameID = create_ind_game(request, tournamentObj, tournamentGameName, currentPlayers)
         else:
             # LEGACY CODE FOR SEPERARTE TOURNAMENT MODELS
             # THIS WILL FAIL! THIS FUNCTION NO LONGER EXISTS
             # But leave it here to force a fail and alert me with a 500 error
-            newGameID = tournamentObj.createTournamentGame(
-                request, roundNumberString, currentPlayers
-            )
+            newGameID = tournamentObj.createTournamentGame(request, roundNumberString, currentPlayers)
         roundData.append([currentPlayers, newGameID, [], tournamentGameName])
 
     # Save round data
     if roundData:
-        tournamentProgressionDataArray = json.loads(
-            tournamentObj.tournamentProgressionData
-        )
+        tournamentProgressionDataArray = json.loads(tournamentObj.tournamentProgressionData)
         tournamentProgressionDataArray.append(roundData)
-        tournamentObj.tournamentProgressionData = json.dumps(
-            tournamentProgressionDataArray
-        )
+        tournamentObj.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
 
     tournamentObj.save()
 
@@ -931,16 +832,9 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     # Get players sorted by points (weakest first) for RR, PT, or TL
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
-    allPlayersList = list(
-        tournamentObj.nextRoundPlayers.all()
-        .order_by("?")
-        .values_list("username", flat=True)
-    )
+    allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
 
-    if (
-        tournamentType in ["RR", "PT", "TL"]
-        and len(TPDA) < tournamentObj.roundsBeforeKnockout
-    ):
+    if tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournamentObj.roundsBeforeKnockout:
         pointsList = json.loads(tournamentObj.tournamentPointsData)
         # Being lowest points to front, in case a bye is needed
         pointsList.sort(key=lambda x: x[1])
@@ -950,11 +844,7 @@ def SF_createNextRoundGamesSetup(tournamentObj):
             livesList = json.loads(tournamentObj.tournamentSideData)
             # Being lowest points to front, in case a bye is needed
             livesList.sort(key=lambda x: x[1])
-            allPlayersList = [
-                p
-                for p in allPlayersList
-                if any(p == row[0] and row[1] > 0 for row in livesList)
-            ]
+            allPlayersList = [p for p in allPlayersList if any(p == row[0] and row[1] > 0 for row in livesList)]
 
     # Switch to knockout mode for RR after roundsBeforeKnockout
     if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout:
@@ -969,12 +859,7 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     # Set final round label if exactly maxGamePlayers remain
     if len(allPlayersList) == tournamentObj.maxGamePlayers:
-        roundNumberString = gettext("Final Round") + (
-            " (KO)"
-            if tournamentType == "RR"
-            and len(TPDA) >= tournamentObj.roundsBeforeKnockout
-            else ""
-        )
+        roundNumberString = gettext("Final Round") + (" (KO)" if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout else "")
 
     # 1. CALCULATE HOW MANY BYES ARE REQUIRED
     num_players = len(allPlayersList)
@@ -1005,13 +890,7 @@ def SF_createNextRoundGamesSetup(tournamentObj):
         # Count historical byes for players currently in the pool
         byeCountDict = {}
         # Flattened list of everyone who has ever had a bye in previous rounds
-        historicalByedPlayers = [
-            player
-            for round in TPDA
-            for row in round
-            if row[0] == "BYEPLAYERS"
-            for player in row[1:]
-        ]
+        historicalByedPlayers = [player for round in TPDA for row in round if row[0] == "BYEPLAYERS" for player in row[1:]]
 
         for player in allPlayersList:
             byeCountDict[player] = historicalByedPlayers.count(player)
@@ -1020,9 +899,7 @@ def SF_createNextRoundGamesSetup(tournamentObj):
         minByes = min(byeCountDict.values())
 
         # Pick the first player in the list who has that minimum count
-        selectedByePlayer = next(
-            p for p in allPlayersList if byeCountDict[p] == minByes
-        )
+        selectedByePlayer = next(p for p in allPlayersList if byeCountDict[p] == minByes)
 
         byePlayers.append(selectedByePlayer)
         allPlayersList.remove(selectedByePlayer)
@@ -1071,33 +948,19 @@ def SF_createNextRoundGamesSetup(tournamentObj):
                 candidate_scores = {}
                 for candidate in candidates:
                     # Find the maximum matchup count for any pair involving this candidate
-                    max_count = max(
-                        matchupCounts[frozenset({player, candidate})]
-                        for player in currentPlayers
-                    )
+                    max_count = max(matchupCounts[frozenset({player, candidate})] for player in currentPlayers)
                     candidate_scores[candidate] = max_count
 
                 # Prefer candidates with max_count == 0 (no previous matchups with group)
                 min_score = min(candidate_scores.values())
-                min_score_candidates = [
-                    c for c, s in candidate_scores.items() if s == min_score
-                ]
+                min_score_candidates = [c for c, s in candidate_scores.items() if s == min_score]
 
                 # If there are candidates with no previous matchups, prioritize them
                 if min_score == 0:
-                    min_score_candidates = [
-                        c
-                        for c in min_score_candidates
-                        if all(
-                            matchupCounts[frozenset({c, p})] == 0
-                            for p in currentPlayers
-                        )
-                    ]
+                    min_score_candidates = [c for c in min_score_candidates if all(matchupCounts[frozenset({c, p})] == 0 for p in currentPlayers)]
 
                 # Select the first candidate in the original order (to respect points)
-                selected_candidate = next(
-                    c for c in candidates if c in min_score_candidates
-                )
+                selected_candidate = next(c for c in candidates if c in min_score_candidates)
 
                 # Add the selected candidate
                 currentPlayers.append(selected_candidate)
@@ -1132,9 +995,7 @@ def SF_checkForAnyTournamentEnd(tournamentObj):
         TPDA = json.loads(tournamentObj.tournamentProgressionData)
         if len(TPDA) >= tournamentObj.roundsBeforeKnockout:
             pointsList = json.loads(tournamentObj.tournamentPointsData)
-            pointsList.sort(
-                key=lambda x: x[1], reverse=True
-            )  # Sort by points (descending)
+            pointsList.sort(key=lambda x: x[1], reverse=True)  # Sort by points (descending)
             maxPoints = pointsList[0][1]
             allPlayersList = [row[0] for row in pointsList if row[1] >= maxPoints]
             if len(allPlayersList) < tournamentObj.maxGamePlayers:
@@ -1158,25 +1019,17 @@ def SF_M_ProcessAnyTournamentEndGame(
 ):
 
     ### Add winner(s) into results
-    tournamentProgressionDataArray = json.loads(
-        tournamanetObj.tournamentProgressionData
-    )
+    tournamentProgressionDataArray = json.loads(tournamanetObj.tournamentProgressionData)
     # Find correct index in latest round using game id
     match = next(
-        (
-            row
-            for row in tournamentProgressionDataArray[-1]
-            if row[1] == _currentGame.id
-        ),
+        (row for row in tournamentProgressionDataArray[-1] if row[1] == _currentGame.id),
         None,
     )
     if match is not None:
         match[2].extend(_winnerArray)  # this modifies the original data!
     else:
         print("gameID not found ending tournament EndGame")
-    tournamanetObj.tournamentProgressionData = json.dumps(
-        tournamentProgressionDataArray
-    )
+    tournamanetObj.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
 
     # This is an array, with all tied player usernames at each subarray
     finalPositionNames = []
@@ -1193,34 +1046,24 @@ def SF_M_ProcessAnyTournamentEndGame(
 
     localAllPlayers = [p.player for p in _currentGame.players.all() if p.player]
 
-    localKickedPlayers = [
-        p.player for p in _currentGame.players.all() if p.player and p.is_kicked
-    ]
+    localKickedPlayers = [p.player for p in _currentGame.players.all() if p.player and p.is_kicked]
 
     ############################## Add players to next round players
     # KO JUST ADD THE WINNER
     if tournamanetObj.tournamentType == "KO":
         for playerUsername in _winnerArray:
-            tournamanetObj.nextRoundPlayers.add(
-                User.objects.get(username=playerUsername)
-            )
+            tournamanetObj.nextRoundPlayers.add(User.objects.get(username=playerUsername))
     # RR/PT Add all players not kickied
     elif tournamanetObj.tournamentType == "RR" or tournamanetObj.tournamentType == "PT":
         # Just add winner for KO part
         if len(tournamentProgressionDataArray) >= tournamanetObj.roundsBeforeKnockout:
             for playerUsername in _winnerArray:
                 if playerUsername not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
-                    tournamanetObj.nextRoundPlayers.add(
-                        User.objects.get(username=playerUsername)
-                    )
+                    tournamanetObj.nextRoundPlayers.add(User.objects.get(username=playerUsername))
         # Else add everyone
         else:
             for playerObj in localAllPlayers:
-                if (
-                    playerObj not in localKickedPlayers
-                    and playerObj.username
-                    not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND
-                ):
+                if playerObj not in localKickedPlayers and playerObj.username not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
                     tournamanetObj.nextRoundPlayers.add(playerObj)
     # TL Process lives, remove kicks, add players with lives
     elif tournamanetObj.tournamentType == "TL":
@@ -1229,10 +1072,7 @@ def SF_M_ProcessAnyTournamentEndGame(
 
         for playerObj in localAllPlayers:
             isWinner = playerObj.username in _winnerArray
-            if (
-                not isWinner
-                and playerObj.username not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND
-            ):
+            if not isWinner and playerObj.username not in NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND:
                 # Step BACKWARDS through entire lives list
                 for i in range(len(livesList) - 1, -1, -1):
                     player, lives = livesList[i]
@@ -1251,10 +1091,7 @@ def SF_M_ProcessAnyTournamentEndGame(
 
         # Now add players to next round with 1/2 lives and not kicked
         for playerObj in localAllPlayers:
-            if any(
-                playerObj.username == subarr[0] and subarr[1] > 0
-                for subarr in livesList
-            ):
+            if any(playerObj.username == subarr[0] and subarr[1] > 0 for subarr in livesList):
                 tournamanetObj.nextRoundPlayers.add(playerObj)
 
         tournamanetObj.tournamentSideData = json.dumps(livesList)
@@ -1274,13 +1111,9 @@ def SF_M_ProcessAnyTournamentEndGame(
         for i, subArr in enumerate(finalPositionNames):
             for player_name in subArr:
                 # Find the index of the player in pointsList
-                points_list_idx = next(
-                    (idx for idx, x in enumerate(pointsList) if x[0] == player_name), -1
-                )
+                points_list_idx = next((idx for idx, x in enumerate(pointsList) if x[0] == player_name), -1)
                 if points_list_idx != -1:  # Ensure player was found
-                    pointsList[points_list_idx][1] += SR_getPointsForPosition(
-                        i, tournamanetObj.maxGamePlayers
-                    )
+                    pointsList[points_list_idx][1] += SR_getPointsForPosition(i, tournamanetObj.maxGamePlayers)
         tournamanetObj.tournamentPointsData = json.dumps(pointsList)
 
     # Update the tiebreakers for TGZ MG
@@ -1302,11 +1135,7 @@ def SF_M_ProcessAnyTournamentEndGame(
             for player_name in players_in_row:
                 # Find the player's index in pointsList
                 points_list_idx = next(
-                    (
-                        idx
-                        for idx, x in enumerate(pointsList[-1])
-                        if x[0] == player_name
-                    ),
+                    (idx for idx, x in enumerate(pointsList[-1]) if x[0] == player_name),
                     -1,
                 )
 
@@ -1319,9 +1148,7 @@ def SF_M_ProcessAnyTournamentEndGame(
                         pointsList[-1][points_list_idx][2] += 1
                     else:
                         # 3. Add tie-breaker and Game ID for everyone else
-                        pointsList[-1][points_list_idx].append(
-                            [tie_breaker_value, currentGameID]
-                        )
+                        pointsList[-1][points_list_idx].append([tie_breaker_value, currentGameID])
 
         # Save once after all loops are finished
         tournamanetObj.tournamentPointsData = json.dumps(pointsList)
@@ -1364,6 +1191,8 @@ def SF_endAnyTournament(
     _winnerArray,
     _finalPositionNamesAndScore,
 ):
+    from django_q.tasks import async_task
+
     tournamentObj.nextRoundPlayers.clear()
     gameCode = tournamentObj.gameCode
     winnersData = []
@@ -1371,11 +1200,7 @@ def SF_endAnyTournament(
     # End the tournament
     tournamentObj.tournamentStatus = "FN"
     # RR / TL / PT
-    if (
-        tournamentObj.tournamentType == "RR"
-        or tournamentObj.tournamentType == "TL"
-        or tournamentObj.tournamentType == "PT"
-    ):
+    if tournamentObj.tournamentType == "RR" or tournamentObj.tournamentType == "TL" or tournamentObj.tournamentType == "PT":
         # get winners based on points
         pointsList = json.loads(tournamentObj.tournamentPointsData)
         pointsList = sorted(pointsList, key=lambda x: -x[1])
@@ -1427,15 +1252,9 @@ def SF_endAnyTournament(
         firsts = []
         seconds = []
 
-        finalPlayersList = _currentGame.presenter().getAllPlayersOrderedySeatInArray(
-            True
-        )
+        finalPlayersList = _currentGame.presenter().getAllPlayersOrderedySeatInArray(True)
         # add BYES from next round first
-        nextRoundPlayersList = list(
-            tournamentObj.nextRoundPlayers.all()
-            .order_by("?")
-            .values_list("username", flat=True)
-        )
+        nextRoundPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
 
         for player in nextRoundPlayersList:
             firsts.append(player)
@@ -1458,11 +1277,7 @@ def SF_endAnyTournament(
             if tournamentObj.tournamentCategory == "Main":
                 playerObject = User.objects.get(username=player)
                 relatedProfile = Profile.objects.get(user=playerObject)
-                FCMtournamentTrophies = (
-                    json.loads(relatedProfile.FCMtournamentTrophies)
-                    if relatedProfile.FCMtournamentTrophies
-                    else []
-                )
+                FCMtournamentTrophies = json.loads(relatedProfile.FCMtournamentTrophies) if relatedProfile.FCMtournamentTrophies else []
                 while len(FCMtournamentTrophies) < 7:
                     FCMtournamentTrophies.append([0, 0, 0])
                 baseIndex = 0
@@ -1483,9 +1298,9 @@ def SF_endAnyTournament(
                 relatedProfile.save()
             # In all cases, notify the winner(s)
             if i == 0:
-                SN_M_T_sendTournamentWinNotification(
-                    tournamentObj, request, player, gameCode
-                )
+                # Send Tournament win notification
+                # def SN_M_T_sendTournamentWinNotification(tournamentCategory, tournamentName, _playerName, _game):
+                async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_T_sendTournamentWinNotification", tournamentObj.tournamentCategory, tournamentObj.tournamentName, player, gameCode)
 
 
 # End common main/mini functions
