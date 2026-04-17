@@ -340,7 +340,10 @@ export function importModel(input, includeContext) {
 			store.players[i].monuments = inputModel[0][i][4]
 			store.players[i].craftsmen = inputModel[0][i][5]
 			store.players[i].craftsmenPrices = inputModel[0][i][6]
-			store.players[i].god = inputModel[0][i][7]
+			// If inputModel[0][i][7][0] is a number, then wrap it in another arryay. Otherwise just copy it in
+			if (typeof inputModel[0][i][7][0] === "object") store.players[i].god = inputModel[0][i][7]
+			else store.players[i].god = [inputModel[0][i][7]]
+			
 			store.players[i].specialists = inputModel[0][i][8]
 			store.players[i].techs = inputModel[0][i][9]
 			store.players[i].maxVR = inputModel[0][i][10]
@@ -354,11 +357,14 @@ export function importModel(input, includeContext) {
 				monuments: inputModel[0][i][4],
 				craftsmen: inputModel[0][i][5],
 				craftsmenPrices: inputModel[0][i][6],
-				god: inputModel[0][i][7],
+				god: [],
 				specialists: inputModel[0][i][8],
 				techs: inputModel[0][i][9],
 				maxVR: inputModel[0][i][10],
 			})
+			// If inputModel[0][i][7][0] is a number, then wrap it in another arryay. Otherwise just copy it in
+			if (typeof inputModel[0][i][7][0] === "object") store.players[i].god = inputModel[0][i][7]
+			else store.players[i].god = [inputModel[0][i][7]]
 		}
 	}
 	//Object.assign(store.players, inputModel[0])
