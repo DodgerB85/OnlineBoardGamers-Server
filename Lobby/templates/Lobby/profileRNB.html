@@ -41,8 +41,13 @@
                     </div>
                     <div class="favRestChoice">
                         <label for="rnbRad0">
-                            <b>Blue</b>
+                            <img src="{% static 'RNB/images/transporters/transport_donkey_black.png' %}"
+                                 width="100"
+                                 height="100"
+                                 alt="Black" />
                         </label>
+                        <br />
+                        <b>Black</b>
                         <br />
                         <input type="radio"
                                id="rnbRad0"
@@ -52,8 +57,13 @@
                     </div>
                     <div class="favRestChoice">
                         <label for="rnbRad1">
-                            <b>Red</b>
+                            <img src="{% static 'RNB/images/transporters/transport_donkey_blue.png' %}"
+                                 width="100"
+                                 height="100"
+                                 alt="Blue" />
                         </label>
+                        <br />
+                        <b>Blue</b>
                         <br />
                         <input type="radio"
                                id="rnbRad1"
@@ -63,8 +73,13 @@
                     </div>
                     <div class="favRestChoice">
                         <label for="rnbRad2">
-                            <b>Green</b>
+                            <img src="{% static 'RNB/images/transporters/transport_donkey_green.png' %}"
+                                 width="100"
+                                 height="100"
+                                 alt="Green" />
                         </label>
+                        <br />
+                        <b>Green</b>
                         <br />
                         <input type="radio"
                                id="rnbRad2"
@@ -74,14 +89,51 @@
                     </div>
                     <div class="favRestChoice">
                         <label for="rnbRad3">
-                            <b>Yellow</b>
+                            <img src="{% static 'RNB/images/transporters/transport_donkey_grey.png' %}"
+                                 width="100"
+                                 height="100"
+                                 alt="Grey" />
                         </label>
+                        <br />
+                        <b>Grey</b>
                         <br />
                         <input type="radio"
                                id="rnbRad3"
                                name="rnbColour"
                                value="3"
                                {% if colour == 3 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="rnbRad4">
+                            <img src="{% static 'RNB/images/transporters/transport_donkey_red.png' %}"
+                                 width="100"
+                                 height="100"
+                                 alt="Red" />
+                        </label>
+                        <br />
+                        <b>Red</b>
+                        <br />
+                        <input type="radio"
+                               id="rnbRad4"
+                               name="rnbColour"
+                               value="4"
+                               {% if colour == 4 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="rnbRad5">
+                            <img src="{% static 'RNB/images/transporters/transport_donkey_yellow.png' %}"
+                                 width="100"
+                                 height="100"
+                                 alt="Yellow" />
+                        </label>
+                        <br />
+                        <b>Yellow</b>
+                        <br />
+                        <input type="radio"
+                               id="rnbRad5"
+                               name="rnbColour"
+                               value="5"
+                               {% if colour == 5 %}checked{% endif %} />
                     </div>
                 </div>
                 <br />

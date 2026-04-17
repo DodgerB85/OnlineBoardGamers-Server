@@ -148,6 +148,11 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
+    preferredRNBoptions = json.loads(result["user_profile"].preferredRNBoptions) if result["user_profile"].preferredRNBoptions != "" else [-1]
+    if len(preferredRNBoptions) < 1:
+        preferredRNBoptions.extend([-1] * (1 - len(preferredRNBoptions)))
+    returnData["preferredRNBoptions"] = preferredRNBoptions
+
     # RNB uses presenter.removeChatNotification + currentGame.save()
     if user_gp and user_gp.has_chat_notification:
         returnData["chatNotification"] = True
