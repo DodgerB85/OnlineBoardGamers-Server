@@ -164,7 +164,6 @@ export async function saveGame(saveRewind) {
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED" // USED
 		let overshootObj = model.endGame_core()
-		console.log(JSON.stringify(overshootObj))
 		let tournamentData = []
 		for (let i = 0; i < overshootObj.length; i++) tournamentData.push([overshootObj[i][1]])
 		let winningPlayerObj = store.players[tournamentData[0][0]]
@@ -181,7 +180,6 @@ export async function saveGame(saveRewind) {
 		}
 		// Now replace indexes with names
 		for (let i = 0; i < tournamentData.length; i++) tournamentData[i][0] = store.players[tournamentData[i][0]].name
-		//console.log(JSON.stringify(tournamentData))
 
 		postData.tournamentData = [...tournamentData]
 		postData.winner = store.players[overshootObj[0][1]].name // USED

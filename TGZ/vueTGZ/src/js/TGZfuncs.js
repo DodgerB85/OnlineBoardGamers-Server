@@ -253,19 +253,12 @@ export function exportModel(includeContext) {
 	if (includeContext) temp.push(JSON.parse(JSON.stringify(store.context)))
 
 	/*let test = encodeURI(JSON.stringify(temp))
-  console.log(test)
   let test2 = decodeURI(test)
-  console.log(test2)*/
+*/
 
 	let step1 = JSON.stringify(temp)
 	//var step2 = LZString.compressToEncodedURIComponent(step1)
-	/*console.log('LZ')
-  console.log(step2)*/
-	/*console.log('btoa')
-  console.log(btoa(step1))
-  console.log('utf')
-  console.log(LZString.compressToUTF16(step1))*/
-
+	
 	// PAKO
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
@@ -281,10 +274,6 @@ export function exportModel(includeContext) {
   // Convert the compressed data to base64
   let base64Data2_ilt= compressedData.toString('base64');*/
 
-	/* alert(`LZS: ${step2.length}`)
-  alert(`pako: ${base64Data1.length}`)
-  alert(`pako alone: ${step2C.length}`)
-  console.log(step2C)*/
 	//console.log(base64Data)
 	return base64Data
 }
@@ -469,7 +458,6 @@ export function importModel(input, includeContext) {
 	// RESET TEMP VARS
 	//context.buildingsLeftToPlace = 0
 
-	//alert('import')
 	//map.getMapDisplayArray()
 }
 

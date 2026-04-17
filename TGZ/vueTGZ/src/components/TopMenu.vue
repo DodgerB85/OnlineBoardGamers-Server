@@ -190,7 +190,6 @@ function adminBKSbutton() {
 	/*for (let i = 0; i < controller.currentPlayerObj().monuments.length; i++) {
 		controller.currentPlayerObj().monuments[i][1] = 5
 	}*/
-	//alert(typeof(store.players[1].cows))
 	//store.remainingItems = [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
 	//for (let i = 0; i < store.players.length; i++) {
 	//	model.adjustMaxVR(store.players[i], 100)

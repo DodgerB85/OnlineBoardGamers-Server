@@ -58,10 +58,6 @@ async function TGZwebSocketOnInfo(IncomingInfo) {
   const store = useModelStore()
   const personal = usePersonalStore()
 
-  //alert(JSON.stringify(IncomingInfo.data, null, 4));
-  //alert(IncomingInfo.data.slice(0, 16))
-  //alert(IncomingInfo.data.slice(16))
-
   if (IncomingInfo.data.slice(0, 16) === 'MESSAGEFROMADIN=') {
     alert(IncomingInfo.data.slice(16))
   }

@@ -605,9 +605,7 @@ export function getAllowedIndexesToPlacePriCraftsman(craftsman, range, rotation)
 	// FIX OGUN
 	if (craftsman === rf.BLACKSMITH_TILE) allResourcesSquares = getAllSquaresOfSameType(rf.WOOD_SQ).concat(getAllSquaresOfSameType(rf.CLAY_SQ)).concat(getAllSquaresOfSameType(rf.IVORY_SQ))
 	let availableResourcesSquares = []
-	console.log(`allResourcesSquares: ${allResourcesSquares}   // takenResourcesSquares: ${takenResourcesSquares}`)
 	for (let i = 0; i < allResourcesSquares.length; i++) if (!takenResourcesSquares.includes(allResourcesSquares[i])) availableResourcesSquares.push(allResourcesSquares[i])
-	console.log(`availableResourcesSquares: ${availableResourcesSquares}`)
 	// Now find sqaures within range of available resources
 	let withinRangeSquares = []
 	if (craftsman !== rf.BLACKSMITH_TILE) withinRangeSquares = getAllSquaresWithinRangeOfZone(availableResourcesSquares, range, false)

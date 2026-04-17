@@ -702,7 +702,6 @@ export function getValidCraftsmenToRaiseMonument(startingZone, simulateOnly) {
 			let craftsmanCost = getPriceForCraftsman(getPlayerForCraftsmanPriIndex(craftsmanData[0]), craftsmanData[1], true)
 			let hubCost = hubsUsed[i]
 			//let totalCost = hubCost + craftsmanCost
-			console.log(`canaford: ${canAffordCraftsman(craftsmanCost, hubCost, craftsmanData)}`)
 			if (canAffordCraftsman(craftsmanCost, hubCost, craftsmanData)) {
 				if (has_god(controller.currentPlayerObj(), rf.TSUI_GOAB)) {
 					for (let j = 0; j < availableResources.length; j++) validCraftsmenWithMultipleTG.push(allPossibleCraftsmenSqs[i])
@@ -1346,7 +1345,6 @@ export function endGame_core(simulateOnly) {
     store.gameflow.fullTurnOrder.splice(0, store.gameflow.fullTurnOrder.length, ...overshoot.map(item => item[1]));
     store.gameflow.turnOrder.splice(0, store.gameflow.turnOrder.length, overshoot[0][1]);
   }
-  console.log(JSON.stringify(overshoot));
   return overshoot;
 }
 
