@@ -22,6 +22,20 @@ from .modelProxies import (
     RNBgame,
     HLCgame,
     KFWgame,
+    FCMMiniTournament,
+    TGZMiniTournament,
+    FCMMainTournament,
+    TGZMainTournament,
+    HLCMiniTournament,
+    HLCMainTournament,
+    BUSMiniTournament,
+    BUSMainTournament,
+    AQYMiniTournament,
+    AQYMainTournament,
+    INDMiniTournament,
+    INDMainTournament,
+    RNBMiniTournament,
+    RNBMainTournament,
 )
 
 from django.conf import settings
@@ -511,3 +525,135 @@ class KFWgameAdmin(GameAdmin):
 
 
 ################### END Register game objects to specific app
+
+
+################### Register Tournament objects to specific app
+
+
+@admin.register(FCMMiniTournament)
+class FCMMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="FCM", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "FCM"
+
+
+@admin.register(TGZMiniTournament)
+class TGZMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="TGZ", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "TGZ"
+
+
+@admin.register(FCMMainTournament)
+class FCMMainTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="FCM", tournamentCategory="Main")
+
+    class Meta:
+        app_label = "FCM"
+
+
+@admin.register(TGZMainTournament)
+class TGZMainTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="TGZ", tournamentCategory="Main")
+
+    class Meta:
+        app_label = "TGZ"
+
+
+@admin.register(HLCMiniTournament)
+class HLCMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="HLC", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "HLC"
+
+
+@admin.register(HLCMainTournament)
+class HLCMainTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="HLC", tournamentCategory="Main")
+
+    class Meta:
+        app_label = "HLC"
+
+
+@admin.register(BUSMiniTournament)
+class BUSMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="BUS", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "BUS"
+
+
+@admin.register(BUSMainTournament)
+class BUSMainTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="BUS", tournamentCategory="Main")
+
+    class Meta:
+        app_label = "BUS"
+
+
+@admin.register(AQYMiniTournament)
+class AQYMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="AQY", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "AQY"
+
+
+@admin.register(AQYMainTournament)
+class AQYMainTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="AQY", tournamentCategory="Main")
+
+    class Meta:
+        app_label = "AQY"
+
+
+@admin.register(INDMiniTournament)
+class INDMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="IND", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "IND"
+
+
+@admin.register(INDMainTournament)
+class INDMainTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="IND", tournamentCategory="Main")
+
+    class Meta:
+        app_label = "IND"
+
+
+@admin.register(RNBMiniTournament)
+class RNBMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="RNB", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "RNB"
+
+
+@admin.register(RNBMainTournament)
+class RNBMainTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="RNB", tournamentCategory="Main")
+
+    class Meta:
+        app_label = "RNB"
+
+
+################### END Register Tournament objects to specific app

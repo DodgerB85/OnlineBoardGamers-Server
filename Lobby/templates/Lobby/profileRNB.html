@@ -1,0 +1,100 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
+{% endblock head %}
+{% block body %}
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <div class="container formsPage">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <h1>RNB Settings</h1>
+        <b>Note: These settings are cosmetic and do not affect gameplay
+            <br />
+        Refresh any open games for these settings to take effect</b>
+        <div class="profilePreferenceDiv">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden"
+                       id="action"
+                       name="action"
+                       value="updateProfileFavourites">
+                <label class="preferenceTitle">{% translate "Favourite Colour" %}</label>
+                <br />
+                <div>
+                    <div class="favRestChoice">
+                        <label for="rnbRadM1">
+                            <b>{% translate "None" %}</b>
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="rnbRadM1"
+                               name="rnbColour"
+                               value="-1"
+                               {% if colour == -1 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="rnbRad0">
+                            <b>Blue</b>
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="rnbRad0"
+                               name="rnbColour"
+                               value="0"
+                               {% if colour == 0 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="rnbRad1">
+                            <b>Red</b>
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="rnbRad1"
+                               name="rnbColour"
+                               value="1"
+                               {% if colour == 1 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="rnbRad2">
+                            <b>Green</b>
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="rnbRad2"
+                               name="rnbColour"
+                               value="2"
+                               {% if colour == 2 %}checked{% endif %} />
+                    </div>
+                    <div class="favRestChoice">
+                        <label for="rnbRad3">
+                            <b>Yellow</b>
+                        </label>
+                        <br />
+                        <input type="radio"
+                               id="rnbRad3"
+                               name="rnbColour"
+                               value="3"
+                               {% if colour == 3 %}checked{% endif %} />
+                    </div>
+                </div>
+                <br />
+                <br />
+                <button type="submit" class="updateProfilebtn">{% translate "Update RNB Preferences" %}</button>
+            </form>
+        </div>
+        {% include "Lobby/common/homeButton.html" %}
+    </div>
+    {% block script %}
+        <script>
+    var global = {};
+    global.halt = true;
+        </script>
+    {% endblock script %}
+{% endblock body %}

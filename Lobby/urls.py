@@ -36,6 +36,7 @@ urlpatterns = [
     path("profile/", views.profile, name="profile"),
     path("profileAQY/", views.profileAQY, name="profileAQY"),
     path("profileIND/", views.profileIND, name="profileIND"),
+    path("profileRNB/", views.profileRNB, name="profileRNB"),
     path("register/", registerView.as_view(), name="register"),
     path("help/", views.lobbyHelp, name="lobbyHelp"),
     path("helpTournaments/", views.helpTournaments, name="helpTournaments"),

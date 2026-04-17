@@ -105,8 +105,7 @@ class Profile(models.Model):
     preferredINDoptions = models.CharField(max_length=30, blank=True)
     preferredKFWoptions = models.CharField(max_length=30, blank=True)
     preferredWEBoptions = models.CharField(max_length=30, blank=True)
-
-    # preferredRNBcolour = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
+    preferredRNBoptions = models.CharField(max_length=30, blank=True)
 
     FCMtournamentTrophies = models.CharField(
         max_length=100,

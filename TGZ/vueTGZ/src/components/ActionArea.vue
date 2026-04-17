@@ -787,7 +787,7 @@ function failedToJustPlaceCraftsmanFlag() {
 			Winning Kingdom:
 			<img class="winningTribeImg" :src="view.getPlayerTribeImage(personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][0][1]].colour))" alt="Tribe" />
 			Best Mythology:
-			<template v-if="model.getPlayerPrimary_god(store.players[store.history[store.history.length - 1][3][0][1]])[0] !== rf.NO_god">
+			<template v-if="store.players[store.history[store.history.length - 1][3][0][1]].god[0][0] !== rf.NO_god">
 				<template v-for="(godData, index) in model.getPlayer_gods(store.players[store.history[store.history.length - 1][3][0][1]])" :key="index">
 					<img v-if="godData[0] !== rf.NO_god" :src="view.getImage('god' + godData[0])" alt="god" class="winningMythImg" />
 				</template>

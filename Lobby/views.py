@@ -1892,6 +1892,40 @@ def profileIND(request):
 
 
 @login_required
+def profileRNB(request):
+    if request.method == "POST":
+        profile = Profile.objects.get(user=request.user)
+
+        RNBoptions = []
+        RNBoptions.append(int(request.POST.get("rnbColour", -1)))
+
+        profile.preferredRNBoptions = json.dumps(RNBoptions, separators=(",", ":"))
+
+        profile.save()
+
+        messages.success(
+            request,
+            gettext("Your RNB preferences have been updated successfully"),
+        )
+        return redirect(to="profileRNB")
+
+    else:
+        profile = Profile.objects.get(user=request.user)
+        preferredRNBoptions = json.loads(request.user.profile.preferredRNBoptions) if request.user.profile.preferredRNBoptions != "" else [-1]
+
+        if len(preferredRNBoptions) < 1:
+            preferredRNBoptions.extend([-1] * (1 - len(preferredRNBoptions)))
+
+        return render(
+            request,
+            "Lobby/profileRNB.html",
+            {
+                "colour": preferredRNBoptions[0],
+            },
+        )
+
+
+@login_required
 def createBUSpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "BUS", Game)
     if request.method != "POST" and gameID == 0:
