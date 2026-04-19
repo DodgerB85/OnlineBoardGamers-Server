@@ -393,7 +393,7 @@ def _processRNBturn(request):
 
     # End stack move
 
-    elif jsonData["action"] == "saveConflictMove":
+    elif jsonData["action"] == "savePrePhaseMain":
         # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
@@ -401,6 +401,60 @@ def _processRNBturn(request):
         if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
+            message = f"RNB saveStackMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
+            SN_sendAdminErrorMessage(message)
+            return JsonResponse({"syncError": True}, safe=False)
+
+        nameToUse = request.user.username
+        if request.user.username == "BotKickStarter":
+            nameToUse = jsonData["BKSN"]
+
+        # First, ALWAYS add the conflict preset move
+        if jsonData["conflictPresetData"] != "":
+            conflictPresetMoves = PdecompressData(jsonData["conflictPresetData"])
+            for conflictPresetMove in conflictPresetMoves:
+                conflictPresetMove["status"] = "pending"
+                PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
+
+        # Next, ALWAYS add in any phase skips
+        for mainPhaseSkipData in jsonData["mainPhaseSkipsData"]:
+            newMoveEntry = {
+                "turn": mainPhaseSkipData[0],
+                "phase": mainPhaseSkipData[1],
+                "actionStack": "SKIP",
+                "status": "pending",
+            }
+            PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
+
+        # Next, we can clear out old data
+        PclearPastMoveData(currentGame)
+
+        # Now save the preset main phase
+        newMoveEntry = {
+            "turn": jsonData["futureTurn"],
+            "phase": jsonData["futurePhase"],
+            "actionStack": jsonData["actionStack"],
+            "status": "pending",
+        }
+        PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
+
+        response_data = {
+            "latestUpdate": currentGame.latestUpdate,
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "savedMoveForLater": True,
+            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+        }
+
+        return JsonResponse(response_data, safe=False)
+    # End savePrePhaseMain
+
+    elif jsonData["action"] == "saveConflictMove":
+        # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
+        # But we can reject earlier moves that are prior to the game's current state
+        savingTurn = jsonData["turn"]
+        savingPhase = jsonData["phase"]
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
             message = f"RNB saveConflictMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -485,6 +539,35 @@ def _processRNBturn(request):
             return JsonResponse(response_data, safe=False)
 
     # End conflict move
+
+    elif jsonData["action"] == "saveConflictPreset":
+        # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
+        # But we can reject earlier moves that are prior to the game's current state
+        savingTurn = jsonData["turn"]
+        savingPhase = jsonData["phase"]
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
+            message = f"RNB saveConflictMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
+            SN_sendAdminErrorMessage(message)
+            return JsonResponse({"syncError": True}, safe=False)
+
+        nameToUse = request.user.username
+        if request.user.username == "BotKickStarter":
+            nameToUse = jsonData["BKSN"]
+
+        conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
+        conflictPresetMove["status"] = "pending"
+        PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
+
+        currentGame.save()
+
+        response_data = {
+            "savedConflictPreset": True,
+            "gameDataB64": currentGame.gameData,
+            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+        }
+
+        return JsonResponse(response_data, safe=False)
 
     elif jsonData["action"] == "saveAndUpdateNotifictionsAfterStack":
         db_latest_update = currentGame.latestUpdate
