@@ -1,18 +1,19 @@
 # Needs to be inside the root folder of the project, IE with manage.py
+import base64
+import datetime
+import gzip
+import json
 import os
 import sys
 import time
 from pathlib import Path
+
+import django
 from decouple import config
 from django.db import connection
 
 # import time
-from django.db.models import Q, Avg, Prefetch
-import json
-import django
-import datetime
-import base64
-import gzip
+from django.db.models import Avg, Prefetch, Q
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
@@ -281,7 +282,7 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
         winner_gp = winner_gp_list[0] if winner_gp_list else None
 
         if not winner_gp or not winner_gp.player:
-            print(f"NO WINNER:: {getattr(game, 'id')}")
+            print(f"NO WINNER:: {game.id}")
             continue
 
         winner_username = winner_gp.player.username
@@ -294,7 +295,7 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
             decompressed_string = decompressed_data.decode("utf-8")
             raw_data = json.loads(decompressed_string)
         except Exception as e:
-            print(f"Game ERROR - COULD NOT DECOMPRESS: {getattr(game, 'id')} :: {e}")
+            print(f"Game ERROR - COULD NOT DECOMPRESS: {game.id} :: {e}")
             continue
 
         raw_player_index = 3
@@ -347,10 +348,10 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
 
                 if is_winner:
                     results[f"winner_{ms_type}"] += 1
-                    results[f"winner_{ms_type}_ids"].append(getattr(game, "id"))
+                    results[f"winner_{ms_type}_ids"].append(game.id)
                 else:
                     results[f"picked_{ms_type}"] += 1
-                    results[f"picked_{ms_type}_ids"].append(getattr(game, "id"))
+                    results[f"picked_{ms_type}_ids"].append(game.id)
 
                 # Update player count specific stats
                 num_players = len(playerData)
@@ -358,12 +359,12 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
                     if is_winner:
                         results[f"winner_{ms_type}_{num_players}p"] += 1
                         results[f"winner_{ms_type}_{num_players}p_ids"].append(
-                            getattr(game, "id")
+                            game.id
                         )
                     else:
                         results[f"picked_{ms_type}_{num_players}p"] += 1
                         results[f"picked_{ms_type}_{num_players}p_ids"].append(
-                            getattr(game, "id")
+                            game.id
                         )
 
     return results

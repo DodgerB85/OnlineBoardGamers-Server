@@ -1,5 +1,5 @@
-from django.urls import path
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import path
 
 from Lobby.models import Game
 

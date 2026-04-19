@@ -1,8 +1,9 @@
-import os
 import datetime
+import os
+
+from decouple import config
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
-from decouple import config
 
 # Configuration
 BACKUP_DIR_NAME = "~/mysql_backups"

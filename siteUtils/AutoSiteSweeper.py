@@ -1,19 +1,18 @@
 # This is a general utility to sweep the DB and remove abandoned games / Mini Tournaments, and check for stalled games
+import math
 import os
 import sys
 import time
-import math
 from pathlib import Path
+from unittest.mock import MagicMock
+
+# from django.db import connections
+import django
+from decouple import config  # , Csv
+from django.db import OperationalError, transaction
 
 # from itertools import chain
 from django.db.models import Count, Q
-from unittest.mock import MagicMock
-from decouple import config  # , Csv
-from django.db import OperationalError, transaction
-# from django.db import connections
-
-import django
-
 
 ###### SET UP PARAMS HERE
 ACTUALLY_DELETE_ITEMS = True
@@ -53,7 +52,6 @@ except Exception as e:
     print(f"Error setting up Django: {e}")
     sys.exit(1)
 
-from django.conf import settings
 
 # Import models after Django setup to avoid import errors
 

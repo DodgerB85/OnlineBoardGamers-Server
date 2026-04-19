@@ -1,16 +1,14 @@
 # Needs to be inside the root folder of the project, IE with manage.py
+import math
 import os
 import sys
 import time
 from pathlib import Path
 
-from django.db.models import Q, Prefetch  # , Count
-from django.db import connection
-import math
-from itertools import chain
-from decouple import config
-
 import django
+from decouple import config
+from django.db import connection
+from django.db.models import Prefetch, Q  # , Count
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
@@ -41,14 +39,12 @@ os.environ.setdefault(
 
 try:
     django.setup()
-    from django.contrib.sites.models import Site
 
 except Exception as e:
     print(f"Error setting up Django: {e}")
     sys.exit(1)
 
-from Lobby.models import User, Game, GamePlayer  # noqa: E402
-
+from Lobby.models import Game, GamePlayer, User  # noqa: E402
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_send24HourTimedOutReminderEmail,
 )  # noqa: E402

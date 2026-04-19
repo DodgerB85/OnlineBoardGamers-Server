@@ -1,15 +1,14 @@
 # Needs to be inside the root folder of the project, IE with manage.py
+import json
 import os
 import sys
 import time
-from decouple import config
+from datetime import datetime, timedelta
 from pathlib import Path
 
-from django.db.models import Q, Count
-import json
 import django
-from django.conf import settings
-from datetime import datetime, timedelta
+from decouple import config
+from django.db.models import Count, Q
 
 # from django.contrib.auth.models import User
 
@@ -54,8 +53,7 @@ except Exception as e:
     print(f"Error setting up Django: {e}")
     sys.exit(1)
 
-from Lobby.models import User, Game, GamePlayer
-
+from Lobby.models import GamePlayer, User
 
 # These are the final output arrays, eg winArr - [ [game1tot, game 1%], [game2tot, game2%], etc]
 fairPlayArr_E = []

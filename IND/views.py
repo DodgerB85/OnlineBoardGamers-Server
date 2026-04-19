@@ -1,18 +1,23 @@
-import json
-import time
 import base64
 import gzip
-
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
+import json
+import time
 from typing import TYPE_CHECKING, cast
 
-
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import gettext
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
+from django.utils.translation import gettext
 
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_bug_entry,
+    shared_cast_vote,
+    shared_save_notes,
+    shared_save_zoom,
+)
+from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -21,17 +26,6 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 from .common import create_ind_game
-
-
-from Lobby.models import User, Game, GamePlayer
-
-from Lobby.gameViewHelpers import (
-    build_show_game_data,
-    shared_save_zoom,
-    shared_save_notes,
-    shared_bug_entry,
-    shared_cast_vote,
-)
 
 if TYPE_CHECKING:
     from Lobby.presenters import INDpresenter
@@ -113,9 +107,8 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     # IND: only get notes if pov >= 0
     notes = ""
-    if pov >= 0:
-        if user_gp:
-            notes = user_gp.notes
+    if pov >= 0 and user_gp:
+        notes = user_gp.notes
     returnData["notes"] = notes
 
     # IND: zoom fallback to 100 when pov < 0
@@ -175,7 +168,7 @@ def _processINDturn(request):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="IND")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("INDpresenter", currentGame.presenter())
 
@@ -193,10 +186,7 @@ def _processINDturn(request):
             return JsonResponse({"syncError": "12345"}, safe=False)
 
         # If saving into >= operations, delete all pre-moves
-        if jsonData["phase"] >= 7:
-            presenter.clearAllPreMoveData()
-        # If saving less than ops, from >= ops, delete all pre-moves
-        elif currentGame.phase >= 7 and jsonData["phase"] < 7:
+        if jsonData["phase"] >= 7 or currentGame.phase >= 7 and jsonData["phase"] < 7:
             presenter.clearAllPreMoveData()
 
         currentGame.gameData = jsonData["data"]
@@ -508,7 +498,7 @@ def INDdata(request, dataType):
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("INDpresenter", currentGame.presenter())
 
@@ -631,7 +621,7 @@ def forkINDgame(request):
     try:
         source_game = Game.objects.get(id=jsonData["gameID"], gameCode="IND")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     # Clone the currentGame object
     # newGame = copy.deepcopy(currentGame)

@@ -1,7 +1,7 @@
 from django.templatetags.static import static
 from django.urls import reverse
-from jinja2 import Environment
 from django.utils.translation import gettext
+from jinja2 import Environment
 
 
 def environment(**options):

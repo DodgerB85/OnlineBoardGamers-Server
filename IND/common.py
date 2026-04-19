@@ -1,21 +1,21 @@
-from typing import TYPE_CHECKING, cast
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.contrib import messages
-from django.shortcuts import get_object_or_404
-from django.db import transaction
-from django.utils.translation import gettext
 import json
 import random
-from Lobby.models import User, Game, GamePlayer
+from typing import TYPE_CHECKING, cast
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.translation import gettext
+
+import Lobby.sharedFunctions.constants as rf
+from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
 )  # Replace 'somewhere' with actual module
-
-import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import INDpresenter

@@ -1,42 +1,36 @@
-import json
-import time
-
 # import lzstring
 import base64
 import gzip
-
+import json
+import time
 from typing import TYPE_CHECKING, cast
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import gettext
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
+from django.utils.translation import gettext
 
+import Lobby.sharedFunctions.constants as rf
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_bug_entry,
+    shared_cast_vote,
+    shared_save_notes,
+    shared_save_zoom,
+)
+from Lobby.models import Game, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_updateFlexiTime,
     SF_fastSerializeGame,
+    SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
-from .common import create_aqy_game
-
-from Lobby.models import User, Game
 
 from . import AQYconstants as rfAQY
-import Lobby.sharedFunctions.constants as rf
-
-from Lobby.gameViewHelpers import (
-    build_show_game_data,
-    shared_save_zoom,
-    shared_save_notes,
-    shared_bug_entry,
-    shared_cast_vote,
-)
+from .common import create_aqy_game
 
 if TYPE_CHECKING:
     from Lobby.presenters import AQYpresenter
@@ -119,9 +113,8 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         rfAQY.PHASE_EXPLORE,
         rfAQY.PHASE_FAMINE,
         rfAQY.PHASE_POLLUTION,
-    ]:
-        if presenter.getMoveDataTime(username) == "PRE_MOVE":
-            returnData["preMove"] = presenter.getMoveData(username)
+    ] and presenter.getMoveDataTime(username) == "PRE_MOVE":
+        returnData["preMove"] = presenter.getMoveData(username)
 
     ### NEW GAME
     if currentGame.gameData == "":
@@ -169,7 +162,7 @@ def _processAQYturn(request):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="AQY")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("AQYpresenter", currentGame.presenter())
 
@@ -922,7 +915,7 @@ def AQYdata(request, dataType):
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("AQYpresenter", currentGame.presenter())
 
@@ -940,9 +933,8 @@ def AQYdata(request, dataType):
             rfAQY.PHASE_EXPLORE,
             rfAQY.PHASE_FAMINE,
             rfAQY.PHASE_POLLUTION,
-        ]:
-            if presenter.getMoveDataTime(request.user.username) == "PRE_MOVE":
-                returnData.update({"preMove": presenter.getMoveData(request.user.username)})
+        ] and presenter.getMoveDataTime(request.user.username) == "PRE_MOVE":
+            returnData.update({"preMove": presenter.getMoveData(request.user.username)})
         # Send game data
         return JsonResponse(returnData)
     elif dataType == 2:
@@ -1067,7 +1059,7 @@ def castVote(request):
 @login_required
 def AQYstats(request):
     # Load regular stats
-    with open("./AQY/AQYstats/AQY_stats.json", "r") as f:
+    with open("./AQY/AQYstats/AQY_stats.json") as f:
         data = json.load(f)
 
     timeString = data["time_string"]

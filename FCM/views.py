@@ -1,46 +1,37 @@
+import base64
+import gzip
 import json
 import time
-import base64
-
-import gzip
-
-from decouple import config
 from typing import TYPE_CHECKING, cast
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
+from decouple import config
 from django.contrib.auth.decorators import login_required
-
-
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db import transaction
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
 from django.utils.translation import gettext  # , get_language
 
-from Lobby.sharedFunctions.sharedFunctions import (
-    SF_updateFlexiTime,
-    SF_fastSerializeGame,
+import Lobby.sharedFunctions.constants as rf
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_bug_entry,
+    shared_cast_vote,
+    shared_save_notes,
 )
-from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
+from Lobby.models import Game, GamePlayer, Profile, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_fastSerializeGame,
+    SF_updateFlexiTime,
+)
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
-
-from .common import create_fcm_game
+from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
 
 from . import FCMconstants as rfFCM
-import Lobby.sharedFunctions.constants as rf
-
-from Lobby.models import User, Profile, Game, GamePlayer
-
-from Lobby.gameViewHelpers import (
-    build_show_game_data,
-    shared_save_notes,
-    shared_bug_entry,
-    shared_cast_vote,
-)
+from .common import create_fcm_game
 
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
@@ -70,8 +61,8 @@ def coffeeHelp(request):
 
 @login_required
 def FCMstats(request):
-    f = open("./FCM/FCMstats/FCM_stats.json")
-    data = json.load(f)
+    with open("./FCM/FCMstats/FCM_stats.json") as f:
+        data = json.load(f)
 
     return render(
         request,
@@ -177,9 +168,8 @@ def showGame(request, game_id):
     username = request.user.username
 
     # FCMtourneyAdmin super user check (needs game data)
-    if currentGame.relatedMainTournament and username == "FCMtourneyAdmin":
-        if "FCMtourneyAdmin" not in FCMsuperUsers:
-            FCMsuperUsers.append("FCMtourneyAdmin")
+    if currentGame.relatedMainTournament and username == "FCMtourneyAdmin" and "FCMtourneyAdmin" not in FCMsuperUsers:
+        FCMsuperUsers.append("FCMtourneyAdmin")
 
     finishedGame = currentGame.gameStatus == "FINISHED"
     USE_NEW_CODE = int(currentGame.created) > rfFCM.TS_USE_NEW_CODE
@@ -371,9 +361,8 @@ def showGameVue(request, game_id):
     username = request.user.username
 
     # FCMtourneyAdmin super user check (needs game data)
-    if currentGame.relatedMainTournament and username == "FCMtourneyAdmin":
-        if "FCMtourneyAdmin" not in FCMsuperUsers:
-            FCMsuperUsers.append("FCMtourneyAdmin")
+    if currentGame.relatedMainTournament and username == "FCMtourneyAdmin" and "FCMtourneyAdmin" not in FCMsuperUsers:
+        FCMsuperUsers.append("FCMtourneyAdmin")
 
     finishedGame = currentGame.gameStatus == "FINISHED"
     USE_NEW_CODE = int(currentGame.created) > rfFCM.TS_USE_NEW_CODE
@@ -550,8 +539,7 @@ def checkNewData(request, game_id):
         try:
             currentGame = Game.objects.get(id=game_id, gameCode="FCM")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-            # pass
+            raise Http404(gettext("Game does not exist")) from None
         return HttpResponse(currentGame.latestUpdate)
 
     return HttpResponse(status=204)  # No Content
@@ -602,7 +590,7 @@ def _processTurn(request):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("FCMpresenter", currentGame.presenter())
 
@@ -637,7 +625,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM unlockRestructure - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM unlockRestructure - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -666,7 +654,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM saveOOBpreference - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM saveOOBpreference - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -705,7 +693,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM saveInProgressMap - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM saveInProgressMap - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -785,7 +773,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM saveModuleSelection - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM saveModuleSelection - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -874,7 +862,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM saveNormal - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM saveNormal - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -896,7 +884,7 @@ def _processTurn(request):
                 turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
                 phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
                 message = (
-                    f"MAP TILES LENGTH OUT OF SYNC - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                    f"MAP TILES LENGTH OUT OF SYNC - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                     f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                     f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
                 )
@@ -907,7 +895,7 @@ def _processTurn(request):
                     turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
                     phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
                     message = (
-                        f"MAP TILES CONTENT OUT OF SYNC - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - DB Tiles: {currentTiles} - IN Tiles: {incomingTiles} - JSON_LU: {jsonData['latestUpdate']} "
+                        f"MAP TILES CONTENT OUT OF SYNC - gameID: {currentGame.id} - User: {request.user.username} - DB Tiles: {currentTiles} - IN Tiles: {incomingTiles} - JSON_LU: {jsonData['latestUpdate']} "
                         f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                         f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
                     )
@@ -931,9 +919,7 @@ def _processTurn(request):
         # saved into the rewind stack
         currentRewindDataArray = load_rewind_data(currentGame)
         oldData = currentGame.gameData
-        if len(currentRewindDataArray) == 0:
-            currentRewindDataArray.append(oldData)
-        elif currentRewindDataArray[-1] != oldData:
+        if len(currentRewindDataArray) == 0 or currentRewindDataArray[-1] != oldData:
             currentRewindDataArray.append(oldData)
         currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
 
@@ -1017,21 +1003,20 @@ def _processTurn(request):
 
         # If it WAS a working day save the side data (pre moves) - UNLESS it is now working day again
         # So also check you're not coming from Turn Order
-        if not trainingGame and nameToUse != "" and oldPhase != rfFCM.PHASE_TURN_ORDER and jsonData["phase"] != rfFCM.PHASE_RESTRUCTURING and (jsonData["phase"] == rfFCM.PHASE_WORKING_DAY or oldPhase == rfFCM.PHASE_WORKING_DAY):
-            if jsonData["sideData"] and jsonData["sideData"] != "":
-                preMoveArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["sideData"]))).decode("utf-8"))
-                # currentGame.updateWholeMoveData(nameToUse, json.dumps(preMoveArray, separators=(",", ":")))
-                phases = [
-                    rfFCM.PHASE_WORKING_DAY,
-                    rfFCM.PHASE_DINNERTIME,
-                    rfFCM.PHASE_PAYDAY,
-                    rfFCM.PHASE_MARKETING_CAMPAIGNS,
-                    rfFCM.PHASE_CLEAN_UP,
-                    rfFCM.PHASE_PIZZA_BOMB,
-                    rfFCM.PHASE_COFFE_SHOP_MS,
-                    rfFCM.PHASE_CHOOSE_CEO_BONUS,
-                ]
-                presenter.insertPlayerMoveData(nameToUse, phases, preMoveArray)
+        if not trainingGame and nameToUse != "" and oldPhase != rfFCM.PHASE_TURN_ORDER and jsonData["phase"] != rfFCM.PHASE_RESTRUCTURING and (jsonData["phase"] == rfFCM.PHASE_WORKING_DAY or oldPhase == rfFCM.PHASE_WORKING_DAY) and jsonData["sideData"] and jsonData["sideData"] != "":
+            preMoveArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["sideData"]))).decode("utf-8"))
+            # currentGame.updateWholeMoveData(nameToUse, json.dumps(preMoveArray, separators=(",", ":")))
+            phases = [
+                rfFCM.PHASE_WORKING_DAY,
+                rfFCM.PHASE_DINNERTIME,
+                rfFCM.PHASE_PAYDAY,
+                rfFCM.PHASE_MARKETING_CAMPAIGNS,
+                rfFCM.PHASE_CLEAN_UP,
+                rfFCM.PHASE_PIZZA_BOMB,
+                rfFCM.PHASE_COFFE_SHOP_MS,
+                rfFCM.PHASE_CHOOSE_CEO_BONUS,
+            ]
+            presenter.insertPlayerMoveData(nameToUse, phases, preMoveArray)
 
         # Use for rewind save check
         if nameToUse != "":
@@ -1057,7 +1042,7 @@ def _processTurn(request):
 
         # Send Notifications - payday/fridge with moves are already removd
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
-        if len(currentPlayersArr) > 0 and not jsonData["status"] == "FINISHED":
+        if len(currentPlayersArr) > 0 and jsonData["status"] != "FINISHED":
             playerListToNotify = currentPlayersArr
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
@@ -1067,9 +1052,8 @@ def _processTurn(request):
                 playerListToNotify.remove("FcmAI")
 
             # If you are saving into phase 4, and the next player has OOB, remove them from notifications
-            if jsonData["phase"] == rfFCM.PHASE_TURN_ORDER:
-                if presenter.hasValidActualMoveData(jsonData["nextPlayer"][0]):
-                    playerListToNotify.remove(jsonData["nextPlayer"][0])
+            if jsonData["phase"] == rfFCM.PHASE_TURN_ORDER and presenter.hasValidActualMoveData(jsonData["nextPlayer"][0]):
+                playerListToNotify.remove(jsonData["nextPlayer"][0])
 
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
@@ -1166,14 +1150,14 @@ def _processTurn(request):
 
     # NEW
     elif jsonData["action"] == "saveSimulMove":
-        notRequiedPlayerNames = jsonData["notRequiedPlayerNames"] if "notRequiedPlayerNames" in jsonData else []
-        continueFromStalledGame = jsonData["continueFromStalledGame"] if "continueFromStalledGame" in jsonData else False
+        notRequiedPlayerNames = jsonData.get("notRequiedPlayerNames", [])
+        continueFromStalledGame = jsonData.get("continueFromStalledGame", False)
 
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate) or jsonData["phase"] != currentGame.phase or jsonData["turn"] != currentGame.turn:
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM saveSimulMove - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM saveSimulMove - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -1265,7 +1249,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM kickout - preTurn: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM kickout - preTurn: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -1330,7 +1314,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM saveAfterKickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM saveAfterKickout - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -1364,18 +1348,17 @@ def _processTurn(request):
         currentGame.save()
 
         # Send notification s
-        if not jsonData["noNotification"]:
-            if len(jsonData["nextPlayer"]) > 0 and not jsonData["phase"] == rfFCM.PHASE_GAME_OVER:
-                playerListToNotify = jsonData["nextPlayer"]
-                if request.user.username in playerListToNotify:
-                    playerListToNotify.remove(request.user.username)
-                if "FcmBot" in playerListToNotify:
-                    playerListToNotify.remove("FcmBot")
-                if "FcmAI" in playerListToNotify:
-                    playerListToNotify.remove("FcmAI")
-                if len(playerListToNotify) > 0:
-                    presenter.sendYourTurnNotification(
-                        "FCM",
+        if not jsonData["noNotification"] and len(jsonData["nextPlayer"]) > 0 and jsonData["phase"] != rfFCM.PHASE_GAME_OVER:
+            playerListToNotify = jsonData["nextPlayer"]
+            if request.user.username in playerListToNotify:
+                playerListToNotify.remove(request.user.username)
+            if "FcmBot" in playerListToNotify:
+                playerListToNotify.remove("FcmBot")
+            if "FcmAI" in playerListToNotify:
+                playerListToNotify.remove("FcmAI")
+            if len(playerListToNotify) > 0:
+                presenter.sendYourTurnNotification(
+                    "FCM",
                         playerListToNotify,
                         jsonData["gameID"],
                         presenter.getGameName(),
@@ -1407,7 +1390,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM kickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM kickout - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -1577,7 +1560,7 @@ def _processTurn(request):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
-                f"SYNC ERROR IN: FCM adminKickout - gameID: {getattr(currentGame, 'id')} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                f"SYNC ERROR IN: FCM adminKickout - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
@@ -1686,7 +1669,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    print(f"* * * ERROR: {jsonData['action']} -- Game: {currentGame.gameName} -- ID: {getattr(currentGame, 'id')}")
+    print(f"* * * ERROR: {jsonData['action']} -- Game: {currentGame.gameName} -- ID: {currentGame.id}")
     return HttpResponse(status=204)  # No Content
 
 
@@ -1782,19 +1765,19 @@ def changeAssistance(request):
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-        
+            raise Http404(gettext("Game does not exist")) from None
+
         playerNumber = int(jsonData["playerNumber"])
         requiredLength = 3 * currentGame.maxPlayers
-        
+
         # Ensure zoomLevels string is long enough
         if len(currentGame.zoomLevels) < requiredLength:
             currentGame.zoomLevels = "200" * currentGame.maxPlayers
-        
+
         # Ensure we have enough space for the player's zoom level
         while len(currentGame.zoomLevels) < (playerNumber + 1) * 3:
             currentGame.zoomLevels += "200"
-        
+
         currentGame.zoomLevels = currentGame.zoomLevels[: playerNumber * 3] + jsonData["zoomLevel"] + currentGame.zoomLevels[playerNumber * 3 + 3 :]
         if jsonData["allPlayers"]:
             currentGame.zoomLevels = jsonData["zoomLevel"] * (len(currentGame.zoomLevels) // 3)
@@ -1862,7 +1845,7 @@ def FCMdata(request, dataType):
         # raise Http404(gettext("Game does not exist"))
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: FCM)")
+        raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: FCM)") from None
 
     presenter = cast("FCMpresenter", currentGame.presenter())
 

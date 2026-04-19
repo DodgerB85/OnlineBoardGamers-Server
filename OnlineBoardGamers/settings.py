@@ -10,10 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-from decouple import config
 import os
 from os.path import join
 from pathlib import Path
+
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -260,7 +261,7 @@ Q_CLUSTER = {
     "catch_up": False, # Don't try to catch up on missed tasks
     "scheduler": True, # Disables the scheduler loop entirely
     "recycle": 500,
-    "sync": False, # If true then removes the whole point of async. Testing only. 
+    "sync": False, # If true then removes the whole point of async. Testing only.
     "benchmark": False,  # Disable performance testing
 
     ############################################

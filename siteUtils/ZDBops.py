@@ -1,29 +1,18 @@
 # Needs to be inside the root folder of the project, IE with manage.py
-import os, re, lzstring
-import base64, zlib
+import base64
+import gzip
+import os
 import sys
 import time
 from pathlib import Path
-from decouple import config
-from django.db.models import Q
-import json
-import django
-from django.conf import settings
-from datetime import datetime, timedelta
-import lzstring
-import requests
-from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpRequest
-import gzip
-from django.utils.translation import gettext
-from unittest.mock import MagicMock
-import msgpack
 
-from collections import defaultdict
+import django
+import lzstring
+import msgpack
+from decouple import config
 
 # import matplotlib.pyplot as plt
 # import plotly.graph_objects as go
-import codecs
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 
@@ -52,12 +41,8 @@ print(BASE_DIR)
 
 django.setup()
 
-from django.contrib.sites.models import Site
 
 from Lobby.models import (
-    User,
-    Profile,
-    Tournament,
     Game,
 )
 
@@ -91,7 +76,7 @@ LZD = lzstring.LZString()
 start_calc_time = time.perf_counter()
 count = 0
 
-TARGET_CODE = "Bus" 
+TARGET_CODE = "Bus"
 
 allBusFinishedGames = Game.objects.filter(gameCode="BUS", gameStatus="FINISHED")
 
@@ -111,7 +96,7 @@ for game in allBusFinishedGames:
         # 3. Unpack the MessagePack binary into a Python object
         # raw=False ensures strings are decoded as UTF-8 instead of bytes
         original_data = msgpack.unpackb(msgpacked_data, raw=False)
-    except Exception as e:
+    except Exception:
         errorCount += 1
 
 print(f"Error count: {errorCount}")

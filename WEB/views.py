@@ -1,41 +1,35 @@
-import json
-import time
 import base64
 import gzip
-
+import json
+import time
 from typing import TYPE_CHECKING, cast
 
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
 from django.contrib import messages
-
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import gettext
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
-from django.urls import reverse
 from django.db import transaction
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.translation import gettext
 
+import Lobby.sharedFunctions.constants as rf
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_bug_entry,
+    shared_cast_vote,
+    shared_save_notes,
+    shared_save_zoom,
+)
+from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_updateFlexiTime,
     SF_getGameCreationJsonReturn,
+    SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
-
-from Lobby.models import User, Game, GamePlayer
-
-from Lobby.gameViewHelpers import (
-    build_show_game_data,
-    shared_save_zoom,
-    shared_save_notes,
-    shared_bug_entry,
-    shared_cast_vote,
-)
-
-import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import WEBpresenter
@@ -118,10 +112,7 @@ def createWEBgame(request):
                 shadow_player = User.objects.get(username=f"{shadow_names[i - 1]}")
                 GamePlayer.objects.create(game=newGame, player=shadow_player)
 
-                if request.POST[f"player{i + 1}"]:
-                    display_name = request.POST[f"player{i + 1}"]
-                else:
-                    display_name = f"{shadow_names[i - 1]}"
+                display_name = request.POST[f"player{i + 1}"] if request.POST[f"player{i + 1}"] else f"{shadow_names[i - 1]}"
                 shadow_players.append(display_name)
 
             # Store shadow player names in creator's notes
@@ -153,9 +144,7 @@ def createWEBgame(request):
         zoomLevels = [0] * _maxPlayers
         newGame.zoomLevels = json.dumps(zoomLevels)
 
-        if "trainingGame" in request.POST:
-            newGame.statsExcludedGame = True
-        elif "learningGame" in request.POST:
+        if "trainingGame" in request.POST or "learningGame" in request.POST:
             newGame.statsExcludedGame = True
 
         _startingOptions = []
@@ -180,7 +169,7 @@ def createWEBgame(request):
         messages.success(request, gettext("Your Practice game has started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
     else:
-        messages.success(request, (SF_getGameCreationJsonReturn("WEB", getattr(newGame, "id"))))
+        messages.success(request, (SF_getGameCreationJsonReturn("WEB", newGame.id)))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
@@ -284,7 +273,7 @@ def _processWEBturn(request):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="WEB")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("WEBpresenter", currentGame.presenter())
 
@@ -377,7 +366,7 @@ def _processWEBturn(request):
                     presenter.sendYourTurnNotification(
                         "WEB",
                         playerListToNotify,
-                        getattr(currentGame, "id"),
+                        currentGame.id,
                         presenter.getGameName(),
                         currentGame,
                         oldVer,
@@ -571,7 +560,7 @@ def _processWEBturn(request):
                 presenter.sendYourTurnNotification(
                     "WEB",
                     playerListToNotify,
-                    getattr(currentGame, "id"),
+                    currentGame.id,
                     presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
@@ -634,7 +623,7 @@ def WEBdata(request, dataType=1):
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("WEBpresenter", currentGame.presenter())
 

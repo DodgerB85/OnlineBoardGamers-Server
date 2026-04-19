@@ -1,16 +1,15 @@
+import base64
+import datetime
+import gzip
+import json
 import os
 import sys
 import time
 from pathlib import Path
-from decouple import config
 
-from django.db.models import Q
-import json
 import django
-import datetime
-import base64
-import gzip
-from typing import List, Union, Dict
+from decouple import config
+from django.db.models import Q
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
@@ -46,7 +45,7 @@ print(BASE_DIR)
 django.setup()
 start_calc_time = time.perf_counter()
 
-from Lobby.models import User, Game  # noqa: E402
+from Lobby.models import Game, User  # noqa: E402
 
 # gods
 NO_god = -1
@@ -89,15 +88,15 @@ def analyze_games(player_count_index, schism_games=False, external_tournament=Fa
     """Analyzes game data for a given player count."""
 
     num_gods = 25 if schism_games else 13  # Determine number of gods based on schism
-    G_AVAILABLE: Dict[int, List[int]] = {
+    G_AVAILABLE: dict[int, list[int]] = {
         i: [] for i in range(num_gods)
     }  # {god_index: [game_id1, game_id2, ...]}
-    G_PICKED: Dict[int, List[int]] = {i: [] for i in range(num_gods)}
-    G_WON: Dict[int, List[int]] = {i: [] for i in range(num_gods)}
-    SPEC_LOST: Dict[int, List[int]] = {
+    G_PICKED: dict[int, list[int]] = {i: [] for i in range(num_gods)}
+    G_WON: dict[int, list[int]] = {i: [] for i in range(num_gods)}
+    SPEC_LOST: dict[int, list[int]] = {
         i: [] for i in range(6)
     }  # {spec_index: [game_id1, game_id2, ...]}
-    SPEC_WON: Dict[int, List[int]] = {i: [] for i in range(6)}
+    SPEC_WON: dict[int, list[int]] = {i: [] for i in range(6)}
 
     seat_wins_4p = [0, 0, 0, 0]  # Initialize array to track seat wins
     seat_wins_4p_ids = [
@@ -465,7 +464,7 @@ def calculate_stats(
 
 def generate_stats_data(schism_games=False):
     """Generates the stats data for all player counts."""
-    ALL_DATA: Dict[str, Union[str, int, object]] = {}
+    ALL_DATA: dict[str, str | int | object] = {}
 
     # Get the current UTC time
     current_time = datetime.datetime.now(datetime.UTC)

@@ -1,5 +1,5 @@
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import path
-from django.shortcuts import redirect, get_object_or_404
 
 # now import the views.py file into this code
 from . import views

@@ -14,28 +14,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
 from django.contrib.auth import views as auth_views  # import this
+
+# from django.conf.urls import url
+# from django.contrib.auth import views as auth_views
+from django.contrib.sitemaps.views import sitemap
+from django.shortcuts import redirect
+from django.urls import include, path
+from django.views.generic import RedirectView
+from django.views.generic.base import TemplateView
+from django.views.i18n import JavaScriptCatalog
 
 # from django.conf.urls import handler403
 from Lobby.forms import SetPasswordFormCustom
-# from django.conf.urls import url
-# from django.contrib.auth import views as auth_views
-
-from django.contrib.sitemaps.views import sitemap
-from .sitemaps import StaticSitemap
-
-from django.views.generic.base import TemplateView
-
-from django.conf.urls.i18n import i18n_patterns
-from django.views.i18n import JavaScriptCatalog
-from django.views.generic import RedirectView
-
-from django.conf import settings
-from django.conf.urls.static import static
-from django.shortcuts import redirect
 from Lobby.models import Game
+
+from .sitemaps import StaticSitemap
 
 
 def redirect_hc_to_hlc(request, game_id):

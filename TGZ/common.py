@@ -1,18 +1,19 @@
-from typing import TYPE_CHECKING, cast
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.contrib import messages
-from django.shortcuts import get_object_or_404
-from django.db import transaction
-from django.utils.translation import gettext
 import json
 import random
+from typing import TYPE_CHECKING, cast
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.translation import gettext
+
 from Lobby.models import User
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_TGZadvancedOptions,
     SF_getGameCreationJsonReturn,
+    SF_TGZadvancedOptions,
 )
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
@@ -149,7 +150,7 @@ def create_tgz_game(
         game_description = request.POST.get("gameDescription", "")
         creator = request.user
         host = request.user
-        starting_map = request.POST["mapData"] if "mapData" in request.POST else ""
+        starting_map = request.POST.get("mapData", "")
         game_pace = request.POST.get("pace", 40)
         kickout_duration = request.POST.get("kickoutDuration", 100)
         invited_usernames = [
@@ -271,7 +272,7 @@ def create_tgz_game(
 
     # Tournament Notifications and redirects and return
     if is_main_tournament or is_mini_tournament:
-        return getattr(new_game, "id")
+        return new_game.id
 
     # Normal Game Notifications
     if usernames_to_notify:
@@ -291,7 +292,7 @@ def create_tgz_game(
 
     # Otherwise, return normal game creation with Game model ID
     messages.success(
-        request, SF_getGameCreationJsonReturn("TGZ", getattr(new_game, "id"))
+        request, SF_getGameCreationJsonReturn("TGZ", new_game.id)
     )
     return HttpResponseRedirect(
         reverse("indexListType", kwargs={"listType": "waiting"})

@@ -1,38 +1,35 @@
+import base64
+import contextlib
+import gzip
 import json
 import time
-import base64
-import gzip
-
 from typing import TYPE_CHECKING, cast
 
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
 from django.contrib import messages
-
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import gettext
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
-from django.urls import reverse
 from django.db import transaction
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.translation import gettext
 
+import Lobby.sharedFunctions.constants as rf
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_bug_entry,
+    shared_save_notes,
+    shared_save_zoom,
+)
+from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_updateFlexiTime,
     SF_getGameCreationJsonReturn,
+    SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
-import Lobby.sharedFunctions.constants as rf
-
-from Lobby.models import Game, GamePlayer, User
-from Lobby.gameViewHelpers import (
-    build_show_game_data,
-    shared_save_zoom,
-    shared_save_notes,
-    shared_bug_entry,
-)
 
 if TYPE_CHECKING:
     from Lobby.presenters import KFWpresenter
@@ -121,10 +118,7 @@ def createKFWgame(request):
                     is_current=False,
                 )
 
-                if request.POST[f"player{i + 1}"]:
-                    display_name = request.POST[f"player{i + 1}"]
-                else:
-                    display_name = f"{shadow_names[i - 1]}"
+                display_name = request.POST[f"player{i + 1}"] if request.POST[f"player{i + 1}"] else f"{shadow_names[i - 1]}"
                 shadow_players.append(display_name)
 
             # Store shadow display names in creator's notes (replaces player0notes)
@@ -157,9 +151,7 @@ def createKFWgame(request):
         zoomLevels = [0] * _maxPlayers
         newGame.zoomLevels = json.dumps(zoomLevels)
 
-        if "trainingGame" in request.POST:
-            newGame.statsExcludedGame = True
-        elif "learningGame" in request.POST:
+        if "trainingGame" in request.POST or "learningGame" in request.POST:
             newGame.statsExcludedGame = True
 
         _startingOptions = []
@@ -188,7 +180,7 @@ def createKFWgame(request):
         messages.success(request, gettext("Your Practice game has started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
     else:
-        messages.success(request, (SF_getGameCreationJsonReturn("KFW", getattr(newGame, "id"))))
+        messages.success(request, (SF_getGameCreationJsonReturn("KFW", newGame.id)))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
@@ -260,10 +252,8 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if username in KFW_SUPER_USERS:
         pov = 0
         returnData["pov"] = pov
-        try:
+        with contextlib.suppress(json.JSONDecodeError, IndexError, TypeError):
             returnData["myZoomLevel"] = json.loads(currentGame.zoomLevels)[pov]
-        except (json.JSONDecodeError, IndexError, TypeError):
-            pass
 
     returnData["move"] = presenter.getMoveData(username)
 
@@ -317,7 +307,7 @@ def _processKFWturn(request):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="KFW")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("KFWpresenter", currentGame.presenter())
 
@@ -463,7 +453,7 @@ def _processKFWturn(request):
                     presenter.sendYourTurnNotification(
                         "KFW",
                         playerListToNotify,
-                        getattr(currentGame, "id"),
+                        currentGame.id,
                         presenter.getGameName(),
                         currentGame,
                         oldVer,
@@ -706,10 +696,7 @@ def _processKFWturn(request):
             # add all players back into currentPlayers
             presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayers())
 
-            if currentGame.rewindTempData != "":
-                loadDataArr = json.loads(currentGame.rewindTempData)
-            else:
-                loadDataArr = currentRewindDataArray.pop()
+            loadDataArr = json.loads(currentGame.rewindTempData) if currentGame.rewindTempData != "" else currentRewindDataArray.pop()
 
             ####################################
             currentGame.gameData = loadDataArr[0]
@@ -802,7 +789,7 @@ def _processKFWturn(request):
                 presenter.sendYourTurnNotification(
                     "KFW",
                     playerListToNotify,
-                    getattr(currentGame, "id"),
+                    currentGame.id,
                     presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
@@ -885,7 +872,7 @@ def KFWdata(request, dataType=1):
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("KFWpresenter", currentGame.presenter())
 

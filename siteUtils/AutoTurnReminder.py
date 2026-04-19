@@ -2,15 +2,15 @@
 import os
 import sys
 import time
-from django.db.models import Q  # , Count
 from pathlib import Path
-
-from django.db import connection
-from decouple import config
 
 # import json
 import django
 import requests
+from decouple import config
+from django.db import connection
+from django.db.models import Q  # , Count
+
 # from django.conf import settings
 # from datetime import datetime, timedelta
 # from django.contrib.auth.models import User

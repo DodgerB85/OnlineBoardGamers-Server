@@ -1,27 +1,31 @@
+import contextlib
 import json
-import lzstring
 import time
-
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
 from typing import TYPE_CHECKING, cast
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
-from django.shortcuts import render  # , redirect
+import lzstring
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render  # , redirect
+from django.urls import reverse
 
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.template.loader import render_to_string
 from django.utils.translation import gettext  # , get_language
-from django.urls import reverse
 
-from Lobby.models import User, Game
-
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_bug_entry,
+    shared_cast_vote,
+    shared_save_notes,
+    shared_save_zoom,
+)
+from Lobby.models import Game, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_updateFlexiTime,
     SF_fastSerializeGame,
+    SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
@@ -29,15 +33,6 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from .common import create_tgz_game
-
-from Lobby.gameViewHelpers import (
-    build_show_game_data,
-    shared_save_zoom,
-    shared_save_notes,
-    shared_bug_entry,
-    shared_cast_vote,
-)
-
 
 if TYPE_CHECKING:
     from Lobby.presenters import TGZpresenter
@@ -55,7 +50,7 @@ def redirectLegacyTGZ(request, original_id):
         game = Game.objects.get(gameCode="TGZ", original_id=original_id)
         return HttpResponseRedirect(reverse("TGZ:showTGZgame", args=[game.id]))
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
 
 def TGZhelp(request):
@@ -160,10 +155,8 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
 
     # Recalc zoom for overridden pov
     if pov != result["pov"]:
-        try:
+        with contextlib.suppress(json.JSONDecodeError, IndexError, TypeError):
             returnData["myZoomLevel"] = json.loads(currentGame.zoomLevels)[pov]
-        except (json.JSONDecodeError, IndexError, TypeError):
-            pass
 
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     returnData["startingOptions"] = startingOptions
@@ -177,9 +170,8 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     returnData["autoPass"] = autoPass
 
     experiencedPlayer = False
-    if currentGame.turn == 0:
-        if Game.objects.filter(gameCode="TGZ", players__player=request.user, gameStatus="FINISHED").distinct().count() >= 5:
-            experiencedPlayer = True
+    if currentGame.turn == 0 and Game.objects.filter(gameCode="TGZ", players__player=request.user, gameStatus="FINISHED").distinct().count() >= 5:
+        experiencedPlayer = True
     returnData["experiencedPlayer"] = experiencedPlayer
     returnData["externalTournamentGame"] = is_external_tournament
 
@@ -233,7 +225,7 @@ def _processTGZturn(request):
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         presenter = cast("TGZpresenter", currentGame.presenter())
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     # Helper function to update current players
     def set_current_players(next_player_str):
@@ -251,10 +243,7 @@ def _processTGZturn(request):
         autoPass = jsonData["autoPass"]
         if not autoPass and currentGame.autoMoves is None:
             return JsonResponse({"setAutoPassSuccess": True})
-        if currentGame.autoMoves is None:
-            autoMoves = [0] * currentGame.maxPlayers
-        else:
-            autoMoves = json.loads(currentGame.autoMoves)
+        autoMoves = [0] * currentGame.maxPlayers if currentGame.autoMoves is None else json.loads(currentGame.autoMoves)
         if autoPass:
             autoMoves[playerIndex] = 1
         else:
@@ -383,12 +372,11 @@ def _processTGZturn(request):
 
         # If staying in bid phase
         autoPass = False
-        if currentGame.phase == 1 and jsonData["phase"] == 1:
-            if currentGame.autoMoves is not None:
-                autoMoves = json.loads(currentGame.autoMoves)
-                seat = presenter.seatPosition(jsonData["nextPlayer"])
-                if autoMoves[seat] == 1:
-                    autoPass = True
+        if currentGame.phase == 1 and jsonData["phase"] == 1 and currentGame.autoMoves is not None:
+            autoMoves = json.loads(currentGame.autoMoves)
+            seat = presenter.seatPosition(jsonData["nextPlayer"])
+            if autoMoves[seat] == 1:
+                autoPass = True
 
         # If moving from bids to actions, set automoves to null
         if currentGame.phase == 1 and jsonData["phase"] == 2:
@@ -445,7 +433,7 @@ def _processTGZturn(request):
         elif not autoPass and not firstSave:
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-            if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "TgzBot" and not jsonData["status"] == "FINISHED" and 102 not in loadedStartingOptions:
+            if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "TgzBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
                 playerListToNotify = jsonData["nextPlayer"].split(",")
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -454,7 +442,7 @@ def _processTGZturn(request):
                     presenter.sendYourTurnNotification(
                         "TGZ",
                         playerListToNotify,
-                        getattr(currentGame, "id"),
+                        currentGame.id,
                         currentGame.gameName,
                         currentGame,
                         oldVer,
@@ -591,7 +579,7 @@ def _processTGZturn(request):
                 presenter.sendYourTurnNotification(
                     "TGZ",
                     playerListToNotify,
-                    getattr(currentGame, "id"),
+                    currentGame.id,
                     currentGame.gameName,
                     currentGame,
                     currentGame.latestUpdate,
@@ -683,7 +671,7 @@ def _sendChatMessage(request):
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         user_gp = currentGame.players.filter(player=request.user).first()
         if user_gp and user_gp.has_chat_notification:
@@ -738,7 +726,7 @@ def TGZdata(request, dataType):
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     if dataType == 1:
         # Send game data
@@ -801,14 +789,11 @@ def createTGZspinoff(request):
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         NgameName = "[Copy] - " + currentGame.gameName
         NgameStatus = "ACTIVE"
-        if currentGame.startingOptions != "":
-            NstartingOptions = json.loads(currentGame.startingOptions)
-        else:
-            NstartingOptions = []
+        NstartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions != "" else []
         if len(NstartingOptions) == 0 or NstartingOptions[0] != 102:
             NstartingOptions = [102, *NstartingOptions]
         NstartingOptions = json.dumps(NstartingOptions)
@@ -870,7 +855,7 @@ def createTGZspinoff(request):
 
         newGame.save()
 
-        return JsonResponse({"response": "ok", "newID": getattr(newGame, "id")})
+        return JsonResponse({"response": "ok", "newID": newGame.id})
 
     return JsonResponse({"error": "Wrong request."}, status=400)
 
@@ -943,7 +928,7 @@ def createTGZspinoff(request):
 @login_required
 def TGZstats(request):
     # Load regular stats
-    with open("./TGZ/TGZstats/TGZ_stats.json", "r") as f:
+    with open("./TGZ/TGZstats/TGZ_stats.json") as f:
         data = json.load(f)
 
     timeString = data["time_string"]
@@ -965,7 +950,7 @@ def TGZstats(request):
             }
 
     # Load schism stats
-    with open("./TGZ/TGZstats/TGZ_stats_schism.json", "r") as f_schism:
+    with open("./TGZ/TGZstats/TGZ_stats_schism.json") as f_schism:
         data_schism = json.load(f_schism)
 
     # timeString_schism = data_schism["time_string"]

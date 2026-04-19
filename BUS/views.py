@@ -1,41 +1,37 @@
 import json
 import time
-import lzstring
 
 # import requests
 from typing import TYPE_CHECKING, cast
 
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
+import lzstring
 from django.contrib.auth.decorators import login_required
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.template.loader import render_to_string
 from django.utils.translation import gettext  # , get_language
 
-# from django.utils import translation
-# fore change comment
-
-from Lobby.models import User, Profile, Game
-
-from .common import create_bus_game
-
 from Lobby.gameViewHelpers import (
     build_show_game_data,
-    shared_save_notes,
     shared_bug_entry,
     shared_cast_vote,
+    shared_save_notes,
 )
 
-
+# from django.utils import translation
+# fore change comment
+from Lobby.models import Game, Profile, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
+
+from .common import create_bus_game
 
 if TYPE_CHECKING:
     from Lobby.presenters import BUSpresenter
@@ -137,7 +133,7 @@ def busData(request, dataType):
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("BUSpresenter", currentGame.presenter())
 
@@ -249,7 +245,7 @@ def _processBUSturn(request):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("BUSpresenter", currentGame.presenter())
 
@@ -319,7 +315,7 @@ def _processBUSturn(request):
         else:
             # Send Notifications
             starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED" and 102 not in starting_options:
+            if len(jsonData["nextPlayer"]) > 0 and jsonData["status"] != "FINISHED" and 102 not in starting_options:
                 playerListToNotify = jsonData["nextPlayer"]
                 if "BusBot" in playerListToNotify:
                     playerListToNotify.remove("BusBot")
@@ -524,13 +520,13 @@ def changeBUSviewport(request):
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
         zoomLevels = json.loads(currentGame.zoomLevels)
         playerNumber = int(jsonData["playerNumber"])
         # Ensure zoomLevels array is long enough
         while len(zoomLevels) <= playerNumber:
             zoomLevels.append(120)  # Add default zoom level for new players
-        
+
         zoomLevels[playerNumber] = int(jsonData["zoomLevel"])
         if jsonData["allPlayers"]:
             for i in range(len(zoomLevels)):
@@ -584,7 +580,7 @@ def updateFinishedGameDataFormat(request):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     # Verify game is finished
     if currentGame.gameStatus != "FINISHED":

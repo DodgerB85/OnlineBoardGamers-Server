@@ -1,12 +1,9 @@
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import path
-from django.shortcuts import redirect, get_object_or_404
-
-from . import views
-
-from django.conf import settings
-from django.conf.urls.static import static
 
 from Lobby.models import Game
+
+from . import views
 
 app_name = "FCM"
 

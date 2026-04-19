@@ -1,17 +1,15 @@
+import base64
+import datetime
+import gzip
+import json
 import os
 import sys
 import time
 from pathlib import Path
-from decouple import config
-from collections import Counter
 
-from django.db.models import Q
-import json
 import django
-import datetime
-import base64
-import gzip
-from typing import List, Union, Dict
+from decouple import config
+from django.db.models import Q
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
@@ -157,11 +155,11 @@ def merge_player_counts(data_dict, keys_to_combine, new_key):
 def analyze_games(player_count_index):
     """Analyzes game data for a given player count."""
     NUM_SAINT_OPTIONS = 6
-    SAINTS_PICKED: Dict[int, List[int]] = {i: [] for i in range(NUM_SAINT_OPTIONS)}
-    SAINTS_WON: Dict[int, List[int]] = {i: [] for i in range(NUM_SAINT_OPTIONS)}
-    SAINTS_NOT_PICKED: Dict[int, List[int]] = {i: [] for i in range(NUM_SAINT_OPTIONS)}
-    SAINTS_LOST: Dict[int, List[int]] = {i: [] for i in range(NUM_SAINT_OPTIONS)}
-    SAINTS_WON_TURNS: Dict[int, List[int]] = {
+    SAINTS_PICKED: dict[int, list[int]] = {i: [] for i in range(NUM_SAINT_OPTIONS)}
+    SAINTS_WON: dict[int, list[int]] = {i: [] for i in range(NUM_SAINT_OPTIONS)}
+    SAINTS_NOT_PICKED: dict[int, list[int]] = {i: [] for i in range(NUM_SAINT_OPTIONS)}
+    SAINTS_LOST: dict[int, list[int]] = {i: [] for i in range(NUM_SAINT_OPTIONS)}
+    SAINTS_WON_TURNS: dict[int, list[int]] = {
         i: [] for i in range(6)
     }  # Track turns for wins
     total_turns_list = []
@@ -352,7 +350,7 @@ def calculate_stats(
 
 def generate_stats_data():
     """Generates the stats data for all player counts."""
-    ALL_DATA: Dict[str, Union[str, int, object]] = {}
+    ALL_DATA: dict[str, str | int | object] = {}
 
     # Get the current UTC time
     current_time = datetime.datetime.now(datetime.UTC)

@@ -1,7 +1,7 @@
 # sitemaps.py
+from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
-from django.conf import settings
 
 
 class StaticSitemap(Sitemap):

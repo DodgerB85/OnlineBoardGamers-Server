@@ -26,5 +26,5 @@ class Migration(migrations.Migration):
             },
             bases=('Lobby.game',),
         ),
-       
+
     ]

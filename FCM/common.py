@@ -2,20 +2,20 @@ import json
 from random import randint
 from typing import TYPE_CHECKING, cast
 
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext
-from django.urls import reverse
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.translation import gettext
 
-from Lobby.models import User, Game, GamePlayer
+import Lobby.sharedFunctions.constants as rf
+from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from . import FCMconstants as rfFCM
-import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
@@ -380,7 +380,7 @@ def create_fcm_game(
         #        False,
         #        tournamentType,
         #    )
-        return getattr(new_game, "id")
+        return new_game.id
 
     # Now handle normal games
     if usernames_to_notify:
@@ -391,7 +391,7 @@ def create_fcm_game(
             max_players,
             "FCM",
         )
-    
+
 
 
     if "trainingGame" in request.POST:
@@ -406,7 +406,7 @@ def create_fcm_game(
         )
     else:
         messages.success(
-            request, SF_getGameCreationJsonReturn("FCM", getattr(new_game, "id"))
+            request, SF_getGameCreationJsonReturn("FCM", new_game.id)
         )
         return HttpResponseRedirect(
             reverse("indexListType", kwargs={"listType": "waiting"})

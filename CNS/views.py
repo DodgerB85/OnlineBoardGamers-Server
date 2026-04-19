@@ -1,39 +1,32 @@
-import json
-import time
-
 import base64
 import gzip
-
+import json
+import time
 from typing import TYPE_CHECKING, cast
 
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
 from django.contrib import messages
-
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import gettext
-from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils.translation import gettext
 
+import Lobby.sharedFunctions.constants as rf
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_bug_entry,
+    shared_cast_vote,
+    shared_save_notes,
+    shared_save_zoom,
+)
+from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getGameCreationJsonReturn,
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
-
-from Lobby.models import User, Game, GamePlayer
-
-import Lobby.sharedFunctions.constants as rf
-from Lobby.gameViewHelpers import (
-    build_show_game_data,
-    shared_save_zoom,
-    shared_save_notes,
-    shared_bug_entry,
-    shared_cast_vote,
-)
 
 from . import CNSconstants as rfCNS
 
@@ -54,7 +47,7 @@ def redirectLegacyCNS(request, original_id):
         game = Game.objects.get(gameCode="CNS", original_id=original_id)
         return HttpResponseRedirect(reverse("CNS:showCNSgame", args=[game.id]))
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
 
 def CNShelp(request):
@@ -143,10 +136,7 @@ def createCNSgame(request):
                     player=shadow_player,
                 )
 
-                if request.POST[f"player{i + 1}"]:
-                    display_name = request.POST[f"player{i + 1}"]
-                else:
-                    display_name = f"{shadow_names[i - 1]}"
+                display_name = request.POST[f"player{i + 1}"] if request.POST[f"player{i + 1}"] else f"{shadow_names[i - 1]}"
                 shadow_players.append(display_name)
 
             # Store shadow player names in creator's notes
@@ -177,9 +167,7 @@ def createCNSgame(request):
         newGame.kickoutDuration = request.POST["kickoutDuration"]
         zoomLevels = [24] * _maxPlayers
         newGame.zoomLevels = json.dumps(zoomLevels)
-        if "trainingGame" in request.POST:
-            newGame.statsExcludedGame = True
-        elif "learningGame" in request.POST:
+        if "trainingGame" in request.POST or "learningGame" in request.POST:
             newGame.statsExcludedGame = True
 
         newGame.startingOptions = json.dumps(_startingOptions)
@@ -287,7 +275,7 @@ def _processCNSturn(request):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="CNS")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("CNSpresenter", currentGame.presenter())
 
@@ -609,7 +597,7 @@ def CNSdata(request, dataType):
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = currentGame.presenter()
 

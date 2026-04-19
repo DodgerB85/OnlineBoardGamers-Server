@@ -1,39 +1,33 @@
 import json
-import time
 
 # from datetime import datetime
 import re
-import lzstring
-
-from decouple import config
+import time
 from typing import TYPE_CHECKING, cast
 
-from django.shortcuts import render
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
+import lzstring
+from decouple import config
 from django.contrib.auth.decorators import login_required
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+from django.utils.translation import gettext
 
-from Lobby.sharedFunctions.db_mutex import db_mutex
-
-from Lobby.models import User, Game
-
+import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
     build_show_game_data,
-    shared_save_notes,
     shared_bug_entry,
     shared_cast_vote,
+    shared_save_notes,
 )
-
+from Lobby.models import Game, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
-    SN_sendFactoryAlertNotification,
     SN_sendAdminErrorMessage,
+    SN_sendFactoryAlertNotification,
 )
-
-from django.utils.translation import gettext
-
-import Lobby.sharedFunctions.constants as rf
 
 if TYPE_CHECKING:
     from Lobby.presenters import HLCpresenter
@@ -48,7 +42,7 @@ def HLCgameSummary(request, game_id):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="HLC")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     return render(
         request,
@@ -57,7 +51,7 @@ def HLCgameSummary(request, game_id):
             # "now": now,
             "settingsDEBUG": config("HLC_USE_SOURCE_CODE", default=False, cast=bool),
             "gameData": currentGame.gameData,
-            "gameID": getattr(currentGame, "id"),
+            "gameID": currentGame.id,
         },
     )
 
@@ -98,7 +92,7 @@ def _processHLCturn(request):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="HLC")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("HLCpresenter", currentGame.presenter())
 
@@ -373,10 +367,9 @@ def _processHLCturn(request):
             seat = presenter.seatPosition(newNameCurrent)
             gp = currentGame.players.filter(seat_order=seat).first()
 
-            if gp:
-                if gp.currentMoveTime != "NODATASFWET":
-                    gp.currentMoveTime = "ILLEGALMOVE"  # "NODATASFWET"
-                    gp.save()
+            if gp and gp.currentMoveTime != "NODATASFWET":
+                gp.currentMoveTime = "ILLEGALMOVE"  # "NODATASFWET"
+                gp.save()
             SN_sendFactoryAlertNotification(request, newNameCurrent, jsonData["gameID"], currentGame)
 
         return JsonResponse(
@@ -456,7 +449,7 @@ def _processHLCturn(request):
         else:
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             # Send Notifications
-            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+            if len(jsonData["nextPlayer"]) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -562,10 +555,7 @@ def _processHLCturn(request):
             #    # This saves it anyway
             #    presenter.actionRewindAlterConsent()
 
-            if currentGame.rewindTempData != "":
-                loadData = currentGame.rewindTempData
-            else:
-                loadData = currentRewindDataArray[-1]
+            loadData = currentGame.rewindTempData if currentGame.rewindTempData != "" else currentRewindDataArray[-1]
 
             newVer = (int(currentGame.latestUpdate) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -637,7 +627,7 @@ def _processHLCturn(request):
                 playerListToNotify.remove("HlcBot")
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
-            if len(playerListToNotify) > 0: 
+            if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
                     "HLC",
                     playerListToNotify,
@@ -691,7 +681,7 @@ def _processHLCturn(request):
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             # Send Notifications
-            if len(jsonData["nextPlayer"]) > 0 and not jsonData["status"] == "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+            if len(jsonData["nextPlayer"]) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
                 playerListToNotify = jsonData["nextPlayer"]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
@@ -971,7 +961,7 @@ def HLCdata(request, dataType):
         # raise Http404(gettext("Game does not exist"))
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: HLC)")
+        raise Http404(f"Game {jsonData.get('gameID')} does not exist (Code: HLC)") from None
 
     presenter = cast("HLCpresenter", currentGame.presenter())
 

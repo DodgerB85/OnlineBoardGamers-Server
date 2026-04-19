@@ -1,20 +1,17 @@
 # Needs to be inside the root folder of the project, IE with manage.py
-import django
-
-
+import datetime
 import os
+import random
 import sys
 import time
 from pathlib import Path
 
-from decouple import config
-from django.db import connection
-
-from django.conf import settings
-import datetime
+import django
 import requests
+from decouple import config
+from django.conf import settings
+from django.db import connection
 from django.http import HttpRequest
-import random
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
@@ -49,8 +46,7 @@ print(BASE_DIR)
 django.setup()
 start_calc_time = time.perf_counter()
 
-from Lobby.models import User, Tournament
-
+from Lobby.models import Tournament, User
 from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
 from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen
 
@@ -193,7 +189,7 @@ for tournament in TOURNAMENT_SCHEDULE:
                 f"Name: {tournament_name}\n"
                 f"Players per Game: {maxGamePlayers}\n"
                 f"Format: {tournament_type_string}\n"
-                f"[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{getattr(new_tournament, 'id')}/)"
+                f"[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{new_tournament.id}/)"
             )
             if settings.DEBUG:
                 requests.post(
