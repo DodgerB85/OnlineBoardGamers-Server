@@ -1,23 +1,24 @@
 from django.db import models, transaction
 
+
 class RNBmap(models.Model):
     id = models.AutoField(primary_key=True)  # Explicitly define the id field
-    
+
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    
+
     class Meta:
         verbose_name = "RNB Map"
         verbose_name_plural = "RNB Maps"
-    
+
     # Player counts
     playerCount = models.PositiveSmallIntegerField(default=2)
-    
+
     # All map data (tiles, starting positions, etc.)
     # Note: Requires a database that supports JSON (like PostgreSQL or SQLite 3.9+)
     hexData = models.JSONField(blank=True, null=True, help_text="JUST the hex data, in format [ [q,r,rotation,terrainID], ...]]")
     customElements = models.JSONField(blank=True, null=True, help_text="Preset starting locations, built bridges, etc etc")
-    
+
     # Highscores stored as an array of subArrs [ [userID, score, achievedTS], ...]
     highscores = models.JSONField(default=list, blank=True, null=True)
 
@@ -25,8 +26,8 @@ class RNBmap(models.Model):
     isOfficial = models.BooleanField(default=False)
 
     map_number = models.PositiveIntegerField(
-        unique=True, 
-        editable=False, 
+        unique=True,
+        editable=False,
         help_text="Permanent unique ID for this map across all installations."
     )
 

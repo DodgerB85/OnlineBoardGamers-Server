@@ -1,5 +1,6 @@
 from django.db import migrations
 
+
 def migrate_hc_games(apps, schema_editor):
     """
     No-op: HLC app has been deleted/unified into Lobby.

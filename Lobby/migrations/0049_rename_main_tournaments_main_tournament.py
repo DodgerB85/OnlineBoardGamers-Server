@@ -1,5 +1,6 @@
 from django.db import migrations
 
+
 class Migration(migrations.Migration):
     dependencies = [
         ("Lobby", "0048_alter_mini_tournaments_tournamenttype_and_more"),

@@ -5,21 +5,19 @@
 
 import base64
 import gzip
-import time
 import json
 import random
+import time
 
-from django.utils.translation import gettext
 from django.urls import reverse
+from django.utils.translation import gettext
 
-
+import FCM.FCMconstants as rfFCM
+import Lobby.sharedFunctions.constants as rf
+import RNB.RNBconstants as rfRNB
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
 )
-
-import Lobby.sharedFunctions.constants as rf
-import FCM.FCMconstants as rfFCM
-import RNB.RNBconstants as rfRNB
 
 
 class GamePresenter:
@@ -136,21 +134,15 @@ class GamePresenter:
 
     def isExperiencedGame(self):
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if rf.SO_EXPERIENCED_GAME in starting_options:
-            return True
-        return False
+        return rf.SO_EXPERIENCED_GAME in starting_options
 
     def isLearningGame(self):
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if rf.SO_LEARNING_GAME in starting_options:
-            return True
-        return False
+        return rf.SO_LEARNING_GAME in starting_options
 
     def isTrainingGame(self):
         startingOptions = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
-        if rf.SO_TRAINING_GAME in startingOptions:
-            return True
-        return False
+        return rf.SO_TRAINING_GAME in startingOptions
 
     # KICKOUT STUFF
     def getSecondsToNextKickout(self):
@@ -289,9 +281,10 @@ class GamePresenter:
 
     def sendYourTurnNotification(self, gameCode, playerListToNotify, gameID, gameName, gameObj, oldVer):
         # from django_q.tasks import async_task
-        from django_q.tasks import schedule
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
+        from django_q.tasks import schedule
 
         # Store current game state for validation
         current_turn = gameObj.turn
@@ -315,8 +308,8 @@ class GamePresenter:
             current_players,
             oldVer,
             next_run=start_time,
-            repeats=-1, # Neg repeats for delete
-            schedule_type='O'
+            repeats=-1,  # Neg repeats for delete
+            schedule_type="O",
         )
 
     def _sendStartGameNotification(self, request, playerListToNotify):
@@ -493,8 +486,9 @@ class GamePresenter:
 
 class CNSpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -577,8 +571,9 @@ class CNSpresenter(GamePresenter):
 
 class WEBpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -671,9 +666,10 @@ class WEBpresenter(GamePresenter):
 
 class AQYpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
+        from django_q.tasks import async_task
+
         from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
-        from django_q.tasks import async_task
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -888,9 +884,9 @@ class AQYpresenter(GamePresenter):
         return jsonResponse
 
     def removePlayerTrade(self, entry):
-        import json
         import base64
         import gzip
+        import json
 
         if self.gameObj.playerTradeData == "":
             return
@@ -904,9 +900,9 @@ class AQYpresenter(GamePresenter):
         self.gameObj.playerTradeData = base64.b64encode(gzip.compress(json.dumps(playerTradeData).encode("utf-8"))).decode("utf-8")
 
     def markPromiseComplete(self, promise):
-        import json
         import base64
         import gzip
+        import json
 
         if self.gameObj.playerTradeData != "":
             playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
@@ -932,8 +928,9 @@ class AQYpresenter(GamePresenter):
 
 class TGZpresenter(GamePresenter):
     def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -1019,7 +1016,7 @@ class TGZpresenter(GamePresenter):
                 self.sendYourTurnNotification(
                     "TGZ",
                     [allPlayersL[0]],
-                    getattr(self.gameObj, "id"),
+                    self.gameObj.id,
                     self.gameObj.gameName,
                     self.gameObj,
                     self.gameObj.latestUpdate,
@@ -1036,8 +1033,9 @@ class TGZpresenter(GamePresenter):
 
 class INDpresenter(GamePresenter):
     def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             # TODO: get this working
             SF_M_ProcessAnyTournamentEndGame,
@@ -1131,7 +1129,7 @@ class INDpresenter(GamePresenter):
                 self.sendYourTurnNotification(
                     "IND",
                     [allPlayersL[0]],
-                    getattr(self.gameObj, "id"),
+                    self.gameObj.id,
                     self.gameObj.gameName,
                     self.gameObj,
                     self.gameObj.latestUpdate,
@@ -1234,8 +1232,9 @@ class INDpresenter(GamePresenter):
 
 class BUSpresenter(GamePresenter):
     def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -1324,7 +1323,7 @@ class BUSpresenter(GamePresenter):
         # Initialize rewind consent in activeVotes
 
         rewind_votes = {}
-        host_username = getattr(self.gameObj.host, "username") if self.gameObj.host else None
+        host_username = self.gameObj.host.username if self.gameObj.host else None
         for gp in game_players:
             if gp.player:
                 username = gp.player.username
@@ -1365,10 +1364,7 @@ class RNBpresenter(GamePresenter):
         if currentPlayersList[0] == loggedInPlayerUsername:
             return True
         # If it is a simul turn, and you are ANYWHERE in the list, it is your move
-        if self.gameObj.phase in rfRNB.ALL_PHASE_CONFLICT_DECISIONS:
-            return True
-
-        return False
+        return self.gameObj.phase in rfRNB.ALL_PHASE_CONFLICT_DECISIONS
 
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
@@ -1393,8 +1389,9 @@ class RNBpresenter(GamePresenter):
         return not currentPlayersList or loggedInPlayerUsername in currentPlayersList or currentPlayersList[0] in rf.SHADOW_USERNAMES
 
     def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             # TODO: get this working
             SF_M_ProcessAnyTournamentEndGame,
@@ -1494,15 +1491,15 @@ class RNBpresenter(GamePresenter):
     #
     #    return ", ".join(_currentPlayers)
     #
-    
+
     def playerHasPreMove(self, name):
         # This calls getCurrentMoveDataForPlayer
         currentMove = self.getCurrentMoveDataForPlayer(name)
-        
-        # In Python, {} is falsy. 
+
+        # In Python, {} is falsy.
         # This returns True if data exists, False if it is {}
-        return bool(currentMove) 
-        
+        return bool(currentMove)
+
     def updateSingleMove(self, name, data, deleteMove=False):
         import time
 
@@ -1565,11 +1562,7 @@ class RNBpresenter(GamePresenter):
         gp = self.gameObj.players.filter(seat_order=seat).first()
         gp_move_data = gp.moveDataJSON if gp and gp.moveDataJSON else []
         for entry in gp_move_data:
-            if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
-                return entry
-            elif entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase - 1:
-                return entry
-            elif entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase - rfRNB.PHASE_LOOKBACK_AMOUNT:
+            if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase or entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase - 1 or entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase - rfRNB.PHASE_LOOKBACK_AMOUNT:
                 return entry
         return {}
 
@@ -1583,7 +1576,29 @@ class RNBpresenter(GamePresenter):
         for entry in gp_move_data:
             if entry["turn"] >= self.gameObj.turn:
                 allMoves.append(entry)
-        return allMoves      
+        return allMoves
+
+    def cancelPreMovesForPlayer(self, name, turn, phase):
+        seat = self.seatPosition(name)
+        if seat == -1:
+            return
+
+        # Fetch the GamePlayer object
+        gp = self.gameObj.players.filter(seat_order=seat).first()
+        if not gp:
+            return
+
+        # Ensure we have a list to work with
+        gp_move_data = gp.moveDataJSON if gp.moveDataJSON else []
+
+        # Filter the list: Keep entries that are BEFORE the specified turn/phase
+        # This effectively "deletes" any entry that is >= the target turn/phase
+        updated_move_data = [entry for entry in gp_move_data if entry["turn"] < turn or (entry["turn"] == turn and entry["phase"] < phase)]
+
+        # Only save to the database if changes were actually made
+        if len(updated_move_data) != len(gp_move_data):
+            gp.moveDataJSON = updated_move_data
+            gp.save(update_fields=["moveDataJSON"])
 
     def getMoveDataTime(self, name):
         seat = self.seatPosition(name)
@@ -1690,7 +1705,7 @@ class FCMpresenter(GamePresenter):
             for i in range(len(moduleRange)):
                 moduleRange[i] = int(moduleRange[i][-2:])
             numberOfModulesToPick = random.randrange(int(moduleRange[0]), int(moduleRange[1] + 1), 1)
-            for i in range(numberOfModulesToPick):
+            for _i in range(numberOfModulesToPick):
                 currentIndex = random.randrange(0, len(availableModules), 1)
                 selectedModules.append(availableModules.pop(currentIndex))
             # _tournamentType = random.choice(["RR", "KO", "TL"])
@@ -1788,11 +1803,7 @@ class FCMpresenter(GamePresenter):
 
     def hasAnyPlayerMovedThisPhase(self, phase):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
-        for playerMoveArr in playersMoveDataArr:
-            if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr):
-                return True
-
-        return False
+        return any(self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr) for playerMoveArr in playersMoveDataArr)
 
     def hasValidActualMoveData(self, name):
         if not self.gameObj.FCMplayersMoveData:
@@ -1834,10 +1845,7 @@ class FCMpresenter(GamePresenter):
         # If no phase/wrong phase / empty data is set, then there's no move Data
         if playerMoveArr[1] == [-1] or 9 not in playerMoveArr[1] or playerMoveArr[3] == []:
             return False
-        if len(playerMoveArr) >= 4 and len(playerMoveArr[3]) >= 2 and isinstance(playerMoveArr[3][1], list) and len(playerMoveArr[3][1]) > 0 and playerMoveArr[3][1][0] != -9:
-            return True
-
-        return False
+        return len(playerMoveArr) >= 4 and len(playerMoveArr[3]) >= 2 and isinstance(playerMoveArr[3][1], list) and len(playerMoveArr[3][1]) > 0
 
     # rf.PHASE_SETUP_RESTAURANT1 = 0
     # rf.PHASE_SETUP_RESTAURANT2 = 1
@@ -1915,10 +1923,7 @@ class FCMpresenter(GamePresenter):
                 SN_sendAdminErrorMessage(message)
                 return False
 
-            if moveData[2] == 1 or moveData[2] == 2:
-                return True
-
-            return False
+            return bool(moveData[2] == 1 or moveData[2] == 2)
 
         # Now phase is 7 or 9, AND there is move data
         # moveData = [[[-9],[]],[-9]]
@@ -1959,10 +1964,7 @@ class FCMpresenter(GamePresenter):
             # Now there is valid data, so check it is an ACTUAL move
             if phase == rfFCM.PHASE_PAYDAY and moveData[0][0][0] == -9:
                 return False
-            if phase == rfFCM.PHASE_CLEAN_UP and moveData[1][0] == -9:
-                return False
-
-            return True
+            return not (phase == rfFCM.PHASE_CLEAN_UP and moveData[1][0] == -9)
 
     def insertPlayerMoveData(self, name, phasesArr, moveArr):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
@@ -2092,7 +2094,7 @@ class FCMpresenter(GamePresenter):
         rewindHTML = ""
 
         for player, vote_value in rewindConsentVotes.items():
-            if player != getattr(self.gameObj.host, "username"):
+            if player != self.gameObj.host.username:
                 if vote_value == 0:
                     rewindHTML += "<span style='background-color:red'>" + player + ": " + gettext("No Permission") + "</span><BR/>"
                 elif vote_value == 1:
@@ -2107,7 +2109,7 @@ class FCMpresenter(GamePresenter):
             return True
         rewindConsentVotes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
         missingPlayerNames = self.getMissingPlayersNamesArray()
-        hostUsername = getattr(self.gameObj.host, "username")
+        hostUsername = self.gameObj.host.username
         possible = True
         for player in rewindConsentVotes:
             # If the player is not missing, and has a 0 vote, then it is not possible
@@ -2133,8 +2135,9 @@ class FCMpresenter(GamePresenter):
 
     # Takes in self, request, and then 3 JSON[""] pieces of string data
     def endGame(self, request, _winnerUsername, _finalScores, _tournamentData, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -2221,9 +2224,8 @@ class FCMpresenter(GamePresenter):
             return 0
 
         # Finally, check it is valid
-        if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr):
-            if self.gameObj.phase == rfFCM.PHASE_TURN_ORDER:
-                return playerMoveArr[3][2]
+        if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr) and self.gameObj.phase == rfFCM.PHASE_TURN_ORDER:
+            return playerMoveArr[3][2]
 
         return 0
 
@@ -2279,10 +2281,7 @@ class HLCpresenter(GamePresenter):
         currentPlayerrsList = currentPlayers
         if self.gameObj.phase == 3 and self.hasMoveData(loggedInPlayerUsername) and loggedInPlayerUsername != currentPlayerrsList[0]:
             return False
-        if (loggedInPlayerUsername in currentPlayers) or (currentPlayers == "SHADOW") or (currentPlayers == "SHADOW_2") or (currentPlayers == "SHADOW_3") or (currentPlayers == "SHADOW_4"):
-            return True
-        else:
-            return False
+        return (loggedInPlayerUsername in currentPlayers) or (currentPlayers == "SHADOW") or (currentPlayers == "SHADOW_2") or (currentPlayers == "SHADOW_3") or (currentPlayers == "SHADOW_4")
 
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
@@ -2317,7 +2316,7 @@ class HLCpresenter(GamePresenter):
 
         # Initialize rewind consent in activeVotes
         rewind_votes = {}
-        host_username = getattr(self.gameObj.host, "username") if self.gameObj.host else None
+        host_username = self.gameObj.host.username if self.gameObj.host else None
         for gp in game_players:
             if gp.player:
                 username = gp.player.username
@@ -2342,8 +2341,9 @@ class HLCpresenter(GamePresenter):
             self._sendStartGameNotification(request, playerListToNotify)
 
     def endGame(self, request, _winner, _finalPositions, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -2537,7 +2537,7 @@ class HLCpresenter(GamePresenter):
             return
         rewind_votes = {}
         all_players = self.getAllPlayersOrderedySeatInArray(True)
-        host_username = getattr(self.gameObj.host, "username") if self.gameObj.host else None
+        host_username = self.gameObj.host.username if self.gameObj.host else None
         for player in all_players:
             if player == host_username:
                 rewind_votes[player] = 2
@@ -2565,10 +2565,7 @@ class HLCpresenter(GamePresenter):
             return False
 
         rewind_votes = self.gameObj.activeVotes.get(rf.REWIND_CONSENT_VOTE_TOPIC, {})
-        for consent in rewind_votes.values():
-            if consent == 0:
-                return False
-        return True
+        return all(consent != 0 for consent in rewind_votes.values())
 
     def getRewindHostHTML(self):
         if not self.gameObj.activeVotes or rf.REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
@@ -2579,7 +2576,7 @@ class HLCpresenter(GamePresenter):
         rewindHTML = ""
 
         for player, vote_value in rewindConsentVotes.items():
-            if player != getattr(self.gameObj.host, "username"):
+            if player != self.gameObj.host.username:
                 if vote_value == 0:
                     rewindHTML += "<span style='background-color:red'>" + player + ": " + gettext("No Permission") + "</span><BR/>"
                 elif vote_value == 1:
@@ -2600,8 +2597,9 @@ class HLCpresenter(GamePresenter):
 
 class KFWpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
-        from Lobby.models import User
         from django_q.tasks import async_task
+
+        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -2672,8 +2670,6 @@ class KFWpresenter(GamePresenter):
                 finalResults,
             )
 
-
-
     def startGame(self, request):
         from Lobby.models import GamePlayer
 
@@ -2739,10 +2735,7 @@ class KFWpresenter(GamePresenter):
                 continue
             username = gp.player.username
             # If you have a move, then don't add
-            if self.hasMoveEndData(username):
-                pass
-            # if you don't NEED to move (not in currentPlayers), then don't add
-            elif username not in current_usernames_set:
+            if self.hasMoveEndData(username) or username not in current_usernames_set:
                 pass
             elif username != "KfwBot":
                 _currentPlayers.append(username)
@@ -2755,10 +2748,7 @@ class KFWpresenter(GamePresenter):
 
     def anyMoveData(self):
         playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-        for playerMoveData in playersMoveDataArr:
-            if playerMoveData[2] != "":
-                return True
-        return False
+        return any(playerMoveData[2] != "" for playerMoveData in playersMoveDataArr)
 
     def getMoveData(self, name):
         if self.gameObj.KFWplayersMoveData == "":
@@ -3058,7 +3048,7 @@ class KFWpresenter(GamePresenter):
                         meeplesPulled.append(i)
                         newInformation[0].append(i)
                 # Add meeples to player
-                playerHiddenData[1] = [x + y for x, y in zip(playerHiddenData[1], meeplesPulledArr)]
+                playerHiddenData[1] = [x + y for x, y in zip(playerHiddenData[1], meeplesPulledArr, strict=True)]
                 for i, value in enumerate(histEntry):
                     if value == MEEPLE_RANDOM and meeplesPulled:
                         histEntry[i] = meeplesPulled.pop()
@@ -3080,7 +3070,7 @@ class KFWpresenter(GamePresenter):
                         skillsPulled.append(i)
                         newInformation[1].append(i)
                 # Add skills to player
-                playerHiddenData[2] = [x + y for x, y in zip(playerHiddenData[2], skillsPulledArr)]
+                playerHiddenData[2] = [x + y for x, y in zip(playerHiddenData[2], skillsPulledArr, strict=True)]
                 # Create the history
                 for i, value in enumerate(histEntry):
                     if value == SKILL_ANY_RANDOM and skillsPulled:
@@ -3103,7 +3093,7 @@ class KFWpresenter(GamePresenter):
                         meeplesPulled.append(i)
                         newInformation[0].append(i)
                 # Add meeples to player
-                playerHiddenData[1] = [x + y for x, y in zip(playerHiddenData[1], meeplesPulledArr)]
+                playerHiddenData[1] = [x + y for x, y in zip(playerHiddenData[1], meeplesPulledArr, strict=True)]
 
                 # Remove skills from bag
                 [skillsPulledArr, skills_bag] = self.pull_items_from_bag(num, skills_bag)
@@ -3114,7 +3104,7 @@ class KFWpresenter(GamePresenter):
                         newInformation[1].append(i)
 
                 # Add skills to player
-                playerHiddenData[2] = [x + y for x, y in zip(playerHiddenData[2], skillsPulledArr)]
+                playerHiddenData[2] = [x + y for x, y in zip(playerHiddenData[2], skillsPulledArr, strict=True)]
                 histEntry[0] = meeplesPulled[0]
                 histEntry[1] = skillsPulled[0]
 

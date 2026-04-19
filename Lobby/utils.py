@@ -1,6 +1,8 @@
 # Lobby/utils.py
 import logging
-from django.urls import resolve as django_resolve, Resolver404
+
+from django.urls import Resolver404
+from django.urls import resolve as django_resolve
 
 logger = logging.getLogger(__name__)  # Lobby.utils
 

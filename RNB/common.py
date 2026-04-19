@@ -1,15 +1,16 @@
-from typing import TYPE_CHECKING, cast
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.contrib import messages
-from django.shortcuts import get_object_or_404
-from django.db import transaction
-from django.utils.translation import gettext
 import json
 import random
-from Lobby.models import User, Game, GamePlayer
+from typing import TYPE_CHECKING, cast
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.translation import gettext
+
+from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
@@ -122,7 +123,7 @@ def create_rnb_game(
         game_description = request.POST.get("gameDescription", "")
         creator = request.user
         host = request.user
-        starting_map = request.POST["mapData"] if "mapData" in request.POST else ""
+        starting_map = request.POST.get("mapData", "")
         game_pace = request.POST.get("pace", 40)
         kickout_duration = request.POST.get("kickoutDuration", 100)
         invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 6) if request.POST.get(f"player{i}")]

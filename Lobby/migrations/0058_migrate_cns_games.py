@@ -1,5 +1,6 @@
 from django.db import migrations
 
+
 def migrate_cns_games(apps, schema_editor):
     # Do nothing - CNS app is deleted
     pass

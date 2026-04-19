@@ -1,5 +1,6 @@
 from django.db import migrations
 
+
 def migrate_ind_games(apps, schema_editor):
     # No-Op: IND app has been deleted
     pass

@@ -1,31 +1,30 @@
 # import time
-import requests
 import json
 import random
-import time
-import urllib.parse
-from decouple import config
-
-# from django.db import close_old_connections
-# from django.core.mail import send_mail
-from django.utils.translation import gettext, activate, get_language
-from django.template.loader import render_to_string
-from django.contrib.sites.shortcuts import get_current_site
-
-# from django.core.mail import get_connection, EmailMessage
-
-# from django.urls import reverse
-# from django.http import HttpResponseRedirect
-from Lobby.models import User, Profile
 
 # from django.contrib import messages
 # from django.core.mail import get_connection, EmailMessage
-
 import smtplib
-from email.mime.text import MIMEText
+import time
+import urllib.parse
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import requests
+from decouple import config
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+
+# from django.db import close_old_connections
+# from django.core.mail import send_mail
+from django.utils.translation import activate, get_language, gettext
 
 import Lobby.sharedFunctions.constants as rf
+
+# from django.core.mail import get_connection, EmailMessage
+# from django.urls import reverse
+# from django.http import HttpResponseRedirect
+from Lobby.models import Profile, User
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
@@ -314,77 +313,46 @@ def shouldSendEmail(emailType, username, profile, currentGamePace):
         if profile.stopEmailsUntil is not None:
             return False
         # If live then don't email
-        if currentGamePace == 10:
-            return False
-        # if currentGame.gamePace == 20:
-        #    # str((int(time.time()) * 1000) + newVer)
-        #    latestUpdate = int(int(oldLatestUpdate) / 1000)
-        #    now = round(time.time())
-        #    elapsedMinutes = int((now - latestUpdate) / 60)
-        #    # .... if less than 5 minutes then false
-        #    if elapsedMinutes <= 5:
-        #        return False
-        return True
+        return currentGamePace != 10
 
     # GAME INVITE
     if emailType == "gameInvite":
-        if gameInviteEmail == 0:
-            return False
-        # NB NO PROFILE PASSED IN AT THE MOMENT
-        return True
+        return gameInviteEmail != 0
 
     if emailType == "gameDecline":
-        if inviteDeclineEmail == 0:
-            return False
-        return True
+        return inviteDeclineEmail != 0
 
     # GAME START
     if emailType == "gameStart":
-        if gameStartEmail == 0:
-            return False
-        return True
+        return gameStartEmail != 0
 
     # GAME END
     if emailType == "gameEnd":
-        if gameEndEmail == 0:
-            return False
-        return True
+        return gameEndEmail != 0
 
     # 2 HOUR REMINDER
     if emailType == "2hourReminder":
-        if twoHourReminderEmail == 0:
-            return False
-        return True
+        return twoHourReminderEmail != 0
 
     # TURN EXPIRED
     if emailType == "turnExpired":
-        if turnExpiredEmail == 0:
-            return False
-        return True
+        return turnExpiredEmail != 0
 
     # 24 hr Reminder
     if emailType == "24hrReminder":
-        if dailyReminderEmail == 0:
-            return False
-        return True
+        return dailyReminderEmail != 0
 
     # Tournament game start
     if emailType == "tournamentGameStart":
-        if tournamentGameStartEmail == 0:
-            return False
-        return True
+        return tournamentGameStartEmail != 0
 
     # Tournament win
     if emailType == "tournamentWin":
-        if tournamentWinEmail == 0:
-            return False
-        return True
+        return tournamentWinEmail != 0
 
     # Tournament admin
     if emailType == "tournamentOpen" or emailType == "MTinvite":
-        if tournamentOpenEmail == 0:
-            return False
-        return True
+        return tournamentOpenEmail != 0
 
     # Final return
     return True
@@ -392,12 +360,12 @@ def shouldSendEmail(emailType, username, profile, currentGamePace):
 # This is async
 def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, currentGamePace, currentGameName):
     # originalLang = get_language()
-    
+
     # Pre-fetch users and profiles to avoid N+1 queries
     usernames = [entry[0] for entry in finalPositions]
     users = User.objects.filter(username__in=usernames).select_related('profile')
     user_dict = {user.username: user for user in users}
-    
+
     for entry in finalPositions:
         # user = None
         userObj = user_dict.get(entry[0])
@@ -505,7 +473,7 @@ def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentG
     valid_players = [player for player in playerList if player not in USERNAMES_NOT_TO_NOTIFY]
     users = User.objects.filter(username__in=valid_players).select_related('profile')
     user_dict = {user.username: user for user in users}
-    
+
     for player in valid_players:
         user = user_dict.get(player)
         if not user:
@@ -614,12 +582,12 @@ def SN_sendFixNextTurnNotificationWithValidation(gameCode, playerName, gameID, g
 # Used by above function to ACTUALLY send notifiation
 def SN_sendFixNextTurnNotification(gameCode, playerList, gameID, gameName, turn_string, gamePace):
     originalLang = get_language()
-    
+
     # Pre-fetch users and profiles to avoid N+1 queries
     valid_players = [player for player in playerList if player not in USERNAMES_NOT_TO_NOTIFY]
     users = User.objects.filter(username__in=valid_players).select_related('profile')
     user_dict = {user.username: user for user in users}
-    
+
     for player in valid_players:
         user = user_dict.get(player)
         if not user:
@@ -837,7 +805,7 @@ def SN_sendInviteNotifications(playerNames, _gameName, _maxPlayers, _gameCode):
     # Pre-fetch users and profiles to avoid N+1 queries
     users = User.objects.filter(username__in=playerNames).select_related('profile')
     user_dict = {user.username: user for user in users}
-    
+
     for player in playerNames:
         user = user_dict.get(player)
         if not user:
@@ -1020,11 +988,11 @@ def SN_M_sendGameStartNotification(playerListToNotify, message_data):
     relatedMiniTournamentID = message_data["relatedMiniTournamentID"]
 
     originalLang = get_language()
-    
+
     # Pre-fetch users and profiles to avoid N+1 queries
     users = User.objects.filter(username__in=playerListToNotify).select_related('profile')
     user_dict = {user.username: user for user in users}
-    
+
     for player in playerListToNotify:
         user = user_dict.get(player)
         if not user:
@@ -1420,9 +1388,7 @@ def SN_sendTournamentOpen(new_tournament, gameCode):
         tournament_type_string = "Rounds"
 
     allUsers = User.objects.all()
-    count = 0
-    for user in allUsers:
-        count += 1
+    for _count, user in enumerate(allUsers, 1):
         try:
             profile = Profile.objects.get(user=user)
 
@@ -1515,23 +1481,11 @@ def SN_sendEmail(emailTypeFlag, subject, message, toEmail):
     ]
 
     idx = 0
-    if emailTypeFlag == "gameInvite":
+    if emailTypeFlag == "gameInvite" or emailTypeFlag == "gameDecline" or emailTypeFlag == "gameStart" or emailTypeFlag == "gameEnd":
         idx = OBG_MAILER_IDX
-    elif emailTypeFlag == "gameDecline":
-        idx = OBG_MAILER_IDX
-    elif emailTypeFlag == "gameStart":
-        idx = OBG_MAILER_IDX
-    elif emailTypeFlag == "gameEnd":
-        idx = OBG_MAILER_IDX
-    elif emailTypeFlag == "2hourReminder":
+    elif emailTypeFlag == "2hourReminder" or emailTypeFlag == "turnExpired" or emailTypeFlag == "24hrReminder":
         idx = MAIN_EMAIL_IDX
-    elif emailTypeFlag == "turnExpired":
-        idx = MAIN_EMAIL_IDX
-    elif emailTypeFlag == "24hrReminder":
-        idx = MAIN_EMAIL_IDX
-    elif emailTypeFlag == "tournamentGameStart":
-        idx = OBG_MAILER_IDX
-    elif emailTypeFlag == "tournamentWin":
+    elif emailTypeFlag == "tournamentGameStart" or emailTypeFlag == "tournamentWin":
         idx = OBG_MAILER_IDX
     elif emailTypeFlag == "tournamentOpen":
         idx = MAIN_EMAIL_IDX

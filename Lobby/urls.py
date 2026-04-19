@@ -14,12 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from decouple import config
 from django.urls import path, re_path
 from django.views.generic import RedirectView
-from decouple import config
 
 from . import views
-from .views import registerView, ActivateAccount
+from .views import ActivateAccount, registerView
 
 # app_name = 'Lobby' # Requires Lobby:index etc after everything
 

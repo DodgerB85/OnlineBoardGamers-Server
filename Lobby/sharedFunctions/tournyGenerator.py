@@ -1,5 +1,5 @@
-from collections import Counter
 import itertools
+from collections import Counter
 
 
 def multiGamePlayers4p(players):

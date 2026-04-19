@@ -1,5 +1,5 @@
-import django.db.models.deletion
 import json
+
 from django.db import migrations, models
 
 

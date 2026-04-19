@@ -7,9 +7,8 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonRespons
 from django.urls import reverse
 from django.utils.translation import gettext
 
-from Lobby.models import Profile, Game
-
 import Lobby.sharedFunctions.constants as rf
+from Lobby.models import Game, Profile
 
 
 def build_show_game_data(
@@ -37,7 +36,7 @@ def build_show_game_data(
     try:
         currentGame = Game.objects.select_related(*select_related).prefetch_related("players__player", "invitedPlayers").get(id=game_id, gameCode=game_code)
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = currentGame.presenter()
 
@@ -210,8 +209,8 @@ def shared_save_zoom(request, game_code):
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=game_code)
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
-        
+            raise Http404(gettext("Game does not exist")) from None
+
         # If you are not an invovled player, don't save the zoom
         user_id = request.user.id
         all_players = [gp for gp in currentGame.players.all() if not gp.is_kicked]
@@ -235,7 +234,7 @@ def shared_save_zoom(request, game_code):
             # Ensure zoomLevels array is long enough
             while len(zoomLevels) <= playerNumber:
                 zoomLevels.append(0)  # Add default zoom level for new players
-            
+
             if game_code == "RNB":
                 zoomLevels[playerNumber] = round(float(jsonData["zoomLevel"]), 1)
             else:
@@ -256,7 +255,7 @@ def shared_save_notes(request, game_code, json_key="notes"):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=game_code)
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     user_gp = currentGame.players.filter(player=request.user).first()
     if user_gp:
@@ -278,11 +277,11 @@ def shared_bug_entry(request, game_code, extra_info_fn=None):
     try:
         currentGame = Game.objects.get(id=gameID, gameCode=game_code)
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     extra_info = extra_info_fn(currentGame) if extra_info_fn else ""
 
-    async_task("Lobby.sharedFunctions.sharedNotifications.SN_sendBugReportEmail", 
+    async_task("Lobby.sharedFunctions.sharedNotifications.SN_sendBugReportEmail",
         request.user.username,
         request.user.email,
         game_code,
@@ -303,7 +302,7 @@ def shared_cast_vote(request):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"])
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     result = currentGame.presenter().processVoteLogic(
         topic=jsonData["topic"],

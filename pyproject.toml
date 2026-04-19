@@ -1,4 +1,25 @@
 [tool.black]
-line-length = 150
+line-length = 320
 target-version = ['py39']
 include = '\.pyi?$'
+
+[tool.ruff]
+# General Settings
+line-length = 320
+target-version = "py311"
+
+[tool.ruff.lint]
+# F: Pyflakes (includes F841 unused variables)
+# W/E: pycodestyle
+# UP: pyupgrade
+# B: flake8-bugbear
+# SIM: flake8-simplify
+# I: isort
+select = ["F", "W", "E", "UP", "B", "SIM", "I"]
+ignore = ["E501"]
+
+# Only ignore variables named exactly "_"
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Add file-specific ignores here if needed

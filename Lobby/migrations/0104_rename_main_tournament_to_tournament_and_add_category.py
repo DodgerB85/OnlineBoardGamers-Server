@@ -1,6 +1,6 @@
-from django.db import migrations, models
 import django.db.models.deletion
 from django.conf import settings
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("Lobby", "0103_alter_game_startingmap"),
         # CRITICAL: This tells Django to ensure auth_user exists before running
-        ("auth", "__latest__"), 
+        ("auth", "__latest__"),
     ]
 
     operations = [

@@ -1,49 +1,48 @@
 import json
-from django.utils import timezone
 from datetime import timedelta
-
-from decouple import config
 from typing import TYPE_CHECKING
 
+from decouple import config
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
 
 # from django.db.models.manager import RelatedManager
 from django.dispatch import receiver
-from django.conf import settings
+from django.utils import timezone
 from django.utils.translation import gettext_lazy
 
-from .presenters import (
-    GamePresenter,
-    CNSpresenter,
-    WEBpresenter,
-    AQYpresenter,
-    TGZpresenter,
-    INDpresenter,
-    BUSpresenter,
-    FCMpresenter,
-    RNBpresenter,
-    HLCpresenter,
-    KFWpresenter,
-)
-
 from Lobby.sharedFunctions.sharedRefs import (
+    SR_GAME_STATUS_CHOICES,
     SR_TOURNAMENT_STATUS_CHOICES,
     SR_TOURNAMENT_TYPE_CHOICES,
     SR_getTimeNow,
     SR_getTournamentWinnerHTML,
-    SR_GAME_STATUS_CHOICES,
 )
 
+from .presenters import (
+    AQYpresenter,
+    BUSpresenter,
+    CNSpresenter,
+    FCMpresenter,
+    GamePresenter,
+    HLCpresenter,
+    INDpresenter,
+    KFWpresenter,
+    RNBpresenter,
+    TGZpresenter,
+    WEBpresenter,
+)
 from .sharedFunctions.sharedRefs import (
+    SR_GAMES_CODES_AND_NAMES_CHOICES,
     SR_getFCMstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
-    SR_GAMES_CODES_AND_NAMES_CHOICES,
 )
 
 if TYPE_CHECKING:
     from django.db.models.manager import RelatedManager
+
     from .models import GamePlayer  # Import your GamePlayer model
 
 
@@ -227,17 +226,13 @@ class Tournament(models.Model):
     chatData = models.TextField(blank=True)
 
     def __str__(self):
-        return f"Tournament {getattr(self, 'id')}: {self.tournamentName} : {self.tournamentType} : {self.tournamentStatus}"
+        return f"Tournament {self.id}: {self.tournamentName} : {self.tournamentType} : {self.tournamentStatus}"
 
     def isSignedUp(self, loggedInUser):
-        if loggedInUser in self.startingPlayers.all():
-            return True
-        return False
+        return loggedInUser in self.startingPlayers.all()
 
     def isInvitedPlayer(self, loggedInUser):
-        if loggedInUser in self.invitedPlayers.all():
-            return True
-        return False
+        return loggedInUser in self.invitedPlayers.all()
 
     def getByedPlayersList(self):
         TPDA = json.loads(self.tournamentProgressionData)

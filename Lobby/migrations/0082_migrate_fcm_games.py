@@ -1,5 +1,6 @@
 from django.db import migrations
 
+
 def no_op(apps, schema_editor):
     pass
 

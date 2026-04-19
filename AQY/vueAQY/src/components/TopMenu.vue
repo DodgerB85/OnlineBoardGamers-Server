@@ -492,6 +492,7 @@ function getCurrentPlayerNames() {
 }
 
 .redText {
+	font-weight: bolder;
 	color: red;
 }
 

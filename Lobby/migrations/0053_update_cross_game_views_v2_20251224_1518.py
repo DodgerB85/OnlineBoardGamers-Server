@@ -1,4 +1,5 @@
 import os
+
 from django.db import migrations
 
 
@@ -6,7 +7,7 @@ def load_sql(view_name, version):
     path = os.path.join(
         os.path.dirname(__file__), "views", view_name, f"v{version}.sql"
     )
-    with open(path, "r") as f:
+    with open(path) as f:
         return f.read()
 
 

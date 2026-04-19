@@ -1,4 +1,4 @@
-from Lobby.models import Tournament, Game
+from Lobby.models import Game, Tournament
 
 ################### Register Tournament objects when MAIN to specific app
 

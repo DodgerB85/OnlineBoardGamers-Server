@@ -1,16 +1,17 @@
 #### THESE ITEMS SHOULD BE "PURE" AND INDEPENDENT OF ANY MODELS
 
-import json
-import time
 import copy
+import json
 import math
-from django.utils.translation import gettext, gettext_lazy
+import time
 from collections import Counter
+
+from django.utils.translation import gettext, gettext_lazy
 
 import AQY.AQYconstants as rfAQY
 import FCM.FCMconstants as rfFCM
-import RNB.RNBconstants as rfRNB
 import Lobby.sharedFunctions.constants as rf
+import RNB.RNBconstants as rfRNB
 
 DISCORD = "DC"
 SLACK = "SL"
@@ -86,9 +87,7 @@ def SR_getTimeNow():
 
 
 def SR_isThisMultiiWinnersGame(_gameCode):
-    if _gameCode == "KFW" or _gameCode == "AQY":
-        return True
-    return False
+    return bool(_gameCode == "KFW" or _gameCode == "AQY")
 
 
 def SR_getTournamentWinnerHTML(tournamentStatus, winnersData):
@@ -317,16 +316,7 @@ def SR_getTournamentRoundsHTML(
             if tournamentType == "RR":
                 roundsHTML += "<th>" + pointsList[i][0] + "</th>"
             elif tournamentType == "TL":
-                # fullyCompletedRounds = len(TPDA) - 1
-                # hasCompletedThisRound = pointsList[i][0] in tournamentObj.nextRoundPlayers.all().values_list("username", flat=True)
-                # if hasCompletedThisRound:
-                #    fullyCompletedRounds += 1
-                # lives = 2 - fullyCompletedRounds + pointsList[i][1]
-                lives = (
-                    TL_sideData[pointsList[i][0]]
-                    if pointsList[i][0] in TL_sideData
-                    else 0
-                )
+                lives = TL_sideData.get(pointsList[i][0], 0)
                 roundsHTML += "<th>" + pointsList[i][0] + " (" + str(lives) + ")</th>"
             roundsHTML += "<th>" + str(pointsList[i][1]) + "</th>"
             roundsHTML += "</tr>"
@@ -361,7 +351,7 @@ def SR_getTournamentRoundsHTML(
                 for j in range(len(row)):
                     # Only add lives if 2L AND it is the latest round
                     if tournamentType == "TL" and i == len(TPDA) - 1:
-                        lives = TL_sideData[row[j]] if row[j] in TL_sideData else 0
+                        lives = TL_sideData.get(row[j], 0)
                         if j == 0:
                             roundsHTML += (
                                 '<td><a href="/profile/'
@@ -415,7 +405,7 @@ def SR_getTournamentRoundsHTML(
                 for j in range(len(row)):
                     # Only add lives if 2L AND it is the latest round
                     if tournamentType == "TL" and i == len(TPDA) - 1:
-                        lives = TL_sideData[row[j]] if row[j] in TL_sideData else 0
+                        lives = TL_sideData.get(row[j], 0)
                         if j == 1:
                             roundsHTML += (
                                 "<td>"
@@ -924,7 +914,7 @@ def SR_getTGZstartingOptionsHTML(startingOptionsArr):
     customgods = []
     customVR = []
     specVR = []
-    for index, entry in enumerate(startingOptionsArr):
+    for _index, entry in enumerate(startingOptionsArr):
         if isinstance(entry, list) and len(entry) > 0 and entry[0] == 90:
             requiresHTML = True
             customgods = copy.deepcopy(entry)  # Make a copy of the entry array
@@ -934,10 +924,7 @@ def SR_getTGZstartingOptionsHTML(startingOptionsArr):
         elif isinstance(entry, list) and len(entry) > 0 and entry[0] == 92:
             requiresHTML = True
             specVR = copy.deepcopy(entry)  # Make a copy of the entry array
-        elif entry == rf.SO_LEARNING_GAME or entry == rf.SO_EXPERIENCED_GAME:
-            requiresHTML = True
-        #
-        elif entry == 7 or entry == 8 or entry == 9:
+        elif entry == rf.SO_LEARNING_GAME or entry == rf.SO_EXPERIENCED_GAME or entry == 7 or entry == 8 or entry == 9:
             requiresHTML = True
 
     if not requiresHTML:
@@ -1435,16 +1422,7 @@ def SR_getPointsForPosition(position, maxPlayers):
     """
     # First check for bye points
     if position == 99:
-        if maxPlayers == 2:
-            return 1
-        elif maxPlayers == 3:
-            return 6
-        elif maxPlayers == 4:
-            return 9
-        elif maxPlayers == 5:
-            return 11
-        elif maxPlayers == 6:
-            return 13
+        return {2: 1, 3: 6, 4: 9, 5: 11, 6: 13}.get(maxPlayers, 0)
 
     # Points schemas for 3, 4, 5, and 6 players
     points_schemas = {

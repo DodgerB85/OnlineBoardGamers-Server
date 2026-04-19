@@ -1,47 +1,46 @@
+from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import Group
+from django.urls import reverse
+from django.utils.html import format_html
 
+from .modelProxies import (
+    AQYgame,
+    AQYMainTournament,
+    AQYMiniTournament,
+    BUSgame,
+    BUSMainTournament,
+    BUSMiniTournament,
+    CNSgame,
+    FCMgame,
+    FCMMainTournament,
+    FCMMiniTournament,
+    HLCgame,
+    HLCMainTournament,
+    HLCMiniTournament,
+    INDgame,
+    INDMainTournament,
+    INDMiniTournament,
+    KFWgame,
+    RNBgame,
+    RNBMainTournament,
+    RNBMiniTournament,
+    TGZgame,
+    TGZMainTournament,
+    TGZMiniTournament,
+    WEBgame,
+)
 
 # Register your models here.
 from .models import (
-    User,
-    Profile,
-    changelog,
-    Tournament,
     Game,
     GamePlayer,
+    Profile,
+    Tournament,
+    User,
+    changelog,
 )
-from .modelProxies import (
-    CNSgame,
-    WEBgame,
-    AQYgame,
-    TGZgame,
-    INDgame,
-    BUSgame,
-    FCMgame,
-    RNBgame,
-    HLCgame,
-    KFWgame,
-    FCMMiniTournament,
-    TGZMiniTournament,
-    FCMMainTournament,
-    TGZMainTournament,
-    HLCMiniTournament,
-    HLCMainTournament,
-    BUSMiniTournament,
-    BUSMainTournament,
-    AQYMiniTournament,
-    AQYMainTournament,
-    INDMiniTournament,
-    INDMainTournament,
-    RNBMiniTournament,
-    RNBMainTournament,
-)
-
-from django.conf import settings
-from django import forms
-from django.utils.html import format_html
-from django.urls import reverse
 
 admin.site.unregister(Group)
 

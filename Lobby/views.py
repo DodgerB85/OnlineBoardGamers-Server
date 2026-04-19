@@ -1,109 +1,81 @@
-import json
-import time
-import datetime
-import requests
-import traceback
-import re
-import logging
 import base64
+import datetime
 import gzip
-from django.core.cache import cache
+import json
+import logging
+import re
+import time
+import traceback
+from collections import Counter
 
-from Lobby.sharedFunctions.db_mutex import db_mutex
+# import hashlib
+# import urllib
+# from random import randint
+from datetime import timedelta
+
+import requests
 
 # from telegram import Update
 # from telegram.ext import Application, CommandHandler, ContextTypes
 from decouple import config
-
-# import hashlib
-# import urllib
-
-# from random import randint
-from datetime import timedelta
-from collections import Counter
-
-from django.db import connection, transaction
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import (
     authenticate,
+    get_user,
+    get_user_model,
     login,
     logout,
-    get_user_model,
     update_session_auth_hash,
-    get_user,
 )
 from django.contrib.auth.decorators import login_required
-
-from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import default_token_generator
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.cache import cache
+from django.core.exceptions import ValidationError
+from django.core.mail import BadHeaderError, send_mail
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.validators import URLValidator
+from django.db import connection, transaction
+from django.db.models import Count, Max, Prefetch, Q
+from django.db.models.expressions import RawSQL
+from django.db.models.functions import TruncDate
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+    JsonResponse,
+)
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
-
+from django.utils import timezone, translation
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import (
-    urlsafe_base64_encode,
-    urlsafe_base64_decode,
     url_has_allowed_host_and_scheme,
+    urlsafe_base64_decode,
+    urlsafe_base64_encode,
 )
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext  # , get_language
-from django.utils import translation
-from django.utils import timezone
-
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
-from django.core.mail import send_mail, BadHeaderError
-from django.views.generic import View
-from django.views.i18n import set_language as django_set_language
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-
-from django.http import (
-    HttpResponse,
-    HttpResponseRedirect,
-    JsonResponse,
-    Http404,
-    HttpResponsePermanentRedirect,
-)
-from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q, Count, IntegerField, Prefetch, Max
-from django.db.models.functions import TruncDate, Cast
-from django.db.models.expressions import RawSQL
-
-from django.template.loader import render_to_string
-
-from django.conf import settings
-
-from .tokens import account_activation_token
-from .forms import (
-    NewUserForm,
-    UpdateProfileForm,
-    PasswordChangeCustomForm,
-    PasswordResetFormCustom,
-    changelogForm,
-)
-
-from .models import (
-    Game,
-    GamePlayer,
-    Profile,
-    changelog,
-    Tournament,
-)
-
+from django.views.generic import View
+from django.views.i18n import set_language as django_set_language
 from user_visit.models import UserVisit
 
+import Lobby.sharedFunctions.constants as rf
 from FCM.common import buildFCMstartingOptions
-
+from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_hasRequiredExperience,
-    SF_startAnyTournament,
-    SF_getRequiredExp,
-    SF_getMiniTournamentCreationJsonReturn,
-    SF_TGZadvancedOptions,
     SF_fastSerializeGame,
+    SF_getMiniTournamentCreationJsonReturn,
+    SF_getRequiredExp,
+    SF_hasRequiredExperience,
     SF_serializeGame,
+    SF_startAnyTournament,
+    SF_TGZadvancedOptions,
 )
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage, SN_sendDiscordDM
 from Lobby.sharedFunctions.sharedRefs import (
@@ -111,13 +83,27 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getAnyTournamentPlayersData,
     SR_getAnyTournamentRoundsData,
     SR_getFCMstartingOptionsHTML,
-    SR_getTournamentTypeDisplay,
-    SR_getTGZstartingOptionsHTML,
     SR_getgodsVRoptionsHTML,
     SR_getPointsForPosition,
+    SR_getTGZstartingOptionsHTML,
+    SR_getTournamentTypeDisplay,
 )
 
-import Lobby.sharedFunctions.constants as rf
+from .forms import (
+    NewUserForm,
+    PasswordChangeCustomForm,
+    PasswordResetFormCustom,
+    UpdateProfileForm,
+    changelogForm,
+)
+from .models import (
+    Game,
+    GamePlayer,
+    Profile,
+    Tournament,
+    changelog,
+)
+from .tokens import account_activation_token
 
 User = get_user_model()
 
@@ -591,11 +577,11 @@ def DBO(request):
         games_by_code[game.gameCode].append(game)
 
     # Count finished games for each filtered_games game code
-    for game_code in games_by_code.keys():
+    for game_code in games_by_code:
         finishedGamesCount += Game.objects.filter(gameCode=game_code, gameStatus="FINISHED").count()
 
     # Process all filtered_games games
-    for game_code, games in games_by_code.items():
+    for _game_code, games in games_by_code.items():
         for singleGame in games:
             presenter = singleGame.presenter()
             timeRemaining = presenter.getSecondsToNextKickout()
@@ -880,10 +866,7 @@ def next_game_redirect(request):
     )
 
     # Determine the next game details based on the index
-    if index is None or index >= len(filteredGamesList) - 1:
-        nextGame = filteredGamesList[0]
-    else:
-        nextGame = filteredGamesList[index + 1]
+    nextGame = filteredGamesList[0] if index is None or index >= len(filteredGamesList) - 1 else filteredGamesList[index + 1]
 
     # Construct the nextURL using the next game details
     nextGameCode = nextGame.getGameCode()
@@ -1178,7 +1161,7 @@ def stats(request):
     # 6. JSON Data Loading (Files)
     def load_stat_json(path):
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             return []
@@ -1607,7 +1590,7 @@ def profile(request):
                 return redirect("profile")
             else:
                 error_messages = []
-                for field, errors in form.errors.items():
+                for _field, errors in form.errors.items():
                     for error in errors:
                         if isinstance(error, str):
                             error_messages.append(error)
@@ -1935,7 +1918,7 @@ def createBUSpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="BUS")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         playerNames = []
         for gp in currentGame.players.exclude(is_kicked=True).select_related("player"):
@@ -1972,7 +1955,7 @@ def createCNSpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="CNS")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
@@ -2008,7 +1991,7 @@ def createAQYpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID)
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
@@ -2053,7 +2036,7 @@ def createINDpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="IND")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
@@ -2089,7 +2072,7 @@ def createINDpage2(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="IND")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         # Get players from GamePlayer relationship
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
@@ -2126,7 +2109,7 @@ def createKFWpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="KFW")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         playerNames = []
         for gp in currentGame.players.exclude(is_kicked=True).select_related("player"):
@@ -2164,7 +2147,7 @@ def createWEBpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="WEB")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
         # presenter = currentGame.presenter()
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
@@ -2205,7 +2188,7 @@ def createRNBpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="RNB")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
         # presenter = currentGame.presenter()
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
@@ -2243,7 +2226,7 @@ def createTGZpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID)
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         all_players = currentGame.players.exclude(player=request.user).select_related("player")
         playerNames = [gp.player.username for gp in all_players if gp.player]
@@ -2279,7 +2262,7 @@ def showTGZoptions(request, gameID):
     try:
         currentGame = Game.objects.get(id=gameID)
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     return render(
         request,
@@ -2302,7 +2285,7 @@ def createHLCpage(request, gameID=0):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="HLC")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         playerNames = []
         for gp in currentGame.players.all().select_related("player"):
@@ -2340,7 +2323,7 @@ def createFCMpage(request, gameID=None):
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="FCM")
         except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist"))
+            raise Http404(gettext("Game does not exist")) from None
 
         SCENARIO_NAMES = [
             "[Cool Original]",
@@ -2467,7 +2450,7 @@ class ActivateAccount(View):
 
         if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
-            profile = getattr(user, "profile")
+            profile = user.profile
             profile.email_confirmed = True
             profile.save()
             user.save()
@@ -2508,7 +2491,7 @@ def playerInfo(request, usernameToProfile):
         messages.error(request, gettext("Player does not exist"))
         return render(request, "Lobby/playerInfo.jinja")
 
-    profileOfUser = getattr(userToProfile, "profile")
+    profileOfUser = userToProfile.profile
     FCMtournamentTrophies = json.loads(profileOfUser.FCMtournamentTrophies)
 
     trophyHTML = ""
@@ -2537,7 +2520,7 @@ def playerInfo(request, usernameToProfile):
     }
 
     if len(FCMtournamentTrophies) > 1:
-        totals = [sum(col) for col in zip(*FCMtournamentTrophies[1:])]
+        totals = [sum(col) for col in zip(*FCMtournamentTrophies[1:], strict=True)]
 
         medal_names = ["gold", "silver", "bronze"]
         medal_images = [
@@ -2546,7 +2529,7 @@ def playerInfo(request, usernameToProfile):
             "/static/Lobby/images/trophy_bronze.png",
         ]
 
-        for total, medal_name, medal_image in zip(totals, medal_names, medal_images):
+        for total, _medal_name, medal_image in zip(totals, medal_names, medal_images, strict=True):
             if total > 0:
                 trophyHTML += f'<div class="trophyHolderDiv"><img class="trophyIMG" src="{medal_image}"><div class="trophyNumberDiv">{total}</div></div>'
 
@@ -2562,7 +2545,7 @@ def playerInfo(request, usernameToProfile):
                         colour = ["gold", "silver", "bronze"][trophy_colour]
                         trophyDetailHTML += f'<div class="trophyHolderSummaryDiv"><img class="trophyIMGsummary" src="/static/Lobby/images/trophy_{colour}.png"><div class="trophyNumberSummaryDiv">{amount}</div></div>'
 
-    target_id = getattr(userToProfile, "id")
+    target_id = userToProfile.id
     req_user_id = request.user.id
     is_self = request.user.username == usernameToProfile
 
@@ -2616,7 +2599,7 @@ def playerInfo(request, usernameToProfile):
         games_by_type[game.gameCode].append(game)
 
     # Now process each game type with its games
-    for game_name in GAME_NAMES_MODELS.keys():
+    for game_name in GAME_NAMES_MODELS:
         all_games_for_type = games_by_type.get(game_name, [])
 
         # Model-specific counters for the stats table
@@ -2736,10 +2719,10 @@ def playerInfo(request, usernameToProfile):
         gameArr = []
         for i in range(2, 7):
             total, won = stats_by_size[i]
-            pct = int((won / total * 100)) if total > 0 else 0
+            pct = int(won / total * 100) if total > 0 else 0
             gameArr.extend([total, won, pct])
 
-        all_pct = int((model_total_won / model_total_finished * 100)) if model_total_finished > 0 else 0
+        all_pct = int(model_total_won / model_total_finished * 100) if model_total_finished > 0 else 0
         gameArr.extend([model_total_finished, model_total_won, all_pct])
         allGamesArr.append(gameArr)
 
@@ -3076,7 +3059,7 @@ def checkJoinGame(request, gameType, gameID):
         kickedOutGamesLastYear = 0
         fairPlayLastYear = 100
 
-        for game_name, game_model in GAME_NAMES_MODELS.items():
+        for game_name, _game_model in GAME_NAMES_MODELS.items():
             finishedGames = Game.objects.filter(
                 Q(gameCode=game_name),
                 Q(gameStatus="FINISHED"),
@@ -3569,13 +3552,12 @@ def TGZtournamentMain(request, tournamentName):
     tournamentKey = "TGZ Summer 25"  # Then immewdiately " A1" or " B2" NOTE THE KEY DOESN'T INCLUDE THE SPACE FOR SOME REASON
 
     # This line is common to all
-    # allTournamentGames = TGZ_Game.objects.filter(gameName__istartswith=tournamentKey, externalTournamentGame=True, created__gte="1751279600000")
-
-    allTournamentGames = TGZ_Game.objects.annotate(created_int=Cast("created", IntegerField())).filter(
-        gameName__istartswith=tournamentKey,
-        externalTournamentGame=True,
-        created_int__gte=1751279600000,
-    )
+    #allTournamentGames = TGZ_Game.objects.annotate(created_int=Cast("created", IntegerField())).filter(
+    #    gameName__istartswith=tournamentKey,
+    #    externalTournamentGame=True,
+    #    created_int__gte=1751279600000,
+    #)
+    allTournamentGames = {}
 
     ## Split the gameName into groups based on letters A to G
     grouped_games = allTournamentGames.annotate(group=RawSQL("SUBSTRING(gameName, %s, %s)", (len(tournamentKey) + 2, 1))).values("group").annotate(count_games=Count("id"))
@@ -3605,18 +3587,17 @@ def TGZtournamentMain(request, tournamentName):
             # Calculate tie breakers
             tie_breakers = []
             for game in player_games_finished:
-                if game.winner != player:
-                    if game.kickoutFlexiData != "":
-                        kickout_data = json.loads(game.kickoutFlexiData)
-                        winner_vp_vr = kickout_data[0][1] - kickout_data[0][2]
+                if game.winner != player and game.kickoutFlexiData != "":
+                    kickout_data = json.loads(game.kickoutFlexiData)
+                    winner_vp_vr = kickout_data[0][1] - kickout_data[0][2]
 
-                        player_index = next(
-                            (index for index, data in enumerate(kickout_data) if data[0] == player.username),
-                            None,
-                        )
-                        if player_index is not None:
-                            player_vp_vr = kickout_data[player_index][1] - kickout_data[player_index][2]
-                            tie_breakers.append([-winner_vp_vr + player_vp_vr, getattr(game, "id")])
+                    player_index = next(
+                        (index for index, data in enumerate(kickout_data) if data[0] == player.username),
+                        None,
+                    )
+                    if player_index is not None:
+                        player_vp_vr = kickout_data[player_index][1] - kickout_data[player_index][2]
+                        tie_breakers.append([-winner_vp_vr + player_vp_vr, game.id])
 
             # Sort tie breakers in descending order
             tie_breakers.sort(reverse=True)
@@ -3653,7 +3634,7 @@ def TGZtournamentMain(request, tournamentName):
                 "gameName": game.gameName,
                 "players": game.allPlayers,
                 "winner": game.winner,  # .username if game.winner else None,
-                "gameID": getattr(game, "id"),
+                "gameID": game.id,
             }
             group_data["games"].append(game_data)
 
@@ -4090,7 +4071,7 @@ def MiniTournament(request, Mini_Tournament_id):
         try:
             Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
         except Exception:
-            raise Http404(gettext("Tournament does not exist"))
+            raise Http404(gettext("Tournament does not exist")) from None
         # First check if it is a person declining an invite
         if "declineInvite" in request.POST and request.POST["declineInvite"] == "true":
             Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
@@ -4120,7 +4101,7 @@ def MiniTournament(request, Mini_Tournament_id):
     try:
         Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
     except Exception:
-        raise Http404(gettext("Tournament does not exist"))
+        raise Http404(gettext("Tournament does not exist")) from None
 
     # Common items
     chatData = Mini_Tournament.chatData
@@ -4275,7 +4256,7 @@ def reloadMTchatData(request):
     try:
         Mini_Tournament = Tournament.objects.get(id=jsonData["MT_ID"], tournamentCategory="Mini")
     except Tournament.DoesNotExist:
-        raise Http404(gettext("Mini Tournament does not exist"))
+        raise Http404(gettext("Mini Tournament does not exist")) from None
 
     return JsonResponse(
         {"chatData": Mini_Tournament.chatData},
@@ -4340,7 +4321,7 @@ def createFCMminiTournament(request):
         newTournament.id,
     )
 
-    messages.success(request, SF_getMiniTournamentCreationJsonReturn(getattr(newTournament, "id")))
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
@@ -4407,7 +4388,7 @@ def createTGZminiTournament(request):
         newTournament.id,
     )
 
-    messages.success(request, SF_getMiniTournamentCreationJsonReturn(getattr(newTournament, "id")))
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
@@ -4441,7 +4422,7 @@ def MainTournament(request, Main_Tournament_id):
         try:
             currentTournament = Tournament.objects.get(id=Main_Tournament_id, tournamentCategory="Main")
         except Tournament.DoesNotExist:
-            raise Http404(gettext("Tournament does not exist"))
+            raise Http404(gettext("Tournament does not exist")) from None
 
         if "understand_movement" not in request.POST:
             messages.error(request, gettext("Please tick to confirm you can move regularly"))
@@ -4460,7 +4441,7 @@ def MainTournament(request, Main_Tournament_id):
     try:
         currentTournament = Tournament.objects.get(id=Main_Tournament_id, tournamentCategory="Main")
     except Tournament.DoesNotExist:
-        raise Http404(gettext("Tournament does not exist"))
+        raise Http404(gettext("Tournament does not exist")) from None
 
     # Common items
     chatData = currentTournament.chatData
@@ -4624,7 +4605,7 @@ def reloadMainTchatData(request):
     try:
         currentTournament = Tournament.objects.get(id=jsonData["MainT_ID"], tournamentCategory="Main")
     except Tournament.DoesNotExist:
-        raise Http404(gettext("Main Tournament does not exist"))
+        raise Http404(gettext("Main Tournament does not exist")) from None
 
     return JsonResponse(
         {"chatData": currentTournament.chatData},

@@ -1,29 +1,34 @@
-import json
-import time
 import base64
 import gzip
-
+import json
+import time
 from datetime import timedelta
+from typing import TYPE_CHECKING, cast
 
 from decouple import config
-from typing import TYPE_CHECKING, cast
-from django.db import transaction
-
-from Lobby.sharedFunctions.db_mutex import db_mutex
 
 # from django.contrib import messages
 # from django.conf import settings
-
 from django.contrib.auth.decorators import login_required
-from django_q.tasks import schedule
-from django.utils.translation import gettext
+from django.db import transaction
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect, render  # get_object_or_404,
 from django.utils import timezone
-from django.shortcuts import render, redirect  # get_object_or_404,
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
+from django.utils.translation import gettext
+from django_q.tasks import schedule
+
+import Lobby.sharedFunctions.constants as rf
+from Lobby.gameViewHelpers import (
+    build_show_game_data,
+    shared_bug_entry,
+    shared_save_notes,
+    shared_save_zoom,
+)
+from Lobby.models import Game, User
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 # from django.urls import reverse
 # from django.db.models import Q
-
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -31,21 +36,9 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
 
-import Lobby.sharedFunctions.constants as rf
-
-from .common import create_rnb_game
-
 from . import RNBconstants as rfRNB
-
-from Lobby.models import User, Game
+from .common import create_rnb_game
 from .models import RNBmap
-
-from Lobby.gameViewHelpers import (
-    build_show_game_data,
-    shared_save_zoom,
-    shared_save_notes,
-    shared_bug_entry,
-)
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
@@ -78,7 +71,7 @@ def showRNBmap(request, game_id=0):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="RNB")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
 
@@ -216,7 +209,7 @@ def _processRNBturn(request):
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="RNB")
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("RNBpresenter", currentGame.presenter())
 
@@ -392,6 +385,8 @@ def _processRNBturn(request):
             "latestUpdate": currentGame.latestUpdate,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "savedMoveForLater": True,
+            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -547,13 +542,13 @@ def _processRNBturn(request):
                     playerListToNotify.remove("RnbBot")
                 if len(playerListToNotify) > 0:
                     if jsonData["currentPlayerNeedsToFixMove"]:
-                        #start_time = timezone.now() + timedelta(minutes=2)
-                        start_time = timezone.now() + timedelta(seconds=10) # For debug
+                        # start_time = timezone.now() + timedelta(minutes=2)
+                        start_time = timezone.now() + timedelta(seconds=10)  # For debug
                         schedule(
                             "Lobby.sharedFunctions.sharedNotifications.SN_sendFixNextTurnNotificationWithValidation",
                             "RNB",
                             playerListToNotify[0],
-                            getattr(currentGame, "id"),
+                            currentGame.id,
                             presenter.getGameName(),
                             currentGame.latestUpdate,
                             currentGame.turn,
@@ -566,7 +561,7 @@ def _processRNBturn(request):
                         presenter.sendYourTurnNotification(
                             "RNB",
                             playerListToNotify,
-                            getattr(currentGame, "id"),
+                            currentGame.id,
                             presenter.getGameName(),
                             currentGame,
                             oldVer,
@@ -591,13 +586,13 @@ def _processRNBturn(request):
                 playerListToNotify = [pName for pName in playerListToNotify if not presenter.playerHasPreMove(pName)]
 
                 if len(playerListToNotify) > 0:
-                    #start_time = timezone.now() + timedelta(minutes=2)
-                    start_time = timezone.now() + timedelta(seconds=10) # For debug
+                    # start_time = timezone.now() + timedelta(minutes=2)
+                    start_time = timezone.now() + timedelta(seconds=10)  # For debug
                     schedule(
                         "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
                         "RNB",
                         playerListToNotify,
-                        getattr(currentGame, "id"),
+                        currentGame.id,
                         presenter.getGameName(),
                         currentGame.latestUpdate,
                         currentGame.turn,
@@ -621,6 +616,31 @@ def _processRNBturn(request):
             "latestUpdate": currentGame.latestUpdate,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "savingFromStackMove": False,
+        }
+
+        return JsonResponse(response_data, safe=False)
+
+    elif jsonData["action"] == "cancelPresetMoves":
+        # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
+        # But we can reject earlier moves that are prior to the game's current state
+        savingTurn = jsonData["turn"]
+        savingPhase = jsonData["phase"]
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
+            message = f"RNB saveConflictMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
+            SN_sendAdminErrorMessage(message)
+            return JsonResponse({"syncError": True}, safe=False)
+
+        nameToUse = request.user.username
+        if request.user.username == "BotKickStarter":
+            nameToUse = jsonData["BKSN"]
+
+        presenter.cancelPreMovesForPlayer(nameToUse, jsonData["startingTurn"], jsonData["startingPhase"])
+
+        response_data = {
+            "deletedMoves": True,
+            "gameDataB64": currentGame.gameData,
+            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -741,7 +761,7 @@ def _processRNBturn(request):
                 presenter.sendYourTurnNotification(
                     "RNB",
                     playerListToNotify,
-                    getattr(currentGame, "id"),
+                    currentGame.id,
                     presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
@@ -886,7 +906,7 @@ def performSaveGame(request, currentGame, jsonData):
                 presenter.sendYourTurnNotification(
                     "RNB",
                     playerListToNotify,
-                    getattr(currentGame, "id"),
+                    currentGame.id,
                     presenter.getGameName(),
                     currentGame,
                     oldVer,
@@ -899,13 +919,13 @@ def performSaveGame(request, currentGame, jsonData):
             if "RnbBot" in playerListToNotify:
                 playerListToNotify.remove("RnbBot")
             if len(playerListToNotify) > 0:
-                #start_time = timezone.now() + timedelta(minutes=2)
-                start_time = timezone.now() + timedelta(seconds=10) # For debug
+                # start_time = timezone.now() + timedelta(minutes=2)
+                start_time = timezone.now() + timedelta(seconds=10)  # For debug
                 schedule(
                     "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
                     "RNB",
                     playerListToNotify,
-                    getattr(currentGame, "id"),
+                    currentGame.id,
                     presenter.getGameName(),
                     currentGame.latestUpdate,
                     currentGame.turn,
@@ -914,7 +934,6 @@ def performSaveGame(request, currentGame, jsonData):
                     repeats=-1,  # Neg repeats for delete
                     schedule_type="O",
                 )
-
 
     ################ REWIND EVERY SAVE #######################
 
@@ -1087,7 +1106,7 @@ def RNBdata(request, dataType=1):
     except Game.DoesNotExist:
         if dataType == 3:
             return JsonResponse({"gameDoesNotExist": True})
-        raise Http404(gettext("Game does not exist"))
+        raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("RNBpresenter", currentGame.presenter())
 

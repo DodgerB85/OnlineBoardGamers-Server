@@ -1,5 +1,6 @@
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
+
 
 def no_op(apps, schema_editor):
     pass
@@ -11,7 +12,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Option 1: Keep the field if you still use it in Lobby, 
+        # Option 1: Keep the field if you still use it in Lobby,
         # but point it to a model that actually exists (like Lobby.Main_Tournament)
         migrations.AddField(
             model_name="game",
@@ -24,8 +25,8 @@ class Migration(migrations.Migration):
                 to="Lobby.Main_Tournament", # Changed from AQY.aqy_tournament
             ),
         ),
-        # Option 2: If the field is totally useless now, 
+        # Option 2: If the field is totally useless now,
         # just comment out the AddField and the RunPython blocks.
-        
+
         migrations.RunPython(no_op, no_op),
     ]

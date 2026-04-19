@@ -2,6 +2,7 @@
 
 from django.db import migrations
 
+
 def migrate_tgz_automoves(apps, schema_editor):
     # App is deleted/unified, do nothing
     pass

@@ -1,22 +1,17 @@
-from .models import Profile
 from django import forms
-
-
-from django.contrib.auth.forms import UserCreationForm
-from django.utils.safestring import mark_safe
-
-from django.utils.translation import gettext, gettext_lazy
-
 from django.contrib.auth import get_user_model
-
-User = get_user_model()
-from .models import changelog
-
 from django.contrib.auth.forms import (
     PasswordChangeForm,
     PasswordResetForm,
     SetPasswordForm,
+    UserCreationForm,
 )
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy
+
+from .models import Profile, changelog
+
+User = get_user_model()
 
 
 # Create your forms here.
@@ -67,7 +62,7 @@ class PasswordResetFormCustom(PasswordResetForm):
 
 class PasswordChangeCustomForm(PasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
-        super(PasswordChangeCustomForm, self).__init__(user, *args, **kwargs)
+        super().__init__(user, *args, **kwargs)
         self.fields["old_password"].widget.attrs.update(
             {"class": "registerInput", "placeholder": gettext_lazy("Old Password")}
         )
@@ -144,7 +139,7 @@ class NewUserForm(UserCreationForm):
         fields = ("username", "email", "password1", "password2")
 
     def save(self, commit=True):
-        user = super(NewUserForm, self).save(commit=False)
+        user = super().save(commit=False)
         user.email = self.cleaned_data["email"]
         if commit:
             user.save()

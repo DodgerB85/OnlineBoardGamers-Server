@@ -1,51 +1,47 @@
-import time
 import itertools
-from collections import defaultdict
 import json
-
-from django.utils.translation import gettext  # , activate, get_language
+import time
+from collections import defaultdict
 
 # from django.template.loader import render_to_string
 # from django.contrib.sites.shortcuts import get_current_site
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext  # , activate, get_language
+
+import Lobby.sharedFunctions.constants as rf
 
 # from django.urls import reverse
 # from django.http import HttpResponseRedirect
-from Lobby.models import User, Profile
+from Lobby.models import Profile, User
 
 # from django.contrib import messages
 # from django.core.mail import get_connection, EmailMessage
-
 # import smtplib
 # from email.mime.text import MIMEText
 # from email.mime.multipart import MIMEMultipart
-
 # from django.conf import settings
-
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
 from Lobby.sharedFunctions.sharedRefs import (
-    SR_getPointsForPosition,
-    getCleanedAndSortedRoundData,
     SR_currentTurnString,
-    SR_getHLCstartingOptionsHTML,
-    SR_getBUSstartingOptionsHTML,
-    SR_getTGZstartingOptionsHTML,
-    SR_getCNSstartingOptionsHTML,
+    SR_gamePaceString,
     SR_getAQYstartingOptionsHTML,
+    SR_getBUSstartingOptionsHTML,
+    SR_getCNSstartingOptionsHTML,
+    SR_getFCMstartingOptionsHTML,
+    SR_getHLCstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
     SR_getKFWstartingOptionsHTML,
+    SR_getPointsForPosition,
+    SR_getTGZstartingOptionsHTML,
     SR_getWEBstartingOptionsHTML,
-    SR_gamePaceString,
-    SR_getFCMstartingOptionsHTML,
+    getCleanedAndSortedRoundData,
 )
 from Lobby.sharedFunctions.tournyGenerator import (
     multiGamePlayers4p,
     multiGamePlayersRound2,
 )
-
-import Lobby.sharedFunctions.constants as rf
 
 NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND = ["FCMtourneyAdmin", "TGZtourneyAdmin"]
 
@@ -161,9 +157,8 @@ def SF_serializeGame(game, user, player_context):
         # For HLC, if it is factory phase, AND you have submitted your move, set it back to false
         if game_code == "HLC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
             is_my_move = False
-        if game_code == "RNB":
-            if is_my_move and not game.presenter().quickIsMyMove(user.username):
-                is_my_move = False
+        if game_code == "RNB" and is_my_move and not game.presenter().quickIsMyMove(user.username):
+            is_my_move = False
 
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
@@ -358,9 +353,7 @@ def SF_kickoutRequired(
 
     if individualCheckRequired:
         # Any extra 24hrs must be a kickout
-        if kickoutDuration == 50 and secondsSinceUpdate > (12 * 60 * 60) + FLEXI_SECONDS:
-            return 2
-        elif kickoutDuration >= 100 and secondsSinceUpdate > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:
+        if kickoutDuration == 50 and secondsSinceUpdate > (12 * 60 * 60) + FLEXI_SECONDS or kickoutDuration >= 100 and secondsSinceUpdate > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:
             return 2
         # Otherwise, need to interrogate the array
         KickoutFlexiDataArray = []
@@ -369,15 +362,12 @@ def SF_kickoutRequired(
 
         usedSeconds = 0
         for entry in KickoutFlexiDataArray:
-            if isinstance(entry, list) and len(entry) == 2:
-                if entry[0] == currentUsername:
-                    usedSeconds = entry[1]
-                    break
+            if isinstance(entry, list) and len(entry) == 2 and entry[0] == currentUsername:
+                usedSeconds = entry[1]
+                break
         # So need to check whether used seconds + difference
         total_elasped_time = secondsSinceUpdate + usedSeconds
-        if kickoutDuration == 50 and total_elasped_time > (12 * 60 * 60) + FLEXI_SECONDS:
-            return 2
-        elif kickoutDuration >= 100 and total_elasped_time > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:
+        if kickoutDuration == 50 and total_elasped_time > (12 * 60 * 60) + FLEXI_SECONDS or kickoutDuration >= 100 and total_elasped_time > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:
             return 2
         return 1
 
@@ -451,7 +441,7 @@ def SF_TGZadvancedOptions(request):
             if int(request.POST[vr_key]) != value:
                 useCustomVr = True
 
-    for spec_key, value in specVR_mapping.items():
+    for spec_key, _value in specVR_mapping.items():
         if spec_key in request.POST:
             specVR[specVR_mapping[spec_key]] = int(request.POST[spec_key])
             if int(request.POST[spec_key]) != specVR_ORIGINAL[specVR_mapping[spec_key]]:
@@ -473,6 +463,7 @@ def SF_TGZadvancedOptions(request):
 #    specVR = [92, 6, 1, 1, 3, 2]
 #    useCustomVr = False
 #    useSpecVR = False
+
 #    if "shadipinyi" in request.POST:
 #        gods.append(int(request.POST["shadipinyi"]))
 #        customVR.append(int(request.POST["VRgod0"]))
@@ -533,7 +524,7 @@ def SF_TGZadvancedOptions(request):
 #        customVR.append(int(request.POST["VRgod11"]))
 #        if int(request.POST["VRgod11"]) != -2:
 #            useCustomVr = True
-#
+
 #    if "VRherd" in request.POST:
 #        specVR[1] = int(request.POST["VRherd"])
 #        if int(request.POST["VRherd"]) != 6:
@@ -554,13 +545,13 @@ def SF_TGZadvancedOptions(request):
 #        specVR[5] = int(request.POST["VRbuilder"])
 #        if int(request.POST["VRbuilder"]) != 2:
 #            useSpecVR = True
-#
+
 #    _startingOptions.append(gods)
 #    if useCustomVr:
 #        _startingOptions.append(customVR)
 #    if useSpecVR:
 #        _startingOptions.append(specVR)
-#
+
 #    return _startingOptions
 
 
@@ -701,12 +692,12 @@ def start_next_any_tournament_round(
     _winnerArray,
     _finalPositionNamesAndScore,
 ):
+    from AQY.common import create_aqy_game
+    from BUS.common import create_bus_game
     from FCM.common import create_fcm_game
     from HLC.common import create_hlc_game
-    from BUS.common import create_bus_game
-    from TGZ.common import create_tgz_game
-    from AQY.common import create_aqy_game
     from IND.common import create_ind_game
+    from TGZ.common import create_tgz_game
 
     # MG tournaments don't add next round players dynamically
     # End T check checks for not enough next round players
@@ -1000,11 +991,8 @@ def SF_checkForAnyTournamentEnd(tournamentObj):
             allPlayersList = [row[0] for row in pointsList if row[1] >= maxPoints]
             if len(allPlayersList) < tournamentObj.maxGamePlayers:
                 return True
-    # For any tournament, check if there's a winner or not enough players for a FULL game
-    if tournamentObj.nextRoundPlayers.count() < tournamentObj.maxGamePlayers:
-        return True
-
-    return False
+        # For any tournament, check if there's a winner or not enough players for a FULL game
+    return tournamentObj.nextRoundPlayers.count() < tournamentObj.maxGamePlayers
 
 
 # _winnerArray is an array of [winner_username, winner_username, ...]
