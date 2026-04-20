@@ -8,9 +8,7 @@
 
 import * as IO from "../backend/KFW_IO"
 import * as rf from "../js/KFWreference"
-import * as map from "../js/KFWmap"
 import * as controller from "../js/KFWcontroller"
-import * as model from "../js/KFWmodel"
 //import * as funcs from '../js/KFWfuncs'
 import * as view from "../js/KFWview"
 
@@ -20,7 +18,6 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/KFWpersonal.js"
 const personal = usePersonalStore()
 
-import { ref, computed } from "vue"
 
 function debugButton() {
 	//
@@ -362,6 +359,7 @@ function localAdminDataInspection() {
 						<th><b>Winter Tiles</b></th>
 					</tr>
 				</thead>
+				<tbody>
 				<!-- FOUND MEEPLES -->
 				<tr>
 					<td><b>Bags</b></td>
@@ -433,6 +431,7 @@ function localAdminDataInspection() {
 					<td></td>
 					<td>{{ store.availableGreenMeeples }}</td>
 				</tr>
+				</tbody>
 			</table>
 		</div>
 
@@ -440,8 +439,6 @@ function localAdminDataInspection() {
 		<!--- DEBUG DEBUG DEBUG-->
 		<button @click="debugButton"><b>Debug</b></button>
 		<br />
-		<button @click="highlightAllTerrs"><b>Highlight All Territories</b></button>
-		<button @click="makeCities"><b>Make Cities</b></button>
 		<div id="terrInfoDiv">Territory Path:</div>
 
 		<br />

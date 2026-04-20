@@ -319,7 +319,7 @@ def _processKFWturn(request):
         meeple_bag = serverDataArr[0]
         skills_bag = serverDataArr[1]
         [meeplesPulled, meeple_bag] = presenter.pull_items_from_bag(meeplesRequired, meeple_bag)
-        [skillsPulled, skills_bag] = presenter.pull_items_from_bag(skillsRequired, skills_bag)
+        [skillsPulled, skills_bag] = presenter.pull_items_from_bag(skillsRequired, skills_bag, True)
         currentGame.KFWserverData = json.dumps([meeple_bag, skills_bag])
         currentGame.save()
         returnData = presenter.compressData([meeplesPulled, skillsPulled])

@@ -523,92 +523,31 @@ function itemTypeNumToString(itemNum) {
 					<th>Score</th>
 				</tr>
 			</thead>
-			<!-- 1 vp / gold -->
-			<tr>
-				<td class="sectionHeader" colspan="3">1 VP for any remaining gold</td>
-			</tr>
-			<tr>
-				<td>
-					1 VP / gold
-					<br />
-					(Scored Automatically for any unused gold)
-				</td>
-				<td>
-					<div class="completedItemSetDiv" v-for="(res, idx) in store.players[playerIndexProp].villageTiles[0].resources[rf.GOLD]" :key="idx">
-						<img class="itemsetImg" :src="view.getImage('res_' + rf.GOLD)" />
-					</div>
-				</td>
-				<td>
-					{{ store.players[playerIndexProp].villageTiles[0].resources[rf.GOLD] }}
-				</td>
-			</tr>
-			<!-- REQUIRES ITEMS -->
-			<tr>
-				<td class="sectionHeader" colspan="3">Score for Items</td>
-			</tr>
-			<tr v-for="(tile, idx) in computedScoringData.needsItems" :key="idx">
-				<td>
-					<div class="hexDiv">
-						<svg class="hexSVG" viewBox="-420 -348 840 696">
-							<polygon class="hexPolygon" @mouseover="showPopupFunc($event, tile)" @mouseout="hidePopup()" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" :fill="`url(#${tile.gfx[tile.upgraded]})`" />
-						</svg>
-					</div>
-				</td>
-				<td>
-					<div class="completedItemSetDiv" v-for="(completedItemSet, idx) in tile.completedSets" :key="idx">
-						<button v-if="personal.canPlay()" class="cancelItemsButton" @click="cancelItemSet(tile, idx)">X</button>
-						<img v-for="(item, idx2) in completedItemSet" :key="idx2" class="itemsetImg" :src="view.getImage(itemTypeNumToString(tile.tileItemType) + '_' + item)" />
-					</div>
-					<div v-if="personal.canPlay()" class="newItemSetDiv" @click="clickedNewItemSet(tile)" :class="getNewItemSetClass(tile)">
-						<img v-for="(item, idx) in tile.itemSet" :key="idx" class="itemsetImg" :src="view.getImage(itemTypeNumToString(tile.tileItemType) + '_' + item)" />
-					</div>
-				</td>
-				<td>
-					{{ tile.pointsPerSet * tile.completedSets.length }}
-					<br />
-					{{ tile.pointsPerSet }} / set
-				</td>
-			</tr>
-			<!-- REQUIRES ITEMS - CONTRACT -->
-			<template v-if="store.players[playerIndexProp].hiddenContracts.length > 0">
+			<tbody>
+				<!-- 1 vp / gold -->
 				<tr>
-					<td class="sectionHeader" colspan="3">Score for Contracts</td>
+					<td class="sectionHeader" colspan="3">1 VP for any remaining gold</td>
 				</tr>
-				<tr v-for="(contract, idx) in computedScoringData.computedContracts" :key="idx">
+				<tr>
 					<td>
-						<div class="contractDiv">
-							<svg viewBox="77 131.5 55.5 34" class="contractSVG">
-								<image width="52.916668" height="31.75" :xlink:href="view.getImage(contract.gfx)" x="78.386688" y="132.625" style="clip-path: url(#conttractClipPath)" />
-								<path :d="rf.CONTRACT_PATH_D" class="contractPath" />
-							</svg>
-						</div>
-					</td>
-					<td>
-						<div v-if="!contract.completed && personal.canPlay()" :class="[{ newItemSetDiv: !contract.completed }, { completedContractDiv: contract.completed }, getContractClass(contract)]" @click="clickedContract(contract)">
-							<img v-for="(meeple, idx) in contract.requiredMeeples" :key="idx" class="contractMeepleImg itemShadow" :src="view.getImage('meeple_' + String(meeple))" alt="Worker" />
-							<img v-for="(skillTile, idx) in contract.requiredSkillTiles" :key="idx" class="contractSkillTileImg itemShadow" :src="view.getImage('skillTile_' + String(skillTile))" alt="Skill Tile" />
-							<img v-for="(resource, idx) in contract.requiredResources" :key="idx" class="contractResImg" :src="view.getImage('res_' + String(resource))" alt="Res" />
-						</div>
-						<div v-else-if="contract.completed" :class="[{ newItemSetDiv: !contract.completed }, { completedContractDiv: contract.completed }, getContractClass(contract)]" @click="clickedContract(contract)">
-							<img v-for="(meeple, idx) in contract.chosenMeeples" :key="idx" class="contractMeepleImg itemShadow" :src="view.getImage('meeple_' + String(meeple))" alt="Worker" />
-							<img v-for="(skillTile, idx) in contract.chosenSkillTiles" :key="idx" class="contractSkillTileImg itemShadow" :src="view.getImage('skillTile_' + String(skillTile))" alt="Skill Tile" />
-							<img v-for="(resource, idx) in contract.chosenResources" :key="idx" class="contractResImg" :src="view.getImage('res_' + String(resource))" alt="Res" />
-							<button v-if="personal.canPlay()" class="cancelItemsButton" @click.stop="cancelContractSet(contract)">X</button>
-						</div>
-					</td>
-					<td>
-						{{ contract.score }}
+						1 VP / gold
 						<br />
-						{{ 7 }} / set
+						(Scored Automatically for any unused gold)
+					</td>
+					<td>
+						<div class="completedItemSetDiv" v-for="(res, idx) in store.players[playerIndexProp].villageTiles[0].resources[rf.GOLD]" :key="idx">
+							<img class="itemsetImg" :src="view.getImage('res_' + rf.GOLD)" />
+						</div>
+					</td>
+					<td>
+						{{ store.players[playerIndexProp].villageTiles[0].resources[rf.GOLD] }}
 					</td>
 				</tr>
-			</template>
-			<!-- Manual Actions -->
-			<template v-if="computedScoringData.needsAction.length > 0">
+				<!-- REQUIRES ITEMS -->
 				<tr>
-					<td class="sectionHeader" colspan="3">Manual Scoring</td>
+					<td class="sectionHeader" colspan="3">Score for Items</td>
 				</tr>
-				<tr v-for="(tile, idx) in computedScoringData.needsAction" :key="idx">
+				<tr v-for="(tile, idx) in computedScoringData.needsItems" :key="idx">
 					<td>
 						<div class="hexDiv">
 							<svg class="hexSVG" viewBox="-420 -348 840 696">
@@ -617,59 +556,122 @@ function itemTypeNumToString(itemNum) {
 						</div>
 					</td>
 					<td>
-						<button v-if="personal.canPlay()" class="actionsLineButton" @click="setupManualScoring(tile.tileID[tile.upgraded])">{{ tile.buttonText }}</button>
+						<div class="completedItemSetDiv" v-for="(completedItemSet, idx) in tile.completedSets" :key="idx">
+							<button v-if="personal.canPlay()" class="cancelItemsButton" @click="cancelItemSet(tile, idx)">X</button>
+							<img v-for="(item, idx2) in completedItemSet" :key="idx2" class="itemsetImg" :src="view.getImage(itemTypeNumToString(tile.tileItemType) + '_' + item)" />
+						</div>
+						<div v-if="personal.canPlay()" class="newItemSetDiv" @click="clickedNewItemSet(tile)" :class="getNewItemSetClass(tile)">
+							<img v-for="(item, idx) in tile.itemSet" :key="idx" class="itemsetImg" :src="view.getImage(itemTypeNumToString(tile.tileItemType) + '_' + item)" />
+						</div>
 					</td>
+					<td>
+						{{ tile.pointsPerSet * tile.completedSets.length }}
+						<br />
+						{{ tile.pointsPerSet }} / set
+					</td>
+				</tr>
+				<!-- REQUIRES ITEMS - CONTRACT -->
+				<template v-if="store.players[playerIndexProp].hiddenContracts.length > 0">
+					<tr>
+						<td class="sectionHeader" colspan="3">Score for Contracts</td>
+					</tr>
+					<tr v-for="(contract, idx) in computedScoringData.computedContracts" :key="idx">
+						<td>
+							<div class="contractDiv">
+								<svg viewBox="77 131.5 55.5 34" class="contractSVG">
+									<image width="52.916668" height="31.75" :xlink:href="view.getImage(contract.gfx)" x="78.386688" y="132.625" style="clip-path: url(#conttractClipPath)" />
+									<path :d="rf.CONTRACT_PATH_D" class="contractPath" />
+								</svg>
+							</div>
+						</td>
+						<td>
+							<div v-if="!contract.completed && personal.canPlay()" :class="[{ newItemSetDiv: !contract.completed }, { completedContractDiv: contract.completed }, getContractClass(contract)]" @click="clickedContract(contract)">
+								<img v-for="(meeple, idx) in contract.requiredMeeples" :key="idx" class="contractMeepleImg itemShadow" :src="view.getImage('meeple_' + String(meeple))" alt="Worker" />
+								<img v-for="(skillTile, idx) in contract.requiredSkillTiles" :key="idx" class="contractSkillTileImg itemShadow" :src="view.getImage('skillTile_' + String(skillTile))" alt="Skill Tile" />
+								<img v-for="(resource, idx) in contract.requiredResources" :key="idx" class="contractResImg" :src="view.getImage('res_' + String(resource))" alt="Res" />
+							</div>
+							<div v-else-if="contract.completed" :class="[{ newItemSetDiv: !contract.completed }, { completedContractDiv: contract.completed }, getContractClass(contract)]" @click="clickedContract(contract)">
+								<img v-for="(meeple, idx) in contract.chosenMeeples" :key="idx" class="contractMeepleImg itemShadow" :src="view.getImage('meeple_' + String(meeple))" alt="Worker" />
+								<img v-for="(skillTile, idx) in contract.chosenSkillTiles" :key="idx" class="contractSkillTileImg itemShadow" :src="view.getImage('skillTile_' + String(skillTile))" alt="Skill Tile" />
+								<img v-for="(resource, idx) in contract.chosenResources" :key="idx" class="contractResImg" :src="view.getImage('res_' + String(resource))" alt="Res" />
+								<button v-if="personal.canPlay()" class="cancelItemsButton" @click.stop="cancelContractSet(contract)">X</button>
+							</div>
+						</td>
+						<td>
+							{{ contract.score }}
+							<br />
+							{{ 7 }} / set
+						</td>
+					</tr>
+				</template>
+				<!-- Manual Actions -->
+				<template v-if="computedScoringData.needsAction.length > 0">
+					<tr>
+						<td class="sectionHeader" colspan="3">Manual Scoring</td>
+					</tr>
+					<tr v-for="(tile, idx) in computedScoringData.needsAction" :key="idx">
+						<td>
+							<div class="hexDiv">
+								<svg class="hexSVG" viewBox="-420 -348 840 696">
+									<polygon class="hexPolygon" @mouseover="showPopupFunc($event, tile)" @mouseout="hidePopup()" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" :fill="`url(#${tile.gfx[tile.upgraded]})`" />
+								</svg>
+							</div>
+						</td>
+						<td>
+							<button v-if="personal.canPlay()" class="actionsLineButton" @click="setupManualScoring(tile.tileID[tile.upgraded])">{{ tile.buttonText }}</button>
+						</td>
+						<td>{{ tile.victoryPoints[tile.upgraded] }}</td>
+					</tr>
+				</template>
+				<!-- Auto VP tiles-->
+				<tr>
+					<td class="sectionHeader" colspan="3">VP Tiles - Auto Scoring</td>
+				</tr>
+				<tr v-for="(tile, idx) in computedScoringData.autoVP" :key="idx">
+					<td>
+						<div class="hexDiv">
+							<svg class="hexSVG" viewBox="-420 -348 840 696">
+								<polygon class="hexPolygon" @mouseover="showPopupFunc($event, tile)" @mouseout="hidePopup()" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" :fill="`url(#${tile.gfx[tile.upgraded]})`" />
+							</svg>
+						</div>
+					</td>
+					<td>{{ tile.itemMessage }}</td>
 					<td>{{ tile.victoryPoints[tile.upgraded] }}</td>
 				</tr>
-			</template>
-			<!-- Auto VP tiles-->
-			<tr>
-				<td class="sectionHeader" colspan="3">VP Tiles - Auto Scoring</td>
-			</tr>
-			<tr v-for="(tile, idx) in computedScoringData.autoVP" :key="idx">
-				<td>
-					<div class="hexDiv">
-						<svg class="hexSVG" viewBox="-420 -348 840 696">
-							<polygon class="hexPolygon" @mouseover="showPopupFunc($event, tile)" @mouseout="hidePopup()" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" :fill="`url(#${tile.gfx[tile.upgraded]})`" />
-						</svg>
-					</div>
-				</td>
-				<td>{{ tile.itemMessage }}</td>
-				<td>{{ tile.victoryPoints[tile.upgraded] }}</td>
-			</tr>
-			<!-- VP only tiles-->
-			<tr>
-				<td class="sectionHeader" colspan="3">VP Tiles (no action)</td>
-			</tr>
-			<tr>
-				<td>
-					<div class="hexDiv" v-for="(tile, idx) in computedScoringData.VPonly" :key="idx">
-						<svg class="hexSVG" viewBox="-420 -348 840 696">
-							<polygon class="hexPolygon" @mouseover="showPopupFunc($event, tile)" @mouseout="hidePopup()" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" :fill="`url(#${tile.gfx[tile.upgraded]})`" />
-						</svg>
-					</div>
-				</td>
-				<td>-</td>
-				<td>{{ computedScoringData.VPonlyScore }}</td>
-			</tr>
-			<!-- TILES THAT SCORE WHEN UPGRADED ONLY-->
-			<tr>
-				<td class="sectionHeader" colspan="3">Upgraded Tiles</td>
-			</tr>
-			<tr>
-				<td>
-					<div class="hexDiv" v-for="(tile, idx) in computedScoringData.scoreUpgradedOnly" :key="idx">
-						<svg class="hexSVG" viewBox="-420 -348 840 696">
-							<polygon class="hexPolygon" @mouseover="showPopupFunc($event, tile)" @mouseout="hidePopup()" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" :fill="`url(#${tile.gfx[tile.upgraded]})`" />
-						</svg>
-					</div>
-				</td>
-				<td>-</td>
-				<td>{{ computedScoringData.scoreUpgradeOnlyPoint }}</td>
-			</tr>
-			<tr>
-				<td colspan="3" id="totalScoreTD">Total Score: {{ computedScoringData.totalScore }}</td>
-			</tr>
+				<!-- VP only tiles-->
+				<tr>
+					<td class="sectionHeader" colspan="3">VP Tiles (no action)</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="hexDiv" v-for="(tile, idx) in computedScoringData.VPonly" :key="idx">
+							<svg class="hexSVG" viewBox="-420 -348 840 696">
+								<polygon class="hexPolygon" @mouseover="showPopupFunc($event, tile)" @mouseout="hidePopup()" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" :fill="`url(#${tile.gfx[tile.upgraded]})`" />
+							</svg>
+						</div>
+					</td>
+					<td>-</td>
+					<td>{{ computedScoringData.VPonlyScore }}</td>
+				</tr>
+				<!-- TILES THAT SCORE WHEN UPGRADED ONLY-->
+				<tr>
+					<td class="sectionHeader" colspan="3">Upgraded Tiles</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="hexDiv" v-for="(tile, idx) in computedScoringData.scoreUpgradedOnly" :key="idx">
+							<svg class="hexSVG" viewBox="-420 -348 840 696">
+								<polygon class="hexPolygon" @mouseover="showPopupFunc($event, tile)" @mouseout="hidePopup()" points="200,346.41 400,0 200,-346.41 -200,-346.41 -400,0 -200,346.41" :fill="`url(#${tile.gfx[tile.upgraded]})`" />
+							</svg>
+						</div>
+					</td>
+					<td>-</td>
+					<td>{{ computedScoringData.scoreUpgradeOnlyPoint }}</td>
+				</tr>
+				<tr>
+					<td colspan="3" id="totalScoreTD">Total Score: {{ computedScoringData.totalScore }}</td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
 </template>

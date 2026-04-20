@@ -2962,19 +2962,26 @@ class KFWpresenter(GamePresenter):
                 return self.compressData(playerData[1:])
         return self.compressData([[], [], []])
 
-    def pull_items_from_bag(self, num_items, itmes_bag):
+    def pull_items_from_bag(self, num_items, items_bag, pullingSkills=False):
         pulled_meeples = [0, 0, 0, 0]
+        pulled_skills = [0, 0, 0]
         for _ in range(num_items):
-            bag_size = sum(itmes_bag)
+            bag_size = sum(items_bag)
             if bag_size == 0:
                 break
-            picked = _kfw_pick_random(bag_size, itmes_bag)
+            picked = _kfw_pick_random(bag_size, items_bag)
             if picked == -1:
                 raise ValueError("Invalid pick from items bag")
-            itmes_bag[picked] -= 1
-            pulled_meeples[picked] += 1
+            items_bag[picked] -= 1
+            if pullingSkills:
+                pulled_skills[picked] += 1
+            else:
+                pulled_meeples[picked] += 1
 
-        return [pulled_meeples, itmes_bag]
+        if pullingSkills:
+            return [pulled_skills, items_bag]
+
+        return [pulled_meeples, items_bag]
 
     def processEndOfTurnActions(self, compressedString):
         SERV_MEEPLES_FROM_PLAYER_TO_BAG = 0  # MOVE from player to bg --  then [MR, MR, ...]
@@ -3063,13 +3070,14 @@ class KFWpresenter(GamePresenter):
                 histEntry = row[4]
 
                 # Remove skills from bag
-                [skillsPulledArr, skills_bag] = self.pull_items_from_bag(num, skills_bag)
+                [skillsPulledArr, skills_bag] = self.pull_items_from_bag(num, skills_bag, True)
                 skillsPulled = []
                 for i in range(len(skillsPulledArr)):
                     for _ in range(skillsPulledArr[i]):
                         skillsPulled.append(i)
                         newInformation[1].append(i)
                 # Add skills to player
+                print(f"playersHiddenData[2]: {playerHiddenData[2]}  skillsPulledArr: ${skillsPulledArr}")
                 playerHiddenData[2] = [x + y for x, y in zip(playerHiddenData[2], skillsPulledArr, strict=True)]
                 # Create the history
                 for i, value in enumerate(histEntry):
@@ -3096,7 +3104,7 @@ class KFWpresenter(GamePresenter):
                 playerHiddenData[1] = [x + y for x, y in zip(playerHiddenData[1], meeplesPulledArr, strict=True)]
 
                 # Remove skills from bag
-                [skillsPulledArr, skills_bag] = self.pull_items_from_bag(num, skills_bag)
+                [skillsPulledArr, skills_bag] = self.pull_items_from_bag(num, skills_bag, True)
                 skillsPulled = []
                 for i in range(len(skillsPulledArr)):
                     for _ in range(skillsPulledArr[i]):
