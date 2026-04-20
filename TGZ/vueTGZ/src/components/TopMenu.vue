@@ -292,7 +292,7 @@ function adminBKSbutton() {
 			</template>
 			<template v-if="personal.name === 'admin' || personal.name === 'BotKickStarter'">
 				<br />
-				<button @click="adminBKSbutton">Admin / BKS button</button>
+				<button class="actionsLineButton" @click="adminBKSbutton">Admin / BKS button</button>
 			</template>
 			<!-- Stats exclude bit
 			<br />

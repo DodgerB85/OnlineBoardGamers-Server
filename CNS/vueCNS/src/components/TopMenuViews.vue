@@ -243,8 +243,8 @@ function localCastVote(topic) {
 				<textarea cols="150" rows="10" name="bugContent" id="bugContent" v-model="bugReportText"></textarea>
 			</div>
 			<div>
-				<button id="submitBug" @click="submitBug">Submit</button>
-				<button id="resetBug" @click="toggleBug">Cancel</button>
+				<button id="submitBug" class="actionsLineButton" @click="submitBug">Submit</button>
+				<button id="resetBug" class="actionsLineButton" @click="toggleBug">Cancel</button>
 			</div>
 		</div>
 	</transition>
@@ -256,9 +256,9 @@ function localCastVote(topic) {
 			<p>Only you can see these notes</p>
 			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes"></textarea></div>
 			<div>
-				<button id="submitNotes" @click="IO.saveNotes">Submit</button>
-				<button id="clearNotes" @click="clearNotes">Clear</button>
-				<button id="closeNotes" @click="toggleNotes">Close</button>
+				<button id="submitNotes" class="actionsLineButton" @click="IO.saveNotes">Submit</button>
+				<button id="clearNotes" class="actionsLineButton" @click="clearNotes">Clear</button>
+				<button id="closeNotes" class="actionsLineButton" @click="toggleNotes">Close</button>
 			</div>
 		</div>
 	</transition>
@@ -271,7 +271,7 @@ function localCastVote(topic) {
 				<div>
 					<textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea>
 				</div>
-				<div><button @click="sendChatMessage()">Send</button></div>
+				<div><button class="actionsLineButton" @click="sendChatMessage()">Send</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
