@@ -343,6 +343,9 @@ def _processRNBturn(request):
                 "allStackData": getAllCurrentStackMoves(currentGame),
                 # "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
                 "stackCurrentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
+                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+                "gameDataB64": currentGame.gameData,
             }
 
             return JsonResponse(response_data, safe=False)
@@ -387,6 +390,7 @@ def _processRNBturn(request):
             "savedMoveForLater": True,
             "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
             "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+            "gameDataB64": currentGame.gameData,
         }
 
         return JsonResponse(response_data, safe=False)
@@ -444,6 +448,7 @@ def _processRNBturn(request):
             "savedMoveForLater": True,
             "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
             "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+            "gameDataB64": currentGame.gameData,
         }
 
         return JsonResponse(response_data, safe=False)

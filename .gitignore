@@ -82,3 +82,4 @@ Lobby/sharedFunctions/emailCounter.txt
 siteUtils/creds4.txt
 siteUtils/client_secrets.json
 live.sql
+.codeiumignore
