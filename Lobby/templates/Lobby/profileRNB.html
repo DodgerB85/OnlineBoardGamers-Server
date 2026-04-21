@@ -138,6 +138,70 @@
                 </div>
                 <br />
                 <br />
+                <!-- PLAYER AID -->
+                <label class="preferenceTitle">{% translate "Select Player Aid" %}</label>
+                <br />
+                <label class="preferenceExplanation">{% translate "This will be displayed below the map" %}</label>
+                <br />
+                <div class="favRestChoice">
+                    <b>None</b>
+                    <br />
+                    <input type="radio"
+                           id="playerAid0"
+                           name="playerAid"
+                           value="0"
+                           {% if playerAid == 0 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="playerAid1">
+                        <img src="{% static 'Lobby/images/RNBprofile/playerAid_OG_icon.jpg' %}"
+                             width="230"
+                             height="126"
+                             alt="Original" />
+                    </label>
+                    <br />
+                    <b>Original</b>
+                    <br />
+                    <input type="radio"
+                           id="playerAid1"
+                           name="playerAid"
+                           value="1"
+                           {% if playerAid == 1 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="playerAid2">
+                        <img src="{% static 'Lobby/images/RNBprofile/playerAid_colour_icon.jpg' %}"
+                             width="230"
+                             height="120"
+                             alt="Colour" />
+                    </label>
+                    <br />
+                    <b>Colour</b>
+                    <br />
+                    <input type="radio"
+                           id="playerAid2"
+                           name="playerAid"
+                           value="2"
+                           {% if playerAid == 2 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="playerAid3">
+                        <img src="{% static 'Lobby/images/RNBprofile/playerAid_colour_etc_icon.jpg' %}"
+                             width="230"
+                             height="175"
+                             alt="Colour &c" />
+                    </label>
+                    <br />
+                    <b>Colour &c</b>
+                    <br />
+                    <input type="radio"
+                           id="playerAid3"
+                           name="playerAid"
+                           value="3"
+                           {% if playerAid == 3 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
                 <button type="submit" class="updateProfilebtn">{% translate "Update Roads & Boats Preferences" %}</button>
             </form>
         </div>

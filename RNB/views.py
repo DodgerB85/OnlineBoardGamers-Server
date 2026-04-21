@@ -142,8 +142,13 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData["pov"] = -9
 
     preferredRNBoptions = json.loads(result["user_profile"].preferredRNBoptions) if result["user_profile"].preferredRNBoptions != "" else [-1]
-    if len(preferredRNBoptions) < 1:
-        preferredRNBoptions.extend([-1] * (1 - len(preferredRNBoptions)))
+    if len(preferredRNBoptions) < 2:
+        preferredRNBoptions.extend([-1] * (2 - len(preferredRNBoptions)))
+
+    # Check the default for playerAid
+    if preferredRNBoptions[1] == -1:
+        preferredRNBoptions[1] = 1
+
     returnData["preferredRNBoptions"] = preferredRNBoptions
 
     # RNB uses presenter.removeChatNotification + currentGame.save()

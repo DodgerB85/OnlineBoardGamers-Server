@@ -1881,6 +1881,7 @@ def profileRNB(request):
 
         RNBoptions = []
         RNBoptions.append(int(request.POST.get("rnbColour", -1)))
+        RNBoptions.append(int(request.POST.get("playerAid", 1)))
 
         profile.preferredRNBoptions = json.dumps(RNBoptions, separators=(",", ":"))
 
@@ -1896,14 +1897,19 @@ def profileRNB(request):
         profile = Profile.objects.get(user=request.user)
         preferredRNBoptions = json.loads(request.user.profile.preferredRNBoptions) if request.user.profile.preferredRNBoptions != "" else [-1]
 
-        if len(preferredRNBoptions) < 1:
-            preferredRNBoptions.extend([-1] * (1 - len(preferredRNBoptions)))
+        if len(preferredRNBoptions) < 2:
+            preferredRNBoptions.extend([-1] * (2 - len(preferredRNBoptions)))
+
+        # Check the default for playerAid
+        if preferredRNBoptions[1] == -1:
+            preferredRNBoptions[1] = 1
 
         return render(
             request,
             "Lobby/profileRNB.html",
             {
                 "colour": preferredRNBoptions[0],
+                "playerAid": preferredRNBoptions[1],
             },
         )
 
