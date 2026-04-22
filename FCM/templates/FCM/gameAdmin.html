@@ -15,11 +15,11 @@
 Enter game data <br />
 
 <textarea id="inputData" name="inputData" rows="4" cols="50"></textarea>
-                        <br />
-                        <input type="button"
-                               onclick="decompressData()"
-                               value="Decompress to Model.export">
-                        <br />
+                                <br />
+                                <input type="button"
+                                       onclick="decompressData()"
+                                       value="Decompress to Model.export">
+                                <br />
     <textarea id="outputData" name="outputData" rows="4" cols="50"></textarea>
 
     <br /><br /><br />
@@ -293,14 +293,14 @@ PAKO CHAT AREA
 
         for (var i = 0; i < decodedMove[0].length; i++) {
             if (decodedMove[0][i] == null) document.getElementById("moveDataOutput").innerHTML += " =BLANK= ";
-            else document.getElementById("moveDataOutput").innerHTML += Log.giveEmployeeSpan(decodedMove[0][i]);
+            else document.getElementById("moveDataOutput").innerHTML += giveEmployeeSpan(decodedMove[0][i]);
         }
         document.getElementById("moveDataOutput").innerHTML += "<br /><br /><b>" + moveDataWithName[1] + ":  AT WORK: </b><br />";
         var freeSlots = 4;
 
         for (var i = 0; i < decodedMove[1].length; i++) {
             if (decodedMove[1][i] == null) document.getElementById("moveDataOutput").innerHTML += " =BLANK= ";
-            else document.getElementById("moveDataOutput").innerHTML += Log.giveEmployeeSpan(decodedMove[1][i]);
+            else document.getElementById("moveDataOutput").innerHTML += giveEmployeeSpan(decodedMove[1][i]);
             freeSlots--;
             freeSlots += Rules.hierarchySlots(decodedMove[1][i]);
         }
@@ -308,6 +308,12 @@ PAKO CHAT AREA
         document.getElementById("moveDataOutput").innerHTML += " AUTO-SELECT: " + String(decodedMove[2]) + " ";
         
     }
+
+    function giveEmployeeSpan (e) {
+		let nameString = rf.EMPLOYEES_STR[e].title
+		let span = '<span class="compact ' + rf.EMPLOYEES_STR[e].type + (rf.EMPLOYEES_STR[e].type === "manager" ? " inverted" : "") + '">' + nameString + "</span>"
+		return span
+	}
 
 
     function getCookie(name) {
