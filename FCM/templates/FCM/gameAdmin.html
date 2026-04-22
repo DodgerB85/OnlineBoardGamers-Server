@@ -15,11 +15,11 @@
 Enter game data <br />
 
 <textarea id="inputData" name="inputData" rows="4" cols="50"></textarea>
-                                <br />
-                                <input type="button"
-                                       onclick="decompressData()"
-                                       value="Decompress to Model.export">
-                                <br />
+                                    <br />
+                                    <input type="button"
+                                           onclick="decompressData()"
+                                           value="Decompress to Model.export">
+                                    <br />
     <textarea id="outputData" name="outputData" rows="4" cols="50"></textarea>
 
     <br /><br /><br />
@@ -353,5 +353,5 @@ PAKO CHAT AREA
     <script src="/static/FCM/JS/websocket.js"></script>
 {% else %}
     <!-- Live server -->
-    <script src="/static/FCM/JS/FCMmain.js"></script>
+    <script src="{% static 'FCM/FCMdist/FCMmain.js' %}"></script>
 {% endif %}
