@@ -56,6 +56,11 @@ async function initGame() {
 	//store.refSize = window.initData.myZoomLevel
 
 	store.refSize = window.initData.myZoomLevel * 10
+	
+	// Safety check: ensure refSize is never 0 or NaN
+	if (store.refSize === 0 || isNaN(store.refSize)) {
+		store.refSize = 160
+	}
 
 	store.deleteVotesData = window.initData.deleteVotesData
 	store.statsExcludeVotesData = window.initData.statsExcludeVotesData

@@ -170,6 +170,10 @@ def build_show_game_data(
     except (json.JSONDecodeError, IndexError, TypeError):
         pass
 
+    # Safety check: ensure myZoomLevel is never 0
+    if myZoomLevel == 0:
+        myZoomLevel = default_zoom
+
     involved_data = {
         "involvedPlayer": True,
         "pov": pov,
