@@ -19,6 +19,7 @@ urlpatterns = [
     path("IND/", views.showINDgameOLD, name="showINDgameOLD"),
     # New Game URL format (game_id is the Game Game.id)
     path("<int:game_id>/show/", views.showINDgame, name="showINDgame"),
+    path("<int:game_id>/history/", views.showINDhistory, name="showINDhistory"),
     path(
         "<int:game_id>/show/replay/<int:replayStep>/",
         views.showINDgame,

@@ -156,6 +156,10 @@
   initData.finishedGame = true
   {% endif %}
 
+  {% if historyOnly %}
+  initData.historyOnly = true;
+  {% endif %}
+
   {% if spoilerFree %}
   initData.spoilerFree = true;
   initData.replayStep = {{replayStep}}-1;

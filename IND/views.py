@@ -140,6 +140,82 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     return render(request, "IND/showINDgame.html", returnData)
 
 
+@login_required
+def showINDhistory(request, game_id=1):
+    """Show only the history tab for a game"""
+    result = build_show_game_data(
+        request,
+        game_id,
+        "IND",
+        default_zoom=0,
+        settings_debug_key="IND_USE_SOURCE_CODE",
+    )
+    if isinstance(result, HttpResponseRedirect):
+        return result
+
+    currentGame = result["game"]
+    presenter = cast("INDpresenter", currentGame.presenter())
+    user_gp = result["user_gp"]
+    username = request.user.username
+    userObj = request.user
+
+    returnData = {**result["base_data"]}
+    returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
+    returnData.update(
+        {
+            "spoilerFree": False,
+            "replayStep": 1,
+            "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
+            "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
+            "finishedGame": currentGame.gameStatus == "FINISHED",
+            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0],
+            "pov": -99,
+            "preMoves": "",
+            "sideData": "",
+            "historyOnly": True,  # Flag to indicate history-only mode
+        }
+    )
+
+    if not result["is_authenticated"]:
+        return render(request, "IND/showINDgame.html", returnData)
+
+    returnData.update(result["auth_data"])
+    returnData["pov"] = -9
+
+    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
+    if len(preferredINDoptions) < 7:
+        preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
+        preferredINDoptions[6] = 0
+    if preferredINDoptions[4] == 0:
+            preferredINDoptions[4] = 1
+    returnData["preferredINDoptions"] = preferredINDoptions
+
+    if not result["is_involved"]:
+        return render(request, "IND/showINDgame.html", returnData)
+
+    returnData.update(result["involved_data"])
+
+    pov = result["pov"]
+
+    notes = ""
+    if pov >= 0 and user_gp:
+        notes = user_gp.notes
+    returnData["notes"] = notes
+
+    if pov < 0:
+        returnData["myZoomLevel"] = 100
+
+    returnData.update(
+        {
+            "isHost": currentGame.host == userObj,
+            "preMoves": presenter.getCompressedPreMoveArr(username),
+            "sideData": presenter.getAllPreMoveDataCompressed(),
+        }
+    )
+
+    return render(request, "IND/showINDgame.html", returnData)
+
+
 @login_required()
 def processINDturn(request):
     if request.method != "POST":

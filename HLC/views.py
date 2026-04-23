@@ -987,7 +987,7 @@ def HLCdata(request, dataType):
             gameUpdate = int(jsonData["latestUpdate"])
             latestUpdate = int(currentGame.latestUpdate)
         except Exception as e:
-            SN_sendAdminErrorMessage(request, f"ERROR IN HLCdata: gameID: {jsonData['gameID']} Error: {e}")
+            SN_sendAdminErrorMessage(f"ERROR IN HLCdata: gameID: {jsonData['gameID']} Error: {e}")
             # NB this might need to be changed if the above msg is getting triggered
             # specialData = False
 
