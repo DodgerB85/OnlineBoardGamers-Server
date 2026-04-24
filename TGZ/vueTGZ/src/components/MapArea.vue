@@ -445,7 +445,7 @@ function clickedResource(index) {
 		store.context.selectedResourcesForCraftsmen.splice(0)
 
 		// Check if Raise complete
-		if (store.context.action === rf.ACT_OYA_RUITUALGOOD || store.context.upgradingMonumentProcess.length === store.context.upgradingMonumentProcess[0][1] + 1 || (model.has_god(controller.currentPlayerObj(), rf.TIURAKH) && store.context.upgradingMonumentProcess.length === model.get_godData(controller.currentPlayerObj(), rf.TIURAKH)[1])) {
+		if (store.context.action === rf.ACT_OYA_RUITUALGOOD || store.context.upgradingMonumentProcess.length === store.context.upgradingMonumentProcess[0][1] + 1 || (model.has_god(controller.currentPlayerObj(), rf.TIURAKH) && store.context.upgradingMonumentProcess.length === store.context.upgradingMonumentProcess[0][1])) {
 			// Raise complete!
 
 			// Clear vars and end Raise
