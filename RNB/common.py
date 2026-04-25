@@ -19,6 +19,8 @@ from Lobby.sharedFunctions.sharedRefs import (
 if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter
 
+from . import RNBconstants as rfRNB
+
 
 @login_required()
 def create_rnb_game(
@@ -167,7 +169,7 @@ def create_rnb_game(
             host=host,
             gamePace=game_pace,
             turn=1,
-            phase=3,
+            phase=rfRNB.PHASE_CHOOSE_HOME_TILE,
             created=created_time,
             latestUpdate=created_time,
             maxPlayers=max_players,
