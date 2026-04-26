@@ -123,6 +123,10 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
         }
     )
 
+    ## DEBUG
+    if request.user.username == "user1":
+        returnData["settingsDEBUG"] = False
+
     ### NEW GAME
     if currentGame.gameData == "":
         displayNames = ""
