@@ -112,6 +112,7 @@ logger = logging.getLogger(__name__)
 ALLOWED_USERS_RNB = [
     "admin",
     "DodgerB",
+    "user1",
     "durendal",
     "Benkyo",
     "vraid",

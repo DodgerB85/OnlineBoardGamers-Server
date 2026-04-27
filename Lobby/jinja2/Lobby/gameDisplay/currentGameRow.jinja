@@ -47,7 +47,19 @@
     {% endif %}
     {{ game.startingOptionsHTML|safe }}
   </td>
+  <td>{{ game.currentPlayers }}</td>
+  <td>{{ game.currentTurn }}</td>
+
   <td>
+    {% for player in game.allPlayers %}
+      <a href="{{ url('playerInfo', kwargs={'usernameToProfile': player}) }}">{{ player }}</a>
+      {% if not loop.last %},{% endif %}
+    {% endfor %}
+  </td>
+
+  <!--<td>{{ game.created }}</td>-->
+  <td>{{ game.pace|safe }}</td>
+    <td>
     {% if game.deleteableGame %}
       <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}"
            class="deleteTrainingGame">
@@ -61,16 +73,6 @@
       <a href="{{ url('playerInfo', kwargs={'usernameToProfile': game.creator}) }}">{{ game.creator }}</a>
     {% endif %}
   </td>
-  <td>
-    {% for player in game.allPlayers %}
-      <a href="{{ url('playerInfo', kwargs={'usernameToProfile': player}) }}">{{ player }}</a>
-      {% if not loop.last %},{% endif %}
-    {% endfor %}
-  </td>
-  <td>{{ game.currentPlayers }}</td>
-  <td>{{ game.currentTurn }}</td>
-  <!--<td>{{ game.created }}</td>-->
-  <td>{{ game.pace|safe }}</td>
   <td>
     <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
     {% if 'SHADOW' not in game.allPlayers %}

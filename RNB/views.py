@@ -42,7 +42,7 @@ from .models import RNBmap
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
-ALLOWED_USERS_RNB = ["admin", "DodgerB", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy", "BotKickStarter", "Dycu"]
+ALLOWED_USERS_RNB = ["admin", "DodgerB", "user1", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy", "BotKickStarter", "Dycu"]
 
 if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter
@@ -294,6 +294,9 @@ def _processRNBturn(request):
                 "phase": mainPhaseSkipData[1],
                 "actionStack": "SKIP",
                 "status": "pending",
+                "knownArrayLengths": jsonData["knownArrayLengths"],
+                "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+                "playerIndex": jsonData["playerIndex"],
             }
             PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -366,6 +369,9 @@ def _processRNBturn(request):
                 "phase": jsonData["phase"],
                 "actionStack": jsonData["actionStack"],
                 "status": "current",
+                "knownArrayLengths": jsonData["knownArrayLengths"],
+                 "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+                 "playerIndex": jsonData["playerIndex"],
             }
             PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -386,6 +392,9 @@ def _processRNBturn(request):
             "phase": jsonData["phase"],
             "actionStack": jsonData["actionStack"],
             "status": "pending",
+            "knownArrayLengths": jsonData["knownArrayLengths"],
+             "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+             "playerIndex": jsonData["playerIndex"],
         }
         PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -432,6 +441,9 @@ def _processRNBturn(request):
                 "phase": mainPhaseSkipData[1],
                 "actionStack": "SKIP",
                 "status": "pending",
+                "knownArrayLengths": jsonData["knownArrayLengths"],
+                 "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+                 "playerIndex": jsonData["playerIndex"],
             }
             PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -444,6 +456,9 @@ def _processRNBturn(request):
             "phase": jsonData["futurePhase"],
             "actionStack": jsonData["actionStack"],
             "status": "pending",
+            "knownArrayLengths": jsonData["knownArrayLengths"],
+             "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+             "playerIndex": jsonData["playerIndex"],
         }
         PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -1267,6 +1282,13 @@ def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
     # If the entry is blank, ignore it
     if newMoveEntry == "":
         return
+
+    if ("knownArrayLengths" not in newMoveEntry or "knownFinalHistoryIndex" not in newMoveEntry) and newMoveEntry["phase"] in rfRNB.MAIN_PHASES:
+        print("knownArrayLengths or knownFinalHistoryIndex is missing entirely!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("knownArrayLengths or knownFinalHistoryIndex is missing entirely!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("knownArrayLengths or knownFinalHistoryIndex is missing entirely!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("knownArrayLengths or knownFinalHistoryIndex is missing entirely!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
     newMoveEntry["username"] = nameToUse
     gp_player = currentGame.players.only("moveDataJSON").get(player__username=nameToUse)
 
