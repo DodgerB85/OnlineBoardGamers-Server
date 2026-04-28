@@ -83,8 +83,8 @@
         OBG discord! Click <a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a> to
         join!
       {% endblocktranslate %}
-                                                                                                                                                                                                                      <br />
-                                                                                                                                                                                                                    </span>-->
+                                                                                                                                                                                                                                                      <br />
+                                                                                                                                                                                                                                                    </span>-->
         <!--<span class="newsSpan"><a href="https://splottercon.com/" target="_blank">Splotter Con</a> Finishes with a great TGZ match!</span>-->
         <!--<span class="newsSpan"><a href="https://www.onlineboardgamers.com/TGZ/1894/spoilerFree" target="_blank">Click here to go to the start of the replay</a>! <a href="https://group.doubletree.com/48x0hz" target="_blank">Discounted Hotel Rooms</a>!</span>-->
         <!--<span class="newsSpan">Splotter Con (Pitts, USA, 29 Aug - 2 Sep ) <a href="https://tabletop.events/conventions/splotter-con-2025" target="_blank">Last few badges left!</a>!  <a href="https://splottercon.com/" target="_blank">Main Splotter Con Site</a> </span>-->
@@ -206,7 +206,7 @@
             <div id="availableGamesListSquares">
                 {% if availableGamesList %}
                     {% for game in availableGamesList %}
-                        {% include 'Lobby/gameDisplay/availableGameSq.html' with game=game %}
+                        {% include "Lobby/gameDisplay/availableGameSq.html" with game=game %}
                     {% endfor %}
                 {% else %}
                     <span class="noGamesSpan">
@@ -215,7 +215,7 @@
                         <br />
                         <br />
                     </span>
-                    {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
                 {% endif %}
                 <span>
                     {% url "lobbyHelp" as the_url %}
@@ -261,7 +261,7 @@
                                     </tr>
                                 </thead>
                                 {% for game in availableGamesList %}
-                                    {% include 'Lobby/gameDisplay/availableGameRow.html' with game=game %}
+                                    {% include "Lobby/gameDisplay/availableGameRow.html" with game=game %}
                                 {% endfor %}
                             </table>
                         </div>
@@ -286,7 +286,7 @@
                                     </tr>
                                 </thead>
                                 {% for Mini_Tournament in available_MT %}
-                                    {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
+                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                 {% endfor %}
                             </table>
                         </div>
@@ -334,7 +334,7 @@
                         </div>
                     </a>
                 {% endif %}
-                {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+                {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
                 {% url "lobbyHelp" as the_url %}
                 {% blocktranslate trimmed %}
                     For icon explanations see
@@ -360,12 +360,12 @@
                                 </thead>
                                 {% for game in currentGamesList %}
                                     {% if game.myMove %}
-                                        {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
                                     {% endif %}
                                 {% endfor %}
                                 {% for game in currentGamesList %}
                                     {% if not game.myMove %}
-                                        {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
                                     {% endif %}
                                 {% endfor %}
                             </table>
@@ -396,14 +396,14 @@
                                     </tr>
                                 </thead>
                                 {% for Mini_Tournament in current_MT %}
-                                    {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
+                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                 {% endfor %}
                             </table>
                         </div>
                     {% endif %}
                 {% else %}
                     <h2>{% translate "No Current Games or Mini Tournaments" %}</h2>
-                    {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
                 {% endif %}
                 {% if current_MT %}<br />{% endif %}
                 <b><u>{% translate "Colour Guide" %}</u></b>
@@ -443,7 +443,7 @@
                                     </tr>
                                 </thead>
                                 {% for game in waitingGamesList %}
-                                    {% include 'Lobby/gameDisplay/waitingGameRow.html' with game=game %}
+                                    {% include "Lobby/gameDisplay/waitingGameRow.html" with game=game %}
                                 {% endfor %}
                             </table>
                         </div>
@@ -465,7 +465,7 @@
                                     </tr>
                                 </thead>
                                 {% for Mini_Tournament in waiting_MT %}
-                                    {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
+                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                 {% endfor %}
                             </table>
                         </div>
@@ -474,7 +474,7 @@
                     <span class="noGamesSpan">
                         <h2>{% translate "No Waiting Games" %}</h2>
                     </span>
-                    {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
                 {% endif %}
             </div>
             <!-- INVITATIONS GAMES -->
@@ -498,7 +498,7 @@
                                     </tr>
                                 </thead>
                                 {% for game in invitaionsGamesList %}
-                                    {% include 'Lobby/gameDisplay/invitationGameRow.html' with game=game %}
+                                    {% include "Lobby/gameDisplay/invitationGameRow.html" with game=game %}
                                 {% endfor %}
                             </table>
                         </div>
@@ -520,7 +520,7 @@
                                     </tr>
                                 </thead>
                                 {% for Mini_Tournament in invitations_MT %}
-                                    {% include 'Lobby/gameDisplay/available_MT_row.html' with Mini_Tournament=Mini_Tournament %}
+                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                 {% endfor %}
                             </table>
                         </div>
@@ -529,7 +529,7 @@
                     <span class="noGamesSpan">
                         <h2>{% translate "No Invitations" %}</h2>
                     </span>
-                    {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
                 {% endif %}
             </div>
             <!-- FINIHED GAMES -->
@@ -548,7 +548,7 @@
                                 </tr>
                             </thead>
                             {% for game in finishedGamesList %}
-                                {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                                {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
                             {% endfor %}
                         </table>
                     </div>
@@ -565,12 +565,12 @@
                     <span class="noGamesSpan">
                         <h2>{% translate "No Finished Games" %}</h2>
                     </span>
-                    {% include 'Lobby/lobby_icons.html' with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
                 {% endif %}
             </div>
         </div>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/splotterconSponsor.html' %}
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/splotterconSponsor.html" %}
     </div>
     {% block script %}
         <script>
@@ -593,5 +593,5 @@
 	global.invitationsCount = {{invitationsCount}};
 	global.myMoveGamesData = {{myMoveGamesData|safe}};
         </script>
-    {% endblock %}
-{% endblock %}
+    {% endblock script %}
+{% endblock body %}

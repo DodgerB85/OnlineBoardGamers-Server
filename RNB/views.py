@@ -297,6 +297,7 @@ def _processRNBturn(request):
                 "knownArrayLengths": jsonData["knownArrayLengths"],
                 "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
                 "playerIndex": jsonData["playerIndex"],
+                "expectedResPreProduction": jsonData["expectedResPreProduction"],
             }
             PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -370,8 +371,9 @@ def _processRNBturn(request):
                 "actionStack": jsonData["actionStack"],
                 "status": "current",
                 "knownArrayLengths": jsonData["knownArrayLengths"],
-                 "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
-                 "playerIndex": jsonData["playerIndex"],
+                "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+                "playerIndex": jsonData["playerIndex"],
+                "expectedResPreProduction": jsonData["expectedResPreProduction"],
             }
             PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -393,8 +395,9 @@ def _processRNBturn(request):
             "actionStack": jsonData["actionStack"],
             "status": "pending",
             "knownArrayLengths": jsonData["knownArrayLengths"],
-             "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
-             "playerIndex": jsonData["playerIndex"],
+            "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+            "playerIndex": jsonData["playerIndex"],
+            "expectedResPreProduction": jsonData["expectedResPreProduction"],
         }
         PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -442,8 +445,9 @@ def _processRNBturn(request):
                 "actionStack": "SKIP",
                 "status": "pending",
                 "knownArrayLengths": jsonData["knownArrayLengths"],
-                 "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
-                 "playerIndex": jsonData["playerIndex"],
+                "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+                "playerIndex": jsonData["playerIndex"],
+                "expectedResPreProduction": jsonData["expectedResPreProduction"],
             }
             PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -457,8 +461,9 @@ def _processRNBturn(request):
             "actionStack": jsonData["actionStack"],
             "status": "pending",
             "knownArrayLengths": jsonData["knownArrayLengths"],
-             "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
-             "playerIndex": jsonData["playerIndex"],
+            "knownFinalHistoryidx": jsonData["knownFinalHistoryidx"],
+            "playerIndex": jsonData["playerIndex"],
+            "expectedResPreProduction": jsonData["expectedResPreProduction"],
         }
         PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
@@ -623,6 +628,9 @@ def _processRNBturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayersArr"])
+
+        # Next, we can clear out old data
+        PclearPastMoveData(currentGame)
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -1318,7 +1326,7 @@ def PclearPastMoveData(currentGame):
         moves = gp.moveDataJSON or []
 
         # Rebuild the list with ONLY the moves that are NOT in the past
-        gp.moveDataJSON = [m for m in moves if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT)]
+        gp.moveDataJSON = [m for m in moves if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)]
 
         gp.save(update_fields=["moveDataJSON"])
 
