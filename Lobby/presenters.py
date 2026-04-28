@@ -191,6 +191,10 @@ class GamePresenter:
             gp.is_kicked = True
             gp.save()
 
+    def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray):
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = playersInTurnOrderArray
+        self.gameObj.save()
+
     def setCurrentPlayersFromArrInTurnOrder(self, current_players_array):
         """Set current players by updating is_current on GamePlayer instances"""
         if not current_players_array or len(current_players_array) == 0:
@@ -206,9 +210,10 @@ class GamePresenter:
         game_players = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
 
         to_update = []
-        if self.gameObj.gameCode == "RNB":
-            self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
-        elif self.gameObj.gameCode == "HLC":
+        #if self.gameObj.gameCode == "RNB":
+        #    self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
+        #el
+        if self.gameObj.gameCode == "HLC":
             self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
         self.gameObj.save()
 

@@ -126,6 +126,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # RNB uses gameDataB64 instead of gameData
     returnData["gameDataB64"] = returnData.pop("gameData")
     currentPlayersArr = []
+    print(currentGame.serverCurrentPlayerNamesInTurnOrder)
     if currentGame.phase in rfRNB.MAIN_PHASES:
         currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
     elif currentGame.phase in rfRNB.ALL_PHASE_CONFLICTS:
@@ -133,7 +134,16 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
 
-    returnData.update({"spoilerFree": spoilerFree, "replayStep": replayStep, "pov": -99, "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)), "currentPlayers": currentPlayersArr, "startingMap": startingMap})
+    returnData.update(
+        {
+            "spoilerFree": spoilerFree,
+            "replayStep": replayStep,
+            "pov": -99,
+            "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
+            "currentPlayers": currentPlayersArr,
+            "startingMap": startingMap,
+        }
+    )
 
     if not result["is_authenticated"]:
         return render(request, "RNB/showRNBgame.html", returnData)
@@ -324,7 +334,9 @@ def _processRNBturn(request):
             newVer = (int(db_latest_update) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayersArr"])
+            # NO! This sets ALL POSSIBLE player to is_current, which triggers emails.
+            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+            presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
             # SAVE BEFORE NOTIFICATIONS
             currentGame.save()
@@ -545,6 +557,8 @@ def _processRNBturn(request):
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
             presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+            presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+
 
             # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
 
@@ -627,7 +641,9 @@ def _processRNBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayersArr"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+
 
         # Next, we can clear out old data
         PclearPastMoveData(currentGame)
@@ -649,13 +665,9 @@ def _processRNBturn(request):
             # Send Notifications
             # Next player either needs to move OR fix a move
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-            nextCurrentPlayerUsername = jsonData["nextCurrentPlayerUsername"]
-            if nextCurrentPlayerUsername != "" and nextCurrentPlayerUsername != "RnbBot" and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-                playerListToNotify = [nextCurrentPlayerUsername.strip()]
-                if request.user.username in playerListToNotify:
-                    playerListToNotify.remove(request.user.username)
-                if "RnbBot" in playerListToNotify:
-                    playerListToNotify.remove("RnbBot")
+            allIsCurrentPlayers = jsonData["allIsCurrentPlayers"]
+            if len(allIsCurrentPlayers) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+                playerListToNotify = [p for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "RnbBot"}]
                 if len(playerListToNotify) > 0:
                     if jsonData["currentPlayerNeedsToFixMove"]:
                         # start_time = timezone.now() + timedelta(minutes=2)
@@ -686,20 +698,13 @@ def _processRNBturn(request):
             pendingPlayersArr = jsonData["pendingPlayersArr"]
             if len(pendingPlayersArr) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
                 # 1. Clean the list (strip whitespace)
-                playerListToNotify = [player.strip() for player in pendingPlayersArr]
-                # 2. Remove the current user and the Bot
-                if request.user.username in playerListToNotify:
-                    playerListToNotify.remove(request.user.username)
-                if "RnbBot" in playerListToNotify:
-                    playerListToNotify.remove("RnbBot")
-
                 # 3. Remove players who have a PreMove saved
                 # This keeps only players where playerHasPreMove returns False
                 # Debug print
-                #for pName in playerListToNotify:
+                # for pName in playerListToNotify:
                 #    if presenter.playerHasPreMove(pName):
                 #        print(f"{pName}: has premove: {presenter.getCurrentMoveDataForPlayer(pName)}")
-                playerListToNotify = [pName for pName in playerListToNotify if not presenter.playerHasPreMove(pName)]
+                playerListToNotify = [pName.strip() for pName in playerListToNotify if pName.strip() not in {request.user.username, "RnbBot"} and not presenter.playerHasPreMove(pName.strip())]
 
                 if len(playerListToNotify) > 0:
                     # start_time = timezone.now() + timedelta(minutes=2)
@@ -855,7 +860,9 @@ def _processRNBturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextCurrentPlayersArr"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+
 
         gameDataB64 = jsonData["gameDataB64"]
         # raw_binary = base64.b64decode(gameDataStr)
@@ -869,9 +876,9 @@ def _processRNBturn(request):
 
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        nextPlayersArr = jsonData["nextCurrentPlayersArr"]
-        if len(nextPlayersArr) > 0 and not any(p.startswith("RnbBot") for p in nextPlayersArr) and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-            playerListToNotify = [p for p in nextPlayersArr if p != request.user.username and p != "RnbBot"]
+        nextPlayersArr = jsonData["allIsCurrentPlayers"]
+        if len(nextPlayersArr) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+            playerListToNotify = [p.strip() for p in nextPlayersArr if p.strip() not in {request.user.username, "RnbBot"}]
 
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
@@ -881,6 +888,27 @@ def _processRNBturn(request):
                     presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
+                )
+
+        pendingPlayersArr = jsonData["pendingPlayersArr"]
+        if len(pendingPlayersArr) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+            playerListToNotify = [p.strip() for p in pendingPlayersArr if p.strip() not in {request.user.username, "RnbBot"}]
+
+            if len(playerListToNotify) > 0:
+                # start_time = timezone.now() + timedelta(minutes=2)
+                start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                schedule(
+                    "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
+                    "RNB",
+                    playerListToNotify,
+                    currentGame.id,
+                    presenter.getGameName(),
+                    currentGame.latestUpdate,
+                    currentGame.turn,
+                    currentGame.phase,
+                    next_run=start_time,
+                    repeats=-1,  # Neg repeats for delete
+                    schedule_type="O",
                 )
 
         return JsonResponse(
@@ -993,7 +1021,9 @@ def performSaveGame(request, currentGame, jsonData):
     newVer = (int(db_latest_update) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allCurrentPlayersArr"])
+    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+    presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+
 
     # SAVE BEFORE NOTIFICATIONS
     currentGame.save()
@@ -1011,13 +1041,9 @@ def performSaveGame(request, currentGame, jsonData):
     else:
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        nextCurrentPlayerUsername = jsonData["nextCurrentPlayerUsername"]
-        if nextCurrentPlayerUsername != "" and nextCurrentPlayerUsername != "RnbBot" and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-            playerListToNotify = [nextCurrentPlayerUsername]
-            if request.user.username in playerListToNotify:
-                playerListToNotify.remove(request.user.username)
-            if "RnbBot" in playerListToNotify:
-                playerListToNotify.remove("RnbBot")
+        allIsCurrentPlayers = jsonData["allIsCurrentPlayers"]
+        if len(allIsCurrentPlayers) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+            playerListToNotify = [p.strip() for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "RnbBot"}]
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
                     "RNB",
@@ -1029,11 +1055,8 @@ def performSaveGame(request, currentGame, jsonData):
                 )
         pendingPlayersArr = jsonData["pendingPlayersArr"]
         if len(pendingPlayersArr) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-            playerListToNotify = [player.strip() for player in pendingPlayersArr]
-            if request.user.username in playerListToNotify:
-                playerListToNotify.remove(request.user.username)
-            if "RnbBot" in playerListToNotify:
-                playerListToNotify.remove("RnbBot")
+            playerListToNotify = [p.strip() for p in pendingPlayersArr if p.strip() not in {request.user.username, "RnbBot"}]
+
             if len(playerListToNotify) > 0:
                 # start_time = timezone.now() + timedelta(minutes=2)
                 start_time = timezone.now() + timedelta(seconds=10)  # For debug
@@ -1320,7 +1343,11 @@ def PclearPastMoveData(currentGame):
         moves = gp.moveDataJSON or []
 
         # Rebuild the list with ONLY the moves that are NOT in the past
-        gp.moveDataJSON = [m for m in moves if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)]
+        gp.moveDataJSON = [
+            m
+            for m in moves
+            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT + 1) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)
+        ]
 
         gp.save(update_fields=["moveDataJSON"])
 
