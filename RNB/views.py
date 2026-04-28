@@ -696,9 +696,9 @@ def _processRNBturn(request):
                 # 3. Remove players who have a PreMove saved
                 # This keeps only players where playerHasPreMove returns False
                 # Debug print
-                for pName in playerListToNotify:
-                    if presenter.playerHasPreMove(pName):
-                        print(f"{pName}: has premove: {presenter.getCurrentMoveDataForPlayer(pName)}")
+                #for pName in playerListToNotify:
+                #    if presenter.playerHasPreMove(pName):
+                #        print(f"{pName}: has premove: {presenter.getCurrentMoveDataForPlayer(pName)}")
                 playerListToNotify = [pName for pName in playerListToNotify if not presenter.playerHasPreMove(pName)]
 
                 if len(playerListToNotify) > 0:
@@ -1290,12 +1290,6 @@ def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
     # If the entry is blank, ignore it
     if newMoveEntry == "":
         return
-
-    if ("knownArrayLengths" not in newMoveEntry or "knownFinalHistoryIndex" not in newMoveEntry) and newMoveEntry["phase"] in rfRNB.MAIN_PHASES:
-        print("knownArrayLengths or knownFinalHistoryIndex is missing entirely!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print("knownArrayLengths or knownFinalHistoryIndex is missing entirely!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print("knownArrayLengths or knownFinalHistoryIndex is missing entirely!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print("knownArrayLengths or knownFinalHistoryIndex is missing entirely!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     newMoveEntry["username"] = nameToUse
     gp_player = currentGame.players.only("moveDataJSON").get(player__username=nameToUse)
