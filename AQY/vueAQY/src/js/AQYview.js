@@ -270,7 +270,7 @@ export function getImage(image) {
 	else if (image === "zoomTerr_1") return new URL(`../../../static/AQY/images/zoomTerr_1.jpg`, import.meta.url).href
 	else if (image === "zoomTerr_2") return new URL(`../../../static/AQY/images/zoomTerr_2.jpg`, import.meta.url).href
 	else if (image === "zoomTerr_3") return new URL(`../../../static/AQY/images/zoomTerr_3.jpg`, import.meta.url).href
-	else alert("V-GI: " + image)
+	else rf.doAdminAlrt("V-GI: " + image)
 }
 
 export function getCityHouseImg(houseNum) {

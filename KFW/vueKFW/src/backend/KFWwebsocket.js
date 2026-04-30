@@ -2,38 +2,60 @@ import { useModelStore } from "../stores/KFWstore.js"
 import { usePersonalStore } from "../stores/KFWpersonal.js"
 
 import * as IO from "./KFW_IO"
-import * as funcs from "../js/KFWfuncs"
+//import * as funcs from "../js/KFWfuncs"
 import * as view from "../js/KFWview"
 import * as rf from "../js/KFWreference.js"
 import * as model from "../js/KFWmodel"
 
 export var KFWwebSocket
+let KFWconnectionPromise = null // Track the in-progress connection
 
 export async function StartWebSocket() {
-	if (typeof KFWwebSocket !== "undefined") {
-		if (KFWwebSocket.readyState === 0 || KFWwebSocket.readyState === 1) return
-		else KFWwebSocket.close()
-	}
 	const personal = usePersonalStore()
-
-	var ChannelNumber = personal.gameID
-
-	var wsUri = "wss://wss.s3.sitereview.io/ws/HomeKFWchannel" + String(ChannelNumber) + "/"
-
-	KFWwebSocket = new WebSocket(wsUri)
-
-	KFWwebSocket.onopen = async function (evt) {
-		await KFWwebSocketOnOpen(evt)
+	// 1. If already open, return immediately
+	if (KFWwebSocket && KFWwebSocket.readyState === 1) {
+		return KFWwebSocket
 	}
-	KFWwebSocket.onclose = function (evt) {
-		KFWwebSocketOnClose(evt)
+
+	// 2. If currently connecting, return the existing promise
+	if (KFWconnectionPromise) {
+		return KFWconnectionPromise
 	}
-	KFWwebSocket.onmessage = function (evt) {
-		KFWwebSocketOnInfo(evt)
-	}
-	KFWwebSocket.onerror = function (evt) {
-		KFWwebSocketOnError(evt)
-	}
+
+	// 3. Create a new connection promise
+	KFWconnectionPromise = new Promise((resolve, reject) => {
+		if (typeof KFWwebSocket !== "undefined" && KFWwebSocket.readyState === 0) {
+			// Already in native connecting state, just attach listeners
+		} else {
+			if (KFWwebSocket) KFWwebSocket.close()
+			let ChannelNumber = personal.gameID
+			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeKFWchannel" + String(ChannelNumber) + "/"
+			KFWwebSocket = new WebSocket(wsUri)
+		}
+
+		KFWwebSocket.onopen = function (evt) {
+			KFWconnectionPromise = null // Clear promise on success
+			KFWwebSocketOnOpen(evt)
+			resolve(KFWwebSocket)
+		}
+
+		KFWwebSocket.onclose = function (evt) {
+			KFWconnectionPromise = null
+			KFWwebSocketOnClose(evt)
+		}
+
+		KFWwebSocket.onerror = function (evt) {
+			KFWconnectionPromise = null
+			KFWwebSocketOnError(evt)
+			reject(evt)
+		}
+
+		KFWwebSocket.onmessage = function (evt) {
+			KFWwebSocketOnInfo(evt)
+		}
+	})
+
+	return KFWconnectionPromise
 }
 
 async function KFWwebSocketOnOpen() {
@@ -99,7 +121,7 @@ async function KFWwebSocketOnInfo(IncomingInfo) {
 						// Get the decoded text
 						let decodedGameName = tempElement.textContent
 
-						Notification.requestPermission(function (status) {
+						Notification.requestPermission(function (_status) {
 							const title = "It is your turn in Keyflower"
 
 							const options = {
@@ -110,7 +132,7 @@ async function KFWwebSocketOnInfo(IncomingInfo) {
 							}
 
 							var n = new Notification(title, options)
-							n.onclick = function (event) {
+							n.onclick = function (_event) {
 								//event.preventDefault() // Prevents the browser from focusing the Notification's tab
 								//window.open("http://localhost:8000/IND/54/", "_blank")
 								// Check if the window client exists
@@ -125,14 +147,19 @@ async function KFWwebSocketOnInfo(IncomingInfo) {
 	}
 }
 
-export async function broadcaseGameUpdate() {
+export async function broadcastGameUpdate(existingPromise = null) {
 	const personal = usePersonalStore()
+	if (!personal.liveWS) return
 
-	if (KFWwebSocket && KFWwebSocket.readyState === 1) KFWwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-	else if (KFWwebSocket && personal.liveWS) {
-		await StartWebSocket()
-		await funcs.sleep(2000)
-		if (personal.liveWS && KFWwebSocket.readyState === 1) KFWwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else console.log("2xTO: " + KFWwebSocket.readyState)
+	try {
+		// If we already started connecting in the previous function, use that.
+		// Otherwise, start a new check.
+		const socket = await (existingPromise || StartWebSocket())
+
+		if (socket.readyState === 1) {
+			socket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+		}
+	} catch (err) {
+		console.warn("AQY Broadcast failed:", err)
 	}
 }

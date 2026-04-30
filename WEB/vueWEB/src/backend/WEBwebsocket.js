@@ -2,38 +2,59 @@ import { useModelStore } from "../stores/WEBstore.js"
 import { usePersonalStore } from "../stores/WEBpersonal.js"
 
 import * as IO from "./WEB_IO"
-import * as funcs from "../js/WEBfuncs"
 import * as view from "../js/WEBview"
 //import * as rf from "../js/WEBreference.js"
 //import * as model from "../js/WEBmodel"
 
 export var WEBwebSocket
+let WEBconnectionPromise = null // Track the in-progress connection
 
 export async function StartWebSocket() {
-	if (typeof WEBwebSocket !== "undefined") {
-		if (WEBwebSocket.readyState === 0 || WEBwebSocket.readyState === 1) return
-		else WEBwebSocket.close()
-	}
 	const personal = usePersonalStore()
-
-	var ChannelNumber = personal.gameID
-
-	var wsUri = "wss://wss.s3.sitereview.io/ws/HomeWEBchannel" + String(ChannelNumber) + "/"
-
-	WEBwebSocket = new WebSocket(wsUri)
-
-	WEBwebSocket.onopen = async function (evt) {
-		await WEBwebSocketOnOpen(evt)
+	// 1. If already open, return immediately
+	if (WEBwebSocket && WEBwebSocket.readyState === 1) {
+		return WEBwebSocket
 	}
-	WEBwebSocket.onclose = function (evt) {
-		WEBwebSocketOnClose(evt)
+
+	// 2. If currently connecting, return the existing promise
+	if (WEBconnectionPromise) {
+		return WEBconnectionPromise
 	}
-	WEBwebSocket.onmessage = function (evt) {
-		WEBwebSocketOnInfo(evt)
-	}
-	WEBwebSocket.onerror = function (evt) {
-		WEBwebSocketOnError(evt)
-	}
+
+	// 3. Create a new connection promise
+	WEBconnectionPromise = new Promise((resolve, reject) => {
+		if (typeof WEBwebSocket !== "undefined" && WEBwebSocket.readyState === 0) {
+			// Already in native connecting state, just attach listeners
+		} else {
+			if (WEBwebSocket) WEBwebSocket.close()
+			let ChannelNumber = personal.gameID
+			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeWEBchannel" + String(ChannelNumber) + "/"
+			WEBwebSocket = new WebSocket(wsUri)
+		}
+
+		WEBwebSocket.onopen = function (evt) {
+			WEBconnectionPromise = null // Clear promise on success
+			WEBwebSocketOnOpen(evt)
+			resolve(WEBwebSocket)
+		}
+
+		WEBwebSocket.onclose = function (evt) {
+			WEBconnectionPromise = null
+			WEBwebSocketOnClose(evt)
+		}
+
+		WEBwebSocket.onerror = function (evt) {
+			WEBconnectionPromise = null
+			WEBwebSocketOnError(evt)
+			reject(evt)
+		}
+
+		WEBwebSocket.onmessage = function (evt) {
+			WEBwebSocketOnInfo(evt)
+		}
+	})
+
+	return WEBconnectionPromise
 }
 
 async function WEBwebSocketOnOpen() {
@@ -96,7 +117,7 @@ async function WEBwebSocketOnInfo(IncomingInfo) {
 						// Get the decoded text
 						let decodedGameName = tempElement.textContent
 
-						Notification.requestPermission(function (status) {
+						Notification.requestPermission(function (_status) {
 							const title = "It is your turn in Web"
 
 							const options = {
@@ -107,7 +128,7 @@ async function WEBwebSocketOnInfo(IncomingInfo) {
 							}
 
 							var n = new Notification(title, options)
-							n.onclick = function (event) {
+							n.onclick = function (_event) {
 								//event.preventDefault() // Prevents the browser from focusing the Notification's tab
 								//window.open("http://localhost:8000/IND/54/", "_blank")
 								// Check if the window client exists
@@ -122,14 +143,19 @@ async function WEBwebSocketOnInfo(IncomingInfo) {
 	}
 }
 
-export async function broadcaseGameUpdate() {
+export async function broadcastGameUpdate(existingPromise = null) {
 	const personal = usePersonalStore()
+	if (!personal.liveWS) return
 
-	if (WEBwebSocket && WEBwebSocket.readyState === 1) WEBwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-	else if (WEBwebSocket && personal.liveWS) {
-		await StartWebSocket()
-		await funcs.sleep(2000)
-		if (personal.liveWS && WEBwebSocket.readyState === 1) WEBwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else console.log("2xTO: " + WEBwebSocket.readyState)
+	try {
+		// If we already started connecting in the previous function, use that.
+		// Otherwise, start a new check.
+		const socket = await (existingPromise || StartWebSocket())
+
+		if (socket.readyState === 1) {
+			socket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+		}
+	} catch (err) {
+		console.warn("WEB Broadcast failed:", err)
 	}
 }

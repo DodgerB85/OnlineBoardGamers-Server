@@ -44,13 +44,13 @@ export async function saveGame(saveRewind, saveContext) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket()
+	}
+
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
-
-	if (personal.liveWS && WS.CNSwebSocket && WS.CNSwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -114,18 +114,10 @@ export async function saveGame(saveRewind, saveContext) {
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 
-		// Broadcast update
-		if (WS.CNSwebSocket && WS.CNSwebSocket.readyState === 1) WS.CNSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else if (WS.CNSwebSocket && personal.liveWS) {
-			await WS.StartWebSocket()
-			await funcs.sleep(2000)
-			if (personal.liveWS && WS.CNSwebSocket.readyState === 1) WS.CNSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-			else console.log("2xTO: " + WS.CNSwebSocket.readyState)
-		}
-
 		store.topMenuViews.showLoader = false
 		personal.haltPlay = false
 		controller.startPlayerTurn()
+		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		alert("Error saving the game")
@@ -326,6 +318,12 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket()
+	}
+
 	store.topMenuViews.showLoader = true
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
@@ -349,16 +347,12 @@ async function updateDataFromLoadRewind() {
 		const data = await response.json()
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
-		if (WS.CNSwebSocket.readyState === 1) WS.CNSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else if (personal.liveWS && WS.CNSwebSocket.readyState === 0) {
-			funcs.sleepPause(1000)
-			if (personal.liveWS && WS.CNSwebSocket.readyState === 1) WS.CNSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		}
 		store.topMenuViews.showLoader = false
 		store.topMenuViews.performingRewind = false
 		Bot.actionAnyBotMooves()
 		if (store.gameflow.phase !== rf.PHASE_PRODUCTION && store.gameflow.phase !== rf.PHASE_MOVE_PIRATE) store.resetContext()
 		controller.startPlayerTurn()
+		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
 		alert("Error updating the game")
@@ -564,17 +558,15 @@ export async function castVote(topic) {
 		console.log(data)
 		if (data.voteChanged === true) {
 			store.topMenuViews.tradeSuccessText = "Vote Saved"
-			
+
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true
 				store.deleteVotesData = JSON.parse(data.votesData)
 				if (data.redirect_url) window.location.href = data.redirect_url
-			}
-			else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
+			} else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-			
 		} else store.topMenuViews.rewindErrorText = "Error; Contact Admin"
 	} catch (error) {
 		console.error("Error fetching data:", error)

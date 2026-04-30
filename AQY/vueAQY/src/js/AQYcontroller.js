@@ -185,7 +185,7 @@ export async function endPlayerTurn() {
 		}
 
 		// await save
-		await IO.saveGame(true, false)
+		await IO.saveGame(true, false, false)
 
 		// In case it is your turn again right away, run startPlayerTurn
 		// If it isn't then you get returned from that function anyway
@@ -263,7 +263,7 @@ export async function startPlayerTurn() {
 		store.topMenuViews.showingPlayerIndex = -1
 		store.context.selectedExplorerRes = rf.RES_NONE
 		if (!city.hasWorkingUniqueBuilding(currentPlayerIndex(), rf.BLDG_EXPLORER, false)) {
-			alert("No Explorer - turn should have been skipped")
+			rf.doAdminAlrt("No Explorer - turn should have been skipped")
 			return
 		}
 
@@ -272,7 +272,7 @@ export async function startPlayerTurn() {
 		const tiles = zoc.filter((hex) => store.mapData.explorers.includes(hex.id))
 
 		if (tiles.length === 0) {
-			alert("No Explorer tile within ZoC - turn should have been skipped")
+			rf.doAdminAlrt("No Explorer tile within ZoC - turn should have been skipped")
 			return
 		}
 		store.context.action = rf.ACT_EXPLORE

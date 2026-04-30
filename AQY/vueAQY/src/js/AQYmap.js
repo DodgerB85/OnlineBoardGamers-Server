@@ -178,14 +178,6 @@ function isNeighbour(hex1, hex2) {
 export function getHexDataFromID(ID) {
 	const store = useModelStore()
 
-	/*
-	for (const item of store.mapData.hexes) {
-		if (item.id === ID) {
-			return item
-		}
-	}
-	alert("HEX NOT FOUND")
-	*/
 	return store.mapData.hexes[ID]
 }
 

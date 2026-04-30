@@ -92,13 +92,13 @@ export async function saveGame(saveRewind, saveContext = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+	}
+
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
-
-	if (personal.liveWS && WS.WEBwebSocket && WS.WEBwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -122,7 +122,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED" // USED
-    let result = model.endGame_core()
+		let result = model.endGame_core()
 		postData.winner = result[0]
 		postData.saveRewind = false
 		postData.data = funcs.exportWEBmodel(false, true)
@@ -167,12 +167,11 @@ export async function saveGame(saveRewind, saveContext = false) {
 		window.initData.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 
-		// Broadcast update
-		await WS.broadcaseGameUpdate()
-
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
 		controller.startPlayerTurn()
+
+		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		store.gameMessages.errorText = "Error saving the game"
@@ -407,6 +406,12 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+	}
+
 	store.viewSettings.showLoader = true
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
@@ -436,9 +441,6 @@ async function updateDataFromLoadRewind() {
 		window.initData.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 
-		// Broadcast update
-		await WS.broadcaseGameUpdate()
-
 		store.viewSettings.showLoader = false
 		store.viewSettings.performingRewind = false
 		Bot.removeBotPlayers()
@@ -446,6 +448,8 @@ async function updateDataFromLoadRewind() {
 		//if (store.gameflow.phase !== rf.PHASE_PRODUCTION && store.gameflow.phase !== rf.PHASE_MOVE_PIRATE) store.resetContext()
 
 		controller.startPlayerTurn()
+
+		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
 		store.gameMessages.errorText = "Error updating the game"
@@ -571,7 +575,7 @@ export async function checkForLatestData() {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-    if (data.gameDoesNotExist === true) location.reload()
+		if (data.gameDoesNotExist === true) location.reload()
 		if (data.latest === true) return
 		else {
 			if (store.gameflow.phase === rf.PHASE_GAME_OVER) funcs.importWEBmodel(data.gameData, true, false)
@@ -621,12 +625,10 @@ export async function castVote(topic) {
 				personal.votedToDelete = true
 				store.deleteVotesData = JSON.parse(data.votesData)
 				if (data.redirect_url) window.location.href = data.redirect_url
-			}
-			else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
+			} else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-
 		} else store.gameMessages.errorText = "Error; Contact Admin"
 	} catch (error) {
 		console.error("Error fetching data:", error)

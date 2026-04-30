@@ -548,7 +548,7 @@ export function doAutoHarvest_core(playerIndex, ismannedForcedLabour) {
 						}
 					}
 				} else {
-					if (!isFisheryWithoutRes) alert(`Auto-Harvest Error: Without Manned Labour -- res.length: ${res.length}`)
+					if (!isFisheryWithoutRes) rf.doAdminAlrt(`Auto-Harvest Error: Without Manned Labour -- res.length: ${res.length}`)
 				}
 
 				// GAIN THE RESOURCE - res[0] has been spliced? But works because of a copy?
@@ -736,7 +736,7 @@ export function harvestResources_core(tile, playerIndex, replayDiscardFlag = fal
 	const store = useModelStore()
 
 	if (tile == undefined) {
-		alert("No tile")
+		rf.doAdminAlrt("No tile")
 		return
 	}
 
@@ -963,7 +963,6 @@ export function getAllCityHexId() {
 	const store = useModelStore()
 	const zoc = getZocTiles(playerIndex, false)
 
-	//console.log(JSON.stringify(store.mapData.grass))
 
 	for (let i = zoc.length - 1; i >= 0; i--) {
 		let allowedHex = false
@@ -1670,7 +1669,7 @@ export function setMountainType(hex, goodsToBeProduced) {
 
 	// Find connected Mountain
 	if (hex.terrainType != rf.TERR_MOUNTAINS) {
-		alert("Err in setMountainType")
+		rf.doAdminAlrt("Err in setMountainType")
 	}
 
 	let hexIdToChangeType = expandMountain([hex.id])
@@ -1678,7 +1677,7 @@ export function setMountainType(hex, goodsToBeProduced) {
 	// Set the mountain type to goodsToBeProduced
 	for (let i = 0; i < hexIdToChangeType.length; i++) {
 		if (store.mapData.hexes[hexIdToChangeType[i]].mountainType != rf.MOUNTAIN_NONE) {
-			alert("Err in setMountainType")
+			rf.doAdminAlrt("Err in setMountainType")
 			return
 		} else if (goodsToBeProduced === rf.RES_STONE) {
 			store.mapData.hexes[hexIdToChangeType[i]].mountainType = rf.MOUNTAIN_STONE

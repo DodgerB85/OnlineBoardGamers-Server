@@ -143,13 +143,13 @@ export async function saveGame(saveRewind, saveContext = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket()
+	}
+
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
-
-	if (personal.liveWS && WS.KFWwebSocket && WS.KFWwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -277,7 +277,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		}
 
 		// Broadcast update
-		await WS.broadcaseGameUpdate()
+		WS.broadcastGameUpdate(wsConnecting).catch((err) => console.warn("Broadcast failed:", err))
 
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
@@ -294,11 +294,6 @@ export async function saveSimulMove(playerIndex, moveDataString) {
 
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
-
-	if (personal.liveWS && WS.KFWwebSocket && WS.KFWwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -444,11 +439,6 @@ export async function saveFinalScoringMove(playerIndex, moveDataString) {
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
 
-	if (personal.liveWS && WS.KFWwebSocket && WS.KFWwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
-
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (personal.latestUpdate === -1) personal.latestUpdate = "9999999999999"
@@ -554,15 +544,15 @@ export async function saveGameForGameOver() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket()
+	}
+
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
 
 	model.endGame()
-
-	if (personal.liveWS && WS.KFWwebSocket && WS.KFWwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -620,7 +610,7 @@ export async function saveGameForGameOver() {
 		funcs.importKFWmodelForGameOver(exportData)
 
 		// Broadcast update
-		await WS.broadcaseGameUpdate()
+		WS.broadcastGameUpdate(wsConnecting).catch((err) => console.warn("Broadcast failed:", err))
 
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
@@ -862,6 +852,12 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket()
+	}
+
 	store.viewSettings.showLoader = true
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
@@ -913,7 +909,7 @@ async function updateDataFromLoadRewind() {
 		personal.secondsToNextKickout = data.secondsToNextKickout
 
 		// Broadcast update
-		await WS.broadcaseGameUpdate()
+		WS.broadcastGameUpdate(wsConnecting).catch((err) => console.warn("Broadcast failed:", err))
 
 		store.viewSettings.showLoader = false
 		store.viewSettings.performingRewind = false

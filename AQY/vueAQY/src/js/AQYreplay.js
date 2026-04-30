@@ -367,7 +367,7 @@ function replayCityBuild(historyIndex, playerIndex, entry3) {
 				store.players[playerIndex].availableMen--
 				//break
 			} else {
-				alert(`BUILDING NOT FOUND TO MAN: playerIndex: ${playerIndex}, bldgNum: ${entry3[2][i][0]}, city: ${entry3[2][i][1]}, index: ${entry3[2][i][2]}`)
+				rf.doAdminAlrt(`BUILDING NOT FOUND TO MAN: playerIndex: ${playerIndex}, bldgNum: ${entry3[2][i][0]}, city: ${entry3[2][i][1]}, index: ${entry3[2][i][2]}`)
 			}
 			//}
 		}
@@ -397,7 +397,6 @@ function replayCityFountains(historyIndex, playerIndex, entry3) {
 
 	let newFountains = entry3[0]
 	store.famineLevel -= newFountains
-	//if (store.famineLevel !== entry3[1]) alert("Famine Level Mismatch")
 }
 
 function replayNewTurnOrder(historyIndex, playerIndex, entry3) {
@@ -588,7 +587,6 @@ function checkAndPerformTurnEnd(historyIndex) {
 		if (store.gameflow.turnOrder.length === 0) {
 			store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 			if (store.gameflow.phase === rf.PHASE_FIRST_CITY) {
-				//alert("REVERSING")
 				store.gameflow.turnOrder.reverse()
 				store.gameflow.fullTurnOrder = [...store.gameflow.turnOrder]
 				store.gameflow.phase = rf.PHASE_CITY_BUILDING

@@ -5,32 +5,54 @@ import * as IO from "./CNS_IO"
 import * as view from "./CNSview"
 
 export var CNSwebSocket
+let CNSconnectionPromise = null // Track the in-progress connection
 
 export async function StartWebSocket() {
-	if (typeof CNSwebSocket !== "undefined") {
-		if (CNSwebSocket.readyState === 0 || CNSwebSocket.readyState === 1) return
-		else CNSwebSocket.close()
-	}
 	const personal = usePersonalStore()
-
-	var ChannelNumber = personal.gameID
-
-	var wsUri = "wss://wss.s3.sitereview.io/ws/HomeCNSchannel" + String(ChannelNumber) + "/"
-
-	CNSwebSocket = new WebSocket(wsUri)
-
-	CNSwebSocket.onopen = async function (evt) {
-		await CNSwebSocketOnOpen(evt)
+	// 1. If already open, return immediately
+	if (CNSwebSocket && CNSwebSocket.readyState === 1) {
+		return CNSwebSocket
 	}
-	CNSwebSocket.onclose = function (evt) {
-		CNSwebSocketOnClose(evt)
+
+	// 2. If currently connecting, return the existing promise
+	if (CNSconnectionPromise) {
+		return CNSconnectionPromise
 	}
-	CNSwebSocket.onmessage = function (evt) {
-		CNSwebSocketOnInfo(evt)
-	}
-	CNSwebSocket.onerror = function (evt) {
-		CNSwebSocketOnError(evt)
-	}
+
+	// 3. Create a new connection promise
+	CNSconnectionPromise = new Promise((resolve, reject) => {
+		if (typeof CNSwebSocket !== "undefined" && CNSwebSocket.readyState === 0) {
+			// Already in native connecting state, just attach listeners
+		} else {
+			if (CNSwebSocket) CNSwebSocket.close()
+			let ChannelNumber = personal.gameID
+			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeCNSchannel" + String(ChannelNumber) + "/"
+			CNSwebSocket = new WebSocket(wsUri)
+		}
+
+		CNSwebSocket.onopen = function (evt) {
+			CNSconnectionPromise = null // Clear promise on success
+			CNSwebSocketOnOpen(evt)
+			resolve(CNSwebSocket)
+		}
+
+		CNSwebSocket.onclose = function (evt) {
+			CNSconnectionPromise = null
+			CNSwebSocketOnClose(evt)
+		}
+
+		CNSwebSocket.onerror = function (evt) {
+			CNSconnectionPromise = null
+			CNSwebSocketOnError(evt)
+			reject(evt)
+		}
+
+		CNSwebSocket.onmessage = function (evt) {
+			CNSwebSocketOnInfo(evt)
+		}
+	})
+
+	return CNSconnectionPromise
 }
 
 async function CNSwebSocketOnOpen() {
@@ -118,5 +140,22 @@ async function CNSwebSocketOnInfo(IncomingInfo) {
 				}
 			} else CNSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
 		}
+	}
+}
+
+export async function broadcastGameUpdate(existingPromise = null) {
+	const personal = usePersonalStore()
+	if (!personal.liveWS) return
+
+	try {
+		// If we already started connecting in the previous function, use that.
+		// Otherwise, start a new check.
+		const socket = await (existingPromise || StartWebSocket())
+
+		if (socket.readyState === 1) {
+			socket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+		}
+	} catch (err) {
+		console.warn("AQY Broadcast failed:", err)
 	}
 }

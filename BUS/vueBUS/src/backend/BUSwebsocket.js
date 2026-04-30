@@ -7,33 +7,54 @@ import * as view from "../js/BUSview.js"
 import * as IO from './BUS_IO.js'
 
 export var BUSwebSocket
+let BUSconnectionPromise = null // Track the in-progress connection
 
 export async function StartWebSocket() {
-  if (typeof BUSwebSocket !== 'undefined') {
-    if (BUSwebSocket.readyState === 0 || BUSwebSocket.readyState === 1) return
-    else BUSwebSocket.close()
-  }
   const personal = usePersonalStore()
-  const store = useModelStore()
-
-  var ChannelNumber = personal.gameID
-
-  var wsUri = 'wss://wss.s3.sitereview.io/ws/HomeBUSchannel' + String(ChannelNumber) + '/'
-
-  BUSwebSocket = new WebSocket(wsUri)
-
-  BUSwebSocket.onopen = async function (evt) {
-    await BUSwebSocketOnOpen(evt)
+  // 1. If already open, return immediately
+  if (BUSwebSocket && BUSwebSocket.readyState === 1) {
+    return BUSwebSocket
   }
-  BUSwebSocket.onclose = function (evt) {
-    BUSwebSocketOnClose(evt)
+
+  // 2. If currently connecting, return the existing promise
+  if (BUSconnectionPromise) {
+    return BUSconnectionPromise
   }
-  BUSwebSocket.onmessage = function (evt) {
-    BUSwebSocketOnInfo(evt)
-  }
-  BUSwebSocket.onerror = function (evt) {
-    BUSwebSocketOnError(evt)
-  }
+
+  // 3. Create a new connection promise
+  BUSconnectionPromise = new Promise((resolve, reject) => {
+    if (typeof BUSwebSocket !== "undefined" && BUSwebSocket.readyState === 0) {
+      // Already in native connecting state, just attach listeners
+    } else {
+      if (BUSwebSocket) BUSwebSocket.close()
+      let ChannelNumber = personal.gameID
+      let wsUri = "wss://wss.s3.sitereview.io/ws/HomeBUSchannel" + String(ChannelNumber) + "/"
+      BUSwebSocket = new WebSocket(wsUri)
+    }
+
+    BUSwebSocket.onopen = function (evt) {
+      BUSconnectionPromise = null // Clear promise on success
+      BUSwebSocketOnOpen(evt)
+      resolve(BUSwebSocket)
+    }
+
+    BUSwebSocket.onclose = function (evt) {
+      BUSconnectionPromise = null
+      BUSwebSocketOnClose(evt)
+    }
+
+    BUSwebSocket.onerror = function (evt) {
+      BUSconnectionPromise = null
+      BUSwebSocketOnError(evt)
+      reject(evt)
+    }
+
+    BUSwebSocket.onmessage = function (evt) {
+      BUSwebSocketOnInfo(evt)
+    }
+  })
+
+  return BUSconnectionPromise
 }
 
 function BUSwebSocketOnOpen() {
@@ -124,5 +145,23 @@ async function BUSwebSocketOnInfo(IncomingInfo) {
       } else
         BUSwebSocket.send('NEWDATATS' + String(personal.gameID) + String(personal.latestUpdate))
     }
+  }
+}
+
+
+export async function broadcastGameUpdate(existingPromise = null) {
+  const personal = usePersonalStore()
+  if (!personal.liveWS) return
+
+  try {
+    // If we already started connecting in the previous function, use that.
+    // Otherwise, start a new check.
+    const socket = await (existingPromise || StartWebSocket())
+
+    if (socket.readyState === 1) {
+      socket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+    }
+  } catch (err) {
+    console.warn("BUS Broadcast failed:", err)
   }
 }

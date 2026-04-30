@@ -1,29 +1,51 @@
 var HLCwebSocket
+var HLCconnectionPromise = null // Track the in-progress connection
 
 function StartWebSocket() {
-	if (typeof HLCwebSocket !== "undefined") {
-		if (HLCwebSocket.readyState === 0 || HLCwebSocket.readyState === 1) return
-		else HLCwebSocket.close()
+	// 1. If already open, return immediately
+	if (HLCwebSocket && HLCwebSocket.readyState === 1) {
+		return HLCwebSocket
 	}
 
-	var ChannelNumber = global.gameID
+	// 2. If currently connecting, return the existing promise
+	if (HLCconnectionPromise) {
+		return HLCconnectionPromise
+	}
 
-	var wsUri = "wss://wss.s3.sitereview.io/ws/HomeHLCchannel" + String(ChannelNumber) + "/"
+	// 3. Create a new connection promise
+	HLCconnectionPromise = new Promise((resolve, reject) => {
+		if (typeof HLCwebSocket !== "undefined" && HLCwebSocket.readyState === 0) {
+			// Already in native connecting state, just attach listeners
+		} else {
+			if (HLCwebSocket) HLCwebSocket.close()
+			let ChannelNumber = global.gameID
+			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeHLCchannel" + String(ChannelNumber) + "/"
+			HLCwebSocket = new WebSocket(wsUri)
+		}
 
-	HLCwebSocket = new WebSocket(wsUri)
+		HLCwebSocket.onopen = function (evt) {
+			HLCconnectionPromise = null // Clear promise on success
+			HLCwebSocketOnOpen(evt)
+			resolve(HLCwebSocket)
+		}
 
-	HLCwebSocket.onopen = async function (evt) {
-		HLCwebSocketOnOpen(evt)
-	}
-	HLCwebSocket.onclose = function (evt) {
-		HLCwebSocketOnClose(evt)
-	}
-	HLCwebSocket.onmessage = function (evt) {
-		HLCwebSocketOnInfo(evt)
-	}
-	HLCwebSocket.onerror = function (evt) {
-		HLCwebSocketOnError(evt)
-	}
+		HLCwebSocket.onclose = function (evt) {
+			HLCconnectionPromise = null
+			HLCwebSocketOnClose(evt)
+		}
+
+		HLCwebSocket.onerror = function (evt) {
+			HLCconnectionPromise = null
+			HLCwebSocketOnError(evt)
+			reject(evt)
+		}
+
+		HLCwebSocket.onmessage = function (evt) {
+			HLCwebSocketOnInfo(evt)
+		}
+	})
+
+	return HLCconnectionPromise
 }
 
 function HLCwebSocketOnOpen(evt) {
@@ -104,5 +126,19 @@ async function HLCwebSocketOnInfo(IncomingInfo) {
 				} else HLCwebSocket.send("NEWDATATS" + String(global.gameID) + String(global.latestUpdate))
 			}
 		}
+	}
+}
+
+async function broadcastGameUpdate(existingPromise = null) {
+	try {
+		// If we already started connecting in the previous function, use that.
+		// Otherwise, start a new check.
+		const socket = await (existingPromise || StartWebSocket())
+
+		if (socket.readyState === 1) {
+			socket.send("NEWDATATS" + String(global.gameID) + String(global.latestUpdate))
+		}
+	} catch (err) {
+		console.warn("HLC Broadcast failed:", err)
 	}
 }

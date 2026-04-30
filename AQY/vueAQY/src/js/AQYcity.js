@@ -651,11 +651,6 @@ export function addBuildingToCity(playerIndex, cityIndex, index, bldgNum, rotati
 
 		const bldgInfo = city.buildings.find((building) => building.index === index && building.bldgNum === bldgNum && building.rotation === rotation)
 
-		/*if (bldgInfo === undefined) {
-			alert(`playerIndex: ${playerIndex}, cityIndex: ${cityIndex}, index: ${index}, bldgNum: ${bldgNum}, rotation: ${rotation}`)
-			alert(JSON.stringify(city.buildings))
-		}*/
-
 		// NOTE: If used this turn and NOT barbara power, you have already hit the error message
 		if (!bldgInfo.builtThisTurn || bldgInfo.usedThisTurn || bldgInfo.lockedDueTrade || store.context.saintHousesThisTurn.includes(bldgInfo.bldgNum)) {
 			// You are MOVING a building with the saint power, so it must be rebuilt
@@ -1509,11 +1504,11 @@ export function completeBuildingMoveInfo(playerIndex, cityIndex, bldgNum, index,
 		// It is mid move, so an entry must exist
 		const arr_idx = store.players[playerIndex].cityHistory.moved.findIndex((subarray) => subarray[0] === bldgNum)
 		if (arr_idx === -1) {
-			alert("ERROR: Move History Entry Not Found")
+			rf.doAdminAlrt("ERROR: Move History Entry Not Found")
 			return
 		}
 		if (store.players[playerIndex].cityHistory.moved[arr_idx].length !== 2) {
-			alert("ERROR: Move History Entry Not = 2a")
+			rf.doAdminAlrt("ERROR: Move History Entry Not = 2a")
 			return
 		}
 		// Now it has been found, so add the "to" data
@@ -1531,12 +1526,12 @@ export function completeBuildingMoveInfo(playerIndex, cityIndex, bldgNum, index,
 	else {
 		const arr_idx = store.players[playerIndex].cityHistory.moved.findIndex((subarray) => subarray[0] === bldgNum && subarray[1][0] === originalMovedFromCity && subarray[1][1] === originalMovedFromIndex)
 		if (arr_idx === -1) {
-			alert("ERROR: Move History Entry Not Found")
-			alert(`originalMovedFromCity: ${originalMovedFromCity}, originalMovedFromIndex: ${originalMovedFromIndex}`)
+			rf.doAdminAlrt("ERROR: Move History Entry Not Found")
+			rf.doAdminAlrt(`originalMovedFromCity: ${originalMovedFromCity}, originalMovedFromIndex: ${originalMovedFromIndex}`)
 			return
 		}
 		if (store.players[playerIndex].cityHistory.moved[arr_idx].length !== 2) {
-			alert("ERROR: Move History Entry Not = 2b")
+			rf.doAdminAlrt("ERROR: Move History Entry Not = 2b")
 			return
 		}
 		// Now it has been found, so add the "to" data

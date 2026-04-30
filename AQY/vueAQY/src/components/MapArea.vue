@@ -305,7 +305,7 @@ watch(
 
 			if (zoc.length === 0 && store.context.pollutionLeftToPlace > 0) {
 				if (store.gameflow.phase === rf.PRE_PHASE_POLLUTION) {
-					alert("ERROR: should not switch to graves in pre phase")
+					rf.doAdminAlrt("ERROR: should not switch to graves in pre phase")
 					return
 				}
 				// Set the number of graves to place

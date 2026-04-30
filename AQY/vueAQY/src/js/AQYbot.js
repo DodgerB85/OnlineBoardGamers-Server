@@ -48,7 +48,7 @@ export function performBotHarvest(playerIndex) {
 					}
 				}
 			} else {
-				if (!isFisheryWithoutRes) alert(`BOT Auto-Harvest Error: Without Manned Labour -- res.length: ${res.length}`)
+				if (!isFisheryWithoutRes) rf.doAdminAlrt(`BOT Auto-Harvest Error: Without Manned Labour -- res.length: ${res.length}`)
 			}
 
 			// GAIN THE RESOURCE - res[0] has been spliced? But works because of a copy?
@@ -171,5 +171,5 @@ export async function actionResign() {
 	}
 
 	// Save the game
-	IO.saveGame(false)
+	IO.saveGame(false, false, true)
 }

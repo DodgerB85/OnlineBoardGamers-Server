@@ -525,7 +525,7 @@ export function getTileByID(id) {
 	if (id === 13) return TILE_5
 	if (id === 14) return TILE_6
 	if (id === 15) return TILE_7*/
-	alert(`AQYREF: TILEid: ${id} not found`)
+	rf.doAdminAlrt(`AQYREF: TILEid: ${id} not found`)
 }
 
 export function generateMirroredTiles(tiles = []) {
@@ -843,4 +843,8 @@ export function getRotatedBuildingModel(bldgNum, rotation) {
 	}
 
 	return res
+}
+
+export function doAdminAlrt(message) {
+	alert(message)
 }

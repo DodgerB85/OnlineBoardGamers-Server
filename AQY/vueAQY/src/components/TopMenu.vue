@@ -28,23 +28,17 @@ import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
 
 function debugButton() {
-	//alert(store.mapData.mountainRangeSeedGold)
-	//console.log(JSON.stringify(store.players))
-	//console.log(JSON.stringify(store.mapData.seed))
-	//console.log(JSON.stringify(store.players[0].cities[0].buildings))
+
 	//model.endGame()
 	//store.topMenuViews.tradeSuccessText = `Your trade has been sent to <div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[0].colour) + `">${store.players[0].displayName}</span></div> `;
 	//store.famineLevel = 10
 	//store.context.gravesLeftToPlace = 3
 	//store.context.gravesLeftToRemove = 2
 	//store.context.action = rf.ACT_HOSPITAL_GRAVES
-	//console.log(JSON.stringify(funcs.exportModel(false, false)))
 	//store.famineLevel = 9
 	//store.famineLevel = 0
 	//store.context.pollutionLeftToPlace = 5
-	//console.log(JSON.stringify(store.players[0].countrysideBuildings, null, 2))
 	//IO.saveGame(false, false)
-	//alert(JSON.stringify(store.gameflow))
 	//store.players[1].availableResources= [6, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 	store.players[1].saint = rf.SAINT_GIORGIO
 	IO.saveGame(false, false)
@@ -96,16 +90,13 @@ function cheatStart() {
 	funcs.simpleImportWholeModel(data)
 	controller.startPlayerTurn()*/
 	/*store.refSize = 160
-	alert(store.players[2].name)*/
 	//store.context.hexesToHighlight.push(map.getHexDataFromID(96))
 	/*let nebs = store.mapNeighbours[177]
 	for (let i=0; i<nebs.length; i++) {
-		alert(nebs[i])
 		country.hexOccupied(nebs[i])
 	}*/
 	//country.hexOccupied(182)
 	//map.generateMap()
-	//console.log((JSON.stringify(store.mapData.seed)))
 	store.famineLevel = 0
 	store.context.pollutionLeftToPlace = 5
 	//store.permanentSettings.showPollutionUnderRes = !store.permanentSettings.showPollutionUnderRes

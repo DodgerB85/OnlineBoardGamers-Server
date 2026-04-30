@@ -149,7 +149,7 @@ async function initGame() {
 		// Append the <h1> element to the body
 		body.appendChild(heading)
 	} else if (window.initData.gameData === "") {
-		await IO.saveGame(true)
+		await IO.saveGame(true, false, true)
 		personal.haltPlay = true
 	} else {
 		// FInally, impport data
@@ -209,7 +209,7 @@ async function initGame() {
 		await IO.kickstartGame()
 	} else if (store.gameflow.turnOrder.length === 0) {
 		IO.sendDiscordWebhook(`AQY GameID ${personal.gameID} - No current player detected: ${store.gameflow.turnOrder}`)
-		alert("ERROR: No current player\nContact admin on Discord or Email")
+		rf.doAdminAlrt("ERROR: No current player\nContact admin on Discord or Email")
 	}
 
 	if (window.initData.pov != undefined) await WS.StartWebSocket()

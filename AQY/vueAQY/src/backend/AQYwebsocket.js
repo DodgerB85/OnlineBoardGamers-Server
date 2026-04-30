@@ -3,6 +3,7 @@ import { usePersonalStore } from "../stores/AQYpersonal.js"
 
 import * as IO from "./AQY_IO"
 import * as view from "../js/AQYview"
+import * as rf from "../js/AQYreference"
 
 export var AQYwebSocket
 let AQYconnectionPromise = null // Track the in-progress connection
@@ -21,12 +22,12 @@ export async function StartWebSocket() {
 
 	// 3. Create a new connection promise
 	AQYconnectionPromise = new Promise((resolve, reject) => {
-		if (typeof FCMwebSocket !== "undefined" && FCMwebSocket.readyState === 0) {
+		if (typeof AQYwebSocket !== "undefined" && AQYwebSocket.readyState === 0) {
 			// Already in native connecting state, just attach listeners
 		} else {
 			if (AQYwebSocket) AQYwebSocket.close()
 			let ChannelNumber = personal.gameID
-			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeFCMchannel" + String(ChannelNumber) + "/"
+			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeAQYchannel" + String(ChannelNumber) + "/"
 			AQYwebSocket = new WebSocket(wsUri)
 		}
 
@@ -81,7 +82,7 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 	const personal = usePersonalStore()
 
 	if (IncomingInfo.data.slice(0, 16) === "MESSAGEFROMADIN=") {
-		alert(IncomingInfo.data.slice(16))
+		rf.doAdminAlrt(IncomingInfo.data.slice(16))
 	}
 
 	if (IncomingInfo.data.slice(0, 9) === "NEWCHATTS") {
@@ -113,7 +114,7 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 						// Get the decoded text
 						let decodedGameName = tempElement.textContent
 	
-						Notification.requestPermission(function (status) {
+						Notification.requestPermission(function (_status) {
 							const title = "It is your turn in Antiquity"
 	
 							const options = {
@@ -124,7 +125,7 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 							}
 	
 							var n = new Notification(title, options)
-							n.onclick = function (event) {
+							n.onclick = function (_event) {
 								//event.preventDefault() // Prevents the browser from focusing the Notification's tab
 								//window.open("http://localhost:8000/IND/54/", "_blank")
 								// Check if the window client exists
@@ -191,7 +192,7 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 			} else if (differencesOutgoing.length > 0) {
 				// Change in incoming info
 				if (differencesOutgoing[0].type === "added") {
-					alert("diff out add")
+					rf.doAdminAlrt("diff out add")
 				} else if (differencesOutgoing[0].type === "deleted") {
 					if (oldHistoryLength === newHistoryLength) store.topMenuViews.tradeErrorText = `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesOutgoing[0].data[1]].colour) + `">${store.players[differencesOutgoing[0].data[1]].displayName}</span></div> rejected your trade`
 					else store.topMenuViews.tradeSuccessText = `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesOutgoing[0].data[1]].colour) + `">${store.players[differencesOutgoing[0].data[1]].displayName}</span></div> accepted your trade`
@@ -222,7 +223,7 @@ function compareArraysOfArrays(arr1, arr2) {
 	return differences
 }
 
-function findObjectDifferences(obj1, obj2) {
+/*function findObjectDifferences(obj1, obj2) {
 	const differences = {}
 
 	// Check properties in obj1
@@ -267,17 +268,16 @@ function deepObjectDifference(obj1, obj2) {
 	}
 
 	return diff
-}
+}**/
 
-export async function broadcastGameUpdate() {
+export async function broadcastGameUpdate(existingPromise = null) {
 	const personal = usePersonalStore()
-	// Only attempt if we want live updates
 	if (!personal.liveWS) return
 
 	try {
-		// This will either return the open socket instantly
-		// or wait for the connection to finish.
-		const socket = await StartWebSocket()
+		// If we already started connecting in the previous function, use that.
+		// Otherwise, start a new check.
+		const socket = await (existingPromise || StartWebSocket())
 
 		if (socket.readyState === 1) {
 			socket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))

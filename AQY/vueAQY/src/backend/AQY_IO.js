@@ -48,6 +48,11 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket()
+	}
+
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
 
@@ -79,7 +84,7 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 		// THIS IS JUST AN EMERGENCY CHECK ??
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
-		alert("RE-EXPORT")
+		rf.doAdminAlrt("RE-EXPORT")
 		postData.data = funcs.exportModel()
 	}
 
@@ -133,16 +138,16 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 			let errorFound = false
 			if (preMoveJSON.phase !== store.gameflow.phase + 10) {
 				errorFound = true
-				alert("Pre Move Phase Mismatch Error")
+				rf.doAdminAlrt("Pre Move Phase Mismatch Error")
 			}
 			if (preMoveJSON.playerIndex !== controller.currentPlayerIndex()) {
 				errorFound = true
-				alert("Pre Move Player Mismatch Error")
+				rf.doAdminAlrt("Pre Move Player Mismatch Error")
 			}
 			// If no error found, process the move, and stop this function early
 			if (!errorFound) {
 				let gameSavedDueModelEndGame = model.processPreMove(preMoveJSON)
-				if (!gameSavedDueModelEndGame) await saveGame(true, false)
+				if (!gameSavedDueModelEndGame) await saveGame(true, false, false)
 				return
 			}
 		}
@@ -151,18 +156,23 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 		personal.haltPlay = false
 
 		// Broadcast update
-		WS.broadcastGameUpdate()
+		WS.broadcastGameUpdate(wsConnecting).catch(err => console.warn("Broadcast failed:", err))
 
 		await controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		rf.doAdminAlrt("Error saving the game")
 	}
 }
 
 export async function sendNotification(name) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+	}
 
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
@@ -194,12 +204,12 @@ export async function sendNotification(name) {
 		store.topMenuViews.showLoader = false
 		personal.haltPlay = false
 
-		WS.broadcastGameUpdate()
+		WS.broadcastGameUpdate(wsConnecting)
 
 		await controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		rf.doAdminAlrt("Error saving the game")
 	}
 }
 
@@ -248,13 +258,19 @@ export async function savePreTurn(prePhase, data) {
 		store.players[personal.pov].preMoves = [...funcs.decompressData(data.data)]
 	} catch (error) {
 		console.error("Error saving pre-move:", error)
-		alert("Error saving the pre-move")
+		rf.doAdminAlrt("Error saving the pre-move")
 	}
 }
 
 export async function sendProposeTrade(selectedOpponent, yourResources, opponentsResources, yourPromise, opponentsPromise) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+	}
+
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
 
@@ -320,17 +336,23 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 
-			WS.broadcastGameUpdate()
+			WS.broadcastGameUpdate(wsConnecting)
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error proposing trade")
+		rf.doAdminAlrt("Error proposing trade")
 	}
 }
 
 export async function acceptTrade(entry) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+	}
+
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
 
@@ -392,17 +414,23 @@ export async function acceptTrade(entry) {
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 
-			WS.broadcastGameUpdate()
+			WS.broadcastGameUpdate(wsConnecting)
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error processing trade")
+		rf.doAdminAlrt("Error processing trade")
 	}
 }
 
 export async function rejectTrade(entry) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+	}
+
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
 
@@ -441,11 +469,11 @@ export async function rejectTrade(entry) {
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 
-			WS.broadcastGameUpdate()
+			WS.broadcastGameUpdate(wsConnecting)
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error rejecting trade")
+		rf.doAdminAlrt("Error rejecting trade")
 	}
 }
 
@@ -497,7 +525,7 @@ export async function markPromiseComplete(playerIndex, promise) {
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error marking promise as complete")
+		rf.doAdminAlrt("Error marking promise as complete")
 	}
 }
 
@@ -575,7 +603,7 @@ export async function saveSimulTurn(playerIndex) {
 		personal.haltPlay = false
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		rf.doAdminAlrt("Error saving the game")
 	}
 }
 
@@ -664,7 +692,7 @@ export async function kickstartGame() {
 		personal.haltPlay = false
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		rf.doAdminAlrt("Error saving the game")
 	}
 }
 
@@ -691,7 +719,7 @@ export async function sendChatMessage(newEntry) {
 		}
 		const data = await response.json()
 		if (!data.chatData) {
-			alert("Sorry, there was a problem. Please email the webmaster directly")
+			rf.doAdminAlrt("Sorry, there was a problem. Please email the webmaster directly")
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
@@ -700,7 +728,7 @@ export async function sendChatMessage(newEntry) {
 		if (personal.liveWS) WS.AQYwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		alert("Error sending chat message")
+		rf.doAdminAlrt("Error sending chat message")
 	}
 }
 
@@ -817,13 +845,13 @@ export async function saveNotes() {
 		}
 		const data = await response.json()
 		if (!data.notePosted) {
-			alert("Sorry, there was a problem. Please email the webmaster directly")
+			rf.doAdminAlrt("Sorry, there was a problem. Please email the webmaster directly")
 			return
 		}
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		alert("Error saving Notes")
+		rf.doAdminAlrt("Error saving Notes")
 	}
 }
 
@@ -895,7 +923,7 @@ export async function loadRewind() {
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error rewinding data:", error)
-		alert("Error rewinding the game")
+		rf.doAdminAlrt("Error rewinding the game")
 		store.topMenuViews.performingRewind = false
 	}
 }
@@ -903,6 +931,12 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() 
+	}
+
 	store.topMenuViews.showLoader = true
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
@@ -926,20 +960,16 @@ async function updateDataFromLoadRewind() {
 		const data = await response.json()
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
-		if (WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else if (personal.liveWS && WS.AQYwebSocket.readyState === 0) {
-			funcs.sleepPause(1000)
-			if (personal.liveWS && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		}
 		store.topMenuViews.showLoader = false
 		store.topMenuViews.performingRewind = false
 		Bot.removeBotPlayers()
 		if (store.gameflow.turnOrder.length === 0) controller.endCurrentPhase()
 		//if (store.gameflow.phase !== rf.PHASE_PRODUCTION && store.gameflow.phase !== rf.PHASE_MOVE_PIRATE) store.resetContext()
 		controller.startPlayerTurn()
+		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
-		alert("Error updating the game")
+		rf.doAdminAlrt("Error updating the game")
 		store.topMenuViews.performingRewind = false
 		controller.startPlayerTurn()
 	}
@@ -971,7 +1001,7 @@ export async function resign(lossDueToGraves) {
 		const data = await response.json()
 	} catch (error) {
 		console.error("Error resiging:", error)
-		alert("Error Resigning")
+		rf.doAdminAlrt("Error Resigning")
 	}
 }
 
@@ -1006,7 +1036,7 @@ export async function kickout() {
 		personal.secondsToNextKickout = data.secondsToNextKickout
 	} catch (error) {
 		console.error("Error kicking:", error)
-		alert("Error Kicking")
+		rf.doAdminAlrt("Error Kicking")
 	}
 }
 

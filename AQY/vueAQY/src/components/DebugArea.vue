@@ -38,21 +38,10 @@ function test2() {
 	store.historyHelpers.citySquaresToHighlight[0][0].push(7)
 	store.historyHelpers.citySquaresToHighlight[0][0].push(14)*/
 	// Example usage
-	//alert(store.players[0].cities[0].coords);
-	//store.players[0].cities[0].coords[0] = 1
-	//
-	//console.log(store.players[0].cities)
 
-	/*console.log(store.players[0].cities[0])
-	funcs.importModel(funcs.exportModel(false, false))
-	console.log(store.players[0].cities[0])
-	controller.startPlayerTurn()*/
-
-	console.log(JSON.stringify(store.players[1].cities[0].buildings, null, 4))
 }
 
 function exportLoc() {
-	console.log(JSON.stringify(funcs.exportModel(false, true)))
 	store.turnResetData = funcs.exportModel()
 }
 function importLoc() {
@@ -139,7 +128,7 @@ function setExplorePhase(playerIndex) {
 	const tiles = zoc.filter((hex) => store.mapData.explorers.includes(hex.id))
 
 	if (tiles.length === 0) {
-		alert("NO EXPLORABLE TILES")
+		rf.doAdminAlrt("NO EXPLORABLE TILES")
 		return
 	}
 	store.context.action = rf.ACT_EXPLORE

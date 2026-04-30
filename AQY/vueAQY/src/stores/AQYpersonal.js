@@ -100,7 +100,7 @@ export const usePersonalStore = defineStore("personal", () => {
     if (colour === 2) return "red";
     if (colour === 3) return "white";
     if (colour === 4) return "yellow";*/
-		alert("P..GCCH: " + colour)
+		rf.doAdminAlrt("P..GCCH: " + colour)
 		return "none"
 	}
 

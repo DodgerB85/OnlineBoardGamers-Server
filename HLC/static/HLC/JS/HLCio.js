@@ -99,11 +99,12 @@ var IO = {
 	},
 
 	saveGame: async function (model, saveOnly) {
+		let wsConnecting = null
+		wsConnecting = StartWebSocket()
+		
+
 		global.haltPlay = true
-		if (global.liveWS && (!HLCwebSocket || HLCwebSocket.readyState !== WebSocket.OPEN)) {
-			await StartWebSocket()
-			await sleep(2000)
-		}
+
 
 		var i = 0
 		var nextPlayer = []
@@ -209,19 +210,11 @@ var IO = {
 							);
 						}*/
 
-					// Broadcast update
-					if (global.liveWS) {
-						if (HLCwebSocket.readyState === 1) HLCwebSocket.send("NEWDATATS" + String(global.gameID) + String(result.latestUpdate))
-						else {
-							StartWebSocket()
-							sleepPause(2000)
-							if (HLCwebSocket.readyState === 1) HLCwebSocket.send("NEWDATATS" + String(global.gameID) + String(result.latestUpdate))
-							else console.log("2xTO: " + HLCwebSocket.readyState)
-						}
-					}
+					
 					global.haltPlay = false
 					V.render()
 					C.startActions()
+					broadcastGameUpdate(wsConnecting)
 					//if (M.trainingGame) V.render()
 				}
 				// Otherwise start actions for the opening game player
@@ -470,10 +463,8 @@ var IO = {
 
 	saveGameDataFromKickout: async function (model, nextPlayersArr, kickedName) {
 		// TODO
-		if (global.liveWS && (!HLCwebSocket || HLCwebSocket.readyState !== WebSocket.OPEN)) {
-			await StartWebSocket()
-			await sleep(2000)
-		}
+		let wsConnecting = null
+		wsConnecting = StartWebSocket()
 
 		var turn = M.gameFlow.turn
 		var phase = M.gameFlow.phase
@@ -565,31 +556,7 @@ var IO = {
 						})
 				} // END TURN 0 KICKOUT
 				else if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
-					// send out the update
-					/*if (global.liveWS && HLCwebSocket.readyState === 1)
-            HLCwebSocket.send(
-              "NEWDATATS" + String(global.gameID) + String(result.latestUpdate)
-            );
-          else if (global.liveWS && HLCwebSocket.readyState === 0) {
-            sleepPause(2000);
-            if (global.liveWS && HLCwebSocket.readyState === 1)
-              HLCwebSocket.send(
-                "NEWDATATS" +
-                String(global.gameID) +
-                String(result.latestUpdate)
-              );
-          }*/
-					// Broadcast update
-					if (global.liveWS) {
-						if (HLCwebSocket.readyState === 1) HLCwebSocket.send("NEWDATATS" + String(global.gameID) + String(result.latestUpdate))
-						else {
-							StartWebSocket()
-							sleepPause(2000)
-							if (HLCwebSocket.readyState === 1) HLCwebSocket.send("NEWDATATS" + String(global.gameID) + String(result.latestUpdate))
-							else console.log("2xTO: " + HLCwebSocket.readyState)
-						}
-					}
-
+					
 					// kickout last player
 					if (global.currentPlayers.length === 0) {
 						M = C.moveToNextPhase()
@@ -601,6 +568,9 @@ var IO = {
 						player = M.players[index]
 						IO.saveFactoryMove(M, player, true)
 					}
+
+					broadcastGameUpdate(wsConnecting)
+
 				}
 				// Otherwise in standard non-simul phase
 				else {
@@ -720,10 +690,8 @@ var IO = {
 	},
 
 	updateDataFromLoadRewind: async function (model) {
-		if (global.liveWS && (!HLCwebSocket || HLCwebSocket.readyState !== WebSocket.OPEN)) {
-			await StartWebSocket()
-			await sleep(2000)
-		}
+		let wsConnecting = null
+		wsConnecting = StartWebSocket()
 
 		var i = 0
 		// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
@@ -768,21 +736,8 @@ var IO = {
 				global.latestUpdate = result.latestUpdate
 				hideLoader()
 
-				/*if (global.liveWS && HLCwebSocket.readyState === 1)
-          HLCwebSocket.send(
-            "NEWDATATS" + String(global.gameID) + String(result.latestUpdate)
-          );*/
 
-				// Broadcast update
-				if (global.liveWS) {
-					if (HLCwebSocket.readyState === 1) HLCwebSocket.send("NEWDATATS" + String(global.gameID) + String(result.latestUpdate))
-					else {
-						StartWebSocket()
-						sleepPause(2000)
-						if (HLCwebSocket.readyState === 1) HLCwebSocket.send("NEWDATATS" + String(global.gameID) + String(result.latestUpdate))
-						else console.log("2xTO: " + HLCwebSocket.readyState)
-					}
-				}
+				broadcastGameUpdate(wsConnecting)
 				$("#actions").empty()
 				C.startActions()
 			})

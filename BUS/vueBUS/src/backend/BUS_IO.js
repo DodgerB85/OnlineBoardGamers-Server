@@ -15,6 +15,11 @@ export async function saveGame(saveRewind) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() 
+	}
+
 	store.topMenuViews.showLoader = true
 
 	let csrftoken = funcs.getCookie("csrftoken")
@@ -81,17 +86,7 @@ export async function saveGame(saveRewind) {
 		store.topMenuViews.showLoader = false
 		controller.startPlayerTurn()
 
-		// Broadcast update
-		if (personal.liveWS && (!WS.BUSwebSocket || WS.BUSwebSocket.readyState > 1)) {
-			await WS.StartWebSocket()
-		}
-		if (WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else if (personal.liveWS) {
-			await WS.StartWebSocket()
-			await funcs.sleep(2000)
-			if (personal.liveWS && WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-			else console.log("2xTO: " + WS.BUSwebSocket.readyState)
-		}
+		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		alert("Error saving the game")
@@ -327,6 +322,12 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	let wsConnecting = null
+	if (personal.liveWS) {
+		wsConnecting = WS.StartWebSocket() 
+	}
+	
 	store.topMenuViews.showLoader = true
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
@@ -357,15 +358,7 @@ async function updateDataFromLoadRewind() {
 		controller.startPlayerTurn()
 
 		// BroadcasT UpDATE
-		if (personal.liveWS && (!WS.BUSwebSocket || WS.BUSwebSocket.readyState > 1)) {
-			await WS.StartWebSocket()
-		}
-		if (WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else if (personal.liveWS && WS.BUSwebSocket.readyState === 0) {
-			funcs.sleepPause(1000)
-			if (personal.liveWS && WS.BUSwebSocket.readyState === 1) WS.BUSwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		}
-
+		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
 		alert("Error updating the game")

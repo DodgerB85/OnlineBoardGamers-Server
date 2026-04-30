@@ -36,7 +36,6 @@ from .common import create_fcm_game
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
 
-# import requests  # Keep this to broadcase on WSS when it is uncommented
 FCMsuperUsers = ["BotKickStarter"]
 USE_NEW_CODE = False
 
