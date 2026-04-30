@@ -56,7 +56,7 @@ async function initGame() {
 	//store.refSize = window.initData.myZoomLevel
 
 	store.refSize = window.initData.myZoomLevel * 10
-	
+
 	// Safety check: ensure refSize is never 0 or NaN
 	if (store.refSize === 0 || isNaN(store.refSize)) {
 		store.refSize = 160
@@ -114,10 +114,9 @@ async function initGame() {
 			}
 		} // END KICKOUT REQUIRED
 		personal.notes = funcs.htmlUnescape(window.initData.notes)
-		
 	} // end involved player
 	if (window.initData.chatNotification) store.topMenuViews.showChat = true
-	
+
 	// Set AQY options
 	let options = window.initData.preferredAQYoptions
 	// [colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes, showPollutionUnderRes]
@@ -132,73 +131,8 @@ async function initGame() {
 	personal.yourTurnAudioType = window.initData.yourTurnAudioType
 	if (window.initData.startingOptions.includes(102)) personal.trainingGame = true
 
-	// Set up and save new game - ALWAYS DOING THIS
-	if (window.initData.gameData === "" || 1 == 1) {
-		model.initiateGameVars()
-		/*const COLOURS = funcs.shuffle([rf.BLUE, rf.PURPLE, rf.RED, rf.YELLOW])
-
-		for (let i = 0; i < window.initData.playerNames.length; i++) {
-			store.players.push({
-				name: window.initData.playerNames[i],
-				displayName: "",
-				colour: COLOURS[i],
-				countrysideBuildings: [],
-
-				cities: [], //[city.createNewCity_core({"q": 0,"r": 0,"s": 0})],
-				availableBuildings: [...rf.SINGLE_CITY_BUILDINGS],
-				availableHouses: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
-				availableMen: 0,
-				availableResources: [6, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				saint: rf.SAINT_NONE,
-				requiredRebuilds: [],
-				cathedralStatus: 0,
-				cityHistory: {
-					//built: [], // Use flags? Need: bldgNum, cityIndex, index, rotation, payment?
-					moved: [], // Use flags? Need: bldgNum, newPos-> cityIndex, index, rotation, payment?
-					//manned: [],// Use flags? Need: bldgNum, (if not unique then also: cityIndex, index),
-					boardTrades: [], // IN: sets of [out, out, in]
-					gravesRemoved: [], // IN: [][][][], up to 4 arrays, 1 per city, with grave indexes in each,
-					saintChosen: rf.SAINT_NONE, // IN: just a saint_ID
-					razedCathedral: 0, // IN: true/false
-				},
-				promises: [],
-				selectedForZOCline: false, // Use to display individual ZOCs. Not saved
-			})
-		}
-
-		store.currentLayout = rf.MAP_LAYOUTS.find((l) => l.players === store.players.length)
-
-		// Now insert display names
-		for (let i = 0; i < store.players.length; i++) {
-			if (store.players[i].name === "SHADOW" && window.initData.displayNames != undefined) store.players[i].displayName = window.initData.displayNames[0]
-			else if (store.players[i].name === "SHADOW_2" && window.initData.displayNames != undefined) store.players[i].displayName = window.initData.displayNames[1]
-			else if (store.players[i].name === "SHADOW_3" && window.initData.displayNames != undefined) store.players[i].displayName = window.initData.displayNames[2]
-			else store.players[i].displayName = store.players[i].name
-		}
-		for (let i = 0; i < store.players.length; i++) {
-			store.gameflow.turnOrder.push(i)
-			store.gameflow.fullTurnOrder.push(i)
-		}
-
-		store.gameflow.phase = rf.PHASE_FIRST_CITY
-		store.gameflow.subPhase = rf.SUB_PHASE_NONE
-		store.gameflow.action = rf.ACT_NONE
-
-		// GENERATE A NEW MAP
-		map.generateMap()
-
-		map.calculateCanvasSize()
-
-		store.players.forEach(() => {
-			store.mapData.availableExplorerResources.push(rf.RES_WINE)
-			store.mapData.availableExplorerResources.push(rf.RES_GRAIN)
-			store.mapData.availableExplorerResources.push(rf.RES_OLIVES)
-			store.mapData.availableExplorerResources.push(rf.RES_SHEEP)
-		})
-		funcs.shuffle(store.mapData.availableExplorerResources)
-
-		model.addHistory(rf.HIST_NEW_GAME, -1, 0, [[...store.gameflow.fullTurnOrder]])*/
-	} // End NEW GAME - ALWAYS DOING THIS
+	// Always iuit game vars
+	model.initiateGameVars()
 
 	// If new, save, otherwise, import data
 	if (window.initData.pov == undefined && window.initData.gameData === "") {
@@ -225,7 +159,7 @@ async function initGame() {
 		personal.votedToExclude = store.statsExcludeVotesData[personal.name]
 
 		// And import pre-moves
-		if (window.initData.preMove !==  "" && personal.pov >= 0) store.players[personal.pov].preMoves = funcs.decompressData(window.initData.preMove)
+		if (window.initData.preMove !== "" && personal.pov >= 0) store.players[personal.pov].preMoves = funcs.decompressData(window.initData.preMove)
 
 		store.currentLayout = JSON.parse(JSON.stringify(rf.MAP_LAYOUTS.find((l) => l.players === store.players.length)))
 
@@ -258,7 +192,6 @@ async function initGame() {
 			await replay.generateReplayData(true)
 		}
 	}
-	if (window.initData.pov != undefined) await WS.StartWebSocket()
 
 	personal.haltPlay = false
 
@@ -267,6 +200,19 @@ async function initGame() {
 	map.setNeighbours()
 
 	controller.startPlayerTurn()
+
+	// Finally, check for stalled game
+	// Check for no current player here
+	if (store.gameflow.turnOrder.length === 0 && store.gameflow.phase === rf.PHASE_CITY_BUILDING) {
+		// If it is factory build phase, with no one to move, it means the last player disconnected
+		// So run the code in IO again here. This should save it and move the game on
+		await IO.kickstartGame()
+	} else if (store.gameflow.turnOrder.length === 0) {
+		IO.sendDiscordWebhook(`AQY GameID ${personal.gameID} - No current player detected: ${store.gameflow.turnOrder}`)
+		alert("ERROR: No current player\nContact admin on Discord or Email")
+	}
+
+	if (window.initData.pov != undefined) await WS.StartWebSocket()
 } // end initGame
 
 initGame()

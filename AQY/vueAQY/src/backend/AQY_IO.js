@@ -44,17 +44,12 @@ export async function submitBug(bugContent) {
 	store.topMenuViews.showLoader = false
 }
 
-export async function saveGame(saveRewind, saveContext = false) {
+export async function saveGame(saveRewind, saveContext = false, deleteMoves = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	
+
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
-
-	if (personal.liveWS && WS.AQYwebSocket && WS.AQYwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -72,6 +67,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		status: "ACTIVE",
 		gameID: personal.gameID,
 		saveRewind: saveRewind,
+		deleteMoves: deleteMoves,
 	}
 
 	if (window.initData.gameData === "") postData.mapTiles = [...store.mapData.seed]
@@ -90,7 +86,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 	if (controller.isSimulPhase(store.gameflow.phase)) {
 		const filteredNames = store.players.filter((player) => player.displayName != rf.BOT_NAME).map((player) => player.displayName)
 
-		postData.nextPlayer = filteredNames//.join(",")
+		postData.nextPlayer = filteredNames //.join(",")
 	}
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
@@ -146,22 +142,17 @@ export async function saveGame(saveRewind, saveContext = false) {
 			// If no error found, process the move, and stop this function early
 			if (!errorFound) {
 				let gameSavedDueModelEndGame = model.processPreMove(preMoveJSON)
-				if (!gameSavedDueModelEndGame)await saveGame(true, false)
+				if (!gameSavedDueModelEndGame) await saveGame(true, false)
 				return
 			}
 		}
 
-		// Broadcast update
-		if (WS.AQYwebSocket && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else if (WS.AQYwebSocket && personal.liveWS) {
-			await WS.StartWebSocket()
-			await funcs.sleep(2000)
-			if (personal.liveWS && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-			else console.log("2xTO: " + WS.AQYwebSocket.readyState)
-		}
-
 		store.topMenuViews.showLoader = false
 		personal.haltPlay = false
+
+		// Broadcast update
+		WS.broadcastGameUpdate()
+
 		await controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
@@ -175,11 +166,6 @@ export async function sendNotification(name) {
 
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
-
-	if (personal.liveWS && WS.AQYwebSocket && WS.AQYwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -205,17 +191,11 @@ export async function sendNotification(name) {
 		}
 		const data = await response.json()
 
-		// Broadcast update
-		if (WS.AQYwebSocket && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-		else if (WS.AQYwebSocket && personal.liveWS) {
-			await WS.StartWebSocket()
-			await funcs.sleep(2000)
-			if (personal.liveWS && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-			else console.log("2xTO: " + WS.AQYwebSocket.readyState)
-		}
-
 		store.topMenuViews.showLoader = false
 		personal.haltPlay = false
+
+		WS.broadcastGameUpdate()
+
 		await controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
@@ -277,10 +257,7 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 	const personal = usePersonalStore()
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
-	if (personal.liveWS && WS.AQYwebSocket && WS.AQYwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
+
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (personal.latestUpdate == undefined) personal.latestUpdate = "9999999999999"
@@ -339,18 +316,11 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 			// Just a proposal, so no need to force update
 			funcs.decompressTradeData(data.playerTradeData, false)
 
-			// Broadcast update
-			if (WS.AQYwebSocket && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATT" + String(personal.gameID))
-			else if (WS.AQYwebSocket && personal.liveWS) {
-				await WS.StartWebSocket()
-				await funcs.sleep(2000)
-				if (personal.liveWS && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATT" + String(personal.gameID))
-				else console.log("2xTO: " + WS.AQYwebSocket.readyState)
-			}
-
 			store.topMenuViews.bugSuccessText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
+
+			WS.broadcastGameUpdate()
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
@@ -364,10 +334,6 @@ export async function acceptTrade(entry) {
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
 
-	if (personal.liveWS && WS.AQYwebSocket && WS.AQYwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (personal.latestUpdate == undefined) personal.latestUpdate = "9999999999999"
@@ -422,18 +388,11 @@ export async function acceptTrade(entry) {
 			// Trade accepted, so force update
 			funcs.decompressTradeData(data.playerTradeData, true)
 
-			// Broadcast update
-			if (WS.AQYwebSocket && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATT" + String(personal.gameID))
-			else if (WS.AQYwebSocket && personal.liveWS) {
-				await WS.StartWebSocket()
-				await funcs.sleep(2000)
-				if (personal.liveWS && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATT" + String(personal.gameID))
-				else console.log("2xTO: " + WS.AQYwebSocket.readyState)
-			}
-
 			//store.topMenuViews.bugSuccessText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
+
+			WS.broadcastGameUpdate()
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
@@ -447,10 +406,6 @@ export async function rejectTrade(entry) {
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
 
-	if (personal.liveWS && WS.AQYwebSocket && WS.AQYwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (personal.latestUpdate == undefined) personal.latestUpdate = "9999999999999"
@@ -482,18 +437,11 @@ export async function rejectTrade(entry) {
 			funcs.decompressTradeData(data.playerTradeData, false)
 			store.topMenuViews.tradeSuccessText = `You have rejected the trade with <div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[entry[0]].colour) + `">${store.players[entry[0]].displayName}</span></div> `
 
-			// Broadcast update
-			if (WS.AQYwebSocket && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATT" + String(personal.gameID))
-			else if (WS.AQYwebSocket && personal.liveWS) {
-				await WS.StartWebSocket()
-				await funcs.sleep(2000)
-				if (personal.liveWS && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATT" + String(personal.gameID))
-				else console.log("2xTO: " + WS.AQYwebSocket.readyState)
-			}
-
 			//store.topMenuViews.bugSuccessText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
+
+			WS.broadcastGameUpdate()
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
@@ -508,10 +456,6 @@ export async function markPromiseComplete(playerIndex, promise) {
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
 
-	if (personal.liveWS && WS.AQYwebSocket && WS.AQYwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (personal.latestUpdate == undefined) personal.latestUpdate = "9999999999999"
@@ -563,11 +507,6 @@ export async function saveSimulTurn(playerIndex) {
 
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
-
-	if (personal.liveWS && WS.AQYwebSocket && WS.AQYwebSocket.readyState !== 1) {
-		await WS.StartWebSocket()
-		await funcs.sleep(2000)
-	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -629,7 +568,96 @@ export async function saveSimulTurn(playerIndex) {
 			// End the city phase
 			controller.endCurrentPhase()
 			// save the game
-			await saveGame(true, false)
+			await saveGame(true, false, true)
+		}
+
+		store.topMenuViews.showLoader = false
+		personal.haltPlay = false
+	} catch (error) {
+		console.error("Error fetching data:", error)
+		alert("Error saving the game")
+	}
+}
+
+export async function sendDiscordWebhook(message) {
+	let csrftoken = funcs.getCookie("csrftoken")
+
+	fetch("/sendAdminMessage/", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"X-CSRFToken": csrftoken, // Important for Django CSRF protection
+		},
+		body: JSON.stringify({ message: message }),
+	})
+		.then((response) => {
+			if (!response.ok) {
+				console.error("Error sending webhook:", response.status, response.statusText)
+			}
+		})
+		.catch((error) => {
+			console.error("Error sending webhook:", error)
+		})
+}
+
+export async function kickstartGame() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	personal.haltPlay = true
+	store.topMenuViews.showLoader = true
+
+	let csrftoken = funcs.getCookie("csrftoken")
+
+	if (personal.latestUpdate == undefined) personal.latestUpdate = "9999999999999"
+
+	let postData = {
+		action: "kickstartGame",
+		latestUpdate: personal.latestUpdate,
+		turn: store.gameflow.turn,
+		phase: store.gameflow.phase,
+		status: "ACTIVE",
+		gameID: personal.gameID,
+		BKSN: store.players[personal.pov].name,
+	}
+
+	try {
+		const response = await fetch("/AQY/processAQYturn/", {
+			method: "POST",
+			body: JSON.stringify(postData),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) {
+			const errorData = await response.json() // Assuming the server returns JSON error data
+			const errorMessage = errorData.error || "Network response was not ok"
+			throw new Error(errorMessage)
+		}
+		const data = await response.json()
+
+		if (data.syncError) {
+			store.topMenuViews.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			return
+		}
+		// If not ready
+		if (!data[data.length - 1].allReady) {
+			store.gameflow.turnOrder.splice(0)
+			for (let i = 0; i < data[0].ready.length; i++) {
+				if (!data[0].ready[i]) store.gameflow.turnOrder.push(i)
+			}
+		} else {
+			// Reload the data
+			let timestamps = []
+			for (let i = 0; i < store.players.length; i++) {
+				funcs.simpleImportPlayerCityTurnData(i, data[i].content)
+				timestamps.push(data[i].timestamp)
+			}
+			// Process end of simul city phase (do famine, history)
+			city.processEndOfSimulTurn(timestamps)
+
+			// End the city phase
+			controller.endCurrentPhase()
+			// save the game
+			await saveGame(true, false, true)
 		}
 
 		store.topMenuViews.showLoader = false
@@ -667,8 +695,9 @@ export async function sendChatMessage(newEntry) {
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
-		if (personal.liveWS) WS.AQYwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
 		store.topMenuViews.showLoader = false
+		// TODO - move this?
+		if (personal.liveWS) WS.AQYwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
 	} catch (error) {
 		console.error("Error sending chat:", error)
 		alert("Error sending chat message")
@@ -1117,17 +1146,15 @@ export async function castVote(topic) {
 		store.topMenuViews.showLoader = false
 		if (data.voteChanged === true) {
 			store.topMenuViews.tradeSuccessText = "Vote Saved"
-			
+
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true
 				store.deleteVotesData = JSON.parse(data.votesData)
 				if (data.redirect_url) window.location.href = data.redirect_url
-			}
-			else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
+			} else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-			
 		} else store.topMenuViews.rewindErrorText = "Error; Contact Admin"
 	} catch (error) {
 		console.error("Error fetching data:", error)

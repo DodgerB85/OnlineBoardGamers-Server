@@ -5,32 +5,54 @@ import * as IO from "./AQY_IO"
 import * as view from "../js/AQYview"
 
 export var AQYwebSocket
+let AQYconnectionPromise = null // Track the in-progress connection
 
 export async function StartWebSocket() {
-	if (typeof AQYwebSocket !== "undefined") {
-		if (AQYwebSocket.readyState === 0 || AQYwebSocket.readyState === 1) return
-		else AQYwebSocket.close()
-	}
 	const personal = usePersonalStore()
-
-	var ChannelNumber = personal.gameID
-
-	var wsUri = "wss://wss.s3.sitereview.io/ws/HomeAQYchannel" + String(ChannelNumber) + "/"
-
-	AQYwebSocket = new WebSocket(wsUri)
-
-	AQYwebSocket.onopen = async function (evt) {
-		await AQYwebSocketOnOpen(evt)
+	// 1. If already open, return immediately
+	if (AQYwebSocket && AQYwebSocket.readyState === 1) {
+		return AQYwebSocket
 	}
-	AQYwebSocket.onclose = function (evt) {
-		AQYwebSocketOnClose(evt)
+
+	// 2. If currently connecting, return the existing promise
+	if (AQYconnectionPromise) {
+		return AQYconnectionPromise
 	}
-	AQYwebSocket.onmessage = function (evt) {
-		AQYwebSocketOnInfo(evt)
-	}
-	AQYwebSocket.onerror = function (evt) {
-		AQYwebSocketOnError(evt)
-	}
+
+	// 3. Create a new connection promise
+	AQYconnectionPromise = new Promise((resolve, reject) => {
+		if (typeof FCMwebSocket !== "undefined" && FCMwebSocket.readyState === 0) {
+			// Already in native connecting state, just attach listeners
+		} else {
+			if (AQYwebSocket) AQYwebSocket.close()
+			let ChannelNumber = personal.gameID
+			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeFCMchannel" + String(ChannelNumber) + "/"
+			AQYwebSocket = new WebSocket(wsUri)
+		}
+
+		AQYwebSocket.onopen = function (evt) {
+			AQYconnectionPromise = null // Clear promise on success
+			AQYwebSocketOnOpen(evt)
+			resolve(AQYwebSocket)
+		}
+
+		AQYwebSocket.onclose = function (evt) {
+			AQYconnectionPromise = null
+			AQYwebSocketOnClose(evt)
+		}
+
+		AQYwebSocket.onerror = function (evt) {
+			AQYconnectionPromise = null
+			AQYwebSocketOnError(evt)
+			reject(evt)
+		}
+
+		AQYwebSocket.onmessage = function (evt) {
+			AQYwebSocketOnInfo(evt)
+		}
+	})
+
+	return AQYconnectionPromise
 }
 
 async function AQYwebSocketOnOpen() {
@@ -246,3 +268,29 @@ function deepObjectDifference(obj1, obj2) {
 
 	return diff
 }
+
+export async function broadcastGameUpdate() {
+	const personal = usePersonalStore()
+	// Only attempt if we want live updates
+	if (!personal.liveWS) return
+
+	try {
+		// This will either return the open socket instantly
+		// or wait for the connection to finish.
+		const socket = await StartWebSocket()
+
+		if (socket.readyState === 1) {
+			socket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+		}
+	} catch (err) {
+		console.warn("AQY Broadcast failed:", err)
+	}
+}
+
+/*if (WS.AQYwebSocket && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+else if (WS.AQYwebSocket && personal.liveWS) {
+	await WS.StartWebSocket()
+	await funcs.sleep(2000)
+	if (personal.liveWS && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+	else console.log("2xTO: " + WS.AQYwebSocket.readyState)
+}*/

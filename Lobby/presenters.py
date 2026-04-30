@@ -880,7 +880,6 @@ class AQYpresenter(GamePresenter):
             readyWithBots = True
 
         if all(readyPlayers) or readyWithBots:
-            self.clearAllMoveData()
             jsonResponse.append({"allReady": True})
         else:
             jsonResponse = [{"ready": readyPlayers}]

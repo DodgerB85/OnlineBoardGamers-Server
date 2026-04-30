@@ -213,6 +213,9 @@ def _processAQYturn(request):
         if currentGame.phase == rfAQY.PHASE_ALL_RISE or currentGame.phase == rfAQY.PHASE_CITY_BUILDING:
             presenter.deleteAllPreMoves()
 
+        if jsonData["deleteMoves"]:
+            presenter.clearAllMoveData()
+
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
 
@@ -744,6 +747,43 @@ def _processAQYturn(request):
         currentGame.save()
         return JsonResponse(response, safe=False)
 
+    elif jsonData["action"] == "kickstartGame":
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+            turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
+            phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
+            message = (
+                f"SYNC ERROR IN: Aqy kickstartGame - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
+                f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getCurrentPlayersArrayAQY()}"
+            )
+            SN_sendAdminErrorMessage(message)
+            return JsonResponse({"syncError": True}, safe=False)
+
+        # Remove your trades
+        if currentGame.playerTradeData != "":
+            seat = presenter.seatPosition(jsonData["BKSN"])
+            byte_array = bytearray(base64.b64decode(currentGame.playerTradeData))
+            decompressed_data = gzip.decompress(byte_array)
+            decompressed_string = decompressed_data.decode("utf-8")
+            playerTradeData = json.loads(decompressed_string)
+            # Find and remove the entry from playerTradeData
+            for subarray in playerTradeData["playerTrades"]:
+                if subarray[0] == seat or subarray[1] == seat:
+                    playerTradeData["playerTrades"].remove(subarray)
+
+            json_string = json.dumps(playerTradeData)
+            # Step 2: Compress the JSON string using zlib
+            compressed_data = gzip.compress(json_string.encode("utf-8"))
+            # Step 3: Convert the compressed data to a base64-encoded string
+            base64_data = base64.b64encode(compressed_data).decode("utf-8")
+            currentGame.playerTradeData = base64_data
+
+        response = presenter.getJsonMoveResponse()
+
+        currentGame.save()
+        return JsonResponse(response, safe=False)
+
+
     elif jsonData["action"] == "resign":
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
@@ -883,7 +923,6 @@ def _processAQYturn(request):
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
 
-        # Clears data and saves record - DONT DELETE FAC MOVES
         # presenter.clearAllMoveData()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
