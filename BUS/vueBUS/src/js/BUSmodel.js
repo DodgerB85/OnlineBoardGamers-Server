@@ -199,29 +199,75 @@ export function getWinnerName(returnScores) {
 }
 
 export function increaseScore(player) {
+	const store = useModelStore()
 	let newScore = Math.floor(player.score) + 1 + 0.5
-	for (let i = 0; i < player.length; i++) {
-		if (Math.floor(player[i].score) === Math.floor(newScore)) newScore -= 0.1
+	for (let i = 0; i < store.players.length; i++) {
+		if (Math.floor(store.players[i].score) === Math.floor(newScore)) newScore -= 0.1
 		newScore = Math.round(newScore * 10) / 10
 	}
 	player.score = newScore
-	let newMax = Math.floor(player.score) + player.timeStones
+	// Encode turn info in maxScore: higher decimal = earlier turn (earlier wins ties)
+	let newMax = Math.floor(player.score) + player.timeStones + (100 - store.gameflow.turn) / 100
 
 	if (newMax > player.maxScore) {
-		//let newMax = newScore + player.timeStones
-		for (let i = 0; i < player.length; i++) if (newMax === player[i].maxScore) newMax -= 0.1
+		for (let i = 0; i < store.players.length; i++) if (newMax === store.players[i].maxScore) newMax -= 0.001
 		player.maxScore = newMax
 	}
 }
 
 export function decreaseScore(player) {
+	const store = useModelStore()
 	let newScore = Math.floor(player.score) - 1 + 0.5 + player.timeStones / 10
-	for (let i = 0; i < player.length; i++) {
-		if (Math.floor(player[i].score) === Math.floor(newScore)) newScore -= 0.1
+	for (let i = 0; i < store.players.length; i++) {
+		if (Math.floor(store.players[i].score) === Math.floor(newScore)) newScore -= 0.1
 		newScore = Math.round(newScore * 10) / 10
 	}
 	player.score = newScore
 }
+
+/*
+export function increaseScore(player) {
+    const store = useModelStore()
+    
+    // 1. Calculate Score (Unique within the current turn)
+    let newScore = Math.floor(player.score) + 1.5
+    store.players.forEach(p => {
+        // If someone else already has this floor, nudge this one down
+        if (p.id !== player.id && Math.floor(p.score) === Math.floor(newScore)) {
+            newScore -= 0.1
+        }
+    })
+    player.score = Math.round(newScore * 10) / 10
+
+    // 2. Calculate Max Score (Tie-breaking: TimeStones > Turn > Order)
+    // Turn bonus: 0.99 for turn 1, 0.01 for turn 99
+    const turnBonus = (100 - store.gameflow.turn) / 100 
+    let newMax = Math.floor(player.score) + player.timeStones + turnBonus
+
+    // 3. Force Winner (Execution Order)
+    if (newMax > player.maxScore) {
+        // If ANYONE else already has this EXACT maxScore, 
+        // this player is "later," so they get a tiny penalty.
+        const alreadyExists = store.players.some(p => p.id !== player.id && p.maxScore === newMax)
+        if (alreadyExists) {
+            newMax -= 0.001 
+        }
+        player.maxScore = newMax
+    }
+}
+
+export function decreaseScore(player) {
+    const store = useModelStore()
+    let newScore = Math.floor(player.score) - 1 + 0.5 + (player.timeStones / 10)
+    
+    store.players.forEach(p => {
+        if (p.id !== player.id && Math.floor(p.score) === Math.floor(newScore)) {
+            newScore -= 0.1
+        }
+    })
+    player.score = Math.round(newScore * 10) / 10
+}
+*/
 
 export function getScoreObj() {
 	let resArr = getWinnerName(true)
