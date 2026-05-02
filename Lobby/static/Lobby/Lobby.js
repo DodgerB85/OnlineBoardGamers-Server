@@ -414,7 +414,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	if (!global.joinGameLink) {
 		show_gamesList(global.listType)
-		setInterval(checkLobbyUpdates, 120000)
+		setInterval(checkLobbyUpdates, 4000)
 	} else if (global.joinGameLink) document.getElementById("availableGamesListView").style.display = "block"
 	//show_gamesList("current");
 
@@ -476,7 +476,7 @@ async function checkLobbyUpdates() {
 		}
 
 		const data = await response.json()
-
+		console.log(global.listType)
 		if (data.latest === false) {
 			// Use global.listType to preserve the currently showing list
 			if (global.listType === "current") window.location.href = "/index/current/"

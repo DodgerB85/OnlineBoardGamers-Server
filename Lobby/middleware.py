@@ -21,6 +21,7 @@ class ForceTrailingSlashMiddleware:
             "/RNB",
             "/login",
             "/profile",
+            "/index",
         )
 
         # Check if the path starts with one of your app prefixes and does NOT end with a slash
