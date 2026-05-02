@@ -478,7 +478,13 @@ async function checkLobbyUpdates() {
 		const data = await response.json()
 
 		if (data.latest === false) {
-			location.reload()
+			// Use global.listType to preserve the currently showing list
+			if (global.listType === "current") window.location.href = "/index/current/"
+			else if (global.listType === "waiting") window.location.href = "/index/waiting/"
+			else if (global.listType === "available") window.location.href = "/index/available/"
+			else if (global.listType === "invitations") window.location.href = "/index/invitations/"
+			else if (global.listType === "finished") window.location.href = "/index/finished/"
+			else location.reload()
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
