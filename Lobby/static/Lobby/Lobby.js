@@ -414,7 +414,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	if (!global.joinGameLink) {
 		show_gamesList(global.listType)
-		setInterval(checkLobbyUpdates, 4000)
+		setInterval(checkLobbyUpdates, 120000)
 	} else if (global.joinGameLink) document.getElementById("availableGamesListView").style.display = "block"
 	//show_gamesList("current");
 
