@@ -380,6 +380,7 @@ export function cancelSellMovies() {
 		store.context.availableResources[i + rf.RES_MOVIE_OFFET] += store.context.sellingSummary[i]
 		store.context.sellingSummary[i] = 0
 	}
+	store.context.action = rf.ACT_NONE
 }
 
 export function hexActionsRemaining(playerIndex) {

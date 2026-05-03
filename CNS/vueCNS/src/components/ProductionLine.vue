@@ -101,7 +101,7 @@ function enoughResForProd(prod) {
 </script>
 
 <template>
-  <template v-if="store.gameflow.phase === rf.PHASE_PRODUCTION">
+  <template v-if="store.gameflow.phase === rf.PHASE_PRODUCTION && store.context.action !== rf.ACT_SELL_CANNES">
     <div id="productionLineDiv"
       v-if="store.context.availableProduction.length > 0 && store.context.action !== rf.ACT_PIRATE && store.context.action !== rf.ACT_CONFIRM_END_TURN">
       <transition name="fadeOut">

@@ -24,8 +24,9 @@ function canMoveToNetworkPhase(hexActionsUsed, agents) {
 	if (agents === 2 && hexActionsUsed >= 1) return true
 }
 
-function localEndPlayerTurn() {
+function localEndPlayerTurn(withoutConfirmation) {
 	store.context.action = rf.ACT_CONFIRM_END_TURN
+	if (withoutConfirmation) controller.endPlayerTurn()
 }
 
 function resetWholeTurn() {
@@ -76,6 +77,7 @@ function offerResourceStoragePhaseButton() {
 function stopStoringResources() {
 	model.storeResources()
 	store.context.action = rf.ACT_CONFIRM_END_TURN
+	controller.endPlayerTurn()
 }
 
 function getOrdinal(num) {
@@ -105,6 +107,14 @@ function getFlexiKickoutTImerText() {
 
 	return hoursToGo + ":" + minsToGo + ":" + secsToGo
 }
+
+function localSellMovies() {
+  model.sellMovies(controller.currentPlayerIndex())
+}
+
+function cancelSales() {
+  model.cancelSellMovies()
+}
 </script>
 
 <template>
@@ -121,8 +131,7 @@ function getFlexiKickoutTImerText() {
 			<br />
 		</template>
 
-		<template
-			v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
+		<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 			<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
 				Player
 				<b>{{ controller.currentPlayerObj().name }}</b>
@@ -156,14 +165,11 @@ function getFlexiKickoutTImerText() {
 					<br />
 
 					<br />
-					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now -
-							allow more time</button></span>
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 					<span>
-						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{
-							controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
 					</span>
-					<span><button class="actionsLineButton" id="confirmKickoutButton"
-							@click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
+					<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
 				</template>
 				<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
 					This will permanently remove
@@ -178,12 +184,9 @@ function getFlexiKickoutTImerText() {
 					Please consider giving them a short grace period, in case they are just delayed
 
 					<br />
-					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now -
-							allow more time</button></span>
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 					<span>
-						<button class="actionsLineButton" id="confirmKickoutButton"
-							@click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name
-							}}</button>
+						<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
 					</span>
 				</template>
 			</div>
@@ -206,10 +209,7 @@ function getFlexiKickoutTImerText() {
 				<br />
 				Winner:
 				<div class="playerScoreSummaryDiv">
-					<span class="mainEntryPlayerNewTurn"
-						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][0][0]].colour)">{{
-							store.players[store.history[store.history.length - 1][3][0][0]].displayName }} € {{
-							store.players[store.history[store.history.length - 1][3][0][0]].score }} M</span>
+					<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][0][0]].colour)">{{ store.players[store.history[store.history.length - 1][3][0][0]].displayName }} € {{ store.players[store.history[store.history.length - 1][3][0][0]].score }} M</span>
 				</div>
 
 				<br />
@@ -218,9 +218,7 @@ function getFlexiKickoutTImerText() {
 				</template>
 
 				<br />
-				<span
-					v-if="store.players[store.gameflow.fullTurnOrder[0]].score === store.players[store.gameflow.fullTurnOrder[1]].score">Next
-					in Turn Order</span>
+				<span v-if="store.players[store.gameflow.fullTurnOrder[0]].score === store.players[store.gameflow.fullTurnOrder[1]].score">Next in Turn Order</span>
 				<span v-else>Outright Winner</span>
 
 				<br />
@@ -234,9 +232,7 @@ function getFlexiKickoutTImerText() {
 					<template v-if="idx !== 0">
 						{{ getOrdinal(idx + 1) }}:
 						<div class="playerScoreSummaryDiv">
-							<span class="mainEntryPlayerNewTurn"
-								:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)">{{
-									store.players[entry[0]].name }} € {{ store.players[entry[0]].score }} M</span>
+							<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)">{{ store.players[entry[0]].name }} € {{ store.players[entry[0]].score }} M</span>
 						</div>
 					</template>
 					<br />
@@ -260,8 +256,7 @@ function getFlexiKickoutTImerText() {
 					<br />
 					Place tiles and links directly on the map below.
 					<br />
-					Use the area above and right to choose new tiles, increase film prices, sell films, and pirate
-					films.
+					Use the area above and right to choose new tiles, increase film prices, sell films, and pirate films.
 					<br />
 					<br />
 					<b>REWIND</b>
@@ -279,8 +274,7 @@ function getFlexiKickoutTImerText() {
 					<b>REPLAY</b>
 					does not alter the game state in any way. You can view all the moves made from the
 					<br />
-					start of the game, stepping through move by move, and viewing the game state exactly as it was at
-					that time.
+					start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
 					<br />
 					Once you exit replay mode, the game will return to the same state as when you entered replay mode.
 					<br />
@@ -311,18 +305,15 @@ function getFlexiKickoutTImerText() {
 				<p>Are you sure you want to resign?</p>
 				<p>Resigning will unbalance the game for the remaining players</p>
 				<p>Please carry on playing if that is at all possible</p>
-				<p>Even if you think you can't win, you can still aim for not last / most monuments / funny monument
-					positions / etc</p>
+				<p>Even if you think you can't win, you can still aim for not last / most monuments / funny monument positions / etc</p>
 				<button class="actionsLineButton resignButton" @click="resetWholeTurn">Carry On Playing</button>
 				<button class="actionsLineButton" @click="Bot.actionResign">Confirm Resignation</button>
 			</template>
 
 			<!-- PLACE HEXES -->
-			<div
-				v-if="store.gameflow.phase === rf.PHASE_PLACE_HEXES && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
+			<div v-if="store.gameflow.phase === rf.PHASE_PLACE_HEXES && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
 				You must place at least one Tile. You may then place a second Tile, or add to your Network
-				<span
-					v-if="store.useExpansion && !controller.currentPlayerObj().storedResources.some((value) => value >= 20)">
+				<span v-if="store.useExpansion && !controller.currentPlayerObj().storedResources.some((value) => value >= 20)">
 					<br />
 					Instead of placing a Tile, you may store a single Tile instead - it will take up 2 spaces
 					<template v-if="controller.currentPlayerObj().links.length === 0">
@@ -332,39 +323,28 @@ function getFlexiKickoutTImerText() {
 				</span>
 				<span v-if="store.context.realEstateAgentsInNetwork === 1">
 					<br />
-					The estate agent in your network allows you to place an additional Tile (3 total, or 1/2 and then
-					add to your
-					network)
+					The estate agent in your network allows you to place an additional Tile (3 total, or 1/2 and then add to your network)
 				</span>
 				<span v-if="store.context.realEstateAgentsInNetwork === 2">
 					<br />
-					The 2 estate agents in your network allow you to place 2 additional Tiles (Up to 3 total - you may
-					then also add
-					to your Network)
+					The 2 estate agents in your network allow you to place 2 additional Tiles (Up to 3 total - you may then also add to your Network)
 				</span>
 				<span v-if="controller.currentPlayerObj().storedResources.some((value) => value >= 20)">
 					<br />
 					As an action, you may place your stored Tile
 				</span>
 				<br />
-				<button @click="localCheckResign" v-if="controller.canResign()"
-					class="actionsLineButton resignButton">Resign</button>
+				<button @click="localCheckResign" v-if="controller.canResign()" class="actionsLineButton resignButton">Resign</button>
 				<button @click="resetWholeTurn" class="actionsLineButton">Reset</button>
-				<button @click="controller.endCurrentPhase(true)"
-					v-if="canMoveToNetworkPhase(store.context.hexActionsUsed, store.context.realEstateAgentsInNetwork)"
-					class="actionsLineButton">Move on to Network Phase</button>
-				<button @click="localEndPlayerTurn()" v-if="store.context.hexActionsUsed >= 2"
-					class="actionsLineButton">End
-					Turn</button>
+				<button @click="controller.endCurrentPhase(true)" v-if="canMoveToNetworkPhase(store.context.hexActionsUsed, store.context.realEstateAgentsInNetwork)" class="actionsLineButton">Move on to Network Phase</button>
+				<button @click="localEndPlayerTurn(true)" v-if="store.context.hexActionsUsed >= 2" class="actionsLineButton">End Turn</button>
 			</div>
 
 			<!-- PLACE LINKS -->
 			<div v-if="store.gameflow.phase === rf.PHASE_NETWORK">
 				<span v-if="store.context.linksPlacedThisTurn === 0">
 					<span v-if="controller.currentPlayerObj().links.length <= 3">You may place 2 Links</span>
-					<span v-else-if="controller.currentPlayerObj().links.length == 4">You may place 1 Link and then Move
-						1
-						Link</span>
+					<span v-else-if="controller.currentPlayerObj().links.length == 4">You may place 1 Link and then Move 1 Link</span>
 					<span v-else>You may move 2 Links</span>
 				</span>
 				<span v-if="store.context.linksPlacedThisTurn === 1">
@@ -376,42 +356,47 @@ function getFlexiKickoutTImerText() {
 				<br />
 				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
 				<button @click="resetNetworkPhase" class="actionsLineButton">Reset Network</button>
-				<button v-if="store.context.action !== rf.ACT_READD_LINK" @click="controller.endCurrentPhase(true)"
-					class="actionsLineButton">Move on to Production Phase</button>
+				<button v-if="store.context.action !== rf.ACT_READD_LINK" @click="controller.endCurrentPhase(true)" class="actionsLineButton">Move on to Production Phase</button>
 			</div>
 
 			<!-- PRODUCTION -->
-			<div
-				v-if="store.gameflow.phase === rf.PHASE_PRODUCTION && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_PIRATE">
+			<div v-if="store.gameflow.phase === rf.PHASE_PRODUCTION && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_PIRATE && store.context.action !== rf.ACT_SELL_CANNES">
 				Convert Available Resources into New Resources
 
 				<br />
 				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase"
-					class="actionsLineButton">Reset
-					Network</button>
+				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">Reset Network</button>
 				<button @click="resetPhase" class="actionsLineButton">Reset Production</button>
 				<button @click="controller.endCurrentPhase(true)" class="actionsLineButton">Finish Production</button>
+			</div>
+
+			<div v-if="store.gameflow.phase === rf.PHASE_PRODUCTION && store.context.action === rf.ACT_SELL_CANNES">
+				         Confirm Movie Sales (See upper right panel)<br />
+          <button class="actionsLineButton" @click="localSellMovies">Sell Movies</button>
+          <button class="actionsLineButton" @click="cancelSales">Canccel</button>
 			</div>
 
 			<!-- STORE RESOURCES -->
 			<div v-if="offerResourceStoragePhase()">
 				You may only store 5 resources. Click resources to remove them
+				<br/>
+				<span :class="[{tooManyResources: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) > 5}, {tooManyResForTile: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) >=4 && store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 5}, {canStoreAllRes : store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 3}]">
+					(You have {{ store.context.availableResources.reduce((acc, curr) => acc + curr, 0) }} resources
+					<span v-if="store.context.availableResources.reduce((acc, curr) => acc + curr, 0) > 5"> - you must discard</span>
+					<span v-else-if="store.context.availableResources.reduce((acc, curr) => acc + curr, 0) >=4 && store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 5"> - you can store all resources, but will be unable to store a tile</span>
+					<span v-else> - you can store all resources</span>
+					)
+				</span>
 
 				<br />
 				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase"
-					class="actionsLineButton">Reset
-					Network</button>
+				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">Reset Network</button>
 				<button @click="resetPhase" class="actionsLineButton">Reset Resources</button>
-				<button v-if="offerResourceStoragePhaseButton()" class="actionsLineButton"
-					@click="stopStoringResources">Store
-					current resources (No room to store a tile)</button>
+				<button v-if="offerResourceStoragePhaseButton()" class="actionsLineButton" @click="stopStoringResources">Store current resources & End Turn (No room to store a tile)</button>
 			</div>
 
 			<!-- Confirm Turn End -->
 			<div v-if="store.context.action === rf.ACT_CONFIRM_END_TURN">
-				Are you sure you want to end your turn?
 				<span v-if="store.gameflow.phase === rf.PHASE_PRODUCTION">
 					<br />
 					<br />
@@ -424,16 +409,13 @@ function getFlexiKickoutTImerText() {
 
 				<br />
 				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase"
-					class="actionsLineButton">Reset
-					Network</button>
+				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">Reset Network</button>
 
-				<button @click="resetPhase" v-if="store.gameflow.phase !== rf.PHASE_PLACE_HEXES"
-					class="actionsLineButton">
+				<button @click="resetPhase" v-if="store.gameflow.phase !== rf.PHASE_PLACE_HEXES" class="actionsLineButton">
 					<span v-if="store.gameflow.phase === rf.PHASE_STORE_RES">Reset Resource Phase</span>
 					<span v-else>Reset Production Phase</span>
 				</button>
-				<button @click="controller.endPlayerTurn()" class="actionsLineButton">Confirm End Turn</button>
+				<button @click="controller.endPlayerTurn()" class="actionsLineButton">End Turn</button>
 			</div>
 
 			<!-- Confirm PIRATE Turn End -->
@@ -449,20 +431,15 @@ function getFlexiKickoutTImerText() {
 				You have completed pirating movies and now the next player in turn order needs to move the pirates
 				<br />
 				<br />
-				<span class="warningSpan">YOUR ACTIONS UP TO THIS POINT WILL BE SAVED - YOU WILL NOT BE ABLE TO
-					UNDO THEM
-					LATER</span>
+				<span class="warningSpan">YOUR ACTIONS UP TO THIS POINT WILL BE SAVED - YOU WILL NOT BE ABLE TO UNDO THEM LATER</span>
 				<!--<br/>Your actions up to this point will be saved. You will not be able to undo them later.-->
 				<br />
 				<br />
 				Are you sure you want to end your turn?
 				<br />
 				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button @click="resetPhase" v-if="store.gameflow.phase !== rf.PHASE_PLACE_HEXES"
-					class="actionsLineButton">Reset
-					Phase</button>
-				<button @click="controller.endPlayerPirateTurn()" class="actionsLineButton">Confirm Turn To This
-					Point</button>
+				<button @click="resetPhase" v-if="store.gameflow.phase !== rf.PHASE_PLACE_HEXES" class="actionsLineButton">Reset Phase</button>
+				<button @click="controller.endPlayerPirateTurn()" class="actionsLineButton">Confirm Turn To This Point</button>
 			</div>
 		</template>
 	</div>
@@ -501,6 +478,21 @@ function getFlexiKickoutTImerText() {
 	/*text-align: center;*/
 	background-color: lightgoldenrodyellow;
 	color: darkred;
+}
+
+.tooManyResources {
+	/*background-color: lightgoldenrodyellow;*/
+	color: darkred;
+}
+
+.tooManyResForTile {
+		background-color: lightgoldenrodyellow;
+	color: darkred;
+}
+
+.canStoreAllRes {
+	background-color: lightgreen;
+	color: darkgreen;
 }
 
 .playerScoreSummaryDiv {
