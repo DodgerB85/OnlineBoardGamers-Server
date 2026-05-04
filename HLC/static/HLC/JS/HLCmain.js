@@ -57,11 +57,13 @@ function init() {
 	if (global.liveWS) {
 		$(".live").show()
 		IO.init(C)
-		StartWebSocket()
+		StartWebSocket().catch(() => {
+			console.log("WebSocket background task initialized.")
+		})
 	}
 
 	// Check for no current player here
-	if (global.currentPlayers === undefined || global.currentPlayers.length === 0 ) {
+	if (global.currentPlayers === undefined || global.currentPlayers.length === 0) {
 		// If it is factory build phase, with no one to move, it means the last player disconnected
 		// So run the code in IO again here. This should save it and move the game on
 		if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
@@ -87,8 +89,7 @@ function init() {
 
 		if (!Rules.canPlay()) {
 			M.players[global.pov].factory = Factory.import(FAC_DATA_RAW)
-		}
-		else {
+		} else {
 			M.players[global.pov].factory = Factory.import(FDBE)
 		}
 

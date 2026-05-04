@@ -102,7 +102,9 @@ function toggleChat() {
 		}, 50)
 	}
 
-	WS.StartWebSocket()
+	WS.StartWebSocket().catch(() => {
+		console.log("WebSocket background task initialized.")
+	})
 }
 function toggleReserve() {
 	store.topMenuViews.showReserve = !store.topMenuViews.showReserve
@@ -141,12 +143,11 @@ function clickedLoggedInDiv() {
 		if (personal.pov === store.players.length) personal.pov = 0
 		store.gameName = String(personal.pov) + "  :  " + store.players[personal.pov].name
 		controller.startPlayerTurn()
-	}
-	/*else if (personal.trainingGame) {
+	} else {
+		/*else if (personal.trainingGame) {
 		personal.aidText = true
 		store.availablegods = [...rf.EVERYTHING_gods]
 	}*/
-	else {
 		nameClickCounter.value++
 		if (nameClickCounter.value >= 5) {
 			store.allowMultiple_gods = true
@@ -383,7 +384,8 @@ function adminBKSbutton() {
 		<div id="topInfos">
 			<div class="infoSpanDiv">
 				<span id="infoSpan">
-					<span v-html="store.gameName"></span> | {{ store.gameflow.turn }}: {{ view.phaseStr() }}
+					<span v-html="store.gameName"></span>
+					| {{ store.gameflow.turn }}: {{ view.phaseStr() }}
 					<span v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">| {{ controller.currentPlayerObj().displayName }}</span>
 				</span>
 			</div>

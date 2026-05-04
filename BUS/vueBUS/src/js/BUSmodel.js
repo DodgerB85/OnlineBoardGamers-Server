@@ -13,7 +13,7 @@ export function initGame() {
 	// Set up all Data
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	
+
 	personal.gameID = window.initData.gameID
 	store.gameName = window.initData.gameName
 	personal.gameCreationTimestamp = window.initData.gameCreationTimestamp / 1000
@@ -113,7 +113,9 @@ export function initGame() {
 			// 3p remove one timestone
 			if (store.players.length === 3) store.remainingTimeStones--
 		} // End NEW GAME
-		WS.StartWebSocket()
+		WS.StartWebSocket().catch(() => {
+			console.log("WebSocket background task initialized.")
+		})
 	} // end involved player
 
 	// If new, save, otherwise, import data
@@ -130,8 +132,7 @@ export function initGame() {
 
 		// Append the <h1> element to the body
 		body.appendChild(heading)
-	}
-	else if (window.initData.gameData === "") IO.saveGame(true)
+	} else if (window.initData.gameData === "") IO.saveGame(true)
 	else {
 		// FInally, impport data
 		funcs.importBUSmodel(window.initData.gameData, personal.finishedGame, false)
@@ -148,7 +149,6 @@ export function maxBuses() {
 	store.players.forEach((player) => busArr.push(player.buses))
 	return busArr.reduce((a, b) => Math.max(a, b), -Infinity)
 }
-
 
 export function maxBusesWithNewBus() {
 	const store = useModelStore()
@@ -590,26 +590,26 @@ export function addLine_core(playerIndex, lineID) {
 export function getJunctionsReachableFromJunction(playerIndex, junctionID) {
 	const store = useModelStore()
 	const playerColout = store.players[playerIndex].colour
-	
+
 	// Use a Set to avoid duplicates and a stack/queue for BFS
 	const reachableJunctions = new Set()
 	const junctionsToVisit = [junctionID]
-	
+
 	// Add starting junction
 	reachableJunctions.add(junctionID)
-	
+
 	while (junctionsToVisit.length > 0) {
 		const currentJunction = junctionsToVisit.shift()
 		// Get all lines around this junction
 		const linesAroundJunction = view.getLinesAroundJunction(currentJunction)
-		
+
 		for (const lineID of linesAroundJunction) {
 			// Check if this player has built this line
 			const lineColours = store.lines[lineID]
 			if (lineColours && lineColours.includes(playerColout)) {
 				// Get the junctions at the ends of this line
 				const junctionsAtEnds = view.getJunctionsAtEndOfLine(lineID)
-				
+
 				// Find the junction at the other end (not the current one)
 				for (const junctionAtEnd of junctionsAtEnds) {
 					if (junctionAtEnd !== currentJunction && !reachableJunctions.has(junctionAtEnd)) {
@@ -621,7 +621,7 @@ export function getJunctionsReachableFromJunction(playerIndex, junctionID) {
 			}
 		}
 	}
-	
+
 	// Convert Set to Array and return
 	return Array.from(reachableJunctions)
 }

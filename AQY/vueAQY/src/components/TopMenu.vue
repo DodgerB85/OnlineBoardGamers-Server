@@ -28,7 +28,6 @@ import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
 
 function debugButton() {
-
 	//model.endGame()
 	//store.topMenuViews.tradeSuccessText = `Your trade has been sent to <div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[0].colour) + `">${store.players[0].displayName}</span></div> `;
 	//store.famineLevel = 10
@@ -156,7 +155,9 @@ function toggleChat() {
 	store.topMenuViews.showHistory = false
 	document.getElementById("boardContainer").classList.remove("slideRight")
 	store.topMenuViews.showChat = !store.topMenuViews.showChat
-	WS.StartWebSocket()
+	WS.StartWebSocket().catch(() => {
+		console.log("WebSocket background task initialized.")
+	})
 }
 
 function toggleHistory() {

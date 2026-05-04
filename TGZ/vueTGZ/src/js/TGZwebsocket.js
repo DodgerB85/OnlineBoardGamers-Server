@@ -7,7 +7,7 @@ import * as view from "./TGZview"
 export var TGZwebSocket
 let TGZconnectionPromise = null // Track the in-progress connection
 
-export async function StartWebSocket() {
+/*export async function StartWebSocket() {
 	const personal = usePersonalStore()
 	// 1. If already open, return immediately
 	if (TGZwebSocket && TGZwebSocket.readyState === 1) {
@@ -53,6 +53,89 @@ export async function StartWebSocket() {
 	})
 
 	return TGZconnectionPromise
+}*/
+
+let retryCount = 0
+const MAX_RETRIES = 13 // Uses 3 tries per attempt
+const BASE_RETRY_DELAY = 2000
+
+export async function StartWebSocket() {
+	const personal = usePersonalStore()
+
+	if (TGZwebSocket && TGZwebSocket.readyState === 1) return TGZwebSocket
+	if (TGZconnectionPromise) return TGZconnectionPromise
+
+	if (retryCount >= MAX_RETRIES) {
+		console.error("Max WebSocket retries reached.")
+		personal.WSstatus = "WSdisconnected"
+		return null
+	}
+
+	TGZconnectionPromise = new Promise((resolve) => {
+		const connectionTimeout = setTimeout(() => {
+			cleanup()
+			if (TGZwebSocket) TGZwebSocket.close()
+			handleFailure("Connection Timeout")
+			resolve(null) // Resolve null to prevent "Uncaught Promise" errors
+		}, 4000)
+
+		const cleanup = () => {
+			clearTimeout(connectionTimeout)
+			TGZconnectionPromise = null
+		}
+
+		const handleFailure = (reason) => {
+			retryCount++
+			console.warn(`WS Attempt ${retryCount} failed: ${reason}`)
+			personal.liveWS = false
+
+			if (retryCount < MAX_RETRIES) {
+				personal.WSstatus = "WSconnecting" // Or "WSretrying"
+				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
+				setTimeout(StartWebSocket, delay)
+			} else {
+				personal.WSstatus = "WSdisconnected"
+			}
+		}
+
+		try {
+			// Logic to prevent multiple native connections
+			if (TGZwebSocket && TGZwebSocket.readyState === 0) {
+				// Wait for existing native attempt
+			} else {
+				if (TGZwebSocket) TGZwebSocket.close()
+				let wsUri = "wss://wss.s3.sitereview.io/ws/HomeTGZchannel" + String(personal.gameID) + "/"
+				TGZwebSocket = new WebSocket(wsUri)
+			}
+
+			TGZwebSocket.onopen = (evt) => {
+				cleanup()
+				retryCount = 0
+				TGZwebSocketOnOpen(evt)
+				resolve(TGZwebSocket)
+			}
+
+			TGZwebSocket.onclose = () => {
+				cleanup()
+				handleFailure("Socket Closed")
+				resolve(null)
+			}
+
+			TGZwebSocket.onerror = (evt) => {
+				cleanup()
+				handleFailure("Socket Error (Blocked)")
+				resolve(null)
+			}
+
+			TGZwebSocket.onmessage = (evt) => TGZwebSocketOnInfo(evt)
+		} catch (err) {
+			cleanup()
+			handleFailure(err.message)
+			resolve(null)
+		}
+	})
+
+	return TGZconnectionPromise
 }
 
 async function TGZwebSocketOnOpen() {
@@ -60,20 +143,6 @@ async function TGZwebSocketOnOpen() {
 	personal.WSstatus = "WSconnected"
 	personal.liveWS = true
 	IO.checkForLatestData()
-}
-
-function TGZwebSocketOnClose() {
-	const personal = usePersonalStore()
-	personal.WSstatus = "WSdisconnected"
-	// Reconnect after a delay
-	setTimeout(StartWebSocket, 2000)
-}
-
-function TGZwebSocketOnError() {
-	const personal = usePersonalStore()
-	personal.WSstatus = "WSdisconnected"
-	// Reconnect after a delay
-	setTimeout(StartWebSocket, 2000)
 }
 
 async function TGZwebSocketOnInfo(IncomingInfo) {
@@ -140,18 +209,18 @@ async function TGZwebSocketOnInfo(IncomingInfo) {
 }
 
 export async function broadcastGameUpdate(existingPromise = null) {
-  const personal = usePersonalStore()
-  if (!personal.liveWS) return
+	const personal = usePersonalStore()
+	if (!personal.liveWS) return
 
-  try {
-    // If we already started connecting in the previous function, use that.
-    // Otherwise, start a new check.
-    const socket = await (existingPromise || StartWebSocket())
+	try {
+		// If we already started connecting in the previous function, use that.
+		// Otherwise, start a new check.
+		const socket = await (existingPromise || StartWebSocket())
 
-    if (socket.readyState === 1) {
-      socket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-    }
-  } catch (err) {
-    console.warn("AQY Broadcast failed:", err)
-  }
+		if (socket.readyState === 1) {
+			socket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+		}
+	} catch (err) {
+		console.warn("AQY Broadcast failed:", err)
+	}
 }

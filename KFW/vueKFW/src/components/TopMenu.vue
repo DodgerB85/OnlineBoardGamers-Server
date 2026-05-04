@@ -118,7 +118,7 @@ function clickedLoggedInDiv() {
 	if (IO.SUPER_USERS.includes(personal.name)) {
 		personal.pov++
 		if (personal.pov === store.players.length) personal.pov = 0
-		store.gameName = `POC: ${String(personal.pov)}  :  ${store.players[personal.pov].name}, currentTO: ${store.gameflow.turnOrder}, FullTO: ${store.gameflow.fullTurnOrder}` 
+		store.gameName = `POC: ${String(personal.pov)}  :  ${store.players[personal.pov].name}, currentTO: ${store.gameflow.turnOrder}, FullTO: ${store.gameflow.fullTurnOrder}`
 		// controller.startPlayerTurn()
 	}
 	personal.aidText = false
@@ -557,7 +557,7 @@ function getMapBubblePosition(bubble) {
 				</span>
 			</div>
 			<div id="playerLineDiv">
-				Turn Order: 
+				Turn Order:
 				<span
 					v-for="(playerIndex, idx) in store.gameflow.turnOrder"
 					:key="idx"

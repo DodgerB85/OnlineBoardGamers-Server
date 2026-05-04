@@ -8,55 +8,88 @@ import * as view from "../js/WEBview"
 
 export var WEBwebSocket
 let WEBconnectionPromise = null // Track the in-progress connection
+let retryCount = 0
+const MAX_RETRIES = 13 // Uses 3 tries per attempt
+const BASE_RETRY_DELAY = 2000
 
 export async function StartWebSocket() {
 	const personal = usePersonalStore()
-	// 1. If already open, return immediately
-	if (WEBwebSocket && WEBwebSocket.readyState === 1) {
-		return WEBwebSocket
+
+	if (WEBwebSocket && WEBwebSocket.readyState === 1) return WEBwebSocket
+	if (WEBconnectionPromise) return WEBconnectionPromise
+
+	if (retryCount >= MAX_RETRIES) {
+		console.error("Max WebSocket retries reached.")
+		personal.WSstatus = "WSdisconnected"
+		return null
 	}
 
-	// 2. If currently connecting, return the existing promise
-	if (WEBconnectionPromise) {
-		return WEBconnectionPromise
-	}
-
-	// 3. Create a new connection promise
-	WEBconnectionPromise = new Promise((resolve, reject) => {
-		if (typeof WEBwebSocket !== "undefined" && WEBwebSocket.readyState === 0) {
-			// Already in native connecting state, just attach listeners
-		} else {
+	WEBconnectionPromise = new Promise((resolve) => {
+		const connectionTimeout = setTimeout(() => {
+			cleanup()
 			if (WEBwebSocket) WEBwebSocket.close()
-			let ChannelNumber = personal.gameID
-			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeWEBchannel" + String(ChannelNumber) + "/"
-			WEBwebSocket = new WebSocket(wsUri)
-		}
+			handleFailure("Connection Timeout")
+			resolve(null) // Resolve null to prevent "Uncaught Promise" errors
+		}, 4000)
 
-		WEBwebSocket.onopen = function (evt) {
-			WEBconnectionPromise = null // Clear promise on success
-			WEBwebSocketOnOpen(evt)
-			resolve(WEBwebSocket)
-		}
-
-		WEBwebSocket.onclose = function (evt) {
+		const cleanup = () => {
+			clearTimeout(connectionTimeout)
 			WEBconnectionPromise = null
-			WEBwebSocketOnClose(evt)
 		}
 
-		WEBwebSocket.onerror = function (evt) {
-			WEBconnectionPromise = null
-			WEBwebSocketOnError(evt)
-			reject(evt)
+		const handleFailure = (reason) => {
+			retryCount++
+			console.warn(`WS Attempt ${retryCount} failed: ${reason}`)
+			personal.liveWS = false
+
+			if (retryCount < MAX_RETRIES) {
+				personal.WSstatus = "WSconnecting" // Or "WSretrying"
+				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
+				setTimeout(StartWebSocket, delay)
+			} else {
+				personal.WSstatus = "WSdisconnected"
+			}
 		}
 
-		WEBwebSocket.onmessage = function (evt) {
-			WEBwebSocketOnInfo(evt)
+		try {
+			// Logic to prevent multiple native connections
+			if (WEBwebSocket && WEBwebSocket.readyState === 0) {
+				// Wait for existing native attempt
+			} else {
+				if (WEBwebSocket) WEBwebSocket.close()
+				let wsUri = "wss://wss.s3.sitereview.io/ws/HomeWEBchannel" + String(personal.gameID) + "/"
+				WEBwebSocket = new WebSocket(wsUri)
+			}
+
+			WEBwebSocket.onopen = (evt) => {
+				cleanup()
+				retryCount = 0
+				WEBwebSocketOnOpen(evt)
+				resolve(WEBwebSocket)
+			}
+
+			WEBwebSocket.onclose = () => {
+				cleanup()
+				handleFailure("Socket Closed")
+				resolve(null)
+			}
+
+			WEBwebSocket.onerror = (evt) => {
+				cleanup()
+				handleFailure("Socket Error (Blocked)")
+				resolve(null)
+			}
+
+			WEBwebSocket.onmessage = (evt) => WEBwebSocketOnInfo(evt)
+		} catch (err) {
+			cleanup()
+			handleFailure(err.message)
+			resolve(null)
 		}
 	})
 
 	return WEBconnectionPromise
 }
-
 async function WEBwebSocketOnOpen() {
 	const personal = usePersonalStore()
 	personal.WSstatus = "WSconnected"

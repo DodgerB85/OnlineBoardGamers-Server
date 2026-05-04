@@ -53,7 +53,9 @@ function toggleChat() {
 		}, 50)
 	}
 
-	WS.StartWebSocket()
+	WS.StartWebSocket().catch(() => {
+		console.log("WebSocket background task initialized.")
+	})
 }
 
 function toggleHistory() {

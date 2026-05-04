@@ -283,10 +283,12 @@ async function initGame() {
 		}
 	}
 
-	await WS.StartWebSocket()
-
 	personal.haltPlay = false
 	controller.startPlayerTurn()
+
+	WS.StartWebSocket().catch(() => {
+		console.log("WebSocket background task initialized.")
+	})
 } // end initGame
 
 initGame()
@@ -358,15 +360,16 @@ function getSplitUIleftMinWidth() {
 <template>
 	<TopMenu />
 
-	<div id="wholeMiddleArea" :style="{
-		'min-width': (store.players.length === 2 ? '500' : '730') + 'px',
-	}">
+	<div
+		id="wholeMiddleArea"
+		:style="{
+			'min-width': (store.players.length === 2 ? '500' : '730') + 'px',
+		}">
 		<transition name="fadeMainArea">
 			<div id="boardContainer" v-if="!store.topMenuViews.performingRewind">
 				<div id="middle">
 					<transition name="slideC">
-						<PlayerDetails v-if="store.topMenuViews.showingPlayerIndex >= 0"
-							:playerIndex="store.topMenuViews.showingPlayerIndex" />
+						<PlayerDetails v-if="store.topMenuViews.showingPlayerIndex >= 0" :playerIndex="store.topMenuViews.showingPlayerIndex" />
 					</transition>
 					<TopMenuViews />
 					<HistoryTab />
@@ -380,9 +383,11 @@ function getSplitUIleftMinWidth() {
 						<ReplayArea v-if="store.topMenuViews.generatingReplay" />
 						<template v-if="!store.topMenuViews.generatingReplay">
 							<div id="splitUIcontainer">
-								<div id="splitUIleft" :style="{
-									'min-width': String(getSplitUIleftMinWidth()) + 'px',
-								}">
+								<div
+									id="splitUIleft"
+									:style="{
+										'min-width': String(getSplitUIleftMinWidth()) + 'px',
+									}">
 									<ReplayArea />
 									<ActionArea />
 								</div>
@@ -394,8 +399,7 @@ function getSplitUIleftMinWidth() {
 					</template>
 					<!-- NORMAL UI -->
 					<template v-else>
-						<ReplayArea
-							v-if="store.topMenuViews.generatingReplay || store.topMenuViews.replayUIlocation === 0" />
+						<ReplayArea v-if="store.topMenuViews.generatingReplay || store.topMenuViews.replayUIlocation === 0" />
 						<template v-if="!store.topMenuViews.generatingReplay">
 							<div id="mainAreaLessHistory">
 								<ActionArea />

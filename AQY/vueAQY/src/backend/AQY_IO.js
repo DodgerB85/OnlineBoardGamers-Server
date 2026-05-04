@@ -156,7 +156,7 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 		personal.haltPlay = false
 
 		// Broadcast update
-		WS.broadcastGameUpdate(wsConnecting).catch(err => console.warn("Broadcast failed:", err))
+		WS.broadcastGameUpdate(wsConnecting).catch((err) => console.warn("Broadcast failed:", err))
 
 		await controller.startPlayerTurn()
 	} catch (error) {
@@ -171,7 +171,7 @@ export async function sendNotification(name) {
 
 	let wsConnecting = null
 	if (personal.liveWS) {
-		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+		wsConnecting = WS.StartWebSocket()
 	}
 
 	personal.haltPlay = true
@@ -268,7 +268,7 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 
 	let wsConnecting = null
 	if (personal.liveWS) {
-		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+		wsConnecting = WS.StartWebSocket()
 	}
 
 	personal.haltPlay = true
@@ -350,7 +350,7 @@ export async function acceptTrade(entry) {
 
 	let wsConnecting = null
 	if (personal.liveWS) {
-		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+		wsConnecting = WS.StartWebSocket()
 	}
 
 	personal.haltPlay = true
@@ -428,7 +428,7 @@ export async function rejectTrade(entry) {
 
 	let wsConnecting = null
 	if (personal.liveWS) {
-		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
+		wsConnecting = WS.StartWebSocket()
 	}
 
 	personal.haltPlay = true
@@ -934,7 +934,7 @@ async function updateDataFromLoadRewind() {
 
 	let wsConnecting = null
 	if (personal.liveWS) {
-		wsConnecting = WS.StartWebSocket() 
+		wsConnecting = WS.StartWebSocket()
 	}
 
 	store.topMenuViews.showLoader = true

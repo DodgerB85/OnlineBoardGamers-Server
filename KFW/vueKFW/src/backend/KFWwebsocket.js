@@ -9,55 +9,88 @@ import * as model from "../js/KFWmodel"
 
 export var KFWwebSocket
 let KFWconnectionPromise = null // Track the in-progress connection
+let retryCount = 0
+const MAX_RETRIES = 13 // Uses 3 tries per attempt
+const BASE_RETRY_DELAY = 2000
 
 export async function StartWebSocket() {
 	const personal = usePersonalStore()
-	// 1. If already open, return immediately
-	if (KFWwebSocket && KFWwebSocket.readyState === 1) {
-		return KFWwebSocket
+
+	if (KFWwebSocket && KFWwebSocket.readyState === 1) return KFWwebSocket
+	if (KFWconnectionPromise) return KFWconnectionPromise
+
+	if (retryCount >= MAX_RETRIES) {
+		console.error("Max WebSocket retries reached.")
+		personal.WSstatus = "WSdisconnected"
+		return null
 	}
 
-	// 2. If currently connecting, return the existing promise
-	if (KFWconnectionPromise) {
-		return KFWconnectionPromise
-	}
-
-	// 3. Create a new connection promise
-	KFWconnectionPromise = new Promise((resolve, reject) => {
-		if (typeof KFWwebSocket !== "undefined" && KFWwebSocket.readyState === 0) {
-			// Already in native connecting state, just attach listeners
-		} else {
+	KFWconnectionPromise = new Promise((resolve) => {
+		const connectionTimeout = setTimeout(() => {
+			cleanup()
 			if (KFWwebSocket) KFWwebSocket.close()
-			let ChannelNumber = personal.gameID
-			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeKFWchannel" + String(ChannelNumber) + "/"
-			KFWwebSocket = new WebSocket(wsUri)
-		}
+			handleFailure("Connection Timeout")
+			resolve(null) // Resolve null to prevent "Uncaught Promise" errors
+		}, 4000)
 
-		KFWwebSocket.onopen = function (evt) {
-			KFWconnectionPromise = null // Clear promise on success
-			KFWwebSocketOnOpen(evt)
-			resolve(KFWwebSocket)
-		}
-
-		KFWwebSocket.onclose = function (evt) {
+		const cleanup = () => {
+			clearTimeout(connectionTimeout)
 			KFWconnectionPromise = null
-			KFWwebSocketOnClose(evt)
 		}
 
-		KFWwebSocket.onerror = function (evt) {
-			KFWconnectionPromise = null
-			KFWwebSocketOnError(evt)
-			reject(evt)
+		const handleFailure = (reason) => {
+			retryCount++
+			console.warn(`WS Attempt ${retryCount} failed: ${reason}`)
+			personal.liveWS = false
+
+			if (retryCount < MAX_RETRIES) {
+				personal.WSstatus = "WSconnecting" // Or "WSretrying"
+				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
+				setTimeout(StartWebSocket, delay)
+			} else {
+				personal.WSstatus = "WSdisconnected"
+			}
 		}
 
-		KFWwebSocket.onmessage = function (evt) {
-			KFWwebSocketOnInfo(evt)
+		try {
+			// Logic to prevent multiple native connections
+			if (KFWwebSocket && KFWwebSocket.readyState === 0) {
+				// Wait for existing native attempt
+			} else {
+				if (KFWwebSocket) KFWwebSocket.close()
+				let wsUri = "wss://wss.s3.sitereview.io/ws/HomeKFWchannel" + String(personal.gameID) + "/"
+				KFWwebSocket = new WebSocket(wsUri)
+			}
+
+			KFWwebSocket.onopen = (evt) => {
+				cleanup()
+				retryCount = 0
+				KFWwebSocketOnOpen(evt)
+				resolve(KFWwebSocket)
+			}
+
+			KFWwebSocket.onclose = () => {
+				cleanup()
+				handleFailure("Socket Closed")
+				resolve(null)
+			}
+
+			KFWwebSocket.onerror = (evt) => {
+				cleanup()
+				handleFailure("Socket Error (Blocked)")
+				resolve(null)
+			}
+
+			KFWwebSocket.onmessage = (evt) => KFWwebSocketOnInfo(evt)
+		} catch (err) {
+			cleanup()
+			handleFailure(err.message)
+			resolve(null)
 		}
 	})
 
 	return KFWconnectionPromise
 }
-
 async function KFWwebSocketOnOpen() {
 	const personal = usePersonalStore()
 	personal.WSstatus = "WSconnected"

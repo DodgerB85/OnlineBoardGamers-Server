@@ -6,74 +6,93 @@ import * as view from "./CNSview"
 
 export var CNSwebSocket
 let CNSconnectionPromise = null // Track the in-progress connection
+let retryCount = 0
+const MAX_RETRIES = 13 // Uses 3 tries per attempt
+const BASE_RETRY_DELAY = 2000
 
 export async function StartWebSocket() {
 	const personal = usePersonalStore()
-	// 1. If already open, return immediately
-	if (CNSwebSocket && CNSwebSocket.readyState === 1) {
-		return CNSwebSocket
+
+	if (CNSwebSocket && CNSwebSocket.readyState === 1) return CNSwebSocket
+	if (CNSconnectionPromise) return CNSconnectionPromise
+
+	if (retryCount >= MAX_RETRIES) {
+		console.error("Max WebSocket retries reached.")
+		personal.WSstatus = "WSdisconnected"
+		return null
 	}
 
-	// 2. If currently connecting, return the existing promise
-	if (CNSconnectionPromise) {
-		return CNSconnectionPromise
-	}
-
-	// 3. Create a new connection promise
-	CNSconnectionPromise = new Promise((resolve, reject) => {
-		if (typeof CNSwebSocket !== "undefined" && CNSwebSocket.readyState === 0) {
-			// Already in native connecting state, just attach listeners
-		} else {
+	CNSconnectionPromise = new Promise((resolve) => {
+		const connectionTimeout = setTimeout(() => {
+			cleanup()
 			if (CNSwebSocket) CNSwebSocket.close()
-			let ChannelNumber = personal.gameID
-			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeCNSchannel" + String(ChannelNumber) + "/"
-			CNSwebSocket = new WebSocket(wsUri)
-		}
+			handleFailure("Connection Timeout")
+			resolve(null) // Resolve null to prevent "Uncaught Promise" errors
+		}, 4000)
 
-		CNSwebSocket.onopen = function (evt) {
-			CNSconnectionPromise = null // Clear promise on success
-			CNSwebSocketOnOpen(evt)
-			resolve(CNSwebSocket)
-		}
-
-		CNSwebSocket.onclose = function (evt) {
+		const cleanup = () => {
+			clearTimeout(connectionTimeout)
 			CNSconnectionPromise = null
-			CNSwebSocketOnClose(evt)
 		}
 
-		CNSwebSocket.onerror = function (evt) {
-			CNSconnectionPromise = null
-			CNSwebSocketOnError(evt)
-			reject(evt)
+		const handleFailure = (reason) => {
+			retryCount++
+			console.warn(`WS Attempt ${retryCount} failed: ${reason}`)
+			personal.liveWS = false
+
+			if (retryCount < MAX_RETRIES) {
+				personal.WSstatus = "WSconnecting" // Or "WSretrying"
+				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
+				setTimeout(StartWebSocket, delay)
+			} else {
+				personal.WSstatus = "WSdisconnected"
+			}
 		}
 
-		CNSwebSocket.onmessage = function (evt) {
-			CNSwebSocketOnInfo(evt)
+		try {
+			// Logic to prevent multiple native connections
+			if (CNSwebSocket && CNSwebSocket.readyState === 0) {
+				// Wait for existing native attempt
+			} else {
+				if (CNSwebSocket) CNSwebSocket.close()
+				let wsUri = "wss://wss.s3.sitereview.io/ws/HomeCNSchannel" + String(personal.gameID) + "/"
+				CNSwebSocket = new WebSocket(wsUri)
+			}
+
+			CNSwebSocket.onopen = (evt) => {
+				cleanup()
+				retryCount = 0
+				CNSwebSocketOnOpen(evt)
+				resolve(CNSwebSocket)
+			}
+
+			CNSwebSocket.onclose = () => {
+				cleanup()
+				handleFailure("Socket Closed")
+				resolve(null)
+			}
+
+			CNSwebSocket.onerror = (evt) => {
+				cleanup()
+				handleFailure("Socket Error (Blocked)")
+				resolve(null)
+			}
+
+			CNSwebSocket.onmessage = (evt) => CNSwebSocketOnInfo(evt)
+		} catch (err) {
+			cleanup()
+			handleFailure(err.message)
+			resolve(null)
 		}
 	})
 
 	return CNSconnectionPromise
 }
-
 async function CNSwebSocketOnOpen() {
 	const personal = usePersonalStore()
 	personal.WSstatus = "WSconnected"
 	personal.liveWS = true
 	IO.checkForLatestData()
-}
-
-function CNSwebSocketOnClose() {
-	const personal = usePersonalStore()
-	personal.WSstatus = "WSdisconnected"
-	// Reconnect after a delay
-	setTimeout(StartWebSocket, 2000)
-}
-
-function CNSwebSocketOnError() {
-	const personal = usePersonalStore()
-	personal.WSstatus = "WSdisconnected"
-	// Reconnect after a delay
-	setTimeout(StartWebSocket, 2000)
 }
 
 async function CNSwebSocketOnInfo(IncomingInfo) {

@@ -358,8 +358,6 @@ export async function initGame() {
 
 	// Now insert data1/3
 	if (!window.initData.finishedGame) funcs.importCompressedGameData13(window.initData.gameData1, window.initData.gameData3)
-	// start WS
-	if (window.initData.pov >= 0) await WS.StartWebSocket()
 	// Allow play
 	personal.haltPlay = false
 
@@ -369,6 +367,13 @@ export async function initGame() {
 		if (!IO.DEBUG_USERS.includes(personal.name) && personal.pov >= 0 && window.initData.move == "") store.gameflow.phase = rf.PRE_PHASE_VILLAGE_EXPANDING
 	}
 	if (personal.canPlay()) controller.startPlayerTurn()
+
+	// start WS
+	if (window.initData.pov >= 0) {
+		WS.StartWebSocket().catch(() => {
+			console.log("WebSocket background task initialized.")
+		})
+	}
 } // end initGame
 
 export function doturnStartHighlights() {

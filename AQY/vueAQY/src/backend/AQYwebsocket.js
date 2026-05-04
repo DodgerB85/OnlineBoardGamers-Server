@@ -7,49 +7,83 @@ import * as rf from "../js/AQYreference"
 
 export var AQYwebSocket
 let AQYconnectionPromise = null // Track the in-progress connection
+let retryCount = 0
+const MAX_RETRIES = 13 // Uses 3 tries per attempt
+const BASE_RETRY_DELAY = 2000
 
 export async function StartWebSocket() {
 	const personal = usePersonalStore()
-	// 1. If already open, return immediately
-	if (AQYwebSocket && AQYwebSocket.readyState === 1) {
-		return AQYwebSocket
+
+	if (AQYwebSocket && AQYwebSocket.readyState === 1) return AQYwebSocket
+	if (AQYconnectionPromise) return AQYconnectionPromise
+
+	if (retryCount >= MAX_RETRIES) {
+		console.error("Max WebSocket retries reached.")
+		personal.WSstatus = "WSdisconnected"
+		return null
 	}
 
-	// 2. If currently connecting, return the existing promise
-	if (AQYconnectionPromise) {
-		return AQYconnectionPromise
-	}
-
-	// 3. Create a new connection promise
-	AQYconnectionPromise = new Promise((resolve, reject) => {
-		if (typeof AQYwebSocket !== "undefined" && AQYwebSocket.readyState === 0) {
-			// Already in native connecting state, just attach listeners
-		} else {
+	AQYconnectionPromise = new Promise((resolve) => {
+		const connectionTimeout = setTimeout(() => {
+			cleanup()
 			if (AQYwebSocket) AQYwebSocket.close()
-			let ChannelNumber = personal.gameID
-			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeAQYchannel" + String(ChannelNumber) + "/"
-			AQYwebSocket = new WebSocket(wsUri)
-		}
+			handleFailure("Connection Timeout")
+			resolve(null) // Resolve null to prevent "Uncaught Promise" errors
+		}, 4000)
 
-		AQYwebSocket.onopen = function (evt) {
-			AQYconnectionPromise = null // Clear promise on success
-			AQYwebSocketOnOpen(evt)
-			resolve(AQYwebSocket)
-		}
-
-		AQYwebSocket.onclose = function (evt) {
+		const cleanup = () => {
+			clearTimeout(connectionTimeout)
 			AQYconnectionPromise = null
-			AQYwebSocketOnClose(evt)
 		}
 
-		AQYwebSocket.onerror = function (evt) {
-			AQYconnectionPromise = null
-			AQYwebSocketOnError(evt)
-			reject(evt)
+		const handleFailure = (reason) => {
+			retryCount++
+			console.warn(`WS Attempt ${retryCount} failed: ${reason}`)
+			personal.liveWS = false
+
+			if (retryCount < MAX_RETRIES) {
+				personal.WSstatus = "WSconnecting" // Or "WSretrying"
+				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
+				setTimeout(StartWebSocket, delay)
+			} else {
+				personal.WSstatus = "WSdisconnected"
+			}
 		}
 
-		AQYwebSocket.onmessage = function (evt) {
-			AQYwebSocketOnInfo(evt)
+		try {
+			// Logic to prevent multiple native connections
+			if (AQYwebSocket && AQYwebSocket.readyState === 0) {
+				// Wait for existing native attempt
+			} else {
+				if (AQYwebSocket) AQYwebSocket.close()
+				let wsUri = "wss://wss.s3.sitereview.io/ws/HomeAQYchannel" + String(personal.gameID) + "/"
+				AQYwebSocket = new WebSocket(wsUri)
+			}
+
+			AQYwebSocket.onopen = (evt) => {
+				cleanup()
+				retryCount = 0
+				AQYwebSocketOnOpen(evt)
+				resolve(AQYwebSocket)
+			}
+
+			AQYwebSocket.onclose = () => {
+				cleanup()
+				handleFailure("Socket Closed")
+				resolve(null)
+			}
+
+			AQYwebSocket.onerror = (evt) => {
+				cleanup()
+				handleFailure("Socket Error (Blocked)")
+				resolve(null)
+			}
+
+			AQYwebSocket.onmessage = (evt) => AQYwebSocketOnInfo(evt)
+		} catch (err) {
+			cleanup()
+			handleFailure(err.message)
+			resolve(null)
 		}
 	})
 
@@ -61,20 +95,6 @@ async function AQYwebSocketOnOpen() {
 	personal.WSstatus = "WSconnected"
 	personal.liveWS = true
 	IO.checkForLatestData()
-}
-
-function AQYwebSocketOnClose() {
-	const personal = usePersonalStore()
-	personal.WSstatus = "WSdisconnected"
-	// Reconnect after a delay
-	setTimeout(StartWebSocket, 2000)
-}
-
-function AQYwebSocketOnError() {
-	const personal = usePersonalStore()
-	personal.WSstatus = "WSdisconnected"
-	// Reconnect after a delay
-	setTimeout(StartWebSocket, 2000)
 }
 
 async function AQYwebSocketOnInfo(IncomingInfo) {
@@ -113,17 +133,17 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 						tempElement.innerHTML = store.gameName
 						// Get the decoded text
 						let decodedGameName = tempElement.textContent
-	
+
 						Notification.requestPermission(function (_status) {
 							const title = "It is your turn in Antiquity"
-	
+
 							const options = {
 								body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(),
 								//badge: "/static/Lobby/favicon.jpg", // Monochrome, chrome only. Seems to crash
 								icon: "/static/AQY/images/aqy_icon.png",
 								tag: "OBGgame",
 							}
-	
+
 							var n = new Notification(title, options)
 							n.onclick = function (_event) {
 								//event.preventDefault() // Prevents the browser from focusing the Notification's tab
@@ -135,11 +155,7 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 						})
 					}
 				}
-
-				
 			} else AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-
-
 		}
 	}
 
@@ -286,11 +302,3 @@ export async function broadcastGameUpdate(existingPromise = null) {
 		console.warn("AQY Broadcast failed:", err)
 	}
 }
-
-/*if (WS.AQYwebSocket && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-else if (WS.AQYwebSocket && personal.liveWS) {
-	await WS.StartWebSocket()
-	await funcs.sleep(2000)
-	if (personal.liveWS && WS.AQYwebSocket.readyState === 1) WS.AQYwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
-	else console.log("2xTO: " + WS.AQYwebSocket.readyState)
-}*/

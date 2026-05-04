@@ -212,7 +212,11 @@ async function initGame() {
 		rf.doAdminAlrt("ERROR: No current player\nContact admin on Discord or Email")
 	}
 
-	if (window.initData.pov != undefined) await WS.StartWebSocket()
+	if (window.initData.pov != undefined) {
+		WS.StartWebSocket().catch(() => {
+			console.log("WebSocket background task initialized.")
+		})
+	}
 } // end initGame
 
 initGame()

@@ -75,8 +75,8 @@ export async function initGame() {
 	let zoomLevel = window.initData.myZoomLevel !== 0 ? window.initData.myZoomLevel * 10 : 50
 	store.refSize = zoomLevel
 
-  store.deleteVotesData = window.initData.deleteVotesData
-  store.statsExcludeVotesData = window.initData.statsExcludeVotesData
+	store.deleteVotesData = window.initData.deleteVotesData
+	store.statsExcludeVotesData = window.initData.statsExcludeVotesData
 
 	personal.liveWS = false
 
@@ -224,8 +224,8 @@ export async function initGame() {
 			funcs.importWEBmodel(window.initData.gameData, true, false)
 		} else funcs.importWEBmodel(window.initData.gameData, false, false)
 
-    personal.votedToDelete = store.deleteVotesData[personal.name]
-    personal.votedToExclude = store.statsExcludeVotesData[personal.name]
+		personal.votedToDelete = store.deleteVotesData[personal.name]
+		personal.votedToExclude = store.statsExcludeVotesData[personal.name]
 		// Go to replay mode if requested
 		/*if (window.initData.spoilerFree) {
 			// Enter replay mode at step 1
@@ -237,12 +237,17 @@ export async function initGame() {
 		}*/
 	}
 
-	// start WS
-	if (window.initData.pov >= 0) await WS.StartWebSocket()
 	// Allow play
 	personal.haltPlay = false
 
 	if (personal.canPlay()) controller.startPlayerTurn()
+
+	// start WS
+	if (window.initData.pov >= 0) {
+		WS.StartWebSocket().catch(() => {
+			console.log("WebSocket background task initialized.")
+		})
+	}
 } // end initGame
 
 /**
@@ -413,7 +418,7 @@ export function undoLastAction() {
 
 export function addCablesToPlayer(playerIndex) {
 	const store = useModelStore()
-  store.clearMessages()
+	store.clearMessages()
 	addCablesToPlayer_core(playerIndex)
 	store.context.remainingActions--
 	addHistory(rf.HIST_ADD_CABLES, playerIndex, 0, [store.players[playerIndex].currentCables, store.players[playerIndex].storedCables])
@@ -430,7 +435,7 @@ export function addCablesToPlayer_core(playerIndex) {
 
 export async function addTileToPlayer(playerIndex, tileID) {
 	const store = useModelStore()
-  store.clearMessages()
+	store.clearMessages()
 	addTileToPlayer_core(playerIndex, tileID)
 	store.context.remainingActions--
 	addHistory(rf.HIST_GET_NEW_TILE, playerIndex, 0, [tileID])
@@ -461,7 +466,7 @@ export function addTileToPlayer_core(playerIndex, tileID) {
 
 export function addCableToMap(playerIndex, index, rotation) {
 	const store = useModelStore()
-  store.clearMessages()
+	store.clearMessages()
 	addCableToMap_core(playerIndex, index, rotation)
 	store.context.remainingActions--
 	let remainingActions = store.context.remainingActions
@@ -513,7 +518,7 @@ export function endGame_core() {
 	const store = useModelStore()
 	store.gameflow.phase = rf.PHASE_GAME_OVER
 
-  	// Create an array of player objects with their original index
+	// Create an array of player objects with their original index
 	const playerScores = store.players.map((player, index) => ({
 		index: index,
 		finalScore: cb.getScore(index),

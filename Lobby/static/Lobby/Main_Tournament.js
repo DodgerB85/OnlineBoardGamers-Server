@@ -34,7 +34,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	reparseChatData()
 
 	// Start WS
-	StartWebSocket()
+	StartWebSocket().catch(() => {
+		console.log("WebSocket background task initialized.")
+	})
 })
 
 function reparseChatData() {
@@ -198,45 +200,88 @@ function getCookie(name) {
 
 /******* WS */
 var MainTwebSocket
+let MainTconnectionPromise = null // Track the in-progress connection
+
+let retryCount = 0
+const MAX_RETRIES = 13 // Uses 3 tries per attempt
+const BASE_RETRY_DELAY = 2000
 
 async function StartWebSocket() {
-	if (typeof MainTwebSocket !== "undefined") {
-		if (MainTwebSocket.readyState === 0 || MainTwebSocket.readyState === 1) return
-		else MainTwebSocket.close()
+	if (MainTwebSocket && MainTwebSocket.readyState === 1) return MainTwebSocket
+	if (MainTconnectionPromise) return MainTconnectionPromise
+
+	if (retryCount >= MAX_RETRIES) {
+		console.error("Max WebSocket retries reached.")
+		return null
 	}
 
-	let ChannelNumber = global.MainT_ID
+	MainTconnectionPromise = new Promise((resolve) => {
+		const connectionTimeout = setTimeout(() => {
+			cleanup()
+			if (MainTwebSocket) MainTwebSocket.close()
+			handleFailure("Connection Timeout")
+			resolve(null) // Resolve null to prevent "Uncaught Promise" errors
+		}, 4000)
 
-	let wsUri = "wss://wss.s3.sitereview.io/ws/HomeMainThannel" + String(ChannelNumber) + "/"
+		const cleanup = () => {
+			clearTimeout(connectionTimeout)
+			MainTconnectionPromise = null
+		}
 
-	MainTwebSocket = new WebSocket(wsUri)
+		const handleFailure = (reason) => {
+			retryCount++
+			console.warn(`WS Attempt ${retryCount} failed: ${reason}`)
 
-	MainTwebSocket.onopen = async function (evt) {
-		MainTwebSocketOnOpen(evt)
-	}
-	MainTwebSocket.onclose = function (evt) {
-		MainTwebSocketOnClose(evt)
-	}
-	MainTwebSocket.onmessage = function (evt) {
-		MainTwebSocketOnInfo(evt)
-	}
-	MainTwebSocket.onerror = function (evt) {
-		MainTwebSocketOnError(evt)
-	}
+			if (retryCount < MAX_RETRIES) {
+				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
+				setTimeout(StartWebSocket, delay)
+			} else {
+				//
+			}
+		}
+
+		try {
+			// Logic to prevent multiple native connections
+			if (MainTwebSocket && MainTwebSocket.readyState === 0) {
+				// Wait for existing native attempt
+			} else {
+				if (MainTwebSocket) MainTwebSocket.close()
+				let wsUri = "wss://wss.s3.sitereview.io/ws/HomeMainTchannel" + String(global.MainT_ID) + "/"
+				MainTwebSocket = new WebSocket(wsUri)
+			}
+
+			MainTwebSocket.onopen = (evt) => {
+				cleanup()
+				retryCount = 0
+				MainTwebSocketOnOpen(evt)
+				resolve(MainTwebSocket)
+			}
+
+			MainTwebSocket.onclose = () => {
+				cleanup()
+				handleFailure("Socket Closed")
+				resolve(null)
+			}
+
+			MainTwebSocket.onerror = (_evt) => {
+				cleanup()
+				handleFailure("Socket Error (Blocked)")
+				resolve(null)
+			}
+
+			MainTwebSocket.onmessage = (evt) => MainTwebSocketOnInfo(evt)
+		} catch (err) {
+			cleanup()
+			handleFailure(err.message)
+			resolve(null)
+		}
+	})
+
+	return MainTconnectionPromise
 }
 
-function MainTwebSocketOnOpen(evt) {
+function MainTwebSocketOnOpen(_evt) {
 	//ConnectionStatus = "CONNECTED";
-}
-
-function MainTwebSocketOnClose(evt) {
-	MainTwebSocket.close()
-	//setTimeout(StartWebSocket, 2000)
-}
-
-function MainTwebSocketOnError(evt) {
-	//document.getElementById("liveDiv").innerHTML = gettext("Error")
-	setTimeout(StartWebSocket, 2000)
 }
 
 async function MainTwebSocketOnInfo(IncomingInfo) {
@@ -247,30 +292,29 @@ async function MainTwebSocketOnInfo(IncomingInfo) {
 	}
 }
 
-	async function reloadChatData() {
-		let csrftoken = getCookie("csrftoken")
+async function reloadChatData() {
+	let csrftoken = getCookie("csrftoken")
 
-		// Function to fetch data from the database
-		try {
-			const response = await fetch("/reloadMainTchatData/", {
-				method: "POST",
-				body: JSON.stringify({
-					MainT_ID: global.MainT_ID,
-				}),
-				headers: { "X-CSRFToken": csrftoken },
-			})
+	// Function to fetch data from the database
+	try {
+		const response = await fetch("/reloadMainTchatData/", {
+			method: "POST",
+			body: JSON.stringify({
+				MainT_ID: global.MainT_ID,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
 
-			if (!response.ok) {
-				throw new Error("Network response was not ok")
-			}
-			const data = await response.json()
-
-			global.chatData = data.chatData
-			reparseChatData()
-		} catch (error) {
-			console.error("Error fetching data:", error)
+		if (!response.ok) {
+			throw new Error("Network response was not ok")
 		}
-	}
+		const data = await response.json()
 
+		global.chatData = data.chatData
+		reparseChatData()
+	} catch (error) {
+		console.error("Error fetching data:", error)
+	}
+}
 
 /******* END WS */

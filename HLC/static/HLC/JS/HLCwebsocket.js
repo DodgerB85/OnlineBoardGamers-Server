@@ -1,47 +1,80 @@
 var HLCwebSocket
 var HLCconnectionPromise = null // Track the in-progress connection
+let retryCount = 0
+const MAX_RETRIES = 13 // Uses 3 tries per attempt
+const BASE_RETRY_DELAY = 2000
 
-function StartWebSocket() {
-	// 1. If already open, return immediately
-	if (HLCwebSocket && HLCwebSocket.readyState === 1) {
-		return HLCwebSocket
+export async function StartWebSocket() {
+	if (HLCwebSocket && HLCwebSocket.readyState === 1) return HLCwebSocket
+	if (HLCconnectionPromise) return HLCconnectionPromise
+
+	if (retryCount >= MAX_RETRIES) {
+		console.error("Max WebSocket retries reached.")
+		document.getElementById("liveDiv").innerHTML = gettext("Disconnected")
+		return null
 	}
 
-	// 2. If currently connecting, return the existing promise
-	if (HLCconnectionPromise) {
-		return HLCconnectionPromise
-	}
-
-	// 3. Create a new connection promise
-	HLCconnectionPromise = new Promise((resolve, reject) => {
-		if (typeof HLCwebSocket !== "undefined" && HLCwebSocket.readyState === 0) {
-			// Already in native connecting state, just attach listeners
-		} else {
+	HLCconnectionPromise = new Promise((resolve) => {
+		const connectionTimeout = setTimeout(() => {
+			cleanup()
 			if (HLCwebSocket) HLCwebSocket.close()
-			let ChannelNumber = global.gameID
-			let wsUri = "wss://wss.s3.sitereview.io/ws/HomeHLCchannel" + String(ChannelNumber) + "/"
-			HLCwebSocket = new WebSocket(wsUri)
-		}
+			handleFailure("Connection Timeout")
+			resolve(null) // Resolve null to prevent "Uncaught Promise" errors
+		}, 4000)
 
-		HLCwebSocket.onopen = function (evt) {
-			HLCconnectionPromise = null // Clear promise on success
-			HLCwebSocketOnOpen(evt)
-			resolve(HLCwebSocket)
-		}
-
-		HLCwebSocket.onclose = function (evt) {
+		const cleanup = () => {
+			clearTimeout(connectionTimeout)
 			HLCconnectionPromise = null
-			HLCwebSocketOnClose(evt)
 		}
 
-		HLCwebSocket.onerror = function (evt) {
-			HLCconnectionPromise = null
-			HLCwebSocketOnError(evt)
-			reject(evt)
+		const handleFailure = (reason) => {
+			retryCount++
+			console.warn(`WS Attempt ${retryCount} failed: ${reason}`)
+			global.liveWS = false
+
+			if (retryCount < MAX_RETRIES) {
+				document.getElementById("liveDiv").innerHTML = gettext("Connecting...")
+				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
+				setTimeout(StartWebSocket, delay)
+			} else {
+				document.getElementById("liveDiv").innerHTML = gettext("Disconnected")
+			}
 		}
 
-		HLCwebSocket.onmessage = function (evt) {
-			HLCwebSocketOnInfo(evt)
+		try {
+			// Logic to prevent multiple native connections
+			if (HLCwebSocket && HLCwebSocket.readyState === 0) {
+				// Wait for existing native attempt
+			} else {
+				if (HLCwebSocket) HLCwebSocket.close()
+				let wsUri = "wss://wss.s3.sitereview.io/ws/HomeHLCchannel" + String(global.gameID) + "/"
+				HLCwebSocket = new WebSocket(wsUri)
+			}
+
+			HLCwebSocket.onopen = (evt) => {
+				cleanup()
+				retryCount = 0
+				HLCwebSocketOnOpen(evt)
+				resolve(HLCwebSocket)
+			}
+
+			HLCwebSocket.onclose = (_evt) => {
+				cleanup()
+				handleFailure("Socket Closed")
+				resolve(null)
+			}
+
+			HLCwebSocket.onerror = (_evt) => {
+				cleanup()
+				handleFailure("Socket Error (Blocked)")
+				resolve(null)
+			}
+
+			HLCwebSocket.onmessage = (evt) => HLCwebSocketOnInfo(evt)
+		} catch (err) {
+			cleanup()
+			handleFailure(err.message)
+			resolve(null)
 		}
 	})
 
@@ -50,7 +83,7 @@ function StartWebSocket() {
 
 function HLCwebSocketOnOpen(evt) {
 	document.getElementById("liveDiv").innerHTML = gettext("Connected")
-	IO.checkForLatestData();
+	IO.checkForLatestData()
 }
 
 function HLCwebSocketOnClose(evt) {
@@ -99,7 +132,7 @@ async function HLCwebSocketOnInfo(IncomingInfo) {
 					}
 					await IO.loadGame(C)
 
-                    if (Rules.canPlay()) {
+					if (Rules.canPlay()) {
 						// Check the browser is capable
 						if ("serviceWorker" in navigator && "PushManager" in window) {
 							Notification.requestPermission(function (status) {

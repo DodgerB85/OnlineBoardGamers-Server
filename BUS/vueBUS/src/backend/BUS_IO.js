@@ -17,7 +17,7 @@ export async function saveGame(saveRewind) {
 
 	let wsConnecting = null
 	if (personal.liveWS) {
-		wsConnecting = WS.StartWebSocket() 
+		wsConnecting = WS.StartWebSocket()
 	}
 
 	store.topMenuViews.showLoader = true
@@ -325,9 +325,9 @@ async function updateDataFromLoadRewind() {
 
 	let wsConnecting = null
 	if (personal.liveWS) {
-		wsConnecting = WS.StartWebSocket() 
+		wsConnecting = WS.StartWebSocket()
 	}
-	
+
 	store.topMenuViews.showLoader = true
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER

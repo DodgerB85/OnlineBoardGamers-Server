@@ -34,7 +34,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	reparseChatData()
 
 	// Start WS
-	StartWebSocket()
+	StartWebSocket().catch(() => {
+		console.log("WebSocket background task initialized.")
+	})
 })
 
 function reparseChatData() {
@@ -170,7 +172,7 @@ async function sendChatMessage() {
 			}
 			global.chatData = result.chatData
 
-			MTwebSocket.send("NEWCHATTS" + String(global.MT_ID)) //+ String(result.latestUpdate));
+			MiniTwebSocket.send("NEWCHATTS" + String(global.MT_ID)) //+ String(result.latestUpdate));
 			reparseChatData()
 			chatButton.disabled = false
 			chatButton.textContent = "Send"
@@ -197,49 +199,91 @@ function getCookie(name) {
 }
 
 /******* WS */
-var MTwebSocket
+var MiniTwebSocket
+let MiniTconnectionPromise = null // Track the in-progress connection
+
+let retryCount = 0
+const MAX_RETRIES = 13 // Uses 3 tries per attempt
+const BASE_RETRY_DELAY = 2000
 
 async function StartWebSocket() {
-	if (typeof MTwebSocket !== "undefined") {
-		if (MTwebSocket.readyState === 0 || MTwebSocket.readyState === 1) return
-		else MTwebSocket.close()
+	if (MiniTwebSocket && MiniTwebSocket.readyState === 1) return MiniTwebSocket
+	if (MiniTconnectionPromise) return MiniTconnectionPromise
+
+	if (retryCount >= MAX_RETRIES) {
+		console.error("Max WebSocket retries reached.")
+		return null
 	}
 
-	let ChannelNumber = global.MT_ID
+	MiniTconnectionPromise = new Promise((resolve) => {
+		const connectionTimeout = setTimeout(() => {
+			cleanup()
+			if (MiniTwebSocket) MiniTwebSocket.close()
+			handleFailure("Connection Timeout")
+			resolve(null) // Resolve null to prevent "Uncaught Promise" errors
+		}, 4000)
 
-	let wsUri = "wss://wss.s3.sitereview.io/ws/HomeMThannel" + String(ChannelNumber) + "/"
+		const cleanup = () => {
+			clearTimeout(connectionTimeout)
+			MiniTconnectionPromise = null
+		}
 
-	MTwebSocket = new WebSocket(wsUri)
+		const handleFailure = (reason) => {
+			retryCount++
+			console.warn(`WS Attempt ${retryCount} failed: ${reason}`)
 
-	MTwebSocket.onopen = async function (evt) {
-		MTwebSocketOnOpen(evt)
-	}
-	MTwebSocket.onclose = function (evt) {
-		MTwebSocketOnClose(evt)
-	}
-	MTwebSocket.onmessage = function (evt) {
-		MTwebSocketOnInfo(evt)
-	}
-	MTwebSocket.onerror = function (evt) {
-		MTwebSocketOnError(evt)
-	}
+			if (retryCount < MAX_RETRIES) {
+				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
+				setTimeout(StartWebSocket, delay)
+			} else {
+				//
+			}
+		}
+
+		try {
+			// Logic to prevent multiple native connections
+			if (MiniTwebSocket && MiniTwebSocket.readyState === 0) {
+				// Wait for existing native attempt
+			} else {
+				if (MiniTwebSocket) MiniTwebSocket.close()
+				let wsUri = "wss://wss.s3.sitereview.io/ws/HomeMiniTchannel" + String(global.MT_ID) + "/"
+				MiniTwebSocket = new WebSocket(wsUri)
+			}
+
+			MiniTwebSocket.onopen = (evt) => {
+				cleanup()
+				retryCount = 0
+				MiniTwebSocketOnOpen(evt)
+				resolve(MiniTwebSocket)
+			}
+
+			MiniTwebSocket.onclose = () => {
+				cleanup()
+				handleFailure("Socket Closed")
+				resolve(null)
+			}
+
+			MiniTwebSocket.onerror = (_evt) => {
+				cleanup()
+				handleFailure("Socket Error (Blocked)")
+				resolve(null)
+			}
+
+			MiniTwebSocket.onmessage = (evt) => MiniTwebSocketOnInfo(evt)
+		} catch (err) {
+			cleanup()
+			handleFailure(err.message)
+			resolve(null)
+		}
+	})
+
+	return MiniTconnectionPromise
 }
-
-function MTwebSocketOnOpen(evt) {
+function MiniTwebSocketOnOpen(evt) {
 	//ConnectionStatus = "CONNECTED";
 }
 
-function MTwebSocketOnClose(evt) {
-	MTwebSocket.close()
-	//setTimeout(StartWebSocket, 2000)
-}
-
-function MTwebSocketOnError(evt) {
-	//document.getElementById("liveDiv").innerHTML = gettext("Error")
-	setTimeout(StartWebSocket, 2000)
-}
-
-async function MTwebSocketOnInfo(IncomingInfo) {
+async function MiniTwebSocketOnInfo(IncomingInfo) {
 	if (IncomingInfo.data.slice(0, 9) === "NEWCHATTS") {
 		if (IncomingInfo.data.slice(9) == global.MT_ID) {
 			reloadChatData()
@@ -247,30 +291,29 @@ async function MTwebSocketOnInfo(IncomingInfo) {
 	}
 }
 
-	async function reloadChatData() {
-		let csrftoken = getCookie("csrftoken")
+async function reloadChatData() {
+	let csrftoken = getCookie("csrftoken")
 
-		// Function to fetch data from the database
-		try {
-			const response = await fetch("/reloadMTchatData/", {
-				method: "POST",
-				body: JSON.stringify({
-					MT_ID: global.MT_ID,
-				}),
-				headers: { "X-CSRFToken": csrftoken },
-			})
+	// Function to fetch data from the database
+	try {
+		const response = await fetch("/reloadMTchatData/", {
+			method: "POST",
+			body: JSON.stringify({
+				MT_ID: global.MT_ID,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
 
-			if (!response.ok) {
-				throw new Error("Network response was not ok")
-			}
-			const data = await response.json()
-
-			global.chatData = data.chatData
-			reparseChatData()
-		} catch (error) {
-			console.error("Error fetching data:", error)
+		if (!response.ok) {
+			throw new Error("Network response was not ok")
 		}
-	}
+		const data = await response.json()
 
+		global.chatData = data.chatData
+		reparseChatData()
+	} catch (error) {
+		console.error("Error fetching data:", error)
+	}
+}
 
 /******* END WS */
