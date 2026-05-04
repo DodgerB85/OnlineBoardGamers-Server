@@ -4,7 +4,7 @@ let retryCount = 0
 const MAX_RETRIES = 13 // Uses 3 tries per attempt
 const BASE_RETRY_DELAY = 2000
 
-export async function StartWebSocket() {
+async function StartWebSocket() {
 	if (HLCwebSocket && HLCwebSocket.readyState === 1) return HLCwebSocket
 	if (HLCconnectionPromise) return HLCconnectionPromise
 
