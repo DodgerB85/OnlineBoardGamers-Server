@@ -15,7 +15,17 @@ import { usePersonalStore } from "../stores/WEBpersonal.js"
 export function phaseStr() {
 	//const store = useModelStore()
 
-  return ""
+	return ""
+}
+
+export function getFlexiKickoutTImerText() {
+	const personal = usePersonalStore()
+	if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
+	let hoursToGo = String(Math.floor(personal.flexiSecondsToNextKickout / 60 / 60))
+	let minsToGo = String(Math.floor((personal.flexiSecondsToNextKickout % 3600) / 60)).padStart(2, "0")
+	let secsToGo = String(Math.floor(personal.flexiSecondsToNextKickout % 60)).padStart(2, "0")
+
+	return hoursToGo + ":" + minsToGo + ":" + secsToGo
 }
 
 export function kickoutTimerTicker() {

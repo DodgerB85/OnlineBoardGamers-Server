@@ -165,7 +165,6 @@ class GamePresenter:
 
         current_players = self.getArrayOfIsCurrentPlayers()
         current_username = current_players[0] if current_players else ""
-
         return SF_kickoutRequired(
             self.gameObj.gameStatus,
             all_player_usernames,

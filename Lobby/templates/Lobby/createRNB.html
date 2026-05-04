@@ -47,7 +47,7 @@
         showMapOnly: true,
         gameID: -1,
         startingMap: [],
-        gameName: '{{ gameName }}'
+        gameName: "{{ gameName|escapejs }}"
     };
     </script>
 {% endblock head %}
@@ -378,7 +378,7 @@
     {% if fillData %}
     //alert("Filling Data")
     var setupData = {};
-    setupData.gameName = "{{ gameName }}";
+    setupData.gameName = "{{ gameName|escapejs }}";
     setupData.gameDescription = "{{ gameDescription }}";
     setupData.gamePace = {{ gamePace }};
     setupData.kickoutDuration = "{{ kickoutDuration }}";

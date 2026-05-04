@@ -183,7 +183,7 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     )
     if isinstance(result, HttpResponseRedirect):
         return result
-
+    print(result)
     currentGame = result["game"]
     presenter = result["presenter"]
     all_players = result["all_players"]

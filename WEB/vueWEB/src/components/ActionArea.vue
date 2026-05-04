@@ -127,7 +127,7 @@ function passKickout() {
 				<br />
 				<br />
 				Remaining Flex-Time:
-				<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
+				<span id="flexiKickoutTimerSpan">{{ view.getFlexiKickoutTImerText() }}</span>
 				<br />
 				<br />
 				For more information see

@@ -280,6 +280,7 @@ def SF_updateFlexiTime(kickoutFlexiData, latestUpdate, now, currentUsername, kic
     # Now check kickout in days
     elif kickoutDuration >= 100:
         flexUsed = secondsSinceUpdate - (int(kickoutDuration / 100) * 60 * 60 * 24)
+
     if flexUsed <= 0:
         # ("no update")
         return kickoutFlexiData
@@ -350,7 +351,6 @@ def SF_kickoutRequired(
         # if secondsSinceUpdate > kickoutDuration:
         if secondsSinceUpdate > (kickoutInDays * 60 * 60 * 24):
             individualCheckRequired = True
-
     if individualCheckRequired:
         # Any extra 24hrs must be a kickout
         if kickoutDuration == 50 and secondsSinceUpdate > (12 * 60 * 60) + FLEXI_SECONDS or kickoutDuration >= 100 and secondsSinceUpdate > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:

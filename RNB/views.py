@@ -772,16 +772,11 @@ def _processRNBturn(request):
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
 
-        # newVer = (int(currentGame.latestUpdate) % 1000) + 1
-        # currentGame.latestUpdate = str((int(time.time())*1000) + newVer)
-        # currentGame.save()
         currentGame.save()
         # Response not used
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
-                # "secondsToNextKickout": presenter.getSecondsToNextKickout(),
-                # "nextPlayer": currentGame.currentPlayers,
             },
             safe=False,
         )

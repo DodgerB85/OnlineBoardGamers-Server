@@ -131,7 +131,7 @@
   initData.statsExcludedGame = {{ statsExcludedGame|lower }};
   initData.secondsToNextKickout = {{ secondsToNextKickout }};
   initData.trade = '{{ trade }}';
-  {% if kickoutRequired > 0  %}
+  {% if kickoutRequired > 0 and not myMove %}
   initData.kickoutRequired = {{kickoutRequired}};
   {% endif %}
   initData.notes = '{{ notes | safe }}';
