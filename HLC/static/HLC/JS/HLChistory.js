@@ -14,6 +14,7 @@ var Log = {
 	PLAY_CARD: 6,
 	INCREASE_GANTT: 7,
 	SALES: 8,
+	SALES_V2: 18,
 	ADVANCE_EXPECTATIONS: 9,
 	SHOW_CARDS: 10,
 	NEUTRAL_CARDS: 11,
@@ -99,6 +100,7 @@ var Log = {
 		var ul
 
 		var res = $("<div>")
+		//res.append(JSON.stringify(param))
 		var str = ""
 		if (action == this.FACTORY_SETUP) {
 			/*res.append(playerSpan);
@@ -392,6 +394,110 @@ var Log = {
 				}
 				res.append("<BR>" + gettext("Total Income:") + " $" + String(param[3]))
 			}
+		} else if (action == this.SALES_V2) {
+			//res.append(playerSpan);
+			// param[1] has MW info
+			// param[0] has dealership component name
+			var originalColour = Math.floor((param[0] - 40) / 3)
+			var correctedDshipName = getCorrectedDealershipColour(param[0], originalColour)
+
+			// 0 = dship name
+			// 1 = [0(newplacement) or 1(alreadyplaced), Index, Size, {{1 = rotated, ie a horizontal 2x1 window}}]
+			// 2 = -1 if no sellingNicheEligibility
+			//	 = histSales
+
+			const MWindex = param[1][1]
+			const MWxcoord = (MWindex % 8) + 1
+			const MWycoord = Math.floor(MWindex / 8) + 1
+			const MWsize = param[1][2]
+			let imgRotation = 1
+			if (param[1].length >= 4 && param[1][3] === 1) {
+				imgRotation = 0
+			}
+
+			// Start with either place or use
+			if (param[1][0] === 0) {
+				res.append(interpolate(gettext("%(playerName)s places %(dealershipName)s "), { playerName: playerSpan.prop("outerHTML"), dealershipName: COMPONENTS_NAME_STRING[correctedDshipName] }, true) + "")
+			} else if (param[1][0] === 1) {
+				res.append(interpolate(gettext("%(playerName)s uses %(dealershipName)s "), { playerName: playerSpan.prop("outerHTML"), dealershipName: COMPONENTS_NAME_STRING[correctedDshipName] }, true) + "")
+			}
+
+			let MWimg
+			if (MWsize === 0 && imgRotation === 1) MWimg = V.getImage(`MWicon${MWsize}_v`)
+			else MWimg = V.getImage(`MWicon${MWsize}`)
+			MWimg.addClass("MWhistImg")
+			if (MWsize !== 0) {
+				MWimg.css({
+					height: "30px",
+					width: "30px",
+				})
+			} else if (imgRotation === 0) {
+				MWimg.css({
+					height: "15px",
+					width: "30px",
+				})
+			} else {
+				MWimg.css({
+					height: "30px",
+					width: "15px",
+				})
+			}
+
+			res.append(MWimg)
+
+			res.append(interpolate(gettext(" at position (%(xcoord)s, %(ycoord)s) "), { xcoord: MWxcoord, ycoord: MWycoord }, true))
+
+			// NO POSSIBLE SALES
+			if (param[2] === -1) res.append(gettext("but cannot make any sales"))
+			// RECORD SALES
+			else {
+				res.append(gettext("to sell: ") + "<br/>")
+
+				var infoAdded = false
+				// New info
+				infoAdded = false
+				if (param[2][0][0] > 0) {
+					const data = {
+						carAmount: param[2][0][0],
+						eachSaleAmount: param[2][0][1],
+						xCoord: (param[2][0][2] % 8) +1,
+						yCoord: Math.floor(param[2][0][2] / 8) +1
+					}
+
+					const formats = ngettext("%(carAmount)s Car for $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)", "%(carAmount)s Cars, each for $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)", data.carAmount)
+					res.append(interpolate(formats, data, true))
+
+					infoAdded = true
+				}
+				if (param[2][1][0] > 0) {
+					if (infoAdded) res.append("<BR/>")
+					const data = {
+						truckAmount: param[2][1][0],
+						eachSaleAmount: param[2][1][1],
+						xCoord: (param[2][1][2] % 8) +1,
+						yCoord: Math.floor(param[2][1][2] / 8) +1
+					}
+					const formats = ngettext("%(truckAmount)s Truck for $%(eachSaleAmount)s plus bonus $1 (%(xCoord)s,%(yCoord)s)", "%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1 (%(xCoord)s,%(yCoord)s)", data.truckAmount)
+					res.append(interpolate(formats, data, true))
+
+					infoAdded = true
+				}
+				if (param[2][2][0] > 0) {
+					if (infoAdded) res.append("<BR/>")
+					const data = {
+						sportsAmount: param[2][2][0],
+						eachSaleAmount: param[2][2][1],
+						xCoord: (param[2][2][2] % 8) +1,
+						yCoord: Math.floor(param[2][2][2] / 8) +1
+					}
+					const formats = ngettext("%(sportsAmount)s Sports Car for $%(eachSaleAmount)s plus bonus $2 (%(xCoord)s,%(yCoord)s)", "%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2 (%(xCoord)s,%(yCoord)s)", data.sportsAmount)
+					res.append(interpolate(formats, data, true))
+
+					infoAdded = true
+				}
+
+				res.append("<BR>" + gettext("Total Income:") + " $" + String(param[3]))
+			}
 		} else if (action === this.SALES_SUMMARY) {
 			res.append("<span class=salesSummaryTitle>" + gettext("Sales Summary") + "</span>")
 			var table = $('<table class="salesSummaryTable"><thead><tr><td class="blankTD"></td><td><img class="salesSummaryVehicle" src="' + imagePreURL + '/v_car.png"></td><td><img class="salesSummaryVehicle" src="' + imagePreURL + '/v_truck.png"></td><td><img class="salesSummaryVehicle" src="' + imagePreURL + '/v_sports.png"></td><td>' + gettext("Total") + "</td></tr></thead></table>")
@@ -462,7 +568,7 @@ var Log = {
 				)
 			)
 			res.append(img)
-		}else if (action == this.NO_CARDS) {
+		} else if (action == this.NO_CARDS) {
 			res.append(
 				interpolate(
 					gettext("%(playerName)s has no more cards"),

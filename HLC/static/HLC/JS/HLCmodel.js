@@ -338,6 +338,7 @@ Model = function () {
 			this.piecesUsedInResearch = []
 			this.setupSubPhase = 0
 			this.historyObj = []
+			this.historyObjV2 = []
 			this.sandboxMode = false
 			this.preventMultipleDealershipUses = -1
 			this.justAutoSold = false
@@ -573,6 +574,15 @@ Model = function () {
 		dealership[MW_IDX][1] = this.MWrotation
 		dealership[MW_IDX][2] = MWsize
 		V.render(-1)
+		let HISTindex = index
+		if (MWsize === 0 && this.MWrotation === 1) HISTindex--
+		else if (MWsize === 0 && this.MWrotation === 2) HISTindex-=8
+		else if (MWsize === 1) HISTindex--
+		else if (MWsize === 2) HISTindex-=2
+		M.historyObjV2[M.historyObjV2.length-1][1] = HISTindex
+		M.historyObjV2[M.historyObjV2.length-1][2] = MWsize
+		if (MWsize === 0 && ![0,2].includes(this.MWrotation)) M.historyObjV2[1].push(1)
+		
 	}
 
 	this.log = function (action, param, playerNumber, timestamp) {
@@ -809,6 +819,7 @@ Model.import = function (tab) {
 		m.piecesUsedInResearch = []
 		m.setupSubPhase = 0
 		m.historyObj = []
+		m.historyObjV2 = []
 		m.sandboxMode = false
 		m.preventMultipleDealershipUses = -1
 		m.justAutoSold = false

@@ -462,7 +462,8 @@ var Controller = function (_model, _view) {
 	}
 
 	this.getTrackCompressedNumberFromID = function (id) {
-		if (id === "ACT") return 5 //"Assembly Capacity Track";
+		if (id === "ACT")
+			return 5 //"Assembly Capacity Track";
 		else {
 			var trackToUse = this.model.techTracks[parseInt(id.slice(2, 3))]
 			var colour = trackToUse[7][0]
@@ -917,14 +918,25 @@ var Controller = function (_model, _view) {
 		$(".marketIneligible").remove()
 		$(".marketSelectable").remove()
 		M.historyObj.splice(0, M.historyObj.length)
+		M.historyObjV2.splice(0)
 
 		M.historyObj.push(e.data.dealership[0])
+		M.historyObjV2.push(e.data.dealership[0])
 
 		if (e.data.dealership[MW_IDX][0] == -1) {
 			C.enableMarketWindowPlacement(e.data.dealership)
 			M.historyObj.push(-1)
+			M.historyObjV2.push([0, -1, -1])
 		} else {
 			M.historyObj.push(e.data.dealership[MW_IDX][0])
+			let HISTindex = e.data.dealership[MW_IDX][0]
+			const MWsize = e.data.dealership[MW_IDX][2]
+			if (MWsize === 0 && e.data.dealership[MW_IDX][1] === 1) HISTindex--
+			else if (MWsize === 0 && e.data.dealership[MW_IDX][1] === 2) HISTindex -= 8
+			else if (MWsize === 1) HISTindex--
+			else if (MWsize === 2) HISTindex -= 2
+			M.historyObjV2.push([1, HISTindex, MWsize])
+			if (MWsize === 0 && ![0, 2].includes(e.data.dealership[MW_IDX][1])) M.historyObjV2[M.historyObjV2.length - 1].push(1)
 
 			C.enableSellingForDealership(e.data.dealership)
 		}
@@ -1014,6 +1026,7 @@ var Controller = function (_model, _view) {
 		var sellingNichesEligibility = this.model.getSellingNichesEligibilityForDealership(C.currentPlayer(), dealership)
 		if (sellingNichesEligibility[0].length == 0) {
 			M.historyObj.push(-1)
+			M.historyObjV2.push(-1)
 			$("#actions").empty()
 			$("#actions").append(gettext("No sales possible"))
 			dealership[SE_IDX] = -1
@@ -1042,9 +1055,9 @@ var Controller = function (_model, _view) {
 
 		var histTotalIncome = 0
 		var histSales = [
-			[0, 0],
-			[0, 0],
-			[0, 0],
+			[0, 0, -1],
+			[0, 0, -1],
+			[0, 0, -1],
 		]
 
 		for (var i = 0; i < stock.length; i++) {
@@ -1053,6 +1066,7 @@ var Controller = function (_model, _view) {
 					// Remove from local stock data
 					stock[i]--
 					histSales[i][0]++
+					histSales[i][2] = MBindex
 					// Remove from factory data
 					p.factory.removeItemFromMainlineAdjacentToDealership(dealership, i)
 					// Remove from niche
@@ -1089,15 +1103,30 @@ var Controller = function (_model, _view) {
 			// Must come from a placed MW
 			M.historyObj.push(dealership[0])
 			M.historyObj.push(dealership[MW_IDX][0])
+			M.historyObjV2.push(dealership[0])
+			let HISTindex = dealership[MW_IDX][0]
+			const MWsize = dealership[MW_IDX][2]
+			if (MWsize === 0 && dealership[MW_IDX][1] === 1) HISTindex--
+			else if (MWsize === 0 && dealership[MW_IDX][1] === 2) HISTindex -= 8
+			else if (MWsize === 1) HISTindex--
+			else if (MWsize === 2) HISTindex -= 2
+
+			M.historyObjV2.push([1, HISTindex, MWsize])
+			if (MWsize === 0 && ![0, 2].includes(dealership[MW_IDX][1])) M.historyObjV2[M.historyObjV2.length - 1].push(1)
 		}
 		M.historyObj.push(histSales)
 		M.historyObj.push(histTotalIncome)
+		M.historyObjV2.push(histSales)
+		M.historyObjV2.push(histTotalIncome)
 
 		// If auto selling, add the history now
 		if (autoSale) {
 			M.historyObj.push(1)
-			M.log(Log.SALES, [...M.historyObj], M.gameFlow.turnOrder[0])
+			M.historyObjV2.push(1)
+			//M.log(Log.SALES, [...M.historyObj], M.gameFlow.turnOrder[0])
+			M.log(Log.SALES_V2, [...M.historyObjV2], M.gameFlow.turnOrder[0])
 			M.historyObj.splice(0, M.historyObj.length)
+			M.historyObjV2.splice(0)
 			M.justAutoSold = true
 		}
 
@@ -1225,12 +1254,9 @@ var Controller = function (_model, _view) {
 			// Need to finish off the expansion process
 			this.currentPlayer().factory.collapseFactoryAfterExpansion()
 			// needs a render, but this is done at the end
-		} else if (this.model.gameFlow.phase === PHASE_SELL) {
-			// SHOULD NEVER EVER GET HERE
-			alert("IN EPT")
-			this.model.log(Log.SALES, [...this.model.historyObj])
-			this.model.historyObj.splice(0, this.model.historyObj.length)
-		} else if (this.model.gameFlow.phase === PHASE_GROW_DEMANDS) {
+		} 
+		// NB sales phase is handled in its own function
+		else if (this.model.gameFlow.phase === PHASE_GROW_DEMANDS) {
 			// remove here, as all players will make this move
 			this.model.players[global.pov].factory.factoryComponenetIndexesAddedThisTurn.splice(0, this.model.players[global.pov].factory.factoryComponenetIndexesAddedThisTurn.length)
 		}
@@ -1283,8 +1309,12 @@ var Controller = function (_model, _view) {
 			return
 		}
 
-		if (this.model.players[this.model.gameFlow.turnOrder[0]].name !== "HcBot") this.model.log(Log.SALES, [...this.model.historyObj], this.model.gameFlow.turnOrder[0])
+		if (this.model.players[this.model.gameFlow.turnOrder[0]].name !== "HcBot") {
+			//this.model.log(Log.SALES, [...this.model.historyObj], this.model.gameFlow.turnOrder[0])
+			this.model.log(Log.SALES_V2, [...this.model.historyObjV2], this.model.gameFlow.turnOrder[0])
+		}
 		this.model.historyObj.splice(0, this.model.historyObj.length)
+		this.model.historyObjV2.splice(0)
 
 		delete global.fullreset
 
@@ -1439,11 +1469,12 @@ var Controller = function (_model, _view) {
 		} else if (oldPhase === PHASE_SELL) {
 			// Produce a selling summary
 			var relevantSellingLogs = []
-			const ACTIONS_FOR_SALES_HISTORY = [Log.SALES, Log.SALES_SKIP, Log.REWIND, Log.RESIGN, Log.KICKOUT]
+			const ACTIONS_FOR_SALES_HISTORY = [Log.SALES, Log.SALES_V2, Log.SALES_SKIP, Log.REWIND, Log.RESIGN, Log.KICKOUT]
 
 			i = this.model.logs.length - 1
 			while (ACTIONS_FOR_SALES_HISTORY.includes(this.model.logs[i].action)) {
 				if (this.model.logs[i].action === Log.SALES && this.model.logs[i].param[2] !== -1) relevantSellingLogs.push(this.model.logs[i])
+				if (this.model.logs[i].action === Log.SALES_V2 && this.model.logs[i].param[2] !== -1) relevantSellingLogs.push(this.model.logs[i])
 				i--
 			}
 

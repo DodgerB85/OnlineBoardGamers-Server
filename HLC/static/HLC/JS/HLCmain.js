@@ -19,7 +19,7 @@ function init() {
 	if (global.load != undefined) {
 		var loadData = decompressObjectFromDB(global.load)
 		M = Model.import(loadData)
-		if (!global.HLCgameSummary) Log.refreshHistory(M)
+		//if (!global.HLCgameSummary) Log.refreshHistory(M)
 
 		///////////////////
 
@@ -53,6 +53,8 @@ function init() {
 	V = new View(M)
 
 	C = new Controller(M, V)
+
+	if (global.load != undefined && !global.HLCgameSummary) Log.refreshHistory(M)
 
 	if (global.liveWS) {
 		$(".live").show()

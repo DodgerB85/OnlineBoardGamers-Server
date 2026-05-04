@@ -1093,6 +1093,7 @@ var View = function (model) {
 		else if (imgName === "S1") img.attr("src", imagePreURL + "/s_truck.jpg")
 		else if (imgName === "S2") img.attr("src", imagePreURL + "/s_sports.jpg")
 		else if (imgName === "MWicon0") img.attr("src", imagePreURL + "/MW_sm_i.jpg")
+		else if (imgName === "MWicon0_v") img.attr("src", imagePreURL + "/MW_sm_i_v.jpg")
 		else if (imgName === "MWicon1") img.attr("src", imagePreURL + "/MW_med_i.jpg")
 		else if (imgName === "MWicon2") img.attr("src", imagePreURL + "/MW_lrg_i.jpg")
 
