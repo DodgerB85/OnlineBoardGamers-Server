@@ -256,9 +256,9 @@ function localCastVote(topic) {
 		<div id="notesBox" v-if="store.topMenuViews.showNotes">
 			<h2>Personal game notes</h2>
 			<p>Only you can see these notes</p>
-			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes"></textarea></div>
+			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
-				<button id="submitNotes" class="actionsLineButton" @click="IO.saveNotes">Submit</button>
+				<button id="submitNotes" class="actionsLineButton" @click="IO.saveNotes">Save</button>
 				<button id="clearNotes" class="actionsLineButton" @click="clearNotes">Clear</button>
 				<button id="closeNotes" class="actionsLineButton" @click="toggleNotes">Close</button>
 			</div>

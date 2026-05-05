@@ -70,7 +70,14 @@ export function addLink(playerObj, twoHexes) {
 }
 
 export function addLink_core(playerObj, twoHexes) {
-	playerObj.links.push([twoHexes[0], twoHexes[1]])
+	const newLink = [twoHexes[0], twoHexes[1]]
+	newLink.isNew = true
+	playerObj.links.push(newLink)
+
+	// Remove the isNew flag after animation completes
+	setTimeout(() => {
+		newLink.isNew = false
+	}, 500)
 }
 
 export function removeLink(link) {
@@ -114,7 +121,14 @@ export function addCigar_core(twoHexes, playerObj) {
 
 	store.context.availableResources[rf.RES_PEOPLE]--
 	store.context.availableResources[rf.RES_PEOPLE]--
-	store.oldBoysNetwork.push([twoHexes[0], twoHexes[1]])
+	const newCigar = [twoHexes[0], twoHexes[1]]
+	newCigar.isNew = true
+	store.oldBoysNetwork.push(newCigar)
+
+	// Remove the isNew flag after animation completes
+	setTimeout(() => {
+		newCigar.isNew = false
+	}, 500)
 
 	let newHexRefs = map.getHexesInNetwork(playerObj, true)
 

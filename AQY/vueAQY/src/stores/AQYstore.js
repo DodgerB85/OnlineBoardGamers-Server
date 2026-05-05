@@ -295,6 +295,7 @@ export const useModelStore = defineStore("store", () => {
 		showRewindPanel: false,
 		performingRewind: false,
 		rewindErrorText: "",
+		errorText: "",
 		bugErrorText: "",
 		bugSuccessText: "",
 		tradeSuccessText: "",
@@ -350,6 +351,7 @@ export const useModelStore = defineStore("store", () => {
 
 	function clearMessages() {
 		topMenuViews.rewindErrorText = ""
+		topMenuViews.errorText = ""
 		topMenuViews.bugErrorText = ""
 		topMenuViews.bugSuccessText = ""
 		topMenuViews.tradeSuccessText = ""

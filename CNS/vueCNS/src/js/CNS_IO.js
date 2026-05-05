@@ -31,8 +31,12 @@ export async function submitBug(bugContent) {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.bugEntrySuccess) store.topMenuViews.bugSuccessText = "Your bug report has been submitted"
-		else store.topMenuViews.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		if (data.bugEntrySuccess) {
+			store.topMenuViews.bugSuccessText = "Your bug report has been submitted"
+			store.topMenuViews.successText = "Your bug report has been submitted"
+			store.topMenuViews.showLoader = false
+			store.topMenuViews.showBug = false
+		} else store.topMenuViews.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		store.topMenuViews.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
@@ -221,6 +225,7 @@ export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -235,18 +240,25 @@ export async function saveNotes() {
 			}),
 			headers: { "X-CSRFToken": csrftoken },
 		})
+		const data = await response.json()
+		if (data.error) {
+			store.topMenuViews.errorText = data.error
+			store.topMenuViews.showLoader = false
+			return
+		}
 		if (!response.ok) {
+			console.log(JSON.stringify(response))
 			throw new Error("Network response was not ok")
 		}
-		const data = await response.json()
 		if (!data.notePosted) {
-			alert("Sorry, there was a problem. Please email the webmaster directly")
+			store.topMenuViews.errorText = "Sorry, there was a problem. Please email the webmaster directly"
 			return
 		}
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		alert("Error saving Notes")
+		store.topMenuViews.errorText = "Error: Sorry, there was a problem. Please email the webmaster directly"
+
 	}
 }
 

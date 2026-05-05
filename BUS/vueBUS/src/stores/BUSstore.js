@@ -75,6 +75,7 @@ export const useModelStore = defineStore("model", () => {
 		showReplay: false,
 		generatingReplay: false,
 		showStatsExcludeDropdown: false,
+		errorText: "",
 	})
 
 	const turnResetData = ref("")
@@ -115,6 +116,7 @@ export const useModelStore = defineStore("model", () => {
 		context.historyObj.splice(0, context.historyObj.length)
 		rewindErrorText.value = ""
 		successText.value = ""
+		topMenuViews.errorText = ""
 	}
 
 	return {

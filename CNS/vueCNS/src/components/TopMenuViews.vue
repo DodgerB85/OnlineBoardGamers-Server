@@ -14,6 +14,7 @@ const personal = usePersonalStore()
 
 const chatMessage = ref("")
 const bugReportText = ref("")
+const submittingBug = ref(false)
 
 function getFlexiTimeString(playerName) {
 	let KickoutFlexiDataArray = window.initData.KickoutFlexiDataArray
@@ -80,6 +81,7 @@ function loadRewind() {
 }
 
 function submitBug() {
+	submittingBug.value = true
 	store.topMenuViews.bugErrorText = ""
 	store.topMenuViews.bugSuccessText = ""
 
@@ -88,6 +90,7 @@ function submitBug() {
 		return
 	}
 	IO.submitBug(bugReportText.value)
+	submittingBug.value = false
 }
 
 function getDiscardedHexRefs() {
@@ -243,7 +246,10 @@ function localCastVote(topic) {
 				<textarea cols="150" rows="10" name="bugContent" id="bugContent" v-model="bugReportText"></textarea>
 			</div>
 			<div>
-				<button id="submitBug" class="actionsLineButton" @click="submitBug">Submit</button>
+				<button class="actionsLineButton" id="submitBug" @click="submitBug" :disabled="submittingBug">
+					<span v-if="submittingBug">Submitting Bug Report...</span>
+					<span v-else>Submit</span>
+				</button>
 				<button id="resetBug" class="actionsLineButton" @click="toggleBug">Cancel</button>
 			</div>
 		</div>
@@ -254,9 +260,9 @@ function localCastVote(topic) {
 		<div id="notesBox" v-if="store.topMenuViews.showNotes">
 			<h2>Personal game notes</h2>
 			<p>Only you can see these notes</p>
-			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes"></textarea></div>
+			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
-				<button id="submitNotes" class="actionsLineButton" @click="IO.saveNotes">Submit</button>
+				<button id="submitNotes" class="actionsLineButton" @click="IO.saveNotes">Save</button>
 				<button id="clearNotes" class="actionsLineButton" @click="clearNotes">Clear</button>
 				<button id="closeNotes" class="actionsLineButton" @click="toggleNotes">Close</button>
 			</div>

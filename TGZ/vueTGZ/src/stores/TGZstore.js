@@ -108,6 +108,7 @@ export const useModelStore = defineStore('store', () => {
     showRewindPanel: false,
     performingRewind: false,
     rewindErrorText: '',
+    errorText: '',
     bugSuccessText: '',
     showReplay: false,
     showingPlayerIndex: -1,
@@ -161,6 +162,7 @@ export const useModelStore = defineStore('store', () => {
     context.ignoreAjeShaluga = false
 
     topMenuViews.rewindErrorText = ''
+    topMenuViews.errorText = ''
     topMenuViews.bugSuccessText = ''
     topMenuViews.hubRangesToHighlight.splice(0)
     topMenuViews.currentGhostIndex = -1

@@ -161,6 +161,9 @@ function passKickout() {
 	<template v-if="store.rewindErrorText !== ''">
 		<h1 id="rewindErrorText">{{ store.rewindErrorText }}</h1>
 	</template>
+	<template v-if="store.topMenuViews.errorText !== ''">
+		<h1 id="errorText">{{ store.topMenuViews.errorText }}</h1>
+	</template>
 	<template v-if="store.successText !== ''">
 		<h1 id="successText">{{ store.successText }}</h1>
 	</template>
@@ -448,7 +451,8 @@ function passKickout() {
 }
 
 #rewindErrorText,
-#loggedOutText {
+#loggedOutText,
+#errorText {
 	margin: 0;
 	font-weight: bolder;
 	text-align: center;

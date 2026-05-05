@@ -117,6 +117,8 @@ export const useModelStore = defineStore('store', () => {
     showRewindPanel: false,
     performingRewind: false,
     rewindErrorText: '',
+    errorText: '',
+    successText: '',
     bugErrorText: '',
     bugSuccessText: '',
     showReplay: false,
@@ -154,6 +156,8 @@ export const useModelStore = defineStore('store', () => {
     context.startingTurnAfterPirates = false
 
     topMenuViews.rewindErrorText = ''
+    topMenuViews.errorText = ''
+    topMenuViews.successText = ''
 
   }
 

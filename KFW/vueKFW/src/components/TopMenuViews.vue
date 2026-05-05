@@ -174,9 +174,9 @@ function hidePopup() {
 		<div id="notesBox" v-if="store.viewSettings.showNotes">
 			<h2>Personal game notes</h2>
 			<p>Only you can see these notes</p>
-			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes"></textarea></div>
+			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
-				<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes">Submit</button>
+				<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes">Save</button>
 				<button class="actionsLineButton" id="clearNotes" @click="clearNotes">Clear</button>
 				<button class="actionsLineButton" id="closeNotes" @click="toggleNotes">Close</button>
 			</div>

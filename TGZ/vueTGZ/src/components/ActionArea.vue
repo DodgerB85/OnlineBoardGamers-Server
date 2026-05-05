@@ -615,6 +615,9 @@ function failedToJustPlaceCraftsmanFlag() {
 	<template v-if="store.topMenuViews.rewindErrorText !== ''">
 		<h1 id="rewindErrorText">{{ store.topMenuViews.rewindErrorText }}</h1>
 	</template>
+	<template v-else-if="store.topMenuViews.errorText !== ''">
+		<h1 id="errorText">{{ store.topMenuViews.errorText }}</h1>
+	</template>
 	<template v-else-if="store.topMenuViews.bugSuccessText !== ''">
 		<h2 id="bugSuccessText" v-html="store.topMenuViews.bugSuccessText"></h2>
 	</template>
@@ -2110,7 +2113,8 @@ function failedToJustPlaceCraftsmanFlag() {
 }
 
 #rewindErrorText,
-#loggedOutText {
+#loggedOutText,
+#errorText {
 	/*margin: 0;
     width: 100%;*/
 	font-weight: bolder;

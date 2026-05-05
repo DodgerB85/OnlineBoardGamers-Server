@@ -235,12 +235,17 @@ function localCastVote(topic) {
 		</div>
 	</transition>
 
+	<!-- ERROR TEXT -->
+	<template v-if="store.topMenuViews.errorText !== ''">
+		<h1 id="errorText">{{ store.topMenuViews.errorText }}</h1>
+	</template>
+
 	<!-- NOTES -->
 	<transition name="slideNotes">
 		<div id="notesBox" v-if="store.topMenuViews.showNotes">
 			<h2>Personal game notes</h2>
 			<p>Only you can see these notes</p>
-			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes"></textarea></div>
+			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
 				<button class="actionsLineButton" @click="toggleNoteHexIDs">
 					<template v-if="store.topMenuViews.showNoteHexIDs">Hide</template>
@@ -248,7 +253,7 @@ function localCastVote(topic) {
 					hex IDs
 				</button>
 				<br />
-				<button class="actionsLineButton" @click="IO.saveNotes">Submit</button>
+				<button class="actionsLineButton" @click="IO.saveNotes">Save</button>
 				<button class="actionsLineButton" @click="clearNotes">Clear</button>
 				<button class="actionsLineButton" @click="toggleNotes">Close</button>
 			</div>
@@ -556,7 +561,8 @@ function localCastVote(topic) {
 	height: 0px;
 }
 
-#bugErrorText {
+#bugErrorText,
+#errorText {
 	width: 100%;
 	font-weight: bolder;
 	text-align: center;

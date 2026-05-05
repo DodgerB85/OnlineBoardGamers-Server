@@ -737,6 +737,7 @@ export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.viewSettings.showLoader = true
+	store.gameMessages.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -751,10 +752,15 @@ export async function saveNotes() {
 			}),
 			headers: { "X-CSRFToken": csrftoken },
 		})
+		const data = await response.json()
+		if (data.error) {
+			store.gameMessages.errorText = data.error
+			store.viewSettings.showLoader = false
+			return
+		}
 		if (!response.ok) {
 			throw new Error("Network response was not ok")
 		}
-		const data = await response.json()
 		if (!data.notePosted) {
 			store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
 			return

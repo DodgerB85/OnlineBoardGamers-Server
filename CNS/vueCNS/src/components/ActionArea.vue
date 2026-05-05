@@ -109,11 +109,11 @@ function getFlexiKickoutTImerText() {
 }
 
 function localSellMovies() {
-  model.sellMovies(controller.currentPlayerIndex())
+	model.sellMovies(controller.currentPlayerIndex())
 }
 
 function cancelSales() {
-  model.cancelSellMovies()
+	model.cancelSellMovies()
 }
 </script>
 
@@ -194,6 +194,14 @@ function cancelSales() {
 
 		<template v-if="store.topMenuViews.rewindErrorText !== ''">
 			<h1 id="rewindErrorText">{{ store.topMenuViews.rewindErrorText }}</h1>
+		</template>
+
+		<template v-if="store.topMenuViews.errorText !== ''">
+			<h1 id="errorText">{{ store.topMenuViews.errorText }}</h1>
+		</template>
+
+		<template v-if="store.topMenuViews.successText !== ''">
+			<h1 id="successText">{{ store.topMenuViews.successText }}</h1>
 		</template>
 
 		<!-- ALWAYS SHOWS GAME END-->
@@ -371,20 +379,21 @@ function cancelSales() {
 			</div>
 
 			<div v-if="store.gameflow.phase === rf.PHASE_PRODUCTION && store.context.action === rf.ACT_SELL_CANNES">
-				         Confirm Movie Sales (See upper right panel)<br />
-          <button class="actionsLineButton" @click="localSellMovies">Sell Movies</button>
-          <button class="actionsLineButton" @click="cancelSales">Canccel</button>
+				Confirm Movie Sales (See upper right panel)
+				<br />
+				<button class="actionsLineButton" @click="localSellMovies">Sell Movies</button>
+				<button class="actionsLineButton" @click="cancelSales">Canccel</button>
 			</div>
 
 			<!-- STORE RESOURCES -->
 			<div v-if="offerResourceStoragePhase()">
 				You may only store 5 resources. Click resources to remove them
-				<br/>
-				<span :class="[{tooManyResources: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) > 5}, {tooManyResForTile: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) >=4 && store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 5}, {canStoreAllRes : store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 3}]">
+				<br />
+				<span :class="[{ tooManyResources: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) > 5 }, { tooManyResForTile: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) >= 4 && store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 5 }, { canStoreAllRes: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 3 }]">
 					(You have {{ store.context.availableResources.reduce((acc, curr) => acc + curr, 0) }} resources
-					<span v-if="store.context.availableResources.reduce((acc, curr) => acc + curr, 0) > 5"> - you must discard</span>
-					<span v-else-if="store.context.availableResources.reduce((acc, curr) => acc + curr, 0) >=4 && store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 5"> - you can store all resources, but will be unable to store a tile</span>
-					<span v-else> - you can store all resources</span>
+					<span v-if="store.context.availableResources.reduce((acc, curr) => acc + curr, 0) > 5">- you must discard</span>
+					<span v-else-if="store.context.availableResources.reduce((acc, curr) => acc + curr, 0) >= 4 && store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 5">- you can store all resources, but will be unable to store a tile</span>
+					<span v-else>- you can store all resources</span>
 					)
 				</span>
 
@@ -471,7 +480,8 @@ function cancelSales() {
 }
 
 #rewindErrorText,
-#loggedOutText {
+#loggedOutText,
+#errorText {
 	/*margin: 0;
     width: 100%;*/
 	font-weight: bolder;
@@ -486,7 +496,7 @@ function cancelSales() {
 }
 
 .tooManyResForTile {
-		background-color: lightgoldenrodyellow;
+	background-color: lightgoldenrodyellow;
 	color: darkred;
 }
 
@@ -507,5 +517,10 @@ function cancelSales() {
 	padding: 4px;
 	padding-left: 8px;
 	padding-right: 8px;
+}
+
+#successText {
+	color: darkgreen;
+	background-color: lightblue;
 }
 </style>

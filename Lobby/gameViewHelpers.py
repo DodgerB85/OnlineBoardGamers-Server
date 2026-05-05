@@ -258,9 +258,17 @@ def shared_save_notes(request, game_code, json_key="notes"):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist")) from None
 
+    notes_content = jsonData.get(json_key, "")
+    if len(notes_content) > 5000:
+        return JsonResponse({"error": "Notes exceed 5000 character limit."}, status=400)
+
+    word_count = len(notes_content.split())
+    if word_count > 500:
+        return JsonResponse({"error": "Notes exceed 500 word limit."}, status=400)
+
     user_gp = currentGame.players.filter(player=request.user).first()
     if user_gp:
-        user_gp.notes = jsonData[json_key]
+        user_gp.notes = notes_content
         user_gp.save()
 
     return JsonResponse({"notePosted": True})

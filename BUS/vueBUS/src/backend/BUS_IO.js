@@ -220,6 +220,7 @@ export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -234,12 +235,17 @@ export async function saveNotes() {
 			}),
 			headers: { "X-CSRFToken": csrftoken },
 		})
+		const data = await response.json()
+		if (data.error) {
+			store.topMenuViews.errorText = data.error
+			store.topMenuViews.showLoader = false
+			return
+		}
 		if (!response.ok) {
 			throw new Error("Network response was not ok")
 		}
-		const data = await response.json()
 		if (!data.notePosted) {
-			alert("Sorry, there was a problem. Please email the webmaster directly")
+			store.topMenuViews.errorText = "Sorry, there was a problem. Please email the webmaster directly"
 			return
 		}
 

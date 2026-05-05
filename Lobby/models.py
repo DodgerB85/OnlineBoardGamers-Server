@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from decouple import config
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxLengthValidator
 from django.db import models
 from django.db.models.signals import post_save
 
@@ -57,6 +58,7 @@ class User(AbstractUser):
         activeString = "" if self.is_active else " :A NOT AN ACTIVE USER"
         return f"{self.username} {activeString}"
 
+
 # 1. THE MODEL
 class Lock(models.Model):
     name = models.CharField(max_length=255, primary_key=True)
@@ -69,6 +71,7 @@ class Lock(models.Model):
         # This ensures it shows up in your migrations
         verbose_name = "Database Lock"
         verbose_name_plural = "Database Locks"
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
@@ -83,9 +86,7 @@ class Profile(models.Model):
     webhooks = models.TextField(blank=True, null=True)
     discord_id = models.CharField(max_length=100, blank=True, null=True)
 
-    preferredRestaurantColour = models.SmallIntegerField(
-        null=False, blank=False, default=-1
-    )
+    preferredRestaurantColour = models.SmallIntegerField(null=False, blank=False, default=-1)
     highContrastBoardItems = models.BooleanField(default=False)
 
     preferredHCcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
@@ -96,9 +97,7 @@ class Profile(models.Model):
     preferredTGZcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
     TGZminimalText = models.BooleanField(blank=False, default=False)
 
-    preferredCNScolour = models.PositiveSmallIntegerField(
-        null=True, blank=True, default=None
-    )
+    preferredCNScolour = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
 
     preferredAQYoptions = models.CharField(max_length=30, blank=True)
     preferredINDoptions = models.CharField(max_length=30, blank=True)
@@ -116,13 +115,9 @@ class Profile(models.Model):
     email_confirmed = models.BooleanField(default=False)
     showAssistance = models.BooleanField(default=True)
 
-    profileLanguage = models.CharField(
-        max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE
-    )
+    profileLanguage = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)
 
-    blacklistedPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="blacklistedPlayers_relName", blank=True
-    )
+    blacklistedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="blacklistedPlayers_relName", blank=True)
 
     def __str__(self):
         return f"{self.user} : {self.email_confirmed} : {self.user.email}"
@@ -142,9 +137,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 class changelog(models.Model):
     update = models.CharField(max_length=120)
-    timestamp = models.CharField(
-        max_length=30, blank=False, default=SR_getTimeNow, db_index=True
-    )
+    timestamp = models.CharField(max_length=30, blank=False, default=SR_getTimeNow, db_index=True)
 
     def __str__(self):
         return f"{self.timestamp}: {self.update}"
@@ -171,9 +164,7 @@ class Tournament(models.Model):
     )
 
     tournamentName = models.CharField(max_length=120)
-    tournamentDescription = models.CharField(
-        max_length=120, blank=True
-    )
+    tournamentDescription = models.CharField(max_length=120, blank=True)
 
     tournamentStatus = models.CharField(
         max_length=2,
@@ -236,13 +227,7 @@ class Tournament(models.Model):
 
     def getByedPlayersList(self):
         TPDA = json.loads(self.tournamentProgressionData)
-        return [
-            player
-            for round in TPDA
-            for row in round
-            if row[0] == "BYEPLAYERS"
-            for player in row[1:]
-        ]
+        return [player for round in TPDA for row in round if row[0] == "BYEPLAYERS" for player in row[1:]]
 
     def get_tournamentType_display(self):
         return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
@@ -254,13 +239,9 @@ class Tournament(models.Model):
         createdTS = str(self.created)
         startingOptionsHTML = "[None]"
         if self.gameCode == "FCM":
-            startingOptionsHTML = SR_getFCMstartingOptionsHTML(
-                json.loads(self.startingOptions) if self.startingOptions else []
-            )
+            startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "TGZ":
-            startingOptionsHTML = SR_getTGZstartingOptionsHTML(
-                json.loads(self.startingOptions) if self.startingOptions else []
-            )
+            startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
 
         if startingOptionsHTML == "":
             startingOptionsHTML = "[None]"
@@ -291,12 +272,8 @@ class BaseGame(models.Model):
 
     id = models.AutoField(primary_key=True)
 
-    gameName = models.CharField(
-        max_length=120, blank=True
-    )
-    gameDescription = models.CharField(
-        max_length=120, blank=True
-    )
+    gameName = models.CharField(max_length=120, blank=True)
+    gameDescription = models.CharField(max_length=120, blank=True)
     gameStatus = models.CharField(
         max_length=9,
         choices=SR_GAME_STATUS_CHOICES,
@@ -316,9 +293,7 @@ class BaseGame(models.Model):
     turn = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
     phase = models.PositiveSmallIntegerField(null=False, blank=False, default=0)
 
-    kickoutDuration = models.PositiveSmallIntegerField(
-        null=False, blank=False, default=200
-    )
+    kickoutDuration = models.PositiveSmallIntegerField(null=False, blank=False, default=200)
     gamePace = models.PositiveSmallIntegerField(null=False, blank=False, default=30)
 
     chatData = models.TextField(blank=True)
@@ -335,19 +310,15 @@ class BaseGame(models.Model):
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
 
-    zoomLevels = models.CharField(
-        max_length=30, blank=False, default=json.dumps([16, 16, 16, 16])
-    )
+    zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([16, 16, 16, 16]))
 
     # This has a few different lengths, but 15 should be plenty. It is just a unix timestamp
     # THESE MIGHT BE BETTER CONVERTED TO A DATE_TIME FIELD?!
-    latestUpdate = models.CharField(
-        max_length=15, blank=False, default=SR_getTimeNow, db_index=True
-    )
+    latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
 
     # Change to JSON field?
-    startingMap = models.TextField(blank=True, default='')
+    startingMap = models.TextField(blank=True, default="")
 
     # The longest was 100 chars, so i set it to that.
     # Not sure if that's inefficient?
@@ -376,9 +347,7 @@ class Game(BaseGame):
 
     original_id = models.PositiveIntegerField(null=True, blank=True)
 
-    models.constraints.UniqueConstraint(
-        fields=["gameCode", "original_id"], name="unique_game_code_and_original_id"
-    )
+    models.constraints.UniqueConstraint(fields=["gameCode", "original_id"], name="unique_game_code_and_original_id")
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -395,9 +364,7 @@ class Game(BaseGame):
         default=config("ADMIN_DB_KEY", default=1, cast=int),
     )
 
-    invitedPlayers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="invited_games", blank=True
-    )
+    invitedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="invited_games", blank=True)
 
     relatedMainTournament = models.ForeignKey(
         "Tournament",
@@ -415,14 +382,10 @@ class Game(BaseGame):
         related_name="minitournamentGEN_relName",
     )
 
-    currentPlayersInTurnOrder = models.CharField(
-        max_length=150, blank=True, null=True, default=None
-    )
+    currentPlayersInTurnOrder = models.CharField(max_length=150, blank=True, null=True, default=None)
 
     # CURRENTLY RnB ONLY
-    serverCurrentPlayerNamesInTurnOrder = models.JSONField(
-        default=list, blank=True, null=True
-    )
+    serverCurrentPlayerNamesInTurnOrder = models.JSONField(default=list, blank=True, null=True)
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
@@ -432,14 +395,10 @@ class Game(BaseGame):
 
     # FCM-specific fields
     FCMplayersMoveData = models.TextField(blank=True)
-    FCMnotificationSuppression = models.CharField(
-        max_length=30, blank=False, default="000000"
-    )
+    FCMnotificationSuppression = models.CharField(max_length=30, blank=False, default="000000")
 
     # KFW-specific fields
-    KFWserverData = models.TextField(
-        blank=True, default=json.dumps([[40, 40, 40, 0], [16, 16, 16]])
-    )
+    KFWserverData = models.TextField(blank=True, default=json.dumps([[40, 40, 40, 0], [16, 16, 16]]))
     KFWplayersHiddenData = models.TextField(blank=True)
     KFWplayersMoveData = models.TextField(blank=True)
 
@@ -479,9 +438,7 @@ class Game(BaseGame):
 
 
 class GamePlayer(models.Model):
-    game = models.ForeignKey(
-        Game, related_name="players", on_delete=models.deletion.CASCADE
-    )
+    game = models.ForeignKey(Game, related_name="players", on_delete=models.deletion.CASCADE)
     player = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.deletion.SET_NULL,
@@ -489,7 +446,7 @@ class GamePlayer(models.Model):
         related_name="games",
     )
 
-    notes = models.TextField(blank=True)
+    notes = models.TextField(blank=True, validators=[MaxLengthValidator(5000)])
     winner = models.BooleanField(default=False)
 
     is_missing = models.BooleanField(default=False)
@@ -508,8 +465,4 @@ class GamePlayer(models.Model):
 
     class Meta:
         ordering = ["seat_order"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["game", "player"], name="unique_game_player"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["game", "player"], name="unique_game_player")]
