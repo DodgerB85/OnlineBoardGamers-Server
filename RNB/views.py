@@ -1171,12 +1171,36 @@ def saveRNBmap(request):
         data = json.loads(request.body)
         map_name = data.get("mapName", "")
         map_description = data.get("mapDescription", "")
-        map_data = data.get("mapData", {})
+        map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
 
         # Validate required fields
         # if not map_name:
         #    return JsonResponse({'error': 'Map name is required'}, status=400)
+
+        max_unique_key = 0
+        all_maps = RNBmap.objects.all()
+
+        for m in all_maps:
+            # hexData is stored as a list/json
+            current_data = m.hexData 
+            if current_data and isinstance(current_data, list) and len(current_data) > 0:
+                # Grab the last entry (the metadata object)
+                meta = current_data[-1]
+                if isinstance(meta, dict):
+                    uk_val = meta.get("UK", 0)
+                    if uk_val > max_unique_key:
+                        max_unique_key = uk_val
+
+        # Increment UK for the new map
+        max_unique_key = max_unique_key + 1
+
+        # Ensure the incoming map_data has a metadata object at the end
+        if isinstance(map_data[-1], dict):
+            map_data[-1]["UK"] = max_unique_key
+        else:
+            # If for some reason the last entry isn't an object, push a new one
+            map_data.append({"UK": max_unique_key})
 
         # Use transaction for atomic database operations
         with transaction.atomic():
