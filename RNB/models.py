@@ -19,7 +19,6 @@ class RNBmap(models.Model):
     hexData = models.JSONField(blank=True, null=True, help_text="JUST the hex data, in format [ [q,r,rotation,terrainID], ...]]")
     uniqueID = models.PositiveIntegerField(
         unique=True,
-        editable=False,
         help_text="Permanent unique ID for this map across all installations."
     )
     # Highscores stored as an array of subArrs [ [userID, score, achievedTS], ...]
