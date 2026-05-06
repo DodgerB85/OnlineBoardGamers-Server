@@ -118,6 +118,7 @@
                             <label class="choiceLabel" for="pace">{% translate "Number of players" %}</label>
                             <div class="optionSelection">
                                 <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                                    <option value="1">1 (Solo)</option>
                                     <option value="2" selected="selected">2</option>
                                     <option value="3">3</option>
                                     <option value="4">4</option>
@@ -126,7 +127,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv">
+                        <div class="singleChoiceWithTextDiv" id="selPlayer2">
                             <label class="choiceLabelText" for="player2">{% translate "Player 2" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
@@ -272,12 +273,13 @@
                         <legend class="optionsHeader">{% translate "Game Options" %}</legend>
                         <div class="singleChoiceDiv">
                             <label class="choiceLabel" for="mapSelection">{% translate "Select Map" %}</label>
+                            <br />
                             <div class="optionSelection">
                                 <select name="mapSelection"
                                         id="mapSelection"
                                         onchange="onMapSelectionChange();"
                                         required>
-                                    <option value="">Select Map</option>
+                                    <option value="">Select Map (sorted by player count)</option>
                                 </select>
                                 <br />
                                 <div class="mapFilterToggle">

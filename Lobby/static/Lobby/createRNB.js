@@ -193,7 +193,42 @@ function selectPlayers() {
 	} else document.getElementById("player2help").innerHTML = global.player2normText
 
 	switch (numberOfPlayers) {
+		case "1":
+			// Solo mode: tick and disable practice game
+			removeOption("trainingGame")
+			document.getElementById("trainingGame").checked = true
+
+			// Disable kickout options
+			document.getElementById("kickoutDuration").disabled = true
+			// Disable private game
+			removeOption("privateGame")
+			// Disable learning game
+			removeOption("learningGame")
+			// Disable experienced game
+			removeOption("experiencedGame")
+			// Hide all player name options
+			document.getElementById("selPlayer2").style.display = "none"
+			document.getElementById("selPlayer3").style.display = "none"
+			document.getElementById("selPlayer4").style.display = "none"
+			document.getElementById("selPlayer5").style.display = "none"
+			document.getElementById("selPlayer6").style.display = "none"
+			// Clear player fields
+			document.getElementById("player2").value = ""
+			document.getElementById("player3").value = ""
+			document.getElementById("player4").value = ""
+			document.getElementById("player5").value = ""
+			document.getElementById("player6").value = ""
+			break
 		case "2":
+			// Re-enable options when switching from solo
+			document.getElementById("kickoutDuration").disabled = false
+			addOption("privateGame")
+			addOption("learningGame")
+			addOption("trainingGame")
+			if (global.experienced) addOption("experiencedGame")
+			document.getElementById("player2").disabled = false
+
+			document.getElementById("selPlayer2").style.display = "flex"
 			document.getElementById("selPlayer3").style.display = "none"
 			document.getElementById("selPlayer4").style.display = "none"
 			document.getElementById("selPlayer5").style.display = "none"
@@ -207,6 +242,17 @@ function selectPlayers() {
 			if (document.getElementById("trainingGame").checked) document.getElementById("player2").value = "SHADOW"
 			break
 		case "3":
+			// Re-enable options when switching from solo
+			document.getElementById("kickoutDuration").disabled = false
+			addOption("privateGame")
+			addOption("learningGame")
+			addOption("trainingGame")
+
+			if (global.experienced) addOption("experiencedGame")
+			document.getElementById("player2").disabled = false
+			document.getElementById("player3").disabled = false
+
+			document.getElementById("selPlayer2").style.display = "flex"
 			document.getElementById("selPlayer3").style.display = "flex"
 			document.getElementById("selPlayer4").style.display = "none"
 			document.getElementById("selPlayer5").style.display = "none"
@@ -222,6 +268,18 @@ function selectPlayers() {
 			}
 			break
 		case "4":
+			// Re-enable options when switching from solo
+			document.getElementById("kickoutDuration").disabled = false
+			addOption("privateGame")
+			addOption("learningGame")
+			addOption("trainingGame")
+
+			if (global.experienced) addOption("experiencedGame")
+			document.getElementById("player2").disabled = false
+			document.getElementById("player3").disabled = false
+			document.getElementById("player4").disabled = false
+
+			document.getElementById("selPlayer2").style.display = "flex"
 			document.getElementById("selPlayer3").style.display = "flex"
 			document.getElementById("selPlayer4").style.display = "flex"
 			document.getElementById("selPlayer5").style.display = "none"
@@ -237,6 +295,19 @@ function selectPlayers() {
 			}
 			break
 		case "5":
+			// Re-enable options when switching from solo
+			document.getElementById("kickoutDuration").disabled = false
+			addOption("privateGame")
+			addOption("learningGame")
+			addOption("trainingGame")
+
+			if (global.experienced) addOption("experiencedGame")
+			document.getElementById("player2").disabled = false
+			document.getElementById("player3").disabled = false
+			document.getElementById("player4").disabled = false
+			document.getElementById("player5").disabled = false
+
+			document.getElementById("selPlayer2").style.display = "flex"
 			document.getElementById("selPlayer3").style.display = "flex"
 			document.getElementById("selPlayer4").style.display = "flex"
 			document.getElementById("selPlayer5").style.display = "flex"
@@ -252,6 +323,20 @@ function selectPlayers() {
 			}
 			break
 		case "6":
+			// Re-enable options when switching from solo
+			document.getElementById("kickoutDuration").disabled = false
+			addOption("privateGame")
+			addOption("learningGame")
+			addOption("trainingGame")
+
+			if (global.experienced) addOption("experiencedGame")
+			document.getElementById("player2").disabled = false
+			document.getElementById("player3").disabled = false
+			document.getElementById("player4").disabled = false
+			document.getElementById("player5").disabled = false
+			document.getElementById("player6").disabled = false
+
+			document.getElementById("selPlayer2").style.display = "flex"
 			document.getElementById("selPlayer3").style.display = "flex"
 			document.getElementById("selPlayer4").style.display = "flex"
 			document.getElementById("selPlayer5").style.display = "flex"
@@ -265,6 +350,11 @@ function selectPlayers() {
 				document.getElementById("player6").value = "SHADOW_5"
 			}
 			break
+	}
+
+	// Re-sort maps based on new player count
+	if (loadedMaps.length > 0) {
+		populateMapDropdown(loadedMaps)
 	}
 }
 
@@ -427,6 +517,8 @@ function getCookie(name) {
 
 /*** MAP FUNCTIONS */
 // Map selection functions
+let loadedMaps = [] // Store maps globally for re-sorting
+
 function loadMaps() {
 	const isOfficialToggle = document.getElementById("isOfficialToggle")
 	const isOfficial = isOfficialToggle.checked ? "true" : "all"
@@ -435,6 +527,7 @@ function loadMaps() {
 		.then((response) => response.json())
 		.then((data) => {
 			if (data.success) {
+				loadedMaps = data.maps // Store maps globally
 				populateMapDropdown(data.maps)
 			} else {
 				console.error("Error loading maps:", data.error)
@@ -447,14 +540,47 @@ function loadMaps() {
 
 function populateMapDropdown(maps) {
 	const mapSelect = document.getElementById("mapSelection")
+	const numberOfPlayers = document.getElementById("playerNumber").value
 
 	// Clear existing options except the default
 	while (mapSelect.options.length > 1) {
 		mapSelect.remove(1)
 	}
 
-	// Add map options
+	// Separate maps into matching and non-matching
+	const matchingMaps = []
+	const nonMatchingMaps = []
+
 	maps.forEach((map) => {
+		if (map.playerCount == numberOfPlayers) {
+			matchingMaps.push(map)
+		} else {
+			nonMatchingMaps.push(map)
+		}
+	})
+
+	// Add matching maps first (green)
+	matchingMaps.forEach((map) => {
+		const option = document.createElement("option")
+		option.value = JSON.stringify({
+			id: map.id,
+			name: map.name,
+			description: map.description,
+			hexData: map.hexData,
+			playerCount: map.playerCount,
+		})
+		option.textContent = `${map.name} (${map.playerCount} players)`
+		if (map.playerCount === 1) option.textContent = `${map.name} (Solo)`
+		if (map.isOfficial) {
+			option.textContent += " [Official]"
+		}
+		option.style.color = "green"
+		option.style.fontWeight = "bold"
+		mapSelect.appendChild(option)
+	})
+
+	// Add non-matching maps below (red)
+	nonMatchingMaps.forEach((map) => {
 		const option = document.createElement("option")
 		option.value = JSON.stringify({
 			id: map.id,
@@ -467,6 +593,7 @@ function populateMapDropdown(maps) {
 		if (map.isOfficial) {
 			option.textContent += " [Official]"
 		}
+		option.style.color = "red"
 		mapSelect.appendChild(option)
 	})
 }
@@ -540,26 +667,26 @@ function clearMapSelection() {
 	const mapInfoDisplay = document.getElementById("mapInfoDisplay")
 	const selectedMapName = document.getElementById("selectedMapName")
 	const selectedMapDescription = document.getElementById("selectedMapDescription")
-	
+
 	// Reset map selection to default
 	mapSelect.value = ""
-	
+
 	// Hide map preview and show placeholder
 	mapPreviewPlaceholder.style.display = "block"
 	mapPreviewContent.style.display = "none"
-	
+
 	// Hide map info
 	if (mapInfoDisplay) {
 		mapInfoDisplay.style.display = "none"
 		selectedMapName.textContent = ""
 		selectedMapDescription.textContent = ""
 	}
-	
+
 	// Clear the hidden mapData input
 	if (mapDataInput) {
 		mapDataInput.value = ""
 	}
-	
+
 	// Update Vue store if available
 	if (window.mapStore) {
 		window.mapStore.mapData.externalMapData = null

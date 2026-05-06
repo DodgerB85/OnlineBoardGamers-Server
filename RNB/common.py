@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext
 
+import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedRefs import (
@@ -130,7 +131,13 @@ def create_rnb_game(
         kickout_duration = request.POST.get("kickoutDuration", 100)
         invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 6) if request.POST.get(f"player{i}")]
 
-        if "trainingGame" not in request.POST:
+        isTrainingGame = False
+        if "trainingGame" in request.POST:
+            isTrainingGame = True
+        if max_players == 1:
+            isTrainingGame = True
+
+        if not isTrainingGame:
             invited_usernames_objs = validate_players(invited_usernames, max_players, allow_creator=False)
             # If no invited playerrs, get []. If error, get None
             if invited_usernames_objs is None:
@@ -141,8 +148,8 @@ def create_rnb_game(
                 game_status = "WAITING"
                 usernames_to_notify = [user.username for user in invited_usernames_objs]
 
-        if "trainingGame" in request.POST:
-            starting_options.append(int(request.POST["trainingGame"]))
+        if isTrainingGame:
+            starting_options.append(rf.SO_TRAINING_GAME)
             game_status = "ACTIVE"
             stats_exclude = True
             shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
@@ -213,7 +220,7 @@ def create_rnb_game(
             new_game.save()
 
         # Start pre-populated games
-        if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
+        if is_main_tournament or is_mini_tournament or isTrainingGame:
             presenter = cast("RNBpresenter", new_game.presenter())
             presenter.startGame(request)
 
@@ -233,7 +240,13 @@ def create_rnb_game(
             "RNB",
         )
 
-    if "trainingGame" in request.POST:
+    # Solo challenge return
+    if max_players == 1:
+        messages.success(request, gettext("Your Solo Challenge has started"))
+        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
+
+    # Training Game return
+    elif isTrainingGame:
         messages.success(request, gettext("Your Practice game has started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
 
