@@ -19,7 +19,9 @@ class RNBmap(models.Model):
     hexData = models.JSONField(blank=True, null=True, help_text="JUST the hex data, in format [ [q,r,rotation,terrainID], ...]]")
     uniqueID = models.PositiveIntegerField(
         unique=True,
-        help_text="Permanent unique ID for this map across all installations."
+        help_text="Permanent unique ID for this map across all installations.",
+        blank=True,
+        null=True,
     )
     # Highscores stored as an array of subArrs [ [userID, score, achievedTS], ...]
     highscores = models.JSONField(default=list, blank=True, null=True)
@@ -28,14 +30,12 @@ class RNBmap(models.Model):
     isOfficial = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        if not self.map_number:
+        if not self.uniqueID:
             # Atomic transaction to prevent two maps getting the same number
             with transaction.atomic():
-                last_map = RNBmap.objects.select_for_update().order_by('-map_number').first()
-                if last_map:
-                    self.map_number = last_map.map_number + 1
-                else:
-                    self.map_number = 1  # Start at 1
+                customElements = self.hexData[-1]
+                uk_value = customElements.get('UK')
+                self.uniqueID = uk_value
         super().save(*args, **kwargs)
 
     def __str__(self):
