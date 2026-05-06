@@ -17,19 +17,16 @@ class RNBmap(models.Model):
     # All map data (tiles, starting positions, etc.)
     # Note: Requires a database that supports JSON (like PostgreSQL or SQLite 3.9+)
     hexData = models.JSONField(blank=True, null=True, help_text="JUST the hex data, in format [ [q,r,rotation,terrainID], ...]]")
-    customElements = models.JSONField(blank=True, null=True, help_text="Preset starting locations, built bridges, etc etc")
-
+    uniqueID = models.PositiveIntegerField(
+        unique=True,
+        editable=False,
+        help_text="Permanent unique ID for this map across all installations."
+    )
     # Highscores stored as an array of subArrs [ [userID, score, achievedTS], ...]
     highscores = models.JSONField(default=list, blank=True, null=True)
 
     # Manual checkbox for verified maps to be part of the official collection
     isOfficial = models.BooleanField(default=False)
-
-    map_number = models.PositiveIntegerField(
-        unique=True,
-        editable=False,
-        help_text="Permanent unique ID for this map across all installations."
-    )
 
     def save(self, *args, **kwargs):
         if not self.map_number:

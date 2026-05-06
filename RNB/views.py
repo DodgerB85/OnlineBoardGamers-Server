@@ -1209,7 +1209,7 @@ def saveRNBmap(request):
                 description=map_description,
                 playerCount=map_playerCount,
                 hexData=map_data,
-                customElements=None,  # Can be populated later if needed
+                uniqueID=max_unique_key,
                 highscores=None,  # Empty list for new maps
                 isOfficial=False,  # Default to not official
             )

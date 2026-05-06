@@ -15,7 +15,7 @@ class RNBmapAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'playerCount')
         }),
         ('Map Data', {
-            'fields': ('hexData', 'customElements')
+            'fields': ('hexData', 'uniqueID')
         }),
         ('Settings', {
             'fields': ('isOfficial', 'highscores')

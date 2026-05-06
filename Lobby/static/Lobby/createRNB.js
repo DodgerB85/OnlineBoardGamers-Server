@@ -222,8 +222,11 @@ function selectPlayers() {
 		case "2":
 			// Re-enable options when switching from solo
 			document.getElementById("kickoutDuration").disabled = false
-			addOption("privateGame")
-			addOption("learningGame")
+			// Only re-enable if practice game is not checked
+			if (!document.getElementById("trainingGame").checked) {
+				addOption("privateGame")
+				addOption("learningGame")
+			}
 			addOption("trainingGame")
 			if (global.experienced) addOption("experiencedGame")
 			document.getElementById("player2").disabled = false
@@ -244,8 +247,11 @@ function selectPlayers() {
 		case "3":
 			// Re-enable options when switching from solo
 			document.getElementById("kickoutDuration").disabled = false
-			addOption("privateGame")
-			addOption("learningGame")
+			// Only re-enable if practice game is not checked
+			if (!document.getElementById("trainingGame").checked) {
+				addOption("privateGame")
+				addOption("learningGame")
+			}
 			addOption("trainingGame")
 
 			if (global.experienced) addOption("experiencedGame")
@@ -270,8 +276,11 @@ function selectPlayers() {
 		case "4":
 			// Re-enable options when switching from solo
 			document.getElementById("kickoutDuration").disabled = false
-			addOption("privateGame")
-			addOption("learningGame")
+			// Only re-enable if practice game is not checked
+			if (!document.getElementById("trainingGame").checked) {
+				addOption("privateGame")
+				addOption("learningGame")
+			}
 			addOption("trainingGame")
 
 			if (global.experienced) addOption("experiencedGame")
@@ -297,8 +306,11 @@ function selectPlayers() {
 		case "5":
 			// Re-enable options when switching from solo
 			document.getElementById("kickoutDuration").disabled = false
-			addOption("privateGame")
-			addOption("learningGame")
+			// Only re-enable if practice game is not checked
+			if (!document.getElementById("trainingGame").checked) {
+				addOption("privateGame")
+				addOption("learningGame")
+			}
 			addOption("trainingGame")
 
 			if (global.experienced) addOption("experiencedGame")
@@ -325,8 +337,11 @@ function selectPlayers() {
 		case "6":
 			// Re-enable options when switching from solo
 			document.getElementById("kickoutDuration").disabled = false
-			addOption("privateGame")
-			addOption("learningGame")
+			// Only re-enable if practice game is not checked
+			if (!document.getElementById("trainingGame").checked) {
+				addOption("privateGame")
+				addOption("learningGame")
+			}
 			addOption("trainingGame")
 
 			if (global.experienced) addOption("experiencedGame")

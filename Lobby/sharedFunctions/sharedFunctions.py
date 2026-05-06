@@ -163,7 +163,7 @@ def SF_serializeGame(game, user, player_context):
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
     # 5. Shadow/Delete Logic
-    is_deleteable = any(name in all_usernames for name in rf.SHADOW_USERNAMES) and (user.id in all_ids if user else False)
+    is_deleteable = (any(name in all_usernames for name in rf.SHADOW_USERNAMES) and (user.id in all_ids if user else False)) or (game.maxPlayers == 1)
 
     creator = game.creator.username if game.creator else "Unknown Creator"
     if creator == "Unknown Creator":
