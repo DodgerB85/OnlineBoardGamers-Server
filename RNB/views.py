@@ -11,6 +11,7 @@ from decouple import config
 # from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Max
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render  # get_object_or_404,
 from django.utils import timezone
@@ -78,11 +79,29 @@ def showRNBmap(request, game_id=0):
     # Get map data from the game
     startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
 
+    mapName = "[No Name]"
+    mapDescription = '[No description]'
+    playerCount = 0
+    uniqueID = startingMap[-1].get("UK", -1)
+
+    print(f"UID: {uniqueID}")
+    if (uniqueID >=0):
+        currentMap = RNBmap.objects.get(uniqueID=uniqueID)
+        mapName = currentMap.name
+        mapDescription = currentMap.description
+        playerCount = currentMap.playerCount
+
+    showPlayerCountWarning = playerCount != currentGame.maxPlayers
+
     returnData = {
         "settingsDebug": settings_debug,
         "startingMap": startingMap,  # Pass map data directly
         "gameID": game_id,
         "gameName": currentGame.gameName if currentGame.gameName else f"RNB Game {game_id}",
+        "mapName": mapName,
+        "mapDescription": mapDescription,
+        "playerCount": playerCount,
+        "showPlayerCountWarning": showPlayerCountWarning
     }
 
     return render(request, "RNB/showRNBmapPage.html", returnData)
@@ -1178,19 +1197,8 @@ def saveRNBmap(request):
         # if not map_name:
         #    return JsonResponse({'error': 'Map name is required'}, status=400)
 
-        max_unique_key = 0
-        all_maps = RNBmap.objects.all()
-
-        for m in all_maps:
-            # hexData is stored as a list/json
-            current_data = m.hexData 
-            if current_data and isinstance(current_data, list) and len(current_data) > 0:
-                # Grab the last entry (the metadata object)
-                meta = current_data[-1]
-                if isinstance(meta, dict):
-                    uk_val = meta.get("UK", 0)
-                    if uk_val > max_unique_key:
-                        max_unique_key = uk_val
+        result = RNBmap.objects.aggregate(Max('uniqueID'))
+        max_unique_key = result['uniqueID__max'] or 0
 
         # Increment UK for the new map
         max_unique_key = max_unique_key + 1
