@@ -209,9 +209,9 @@ class GamePresenter:
         game_players = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
 
         to_update = []
-        #if self.gameObj.gameCode == "RNB":
+        # if self.gameObj.gameCode == "RNB":
         #    self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
-        #el
+        # el
         if self.gameObj.gameCode == "HLC":
             self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
         self.gameObj.save()
@@ -1391,7 +1391,7 @@ class RNBpresenter(GamePresenter):
 
         return not currentPlayersList or loggedInPlayerUsername in currentPlayersList or currentPlayersList[0] in rf.SHADOW_USERNAMES
 
-    def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID, _winningPlayerScore):
         from django_q.tasks import async_task
 
         from Lobby.models import User
@@ -1436,26 +1436,44 @@ class RNBpresenter(GamePresenter):
 
             convertedFinalPositions.append([username, posText, pos])
 
-        # Now send winning notification
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "RNB", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+        # if solo, store the score
+        if self.gameObj.maxPlayers == 1:
+            startingMap = json.loads(self.gameObj.startingMap)
+            uniqueID = startingMap[-1].get("UK", -1)
+            if uniqueID >= 0:
+                from RNB.models import RNBmap, RNBMapScore
+                # 1. Get the actual map object using the uniqueID
+                map_obj = RNBmap.objects.get(uniqueID=uniqueID)
 
-        if self.gameObj.relatedMainTournament:
-            SF_M_ProcessAnyTournamentEndGame(
-                request,
-                self.gameObj.relatedMainTournament,
-                self.gameObj,
-                [_winnerUseranme],
-                _tournamentData,
-            )
+                # 2. Pass the object to the manager
+                _entry, _is_new_record = RNBMapScore.objects.add_highscore(
+                    user=request.user,
+                    game=self.gameObj,
+                    map_ref=map_obj,  # Pass the OBJECT
+                    score=_winningPlayerScore,
+                )
 
-        if self.gameObj.relatedMiniTournament:
-            SF_M_ProcessAnyTournamentEndGame(
-                request,
-                self.gameObj.relatedMiniTournament,
-                self.gameObj,
-                [_winnerUseranme],
-                _tournamentData,
-            )
+        # Now send winning notification - if not solo
+        elif self.gameObj.maxPlayers > 1:
+            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "RNB", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+
+            if self.gameObj.relatedMainTournament:
+                SF_M_ProcessAnyTournamentEndGame(
+                    request,
+                    self.gameObj.relatedMainTournament,
+                    self.gameObj,
+                    [_winnerUseranme],
+                    _tournamentData,
+                )
+
+            if self.gameObj.relatedMiniTournament:
+                SF_M_ProcessAnyTournamentEndGame(
+                    request,
+                    self.gameObj.relatedMiniTournament,
+                    self.gameObj,
+                    [_winnerUseranme],
+                    _tournamentData,
+                )
 
     def startGame(self, request):
         from Lobby.models import GamePlayer
@@ -3080,7 +3098,6 @@ class KFWpresenter(GamePresenter):
                         skillsPulled.append(i)
                         newInformation[1].append(i)
                 # Add skills to player
-                print(f"playersHiddenData[2]: {playerHiddenData[2]}  skillsPulledArr: ${skillsPulledArr}")
                 playerHiddenData[2] = [x + y for x, y in zip(playerHiddenData[2], skillsPulledArr, strict=True)]
                 # Create the history
                 for i, value in enumerate(histEntry):

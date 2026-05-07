@@ -1,0 +1,105 @@
+/* Styles from newGame.css */
+.mainTitleSpan {
+    font-size: 30px;
+    font-weight: bolder;
+}
+
+
+.panelHeader {
+    font-size: 1.35em;
+    font-weight: bold;
+    margin: auto;
+    text-align: center;
+}
+
+/* Layout styles */
+.soloHighscoresLayout {
+    display: flex;
+    gap: 20px;
+}
+
+.leftPanel {
+    flex: 0 0 300px;
+    border: 1px solid black;
+    padding: 10px;
+    margin: 10px;
+    text-align: left;
+    line-height: 30px;
+    float: left;
+    width: 22.38em;
+    height: 370px;
+    min-height: auto;
+
+}
+
+.rightPanel {
+    flex: 1;
+    padding: 10px;
+    margin: 10px;
+    text-align: left;
+    line-height: 30px;
+    float: left;
+    width: 22.38em;
+    height: fit-content;
+    min-height: auto;
+}
+
+/* Map selection styles */
+.mapSelectionSelect {
+    width: 100%;
+}
+
+/* Map info display styles */
+.mapInfoDisplay {
+    display: none;
+    margin-bottom: 10px;
+}
+
+.selectedMapName {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.selectedMapDescription {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Map preview container styles */
+.mapPreviewContainer {
+    min-height: 300px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.mapPreviewContent {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+.mapPreviewContent #app {
+    width: 100%;
+    height: 100%;
+}
+
+/* Highscores table styles */
+.highscoresContainer {
+    display: none;
+    width: fit-content;
+    margin: auto;
+}
+
+.noHighscoresMessage {
+    display: none;
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}

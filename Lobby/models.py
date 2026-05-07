@@ -312,6 +312,9 @@ class BaseGame(models.Model):
 
     zoomLevels = models.CharField(max_length=30, blank=False, default=json.dumps([16, 16, 16, 16]))
 
+    def __str__(self):
+        return f"{self.id} {self.gameCode} {self.gameName or f'{self.gameCode} Game'}"
+
     # This has a few different lengths, but 15 should be plenty. It is just a unix timestamp
     # THESE MIGHT BE BETTER CONVERTED TO A DATE_TIME FIELD?!
     latestUpdate = models.CharField(max_length=15, blank=False, default=SR_getTimeNow, db_index=True)

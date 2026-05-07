@@ -39,7 +39,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from . import RNBconstants as rfRNB
 from .common import create_rnb_game
-from .models import RNBmap
+from .models import RNBmap, RNBMapScore
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
@@ -84,7 +84,6 @@ def showRNBmap(request, game_id=0):
     playerCount = 0
     uniqueID = startingMap[-1].get("UK", -1)
 
-    print(f"UID: {uniqueID}")
     if (uniqueID >=0):
         currentMap = RNBmap.objects.get(uniqueID=uniqueID)
         mapName = currentMap.name
@@ -145,7 +144,6 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # RNB uses gameDataB64 instead of gameData
     returnData["gameDataB64"] = returnData.pop("gameData")
     currentPlayersArr = []
-    print(currentGame.serverCurrentPlayerNamesInTurnOrder)
     if currentGame.phase in rfRNB.MAIN_PHASES:
         currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
     elif currentGame.phase in rfRNB.ALL_PHASE_CONFLICTS:
@@ -677,6 +675,7 @@ def _processRNBturn(request):
                 jsonData["finalPositions"],
                 (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
                 jsonData["gameID"],
+                jsonData["winningPlayerScore"],
             )
 
         # Only notify if game still running
@@ -1049,6 +1048,7 @@ def performSaveGame(request, currentGame, jsonData):
             jsonData["finalPositions"],
             (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
             jsonData["gameID"],
+            jsonData["winningPlayerScore"],
         )
 
     # Only notify if game still running
@@ -1256,6 +1256,92 @@ def getRNBmaps(request):
 
         return JsonResponse({"success": True, "maps": maps_data})
 
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+
+
+def RNBhighScores(request, map_unique_id=None):
+    """
+    Display highscores page for solo RNB maps
+    Optional map_unique_id parameter to pre-select a specific map
+    """
+    settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
+    context = {
+        "settingsDebug": settings_debug,
+        "selected_map_id": map_unique_id
+    }
+    return render(request, "RNB/RNBhighScores.html", context)
+
+
+@login_required
+def getSoloMaps(request):
+    """
+    Get solo RNB maps from database
+    """
+    if request.method != "GET":
+        return JsonResponse({"error": "GET method required"}, status=405)
+
+    try:
+        # Query solo maps only (playerCount == 1)
+        maps_queryset = RNBmap.objects.filter(playerCount=1)
+
+        # Format response
+        maps_data = []
+        for map_obj in maps_queryset:
+            maps_data.append({
+                "id": map_obj.id,
+                "uniqueID": map_obj.uniqueID,
+                "name": map_obj.name,
+                "description": map_obj.description,
+                "playerCount": map_obj.playerCount,
+                "isOfficial": map_obj.isOfficial,
+                "hexData": map_obj.hexData
+            })
+
+        return JsonResponse({"success": True, "maps": maps_data})
+
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+
+
+@login_required
+def getMapHighscores(request):
+    """
+    Get highscores for a specific map
+    """
+    if request.method != "GET":
+        return JsonResponse({"error": "GET method required"}, status=405)
+
+    try:
+        map_id = request.GET.get("mapId")
+        if not map_id:
+            return JsonResponse({"error": "mapId parameter required"}, status=400)
+
+        # Get the map
+        map_obj = RNBmap.objects.get(id=map_id)
+
+        # Get highscores from RNBMapScore model
+        highscores = RNBMapScore.objects.filter(map_ref=map_obj).select_related('user').order_by('-score', 'timeStamp')
+
+        # Format highscores with user names
+        highscores_data = []
+        for score_entry in highscores:
+                highscores_data.append({
+                "name": score_entry.user.username,
+                "date_timestamp": int(score_entry.timeStamp),
+                "game": score_entry.game_id,
+                "score": score_entry.score
+            })
+
+        return JsonResponse({
+            "success": True,
+            "mapName": map_obj.name,
+            "mapDescription": map_obj.description,
+            "highscores": highscores_data
+        })
+
+    except RNBmap.DoesNotExist:
+        return JsonResponse({"error": "Map not found"}, status=404)
     except Exception as e:
         return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
 

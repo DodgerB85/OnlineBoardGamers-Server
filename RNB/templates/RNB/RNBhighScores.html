@@ -1,0 +1,126 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'RNB/highScore.css' %}" rel="stylesheet">
+    <style>
+        /* Ensure topBar stays on top of map */
+        .topBar {
+            z-index: 1000 !important;
+        }
+        
+        /* Map container should be below topBar */
+        #hexDIV {
+            z-index: 1;
+        }
+        
+        /* Map preview container styles */
+        #mapPreviewContainer {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #mapPreviewContent {
+            position: relative;
+            min-height: 300px;
+        }
+        
+        /* Hide map preview elements that might interfere */
+        #mapPreviewContent .loading-text {
+            display: none;
+        }
+    </style>
+    {% if settingsDebug %}
+        <script type="module" src="http://localhost:3042/static/@vite/client"></script>
+        <script type="module" src="http://localhost:3042/static/main.js"></script>
+    {% else %}
+        <link href="{% static 'RNB/RNBvuedist/main.css' %}?" rel="stylesheet" />
+        <script type="module"
+                crossorigin=""
+                src="{% static 'RNB/RNBvuedist/main.js' %}"></script>
+    {% endif %}
+    {% compress js %}
+        <script src="{% static 'RNB/soloHighscores.js' %}"></script>
+    {% endcompress %}
+    <script>
+    window.initData = {
+        showMapOnly: true,
+        gameID: -1,
+        startingMap: [],
+        gameName: "",
+        selectedMapId: {% if selected_map_id %}"{{ selected_map_id }}"{% else %}null{% endif %}
+    };
+    </script>
+{% endblock head %}
+{% block body %}
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div id="allOptions">
+            <span class="mainTitleSpan">{% translate "Solo Map Highscores" %}</span>
+            <div class="soloHighscoresLayout">
+                <!-- Left Div: Map Selection -->
+                <div class="leftPanel">
+                    <div class="panelHeader">{% translate "Select Solo Map" %}</div>
+                    <br />
+                    <select name="mapSelection"
+                            id="mapSelection"
+                            onchange="onMapSelectionChange();"
+                            size="10"
+                            class="mapSelectionSelect">
+                        <option value="">Select a solo map</option>
+                    </select>
+                </div>
+                <!-- Right Div: Map Info, Preview, and Highscores -->
+                <div class="rightPanel">
+                    <!-- Map Info Display -->
+                    <div id="mapInfoDisplay" class="mapInfoDisplay">
+                        <div class="selectedMapName" id="selectedMapName"></div>
+                        <div class="selectedMapDescription" id="selectedMapDescription"></div>
+                    </div>
+                    <div id="mapPreviewContainer" class="mapPreviewContainer">
+                        <div id="mapPreviewPlaceholder">{% translate "Select a map to view high scores" %}</div>
+                        <div id="mapPreviewContent" class="mapPreviewContent">
+                            <div id="app">
+                                <div id="loadingText">Loading Map...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Highscores Table -->
+                    <div id="highscoresContainer" class="highscoresContainer">
+                        <div class="panelHeader">{% translate "Highscores" %}</div>
+                        <table class="generalTable">
+                            <thead>
+                                <tr>
+                                    <th>{% translate "Name" %}</th>
+                                    <th>{% translate "Date" %}</th>
+                                    <th>{% translate "Game" %}</th>
+                                    <th>{% translate "Score" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="highscoresTableBody">
+                                <!-- Highscores will be loaded here -->
+                            </tbody>
+                        </table>
+                        <div id="noHighscoresMessage" class="noHighscoresMessage">
+                            {% translate "No highscores recorded for this map yet." %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% block script %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load solo maps when page loads
+            loadSoloMaps();
+        });
+        </script>
+    {% endblock script %}
+{% endblock body %}

@@ -273,7 +273,7 @@ class GameAdmin(admin.ModelAdmin):
     )
 
     # search_fields = ("gameName", "creator__username")
-    search_fields = ("gameName", "gameDescription", "gameCode")
+    search_fields = ("gameName", "gameDescription", "gameCode", "id")
 
     readonly_fields = ("ind_premove_display",)  # , "gameDataBLOB")
 
