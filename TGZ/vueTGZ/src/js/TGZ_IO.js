@@ -199,6 +199,11 @@ export async function saveGame(saveRewind) {
 		personal.removeCurrentFlexTimeName = ""
 	}
 
+	// Emergency check to ensure double god gods are stats excluded
+	if (!personal.statsExcludedGame && store.players.some((player) => player.god.length > 1)) {
+		postData.forceStatsExclude = true
+	}
+
 	try {
 		const response = await fetch("/TGZ/processTGZturn/", {
 			method: "POST",

@@ -363,6 +363,10 @@ def _processTGZturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
+        # Check if someone has 2 gods, and then stats exclude
+        if "forceStatsExclude" in jsonData and jsonData["forceStatsExclude"]:
+            currentGame.statsExcludedGame = True
+
         if "mapTiles" in jsonData:
             currentGame.startingMap = json.dumps(jsonData["mapTiles"])
 
