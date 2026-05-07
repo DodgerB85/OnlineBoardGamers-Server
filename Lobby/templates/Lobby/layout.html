@@ -25,15 +25,15 @@
   "operatingSystem": "WEB",
   "applicationCategory": "GameApplication"
 }
-</script>
+        </script>
         <title>
             {% block title %}
-            {% if user.is_authenticated %}
-                {% if myMoveGames %}({{ myMoveGames }}){% endif %}
-                Online Board Gamers
-            {% else %}
-            Online Board Gamers - Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!
-             {% endif %}
+                {% if user.is_authenticated %}
+                    {% if myMoveGames %}({{ myMoveGames }}){% endif %}
+                    Online Board Gamers
+                {% else %}
+                    Online Board Gamers - Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!
+                {% endif %}
             {% endblock %}
         </title>
         <meta name="title" content="Online Board Gamers">
@@ -49,23 +49,29 @@
         <meta name="revisit-after" content="2 days">
         <meta name="author" content="Online Board Gamers">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta property="og:image"
-              content="https://www.onlineboardgamers.com{% static 'Lobby/favicon.jpg' %}" />
         <!--<link rel="preload"
       href="/static/Lobby/Lobby.css"
       as="style"
       onload="this.rel='stylesheet'">-->
-        <link rel="icon" type="image/jpg" href="{% static 'Lobby/favicon.jpg' %}" />
-        <link rel="apple-touch-icon-precomposed"
-              href="{% static 'Lobby/favicon.jpg' %}">
-        <link rel="apple-touch-icon" href="{% static 'Lobby/favicon.jpg' %}">
-        <link rel="apple-touch-icon-precomposed"
-              sizes="57x57 72x72 76x76 114x114 120x120 144x144 152x152"
-              href="{% static 'Lobby/favicon.jpg' %}">
+        <!-- Browser Icons -->
+        <link rel="icon"
+              type="image/png"
+              sizes="96x96"
+              href="{% static 'Lobby/favicons/favicon-96x96.png' %}?v=20260507" />
+        <link rel="icon"
+              type="image/svg+xml"
+              href="{% static 'Lobby/favicons/favicon.svg' %}?v=20260507" />
+        <link rel="shortcut icon"
+              href="{% static 'Lobby/favicons/favicon.ico' %}?v=20260507" />
+        <!-- Apple/Mobile Icons -->
         <link rel="apple-touch-icon"
-              sizes="57x57 72x72 76x76 114x114 120x120 144x144 152x152"
-              href="{% static 'Lobby/favicon.jpg' %}">
-        <link rel="shortcut icon" href="{% static 'Lobby/favicon.ico' %}" />
+              sizes="180x180"
+              href="{% static 'Lobby/favicons/apple-touch-icon.png' %}?v=20260507" />
+        <link rel="manifest"
+              href="{% static 'Lobby/favicons/site.webmanifest' %}?v=20260507" />
+        <!-- Social Media (Open Graph) -->
+        <meta property="og:image"
+              content="https://www.onlineboardgamers.com{% static 'Lobby/favicons/favicon-96x96.png' %}" />
         {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com/">{% endblock %}
         <link href="{% static 'Lobby/CSS/layout.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}

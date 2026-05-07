@@ -165,29 +165,4 @@ urlpatterns = [
         "sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"
     ),
     path("reloadMainTchatData/", views.reloadMainTchatData, name="reloadMainTchatData"),
-    # Icons
-    re_path(
-        r"^apple-touch-icon\.png$",
-        RedirectView.as_view(url="/static/Lobby/favicon.png"),
-    ),
-    re_path(
-        r"^apple-touch-icon-precomposed\.png$",
-        RedirectView.as_view(url="/static/Lobby/favicon.png"),
-    ),
-    re_path(
-        r"^apple-touch-icon-120x120\.png$",
-        RedirectView.as_view(url="/static/Lobby/favicon.png"),
-    ),
-    re_path(
-        r"^apple-touch-icon-120x120-precomposed\.png$",
-        RedirectView.as_view(url="/static/Lobby/favicon.png"),
-    ),
-    re_path(
-        r"^apple-touch-icon-152x152\.png$",
-        RedirectView.as_view(url="/static/Lobby/favicon.png"),
-    ),
-    re_path(
-        r"^apple-touch-icon-152x152-precomposed\.png$",
-        RedirectView.as_view(url="/static/Lobby/favicon.png"),
-    ),
 ]
