@@ -1454,7 +1454,7 @@ class RNBpresenter(GamePresenter):
                 )
 
         # Now send winning notification - if not solo
-        elif self.gameObj.maxPlayers > 1:
+        elif not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
             async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "RNB", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
 
             if self.gameObj.relatedMainTournament:
