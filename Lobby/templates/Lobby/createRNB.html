@@ -388,6 +388,26 @@
     setupData.playerNames = {{ playerNames | safe }};
     setupData.startingOptions = {{ startingOptions }};
     initGameCreation(true, setupData);
+    
+    // Handle selectedMapId for solo map play
+    {% if selectedMapId %}
+    // Load maps and then select the specified map
+    loadMaps().then(function() {
+        var mapSelect = document.getElementById("mapSelection");
+        if (mapSelect) {
+            for (var i = 0; i < mapSelect.options.length; i++) {
+                var option = mapSelect.options[i];
+                if (option.value && option.value.includes("{{ selectedMapId }}")) {
+                    mapSelect.selectedIndex = i;
+                    onMapSelectionChange();
+                    break;
+                }
+            }
+        }
+    }).catch(function(error) {
+        console.error("Error loading maps for selection:", error);
+    });
+    {% endif %}
     {% else %}
     initGameCreation(false);
     {% endif %}      

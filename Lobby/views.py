@@ -2188,8 +2188,30 @@ def createRNBpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "RNB", Game)
     # Get settings debug flag for RNB map rendering
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
+    
+    # Handle query parameters for solo map play
     if request.method != "POST" and gameID == 0:
-        return render(request, "Lobby/createRNB.html", {"experienced": experienced, "settingsDebug": settings_debug})
+        context = {"experienced": experienced, "settingsDebug": settings_debug}
+        
+        # Check for map and players query parameters
+        map_id = request.GET.get("map")
+        players = request.GET.get("players")
+        
+        if map_id and players == "1":
+            # Set up for solo play with selected map
+            context.update({
+                "fillData": True,
+                "gameName": f"Solo Map {map_id}",
+                "gameDescription": f"Solo game on map {map_id}",
+                "gamePace": 30,  # Default pace
+                "playerNumber": 1,  # Solo play
+                "playerNames": [],  # No additional players
+                "kickoutDuration": 100,  # Default kickout duration
+                "startingOptions": [],  # No special starting options
+                "selectedMapId": map_id,  # Pass selected map ID to template
+            })
+        
+        return render(request, "Lobby/createRNB.html", context)
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
         try:

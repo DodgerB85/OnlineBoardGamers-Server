@@ -1305,6 +1305,65 @@ def getSoloMaps(request):
 
 
 @login_required
+def RNBuserHighScores(request, username):
+    """
+    Display highscores page for a specific user
+    Shows all scores for the specified username across all maps
+    """
+    settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
+    context = {
+        "settingsDebug": settings_debug,
+        "username": username
+    }
+    return render(request, "RNB/RNBuserHighScores.html", context)
+
+
+@login_required
+def getUserHighscores(request):
+    """
+    Get highscores for a specific user across all maps
+    """
+    if request.method != "GET":
+        return JsonResponse({"error": "GET method required"}, status=405)
+
+    try:
+        username = request.GET.get("username")
+        if not username:
+            return JsonResponse({"error": "Username parameter required"}, status=400)
+
+        # Get user
+        from Lobby.models import User
+        try:
+            user_obj = request.user if request.user.username == username else None
+            if not user_obj:
+                user_obj = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        # Get all highscores for this user
+        highscores = RNBMapScore.objects.filter(user=user_obj).select_related('map_ref').order_by('-score', 'timeStamp')
+
+        # Format highscores data
+        highscores_data = []
+        for score_entry in highscores:
+            highscores_data.append({
+                "mapName": score_entry.map_ref.name if score_entry.map_ref else "Unknown Map",
+                "date_timestamp": int(score_entry.timeStamp),
+                "game": score_entry.game_id,
+                "score": score_entry.score,
+            })
+
+        return JsonResponse({
+            "success": True,
+            "username": username,
+            "highscores": highscores_data
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+
+
+@login_required
 def getMapHighscores(request):
     """
     Get highscores for a specific map

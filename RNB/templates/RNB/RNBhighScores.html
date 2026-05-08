@@ -29,6 +29,30 @@
         #mapPreviewContent .loading-text {
             display: none;
         }
+        
+        /* Play map button styles */
+        .playMapButton {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 10px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        
+        .playMapButton:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        
+        .playMapButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
     </style>
     {% if settingsDebug %}
         <script type="module" src="http://localhost:3042/static/@vite/client"></script>
@@ -67,6 +91,10 @@
                 <!-- Left Div: Map Selection -->
                 <div class="leftPanel">
                     <div class="panelHeader">{% translate "Select Solo Map" %}</div>
+                    <button id="playMapButton"
+                            class="playMapButton"
+                            onclick="playSelectedMap()"
+                            disabled>{% translate "Play this map" %}</button>
                     <br />
                     <select name="mapSelection"
                             id="mapSelection"
@@ -121,6 +149,25 @@
             // Load solo maps when page loads
             loadSoloMaps();
         });
+
+        function playSelectedMap() {
+            const mapSelect = document.getElementById('mapSelection');
+            let selectedMapId;
+            
+            if (mapSelect.value) {
+                try {
+                    const selectedMap = JSON.parse(mapSelect.value);
+                    selectedMapId = selectedMap.uniqueID || selectedMap.id;
+                } catch (error) {
+                    console.error("Error parsing map selection:", error);
+                    return;
+                }
+                
+                // Navigate to createRNB page with the selected map and set players to 1 (solo)
+                window.location.href = `/createRNBpage/?map=${selectedMapId}&players=1`;
+            }
+        }
+
         </script>
     {% endblock script %}
 {% endblock body %}

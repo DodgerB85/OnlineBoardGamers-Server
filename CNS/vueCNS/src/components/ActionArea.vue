@@ -382,7 +382,7 @@ function cancelSales() {
 				Confirm Movie Sales (See upper right panel)
 				<br />
 				<button class="actionsLineButton" @click="localSellMovies">Sell Movies</button>
-				<button class="actionsLineButton" @click="cancelSales">Canccel</button>
+				<button class="actionsLineButton" @click="cancelSales">Cancel</button>
 			</div>
 
 			<!-- STORE RESOURCES -->

@@ -538,18 +538,21 @@ function loadMaps() {
 	const isOfficialToggle = document.getElementById("isOfficialToggle")
 	const isOfficial = isOfficialToggle.checked ? "true" : "all"
 
-	fetch(`/RNB/getRNBmaps/?isOfficial=${isOfficial}`)
+	return fetch(`/RNB/getRNBmaps/?isOfficial=${isOfficial}`)
 		.then((response) => response.json())
 		.then((data) => {
 			if (data.success) {
 				loadedMaps = data.maps // Store maps globally
 				populateMapDropdown(data.maps)
+				return data.maps // Return maps for chaining
 			} else {
 				console.error("Error loading maps:", data.error)
+				throw new Error(data.error)
 			}
 		})
 		.catch((error) => {
 			console.error("Error fetching maps:", error)
+			throw error
 		})
 }
 

@@ -352,7 +352,7 @@ function clickedCigar() {
         <div id="cannesButtonsDiv">
           Confirm Sales<br />
           <button class="actionsLineButton" @click="localSellMovies">Sell Movies</button><br />
-          <button class="actionsLineButton" @click="cancelSales">Canccel</button>
+          <button class="actionsLineButton" @click="cancelSales">Cancel</button>
         </div>
       </div>
 

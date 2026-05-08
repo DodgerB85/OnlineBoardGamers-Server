@@ -1,0 +1,115 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'RNB/highScore.css' %}" rel="stylesheet">
+    <style>
+        .panelHeader {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            margin-top: 20px;
+            color: #495057;
+        }
+        
+        .usernameInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .searchUserButton {
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .searchUserButton:hover {
+            background-color: #0056b3;
+        }
+        
+        .noUserScoresMessage {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 20px;
+        }
+        
+        .loadingMessage {
+            text-align: center;
+            color: #007bff;
+            margin-top: 20px;
+        }
+    </style>
+    {% if settingsDebug %}
+        <script type="module" src="http://localhost:3042/static/@vite/client"></script>
+        <script type="module" src="http://localhost:3042/static/main.js"></script>
+    {% else %}
+        <link href="{% static 'RNB/RNBvuedist/main.css' %}?" rel="stylesheet" />
+        <script type="module"
+                crossorigin=""
+                src="{% static 'RNB/RNBvuedist/main.js' %}"></script>
+    {% endif %}
+    {% compress js %}
+        <script src="{% static 'RNB/userHighscores.js' %}"></script>
+    {% endcompress %}
+{% endblock head %}
+{% block body %}
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div id="playerInfoNameDiv">
+            <h1>{{ username }}</h1>
+        </div>
+        <div class="panelHeader">{% translate "Search Another Player" %}</div>
+        <input type="text"
+               id="usernameInput"
+               class="usernameInput"
+               placeholder="{% translate 'Enter username' %}"
+               onkeyup="handleUsernameInput(event)">
+        <button id="searchUserButton"
+                class="searchUserButton"
+                onclick="searchUserScores()">{% translate "Search Player" %}</button>
+        <h2>{% translate "All Highscores for" %} {{ username }}</h2>
+        <div id="loadingMessage" class="loadingMessage" style="display: none;">{% translate "Loading highscores..." %}</div>
+        <table class="generalTable">
+            <thead>
+                <tr>
+                    <th>{% translate "Map" %}</th>
+                    <th>{% translate "Date" %}</th>
+                    <th>{% translate "Game" %}</th>
+                    <th>{% translate "Score" %}</th>
+                </tr>
+            </thead>
+            <tbody id="userScoresTableBody">
+                <!-- User scores will be loaded here -->
+            </tbody>
+        </table>
+        <div id="noUserScoresMessage"
+             class="noUserScoresMessage"
+             style="display: none">{% translate "No highscores recorded for this player yet." %}</div>
+    </div>
+    {% block script %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load user scores when page loads
+            loadUserScores('{{ username }}');
+        });
+        </script>
+    {% endblock script %}
+{% endblock body %}

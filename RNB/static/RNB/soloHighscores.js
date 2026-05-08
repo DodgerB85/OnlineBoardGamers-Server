@@ -107,6 +107,12 @@ function onMapSelectionChange() {
     const highscoresContainer = document.getElementById("highscoresContainer")
     const highscoresTableBody = document.getElementById("highscoresTableBody")
     const noHighscoresMessage = document.getElementById("noHighscoresMessage")
+    
+    // Update play button state
+    const playButton = document.getElementById('playMapButton');
+    if (playButton) {
+        playButton.disabled = !mapSelect.value;
+    }
 
     if (mapSelect.value) {
         try {
