@@ -264,6 +264,7 @@ var Log = {
 				this
 			)
 			bldgStr = bldgStr.slice(0, -2)
+			if (bldgStr === "") bldgStr = "nothing."
 			res.append(bldgStr)
 			res.css({
 				border: "1px solid yellow",

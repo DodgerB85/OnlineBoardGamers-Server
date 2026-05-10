@@ -39,4 +39,5 @@ urlpatterns = [
     path("data/<int:dataType>/", views.INDdata, name="INDdata"),
     path("saveZoom/", views.saveZoom, name="saveZoom"),
     path("castVote/", views.castVote, name="castVoteCNS"),
+    path("createINDspinoff/", views.createINDspinoff, name="createINDspinoff"),
 ]

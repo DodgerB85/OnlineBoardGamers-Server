@@ -752,6 +752,88 @@ def forkINDgame(request):
 
 
 @login_required()
+def createINDspinoff(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Wrong request."}, status=400)
+
+    jsonData = json.loads(request.body)
+
+    if jsonData["action"] == "copyGame":
+        try:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="IND")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
+
+        NgameName = "[Copy] - " + currentGame.gameName
+        NgameStatus = "ACTIVE"
+        NstartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions != "" else []
+        if len(NstartingOptions) == 0 or NstartingOptions[0] != 102:
+            NstartingOptions = [102, *NstartingOptions]
+        NstartingOptions = json.dumps(NstartingOptions)
+        NplayerOrderSeed = currentGame.playerOrderSeed
+        NmaxPlayers = currentGame.maxPlayers
+        Nturn = jsonData["turn"]
+        Nphase = jsonData["phase"]
+        NkickoutDuration = currentGame.kickoutDuration
+        NgamePace = currentGame.gamePace
+        Ncreator = request.user
+        Nhost = request.user
+        NgameData = jsonData["data"]
+        NstatsExcludedGame = True
+        # For some reason jsonData["latestUpdate"] didn't come through one time. Use this as a fallback so it doesn't fail
+        Ncreated = jsonData["latestUpdate"] if jsonData["latestUpdate"] else int(time.time() * 1000)
+        NlatestUpdate = jsonData["latestUpdate"] if jsonData["latestUpdate"] else int(time.time() * 1000)
+        NstartingMap = currentGame.startingMap
+        NzoomLevels = currentGame.zoomLevels
+
+        newGame = Game(
+            gameCode="IND",
+            gameName=NgameName,
+            gameStatus=NgameStatus,
+            startingOptions=NstartingOptions,
+            startingMap=NstartingMap,
+            playerOrderSeed=NplayerOrderSeed,
+            maxPlayers=NmaxPlayers,
+            turn=Nturn,
+            phase=Nphase,
+            kickoutDuration=NkickoutDuration,
+            gamePace=NgamePace,
+            creator=Ncreator,
+            host=Nhost,
+            gameData=NgameData,
+            statsExcludedGame=NstatsExcludedGame,
+            created=Ncreated,
+            latestUpdate=NlatestUpdate,
+            zoomLevels=NzoomLevels,
+        )
+
+        newGame.save()
+
+        from Lobby.models import GamePlayer
+
+        GamePlayer.objects.create(game=newGame, player=request.user, seat_order=0, is_current=True)
+        GamePlayer.objects.create(game=newGame, player=User.objects.get(username="SHADOW"), seat_order=1)
+        if NmaxPlayers >= 3:
+            GamePlayer.objects.create(game=newGame, player=User.objects.get(username="SHADOW_2"), seat_order=2)
+        if NmaxPlayers >= 4:
+            GamePlayer.objects.create(game=newGame, player=User.objects.get(username="SHADOW_3"), seat_order=3)
+        if NmaxPlayers >= 5:
+            GamePlayer.objects.create(game=newGame, player=User.objects.get(username="SHADOW_4"), seat_order=4)
+
+        newGame.latestUpdate = str(int(time.time()) * 1000)
+
+        rewindDataArray = []
+        rewindDataArray.append(NgameData)
+        newGame.rewindData = json.dumps(rewindDataArray)
+
+        newGame.save()
+
+        return JsonResponse({"response": "ok", "newID": newGame.id})
+
+    return JsonResponse({"error": "Wrong request."}, status=400)
+
+
+@login_required()
 def castVote(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
