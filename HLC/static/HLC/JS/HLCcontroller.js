@@ -1344,7 +1344,7 @@ var Controller = function (_model, _view) {
 			V.render(-1)
 		}
 		if (this.model.gameFlow.turnOrder.length === 0) {
-			await this.moveToNextPhase()
+			this.moveToNextPhase()
 			await IO.saveGame(this.model)
 		} else this.startActions()
 	}

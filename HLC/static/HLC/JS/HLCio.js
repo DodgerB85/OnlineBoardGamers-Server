@@ -446,7 +446,7 @@ var IO = {
 					global.currentPlayers = result.currentPlayers
 					// refresh active players
 					V.render(M.gameFlow.unalteredTurnOrder.indexOf(global.pov))
-				} else {
+				} else if (result.ready === true) {
 					// reload model
 					C.reloadModel(result.gameData)
 					$("#actions").empty()
