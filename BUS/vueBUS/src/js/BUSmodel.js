@@ -166,6 +166,12 @@ export function getWinnerName(returnScores) {
 
 	// sort by timestones in equal score
 	resArr.sort(function (a, b) {
+		// Move bots to the end of the sort
+		const aIsBot = a.displayName === rf.BOT_NAME
+		const bIsBot = b.displayName === rf.BOT_NAME
+		if (aIsBot && !bIsBot) return 1
+		if (!aIsBot && bIsBot) return -1
+		
 		return cmp(Math.floor(b.score), Math.floor(a.score)) || cmp(b.timeStones, a.timeStones) || cmp(b.maxScore, a.maxScore)
 	})
 

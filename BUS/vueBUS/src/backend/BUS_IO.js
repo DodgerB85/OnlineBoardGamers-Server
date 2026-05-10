@@ -308,7 +308,7 @@ export async function loadRewind() {
 			for (let i = 0; i < data.missingPlayers.length; i++) {
 				for (let j = 0; j < store.players.length; j++) {
 					if (store.players[j].name == data.missingPlayers[i]) {
-						store.players[j].displayName = "BusBot"
+						store.players[j].displayName = rf.BOT_NAME
 						store.players[j].score = 0
 					}
 				}
@@ -439,7 +439,7 @@ export async function saveGameDataAfterKickout() {
 		// Now set the game to the next state
 		// Count non players and end game if only 1 left
 		var nbNonPlayers = 0
-		for (let i = 0; i < store.players.length; i++) if (store.players[i].displayName === "BusBot") nbNonPlayers++
+		for (let i = 0; i < store.players.length; i++) if (store.players[i].displayName === rf.BOT_NAME) nbNonPlayers++
 
 		if (nbNonPlayers >= store.players.length - 1) {
 			// Only 1 player left, so end game

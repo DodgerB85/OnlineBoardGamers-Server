@@ -21,7 +21,7 @@ export const usePersonalStore = defineStore('personal', () => {
 
   function canPlay() {
     for (let i = 0; i < store.players.length; i++) {
-      if (store.players[i].displayName === "BusBot") store.players[i].remainingActions = 0
+      if (store.players[i].displayName === rf.BOT_NAME) store.players[i].remainingActions = 0
     }
     if (store.topMenuViews.showReplay === true) return false
     if (store.topMenuViews.generatingReplay === true) return false

@@ -3,6 +3,8 @@ import { usePersonalStore } from "../stores/BUSpersonal.js"
 export const DELETE_VOTE_TOPIC = "delete_game_votes"
 export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
 
+export const BOT_NAME = "BusBot"
+
 export const paxIdx = 5
 
 export const BLUE = 0

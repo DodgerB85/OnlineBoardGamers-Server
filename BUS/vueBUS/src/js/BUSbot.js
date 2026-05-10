@@ -12,7 +12,7 @@ export function actionAnyBotMooves() {
 	if (store.gameflow.gameEnded > 0) return
 	// Still action any bot turns for history on time passing, or adding buses
 	if (store.gameflow.phase === rf.PHASE_ADD_BUS || store.gameflow.phase === rf.PHASE_ALTER_TIME) return
-	while (store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === "BusBot") {
+	while (store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) {
 		store.gameflow.turnOrder.shift()
 	}
 
@@ -35,7 +35,7 @@ export function actionPlayerKickout() {
 		store.history.push([rf.HIST_KICKOUT, personal.pov, Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [store.gameflow.turnOrder[0]]])
 		store.resetVarsOnTurnEnd()
 
-		store.players[store.gameflow.turnOrder[0]].displayName = "BusBot"
+		store.players[store.gameflow.turnOrder[0]].displayName = rf.BOT_NAME
 		store.players[store.gameflow.turnOrder[0]].score = 0
 		store.players[store.gameflow.turnOrder[0]].remainingActions = 0
 
@@ -47,13 +47,13 @@ export function actionResign() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	// change display name
-	store.players[personal.pov].displayName = "BusBot"
+	store.players[personal.pov].displayName = rf.BOT_NAME
 	// set score to 0
 	store.players[personal.pov].score = 0
 
 	// Count non players and end game if only 1 left
 	var nbNonPlayers = 0
-	for (let i = 0; i < store.players.length; i++) if (store.players[i].displayName === "BusBot") nbNonPlayers++
+	for (let i = 0; i < store.players.length; i++) if (store.players[i].displayName === rf.BOT_NAME) nbNonPlayers++
 
 	if (nbNonPlayers >= store.players.length - 1) {
 		// Only 1 player left, so end game

@@ -316,7 +316,7 @@ export function endCurrentPhase() {
 		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 		// remove all non players
 		for (let i = store.gameflow.turnOrder.length - 1; i >= 0; i--) {
-			if (store.players[store.gameflow.turnOrder[i]].displayName === "BusBot" || store.players[store.gameflow.turnOrder[i]].remainingActions === 0) {
+			if (store.players[store.gameflow.turnOrder[i]].displayName === rf.BOT_NAME || store.players[store.gameflow.turnOrder[i]].remainingActions === 0) {
 				store.gameflow.turnOrder.splice(i, 1)
 			}
 		}
@@ -368,7 +368,7 @@ export function endCurrentPhase() {
 		if (store.actionAreaData[4][0] !== -1) {
 			store.gameflow.turnOrder = [store.actionAreaData[4][0]]
 			store.gameflow.turnOrder[0] = getPlayerIndexFromColour(store.gameflow.turnOrder[0])
-			if (store.players[store.gameflow.turnOrder[0]].displayName === "BusBot") botAlterTime = true
+			if (store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) botAlterTime = true
 			//Bot.updateTurnOrder()
 		}
 		if (botAlterTime || store.actionAreaData[4][0] === -1 || store.gameflow.turnOrder.length === 0) {
