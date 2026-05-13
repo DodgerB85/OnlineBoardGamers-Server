@@ -562,7 +562,7 @@ def test(request):
 
 
 def processTurn(request):
-    # time.sleep(5)
+    #time.sleep(5)
     # processing a turn must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
