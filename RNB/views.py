@@ -80,11 +80,11 @@ def showRNBmap(request, game_id=0):
     startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
 
     mapName = "[No Name]"
-    mapDescription = '[No description]'
+    mapDescription = "[No description]"
     playerCount = 0
     uniqueID = startingMap[-1].get("UK", -1)
 
-    if (uniqueID >=0):
+    if uniqueID >= 0:
         currentMap = RNBmap.objects.get(uniqueID=uniqueID)
         mapName = currentMap.name
         mapDescription = currentMap.description
@@ -100,7 +100,7 @@ def showRNBmap(request, game_id=0):
         "mapName": mapName,
         "mapDescription": mapDescription,
         "playerCount": playerCount,
-        "showPlayerCountWarning": showPlayerCountWarning
+        "showPlayerCountWarning": showPlayerCountWarning,
     }
 
     return render(request, "RNB/showRNBmapPage.html", returnData)
@@ -576,7 +576,6 @@ def _processRNBturn(request):
             presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
             presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
-
             # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
 
             ################ REWIND EVERY SAVE #######################
@@ -661,9 +660,12 @@ def _processRNBturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
-
         # Next, we can clear out old data
         PclearPastMoveData(currentGame)
+
+        # If the current player needs to fix their move, clear out their future moves
+        if jsonData["currentPlayerNeedsToFixMove"]:
+            PdeleteAllOtherMovesForInteferedWithPlayer(currentGame, jsonData["allRemainingPlayersInTurnOrder"][0])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -876,7 +878,6 @@ def _processRNBturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
-
         gameDataB64 = jsonData["gameDataB64"]
         # raw_binary = base64.b64decode(gameDataStr)
         # currentGame.gameDataBLOB = raw_binary
@@ -1037,7 +1038,6 @@ def performSaveGame(request, currentGame, jsonData):
     presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
     presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
-
     # SAVE BEFORE NOTIFICATIONS
     currentGame.save()
 
@@ -1197,8 +1197,8 @@ def saveRNBmap(request):
         # if not map_name:
         #    return JsonResponse({'error': 'Map name is required'}, status=400)
 
-        result = RNBmap.objects.aggregate(Max('uniqueID'))
-        max_unique_key = result['uniqueID__max'] or 0
+        result = RNBmap.objects.aggregate(Max("uniqueID"))
+        max_unique_key = result["uniqueID__max"] or 0
 
         # Increment UK for the new map
         max_unique_key = max_unique_key + 1
@@ -1265,10 +1265,7 @@ def RNBhighScores(request, map_unique_id=None):
     Optional map_unique_id parameter to pre-select a specific map
     """
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
-    context = {
-        "settingsDebug": settings_debug,
-        "selected_map_id": map_unique_id
-    }
+    context = {"settingsDebug": settings_debug, "selected_map_id": map_unique_id}
     return render(request, "RNB/RNBhighScores.html", context)
 
 
@@ -1287,15 +1284,7 @@ def getSoloMaps(request):
         # Format response
         maps_data = []
         for map_obj in maps_queryset:
-            maps_data.append({
-                "id": map_obj.id,
-                "uniqueID": map_obj.uniqueID,
-                "name": map_obj.name,
-                "description": map_obj.description,
-                "playerCount": map_obj.playerCount,
-                "isOfficial": map_obj.isOfficial,
-                "hexData": map_obj.hexData
-            })
+            maps_data.append({"id": map_obj.id, "uniqueID": map_obj.uniqueID, "name": map_obj.name, "description": map_obj.description, "playerCount": map_obj.playerCount, "isOfficial": map_obj.isOfficial, "hexData": map_obj.hexData})
 
         return JsonResponse({"success": True, "maps": maps_data})
 
@@ -1310,10 +1299,7 @@ def RNBuserHighScores(request, username):
     Shows all scores for the specified username across all maps
     """
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
-    context = {
-        "settingsDebug": settings_debug,
-        "username": username
-    }
+    context = {"settingsDebug": settings_debug, "username": username}
     return render(request, "RNB/RNBuserHighScores.html", context)
 
 
@@ -1332,6 +1318,7 @@ def getUserHighscores(request):
 
         # Get user
         from Lobby.models import User
+
         try:
             user_obj = request.user if request.user.username == username else None
             if not user_obj:
@@ -1340,23 +1327,21 @@ def getUserHighscores(request):
             return JsonResponse({"error": "User not found"}, status=404)
 
         # Get all highscores for this user
-        highscores = RNBMapScore.objects.filter(user=user_obj).select_related('map_ref').order_by('-score', 'timeStamp')
+        highscores = RNBMapScore.objects.filter(user=user_obj).select_related("map_ref").order_by("-score", "timeStamp")
 
         # Format highscores data
         highscores_data = []
         for score_entry in highscores:
-            highscores_data.append({
-                "mapName": score_entry.map_ref.name if score_entry.map_ref else "Unknown Map",
-                "date_timestamp": int(score_entry.timeStamp),
-                "game": score_entry.game_id,
-                "score": score_entry.score,
-            })
+            highscores_data.append(
+                {
+                    "mapName": score_entry.map_ref.name if score_entry.map_ref else "Unknown Map",
+                    "date_timestamp": int(score_entry.timeStamp),
+                    "game": score_entry.game_id,
+                    "score": score_entry.score,
+                }
+            )
 
-        return JsonResponse({
-            "success": True,
-            "username": username,
-            "highscores": highscores_data
-        })
+        return JsonResponse({"success": True, "username": username, "highscores": highscores_data})
 
     except Exception as e:
         return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
@@ -1379,24 +1364,14 @@ def getMapHighscores(request):
         map_obj = RNBmap.objects.get(id=map_id)
 
         # Get highscores from RNBMapScore model
-        highscores = RNBMapScore.objects.filter(map_ref=map_obj).select_related('user').order_by('-score', 'timeStamp')
+        highscores = RNBMapScore.objects.filter(map_ref=map_obj).select_related("user").order_by("-score", "timeStamp")
 
         # Format highscores with user names
         highscores_data = []
         for score_entry in highscores:
-                highscores_data.append({
-                "name": score_entry.user.username,
-                "date_timestamp": int(score_entry.timeStamp),
-                "game": score_entry.game_id,
-                "score": score_entry.score
-            })
+            highscores_data.append({"name": score_entry.user.username, "date_timestamp": int(score_entry.timeStamp), "game": score_entry.game_id, "score": score_entry.score})
 
-        return JsonResponse({
-            "success": True,
-            "mapName": map_obj.name,
-            "mapDescription": map_obj.description,
-            "highscores": highscores_data
-        })
+        return JsonResponse({"success": True, "mapName": map_obj.name, "mapDescription": map_obj.description, "highscores": highscores_data})
 
     except RNBmap.DoesNotExist:
         return JsonResponse({"error": "Map not found"}, status=404)
@@ -1503,6 +1478,20 @@ def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
     gp_player.moveDataJSON = moves
     gp_player.save(update_fields=["moveDataJSON"])  # ONLY save this field
 
+
+def PdeleteAllOtherMovesForInteferedWithPlayer(currentGame, nameToUse):
+    turn = currentGame.turn
+    phase = currentGame.phase
+
+    gp_player = currentGame.players.only("moveDataJSON").get(player__username=nameToUse)
+    moves = gp_player.moveDataJSON or []
+    gp_player.moveDataJSON = [
+        m
+        for m in moves
+        if m.get("turn", 0) == turn and m.get("phase", 0) == phase
+    ]
+
+    gp_player.save(update_fields=["moveDataJSON"])
 
 def PclearPastMoveData(currentGame):
     turn = currentGame.turn
