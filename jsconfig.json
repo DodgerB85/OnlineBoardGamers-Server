@@ -2,12 +2,12 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    //"moduleResolution": "node",
     "allowJs": true,
     "checkJs": false,      // <--- CHANGE THIS TO FALSE
     "strict": false,       // <--- CHANGE THIS TO FALSE
     "jsx": "preserve",
-    "baseUrl": ".",
+    //"baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
