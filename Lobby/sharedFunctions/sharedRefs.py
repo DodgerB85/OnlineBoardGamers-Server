@@ -1408,6 +1408,29 @@ def SR_getWEBstartingOptionsHTML(startingOptionsArr):
 
     return startingOptionsHTML
 
+def SR_getRNBstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
+        return ""
+    if len(startingOptionsArr) == 0:
+        return ""
+    startingOptionsHTML = ""
+    for option in startingOptionsArr:
+        if option == rf.SO_LEARNING_GAME:
+            # usedOptions += 1
+            startingOptionsHTML += (
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
+                + gettext("Learning Game")
+                + "'>"
+            )
+        if option == rf.SO_EXPERIENCED_GAME:
+            # usedOptions += 1
+            startingOptionsHTML += (
+                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
+                + gettext("Experienced Game")
+                + "'>"
+            )
+
+    return startingOptionsHTML
 
 def SR_getPointsForPosition(position, maxPlayers):
     """

@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	document.querySelector("#IND").addEventListener("click", () => show_playerStatsTab("IND"))
 	document.querySelector("#KFW").addEventListener("click", () => show_playerStatsTab("KFW"))
 	document.querySelector("#WEB").addEventListener("click", () => show_playerStatsTab("WEB"))
+	document.querySelector("#RNB").addEventListener("click", () => show_playerStatsTab("RNB"))
 
 	var gameRows = document.querySelectorAll(".gameRow")
 
@@ -51,6 +52,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			} else if (this.parentNode.parentNode.id.slice(0, 3) === "WEB") {
 				_gameID = parseInt(this.parentNode.parentNode.id.slice(11))
 				URLstring = "WEB"
+			}else if (this.parentNode.parentNode.id.slice(0, 3) === "RNB") {
+				_gameID = parseInt(this.parentNode.parentNode.id.slice(11))
+				URLstring = "RNB"
 			}
 
 			let csrftoken = getCookie("csrftoken")
@@ -147,6 +151,8 @@ function show_playerStatsTab(game) {
 		document.getElementsByClassName("players5")[8].style.display = "none"
 		document.getElementsByClassName("players6")[8].style.display = "none"
 		document.getElementById(game).classList.add("active")
+	} else if (game === "RNB") {
+		document.getElementById(game).classList.add("active")
 	}
 
 	var divToDisplay = "playerStatsDiv"
@@ -159,6 +165,7 @@ function show_playerStatsTab(game) {
 	else if (game === "IND") divToDisplay += "6"
 	else if (game === "KFW") divToDisplay += "7"
 	else if (game === "WEB") divToDisplay += "8"
+	else if (game === "RNB") divToDisplay += "9"
 	// Show the correct Div
 	document.getElementById(divToDisplay).style.display = "block"
 }

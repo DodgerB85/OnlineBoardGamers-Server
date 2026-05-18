@@ -1020,6 +1020,9 @@
     <b><a class="linkOther AQYpreferencesDiv" href="{% url 'profileIND' %}">{% translate "Dedicated Indonesia Preferences Page" %}</a></b>
 </div>
 <div class="profilePreferenceDiv">
+    <b><a class="linkOther AQYpreferencesDiv" href="{% url 'profileRNB' %}">{% translate "Dedicated Roads & Boats Preferences Page" %}</a></b>
+</div>
+<div class="profilePreferenceDiv">
     <form method="post">
         {% csrf_token %}
         {% for field in form2 %}{{ field }}{% endfor %}

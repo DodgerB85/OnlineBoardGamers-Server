@@ -34,6 +34,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getINDstartingOptionsHTML,
     SR_getKFWstartingOptionsHTML,
     SR_getPointsForPosition,
+    SR_getRNBstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
     SR_getWEBstartingOptionsHTML,
     getCleanedAndSortedRoundData,
@@ -66,6 +67,8 @@ def SF_getRequiredExp(gameCode):
     if gameCode == "IND":
         return 2
     if gameCode == "KFW":
+        return 2
+    if gameCode == "RNB":
         return 2
     return 2
 
@@ -214,6 +217,10 @@ def SF_serializeGame(game, user, player_context):
         startingOptionsHTML = SR_getKFWstartingOptionsHTML(startingOptionsArr)
     if game_code == "WEB":
         startingOptionsHTML = SR_getWEBstartingOptionsHTML(startingOptionsArr)
+    if game_code == "RNB":
+        startingOptionsHTML = SR_getRNBstartingOptionsHTML(startingOptionsArr)
+
+
 
     # Compute kickout inline using already-extracted data to avoid extra queries
     current_username = current_players_str.split(", ")[0] if current_players_str else ""

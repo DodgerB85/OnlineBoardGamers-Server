@@ -370,6 +370,19 @@ function selectPlayers() {
 	// Re-sort maps based on new player count
 	if (loadedMaps.length > 0) {
 		populateMapDropdown(loadedMaps)
+		//window.mapStore.mapData.externalMapData.splice(0)
+		//window.mapStore.playerCount = numberOfPlayers
+		const mapPreviewPlaceholder = document.getElementById("mapPreviewPlaceholder")
+		const mapPreviewContent = document.getElementById("mapPreviewContent")
+
+		const selectedMapName = document.getElementById("selectedMapName")
+		const selectedMapDescription = document.getElementById("selectedMapDescription")
+
+		mapPreviewPlaceholder.style.display = "block"
+		mapPreviewContent.style.display = "none"
+
+		selectedMapName.textContent = ""
+		selectedMapDescription.textContent = ""
 	}
 }
 
@@ -637,10 +650,12 @@ function onMapSelectionChange() {
 			// 2. Use global store reference we created in Step 1
 			if (window.mapStore) {
 				// This triggers all your computed properties in the Vue app
+				// ADD TO CHANGE PLAYER
 				window.mapStore.mapData.externalMapData = selectedMap.hexData
 
 				// If you have player count logic in the store
 				if (selectedMap.playerCount) {
+					// ADD TO CHANGE PLAYER
 					window.mapStore.playerCount = selectedMap.playerCount
 				}
 			} else {
