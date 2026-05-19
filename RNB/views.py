@@ -116,6 +116,7 @@ def RNBmapEditor(request, game_id=0):
         {
             "gameID": game_id,
             "settingsDebug": config("RNB_USE_SOURCE_CODE", default=False, cast=bool),
+            "username": request.user.username,
         },
     )
 
@@ -1294,7 +1295,8 @@ def replaceRNBmap(request):
         existing_map = RNBmap.objects.get(id=map_id)
 
         # Double-check the request user is the creator and map is not official
-        if existing_map.creator != request.user:
+        # Admin user can replace any map
+        if existing_map.creator != request.user and request.user.username != "admin":
             return JsonResponse({"error": "Only the map creator can replace this map"}, status=403)
         if existing_map.isOfficial:
             return JsonResponse({"error": "Official maps cannot be replaced"}, status=403)
