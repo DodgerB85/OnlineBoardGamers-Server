@@ -71,6 +71,13 @@
         <img src="{% static "Lobby/images/createMap.jpg" %}" alt="FCM Map Editor">
       </div>
     </a>
+    <a href="{% url 'RNB:RNBmapEditor' %}" class="newGameLink">
+      <div id="createNewFCMmap">
+        {% translate "R&B Map Editor" %}
+        <img src="{% static "Lobby/images/createMapRNB.jpg" %}"
+             alt="R&B Map Editor">
+      </div>
+    </a>
     <a href="{% url 'TGZmapEditor' %}" class="newGameLink">
       <div id="createNewTGZmap">
         {% translate "TGZ Map Editor" %}
