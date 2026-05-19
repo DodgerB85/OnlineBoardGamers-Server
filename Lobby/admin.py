@@ -2,6 +2,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import Group
+from django.db import models
 from django.urls import reverse
 from django.utils.html import format_html
 
@@ -68,6 +69,7 @@ class TournamentAdmin(admin.ModelAdmin):
 class GamePlayerInline(admin.TabularInline):
     model = GamePlayer
     extra = 0
+    can_delete = False
     # fields = ("player", "player_number", "status", "edit_link")
     # readonly_fields = ("edit_link",)
     show_change_link = True
@@ -83,6 +85,10 @@ class GamePlayerInline(admin.TabularInline):
         "currentMoveData",
     )
     autocomplete_fields = ["player"]
+
+    formfield_overrides = {
+        models.JSONField: {"widget": forms.Textarea(attrs={"rows": 3, "cols": 40})},
+    }
 
     # @admin.display(description="Edit")
     # def edit_link(self, obj):
@@ -113,6 +119,16 @@ class GameAdmin(admin.ModelAdmin):
     ]
 
     inlines = [GamePlayerInline]  # Add this line
+
+    def save_formset(self, request, form, formset, change):
+        # Force save ALL GamePlayer instances, not just changed ones
+        if formset.model == GamePlayer:
+            formset.save()  # Sets up new_objects/changed_objects/deleted_objects metadata
+            for inline_form in formset.forms:
+                if inline_form.instance.pk:
+                    inline_form.instance.save()
+        else:
+            super().save_formset(request, form, formset, change)
 
     # Map your Textareas here without needing a separate Form class
     def formfield_for_dbfield(self, db_field, request, **kwargs):

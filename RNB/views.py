@@ -1593,6 +1593,8 @@ def PclearPastMoveData(currentGame):
     # .all() is needed after .only() to iterate
     all_gp = currentGame.players.only("moveDataJSON")
 
+    print(phase)
+
     for gp in all_gp:
         moves = gp.moveDataJSON or []
 
@@ -1600,7 +1602,7 @@ def PclearPastMoveData(currentGame):
         gp.moveDataJSON = [
             m
             for m in moves
-            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT + 1) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)
+            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT ) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)
         ]
 
         gp.save(update_fields=["moveDataJSON"])
