@@ -531,8 +531,8 @@ def _processRNBturn(request):
             currentGame.kickoutDuration,
         )
 
-        # First, ALWAYS add the conflict preset move
-        if jsonData["conflictPresetData"] != "":
+        # First, ALWAYS add the conflict preset move, UNLESS saving into a main phase
+        if jsonData["conflictPresetData"] != "" and jsonData["phase"] not in rfRNB.MAIN_PHASES:
             conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
             conflictPresetMove["status"] = "pending"
             PaddMoveToPlayer(currentGame, nameToUse, conflictPresetMove)
@@ -542,6 +542,7 @@ def _processRNBturn(request):
 
         # If you are saving INTO a conflict decision phase, then you must NOT be calling conflict.
         # So save your move, and return all moves for immediate client-side verification
+        print(f"SAVING PHASE: {savingPhase}")
         if savingPhase in rfRNB.PHASE_CONFLICT_DECISIONS:
             presenter.reduceCurrentPlayersUsingArray(jsonData["clientNextPlayerNames"])
 
@@ -597,6 +598,49 @@ def _processRNBturn(request):
             }
 
             return JsonResponse(response_data, safe=False)
+
+        # Otherwise, you are saving INTO the start of a new main phase
+        # Perform most of a normal save
+        db_latest_update = currentGame.latestUpdate
+        latest_update = jsonData.get("latestUpdate", 0)
+        game_id = currentGame.id
+        presenter = cast("RNBpresenter", currentGame.presenter())
+
+        gameDataB64 = jsonData["gameDataB64"]
+        # raw_binary = base64.b64decode(gameDataStr)
+        # currentGame.gameDataBLOB = raw_binary
+        currentGame.gameData = gameDataB64
+        currentGame.turn = jsonData["turn"]
+        currentGame.phase = jsonData["phase"]
+
+        oldVer = db_latest_update
+        newVer = (int(db_latest_update) % 1000) + 1
+        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
+
+        presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+
+        # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
+
+        ################ REWIND EVERY SAVE #######################
+        # Don't save rewind if all players have moved - wait for client to process phase
+        if jsonData["saveRewind"]:  # and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+            doSaveRewind(currentGame, jsonData)
+
+        ################ END REWIND EVERY SAVE #######################
+
+        currentGame.save()
+
+        response_data = {
+            "latestUpdate": currentGame.latestUpdate,
+            "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "savingFromStackMove": True,
+            "allStackData": getAllCurrentStackMoves(currentGame),
+            # "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
+            "isCurrentPlayersArr": presenter.getArrayOfIsCurrentPlayers(),
+        }
+
+        return JsonResponse(response_data, safe=False)
 
     # End conflict move
 
@@ -1538,13 +1582,10 @@ def PdeleteAllOtherMovesForInteferedWithPlayer(currentGame, nameToUse):
 
     gp_player = currentGame.players.only("moveDataJSON").get(player__username=nameToUse)
     moves = gp_player.moveDataJSON or []
-    gp_player.moveDataJSON = [
-        m
-        for m in moves
-        if m.get("turn", 0) == turn and m.get("phase", 0) == phase
-    ]
+    gp_player.moveDataJSON = [m for m in moves if m.get("turn", 0) == turn and m.get("phase", 0) == phase]
 
     gp_player.save(update_fields=["moveDataJSON"])
+
 
 def PclearPastMoveData(currentGame):
     turn = currentGame.turn

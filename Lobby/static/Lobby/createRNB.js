@@ -600,11 +600,8 @@ function populateMapDropdown(maps) {
 			hexData: map.hexData,
 			playerCount: map.playerCount,
 		})
-		option.textContent = `${map.name} (${map.playerCount} players)`
-		if (map.playerCount === 1) option.textContent = `${map.name} (Solo)`
-		if (map.isOfficial) {
-			option.textContent += " [Official]"
-		}
+		const playerText = map.playerCount === 1 ? "Solo" : map.playerCount + " players"
+		option.textContent = `${map.name} (${playerText}) ${map.isOfficial ? " [Official]" : ""}`
 		option.style.color = "green"
 		option.style.fontWeight = "bold"
 		mapSelect.appendChild(option)
@@ -620,10 +617,8 @@ function populateMapDropdown(maps) {
 			hexData: map.hexData,
 			playerCount: map.playerCount,
 		})
-		option.textContent = `${map.name} (${map.playerCount} players)`
-		if (map.isOfficial) {
-			option.textContent += " [Official]"
-		}
+		const playerText = map.playerCount === 1 ? "Solo" : map.playerCount + " players"
+		option.textContent = `${map.name} (${playerText}) ${map.isOfficial ? " [Official]" : ""}`
 		option.style.color = "red"
 		mapSelect.appendChild(option)
 	})
