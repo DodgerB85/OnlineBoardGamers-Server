@@ -34,6 +34,14 @@ class RNBmap(models.Model):
     # Manual checkbox for verified maps to be part of the official collection
     isOfficial = models.BooleanField(default=False)
 
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_rnb_maps",
+    )
+
     def save(self, *args, **kwargs):
         if not self.uniqueID:
             # Atomic transaction to prevent two maps getting the same number

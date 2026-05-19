@@ -1219,10 +1219,53 @@ def saveRNBmap(request):
                 hexData=map_data,
                 uniqueID=max_unique_key,
                 isOfficial=False,  # Default to not official
+                creator=request.user,
             )
 
         return JsonResponse({"success": True, "message": f'Map "{map_name}" saved successfully', "map_id": new_map.id})
 
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+
+
+@login_required
+def replaceRNBmap(request):
+    """
+    Replace an existing RNB map in the database.
+    Expects POST request with map id, name, description, player count, and map data.
+    Only the creator can replace the map.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        map_id = data.get("mapId")
+        map_name = data.get("mapName", "")
+        map_description = data.get("mapDescription", "")
+        map_data = data.get("mapData", [])
+        map_playerCount = data.get("playerCount", 2)
+
+        # Find the existing map
+        existing_map = RNBmap.objects.get(id=map_id)
+
+        # Double-check the request user is the creator and map is not official
+        if existing_map.creator != request.user:
+            return JsonResponse({"error": "Only the map creator can replace this map"}, status=403)
+        if existing_map.isOfficial:
+            return JsonResponse({"error": "Official maps cannot be replaced"}, status=403)
+
+        # Update the map fields
+        existing_map.name = map_name
+        existing_map.description = map_description
+        existing_map.playerCount = map_playerCount
+        existing_map.hexData = map_data
+        existing_map.save()
+
+        return JsonResponse({"success": True, "message": f'Map "{map_name}" replaced successfully'})
+
+    except RNBmap.DoesNotExist:
+        return JsonResponse({"error": "Map not found"}, status=404)
     except Exception as e:
         return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
 
@@ -1251,7 +1294,17 @@ def getRNBmaps(request):
         # Format response
         maps_data = []
         for map_obj in maps_queryset:
-            maps_data.append({"id": map_obj.id, "name": map_obj.name, "description": map_obj.description, "playerCount": map_obj.playerCount, "isOfficial": map_obj.isOfficial, "hexData": map_obj.hexData})
+            maps_data.append(
+                {
+                    "id": map_obj.id,
+                    "name": map_obj.name,
+                    "description": map_obj.description,
+                    "playerCount": map_obj.playerCount,
+                    "isOfficial": map_obj.isOfficial,
+                    "hexData": map_obj.hexData,
+                    "canReplace": map_obj.creator == request.user and not map_obj.isOfficial,
+                }
+            )
 
         return JsonResponse({"success": True, "maps": maps_data})
 

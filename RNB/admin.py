@@ -28,13 +28,14 @@ class RNBmapAdmin(admin.ModelAdmin):
     list_display = ('name', 'playerCount', 'isOfficial', 'id')
     list_filter = ('playerCount', 'isOfficial')
     search_fields = ('name', 'description')
+    autocomplete_fields = ("creator",)
     readonly_fields = ('id',)
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'description', 'playerCount')
         }),
         ('Map Data', {
-            'fields': ('hexData', 'uniqueID', 'isOfficial')
+            'fields': ('hexData', 'uniqueID', 'isOfficial', 'creator')
         }),
         ('System', {
             'fields': ('id',),
