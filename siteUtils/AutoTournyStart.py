@@ -106,6 +106,13 @@ TOURNAMENT_SCHEDULE = [
         "minPlayers": 3,
         "maxPlayers": 5,
     },
+        {
+        "gameCode": "TGZ",
+        "boxName": "The Great Zimbabwe",
+        "dates": [(6, 1), (11, 15)],
+        "minPlayers": 3,
+        "maxPlayers": 5,
+    },
 ]
 
 
@@ -135,9 +142,13 @@ def create_pending_tournament_if_missing(tournament, tournament_date):
     max_game_players = random.randrange(tournament["minPlayers"], tournament["maxPlayers"] + 1, 1)
     tournament_type = random.choice(["RR", "TL"])
 
-    max_tournament_players = 30
-    if max_game_players == 4:
-        max_tournament_players = 32
+    max_tournament_players = 44
+    if max_game_players == 3:
+        max_tournament_players = 45
+    if max_game_players == 5:
+        max_tournament_players = 40
+    if max_game_players == 6:
+        max_tournament_players = 42
 
     new_tournament = Tournament.objects.create(
         tournamentCategory="Main",
@@ -208,6 +219,7 @@ for tournament in TOURNAMENT_SCHEDULE:
                 continue
 
             new_tournament.tournamentStatus = OPEN
+            new_tournament.created = int(time.time()) * 1000
             new_tournament.save()
 
             # Add message to Discord
@@ -359,7 +371,7 @@ for gameCode in GAME_CODES:
         continue
 
     # Now we only hit the DB further if we actually have a candidate to start
-    # FIX startTime = int(newTourny.openedForSignupAt) if newTourny.openedForSignupAt else int(newTourny.created)
+    startTime = int(newTourny.created)
     now = int(time.time()) * 1000
     diff_in_s = (now - startTime) // 1000
 

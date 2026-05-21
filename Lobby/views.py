@@ -2800,7 +2800,7 @@ def playerInfo(request, usernameToProfile):
 
 @login_required()
 def AllTournaments(request):
-    tournaments_MAIN = Tournament.objects.filter(tournamentCategory="Main").order_by("-id").all()
+    tournaments_MAIN = Tournament.objects.filter(tournamentCategory="Main").exclude(tournamentStatus=PENDING).order_by("-id").all()
 
     tournaments = sorted(
         tournaments_MAIN,
