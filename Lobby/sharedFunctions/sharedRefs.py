@@ -40,11 +40,13 @@ SR_WEBHOOK_CHOICES = {
 
 
 OPEN = "OP"
+PENDING = "PD"
 PRIVATE = "PR"
 IN_PROGRESS = "IP"
 FINISHED = "FN"
 
 SR_TOURNAMENT_STATUS_CHOICES = [
+    (PENDING, gettext_lazy("Pending")),
     (OPEN, gettext_lazy("Open")),
     (PRIVATE, gettext_lazy("Private")),
     (IN_PROGRESS, gettext_lazy("In Progress")),
@@ -92,8 +94,12 @@ def SR_isThisMultiiWinnersGame(_gameCode):
 
 def SR_getTournamentWinnerHTML(tournamentStatus, winnersData):
     winnerHTML = ""
+    if tournamentStatus == "PD":
+        return "[ " + gettext("PENDING") + " ]"
     if tournamentStatus == "OP":
         return "[ " + gettext("OPEN FOR SIGNUP") + " ]"
+    if tournamentStatus == "PR":
+        return "[ " + gettext("PRIVATE") + " ]"
     if tournamentStatus == "IP":
         return "[ " + gettext("In Progress") + " ]"
     if winnersData:

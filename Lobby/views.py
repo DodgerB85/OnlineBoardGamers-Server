@@ -79,6 +79,9 @@ from Lobby.sharedFunctions.sharedFunctions import (
 )
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage, SN_sendDiscordDM
 from Lobby.sharedFunctions.sharedRefs import (
+    OPEN,
+    PENDING,
+    PRIVATE,
     SR_WEBHOOK_CHOICES,
     SR_getAnyTournamentPlayersData,
     SR_getAnyTournamentRoundsData,
@@ -4428,7 +4431,7 @@ def createTGZminiTournament(request):
 #####################################
 @login_required()
 def MainTournaments(request):
-    available_MainT_raw = Tournament.objects.filter(tournamentStatus="OP", tournamentCategory="Main").order_by("-created")
+    available_MainT_raw = Tournament.objects.filter(tournamentStatus=OPEN, tournamentCategory="Main").order_by("-created")
     current_MainT_raw = Tournament.objects.filter(tournamentStatus="IP", tournamentCategory="Main").order_by("-created")
     finished_MainT_raw = Tournament.objects.filter(tournamentStatus="FN", tournamentCategory="Main").order_by("-created")
     available_MainT = [available_MainT_raw_item.serialize() for available_MainT_raw_item in available_MainT_raw]
@@ -4453,9 +4456,13 @@ def MainTournament(request, Main_Tournament_id):
         except Tournament.DoesNotExist:
             raise Http404(gettext("Tournament does not exist")) from None
 
+        if currentTournament.tournamentStatus not in [OPEN, PRIVATE]:
+            messages.error(request, gettext("This tournament is not open for signup yet"))
+            return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
+
         if "understand_movement" not in request.POST:
             messages.error(request, gettext("Please tick to confirm you can move regularly"))
-            HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
+            return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
 
         if currentTournament and currentTournament.startingPlayers.count() < currentTournament.maxTournamentPlayers:
             currentTournament.startingPlayers.add(request.user)
@@ -4512,7 +4519,7 @@ def MainTournament(request, Main_Tournament_id):
         "pointsValues": pointsValues,
     }
 
-    if currentTournament.tournamentStatus == "OP":
+    if currentTournament.tournamentStatus in [PENDING, OPEN, PRIVATE]:
         openSlots = []
         for i in range(
             currentTournament.startingPlayers.count() + 1,
@@ -4662,7 +4669,7 @@ def createTGZmainTournament(request):
             gameCode="TGZ",
             tournamentName=request.POST["tournamentName"],
             tournamentDescription=request.POST["tournamentDescription"],
-            tournamentStatus="OP",
+            tournamentStatus=PENDING,
             tournamentType=request.POST["tournamentFormat"],
             startingOptions=startingOptions,
             maxTournamentPlayers=request.POST["totalPlayersMT"],
@@ -4671,7 +4678,9 @@ def createTGZmainTournament(request):
         )
         newTournament.startingPlayers.add(request.user)
         if "privateTournament" in request.POST:
-            newTournament.tournamentStatus = "PR"
+            newTournament.tournamentStatus = PRIVATE
+        else:
+            newTournament.tournamentStatus = OPEN
 
         newTournament.save()
 
