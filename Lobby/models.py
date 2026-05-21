@@ -210,7 +210,6 @@ class Tournament(models.Model):
     winnersData = models.TextField(blank=True)
 
     created = models.CharField(max_length=15, blank=False, default=SR_getTimeNow)
-    openedForSignupAt = models.CharField(max_length=15, blank=True, default="")
     tournamentProgressionData = models.TextField(blank=True)
     tournamentSideData = models.TextField(blank=True)
     tournamentPointsData = models.TextField(blank=True)
