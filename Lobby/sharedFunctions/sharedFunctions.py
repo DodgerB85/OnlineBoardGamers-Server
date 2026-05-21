@@ -89,7 +89,7 @@ def SF_hasRequiredExperience(request, gameCode, gameModel):
 
 
 def SF_getGameCreationJsonReturn(gameCode, gameID):
-    invite_link = f"/join/{gameCode}{gameID}/"
+    invite_link = f"https://www.onlineboardgamers.com/join/{gameCode}{gameID}/"
     return mark_safe(
         gettext("Your game has been created and is waiting for players<br/>Invite Link: ")
         + f"<a href='{invite_link}'>{invite_link}</a> <button class='copyGameLinkButton' onclick='copyToClipboard(`{invite_link}`, event)'>"
@@ -99,7 +99,7 @@ def SF_getGameCreationJsonReturn(gameCode, gameID):
 
 
 def SF_getMiniTournamentCreationJsonReturn(MT_ID):
-    invite_link = f"/MiniTournament/{MT_ID}/"
+    invite_link = f"https://www.onlineboardgamers.com/MiniTournament/{MT_ID}/"
     return mark_safe(
         gettext("Your Mini Tournament has been created and is waiting for players<br/>Invite Link: ")
         + f"<a href='{invite_link}'>{invite_link}</a> <button class='copyGameLinkButton' onclick='copyToClipboard(`{invite_link}`, event)'>"
