@@ -1295,10 +1295,10 @@ def replaceRNBmap(request):
         existing_map = RNBmap.objects.get(id=map_id)
 
         # Double-check the request user is the creator and map is not official
-        # Admin user can replace any map
+        # Admin user can replace any map, including official maps
         if existing_map.creator != request.user and request.user.username != "admin":
             return JsonResponse({"error": "Only the map creator can replace this map"}, status=403)
-        if existing_map.isOfficial:
+        if existing_map.isOfficial and request.user.username != "admin":
             return JsonResponse({"error": "Official maps cannot be replaced"}, status=403)
 
         # Update the map fields
@@ -1348,7 +1348,7 @@ def getRNBmaps(request):
                     "playerCount": map_obj.playerCount,
                     "isOfficial": map_obj.isOfficial,
                     "hexData": map_obj.hexData,
-                    "canReplace": map_obj.creator == request.user and not map_obj.isOfficial,
+                    "canReplace": (map_obj.creator == request.user and not map_obj.isOfficial) or request.user.username == "admin",
                 }
             )
 
