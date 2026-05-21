@@ -4514,7 +4514,6 @@ def MainTournament(request, Main_Tournament_id):
         "gameCode": currentTournament.gameCode,
         "startingOptionsHTML": startingOptionsHTML,
         "MainT_CreationTimestamp": currentTournament.created,
-        "MainT_OpenedForSignupTimestamp": currentTournament.openedForSignupAt,
         "MainT_ID": Main_Tournament_id,
         "chatData": chatData,
         "pointsValues": pointsValues,
