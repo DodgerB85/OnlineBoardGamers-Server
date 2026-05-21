@@ -20,15 +20,9 @@ PRINT_TIME = True
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
 if DEBUG:
-    os.environ["LOCAL_DB_NAME"] = str(
-        config("LOCAL_DB_NAME", default="password", cast=str)
-    )
-    os.environ["LOCAL_DB_USER"] = str(
-        config("LOCAL_DB_USER", default="password", cast=str)
-    )
-    os.environ["LOCAL_DB_PWD"] = str(
-        config("LOCAL_DB_PWD", default="password", cast=str)
-    )
+    os.environ["LOCAL_DB_NAME"] = str(config("LOCAL_DB_NAME", default="password", cast=str))
+    os.environ["LOCAL_DB_USER"] = str(config("LOCAL_DB_USER", default="password", cast=str))
+    os.environ["LOCAL_DB_PWD"] = str(config("LOCAL_DB_PWD", default="password", cast=str))
     os.environ["LOCAL_DB_HOST"] = "127.0.0.1"
 
 BASE_DIR = ROOT_DIR / "OnlineBoardGamers"
@@ -73,6 +67,7 @@ monthNumber = myDate.month
 TOURNAMENT_SCHEDULE = [
     {
         "gameCode": "AQY",
+        "name_code": "Aqy",
         "boxName": "Antiquity",
         "dates": [(2, 1), (8, 1)],
         "minPlayers": 2,
@@ -80,6 +75,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "IND",
+        "name_code": "Ind",
         "boxName": "Indonesia",
         "dates": [(3, 1), (9, 1)],
         "minPlayers": 3,
@@ -87,6 +83,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "HLC",
+        "name_code": "Hlc",
         "boxName": "Horseless Carriage",
         "dates": [(4, 1), (10, 1)],
         "minPlayers": 3,
@@ -94,6 +91,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "BUS",
+        "name_code": "Bus",
         "boxName": "Bus",
         "dates": [(5, 1), (11, 1)],
         "minPlayers": 3,
@@ -101,13 +99,15 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "FCM",
+        "name_code": "Fcm",
         "boxName": "Food Chain Magnate",
         "dates": [(5, 15), (10, 15), (12, 1)],
         "minPlayers": 3,
         "maxPlayers": 5,
     },
-        {
+    {
         "gameCode": "TGZ",
+        "name_code": "Tgz",
         "boxName": "The Great Zimbabwe",
         "dates": [(6, 1), (11, 15)],
         "minPlayers": 3,
@@ -116,14 +116,15 @@ TOURNAMENT_SCHEDULE = [
 ]
 
 
-def get_tournament_name(target_date, game_code):
-    return f"{target_date.strftime('%B')} {target_date.year} {game_code} Tournament"
+def get_tournament_name(target_date, name_code):
+    return f"{target_date.strftime('%B')} {target_date.year} {name_code} Tournament"
 
 
 def create_pending_tournament_if_missing(tournament, tournament_date):
     box_name = tournament["boxName"]
     game_code = tournament["gameCode"]
-    tournament_name = get_tournament_name(tournament_date, game_code)
+    name_code = tournament["name_code"]
+    tournament_name = get_tournament_name(tournament_date, name_code)
 
     existing_pending = (
         Tournament.objects.filter(
@@ -149,6 +150,10 @@ def create_pending_tournament_if_missing(tournament, tournament_date):
         max_tournament_players = 40
     if max_game_players == 6:
         max_tournament_players = 42
+
+    if game_code == "TGZ":
+        max_game_players = 4
+        tournament_type = "RR"
 
     new_tournament = Tournament.objects.create(
         tournamentCategory="Main",
@@ -177,10 +182,7 @@ for tournament in TOURNAMENT_SCHEDULE:
         if days_until == 7:
             print(f"It is 7 days until {tournament['boxName']} tournament on {tournament_day}/{tournament_month}")
             create_pending_tournament_if_missing(tournament, tournament_date)
-            message = (
-                f"New {tournament['boxName']} Tournament Opens for Signup in 7 days!\n"
-                "[Click here to Play](https://www.OnlineBoardGamers.com/)"
-            )
+            message = f"New {tournament['boxName']} Tournament Opens for Signup in 7 days!\n[Click here to Play](https://www.OnlineBoardGamers.com/)"
             if settings.DEBUG:
                 requests.post(
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
@@ -201,8 +203,9 @@ for tournament in TOURNAMENT_SCHEDULE:
             print(f"Today is {tournament_day}/{tournament_month} - Opening {tournament['gameCode']} tournament")
             box_name = tournament["boxName"]
             gameCode = tournament["gameCode"]
+            name_code = tournament["name_code"]
             tournament_date = datetime.datetime(current_date.year, tournament_month, tournament_day)
-            tournament_name = get_tournament_name(tournament_date, gameCode)
+            tournament_name = get_tournament_name(tournament_date, name_code)
 
             new_tournament = (
                 Tournament.objects.filter(
@@ -235,14 +238,7 @@ for tournament in TOURNAMENT_SCHEDULE:
             if new_tournament.tournamentType == "MG":
                 tournament_type_string = "Multi-Game"
 
-            message = (
-                f"New {box_name} Tournament!\n"
-                "================================\n"
-                f"Name: {tournament_name}\n"
-                f"Players per Game: {new_tournament.maxGamePlayers}\n"
-                f"Format: {tournament_type_string}\n"
-                f"[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{new_tournament.id}/)"
-            )
+            message = f"New {box_name} Tournament!\n================================\nName: {tournament_name}\nPlayers per Game: {new_tournament.maxGamePlayers}\nFormat: {tournament_type_string}\n[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{new_tournament.id}/)"
             if settings.DEBUG:
                 requests.post(
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
@@ -354,11 +350,7 @@ GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RN
 for gameCode in GAME_CODES:
     # 1. OPTIMIZATION: Filter for "OP" status immediately in the DB.
     # If no open tournament exists, this returns None and skips the rest of the hits.
-    newTourny = (
-        Tournament.objects.filter(tournamentStatus=OPEN, gameCode=gameCode)
-        .order_by("-id")
-        .first()
-    )
+    newTourny = Tournament.objects.filter(tournamentStatus=OPEN, gameCode=gameCode).order_by("-id").first()
 
     # 2. Add an early exit check for dayNumber
     if not newTourny or dayNumber < 7:
@@ -409,9 +401,7 @@ for gameCode in GAME_CODES:
 
             # START TRIGGER: Only if we hit that specific perfect multiple
             if totalPlayers >= target_start_size and totalPlayers % maxGP == 0:
-                print(
-                    f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}"
-                )
+                print(f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}")
                 # Use the admin ID directly if possible to avoid a User.objects.get hit
                 # Or fetch once outside the 'for' loop to save 4 hits
                 admin_user = User.objects.get(username="admin")
@@ -425,9 +415,7 @@ for gameCode in GAME_CODES:
                 SF_startAnyTournament(request, newTourny)
                 newTourny.save()
             else:
-                print(
-                    f"{gameCode}: Not starting tournament, not at perfect multiple total - max Players set to: {target_start_size}"
-                )
+                print(f"{gameCode}: Not starting tournament, not at perfect multiple total - max Players set to: {target_start_size}")
 
 print(f"DB hits: {len(connection.queries)}")
 
