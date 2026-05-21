@@ -1,0 +1,479 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBG — Functional Pro (BGA-inspired)</title>
+    <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --nav: #2d3748;
+    --nav-hover: #4a5568;
+    --surface: #edf2f7;
+    --card: #ffffff;
+    --border: #cbd5e0;
+    --border-light: #e2e8f0;
+    --accent: #d69e2e;
+    --accent-bg: #fefcbf;
+    --accent-text: #744210;
+    --blue: #3182ce;
+    --blue-bg: #ebf8ff;
+    --blue-text: #2b6cb0;
+    --green: #38a169;
+    --green-bg: #f0fff4;
+    --green-text: #276749;
+    --text: #1a202c;
+    --text-mid: #4a5568;
+    --text-muted: #718096;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --r: 5px;
+  }
+
+  body { background: var(--surface); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* NAV */
+  nav {
+    background: var(--nav);
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 52px; z-index: 100;
+    display: flex; align-items: center;
+    padding: 0 16px; gap: 4px;
+  }
+  .nav-logo { color: white; font-weight: 700; font-size: 1rem; text-decoration: none; margin-right: 20px; letter-spacing: -0.01em; }
+  .nav-logo strong { color: var(--accent); }
+  .nav-link { color: rgba(255,255,255,0.75); text-decoration: none; padding: 6px 10px; border-radius: var(--r); font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; white-space: nowrap; }
+  .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .nav-user { color: rgba(255,255,255,0.7); font-size: 0.78rem; }
+  .btn-sm { padding: 5px 12px; border-radius: var(--r); font-size: 0.78rem; font-weight: 600; cursor: pointer; text-decoration: none; border: 1px solid rgba(255,255,255,0.3); color: white; background: transparent; transition: background 0.15s; }
+  .btn-sm:hover { background: rgba(255,255,255,0.1); }
+
+  .hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; margin-left: auto; }
+  .hamburger span { display: block; width: 20px; height: 2px; background: white; border-radius: 1px; transition: all 0.2s; }
+  .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .mob { display: none; position: fixed; top: 52px; left: 0; right: 0; background: var(--nav); z-index: 99; flex-direction: column; }
+  .mob.open { display: flex; }
+  .mob a { color: rgba(255,255,255,0.8); text-decoration: none; padding: 12px 16px; font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .mob a:hover { background: rgba(255,255,255,0.06); }
+
+  main { margin-top: 52px; flex: 1; }
+
+  /* HERO */
+  .hero { background: var(--nav); padding: 48px 20px 40px; }
+  .hero-inner { max-width: 600px; }
+  .hero h1 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700; color: white; margin-bottom: 8px; line-height: 1.25; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p { color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; max-width: 480px; }
+  .hero-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+  .hero-form input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 8px 12px; border-radius: var(--r); font-size: 0.875rem; width: 150px; outline: none; }
+  .hero-form input::placeholder { color: rgba(255,255,255,0.4); }
+  .hero-form input:focus { border-color: var(--accent); }
+  .btn-accent { background: var(--accent); color: #744210; border: none; padding: 8px 18px; border-radius: var(--r); font-size: 0.875rem; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .btn-accent:hover { background: #ecc94b; }
+  .hero-links { margin-top: 12px; display: flex; gap: 14px; }
+  .hero-links a { color: var(--accent); font-size: 0.82rem; text-decoration: none; }
+  .hero-links a:hover { text-decoration: underline; }
+
+  /* PAGE */
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 16px; }
+
+  /* SUMMARY ROW */
+  .summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .sum-chip { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }
+  .sum-chip .n { font-size: 1.2rem; font-weight: 700; }
+  .sum-chip .n.amber { color: var(--accent-text); }
+  .sum-chip .n.blue { color: var(--blue-text); }
+  .sum-chip .lbl { color: var(--text-muted); }
+
+  /* TABS */
+  .tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 16px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 9px 14px; text-decoration: none; color: var(--text-muted); font-size: 0.82rem; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: color 0.15s, border-color 0.15s; }
+  .tab.active { color: var(--blue-text); border-color: var(--blue); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* GAME TABLE */
+  .gtable { width: 100%; border-collapse: collapse; background: var(--card); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .gtable th { background: #f7fafc; text-align: left; padding: 8px 12px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .gtable td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); font-size: 0.82rem; vertical-align: middle; }
+  .gtable tr:last-child td { border-bottom: none; }
+  .gtable tr:hover td { background: #f7fafc; }
+
+  .gname { font-weight: 600; }
+  .gname a { color: var(--text); text-decoration: none; }
+  .gname a:hover { color: var(--blue); }
+  .code { display: inline-block; background: var(--blue-bg); color: var(--blue-text); padding: 1px 5px; border-radius: 3px; font-size: 0.68rem; font-weight: 700; margin-right: 5px; }
+  .players { color: var(--text-muted); font-size: 0.78rem; max-width: 180px; }
+  .turn { color: var(--text-muted); font-size: 0.78rem; white-space: nowrap; }
+
+  /* ICON ROW — the key component */
+  .icon-row { display: flex; align-items: center; gap: 3px; flex-wrap: nowrap; }
+  .icon-row.expanded { flex-wrap: wrap; }
+  .ico {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    border-radius: 3px;
+    font-size: 13px;
+    background: #f7fafc;
+    border: 1px solid var(--border);
+    cursor: default;
+    flex-shrink: 0;
+    position: relative;
+    padding: 3px;
+  }
+  .ico img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .ico[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a202c;
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .ico-hidden { display: none; }
+  .icon-row.expanded .ico-hidden { display: inline-flex; }
+
+  .ico-more {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 22px; padding: 0 6px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-mid);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.12s;
+    white-space: nowrap;
+  }
+  .ico-more:hover { background: var(--accent-bg); color: var(--accent-text); }
+  .icon-row.expanded .ico-more { display: none; }
+
+  /* STATUS */
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
+  .pill-green { background: var(--green-bg); color: var(--green-text); }
+  .pill-blue { background: var(--blue-bg); color: var(--blue-text); }
+  .pill-gray { background: #edf2f7; color: var(--text-muted); }
+  .pill-amber { background: var(--accent-bg); color: var(--accent-text); }
+
+  /* SHOWCASE */
+  .showcase-title { font-size: 1rem; font-weight: 700; margin: 28px 0 14px; color: var(--text); }
+  .sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .scard { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; transition: border-color 0.15s, box-shadow 0.15s; cursor: pointer; }
+  .scard:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(49,130,206,0.1); }
+  .scard-img { width: 100%; height: 80px; object-fit: contain; display: block; margin-bottom: 8px; border-radius: 3px; background: var(--surface); padding: 4px; }
+  .scard h3 { font-size: 0.875rem; font-weight: 700; margin-bottom: 5px; }
+  .scard p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.45; }
+  .scard .meta { margin-top: 8px; font-size: 0.7rem; color: var(--text-muted); display: flex; gap: 8px; }
+  .scard .meta span { background: var(--surface); border: 1px solid var(--border); padding: 1px 6px; border-radius: 20px; }
+
+  footer { background: var(--nav); color: rgba(255,255,255,0.45); text-align: center; padding: 20px; font-size: 0.75rem; line-height: 1.7; margin-top: auto; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 767px) {
+    .nav-link, .nav-right { display: none; }
+    .hamburger { display: flex; }
+    .hero { padding: 36px 16px 28px; }
+    .gtable th:nth-child(3), .gtable td:nth-child(3) { display: none; }
+    .gtable th:nth-child(5), .gtable td:nth-child(5) { display: none; }
+    .players { display: none; }
+    .wrap { padding: 16px 10px; }
+  }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a class="nav-logo" href="#"><strong>OBG</strong> — Online Board Gamers</a>
+      <a class="nav-link active" href="#">Lobby</a>
+      <a class="nav-link" href="#">New Game</a>
+      <a class="nav-link" href="#">Tournaments</a>
+      <a class="nav-link" href="#">Stats</a>
+      <a class="nav-link" href="#">Help</a>
+      <a class="nav-link" href="#">Updates</a>
+      <div class="nav-right">
+        <span class="nav-user">mihai</span>
+        <a href="#" class="btn-sm">Log Out</a>
+      </div>
+      <div class="hamburger" id="ham" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </nav>
+    <div class="mob" id="mob">
+      <a href="#">Lobby</a><a href="#">New Game</a><a href="#">Tournaments</a>
+      <a href="#">Stats</a><a href="#">Help</a><a href="#">Log Out</a>
+    </div>
+    <main>
+      <div class="hero">
+        <div class="hero-inner">
+          <h1>
+            Play <em>Splotter</em> Board Games Online
+          </h1>
+          <p>Free async-friendly online versions of Food Chain Magnate, The Great Zimbabwe, Indonesia, and more.</p>
+          <div class="hero-form">
+            <input type="text" placeholder="Username">
+            <input type="password" placeholder="Password">
+            <a href="#" class="btn-accent">Sign In</a>
+          </div>
+          <div class="hero-links">
+            <a href="#">Forgot password?</a>
+            <a href="#">Register new account →</a>
+          </div>
+        </div>
+      </div>
+      <div class="wrap">
+        <div class="summary">
+          <div class="sum-chip">
+            <span class="n amber">3</span><span class="lbl">Your turn</span>
+          </div>
+          <div class="sum-chip">
+            <span class="n blue">7</span><span class="lbl">Active games</span>
+          </div>
+          <div class="sum-chip">
+            <span class="n">2</span><span class="lbl">Invitations</span>
+          </div>
+        </div>
+        <div class="tabs">
+          <a class="tab active" href="#">My Turn (3)</a>
+          <a class="tab" href="#">Waiting (4)</a>
+          <a class="tab" href="#">Available</a>
+          <a class="tab" href="#">Invitations (2)</a>
+          <a class="tab" href="#">Finished</a>
+        </div>
+        <table class="gtable">
+          <thead>
+            <tr>
+              <th>Game</th>
+              <th>Players</th>
+              <th>Turn</th>
+              <th>Options</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- FCM with MANY icons — the main challenge -->
+            <tr>
+              <td class="gname">
+                <span class="code">FCM</span><a href="#">Food Chain Magnate</a>
+              </td>
+              <td class="players">PlayerOne, PlayerTwo, PlayerThree</td>
+              <td class="turn">Turn 14</td>
+              <td>
+                <!-- Icon overflow: shows first 6, then "+N more" button, expands on click -->
+                <div class="icon-row" id="ir1">
+                  <span class="ico" title="No Milkshakes">
+                    <img src="{% static 'FCM/images/so_noMS.svg' %}" alt="No MS">
+                  </span>
+                  <span class="ico" title="No CEO">
+                    <img src="{% static 'FCM/images/so_noCEO.svg' %}" alt="No CEO">
+                  </span>
+                  <span class="ico" title="Jazz Musicians">
+                    <img src="{% static 'FCM/images/so_jazz.svg' %}" alt="Jazz">
+                  </span>
+                  <span class="ico" title="Sushi Chefs">
+                    <img src="{% static 'FCM/images/so_sushi.svg' %}" alt="Sushi">
+                  </span>
+                  <span class="ico" title="No Radio">
+                    <img src="{% static 'FCM/images/so_noRadio.svg' %}" alt="No Radio">
+                  </span>
+                  <span class="ico" title="Short Game">
+                    <img src="{% static 'FCM/images/so_shortGame.svg' %}" alt="Short">
+                  </span>
+                  <span class="ico ico-hidden" title="Coffee">
+                    <img src="{% static 'FCM/images/so_coffee.svg' %}" alt="Coffee">
+                  </span>
+                  <span class="ico ico-hidden" title="Hawkers">
+                    <img src="{% static 'FCM/images/so_hawkers.svg' %}" alt="Hawkers">
+                  </span>
+                  <span class="ico ico-hidden" title="Strict Rules">
+                    <img src="{% static 'FCM/images/so_strict.svg' %}" alt="Strict">
+                  </span>
+                  <span class="ico ico-hidden" title="Dumplings">
+                    <img src="{% static 'FCM/images/so_dumplings.svg' %}" alt="Dumplings">
+                  </span>
+                  <button class="ico-more" onclick="expandIcons('ir1')">+4</button>
+                </div>
+              </td>
+              <td>
+                <span class="pill pill-green">Your Turn</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="gname">
+                <span class="code">TGZ</span><a href="#">The Great Zimbabwe</a>
+              </td>
+              <td class="players">AncientTrader, NomadKing</td>
+              <td class="turn">Turn 7</td>
+              <td>
+                <div class="icon-row">
+                  <span class="ico" title="Experienced Game">
+                    <img src="{% static 'Lobby/images/startingOptions/so_experiencedGame.svg' %}"
+                         alt="Experienced">
+                  </span>
+                </div>
+              </td>
+              <td>
+                <span class="pill pill-green">Your Turn</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="gname">
+                <span class="code">HLC</span><a href="#">Horseless Carriage</a>
+              </td>
+              <td class="players">BoardMaster</td>
+              <td class="turn">Turn 3</td>
+              <td>
+                <div class="icon-row">
+                  <span class="ico" title="More Mainlines">
+                    <img src="{% static 'Lobby/images/startingOptions/HLC_moreMainlines.svg' %}"
+                         alt="More Mainlines">
+                  </span>
+                </div>
+              </td>
+              <td>
+                <span class="pill pill-green">Your Turn</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="gname">
+                <span class="code">IND</span><a href="#">Indonesia</a>
+              </td>
+              <td class="players">IslandTrader, SpiceKing, RiceGrown</td>
+              <td class="turn">Turn 11</td>
+              <td>
+                <div class="icon-row" id="ir2">
+                  <span class="ico" title="Merger Subsidy">
+                    <img src="{% static 'Lobby/images/startingOptions/IND_merger_subsidy.svg' %}"
+                         alt="Merger">
+                  </span>
+                  <span class="ico" title="Shipping Subsidy">
+                    <img src="{% static 'Lobby/images/startingOptions/IND_shipping_subsidy.svg' %}"
+                         alt="Shipping">
+                  </span>
+                  <span class="ico" title="Philippine Map">
+                    <img src="{% static 'Lobby/images/startingOptions/IND_php_map.svg' %}"
+                         alt="PHP Map">
+                  </span>
+                  <span class="ico" title="Experienced Game">
+                    <img src="{% static 'Lobby/images/startingOptions/so_experiencedGame.svg' %}"
+                         alt="Experienced">
+                  </span>
+                  <button class="ico-more" onclick="expandIcons('ir2')">+0</button>
+                </div>
+              </td>
+              <td>
+                <span class="pill pill-blue">Waiting</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="gname">
+                <span class="code">BUS</span><a href="#">Bus</a>
+              </td>
+              <td class="players">RoutePlanner, CityDriver</td>
+              <td class="turn">Turn 2</td>
+              <td>
+                <div class="icon-row">
+                  <span class="ico" title="Learning Game">
+                    <img src="{% static 'Lobby/images/startingOptions/so_learningGame.svg' %}"
+                         alt="Learning">
+                  </span>
+                </div>
+              </td>
+              <td>
+                <span class="pill pill-gray">Waiting</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="showcase-title">Available Games</div>
+        <div class="sgrid">
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'FCM/images/fcm-box.jpg' %}"
+                 alt="FCM">
+            <h3>Food Chain Magnate</h3>
+            <p>Build a fast food empire through hiring, marketing and logistics.</p>
+            <div class="meta">
+              <span>2–5 players</span><span>Complex</span>
+            </div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'TGZ/images/icon-box.svg' %}"
+                 alt="TGZ">
+            <h3>The Great Zimbabwe</h3>
+            <p>Raise monuments and trade across ancient Africa.</p>
+            <div class="meta">
+              <span>2–5 players</span><span>Medium</span>
+            </div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'HLC/images/hlc_icon.png' %}"
+                 alt="HLC">
+            <h3>Horseless Carriage</h3>
+            <p>Design and manufacture early automobiles in the 1900s.</p>
+            <div class="meta">
+              <span>2–5 players</span><span>Complex</span>
+            </div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'IND/images/icon-box.svg' %}"
+                 alt="IND">
+            <h3>Indonesia</h3>
+            <p>Shipping and mergers across the archipelago.</p>
+            <div class="meta">
+              <span>2–5 players</span><span>Heavy</span>
+            </div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'AQY/images/icon-box.svg' %}"
+                 alt="AQY">
+            <h3>Antiquity</h3>
+            <p>Survive in a medieval world with scarce resources.</p>
+            <div class="meta">
+              <span>2–4 players</span><span>Heavy</span>
+            </div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'BUS/images/icon-box.svg' %}"
+                 alt="BUS">
+            <h3>Bus</h3>
+            <p>Run bus lines and manipulate passenger flow.</p>
+            <div class="meta">
+              <span>2–5 players</span><span>Medium</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, and Indonesia are board games by Jeroen Doumen and Joris Wiersinga, published by <a href="#">Splotter Spellen</a>. Permission Provided.
+      <br>
+      Summary icons from <a href="#">game-icons.net</a>
+    </footer>
+    <script>
+function toggleMenu() {
+  document.getElementById('ham').classList.toggle('open');
+  document.getElementById('mob').classList.toggle('open');
+}
+function expandIcons(id) {
+  document.getElementById(id).classList.toggle('expanded');
+}
+    </script>
+  </body>
+</html>

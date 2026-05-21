@@ -1,0 +1,488 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBG — Premium Dark</title>
+    <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --card: #1c1c1c;
+    --card-hover: #222222;
+    --border: #2a2a2a;
+    --border-mid: #333333;
+    --accent: #06b6d4;
+    --accent-dim: rgba(6,182,212,0.12);
+    --accent-text: #67e8f9;
+    --green: #10b981;
+    --green-dim: rgba(16,185,129,0.12);
+    --green-text: #6ee7b7;
+    --amber: #f59e0b;
+    --amber-dim: rgba(245,158,11,0.12);
+    --text: #f0f0f0;
+    --text-mid: #a0a0a0;
+    --text-muted: #666666;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --r: 8px;
+    --r-sm: 5px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; flex-direction: column; font-size: 14px; }
+
+  /* NAV */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 54px; z-index: 100;
+    display: flex; align-items: center;
+    padding: 0 20px; gap: 4px;
+  }
+  .nav-logo { color: var(--text); font-weight: 700; font-size: 0.95rem; text-decoration: none; margin-right: 24px; display: flex; align-items: center; gap: 8px; }
+  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+  .nav-a { color: var(--text-muted); text-decoration: none; padding: 5px 10px; border-radius: var(--r-sm); font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; white-space: nowrap; }
+  .nav-a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .nav-a.active { color: var(--accent); background: var(--accent-dim); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .nav-user { color: var(--text-muted); font-size: 0.78rem; }
+  .btn-ghost { border: 1px solid var(--border-mid); color: var(--text-mid); background: transparent; padding: 5px 12px; border-radius: var(--r-sm); font-size: 0.78rem; cursor: pointer; text-decoration: none; transition: border-color 0.15s, color 0.15s; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; margin-left: auto; }
+  .hamburger span { display: block; width: 20px; height: 1.5px; background: var(--text-mid); border-radius: 1px; transition: all 0.2s; }
+  .hamburger.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+  .mob { display: none; position: fixed; top: 54px; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--border); z-index: 99; flex-direction: column; }
+  .mob.open { display: flex; }
+  .mob a { color: var(--text-mid); text-decoration: none; padding: 13px 20px; font-size: 0.9rem; border-bottom: 1px solid var(--border); transition: color 0.15s; }
+  .mob a:hover { color: var(--text); }
+
+  main { margin-top: 54px; flex: 1; }
+
+  /* HERO */
+  .hero {
+    padding: 64px 24px 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .hero-kicker { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 18px; color: var(--accent); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .hero-kicker::before { content: ''; display: block; width: 20px; height: 1px; background: var(--accent); }
+  .hero-kicker::after { content: ''; display: block; width: 20px; height: 1px; background: var(--accent); }
+  .hero h1 { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 14px; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; max-width: 420px; margin: 0 auto 32px; }
+  .hero-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn-cyan { background: var(--accent); color: #0a0a0a; font-weight: 700; padding: 10px 24px; border-radius: var(--r); text-decoration: none; font-size: 0.875rem; transition: opacity 0.15s; }
+  .btn-cyan:hover { opacity: 0.85; }
+  .btn-outlined { border: 1px solid var(--border-mid); color: var(--text-mid); padding: 10px 24px; border-radius: var(--r); text-decoration: none; font-size: 0.875rem; transition: border-color 0.15s, color 0.15s; }
+  .btn-outlined:hover { border-color: var(--text-mid); color: var(--text); }
+
+  /* LOGIN */
+  .login-bar { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .login-bar input { background: var(--bg); border: 1px solid var(--border-mid); color: var(--text); padding: 7px 11px; border-radius: var(--r-sm); font-size: 0.82rem; width: 145px; outline: none; transition: border-color 0.15s; }
+  .login-bar input::placeholder { color: var(--text-muted); }
+  .login-bar input:focus { border-color: var(--accent); }
+  .login-bar a { color: var(--accent); font-size: 0.78rem; text-decoration: none; }
+  .login-bar a:hover { text-decoration: underline; }
+
+  /* CONTENT */
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
+
+  /* MINI STATS */
+  .mstats { display: flex; gap: 1px; background: var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 24px; }
+  .mstat { flex: 1; background: var(--card); padding: 14px 16px; text-align: center; }
+  .mstat .n { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; }
+  .mstat .n.c { color: var(--accent); }
+  .mstat .n.g { color: var(--green); }
+  .mstat .l { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 2px; margin-bottom: 16px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 7px 14px; border-radius: var(--r-sm); text-decoration: none; color: var(--text-muted); font-size: 0.78rem; font-weight: 500; white-space: nowrap; transition: background 0.15s, color 0.15s; }
+  .tab.active { background: var(--accent-dim); color: var(--accent-text); }
+  .tab:hover:not(.active) { background: rgba(255,255,255,0.03); color: var(--text-mid); }
+
+  /* GAME LIST */
+  .glist { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: var(--r); overflow: hidden; }
+  .grow {
+    background: var(--card);
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 40px 1fr auto auto;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.12s;
+  }
+  .grow:hover { background: var(--card-hover); }
+
+  .gmark { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .g-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .g-cyan { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .g-gray { background: var(--text-muted); }
+
+  .gname { display: flex; flex-direction: column; gap: 3px; }
+  .gname-top { display: flex; align-items: center; gap: 7px; }
+  .gname strong { font-size: 0.875rem; font-weight: 600; }
+  .gcode { font-size: 0.65rem; font-weight: 700; color: var(--accent); background: var(--accent-dim); padding: 1px 5px; border-radius: 3px; }
+  .gplayers { font-size: 0.72rem; color: var(--text-muted); }
+
+  /* ICON ROW */
+  .icon-row { display: flex; align-items: center; gap: 3px; }
+  .icon-row.expanded { flex-wrap: wrap; }
+  .ico {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--bg);
+    border: 1px solid var(--border-mid);
+    border-radius: 4px;
+    font-size: 13px;
+    flex-shrink: 0;
+    cursor: default;
+    position: relative;
+    transition: border-color 0.12s;
+    padding: 3px;
+  }
+  .ico:hover { border-color: var(--accent); }
+  .ico img { width: 100%; height: 100%; display: block; object-fit: contain; filter: invert(1) opacity(0.85); }
+  .ico[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--border-mid);
+    color: var(--text);
+    font-size: 0.68rem;
+    padding: 3px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+    border: 1px solid var(--border-mid);
+  }
+  .ico-hidden { display: none; }
+  .icon-row.expanded .ico-hidden { display: inline-flex; }
+  .ico-more {
+    height: 24px; padding: 0 7px;
+    background: var(--border);
+    border: 1px solid var(--border-mid);
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-mid);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.12s, color 0.12s;
+    display: inline-flex; align-items: center;
+  }
+  .ico-more:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+  .icon-row.expanded .ico-more { display: none; }
+
+  /* STATUS */
+  .gpill { padding: 3px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
+  .gpill-green { background: var(--green-dim); color: var(--green-text); }
+  .gpill-cyan { background: var(--accent-dim); color: var(--accent-text); }
+  .gpill-gray { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+  /* GAMES GRID */
+  .section-h { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin: 28px 0 12px; }
+  .sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1px; background: var(--border); border-radius: var(--r); overflow: hidden; }
+  .scard { background: var(--card); padding: 16px; transition: background 0.15s; cursor: pointer; }
+  .scard:hover { background: var(--card-hover); }
+  .scard-img { width: 100%; height: 72px; object-fit: contain; display: block; margin-bottom: 8px; filter: invert(0.85); opacity: 0.9; }
+  .scard h3 { font-size: 0.875rem; font-weight: 600; margin-bottom: 5px; }
+  .scard p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+  .scard .stag { margin-top: 8px; font-size: 0.68rem; color: var(--accent); font-weight: 600; }
+
+  footer { background: var(--surface); border-top: 1px solid var(--border); color: var(--text-muted); text-align: center; padding: 20px; font-size: 0.75rem; line-height: 1.7; margin-top: auto; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 767px) {
+    .nav-a, .nav-right { display: none; }
+    .hamburger { display: flex; }
+    .hero { padding: 44px 16px 36px; }
+    .grow { grid-template-columns: 40px 1fr auto; }
+    .icon-row { grid-column: 1 / -1; }
+    .mstats { flex-wrap: wrap; }
+    .mstat { min-width: 80px; }
+    .wrap { padding: 16px 12px; }
+  }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a class="nav-logo" href="#">
+        <div class="logo-dot"></div>
+      Online Board Gamers</a>
+      <a class="nav-a active" href="#">Lobby</a>
+      <a class="nav-a" href="#">New Game</a>
+      <a class="nav-a" href="#">Tournaments</a>
+      <a class="nav-a" href="#">Stats</a>
+      <a class="nav-a" href="#">Help</a>
+      <a class="nav-a" href="#">Updates</a>
+      <div class="nav-right">
+        <span class="nav-user">mihai</span>
+        <a href="#" class="btn-ghost">Log Out</a>
+      </div>
+      <div class="hamburger" id="ham" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </nav>
+    <div class="mob" id="mob">
+      <a href="#">Lobby</a><a href="#">New Game</a><a href="#">Tournaments</a>
+      <a href="#">Stats</a><a href="#">Help</a><a href="#">Log Out</a>
+    </div>
+    <main>
+      <div class="hero">
+        <div class="hero-kicker">Free to play · Async</div>
+        <h1>
+          Play <span>Splotter</span>
+          <br>
+          Board Games Online
+        </h1>
+        <p>
+          Food Chain Magnate, The Great Zimbabwe, Indonesia, and more — free, async, with a global community of serious gamers.
+        </p>
+        <div class="hero-actions">
+          <a href="#" class="btn-cyan">Create Account</a>
+          <a href="#" class="btn-outlined">Browse Games</a>
+        </div>
+      </div>
+      <div class="login-bar">
+        <input type="text" placeholder="Username">
+        <input type="password" placeholder="Password">
+        <a href="#"
+           class="btn-cyan"
+           style="font-weight:700;
+                  padding:7px 16px;
+                  border-radius:5px;
+                  text-decoration:none;
+                  font-size:0.82rem">Sign In</a>
+        <a href="#">Forgot password?</a>
+        <a href="#" style="margin-left:auto">Register →</a>
+      </div>
+      <div class="wrap">
+        <div class="mstats">
+          <div class="mstat">
+            <div class="n c">3</div>
+            <div class="l">Your Turn</div>
+          </div>
+          <div class="mstat">
+            <div class="n g">7</div>
+            <div class="l">Active</div>
+          </div>
+          <div class="mstat">
+            <div class="n">2</div>
+            <div class="l">Invitations</div>
+          </div>
+          <div class="mstat">
+            <div class="n">142</div>
+            <div class="l">Played</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <a class="tab active" href="#">My Turn (3)</a>
+          <a class="tab" href="#">Waiting (4)</a>
+          <a class="tab" href="#">Available</a>
+          <a class="tab" href="#">Invitations (2)</a>
+          <a class="tab" href="#">Finished</a>
+        </div>
+        <div class="glist">
+          <a class="grow" href="#">
+            <div class="gmark g-green"></div>
+            <div class="gname">
+              <div class="gname-top">
+                <span class="gcode">FCM</span><strong>Food Chain Magnate</strong>
+              </div>
+              <span class="gplayers">PlayerOne, PlayerTwo, PlayerThree · Turn 14</span>
+            </div>
+            <!-- ICON OVERFLOW -->
+            <div class="icon-row" id="ir1">
+              <span class="ico" title="No Milkshakes">
+                <img src="{% static 'FCM/images/so_noMS.svg' %}" alt="No MS">
+              </span>
+              <span class="ico" title="No CEO">
+                <img src="{% static 'FCM/images/so_noCEO.svg' %}" alt="No CEO">
+              </span>
+              <span class="ico" title="Jazz Musicians">
+                <img src="{% static 'FCM/images/so_jazz.svg' %}" alt="Jazz">
+              </span>
+              <span class="ico" title="Sushi Chefs">
+                <img src="{% static 'FCM/images/so_sushi.svg' %}" alt="Sushi">
+              </span>
+              <span class="ico" title="No Radio">
+                <img src="{% static 'FCM/images/so_noRadio.svg' %}" alt="No Radio">
+              </span>
+              <span class="ico" title="Short Game">
+                <img src="{% static 'FCM/images/so_shortGame.svg' %}" alt="Short">
+              </span>
+              <span class="ico ico-hidden" title="Coffee">
+                <img src="{% static 'FCM/images/so_coffee.svg' %}" alt="Coffee">
+              </span>
+              <span class="ico ico-hidden" title="Hawkers">
+                <img src="{% static 'FCM/images/so_hawkers.svg' %}" alt="Hawkers">
+              </span>
+              <span class="ico ico-hidden" title="Strict Rules">
+                <img src="{% static 'FCM/images/so_strict.svg' %}" alt="Strict">
+              </span>
+              <span class="ico ico-hidden" title="Dumplings">
+                <img src="{% static 'FCM/images/so_dumplings.svg' %}" alt="Dumplings">
+              </span>
+              <button class="ico-more" onclick="expandIcons(event,'ir1')">+4</button>
+            </div>
+            <div class="gpill gpill-green">Your Turn</div>
+          </a>
+          <a class="grow" href="#">
+            <div class="gmark g-green"></div>
+            <div class="gname">
+              <div class="gname-top">
+                <span class="gcode">TGZ</span><strong>The Great Zimbabwe</strong>
+              </div>
+              <span class="gplayers">AncientTrader, NomadKing · Turn 7</span>
+            </div>
+            <div class="icon-row">
+              <span class="ico" title="Experienced Game">
+                <img src="{% static 'Lobby/images/startingOptions/so_experiencedGame.svg' %}"
+                     alt="Experienced">
+              </span>
+            </div>
+            <div class="gpill gpill-green">Your Turn</div>
+          </a>
+          <a class="grow" href="#">
+            <div class="gmark g-green"></div>
+            <div class="gname">
+              <div class="gname-top">
+                <span class="gcode">HLC</span><strong>Horseless Carriage</strong>
+              </div>
+              <span class="gplayers">BoardMaster · Turn 3</span>
+            </div>
+            <div class="icon-row">
+              <span class="ico" title="More Mainlines">
+                <img src="{% static 'Lobby/images/startingOptions/HLC_moreMainlines.svg' %}"
+                     alt="More Mainlines">
+              </span>
+            </div>
+            <div class="gpill gpill-green">Your Turn</div>
+          </a>
+          <a class="grow" href="#">
+            <div class="gmark g-cyan"></div>
+            <div class="gname">
+              <div class="gname-top">
+                <span class="gcode">IND</span><strong>Indonesia</strong>
+              </div>
+              <span class="gplayers">IslandTrader, SpiceKing, RiceGrown · Turn 11</span>
+            </div>
+            <div class="icon-row" id="ir2">
+              <span class="ico" title="Merger Subsidy">
+                <img src="{% static 'Lobby/images/startingOptions/IND_merger_subsidy.svg' %}"
+                     alt="Merger">
+              </span>
+              <span class="ico" title="Shipping Subsidy">
+                <img src="{% static 'Lobby/images/startingOptions/IND_shipping_subsidy.svg' %}"
+                     alt="Shipping">
+              </span>
+              <span class="ico" title="Philippine Map">
+                <img src="{% static 'Lobby/images/startingOptions/IND_php_map.svg' %}"
+                     alt="PHP Map">
+              </span>
+            </div>
+            <div class="gpill gpill-cyan">Waiting</div>
+          </a>
+          <a class="grow" href="#">
+            <div class="gmark g-gray"></div>
+            <div class="gname">
+              <div class="gname-top">
+                <span class="gcode">BUS</span><strong>Bus</strong>
+              </div>
+              <span class="gplayers">RoutePlanner, CityDriver · Turn 2</span>
+            </div>
+            <div class="icon-row">
+              <span class="ico" title="Learning Game">
+                <img src="{% static 'Lobby/images/startingOptions/so_learningGame.svg' %}"
+                     alt="Learning">
+              </span>
+            </div>
+            <div class="gpill gpill-gray">Waiting</div>
+          </a>
+        </div>
+        <div class="section-h">Available Games</div>
+        <div class="sgrid">
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'FCM/images/fcm-box.jpg' %}"
+                 alt="FCM">
+            <h3>Food Chain Magnate</h3>
+            <p>Build a fast food empire in this brutally economic game.</p>
+            <div class="stag">2–5 players · Complex</div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'TGZ/images/icon-box.svg' %}"
+                 alt="TGZ">
+            <h3>The Great Zimbabwe</h3>
+            <p>Raise monuments and trade across ancient Africa.</p>
+            <div class="stag">2–5 players · Medium</div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'HLC/images/hlc_icon.png' %}"
+                 alt="HLC">
+            <h3>Horseless Carriage</h3>
+            <p>Design and manufacture early automobiles.</p>
+            <div class="stag">2–5 players · Complex</div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'IND/images/icon-box.svg' %}"
+                 alt="IND">
+            <h3>Indonesia</h3>
+            <p>Shipping and mergers across the archipelago.</p>
+            <div class="stag">2–5 players · Heavy</div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'AQY/images/icon-box.svg' %}"
+                 alt="AQY">
+            <h3>Antiquity</h3>
+            <p>Survive in a medieval world with scarce resources.</p>
+            <div class="stag">2–4 players · Heavy</div>
+          </div>
+          <div class="scard">
+            <img class="scard-img"
+                 src="{% static 'BUS/images/icon-box.svg' %}"
+                 alt="BUS">
+            <h3>Bus</h3>
+            <p>Run bus lines and manipulate passenger flow.</p>
+            <div class="stag">2–5 players · Medium</div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, and Indonesia are board games by Jeroen Doumen and Joris Wiersinga, published by <a href="#">Splotter Spellen</a>. Permission Provided.
+      <br>
+      Summary icons from <a href="#">game-icons.net</a>
+    </footer>
+    <script>
+function toggleMenu() {
+  document.getElementById('ham').classList.toggle('open');
+  document.getElementById('mob').classList.toggle('open');
+}
+function expandIcons(e, id) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById(id).classList.toggle('expanded');
+}
+    </script>
+  </body>
+</html>

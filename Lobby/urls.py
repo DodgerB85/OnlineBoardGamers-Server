@@ -165,4 +165,5 @@ urlpatterns = [
         "sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"
     ),
     path("reloadMainTchatData/", views.reloadMainTchatData, name="reloadMainTchatData"),
+    path("newDesign/<int:design_num>/", views.newDesign, name="newDesign"),
 ]

@@ -1,0 +1,953 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Board Gamers — Cinematic</title>
+    <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #06060f;
+  --surface: #0c0c1e;
+  --card: rgba(18, 18, 42, 0.75);
+  --card-border: rgba(255,255,255,0.07);
+  --card-border-hover: rgba(0,229,160,0.4);
+  --accent: #00e5a0;
+  --accent-glow: rgba(0,229,160,0.25);
+  --accent-dim: rgba(0,229,160,0.1);
+  --purple: #7c3aed;
+  --purple-glow: rgba(124,58,237,0.3);
+  --gold: #fbbf24;
+  --gold-glow: rgba(251,191,36,0.25);
+  --text: #e8e8ff;
+  --text-muted: rgba(232,232,255,0.5);
+  --text-faint: rgba(232,232,255,0.25);
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ─── ANIMATED BACKGROUND ─── */
+.bg-orbs {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+}
+.orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #7c3aed, transparent);
+  top: -200px; left: -100px;
+  animation: driftA 18s ease-in-out infinite alternate;
+}
+.orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #00e5a0, transparent);
+  bottom: -150px; right: -100px;
+  animation: driftB 22s ease-in-out infinite alternate;
+}
+.orb-3 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #1d4ed8, transparent);
+  top: 40%; left: 40%;
+  animation: driftC 16s ease-in-out infinite alternate;
+}
+@keyframes driftA { from { transform: translate(0,0) scale(1); } to { transform: translate(120px, 80px) scale(1.2); } }
+@keyframes driftB { from { transform: translate(0,0) scale(1.1); } to { transform: translate(-100px, -60px) scale(0.9); } }
+@keyframes driftC { from { transform: translate(0,0) scale(1); } to { transform: translate(-80px, 100px) scale(1.15); } }
+
+/* Subtle grid overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: 60px;
+  background: rgba(6, 6, 15, 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 6px;
+}
+
+.nav-logo {
+  text-decoration: none;
+  display: flex; align-items: center; gap: 10px;
+  margin-right: 24px; flex-shrink: 0;
+}
+.nav-logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--purple), var(--accent));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 0.72rem; color: white; letter-spacing: -0.02em;
+  box-shadow: 0 0 16px var(--accent-glow);
+  animation: logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%, 100% { box-shadow: 0 0 16px var(--accent-glow); }
+  50% { box-shadow: 0 0 28px rgba(0,229,160,0.5), 0 0 48px rgba(124,58,237,0.2); }
+}
+.nav-logo-text { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+.nav-logo-text span { display: block; font-size: 0.65rem; font-weight: 400; color: var(--text-muted); }
+
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none; font-size: 0.8rem; font-weight: 500;
+  padding: 6px 10px; border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+.nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.nav-link.active { color: var(--accent); }
+
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.nav-turns {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(0,229,160,0.2);
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 700; color: var(--accent);
+}
+.nav-turns::before { content: '●'; animation: blink 1.5s ease-in-out infinite; font-size: 0.6rem; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 800; color: white; cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.1);
+  transition: border-color 0.2s;
+}
+.nav-avatar:hover { border-color: var(--accent); }
+
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; margin-left: auto; }
+.hamburger span { display: block; width: 22px; height: 1.5px; background: var(--text-muted); border-radius: 1px; transition: all 0.25s; }
+.hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+.mob-menu {
+  display: none; position: fixed; top: 60px; left: 0; right: 0; z-index: 999;
+  background: rgba(6,6,15,0.95); backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-direction: column;
+}
+.mob-menu.open { display: flex; }
+.mob-menu a { color: var(--text-muted); text-decoration: none; padding: 14px 20px; font-size: 0.9rem; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.04); transition: color 0.2s; }
+.mob-menu a:hover { color: var(--accent); }
+
+/* ─── MAIN ─── */
+main { position: relative; z-index: 1; margin-top: 60px; flex: 1; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 90vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 80px 24px 64px;
+  position: relative; overflow: hidden;
+}
+.hero-inner { max-width: 760px; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,229,160,0.08);
+  border: 1px solid rgba(0,229,160,0.2);
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 700;
+  color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 24px;
+  animation: fadeInDown 0.8s ease both;
+}
+.hero-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 1.5s ease-in-out infinite; }
+
+.hero h1 {
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  font-weight: 900; line-height: 1.05;
+  letter-spacing: -0.04em; margin-bottom: 20px;
+  animation: fadeInUp 0.9s ease 0.1s both;
+}
+.hero h1 .line1 { display: block; color: var(--text); }
+.hero h1 .line2 {
+  display: block;
+  background: linear-gradient(90deg, var(--accent), var(--purple), var(--accent));
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientSlide 4s linear infinite;
+}
+@keyframes gradientSlide { from { background-position: 0% center; } to { background-position: 200% center; } }
+
+.hero-sub {
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  color: var(--text-muted); line-height: 1.65;
+  max-width: 520px; margin-bottom: 36px;
+  animation: fadeInUp 0.9s ease 0.2s both;
+}
+
+.hero-actions {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px;
+  animation: fadeInUp 0.9s ease 0.3s both;
+}
+.btn-glow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent); color: #06060f;
+  font-weight: 800; padding: 13px 28px; border-radius: 8px;
+  text-decoration: none; font-size: 0.9rem;
+  box-shadow: 0 0 24px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.btn-glow::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.2s;
+}
+.btn-glow:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,229,160,0.5), 0 8px 24px rgba(0,0,0,0.4); }
+.btn-glow:hover::after { opacity: 1; }
+.btn-glass {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.06); color: var(--text);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-weight: 600; padding: 13px 28px; border-radius: 8px;
+  text-decoration: none; font-size: 0.9rem;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+.btn-glass:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+
+/* HERO STATS */
+.hero-stats {
+  display: flex; gap: 32px; flex-wrap: wrap;
+  animation: fadeInUp 0.9s ease 0.4s both;
+}
+.hstat { }
+.hstat-num {
+  font-size: 1.8rem; font-weight: 900; letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--text), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hstat-lbl { font-size: 0.72rem; color: var(--text-faint); font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; }
+
+/* SCROLL INDICATOR */
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--text-faint); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+  animation: fadeIn 1s ease 1s both;
+}
+.scroll-arrow {
+  width: 20px; height: 20px;
+  border-right: 1.5px solid var(--text-faint);
+  border-bottom: 1.5px solid var(--text-faint);
+  transform: rotate(45deg);
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+@keyframes scrollBounce { 0%,100% { transform: rotate(45deg) translate(0,0); opacity: 0.5; } 50% { transform: rotate(45deg) translate(3px,3px); opacity: 1; } }
+
+/* ─── LOGIN BAR ─── */
+.login-bar {
+  background: rgba(12, 12, 30, 0.8);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 14px 24px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.login-bar input {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text); padding: 9px 14px; border-radius: 6px;
+  font-size: 0.82rem; width: 155px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-bar input::placeholder { color: var(--text-faint); }
+.login-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.login-bar a { color: var(--accent); font-size: 0.78rem; text-decoration: none; transition: opacity 0.2s; }
+.login-bar a:hover { opacity: 0.8; }
+
+/* ─── SECTION ─── */
+.section { max-width: 1140px; margin: 0 auto; padding: 64px 24px; }
+
+.section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+.section-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+.section-title .accent { color: var(--accent); }
+.section-link { color: var(--accent); font-size: 0.8rem; text-decoration: none; opacity: 0.8; }
+.section-link:hover { opacity: 1; }
+
+/* ─── TABS ─── */
+.tab-row { display: flex; gap: 4px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; }
+.tab-row::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 8px 16px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  color: var(--text-muted); background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  white-space: nowrap; transition: all 0.2s; text-decoration: none;
+}
+.tab-btn.active {
+  background: var(--accent-dim); color: var(--accent);
+  border-color: rgba(0,229,160,0.25);
+}
+.tab-btn:hover:not(.active) { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+/* ─── GAME CARDS ─── */
+.game-list { display: flex; flex-direction: column; gap: 2px; }
+
+.game-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: start;
+  gap: 14px;
+  text-decoration: none; color: inherit;
+  transition: border-color 0.25s, background 0.25s, transform 0.2s, box-shadow 0.25s;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(12px);
+  animation: fadeInUp 0.6s ease both;
+}
+.game-card:nth-child(1) { animation-delay: 0.05s; }
+.game-card:nth-child(2) { animation-delay: 0.1s; }
+.game-card:nth-child(3) { animation-delay: 0.15s; }
+.game-card:nth-child(4) { animation-delay: 0.2s; }
+.game-card:nth-child(5) { animation-delay: 0.25s; }
+
+.game-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(0,229,160,0.03));
+  opacity: 0; transition: opacity 0.3s;
+}
+.game-card:hover {
+  border-color: var(--card-border-hover);
+  background: rgba(18, 18, 42, 0.9);
+  transform: translateX(3px);
+  box-shadow: -3px 0 0 var(--accent), 0 4px 24px rgba(0,229,160,0.08);
+}
+.game-card:hover::before { opacity: 1; }
+
+/* Game accent strip left */
+.game-card-your-turn {
+  box-shadow: -3px 0 0 transparent;
+}
+
+.gcol-icon {
+  width: 44px; height: 44px;
+  border-radius: 8px; overflow: hidden;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.gcol-icon img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+
+.gcol-body { min-width: 0; }
+.game-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+.game-code-tag {
+  font-size: 0.6rem; font-weight: 800; padding: 1px 5px; border-radius: 3px;
+  background: rgba(0,229,160,0.1); color: var(--accent);
+  border: 1px solid rgba(0,229,160,0.15); flex-shrink: 0;
+}
+.game-players-txt { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px; }
+
+/* ─── ICON ROW ─── */
+.icon-row { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+.icon-row.expanded { flex-wrap: wrap; row-gap: 4px; }
+
+.ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; padding: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 5px; flex-shrink: 0; cursor: default; position: relative;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.ico:hover {
+  border-color: rgba(0,229,160,0.4);
+  background: rgba(0,229,160,0.08);
+  transform: scale(1.15);
+}
+.ico img {
+  width: 100%; height: 100%; display: block; object-fit: contain;
+  filter: invert(1) opacity(0.75);
+  transition: filter 0.2s;
+}
+.ico:hover img { filter: invert(1) opacity(1); }
+.ico[title]:hover::after {
+  content: attr(title); position: absolute;
+  bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: rgba(6,6,15,0.95);
+  border: 1px solid rgba(0,229,160,0.2);
+  color: var(--accent); font-size: 0.65rem; padding: 4px 8px; border-radius: 4px;
+  white-space: nowrap; z-index: 10; pointer-events: none;
+  font-weight: 600; letter-spacing: 0.02em;
+}
+.ico-hidden { display: none; }
+.icon-row.expanded .ico-hidden { display: inline-flex; }
+
+.ico-more {
+  height: 26px; padding: 0 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 5px; font-size: 0.65rem; font-weight: 800;
+  color: var(--text-muted); cursor: pointer; flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 3px;
+  transition: all 0.2s;
+}
+.ico-more:hover { border-color: rgba(0,229,160,0.3); color: var(--accent); background: rgba(0,229,160,0.06); }
+.icon-row.expanded .ico-more { display: none; }
+
+/* STATUS */
+.gcol-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; padding-top: 2px; flex-shrink: 0; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 0.68rem; font-weight: 700;
+  white-space: nowrap;
+}
+.s-your-turn {
+  background: rgba(0,229,160,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0,229,160,0.2);
+  animation: turnPulse 2.5s ease-in-out infinite;
+}
+@keyframes turnPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,160,0); }
+  50% { box-shadow: 0 0 0 4px rgba(0,229,160,0.12); }
+}
+.s-your-turn::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: blink 1.5s ease-in-out infinite; }
+.s-waiting { background: rgba(124,58,237,0.1); color: #a78bfa; border: 1px solid rgba(124,58,237,0.2); }
+.s-waiting::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #a78bfa; }
+.s-neutral { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
+.g-turn-info { font-size: 0.66rem; color: var(--text-faint); }
+
+/* ─── GAME SHOWCASE ─── */
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.showcase-card {
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s;
+  cursor: pointer;
+  position: relative;
+  animation: fadeInUp 0.6s ease both;
+  transform-style: preserve-3d;
+}
+.showcase-card:nth-child(1) { animation-delay: 0.05s; }
+.showcase-card:nth-child(2) { animation-delay: 0.12s; }
+.showcase-card:nth-child(3) { animation-delay: 0.19s; }
+.showcase-card:nth-child(4) { animation-delay: 0.26s; }
+.showcase-card:nth-child(5) { animation-delay: 0.33s; }
+.showcase-card:nth-child(6) { animation-delay: 0.4s; }
+
+.showcase-card:hover {
+  border-color: rgba(0,229,160,0.3);
+  box-shadow: 0 0 0 1px rgba(0,229,160,0.15), 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,229,160,0.06);
+  transform: translateY(-6px) scale(1.01);
+}
+
+/* Shimmer effect on hover */
+.showcase-card::after {
+  content: '';
+  position: absolute; top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+.showcase-card:hover::after { left: 150%; }
+
+.sc-img {
+  width: 100%; height: 140px;
+  object-fit: contain; display: block;
+  padding: 16px;
+  background: rgba(255,255,255,0.02);
+  transition: transform 0.4s;
+}
+.showcase-card:hover .sc-img { transform: scale(1.05); }
+.sc-body { padding: 14px 16px; }
+.sc-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; }
+.sc-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+.sc-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.sc-tag {
+  font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  background: rgba(255,255,255,0.04); color: var(--text-faint);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.sc-tag.highlight { background: rgba(0,229,160,0.08); color: var(--accent); border-color: rgba(0,229,160,0.15); }
+
+/* ─── REVEAL ANIMATION ─── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── KEYFRAMES ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+/* ─── FOOTER ─── */
+footer {
+  position: relative; z-index: 1;
+  background: rgba(6,6,15,0.9);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  color: var(--text-faint); text-align: center;
+  padding: 28px 24px; font-size: 0.75rem; line-height: 1.8;
+}
+footer a { color: rgba(0,229,160,0.7); text-decoration: none; transition: color 0.2s; }
+footer a:hover { color: var(--accent); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 767px) {
+  .nav-link, .nav-right { display: none; }
+  .hamburger { display: flex; }
+  .hero { padding: 48px 16px 48px; min-height: 80vh; }
+  .hero h1 { font-size: clamp(2rem, 10vw, 3rem); }
+  .section { padding: 40px 14px; }
+  .game-card { grid-template-columns: 44px 1fr; }
+  .gcol-right { grid-column: 1 / -1; flex-direction: row; align-items: center; }
+  .showcase-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hero-stats { gap: 20px; }
+  .login-bar input { width: 120px; }
+}
+@media (max-width: 420px) {
+  .showcase-grid { grid-template-columns: 1fr; }
+}
+    </style>
+  </head>
+  <body>
+    <div class="bg-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <nav>
+      <a class="nav-logo" href="#">
+        <div class="nav-logo-icon">OBG</div>
+        <div class="nav-logo-text">
+          Online Board Gamers
+          <span>Splotter games online</span>
+        </div>
+      </a>
+      <a class="nav-link active" href="#">Lobby</a>
+      <a class="nav-link" href="#">New Game</a>
+      <a class="nav-link" href="#">Tournaments</a>
+      <a class="nav-link" href="#">Stats</a>
+      <a class="nav-link" href="#">Help</a>
+      <a class="nav-link" href="#">Updates</a>
+      <div class="nav-right">
+        <div class="nav-turns">3 moves waiting</div>
+        <div class="nav-avatar">MH</div>
+      </div>
+      <div class="hamburger" id="ham" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </nav>
+    <div class="mob-menu" id="mobMenu">
+      <a href="#">Lobby</a>
+      <a href="#">New Game</a>
+      <a href="#">Tournaments</a>
+      <a href="#">Stats</a>
+      <a href="#">Help</a>
+      <a href="#">Updates</a>
+      <a href="#">Log Out</a>
+    </div>
+    <main>
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-eyebrow">
+            <span class="dot"></span>
+            Free to play · Async-friendly
+          </div>
+          <h1>
+            <span class="line1">The World's Best</span>
+            <span class="line2">Board Games Online</span>
+          </h1>
+          <p class="hero-sub">
+            Food Chain Magnate, The Great Zimbabwe, Indonesia, Horseless Carriage, and more —
+            complex Splotter games brought online, free, with players worldwide.
+          </p>
+          <div class="hero-actions">
+            <a href="#" class="btn-glow">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1L13 7L7 13M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Start Playing Free
+            </a>
+            <a href="#" class="btn-glass">Browse Games</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hstat">
+              <div class="hstat-num" data-target="1400">1,400+</div>
+              <div class="hstat-lbl">Players</div>
+            </div>
+            <div class="hstat">
+              <div class="hstat-num" data-target="10">10</div>
+              <div class="hstat-lbl">Games</div>
+            </div>
+            <div class="hstat">
+              <div class="hstat-num" data-target="45000">45k+</div>
+              <div class="hstat-lbl">Games Played</div>
+            </div>
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <span>Scroll</span>
+          <div class="scroll-arrow"></div>
+        </div>
+      </section>
+      <!-- LOGIN -->
+      <div class="login-bar">
+        <input type="text" placeholder="Username">
+        <input type="password" placeholder="Password">
+        <a href="#" class="btn-glow" style="padding:9px 18px;font-size:0.8rem">Sign In</a>
+        <a href="#">Forgot password?</a>
+        <a href="#" style="margin-left:auto">Create free account →</a>
+      </div>
+      <!-- LOBBY -->
+      <section class="section reveal">
+        <div class="section-header">
+          <div class="section-title">
+            Your Games <span class="accent">·</span> 3 waiting
+          </div>
+        </div>
+        <div class="tab-row">
+          <a class="tab-btn active" href="#">My Turn (3)</a>
+          <a class="tab-btn" href="#">Waiting (4)</a>
+          <a class="tab-btn" href="#">Available</a>
+          <a class="tab-btn" href="#">Invitations (2)</a>
+          <a class="tab-btn" href="#">Finished</a>
+        </div>
+        <div class="game-list">
+          <!-- FCM — many starting options -->
+          <a class="game-card" href="#">
+            <div class="gcol-icon">
+              <img src="{% static 'FCM/images/fcm-box.jpg' %}" alt="FCM">
+            </div>
+            <div class="gcol-body">
+              <div class="game-title">
+                <span class="game-code-tag">FCM</span>
+                Food Chain Magnate
+              </div>
+              <div class="game-players-txt">vs. PlayerOne, PlayerTwo, PlayerThree · Turn 14 · 4 players</div>
+              <div class="icon-row" id="ir1">
+                <span class="ico" title="No Milkshakes">
+                  <img src="{% static 'FCM/images/so_noMS.svg' %}" alt="No MS">
+                </span>
+                <span class="ico" title="No CEO">
+                  <img src="{% static 'FCM/images/so_noCEO.svg' %}" alt="No CEO">
+                </span>
+                <span class="ico" title="Jazz Musicians">
+                  <img src="{% static 'FCM/images/so_jazz.svg' %}" alt="Jazz">
+                </span>
+                <span class="ico" title="Sushi Chefs">
+                  <img src="{% static 'FCM/images/so_sushi.svg' %}" alt="Sushi">
+                </span>
+                <span class="ico" title="No Radio">
+                  <img src="{% static 'FCM/images/so_noRadio.svg' %}" alt="No Radio">
+                </span>
+                <span class="ico" title="Short Game">
+                  <img src="{% static 'FCM/images/so_shortGame.svg' %}" alt="Short">
+                </span>
+                <span class="ico ico-hidden" title="Coffee">
+                  <img src="{% static 'FCM/images/so_coffee.svg' %}" alt="Coffee">
+                </span>
+                <span class="ico ico-hidden" title="Hawkers">
+                  <img src="{% static 'FCM/images/so_hawkers.svg' %}" alt="Hawkers">
+                </span>
+                <span class="ico ico-hidden" title="Strict Rules">
+                  <img src="{% static 'FCM/images/so_strict.svg' %}" alt="Strict">
+                </span>
+                <span class="ico ico-hidden" title="Dumplings">
+                  <img src="{% static 'FCM/images/so_dumplings.svg' %}" alt="Dumplings">
+                </span>
+                <button class="ico-more" onclick="expandIcons(event,'ir1')">+4 more</button>
+              </div>
+            </div>
+            <div class="gcol-right">
+              <div class="status-pill s-your-turn">Your Turn</div>
+              <div class="g-turn-info">4 players</div>
+            </div>
+          </a>
+          <a class="game-card" href="#">
+            <div class="gcol-icon">
+              <img src="{% static 'TGZ/images/icon-box.svg' %}" alt="TGZ">
+            </div>
+            <div class="gcol-body">
+              <div class="game-title">
+                <span class="game-code-tag">TGZ</span> The Great Zimbabwe
+              </div>
+              <div class="game-players-txt">vs. AncientTrader, NomadKing · Turn 7 · 3 players</div>
+              <div class="icon-row">
+                <span class="ico" title="Experienced Game">
+                  <img src="{% static 'Lobby/images/startingOptions/so_experiencedGame.svg' %}"
+                       alt="Experienced">
+                </span>
+              </div>
+            </div>
+            <div class="gcol-right">
+              <div class="status-pill s-your-turn">Your Turn</div>
+            </div>
+          </a>
+          <a class="game-card" href="#">
+            <div class="gcol-icon">
+              <img src="{% static 'HLC/images/hlc_icon.png' %}" alt="HLC">
+            </div>
+            <div class="gcol-body">
+              <div class="game-title">
+                <span class="game-code-tag">HLC</span> Horseless Carriage
+              </div>
+              <div class="game-players-txt">vs. BoardMaster · Turn 3 · 2 players</div>
+              <div class="icon-row">
+                <span class="ico" title="More Mainlines">
+                  <img src="{% static 'Lobby/images/startingOptions/HLC_moreMainlines.svg' %}"
+                       alt="More Mainlines">
+                </span>
+              </div>
+            </div>
+            <div class="gcol-right">
+              <div class="status-pill s-your-turn">Your Turn</div>
+            </div>
+          </a>
+          <a class="game-card" href="#">
+            <div class="gcol-icon">
+              <img src="{% static 'IND/images/icon-box.svg' %}" alt="IND">
+            </div>
+            <div class="gcol-body">
+              <div class="game-title">
+                <span class="game-code-tag">IND</span> Indonesia
+              </div>
+              <div class="game-players-txt">vs. IslandTrader, SpiceKing, RiceGrown · Turn 11 · 4 players</div>
+              <div class="icon-row" id="ir2">
+                <span class="ico" title="Merger Subsidy">
+                  <img src="{% static 'Lobby/images/startingOptions/IND_merger_subsidy.svg' %}"
+                       alt="Merger">
+                </span>
+                <span class="ico" title="Shipping Subsidy">
+                  <img src="{% static 'Lobby/images/startingOptions/IND_shipping_subsidy.svg' %}"
+                       alt="Shipping">
+                </span>
+                <span class="ico" title="Philippine Map">
+                  <img src="{% static 'Lobby/images/startingOptions/IND_php_map.svg' %}"
+                       alt="PHP Map">
+                </span>
+              </div>
+            </div>
+            <div class="gcol-right">
+              <div class="status-pill s-waiting">Waiting</div>
+              <div class="g-turn-info">4 players</div>
+            </div>
+          </a>
+          <a class="game-card" href="#">
+            <div class="gcol-icon">
+              <img src="{% static 'BUS/images/icon-box.svg' %}" alt="BUS">
+            </div>
+            <div class="gcol-body">
+              <div class="game-title">
+                <span class="game-code-tag">BUS</span> Bus
+              </div>
+              <div class="game-players-txt">vs. RoutePlanner, CityDriver · Turn 2 · 3 players</div>
+              <div class="icon-row">
+                <span class="ico" title="Learning Game">
+                  <img src="{% static 'Lobby/images/startingOptions/so_learningGame.svg' %}"
+                       alt="Learning">
+                </span>
+              </div>
+            </div>
+            <div class="gcol-right">
+              <div class="status-pill s-neutral">Waiting</div>
+            </div>
+          </a>
+        </div>
+      </section>
+      <!-- GAME SHOWCASE -->
+      <section class="section reveal">
+        <div class="section-header">
+          <div class="section-title">
+            Play a <span class="accent">New Game</span>
+          </div>
+          <a href="#" class="section-link">View all →</a>
+        </div>
+        <div class="showcase-grid">
+          <div class="showcase-card">
+            <img class="sc-img" src="{% static 'FCM/images/fcm-box.jpg' %}" alt="FCM">
+            <div class="sc-body">
+              <div class="sc-name">Food Chain Magnate</div>
+              <div class="sc-desc">
+                Build a fast food empire through hiring, marketing and logistics in this ruthless economic game.
+              </div>
+              <div class="sc-tags">
+                <span class="sc-tag highlight">2–5 players</span><span class="sc-tag">Complex</span>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-card">
+            <img class="sc-img" src="{% static 'TGZ/images/icon-box.svg' %}" alt="TGZ">
+            <div class="sc-body">
+              <div class="sc-name">The Great Zimbabwe</div>
+              <div class="sc-desc">Raise monuments and trade across ancient Africa in this asymmetric strategy game.</div>
+              <div class="sc-tags">
+                <span class="sc-tag highlight">2–5 players</span><span class="sc-tag">Medium</span>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-card">
+            <img class="sc-img" src="{% static 'HLC/images/hlc_icon.png' %}" alt="HLC">
+            <div class="sc-body">
+              <div class="sc-name">Horseless Carriage</div>
+              <div class="sc-desc">Design and manufacture automobiles in the early 1900s. Production meets logistics.</div>
+              <div class="sc-tags">
+                <span class="sc-tag highlight">2–5 players</span><span class="sc-tag">Complex</span>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-card">
+            <img class="sc-img" src="{% static 'IND/images/icon-box.svg' %}" alt="IND">
+            <div class="sc-body">
+              <div class="sc-name">Indonesia</div>
+              <div class="sc-desc">Manage shipping routes, mergers, and resources across the Indonesian archipelago.</div>
+              <div class="sc-tags">
+                <span class="sc-tag highlight">2–5 players</span><span class="sc-tag">Heavy</span>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-card">
+            <img class="sc-img" src="{% static 'AQY/images/icon-box.svg' %}" alt="AQY">
+            <div class="sc-body">
+              <div class="sc-name">Antiquity</div>
+              <div class="sc-desc">Survive and grow in a medieval world with dangerously scarce resources.</div>
+              <div class="sc-tags">
+                <span class="sc-tag highlight">2–4 players</span><span class="sc-tag">Heavy</span>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-card">
+            <img class="sc-img" src="{% static 'KFW/images/icon-box.svg' %}" alt="KFW">
+            <div class="sc-body">
+              <div class="sc-name">Keyflower</div>
+              <div class="sc-desc">
+                Bid for tiles and workers to build the most valuable village in this worker-placement auction game.
+              </div>
+              <div class="sc-tags">
+                <span class="sc-tag highlight">2–6 players</span><span class="sc-tag">Medium</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p>
+        Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, and Indonesia are board games by Jeroen Doumen and Joris Wiersinga, published by <a href="#">Splotter Spellen</a>. Permission Provided.
+      </p>
+      <p style="margin-top:6px">
+        Summary icons from <a href="#">game-icons.net</a>
+      </p>
+    </footer>
+    <script>
+// NAV
+function toggleMenu() {
+  document.getElementById('ham').classList.toggle('open');
+  document.getElementById('mobMenu').classList.toggle('open');
+}
+
+// ICON EXPAND
+function expandIcons(e, id) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById(id).classList.toggle('expanded');
+}
+
+// SCROLL REVEAL
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// 3D TILT on showcase cards (desktop only)
+if (window.matchMedia('(pointer: fine)').matches) {
+  document.querySelectorAll('.showcase-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(700px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-6px) scale(1.01)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      card.style.transition = 'all 0.4s ease';
+      setTimeout(() => { card.style.transition = ''; }, 400);
+    });
+  });
+
+  // Subtle tilt on game cards too
+  document.querySelectorAll('.game-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `translateX(3px) rotateX(${-y * 3}deg)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+}
+
+// NAV shrink on scroll
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  if (window.scrollY > 40) {
+    nav.style.height = '52px';
+    nav.style.background = 'rgba(6,6,15,0.92)';
+  } else {
+    nav.style.height = '60px';
+    nav.style.background = 'rgba(6,6,15,0.7)';
+  }
+}, { passive: true });
+    </script>
+  </body>
+</html>

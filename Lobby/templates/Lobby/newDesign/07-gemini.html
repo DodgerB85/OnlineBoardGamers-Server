@@ -1,0 +1,337 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBG — Ultimate Splotter Dashboard</title>
+    <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --nav-bg: #0f172a;
+    --surface: #f1f5f9;
+    --card-bg: #ffffff;
+    --accent: #f97316;
+    --accent-indigo: #6366f1;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --radius: 8px;
+  }
+
+  body {
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  nav {
+    background: var(--nav-bg);
+    height: 50px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .nav-logo { font-weight: 900; color: white; text-decoration: none; font-size: 1.2rem; margin-right: 30px; }
+  .nav-logo span { color: var(--accent); }
+  
+  .nav-links a { color: #cbd5e1; text-decoration: none; padding: 8px 12px; font-weight: 500; }
+  .nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    max-width: 1440px;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+
+  /* GAME CARD - THE MASTER COMPONENT */
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+  .section-title { font-size: 1.2rem; font-weight: 800; }
+
+  .game-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 80px 1fr 200px 140px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  .game-card:hover { border-color: var(--accent-indigo); box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+  .game-card.my-turn { border-left: 5px solid var(--accent); }
+
+  /* Left: Box Art Area */
+  .game-art {
+    width: 80px;
+    height: 100%;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border);
+    padding: 8px;
+  }
+  .game-art img { width: 100%; height: 100%; object-fit: contain; }
+
+  /* Middle: Info & Icons */
+  .game-info { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .game-header { display: flex; align-items: center; gap: 10px; }
+  .game-header h3 { font-size: 1.05rem; font-weight: 800; }
+  .game-code { font-size: 0.7rem; font-weight: 900; background: #1e1b4b; color: white; padding: 2px 5px; border-radius: 3px; }
+
+  .state-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .state-pill { background: #f1f5f9; border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+  .state-pill.highlight { border-color: var(--accent-indigo); color: var(--accent-indigo); }
+
+  /* MODIFIER ICONS - RESTORED & PRO-IFIED */
+  .icon-row { display: flex; align-items: center; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .ico {
+    width: 24px; height: 24px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px;
+    position: relative;
+    cursor: help;
+  }
+  .ico img { width: 100%; height: 100%; object-fit: contain; opacity: 0.8; }
+  .ico:hover { border-color: var(--accent-indigo); background: white; }
+  .ico:hover img { opacity: 1; }
+  
+  /* Tooltip logic */
+  .ico::after {
+    content: attr(data-title);
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    background: #0f172a; color: white; font-size: 0.65rem; padding: 4px 8px;
+    border-radius: 4px; white-space: nowrap; visibility: hidden; opacity: 0; transition: 0.2s;
+  }
+  .ico:hover::after { visibility: visible; opacity: 1; margin-bottom: 5px; }
+
+  /* Right: Player list */
+  .players-section { 
+    padding: 12px 16px; 
+    border-left: 1px solid var(--border); 
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 4px;
+    background: #fafafa;
+  }
+  .player { display: flex; justify-content: space-between; font-size: 0.8rem; }
+  .player.active { color: var(--accent); font-weight: 800; }
+  .player-stat { font-family: monospace; color: var(--text-muted); }
+
+  /* Far Right: Timer & Action */
+  .action-section { padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+  .timer { font-family: monospace; font-size: 1rem; font-weight: 800; }
+  .timer.urgent { color: var(--danger); animation: pulse 2s infinite; }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+  .btn-play { background: var(--accent-indigo); color: white; border: none; padding: 6px; border-radius: 4px; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .btn-play:hover { background: #4f46e5; }
+
+  /* SIDEBAR: MINI-GAME SELECTOR */
+  .sidebar-box { background: white; border-radius: var(--radius); padding: 16px; border: 1px solid var(--border); margin-bottom: 16px; }
+  .sidebar-box h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; color: var(--text-muted); }
+  .mini-game-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; text-decoration: none; color: inherit; }
+  .mini-game-item:hover .m-name { color: var(--accent-indigo); }
+  .m-art { width: 32px; height: 32px; object-fit: contain; }
+  .m-name { font-weight: 700; font-size: 0.85rem; }
+
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a class="nav-logo" href="#">OBG<span>.</span></a>
+      <div class="nav-links">
+        <a href="#" class="active">Lobby</a>
+        <a href="#">Tournaments</a>
+        <a href="#">Rankings</a>
+        <a href="#">Library</a>
+      </div>
+      <div style="margin-left:auto; color:white; font-size: 0.8rem;">
+        <strong>mihai</strong> (1840 ELO)
+      </div>
+    </nav>
+    <div class="layout">
+      <main>
+        <div class="section-header">
+          <div class="section-title">
+            Your Turn <span style="color:var(--accent)">(3)</span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted)">Karma: 98.4%</div>
+        </div>
+        <div class="game-card my-turn">
+          <div class="game-art">
+            <img src="{% static 'FCM/images/fcm-box.jpg' %}" alt="FCM">
+          </div>
+          <div class="game-info">
+            <div class="game-header">
+              <span class="game-code">FCM</span>
+              <h3>Food Chain Magnate</h3>
+            </div>
+            <div class="state-row">
+              <span class="state-pill">Bank: $142 / 300</span>
+              <span class="state-pill highlight">Dinner Phase</span>
+              <span class="state-pill">Slot: 1st</span>
+            </div>
+            <div class="icon-row">
+              <div class="ico" data-title="Coffee Expansion">
+                <img src="{% static 'FCM/images/so_coffee.svg' %}">
+              </div>
+              <div class="ico" data-title="New Milestones">
+                <img src="{% static 'FCM/images/so_jazz.svg' %}">
+              </div>
+              <div class="ico" data-title="Sushi Chefs">
+                <img src="{% static 'FCM/images/so_sushi.svg' %}">
+              </div>
+              <div class="ico" data-title="No Radio">
+                <img src="{% static 'FCM/images/so_noRadio.svg' %}">
+              </div>
+              <div style="font-size: 0.7rem;
+                          color: var(--text-muted);
+                          margin-left: 5px">+3 more</div>
+            </div>
+          </div>
+          <div class="players-section">
+            <div class="player active">
+              <span>▶ You</span> <span class="player-stat">$140</span>
+            </div>
+            <div class="player">
+              <span>PlayerTwo</span> <span class="player-stat">$82</span>
+            </div>
+            <div class="player">
+              <span>PlayerThree</span> <span class="player-stat">$12</span>
+            </div>
+          </div>
+          <div class="action-section">
+            <div class="timer urgent">02:14:10</div>
+            <a href="#" class="btn-play">Enter Game</a>
+          </div>
+        </div>
+        <div class="game-card my-turn">
+          <div class="game-art">
+            <img src="{% static 'TGZ/images/icon-box.svg' %}" alt="TGZ">
+          </div>
+          <div class="game-info">
+            <div class="game-header">
+              <span class="game-code">TGZ</span>
+              <h3>The Great Zimbabwe</h3>
+            </div>
+            <div class="state-row">
+              <span class="state-pill">VR: 32</span>
+              <span class="state-pill highlight">Logistics</span>
+              <span class="state-pill">Monuments: 4</span>
+            </div>
+            <div class="icon-row">
+              <div class="ico" data-title="Experienced Game">
+                <img src="{% static 'Lobby/images/startingOptions/so_experiencedGame.svg' %}">
+              </div>
+            </div>
+          </div>
+          <div class="players-section">
+            <div class="player active">
+              <span>▶ You</span> <span class="player-stat">12/32 VP</span>
+            </div>
+            <div class="player">
+              <span>AncientTrader</span> <span class="player-stat">20/40 VP</span>
+            </div>
+          </div>
+          <div class="action-section">
+            <div class="timer">18:45:05</div>
+            <a href="#" class="btn-play">Enter Game</a>
+          </div>
+        </div>
+        <div class="game-card" style="opacity: 0.85;">
+          <div class="game-art">
+            <img src="{% static 'IND/images/icon-box.svg' %}" alt="IND">
+          </div>
+          <div class="game-info">
+            <div class="game-header">
+              <span class="game-code">IND</span>
+              <h3>Indonesia</h3>
+            </div>
+            <div class="state-row">
+              <span class="state-pill">Era: B</span>
+              <span class="state-pill">Merger Phase</span>
+            </div>
+            <div class="icon-row">
+              <div class="ico" data-title="Philippine Map">
+                <img src="{% static 'Lobby/images/startingOptions/IND_php_map.svg' %}">
+              </div>
+              <div class="ico" data-title="Merger Subsidy">
+                <img src="{% static 'Lobby/images/startingOptions/IND_merger_subsidy.svg' %}">
+              </div>
+            </div>
+          </div>
+          <div class="players-section">
+            <div class="player">
+              <span>SpiceKing</span> <span class="player-stat">Active</span>
+            </div>
+            <div class="player" style="color: var(--accent-indigo)">
+              <span>You</span> <span class="player-stat">Next</span>
+            </div>
+          </div>
+          <div class="action-section">
+            <div style="font-size: 0.75rem; color: var(--text-muted)">Waiting for move</div>
+            <a href="#" class="btn-play" style="background: var(--text-muted)">Spectate</a>
+          </div>
+        </div>
+      </main>
+      <aside>
+        <div class="sidebar-box">
+          <h4>Start a New Game</h4>
+          <a href="#" class="mini-game-item">
+            <img src="{% static 'FCM/images/fcm-box.jpg' %}" class="m-art">
+            <div class="m-name">Food Chain Magnate</div>
+          </a>
+          <a href="#" class="mini-game-item">
+            <img src="{% static 'TGZ/images/icon-box.svg' %}" class="m-art">
+            <div class="m-name">The Great Zimbabwe</div>
+          </a>
+          <a href="#" class="mini-game-item">
+            <img src="{% static 'IND/images/icon-box.svg' %}" class="m-art">
+            <div class="m-name">Indonesia</div>
+          </a>
+          <a href="#" class="mini-game-item">
+            <img src="{% static 'HLC/images/hlc_icon.png' %}" class="m-art">
+            <div class="m-name">Horseless Carriage</div>
+          </a>
+          <button style="width:100%;
+                         margin-top:15px;
+                         padding:10px;
+                         border-radius:4px;
+                         border:none;
+                         background:var(--accent);
+                         color:white;
+                         font-weight:800;
+                         cursor:pointer">Create Game +</button>
+        </div>
+        <div class="sidebar-box">
+          <h4>Global Activity</h4>
+          <div style="font-size: 0.75rem;
+                      color: var(--text-muted);
+                      line-height: 1.6">
+            • <strong>ChrisM</strong> just won Indonesia #1041
+            <br>
+            • 3 players waiting for <strong>Bus</strong>
+            <br>
+            • New tournament: <em>Antiquity Spring Open</em>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </body>
+</html>
