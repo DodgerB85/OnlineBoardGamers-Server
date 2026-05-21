@@ -1237,6 +1237,7 @@ def saveRNBmap(request):
         map_description = data.get("mapDescription", "")
         map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
+        map_isOfficial = data.get("isOfficial", False) if request.user.username == "admin" else False
 
         # Validate required fields
         # if not map_name:
@@ -1263,7 +1264,7 @@ def saveRNBmap(request):
                 playerCount=map_playerCount,
                 hexData=map_data,
                 uniqueID=max_unique_key,
-                isOfficial=False,  # Default to not official
+                isOfficial=map_isOfficial,
                 creator=request.user,
             )
 
@@ -1290,6 +1291,7 @@ def replaceRNBmap(request):
         map_description = data.get("mapDescription", "")
         map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
+        map_isOfficial = data.get("isOfficial", False)
 
         # Find the existing map
         existing_map = RNBmap.objects.get(id=map_id)
@@ -1306,6 +1308,9 @@ def replaceRNBmap(request):
         existing_map.description = map_description
         existing_map.playerCount = map_playerCount
         existing_map.hexData = map_data
+        # Only allow isOfficial to be changed by admin
+        if request.user.username == "admin":
+            existing_map.isOfficial = map_isOfficial
         existing_map.save()
 
         return JsonResponse({"success": True, "message": f'Map "{map_name}" replaced successfully'})
