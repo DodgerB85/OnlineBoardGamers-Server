@@ -4682,7 +4682,6 @@ def createTGZmainTournament(request):
             newTournament.tournamentStatus = PRIVATE
         else:
             newTournament.tournamentStatus = OPEN
-            newTournament.openedForSignupAt = newTournament.created
 
         newTournament.save()
 
