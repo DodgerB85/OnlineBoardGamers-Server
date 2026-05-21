@@ -21,6 +21,7 @@ urlpatterns = [
     path("saveZoomRNB/", views.saveZoomRNB, name="saveZoomRNB"),
     path("saveRNBmap/", views.saveRNBmap, name="saveRNBmap"),
     path("replaceRNBmap/", views.replaceRNBmap, name="replaceRNBmap"),
+    path("deleteRNBmap/", views.deleteRNBmap, name="deleteRNBmap"),
     path("getRNBmaps/", views.getRNBmaps, name="getRNBmaps"),
     path("highscores/", views.RNBhighScores, name="RNBhighScores"),
     path("highscores/map/<str:map_unique_id>/", views.RNBhighScores, name="RNBhighScoresWithMap"),

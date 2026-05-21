@@ -1316,6 +1316,37 @@ def replaceRNBmap(request):
 
 
 @login_required
+def deleteRNBmap(request):
+    """
+    Delete an RNB map from the database.
+    Only admin can delete maps.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
+
+    if request.user.username != "admin":
+        return JsonResponse({"error": "Only admin can delete maps"}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        map_id = data.get("mapId")
+
+        # Find the existing map
+        existing_map = RNBmap.objects.get(id=map_id)
+        map_name = existing_map.name
+
+        # Delete the map
+        existing_map.delete()
+
+        return JsonResponse({"success": True, "message": f'Map "{map_name}" deleted successfully'})
+
+    except RNBmap.DoesNotExist:
+        return JsonResponse({"error": "Map not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
+
+
+@login_required
 def getRNBmaps(request):
     """
     Get RNB maps from database with optional isVerified filter
