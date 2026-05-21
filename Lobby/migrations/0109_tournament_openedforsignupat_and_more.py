@@ -10,11 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='tournament',
-            name='openedForSignupAt',
-            field=models.CharField(blank=True, default='', max_length=15),
-        ),
         migrations.AlterField(
             model_name='tournament',
             name='tournamentStatus',
