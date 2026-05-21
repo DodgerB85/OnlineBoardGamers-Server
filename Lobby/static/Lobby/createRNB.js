@@ -578,6 +578,16 @@ function populateMapDropdown(maps) {
 		mapSelect.remove(1)
 	}
 
+	// Sort helper: verified first, then alphabetical by name
+	function sortMaps(mapsList) {
+		return mapsList.sort((a, b) => {
+			if (a.isVerified !== b.isVerified) {
+				return b.isVerified - a.isVerified
+			}
+			return a.name.localeCompare(b.name)
+		})
+	}
+
 	// Separate maps into matching and non-matching
 	const matchingMaps = []
 	const nonMatchingMaps = []
@@ -590,8 +600,8 @@ function populateMapDropdown(maps) {
 		}
 	})
 
-	// Add matching maps first (green)
-	matchingMaps.forEach((map) => {
+	// Add matching maps first (green) — verified top, then alphabetical
+	sortMaps(matchingMaps).forEach((map) => {
 		const option = document.createElement("option")
 		option.value = JSON.stringify({
 			id: map.id,
@@ -605,6 +615,21 @@ function populateMapDropdown(maps) {
 		option.style.color = "green"
 		option.style.fontWeight = "bold"
 		mapSelect.appendChild(option)
+	})
+
+	// Sort non-matching maps by custom player count order: 2,3,4,5,6,1
+	// Then verified first, then alphabetical
+	const playerCountOrder = [2, 3, 4, 5, 6, 1]
+	nonMatchingMaps.sort((a, b) => {
+		const orderA = playerCountOrder.indexOf(a.playerCount)
+		const orderB = playerCountOrder.indexOf(b.playerCount)
+		if (orderA !== orderB) {
+			return orderA - orderB
+		}
+		if (a.isVerified !== b.isVerified) {
+			return b.isVerified - a.isVerified
+		}
+		return a.name.localeCompare(b.name)
 	})
 
 	// Add non-matching maps below (red)
