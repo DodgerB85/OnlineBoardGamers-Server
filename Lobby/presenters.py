@@ -259,6 +259,9 @@ class GamePresenter:
         """Remove chat notification for a player"""
         self.gameObj.players.filter(player=userObj, has_chat_notification=True).update(has_chat_notification=False)
 
+    def markPlayersPendingFinish(self):
+        self.gameObj.players.filter(player__isnull=False, is_kicked=False, is_missing=False).update(is_pending_finish=True)
+
     def clearGeneralDataOnGameEndWithoutSave(self):
         self.gameObj.gameStatus = "FINISHED"
         self.gameObj.rewindData = ""
@@ -509,6 +512,7 @@ class CNSpresenter(GamePresenter):
             winner_gp.save()
 
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         # Convert _finalPositions from simple list to list of lists format
         convertedFinalPositions = []
@@ -593,6 +597,7 @@ class WEBpresenter(GamePresenter):
             winnerNamesArray.append(names[playerIndex])
 
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         for i in range(len(_finalPositions)):
             for j in range(len(_finalPositions[i])):
@@ -688,6 +693,7 @@ class AQYpresenter(GamePresenter):
             winnerNamesArray.append(names[playerIndex])
 
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         for i in range(len(_finalPositions)):
             for j in range(len(_finalPositions[i])):
@@ -952,6 +958,7 @@ class TGZpresenter(GamePresenter):
             winner_gp.save()
 
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         # Convert _finalPositions from simple list to list of lists format
         convertedFinalPositions = []
@@ -1054,6 +1061,7 @@ class INDpresenter(GamePresenter):
             winner_gp.save()
 
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         # _finalPositions is just an array of playerIndexes
         # finalPositionsArr is an array of [pos, username]
@@ -1257,6 +1265,7 @@ class BUSpresenter(GamePresenter):
 
         # Need to save here, so it is FN for tournament
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         # Convert _finalPositions from simple list to list of lists format
         convertedFinalPositions = []
@@ -1409,6 +1418,7 @@ class RNBpresenter(GamePresenter):
             winner_gp.save()
 
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         # _finalPositions is just an array of playerIndexes
         # finalPositionsArr is an array of [pos, username]
@@ -2179,6 +2189,7 @@ class FCMpresenter(GamePresenter):
 
         self.clearAllMoveDataV2()
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         # This is sorted with winner in [0][name, money]
         finalPositions = []
@@ -2377,6 +2388,7 @@ class HLCpresenter(GamePresenter):
             winner_gp.save()
 
         self.gameObj.save()
+        self.markPlayersPendingFinish()
 
         # Convert _finalPositions from simple list to list of lists format
         convertedFinalPositions = []
@@ -2644,6 +2656,7 @@ class KFWpresenter(GamePresenter):
             winnerNamesArray.append(names[playerIndex])
 
         self.gameObj.save()
+        self.markPlayersPendingFinish()
         for i in range(len(_finalPositions)):
             for j in range(len(_finalPositions[i])):
                 _finalPositions[i][j] = names[_finalPositions[i][j]]

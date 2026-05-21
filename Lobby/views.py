@@ -1327,8 +1327,6 @@ def index(request):
     for game in all_user_games:
         # 1. Categorization Logic using local memory
         status = game.gameStatus
-        if status == "FINISHED" and len(finished_games) >= 10:
-            continue
 
         #        # Blacklist check (already optimized)
         #        if (
@@ -1360,6 +1358,8 @@ def index(request):
         all_p_ids = {gp.player_id for gp in active_players}
         inv_p_ids = {p.id for p in game.invitedPlayers.all()}
         miss_p_ids = {gp.player_id for gp in all_game_players if gp.is_missing}
+        user_gp = next((gp for gp in all_game_players if gp.player_id == user_id), None)
+        is_pending_finish = bool(user_gp and user_gp.is_pending_finish)
 
         is_involved = user_id in all_p_ids
         is_invited = user_id in inv_p_ids
@@ -1386,9 +1386,14 @@ def index(request):
             elif status in ["WAITING", "AVAILABLE", "PRIVATE"]:
                 waiting_games.append(serialized)
             elif status == "FINISHED":
-                finished_games.append(serialized)
-                if serialized["chatNotification"]:
-                    finished_chat = True
+                if is_pending_finish:
+                    current_games.append(serialized)
+                    if serialized["chatNotification"]:
+                        current_chat = True
+                elif len(finished_games) < 10:
+                    finished_games.append(serialized)
+                    if serialized["chatNotification"]:
+                        finished_chat = True
 
         elif not is_blacklisted_game and status == "AVAILABLE":
             available_games.append(serialized)
@@ -1397,6 +1402,14 @@ def index(request):
             invitations_games.append(serialized)
 
     # print_timestamp("Step 3: Categorization complete")
+
+    current_games = sorted(
+        current_games,
+        key=lambda game: (
+            0 if game["pendingFinish"] else (1 if game["myMove"] else 2),
+            -int(game["latestUpdate"]),
+        ),
+    )
 
     # --- Step 4: Mini Tournaments (Use select_related to save hits) ---
     # Combine these or use more prefetching if serialize() hits related objects
@@ -2713,6 +2726,9 @@ def playerInfo(request, usernameToProfile):
                         kickedOutGamesLastYear += 1
 
             # --- Categorization for Lists ---
+            target_user_gp = next((gp for gp in all_game_players if gp.player_id == target_id), None)
+            show_pending_finish_in_current = is_self and bool(target_user_gp and target_user_gp.is_pending_finish)
+
             if status == "ACTIVE":
                 serialized_game = SF_serializeGame(
                     game,
@@ -2735,7 +2751,9 @@ def playerInfo(request, usernameToProfile):
                         "invited_users": [],
                     },
                 )
-                if is_joint and not is_self:
+                if show_pending_finish_in_current:
+                    activeOther.append(serialized_game)
+                elif is_joint and not is_self:
                     finishedJoint.append(serialized_game)
                 else:
                     finishedOther.append(serialized_game)
@@ -2768,8 +2786,20 @@ def playerInfo(request, usernameToProfile):
         adj_kicked = max(0, kickedOutGamesLastYear - 1)
         fairPlayLastYear = int((finishedGamesLastYear - adj_kicked) / finishedGamesLastYear * 100)
 
-    active_joint_sorted = sorted(activeJoint, key=lambda x: x["latestUpdate"], reverse=True)
-    active_other_sorted = sorted(activeOther, key=lambda x: x["latestUpdate"], reverse=True)
+    active_joint_sorted = sorted(
+        activeJoint,
+        key=lambda game: (
+            0 if game["pendingFinish"] else (1 if game["myMove"] else 2),
+            -int(game["latestUpdate"]),
+        ),
+    )
+    active_other_sorted = sorted(
+        activeOther,
+        key=lambda game: (
+            0 if game["pendingFinish"] else (1 if game["myMove"] else 2),
+            -int(game["latestUpdate"]),
+        ),
+    )
     finished_joint_sorted = sorted(finishedJoint, key=lambda x: x["latestUpdate"], reverse=True)
     finished_other_sorted = sorted(finishedOther, key=lambda x: x["latestUpdate"], reverse=True)
 

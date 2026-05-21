@@ -136,6 +136,7 @@ def SF_serializeGame(game, user, player_context):
     all_ids = {p.id for p in all_players}
     missing_ids = {gp.player.id for gp in all_game_players if gp.is_missing and gp.player}
     chat_notify_ids = {gp.player.id for gp in all_game_players if gp.has_chat_notification and gp.player}
+    pending_finish_ids = {gp.player.id for gp in all_game_players if gp.is_pending_finish and gp.player}
 
     # Get current players from is_current flag
     current_players_str = ", ".join([gp.player.username for gp in all_game_players if gp.is_current and gp.player])
@@ -246,6 +247,7 @@ def SF_serializeGame(game, user, player_context):
         "myMove": is_my_move,
         "involvedPlayer": is_involved,
         "chatNotification": user.id in chat_notify_ids if user else False,
+        "pendingFinish": user.id in pending_finish_ids if user else False,
         "latestUpdateElapsedTimeString": elapsed_str,
         "deleteableGame": is_deleteable,
         "gameStatus": game.gameStatus,
