@@ -66,9 +66,6 @@ def createRNBgame(request):
 
 
 def showRNBmap(request, game_id=0):
-    if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect("index")
-
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="RNB")
     except Game.DoesNotExist:
@@ -107,9 +104,6 @@ def showRNBmap(request, game_id=0):
 
 
 def RNBmapEditor(request, game_id=0):
-    if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect("index")
-
     return render(
         request,
         "RNB/RNBmapEditor.html",
