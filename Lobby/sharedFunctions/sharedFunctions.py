@@ -89,18 +89,20 @@ def SF_hasRequiredExperience(request, gameCode, gameModel):
 
 
 def SF_getGameCreationJsonReturn(gameCode, gameID):
+    invite_link = f"/join/{gameCode}{gameID}/"
     return mark_safe(
         gettext("Your game has been created and is waiting for players<br/>Invite Link: ")
-        + f"<a href='https://www.onlineboardgamers.com/join/{gameCode}{gameID}/'>https://www.onlineboardgamers.com/join/{gameCode}{gameID}/</a> <button class='copyGameLinkButton' onclick='copyToClipboard(`https://www.onlineboardgamers.com/join/{gameCode}{gameID}/`, event)'>"
+        + f"<a href='{invite_link}'>{invite_link}</a> <button class='copyGameLinkButton' onclick='copyToClipboard(`{invite_link}`, event)'>"
         + gettext("Copy Link")
         + "</button>"
     )
 
 
 def SF_getMiniTournamentCreationJsonReturn(MT_ID):
+    invite_link = f"/MiniTournament/{MT_ID}/"
     return mark_safe(
         gettext("Your Mini Tournament has been created and is waiting for players<br/>Invite Link: ")
-        + f"<a href='https://www.onlineboardgamers.com/MiniTournament/{MT_ID}/'>https://www.onlineboardgamers.com/MiniTournament/{MT_ID}/</a> <button class='copyGameLinkButton' onclick='copyToClipboard(`https://www.onlineboardgamers.com/MiniTournament/{MT_ID}/`, event)'>"
+        + f"<a href='{invite_link}'>{invite_link}</a> <button class='copyGameLinkButton' onclick='copyToClipboard(`{invite_link}`, event)'>"
         + gettext("Copy Link")
         + "</button>"
     )

@@ -40,7 +40,39 @@
       {% endif %}
       {% if startingOptionsHTML != "" %}{{ startingOptionsHTML|safe }}{% endif %}
       <!-- OPEN MainT -->
-      {% if tournament.tournamentStatus == "OP" or tournament.tournamentStatus == "PR" %}
+      {% if tournament.tournamentStatus == "PD" %}
+        <h3>{% translate "This tournament has been created and is pending signup opening." %}</h3>
+        <h3>{% translate "Signup is not available yet." %}</h3>
+        <h3>{% translate "Max Players" %}: {{ tournament.maxTournamentPlayers }}</h3>
+        <h3>{% translate "Players per game" %}: {{ tournament.maxGamePlayers }}</h3>
+        <h3>{% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}</h3>
+        <div class="tournamentSignupContainer">
+          <div class="MTallRoundHolder">
+            <table class="generalTable">
+              <tr>
+                <th>#</th>
+                <th>{% translate "Current Players" %}</th>
+              </tr>
+              {% for player in startingPlayers %}
+                <tr class="clickablePlayerRow"
+                    id="playerRow{{ player.username }}"
+                    onclick="window.location.href='/profile/{{ player.username }}';">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <a href="{% url 'playerInfo' usernameToProfile=player.username %}">{{ player.username }}</a>
+                  </td>
+                </tr>
+              {% endfor %}
+              {% for i in openSlots %}
+                <tr>
+                  <td>{{ i }}</td>
+                  <td></td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      {% elif tournament.tournamentStatus == "OP" or tournament.tournamentStatus == "PR" %}
         <h3>
           {% blocktranslate trimmed %}
             Before joining, please be aware that you should be making several moves per day.

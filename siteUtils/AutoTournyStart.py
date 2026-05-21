@@ -49,6 +49,7 @@ start_calc_time = time.perf_counter()
 from Lobby.models import Tournament, User
 from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
 from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen
+from Lobby.sharedFunctions.sharedRefs import OPEN, PENDING
 
 # HLC 3-5 players
 # Bus 3-5 players
@@ -59,7 +60,6 @@ myDate = datetime.datetime.today()
 
 dayNumber = myDate.day
 monthNumber = myDate.month
-monthName = myDate.strftime("%B")
 
 # _tournamentType = random.choice(["RR", "KO", "TL"])
 # _tournamentType = random.choice(["RR", "TL"])
@@ -109,14 +109,55 @@ TOURNAMENT_SCHEDULE = [
 ]
 
 
+def get_tournament_name(target_date, game_code):
+    return f"{target_date.strftime('%B')} {target_date.year} {game_code} Tournament"
+
+
+def create_pending_tournament_if_missing(tournament, tournament_date):
+    box_name = tournament["boxName"]
+    game_code = tournament["gameCode"]
+    tournament_name = get_tournament_name(tournament_date, game_code)
+
+    existing_pending = (
+        Tournament.objects.filter(
+            tournamentCategory="Main",
+            tournamentStatus=PENDING,
+            gameCode=game_code,
+            tournamentName=tournament_name,
+        )
+        .order_by("-id")
+        .first()
+    )
+    if existing_pending:
+        print(f"Pending tournament already exists for {box_name}: {existing_pending.id}")
+        return existing_pending
+
+    max_game_players = random.randrange(tournament["minPlayers"], tournament["maxPlayers"] + 1, 1)
+    tournament_type = random.choice(["RR", "TL"])
+
+    max_tournament_players = 30
+    if max_game_players == 4:
+        max_tournament_players = 32
+
+    new_tournament = Tournament.objects.create(
+        tournamentCategory="Main",
+        tournamentStatus=PENDING,
+        gameCode=game_code,
+        tournamentName=tournament_name,
+        maxTournamentPlayers=max_tournament_players,
+        maxGamePlayers=max_game_players,
+        tournamentType=tournament_type,
+    )
+    new_tournament.save()
+    print(f"Created pending tournament {new_tournament.id} for {box_name}")
+    return new_tournament
+
+
 ############################################
-#   ANNOUNCE NEW TOURNMENT
+#   CREATE PENDING TOURNAMENTS 7 DAYS EARLY
 ############################################
 
-# Send message to Discord if tournament start in 7 days
 current_date = datetime.datetime.now()
-# Calculate the date 7 days from now
-current_date_plus_7d = current_date + datetime.timedelta(days=7)
 
 for tournament in TOURNAMENT_SCHEDULE:
     for tournament_month, tournament_day in tournament["dates"]:
@@ -124,6 +165,7 @@ for tournament in TOURNAMENT_SCHEDULE:
         days_until = (tournament_date - current_date).days
         if days_until == 7:
             print(f"It is 7 days until {tournament['boxName']} tournament on {tournament_day}/{tournament_month}")
+            create_pending_tournament_if_missing(tournament, tournament_date)
             message = (
                 f"New {tournament['boxName']} Tournament Opens for Signup in 7 days!\n"
                 "[Click here to Play](https://www.OnlineBoardGamers.com/)"
@@ -140,54 +182,53 @@ for tournament in TOURNAMENT_SCHEDULE:
                 )
 
 ############################################
-#   OPEN NEW TOURNMENT
+#   OPEN PENDING TOURNMENT
 ############################################
 for tournament in TOURNAMENT_SCHEDULE:
     for tournament_month, tournament_day in tournament["dates"]:
         if dayNumber == tournament_day and monthNumber == tournament_month:
-            print(f"Today is {tournament_day}/{tournament_month} - Creating {tournament['gameCode']} tournament")
+            print(f"Today is {tournament_day}/{tournament_month} - Opening {tournament['gameCode']} tournament")
             box_name = tournament["boxName"]
             gameCode = tournament["gameCode"]
-            maxGamePlayers = random.randrange(tournament["minPlayers"], tournament["maxPlayers"] + 1, 1)
+            tournament_date = datetime.datetime(current_date.year, tournament_month, tournament_day)
+            tournament_name = get_tournament_name(tournament_date, gameCode)
 
-            tournamentType = random.choice(["RR", "TL"])
-            if maxGamePlayers >= 3:
-                tournamentType = random.choice(["RR", "TL"])
-
-            maxTournamentPlayers = 30
-            if maxGamePlayers == 4:
-                maxTournamentPlayers = 32
-
-            tournament_name = f"{monthName} {current_date.year} {gameCode} Tournament"
-
-            new_tournament = Tournament.objects.create(
-                gameCode=gameCode,
-                tournamentName=tournament_name,
-                maxTournamentPlayers=maxTournamentPlayers,
-                maxGamePlayers=maxGamePlayers,
-                tournamentType=tournamentType,
+            new_tournament = (
+                Tournament.objects.filter(
+                    tournamentCategory="Main",
+                    tournamentStatus=PENDING,
+                    gameCode=gameCode,
+                    tournamentName=tournament_name,
+                )
+                .order_by("-id")
+                .first()
             )
+            if not new_tournament:
+                print(f"No pending tournament found for {box_name}; skipping open step safely.")
+                continue
 
+            new_tournament.tournamentStatus = OPEN
+            new_tournament.openedForSignupAt = str(int(time.time()) * 1000)
             new_tournament.save()
 
             # Add message to Discord
             tournament_type_string = "Rounds"
-            if tournamentType == "KO":
+            if new_tournament.tournamentType == "KO":
                 tournament_type_string = "Knockout"
-            if tournamentType == "TL":
+            if new_tournament.tournamentType == "TL":
                 tournament_type_string = "Two Lives"
-            if tournamentType == "PT":
+            if new_tournament.tournamentType == "PT":
                 tournament_type_string = "Points"
-            if tournamentType == "RR":
+            if new_tournament.tournamentType == "RR":
                 tournament_type_string = "Rounds"
-            if tournamentType == "MG":
+            if new_tournament.tournamentType == "MG":
                 tournament_type_string = "Multi-Game"
 
             message = (
                 f"New {box_name} Tournament!\n"
                 "================================\n"
                 f"Name: {tournament_name}\n"
-                f"Players per Game: {maxGamePlayers}\n"
+                f"Players per Game: {new_tournament.maxGamePlayers}\n"
                 f"Format: {tournament_type_string}\n"
                 f"[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{new_tournament.id}/)"
             )
@@ -303,7 +344,7 @@ for gameCode in GAME_CODES:
     # 1. OPTIMIZATION: Filter for "OP" status immediately in the DB.
     # If no open tournament exists, this returns None and skips the rest of the hits.
     newTourny = (
-        Tournament.objects.filter(tournamentStatus="OP", gameCode=gameCode)
+        Tournament.objects.filter(tournamentStatus=OPEN, gameCode=gameCode)
         .order_by("-id")
         .first()
     )
@@ -319,7 +360,7 @@ for gameCode in GAME_CODES:
         continue
 
     # Now we only hit the DB further if we actually have a candidate to start
-    startTime = int(newTourny.created)
+    startTime = int(newTourny.openedForSignupAt) if newTourny.openedForSignupAt else int(newTourny.created)
     now = int(time.time()) * 1000
     diff_in_s = (now - startTime) // 1000
 
