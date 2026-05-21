@@ -548,10 +548,10 @@ function getCookie(name) {
 let loadedMaps = [] // Store maps globally for re-sorting
 
 function loadMaps() {
-	const isOfficialToggle = document.getElementById("isOfficialToggle")
-	const isOfficial = isOfficialToggle.checked ? "true" : "all"
+	const isVerifiedToggle = document.getElementById("isVerifiedToggle")
+	const isVerified = isVerifiedToggle.checked ? "true" : "all"
 
-	return fetch(`/RNB/getRNBmaps/?isOfficial=${isOfficial}`)
+	return fetch(`/RNB/getRNBmaps/?isVerified=${isVerified}`)
 		.then((response) => response.json())
 		.then((data) => {
 			if (data.success) {
@@ -601,7 +601,7 @@ function populateMapDropdown(maps) {
 			playerCount: map.playerCount,
 		})
 		const playerText = map.playerCount === 1 ? "Solo" : map.playerCount + " players"
-		option.textContent = `${map.name} (${playerText}) ${map.isOfficial ? " [Official]" : ""}`
+		option.textContent = `${map.name} (${playerText}) ${map.isVerified ? " [Verified]" : ""}`
 		option.style.color = "green"
 		option.style.fontWeight = "bold"
 		mapSelect.appendChild(option)
@@ -618,7 +618,7 @@ function populateMapDropdown(maps) {
 			playerCount: map.playerCount,
 		})
 		const playerText = map.playerCount === 1 ? "Solo" : map.playerCount + " players"
-		option.textContent = `${map.name} (${playerText}) ${map.isOfficial ? " [Official]" : ""}`
+		option.textContent = `${map.name} (${playerText}) ${map.isVerified ? " [Verified]" : ""}`
 		option.style.color = "red"
 		mapSelect.appendChild(option)
 	})

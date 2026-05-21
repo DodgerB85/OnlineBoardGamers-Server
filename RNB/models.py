@@ -32,7 +32,7 @@ class RNBmap(models.Model):
     )
 
     # Manual checkbox for verified maps to be part of the official collection
-    isOfficial = models.BooleanField(default=False)
+    isVerified = models.BooleanField(default=False)
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,

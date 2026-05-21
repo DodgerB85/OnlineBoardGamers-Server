@@ -62,8 +62,8 @@ function populateMapDropdown(maps) {
             playerCount: map.playerCount,
         })
         option.textContent = map.name
-        if (map.isOfficial) {
-            option.textContent += " [Official]"
+        if (map.isVerified) {
+            option.textContent += " [Verified]"
         }
         mapSelect.appendChild(option)
     })

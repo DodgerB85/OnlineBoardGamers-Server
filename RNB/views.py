@@ -1231,7 +1231,7 @@ def saveRNBmap(request):
         map_description = data.get("mapDescription", "")
         map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
-        map_isOfficial = data.get("isOfficial", False) if request.user.username == "admin" else False
+        map_isVerified = data.get("isVerified", False) if request.user.username == "admin" else False
 
         # Validate required fields
         # if not map_name:
@@ -1258,7 +1258,7 @@ def saveRNBmap(request):
                 playerCount=map_playerCount,
                 hexData=map_data,
                 uniqueID=max_unique_key,
-                isOfficial=map_isOfficial,
+                isVerified=map_isVerified,
                 creator=request.user,
             )
 
@@ -1285,7 +1285,7 @@ def replaceRNBmap(request):
         map_description = data.get("mapDescription", "")
         map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
-        map_isOfficial = data.get("isOfficial", False)
+        map_isVerified = data.get("isVerified", False)
 
         # Find the existing map
         existing_map = RNBmap.objects.get(id=map_id)
@@ -1294,17 +1294,17 @@ def replaceRNBmap(request):
         # Admin user can replace any map, including official maps
         if existing_map.creator != request.user and request.user.username != "admin":
             return JsonResponse({"error": "Only the map creator can replace this map"}, status=403)
-        if existing_map.isOfficial and request.user.username != "admin":
-            return JsonResponse({"error": "Official maps cannot be replaced"}, status=403)
+        if existing_map.isVerified and request.user.username != "admin":
+            return JsonResponse({"error": "Verified maps cannot be replaced"}, status=403)
 
         # Update the map fields
         existing_map.name = map_name
         existing_map.description = map_description
         existing_map.playerCount = map_playerCount
         existing_map.hexData = map_data
-        # Only allow isOfficial to be changed by admin
+        # Only allow isVerified to be changed by admin
         if request.user.username == "admin":
-            existing_map.isOfficial = map_isOfficial
+            existing_map.isVerified = map_isVerified
         existing_map.save()
 
         return JsonResponse({"success": True, "message": f'Map "{map_name}" replaced successfully'})
@@ -1318,22 +1318,22 @@ def replaceRNBmap(request):
 @login_required
 def getRNBmaps(request):
     """
-    Get RNB maps from database with optional isOfficial filter
+    Get RNB maps from database with optional isVerified filter
     """
     if request.method != "GET":
         return JsonResponse({"error": "GET method required"}, status=405)
 
     try:
         # Get filter parameters
-        is_official = request.GET.get("isOfficial", "all")
+        is_verified = request.GET.get("isVerified", "all")
 
         # Query maps based on filter
         maps_queryset = RNBmap.objects.all()
 
-        if is_official == "true":
-            maps_queryset = maps_queryset.filter(isOfficial=True)
-        elif is_official == "false":
-            maps_queryset = maps_queryset.filter(isOfficial=False)
+        if is_verified == "true":
+            maps_queryset = maps_queryset.filter(isVerified=True)
+        elif is_verified == "false":
+            maps_queryset = maps_queryset.filter(isVerified=False)
         # 'all' means no filtering
 
         # Format response
@@ -1345,9 +1345,9 @@ def getRNBmaps(request):
                     "name": map_obj.name,
                     "description": map_obj.description,
                     "playerCount": map_obj.playerCount,
-                    "isOfficial": map_obj.isOfficial,
+                    "isVerified": map_obj.isVerified,
                     "hexData": map_obj.hexData,
-                    "canReplace": (map_obj.creator == request.user and not map_obj.isOfficial) or request.user.username == "admin",
+                    "canReplace": (map_obj.creator == request.user and not map_obj.isVerified) or request.user.username == "admin",
                 }
             )
 
@@ -1382,7 +1382,7 @@ def getSoloMaps(request):
         # Format response
         maps_data = []
         for map_obj in maps_queryset:
-            maps_data.append({"id": map_obj.id, "uniqueID": map_obj.uniqueID, "name": map_obj.name, "description": map_obj.description, "playerCount": map_obj.playerCount, "isOfficial": map_obj.isOfficial, "hexData": map_obj.hexData})
+            maps_data.append({"id": map_obj.id, "uniqueID": map_obj.uniqueID, "name": map_obj.name, "description": map_obj.description, "playerCount": map_obj.playerCount, "isVerified": map_obj.isVerified, "hexData": map_obj.hexData})
 
         return JsonResponse({"success": True, "maps": maps_data})
 
