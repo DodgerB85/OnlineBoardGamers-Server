@@ -208,7 +208,6 @@ for tournament in TOURNAMENT_SCHEDULE:
                 continue
 
             new_tournament.tournamentStatus = OPEN
-            new_tournament.openedForSignupAt = str(int(time.time()) * 1000)
             new_tournament.save()
 
             # Add message to Discord
@@ -360,7 +359,7 @@ for gameCode in GAME_CODES:
         continue
 
     # Now we only hit the DB further if we actually have a candidate to start
-    startTime = int(newTourny.openedForSignupAt) if newTourny.openedForSignupAt else int(newTourny.created)
+    # FIX startTime = int(newTourny.openedForSignupAt) if newTourny.openedForSignupAt else int(newTourny.created)
     now = int(time.time()) * 1000
     diff_in_s = (now - startTime) // 1000
 
