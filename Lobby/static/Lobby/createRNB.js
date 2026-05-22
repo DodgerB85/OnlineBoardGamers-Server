@@ -612,7 +612,7 @@ function populateMapDropdown(maps) {
 		})
 		const playerText = map.playerCount === 1 ? "Solo" : map.playerCount + " players"
 		option.textContent = `${map.name} (${playerText}) ${map.isVerified ? " [Verified]" : ""}`
-		option.style.color = "green"
+		option.style.color = map.isVerified ? "darkgreen" : "#D35400"
 		option.style.fontWeight = "bold"
 		mapSelect.appendChild(option)
 	})
@@ -644,7 +644,7 @@ function populateMapDropdown(maps) {
 		})
 		const playerText = map.playerCount === 1 ? "Solo" : map.playerCount + " players"
 		option.textContent = `${map.name} (${playerText}) ${map.isVerified ? " [Verified]" : ""}`
-		option.style.color = "red"
+		option.style.color = map.isVerified ? "darkgreen" : "#D35400"
 		mapSelect.appendChild(option)
 	})
 }
