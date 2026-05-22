@@ -1355,14 +1355,17 @@ def index(request):
         # Use the cached '.prefetched_players' list from our Prefetch object
         all_game_players = game.prefetched_players
         active_players = [gp for gp in all_game_players if not gp.is_missing]
-        all_p_ids = {gp.player_id for gp in active_players}
+        all_active_p_ids = {gp.player_id for gp in active_players}
+        all_p_ids = {gp.player_id for gp in all_game_players if gp.player_id}
+
         inv_p_ids = {p.id for p in game.invitedPlayers.all()}
-        miss_p_ids = {gp.player_id for gp in all_game_players if gp.is_missing}
+        # miss_p_ids = {gp.player_id for gp in all_game_players if gp.is_missing}
         user_gp = next((gp for gp in all_game_players if gp.player_id == user_id), None)
         is_pending_finish = bool(user_gp and user_gp.is_pending_finish)
 
         is_involved = user_id in all_p_ids
         is_invited = user_id in inv_p_ids
+        is_active = user_id in all_active_p_ids
         is_blacklisted_game = game.creator_id in blacklisted_players_ids or game.creator_id in blocked_by_user_ids
 
         player_context = {
@@ -1377,7 +1380,7 @@ def index(request):
             continue
 
         if is_involved:
-            if status == "ACTIVE" and user_id not in miss_p_ids:
+            if status == "ACTIVE" and is_active:
                 current_games.append(serialized)
                 if serialized["myMove"]:
                     my_move_games_data.append([serialized["gameCode"], serialized["gameID"]])
@@ -2204,29 +2207,31 @@ def createRNBpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "RNB", Game)
     # Get settings debug flag for RNB map rendering
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
-    
+
     # Handle query parameters for solo map play
     if request.method != "POST" and gameID == 0:
         context = {"experienced": experienced, "settingsDebug": settings_debug}
-        
+
         # Check for map and players query parameters
         map_id = request.GET.get("map")
         players = request.GET.get("players")
-        
+
         if map_id and players == "1":
             # Set up for solo play with selected map
-            context.update({
-                "fillData": True,
-                "gameName": f"Solo Map {map_id}",
-                "gameDescription": f"Solo game on map {map_id}",
-                "gamePace": 30,  # Default pace
-                "playerNumber": 1,  # Solo play
-                "playerNames": [],  # No additional players
-                "kickoutDuration": 100,  # Default kickout duration
-                "startingOptions": [],  # No special starting options
-                "selectedMapId": map_id,  # Pass selected map ID to template
-            })
-        
+            context.update(
+                {
+                    "fillData": True,
+                    "gameName": f"Solo Map {map_id}",
+                    "gameDescription": f"Solo game on map {map_id}",
+                    "gamePace": 30,  # Default pace
+                    "playerNumber": 1,  # Solo play
+                    "playerNames": [],  # No additional players
+                    "kickoutDuration": 100,  # Default kickout duration
+                    "startingOptions": [],  # No special starting options
+                    "selectedMapId": map_id,  # Pass selected map ID to template
+                }
+            )
+
         return render(request, "Lobby/createRNB.html", context)
     elif request.method != "POST" and gameID != 0:
         # Extract the data from gameID and return template with all data
@@ -3614,11 +3619,11 @@ def TGZtournamentMain(request, tournamentName):
     tournamentKey = "TGZ Summer 25"  # Then immewdiately " A1" or " B2" NOTE THE KEY DOESN'T INCLUDE THE SPACE FOR SOME REASON
 
     # This line is common to all
-    #allTournamentGames = TGZ_Game.objects.annotate(created_int=Cast("created", IntegerField())).filter(
+    # allTournamentGames = TGZ_Game.objects.annotate(created_int=Cast("created", IntegerField())).filter(
     #    gameName__istartswith=tournamentKey,
     #    externalTournamentGame=True,
     #    created_int__gte=1751279600000,
-    #)
+    # )
     allTournamentGames = {}
 
     ## Split the gameName into groups based on letters A to G
@@ -4729,9 +4734,9 @@ def newDesign(request, design_num):
         6: "Lobby/newDesign/06-xbox-cinematic.html",
         7: "Lobby/newDesign/07-gemini.html",
     }
-    
+
     template = template_map.get(design_num)
     if not template:
         raise Http404("Design not found")
-    
+
     return render(request, template)
