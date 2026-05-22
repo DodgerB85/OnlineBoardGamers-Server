@@ -66,6 +66,20 @@ Make sure your docker files have LF and not CRLF
 
 NOTE: You aren't required to use docker; especially if it is slow on Windows. As an alternatice, you can create a venv and install the requirements.txt files. Then run the python server and django servers inside the venv. 
 
+## Linux / Ubuntu setup (alternative to bat files)
+
+Install [process-compose](https://github.com/F1bonacc1/process-compose/releases) (single binary). Then:
+
+```bash
+./setup_linux.sh    # one-time setup (mirrors QuickSetup.bat)
+process-compose up  # starts all services with a live TUI
+```
+
+Useful commands (or use the TUI directly):
+- `process-compose process stop web` — stop a single process
+- `process-compose process start web` — restart it
+- `process-compose down` — stop everything
+
 ## Deployment
 There is currently no automated testing (please help with this if you can!), and deployments are done manually by running a batch script to do a git pull / collectstatic / etc.
 

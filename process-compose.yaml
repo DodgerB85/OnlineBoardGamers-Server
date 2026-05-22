@@ -1,0 +1,36 @@
+version: "0.5"
+
+processes:
+  web:
+    command: ".venv_local/bin/python manage.py runserver"
+    availability:
+      restart: on_failure
+
+  worker:
+    command: ".venv_local/bin/python manage.py qcluster"
+    availability:
+      restart: on_failure
+
+  bus:
+    command: "npm run dev"
+    working_dir: "BUS/vueBUS"
+
+  cns:
+    command: "npm run dev"
+    working_dir: "CNS/vueCNS"
+
+  aqy:
+    command: "npm run dev"
+    working_dir: "AQY/vueAQY"
+
+  kfw:
+    command: "npm run dev"
+    working_dir: "KFW/vueKFW"
+
+  tgz:
+    command: "npm run dev"
+    working_dir: "TGZ/vueTGZ"
+
+  web_ui:
+    command: "npm run dev"
+    working_dir: "WEB/vueWEB"
