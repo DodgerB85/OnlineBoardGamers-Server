@@ -139,6 +139,11 @@ def busData(request, dataType):
 
     if dataType == 2:
         # Send game data
+        if currentGame.gameStatus == "FINISHED":
+            user_gp = currentGame.players.filter(player=request.user).first()
+            if user_gp and user_gp.is_pending_finish:
+                user_gp.is_pending_finish = False
+                user_gp.save()
         return JsonResponse(
             {
                 "gameData": currentGame.gameData,

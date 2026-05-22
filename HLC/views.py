@@ -512,6 +512,11 @@ def _processHLCturn(request):
     # END SAVE / CREATE
 
     elif jsonData["action"] == "load":
+        if currentGame.gameStatus == "FINISHED":
+            user_gp = currentGame.players.filter(player=request.user).first()
+            if user_gp and user_gp.is_pending_finish:
+                user_gp.is_pending_finish = False
+                user_gp.save()
         # specialData = False
         # Use to stop actions showing when there's already move Data
         # if currentGame.hasMoveData(request.user.username):

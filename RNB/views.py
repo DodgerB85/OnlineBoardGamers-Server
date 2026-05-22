@@ -1525,6 +1525,11 @@ def RNBdata(request, dataType=1):
     presenter = cast("RNBpresenter", currentGame.presenter())
 
     if dataType == 1:
+        if currentGame.gameStatus == "FINISHED":
+            user_gp = currentGame.players.filter(player=request.user).first()
+            if user_gp and user_gp.is_pending_finish:
+                user_gp.is_pending_finish = False
+                user_gp.save()
         # 1. Get the raw binary (Gzip + MsgPack)
         # raw_blob = currentGame.gameDataBLOB or b""
         # 2. Encode to Base64 so it can travel safely in HTML

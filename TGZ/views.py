@@ -734,6 +734,11 @@ def TGZdata(request, dataType):
 
     if dataType == 1:
         # Send game data
+        if currentGame.gameStatus == "FINISHED":
+            user_gp = currentGame.players.filter(player=request.user).first()
+            if user_gp and user_gp.is_pending_finish:
+                user_gp.is_pending_finish = False
+                user_gp.save()
         return JsonResponse(
             {
                 "gameData": currentGame.gameData,
@@ -862,72 +867,6 @@ def createTGZspinoff(request):
         return JsonResponse({"response": "ok", "newID": newGame.id})
 
     return JsonResponse({"error": "Wrong request."}, status=400)
-
-
-# @login_required
-# def TGZstats(request):
-#    f = open("./TGZ/TGZstats/TGZ_stats.json")
-#    data = json.load(f)
-#    PRE_DATA = data[0]
-#    G_STATS_DATA = data[1]
-#    S_STATS_DATA = data[2]
-#
-#    timeString = PRE_DATA[0]
-#
-#    data_2p = data[1]
-#    data_3p = data[2]
-#    data_4p = data[3]
-#    data_tp = data[4]
-#    data_5p = data[5]
-#
-#    data_2p.insert(0, "players2")
-#    data_3p.insert(0, "players3")
-#    data_4p.insert(0, "players4")
-#    data_tp.insert(0, "playerst")
-#    data_5p.insert(0, "players5")
-#
-#    all_data = [data_2p, data_3p, data_4p, data_tp, data_5p]
-#
-#    f_schism = open("./TGZ/TGZstats/TGZ_stats_schism.json")
-#    data_schism = json.load(f_schism)
-#    PRE_DATA_schism = data_schism[0]
-#    G_STATS_DATA = data_schism[1]
-#    S_STATS_DATA = data_schism[2]
-#
-#    timeString_schism = PRE_DATA_schism[0]
-#
-#    data_2p_schism = data_schism[1]
-#    data_3p_schism = data_schism[2]
-#    data_4p_schism = data_schism[3]
-#    data_tp_schism = data_schism[4]
-#    data_5p_schism = data_schism[5]
-#
-#    data_2p_schism.insert(0, "players2")
-#    data_3p_schism.insert(0, "players3")
-#    data_4p_schism.insert(0, "players4")
-#    data_tp_schism.insert(0, "playerst")
-#    data_5p_schism.insert(0, "players5")
-#
-#    all_data_schism = [data_2p_schism, data_3p_schism, data_4p_schism, data_tp_schism, data_5p_schism]
-#
-#    # bar_chart_data = []
-#    # for row_god in data[1]:
-#    #    bar_chart_data.append({
-#    #        'totalHeight': row_god[0],
-#    #        'xHeight': row_god[2],
-#    #        'yHeight': row_god[1] - row_god[2]
-#    #    })
-#
-#    return render(
-#        request,
-#        "TGZ/TGZstats.html",
-#        {
-#            "timeString": timeString,
-#            "all_data": all_data,
-#            "all_data_schism": all_data_schism,
-#        },
-#    )
-
 
 @login_required
 def TGZstats(request):

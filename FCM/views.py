@@ -598,6 +598,12 @@ def _processTurn(request):
 
     # loads the latest game and updates latest-Update
     if jsonData["action"] == "loadNew":
+        # NB finished game should trigger a location.reload, but this is here as a reminder
+        if currentGame.gameStatus == "FINISHED":
+            user_gp = currentGame.players.filter(player=request.user).first()
+            if user_gp and user_gp.is_pending_finish:
+                user_gp.is_pending_finish = False
+                user_gp.save()
         currentMove = ""
         # Use to stop actions showing when there's already move Data
         if presenter.hasValidActualMoveData(request.user.username):

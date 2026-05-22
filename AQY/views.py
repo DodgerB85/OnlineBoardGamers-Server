@@ -959,6 +959,11 @@ def AQYdata(request, dataType):
     presenter = cast("AQYpresenter", currentGame.presenter())
 
     if dataType == 1:
+        if currentGame.gameStatus == "FINISHED":
+            user_gp = currentGame.players.filter(player=request.user).first()
+            if user_gp and user_gp.is_pending_finish:
+                user_gp.is_pending_finish = False
+                user_gp.save()
         returnData = {
             "gameData": currentGame.gameData,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),

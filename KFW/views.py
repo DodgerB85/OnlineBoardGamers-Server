@@ -877,6 +877,11 @@ def KFWdata(request, dataType=1):
     presenter = cast("KFWpresenter", currentGame.presenter())
 
     if dataType == 1:
+        if currentGame.gameStatus == "FINISHED":
+            user_gp = currentGame.players.filter(player=request.user).first()
+            if user_gp and user_gp.is_pending_finish:
+                user_gp.is_pending_finish = False
+                user_gp.save()
         gameData1 = presenter.getGameData1Compressed(request.user.username) if request.user.is_authenticated else presenter.getGameData1Compressed("")
         gameData3 = presenter.getGameData3compressed()
         returnData = {
