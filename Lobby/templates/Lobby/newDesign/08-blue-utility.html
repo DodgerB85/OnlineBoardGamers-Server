@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OBG Prototype 08 - Blue Utility</title>
-<style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBG Prototype 08 - Blue Utility</title>
+    <style>
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
@@ -297,205 +297,403 @@
     .status-col { grid-column: 1 / -1; justify-items: start; text-align: left; }
     .game-icon { width: 48px; height: 48px; }
   }
-</style>
-</head>
-<body>
-<div class="shell">
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="#lobby"><span class="brand-mark">OBG</span><span>Online Board Gamers</span></a>
-      <nav class="nav">
-        <a class="active" href="#lobby">Lobby</a>
-        <a href="#tournaments">Tournaments</a>
-        <a href="#available-focus">New Game</a>
-        <a href="#footer">Help</a>
-      </nav>
-      <div class="user-chip"><strong>mihai</strong> · 3 on turn · 2 invites</div>
-    </div>
-  </header>
-
-  <main class="page">
-    <section class="compact-header" id="lobby">
-      <div>
-        <h1>Compact utility-first lobby</h1>
-        <p>Tests the smallest practical shell: fast access to tabs, current games, and tournaments without a hero block.</p>
-      </div>
-      <div class="mini-stats">
-        <span class="mini-stat">Karma 98.4%</span>
-        <span class="mini-stat">7 active games</span>
-        <span class="mini-stat">1 tournament open</span>
-      </div>
-    </section>
-
-    <div class="layout">
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Your Games</h2>
-          <span class="tour-sub">Game list starts immediately below the nav</span>
-        </div>
-        <div class="tabs" role="tablist" aria-label="Lobby tabs">
-          <button class="tab active" data-tab-group="p08" data-target="p08-turn">My Turn (3)</button>
-          <button class="tab" data-tab-group="p08" data-target="p08-wait">Waiting (2)</button>
-          <button class="tab" data-tab-group="p08" data-target="p08-available">Available (5)</button>
-          <button class="tab" data-tab-group="p08" data-target="p08-invites">Invitations (2)</button>
-          <button class="tab" data-tab-group="p08" data-target="p08-finished">Finished</button>
-        </div>
-
-        <div class="tab-panel active" id="p08-turn">
-          <div class="game-list">
-            <a class="game-row" href="#">
-              <img class="game-icon" src="../FCM/static/FCM/images/fcm-box.jpg" alt="FCM">
-              <div class="game-main">
-                <div class="title-line"><span class="code">FCM</span><strong>Food Chain Magnate</strong></div>
-                <div class="meta">Turn 14 · Dinner phase · Kickout in 02:14:10</div>
-                <div class="players">You, DodgerB, dizquiz, Benkyo · current player merged into same line</div>
-                <div class="options">
-                  <img class="option" src="../FCM/static/FCM/images/so_noMS.svg" alt="No milkshakes">
-                  <img class="option" src="../FCM/static/FCM/images/so_jazz.svg" alt="Jazz">
-                  <img class="option" src="../FCM/static/FCM/images/so_sushi.svg" alt="Sushi">
-                  <img class="option" src="../FCM/static/FCM/images/so_noRadio.svg" alt="No radio">
-                  <img class="option" src="../FCM/static/FCM/images/so_shortGame.svg" alt="Short game">
-                  <img class="option" src="../FCM/static/FCM/images/so_dumplings.svg" alt="Dumplings">
-                </div>
-              </div>
-              <div class="status-col">
-                <span class="badge turn">Your Turn</span>
-                <span class="subaction">4 players</span>
-                <span class="action-link">Enter Game</span>
-              </div>
-            </a>
-
-            <a class="game-row" href="#">
-              <img class="game-icon" src="../TGZ/static/TGZ/images/tgz_icon.png" alt="TGZ">
-              <div class="game-main">
-                <div class="title-line"><span class="code">TGZ</span><strong>The Great Zimbabwe</strong></div>
-                <div class="meta">Turn 7 · Logistics phase · Kickout in 18:45:05</div>
-                <div class="players">You, AncientTrader, RoutePlanner</div>
-                <div class="options">
-                  <img class="option" src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced">
-                </div>
-              </div>
-              <div class="status-col">
-                <span class="badge turn">Your Turn</span>
-                <span class="subaction">3 players</span>
-                <span class="action-link">Enter Game</span>
-              </div>
-            </a>
-
-            <a class="game-row" href="#">
-              <img class="game-icon" src="../HLC/static/HLC/images/icon_car.png" alt="HLC">
-              <div class="game-main">
-                <div class="title-line"><span class="code">HLC</span><strong>Horseless Carriage</strong></div>
-                <div class="meta">Turn 3 · Planning phase · Kickout in 07:32:51</div>
-                <div class="players">You, BoardMaster</div>
-                <div class="options">
-                  <img class="option" src="../Lobby/static/Lobby/images/startingOptions/HLC_moreMainlines.svg" alt="More mainlines">
-                </div>
-              </div>
-              <div class="status-col">
-                <span class="badge turn">Your Turn</span>
-                <span class="subaction">2 players</span>
-                <span class="action-link">Enter Game</span>
-              </div>
-            </a>
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <a class="brand" href="#lobby"><span class="brand-mark">OBG</span><span>Online Board Gamers</span></a>
+          <nav class="nav">
+            <a class="active" href="#lobby">Lobby</a>
+            <a href="#tournaments">Tournaments</a>
+            <a href="#available-focus">New Game</a>
+            <a href="#footer">Help</a>
+          </nav>
+          <div class="user-chip">
+            <strong>mihai</strong> · 3 on turn · 2 invites
           </div>
         </div>
-
-        <div class="tab-panel" id="p08-wait">
-          <div class="game-list">
-            <a class="game-row" href="#">
-              <img class="game-icon" src="../IND/static/IND/images/ind_icon.png" alt="IND">
-              <div class="game-main">
-                <div class="title-line"><span class="code">IND</span><strong>Indonesia</strong></div>
-                <div class="meta">Turn 11 · Waiting on SpiceKing</div>
-                <div class="players">You, SpiceKing, IslandTrader, ChrisM</div>
-                <div class="options">
-                  <img class="option" src="../Lobby/static/Lobby/images/startingOptions/IND_php_map.svg" alt="PHP map">
-                  <img class="option" src="../Lobby/static/Lobby/images/startingOptions/IND_merger_subsidy.svg" alt="Merger subsidy">
-                  <img class="option" src="../Lobby/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg" alt="Shipping subsidy">
-                </div>
-              </div>
-              <div class="status-col">
-                <span class="badge wait">Waiting</span>
-                <span class="subaction">4 players</span>
-                <span class="action-link">Open</span>
-              </div>
-            </a>
+      </header>
+      <main class="page">
+        <section class="compact-header" id="lobby">
+          <div>
+            <h1>Compact utility-first lobby</h1>
+            <p>Tests the smallest practical shell: fast access to tabs, current games, and tournaments without a hero block.</p>
           </div>
-        </div>
-
-        <div class="tab-panel" id="p08-available">
-          <div class="game-list" id="available-focus">
-            <a class="game-row" href="#"><img class="game-icon" src="../BUS/static/BUS/images/bus_icon.png" alt="Bus"><div class="game-main"><div class="title-line"><span class="code">BUS</span><strong>Bus</strong></div><div class="meta">2/4 players joined · Learning-friendly pace</div><div class="players">Open seats visible without extra clicks</div><div class="options"><img class="option" src="../Lobby/static/Lobby/images/startingOptions/so_learningGame.svg" alt="Learning"></div></div><div class="status-col"><span class="badge wait">Open</span><span class="subaction">2 seats left</span><span class="action-link">Join / View</span></div></a>
-            <a class="game-row" href="#"><img class="game-icon" src="../AQY/static/AQY/images/aqy_icon.png" alt="Antiquity"><div class="game-main"><div class="title-line"><span class="code">AQY</span><strong>Antiquity</strong></div><div class="meta">3/4 players joined · No hidden option summary</div><div class="players">Compact but full option visibility</div><div class="options"><img class="option" src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div></div><div class="status-col"><span class="badge wait">Open</span><span class="subaction">1 seat left</span><span class="action-link">Join / View</span></div></a>
-            <a class="game-row" href="#"><img class="game-icon" src="../IND/static/IND/images/ind_icon.png" alt="Indonesia"><div class="game-main"><div class="title-line"><span class="code">IND</span><strong>Indonesia</strong></div><div class="meta">1/4 players joined · Map and subsidies shown in-row</div><div class="players">Testing discoverability of options in available rows</div><div class="options"><img class="option" src="../Lobby/static/Lobby/images/startingOptions/IND_php_map.svg" alt="PHP map"><img class="option" src="../Lobby/static/Lobby/images/startingOptions/IND_merger_subsidy.svg" alt="Merger"><img class="option" src="../Lobby/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg" alt="Shipping"></div></div><div class="status-col"><span class="badge wait">Open</span><span class="subaction">3 seats left</span><span class="action-link">Join / View</span></div></a>
-            <a class="game-row" href="#"><img class="game-icon" src="../HLC/static/HLC/images/icon_car.png" alt="HLC"><div class="game-main"><div class="title-line"><span class="code">HLC</span><strong>Horseless Carriage</strong></div><div class="meta">2/3 players joined · Fast tournament pace</div><div class="players">Tests compact icon-first available rows</div><div class="options"><img class="option" src="../Lobby/static/Lobby/images/startingOptions/HLC_moreMainlines.svg" alt="More mainlines"></div></div><div class="status-col"><span class="badge wait">Open</span><span class="subaction">1 seat left</span><span class="action-link">Join / View</span></div></a>
-            <a class="game-row" href="#"><img class="game-icon" src="../RNB/static/RNB/images/rnb_icon.png" alt="Roads & Boats"><div class="game-main"><div class="title-line"><span class="code">RNB</span><strong>Roads &amp; Boats</strong></div><div class="meta">0/4 players joined · Heavy options game</div><div class="players">Useful stress test for wider metadata later</div><div class="options"><img class="option" src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div></div><div class="status-col"><span class="badge wait">Open</span><span class="subaction">4 seats left</span><span class="action-link">Join / View</span></div></a>
-          </div>
-        </div>
-
-        <div class="tab-panel" id="p08-invites"><div class="game-list"><a class="game-row" href="#"><img class="game-icon" src="../BUS/static/BUS/images/bus_icon.png" alt="Bus"><div class="game-main"><div class="title-line"><span class="code">BUS</span><strong>Bus invitational</strong></div><div class="meta">Invite from DodgerB · 1 day kickout</div><div class="players">DodgerB, dizquiz, you</div></div><div class="status-col"><span class="badge wait">Invite</span><span class="action-link">Open Invite</span></div></a></div></div>
-        <div class="tab-panel" id="p08-finished"><div class="game-list"><a class="game-row" href="#"><img class="game-icon" src="../AQY/static/AQY/images/aqy_icon.png" alt="AQY"><div class="game-main"><div class="title-line"><span class="code">AQY</span><strong>Antiquity #411</strong></div><div class="meta">Finished yesterday · Replay available</div><div class="players">Winner: Benkyo</div></div><div class="status-col"><span class="badge wait">Finished</span><span class="action-link">Replay</span></div></a></div></div>
-      </section>
-
-      <aside class="sidebar">
-        <section class="sidebar-card">
-          <div class="sidebar-head"><h2>Quick Start</h2><span class="tour-sub">Desktop side utility rail</span></div>
-          <div class="sidebar-body quick-list">
-            <a class="quick-game" href="#"><img src="../FCM/static/FCM/images/fcm-box.jpg" alt="FCM"><div><strong>Food Chain Magnate</strong><small>2-5 players</small></div></a>
-            <a class="quick-game" href="#"><img src="../TGZ/static/TGZ/images/tgz_icon.png" alt="TGZ"><div><strong>The Great Zimbabwe</strong><small>2-5 players</small></div></a>
-            <a class="quick-game" href="#"><img src="../IND/static/IND/images/ind_icon.png" alt="IND"><div><strong>Indonesia</strong><small>3-5 players</small></div></a>
+          <div class="mini-stats">
+            <span class="mini-stat">Karma 98.4%</span>
+            <span class="mini-stat">7 active games</span>
+            <span class="mini-stat">1 tournament open</span>
           </div>
         </section>
-        <section class="sidebar-card">
-          <div class="sidebar-head"><h2>Notes</h2><span class="tour-sub">What this tests</span></div>
-          <div class="sidebar-body">
-            Current games use a compact row. Available games still show full options. The top of the page stays deliberately short.
+        <div class="layout">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Your Games</h2>
+              <span class="tour-sub">Game list starts immediately below the nav</span>
+            </div>
+            <div class="tabs" role="tablist" aria-label="Lobby tabs">
+              <button class="tab active" data-tab-group="p08" data-target="p08-turn">My Turn (3)</button>
+              <button class="tab" data-tab-group="p08" data-target="p08-wait">Waiting (2)</button>
+              <button class="tab" data-tab-group="p08" data-target="p08-available">Available (5)</button>
+              <button class="tab" data-tab-group="p08" data-target="p08-invites">Invitations (2)</button>
+              <button class="tab" data-tab-group="p08" data-target="p08-finished">Finished</button>
+            </div>
+            <div class="tab-panel active" id="p08-turn">
+              <div class="game-list">
+                <a class="game-row" href="#">
+                  <img class="game-icon" src="/static/FCM/images/fcm-box.jpg" alt="FCM">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">FCM</span><strong>Food Chain Magnate</strong>
+                    </div>
+                    <div class="meta">Turn 14 · Dinner phase · Kickout in 02:14:10</div>
+                    <div class="players">You, DodgerB, dizquiz, Benkyo · current player merged into same line</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/FCM/images/so_noMS.svg"
+                           alt="No milkshakes">
+                      <img class="option" src="/static/FCM/images/so_jazz.svg" alt="Jazz">
+                      <img class="option" src="/static/FCM/images/so_sushi.svg" alt="Sushi">
+                      <img class="option" src="/static/FCM/images/so_noRadio.svg" alt="No radio">
+                      <img class="option"
+                           src="/static/FCM/images/so_shortGame.svg"
+                           alt="Short game">
+                      <img class="option"
+                           src="/static/FCM/images/so_dumplings.svg"
+                           alt="Dumplings">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge turn">Your Turn</span>
+                    <span class="subaction">4 players</span>
+                    <span class="action-link">Enter Game</span>
+                  </div>
+                </a>
+                <a class="game-row" href="#">
+                  <img class="game-icon" src="/static/TGZ/images/tgz_icon.png" alt="TGZ">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">TGZ</span><strong>The Great Zimbabwe</strong>
+                    </div>
+                    <div class="meta">Turn 7 · Logistics phase · Kickout in 18:45:05</div>
+                    <div class="players">You, AncientTrader, RoutePlanner</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/so_experiencedGame.svg"
+                           alt="Experienced">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge turn">Your Turn</span>
+                    <span class="subaction">3 players</span>
+                    <span class="action-link">Enter Game</span>
+                  </div>
+                </a>
+                <a class="game-row" href="#">
+                  <img class="game-icon" src="/static/HLC/images/icon_car.png" alt="HLC">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">HLC</span><strong>Horseless Carriage</strong>
+                    </div>
+                    <div class="meta">Turn 3 · Planning phase · Kickout in 07:32:51</div>
+                    <div class="players">You, BoardMaster</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/HLC_moreMainlines.svg"
+                           alt="More mainlines">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge turn">Your Turn</span>
+                    <span class="subaction">2 players</span>
+                    <span class="action-link">Enter Game</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div class="tab-panel" id="p08-wait">
+              <div class="game-list">
+                <a class="game-row" href="#">
+                  <img class="game-icon" src="/static/IND/images/ind_icon.png" alt="IND">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">IND</span><strong>Indonesia</strong>
+                    </div>
+                    <div class="meta">Turn 11 · Waiting on SpiceKing</div>
+                    <div class="players">You, SpiceKing, IslandTrader, ChrisM</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/IND_php_map.svg"
+                           alt="PHP map">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/IND_merger_subsidy.svg"
+                           alt="Merger subsidy">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg"
+                           alt="Shipping subsidy">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge wait">Waiting</span>
+                    <span class="subaction">4 players</span>
+                    <span class="action-link">Open</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div class="tab-panel" id="p08-available">
+              <div class="game-list" id="available-focus">
+                <a class="game-row" href="#">
+                  <img class="game-icon" src="/static/BUS/images/bus_icon.png" alt="Bus">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">BUS</span><strong>Bus</strong>
+                    </div>
+                    <div class="meta">2/4 players joined · Learning-friendly pace</div>
+                    <div class="players">Open seats visible without extra clicks</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/so_learningGame.svg"
+                           alt="Learning">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge wait">Open</span><span class="subaction">2 seats left</span><span class="action-link">Join / View</span>
+                  </div>
+                </a>
+                <a class="game-row" href="#">
+                  <img class="game-icon"
+                       src="/static/AQY/images/aqy_icon.png"
+                       alt="Antiquity">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">AQY</span><strong>Antiquity</strong>
+                    </div>
+                    <div class="meta">3/4 players joined · No hidden option summary</div>
+                    <div class="players">Compact but full option visibility</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/so_experiencedGame.svg"
+                           alt="Experienced">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge wait">Open</span><span class="subaction">1 seat left</span><span class="action-link">Join / View</span>
+                  </div>
+                </a>
+                <a class="game-row" href="#">
+                  <img class="game-icon"
+                       src="/static/IND/images/ind_icon.png"
+                       alt="Indonesia">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">IND</span><strong>Indonesia</strong>
+                    </div>
+                    <div class="meta">1/4 players joined · Map and subsidies shown in-row</div>
+                    <div class="players">Testing discoverability of options in available rows</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/IND_php_map.svg"
+                           alt="PHP map">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/IND_merger_subsidy.svg"
+                           alt="Merger">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg"
+                           alt="Shipping">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge wait">Open</span><span class="subaction">3 seats left</span><span class="action-link">Join / View</span>
+                  </div>
+                </a>
+                <a class="game-row" href="#">
+                  <img class="game-icon" src="/static/HLC/images/icon_car.png" alt="HLC">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">HLC</span><strong>Horseless Carriage</strong>
+                    </div>
+                    <div class="meta">2/3 players joined · Fast tournament pace</div>
+                    <div class="players">Tests compact icon-first available rows</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/HLC_moreMainlines.svg"
+                           alt="More mainlines">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge wait">Open</span><span class="subaction">1 seat left</span><span class="action-link">Join / View</span>
+                  </div>
+                </a>
+                <a class="game-row" href="#">
+                  <img class="game-icon"
+                       src="/static/RNB/images/rnb_icon.png"
+                       alt="Roads & Boats">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">RNB</span><strong>Roads &amp; Boats</strong>
+                    </div>
+                    <div class="meta">0/4 players joined · Heavy options game</div>
+                    <div class="players">Useful stress test for wider metadata later</div>
+                    <div class="options">
+                      <img class="option"
+                           src="/static/Lobby/images/startingOptions/so_experiencedGame.svg"
+                           alt="Experienced">
+                    </div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge wait">Open</span><span class="subaction">4 seats left</span><span class="action-link">Join / View</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div class="tab-panel" id="p08-invites">
+              <div class="game-list">
+                <a class="game-row" href="#">
+                  <img class="game-icon" src="/static/BUS/images/bus_icon.png" alt="Bus">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">BUS</span><strong>Bus invitational</strong>
+                    </div>
+                    <div class="meta">Invite from DodgerB · 1 day kickout</div>
+                    <div class="players">DodgerB, dizquiz, you</div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge wait">Invite</span><span class="action-link">Open Invite</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div class="tab-panel" id="p08-finished">
+              <div class="game-list">
+                <a class="game-row" href="#">
+                  <img class="game-icon" src="/static/AQY/images/aqy_icon.png" alt="AQY">
+                  <div class="game-main">
+                    <div class="title-line">
+                      <span class="code">AQY</span><strong>Antiquity #411</strong>
+                    </div>
+                    <div class="meta">Finished yesterday · Replay available</div>
+                    <div class="players">Winner: Benkyo</div>
+                  </div>
+                  <div class="status-col">
+                    <span class="badge wait">Finished</span><span class="action-link">Replay</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </section>
+          <aside class="sidebar">
+            <section class="sidebar-card">
+              <div class="sidebar-head">
+                <h2>Quick Start</h2>
+                <span class="tour-sub">Desktop side utility rail</span>
+              </div>
+              <div class="sidebar-body quick-list">
+                <a class="quick-game" href="#">
+                  <img src="/static/FCM/images/fcm-box.jpg" alt="FCM">
+                  <div>
+                    <strong>Food Chain Magnate</strong><small>2-5 players</small>
+                  </div>
+                </a>
+                <a class="quick-game" href="#">
+                  <img src="/static/TGZ/images/tgz_icon.png" alt="TGZ">
+                  <div>
+                    <strong>The Great Zimbabwe</strong><small>2-5 players</small>
+                  </div>
+                </a>
+                <a class="quick-game" href="#">
+                  <img src="/static/IND/images/ind_icon.png" alt="IND">
+                  <div>
+                    <strong>Indonesia</strong><small>3-5 players</small>
+                  </div>
+                </a>
+              </div>
+            </section>
+            <section class="sidebar-card">
+              <div class="sidebar-head">
+                <h2>Notes</h2>
+                <span class="tour-sub">What this tests</span>
+              </div>
+              <div class="sidebar-body">
+                Current games use a compact row. Available games still show full options. The top of the page stays deliberately short.
+              </div>
+            </section>
+          </aside>
+        </div>
+        <section class="tournaments" id="tournaments">
+          <div class="tournaments-head">
+            <h2>Tournament Example</h2>
+            <span class="tour-sub">Same palette, calmer data-heavy treatment</span>
+          </div>
+          <div class="tour-grid">
+            <div class="tour-list">
+              <article class="tour-card">
+                <div class="tour-top">
+                  <img src="/static/AQY/images/aqy_icon.png" alt="AQY">
+                  <div>
+                    <h3>Antiquity Spring Open</h3>
+                    <div class="tour-sub">Open for signup · 10 / 16 players · 4p pods</div>
+                  </div>
+                </div>
+                <div class="tour-sub">Experienced pacing, one move per day minimum, starts in 3 days.</div>
+              </article>
+              <article class="tour-card">
+                <div class="tour-top">
+                  <img src="/static/BUS/images/bus_icon.png" alt="Bus">
+                  <div>
+                    <h3>Bus Compact Cup</h3>
+                    <div class="tour-sub">In progress · Round 2 · Group B</div>
+                  </div>
+                </div>
+                <div class="tour-sub">Three active games, standings update after each finish.</div>
+              </article>
+              <article class="tour-card">
+                <div class="tour-top">
+                  <img src="/static/TGZ/images/tgz_icon.png" alt="TGZ">
+                  <div>
+                    <h3>Zimbabwe League</h3>
+                    <div class="tour-sub">Finished · Winner: dizquiz</div>
+                  </div>
+                </div>
+                <div class="tour-sub">Past event row to check how mixed statuses scan together.</div>
+              </article>
+            </div>
+            <article class="tour-detail">
+              <h3>Antiquity Spring Open</h3>
+              <div class="tour-sub">Detail card example for a tournament page</div>
+              <div class="options" style="margin-top:12px;">
+                <img class="option"
+                     src="/static/Lobby/images/startingOptions/so_experiencedGame.svg"
+                     alt="Experienced">
+              </div>
+              <div class="detail-list">
+                <div class="detail-item">
+                  <span>Status</span><strong>Open for signup</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Players</span><strong>10 / 16</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Format</span><strong>Rounds</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Sample round</span><strong>Table A: mihai, DodgerB, Benkyo, ChrisM</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Join CTA</span><strong>Primary button in real implementation</strong>
+                </div>
+              </div>
+            </article>
           </div>
         </section>
-      </aside>
+      </main>
+      <footer id="footer">
+        Prototype 08 · Blue Utility · compact shell, side utility rail, full available-game options.
+      </footer>
     </div>
-
-    <section class="tournaments" id="tournaments">
-      <div class="tournaments-head">
-        <h2>Tournament Example</h2>
-        <span class="tour-sub">Same palette, calmer data-heavy treatment</span>
-      </div>
-      <div class="tour-grid">
-        <div class="tour-list">
-          <article class="tour-card">
-            <div class="tour-top"><img src="../AQY/static/AQY/images/aqy_icon.png" alt="AQY"><div><h3>Antiquity Spring Open</h3><div class="tour-sub">Open for signup · 10 / 16 players · 4p pods</div></div></div>
-            <div class="tour-sub">Experienced pacing, one move per day minimum, starts in 3 days.</div>
-          </article>
-          <article class="tour-card">
-            <div class="tour-top"><img src="../BUS/static/BUS/images/bus_icon.png" alt="Bus"><div><h3>Bus Compact Cup</h3><div class="tour-sub">In progress · Round 2 · Group B</div></div></div>
-            <div class="tour-sub">Three active games, standings update after each finish.</div>
-          </article>
-          <article class="tour-card">
-            <div class="tour-top"><img src="../TGZ/static/TGZ/images/tgz_icon.png" alt="TGZ"><div><h3>Zimbabwe League</h3><div class="tour-sub">Finished · Winner: dizquiz</div></div></div>
-            <div class="tour-sub">Past event row to check how mixed statuses scan together.</div>
-          </article>
-        </div>
-        <article class="tour-detail">
-          <h3>Antiquity Spring Open</h3>
-          <div class="tour-sub">Detail card example for a tournament page</div>
-          <div class="options" style="margin-top:12px;"><img class="option" src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div>
-          <div class="detail-list">
-            <div class="detail-item"><span>Status</span><strong>Open for signup</strong></div>
-            <div class="detail-item"><span>Players</span><strong>10 / 16</strong></div>
-            <div class="detail-item"><span>Format</span><strong>Rounds</strong></div>
-            <div class="detail-item"><span>Sample round</span><strong>Table A: mihai, DodgerB, Benkyo, ChrisM</strong></div>
-            <div class="detail-item"><span>Join CTA</span><strong>Primary button in real implementation</strong></div>
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
-
-  <footer id="footer">Prototype 08 · Blue Utility · compact shell, side utility rail, full available-game options.</footer>
-</div>
-
-<script>
+    <script>
   document.querySelectorAll('[data-tab-group="p08"]').forEach(function(button) {
     button.addEventListener('click', function() {
       var group = button.getAttribute('data-tab-group')
@@ -505,6 +703,6 @@
       document.getElementById(button.getAttribute('data-target')).classList.add('active')
     })
   })
-</script>
-</body>
+    </script>
+  </body>
 </html>
