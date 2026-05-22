@@ -2731,9 +2731,6 @@ def playerInfo(request, usernameToProfile):
                         kickedOutGamesLastYear += 1
 
             # --- Categorization for Lists ---
-            target_user_gp = next((gp for gp in all_game_players if gp.player_id == target_id), None)
-            show_pending_finish_in_current = is_self and bool(target_user_gp and target_user_gp.is_pending_finish)
-
             if status == "ACTIVE":
                 serialized_game = SF_serializeGame(
                     game,
@@ -2756,9 +2753,7 @@ def playerInfo(request, usernameToProfile):
                         "invited_users": [],
                     },
                 )
-                if show_pending_finish_in_current:
-                    activeOther.append(serialized_game)
-                elif is_joint and not is_self:
+                if is_joint and not is_self:
                     finishedJoint.append(serialized_game)
                 else:
                     finishedOther.append(serialized_game)
@@ -2791,20 +2786,8 @@ def playerInfo(request, usernameToProfile):
         adj_kicked = max(0, kickedOutGamesLastYear - 1)
         fairPlayLastYear = int((finishedGamesLastYear - adj_kicked) / finishedGamesLastYear * 100)
 
-    active_joint_sorted = sorted(
-        activeJoint,
-        key=lambda game: (
-            0 if game["pendingFinish"] else (1 if game["myMove"] else 2),
-            -int(game["latestUpdate"]),
-        ),
-    )
-    active_other_sorted = sorted(
-        activeOther,
-        key=lambda game: (
-            0 if game["pendingFinish"] else (1 if game["myMove"] else 2),
-            -int(game["latestUpdate"]),
-        ),
-    )
+    active_joint_sorted = sorted(activeJoint, key=lambda x: x["latestUpdate"], reverse=True)
+    active_other_sorted = sorted(activeOther, key=lambda x: x["latestUpdate"], reverse=True)
     finished_joint_sorted = sorted(finishedJoint, key=lambda x: x["latestUpdate"], reverse=True)
     finished_other_sorted = sorted(finishedOther, key=lambda x: x["latestUpdate"], reverse=True)
 
