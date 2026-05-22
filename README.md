@@ -21,7 +21,7 @@
 
 # Setup & Install
 
-## Quick setup - see below for full dockerised setup
+## Quick setup (Windows) - see below for full dockerised setup, or quick setup Linux
 This will allow you to easily setup and run a home server. You can login with `admin` (super-user) or `user1` (normal user) and `password`. The easiest way to create a new user is in the Django admin panel - copy the hashed password from the `admin` user.
 - Get the source code `git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`
 - Run `QuickSetup.bat`
