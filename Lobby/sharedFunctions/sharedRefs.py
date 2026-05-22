@@ -13,6 +13,15 @@ import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
 import RNB.RNBconstants as rfRNB
 
+SHADOW_USERNAMES = [
+    "FcmAI",
+    "SHADOW",
+    "SHADOW_2",
+    "SHADOW_3",
+    "SHADOW_4",
+    "SHADOW_5",
+]
+
 DISCORD = "DC"
 SLACK = "SL"
 TELEGRAM = "TG"
@@ -139,25 +148,14 @@ def getCleanedAndSortedRoundData(roundData):
         normalized_row = [name, played, wins] + tb[:4]  # keep only top 4
         playersData.append(normalized_row)
 
-    playersData.sort(
-        key=lambda r: (-r[2], -r[3][0], -r[4][0], -r[5][0], -r[6][0], r[0])
-    )
+    playersData.sort(key=lambda r: (-r[2], -r[3][0], -r[4][0], -r[5][0], -r[6][0], r[0]))
 
     # Now remove the -inf's
     cleaned = []
     for row in playersData:
         # Keep only elements that are not ±inf
         # clean_row = [x for x in row if x == x and  x[0] != float('inf') and x[0] != -float('inf')]
-        clean_row = [
-            item
-            for item in row
-            if not (
-                isinstance(item, list)
-                and len(item) > 0
-                and math.isinf(item[0])
-                and item[0] < 0
-            )
-        ]
+        clean_row = [item for item in row if not (isinstance(item, list) and len(item) > 0 and math.isinf(item[0]) and item[0] < 0)]
         # Alternative (shorter): row[:3] + [x for x in row[3:] if x != -float('inf')]
         cleaned.append(clean_row)
     return cleaned
@@ -178,9 +176,7 @@ def SR_getAnyTournamentPlayersData(tournament):
             playersData = []
             roundData.append(["Round " + str(i + 1)])
             if i == 0:
-                roundData.append(
-                    ["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"]
-                )
+                roundData.append(["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"])
 
                 cleanedData = getCleanedAndSortedRoundData(round)
                 playersData = cleanedData
@@ -193,14 +189,10 @@ def SR_getAnyTournamentPlayersData(tournament):
                 groupB = round[7:]
                 groupData = [[], []]
                 # groupData.append(["Group A"])
-                groupData[0].append(
-                    ["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"]
-                )
+                groupData[0].append(["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"])
                 groupData[0].append(getCleanedAndSortedRoundData(groupA))
                 # groupData.append(["Group B"])
-                groupData[1].append(
-                    ["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"]
-                )
+                groupData[1].append(["Player", "Played", "Won", "TB1", "TB2", "TB3", "TB4"])
                 groupData[1].append(getCleanedAndSortedRoundData(groupB))
                 roundData.append(groupData)
                 allMGdata.append(roundData)
@@ -221,11 +213,7 @@ def SR_getAnyTournamentPlayersData(tournament):
         sideData = json.loads(tournament.tournamentSideData)
         # TL_sideData = Counter(sideData)
 
-    pointsList = (
-        sorted(json.loads(tournament.tournamentPointsData), key=lambda x: -x[1])
-        if tournament.tournamentPointsData != ""
-        else []
-    )
+    pointsList = sorted(json.loads(tournament.tournamentPointsData), key=lambda x: -x[1]) if tournament.tournamentPointsData != "" else []
     ret = {}
     headingRow = ["Player", "Points"]
     if tournament.tournamentType == "TL":
@@ -299,11 +287,7 @@ def SR_getTournamentRoundsHTML(
     TPDA = json.loads(tournamentProgressionData)
 
     roundsHTML = '<div id="tournamentRoundsContainerDiv">'
-    pointsList = (
-        sorted(json.loads(tournamentPointsData), key=lambda x: -x[1])
-        if tournamentPointsData != ""
-        else []
-    )
+    pointsList = sorted(json.loads(tournamentPointsData), key=lambda x: -x[1]) if tournamentPointsData != "" else []
     TL_sideData = []
     if tournamentType == "TL":
         sideData = json.loads(tournamentObj.tournamentSideData)
@@ -346,56 +330,22 @@ def SR_getTournamentRoundsHTML(
 
         for row in TPDA[i]:
             if row[0] != "BYEPLAYERS":
-                roundsHTML += (
-                    '<tr class="clickableGameRow '
-                    + gameTypeString
-                    + '" id="gamesRow'
-                    + str(row[maxGamePlayers])
-                    + '">'
-                )
+                roundsHTML += '<tr class="clickableGameRow ' + gameTypeString + '" id="gamesRow' + str(row[maxGamePlayers]) + '">'
                 j = 0
                 for j in range(len(row)):
                     # Only add lives if 2L AND it is the latest round
                     if tournamentType == "TL" and i == len(TPDA) - 1:
                         lives = TL_sideData.get(row[j], 0)
                         if j == 0:
-                            roundsHTML += (
-                                '<td><a href="/profile/'
-                                + row[j]
-                                + '">'
-                                + row[j]
-                                + " ("
-                                + str(lives)
-                                + ")</a>"
-                            )
+                            roundsHTML += '<td><a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
                         elif j < maxGamePlayers:
-                            roundsHTML += (
-                                ' VS <a href="/profile/'
-                                + row[j]
-                                + '">'
-                                + row[j]
-                                + " ("
-                                + str(lives)
-                                + ")</a>"
-                            )
+                            roundsHTML += ' VS <a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
                     # Else just add the names
                     else:
                         if j == 0:
-                            roundsHTML += (
-                                '<td><a href="/profile/'
-                                + row[j]
-                                + '">'
-                                + row[j]
-                                + "</a>"
-                            )
+                            roundsHTML += '<td><a href="/profile/' + row[j] + '">' + row[j] + "</a>"
                         elif j < maxGamePlayers:
-                            roundsHTML += (
-                                ' VS <a href="/profile/'
-                                + row[j]
-                                + '">'
-                                + row[j]
-                                + "</a>"
-                            )
+                            roundsHTML += ' VS <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
 
                 roundsHTML += "</td>"
                 roundsHTML += "<td>"
@@ -413,42 +363,14 @@ def SR_getTournamentRoundsHTML(
                     if tournamentType == "TL" and i == len(TPDA) - 1:
                         lives = TL_sideData.get(row[j], 0)
                         if j == 1:
-                            roundsHTML += (
-                                "<td>"
-                                + gettext("BYES:")
-                                + '<a href="/profile/'
-                                + row[j]
-                                + '">'
-                                + row[j]
-                                + " ("
-                                + str(lives)
-                                + ")</a>"
-                            )
+                            roundsHTML += "<td>" + gettext("BYES:") + '<a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
                         elif j > 1:
-                            roundsHTML += (
-                                ', <a href="/profile/'
-                                + row[j]
-                                + '">'
-                                + row[j]
-                                + " ("
-                                + str(lives)
-                                + ")</a>"
-                            )
+                            roundsHTML += ', <a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
                     else:
                         if j == 1:
-                            roundsHTML += (
-                                "<td>"
-                                + gettext("BYES:")
-                                + ' <a href="/profile/'
-                                + row[j]
-                                + '">'
-                                + row[j]
-                                + "</a>"
-                            )
+                            roundsHTML += "<td>" + gettext("BYES:") + ' <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
                         elif j > 1:
-                            roundsHTML += (
-                                ', <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
-                            )
+                            roundsHTML += ', <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
 
         roundsHTML += "</table>"
         roundsHTML += "</div>"
@@ -465,10 +387,7 @@ def SR_currentTurnString(gameCode, turn, phase):
             currentTurnString = gettext("Setup - Draft Modules")
         if phase == rfFCM.PHASE_URBAN_PLANNING:
             currentTurnString = gettext("Setup - Urban Planning")
-        if (
-            phase == rfFCM.PHASE_SETUP_RESTAURANT1
-            or phase == rfFCM.PHASE_SETUP_RESTAURANT2
-        ):
+        if phase == rfFCM.PHASE_SETUP_RESTAURANT1 or phase == rfFCM.PHASE_SETUP_RESTAURANT2:
             currentTurnString = gettext("Setup - Restaurants")
         if phase == rfFCM.PHASE_SETUP_RESERVE:
             currentTurnString = gettext("Setup - Reserve Cards")
@@ -881,9 +800,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
     for opt in sorted_options:
         # SPECIAL CASE: Random Modules (200)
         if opt == rfFCM.SO_RANDOM_MODULES:
-            moduleRange = [
-                str(x % 100).zfill(2) for x in startingOptionsArr if 21000 < x < 21116
-            ]
+            moduleRange = [str(x % 100).zfill(2) for x in startingOptionsArr if 21000 < x < 21116]
             if len(moduleRange) != 2:
                 moduleRange = ["??", "??"]
 
@@ -898,9 +815,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
             label = gettext(mapping[1])
             folder = mapping[2] if len(mapping) > 2 else "/static/FCM/images/"
 
-            startingOptionsHTML += (
-                f"<img class='startingOption' src='{folder}{img}' title='{label}'>"
-            )
+            startingOptionsHTML += f"<img class='startingOption' src='{folder}{img}' title='{label}'>"
 
     return startingOptionsHTML or "[None]"
     # usedOptions = 0
@@ -938,59 +853,27 @@ def SR_getTGZstartingOptionsHTML(startingOptionsArr):
 
     retHTML = ""
     if 7 in startingOptionsArr:
-        retHTML += (
-            "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='"
-            + gettext("Use Schism Expansion - Random Mix")
-            + "'>"
-        )
+        retHTML += "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='" + gettext("Use Schism Expansion - Random Mix") + "'>"
     if 8 in startingOptionsArr:
-        retHTML += (
-            "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='"
-            + gettext("Use Schism Expansion - 4/4 Mix")
-            + "'>"
-        )
+        retHTML += "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='" + gettext("Use Schism Expansion - 4/4 Mix") + "'>"
     if 9 in startingOptionsArr:
-        retHTML += (
-            "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='"
-            + gettext("Use Schism Expansion - All SChism")
-            + "'>"
-        )
+        retHTML += "<img class='startingOption' src='/static/TGZ/images/so_schism.svg' title='" + gettext("Use Schism Expansion - All SChism") + "'>"
     if len(customgods) > 0 or len(customVR) > 0:
         retHTML += "<div class='TGZinfoContainer'>"
         if len(customVR) > 0:
-            retHTML += (
-                "<img class ='startingOption' src='/static/TGZ/images/so_customgodsVR.jpg' title='"
-                + gettext("Custom gods and Specs VR")
-                + "'>"
-            )
+            retHTML += "<img class ='startingOption' src='/static/TGZ/images/so_customgodsVR.jpg' title='" + gettext("Custom gods and Specs VR") + "'>"
         elif len(customgods) > 0:
-            retHTML += (
-                "<img class='startingOption TGZinfoIcon' src='/static/TGZ/images/so_customgods.jpg' title='"
-                + gettext("Custom gods")
-                + "'>"
-            )
+            retHTML += "<img class='startingOption TGZinfoIcon' src='/static/TGZ/images/so_customgods.jpg' title='" + gettext("Custom gods") + "'>"
         if len(specVR) > 0:
-            retHTML += (
-                "<img class ='startingOption' src='/static/TGZ/images/so_customSpecVR.jpg' title='"
-                + gettext("Custom Spec VR")
-                + "'>"
-            )
+            retHTML += "<img class ='startingOption' src='/static/TGZ/images/so_customSpecVR.jpg' title='" + gettext("Custom Spec VR") + "'>"
 
         retHTML += "<div class='TGZinfoPopup'>"
         retHTML += SR_getgodsVRoptionsHTML(startingOptionsArr)
         retHTML += "</div></div>"
     if rf.SO_LEARNING_GAME in startingOptionsArr:
-        retHTML += (
-            "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-            + gettext("Learning Game")
-            + "'>"
-        )
+        retHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
     elif rf.SO_EXPERIENCED_GAME in startingOptionsArr:
-        retHTML += (
-            "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-            + gettext("Experienced Game")
-            + "'>"
-        )
+        retHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return retHTML
 
@@ -1087,59 +970,23 @@ def SR_getCNSstartingOptionsHTML(startingOptionsArr):
     startingOptionsHTML = ""
     for option in startingOptionsArr:
         if option == 1:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/CNS/images/so_expansion.svg' title='"
-                + gettext("Use Expansion")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/CNS/images/so_expansion.svg' title='" + gettext("Use Expansion") + "'>"
         elif option == 10:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/CNS/images/so_tableS.svg' title='"
-                + gettext("Smalll Table")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/CNS/images/so_tableS.svg' title='" + gettext("Smalll Table") + "'>"
         elif option == 11:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/CNS/images/so_table.svg' title='"
-                + gettext("Medium Table")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/CNS/images/so_table.svg' title='" + gettext("Medium Table") + "'>"
         elif option == 12:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/CNS/images/so_tableL.svg' title='"
-                + gettext("Large Table")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/CNS/images/so_tableL.svg' title='" + gettext("Large Table") + "'>"
         elif option == 20:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/CNS/images/so_junkS.svg' title='"
-                + gettext("Low Junk")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/CNS/images/so_junkS.svg' title='" + gettext("Low Junk") + "'>"
         elif option == 21:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/CNS/images/so_junk.svg' title='"
-                + gettext("Mediumm Junk")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/CNS/images/so_junk.svg' title='" + gettext("Mediumm Junk") + "'>"
         elif option == 22:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/CNS/images/so_junkL.svg' title='"
-                + gettext("High Junk")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/CNS/images/so_junkL.svg' title='" + gettext("High Junk") + "'>"
         elif option == rf.SO_LEARNING_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         elif option == rf.SO_EXPERIENCED_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return startingOptionsHTML
 
@@ -1153,17 +1000,9 @@ def SR_getBUSstartingOptionsHTML(startingOptionsArr):
     startingOptionsHTML = ""
     for option in startingOptionsArr:
         if option == rf.SO_LEARNING_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         elif option == rf.SO_EXPERIENCED_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return startingOptionsHTML
 
@@ -1176,74 +1015,26 @@ def SR_getHLCstartingOptionsHTML(startingOptionsArr):
     startingOptionsHTML = ""
     for option in startingOptionsArr:
         if option == rf.SO_LEARNING_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         elif option == rf.SO_EXPERIENCED_GAME:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
         elif option == 3:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_car.jpg' title='"
-                + gettext("Cars Only")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_car.jpg' title='" + gettext("Cars Only") + "'>"
         elif option == 4:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_truck.jpg' title='"
-                + gettext("Trucks Only")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_truck.jpg' title='" + gettext("Trucks Only") + "'>"
         elif option == 5:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_sports.jpg' title='"
-                + gettext("Sports Only")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_sports.jpg' title='" + gettext("Sports Only") + "'>"
         elif option == 6:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_car.jpg' title='"
-                + gettext("Include Cars")
-                + "'>"
-            )
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_truck.jpg' title='"
-                + gettext("Include Trucks")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_car.jpg' title='" + gettext("Include Cars") + "'>"
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_truck.jpg' title='" + gettext("Include Trucks") + "'>"
         elif option == 7:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_car.jpg' title='"
-                + gettext("Include Cars")
-                + "'>"
-            )
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_sports.jpg' title='"
-                + gettext("Include Sports")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_car.jpg' title='" + gettext("Include Cars") + "'>"
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_sports.jpg' title='" + gettext("Include Sports") + "'>"
         elif option == 8:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_truck.jpg' title='"
-                + gettext("Include Trucks")
-                + "'>"
-            )
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/HLC/images/s_sports.jpg' title='"
-                + gettext("Include Sports")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_truck.jpg' title='" + gettext("Include Trucks") + "'>"
+            startingOptionsHTML += "<img class='startingOption' src='/static/HLC/images/s_sports.jpg' title='" + gettext("Include Sports") + "'>"
         elif option == 9:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/Lobby/images/startingOptions/HLC_moreMainlines.svg' title='"
-                + gettext("Extra Mainlines")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/HLC_moreMainlines.svg' title='" + gettext("Extra Mainlines") + "'>"
 
     return startingOptionsHTML
 
@@ -1256,17 +1047,9 @@ def SR_getAQYstartingOptionsHTML(startingOptionsArr):
     startingOptionsHTML = ""
     for option in startingOptionsArr:
         if option == rf.SO_LEARNING_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         elif option == rf.SO_EXPERIENCED_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return startingOptionsHTML
 
@@ -1279,47 +1062,19 @@ def SR_getINDstartingOptionsHTML(startingOptionsArr):
     startingOptionsHTML = ""
     for option in startingOptionsArr:
         if option == 1:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/IND/images/so_hiddenMoney.svg' title='"
-                + gettext("Hidden Money")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/IND/images/so_hiddenMoney.svg' title='" + gettext("Hidden Money") + "'>"
         elif option == 2:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/IND/images/so_aegean_map.svg' title='"
-                + gettext("Aegean Map")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/IND/images/so_aegean_map.svg' title='" + gettext("Aegean Map") + "'>"
         elif option == 3:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_php_map.svg' title='"
-                + gettext("Philippines Map")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_php_map.svg' title='" + gettext("Philippines Map") + "'>"
         elif option == 4:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_merger_subsidy.svg' title='"
-                + gettext("Use Merger Subsidy")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_merger_subsidy.svg' title='" + gettext("Use Merger Subsidy") + "'>"
         elif option == 5:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg' title='"
-                + gettext("Use Shipping Subsidy")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg' title='" + gettext("Use Shipping Subsidy") + "'>"
         elif option == rf.SO_LEARNING_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         elif option == rf.SO_EXPERIENCED_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return startingOptionsHTML
 
@@ -1332,60 +1087,24 @@ def SR_getKFWstartingOptionsHTML(startingOptionsArr):
     startingOptionsHTML = ""
     for option in startingOptionsArr:
         if option == 7:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/KFW/images/so_infoLow.svg' title='"
-                + gettext("Low Knowledge\nof Hidden Info")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_infoLow.svg' title='" + gettext("Low Knowledge\nof Hidden Info") + "'>"
         if option == 8:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/KFW/images/so_infoMedMinus.svg' title='"
-                + gettext("Medium Knowledge\nof Hidden Info")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_infoMedMinus.svg' title='" + gettext("Medium Knowledge\nof Hidden Info") + "'>"
         if option == 9:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/KFW/images/so_infoHighPlus.svg' title='"
-                + gettext("High Knowledge\nof Hidden Info")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_infoHighPlus.svg' title='" + gettext("High Knowledge\nof Hidden Info") + "'>"
         if option == 6:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/KFW/images/so_infoHighMinus.svg' title='"
-                + gettext("High Knowledge\nof Hidden Info")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_infoHighMinus.svg' title='" + gettext("High Knowledge\nof Hidden Info") + "'>"
         if option == 5:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/KFW/images/so_infoMedPlus.svg' title='"
-                + gettext("High Knowledge\nof Hidden Info")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_infoMedPlus.svg' title='" + gettext("High Knowledge\nof Hidden Info") + "'>"
 
         if option == 1:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/KFW/images/so_merchants.svg' title='"
-                + gettext("Use Merchants Expansion")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_merchants.svg' title='" + gettext("Use Merchants Expansion") + "'>"
         if option == 2:
-            startingOptionsHTML += (
-                "<img class='startingOption' src='/static/KFW/images/so_promos.svg' title='"
-                + gettext("Use Promo Tiles")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_promos.svg' title='" + gettext("Use Promo Tiles") + "'>"
         if option == rf.SO_LEARNING_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         elif option == rf.SO_EXPERIENCED_GAME:
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return startingOptionsHTML
 
@@ -1399,20 +1118,13 @@ def SR_getWEBstartingOptionsHTML(startingOptionsArr):
     for option in startingOptionsArr:
         if option == rf.SO_LEARNING_GAME:
             # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         if option == rf.SO_EXPERIENCED_GAME:
             # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return startingOptionsHTML
+
 
 def SR_getRNBstartingOptionsHTML(startingOptionsArr):
     if not startingOptionsArr:
@@ -1423,20 +1135,13 @@ def SR_getRNBstartingOptionsHTML(startingOptionsArr):
     for option in startingOptionsArr:
         if option == rf.SO_LEARNING_GAME:
             # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='"
-                + gettext("Learning Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         if option == rf.SO_EXPERIENCED_GAME:
             # usedOptions += 1
-            startingOptionsHTML += (
-                "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='"
-                + gettext("Experienced Game")
-                + "'>"
-            )
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return startingOptionsHTML
+
 
 def SR_getPointsForPosition(position, maxPlayers):
     """
