@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBG Prototype 11 - Split Context Lobby</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: #f1fafa;
+    color: #17353d;
+  }
+  :root {
+    --blue: #93d5d0;
+    --blue-deep: #4f8d90;
+    --green: #9dcd8e;
+    --green-deep: #5e8453;
+    --surface: #ffffff;
+    --surface-alt: #f7fbfb;
+    --border: #d7e8e7;
+    --muted: #688086;
+    --shadow: 0 14px 38px rgba(79, 141, 144, 0.10);
+  }
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .top-inner {
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .logo { text-decoration: none; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+  .logo-badge { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(150deg, var(--blue), var(--green)); display: grid; place-items: center; }
+  .links { display: flex; gap: 6px; flex-wrap: wrap; }
+  .links a { text-decoration: none; color: var(--muted); padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; }
+  .links a.active, .links a:hover { background: var(--surface-alt); color: #17353d; }
+  .context { margin-left: auto; font-size: 0.84rem; color: var(--muted); }
+  .wrap { max-width: 1260px; margin: 0 auto; padding: 16px; }
+  .hero-lite, .main-card, .side-card, .tour {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+  .hero-lite {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .hero-lite h1 { margin: 0 0 4px; font-size: 1.15rem; }
+  .hero-lite p { margin: 0; color: var(--muted); }
+  .hero-lite .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .chip { padding: 7px 10px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 999px; font-size: 0.8rem; font-weight: 800; }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 16px;
+  }
+  .main-head, .side-head, .tour-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+  .main-head h2, .side-head h2, .tour-head h2 { margin: 0; font-size: 1rem; }
+  .sub { color: var(--muted); font-size: 0.84rem; }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 12px 16px 0;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 10px 14px;
+    white-space: nowrap;
+    font-size: 0.84rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .tab.active { background: var(--blue); color: #13353b; border-color: var(--blue); }
+  .main-body, .side-body, .tour-body { padding: 16px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .rows { display: grid; gap: 12px; }
+  .row {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface-alt);
+    padding: 12px;
+  }
+  .row img.icon { width: 52px; height: 52px; border-radius: 12px; border: 1px solid var(--border); object-fit: cover; background: #fff; }
+  .title { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
+  .title strong { font-size: 0.97rem; }
+  .code { background: #eaf7f6; color: var(--blue-deep); border-radius: 999px; padding: 3px 7px; font-size: 0.67rem; font-weight: 800; }
+  .meta, .players { color: var(--muted); font-size: 0.84rem; }
+  .players { margin-top: 4px; }
+  .options { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .options img { width: 30px; height: 30px; padding: 4px; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+  .status { display: grid; gap: 8px; justify-items: end; text-align: right; }
+  .pill { border-radius: 999px; padding: 6px 10px; font-size: 0.74rem; font-weight: 800; }
+  .pill.turn { background: rgba(157, 205, 142, 0.26); color: var(--green-deep); }
+  .pill.wait, .pill.open { background: #eaf7f6; color: var(--blue-deep); }
+  .button { background: #193d43; color: #fff; border-radius: 10px; padding: 9px 12px; font-size: 0.8rem; font-weight: 700; }
+  .side-stack { display: grid; gap: 16px; }
+  .browse-list { display: grid; gap: 12px; }
+  .browse-item {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    background: #fff;
+    text-decoration: none;
+    color: inherit;
+  }
+  .browse-head { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .browse-head img { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--border); object-fit: cover; background: #fff; }
+  .browse-item .options { margin-top: 8px; }
+  .statline {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.84rem;
+  }
+  .statline:last-child { border-bottom: 0; }
+  .tour { margin-top: 16px; }
+  .tour-body { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .tour-cards { display: grid; gap: 12px; }
+  .tour-card { border: 1px solid var(--border); border-radius: 14px; padding: 14px; background: var(--surface-alt); }
+  .tour-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .tour-card-top img { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border); object-fit: cover; background: #fff; }
+  .tour-card h3, .tour-detail h3 { margin: 0; font-size: 0.98rem; }
+  .tour-detail { border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: linear-gradient(180deg, #fff, #eef9f7); }
+  .detail-lines { display: grid; gap: 10px; margin-top: 14px; }
+  .detail-lines div { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); font-size: 0.86rem; }
+  .detail-lines div:last-child { border-bottom: 0; padding-bottom: 0; }
+  footer { text-align: center; padding: 24px 16px 34px; color: var(--muted); font-size: 0.84rem; }
+  @media (max-width: 980px) {
+    .grid, .tour-body, .hero-lite { grid-template-columns: 1fr; }
+    .hero-lite .chips { justify-content: flex-start; }
+  }
+  @media (max-width: 640px) {
+    .context { margin-left: 0; width: 100%; }
+    .row { grid-template-columns: 48px 1fr; }
+    .row img.icon { width: 48px; height: 48px; }
+    .status { grid-column: 1 / -1; justify-items: start; text-align: left; }
+  }
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <a class="logo" href="#lobby"><span class="logo-badge">OBG</span><span>Online Board Gamers</span></a>
+      <nav class="links"><a class="active" href="#lobby">Lobby</a><a href="#tour">Tournaments</a><a href="#browse">Browse</a></nav>
+      <div class="context">Split-context variant: current games central, browse/create context in a distinct rail</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero-lite" id="lobby">
+      <div><h1>Split-context lobby</h1><p>Tests whether current play and browse/discovery should feel more separate instead of using one shared list style everywhere.</p></div>
+      <div class="chips"><span class="chip">3 current turns</span><span class="chip">2 invitations</span><span class="chip">1 open tournament</span></div>
+    </section>
+
+    <div class="grid">
+      <section class="main-card">
+        <div class="main-head"><h2>Current Play</h2><span class="sub">Primary focus column</span></div>
+        <div class="tabs">
+          <button class="tab active" data-tab-group="p11" data-target="p11-turn">My Turn (3)</button>
+          <button class="tab" data-tab-group="p11" data-target="p11-wait">Waiting (2)</button>
+          <button class="tab" data-tab-group="p11" data-target="p11-available">Available (5)</button>
+          <button class="tab" data-tab-group="p11" data-target="p11-invites">Invitations (2)</button>
+          <button class="tab" data-tab-group="p11" data-target="p11-finished">Finished</button>
+        </div>
+        <div class="main-body">
+          <div class="tab-panel active" id="p11-turn">
+            <div class="rows">
+              <a class="row" href="#"><img class="icon" src="../FCM/static/FCM/images/fcm-box.jpg" alt="FCM"><div><div class="title"><span class="code">FCM</span><strong>Food Chain Magnate</strong></div><div class="meta">Turn 14 · Dinner phase · kickout in 02:14:10</div><div class="players">You, DodgerB, dizquiz, Benkyo</div><div class="options"><img src="../FCM/static/FCM/images/so_noMS.svg" alt="No MS"><img src="../FCM/static/FCM/images/so_jazz.svg" alt="Jazz"><img src="../FCM/static/FCM/images/so_sushi.svg" alt="Sushi"><img src="../FCM/static/FCM/images/so_noRadio.svg" alt="No radio"><img src="../FCM/static/FCM/images/so_shortGame.svg" alt="Short"><img src="../FCM/static/FCM/images/so_dumplings.svg" alt="Dumplings"></div></div><div class="status"><span class="pill turn">Your Turn</span><span class="button">Enter Game</span></div></a>
+              <a class="row" href="#"><img class="icon" src="../TGZ/static/TGZ/images/tgz_icon.png" alt="TGZ"><div><div class="title"><span class="code">TGZ</span><strong>The Great Zimbabwe</strong></div><div class="meta">Turn 7 · Logistics phase</div><div class="players">You, AncientTrader, RoutePlanner</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div></div><div class="status"><span class="pill turn">Your Turn</span><span class="button">Enter Game</span></div></a>
+              <a class="row" href="#"><img class="icon" src="../HLC/static/HLC/images/icon_car.png" alt="HLC"><div><div class="title"><span class="code">HLC</span><strong>Horseless Carriage</strong></div><div class="meta">Turn 3 · Planning phase</div><div class="players">You, BoardMaster</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/HLC_moreMainlines.svg" alt="More mainlines"></div></div><div class="status"><span class="pill turn">Your Turn</span><span class="button">Enter Game</span></div></a>
+            </div>
+          </div>
+          <div class="tab-panel" id="p11-wait"><div class="rows"><a class="row" href="#"><img class="icon" src="../IND/static/IND/images/ind_icon.png" alt="IND"><div><div class="title"><span class="code">IND</span><strong>Indonesia</strong></div><div class="meta">Turn 11 · Waiting on SpiceKing</div><div class="players">You, SpiceKing, IslandTrader, ChrisM</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/IND_php_map.svg" alt="PHP"><img src="../Lobby/static/Lobby/images/startingOptions/IND_merger_subsidy.svg" alt="Merger"><img src="../Lobby/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg" alt="Shipping"></div></div><div class="status"><span class="pill wait">Waiting</span><span class="button">Open</span></div></a></div></div>
+          <div class="tab-panel" id="p11-available"><div class="rows" id="browse"><a class="row" href="#"><img class="icon" src="../BUS/static/BUS/images/bus_icon.png" alt="BUS"><div><div class="title"><span class="code">BUS</span><strong>Bus</strong></div><div class="meta">2 / 4 joined · learning-friendly pace</div><div class="players">Available rows stay in the main column when selected from tabs</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_learningGame.svg" alt="Learning"></div></div><div class="status"><span class="pill open">Open</span><span class="button">Join / View</span></div></a><a class="row" href="#"><img class="icon" src="../AQY/static/AQY/images/aqy_icon.png" alt="AQY"><div><div class="title"><span class="code">AQY</span><strong>Antiquity</strong></div><div class="meta">3 / 4 joined</div><div class="players">No +3 more style hiding</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div></div><div class="status"><span class="pill open">Open</span><span class="button">Join / View</span></div></a></div></div>
+          <div class="tab-panel" id="p11-invites"><div class="rows"><a class="row" href="#"><img class="icon" src="../BUS/static/BUS/images/bus_icon.png" alt="BUS"><div><div class="title"><span class="code">BUS</span><strong>Bus invitational</strong></div><div class="meta">Invite from DodgerB</div><div class="players">DodgerB, dizquiz, you</div></div><div class="status"><span class="pill open">Invite</span><span class="button">Open Invite</span></div></a></div></div>
+          <div class="tab-panel" id="p11-finished"><div class="rows"><a class="row" href="#"><img class="icon" src="../AQY/static/AQY/images/aqy_icon.png" alt="AQY"><div><div class="title"><span class="code">AQY</span><strong>Antiquity #411</strong></div><div class="meta">Finished yesterday</div><div class="players">Winner: Benkyo</div></div><div class="status"><span class="pill wait">Finished</span><span class="button">Replay</span></div></a></div></div>
+        </div>
+      </section>
+
+      <aside class="side-stack">
+        <section class="side-card">
+          <div class="side-head"><h2>Browse / Create</h2><span class="sub">Separate discovery rail</span></div>
+          <div class="side-body browse-list">
+            <a class="browse-item" href="#"><div class="browse-head"><img src="../BUS/static/BUS/images/bus_icon.png" alt="BUS"><div><strong>Bus</strong><div class="sub">2 / 4 joined</div></div></div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_learningGame.svg" alt="Learning"></div></a>
+            <a class="browse-item" href="#"><div class="browse-head"><img src="../IND/static/IND/images/ind_icon.png" alt="IND"><div><strong>Indonesia</strong><div class="sub">1 / 4 joined</div></div></div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/IND_php_map.svg" alt="PHP"><img src="../Lobby/static/Lobby/images/startingOptions/IND_merger_subsidy.svg" alt="Merger"><img src="../Lobby/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg" alt="Shipping"></div></a>
+            <a class="browse-item" href="#"><div class="browse-head"><img src="../RNB/static/RNB/images/rnb_icon.png" alt="RNB"><div><strong>Roads &amp; Boats</strong><div class="sub">0 / 4 joined</div></div></div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div></a>
+          </div>
+        </section>
+        <section class="side-card">
+          <div class="side-head"><h2>Quick Stats</h2><span class="sub">Context rail content</span></div>
+          <div class="side-body">
+            <div class="statline"><span>Active games</span><strong>7</strong></div>
+            <div class="statline"><span>Invitations</span><strong>2</strong></div>
+            <div class="statline"><span>Open tournaments</span><strong>1</strong></div>
+            <div class="statline"><span>Win rate</span><strong>34%</strong></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="tour" id="tour">
+      <div class="tour-head"><h2>Tournament Example</h2><span class="sub">Same split between list context and focused detail</span></div>
+      <div class="tour-body">
+        <div class="tour-cards">
+          <article class="tour-card"><div class="tour-card-top"><img src="../AQY/static/AQY/images/aqy_icon.png" alt="AQY"><div><h3>Antiquity Spring Open</h3><div class="sub">Open for signup · 10 / 16 players</div></div></div><div class="sub">Starts in 3 days, rounds format, one move per day minimum.</div></article>
+          <article class="tour-card"><div class="tour-card-top"><img src="../BUS/static/BUS/images/bus_icon.png" alt="BUS"><div><h3>Bus Compact Cup</h3><div class="sub">In progress · Round 2</div></div></div><div class="sub">Three active games remain in the current round.</div></article>
+          <article class="tour-card"><div class="tour-card-top"><img src="../TGZ/static/TGZ/images/tgz_icon.png" alt="TGZ"><div><h3>Zimbabwe League</h3><div class="sub">Finished · Winner dizquiz</div></div></div><div class="sub">Past event row to test mixed statuses.</div></article>
+        </div>
+        <article class="tour-detail">
+          <h3>Antiquity Spring Open</h3>
+          <div class="sub">Detail block for the tournament page</div>
+          <div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div>
+          <div class="detail-lines">
+            <div><span>Status</span><strong>Open for signup</strong></div>
+            <div><span>Players</span><strong>10 / 16</strong></div>
+            <div><span>Format</span><strong>Rounds</strong></div>
+            <div><span>Round preview</span><strong>Table A: mihai, DodgerB, Benkyo, ChrisM</strong></div>
+            <div><span>Question tested</span><strong>Should browse context stay separate?</strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>Prototype 11 · Split Context Lobby · current-play focus column plus distinct browse rail.</footer>
+
+<script>
+  document.querySelectorAll('[data-tab-group="p11"]').forEach(function(button) {
+    button.addEventListener('click', function() {
+      document.querySelectorAll('[data-tab-group="p11"]').forEach(function(tab) { tab.classList.remove('active') })
+      document.querySelectorAll('#p11-turn, #p11-wait, #p11-available, #p11-invites, #p11-finished').forEach(function(panel) { panel.classList.remove('active') })
+      button.classList.add('active')
+      document.getElementById(button.getAttribute('data-target')).classList.add('active')
+    })
+  })
+</script>
+</body>
+</html>

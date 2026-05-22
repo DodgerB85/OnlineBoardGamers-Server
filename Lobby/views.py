@@ -4707,7 +4707,7 @@ def createTGZmainTournament(request):
 
 
 def newDesign(request, design_num):
-    """Render new design templates based on design number (1-7)"""
+    """Render new design templates based on design number (1-12)"""
     template_map = {
         1: "Lobby/newDesign/01-functional-pro.html",
         2: "Lobby/newDesign/02-premium-dark.html",
@@ -4716,6 +4716,11 @@ def newDesign(request, design_num):
         5: "Lobby/newDesign/05-playful-bold.html",
         6: "Lobby/newDesign/06-xbox-cinematic.html",
         7: "Lobby/newDesign/07-gemini.html",
+        8: "Lobby/newDesign/08-blue-utility.html",
+        9: "Lobby/newDesign/09-dense-scoreboard.html",
+        10: "Lobby/newDesign/10-icon-first-lobby.html",
+        11: "Lobby/newDesign/11-split-context-lobby.html",
+        12: "Lobby/newDesign/12-mobile-first-stack.html",
     }
 
     template = template_map.get(design_num)

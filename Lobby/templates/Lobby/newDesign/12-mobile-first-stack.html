@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBG Prototype 12 - Mobile First Stack</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: #f3fbfb;
+    color: #17343b;
+  }
+  :root {
+    --blue: #93d5d0;
+    --blue-deep: #4d8d8f;
+    --green: #9dcd8e;
+    --green-deep: #5b8250;
+    --surface: #ffffff;
+    --surface-alt: #f8fcfc;
+    --border: #d9e9e7;
+    --muted: #6a8086;
+    --shadow: 0 12px 32px rgba(77, 141, 143, 0.10);
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .brand { text-decoration: none; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+  .brand-badge { width: 34px; height: 34px; border-radius: 11px; background: linear-gradient(145deg, var(--blue), var(--green)); display: grid; place-items: center; }
+  .menu-note { color: var(--muted); font-size: 0.82rem; }
+  .nav-pills {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 14px 12px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-pills::-webkit-scrollbar { display: none; }
+  .nav-pills a {
+    text-decoration: none;
+    white-space: nowrap;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 9px 12px;
+    color: var(--muted);
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+  .nav-pills a.active { background: var(--blue); color: #16363b; border-color: var(--blue); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 14px; }
+  .intro, .panel, .tour {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+  }
+  .intro {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .intro h1 { margin: 0 0 6px; font-size: 1.08rem; }
+  .intro p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .stat { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 999px; padding: 7px 10px; font-size: 0.8rem; font-weight: 800; }
+  .panel-head, .tour-head {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+  .panel-head h2, .tour-head h2 { margin: 0; font-size: 0.98rem; }
+  .sub { color: var(--muted); font-size: 0.82rem; }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 12px 14px 0;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 10px 13px;
+    white-space: nowrap;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .tab.active { background: var(--blue); color: #17363d; border-color: var(--blue); }
+  .panel-body, .tour-body { padding: 14px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .stack { display: grid; gap: 12px; }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface-alt);
+    padding: 12px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card-top {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .card-top img {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    object-fit: cover;
+    background: #fff;
+  }
+  .game-name strong { display: block; font-size: 0.94rem; }
+  .game-name small, .line, .tour-card p { color: var(--muted); font-size: 0.82rem; }
+  .line { margin-top: 8px; }
+  .pill {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .pill.turn { background: rgba(157, 205, 142, 0.26); color: var(--green-deep); }
+  .pill.wait, .pill.open { background: #eaf7f6; color: var(--blue-deep); }
+  .meta-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .meta-chip {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 8px;
+    font-size: 0.76rem;
+    color: var(--muted);
+  }
+  .options { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .options img { width: 30px; height: 30px; padding: 4px; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+  .action {
+    display: inline-flex;
+    margin-top: 12px;
+    background: #173d43;
+    color: #fff;
+    border-radius: 12px;
+    padding: 9px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .tour { margin-top: 14px; }
+  .tour-grid {
+    display: grid;
+    gap: 12px;
+  }
+  .tour-card, .tour-detail {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    background: var(--surface-alt);
+  }
+  .tour-top { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .tour-top img { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--border); object-fit: cover; background: #fff; }
+  .tour-card h3, .tour-detail h3 { margin: 0; font-size: 0.96rem; }
+  .rows { display: grid; gap: 10px; margin-top: 14px; }
+  .rows div { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); font-size: 0.84rem; }
+  .rows div:last-child { border-bottom: 0; padding-bottom: 0; }
+  footer { text-align: center; padding: 22px 16px 34px; color: var(--muted); font-size: 0.82rem; }
+  @media (min-width: 768px) {
+    .wrap { padding: 18px 16px 28px; }
+    .stack { grid-template-columns: 1fr 1fr; }
+    .stack .card:first-child { grid-column: 1 / -1; }
+    .tour-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1080px) {
+    .stack { grid-template-columns: 1fr; }
+    .two-col { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; }
+    .side-rail {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .rail-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .rail-card h3 { margin: 0 0 10px; font-size: 0.96rem; }
+    .rail-card .browse { display: grid; gap: 10px; }
+    .rail-item { display: flex; gap: 10px; align-items: center; text-decoration: none; color: inherit; }
+    .rail-item img { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: #fff; object-fit: cover; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#lobby"><span class="brand-badge">OBG</span><span>Online Board Gamers</span></a>
+      <div class="menu-note">Mobile-first stack: touch targets and wrapping come first</div>
+    </div>
+    <nav class="nav-pills"><a class="active" href="#lobby">Lobby</a><a href="#tour">Tournaments</a><a href="#p12-available">Available</a><a href="#footer">Help</a></nav>
+  </header>
+
+  <main class="wrap">
+    <section class="intro" id="lobby">
+      <h1>Mobile-first stacked lobby</h1>
+      <p>Starts from a 375px-friendly structure: stacked rows, visible options, large touch targets, and no hover dependency.</p>
+      <div class="stats"><span class="stat">3 need your move</span><span class="stat">5 available games</span><span class="stat">1 tournament open</span></div>
+    </section>
+
+    <div class="two-col">
+      <section class="panel">
+        <div class="panel-head"><h2>Lobby</h2><span class="sub">Main test: does the small-screen hierarchy still scale up well?</span></div>
+        <div class="tabs">
+          <button class="tab active" data-tab-group="p12" data-target="p12-turn">My Turn (3)</button>
+          <button class="tab" data-tab-group="p12" data-target="p12-wait">Waiting (2)</button>
+          <button class="tab" data-tab-group="p12" data-target="p12-available">Available (5)</button>
+          <button class="tab" data-tab-group="p12" data-target="p12-invites">Invitations (2)</button>
+          <button class="tab" data-tab-group="p12" data-target="p12-finished">Finished</button>
+        </div>
+        <div class="panel-body">
+          <div class="tab-panel active" id="p12-turn"><div class="stack"><a class="card" href="#"><div class="card-top"><img src="../FCM/static/FCM/images/fcm-box.jpg" alt="FCM"><div class="game-name"><strong>Food Chain Magnate</strong><small>FCM · Turn 14 · Dinner phase</small></div><span class="pill turn">Your Turn</span></div><div class="line">Players: you, DodgerB, dizquiz, Benkyo</div><div class="meta-row"><span class="meta-chip">Kickout 02:14:10</span><span class="meta-chip">4 players</span></div><div class="options"><img src="../FCM/static/FCM/images/so_noMS.svg" alt="No MS"><img src="../FCM/static/FCM/images/so_jazz.svg" alt="Jazz"><img src="../FCM/static/FCM/images/so_sushi.svg" alt="Sushi"><img src="../FCM/static/FCM/images/so_noRadio.svg" alt="No radio"><img src="../FCM/static/FCM/images/so_shortGame.svg" alt="Short"><img src="../FCM/static/FCM/images/so_dumplings.svg" alt="Dumplings"></div><span class="action">Enter Game</span></a><a class="card" href="#"><div class="card-top"><img src="../TGZ/static/TGZ/images/tgz_icon.png" alt="TGZ"><div class="game-name"><strong>The Great Zimbabwe</strong><small>TGZ · Turn 7 · Logistics</small></div><span class="pill turn">Your Turn</span></div><div class="line">Players: you, AncientTrader, RoutePlanner</div><div class="meta-row"><span class="meta-chip">Kickout 18:45:05</span><span class="meta-chip">3 players</span></div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div><span class="action">Enter Game</span></a><a class="card" href="#"><div class="card-top"><img src="../HLC/static/HLC/images/icon_car.png" alt="HLC"><div class="game-name"><strong>Horseless Carriage</strong><small>HLC · Turn 3 · Planning phase</small></div><span class="pill turn">Your Turn</span></div><div class="line">Players: you, BoardMaster</div><div class="meta-row"><span class="meta-chip">2 players</span></div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/HLC_moreMainlines.svg" alt="More mainlines"></div><span class="action">Enter Game</span></a></div></div>
+          <div class="tab-panel" id="p12-wait"><div class="stack"><a class="card" href="#"><div class="card-top"><img src="../IND/static/IND/images/ind_icon.png" alt="IND"><div class="game-name"><strong>Indonesia</strong><small>IND · Turn 11 · Waiting on SpiceKing</small></div><span class="pill wait">Waiting</span></div><div class="line">Players: you, SpiceKing, IslandTrader, ChrisM</div><div class="meta-row"><span class="meta-chip">4 players</span></div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/IND_php_map.svg" alt="PHP"><img src="../Lobby/static/Lobby/images/startingOptions/IND_merger_subsidy.svg" alt="Merger"><img src="../Lobby/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg" alt="Shipping"></div><span class="action">Open</span></a></div></div>
+          <div class="tab-panel" id="p12-available"><div class="stack"><a class="card" href="#"><div class="card-top"><img src="../BUS/static/BUS/images/bus_icon.png" alt="BUS"><div class="game-name"><strong>Bus</strong><small>2 / 4 joined</small></div><span class="pill open">Open</span></div><div class="line">Learning-friendly pace. Available rows remain fully readable on small screens.</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_learningGame.svg" alt="Learning"></div><span class="action">Join / View</span></a><a class="card" href="#"><div class="card-top"><img src="../AQY/static/AQY/images/aqy_icon.png" alt="AQY"><div class="game-name"><strong>Antiquity</strong><small>3 / 4 joined</small></div><span class="pill open">Open</span></div><div class="line">No hidden options summary. Everything important fits by wrapping.</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div><span class="action">Join / View</span></a><a class="card" href="#"><div class="card-top"><img src="../IND/static/IND/images/ind_icon.png" alt="IND"><div class="game-name"><strong>Indonesia</strong><small>1 / 4 joined</small></div><span class="pill open">Open</span></div><div class="line">Map and subsidy options are visible without hover.</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/IND_php_map.svg" alt="PHP"><img src="../Lobby/static/Lobby/images/startingOptions/IND_merger_subsidy.svg" alt="Merger"><img src="../Lobby/static/Lobby/images/startingOptions/IND_shipping_subsidy.svg" alt="Shipping"></div><span class="action">Join / View</span></a><a class="card" href="#"><div class="card-top"><img src="../HLC/static/HLC/images/icon_car.png" alt="HLC"><div class="game-name"><strong>Horseless Carriage</strong><small>2 / 3 joined</small></div><span class="pill open">Open</span></div><div class="line">Fast-paced setup with one open seat.</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/HLC_moreMainlines.svg" alt="More mainlines"></div><span class="action">Join / View</span></a><a class="card" href="#"><div class="card-top"><img src="../RNB/static/RNB/images/rnb_icon.png" alt="RNB"><div class="game-name"><strong>Roads &amp; Boats</strong><small>0 / 4 joined</small></div><span class="pill open">Open</span></div><div class="line">Stress case for future heavier metadata.</div><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div><span class="action">Join / View</span></a></div></div>
+          <div class="tab-panel" id="p12-invites"><div class="stack"><a class="card" href="#"><div class="card-top"><img src="../BUS/static/BUS/images/bus_icon.png" alt="BUS"><div class="game-name"><strong>Bus invitational</strong><small>Invite from DodgerB</small></div><span class="pill open">Invite</span></div><div class="line">Players: DodgerB, dizquiz, you</div><span class="action">Open Invite</span></a></div></div>
+          <div class="tab-panel" id="p12-finished"><div class="stack"><a class="card" href="#"><div class="card-top"><img src="../AQY/static/AQY/images/aqy_icon.png" alt="AQY"><div class="game-name"><strong>Antiquity #411</strong><small>Finished yesterday</small></div><span class="pill wait">Finished</span></div><div class="line">Winner: Benkyo</div><span class="action">Replay</span></a></div></div>
+        </div>
+      </section>
+
+      <aside class="side-rail">
+        <section class="rail-card">
+          <h3>Desktop rail</h3>
+          <div class="browse">
+            <a class="rail-item" href="#"><img src="../BUS/static/BUS/images/bus_icon.png" alt="BUS"><div><strong>Bus</strong><div class="sub">2 / 4 joined</div></div></a>
+            <a class="rail-item" href="#"><img src="../IND/static/IND/images/ind_icon.png" alt="IND"><div><strong>Indonesia</strong><div class="sub">1 / 4 joined</div></div></a>
+            <a class="rail-item" href="#"><img src="../RNB/static/RNB/images/rnb_icon.png" alt="RNB"><div><strong>Roads &amp; Boats</strong><div class="sub">0 / 4 joined</div></div></a>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="tour" id="tour">
+      <div class="tour-head"><h2>Tournament Example</h2><span class="sub">Card/list hybrid rather than a table, optimized for mobile scan</span></div>
+      <div class="tour-body">
+        <div class="tour-grid">
+          <article class="tour-card"><div class="tour-top"><img src="../AQY/static/AQY/images/aqy_icon.png" alt="AQY"><div><h3>Antiquity Spring Open</h3><p>Open for signup · 10 / 16 players · starts in 3 days</p></div></div><span class="pill open">Open</span></article>
+          <article class="tour-card"><div class="tour-top"><img src="../BUS/static/BUS/images/bus_icon.png" alt="BUS"><div><h3>Bus Compact Cup</h3><p>In progress · Round 2 · 3 active games</p></div></div><span class="pill wait">Live</span></article>
+          <article class="tour-detail"><h3>Antiquity Spring Open</h3><p>Detail card example for the tournament page using the same mobile-first visual language.</p><div class="options"><img src="../Lobby/static/Lobby/images/startingOptions/so_experiencedGame.svg" alt="Experienced"></div><div class="rows"><div><span>Status</span><strong>Open for signup</strong></div><div><span>Players</span><strong>10 / 16</strong></div><div><span>Format</span><strong>Rounds</strong></div><div><span>Round preview</span><strong>mihai, DodgerB, Benkyo, ChrisM</strong></div></div></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer">Prototype 12 · Mobile First Stack · small-screen hierarchy first, desktop expansion second.</footer>
+
+<script>
+  document.querySelectorAll('[data-tab-group="p12"]').forEach(function(button) {
+    button.addEventListener('click', function() {
+      document.querySelectorAll('[data-tab-group="p12"]').forEach(function(tab) { tab.classList.remove('active') })
+      document.querySelectorAll('#p12-turn, #p12-wait, #p12-available, #p12-invites, #p12-finished').forEach(function(panel) { panel.classList.remove('active') })
+      button.classList.add('active')
+      document.getElementById(button.getAttribute('data-target')).classList.add('active')
+    })
+  })
+</script>
+</body>
+</html>
