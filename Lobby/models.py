@@ -457,6 +457,7 @@ class GamePlayer(models.Model):
 
     is_current = models.BooleanField(default=False)
     has_chat_notification = models.BooleanField(default=False)
+    is_pending_finish = models.BooleanField(default=False)
 
     seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
 

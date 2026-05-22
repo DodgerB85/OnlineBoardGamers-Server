@@ -119,11 +119,19 @@ def build_show_game_data(
 
     # Chat notification
     chatNotification = False
+    gp_updated = False
     if user_gp and user_gp.has_chat_notification:
         chatNotification = True
         if clear_chat_notification:
             user_gp.has_chat_notification = False
-            user_gp.save()
+            gp_updated = True
+
+    if user_gp and currentGame.gameStatus == "FINISHED" and user_gp.is_pending_finish:
+        user_gp.is_pending_finish = False
+        gp_updated = True
+
+    if gp_updated:
+        user_gp.save()
 
     nextURL = f"/nextGame?current_id={gameID}&current_code={presenter.getGameCode()}"
 

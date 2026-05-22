@@ -420,14 +420,7 @@
                                     </tr>
                                 </thead>
                                 {% for game in currentGamesList %}
-                                    {% if game.myMove %}
-                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% for game in currentGamesList %}
-                                    {% if not game.myMove %}
-                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
-                                    {% endif %}
+                                    {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
                                 {% endfor %}
                             </table>
                             {% if myMoveGamesData|length > 0 %}
