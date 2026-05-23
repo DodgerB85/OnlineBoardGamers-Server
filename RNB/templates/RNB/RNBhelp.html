@@ -28,13 +28,11 @@
         <b><u>{% translate "Playing the Game" %}</u></b>
       </h3>
       {% blocktranslate trimmed %}
-        Roads & Boats has a lot of complex interactions with the goods and transporters.
-        For example, you may wish to pick up a good and ferry it, in order to drop it on one side of a river or another.
-        If your raft is full, but you wanted to ferry a good to the other side of the river,
-        then you could deposit a good, pick up the good you wish to ferry, drop it, and then pick up the original good.
-        To remove the need for lots of pointless and tedious interactions, certain shortcuts have been added to smoothen the user experience.
-        In the example above, the game will allow you to select the resource you wish to ferry,
-        and immediately drop it on the other side of the river, even if the raft is full.
+        Roads & Boats has a lot of complex interactions with the goods, transporters, and buildings.
+        To remove the need for lots of pointless and tedious interactions,
+        certain shortcuts have been added to smoothen the user experience.
+        For example, the game will allow you to select a good you wish to ferry even when the
+        transporter is already full, and then allow you to immediately drop it on the other side of the river.
         Such shortcuts are given in each of the phase sections below.
       {% endblocktranslate %}
       <h3>
@@ -50,22 +48,23 @@
           <br />
           <img src="{% static 'RNB/help/transporterSelectHelp.jpg' %}"
                alt="Transporter Help"
-               width="657"
-               height="440">
+               width="496"
+               height="443">
           <br />
           {% blocktranslate trimmed %}
             You can select a transporter directly on the map.
-            You can also select it by clicking on a tile, and then clicking on the transporter in the Zoom Tile.
-            If the tile is so crowded that you still cannot select it in the Zoom Tile, then each area of the tile is listed underneath,
-            and will always display all items. So alternatively you will always be able to select an item in this Zoom Area.
+            You can also select it by clicking on a tile, and then clicking on the transporter in the Zoom Tile. If the Zoom Tile is still so crowded that you cannot select it, then each area of the tile is listed underneath, and will always display all items.
+            So alternatively you will always be able to select an item in this Zoom Area.
             <br />
             Once a transporter is selected, you can interact with goods/buildings either directly on the map,
-            or using the big tile in the Zoom Panel or the area beneath that.
+            or using the big tile in the Zoom Panel or below in the Zoom Area.
           {% endblocktranslate %}
           <br />
           <br />
           {% blocktranslate trimmed %}
             <b>Production Phase:</b>
+            Mines produce automatically before the Production Phase Conflict is resolved.
+            <br />
             Primary producers all produce automatically at the start of the phase.
             <br />
             In addition, secondary producers with no transporters present will also automatically produce, if they are able to do so.
@@ -74,11 +73,13 @@
             <br />
             You can select a transporter to pickup/drop/ferry goods, or interact with any buildings.
             <br />
-            If a tile has any of your transporters present along with a building that is able to produce, it will be also highlighted so you can activate it directly.
+            If a tile has any of your transporters present along with a building that is able to produce, it will be highlighted so you can activate it directly.
             <br />
             A building will place its output onto the tile in the same area as the building.
             <br />
             If a building is not highlighted then check the Zoom Area to find out why.
+            <br />
+            Research is carried out in the production phase. When selecting a transporter, your research options will be shown as bubbles around the transporter.
           {% endblocktranslate %}
           <br />
           <br />
@@ -91,7 +92,7 @@
                 <li>Goods on the selected transporter (if any)</li>
                 <li>Goods on any of your transporters</li>
               </ul>
-              This saves you the hassle of having to deposit every good on to the same tile area before performing your build action.
+              This saves you having to deposit every good on to the same tile area before performing your build action.
             </li>
             <li>
               For the Paper Mill and Coal Burner with 2 different possible input goods, the goods will be automatically selected for you if there is no choice to make
@@ -103,18 +104,16 @@
           {% blocktranslate trimmed %}
             <b>Movement Phase:</b> Select a transporter.
             You can then click goods to load them, or click goods on the transporter to unload them.
-            When you click a transporter, the tile areas you can move to will automatically be highlighted.
+            When you click a transporter, the tile areas you can move to will automatically highlight.
             If you are unable to move a transporter, check the Zoom Area to find the reason.
-            You will either have no moves remaining, or you will have picked up a good that has itself already moved.
+            You will either have no moves remaining, or you will have picked up a good/transporter that has itself already moved.
             <br />
             <br />
             <b>Movement Phase Shortcuts: </b>
             <ul>
-              <li>When dropping a good, if there is only 1 location to drop it, it will be automatically dropped there.</li>
+              <li>If there is only 1 valid location for dropping a good, then it will be selected automatically.</li>
               <li>
-                When dropping a good, if there is more than 1 possible location,
-                or if there is a water transporter present that could perform a ferry,
-                you will be shown all possible options for the final destination of the good.
+                If there is more than 1 possible location, or if there is a water transporter present that could perform a ferry, then you will be shown all possible options for the final destination of the good.
               </li>
               <li>
                 Similarly when picking up a good, if the good could be ferried to your location for pickup,
@@ -129,9 +128,7 @@
                 as that is the equivalent of just “undoing” the action.
               </li>
               <li>
-                Geese cannot be following any of your transporters at the end of your movement phase - they must be on a tile.
-                If any geese followers have only one possible location to be dropped, they will be dropped there automatically.
-                If any geese are following a water transporter on a sea tile, then they cannot be dropped, and you will not be able to end your turn.
+                Geese cannot be following any of your transporters at the end of your movement phase - they must be on a tile. If any geese followers have only one possible location to be dropped, they will be dropped there automatically. If any geese are following a water transporter on a sea tile, then they cannot be dropped, and you must manually choose there destination before ending your turn.
               </li>
             </ul>
           {% endblocktranslate %}
@@ -139,9 +136,7 @@
             <b>Building Phase:</b>
             Select a transporter.
             <br />
-            NOTE THAT THE AUTO-HIGHLIGHTS ON THE MAP WILL BE REMOVED SOON
-            <br />
-            If you are able to build any buildings these will be displayed above the map.
+            If you are able to build any buildings these will be displayed in the Build Panel which will appear just below that transporter.
             <br />
             If you are able to start a build wall / bridge / road, or demolish wall action, these will be shown after the available buildings.
             <br />
@@ -152,7 +147,7 @@
             <ul>
               <li>
                 If you have multiple transporters on a tile, eg a donkey and raft,
-                then all possible options for building a road/wall will be highlighted,
+                then all possible options for building a road/wall will be highlighted
                 if it could be reached by any of your transporters on that tile.
               </li>
               <li>
@@ -162,17 +157,55 @@
                   <li>Goods on the selected transporter (if any)</li>
                   <li>Goods on any of your transporters</li>
                 </ul>
-                This saves you the hassle of having to deposit every good on to the same tile area before performing your build action.
+                This saves you having to deposit every good on to the same tile area before performing your build action.
               </li>
               <li>The same resource pickup/drop/ferry shortcuts as in the Movement phase also apply here.</li>
             </ul>
           {% endblocktranslate %}
           {% blocktranslate trimmed %}
-            <b>Wonder Phase:</b> Goods on your home tile will be highlighted.
-            When you have selected enough to produce the next wonder brick, it will be automatically added to the wonder.
-            <br />
-            NOTE: I EXPECT THIS TO MOVE TO SHOWING AVAILABLE RESOURCES IN THE "ACTION" AREA FOR SELECTION THERE
+            <b>Wonder Phase:</b> Goods on your home tile will be displayed above the map. Click these goods to add them to your next brick. As soon as sufficient goods have been added, then your next brick will be added to the Wonder.
+            You may pickup/drop/ferry goods on any tile. The same resource pickup/drop/ferry shortcuts as in the Movement phase also apply here.
           {% endblocktranslate %}
+        </div>
+      </div>
+      <div class="maxWidthContainerDiv">
+        <div class="RNBhelpSection">
+          <h3>
+            <b><u>{% translate "Conflict" %}</u></b>
+          </h3>
+          {% blocktranslate trimmed %}
+            After playing any main phase, you must pre-set a conflict phase. You may select the option “Wait & See” if you wish to decide whether or not to call conflict later. As soon as any player calls conflict, then each player will make their decisions about praying and turn order.
+            If no one calls conflict then the game will move to the next main phase.
+          {% endblocktranslate %}
+          <div class="RNBhelpSection">
+            <h3>
+              <b><u>{% translate "Presetting phases" %}</u></b>
+            </h3>
+            {% static 'RNB/help/pseudoResHelp.jpg' as pseudo_img_url %}
+            {% blocktranslate trimmed %}
+              To help speed the game up, every player is allowed to perform a move in the current phase.
+              Once you have set this move, then you will have further options to set future phases.
+              If you are setting a future production phase, then mines with only 1 type of good will produce that good.
+              Where a mine has more than 1 good, a “pseudo” good
+              <img src="{{ pseudo_img_url }}"
+                   alt="Pseudo Res Help"
+                   width="25"
+                   height="25">
+              will be produced during the pre-phase.
+              This will allow you to still pick up and transport the produced good if you don't mind if it is either iron or gold.
+              When the pre-set turn is processed, this”pseudo” good will be replaced with the actual mine output.
+              If you want to know which good the mine will produce, then you can wait for the game to move to that production phase.
+            {% endblocktranslate %}
+            <br />
+            <img src="{% static 'RNB/help/prePhaseHelp.jpg' %}"
+                 alt="Transporter Help"
+                 width="504"
+                 height="317">
+            <br />
+            {% blocktranslate trimmed %}
+              Once the current player has moved, then all pre-set moves will be processed in turn order. Should any action no longer be possible, eg because another player has moved a good, then that player will be notified that they need to re-do their turn. When they enter the game, their actions will be re-done until the action that was no longer possible.
+            {% endblocktranslate %}
+          </div>
         </div>
       </div>
       <div class="maxWidthContainerDiv">
@@ -180,9 +213,12 @@
       </div>
       <div class="maxWidthContainerDiv">
         <div class="RNBhelpSection">
-          <b><u>{% translate "When can I resign?" %}</u></b>
-          <br />
-          {% translate "You can resign TBC" %}
+          <h3>
+            <b><u>{% translate "When can I resign?" %}</u></b>
+          </h3>
+          {% blocktranslate trimmed %}
+            You can resign during any of your Production turns (but not when presetting it).
+          {% endblocktranslate %}
         </div>
         <br />
         <br />
@@ -193,7 +229,8 @@
              width="400"
              height="30">
       </div>
-      {% include 'Lobby/donate/donateBanner.html' %}
-      {% include 'Lobby/common/homeButton.html' %}
+      {% include "Lobby/donate/donateBanner.html" %}
+      {% include "Lobby/common/homeButton.html" %}
     </div>
-  {% endblock body %}
+  </div>
+{% endblock body %}
