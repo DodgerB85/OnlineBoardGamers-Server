@@ -2810,7 +2810,7 @@ def playerInfo(request, usernameToProfile):
             "jointWinPercentage": jointWinPercentage,
             "jointGameStats": jointGameStats,
         },
-        using="html",
+        #using="jinja2",
     )
 
     return response
