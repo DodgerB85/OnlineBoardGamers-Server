@@ -232,12 +232,11 @@ def showGame(request, game_id):
     tournamentGame = False
 
     # Chat notification separately (could be kicked out)
-    is_in_all = user_id in result["all_player_ids"]
-    #chat_notify_ids = {gp.player.id for gp in all_players if gp.player and gp.has_chat_notification}
     # Also check all players including kicked
     all_gps_including_kicked = list(currentGame.players.select_related("player").all())
+    all_player_ids_including_kicked = {gp.player.id for gp in all_gps_including_kicked if gp.player}
     chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
-    if is_in_all and user_id in chat_notify_ids_all:
+    if user_id in all_player_ids_including_kicked and user_id in chat_notify_ids_all:
         chatNotification = True
         presenter.removeChatNotification(request.user)
 
@@ -425,10 +424,10 @@ def showGameVue(request, game_id):
     tournamentGame = False
 
     # Chat notification separately (could be kicked out)
-    is_in_all = user_id in result["all_player_ids"]
     all_gps_including_kicked = list(currentGame.players.select_related("player").all())
+    all_player_ids_including_kicked = {gp.player.id for gp in all_gps_including_kicked if gp.player}
     chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
-    if is_in_all and user_id in chat_notify_ids_all:
+    if user_id in all_player_ids_including_kicked and user_id in chat_notify_ids_all:
         chatNotification = True
         presenter.removeChatNotification(request.user)
 
