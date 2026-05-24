@@ -120,11 +120,16 @@ def build_show_game_data(
     # Chat notification
     chatNotification = False
     gp_updated = False
-    if user_gp and user_gp.has_chat_notification:
+    # Check all players including kicked for chat notification
+    user_gp_all = next((gp for gp in currentGame.players.all() if gp.player and gp.player.id == user_id), None)
+    if user_gp_all and user_gp_all.has_chat_notification:
         chatNotification = True
         if clear_chat_notification:
-            user_gp.has_chat_notification = False
-            gp_updated = True
+            user_gp_all.has_chat_notification = False
+            if user_gp and user_gp_all.id == user_gp.id:
+                gp_updated = True
+            else:
+                user_gp_all.save()
 
     if user_gp and currentGame.gameStatus == "FINISHED" and user_gp.is_pending_finish:
         user_gp.is_pending_finish = False

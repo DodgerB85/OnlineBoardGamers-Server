@@ -174,7 +174,10 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData["preferredRNBoptions"] = preferredRNBoptions
 
     # RNB uses presenter.removeChatNotification + currentGame.save()
-    if user_gp and user_gp.has_chat_notification:
+    # Also check all players including kicked for chat notifications
+    all_gps_including_kicked = list(currentGame.players.select_related("player").all())
+    chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
+    if request.user.id in chat_notify_ids_all:
         returnData["chatNotification"] = True
         presenter.removeChatNotification(request.user)
         currentGame.save()
