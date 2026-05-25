@@ -58,34 +58,50 @@
         transform-origin: center;
     }
 
+    .yearRotate {
+        position: relative;
+        width: 0px;
+        height: 0px;
+        transform-origin: center;
+        animation: rotateYear 2s ease-out 1 both;
+        will-change: transform;
+    }
+
+    .yearScale {
+        position: relative;
+        width: 0px;
+        height: 0px;
+        transform-origin: center;
+        animation: shrinkYear 2s ease-out 1 both;
+        will-change: transform;
+    }
+
     .year {
-        /*font-size: 60px;*/
+        position: relative;
+        width: 0px;
+        height: 0px;
+        font-size: 150px;
+        line-height: 1;
         font-weight: bold;
-        /*transition: font-size 5s;*/
-        animation: rotateYear 2s ease-out 1; /* shrinkFont 2s ease-out 1;*/
     }
 
     @keyframes rotateYear {
         from {
             transform: rotate(0deg);
-            font-size: 150px;
         }
         to {
             transform: rotate(-360deg);
-            font-size: 20px;
         }
     }
 
-   /* @keyframes shrinkFont {
+    @keyframes shrinkYear {
         from {
-            font-size: 150px;
-            transform: translateZ(0);
+            transform: scale(1);
         }
         to {
-            font-size: 5px;
-            transform: translateZ(0);
+            transform: scale(0.1333333333);
         }
-    }*/
+    }
 
     .numeral:nth-child(1) { transform: rotate(330deg) translateY(-135px); }
     .numeral:nth-child(2) { transform: rotate(0deg) translateY(-135px); }
@@ -494,81 +510,85 @@
         <div class="numeral">VIII</div>
         <div class="numeral">IX</div>
         <div class="numeral">X</div>
-        <div class="year number" id="year">
-          <div>1899</div>
-          <div>1898</div>
-          <div>1897</div>
-          <div>1896</div>
-          <div>1895</div>
-          <div>1894</div>
-          <div>1893</div>
-          <div>1892</div>
-          <div>1891</div>
-          <div>1890</div>
-          <div>1889</div>
-          <div>1888</div>
-          <div>1887</div>
-          <div>1886</div>
-          <div>1885</div>
-          <div>1884</div>
-          <div>1883</div>
-          <div>1882</div>
-          <div>1881</div>
-          <div>1880</div>
-          <div>1879</div>
-          <div>1878</div>
-          <div>1877</div>
-          <div>1876</div>
-          <div>1875</div>
-          <div>1874</div>
-          <div>1873</div>
-          <div>1872</div>
-          <div>1871</div>
-          <div>1870</div>
-          <div>1869</div>
-          <div>1868</div>
-          <div>1867</div>
-          <div>1866</div>
-          <div>1865</div>
-          <div>1864</div>
-          <div>1863</div>
-          <div>1862</div>
-          <div>1861</div>
-          <div>1860</div>
-          <div>1859</div>
-          <div>1858</div>
-          <div>1857</div>
-          <div>1856</div>
-          <div>1855</div>
-          <div>1854</div>
-          <div>1853</div>
-          <div>1852</div>
-          <div>1851</div>
-          <div>1850</div>
-          <div>1849</div>
-          <div>1848</div>
-          <div>1847</div>
-          <div>1846</div>
-          <div>1845</div>
-          <div>1844</div>
-          <div>1843</div>
-          <div>1842</div>
-          <div>1841</div>
-          <div>1840</div>
-          <div>1839</div>
-          <div>1838</div>
-          <div>1837</div>
-          <div>1836</div>
-          <div>1835</div>
-          <div>1834</div>
-          <div>1833</div>
-          <div>1832</div>
-          <div>1831</div>
-          <div>1830</div>
-          <div>1829</div>
-          <div>1828</div>
-          <div>1827</div>
-          <div>1826</div>
+        <div class="yearRotate">
+          <div class="yearScale">
+            <div class="year number" id="year">
+              <div>1899</div>
+              <div>1898</div>
+              <div>1897</div>
+              <div>1896</div>
+              <div>1895</div>
+              <div>1894</div>
+              <div>1893</div>
+              <div>1892</div>
+              <div>1891</div>
+              <div>1890</div>
+              <div>1889</div>
+              <div>1888</div>
+              <div>1887</div>
+              <div>1886</div>
+              <div>1885</div>
+              <div>1884</div>
+              <div>1883</div>
+              <div>1882</div>
+              <div>1881</div>
+              <div>1880</div>
+              <div>1879</div>
+              <div>1878</div>
+              <div>1877</div>
+              <div>1876</div>
+              <div>1875</div>
+              <div>1874</div>
+              <div>1873</div>
+              <div>1872</div>
+              <div>1871</div>
+              <div>1870</div>
+              <div>1869</div>
+              <div>1868</div>
+              <div>1867</div>
+              <div>1866</div>
+              <div>1865</div>
+              <div>1864</div>
+              <div>1863</div>
+              <div>1862</div>
+              <div>1861</div>
+              <div>1860</div>
+              <div>1859</div>
+              <div>1858</div>
+              <div>1857</div>
+              <div>1856</div>
+              <div>1855</div>
+              <div>1854</div>
+              <div>1853</div>
+              <div>1852</div>
+              <div>1851</div>
+              <div>1850</div>
+              <div>1849</div>
+              <div>1848</div>
+              <div>1847</div>
+              <div>1846</div>
+              <div>1845</div>
+              <div>1844</div>
+              <div>1843</div>
+              <div>1842</div>
+              <div>1841</div>
+              <div>1840</div>
+              <div>1839</div>
+              <div>1838</div>
+              <div>1837</div>
+              <div>1836</div>
+              <div>1835</div>
+              <div>1834</div>
+              <div>1833</div>
+              <div>1832</div>
+              <div>1831</div>
+              <div>1830</div>
+              <div>1829</div>
+              <div>1828</div>
+              <div>1827</div>
+              <div>1826</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
