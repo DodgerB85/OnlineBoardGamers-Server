@@ -1300,6 +1300,12 @@ def replaceRNBmap(request):
         if existing_map.isVerified and request.user.username != "admin":
             return JsonResponse({"error": "Verified maps cannot be replaced"}, status=403)
 
+        # Ensure the incoming map_data has the correct uniqueID metadata at the end
+        if isinstance(map_data[-1], dict):
+            map_data[-1]["UK"] = existing_map.uniqueID
+        else:
+            map_data.append({"UK": existing_map.uniqueID})
+
         # Update the map fields
         existing_map.name = map_name
         existing_map.description = map_description
