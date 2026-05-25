@@ -25,7 +25,7 @@ initData.startingMap = {{ startingMap|safe }};
 initData.gameID = {{ gameID }};
 initData.gameName = "{{ gameName }}";
 initData.mapName = "{{ mapName }}"
-initData.mapDescription = "{{ mapDescription }}"
+initData.mapDescription = "{{ mapDescription | escapejs }}";
 initData.playerCount = {{playerCount}}
 initData.showPlayerCountWarning = {{showPlayerCountWarning|lower }}
 
