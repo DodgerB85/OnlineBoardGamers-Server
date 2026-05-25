@@ -27,13 +27,22 @@
 
     }
 
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
     #loadingText {
-      transform: translate(-50%, 0%);
       position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
       font-size: 40px;
       margin-top: 20px;
-      left: 50%;
-      white-space: nowrap;
+      padding: 0 16px;
+      box-sizing: border-box;
     }
 
     :root {
@@ -42,18 +51,28 @@
 
     #loadingAnimation {
       position: absolute;
-      top: 80px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      width: 235px;
-      height: 120px;
+      transform: translate(-50%, -50%);
+      width: 470px;
+      height: 240px;
+    }
+
+    .road-path {
+      position: absolute;
+      bottom: 30px;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      pointer-events: none;
+      z-index: 1;
     }
 
     .hex-tile {
       position: absolute;
       bottom: 0;
-      width: 100px;
-      height: 100px;
+      width: 200px;
+      height: 200px;
       overflow: visible;
     }
 
@@ -70,12 +89,11 @@
 
     .hex-building {
       position: absolute;
-      top: 8px;
+      top: 16px;
       left: 50%;
       transform: translateX(-50%);
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
+      width: 48px;
+      height: 48px;
       overflow: hidden;
       z-index: 2;
     }
@@ -85,18 +103,18 @@
       height: 100%;
       object-fit: cover;
       image-rendering: pixelated;
+      filter: drop-shadow(2px 0 0 black) drop-shadow(-2px 0 0 black) drop-shadow(0 2px 0 black) drop-shadow(0 -2px 0 black);
     }
 
     .trunks-on-hex {
       position: absolute;
-      bottom: 78px;
-      left: 32px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
+      bottom: 156px;
+      left: 64px;
+      width: 40px;
+      height: 40px;
       overflow: hidden;
       z-index: 4;
-      animation: trunks-hop var(--rnb-load-duration) linear forwards;
+      animation: trunks-to-donkey var(--rnb-load-duration) linear forwards;
     }
 
     .trunks-on-hex > img {
@@ -104,56 +122,129 @@
       height: 100%;
       object-fit: cover;
       image-rendering: pixelated;
+      filter: drop-shadow(2px 0 0 black) drop-shadow(-2px 0 0 black) drop-shadow(0 2px 0 black) drop-shadow(0 -2px 0 black);
     }
 
     .donkey-wrapper {
       position: absolute;
-      bottom: 14px;
-      left: 20px;
+      bottom: 40px;
+      left: 120px;
       z-index: 3;
       animation: donkey-journey var(--rnb-load-duration) linear forwards;
     }
 
     .donkey-wrapper > img {
-      width: 32px;
-      height: 32px;
+      width: 64px;
+      height: 64px;
       image-rendering: pixelated;
+      filter: drop-shadow(2px 0 0 black) drop-shadow(-2px 0 0 black) drop-shadow(0 2px 0 black) drop-shadow(0 -2px 0 black);
     }
 
-    .donkey-cargo {
+    @keyframes donkey-journey {
+      0%, 30% { transform: translateX(0); }
+      75% { transform: translateX(170px); }
+      100% { transform: translateX(170px); }
+    }
+
+    @keyframes trunks-to-donkey {
+      0% { transform: translate(0, 0) scale(0.7); opacity: 1; }
+      30% { transform: translate(58px, 85px) scale(0.5); opacity: 1; }
+      75% { transform: translate(228px, 85px) scale(0.5); opacity: 1; }
+      95% { transform: translate(248px, 30px) scale(0.7); opacity: 1; }
+      100% { transform: translate(248px, 30px) scale(0.7); opacity: 0; }
+    }
+
+    .boards-wrapper {
       position: absolute;
-      top: -12px;
-      left: 16px;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      overflow: hidden;
-      opacity: 0;
-      animation: cargo-appear var(--rnb-load-duration) linear forwards;
+      left: 312px;
+      bottom: 126px;
+      width: 40px;
+      height: 40px;
+      z-index: 5;
+      overflow: visible;
+      pointer-events: none;
     }
 
-    .donkey-cargo > img {
+    .board {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 28px;
+      height: 28px;
+      margin-top: -14px;
+      margin-left: -14px;
+    }
+
+    .board > img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       image-rendering: pixelated;
+      filter: drop-shadow(1px 0 0 black) drop-shadow(-1px 0 0 black) drop-shadow(0 1px 0 black) drop-shadow(0 -1px 0 black);
     }
 
-    @keyframes donkey-journey {
-      0%, 50% { transform: translateX(0); }
-      100% { transform: translateX(135px); }
+    .board-left {
+      animation: board-explode-left var(--rnb-load-duration) linear forwards;
     }
 
-    @keyframes trunks-hop {
-      0%, 35% { opacity: 1; transform: translateY(0) scale(1); }
-      45% { opacity: 0.5; transform: translateY(-8px) scale(0.6); }
-      50%, 100% { opacity: 0; transform: translateY(0) scale(0.3); }
+    .board-right {
+      animation: board-explode-right var(--rnb-load-duration) linear forwards;
     }
 
-    @keyframes cargo-appear {
-      0%, 45% { opacity: 0; transform: translateY(-10px) scale(0.2); }
-      55% { opacity: 1; transform: translateY(-4px) scale(0.8); }
-      60%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+    .firework {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    .spark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 5px;
+      margin: -2.5px 0 0 -2.5px;
+      border-radius: 50%;
+      animation: spark-fly var(--rnb-load-duration) linear forwards;
+    }
+
+    .spark-gold { background: #f5c842; }
+    .spark-orange { background: #ff9800; }
+    .spark-red { background: #f44336; }
+    .spark-white { background: #ffffff; }
+    .spark-n { --tx: 0px; --ty: -28px; }
+    .spark-ne { --tx: 20px; --ty: -20px; }
+    .spark-e { --tx: 28px; --ty: 0px; }
+    .spark-se { --tx: 20px; --ty: 20px; }
+    .spark-s { --tx: 0px; --ty: 28px; }
+    .spark-sw { --tx: -20px; --ty: 20px; }
+    .spark-w { --tx: -28px; --ty: 0px; }
+    .spark-nw { --tx: -20px; --ty: -20px; }
+    .spark-ne2 { --tx: 14px; --ty: -14px; }
+    .spark-se2 { --tx: 14px; --ty: 14px; }
+    .spark-sw2 { --tx: -14px; --ty: 14px; }
+    .spark-nw2 { --tx: -14px; --ty: -14px; }
+
+    @keyframes spark-fly {
+      0%, 75% { opacity: 0; transform: translate(0, 0) scale(0); }
+      80% { opacity: 1; transform: translate(0, 0) scale(1.2); }
+      95% { opacity: 0.7; transform: translate(var(--tx), var(--ty)) scale(0.7); }
+      98% { opacity: 0.3; transform: translate(var(--tx), var(--ty)) scale(0.5); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.2); }
+    }
+
+    @keyframes board-explode-left {
+      0%, 80% { opacity: 0; transform: translate(0, 0) scale(0); }
+      100% { opacity: 1; transform: translate(-18px, -15px) scale(1); }
+    }
+
+    @keyframes board-explode-right {
+      0%, 80% { opacity: 0; transform: translate(0, 0) scale(0); }
+      100% { opacity: 1; transform: translate(18px, -15px) scale(1); }
     }
 
     </style>
@@ -173,62 +264,88 @@
     <noscript>
       <strong>Please enable Javascript to continue.</strong>
     </noscript>
-    <div id="app2">
+    <div id="app">
       <div id="loadingText">Roads & Boats is loading........</div>
       <div id="loadingAnimation">
         <div class="hex-tile hex-woods">
-          <svg width="100" height="100" viewBox="0 0 56 56">
+          <svg width="200" height="200" viewBox="0 0 56 56">
             <defs>
-            <clipPath id="hexClipWoods">
-            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" />
-            </clipPath>
-            </defs>
+            <pattern id="hexPatternWoods" width="100%" height="100%" patternContentUnits="objectBoundingBox">
             <image href="{% static 'RNB/images/hexes/hex_14.jpg' %}"
                    x="0"
                    y="0"
-                   width="56"
-                   height="56"
-                   clip-path="url(#hexClipWoods)" />
+                   width="1"
+                   height="1"
+                   preserveAspectRatio="none" />
+            </pattern>
+            </defs>
+            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" fill="url(#hexPatternWoods)" />
           </svg>
         </div>
         <div class="hex-tile hex-pasture">
-          <svg width="100" height="100" viewBox="0 0 56 56">
+          <svg width="200" height="200" viewBox="0 0 56 56">
             <defs>
-            <clipPath id="hexClipPasture">
-            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" />
-            </clipPath>
-            </defs>
+            <pattern id="hexPatternPasture" width="100%" height="100%" patternContentUnits="objectBoundingBox">
             <image href="{% static 'RNB/images/hexes/hex_59.jpg' %}"
                    x="0"
                    y="0"
-                   width="56"
-                   height="56"
-                   clip-path="url(#hexClipPasture)" />
+                   width="1"
+                   height="1"
+                   preserveAspectRatio="none" />
+            </pattern>
+            </defs>
+            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" fill="url(#hexPatternPasture)" />
           </svg>
           <div class="hex-building">
             <img src="{% static 'RNB/images/buildings/bldg_sawmill.jpg' %}"
                  alt="sawmill"
-                 width="24"
-                 height="24" />
+                 width="48"
+                 height="48" />
           </div>
         </div>
+        <svg class="road-path" viewBox="0 0 470 100" preserveAspectRatio="none">
+          <path d="M 150 30 L 170 85 L 290 85 L 370 30" stroke="#1C2526" stroke-width="24" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+          <path d="M 150 30 L 170 85 L 290 85 L 370 30" stroke="#F5F5F5" stroke-width="4" stroke-dasharray="18 14" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+        </svg>
         <div class="trunks-on-hex">
           <img src="{% static 'RNB/images/resources/res_trunks.jpg' %}"
                alt="trunks"
-               width="20"
-               height="20" />
+               width="40"
+               height="40" />
+        </div>
+        <div class="boards-wrapper">
+          <div class="firework">
+            <div class="spark spark-gold spark-n"></div>
+            <div class="spark spark-orange spark-ne"></div>
+            <div class="spark spark-red spark-e"></div>
+            <div class="spark spark-orange spark-se"></div>
+            <div class="spark spark-gold spark-s"></div>
+            <div class="spark spark-orange spark-sw"></div>
+            <div class="spark spark-red spark-w"></div>
+            <div class="spark spark-orange spark-nw"></div>
+            <div class="spark spark-white spark-ne2"></div>
+            <div class="spark spark-white spark-nw2"></div>
+            <div class="spark spark-white spark-se2"></div>
+            <div class="spark spark-white spark-sw2"></div>
+          </div>
+          <div class="board board-left">
+            <img src="{% static 'RNB/images/resources/res_boards.jpg' %}"
+                 alt="boards"
+                 width="28"
+                 height="28" />
+          </div>
+          <div class="board board-right">
+            <img src="{% static 'RNB/images/resources/res_boards.jpg' %}"
+                 alt="boards"
+                 width="28"
+                 height="28" />
+          </div>
         </div>
         <div class="donkey-wrapper">
-          <img src="{% static 'RNB/images/transporters/transport_donkey_green.png' %}"
+          <img src="{% static 'RNB/images/transporters/transport_donkey_blue.png' %}"
                alt="donkey"
-               width="32"
-               height="32" />
-          <div class="donkey-cargo">
-            <img src="{% static 'RNB/images/resources/res_trunks.jpg' %}"
-                 alt="trunks"
-                 width="14"
-                 height="14" />
-          </div>
+               width="64"
+               height="64" />
         </div>
       </div>
     </div>
