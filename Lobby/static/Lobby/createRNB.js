@@ -369,20 +369,32 @@ function selectPlayers() {
 
 	// Re-sort maps based on new player count
 	if (loadedMaps.length > 0) {
-		populateMapDropdown(loadedMaps)
-		//window.mapStore.mapData.externalMapData.splice(0)
-		//window.mapStore.playerCount = numberOfPlayers
-		const mapPreviewPlaceholder = document.getElementById("mapPreviewPlaceholder")
-		const mapPreviewContent = document.getElementById("mapPreviewContent")
+		const playerNumberSelect = document.getElementById("playerNumber")
+		const lastPlayerCount = playerNumberSelect.dataset.lastValue
+		const currentPlayerCount = playerNumberSelect.value
+		const playerCountChanged = lastPlayerCount !== undefined && lastPlayerCount !== currentPlayerCount
 
-		const selectedMapName = document.getElementById("selectedMapName")
-		const selectedMapDescription = document.getElementById("selectedMapDescription")
+		const mapSelect = document.getElementById("mapSelection")
+		const previousMapValue = playerCountChanged ? null : mapSelect.value
+		const preserved = populateMapDropdown(loadedMaps, previousMapValue)
 
-		mapPreviewPlaceholder.style.display = "block"
-		mapPreviewContent.style.display = "none"
+		if (!preserved) {
+			//window.mapStore.mapData.externalMapData.splice(0)
+			//window.mapStore.playerCount = numberOfPlayers
+			const mapPreviewPlaceholder = document.getElementById("mapPreviewPlaceholder")
+			const mapPreviewContent = document.getElementById("mapPreviewContent")
 
-		selectedMapName.textContent = ""
-		selectedMapDescription.textContent = ""
+			const selectedMapName = document.getElementById("selectedMapName")
+			const selectedMapDescription = document.getElementById("selectedMapDescription")
+
+			mapPreviewPlaceholder.style.display = "block"
+			mapPreviewContent.style.display = "none"
+
+			selectedMapName.textContent = ""
+			selectedMapDescription.textContent = ""
+		}
+
+		playerNumberSelect.dataset.lastValue = currentPlayerCount
 	}
 }
 
@@ -569,7 +581,7 @@ function loadMaps() {
 		})
 }
 
-function populateMapDropdown(maps) {
+function populateMapDropdown(maps, preserveMapValue = null) {
 	const mapSelect = document.getElementById("mapSelection")
 	const numberOfPlayers = document.getElementById("playerNumber").value
 
@@ -647,6 +659,17 @@ function populateMapDropdown(maps) {
 		option.style.color = map.isVerified ? "darkgreen" : "#D35400"
 		mapSelect.appendChild(option)
 	})
+
+	// Restore previous selection if requested and still available
+	if (preserveMapValue) {
+		for (let i = 0; i < mapSelect.options.length; i++) {
+			if (mapSelect.options[i].value === preserveMapValue) {
+				mapSelect.selectedIndex = i
+				return true
+			}
+		}
+	}
+	return false
 }
 
 function onMapSelectionChange() {
