@@ -36,6 +36,126 @@
       white-space: nowrap;
     }
 
+    :root {
+      --rnb-load-duration: 1s;
+    }
+
+    #loadingAnimation {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 235px;
+      height: 120px;
+    }
+
+    .hex-tile {
+      position: absolute;
+      bottom: 0;
+      width: 100px;
+      height: 100px;
+      overflow: visible;
+    }
+
+    .hex-woods { left: 0; }
+
+    .hex-woods svg,
+    .hex-pasture svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .hex-pasture { right: 0; }
+
+    .hex-building {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .hex-building > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    .trunks-on-hex {
+      position: absolute;
+      bottom: 78px;
+      left: 32px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      overflow: hidden;
+      z-index: 4;
+      animation: trunks-hop var(--rnb-load-duration) linear forwards;
+    }
+
+    .trunks-on-hex > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    .donkey-wrapper {
+      position: absolute;
+      bottom: 14px;
+      left: 20px;
+      z-index: 3;
+      animation: donkey-journey var(--rnb-load-duration) linear forwards;
+    }
+
+    .donkey-wrapper > img {
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
+    }
+
+    .donkey-cargo {
+      position: absolute;
+      top: -12px;
+      left: 16px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      overflow: hidden;
+      opacity: 0;
+      animation: cargo-appear var(--rnb-load-duration) linear forwards;
+    }
+
+    .donkey-cargo > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    @keyframes donkey-journey {
+      0%, 50% { transform: translateX(0); }
+      100% { transform: translateX(135px); }
+    }
+
+    @keyframes trunks-hop {
+      0%, 35% { opacity: 1; transform: translateY(0) scale(1); }
+      45% { opacity: 0.5; transform: translateY(-8px) scale(0.6); }
+      50%, 100% { opacity: 0; transform: translateY(0) scale(0.3); }
+    }
+
+    @keyframes cargo-appear {
+      0%, 45% { opacity: 0; transform: translateY(-10px) scale(0.2); }
+      55% { opacity: 1; transform: translateY(-4px) scale(0.8); }
+      60%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     </style>
     <script src="{% static 'Lobby/common/msgPack.js' %}"></script>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
@@ -53,8 +173,64 @@
     <noscript>
       <strong>Please enable Javascript to continue.</strong>
     </noscript>
-    <div id="app">
+    <div id="app2">
       <div id="loadingText">Roads & Boats is loading........</div>
+      <div id="loadingAnimation">
+        <div class="hex-tile hex-woods">
+          <svg width="100" height="100" viewBox="0 0 56 56">
+            <defs>
+            <clipPath id="hexClipWoods">
+            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" />
+            </clipPath>
+            </defs>
+            <image href="{% static 'RNB/images/hexes/hex_14.jpg' %}"
+                   x="0"
+                   y="0"
+                   width="56"
+                   height="56"
+                   clip-path="url(#hexClipWoods)" />
+          </svg>
+        </div>
+        <div class="hex-tile hex-pasture">
+          <svg width="100" height="100" viewBox="0 0 56 56">
+            <defs>
+            <clipPath id="hexClipPasture">
+            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" />
+            </clipPath>
+            </defs>
+            <image href="{% static 'RNB/images/hexes/hex_59.jpg' %}"
+                   x="0"
+                   y="0"
+                   width="56"
+                   height="56"
+                   clip-path="url(#hexClipPasture)" />
+          </svg>
+          <div class="hex-building">
+            <img src="{% static 'RNB/images/buildings/bldg_sawmill.jpg' %}"
+                 alt="sawmill"
+                 width="24"
+                 height="24" />
+          </div>
+        </div>
+        <div class="trunks-on-hex">
+          <img src="{% static 'RNB/images/resources/res_trunks.jpg' %}"
+               alt="trunks"
+               width="20"
+               height="20" />
+        </div>
+        <div class="donkey-wrapper">
+          <img src="{% static 'RNB/images/transporters/transport_donkey_green.png' %}"
+               alt="donkey"
+               width="32"
+               height="32" />
+          <div class="donkey-cargo">
+            <img src="{% static 'RNB/images/resources/res_trunks.jpg' %}"
+                 alt="trunks"
+                 width="14"
+                 height="14" />
+          </div>
+        </div>
+      </div>
     </div>
   </body>
   <script>
