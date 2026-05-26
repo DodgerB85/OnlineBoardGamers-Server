@@ -43,7 +43,7 @@ from .models import RNBmap, RNBMapScore
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
-ALLOWED_USERS_RNB = ["admin", "DodgerB", "user1", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy", "BotKickStarter", "Dycu"]
+ALLOWED_USERS_RNB = ["admin", "DodgerB", "user1", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy", "BotKickStarter", "Dycu", "RedWater", "Shoopuffman", "jmelliere"]
 
 if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter
@@ -1648,7 +1648,7 @@ def PclearPastMoveData(currentGame):
         gp.moveDataJSON = [
             m
             for m in moves
-            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT ) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)
+            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)
         ]
 
         gp.save(update_fields=["moveDataJSON"])

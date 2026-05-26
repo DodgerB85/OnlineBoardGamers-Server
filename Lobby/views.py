@@ -127,6 +127,9 @@ ALLOWED_USERS_RNB = [
     "h",
     "Jungy",
     "Dycu",
+    "RedWater",
+    "Shoopuffman",
+    "jmelliere",
 ]
 
 ##########################
