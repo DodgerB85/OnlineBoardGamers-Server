@@ -49,7 +49,7 @@ async function initGame() {
 	personal.gameID = window.initData.gameID
 	store.gameName = window.initData.gameName
 	personal.gameCreationTimestamp = window.initData.gameCreationTimestamp / 1000
-	store.refSize = window.initData.myZoomLevel
+	store.refSize = window.initData.myZoomLevel || 240
 
 	personal.liveWS = false
 
