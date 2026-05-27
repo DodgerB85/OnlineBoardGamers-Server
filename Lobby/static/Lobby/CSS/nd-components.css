@@ -79,6 +79,10 @@ body.nd .nd-page-narrow {
     max-width: 720px;
 }
 
+body.nd .nd-page-profile {
+    max-width: 80%;
+}
+
 body.nd .nd-page-header {
     display: flex;
     flex-wrap: wrap;
@@ -291,10 +295,10 @@ body.nd .nd-form-row > input[type="email"],
 body.nd .nd-form-row > input[type="password"],
 body.nd .nd-form-row > input[type="number"],
 body.nd .nd-form-row > select,
-body.nd .nd-form-row > textarea,
-body.nd .nd-field {
+body.nd .nd-form-row > textarea {
     flex: 1 1 220px;
     padding: 8px 10px;
+    margin: 0;
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
@@ -304,10 +308,13 @@ body.nd .nd-field {
     box-sizing: border-box;
 }
 
+body.nd .nd-field {
+    flex: 1 1 220px;
+}
+
 body.nd .nd-form-row > input:focus,
 body.nd .nd-form-row > select:focus,
-body.nd .nd-form-row > textarea:focus,
-body.nd .nd-field:focus {
+body.nd .nd-form-row > textarea:focus {
     outline: 2px solid var(--color-accent);
     outline-offset: 1px;
     border-color: var(--color-accent-strong);
@@ -329,6 +336,17 @@ body.nd .nd-form-row > textarea {
     }
     body.nd .nd-form-row .nd-form-help {
         padding-left: 0;
+    }
+    /* In column-flex context flex-basis becomes min-height; override to content sizing */
+    body.nd .nd-field,
+    body.nd .nd-form-row > input[type="text"],
+    body.nd .nd-form-row > input[type="email"],
+    body.nd .nd-form-row > input[type="password"],
+    body.nd .nd-form-row > input[type="number"],
+    body.nd .nd-form-row > select,
+    body.nd .nd-form-row > textarea {
+        flex: 0 0 auto;
+        width: 100%;
     }
 }
 
@@ -636,6 +654,9 @@ body.nd .nd-map-editor-grid .nd-create-tile-label {
 }
 
 @media (max-width: 480px) {
+    body.nd .nd-page-profile {
+        max-width: 100%;
+    }
     body.nd .nd-card-grid-wide,
     body.nd .nd-map-editor-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -688,4 +709,67 @@ body.nd .nd-row-flex {
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
+}
+
+/* Stacked form: label above input instead of side-by-side */
+body.nd .nd-stacked-form .nd-form-row {
+    flex-direction: column;
+    align-items: stretch;
+}
+body.nd .nd-stacked-form .nd-form-label {
+    flex: 0 0 auto;
+    margin-bottom: 4px;
+}
+body.nd .nd-stacked-form .nd-form-row > input[type="text"],
+body.nd .nd-stacked-form .nd-form-row > input[type="email"],
+body.nd .nd-stacked-form .nd-form-row > input[type="password"],
+body.nd .nd-stacked-form .nd-form-row > input[type="number"],
+body.nd .nd-stacked-form .nd-form-row > select,
+body.nd .nd-stacked-form .nd-form-row > textarea {
+    flex: 0 0 auto;
+    width: 100%;
+}
+
+/* ---------- PROFILE COLOUR PICKERS ---------- */
+/* Each choice div is a flex-column: image/svg on top, radio centered below */
+body.nd .favRestChoice,
+body.nd .favHLCchoice,
+body.nd .favBusColour,
+body.nd .favBusMap,
+body.nd .favTGZchoice,
+body.nd .favCNSchoice,
+body.nd .favKFWchoice,
+body.nd .favWEBchoice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+body.nd .favRestChoice label,
+body.nd .favHLCchoice label,
+body.nd .favBusColour label,
+body.nd .favBusMap label,
+body.nd .favTGZchoice label,
+body.nd .favCNSchoice label,
+body.nd .favKFWchoice label,
+body.nd .favWEBchoice label {
+    cursor: pointer;
+    display: block;
+}
+
+/* Image size caps */
+body.nd .favRestChoice img { max-height: 90px; width: auto; display: block; }
+body.nd .favBusMap img { max-height: 182px; width: auto; display: block; }
+body.nd .favHLCchoice img { max-height: 80px; width: auto; display: block; }
+body.nd .favBusColour img { max-height: 60px; width: auto; display: block; }
+body.nd .favTGZchoice img { max-height: 100px; width: auto; display: block; }
+
+/* SVG swatch sizing */
+body.nd .cnsPrefSVG,
+body.nd .kfwPrefSVG,
+body.nd .webPrefSVG {
+    display: block;
+    width: 80px;
+    height: 20px;
 }
