@@ -1,4 +1,31 @@
 {% load static i18n %}
+{% if request.use_new_design %}
+<tr class="nd-row09 gameRow" id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
+  <td class="nd-col-icon">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}</td>
+  <td class="nd-col-game">
+    <strong>{{ game.gameName }}</strong>
+    {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
+    <br><small class="nd-muted">{% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> · {{ game.pace|safe }}</small>
+  </td>
+  <td class="nd-col-players">
+    <span class="nd-muted nd-small">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>
+    {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+  </td>
+  <td class="nd-col-options">
+    {% if game.startingMap and game.gameCode == "FCM" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMap.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="FCM">{% endif %}
+    {% if game.startingMap and game.gameCode == "TGZ" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapTGZ.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="TGZ">{% endif %}
+    {% if game.startingMap and game.gameCode == "AQY" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">{% endif %}
+    {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
+    {{ game.startingOptionsHTML|safe }}
+  </td>
+  <td class="nd-col-status"><span class="nd-pill nd-pill-accent">{% translate "Invited" %}</span></td>
+  <td class="nd-col-cta">
+    <div class="buttonDiv Join availableLink">{% translate "Accept" %}</div>
+    <div class="buttonDiv Leave leaveDeclineLink invitations">{% translate "Decline" %}</div>
+    <input type="text" class="declineInputClass" id="{{ game.gameCode }}declineReason{{ game.gameID }}" placeholder="{% translate 'Reason (optional)' %}">
+  </td>
+</tr>
+{% else %}
 <tr class="gameRow" id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
   <td>
     <div class="buttonDiv Join availableLink">{% translate "Join" %}</div>
@@ -97,3 +124,4 @@
            placeholder="{% translate "You may give a reason" %}">
   </td>
 </tr>
+{% endif %}

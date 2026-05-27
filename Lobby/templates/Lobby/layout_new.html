@@ -1,0 +1,292 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+        html {
+          display: none;
+        }
+        </style>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XVXK8Q50KN"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-XVXK8Q50KN');
+        </script>
+        <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Board Gamers",
+  "operatingSystem": "WEB",
+  "applicationCategory": "GameApplication"
+}
+        </script>
+        <title>
+            {% block title %}
+                {% if user.is_authenticated %}
+                    {% if myMoveGames %}({{ myMoveGames }}){% endif %}
+                    Online Board Gamers
+                {% else %}
+                    Online Board Gamers - Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!
+                {% endif %}
+            {% endblock %}
+        </title>
+        <meta name="title" content="Online Board Gamers">
+        {% block description %}
+            <meta name="description"
+                  content="Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!">
+        {% endblock %}
+        <meta name="keywords"
+              content="Food,Chain,Magnate,Online,Play,Board,Game,Games,Gamers,Horseless,Carriage,Bus,Great,Zimbabwe,Cannes,Antiquity,Indonesia,Keyflower,Web">
+        <meta name="robots" content="index, follow">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="language" content="English">
+        <meta name="revisit-after" content="2 days">
+        <meta name="author" content="Online Board Gamers">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Browser Icons -->
+        <link rel="icon"
+              type="image/png"
+              sizes="96x96"
+              href="{% static 'Lobby/favicons/favicon-96x96.png' %}?v=20260507" />
+        <link rel="icon"
+              type="image/svg+xml"
+              href="{% static 'Lobby/favicons/favicon.svg' %}?v=20260507" />
+        <link rel="shortcut icon"
+              href="{% static 'Lobby/favicons/favicon.ico' %}?v=20260507" />
+        <!-- Apple/Mobile Icons -->
+        <link rel="apple-touch-icon"
+              sizes="180x180"
+              href="{% static 'Lobby/favicons/apple-touch-icon.png' %}?v=20260507" />
+        <link rel="manifest"
+              href="{% static 'Lobby/favicons/site.webmanifest' %}?v=20260507" />
+        <!-- Social Media (Open Graph) -->
+        <meta property="og:image"
+              content="https://www.onlineboardgamers.com{% static 'Lobby/favicons/favicon-96x96.png' %}" />
+        {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com/">{% endblock %}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="{% static 'Lobby/CSS/nd-components.css' %}" rel="stylesheet">
+        <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
+        {% block head %}{% endblock %}
+    </head>
+    <body class="nd">
+        <div class="topBar">
+            {% if user.is_authenticated %}
+                <!-- LOGGED IN TOP BAR -->
+                <div id="leftLoggedInLinks">
+                    <div>
+                        <a class="topBarLink" href="{% url 'index' %}">{% translate "Home" %}</a> |
+                        <a class="topBarLink" href="{% url 'profile' %}">{% translate "Profile" %}</a> |
+                        <a class="topBarLink" href="{% url 'myLogout' %}">{% translate "Log Out" %}</a>
+                        <br />
+                        <span id="leftLoggedInAsInfo">{% translate "Logged in as" %}: {{ user.username }}</span>
+                    </div>
+                    <a href="{% url 'index' %}">
+                        <img id="logoLoggedIn"
+                             src="{% static 'Lobby/images/Logo1.png' %}"
+                             width="400px"
+                             height="30px"
+                             alt="Online Board Gamers">
+                    </a>
+                </div>
+                <div id="rightLinksLoggedIn">
+                    <div id="rightLoggedInHyperlinks">
+                        <a class="topBarLink" href="{% url 'newGamesPage' %}">{% translate "New Game" %}</a> |
+                        <a class="topBarLink"
+                           href="{% url 'playerInfo' usernameToProfile=user.username %}">{% translate "My Games" %}</a> |
+                        <a class="topBarLink" href="{% url 'AllTournaments' %}">{% translate "Tournaments" %}</a> |
+                        <a class="topBarLink" href="{% url 'stats' %}">{% translate "Stats" %}</a> |
+                        <a class="topBarLink" id="helpLink" href="{% url 'lobbyHelp' %}">{% translate "Help" %}</a> |
+                        <a class="topBarLink" href="{% url 'changelog' %}">{% translate "Updates" %}</a> |
+                        <a class="topBarLink" href="{% url 'donate' %}">{% translate "Support" %}</a> |
+                        <a class="topBarLink" id="aboutLink" href="{% url 'about' %}">{% translate "About" %}</a>
+                    </div>
+                    <div id="langSelectLoggedIn">
+                        {% get_current_language_bidi as LANGUAGE_BIDI %}
+                        {% get_current_language as LANGUAGE_CODE %}
+                        <form action="{% url 'set_language_custom' %}" method="post">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.path }}">
+                            <select name="language" onchange="this.form.submit()">
+                                {% get_available_languages as LANGUAGES %}
+                                {% get_language_info_list for LANGUAGES as languages %}
+                                {% for language in languages %}
+                                    <option value="{{ language.code }}"
+                                            {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                                        {% if language.name_local == "British English" %}
+                                            English
+                                        {% else %}
+                                            {{ language.name_local }}
+                                        {% endif %}
+                                        {% if showLangs %}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                    <div class="hamburger">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Not logged in TOP BAR -->
+                <div id="loginForm">
+                    <form action="{% url 'myLogin' %}" method="post">
+                        {% csrf_token %}
+                        <input class="loginInput"
+                               type="text"
+                               name="username"
+                               placeholder="{% translate " Username" %}"
+                               required>
+                        <input class="loginInput"
+                               type="password"
+                               name="password"
+                               placeholder="{% translate " Password" %}"
+                               required>
+                        <input type="hidden" name="next" value="{{ request.GET.next }}" />
+                        <input type="submit" value="{% translate " Login" %}">
+                    </form>
+                    <a href="{% url 'index' %}">
+                        <img id="logoLoggedOut"
+                             width="800px"
+                             height="54px"
+                             src="{% static 'Lobby/images/Logo1.png' %}"
+                             alt="Online Board Gamers">
+                    </a>
+                </div>
+                <div id="registerLink">
+                    <a class="topBarLink" href="{% url 'register' %}">
+                        <span id="registerLinkTextLong">{% translate "Register New Account" %}</span>
+                        <span id="registerLinkTextShort">{% translate "Register" %}</span>
+                    </a>|
+                    <a class="topBarLink"
+                       id="forgotPwdLink"
+                       href="{% url 'password_reset' %}">{% translate "Forgot Password?" %}</a>
+                </div>
+                <div id="rightLinksLoggedOut">
+                    <div id="rightLoggedOutHyperlinks">
+                        <a class="topBarLink" id="homeLink" href="{% url 'index' %}">{% translate "Home" %}</a>
+                        <a class="topBarLink" id="helpLink" href="{% url 'lobbyHelp' %}">{% translate "Help" %}</a>
+                        <a class="topBarLink" id="aboutLink" href="{% url 'about' %}">{% translate "About" %}</a>
+                        <a class="topBarLink" id="contactLink" href="{% url 'contact' %}">{% translate "Contact" %}</a>
+                    </div>
+                    <div id="langSelectLoggedOut">
+                        {% get_current_language_bidi as LANGUAGE_BIDI %}
+                        {% get_current_language as LANGUAGE_CODE %}
+                        <form action="{% url 'set_language_custom' %}" method="post">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.path }}">
+                            <select name="language" onchange="this.form.submit()">
+                                {% get_available_languages as LANGUAGES %}
+                                {% get_language_info_list for LANGUAGES as languages %}
+                                {% for language in languages %}
+                                    <option value="{{ language.code }}"
+                                            {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                                        {% if language.name_local == "British English" %}
+                                            English
+                                        {% else %}
+                                            {{ language.name_local }}
+                                        {% endif %}
+                                        {% if showLangs %}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                    <div class="hamburger">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        {% if user.is_authenticated %}
+            <!-- Hamburger logged in -->
+            <div class="hamburgerMenu">
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'newGamesPage' %}">{% translate "New Game" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink"
+                       href="{% url 'playerInfo' usernameToProfile=user.username %}">{% translate "My Games" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'AllTournaments' %}">{% translate "Tournaments" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'stats' %}">{% translate "Stats" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'lobbyHelp' %}">{% translate "Help" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'changelog' %}">{% translate "Updates" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'donate' %}">{% translate "Support" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'about' %}">{% translate "About" %}</a>
+                </div>
+            </div>
+        {% else %}
+            <!-- Hamburger not logged in -->
+            <div class="hamburgerMenu">
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'index' %}">{% translate "Home" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'lobbyHelp' %}">{% translate "Help" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'about' %}">{% translate "About" %}</a>
+                </div>
+                <div class="hamburgerLinkDiv">
+                    <a class="topBarLink" href="{% url 'contact' %}">{% translate "Contact" %}</a>
+                </div>
+            </div>
+        {% endif %}
+        <main class="mainLayout">
+            {% block body %}{% endblock %}
+        </main>
+        <footer class="footer">
+            <div class="nd-support-strip">
+                {% include "Lobby/donate/donateBanner.html" %}
+                {% include "Lobby/splotterconSponsor.html" %}
+            </div>
+            <div class="content">
+                <p>
+                    {% blocktranslate trimmed %}
+                        Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, and Indonesia are board games by Jeroen Doumen
+                        and Joris Wiersinga, published by
+                        <a href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>. Permission Provided.
+                    {% endblocktranslate %}
+                </p>
+                <p>
+                    Summary icons from <a href="https://game-icons.net/">game-icons.net</a>
+                </p>
+            </div>
+        </footer>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const hamburger = document.querySelector(".hamburger");
+            const hamburgerMenu = document.querySelector(".hamburgerMenu");
+            if (!hamburger || !hamburgerMenu) return;
+            hamburger.addEventListener("click", () => {
+                hamburger.classList.toggle("active");
+                hamburgerMenu.classList.toggle("active");
+            });
+        });
+        </script>
+    </body>
+</html>

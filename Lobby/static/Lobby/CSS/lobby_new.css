@@ -1,0 +1,620 @@
+/* ============================================================
+   OBG New Design — Lobby
+   ============================================================ */
+
+.nd-lobby {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 0 4px;
+}
+
+/* ---- Notices & News ---- */
+.nd-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-positive-bg);
+    border: 1px solid rgba(89, 122, 80, 0.3);
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--color-ink);
+    flex-wrap: wrap;
+}
+.nd-notice a { color: var(--color-accent-strong); font-weight: 600; }
+.nd-notice-icon { vertical-align: middle; }
+
+.nd-news-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, rgba(147, 213, 208, 0.22), rgba(157, 205, 142, 0.18));
+    border: 2px solid var(--color-brand-blue);
+    border-radius: 8px;
+    padding: 9px 14px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-align: center;
+}
+.nd-news-banner a {
+    color: var(--color-accent-strong);
+    font-weight: 700;
+}
+.nd-news-dismiss {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-muted);
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+.nd-news-dismiss:hover {
+    background: rgba(25, 52, 60, 0.1);
+    color: var(--color-ink);
+}
+/* Hide the colour guide inside lobby panels under /nd/ — lobbyHelp has the full legend */
+body.nd .colourGuideDiv { display: none; }
+
+.nd-messages { margin-bottom: 10px; }
+
+/* ---- Tabs (09 dense-scoreboard look) ---- */
+.nd-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    margin: 0 0 14px;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: nowrap;
+    background: var(--color-surface-soft);
+    border-radius: 8px 8px 0 0;
+    border: 1px solid var(--color-border);
+    border-bottom: none;
+}
+
+.nd-tab {
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--color-border);
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--color-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.nd-tab:last-child { border-right: none; }
+
+.nd-tab:hover {
+    color: var(--color-ink);
+    background: rgba(147, 213, 208, 0.12);
+}
+
+/* Lobby.js adds class "tablinks active" when selected */
+.nd-tab.active,
+.nd-tab.tablinks.active {
+    color: var(--color-accent-ink);
+    background: var(--color-accent);
+}
+
+.nd-tab-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: inherit;
+    opacity: 0.85;
+}
+
+.nd-tab.active .nd-tab-count {
+    opacity: 1;
+}
+
+.nd-chat-ping {
+    opacity: 0.85;
+    margin-right: 2px;
+}
+
+/* ---- Empty-state card ---- */
+.nd-empty-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    margin: 12px 0;
+    box-shadow: var(--shadow-sm);
+}
+.nd-empty-msg {
+    margin: 0 0 12px;
+    font-size: 15px;
+    color: var(--color-ink-soft);
+}
+.nd-empty-cta {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    margin-bottom: 10px;
+}
+.nd-empty-cta:hover {
+    background: var(--color-accent-strong);
+    color: #fff;
+}
+.nd-empty-hint {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--color-muted);
+}
+.nd-empty-hint a {
+    color: var(--color-accent-strong);
+}
+
+/* ---- Tables ---- */
+.nd-table-wrap {
+    margin-bottom: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 0 0 8px 8px;
+    border-top: none;
+    background: var(--color-surface);
+    overflow: visible;
+}
+
+/* Hide the legacy thead under /nd/ — rows are self-describing (09 pattern) */
+body.nd .nd-table thead {
+    display: none;
+}
+
+/* ---- 09 Six-column row grid ---- */
+body.nd .nd-table {
+    display: block;
+    width: 100%;
+}
+body.nd .nd-table tbody {
+    display: block;
+}
+body.nd .nd-row09 {
+    display: grid;
+    grid-template-columns: 72px minmax(180px, 1.4fr) minmax(150px, 1fr) minmax(220px, 1.1fr) 110px 130px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    transition: background 0.12s;
+}
+body.nd .nd-row09:last-child {
+    border-bottom: none;
+}
+body.nd .nd-row09:hover {
+    background: var(--color-surface-soft);
+}
+body.nd .nd-row09 > td {
+    display: block;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+body.nd .nd-col-icon img {
+    width: 52px;
+    height: 52px;
+    border-radius: 6px;
+    object-fit: contain;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    padding: 2px;
+}
+body.nd .nd-col-game strong {
+    color: var(--color-ink);
+    font-size: 15px;
+}
+body.nd .nd-col-game small {
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+body.nd .nd-col-game a { color: var(--color-accent-strong); text-decoration: none; }
+body.nd .nd-col-game a:hover { text-decoration: underline; }
+body.nd .nd-col-players {
+    font-size: 13px;
+    color: var(--color-ink-soft);
+    line-height: 1.4;
+}
+body.nd .nd-col-players a {
+    color: var(--color-accent-strong);
+    text-decoration: none;
+}
+body.nd .nd-col-players a:hover { text-decoration: underline; }
+body.nd .nd-col-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+body.nd .nd-col-options img.startingMap {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+body.nd .nd-col-status {
+    text-align: center;
+}
+body.nd .nd-col-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+}
+body.nd .nd-col-cta .buttonDiv {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    border: 1px solid var(--color-border-strong);
+}
+body.nd .nd-col-cta .buttonDiv.Join,
+body.nd .nd-col-cta .buttonDiv.availableLink {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    border-color: var(--color-accent);
+}
+body.nd .nd-col-cta .buttonDiv.Join:hover,
+body.nd .nd-col-cta .buttonDiv.availableLink:hover {
+    background: var(--color-accent-strong);
+    color: #fff;
+}
+body.nd .nd-col-cta .buttonDiv.Leave {
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+body.nd .nd-col-cta .copyGameLinkButtonInTable {
+    background: transparent;
+    color: var(--color-accent-strong);
+    border: none;
+    padding: 2px 4px;
+    font-size: 11px;
+    cursor: pointer;
+}
+body.nd .nd-col-cta .deleteTrainingGame {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    padding: 6px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* State backgrounds via row classes */
+body.nd .nd-row09.myMove { background: var(--color-positive-bg); }
+body.nd .nd-row09.kickoutRequired1 { background: var(--color-warn-bg); }
+body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
+body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.30); }
+body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.32); }
+body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
+
+/* Mobile collapse (per 09 prototype) */
+@media (max-width: 980px) {
+    body.nd .nd-row09 {
+        grid-template-columns: 56px 1fr;
+        gap: 8px 10px;
+        padding: 12px;
+    }
+    body.nd .nd-col-icon img { width: 44px; height: 44px; }
+    body.nd .nd-col-players,
+    body.nd .nd-col-options,
+    body.nd .nd-col-status,
+    body.nd .nd-col-cta {
+        grid-column: 1 / -1;
+    }
+    body.nd .nd-col-cta {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+}
+
+.nd-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 5px;
+    font-size: 14px;
+}
+
+.nd-table thead tr {
+    background: transparent;
+}
+
+.nd-table thead th,
+.nd-table thead td {
+    padding: 4px 8px;
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: none;
+    white-space: nowrap;
+}
+
+.nd-table tbody tr {
+    background: var(--color-surface);
+    transition: box-shadow 0.12s;
+}
+
+.nd-table tbody tr:hover {
+    box-shadow: 0 2px 8px rgba(25, 52, 60, 0.12);
+}
+
+.nd-table tbody tr td {
+    padding: 9px 8px;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+    color: var(--color-ink);
+}
+
+.nd-table tbody tr td:first-child {
+    border-left: 1px solid var(--color-border);
+    border-radius: 8px 0 0 8px;
+    padding-left: 12px;
+}
+
+.nd-table tbody tr td:last-child {
+    border-right: 1px solid var(--color-border);
+    border-radius: 0 8px 8px 0;
+    padding-right: 12px;
+}
+
+/* my move state */
+.nd-table tbody tr.myMove td {
+    background: var(--color-positive-bg);
+    border-color: rgba(89, 122, 80, 0.25);
+}
+
+/* flexi-time warning */
+.nd-table tbody tr.kickoutRequired1 td {
+    background: var(--color-warn-bg);
+    border-color: rgba(200, 140, 40, 0.25);
+}
+
+/* kickout danger */
+.nd-table tbody tr.kickoutRequired2 td {
+    background: var(--color-danger-bg);
+    border-color: rgba(180, 50, 50, 0.2);
+}
+
+/* game icon in rows */
+.nd-table .gameIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+/* links in rows */
+.nd-table a {
+    color: var(--color-accent-strong);
+    text-decoration: none;
+}
+.nd-table a:hover {
+    text-decoration: underline;
+    color: var(--color-ink);
+}
+
+/* Module icon tooltips live in nd-components.css (.nd-mod-wrap) */
+
+/* ---- Action buttons in rows ---- */
+.buttonDiv.Join,
+.buttonDiv.Leave {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    margin: 2px 0;
+}
+
+.buttonDiv.Join {
+    background: var(--color-nav-bg);
+    color: var(--color-brand-blue);
+    border: 1px solid rgba(147, 213, 208, 0.4);
+}
+.buttonDiv.Join:hover {
+    background: #1f3f49;
+}
+
+.buttonDiv.Leave {
+    background: transparent;
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+}
+.buttonDiv.Leave:hover {
+    background: var(--color-surface-soft);
+}
+
+/* ---- Panels (Lobby.js hides/shows these) ---- */
+.nd-panels > div {
+    display: none;
+}
+.nd-panels > div.active {
+    display: block;
+}
+
+/* square list — never shown in new design, but must exist for Lobby.js */
+.nd-panel-hidden {
+    display: none !important;
+}
+
+/* ---- Misc ---- */
+.nd-empty {
+    color: var(--color-muted);
+    font-size: 14px;
+    padding: 20px 0;
+}
+
+.nd-section-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 18px 0 6px;
+}
+
+.nd-open-all-btn {
+    display: block;
+    width: 100%;
+    margin: 10px 0 0;
+    padding: 10px;
+    background: var(--color-nav-bg);
+    color: var(--color-brand-blue);
+    border: 1px solid rgba(147, 213, 208, 0.3);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+}
+.nd-open-all-btn:hover { background: #1f3f49; }
+
+.nd-cta-block {
+    display: inline-block;
+    margin: 10px 0;
+    padding: 10px 20px;
+    background: var(--color-nav-bg);
+    color: var(--color-brand-blue);
+    border: 1px solid rgba(147, 213, 208, 0.3);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.nd-cta-block:hover { background: #1f3f49; }
+
+/* ---- Colour guide ---- */
+.nd-colour-guide {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 13px;
+}
+.nd-colour-guide strong {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+}
+.nd-colour-guide-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.nd-colour-guide-grid span {
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+}
+.nd-colour-guide-grid span.myMove {
+    background: var(--color-positive-bg);
+}
+.nd-colour-guide-grid span.kickoutRequired1 {
+    background: var(--color-warn-bg);
+}
+.nd-colour-guide-grid span.kickoutRequired2 {
+    background: var(--color-danger-bg);
+}
+
+/* ---- Learning game confirm dialog ---- */
+#learningGameConfirmDiv {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 24px;
+    z-index: 9999;
+    box-shadow: 0 8px 32px rgba(25, 52, 60, 0.18);
+    max-width: 340px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-ink);
+}
+
+.learningGameConfirmButtons {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 6px;
+    margin: 6px 4px 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* ---- Mobile overrides ---- */
+@media (max-width: 768px) {
+    .nd-tabs {
+        gap: 1px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+    .nd-tab {
+        padding: 8px 10px 6px;
+        font-size: 13px;
+    }
+    .nd-new-game-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    .nd-table {
+        font-size: 13px;
+    }
+    .nd-table tbody tr td {
+        padding: 8px 6px;
+    }
+    .nd-table .gameIcon {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nd-tab-count {
+        display: none;
+    }
+    .nd-tab {
+        padding: 8px 8px 6px;
+        font-size: 12px;
+    }
+}

@@ -1,0 +1,639 @@
+/* nd-components.css — shared design tokens + components for /nd/ design.
+   All component rules scoped under body.nd so the old design is untouched.
+   Loaded once from layout_new.html. */
+
+:root {
+    --color-brand-blue: #93d5d0;
+    --color-brand-green: #9dcd8e;
+
+    --color-nav-bg: #19343c;
+    --color-nav-link: #c8dfe0;
+    --color-nav-link-hover: #ffffff;
+
+    --color-page-bg: #eff8f7;
+    --color-surface: #ffffff;
+    --color-surface-soft: #f8fbfb;
+    --color-border: #d8e9e7;
+    --color-border-strong: #b9d6d3;
+
+    --color-muted: #617f86;
+    --color-ink: #19343c;
+    --color-ink-soft: #2f4d56;
+
+    --color-accent: #93d5d0;
+    --color-accent-strong: #5c9896;
+    --color-accent-ink: #19343c;
+
+    --color-positive: #597a50;
+    --color-positive-bg: rgba(157, 205, 142, 0.20);
+    --color-warn: #b07a1d;
+    --color-warn-bg: rgba(255, 200, 100, 0.22);
+    --color-danger: #b54040;
+    --color-danger-bg: rgba(220, 80, 80, 0.14);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --shadow-sm: 0 1px 2px rgba(25, 52, 60, 0.06);
+    --shadow-md: 0 4px 12px rgba(25, 52, 60, 0.08);
+}
+
+/* ---------- BASE TYPOGRAPHY ---------- */
+body.nd h1, body.nd h2, body.nd h3, body.nd h4 {
+    color: var(--color-ink);
+    margin: 0 0 8px;
+    line-height: 1.2;
+}
+
+body.nd h1 { font-size: 26px; font-weight: 700; }
+body.nd h2 { font-size: 20px; font-weight: 700; }
+body.nd h3 { font-size: 17px; font-weight: 600; }
+body.nd h4 { font-size: 15px; font-weight: 600; }
+
+body.nd p {
+    margin: 0 0 12px;
+    color: var(--color-ink-soft);
+}
+
+body.nd a {
+    color: var(--color-accent-strong);
+}
+
+body.nd hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 16px 0;
+}
+
+/* ---------- PAGE CONTAINERS ---------- */
+body.nd .nd-page {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body.nd .nd-page-narrow {
+    max-width: 720px;
+}
+
+body.nd .nd-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 4px 0 16px;
+}
+
+body.nd .nd-page-header h1 {
+    margin: 0;
+}
+
+body.nd .nd-page-subtitle {
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+body.nd .nd-section {
+    margin: 0 0 24px;
+}
+
+body.nd .nd-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 10px;
+}
+
+/* ---------- CARDS ---------- */
+body.nd .nd-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
+}
+
+body.nd .nd-card + .nd-card {
+    margin-top: 16px;
+}
+
+body.nd .nd-card-soft {
+    background: var(--color-surface-soft);
+}
+
+body.nd .nd-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: -4px 0 12px;
+}
+
+body.nd .nd-card-header h2,
+body.nd .nd-card-header h3 {
+    margin: 0;
+}
+
+body.nd .nd-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+body.nd .nd-card-grid-wide {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* ---------- BUTTONS ---------- */
+body.nd .nd-button,
+body.nd a.nd-button,
+body.nd button.nd-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    cursor: pointer;
+    line-height: 1.2;
+    box-sizing: border-box;
+}
+
+body.nd .nd-button:hover {
+    border-color: var(--color-accent-strong);
+    color: var(--color-accent-strong);
+}
+
+body.nd .nd-button-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent-ink);
+}
+
+body.nd .nd-button-primary:hover {
+    background: var(--color-accent-strong);
+    border-color: var(--color-accent-strong);
+    color: #fff;
+}
+
+body.nd .nd-button-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--color-accent-strong);
+}
+
+body.nd .nd-button-ghost:hover {
+    background: rgba(147, 213, 208, 0.12);
+}
+
+body.nd .nd-button-danger {
+    background: var(--color-danger-bg);
+    border-color: rgba(181, 64, 64, 0.4);
+    color: var(--color-danger);
+}
+
+body.nd .nd-button-sm {
+    padding: 5px 10px;
+    font-size: 13px;
+}
+
+/* ---------- BASELINE INPUTS ---------- *
+   Cheap baseline styling for forms that haven't been migrated to .nd-form-row
+   yet (createXYZ pages). Specific component selectors win over these. */
+body.nd input[type="text"],
+body.nd input[type="email"],
+body.nd input[type="password"],
+body.nd input[type="number"],
+body.nd input[type="search"],
+body.nd input[type="url"],
+body.nd input[type="tel"],
+body.nd input[type="date"],
+body.nd textarea,
+body.nd select {
+    padding: 6px 8px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 14px;
+    font-family: inherit;
+}
+
+body.nd input[type="text"]:focus,
+body.nd input[type="email"]:focus,
+body.nd input[type="password"]:focus,
+body.nd input[type="number"]:focus,
+body.nd textarea:focus,
+body.nd select:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent-strong);
+}
+
+body.nd button {
+    font-family: inherit;
+}
+
+/* ---------- FORM ELEMENTS ---------- */
+body.nd .nd-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+body.nd .nd-form-row:last-child {
+    border-bottom: none;
+}
+
+body.nd .nd-form-row > label,
+body.nd .nd-form-label {
+    flex: 0 0 220px;
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+body.nd .nd-form-row .nd-form-help {
+    flex-basis: 100%;
+    color: var(--color-muted);
+    font-size: 12px;
+    margin: 0;
+    padding-left: 232px;
+}
+
+body.nd .nd-form-row > input[type="text"],
+body.nd .nd-form-row > input[type="email"],
+body.nd .nd-form-row > input[type="password"],
+body.nd .nd-form-row > input[type="number"],
+body.nd .nd-form-row > select,
+body.nd .nd-form-row > textarea,
+body.nd .nd-field {
+    flex: 1 1 220px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+body.nd .nd-form-row > input:focus,
+body.nd .nd-form-row > select:focus,
+body.nd .nd-form-row > textarea:focus,
+body.nd .nd-field:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent-strong);
+}
+
+body.nd .nd-form-row > textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+@media (max-width: 640px) {
+    body.nd .nd-form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    body.nd .nd-form-row > label,
+    body.nd .nd-form-label {
+        flex: 0 0 auto;
+    }
+    body.nd .nd-form-row .nd-form-help {
+        padding-left: 0;
+    }
+}
+
+/* ---------- TABLES ---------- */
+body.nd .nd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+body.nd .nd-table th,
+body.nd .nd-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+body.nd .nd-table th {
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+body.nd .nd-table tbody tr:hover {
+    background: var(--color-surface-soft);
+}
+
+body.nd .nd-table-scroll {
+    overflow-x: auto;
+}
+
+/* ---------- PILLS ---------- */
+body.nd .nd-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+body.nd .nd-pill-positive {
+    background: var(--color-positive-bg);
+    color: var(--color-positive);
+    border-color: transparent;
+}
+
+body.nd .nd-pill-warn {
+    background: var(--color-warn-bg);
+    color: var(--color-warn);
+    border-color: transparent;
+}
+
+body.nd .nd-pill-danger {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    border-color: transparent;
+}
+
+body.nd .nd-pill-accent {
+    background: rgba(147, 213, 208, 0.22);
+    color: var(--color-accent-strong);
+    border-color: transparent;
+}
+
+/* ---------- TABS ---------- */
+body.nd .nd-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-border);
+    margin: 0 0 16px;
+}
+
+body.nd .nd-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 14px;
+    color: var(--color-muted);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.nd .nd-tab:hover {
+    color: var(--color-ink);
+}
+
+body.nd .nd-tab.active {
+    color: var(--color-ink);
+    border-bottom-color: var(--color-accent-strong);
+}
+
+body.nd .nd-tab-count {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0 6px;
+    font-size: 11px;
+    color: var(--color-muted);
+    font-weight: 600;
+}
+
+body.nd .nd-tab.active .nd-tab-count {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    border-color: transparent;
+}
+
+/* ---------- MODULE-ICON TOOLTIPS ---------- */
+/* Wrapper around .startingOption so hover shows the title on desktop and a
+   readable label on mobile (where hover doesn't exist). */
+body.nd .nd-mod-wrap {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+}
+
+body.nd .nd-mod-wrap .startingOption,
+body.nd .nd-mod-wrap > img {
+    display: inline-block;
+    vertical-align: middle;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-soft);
+    padding: 2px;
+    box-sizing: border-box;
+}
+
+body.nd .nd-mod-wrap::after {
+    content: attr(data-label);
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-ink);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 30;
+}
+
+body.nd .nd-mod-wrap:hover::after,
+body.nd .nd-mod-wrap:focus-within::after {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    /* Touch fallback: render the label inline under the icon when there's room. */
+    body.nd .nd-mod-list-mobile .nd-mod-wrap {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+    body.nd .nd-mod-list-mobile .nd-mod-wrap::after {
+        position: static;
+        transform: none;
+        opacity: 1;
+        background: transparent;
+        color: var(--color-muted);
+        padding: 0;
+        font-size: 11px;
+    }
+}
+
+/* ---------- LANDING / HERO ---------- */
+body.nd .nd-landing {
+    padding: 24px 0;
+}
+
+body.nd .nd-hero {
+    padding: 32px 0 40px;
+}
+
+body.nd .nd-hero h1 {
+    font-size: 32px;
+    line-height: 1.2;
+    max-width: 760px;
+    margin: 0 0 12px;
+}
+
+body.nd .nd-hero-sub {
+    font-size: 16px;
+    color: var(--color-ink-soft);
+    max-width: 760px;
+    margin: 0 0 20px;
+}
+
+body.nd .nd-hero-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+body.nd .nd-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+body.nd .nd-feature h3 {
+    margin: 0 0 4px;
+    color: var(--color-accent-strong);
+}
+
+body.nd .nd-feature p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-ink-soft);
+}
+
+body.nd .nd-game-card {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+body.nd .nd-game-card-img {
+    background: var(--color-surface-soft);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    overflow: hidden;
+}
+
+body.nd .nd-game-card-img img {
+    max-height: 140px;
+    max-width: 90%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+body.nd .nd-game-card-body {
+    padding: 12px 14px 14px;
+}
+
+body.nd .nd-game-card-body h3 {
+    margin: 0 0 2px;
+}
+
+body.nd .nd-game-card-body p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--color-ink-soft);
+}
+
+body.nd a.nd-create-tile {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+
+body.nd a.nd-create-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent-strong);
+}
+
+body.nd a.nd-create-tile .nd-game-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+@media (max-width: 640px) {
+    body.nd .nd-hero {
+        padding: 16px 0 24px;
+    }
+    body.nd .nd-hero h1 {
+        font-size: 24px;
+    }
+    body.nd .nd-hero-sub {
+        font-size: 15px;
+    }
+}
+
+/* ---------- UTILITY ---------- */
+body.nd .nd-muted { color: var(--color-muted); }
+body.nd .nd-small { font-size: 12px; }
+body.nd .nd-center { text-align: center; }
+body.nd .nd-spacer { flex: 1; }
+body.nd .nd-row-flex {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}

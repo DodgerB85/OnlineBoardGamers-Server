@@ -1,4 +1,34 @@
 {% load static i18n %}
+{% if request.use_new_design %}
+<tr class="nd-row09 clickableGameRow" id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
+    onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/show/';">
+  <td class="nd-col-icon">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}</td>
+  <td class="nd-col-game">
+    {% if game.chatNotification %}<img class="startingOption" alt="Chat" width="20" height="20" src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
+    <a href="/{{ game.gameCode }}/{{ game.gameID }}/show/"><strong>{{ game.gameName }}</strong></a>
+    {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
+    <br><small class="nd-muted">{% translate "Winner" %}: {{ game.winner }}</small>
+  </td>
+  <td class="nd-col-players">
+    {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+  </td>
+  <td class="nd-col-options">
+    {% if game.startingMap and game.gameCode == "FCM" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMap.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="FCM">{% endif %}
+    {% if game.startingMap and game.gameCode == "TGZ" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapTGZ.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="TGZ">{% endif %}
+    {% if game.startingMap and game.gameCode == "AQY" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">{% endif %}
+    {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
+    {{ game.startingOptionsHTML|safe }}
+  </td>
+  <td class="nd-col-status"><span class="nd-pill">{% translate "Finished" %}</span></td>
+  <td class="nd-col-cta">
+    {% if game.deleteableGame %}
+      <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">{% translate "Delete" %}</div>
+    {% else %}
+      <span class="timeToConvertSpan nd-small nd-muted">{{ game.latestUpdate }}</span>
+    {% endif %}
+  </td>
+</tr>
+{% else %}
 <tr class="clickableGameRow"
     id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
     onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/show/';">
@@ -87,3 +117,4 @@
   </td>
   <td>{{ game.winner }}</td>
 </tr>
+{% endif %}
