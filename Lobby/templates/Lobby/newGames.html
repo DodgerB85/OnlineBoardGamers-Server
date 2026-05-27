@@ -34,15 +34,13 @@
 
     <section class="nd-section">
       <h2 class="nd-section-title">{% translate "Map editors" %}</h2>
-      <div class="nd-card-grid nd-card-grid-wide">
+      <div class="nd-card-grid nd-map-editor-grid">
         {% include "Lobby/_nd_create_tile.html" with url="FCMmapEditor" title="FCM Map Editor" img="Lobby/images/createMap.jpg" %}
         {% include "Lobby/_nd_create_tile.html" with url="RNB:RNBmapEditor" title="R&B Map Editor" img="Lobby/images/createMapRNB.jpg" %}
         {% include "Lobby/_nd_create_tile.html" with url="TGZmapEditor" title="TGZ Map Editor" img="Lobby/images/createMapTGZ.jpg" %}
         {% include "Lobby/_nd_create_tile.html" with url="AQYmapEditor" title="Antiquity Map Editor" img="Lobby/images/createMapAQY.jpg" %}
       </div>
     </section>
-
-    {% include 'Lobby/donate/donateBanner.html' %}
   </div>
 {% else %}
   <div class="container">
