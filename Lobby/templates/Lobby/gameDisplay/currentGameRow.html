@@ -18,7 +18,7 @@
     {% if game.startingMap and game.gameCode == "TGZ" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapTGZ.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="TGZ">{% endif %}
     {% if game.startingMap and game.gameCode == "AQY" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">{% endif %}
     {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
-    {{ game.startingOptionsHTML|safe }}
+    {% if game.startingOptionsHTML == "[None]" %}None{% else %}{{ game.startingOptionsHTML|safe }}{% endif %}
   </td>
   <td class="nd-col-status">
     {% if game.myMove %}
@@ -32,7 +32,8 @@
     {% endif %}
   </td>
   <td class="nd-col-cta">
-    <span class="timeToConvertSpan nd-small nd-muted">{{ game.latestUpdate }}</span>
+    <span class="timeToConvertSpan nd-small nd-muted">{{ game.latestUpdate }}</span><br>
+    <span class="nd-small nd-muted">{{ game.latestUpdateElapsedTimeString }}</span>
     {% if 'SHADOW' not in game.allPlayers %}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}
     {% if game.deleteableGame %}
       <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">{% translate "Delete" %}</div>

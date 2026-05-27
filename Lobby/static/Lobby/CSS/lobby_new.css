@@ -175,9 +175,31 @@ body.nd .colourGuideDiv { display: none; }
     overflow: visible;
 }
 
-/* Hide the legacy thead under /nd/ — rows are self-describing (09 pattern) */
+/* Hide thead on MT/legacy tables; show only on tables with nd-row09 rows */
 body.nd .nd-table thead {
     display: none;
+}
+body.nd .nd-table:has(.nd-row09) thead {
+    display: block;
+}
+body.nd .nd-table:has(.nd-row09) thead tr {
+    display: grid;
+    grid-template-columns: 72px minmax(180px, 1.4fr) minmax(150px, 1fr) minmax(220px, 1.1fr) 110px 130px;
+    gap: 12px;
+    padding: 6px 14px;
+    background: var(--color-surface-soft);
+    border-bottom: 2px solid var(--color-border-strong);
+}
+body.nd .nd-table:has(.nd-row09) thead th {
+    display: block;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    border: none;
+    text-align: left;
 }
 
 /* ---- 09 Six-column row grid ---- */
@@ -330,6 +352,10 @@ body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); 
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: flex-end;
+    }
+    /* thead uses the same 6-col grid; hide it when rows collapse to 2-col */
+    body.nd .nd-table:has(.nd-row09) thead {
+        display: none;
     }
 }
 

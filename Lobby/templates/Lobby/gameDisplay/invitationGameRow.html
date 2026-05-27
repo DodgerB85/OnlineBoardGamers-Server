@@ -16,10 +16,11 @@
     {% if game.startingMap and game.gameCode == "TGZ" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapTGZ.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="TGZ">{% endif %}
     {% if game.startingMap and game.gameCode == "AQY" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">{% endif %}
     {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
-    {{ game.startingOptionsHTML|safe }}
+    {% if game.startingOptionsHTML == "[None]" %}None{% else %}{{ game.startingOptionsHTML|safe }}{% endif %}
   </td>
   <td class="nd-col-status"><span class="nd-pill nd-pill-accent">{% translate "Invited" %}</span></td>
   <td class="nd-col-cta">
+    <span class="timeToConvertSpan nd-small nd-muted">{{ game.created }}</span><br>
     <div class="buttonDiv Join availableLink">{% translate "Accept" %}</div>
     <div class="buttonDiv Leave leaveDeclineLink invitations">{% translate "Decline" %}</div>
     <input type="text" class="declineInputClass" id="{{ game.gameCode }}declineReason{{ game.gameID }}" placeholder="{% translate 'Reason (optional)' %}">
