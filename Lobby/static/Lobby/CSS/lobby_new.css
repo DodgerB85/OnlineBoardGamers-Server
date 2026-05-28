@@ -210,6 +210,16 @@ body.nd .nd-table {
 body.nd .nd-table tbody {
     display: block;
 }
+/* Revert to normal table layout for tables that don't use nd-row09 (MT rows, tournament
+   list tables). display:block on the table turns tr/td cells into anonymous inline-table
+   boxes sized to content rather than stretching to 100% width. */
+body.nd .nd-table:not(:has(.nd-row09)) {
+    display: table;
+}
+body.nd .nd-table:not(:has(.nd-row09)) tbody {
+    display: table-row-group;
+}
+
 body.nd .nd-row09 {
     display: grid;
     grid-template-columns: 72px minmax(180px, 1.4fr) minmax(150px, 1fr) minmax(220px, 1.1fr) 110px 130px;
@@ -308,6 +318,11 @@ body.nd .nd-col-cta .buttonDiv.Leave {
     background: var(--color-surface);
     color: var(--color-muted);
 }
+body.nd .nd-col-cta .buttonDiv.Leave:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    border-color: var(--color-border-strong);
+}
 body.nd .nd-col-cta .copyGameLinkButtonInTable {
     background: transparent;
     color: var(--color-accent-strong);
@@ -399,13 +414,13 @@ body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); 
     color: var(--color-ink);
 }
 
-.nd-table tbody tr td:first-child {
+.nd-table tbody tr:not(.nd-row09) td:first-child {
     border-left: 1px solid var(--color-border);
     border-radius: 8px 0 0 8px;
     padding-left: 12px;
 }
 
-.nd-table tbody tr td:last-child {
+.nd-table tbody tr:not(.nd-row09) td:last-child {
     border-right: 1px solid var(--color-border);
     border-radius: 0 8px 8px 0;
     padding-right: 12px;

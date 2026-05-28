@@ -1,11 +1,86 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
 {% endblock head %}
 {% block body %}
-  <div class="container" id="aboutPage">
+  {% if request.use_new_design %}<div class="nd-page nd-page-narrow" id="aboutPage">{% else %}<div class="container" id="aboutPage">{% endif %}
+  {% if request.use_new_design %}
+
+    <div class="nd-page-header">
+      <h1>About Online Board Gamers</h1>
+    </div>
+
+    <div class="nd-card nd-section">
+      <div class="nd-card-header"><h2>What is this?</h2></div>
+      <p>Online Board Gamers is a place to play Splotter Spellen board games online against other players.</p>
+      <p style="margin-top:8px;">Games update live — make your move, your opponent sees it immediately. You can also run a solo practice game where you control all players on your own device.</p>
+    </div>
+
+    <div class="nd-card nd-section">
+      <div class="nd-card-header"><h2>{% translate "Current Games" %}</h2></div>
+      <ul style="margin: 4px 0 0; padding-left: 20px; line-height: 2.1; font-size: 15px;">
+        <li>{% translate "Food Chain Magnate — with all Ketchup Expansions" %}</li>
+        <li>{% translate "Horseless Carriage" %}</li>
+        <li>{% translate "Bus" %}</li>
+        <li>{% translate "The Great Zimbabwe" %}</li>
+        <li>{% translate "Cannes" %}</li>
+        <li>{% translate "Antiquity" %}</li>
+        <li>{% translate "Indonesia" %}</li>
+        <li>{% translate "Keyflower" %}</li>
+        <li>{% translate "Web of Power" %}</li>
+        <li>{% translate "Roads &amp; Boats" %}</li>
+      </ul>
+    </div>
+
+    <div class="nd-card nd-section">
+      <div class="nd-card-header"><h2>{% translate "Credits" %}</h2></div>
+      <div style="font-size: 14px; line-height: 1.9;">
+        <div class="nd-credits-grid">
+          <div>Website Design / Game Programming — DodgerB</div>
+          <div>FCM Chief Playtester — looogic</div>
+          <div>Live-updating Games Support — Jonny</div>
+          <div>Backend Assistance — hcarver</div>
+        </div>
+        <div class="nd-credits-group nd-credits-grid">
+          <div>Chinese (Hans) Lobby &amp; FCM — 庄生</div>
+          <div>Chinese (Hans) HLC — 陈斌华</div>
+        </div>
+        <div class="nd-credits-group nd-credits-grid">
+          <div>Cannes Coding Assistance — Rastko</div>
+          <div>Antiquity Coding — kbbr &amp; Rastko</div>
+          <div>Antiquity Chief Playtester — massibull</div>
+          <div>Antiquity Additional Playtesters — F1087 &amp; gdc</div>
+        </div>
+        <div class="nd-credits-group nd-credits-grid">
+          <div>Indonesia Coding Consultant — vraid</div>
+          <div>Indonesia Ship Icons — PhasingPlayer</div>
+          <div>Keyflower Additional Coding — vraid</div>
+          <div>Web playtester — Burmer</div>
+        </div>
+        <div class="nd-credits-group nd-credits-grid">
+          <div>Roads &amp; Boats Consulting &amp; Coding — vraid</div>
+          <div>Roads &amp; Boats Chief Playtester — Benkyo</div>
+          <div>Roads &amp; Boats Additional Playtesters — SaintJason, Dycu, Jungy</div>
+        </div>
+        <div class="nd-credits-group" style="padding-top:12px;">
+          <strong>{% translate "Thanks to all the Playtesters!" %}</strong><br>
+          <span style="color: var(--color-muted);">looogic, Benkyo, massibull, F1087, gdc, vraid, PhasingPlayer, Phil, Burmer, ha.steven, JoshuaAcosta, s4lm, Steveth, enavico, krieg90, your_average_euro</span>
+        </div>
+        <div class="nd-credits-group" style="padding-top:12px; color: var(--color-muted); font-size:13px;">
+          {% translate "Thank you to everyone for your feedback, comments and suggestions — you have helped to make this site what it is!" %}
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
+      {% translate "For further help contact" %}
+      <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30" style="vertical-align:middle; max-width:100%;">
+    </p>
+
+  {% else %}
+
     {% blocktranslate trimmed %}
       <h1>Welcome to Online Board Gamers!</h1>
       Online Board Gamers is a website to play board games online.
@@ -102,5 +177,7 @@ Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/Food
          height="30">
     {% include "Lobby/donate/donateBanner.html" %}
     {% include "Lobby/common/homeButton.html" %}
+
+  {% endif %}
   </div>
 {% endblock body %}

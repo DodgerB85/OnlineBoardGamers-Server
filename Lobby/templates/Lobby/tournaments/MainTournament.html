@@ -1,14 +1,14 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
   <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/Main_Tournament.js' %}"></script>
   {% endcompress %}
-  <div class="container containerFlex">
+  {% if request.use_new_design %}<div class="nd-page"><div class="containerFlex">{% else %}<div class="container containerFlex">{% endif %}
     <div id="wholeMTchat">
       <div id="MTchatBox">
         <h2>{% translate "Send a message" %}</h2>
@@ -548,8 +548,9 @@
     </div>
     <br />
   </div>
-  <div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>
-  {% include 'Lobby/common/homeButton.html' %}
+  {% if request.use_new_design %}</div>{% endif %}
+  {% if not request.use_new_design %}<div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>{% endif %}
+  {% if not request.use_new_design %}{% include 'Lobby/common/homeButton.html' %}{% endif %}
   {% block script %}
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     <script>
@@ -559,5 +560,24 @@
     global.chatArray = [];
 	  global.chatData = "{{ chatData }}";
     </script>
+    {% if request.use_new_design %}
+    <script>
+    (function() {
+      function wrapOne(img) {
+        if (!img.title) return;
+        if (img.classList.contains('startingMap')) return;
+        var p = img.parentNode;
+        if (!p || (p.classList && p.classList.contains('nd-mod-wrap'))) return;
+        var w = document.createElement('span');
+        w.className = 'nd-mod-wrap';
+        w.setAttribute('data-label', img.title);
+        p.insertBefore(w, img);
+        w.appendChild(img);
+      }
+      function start() { document.querySelectorAll('.startingOption').forEach(wrapOne); }
+      document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
+    })();
+    </script>
+    {% endif %}
   {% endblock %}
 {% endblock %}

@@ -1,14 +1,24 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
     <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
+    {% if request.use_new_design %}<link href="{% static 'Lobby/CSS/lobby_new.css' %}" rel="stylesheet">{% endif %}
     {% compress js %}
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
 {% endblock %}
 {% block body %}
-    <div class="container miniTournamentsMainPage">
+    {% if request.use_new_design %}<div class="nd-page">{% else %}<div class="container miniTournamentsMainPage">{% endif %}
+        {% if request.use_new_design %}
+        <div class="nd-page-header">
+          <h1>{% translate "Mini Tournaments" %}</h1>
+          <a class="nd-button nd-button-primary" href="{% url 'newMiniTournaments' %}">+ Create Mini Tournament</a>
+        </div>
+        <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
+          Faster-paced tournaments with a smaller player pool. Anyone can create or join.
+        </p>
+        {% else %}
         <h1>{% translate "Mini Tournaments" %}</h1>
         {% blocktranslate trimmed %}
             Mini Tournaments are meant to be faster paced tournaments with a smaller player pool
@@ -18,18 +28,18 @@
         {% endblocktranslate %}
         <b><a class="linkOther size25text" href="{% url 'newMiniTournaments' %}">{% translate "Click here to create a Mini Tournament" %}</a></b>
         <br />
+        {% endif %}
         {% if available_MT %}
-            <h2>Available Mini Tournaments</h2>
-            <div class="tableOnlyDiv">
-                <table class="gamesTable">
+            {% if request.use_new_design %}<div class="nd-section-title" style="margin-top:8px;">Available</div>{% else %}<h2>Available Mini Tournaments</h2>{% endif %}
+            {% if request.use_new_design %}<div class="nd-card">{% else %}<div class="tableOnlyDiv">{% endif %}
+                <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
                     <thead>
                         <tr class="headingRow">
-                            <th>{% translate "Game" %}</th>
+                            <th></th>
                             <th>{% translate "Name" %}</th>
-                            <th>{% translate "Total Players" %}</th>
-                            <th>{% translate "Players per Game" %}</th>
-                            <th>{% translate "Format" %}</th>
+                            <th>{% translate "Players" %}</th>
                             <th>{% translate "Starting Options" %}</th>
+                            <th>{% translate "Format" %}</th>
                             <th>{% translate "Created" %}</th>
                         </tr>
                     </thead>
@@ -39,20 +49,19 @@
                 </table>
             </div>
         {% else %}
-            <h2>{% translate "No Available Mini Tournaments" %}</h2>
+            {% if not request.use_new_design %}<h2>{% translate "No Available Mini Tournaments" %}</h2>{% endif %}
         {% endif %}
         {% if current_MT %}
-            <h2>Current Mini Tournaments</h2>
-            <div class="tableOnlyDiv">
-                <table class="gamesTable">
+            {% if request.use_new_design %}<div class="nd-section-title" style="margin-top:20px;">In Progress</div>{% else %}<h2>Current Mini Tournaments</h2>{% endif %}
+            {% if request.use_new_design %}<div class="nd-card">{% else %}<div class="tableOnlyDiv">{% endif %}
+                <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
                     <thead>
                         <tr class="headingRow">
-                            <th>{% translate "Game" %}</th>
+                            <th></th>
                             <th>{% translate "Name" %}</th>
-                            <th>{% translate "Total Players" %}</th>
-                            <th>{% translate "Players per Game" %}</th>
-                            <th>{% translate "Format" %}</th>
+                            <th>{% translate "Players" %}</th>
                             <th>{% translate "Starting Options" %}</th>
+                            <th>{% translate "Format" %}</th>
                             <th>{% translate "Created" %}</th>
                         </tr>
                     </thead>
@@ -62,20 +71,19 @@
                 </table>
             </div>
         {% else %}
-            <h2>{% translate "No Current Mini Tournaments" %}</h2>
+            {% if not request.use_new_design %}<h2>{% translate "No Current Mini Tournaments" %}</h2>{% endif %}
         {% endif %}
         {% if finished_MT %}
-            <h2>Finished Mini Tournaments</h2>
-            <div class="tableOnlyDiv">
-                <table class="gamesTable">
+            {% if request.use_new_design %}<div class="nd-section-title" style="margin-top:20px;">Finished</div>{% else %}<h2>Finished Mini Tournaments</h2>{% endif %}
+            {% if request.use_new_design %}<div class="nd-card">{% else %}<div class="tableOnlyDiv">{% endif %}
+                <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
                     <thead>
                         <tr class="headingRow">
-                            <th>{% translate "Game" %}</th>
+                            <th></th>
                             <th>{% translate "Name" %}</th>
-                            <th>{% translate "Total Players" %}</th>
-                            <th>{% translate "Players per Game" %}</th>
-                            <th>{% translate "Format" %}</th>
+                            <th>{% translate "Players" %}</th>
                             <th>{% translate "Starting Options" %}</th>
+                            <th>{% translate "Format" %}</th>
                             <th>{% translate "Winner" %}</th>
                         </tr>
                     </thead>
@@ -85,12 +93,12 @@
                 </table>
             </div>
         {% else %}
-            <h2>{% translate "No Finished Mini Tournaments" %}</h2>
+            {% if not request.use_new_design %}<h2>{% translate "No Finished Mini Tournaments" %}</h2>{% endif %}
         {% endif %}
         <br />
     </div>
-    <div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>
-    {% include 'Lobby/common/homeButton.html' %}
+    {% if not request.use_new_design %}<div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>{% endif %}
+    {% if not request.use_new_design %}{% include 'Lobby/common/homeButton.html' %}{% endif %}
     {% block script %}
         <script>
     var global = {}
@@ -99,5 +107,24 @@
     global.chatArray = [];
 	  global.chatData = "{{ chatData }}";
         </script>
+        {% if request.use_new_design %}
+        <script>
+        (function() {
+          function wrapOne(img) {
+            if (!img.title) return;
+            if (img.classList.contains('startingMap')) return;
+            var p = img.parentNode;
+            if (!p || (p.classList && p.classList.contains('nd-mod-wrap'))) return;
+            var w = document.createElement('span');
+            w.className = 'nd-mod-wrap';
+            w.setAttribute('data-label', img.title);
+            p.insertBefore(w, img);
+            w.appendChild(img);
+          }
+          function start() { document.querySelectorAll('.startingOption').forEach(wrapOne); }
+          document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
+        })();
+        </script>
+        {% endif %}
     {% endblock %}
 {% endblock %}

@@ -1,13 +1,352 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
   <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
+  {% if request.use_new_design %}
+  <style>
+  .nd-mt-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+  }
+  .nd-mt-chat-sticky {
+    position: sticky;
+    top: 90px;
+  }
+
+  /* --- Reset tournaments.css chat styles under /nd/ --- */
+  body.nd #wholeMTchat {
+    background: var(--color-surface) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 16px !important;
+    box-shadow: var(--shadow-sm) !important;
+    box-sizing: border-box;
+    float: none !important;
+    width: auto !important;
+    position: static;   /* will be overridden by .nd-mt-chat-sticky on desktop */
+  }
+  body.nd .nd-mt-chat-sticky#wholeMTchat {
+    position: sticky;
+    top: 90px;
+  }
+  body.nd #MTchatBox {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  body.nd #MTchatBox h2,
+  body.nd #MTchatBox h3 {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--color-muted) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 8px !important;
+  }
+  body.nd #chatMessage {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: var(--color-surface) !important;
+    border: 1px solid var(--color-border-strong) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 8px !important;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--color-ink);
+    resize: vertical;
+    margin-bottom: 8px !important;
+  }
+  body.nd #sendMessageButton {
+    display: block !important;
+    width: 100% !important;
+    background: var(--color-accent) !important;
+    color: var(--color-accent-ink) !important;
+    border: 1px solid var(--color-accent) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 8px 14px !important;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+  }
+  body.nd #sendMessageButton:hover {
+    background: var(--color-accent-strong) !important;
+    border-color: var(--color-accent-strong) !important;
+    color: #fff !important;
+  }
+  body.nd #messageList {
+    margin-top: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: transparent !important;
+  }
+  body.nd #messageList .chatentry {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  body.nd #messageList .chatentry .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  body.nd #messageList .chatentry .header .bold {
+    font-weight: 600;
+    color: var(--color-ink);
+    font-size: 13px;
+  }
+  body.nd #messageList .chatentry .header .date {
+    font-size: 11px;
+    color: var(--color-muted);
+  }
+  body.nd #messageList .chatentry .body {
+    color: var(--color-ink-soft);
+    line-height: 1.5;
+  }
+
+  @media (max-width: 768px) {
+    .nd-mt-layout { grid-template-columns: 1fr; }
+    .nd-mt-chat-sticky,
+    body.nd .nd-mt-chat-sticky#wholeMTchat { position: static !important; top: auto; }
+  }
+  </style>
+  {% endif %}
 {% endblock %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/Mini_Tournament.js' %}"></script>
   {% endcompress %}
+
+  {% if request.use_new_design %}
+  <div class="nd-page">
+    <div class="nd-page-header">
+      <h1>{{ tournament.tournamentName }}</h1>
+    </div>
+    {% if tournament.tournamentDescription %}
+    <p class="nd-page-subtitle" style="margin: -8px 0 16px;">{{ tournament.tournamentDescription }}</p>
+    {% endif %}
+
+    {% if messages %}
+    <div style="margin-bottom: 16px;">
+      {% for message in messages %}
+      <div class="nd-notice">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="nd-mt-layout">
+      <!-- Main column -->
+      <div>
+        <!-- Meta info card -->
+        <div class="nd-card" style="margin-bottom: 16px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            <div>
+              <div class="nd-section-title">Creator</div>
+              <div>{{ creator }}</div>
+            </div>
+            <div>
+              <div class="nd-section-title">Format</div>
+              <div>{{ tournament.get_tournamentType_display }}</div>
+            </div>
+            <div>
+              <div class="nd-section-title">Players</div>
+              <div>{{ tournament.maxTournamentPlayers }} total · {{ tournament.maxGamePlayers }} per game</div>
+            </div>
+            {% if startingOptionsHTML != "" %}
+            <div>
+              <div class="nd-section-title">Options</div>
+              <div>{{ startingOptionsHTML|safe }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if tournament.tournamentStatus == "OP" or tournament.tournamentStatus == "PR" %}
+        <!-- Open / Pre-release: sign-up panel -->
+        <div class="nd-card" style="margin-bottom: 16px;">
+          <div class="nd-card-header">
+            <h3>Players ({{ startingPlayers|length }}/{{ tournament.maxTournamentPlayers }})</h3>
+          </div>
+          <table class="nd-table" style="margin-bottom: 16px;">
+            <thead>
+              <tr><th>#</th><th>{% translate "Player" %}</th></tr>
+            </thead>
+            <tbody>
+              {% for player in startingPlayers %}
+              <tr class="clickablePlayerRow" id="playerRow{{ player.username }}"
+                  onclick="window.location.href='/profile/{{ player.username }}';">
+                <td>{{ forloop.counter }}</td>
+                <td><a href="{% url 'playerInfo' usernameToProfile=player.username %}">{{ player.username }}</a></td>
+              </tr>
+              {% endfor %}
+              {% for i in openSlots %}
+              <tr>
+                <td>{{ i }}</td>
+                <td style="color: var(--color-muted);">{% translate "Open" %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          {% if invitedPlayerString != "" %}
+          <p style="font-size: 14px; margin-bottom: 12px;"><strong>{% translate "Invited Players" %}:</strong> {{ invitedPlayerString }}</p>
+          {% endif %}
+          <p style="font-size: 13px; color: var(--color-muted); margin-bottom: 16px;">
+            {% blocktranslate trimmed %}
+              Before joining, please be aware that you should be making several moves per day.
+              Kickout is set at 1 day, but please make your moves as soon as possible.
+            {% endblocktranslate %}
+          </p>
+
+          {% if not isSignedUp %}
+          <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}" method="post">
+            {% csrf_token %}
+            <label class="nd-check-label" style="margin-bottom: 12px;">
+              <input type="checkbox" id="understand_movement" name="understand_movement" required>
+              <span>I understand I need to move several times a day</span>
+            </label>
+            <br>
+            <input class="nd-button nd-button-primary" type="submit"
+              value="{% if isInvitedPlayer %}Accept Invite &amp; Join Mini Tournament{% else %}{% translate "Join Mini Tournament" %}{% endif %}" />
+          </form>
+          {% if isInvitedPlayer %}
+          <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}" method="post" style="margin-top: 8px;">
+            {% csrf_token %}
+            <input type="hidden" name="declineInvite" value="true">
+            <input class="nd-button nd-button-danger" type="submit" value="{% translate "Decline Invite" %}" />
+          </form>
+          {% endif %}
+          {% else %}
+          <span class="nd-pill nd-pill-positive">{% translate "You are signed up" %}</span>
+          {% endif %}
+        </div>
+
+        {% elif tournament.tournamentStatus == "IP" or tournament.tournamentStatus == "FN" %}
+        {% if tournament.tournamentStatus == "FN" %}
+        <div class="nd-card" style="margin-bottom: 16px; text-align: center;">
+          <h2>{{ winnerHTML|safe }}</h2>
+        </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: {% if tournament.tournamentType == 'PT' %}1fr 1fr{% else %}1fr{% endif %}; gap: 16px; margin-bottom: 16px;">
+          {% if tournament.tournamentType == "PT" %}
+          <div class="nd-card">
+            <h3 style="margin-bottom: 10px;">{% translate "Points" %}</h3>
+            <table class="nd-table">
+              <thead><tr><th>{% translate "Position" %}</th><th>{% translate "Points" %}</th></tr></thead>
+              <tbody>
+                {% for entry in pointsValues.normal %}
+                <tr><td>{{ entry.0 }}</td><td>{{ entry.1 }}</td></tr>
+                {% endfor %}
+                <tr><td>{% translate "Bye" %}</td><td>{{ pointsValues.bye }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+          <div class="nd-card">
+            <h3 style="margin-bottom: 10px;">{% translate "Players" %}</h3>
+            <table class="nd-table">
+              <thead>
+                <tr>
+                  <th>{{ playersData.headingRow.0 }}</th>
+                  <th>{{ playersData.headingRow.1 }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for playerEntry in playersData.playerData %}
+                <tr class="clickablePlayerRow" id="playerRow{{ playerEntry.2 }}"
+                    onclick="window.location.href='/profile/{{ playerEntry.2 }}';">
+                  <td><a href="/profile/{{ playerEntry.2 }}">{{ playerEntry.0 }}</a></td>
+                  <td>{{ playerEntry.1 }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {% if tournament.tournamentStatus == "FN" %}
+        <div class="nd-card" style="margin-bottom: 16px;">
+          <h3 style="margin-bottom: 10px;">{% translate "Result" %}</h3>
+          <table class="nd-table">
+            <thead><tr><th>{% translate "Position" %}</th><th>{% translate "Player" %}</th></tr></thead>
+            <tbody>
+              {% for entry in winnersData %}
+              <tr>
+                <td>{% if forloop.first %}1st{% elif forloop.counter == 2 %}2nd{% elif forloop.counter == 3 %}3rd{% endif %}</td>
+                <td>
+                  {% for player in entry %}
+                    {% if not forloop.last %}
+                      <a href="/profile/{{ player }}">{{ player }}</a>,
+                    {% else %}
+                      <a href="/profile/{{ player }}">{{ player }}</a>
+                    {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+
+        {% for round in roundsData %}
+        <div class="nd-card" style="margin-bottom: 12px;">
+          <h3 style="margin-bottom: 10px;">{{ round.roundTitle }}</h3>
+          <table class="nd-table">
+            <thead><tr><th>Game</th><th>Winner</th></tr></thead>
+            <tbody>
+              {% for game in round.gamesData %}
+              <tr class="clickableGameRow {{ tournament.gameCode }}"
+                  onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/show/';"
+                  id="gamesRow{{ game.gameID }}">
+                <td>
+                  {% for player in game.players %}
+                    <a href="/profile/{{ player }}">{{ player }}</a>
+                    {% if not forloop.last %} VS {% endif %}
+                  {% endfor %}
+                </td>
+                <td>
+                  {% for player in game.winnersArr %}<a href="/profile/{{ player }}">{{ player }}</a>{% endfor %}
+                </td>
+              </tr>
+              {% endfor %}
+              {% if round.byesNames %}
+              <tr>
+                <td colspan="2" style="color: var(--color-muted);">
+                  Byes:
+                  {% for player in round.byesNames %}<a href="/profile/{{ player }}">{{ player }}</a>{% endfor %}
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        {% endfor %}
+        {% endif %}
+      </div>
+
+      <!-- Chat sidebar -->
+      <div class="nd-mt-chat-sticky" id="wholeMTchat">
+        <div id="MTchatBox">
+          <h3>{% translate "Send a message" %}</h3>
+          <textarea rows="4" name="chatMessage" id="chatMessage"></textarea>
+          <button id="sendMessageButton">{% translate "Send" %}</button>
+        </div>
+        <div id="messageList"></div>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
   <div class="container containerFlex">
     <div id="wholeMTchat">
       <div id="MTchatBox">
@@ -232,8 +571,10 @@
     </div>
     <br />
   </div>
-  <div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>
-  {% include 'Lobby/common/homeButton.html' %}
+  {% if not request.use_new_design %}<div class="container">{% include 'Lobby/donate/donateBanner.html' %}</div>{% endif %}
+  {% if not request.use_new_design %}{% include 'Lobby/common/homeButton.html' %}{% endif %}
+  {% endif %}
+
   {% block script %}
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     <script>
@@ -243,5 +584,24 @@
     global.chatArray = [];
 	  global.chatData = "{{ chatData }}";
     </script>
+    {% if request.use_new_design %}
+    <script>
+    (function() {
+      function wrapOne(img) {
+        if (!img.title) return;
+        if (img.classList.contains('startingMap')) return;
+        var p = img.parentNode;
+        if (!p || (p.classList && p.classList.contains('nd-mod-wrap'))) return;
+        var w = document.createElement('span');
+        w.className = 'nd-mod-wrap';
+        w.setAttribute('data-label', img.title);
+        p.insertBefore(w, img);
+        w.appendChild(img);
+      }
+      function start() { document.querySelectorAll('.startingOption').forEach(wrapOne); }
+      document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
+    })();
+    </script>
+    {% endif %}
   {% endblock %}
 {% endblock %}
