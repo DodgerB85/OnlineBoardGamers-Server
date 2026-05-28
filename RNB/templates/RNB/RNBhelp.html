@@ -40,25 +40,32 @@
       </h3>
       <div class="maxWidthContainerDiv">
         <div class="leftTextAlignDiv">
-          {% blocktranslate trimmed %}
-            <b>All Phases:</b> The only thing you really own on the map are your transporters!
-            Therefore, interacting with the map is almost always driven through your transporters.
-            You will start by selecting a transporter, and then interacting with other items using that transporter.
-          {% endblocktranslate %}
-          <br />
-          <img src="{% static 'RNB/help/transporterSelectHelp.jpg' %}"
-               alt="Transporter Help"
-               width="496"
-               height="443">
-          <br />
-          {% blocktranslate trimmed %}
-            You can select a transporter directly on the map.
-            You can also select it by clicking on a tile, and then clicking on the transporter in the Zoom Tile. If the Zoom Tile is still so crowded that you cannot select it, then each area of the tile is listed underneath, and will always display all items.
-            So alternatively you will always be able to select an item in this Zoom Area.
-            <br />
-            Once a transporter is selected, you can interact with goods/buildings either directly on the map,
-            or using the big tile in the Zoom Panel or below in the Zoom Area.
-          {% endblocktranslate %}
+          <div class="RNBsideBYsideWrapper">
+            <div class="RNBsideBYsideContainer">
+              <div class="RNBsideBYsideLeft">
+                <img src="{% static 'RNB/help/transporterSelectHelp.jpg' %}"
+                     alt="Transporter Help"
+                     width="496"
+                     height="443">
+              </div>
+              <div class="RNBsideBYsideRight">
+                {% blocktranslate trimmed %}
+                  <b>All Phases:</b> The only thing you really own on the map are your transporters!
+                  Therefore, interacting with the map is almost always driven through your transporters.
+                  You will start by selecting a transporter, and then interacting with other items using that transporter.
+                {% endblocktranslate %}
+                {% blocktranslate trimmed %}
+                  You can select a transporter directly on the map.
+                  You can also select it by clicking on a tile, and then clicking on the transporter in the Zoom Tile. If the Zoom Tile is still so crowded that you cannot select it, then each area of the tile is listed underneath, and will always display all items.
+                  So alternatively you will always be able to select an item in this Zoom Area.
+                  <br />
+                  <br />
+                  Once a transporter is selected, you can interact with goods/buildings either directly on the map,
+                  or using the big tile in the Zoom Panel or below in the Zoom Area.
+                {% endblocktranslate %}
+              </div>
+            </div>
+          </div>
           <br />
           <br />
           {% blocktranslate trimmed %}

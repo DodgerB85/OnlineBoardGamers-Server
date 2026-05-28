@@ -278,6 +278,8 @@
                                 <select name="mapSelection"
                                         id="mapSelection"
                                         onchange="onMapSelectionChange();"
+                                        oninvalid="this.setCustomValidity('{% translate "Please Select a Map" %}')"
+                                        oninput="this.setCustomValidity('')"
                                         required>
                                     <option value="">Select Map (sorted by player count)</option>
                                 </select>

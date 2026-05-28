@@ -148,7 +148,7 @@ def create_rnb_game(
                 game_status = "WAITING"
                 usernames_to_notify = [user.username for user in invited_usernames_objs]
 
-        if isTrainingGame:
+        if isTrainingGame and max_players > 1:
             starting_options.append(rf.SO_TRAINING_GAME)
             game_status = "ACTIVE"
             stats_exclude = True
