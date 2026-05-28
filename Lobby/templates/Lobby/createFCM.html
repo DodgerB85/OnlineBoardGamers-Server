@@ -74,15 +74,14 @@
         </select>
         <div class="nd-form-help">{% trans "Must be between 6–12 and a multiple of the per-game player count" %}</div>
       </div>
-      <div class="nd-form-row" style="border-bottom:none">
-        <label class="nd-form-label"></label>
-        <div class="nd-field">
-          <label class="nd-check-label">
-            <input type="checkbox" class="myCheckbox" id="privateTournament" name="privateTournament" value="1" />
-            {% trans "Private Tournament" %}
-          </label>
-        </div>
-        <div class="nd-form-help">{% trans "Players can only join through the link" %}</div>
+      <div class="nd-check-list" style="border-top:1px solid var(--color-border)">
+        <label class="nd-check-label">
+          <input type="checkbox" class="myCheckbox" id="privateTournament" name="privateTournament" value="1" />
+          <div>
+            <div>{% trans "Private Tournament" %}</div>
+            <div class="nd-opt-help">{% trans "Players can only join through the link" %}</div>
+          </div>
+        </label>
       </div>
     </div>
 
@@ -95,34 +94,27 @@
           <span style="font-size:13px;color:var(--color-muted)">{% trans "Kickout available after 1 day" %}</span>
         </div>
       </div>
-      <div class="nd-form-row">
-        <label class="nd-form-label"></label>
-        <div class="nd-field">
-          <label class="nd-check-label">
-            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="strictPaydayFridge" name="strictPaydayFridge" value="101" />
-            {% trans "Use turn order for Payday and Fridge" %}
-          </label>
-        </div>
-        <div class="nd-form-help">{% trans "Completed in turn order - not simultaneously" %}</div>
+      <div class="nd-check-list">
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="strictPaydayFridge" name="strictPaydayFridge" value="101" />
+          <div>
+            <div>{% trans "Use turn order for Payday and Fridge" %}</div>
+            <div class="nd-opt-help">{% trans "Completed in turn order - not simultaneously" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="allowRewind" name="allowRewind" value="99" />
+          <div>
+            <div>{% trans "Auto-enable Rewind" %}</div>
+            <div class="nd-opt-help">{% trans "Enable without requiring permissions from all players" %}</div>
+          </div>
+        </label>
       </div>
-      <div class="nd-form-row">
-        <label class="nd-form-label"></label>
-        <div class="nd-field">
-          <label class="nd-check-label">
-            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="allowRewind" name="allowRewind" value="99" />
-            {% trans "Auto-enable Rewind" %}
-          </label>
-        </div>
-        <div class="nd-form-help">{% trans "Enable without requiring permissions from all players" %}</div>
-      </div>
-      <div id="keepMapDiv" class="nd-form-row" style="display:none;border-bottom:none">
-        <label class="nd-form-label"></label>
-        <div class="nd-field">
-          <label class="nd-check-label">
-            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="keepMap" name="keepMap" value="" />
-            {% trans "Keep the same map" %}
-          </label>
-        </div>
+      <div id="keepMapDiv" style="display:none;padding:8px 0 0">
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="keepMap" name="keepMap" value="" />
+          {% trans "Keep the same map" %}
+        </label>
       </div>
     </div>
 
@@ -468,6 +460,571 @@
         {% blocktrans trimmed %}You are creating a Mini Tournament. You will need to wait for the tournament to fill up before any games start.{% endblocktrans %}
       </p>
       <input type="submit" class="nd-button nd-button-primary createNewGameButton" value="{% trans 'Create Food Chain Magnate Mini Tournament' %}" />
+    </div>
+  </form>
+</div>
+
+{% elif request.use_new_design %}
+
+{{ request.user.id|json_script:"user_id" }}{{ request.user.username|json_script:"username" }}
+<div class="nd-page nd-page-narrow" id="FCMallOptions">
+  <div class="nd-page-header">
+    <h1>{% trans "Food Chain Magnate" %}</h1>
+    <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newGamesPage' %}">&#8592; {% trans "New Game" %}</a>
+  </div>
+
+  {% if messages %}
+  <div style="margin-bottom:16px">
+    {% for message in messages %}
+    <div class="nd-pill {% if message.tags == 'error' %}nd-pill-danger{% elif message.tags == 'success' %}nd-pill-positive{% else %}nd-pill-accent{% endif %}" style="display:block;padding:10px 14px;border-radius:var(--radius-md);margin-bottom:8px">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="nd-card nd-card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
+    <span style="font-size:14px">{% trans "New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see" %} <a href="{% url 'FCM:FCMhelp' %}">{% trans "Help" %}</a>.</span>
+  </div>
+
+  <form autocomplete="off" action="{% url 'FCM:createFCMgame' %}" method="post" id="gameCreationForm">
+    {% csrf_token %}
+    <input type="hidden" id="mapData" name="mapData" value="{{ mapData }}" />
+
+    <div class="nd-card">
+      <div class="nd-card-header"><h2>{% trans "Setup Options" %}</h2></div>
+      <div class="nd-form-row">
+        <label class="nd-form-label" for="name">{% trans "Name" %}</label>
+        <input type="text" name="gameName" id="name" placeholder="{% trans 'Game Name' %}" maxlength="100" />
+      </div>
+      <div class="nd-form-row">
+        <label class="nd-form-label" for="description">{% trans "Description" %}</label>
+        <input type="text" name="gameDescription" id="description" placeholder="{% trans 'Optional, eg fast EST time zone' %}" maxlength="100" />
+      </div>
+      <div class="nd-form-row">
+        <label class="nd-form-label" for="pace">{% trans "Playing Speed" %}</label>
+        <select name="pace" id="pace" onchange="validateOptions(this.id)">
+          <option value="10">{% trans "Live: Play the game in one session" %}</option>
+          <option value="20">{% trans "Fast: Several moves per day" %}</option>
+          <option value="30" selected>{% trans "Standard: 1-2+ moves a day" %}</option>
+          <option value="40">{% trans "Standard: At least one move a day" %}</option>
+          <option value="50">{% trans "Casual: Just take your time" %}</option>
+        </select>
+        <div class="nd-form-help">{% trans "Alters kickout options. All games update 'live'" %}</div>
+        <div class="nd-form-help">{% trans "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</div>
+      </div>
+      <div class="nd-form-row">
+        <label class="nd-form-label" for="playerNumber">{% trans "Number of players" %}</label>
+        <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+          <option value="2" selected>2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+      <div class="nd-form-row">
+        <label class="nd-form-label" for="player2">{% trans "Player 2" %}</label>
+        <div class="nd-field">
+          <div class="autocomplete">
+            <input type="text" id="player2" name="player2" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit" />
+          </div>
+          <span id="player2help" style="display:block;margin-top:4px;font-size:13px;color:var(--color-muted)">{% trans "Leave blank to invite anybody" %}</span>
+        </div>
+      </div>
+      <div class="nd-form-row" id="selPlayer3" style="display:none">
+        <label class="nd-form-label" for="player3">{% trans "Player 3" %}</label>
+        <div class="nd-field"><div class="autocomplete">
+          <input type="text" id="player3" name="player3" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit" />
+        </div></div>
+      </div>
+      <div class="nd-form-row" id="selPlayer4" style="display:none">
+        <label class="nd-form-label" for="player4">{% trans "Player 4" %}</label>
+        <div class="nd-field"><div class="autocomplete">
+          <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit" />
+        </div></div>
+      </div>
+      <div class="nd-form-row" id="selPlayer5" style="display:none">
+        <label class="nd-form-label" for="player5">{% trans "Player 5" %}</label>
+        <div class="nd-field"><div class="autocomplete">
+          <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit" />
+        </div></div>
+      </div>
+      <div class="nd-form-row" id="selPlayer6" style="display:none;border-bottom:none">
+        <label class="nd-form-label" for="player6">{% trans "Player 6" %}</label>
+        <div class="nd-field"><div class="autocomplete">
+          <input type="text" id="player6" name="player6" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit" />
+        </div></div>
+      </div>
+    </div>
+
+    <div class="nd-card">
+      <div class="nd-card-header"><h2>{% trans "Common Options" %}</h2></div>
+      <div class="nd-form-row">
+        <label class="nd-form-label" for="kickoutDuration">{% trans "Kickout after:" %}</label>
+        <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
+          <option value="100">{% trans "1 day" %}</option>
+          <option value="200" selected>{% trans "2 days" %}</option>
+          <option value="300">{% trans "3 days" %}</option>
+          <option value="500">{% trans "5 days" %}</option>
+        </select>
+        <div class="nd-form-help">{% trans "Change Playing Speed for different options" %}</div>
+      </div>
+      <div class="nd-check-list">
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="strictPaydayFridge" name="strictPaydayFridge" value="101" />
+          <div>
+            <div>{% trans "Use turn order for Payday and Fridge" %}</div>
+            <div class="nd-opt-help">{% trans "Completed in turn order - not simultaneously" %}</div>
+          </div>
+        </label>
+        {% url "lobbyHelp" as the_url %}
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="trainingGame" name="trainingGame" value="102" />
+          <div>
+            <div>{% trans "Practice Game" %}</div>
+            <div class="nd-opt-help">{% blocktranslate trimmed %}Play as up to 6 players on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="privateGame" name="privateGame" value="1" />
+          <div>
+            <div>{% trans "Private Game" %}</div>
+            <div class="nd-opt-help">{% trans "Players can only join with invite or link" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="learningGame" name="learningGame" value="110" />
+          <div>
+            <div>{% trans "Request Learning Game" %}</div>
+            <div class="nd-opt-help">{% blocktranslate trimmed %}Request help to learn the game. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="experiencedGame" name="experiencedGame" value="120" disabled />
+          <div>
+            <div>{% trans "Experienced Game" %}</div>
+            <div class="nd-opt-help">{% blocktranslate trimmed %}Minimum Experience Level. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+            {% if not experienced %}<div style="font-size:12px;color:var(--color-danger);margin-top:2px">{% trans "You do not have enough experience" %}</div>{% endif %}
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="allowRewind" name="allowRewind" value="99" />
+          <div>
+            <div>{% trans "Auto-enable Rewind" %}</div>
+            <div class="nd-opt-help">{% trans "Enable without requiring permissions from all players" %}</div>
+          </div>
+        </label>
+      </div>
+      <div id="keepMapDiv" style="display:none;padding:8px 0 0">
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="keepMap" name="keepMap" value="" />
+          {% trans "Keep the same map" %}
+        </label>
+      </div>
+    </div>
+
+    <div class="nd-card">
+      <div class="nd-card-header"><h2>{% trans "Expert Options" %}</h2></div>
+      <div class="nd-check-list">
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="enableAdvancedOptions" name="enableAdvancedOptions" value="expert" />
+          <div>
+            <div>{% trans "Enable Advanced Setup Options" %}</div>
+            <div class="nd-opt-help">{% trans "Hides normal game options; unlocks AI, random, and draft controls below" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="fcmAI" name="fcmAI" value="500" disabled />
+          <div>{% trans "AI v0.1. Vague intelligence. Very bad!" %}</div>
+        </label>
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="randomModules" name="randomModules" value="" disabled />
+          <div>
+            <div>{% trans "Use random modules" %}</div>
+            <div style="margin-top:8px;display:flex;gap:16px;font-size:13px;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:4px">
+                <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="random_originalMS" name="random_MS" value="201" disabled />
+                {% trans "Original MS" %}
+              </label>
+              <label style="display:flex;align-items:center;gap:4px">
+                <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="random_newMS" name="random_MS" value="202" disabled />
+                {% trans "New MS" %}
+              </label>
+            </div>
+            <div style="margin-top:6px;display:flex;gap:12px;align-items:center;font-size:13px;flex-wrap:wrap">
+              <label for="minModules">{% trans "Min:" %}</label>
+              <select name="minModules" id="minModules" onchange="validateOptions(this.id)" disabled style="padding:2px 6px;font-size:13px;width:auto">
+                <option value="1" selected>1</option><option value="2">2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+              </select>
+              <label for="maxModules">{% trans "Max:" %}</label>
+              <select name="maxModules" id="maxModules" onchange="validateOptions(this.id)" disabled style="padding:2px 6px;font-size:13px;width:auto">
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                <option value="13">13</option><option value="14">14</option><option value="15" selected>15</option>
+              </select>
+            </div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="draftModules" name="draftModules" value="" disabled />
+          <div>
+            <div>{% trans "Draft modules" %}</div>
+            <div class="nd-opt-help">{% trans "Pick expansion modules at game start" %}</div>
+            <div style="margin-top:8px;display:flex;gap:16px;font-size:13px;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:4px">
+                <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="draft_originalMS" name="draft_MS" value="301" disabled />
+                {% trans "Original MS" %}
+              </label>
+              <label style="display:flex;align-items:center;gap:4px">
+                <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="draft_newMS" name="draft_MS" value="302" disabled />
+                {% trans "New MS" %}
+              </label>
+            </div>
+            <div style="margin-top:8px">
+              <label class="nd-check-label">
+                <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="newDistrictsDraft" name="newDistrictsDraft" value="18" disabled />
+                {% trans "Use New Districts" %}
+              </label>
+              <label class="nd-check-label" style="margin-left:20px">
+                <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="newDistrictsAppDraft" name="newDistrictsAppDraft" value="181" disabled />
+                {% trans "Guarantee at least 1 Apartment" %}
+              </label>
+              <label class="nd-check-label" style="margin-left:20px">
+                <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="newDistrictsParkDraft" name="newDistrictsParkDraft" value="183" disabled />
+                {% trans "Guarantee the Parks tile" %}
+              </label>
+            </div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="nd-card" id="nonExpertOptions">
+      <div class="nd-card-header"><h2>{% trans "Game Options" %}</h2></div>
+      <div class="nd-tabs" style="margin-bottom:16px">
+        <button type="button" class="nd-tab tablinks gameCreationTab" id="individualOptionsTab">{% trans "Use Individual Options" %}</button>
+        <button type="button" class="nd-tab tablinks gameCreationTab" id="scenariosTab">{% trans "Use Pre-set Scenarios" %}</button>
+      </div>
+
+      <div id="individualOptionsView">
+
+        <div class="nd-opts-section nd-opts-slate">
+          <div class="nd-section-title">{% trans "Game Options" %}</div>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="hardChoices" name="hardChoices" value="8" />
+            <div>
+              <div>{% trans "Hard Choices with Original Milestones" %}</div>
+              <div class="nd-opt-help">{% trans "First to train / First to market good disappear after 2 turns. First to hire 3 disappears after 3 turns." %}</div>
+            </div>
+          </label>
+          <div class="nd-section-title" style="margin-top:10px;font-size:11px">{% trans "Rarely used" %}</div>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="short" name="short" value="1" />
+            <div>
+              <div>{% trans "Short Game" %}</div>
+              <div class="nd-opt-help">{% trans "No salaries, bank only breaks once, extra money" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="noMilestones" name="noMilestones" value="2" />
+            <div>{% trans "Do not use milestones" %}</div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="noCeoMilestone" name="noCeoMilestone" value="3" />
+            <div>{% trans "No CFO Milestone" %}</div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="noRadioMilestone" name="noRadioMilestone" value="6" />
+            <div>{% trans "No Radio Milestone" %}</div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="sandboxMode" name="sandboxMode" value="103" />
+            <div>{% trans "Sandbox Mode" %} (<a href="{% url 'FCM:FCMhelp' %}" target="_blank">{% trans "Help" %}</a>)</div>
+          </label>
+        </div>
+
+        <div class="nd-opts-section nd-opts-red">
+          <div class="nd-section-title">{% trans "Ketchup Options" %}</div>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="newMilestones" name="newMilestones" value="21" />
+            <div>{% trans "Use New Milestones" %}</div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="ketchupMilestone" name="ketchupMilestone" value="20" />
+            <div>
+              <div>{% trans "Use Ketchup Milestone" %}</div>
+              <div class="nd-opt-help">{% trans "The first time someone else sells your demand, gain a permanent -1 to distance" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="reservePrice" name="reservePrice" value="23" />
+            <div>
+              <div>{% trans "Use Price Changing Reserve Cards" %}</div>
+              <div class="nd-opt-help">{% trans "When the bank breaks, add $200 per player. The base price changes to whichever is selected most, from $5, $10, or $20." %}</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="nd-opts-section nd-opts-green">
+          <div class="nd-section-title">{% trans "Map / Route Options" %}</div>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="newDistricts" name="newDistricts" value="18" />
+            <div>
+              <div>{% trans "Use New Districts" %}</div>
+              <div class="nd-opt-help">{% trans "Add new tiles to the pool to make the map" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label" style="margin-left:20px">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="newDistrictsApp" name="newDistrictsApp" value="181" />
+            <div>{% trans "Guarantee at least 1 Apartment" %}</div>
+          </label>
+          <label class="nd-check-label" style="margin-left:20px">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="newDistrictsPark" name="newDistrictsPark" value="183" />
+            <div>{% trans "Guarantee the Parks tile" %}</div>
+          </label>
+          <label class="nd-check-label" style="margin-left:20px">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="newDistrictsAll" name="newDistrictsAll" value="182" />
+            <div>{% trans "Use all 5 new tiles plus random others" %}</div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="lobbyists" name="lobbyists" value="22" />
+            <div>
+              <div>{% trans "Use Lobbyists" %}</div>
+              <div class="nd-opt-help">{% trans "Add new roads and parks to the map" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="coffee" name="coffee" value="19" />
+            <div>
+              <div>{% trans "Use Coffee" %}</div>
+              <div class="nd-opt-help">{% trans "Sell coffee along the route travelled by a house" %}</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="nd-opts-section nd-opts-amber">
+          <div class="nd-section-title">{% trans "Food Options" %}</div>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="kimchi" name="kimchi" value="10" />
+            <div>
+              <div>{% trans "Use Kimchi" %}</div>
+              <div class="nd-opt-help">{% trans "Houses prioritise a restaurant with their demands + kimchi" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="sushi" name="sushi" value="11" />
+            <div>
+              <div>{% trans "Use Sushi" %}</div>
+              <div class="nd-opt-help">{% trans "Houses with gardens will try to replace all demand with Sushi" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="noodles" name="noodles" value="12" />
+            <div>
+              <div>{% trans "Use Noodles" %}</div>
+              <div class="nd-opt-help">{% trans "Noodles count as any demand item, but only if no one else can supply it" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="fryChefs" name="fryChefs" value="9" />
+            <div>
+              <div>{% trans "Use Fry Chefs" %}</div>
+              <div class="nd-opt-help">{% trans "Adds $10 per total sale" %}</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="nd-opts-section nd-opts-blue">
+          <div class="nd-section-title">{% trans "Marketing Options" %}</div>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="massMarketers" name="massMarketers" value="15" />
+            <div>
+              <div>{% trans "Use Mass Marketers" %}</div>
+              <div class="nd-opt-help">{% trans "Repeat marketing phase for each Mass Marketeer" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="gourmet" name="gourmet" value="13" />
+            <div>
+              <div>{% trans "Use Gourmet Food Critic" %}</div>
+              <div class="nd-opt-help">{% trans "Markets to all houses with a garden" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="ruralMarketers" name="ruralMarketers" value="17" />
+            <div>
+              <div>{% trans "Use Rural Marketers" %}</div>
+              <div class="nd-opt-help">{% trans "Markets to the Rural Area - accessed by freeway ramps" %}</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="nd-opts-section nd-opts-purple">
+          <div class="nd-section-title">{% trans "Employee Options" %}</div>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="movieStars" name="movieStars" value="14" />
+            <div>
+              <div style="color:#8b5cf6">{% trans "Use Movie Stars" %}</div>
+              <div class="nd-opt-help">{% trans "Decide turn order and break ties" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="nightShift" name="nightShift" value="16" />
+            <div>
+              <div id="nightShiftLabel">{% trans "Use Night Shift Managers" %}</div>
+              <div class="nd-opt-help">{% trans "Must be put in a management slot. All unsalaried employees work twice during 9-5." %}</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="nd-opts-section nd-opts-orange">
+          <div class="nd-section-title">
+            {% trans "China Expansion" %}
+            <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'FCM:FCMchinaHelp' %}" target="_blank" style="font-size:11px;padding:2px 8px;vertical-align:middle;margin-left:8px">{% trans "Help" %}</a>
+          </div>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="urbanPlanning" name="urbanPlanning" value="40" />
+            <div>
+              <div>{% trans "Urban Planning" %}</div>
+              <div class="nd-opt-help">{% trans "Choose map tile rotation" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="urbanPlanningPlus" name="urbanPlanningPlus" value="41" />
+            <div>
+              <div>{% trans "Urban Planning Plus" %}</div>
+              <div class="nd-opt-help">{% trans "Choose map tile AND map tile rotation" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="jazzMusicians" name="jazzMusicians" value="42" />
+            <div>
+              <div style="color:#8b5cf6">{% trans "Use Jazz Musicians" %}</div>
+              <div class="nd-opt-help">{% trans "+$15, loses ties" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="dumplings" name="dumplings" value="43" />
+            <div>
+              <div style="color:var(--color-brand-green)">{% trans "Use Dumplings" %}</div>
+              <div class="nd-opt-help">{% trans "Marketing also markets dumplings" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt" id="deliveryDrivers" name="deliveryDrivers" value="44" />
+            <div>
+              <div style="color:#b07a1d">{% trans "Use Delivery Drivers" %}</div>
+              <div class="nd-opt-help">{% trans "2+ demand has distance 0" %}</div>
+            </div>
+          </label>
+          <label class="nd-check-label">
+            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="hawkers" name="hawkers" value="45" />
+            <div>
+              <div style="color:var(--color-brand-blue)">{% trans "Use Hawker Marketeers" %} (BETA)</div>
+              <div class="nd-opt-help">{% trans "Drives along a road, affects directly connected houses" %}</div>
+            </div>
+          </label>
+        </div>
+
+      </div>
+
+      <div id="scenarioOptionsView">
+        <div class="nd-section-title" style="margin-bottom:12px">{% trans "The scenario name will be added to the front of the game name" %}</div>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_coolOriginal" name="scenario" value="Cool Original" />
+          <div>
+            <div>{% trans "Cool original" %}</div>
+            <div class="nd-opt-help">{% trans "Play the base game" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_newMS" name="scenario" value="New MS" />
+          <div>
+            <div>{% trans "New milestones" %}</div>
+            <div class="nd-opt-help">{% trans 'Use only the "New Milestones" module. This shakes the strategic space up quite a bit already!' %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_firstCoffee" name="scenario" value="First Coffee" />
+          <div>
+            <div>{% trans "Your first cup of coffee" %}</div>
+            <div class="nd-opt-help">{% trans 'The "Coffee" module makes board positions even more important' %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_koreanCity" name="scenario" value="Korean City" />
+          <div>
+            <div>{% trans "Korean city" %}</div>
+            <div class="nd-opt-help">{% trans "New districts (at least 1 apartment building tile in the city) + Kimchi" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_nightlife" name="scenario" value="Nightlife" />
+          <div>
+            <div>{% trans "Nightlife" %}</div>
+            <div class="nd-opt-help">{% trans "New milestones + Night shift managers" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_sustenance" name="scenario" value="Sustenance" />
+          <div>
+            <div>{% trans "Sustenance" %}</div>
+            <div class="nd-opt-help">{% trans "Coffee + Fry chefs" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_upmarketArea" name="scenario" value="Upmarket Area" />
+          <div>
+            <div>{% trans "Upmarket Area" %}</div>
+            <div class="nd-opt-help">{% trans "New milestones + Park tile from new districts + Gourmet food critic + Sushi" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_cityBuilder" name="scenario" value="City Builder" />
+          <div>
+            <div>{% trans "City builder" %}</div>
+            <div class="nd-opt-help">{% trans "Lobbyist + New districts + rural marketeers" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_asianFusion" name="scenario" value="Asian Fusion" />
+          <div>
+            <div>{% trans "Asian Fusion" %}</div>
+            <div class="nd-opt-help">{% trans "Sushi + Kimchi + Noodles + Ketchup" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_firstMover" name="scenario" value="First Mover" />
+          <div>
+            <div>{% trans "First mover" %}</div>
+            <div class="nd-opt-help">{% trans "Hard choices + Ketchup + Movie stars + Lobbyists + Reserve prices" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_overtime" name="scenario" value="Overtime" />
+          <div>
+            <div>{% trans "Overtime" %}</div>
+            <div class="nd-opt-help">{% trans "Night shift managers + Mass marketeers + Rural marketeers + New districts + Noodles + Reserve price" %}</div>
+          </div>
+        </label>
+        <label class="nd-check-label">
+          <input type="radio" onchange="validateScenario(this.id)" class="myCheckbox" id="s_henriLo" name="scenario" value="Henri Lo" />
+          <div>
+            <div>{% trans "Henri Lo Menu" %}</div>
+            <div class="nd-opt-help">{% trans "All modules!" %}</div>
+          </div>
+        </label>
+      </div>
+
+    </div>
+
+    <div style="margin-top:20px;padding:16px 0">
+      <input type="submit" class="nd-button nd-button-primary createNewGameButton" value="{% trans 'Create Food Chain Magnate Game' %}" />
     </div>
   </form>
 </div>

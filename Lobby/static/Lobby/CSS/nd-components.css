@@ -812,3 +812,15 @@ body.nd .nd-opts-amber  { background: rgba(185,130,35,0.07);  border-left-color:
 body.nd .nd-opts-blue   { background: rgba(55,100,200,0.06);  border-left-color: rgba(55,100,200,0.3); }
 body.nd .nd-opts-purple { background: rgba(139,92,246,0.06);  border-left-color: rgba(139,92,246,0.35); }
 body.nd .nd-opts-orange { background: rgba(185,90,30,0.07);   border-left-color: rgba(185,90,30,0.4); }
+
+/* Full-width checkbox list — use instead of nd-form-row when there is no label column */
+body.nd .nd-check-list {
+    padding: 4px 0;
+}
+body.nd .nd-check-list > .nd-check-label {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+body.nd .nd-check-list > .nd-check-label:last-child {
+    border-bottom: none;
+}
