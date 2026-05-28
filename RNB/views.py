@@ -759,31 +759,28 @@ def _processRNBturn(request):
             # Pending players CAN pre-move -- but DON'T notify if a premove is already set
             pendingPlayersArr = jsonData["pendingPlayersArr"]
             if len(pendingPlayersArr) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-                # 1. Clean the list (strip whitespace)
-                # 3. Remove players who have a PreMove saved
-                # This keeps only players where playerHasPreMove returns False
-                # Debug print
-                # for pName in playerListToNotify:
-                #    if presenter.playerHasPreMove(pName):
-                #        print(f"{pName}: has premove: {presenter.getCurrentMoveDataForPlayer(pName)}")
-                playerListToNotify = [pName.strip() for pName in playerListToNotify if pName.strip() not in {request.user.username, "RnbBot"} and not presenter.playerHasPreMove(pName.strip())]
+                pendingPlayersArrToNotify = [pName.strip() for pName in pendingPlayersArr if pName.strip() not in {request.user.username, "RnbBot"} and not presenter.playerHasPreMove(pName.strip())]
 
-                if len(playerListToNotify) > 0:
-                    # start_time = timezone.now() + timedelta(minutes=2)
-                    start_time = timezone.now() + timedelta(seconds=10)  # For debug
-                    schedule(
-                        "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
-                        "RNB",
-                        playerListToNotify,
-                        currentGame.id,
-                        presenter.getGameName(),
-                        currentGame.latestUpdate,
-                        currentGame.turn,
-                        currentGame.phase,
-                        next_run=start_time,
-                        repeats=-1,  # Neg repeats for delete
-                        schedule_type="O",
-                    )
+                if len(pendingPlayersArrToNotify) > 0:
+                    pending_key = f"{currentGame.turn}:{currentGame.phase}"
+                    if currentGame.autoMoves != pending_key:
+                        currentGame.autoMoves = pending_key
+                        currentGame.save()
+                        # start_time = timezone.now() + timedelta(minutes=2)
+                        start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                        schedule(
+                            "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
+                            "RNB",
+                            pendingPlayersArrToNotify,
+                            currentGame.id,
+                            presenter.getGameName(),
+                            currentGame.latestUpdate,
+                            currentGame.turn,
+                            currentGame.phase,
+                            next_run=start_time,
+                            repeats=-1,  # Neg repeats for delete
+                            schedule_type="O",
+                        )
 
             ################ REWIND EVERY SAVE #######################
 
@@ -951,21 +948,25 @@ def _processRNBturn(request):
             playerListToNotify = [p.strip() for p in pendingPlayersArr if p.strip() not in {request.user.username, "RnbBot"}]
 
             if len(playerListToNotify) > 0:
-                # start_time = timezone.now() + timedelta(minutes=2)
-                start_time = timezone.now() + timedelta(seconds=10)  # For debug
-                schedule(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
-                    "RNB",
-                    playerListToNotify,
-                    currentGame.id,
-                    presenter.getGameName(),
-                    currentGame.latestUpdate,
-                    currentGame.turn,
-                    currentGame.phase,
-                    next_run=start_time,
-                    repeats=-1,  # Neg repeats for delete
-                    schedule_type="O",
-                )
+                pending_key = f"{currentGame.turn}:{currentGame.phase}"
+                if currentGame.autoMoves != pending_key:
+                    currentGame.autoMoves = pending_key
+                    currentGame.save()
+                    # start_time = timezone.now() + timedelta(minutes=2)
+                    start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                    schedule(
+                        "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
+                        "RNB",
+                        playerListToNotify,
+                        currentGame.id,
+                        presenter.getGameName(),
+                        currentGame.latestUpdate,
+                        currentGame.turn,
+                        currentGame.phase,
+                        next_run=start_time,
+                        repeats=-1,  # Neg repeats for delete
+                        schedule_type="O",
+                    )
 
         return JsonResponse(
             {
@@ -1114,21 +1115,25 @@ def performSaveGame(request, currentGame, jsonData):
             playerListToNotify = [p.strip() for p in pendingPlayersArr if p.strip() not in {request.user.username, "RnbBot"}]
 
             if len(playerListToNotify) > 0:
-                # start_time = timezone.now() + timedelta(minutes=2)
-                start_time = timezone.now() + timedelta(seconds=10)  # For debug
-                schedule(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
-                    "RNB",
-                    playerListToNotify,
-                    currentGame.id,
-                    presenter.getGameName(),
-                    currentGame.latestUpdate,
-                    currentGame.turn,
-                    currentGame.phase,
-                    next_run=start_time,
-                    repeats=-1,  # Neg repeats for delete
-                    schedule_type="O",
-                )
+                pending_key = f"{currentGame.turn}:{currentGame.phase}"
+                if currentGame.autoMoves != pending_key:
+                    currentGame.autoMoves = pending_key
+                    currentGame.save()
+                    # start_time = timezone.now() + timedelta(minutes=2)
+                    start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                    schedule(
+                        "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
+                        "RNB",
+                        playerListToNotify,
+                        currentGame.id,
+                        presenter.getGameName(),
+                        currentGame.latestUpdate,
+                        currentGame.turn,
+                        currentGame.phase,
+                        next_run=start_time,
+                        repeats=-1,  # Neg repeats for delete
+                        schedule_type="O",
+                    )
 
     ################ REWIND EVERY SAVE #######################
 

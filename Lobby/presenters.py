@@ -273,7 +273,7 @@ class GamePresenter:
         self.gameObj.rewindTempData = ""
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.activeVotes = None
-        # TGZ
+        # TGZ and RNB
         self.gameObj.autoMoves = None
         # AQY
         self.gameObj.playerTradeData = ""

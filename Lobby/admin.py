@@ -348,6 +348,7 @@ class GameAdmin(admin.ModelAdmin):
                     "FCMplayersMoveData",
                     "ind_premove_display",
                     "currentPlayersInTurnOrder",
+                    "autoMoves",
                 ),
             },
         ),
