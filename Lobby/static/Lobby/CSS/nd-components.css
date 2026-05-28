@@ -773,3 +773,42 @@ body.nd .webPrefSVG {
     width: 80px;
     height: 20px;
 }
+
+/* Checkbox/radio option rows used in create-game forms */
+body.nd .nd-check-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--color-ink);
+    padding: 4px 0;
+    line-height: 1.4;
+}
+body.nd .nd-check-label input[type=checkbox],
+body.nd .nd-check-label input[type=radio] {
+    flex-shrink: 0;
+    margin-top: 3px;
+    accent-color: var(--color-accent);
+}
+body.nd .nd-opt-help {
+    font-size: 12px;
+    color: var(--color-muted);
+    margin-top: 2px;
+    line-height: 1.4;
+}
+body.nd .nd-opts-section {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+    margin-bottom: 8px;
+}
+
+/* Per-section color accents — muted tints + left border */
+body.nd .nd-opts-slate  { background: rgba(100,116,139,0.07); border-left-color: rgba(100,116,139,0.4); }
+body.nd .nd-opts-red    { background: rgba(185,60,60,0.06);   border-left-color: rgba(185,60,60,0.35); }
+body.nd .nd-opts-green  { background: rgba(80,145,80,0.06);   border-left-color: rgba(80,145,80,0.35); }
+body.nd .nd-opts-amber  { background: rgba(185,130,35,0.07);  border-left-color: rgba(185,130,35,0.4); }
+body.nd .nd-opts-blue   { background: rgba(55,100,200,0.06);  border-left-color: rgba(55,100,200,0.3); }
+body.nd .nd-opts-purple { background: rgba(139,92,246,0.06);  border-left-color: rgba(139,92,246,0.35); }
+body.nd .nd-opts-orange { background: rgba(185,90,30,0.07);   border-left-color: rgba(185,90,30,0.4); }
