@@ -22,6 +22,7 @@ import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
     build_show_game_data,
     shared_bug_entry,
+    shared_cast_vote,
     shared_save_notes,
     shared_save_zoom,
 )
@@ -1707,3 +1708,14 @@ def getAllCurrentStackMoves(currentGame):
             currentStackMoves.append(entry)
 
     return currentStackMoves
+
+@login_required()
+def castVote(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+    jsonData = json.loads(request.body)
+    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
+        if acquired:
+            return shared_cast_vote(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)

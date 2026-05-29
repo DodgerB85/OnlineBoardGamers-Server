@@ -29,5 +29,5 @@ urlpatterns = [
     path("getSoloMaps/", views.getSoloMaps, name="getSoloMaps"),
     path("getUserHighscores/", views.getUserHighscores, name="getUserHighscores"),
     path("getMapHighscores/", views.getMapHighscores, name="getMapHighscores"),
-    # path("castVote/", views.castVote, name="castVoteRNB"),
+    path("castVote/", views.castVote, name="castVoteRNB"),
 ]

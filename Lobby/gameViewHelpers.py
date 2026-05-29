@@ -180,7 +180,7 @@ def build_show_game_data(
         zoomLevels = json.loads(currentGame.zoomLevels)
         if 0 <= pov < len(zoomLevels):
             myZoomLevel = zoomLevels[pov]
-            # Ind uses 0 to allow the game to set a default zoom according to 
+            # Ind uses 0 to allow the game to set a default zoom according to
             if myZoomLevel <= 0 and game_code != "IND":
                 myZoomLevel = default_zoom
     except (json.JSONDecodeError, IndexError, TypeError):

@@ -33,6 +33,7 @@ module.exports = [
 					args: "all",
 					argsIgnorePattern: "^_",
 					vars: "all",
+					varsIgnorePattern: "^_",
 				},
 			],
 		},
