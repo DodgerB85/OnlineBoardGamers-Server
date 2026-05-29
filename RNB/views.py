@@ -707,7 +707,7 @@ def _processRNBturn(request):
 
         # If the current player needs to fix their move, clear out their future moves
         if jsonData["currentPlayerNeedsToFixMove"]:
-            PdeleteAllOtherMovesForInteferedWithPlayer(currentGame, jsonData["allRemainingPlayersInTurnOrder"][0])
+            PdeleteAllOtherMovesForInterferedWithPlayer(currentGame, jsonData["allRemainingPlayersInTurnOrder"][0])
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -1627,7 +1627,7 @@ def PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry):
     gp_player.save(update_fields=["moveDataJSON"])  # ONLY save this field
 
 
-def PdeleteAllOtherMovesForInteferedWithPlayer(currentGame, nameToUse):
+def PdeleteAllOtherMovesForInterferedWithPlayer(currentGame, nameToUse):
     turn = currentGame.turn
     phase = currentGame.phase
 

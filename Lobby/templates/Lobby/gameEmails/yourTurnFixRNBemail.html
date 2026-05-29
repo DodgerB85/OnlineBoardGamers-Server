@@ -21,13 +21,12 @@
     {% elif game == "RNB" %}
         {% url "RNB:showRNBgame" gameID as the_url %}
     {% endif %}
-        {% url 'discordInviteLink' as discord_url %}
-
+    {% url 'discordInviteLink' as discord_url %}
     {% comment %}Translators: This is an email{% endcomment %}
     {% blocktranslate with profile_url=profile_url discord_link=discord_url game_url=the_url %}
 Hi {{ user }},<br />
 <br />
-Other players have intefered with your move at Online Board Gamers - {{ boxName }}.<br />
+Other players have interfered with your move at Online Board Gamers - {{ boxName }}.<br />
 You will need to redo your move. <br />
 <br />
 https://{{ domain }}{{ game_url }}<br />

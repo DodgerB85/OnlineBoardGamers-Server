@@ -605,7 +605,7 @@ def SN_sendFixNextTurnNotification(gameCode, playerList, gameID, gameName, turn_
 
             # messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers!\n%(gameName)s - %(currentTurnString)s.") % {"gameName": gameName, "currentTurnString": currentTurnString}
 
-            messageText = user.username + ": " + gettext("Other players have intefered with your move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + turn_string + "\n" + gettext("You will need to redo your move")
+            messageText = user.username + ": " + gettext("Other players have interfered with your move at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + turn_string + "\n" + gettext("You will need to redo your move")
 
             # SEND EMAIL
             if shouldSendEmail("yourTurn", player, profile, gamePace):
