@@ -205,7 +205,7 @@ function localCastVote(topic) {
 			Please be courteous and rewind only if absolutely neessary - send a chat message to inform the other
 			players.
 			<br />
-			Misuse of this feature will result in rewinds requiting permission from all players.
+			Misuse of this feature will result in rewinds requiring permission from all players.
 
 			<br />
 			<br />

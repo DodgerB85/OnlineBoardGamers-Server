@@ -204,7 +204,7 @@ export async function initGame() {
 			}
 
 			// Set up gameflow - per start tiles
-			store.gameflow.fullTurnOrder = store.players.map((player, index) => index)
+			store.gameflow.fullTurnOrder = store.players.map((_player, index) => index)
 			store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 			store.gameflow.phase = rf.PHASE_WHOLE_TURN
 
@@ -519,7 +519,7 @@ export function endGame_core() {
 	store.gameflow.phase = rf.PHASE_GAME_OVER
 
 	// Create an array of player objects with their original index
-	const playerScores = store.players.map((player, index) => ({
+	const playerScores = store.players.map((_player, index) => ({
 		index: index,
 		finalScore: cb.getScore(index),
 	}))

@@ -112,24 +112,61 @@ User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_USERS_RNB = [
-    "admin",
-    "DodgerB",
-    "user1",
-    "durendal",
+ALLOWED_SPECIAL_USERS = [
+    "33",
+    "Acacia",
+    "Batch",
+    "Beezy",
     "Benkyo",
-    "vraid",
-    "JoshuaAcosta",
-    "massibull",
-    "phil",
-    "timmymayes",
-    "SaintJason",
-    "h",
-    "Jungy",
+    "BigBad",
+    "BotKickStarter",
+    "Brent",
+    "Burmer",
+    "DodgerB",
+    "Dopple",
     "Dycu",
+    "F1087",
+    "Ftep",
+    "Gauss",
+    "Hohohale",
+    "Jasonbartfast",
+    "JoshuaAcosta",
+    "Jungy",
+    "Juni",
+    "Kawlos",
+    "Lemem",
+    "Melk0r",
+    "PhasingPlayer",
+    "RJ_E",
+    "Rastko",
     "RedWater",
+    "SaintJason",
     "Shoopuffman",
+    "Steveth",
+    "Strange8ractor",
+    "TDUBZ",
+    "admin",
+    "burmer",
+    "craggybackhand",
+    "durendal",
+    "enavico",
+    "gdc",
+    "h",
+    "ha.steven",
+    "huddyrx",
     "jmelliere",
+    "joshuastarr",
+    "kbbr",
+    "krieg90",
+    "looogic",
+    "massibull",
+    "michazhn",
+    "phil",
+    "siddhig",
+    "timmymayes",
+    "user1",
+    "vraid",
+    "waymost",
 ]
 
 ##########################
@@ -413,60 +450,12 @@ def helpTournamentsMini(request):
     return render(request, "Lobby/tournamentsMiniHelp.html")
 
 
-# ALLOWED_USERS = ["admin", "DodgerB", "joshuastarr", "Lemem", "waymost", "timmymayes", "Ftep", "vraid", "RJ_E", "michazhn", "Dopple", "burmer", "siddhig", "Melk0r", "Steveth", "kbbr", "Brent", "Beezy", "durendal", "Gauss"]
-
-
 @login_required
 def indexSpecialRedirect(request):
-    # ALLOWED_USERS = [
-    #    "admin",
-    #    "user1",
-    #    "ha.steven",
-    #    "massibull",
-    #    "durendal",
-    #    "DodgerB",
-    #    "BotKickStarter",
-    #    "Rastko",
-    #    "Benkyo",
-    #    "vraid",
-    #    "F1087",
-    #    "krieg90",
-    #    "gdc",
-    #    "enavico",
-    #    "PhasingPlayer",
-    #    "Acacia",
-    # ]
-    # ALLOWED_USERS += [
-    #    "ha.steven",
-    #    "Kawlos",
-    #    "Jasonbartfast",
-    #    "Batch",
-    #    "Juni",
-    #    "TDUBZ",
-    #    "BigBad",
-    #    "massibull",
-    #    "durendal",
-    #    "DodgerB",
-    #    "BotKickStarter",
-    #    "33",
-    #    "Rastko",
-    #    "Burmer",
-    #    "phil",
-    # ]
-    # ALLOWED_USERS += ["Benkyo", "Steveth", "F1087", "krieg90", "gdc", "michazhn", "Hohohale"]
-    # "Jasonbartfast", "Kawlos", "Batch", "Juni", "TDUBZ", "BigBad",   '33',  'Steveth', ]
-    #'looogic',
-    #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
 
-    # for game in results:
-    #    players = game.allPlayers.all()
-
-    if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect("index")
-
-    # return redirect('index')
+    return redirect("index")
     # return HttpResponseRedirect(reverse("RNB:showRNBgame"))
-    return HttpResponseRedirect(reverse("createRNBpage"))
+    # return HttpResponseRedirect(reverse("createRNBpage"))
 
 
 def set_language_custom(request):
@@ -2205,8 +2194,6 @@ def createWEBpage(request, gameID=0):
 
 @login_required
 def createRNBpage(request, gameID=0):
-    if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect("index")
     experienced = SF_hasRequiredExperience(request, "RNB", Game)
     # Get settings debug flag for RNB map rendering
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
@@ -2813,7 +2800,7 @@ def playerInfo(request, usernameToProfile):
             "jointWinPercentage": jointWinPercentage,
             "jointGameStats": jointGameStats,
         },
-        #using="jinja2",
+        # using="jinja2",
     )
 
     return response

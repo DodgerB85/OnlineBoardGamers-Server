@@ -44,8 +44,6 @@ from .models import RNBmap, RNBMapScore
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
-ALLOWED_USERS_RNB = ["admin", "DodgerB", "user1", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy", "BotKickStarter", "Dycu", "RedWater", "Shoopuffman", "jmelliere"]
-
 if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter
 
@@ -117,9 +115,6 @@ def RNBmapEditor(request, game_id=0):
 
 
 def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect("index")
-
     result = build_show_game_data(
         request,
         game_id,
