@@ -268,33 +268,37 @@
       <div id="loadingText">Roads & Boats is loading........</div>
       <div id="loadingAnimation">
         <div class="hex-tile hex-woods">
-          <svg width="200" height="200" viewBox="0 0 56 56">
+          <svg width="200" height="200" viewBox="0 0 56 56" xmlns="http://w3.org">
             <defs>
-            <pattern id="hexPatternWoods" width="100%" height="100%" patternContentUnits="objectBoundingBox">
-            <image href="{% static 'RNB/images/hexes/hex_14.jpg' %}"
-                   x="0"
-                   y="0"
-                   width="1"
-                   height="1"
-                   preserveAspectRatio="none" />
+            <!-- Pattern to quickly distribute trees across the canvas -->
+            <pattern id="treePattern" width="6" height="6" patternUnits="userSpaceOnUse">
+            <path d="M 3,1 L 1,5 L 5,5 Z" fill="#0d2612" opacity="0.85" />
+            <path d="M 4,4 L 3,6 L 5,6 Z" fill="#061a0a" opacity="0.6" />
             </pattern>
+            <!-- Clip path to keep everything within the hex bounds -->
+            <clipPath id="hexClip">
+            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" />
+            </clipPath>
             </defs>
-            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" fill="url(#hexPatternWoods)" />
+            <g clip-path="url(#hexClip)">
+            <!-- 1. Base Green Grass -->
+            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" fill="#52b145" />
+            <!-- 2. Dense Forest Texture Layer -->
+            <rect width="56" height="56" fill="url(#treePattern)" />
+            <!-- 3. The Blue River (including the central island split) -->
+            <path d="M 11,8 C 14,14 18,22 24,28 C 25,27 27,27 29,28 C 33,31 32,36 34,42 C 36,46 41,50 44,52 L 38,55 C 34,51 31,46 29,40 C 27,41 24,39 23,36 C 17,31 13,22 7,13 Z" fill="#3b66cc" />
+            <!-- 4. Inner River highlights to mimic the original brushstrokes -->
+            <path d="M 11,9 C 14,15 18,23 23,28 M 28,32 C 31,35 31,39 33,43" stroke="#5588ff" stroke-width="0.8" fill="none" opacity="0.6" />
+            </g>
           </svg>
         </div>
         <div class="hex-tile hex-pasture">
-          <svg width="200" height="200" viewBox="0 0 56 56">
-            <defs>
-            <pattern id="hexPatternPasture" width="100%" height="100%" patternContentUnits="objectBoundingBox">
-            <image href="{% static 'RNB/images/hexes/hex_59.jpg' %}"
-                   x="0"
-                   y="0"
-                   width="1"
-                   height="1"
-                   preserveAspectRatio="none" />
-            </pattern>
-            </defs>
-            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" fill="url(#hexPatternPasture)" />
+          <svg width="200" height="200" viewBox="0 0 56 56" xmlns="http://w3.org">
+            <!-- Yellow-Green Hexagonal Base -->
+            <polygon points="28,0 54,14 54,42 28,56 2,42 2,14" fill="#a4cf2b" />
+            <!-- Sketchy Central Black Ring -->
+            <ellipse cx="32" cy="29" rx="7" ry="4" fill="none" stroke="#111111" stroke-width="1.2" transform="rotate(-22, 32, 29)" stroke-dasharray="3,1,1,1,2,1" />
+            <ellipse cx="32.2" cy="28.8" rx="6.8" ry="3.8" fill="none" stroke="#111111" stroke-width="0.8" transform="rotate(-20, 32, 29)" stroke-dasharray="1,2,3,1" />
           </svg>
           <div class="hex-building">
             <img src="{% static 'RNB/images/buildings/bldg_sawmill.jpg' %}"
