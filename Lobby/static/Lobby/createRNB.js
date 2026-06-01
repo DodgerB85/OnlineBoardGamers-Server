@@ -185,6 +185,26 @@ function validateGameOptions(_checkboxID) {
     }*/
 }
 
+function updateHighscoresButton() {
+	const viewHighscoresBtn = document.getElementById("viewHighscoresBtn")
+	if (!viewHighscoresBtn) return
+
+	const numberOfPlayers = document.getElementById("playerNumber").value
+	const mapSelect = document.getElementById("mapSelection")
+
+	if (numberOfPlayers === "1" && mapSelect.value) {
+		try {
+			const selectedMap = JSON.parse(mapSelect.value)
+			viewHighscoresBtn.href = `/RNB/highscores/map/${selectedMap.uniqueID}/`
+			viewHighscoresBtn.style.display = "inline-block"
+		} catch {
+			viewHighscoresBtn.style.display = "none"
+		}
+	} else {
+		viewHighscoresBtn.style.display = "none"
+	}
+}
+
 function selectPlayers() {
 	var numberOfPlayers = document.getElementById("playerNumber").value
 
@@ -396,6 +416,8 @@ function selectPlayers() {
 
 		playerNumberSelect.dataset.lastValue = currentPlayerCount
 	}
+
+	updateHighscoresButton()
 }
 
 function autocomplete(inp) {
@@ -735,6 +757,8 @@ function onMapSelectionChange() {
 			mapDataInput.value = ""
 		}
 	}
+
+	updateHighscoresButton()
 }
 
 function clearMapSelection() {

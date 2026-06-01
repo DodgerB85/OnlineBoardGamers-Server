@@ -66,6 +66,9 @@
     color: #666;
     font-size: 14px;
     line-height: 1.4;
+    white-space: pre-line;
+	max-width: 800px;
+	margin: auto;
 }
 
 /* Map preview container styles */

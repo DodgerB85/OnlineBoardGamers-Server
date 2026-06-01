@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Max
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render  # get_object_or_404,
+from django.shortcuts import render  # get_object_or_404,
 from django.utils import timezone
 from django.utils.translation import gettext
 from django_q.tasks import schedule
