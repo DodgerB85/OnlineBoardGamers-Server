@@ -164,6 +164,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "startingMap": startingMap,
             "mapName": mapName,
             "mapDescription": mapDescription,
+            "preferredRNBoptions": [-1, 1],
         }
     )
 
@@ -173,7 +174,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    preferredRNBoptions = json.loads(result["user_profile"].preferredRNBoptions) if result["user_profile"].preferredRNBoptions != "" else [-1]
+    profile_options = getattr(result["user_profile"], "preferredRNBoptions", "") or ""
+    preferredRNBoptions = json.loads(profile_options) if profile_options else [-1, 1]
     if len(preferredRNBoptions) < 2:
         preferredRNBoptions.extend([-1] * (2 - len(preferredRNBoptions)))
 
