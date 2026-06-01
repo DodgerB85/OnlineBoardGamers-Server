@@ -399,10 +399,17 @@
         if (mapSelect) {
             for (var i = 0; i < mapSelect.options.length; i++) {
                 var option = mapSelect.options[i];
-                if (option.value && option.value.includes("{{ selectedMapId }}")) {
-                    mapSelect.selectedIndex = i;
-                    onMapSelectionChange();
-                    break;
+                if (option.value) {
+                    try {
+                        var mapData = JSON.parse(option.value);
+                        if (mapData.uniqueID == {{ selectedMapId }}) {
+                            mapSelect.selectedIndex = i;
+                            onMapSelectionChange();
+                            break;
+                        }
+                    } catch (e) {
+                        // Skip invalid JSON
+                    }
                 }
             }
         }

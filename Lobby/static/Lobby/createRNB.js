@@ -617,6 +617,7 @@ function populateMapDropdown(maps, preserveMapValue = null) {
 		const option = document.createElement("option")
 		option.value = JSON.stringify({
 			id: map.id,
+			uniqueID: map.uniqueID,
 			name: map.name,
 			description: map.description,
 			hexData: map.hexData,
@@ -649,6 +650,7 @@ function populateMapDropdown(maps, preserveMapValue = null) {
 		const option = document.createElement("option")
 		option.value = JSON.stringify({
 			id: map.id,
+			uniqueID: map.uniqueID,
 			name: map.name,
 			description: map.description,
 			hexData: map.hexData,

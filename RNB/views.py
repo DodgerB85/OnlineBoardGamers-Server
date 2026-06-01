@@ -1383,6 +1383,7 @@ def getRNBmaps(request):
             maps_data.append(
                 {
                     "id": map_obj.id,
+                    "uniqueID": map_obj.uniqueID,
                     "name": map_obj.name,
                     "description": map_obj.description,
                     "playerCount": map_obj.playerCount,

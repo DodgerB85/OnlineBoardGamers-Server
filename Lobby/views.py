@@ -2218,7 +2218,7 @@ def createRNBpage(request, gameID=0):
                     "playerNames": [],  # No additional players
                     "kickoutDuration": 100,  # Default kickout duration
                     "startingOptions": [],  # No special starting options
-                    "selectedMapId": map_id,  # Pass selected map ID to template
+                    "selectedMapId": map_id,  # Pass uniqueID for matching
                 }
             )
 
