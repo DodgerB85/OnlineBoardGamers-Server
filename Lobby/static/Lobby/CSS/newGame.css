@@ -21,6 +21,7 @@
 }
 
 #createNewFCM,
+#createNewRNB,
 #createNewHLC,
 #createNewBus,
 #createNewTGZ,
@@ -54,6 +55,7 @@
 }
 
 #createNewFCM img,
+#createNewRNB img,
 #createNewHLC img,
 #createNewAQY img,
 #createNewTGZ img {
@@ -78,6 +80,7 @@
 }
 
 #createNewFCM:hover,
+#createNewRNB:hover,
 #createNewHLC:hover,
 #createNewBus:hover,
 #createNewTGZ:hover,
