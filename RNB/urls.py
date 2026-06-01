@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 
 from . import views
 
@@ -24,6 +25,7 @@ urlpatterns = [
     path("deleteRNBmap/", views.deleteRNBmap, name="deleteRNBmap"),
     path("getRNBmaps/", views.getRNBmaps, name="getRNBmaps"),
     path("highscores/", views.RNBhighScores, name="RNBhighScores"),
+    path("highscores/map/", RedirectView.as_view(url="/RNB/highscores/")),
     path("highscores/map/<str:map_unique_id>/", views.RNBhighScores, name="RNBhighScoresWithMap"),
     path("highscores/user/<str:username>/", views.RNBuserHighScores, name="RNBuserHighScores"),
     path("getSoloMaps/", views.getSoloMaps, name="getSoloMaps"),
