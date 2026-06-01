@@ -390,6 +390,8 @@
   // V2
   initData.gameID = {{ gameID }};
   initData.gameName = "{{ gameName }}";
+  initData.mapName = "{{ mapName | escapejs}}";
+  initData.mapDescription = "{{ mapDescription | escapejs }}";
   initData.gameDataB64  = '{{ gameDataB64 | safe }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
   initData.myZoomLevel = {{ myZoomLevel }};

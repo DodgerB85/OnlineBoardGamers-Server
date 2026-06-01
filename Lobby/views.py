@@ -1107,7 +1107,7 @@ def stats(request):
     excluded_game_ids = GamePlayer.objects.filter(player__username__in=rf.SHADOW_USERNAMES).values_list("game_id", flat=True)
 
     # 3. Batch Fetch ALL Counts (1 Query instead of 18)
-    game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]
+    game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
     all_counts = (
         Game.objects.filter(gameCode__in=game_codes)
@@ -2211,8 +2211,6 @@ def createRNBpage(request, gameID=0):
             context.update(
                 {
                     "fillData": True,
-                    "gameName": f"Solo Map {map_id}",
-                    "gameDescription": f"Solo game on map {map_id}",
                     "gamePace": 30,  # Default pace
                     "playerNumber": 1,  # Solo play
                     "playerNames": [],  # No additional players

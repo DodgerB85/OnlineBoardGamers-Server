@@ -142,6 +142,18 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
 
+    mapName = "[No map name found]"
+    mapDescription = "[No map description found]"
+    uniqueID = startingMap[-1].get("UK", -1) if startingMap else -1
+
+    if uniqueID >= 0:
+        try:
+            currentMap = RNBmap.objects.get(uniqueID=uniqueID)
+            mapName = currentMap.name
+            mapDescription = currentMap.description
+        except RNBmap.DoesNotExist:
+            pass
+
     returnData.update(
         {
             "spoilerFree": spoilerFree,
@@ -150,6 +162,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
             "currentPlayers": currentPlayersArr,
             "startingMap": startingMap,
+            "mapName": mapName,
+            "mapDescription": mapDescription,
         }
     )
 
