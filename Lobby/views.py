@@ -2825,6 +2825,7 @@ def AllTournaments(request):
     )
 
 
+@login_required
 def joinGameLink(request, joinGameLink):
     gameCode = None
     numbers = None
