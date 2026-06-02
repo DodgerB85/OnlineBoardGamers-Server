@@ -376,13 +376,14 @@ class TransactionRecoveryTest(TestCase):
             "Django-Q schedule() must be called for SN_notifyStuckRNBTransaction",
         )
 
-        # The scheduled call must pass the correct game_id and transaction_id
+        # Scheduled call must pass game_id, transaction_id, and submitting username
         stuck_call = next(
             c for c in mock_schedule.call_args_list
             if c.args[0] == "Lobby.sharedFunctions.sharedNotifications.SN_notifyStuckRNBTransaction"
         )
         self.assertEqual(stuck_call.args[1], self.game.id)
         self.assertEqual(stuck_call.args[2], transaction_id)
+        self.assertEqual(stuck_call.args[3], "playerA")
 
     # ------------------------------------------------------------------
     # H: SN_notifyStuckRNBTransaction no-ops when lock already cleared
@@ -401,28 +402,28 @@ class TransactionRecoveryTest(TestCase):
         with patch(
             "Lobby.sharedFunctions.sharedNotifications._SN_sendStuckTransactionNotification"
         ) as mock_send:
-            SN_notifyStuckRNBTransaction(self.game.id, stale_id)
+            SN_notifyStuckRNBTransaction(self.game.id, stale_id, "playerA")
             mock_send.assert_not_called()
 
     # ------------------------------------------------------------------
-    # I: SN_notifyStuckRNBTransaction fires when lock still set
+    # I: SN_notifyStuckRNBTransaction fires for the submitting player
     # ------------------------------------------------------------------
-    def test_I_stuck_notification_fires_when_lock_still_set(self):
+    def test_I_stuck_notification_fires_for_submitting_player(self):
         """
         If recovery never happened (transactionID still matches), the task must
-        call the send function for the waiting players.
+        notify the submitting player — not whoever is next in turn order.
         """
         from Lobby.sharedFunctions.sharedNotifications import SN_notifyStuckRNBTransaction
 
         lock_id = "still-stuck"
         self.game.transactionID = lock_id
-        self.game.serverCurrentPlayerNamesInTurnOrder = ["playerB"]
+        self.game.serverCurrentPlayerNamesInTurnOrder = ["playerB"]  # B is next, but A submitted
         self.game.save()
 
         with patch(
             "Lobby.sharedFunctions.sharedNotifications._SN_sendStuckTransactionNotification"
         ) as mock_send:
-            SN_notifyStuckRNBTransaction(self.game.id, lock_id)
+            SN_notifyStuckRNBTransaction(self.game.id, lock_id, "playerA")
             mock_send.assert_called_once()
-            player_list = mock_send.call_args[0][0]
-            self.assertIn("playerB", player_list)
+            notified_username = mock_send.call_args[0][0]
+            self.assertEqual(notified_username, "playerA")  # submitter, not B
