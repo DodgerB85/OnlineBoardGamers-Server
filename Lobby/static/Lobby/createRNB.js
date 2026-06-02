@@ -31,6 +31,9 @@ function initGameCreation(fillData, setupData = {}) {
 			document.getElementById("useExpansion").checked = true
 			//validateOptions("useExpansion");
 		}
+		if (startingOptions.includes(8)) {
+			document.getElementById("useSoloMineRules").checked = true
+		}
 	}
 }
 
@@ -205,6 +208,28 @@ function updateHighscoresButton() {
 	}
 }
 
+function updateMapPlayerCountWarning() {
+	const warningSpan = document.getElementById("mapPlayerCountWarning")
+	if (!warningSpan) return
+
+	const numberOfPlayers = document.getElementById("playerNumber").value
+	const mapSelect = document.getElementById("mapSelection")
+
+	if (mapSelect.value) {
+		try {
+			const selectedMap = JSON.parse(mapSelect.value)
+			if (selectedMap.playerCount && String(selectedMap.playerCount) !== numberOfPlayers) {
+				warningSpan.textContent = "Caution: This map is designed for " + selectedMap.playerCount + " players but you have selected " + numberOfPlayers + " players"
+				warningSpan.style.display = "inline-block"
+				return
+			}
+		} catch {
+			// ignore parse errors
+		}
+	}
+	warningSpan.style.display = "none"
+}
+
 function selectPlayers() {
 	var numberOfPlayers = document.getElementById("playerNumber").value
 
@@ -226,6 +251,9 @@ function selectPlayers() {
 			removeOption("learningGame")
 			// Disable experienced game
 			removeOption("experiencedGame")
+			// Tick and disable solo mine rules
+			removeOption("useSoloMineRules")
+			document.getElementById("useSoloMineRules").checked = true
 			// Hide all player name options
 			document.getElementById("selPlayer2").style.display = "none"
 			document.getElementById("selPlayer3").style.display = "none"
@@ -248,6 +276,10 @@ function selectPlayers() {
 				addOption("learningGame")
 			}
 			addOption("trainingGame")
+			if (document.getElementById("useSoloMineRules").disabled) {
+				document.getElementById("useSoloMineRules").checked = false
+			}
+			addOption("useSoloMineRules")
 			if (global.experienced) addOption("experiencedGame")
 			document.getElementById("player2").disabled = false
 
@@ -273,6 +305,10 @@ function selectPlayers() {
 				addOption("learningGame")
 			}
 			addOption("trainingGame")
+			if (document.getElementById("useSoloMineRules").disabled) {
+				document.getElementById("useSoloMineRules").checked = false
+			}
+			addOption("useSoloMineRules")
 
 			if (global.experienced) addOption("experiencedGame")
 			document.getElementById("player2").disabled = false
@@ -302,6 +338,10 @@ function selectPlayers() {
 				addOption("learningGame")
 			}
 			addOption("trainingGame")
+			if (document.getElementById("useSoloMineRules").disabled) {
+				document.getElementById("useSoloMineRules").checked = false
+			}
+			addOption("useSoloMineRules")
 
 			if (global.experienced) addOption("experiencedGame")
 			document.getElementById("player2").disabled = false
@@ -332,6 +372,10 @@ function selectPlayers() {
 				addOption("learningGame")
 			}
 			addOption("trainingGame")
+			if (document.getElementById("useSoloMineRules").disabled) {
+				document.getElementById("useSoloMineRules").checked = false
+			}
+			addOption("useSoloMineRules")
 
 			if (global.experienced) addOption("experiencedGame")
 			document.getElementById("player2").disabled = false
@@ -363,6 +407,10 @@ function selectPlayers() {
 				addOption("learningGame")
 			}
 			addOption("trainingGame")
+			if (document.getElementById("useSoloMineRules").disabled) {
+				document.getElementById("useSoloMineRules").checked = false
+			}
+			addOption("useSoloMineRules")
 
 			if (global.experienced) addOption("experiencedGame")
 			document.getElementById("player2").disabled = false
@@ -418,6 +466,7 @@ function selectPlayers() {
 	}
 
 	updateHighscoresButton()
+	updateMapPlayerCountWarning()
 }
 
 function autocomplete(inp) {
@@ -759,6 +808,7 @@ function onMapSelectionChange() {
 	}
 
 	updateHighscoresButton()
+	updateMapPlayerCountWarning()
 }
 
 function clearMapSelection() {
@@ -793,4 +843,6 @@ function clearMapSelection() {
 	if (window.mapStore) {
 		window.mapStore.mapData.externalMapData = null
 	}
+
+	updateMapPlayerCountWarning()
 }

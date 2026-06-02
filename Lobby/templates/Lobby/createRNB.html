@@ -153,7 +153,7 @@
                             </div>
                         </div>
                         <div class="singleChoiceDivText" id="selPlayer4" style="display: none;">
-                            <label class="choiceLabelText" for="player3">{% translate "Player 4" %}</label>
+                            <label class="choiceLabelText" for="player4">{% translate "Player 4" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
                                     <input type="text"
@@ -165,7 +165,7 @@
                             </div>
                         </div>
                         <div class="singleChoiceDivText" id="selPlayer5" style="display: none;">
-                            <label class="choiceLabelText" for="player3">{% translate "Player 5" %}</label>
+                            <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
                                     <input type="text"
@@ -177,7 +177,7 @@
                             </div>
                         </div>
                         <div class="singleChoiceDivText" id="selPlayer6" style="display: none;">
-                            <label class="choiceLabelText" for="player3">{% translate "Player 6" %}</label>
+                            <label class="choiceLabelText" for="player6">{% translate "Player 6" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
                                     <input type="text"
@@ -271,6 +271,22 @@
                     <fieldset id="basicOptions" class="optionsGroupTop">
                         <legend class="optionsHeader">{% translate "Game Options" %}</legend>
                         <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useSoloMineRules"
+                                   name="useSoloMineRules"
+                                   value="8">
+                            <label for="useSoloMineRules" class="checkboxLabel">{% translate "Solo mine rules (fixed output)" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Use solo rules; mines produce whatever they have more of, or gold if contents are equal" %}</span>
+                        </div>
+                        <br />
+                        <b>&c coming SOON&trade;</b>
+                    </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Map Selection" %}</legend>
+                        <div class="singleChoiceDiv">
                             <label class="choiceLabel" for="mapSelection">{% translate "Select Map" %}</label>
                             <a id="viewHighscoresBtn"
                                href="#"
@@ -338,6 +354,9 @@
                         </div>
                     </fieldset>
                 </div>
+            </div>
+            <div>
+                <span id="mapPlayerCountWarning" class="cautionText" style="display: none;"></span>
             </div>
             <div>
                 <input type="submit"

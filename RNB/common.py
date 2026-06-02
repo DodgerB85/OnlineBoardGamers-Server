@@ -165,6 +165,9 @@ def create_rnb_game(
         elif "experiencedGame" in request.POST:
             starting_options.append(int(request.POST.get("experiencedGame")))
 
+        if "useSoloMineRules" in request.POST:
+            starting_options.append(int(request.POST.get("useSoloMineRules")))
+
         all_players.append(request.user)
 
     with transaction.atomic():
