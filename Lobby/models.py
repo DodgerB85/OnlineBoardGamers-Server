@@ -390,6 +390,9 @@ class Game(BaseGame):
     # CURRENTLY RnB ONLY
     serverCurrentPlayerNamesInTurnOrder = models.JSONField(default=list, blank=True, null=True)
 
+    # RnB transaction recovery: set when server processes a stack move, cleared on final save
+    transactionID = models.CharField(max_length=64, blank=True, default="")
+
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
 

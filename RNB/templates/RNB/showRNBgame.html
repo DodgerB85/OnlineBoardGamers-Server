@@ -410,6 +410,7 @@
 
   // Finished Game
   initData.finishedGame = {{finishedGame|lower}};
+  initData.transactionID = "{{ transactionID }}";
 
   {% if spoilerFree %}
   initData.spoilerFree = true;
@@ -429,6 +430,7 @@
   {% if involvedPlayer %}
   initData.currentMoveData = {{ currentMoveData | safe }};
   initData.allMyMoveData = {{ allMyMoveData|safe  }};
+  initData.allStackData = {{ allStackData|safe  }};
   initData.statsExcludedGame = {{ statsExcludedGame|lower }};
   initData.secondsToNextKickout = {{ secondsToNextKickout }};
   initData.trade = '{{ trade }}';

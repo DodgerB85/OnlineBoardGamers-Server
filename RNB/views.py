@@ -2,6 +2,7 @@ import base64
 import gzip
 import json
 import time
+import uuid
 from datetime import timedelta
 from typing import TYPE_CHECKING, cast
 
@@ -202,6 +203,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         {
             "currentMoveData": presenter.getCurrentMoveDataForPlayer(username),
             "allMyMoveData": presenter.getAllMyMoveDataForPlayer(username),
+            "allStackData": getAllCurrentStackMoves(currentGame),
             "trade": currentGame.playerTradeData,
         }
     )
@@ -293,6 +295,7 @@ def _processRNBturn(request):
     # END SAVE / CREATE
 
     elif jsonData["action"] == "saveStackMove":
+        time.sleep(5)
         # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
@@ -365,6 +368,10 @@ def _processRNBturn(request):
             presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
             presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
+            # Set transaction lock for client-side recovery
+            transaction_id = uuid.uuid4().hex
+            currentGame.transactionID = transaction_id
+
             # SAVE BEFORE NOTIFICATIONS
             currentGame.save()
 
@@ -394,6 +401,7 @@ def _processRNBturn(request):
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
                 "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
                 "gameDataB64": currentGame.gameData,
+                "transactionID": transaction_id,
             }
 
             return JsonResponse(response_data, safe=False)
@@ -519,6 +527,7 @@ def _processRNBturn(request):
     # End savePrePhaseMain
 
     elif jsonData["action"] == "saveConflictMove":
+        time.sleep(5)
         # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
@@ -567,6 +576,9 @@ def _processRNBturn(request):
 
         # Else if we are saving INTO a PRAYIUNG / TO phase, it is a single player single move, single next
         if savingPhase in (rfRNB.PHASE_CONFLICT_PRAYINGS + rfRNB.PHASE_CONFLICT_TURN_ORDERS):
+            # Set transaction lock for client-side recovery
+            transaction_id = uuid.uuid4().hex
+            currentGame.transactionID = transaction_id
             # Perform most of a normal save
             db_latest_update = currentGame.latestUpdate
             latest_update = jsonData.get("latestUpdate", 0)
@@ -605,9 +617,14 @@ def _processRNBturn(request):
                 "allStackData": getAllCurrentStackMoves(currentGame),
                 # "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
                 "isCurrentPlayersArr": presenter.getArrayOfIsCurrentPlayers(),
+                "transactionID": transaction_id,
             }
 
             return JsonResponse(response_data, safe=False)
+
+        # Set transaction lock for client-side recovery
+        transaction_id = uuid.uuid4().hex
+        currentGame.transactionID = transaction_id
 
         # Otherwise, you are saving INTO the start of a new main phase
         # Perform most of a normal save
@@ -648,6 +665,7 @@ def _processRNBturn(request):
             "allStackData": getAllCurrentStackMoves(currentGame),
             # "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
             "isCurrentPlayersArr": presenter.getArrayOfIsCurrentPlayers(),
+            "transactionID": transaction_id,
         }
 
         return JsonResponse(response_data, safe=False)
@@ -699,6 +717,11 @@ def _processRNBturn(request):
             )
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
+
+        # Clear transaction lock (idempotent: if already cleared, just proceed)
+        client_transaction_id = jsonData.get("transactionID", "")
+        if currentGame.transactionID and client_transaction_id and currentGame.transactionID == client_transaction_id:
+            currentGame.transactionID = ""
 
         gameDataB64 = jsonData["gameDataB64"]
         # raw_binary = base64.b64decode(gameDataStr)
@@ -1569,6 +1592,8 @@ def RNBdata(request, dataType=1):
             "latestUpdate": currentGame.latestUpdate,
             "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
             "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+            "transactionID": currentGame.transactionID,
+            "allStackData": getAllCurrentStackMoves(currentGame),
         }
         # Send game data
         return JsonResponse(returnData)
@@ -1603,6 +1628,7 @@ def RNBdata(request, dataType=1):
                 "latestUpdate": currentGame.latestUpdate,
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
                 "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+                "transactionID": currentGame.transactionID,
             }
         )
 

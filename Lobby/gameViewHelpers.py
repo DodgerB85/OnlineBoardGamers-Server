@@ -84,6 +84,7 @@ def build_show_game_data(
                 False,
             )
         ),
+        "transactionID": currentGame.transactionID,
     }
 
     if not request.user.is_authenticated:
