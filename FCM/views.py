@@ -1757,8 +1757,10 @@ def changeAssistance(request):
             profile = Profile.objects.get(user=request.user)
             profile.showAssistance = jsonData["changeAssistance"]
             profile.save()
-        except Exception:
-            print(f"* * * CHANGE ASSISTANCE ERROR:  {request.user.username}")
+        except Profile.DoesNotExist:
+            print(f"* * * CHANGE ASSISTANCE ERROR: Profile not found for {request.user.username}")
+        except (KeyError, ValueError) as e:
+            print(f"* * * CHANGE ASSISTANCE ERROR: {e} {request.user.username}")
         return JsonResponse(
             {
                 "response": "ok",
@@ -1874,7 +1876,7 @@ def FCMdata(request, dataType):
         try:
             gameUpdate = int(jsonData["latestUpdate"])
             latestUpdate = int(currentGame.latestUpdate)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError) as e:
             SN_sendAdminErrorMessage(f"ERROR IN FCMdata: gameID: {jsonData['gameID']} Error: {e}")
             # NB this might need to be changed if the above msg is getting triggered
             specialData = False

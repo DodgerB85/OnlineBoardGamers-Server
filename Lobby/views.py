@@ -405,8 +405,8 @@ def addTGid(request, TGid):
             )
             return redirect("profile")
 
-    except User.DoesNotExist:
-        return HttpResponse(status=500)
+    except Profile.DoesNotExist:
+        return HttpResponse("Profile not found", status=500)
 
 
 GAME_NAMES_MODELS = {
@@ -1476,7 +1476,7 @@ def login_view(request):
             try:
                 body_sample = request.body.decode("utf-8")[:500]
                 debug_info["Raw_Body_Sample"] = body_sample
-            except Exception:
+            except (UnicodeDecodeError, AttributeError):
                 debug_info["Raw_Body_Status"] = "Not decodable"
 
             formatted_data = json.dumps(debug_info, indent=2)
@@ -1616,21 +1616,13 @@ def profile(request):
             profile = Profile.objects.get(user=request.user)
             profile.preferredRestaurantColour = request.POST["fcmResto"]
             profile.preferredHCcolour = request.POST["hcColour"]
-            try:
-                request.POST["highContrastBoardItems"]
-                profile.highContrastBoardItems = True
-            except Exception:
-                profile.highContrastBoardItems = False
+            profile.highContrastBoardItems = "highContrastBoardItems" in request.POST
 
             profile.preferredBusColour = request.POST["busColour"]
             profile.preferredBusBoard = request.POST["BusBoard"]
 
             profile.preferredTGZcolour = request.POST["tgzColour"]
-            try:
-                request.POST["TGZminimalText"]
-                profile.TGZminimalText = True
-            except Exception:
-                profile.TGZminimalText = False
+            profile.TGZminimalText = "TGZminimalText" in request.POST
 
             preferredCNScolour = request.POST["cnsColour"] if request.POST["cnsColour"] != "-1" else None
             profile.preferredCNScolour = preferredCNScolour
@@ -1656,11 +1648,7 @@ def profile(request):
 
             profile.liveNotification = request.POST["liveNotif"]
 
-            try:
-                request.POST["sendEmails"]
-                profile.sendEmailNotificationOnTurn = True
-            except Exception:
-                profile.sendEmailNotificationOnTurn = False
+            profile.sendEmailNotificationOnTurn = "sendEmails" in request.POST
 
             emailNotifications = [
                 int(request.POST["yourTurnEmail"]),
@@ -2851,7 +2839,7 @@ def joinGameLink(request, joinGameLink):
 
     try:
         availableGame = Game.objects.get(id=numbers, gameCode=gameCode)
-    except Exception:
+    except Game.DoesNotExist:
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
 
@@ -3073,8 +3061,8 @@ def checkJoinGame(request, gameType, gameID):
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Discord webhook failed (new user exp): {e}")
             messages.error(
                 request,
                 (
@@ -3128,8 +3116,8 @@ def checkJoinGame(request, gameType, gameID):
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Discord webhook failed (fair play): {e}")
             messages.error(
                 request,
                 (mark_safe(gettext('Your Fair Play rating is too low: {fairplay}%. Please see <a class="linkOther" href="/help/#navGameType">Help</a><br/><br/>').format(fairplay=fairPlayLastYear))),
@@ -3261,8 +3249,8 @@ def deleteGame(request, gameCode):
                     f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Discord webhook failed (delete game alert): {e}")
 
     return HttpResponse(status=204)  # No Content
 
@@ -4048,15 +4036,18 @@ def BGH_API(request, options):
     response = requests.get(url)
     data = response.json()
     final_dictionary = {}
-    try:
-        final_dictionary = eval(data)
-    except Exception as e:
-        print("BGH API Error: " + str(e) + " Data: " + str(data))
+    if isinstance(data, dict):
+        final_dictionary = data
+    else:
+        try:
+            final_dictionary = json.loads(data) if isinstance(data, str) else {}
+        except (json.JSONDecodeError, TypeError) as e:
+            print(f"BGH API Error: {e} Data: {data}")
 
     try:
-        print(f"BGH API:: User: {request.user.username}   Options: {options}   Data: {final_dictionary['view_map_url']}")
-    except Exception:
-        print("BGH PRINT ERROR")
+        print(f"BGH API:: User: {request.user.username}   Options: {options}   Data: {final_dictionary.get('view_map_url', 'N/A')}")
+    except Exception as e:
+        print(f"BGH PRINT ERROR: {e}")
 
     return JsonResponse(final_dictionary)  # , safe=False)
 
@@ -4109,7 +4100,7 @@ def MiniTournament(request, Mini_Tournament_id):
     if request.method == "POST":
         try:
             Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
-        except Exception:
+        except Tournament.DoesNotExist:
             raise Http404(gettext("Tournament does not exist")) from None
         # First check if it is a person declining an invite
         if "declineInvite" in request.POST and request.POST["declineInvite"] == "true":
@@ -4139,7 +4130,7 @@ def MiniTournament(request, Mini_Tournament_id):
 
     try:
         Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
-    except Exception:
+    except Tournament.DoesNotExist:
         raise Http404(gettext("Tournament does not exist")) from None
 
     # Common items

@@ -281,7 +281,7 @@ def _processHLCturn(request):
                     for j in range(len(FCNATT)):
                         try:
                             DBavailableComponents[FCNATT[j]] -= 1
-                        except Exception as e:
+                        except (KeyError, IndexError, TypeError) as e:
                             SN_sendAdminErrorMessage(f"Exception: {e} -- gameID: {game_id} -- FCIATT: {FCIATT} -- FCNATT: {FCNATT} -- DBavailableComponents: {DBavailableComponents} j: {j} FCNATT[j]:")
                             break
                     enoughComponents = True
@@ -991,7 +991,7 @@ def HLCdata(request, dataType):
         try:
             gameUpdate = int(jsonData["latestUpdate"])
             latestUpdate = int(currentGame.latestUpdate)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError) as e:
             SN_sendAdminErrorMessage(f"ERROR IN HLCdata: gameID: {jsonData['gameID']} Error: {e}")
             # NB this might need to be changed if the above msg is getting triggered
             # specialData = False
