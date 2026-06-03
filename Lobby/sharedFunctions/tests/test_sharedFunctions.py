@@ -1,14 +1,23 @@
 import json
 from unittest.mock import patch
 
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.test import RequestFactory
 from django.test import TestCase
 
+from Lobby.models import Game, GamePlayer, Tournament, User
 from Lobby.sharedFunctions.sharedFunctions import (
+    SF_M_ProcessAnyTournamentEndGame,
+    SF_createNextRoundGamesSetup,
     SF_getRequiredExp,
     SF_getSecondsToNextKickout,
     SF_getTimeNow,
     SF_kickoutRequired,
+    SF_serializeGame,
+    SF_setupTrainingGameShadows,
     SF_updateFlexiTime,
+    SF_validatePlayers,
+    setNextRoundMultiGamePlayers,
 )
 
 
@@ -199,3 +208,167 @@ class TestSFgetSecondsToNextKickout(TestCase):
         latest_update = str((1700000000 - 600) * 1000)
         result = SF_getSecondsToNextKickout(latest_update, 5)
         self.assertEqual(result, -300)
+
+
+class TestSFserializeGame(TestCase):
+    def test_serializes_game_player_flags_and_legacy_options(self):
+        creator = User.objects.create_user(username="creator", password="testpass123")
+        current_user = User.objects.create_user(username="current", password="testpass123")
+        other_user = User.objects.create_user(username="other", password="testpass123")
+        invited_user = User.objects.create_user(username="invited", password="testpass123")
+        game = Game.objects.create(
+            gameCode="BUS",
+            creator=creator,
+            host=creator,
+            gameStatus="ACTIVE",
+            gameName="",
+            latestUpdate="1700000000000",
+            created="1699990000000",
+            startingOptions="110,120",
+            maxPlayers=3,
+        )
+        game.invitedPlayers.add(invited_user)
+        GamePlayer.objects.create(game=game, player=current_user, seat_order=0, is_current=True, has_chat_notification=True)
+        GamePlayer.objects.create(game=game, player=other_user, seat_order=1, is_pending_finish=True)
+
+        with patch("Lobby.sharedFunctions.sharedFunctions.time.time", return_value=1700000060):
+            result = SF_serializeGame(
+                game,
+                current_user,
+                {
+                    "all_game_players": list(game.players.all().select_related("player")),
+                    "invited_users": list(game.invitedPlayers.all()),
+                },
+            )
+
+        self.assertEqual(result["gameName"], "[creator's Game]")
+        self.assertEqual(result["allPlayers"], ["current", "other"])
+        self.assertEqual(result["invitedPlayers"], ["invited"])
+        self.assertEqual(result["currentPlayers"], "current")
+        self.assertTrue(result["myMove"])
+        self.assertTrue(result["involvedPlayer"])
+        self.assertTrue(result["chatNotification"])
+        self.assertFalse(result["pendingFinish"])
+        self.assertTrue(result["learningGame"])
+        self.assertTrue(result["experiencedGame"])
+        self.assertEqual(result["latestUpdateElapsedTimeString"], "1m 0s")
+
+    def test_missing_player_is_not_involved(self):
+        creator = User.objects.create_user(username="creator", password="testpass123")
+        user = User.objects.create_user(username="missing", password="testpass123")
+        game = Game.objects.create(gameCode="CNS", creator=creator, host=creator, gameStatus="ACTIVE")
+        player = GamePlayer.objects.create(game=game, player=user, seat_order=0, is_missing=True)
+
+        result = SF_serializeGame(game, user, {"all_game_players": [player], "invited_users": []})
+
+        self.assertFalse(result["involvedPlayer"])
+
+
+class TestTournamentSharedFunctions(TestCase):
+    def _create_users(self, count):
+        return [User.objects.create_user(username=f"P{i}", password="testpass123") for i in range(count)]
+
+    def _create_tournament(self, users, tournament_type="PT", game_code="FCM", category="Mini", max_game_players=4):
+        creator = users[0]
+        tournament = Tournament.objects.create(
+            tournamentName="Test Tournament",
+            tournamentCategory=category,
+            tournamentType=tournament_type,
+            gameCode=game_code,
+            creator=creator,
+            maxTournamentPlayers=len(users),
+            maxGamePlayers=max_game_players,
+            tournamentProgressionData=json.dumps([]),
+            tournamentPointsData=json.dumps([[user.username, index] for index, user in enumerate(users)]),
+            tournamentSideData=json.dumps([]),
+        )
+        tournament.nextRoundPlayers.add(*users)
+        return tournament
+
+    def test_create_next_round_hlc_mini_uses_byes_for_two_leftover_players(self):
+        users = self._create_users(6)
+        tournament = self._create_tournament(users, game_code="HLC")
+
+        result = SF_createNextRoundGamesSetup(tournament)
+
+        self.assertEqual(len(result["byePlayers"]), 2)
+        self.assertEqual(len(result["gamesPlayers"]), 1)
+        self.assertEqual(len(result["gamesPlayers"][0]), 4)
+        self.assertFalse(set(result["byePlayers"]).intersection(result["gamesPlayers"][0]))
+
+    def test_create_next_round_non_hlc_mini_allows_two_player_leftover_game(self):
+        users = self._create_users(6)
+        tournament = self._create_tournament(users, game_code="FCM")
+
+        result = SF_createNextRoundGamesSetup(tournament)
+
+        self.assertEqual(result["byePlayers"], [])
+        self.assertEqual(sorted(len(game) for game in result["gamesPlayers"]), [2, 4])
+
+    def test_set_next_round_multi_game_players_selects_top_14_and_groups_by_seed(self):
+        users = self._create_users(16)
+        tournament = self._create_tournament(users, tournament_type="MG", category="Main")
+        tournament.nextRoundPlayers.clear()
+        tournament.tournamentProgressionData = json.dumps([[["finished round"]]])
+        round_1_points = [[user.username, 4, 10 - index] for index, user in enumerate(users)]
+        tournament.tournamentPointsData = json.dumps([round_1_points])
+        tournament.save()
+
+        setNextRoundMultiGamePlayers(tournament)
+
+        selected_usernames = set(tournament.nextRoundPlayers.values_list("username", flat=True))
+        self.assertEqual(len(selected_usernames), 14)
+        self.assertNotIn("P14", selected_usernames)
+        self.assertNotIn("P15", selected_usernames)
+        round_2_points = json.loads(tournament.tournamentPointsData)[-1]
+        self.assertEqual([row[0] for row in round_2_points], ["P0", "P2", "P4", "P6", "P8", "P10", "P12", "P1", "P3", "P5", "P7", "P9", "P11", "P13"])
+        self.assertTrue(all(row[1:] == [0, 0] for row in round_2_points))
+
+    def test_process_tl_end_game_removes_losers_without_lives_and_kicked_players(self):
+        users = self._create_users(3)
+        tournament = self._create_tournament(users, tournament_type="TL")
+        tournament.nextRoundPlayers.clear()
+        tournament.tournamentSideData = json.dumps([["P0", 2], ["P1", 1], ["P2", 2]])
+        tournament.tournamentPointsData = json.dumps([["P0", 0], ["P1", 0], ["P2", 0]])
+        game = Game.objects.create(gameCode="FCM", creator=users[0], host=users[0])
+        GamePlayer.objects.create(game=game, player=users[0], seat_order=0)
+        GamePlayer.objects.create(game=game, player=users[1], seat_order=1)
+        GamePlayer.objects.create(game=game, player=users[2], seat_order=2, is_kicked=True)
+        tournament.tournamentProgressionData = json.dumps([[[[user.username for user in users], game.id, [], "Round 1"], [["P9"], 999, [], "Unfinished"]]])
+        tournament.save()
+
+        SF_M_ProcessAnyTournamentEndGame(None, tournament, game, ["P0"], [["P0"], ["P1", 5], ["P2", 2]])
+
+        tournament.refresh_from_db()
+        self.assertEqual(json.loads(tournament.tournamentSideData), [["P0", 2]])
+        self.assertEqual(json.loads(tournament.tournamentPointsData)[0], ["P0", 1])
+        self.assertEqual(set(tournament.nextRoundPlayers.values_list("username", flat=True)), {"P0"})
+
+
+class TestSharedGameCreationHelpers(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.request = self.factory.post("/", data={})
+        self.request.session = {}
+        self.request._messages = FallbackStorage(self.request)
+        self.request.user = User.objects.create_user(username="creator", password="testpass123")
+
+    def test_validate_players_rejects_missing_username(self):
+        result = SF_validatePlayers(self.request, ["missing"], 4)
+
+        self.assertIsNone(result)
+
+    def test_validate_players_rejects_creator_when_not_allowed(self):
+        result = SF_validatePlayers(self.request, ["creator"], 4, allow_creator=False)
+
+        self.assertIsNone(result)
+
+    def test_setup_training_game_shadows_uses_posted_display_names(self):
+        User.objects.create_user(username="SHADOW", password="testpass123")
+        User.objects.create_user(username="SHADOW_2", password="testpass123")
+        request = self.factory.post("/", data={"player2": "Bot A", "player3": "Bot B"})
+
+        shadow_users, shadow_name_notes = SF_setupTrainingGameShadows(request, 3, ["SHADOW", "SHADOW_2"])
+
+        self.assertEqual([user.username for user in shadow_users], ["SHADOW", "SHADOW_2"])
+        self.assertEqual(shadow_name_notes, '["Bot A","Bot B"]')
