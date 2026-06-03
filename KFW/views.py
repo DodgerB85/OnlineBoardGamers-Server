@@ -16,6 +16,7 @@ from django.utils.translation import gettext
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
     build_show_game_data,
+    process_turn_with_mutex,
     shared_bug_entry,
     shared_save_notes,
     shared_save_zoom,
@@ -281,17 +282,7 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
 @login_required()
 def processKFWturn(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex("processTurn_" + str(gameID), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return _processKFWturn(request)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    return process_turn_with_mutex(request, _processKFWturn, mutex_prefix="processTurn_")
 
 
 @login_required()

@@ -1303,3 +1303,60 @@ def SF_endAnyTournament(
 
 
 # End common main/mini functions
+
+
+# ---------------------------------------------------------------------------
+# Shared game-creation helpers
+# ---------------------------------------------------------------------------
+
+
+def SF_validatePlayers(request, usernames, max_players, allow_creator=True):
+    """Validate player usernames and return a list of User objects.
+
+    Returns an empty list when *usernames* is empty, ``None`` on any
+    validation error (after adding a Django message), or a list of ``User``
+    objects on success.
+    """
+    from django.contrib import messages
+    from django.shortcuts import get_object_or_404
+
+    if not usernames:
+        return []
+    existing_users = User.objects.filter(username__in=usernames)
+    existing_usernames = set(user.username for user in existing_users)
+    valid_players = []
+    for username in usernames:
+        if username not in existing_usernames:
+            messages.error(request, gettext(f"Error:Player '{username}' does not exist"))
+            return None
+        if not allow_creator and username == request.user.username:
+            messages.error(request, gettext("Error: You cannot add yourself"))
+            return None
+        valid_players.append(get_object_or_404(User, username=username))
+    if len(valid_players) > max_players - 1:
+        messages.error(request, gettext(f"Error: Too many players for max {max_players}"))
+        return None
+    return valid_players
+
+
+def SF_setupTrainingGameShadows(request, max_players, shadow_names=None):
+    """Set up SHADOW players for a training/practice game.
+
+    Returns ``(shadow_user_list, shadow_name_notes)`` where
+    *shadow_user_list* is a list of ``User`` objects and
+    *shadow_name_notes* is a JSON string of display names to store in
+    the creator's notes.
+    """
+    if shadow_names is None:
+        shadow_names = rf.SHADOW_PLAYER_NAMES
+    shadow_users = []
+    shadow_display = []
+    for i in range(1, max_players):
+        shadow_users.append(User.objects.get(username=shadow_names[i - 1]))
+        display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
+        shadow_display.append(display_name)
+    shadow_name_notes = json.dumps(shadow_display, separators=(",", ":"))
+    return shadow_users, shadow_name_notes
+
+
+
