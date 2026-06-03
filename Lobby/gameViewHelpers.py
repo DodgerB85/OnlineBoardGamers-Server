@@ -344,8 +344,8 @@ def shared_cast_vote(request):
     return JsonResponse(result)
 
 
-def process_turn_with_mutex(request, inner_handler, mutex_prefix=""):
-    """Shared wrapper for all processXXXturn views.
+def process_game_with_mutex(request, inner_handler, mutex_prefix=""):
+    """Shared wrapper for all game-mutating views.
 
     Checks for POST, parses the JSON body to extract ``gameID``, acquires
     a ``db_mutex``, and delegates to *inner_handler*.  Returns a 503 if
