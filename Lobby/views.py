@@ -177,7 +177,6 @@ ALLOWED_SPECIAL_USERS = [
 ##########################
 
 
-
 # Constants
 API_TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
 BOT_URL = f"https://api.telegram.org/bot{API_TOKEN}/"
@@ -196,7 +195,9 @@ def send_telegram_msg(chat_id, text):
     url = BOT_URL + "sendMessage"
     payload = {"chat_id": chat_id, "text": text}
     try:
-        requests.post(url, json=payload, timeout=7)
+        response = requests.post(url, json=payload, timeout=7)
+        if response.status_code != 200:
+            logger.error(f"Telegram API error {response.status_code}: {response.text}")
     except Exception as e:
         print(f"Failed to send Telegram message: {e}")
 
