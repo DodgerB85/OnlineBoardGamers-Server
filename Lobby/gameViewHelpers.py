@@ -9,6 +9,7 @@ from django.utils.translation import gettext
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, Profile
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 
 def build_show_game_data(
@@ -341,3 +342,24 @@ def shared_cast_vote(request):
         messages.success(request, msg)
 
     return JsonResponse(result)
+
+
+def process_turn_with_mutex(request, inner_handler, mutex_prefix=""):
+    """Shared wrapper for all processXXXturn views.
+
+    Checks for POST, parses the JSON body to extract ``gameID``, acquires
+    a ``db_mutex``, and delegates to *inner_handler*.  Returns a 503 if
+    the mutex cannot be acquired.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    gameID = jsonData["gameID"]
+
+    lock_name = mutex_prefix + str(gameID)
+    with db_mutex(lock_name, timeout=5, ttl=60) as acquired:
+        if acquired:
+            return inner_handler(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)
