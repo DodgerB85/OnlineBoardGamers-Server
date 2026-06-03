@@ -370,8 +370,8 @@ def _processRNBturn(request):
                 currentGame.id,
                 transaction_id,
                 request.user.username,
-                next_run=timezone.now() + timedelta(minutes=5),
-                repeats=1,
+                next_run=timezone.now() + timedelta(seconds=20),
+                repeats=-1,  # Neg repeats for delete
                 schedule_type="O",
             )
 
@@ -615,8 +615,8 @@ def _processRNBturn(request):
                 currentGame.id,
                 transaction_id,
                 request.user.username,
-                next_run=timezone.now() + timedelta(minutes=5),
-                repeats=1,
+                next_run=timezone.now() + timedelta(seconds=20),
+                repeats=-1,  # Neg repeats for delete
                 schedule_type="O",
             )
 
@@ -673,8 +673,8 @@ def _processRNBturn(request):
             currentGame.id,
             transaction_id,
             request.user.username,
-            next_run=timezone.now() + timedelta(minutes=5),
-            repeats=1,
+            next_run=timezone.now() + timedelta(seconds=20),
+            repeats=-1,  # Neg repeats for delete
             schedule_type="O",
         )
 
@@ -821,8 +821,7 @@ def _processRNBturn(request):
                     if currentGame.autoMoves != pending_key:
                         currentGame.autoMoves = pending_key
                         currentGame.save()
-                        # start_time = timezone.now() + timedelta(minutes=2)
-                        start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                        start_time = timezone.now() + timedelta(minutes=10) 
                         schedule(
                             "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
                             "RNB",
@@ -1007,8 +1006,7 @@ def _processRNBturn(request):
                 if currentGame.autoMoves != pending_key:
                     currentGame.autoMoves = pending_key
                     currentGame.save()
-                    # start_time = timezone.now() + timedelta(minutes=2)
-                    start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                    start_time = timezone.now() + timedelta(minutes=10)
                     schedule(
                         "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
                         "RNB",
@@ -1174,8 +1172,7 @@ def performSaveGame(request, currentGame, jsonData):
                 if currentGame.autoMoves != pending_key:
                     currentGame.autoMoves = pending_key
                     currentGame.save()
-                    # start_time = timezone.now() + timedelta(minutes=2)
-                    start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                    start_time = timezone.now() + timedelta(minutes=10)
                     schedule(
                         "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
                         "RNB",

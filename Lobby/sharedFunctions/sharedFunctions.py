@@ -158,7 +158,8 @@ def SF_serializeGame(game, user, player_context):
     # 4. MyMove & Involved Logic
     is_my_move = False
     if user and game.gameStatus == "ACTIVE":
-        is_my_move = not current_players_str or user.username in current_players_str or any(s in current_players_str for s in rf.SHADOW_USERNAMES)
+        current_usernames = {u.strip() for u in current_players_str.split(",") if u.strip()} if current_players_str else set()
+        is_my_move = not current_players_str or user.username in current_usernames or any(s in current_usernames for s in rf.SHADOW_USERNAMES)
 
         # For HLC, if it is factory phase, AND you have submitted your move, set it back to false
         if game_code == "HLC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
@@ -1328,14 +1329,14 @@ def SF_validatePlayers(request, usernames, max_players, allow_creator=True):
     valid_players = []
     for username in usernames:
         if username not in existing_usernames:
-            messages.error(request, gettext(f"Error:Player '{username}' does not exist"))
+            messages.error(request, gettext("Error:Player '%s' does not exist") % username)
             return None
         if not allow_creator and username == request.user.username:
             messages.error(request, gettext("Error: You cannot add yourself"))
             return None
         valid_players.append(get_object_or_404(User, username=username))
     if len(valid_players) > max_players - 1:
-        messages.error(request, gettext(f"Error: Too many players for max {max_players}"))
+        messages.error(request, gettext("Error: Too many players for max %s") % max_players)
         return None
     return valid_players
 

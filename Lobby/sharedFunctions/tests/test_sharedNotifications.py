@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from Lobby.models import User
+from Lobby.models import Profile, User
 from Lobby.sharedFunctions.sharedNotifications import shouldSendEmail
 
 
@@ -74,3 +74,8 @@ class TestShouldSendEmail(TestCase):
         self.profile.save()
 
         self.assertTrue(shouldSendEmail("yourTurnFactoryFix", self.user.username, self.profile, 10))
+
+        unconfirmed = Profile.objects.get(user=self.user)
+        unconfirmed.email_confirmed = False
+        unconfirmed.save()
+        self.assertFalse(shouldSendEmail("yourTurnFactoryFix", self.user.username, unconfirmed, 10))
