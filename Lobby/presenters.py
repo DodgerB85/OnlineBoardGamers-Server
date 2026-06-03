@@ -1796,7 +1796,7 @@ class FCMpresenter(GamePresenter):
             playerList = self.getAllPlayersOrderedySeatInArray(withoutBots)
             try:
                 return playerList.index(name)
-            except Exception:
+            except ValueError:
                 return -1
         return -1
 

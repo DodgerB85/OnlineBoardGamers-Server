@@ -491,7 +491,9 @@ def changeBUSviewport(request):
             profile = Profile.objects.get(user=request.user)
             profile.preferredBusBoard = jsonData["boardNumber"]
             profile.save()
-        except Exception as e:
+        except Profile.DoesNotExist:
+            print(f"* * * * * CHANGE BUS BOARD ERROR: Profile not found for {request.user.username}")
+        except (KeyError, ValueError) as e:
             print(f"* * * * * CHANGE BUS BOARD ERROR:  {str(e)} {request.user.username}")
         return JsonResponse(
             {
