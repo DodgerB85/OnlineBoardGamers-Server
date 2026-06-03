@@ -67,7 +67,7 @@ monthNumber = myDate.month
 TOURNAMENT_SCHEDULE = [
     {
         "gameCode": "AQY",
-        "name_code": "Aqy",
+        "name_code": "Antiquity",
         "boxName": "Antiquity",
         "dates": [(2, 1), (8, 1)],
         "minPlayers": 2,
@@ -75,7 +75,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "IND",
-        "name_code": "Ind",
+        "name_code": "Indonesia",
         "boxName": "Indonesia",
         "dates": [(3, 1), (9, 1)],
         "minPlayers": 3,
@@ -83,7 +83,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "HLC",
-        "name_code": "Hlc",
+        "name_code": "HLC",
         "boxName": "Horseless Carriage",
         "dates": [(4, 1), (10, 1)],
         "minPlayers": 3,
@@ -99,7 +99,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "FCM",
-        "name_code": "Fcm",
+        "name_code": "FCM",
         "boxName": "Food Chain Magnate",
         "dates": [(5, 15), (10, 15), (12, 1)],
         "minPlayers": 3,
@@ -107,9 +107,9 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "TGZ",
-        "name_code": "Tgz",
+        "name_code": "TGZ",
         "boxName": "The Great Zimbabwe",
-        "dates": [(6, 1), (11, 15)],
+        "dates": [(6, 3), (11, 15)],
         "minPlayers": 3,
         "maxPlayers": 5,
     },
@@ -117,7 +117,7 @@ TOURNAMENT_SCHEDULE = [
 
 
 def get_tournament_name(target_date, name_code):
-    return f"{target_date.strftime('%B')} {target_date.year} {name_code} Tournament"
+    return f"{target_date.strftime('%B')} {target_date.strftime('%y')} {name_code} Tournament"
 
 
 def create_pending_tournament_if_missing(tournament, tournament_date):
