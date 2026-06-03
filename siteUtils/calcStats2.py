@@ -120,6 +120,8 @@ def get_finished_games(game_code, time_limit=None, player_count=None):
 
     if player_count:
         query &= Q(game__maxPlayers=player_count)
+    elif game_code == "RNB":
+        query &= Q(game__maxPlayers__gt=1)
     if time_limit:
         query &= Q(game__latestUpdate__gte=time_limit)
 
@@ -143,6 +145,8 @@ def get_won_games(game_code, time_limit=None, player_count=None):
 
     if player_count:
         query &= Q(game__maxPlayers=player_count)
+    elif game_code == "RNB":
+        query &= Q(game__maxPlayers__gt=1)
     if time_limit:
         query &= Q(game__latestUpdate__gte=time_limit)
 
