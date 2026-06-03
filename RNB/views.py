@@ -284,7 +284,7 @@ def _processRNBturn(request):
     # END SAVE / CREATE
 
     elif jsonData["action"] == "saveStackMove":
-        time.sleep(7)
+        #time.sleep(7)
         # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]

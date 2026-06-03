@@ -11,8 +11,18 @@ Run with:
     .venv/bin/python manage.py test RNB.test_transaction_recovery --keepdb
 """
 import json
+import os
+import sys
 import time
 from unittest.mock import call, patch
+
+# Ensure Django can find the project root when running standalone
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "OnlineBoardGamers.settings")
+import django
+
+django.setup()
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
@@ -45,6 +55,10 @@ class TransactionRecoveryTest(TestCase):
     """
 
     def setUp(self):
+        from django.conf import settings
+
+        settings.ALLOWED_HOSTS.append("testserver")
+
         from Lobby.models import Game, GamePlayer
 
         self.Game = Game
@@ -427,3 +441,16 @@ class TransactionRecoveryTest(TestCase):
             mock_send.assert_called_once()
             notified_username = mock_send.call_args[0][0]
             self.assertEqual(notified_username, "playerA")  # submitter, not B
+
+
+if __name__ == "__main__":
+    import unittest
+
+    loader = unittest.TestLoader()
+    suite = loader.loadTestsFromModule(__import__(__name__))
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print("\n=== All tests passed! ===")
+    else:
+        print("\n=== Some tests failed ===")
