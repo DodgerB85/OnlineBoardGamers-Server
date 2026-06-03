@@ -2858,7 +2858,7 @@ def joinGame(request, gameType):
 
     # Delete Training Game // Can never really fail
     if currentGame and action == "deleteTrgGame":
-        if request.user in current_players_list:
+        if request.user == currentGame.creator:
             currentGame.delete()
             messages.success(request, ("Game Deleted"))
             return JsonResponse(["Ok"], safe=False)
@@ -3187,8 +3187,7 @@ def deleteGame(request, gameCode):
 
     # Delete Training Game // Can never really fail
     if jsonData["action"] == "deleteTrgGame":
-        user_is_player = currentGame.players.filter(player=request.user).exists()
-        if user_is_player:
+        if request.user == currentGame.creator:
             gameStatus = currentGame.gameStatus
             currentGame.delete()
             return JsonResponse(
