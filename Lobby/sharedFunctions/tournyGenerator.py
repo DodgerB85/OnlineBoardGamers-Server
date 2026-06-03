@@ -1,5 +1,5 @@
 import itertools
-from collections import Counter
+from collections import Counter, defaultdict
 
 
 def multiGamePlayers4p(players):
@@ -80,6 +80,105 @@ def multiGamePlayersRound2(players):
     ]
 
     return games
+
+
+def _build_matchup_counts(tpda):
+    matchupCounts = defaultdict(int)
+    for round in tpda:
+        for game in round:
+            if game[0] != "BYEPLAYERS":
+                players = game[0]
+                for pair in itertools.combinations(players, 2):
+                    matchupCounts[frozenset(pair)] += 1
+    return matchupCounts
+
+
+def _candidate_score(matchupCounts, currentPlayers, candidate):
+    return max(matchupCounts[frozenset({player, candidate})] for player in currentPlayers)
+
+
+def _simulate_best_next_game_scores(players_list, matchupCounts, max_game_players):
+    if len(players_list) < max_game_players:
+        return []
+
+    remainingPlayers = players_list[:]
+    currentPlayers = [remainingPlayers.pop(0)]
+    selectedScores = []
+
+    while len(currentPlayers) < max_game_players and remainingPlayers:
+        candidateScores = {}
+        for candidate in remainingPlayers:
+            candidateScores[candidate] = _candidate_score(matchupCounts, currentPlayers, candidate)
+
+        minScore = min(candidateScores.values())
+        selectedCandidate = next(candidate for candidate in remainingPlayers if candidateScores[candidate] == minScore)
+
+        selectedScores.append(minScore)
+        currentPlayers.append(selectedCandidate)
+        remainingPlayers.remove(selectedCandidate)
+
+    return selectedScores
+
+
+def _next_game_would_be_all_rematches(currentPlayers, candidate, players_list, matchupCounts, max_game_players):
+    hypotheticalRemainingPlayers = players_list[:]
+    hypotheticalRemainingPlayers.remove(candidate)
+    hypotheticalCurrentPlayers = currentPlayers[:] + [candidate]
+
+    while len(hypotheticalCurrentPlayers) < max_game_players and hypotheticalRemainingPlayers:
+        candidateScores = {}
+        for nextCandidate in hypotheticalRemainingPlayers:
+            candidateScores[nextCandidate] = _candidate_score(matchupCounts, hypotheticalCurrentPlayers, nextCandidate)
+
+        minScore = min(candidateScores.values())
+        selectedCandidate = next(nextCandidate for nextCandidate in hypotheticalRemainingPlayers if candidateScores[nextCandidate] == minScore)
+        hypotheticalCurrentPlayers.append(selectedCandidate)
+        hypotheticalRemainingPlayers.remove(selectedCandidate)
+
+    if len(hypotheticalRemainingPlayers) < max_game_players:
+        return False
+
+    nextGameScores = _simulate_best_next_game_scores(hypotheticalRemainingPlayers, matchupCounts, max_game_players)
+    return bool(nextGameScores) and all(score > 0 for score in nextGameScores)
+
+
+def _compute_game_groups(players_list, tpda, max_game_players):
+    # players_list: list of usernames, strongest-first, byes already removed (mutated in place)
+    # tpda: list of rounds (tournamentProgressionData already parsed)
+    # max_game_players: int
+    # Returns: list of groups (each group is a list of usernames)
+    matchupCounts = _build_matchup_counts(tpda)
+
+    gamesPlayers = []
+    while len(players_list) >= max_game_players:
+        currentPlayers = [players_list.pop(0)]
+        candidates = players_list.copy()
+
+        while len(currentPlayers) < max_game_players and candidates:
+            candidateScores = {}
+            for candidate in candidates:
+                candidateScores[candidate] = _candidate_score(matchupCounts, currentPlayers, candidate)
+
+            orderedCandidates = [candidate for _, candidate in sorted(enumerate(candidates), key=lambda item: (candidateScores[item[1]], item[0]))]
+            selectedCandidate = orderedCandidates[0]
+
+            futurePlayersAfterThisGame = len(players_list) - (max_game_players - len(currentPlayers))
+            if futurePlayersAfterThisGame >= max_game_players and _next_game_would_be_all_rematches(currentPlayers, selectedCandidate, players_list, matchupCounts, max_game_players):
+                for alternateCandidate in orderedCandidates[1:]:
+                    if not _next_game_would_be_all_rematches(currentPlayers, alternateCandidate, players_list, matchupCounts, max_game_players):
+                        selectedCandidate = alternateCandidate
+                        break
+
+            currentPlayers.append(selectedCandidate)
+            players_list.remove(selectedCandidate)
+            candidates.remove(selectedCandidate)
+
+        while len(currentPlayers) < max_game_players and players_list:
+            currentPlayers.append(players_list.pop(0))
+
+        gamesPlayers.append(currentPlayers)
+
+    return gamesPlayers
 
 
 def show_pair_counts(schedule, players):

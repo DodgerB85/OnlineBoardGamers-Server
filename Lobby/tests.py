@@ -1,5 +1,5 @@
 from django.test import SimpleTestCase
-from Lobby.sharedFunctions.sharedFunctions import _compute_game_groups
+from Lobby.sharedFunctions.tournyGenerator import _compute_game_groups
 
 
 def make_tpda_round(groups):
@@ -79,3 +79,14 @@ class TournamentMatchmakingTests(SimpleTestCase):
         groups = _compute_game_groups(players, [], 2)
         # P1 should be in the first group
         self.assertIn("P1", groups[0])
+
+    def test_lookahead_avoids_second_game_all_rematches(self):
+        tpda = [
+            make_tpda_round([["A", "B", "C"], ["D", "E", "F"]]),
+            make_tpda_round([["A", "B", "D"], ["C", "E", "F"]]),
+            make_tpda_round([["A", "B", "E"], ["C", "D", "F"]]),
+        ]
+        players = ["A", "B", "C", "D", "E", "F"]
+        groups = _compute_game_groups(players, tpda, 3)
+        self.assertEqual(set(groups[0]), {"A", "C", "D"})
+        self.assertEqual(set(groups[1]), {"B", "E", "F"})

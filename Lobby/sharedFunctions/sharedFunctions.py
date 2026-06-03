@@ -1,7 +1,5 @@
-import itertools
 import json
 import time
-from collections import defaultdict
 
 # from django.template.loader import render_to_string
 # from django.contrib.sites.shortcuts import get_current_site
@@ -40,6 +38,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     getCleanedAndSortedRoundData,
 )
 from Lobby.sharedFunctions.tournyGenerator import (
+    _compute_game_groups,
     multiGamePlayers4p,
     multiGamePlayersRound2,
 )
@@ -819,54 +818,6 @@ def start_next_any_tournament_round(
         tournamentObj.tournamentProgressionData = json.dumps(tournamentProgressionDataArray)
 
     tournamentObj.save()
-
-
-def _compute_game_groups(players_list, tpda, max_game_players):
-    # players_list: list of usernames, strongest-first, byes already removed (mutated in place)
-    # tpda: list of rounds (tournamentProgressionData already parsed)
-    # max_game_players: int
-    # Returns: list of groups (each group is a list of usernames)
-    matchupCounts = defaultdict(int)
-    for round in tpda:
-        for game in round:
-            if game[0] != "BYEPLAYERS":
-                players = game[0]
-                for pair in itertools.combinations(players, 2):
-                    matchupCounts[frozenset(pair)] += 1
-
-    gamesPlayers = []
-    while len(players_list) >= max_game_players:
-        currentPlayers = [players_list.pop(0)]
-        candidates = players_list.copy()
-
-        # Try to find players, preferring those with least previous matchups with current group
-        while len(currentPlayers) < max_game_players and candidates:
-            # Calculate max matchup count for each candidate with current group
-            candidate_scores = {}
-            for candidate in candidates:
-                # Find the maximum matchup count for any pair involving this candidate
-                max_count = max(matchupCounts[frozenset({player, candidate})] for player in currentPlayers)
-                candidate_scores[candidate] = max_count
-
-            # Prefer candidates with max_count == 0 (no previous matchups with group)
-            min_score = min(candidate_scores.values())
-            min_score_candidates = [c for c, s in candidate_scores.items() if s == min_score]
-
-            # Select the first candidate in the original order (to respect points)
-            selected_candidate = next(c for c in candidates if c in min_score_candidates)
-
-            # Add the selected candidate
-            currentPlayers.append(selected_candidate)
-            players_list.remove(selected_candidate)
-            candidates.remove(selected_candidate)
-
-        # Fill game if needed (edge case, though unlikely now)
-        while len(currentPlayers) < max_game_players and players_list:
-            currentPlayers.append(players_list.pop(0))
-
-        gamesPlayers.append(currentPlayers)
-
-    return gamesPlayers
 
 
 # Pass in a tournament. Returns an object of { gamesPlayers: [[p1, p2...], [p5,p6...]], byePlayers: [p3, p4] }
