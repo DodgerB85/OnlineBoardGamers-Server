@@ -213,19 +213,20 @@ def telegram_bot_response(request):
             message = data["message"]
             chat_id = message["chat"]["id"]
             chat_type = message["chat"]["type"]
-            text = message.get("text")
+            # Extract and clean text safely
+            text = message.get("text", "").strip()
             # user = message.get("from", {})
 
             # Handle Commands
-            if text and text.startswith("/start"):
+            if text.startswith("/start") or "/start" in text:
                 response = f"To easily add Telegram Notifications to your account, click this link:\nhttps://www.OnlineBoardGamers.com/addTGid/{chat_id}\nFor more information use /help"
                 send_telegram_msg(chat_id, response)
 
-            elif text and text.startswith("/help"):
+            elif text.startswith("/help") or "/help" in text:
                 response = f"To easily add Telegram Notifications to your account, click this link:\nhttps://www.OnlineBoardGamers.com/addTGid/{chat_id}\nYour Telegram ID is: {chat_id}\nEnter this ID in the Webhooks section of your profile page on OBG:\nhttps://www.onlineboardgamers.com"
                 send_telegram_msg(chat_id, response)
 
-            elif text == "/custom":
+            elif text.startswith("/custom") or "/custom" in text:
                 send_telegram_msg(
                     chat_id,
                     "This is a custom command, you can put whatever you want here.",

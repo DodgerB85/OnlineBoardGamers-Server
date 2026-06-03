@@ -109,7 +109,7 @@ TOURNAMENT_SCHEDULE = [
         "gameCode": "TGZ",
         "name_code": "TGZ",
         "boxName": "The Great Zimbabwe",
-        "dates": [(6, 3), (11, 15)],
+        "dates": [(6, 1), (11, 15)],
         "minPlayers": 3,
         "maxPlayers": 5,
     },
