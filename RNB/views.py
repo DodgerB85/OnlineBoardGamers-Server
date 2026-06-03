@@ -363,6 +363,18 @@ def _processRNBturn(request):
             # SAVE BEFORE NOTIFICATIONS
             currentGame.save()
 
+            # If the client disconnects before completing stack processing,
+            # notify the waiting players after a delay so the game doesn't freeze silently.
+            schedule(
+                "Lobby.sharedFunctions.sharedNotifications.SN_notifyStuckRNBTransaction",
+                currentGame.id,
+                transaction_id,
+                request.user.username,
+                next_run=timezone.now() + timedelta(minutes=5),
+                repeats=1,
+                schedule_type="O",
+            )
+
             ################ REWIND EVERY SAVE #######################
             # Don't save rewind if all players have moved - wait for client to process phase
             if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
@@ -567,6 +579,7 @@ def _processRNBturn(request):
             transaction_id = uuid.uuid4().hex
             currentGame.transactionID = transaction_id
             # Perform most of a normal save
+            # (schedule() call added after save below)
             db_latest_update = currentGame.latestUpdate
             latest_update = jsonData.get("latestUpdate", 0)
             game_id = currentGame.id
@@ -596,6 +609,16 @@ def _processRNBturn(request):
             ################ END REWIND EVERY SAVE #######################
 
             currentGame.save()
+
+            schedule(
+                "Lobby.sharedFunctions.sharedNotifications.SN_notifyStuckRNBTransaction",
+                currentGame.id,
+                transaction_id,
+                request.user.username,
+                next_run=timezone.now() + timedelta(minutes=5),
+                repeats=1,
+                schedule_type="O",
+            )
 
             response_data = {
                 "latestUpdate": currentGame.latestUpdate,
@@ -644,6 +667,16 @@ def _processRNBturn(request):
         ################ END REWIND EVERY SAVE #######################
 
         currentGame.save()
+
+        schedule(
+            "Lobby.sharedFunctions.sharedNotifications.SN_notifyStuckRNBTransaction",
+            currentGame.id,
+            transaction_id,
+            request.user.username,
+            next_run=timezone.now() + timedelta(minutes=5),
+            repeats=1,
+            schedule_type="O",
+        )
 
         response_data = {
             "latestUpdate": currentGame.latestUpdate,

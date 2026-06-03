@@ -735,6 +735,83 @@ def SN_sendPendingRNBturnNotification(gameCode, playerList, gameID, gameName, tu
     # activate(originalLang)
 
 
+def SN_notifyStuckRNBTransaction(game_id, expected_transaction_id, submitting_username):
+    """
+    Called by Django-Q after a delay. If transactionID still matches,
+    the submitting player disconnected before completing stack processing —
+    notify them directly so they know to reopen the game.
+    """
+    try:
+        from Lobby.models import Game
+        try:
+            current_game = Game.objects.get(id=game_id, gameCode="RNB")
+        except Game.DoesNotExist:
+            return
+
+        # Recovery already happened — nothing to do
+        if current_game.transactionID != expected_transaction_id:
+            return
+
+        if not submitting_username or submitting_username in USERNAMES_NOT_TO_NOTIFY:
+            return
+
+        turn_string = current_game.presenter().currentTurnString()
+        game_name = current_game.presenter().getGameName()
+        _SN_sendStuckTransactionNotification(submitting_username, game_id, game_name, turn_string, current_game.gamePace)
+
+    except Exception as e:
+        print(f"Error in SN_notifyStuckRNBTransaction: {e}")
+
+
+def _SN_sendStuckTransactionNotification(username, game_id, game_name, turn_string, game_pace):
+    if username in USERNAMES_NOT_TO_NOTIFY:
+        return
+    try:
+        user = User.objects.select_related("profile").get(username=username)
+    except User.DoesNotExist:
+        print(f"Error: could not find user in _SN_sendStuckTransactionNotification: {username}")
+        return
+    try:
+        profile = user.profile
+        activate(profile.profileLanguage)
+        gameStrings = getGameStrings("RNB")
+        subject = gameStrings["yourTurnSubject"]
+        urlText = gameStrings["clickHereToPlayText"]
+        messageText = (
+            user.username
+            + ": "
+            + gettext("Your previous move may not have saved correctly. Please reopen the game to complete the save.")
+            + " - "
+            + game_name
+            + " - "
+            + turn_string
+        )
+        if shouldSendEmail("yourTurn", username, profile, game_pace):
+            try:
+                message = render_to_string(
+                    "Lobby/gameEmails/yourTurnEmail.html",
+                    {
+                        "game": "RNB",
+                        "user": user.username,
+                        "domain": "www.onlineboardgamers.com",
+                        "gameID": game_id,
+                        "gameName": game_name,
+                        "currentTurnString": turn_string,
+                        "boxName": gameStrings["boxName"],
+                    },
+                )
+                SN_sendEmail("yourTurn", subject, message, user.email)
+            except Exception as e:
+                print(f"EMAIL ERROR - _SN_sendStuckTransactionNotification {user.username}: {e}")
+        urlRaw = f"https://www.OnlineBoardGamers.com/RNB/{game_id}/show/"
+        if profile.webhooks not in ("", None, "[]"):
+            SN_sendWebhooks(profile, messageText, urlText, urlRaw)
+        if profile.discord_id not in ("", None):
+            SN_sendDiscordDM(profile.discord_id, messageText, urlText, urlRaw)
+    except Exception as e:
+        print(f"_SN_sendStuckTransactionNotification error for {username}: {e}")
+
+
 # TODO async
 def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
     if player in USERNAMES_NOT_TO_NOTIFY:
