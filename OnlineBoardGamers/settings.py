@@ -134,7 +134,6 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "pyinstrument.middleware.ProfilerMiddleware",  # <--- Put it here BELOW auth
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "user_visit.middleware.UserVisitMiddleware",
 ]
@@ -499,6 +498,9 @@ if DEBUG:
     # Add to middleware (must be near the top, but after GZipMiddleware)
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
+    # Pyinstrument profiler - only in DEBUG
+    MIDDLEWARE.append("pyinstrument.middleware.ProfilerMiddleware")
+
     # Required for the toolbar to show on localhost
     INTERNAL_IPS = ["127.0.0.1"]
 
@@ -519,11 +521,8 @@ if DEBUG:
         "debug_toolbar.panels.profiling.ProfilingPanel",
     ]
 
+    def show_pyinstrument(request):
+        allowed_usernames = ["admin", "h"]
+        return request.user.is_authenticated and request.user.username in allowed_usernames
 
-def show_pyinstrument(request):
-    # Only run the profiler if the user is logged in and their username is in your list
-    allowed_usernames = ["admin", "h"]  # <--- Put your username here
-    return request.user.is_authenticated and request.user.username in allowed_usernames
-
-
-PYINSTRUMENT_SHOW_CALLBACK = show_pyinstrument
+    PYINSTRUMENT_SHOW_CALLBACK = show_pyinstrument

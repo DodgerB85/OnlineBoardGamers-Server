@@ -11,13 +11,13 @@ from django.utils.translation import gettext
 
 from Lobby.gameViewHelpers import (
     build_show_game_data,
+    process_game_with_mutex,
     shared_bug_entry,
     shared_cast_vote,
     shared_save_notes,
     shared_save_zoom,
 )
 from Lobby.models import Game, GamePlayer, User
-from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -222,17 +222,7 @@ def showINDhistory(request, game_id=1):
 
 @login_required()
 def processINDturn(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex("lockINDgame_" + str(gameID), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return _processINDturn(request)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    return process_game_with_mutex(request, _processINDturn, mutex_prefix="processTurn_")
 
 
 @login_required()
@@ -637,17 +627,7 @@ def bugEntry(request):
 
 @login_required()
 def sendChatMessage(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex("lockINDgame_" + str(gameID), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return _sendChatMessage(request)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    return process_game_with_mutex(request, _sendChatMessage, mutex_prefix="processChat_")
 
 
 @login_required()
@@ -840,11 +820,4 @@ def createINDspinoff(request):
 
 @login_required()
 def castVote(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-    jsonData = json.loads(request.body)
-    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return shared_cast_vote(request)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    return process_game_with_mutex(request, shared_cast_vote, mutex_prefix="processTurn_")

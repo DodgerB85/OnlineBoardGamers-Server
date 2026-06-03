@@ -15,12 +15,12 @@ from django.utils.translation import gettext
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
     build_show_game_data,
+    process_game_with_mutex,
     shared_bug_entry,
     shared_cast_vote,
     shared_save_notes,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -67,17 +67,7 @@ def createHLCgame(request):
 
 
 def processHLCturn(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex("processTurn_" + str(gameID), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return _processHLCturn(request)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    return process_game_with_mutex(request, _processHLCturn, mutex_prefix="processTurn_")
 
 
 @login_required()
@@ -943,14 +933,7 @@ def notes(request):
 
 @login_required()
 def castVote(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-    jsonData = json.loads(request.body)
-    with db_mutex(str(jsonData["gameID"]), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return shared_cast_vote(request)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    return process_game_with_mutex(request, shared_cast_vote, mutex_prefix="processTurn_")
 
 
 @login_required

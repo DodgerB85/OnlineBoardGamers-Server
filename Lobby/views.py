@@ -176,40 +176,7 @@ ALLOWED_SPECIAL_USERS = [
 #
 ##########################
 
-# Replace with your NEW test token from BotFather
-# TEST_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
-#
-# @csrf_exempt
-# def telegram_test_webhook(request):
-#    if request.method == "POST":
-#        try:
-#            # 1. Log the raw body to see what Telegram is sending
-#            body = request.body.decode("utf-8")
-#            print(f"TELEGRAM DATA RECEIVED: {body}")
-#
-#            data = json.loads(body)
-#
-#            if "message" in data:
-#                chat_id = data["message"]["chat"]["id"]
-#                token = "8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y"
-#
-#                # 2. Direct API call to reply
-#                api_url = f"https://api.telegram.org/bot{token}/sendMessage"
-#                payload = {"chat_id": chat_id, "text": "DEBUG: Server received your message!"}
-#
-#                # Use a timeout so the thread doesn't hang
-#                response = requests.post(api_url, json=payload, timeout=5)
-#                print(f"TELEGRAM API RESPONSE: {response.status_code}")
-#
-#            return HttpResponse("OK", status=200)
-#
-#        except Exception as e:
-#            # This will print the EXACT error to your PythonAnywhere Error Log
-#            print(f"CRITICAL WEBHOOK ERROR: {str(e)}")
-#            return HttpResponse("Error", status=200) # Still return 200 to stop Telegram retries
-#
-#    return HttpResponse("Method Not Allowed", status=405)
-#
+
 
 # Constants
 API_TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
@@ -359,7 +326,6 @@ def telegram_bot_response(request):
 #################################
 
 
-@csrf_exempt
 @login_required
 def addTGid(request, TGid):
     try:
@@ -3272,6 +3238,7 @@ def autoCompleteUsername(request):
         return render(request, "Lobby/index.html")
 
 
+@login_required
 def blacklistPlayer(request):
     if request.method != "PUT":
         return JsonResponse({"error": "Wrong request."}, status=400)
@@ -3782,6 +3749,7 @@ def setStopEmails(request):
 
 
 @login_required
+@require_POST
 def dataCheck(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -4011,12 +3979,15 @@ def deleteWebhook(request):
 @login_required
 @require_POST
 def sendAdminMessage(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"status": "error", "message": "Forbidden"}, status=403)
+
     try:
         data = json.loads(request.body.decode("utf-8"))
         message = data.get("message")
 
-        if message:  # Check if webhook URL is available
-            SN_sendAdminErrorMessage(message)  # Call your existing function
+        if message:
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"status": "success"}, status=200)
         else:
             return JsonResponse(
