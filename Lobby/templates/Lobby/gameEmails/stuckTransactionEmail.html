@@ -1,0 +1,40 @@
+{% load i18n %}
+{% autoescape off %}
+    {% if game == "FCM" %}
+        {% url "FCM:showFCMgame" gameID as the_url %}
+    {% elif game == "HLC" %}
+        {% url "HLC:showHLCgame" gameID as the_url %}
+    {% elif game == "BUS" %}
+        {% url "BUS:showBUSgame" gameID as the_url %}
+    {% elif game == "TGZ" %}
+        {% url "TGZ:showTGZgame" gameID as the_url %}
+    {% elif game == "CNS" %}
+        {% url "CNS:showCNSgame" gameID as the_url %}
+    {% elif game == "AQY" %}
+        {% url "AQY:showAQYgame" gameID as the_url %}
+    {% elif game == "IND" %}
+        {% url "IND:showINDgame" gameID as the_url %}
+    {% elif game == "KFW" %}
+        {% url "KFW:showKFWgame" gameID as the_url %}
+    {% elif game == "WEB" %}
+        {% url "WEB:showWEBgame" gameID as the_url %}
+    {% elif game == "RNB" %}
+        {% url "RNB:showRNBgame" gameID as the_url %}
+    {% endif %}
+    {% url 'discordInviteLink' as discord_url %}
+    {% comment %}Translators: This is an email{% endcomment %}
+    {% blocktranslate with profile_url=profile_url discord_link=discord_url game_url=the_url %}
+Hi {{ user }},<br />
+<br />
+Your previous move may not have saved correctly. Please reopen the game to complete the save.<br />
+<br />
+https://{{ domain }}{{ game_url }}<br />
+<br />
+Game: {{ gameName }}<br />
+Turn/Phase: {{ currentTurnString }}<br />
+<br />
+<br />
+Join us on the Discord! Click <a href="https://{{ domain }}{{ discord_link }}" target="_blank">Here</a> to join!<br />
+
+{% endblocktranslate %}
+{% endautoescape %}

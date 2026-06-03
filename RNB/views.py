@@ -284,6 +284,7 @@ def _processRNBturn(request):
     # END SAVE / CREATE
 
     elif jsonData["action"] == "saveStackMove":
+        time.sleep(7)
         # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
@@ -370,7 +371,7 @@ def _processRNBturn(request):
                 currentGame.id,
                 transaction_id,
                 request.user.username,
-                next_run=timezone.now() + timedelta(seconds=20),
+                next_run=timezone.now() + timedelta(minutes=5),
                 repeats=-1,  # Neg repeats for delete
                 schedule_type="O",
             )
@@ -615,7 +616,7 @@ def _processRNBturn(request):
                 currentGame.id,
                 transaction_id,
                 request.user.username,
-                next_run=timezone.now() + timedelta(seconds=20),
+                next_run=timezone.now() + timedelta(minutes=5),
                 repeats=-1,  # Neg repeats for delete
                 schedule_type="O",
             )
@@ -673,7 +674,7 @@ def _processRNBturn(request):
             currentGame.id,
             transaction_id,
             request.user.username,
-            next_run=timezone.now() + timedelta(seconds=20),
+            next_run=timezone.now() + timedelta(minutes=5),
             repeats=-1,  # Neg repeats for delete
             schedule_type="O",
         )
@@ -787,8 +788,7 @@ def _processRNBturn(request):
                 playerListToNotify = [p for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "RnbBot"}]
                 if len(playerListToNotify) > 0:
                     if jsonData["currentPlayerNeedsToFixMove"]:
-                        # start_time = timezone.now() + timedelta(minutes=2)
-                        start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                        start_time = timezone.now() + timedelta(minutes=2)
                         schedule(
                             "Lobby.sharedFunctions.sharedNotifications.SN_sendFixNextTurnNotificationWithValidation",
                             "RNB",

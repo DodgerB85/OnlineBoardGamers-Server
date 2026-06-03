@@ -280,6 +280,9 @@ def shouldSendEmail(emailType, username, profile, currentGamePace):
     if emailType == "yourTurnFactoryFix":
         return True
 
+    if emailType == "repairSave":
+        return True
+
     emailNotifications = json.loads(profile.emailNotifications) if profile.emailNotifications != "" and profile.emailNotifications is not None else [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
 
     while len(emailNotifications) < 11:
@@ -775,7 +778,7 @@ def _SN_sendStuckTransactionNotification(username, game_id, game_name, turn_stri
         profile = user.profile
         activate(profile.profileLanguage)
         gameStrings = getGameStrings("RNB")
-        subject = gameStrings["yourTurnSubject"]
+        subject = gettext("Your previous move may not have saved correctly")
         urlText = gameStrings["clickHereToPlayText"]
         messageText = (
             user.username
@@ -786,10 +789,10 @@ def _SN_sendStuckTransactionNotification(username, game_id, game_name, turn_stri
             + " - "
             + turn_string
         )
-        if shouldSendEmail("yourTurn", username, profile, game_pace):
+        if shouldSendEmail("repairSave", username, profile, game_pace):
             try:
                 message = render_to_string(
-                    "Lobby/gameEmails/yourTurnEmail.html",
+                    "Lobby/gameEmails/stuckTransactionEmail.html",
                     {
                         "game": "RNB",
                         "user": user.username,
@@ -800,7 +803,7 @@ def _SN_sendStuckTransactionNotification(username, game_id, game_name, turn_stri
                         "boxName": gameStrings["boxName"],
                     },
                 )
-                SN_sendEmail("yourTurn", subject, message, user.email)
+                SN_sendEmail("repairSave", subject, message, user.email)
             except Exception as e:
                 print(f"EMAIL ERROR - _SN_sendStuckTransactionNotification {user.username}: {e}")
         urlRaw = f"https://www.OnlineBoardGamers.com/RNB/{game_id}/show/"
