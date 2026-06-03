@@ -16,6 +16,8 @@ def multiGamePlayers4p(players):
     total_players = len(players)
     if total_players < 4:
         return [1, "Need at least 4 players"]
+    if total_players < 15:
+        return [1, "Need at least 15 players"]
 
     # The magic difference set: {0, 1, 3, 7}
     base_differences = [0, 1, 3, 7]
