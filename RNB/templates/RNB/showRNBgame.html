@@ -437,7 +437,7 @@
   {% if kickoutRequired > 0 and not myMove %}
   initData.kickoutRequired = {{kickoutRequired}};
   {% endif %}
-  initData.notes = '{{ notes | safe }}';
+  initData.notes = '{{ notes | escapejs }}';
   initData.yourTurnAudioType = {{ yourTurnAudioType }};
 initData.preMove = "{{preMove}}";
   /////////////////////
