@@ -69,12 +69,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 
 		joinGameDivs[i].onmouseenter = function () {
+			if (document.body.classList.contains("nd")) return // /nd/ design styles hover via CSS
 			this.style.backgroundColor = "#5875f8"
 			this.style.color = "white"
 			this.style.cursor = "pointer"
 		}
 
 		joinGameDivs[i].onmouseleave = function () {
+			if (document.body.classList.contains("nd")) return // /nd/ design styles hover via CSS
 			this.style.backgroundColor = "rgba(255, 255, 255, 0.05)"
 			this.style.color = "blue"
 		}
@@ -124,12 +126,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 
 		leaveDeclineDivs[i].onmouseenter = function () {
+			if (document.body.classList.contains("nd")) return // /nd/ design styles hover via CSS
 			this.style.backgroundColor = "#eb5353"
 			this.style.color = "white"
 			this.style.cursor = "pointer"
 		}
 
 		leaveDeclineDivs[i].onmouseleave = function () {
+			if (document.body.classList.contains("nd")) return // /nd/ design styles hover via CSS
 			this.style.backgroundColor = "rgba(255, 255, 255, 0.05)"
 			this.style.color = "blue"
 		}
