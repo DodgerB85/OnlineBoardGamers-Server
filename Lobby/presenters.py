@@ -197,6 +197,16 @@ class GamePresenter:
     def setCurrentPlayersFromArrInTurnOrder(self, current_players_array):
         """Set current players by updating is_current on GamePlayer instances"""
         if not current_players_array or len(current_players_array) == 0:
+            # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
+            if self.gameObj.maxPlayers == 1:
+                solo_gp = self.gameObj.players.first()
+                if solo_gp and solo_gp.player:
+                    self.gameObj.players.all().update(is_current=False)
+                    solo_gp.is_current = True
+                    solo_gp.save()
+                    self.gameObj.serverCurrentPlayerNamesInTurnOrder = [solo_gp.player.username]
+                    self.gameObj.save()
+                    return
             # Clear all current players
             self.gameObj.players.all().update(is_current=False)
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = []
@@ -221,6 +231,9 @@ class GamePresenter:
         for gp in game_players:
             if gp.player:
                 gp.is_current = gp.player.username in current_players_array
+                # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
+                if self.gameObj.maxPlayers == 1:
+                    gp.is_current = True
                 to_update.append(gp)
         if len(to_update) > 0:
             from Lobby.models import GamePlayer
@@ -235,6 +248,10 @@ class GamePresenter:
     # it won't "reset" them as needing to move
     def reduceCurrentPlayersUsingArray(self, current_players_array):
         from Lobby.models import GamePlayer
+
+        # SOLO GAME FAILSAFE: Never reduce the solo player's isCurrent
+        if self.gameObj.maxPlayers == 1:
+            return
 
         game_players_active = self.gameObj.players.exclude(is_missing=True).select_related("player")
         for gp in game_players_active:
