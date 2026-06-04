@@ -1629,10 +1629,10 @@ def TGZmapEditor(request):
         return render(request, "Lobby/TGZmapEditor.html", {"mapData": request.POST["mapDataTGZ"]})
 
     else:
-        isSchismUser = False
-        ALLOWED_SCHISM_USERS = ["admin", "joshuastarr", "Lemem", "waymost", "freddyknuckles", "RJ_E", "zach.chillman", "wsgosset"]
-        if request.user.username in ALLOWED_SCHISM_USERS:
-            isSchismUser = True
+        isSchismUser = True
+        #ALLOWED_SCHISM_USERS = ["admin", "joshuastarr", "Lemem", "waymost", "freddyknuckles", "RJ_E", "zach.chillman", "wsgosset"]
+        #if request.user.username in ALLOWED_SCHISM_USERS:
+        #    isSchismUser = True
         return render(request, "Lobby/TGZmapEditor.html", {"isSchismUser": isSchismUser})
 
 
