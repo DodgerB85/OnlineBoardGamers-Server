@@ -1135,52 +1135,81 @@ def stats(request):
     finishedGames = sum(g["finished"] for g in game_stats)
 
     # Serialize games using prefetched data to avoid additional queries
-    # Build player contexts from prefetched data instead of hitting DB again
-    tenGamesJSON = [
-        SF_serializeGame(
-            g,
-            request.user,
-            {
-                "all_game_players": list(g.players.all()),
-                "invited_users": list(g.invitedPlayers.all()),
-            },
-        )
-        for g in raw_latest_active
-    ]
-    tenGamesFinishedJSON = [
-        SF_serializeGame(
-            g,
-            request.user,
-            {
-                "all_game_players": list(g.players.all()),
-                "invited_users": list(g.invitedPlayers.all()),
-            },
-        )
-        for g in raw_latest_finished
-    ]
+    # Cache serialized data for 2 minutes to avoid expensive serialization on every request
+    serialized_cache_key = f"stats_serialized_games_{request.user.id}"
+    cached_serialized = cache.get(serialized_cache_key)
+
+    if cached_serialized is None:
+        tenGamesJSON = [
+            SF_serializeGame(
+                g,
+                request.user,
+                {
+                    "all_game_players": list(g.players.all()),
+                    "invited_users": list(g.invitedPlayers.all()),
+                },
+            )
+            for g in raw_latest_active
+        ]
+        tenGamesFinishedJSON = [
+            SF_serializeGame(
+                g,
+                request.user,
+                {
+                    "all_game_players": list(g.players.all()),
+                    "invited_users": list(g.invitedPlayers.all()),
+                },
+            )
+            for g in raw_latest_finished
+        ]
+        cached_serialized = {
+            "active": tenGamesJSON,
+            "finished": tenGamesFinishedJSON,
+        }
+        cache.set(serialized_cache_key, cached_serialized, 120)
+    else:
+        tenGamesJSON = cached_serialized["active"]
+        tenGamesFinishedJSON = cached_serialized["finished"]
 
     # 6. JSON Data Loading (Files)
-    def load_stat_json(path):
-        try:
-            with open(path) as f:
-                return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return []
+    # Cache all JSON file data for 5 minutes to avoid repeated disk I/O
+    stats_json_cache_key = "stats_json_files"
+    stats_json_data = cache.get(stats_json_cache_key)
 
-    base_path = "./Lobby/stats/"
-    fairPlayArr = load_stat_json(f"{base_path}fairPlayArr_E.json")
+    if stats_json_data is None:
 
-    win_data = {
-        "winArr": load_stat_json(f"{base_path}winArr_E.json"),
-        "win3mArr": load_stat_json(f"{base_path}win3mArr_E.json"),
-        "win1mArr": load_stat_json(f"{base_path}win1mArr_E.json"),
-    }
+        def load_stat_json(path):
+            try:
+                with open(path) as f:
+                    return json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                return []
 
-    p_stats = {}
-    for p in [2, 3, 4, 5, 6]:
-        p_stats[f"winArr{p}p"] = load_stat_json(f"{base_path}winArr{p}p_E.json")
-        p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
-        p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
+        base_path = "./Lobby/stats/"
+        fairPlayArr = load_stat_json(f"{base_path}fairPlayArr_E.json")
+
+        win_data = {
+            "winArr": load_stat_json(f"{base_path}winArr_E.json"),
+            "win3mArr": load_stat_json(f"{base_path}win3mArr_E.json"),
+            "win1mArr": load_stat_json(f"{base_path}win1mArr_E.json"),
+        }
+
+        p_stats = {}
+        for p in [2, 3, 4, 5, 6]:
+            p_stats[f"winArr{p}p"] = load_stat_json(f"{base_path}winArr{p}p_E.json")
+            p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
+            p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
+
+        stats_json_data = {
+            "fairPlayArr": fairPlayArr,
+            "win_data": win_data,
+            "p_stats": p_stats,
+        }
+        cache.set(stats_json_cache_key, stats_json_data, 300)
+    else:
+        fairPlayArr = stats_json_data["fairPlayArr"]
+        win_data = stats_json_data["win_data"]
+        p_stats = stats_json_data["p_stats"]
 
     return render(
         request,
@@ -1243,7 +1272,7 @@ def index(request):
     # Cache blacklist data per user for 5 minutes
     blacklist_cache_key = f"user_blacklist_{user_id}"
     blacklist_data = cache.get(blacklist_cache_key)
-    
+
     if blacklist_data is None:
         profile = request.user.profile
         blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
