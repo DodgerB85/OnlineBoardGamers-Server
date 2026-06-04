@@ -131,12 +131,14 @@ def create_rnb_game(
                 game_status = "WAITING"
                 usernames_to_notify = [user.username for user in invited_usernames_objs]
 
-        if isTrainingGame and max_players > 1:
+        if isTrainingGame:
             starting_options.append(rf.SO_TRAINING_GAME)
             game_status = "ACTIVE"
             stats_exclude = True
-            shadow_users, shadowNameNotes = SF_setupTrainingGameShadows(request, max_players)
-            all_players.extend(shadow_users)
+            # Only add shadow users for multi-player training games
+            if max_players > 1:
+                shadow_users, shadowNameNotes = SF_setupTrainingGameShadows(request, max_players)
+                all_players.extend(shadow_users)
         elif "learningGame" in request.POST:
             starting_options.append(int(request.POST.get("learningGame")))
             stats_exclude = True
