@@ -1072,28 +1072,44 @@ def stats(request):
     userActivity = stats_data["userActivity"]
 
     # 2. Optimized ID exclusion (Avoids expensive NOT EXISTS subqueries)
-    excluded_game_ids = GamePlayer.objects.filter(player__username__in=rf.SHADOW_USERNAMES).values_list("game_id", flat=True)
+    # Cache this for 5 minutes since shadow games don't change frequently
+    excluded_game_ids = cache.get("stats_excluded_game_ids")
+    if excluded_game_ids is None:
+        excluded_game_ids = list(GamePlayer.objects.filter(player__username__in=rf.SHADOW_USERNAMES).values_list("game_id", flat=True))
+        cache.set("stats_excluded_game_ids", excluded_game_ids, 300)
 
     # 3. Batch Fetch ALL Counts (1 Query instead of 18)
     game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
-    all_counts = (
-        Game.objects.filter(gameCode__in=game_codes)
-        .exclude(id__in=excluded_game_ids)
-        .values("gameCode")
-        .annotate(
-            active_count=Count("id", filter=Q(gameStatus="ACTIVE")),
-            finished_count=Count("id", filter=Q(gameStatus="FINISHED")),
+    # Cache game counts for 2 minutes
+    counts_map = cache.get("stats_game_counts")
+    if counts_map is None:
+        all_counts = (
+            Game.objects.filter(gameCode__in=game_codes)
+            .exclude(id__in=excluded_game_ids)
+            .values("gameCode")
+            .annotate(
+                active_count=Count("id", filter=Q(gameStatus="ACTIVE")),
+                finished_count=Count("id", filter=Q(gameStatus="FINISHED")),
+            )
         )
-    )
+        counts_map = {item["gameCode"]: item for item in all_counts}
+        cache.set("stats_game_counts", counts_map, 120)
 
-    counts_map = {item["gameCode"]: item for item in all_counts}
+    # 4. Batch Fetch Latest Games with prefetched relationships
+    # Cache latest games for 2 minutes
+    cache_key_active = "stats_latest_active_games"
+    cache_key_finished = "stats_latest_finished_games"
 
-    # 4. Batch Fetch Latest Games (2 Queries instead of 18)
-    # We fetch a larger slice and sort/slice in Python to minimize DB hits
-    raw_latest_active = Game.objects.filter(gameCode__in=game_codes, gameStatus="ACTIVE").exclude(id__in=excluded_game_ids).select_related("creator").order_by("-latestUpdate")[:50]
+    raw_latest_active = cache.get(cache_key_active)
+    if raw_latest_active is None:
+        raw_latest_active = list(Game.objects.filter(gameCode__in=game_codes, gameStatus="ACTIVE").exclude(id__in=excluded_game_ids).select_related("creator").prefetch_related("players__player", "invitedPlayers").order_by("-latestUpdate")[:10])
+        cache.set(cache_key_active, raw_latest_active, 120)
 
-    raw_latest_finished = Game.objects.filter(gameCode__in=game_codes, gameStatus="FINISHED").exclude(id__in=excluded_game_ids).select_related("creator").order_by("-latestUpdate")[:50]
+    raw_latest_finished = cache.get(cache_key_finished)
+    if raw_latest_finished is None:
+        raw_latest_finished = list(Game.objects.filter(gameCode__in=game_codes, gameStatus="FINISHED").exclude(id__in=excluded_game_ids).select_related("creator").prefetch_related("players__player", "invitedPlayers").order_by("-latestUpdate")[:10])
+        cache.set(cache_key_finished, raw_latest_finished, 120)
 
     # 5. Build the Game Stats List
     GAME_META = {
@@ -1118,9 +1134,30 @@ def stats(request):
     totalGames = sum(g["active"] for g in game_stats)
     finishedGames = sum(g["finished"] for g in game_stats)
 
-    # Serialize only the top 10 from our prefetched list
-    tenGamesJSON = [SF_fastSerializeGame(g, request.user) for g in raw_latest_active[:10]]
-    tenGamesFinishedJSON = [SF_fastSerializeGame(g, request.user) for g in raw_latest_finished[:10]]
+    # Serialize games using prefetched data to avoid additional queries
+    # Build player contexts from prefetched data instead of hitting DB again
+    tenGamesJSON = [
+        SF_serializeGame(
+            g,
+            request.user,
+            {
+                "all_game_players": list(g.players.all()),
+                "invited_users": list(g.invitedPlayers.all()),
+            },
+        )
+        for g in raw_latest_active
+    ]
+    tenGamesFinishedJSON = [
+        SF_serializeGame(
+            g,
+            request.user,
+            {
+                "all_game_players": list(g.players.all()),
+                "invited_users": list(g.invitedPlayers.all()),
+            },
+        )
+        for g in raw_latest_finished
+    ]
 
     # 6. JSON Data Loading (Files)
     def load_stat_json(path):
@@ -1203,11 +1240,22 @@ def index(request):
     list_type = request.session.pop("listType", "current")
 
     # --- Step 1: Optimized Blacklist (2 Queries total) ---
-    profile = request.user.profile
-    blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
-
-    # Who blocked me?
-    blocked_by_user_ids = set(Profile.objects.filter(blacklistedPlayers=request.user).values_list("user_id", flat=True))
+    # Cache blacklist data per user for 5 minutes
+    blacklist_cache_key = f"user_blacklist_{user_id}"
+    blacklist_data = cache.get(blacklist_cache_key)
+    
+    if blacklist_data is None:
+        profile = request.user.profile
+        blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
+        blocked_by_user_ids = set(Profile.objects.filter(blacklistedPlayers=request.user).values_list("user_id", flat=True))
+        blacklist_data = {
+            "blacklisted": blacklisted_players_ids,
+            "blocked_by": blocked_by_user_ids,
+        }
+        cache.set(blacklist_cache_key, blacklist_data, 300)
+    else:
+        blacklisted_players_ids = blacklist_data["blacklisted"]
+        blocked_by_user_ids = blacklist_data["blocked_by"]
 
     # print_timestamp("Step 1: Blacklists fetched")
 
@@ -1247,8 +1295,9 @@ def index(request):
     #        "players__player", "invitedPlayers"
     #    )
 
-    player_game_ids = GamePlayer.objects.filter(player=user).values_list("game_id", flat=True)
-    invited_game_ids = Game.invitedPlayers.through.objects.filter(user=user).values_list("game_id", flat=True)
+    # Convert to lists immediately to avoid re-evaluation
+    player_game_ids = list(GamePlayer.objects.filter(player=user).values_list("game_id", flat=True))
+    invited_game_ids = list(Game.invitedPlayers.through.objects.filter(user=user).values_list("game_id", flat=True))
 
     # 2. Combine these IDs with the 'AVAILABLE' criteria in a single clean 'IN' clause
     # This avoids the messy JOIN logic in the main query
@@ -1267,9 +1316,8 @@ def index(request):
         .defer("gameData", "rewindData", "rewindTempData", "chatData")
     )
 
-    all_user_games = list(games_query)
-
-    all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
+    # Sort in database instead of Python for better performance
+    all_user_games = list(games_query.order_by("-latestUpdate"))
 
     # print_timestamp("Step 2: Game queries complete")
 
@@ -1283,6 +1331,7 @@ def index(request):
     )
     my_move_games_data = []
     current_chat = finished_chat = False
+    finished_games_count = 0  # Track finished games for early exit optimization
 
     for game in all_user_games:
         # 1. Categorization Logic using local memory
@@ -1328,6 +1377,14 @@ def index(request):
         is_active = user_id in all_active_p_ids
         is_blacklisted_game = game.creator_id in blacklisted_players_ids or game.creator_id in blocked_by_user_ids
 
+        # Early skip optimizations to avoid expensive serialization
+        # Skip finished games beyond 10 (unless pending finish)
+        if status == "FINISHED" and not is_pending_finish and finished_games_count >= 10:
+            continue
+        # Skip blacklisted available games that user isn't involved in
+        if status == "AVAILABLE" and not is_involved and is_blacklisted_game:
+            continue
+
         player_context = {
             "all_game_players": all_game_players,
             "invited_users": list(game.invitedPlayers.all()),
@@ -1355,6 +1412,7 @@ def index(request):
                         current_chat = True
                 elif len(finished_games) < 10:
                     finished_games.append(serialized)
+                    finished_games_count += 1
                     if serialized["chatNotification"]:
                         finished_chat = True
 
