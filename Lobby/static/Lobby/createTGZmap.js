@@ -143,6 +143,20 @@ function getForbiddenTargetId(playerCount) {
 	if (playerCount === 5) return "boardTile4"
 }
 
+function switchStartTile() {
+	for (let i = 0; i < boardTiles.length; i += 2) {
+		if (boardTiles[i] === 0) {
+			boardTiles[i] = 11
+			renderBoard(playerCount)
+			return
+		} else if (boardTiles[i] === 11) {
+			boardTiles[i] = 0
+			renderBoard(playerCount)
+			return
+		}
+	}
+}
+
 function boardTilePickup(event) {
 	event.preventDefault()
 	boardTileMoving = event.target
@@ -150,14 +164,7 @@ function boardTilePickup(event) {
 		let index = parseInt(boardTileMoving.id.slice(9))
 		if (playerCount === 4) index--
 		boardTiles[index * 2 + 1] += 1
-
-		if (boardTiles[index * 2 + 1] == 4) {
-			if (window.initData.isSchismUser) {
-				if (boardTiles[index * 2] == 0) boardTiles[index * 2] = 11
-				else boardTiles[index * 2] = 0
-			}
-			boardTiles[index * 2 + 1] = 0
-		}
+		if (boardTiles[index * 2 + 1] == 4) boardTiles[index * 2 + 1] = 0
 		renderBoard(playerCount)
 		// reset our element
 		boardTileMoving.style.left = ""
@@ -458,6 +465,17 @@ function renderBoard(playerCount) {
 
 			//img.addEventListener('click', rotateBoardTile);
 			div.appendChild(img)
+
+			if (window.initData.isSchismUser && img.id === getForbiddenTargetId(playerCount)) {
+				let btn = document.createElement("button")
+				btn.innerText = "Switch"
+				btn.style.cssText = "position:absolute;top:50%;left:50%;width:60px;height:24px;transform:translate(-50%, -50%);font-size:12px;opacity:0.8;z-index:10;cursor:pointer;"
+				btn.onclick = function (e) {
+					e.stopPropagation()
+					switchStartTile()
+				}
+				div.appendChild(btn)
+			}
 		}
 	}
 	// resizze the board area
