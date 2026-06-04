@@ -2956,10 +2956,10 @@ class KFWpresenter(GamePresenter):
 
         currentPlayersArr = self.getArrayOfIsCurrentPlayers()
 
-        # If there are no current players, add everyone
+        # If there are no current players, start from all active players
         if len(currentPlayersArr) == 0:
             all_gps = self.gameObj.players.filter(is_missing=False, is_kicked=False).select_related("player")
-            return ",".join(gp.player.username for gp in all_gps if gp.player)
+            currentPlayersArr = [gp.player.username for gp in all_gps if gp.player]
 
         # Get an array of possible players to move
         # Remove missing players
