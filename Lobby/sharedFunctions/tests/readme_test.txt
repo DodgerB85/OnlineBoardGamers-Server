@@ -7,6 +7,8 @@ Run tourny gen: python manage.py test Lobby.sharedFunctions.tests.test_tournyGen
 Run 2 tests: python manage.py test Lobby.sharedFunctions.tests.test_tournyGenerator Lobby.sharedFunctions.tests.test_sharedFunctions.TestTournamentSharedFunctions
 
 Run tests in Lobby/tests.py: python manage.py test Lobby.tests
+Run KFW tests: python manage.py test KFW.tests
+
 
 Local Linux venv shortcut:
 
