@@ -1630,7 +1630,7 @@ def TGZmapEditor(request):
 
     else:
         isSchismUser = False
-        ALLOWED_SCHISM_USERS = ["admin", "joshuastarr", "Lemem", "waymost"]
+        ALLOWED_SCHISM_USERS = ["admin", "joshuastarr", "Lemem", "waymost", "freddyknuckles", "RJ_E", "zach.chillman", "wsgosset"]
         if request.user.username in ALLOWED_SCHISM_USERS:
             isSchismUser = True
         return render(request, "Lobby/TGZmapEditor.html", {"isSchismUser": isSchismUser})
