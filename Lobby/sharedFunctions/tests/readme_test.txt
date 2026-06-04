@@ -2,6 +2,12 @@ Run this from the repo root with your virtualenv active to perform all the tests
 
 python manage.py test Lobby.sharedFunctions.tests Lobby.tests_middleware Lobby.tests_models
 
+Run all test: python manage.py test Lobby.sharedFunctions.tests
+Run tourny gen: python manage.py test Lobby.sharedFunctions.tests.test_tournyGenerator
+Run 2 tests: python manage.py test Lobby.sharedFunctions.tests.test_tournyGenerator Lobby.sharedFunctions.tests.test_sharedFunctions.TestTournamentSharedFunctions
+
+Run tests in Lobby/tests.py: python manage.py test Lobby.tests
+
 Local Linux venv shortcut:
 
 .venv/bin/python manage.py test Lobby.sharedFunctions.tests Lobby.tests_middleware Lobby.tests_models

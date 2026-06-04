@@ -21,7 +21,19 @@ from Lobby.sharedFunctions.sharedFunctions import (
 )
 
 
-class TestSFgetTimeNow(TestCase):
+class PrintSuccessTestCase(TestCase):
+    def tearDown(self):
+        super().tearDown()
+        outcome = getattr(self, '_outcome', None)
+        if outcome is None:
+            return
+        errors = [test for test, _ in getattr(outcome, 'errors', [])]
+        failures = [test for test, _ in getattr(outcome, 'failures', [])]
+        if self not in errors and self not in failures:
+            print(f"  PASS: {self.__class__.__name__}.{self._testMethodName}")
+
+
+class TestSFgetTimeNow(PrintSuccessTestCase):
     def test_returns_string(self):
         result = SF_getTimeNow()
         self.assertIsInstance(result, str)
@@ -32,7 +44,7 @@ class TestSFgetTimeNow(TestCase):
         self.assertEqual(result, "1700000000000")
 
 
-class TestSFgetRequiredExp(TestCase):
+class TestSFgetRequiredExp(PrintSuccessTestCase):
     def test_fcm_requires_2(self):
         self.assertEqual(SF_getRequiredExp("FCM"), 2)
 
@@ -64,7 +76,7 @@ class TestSFgetRequiredExp(TestCase):
         self.assertEqual(SF_getRequiredExp("UNKNOWN"), 2)
 
 
-class TestSFupdateFlexiTime(TestCase):
+class TestSFupdateFlexiTime(PrintSuccessTestCase):
     def test_no_update_for_blitz_kickout(self):
         result = SF_updateFlexiTime(None, "1700000000000", 1700000100000, "player1", 10)
         self.assertIsNone(result)
@@ -105,7 +117,7 @@ class TestSFupdateFlexiTime(TestCase):
         self.assertEqual(result_data[0][1], 300)
 
 
-class TestSFkickoutRequired(TestCase):
+class TestSFkickoutRequired(PrintSuccessTestCase):
     def test_not_active_returns_0(self):
         result = SF_kickoutRequired("FINISHED", ["player1", "player2"], "1700000000000", 100, None, "player1")
         self.assertEqual(result, 0)
@@ -174,7 +186,7 @@ class TestSFkickoutRequired(TestCase):
         self.assertEqual(result, 2)
 
 
-class TestSFgetSecondsToNextKickout(TestCase):
+class TestSFgetSecondsToNextKickout(PrintSuccessTestCase):
     @patch("Lobby.sharedFunctions.sharedFunctions.time.time", return_value=1700000000)
     def test_blitz_5_min(self, mock_time):
         # Latest update was 2 min ago -> 3 min left
@@ -210,7 +222,7 @@ class TestSFgetSecondsToNextKickout(TestCase):
         self.assertEqual(result, -300)
 
 
-class TestSFserializeGame(TestCase):
+class TestSFserializeGame(PrintSuccessTestCase):
     def test_serializes_game_player_flags_and_legacy_options(self):
         creator = User.objects.create_user(username="creator", password="testpass123")
         current_user = User.objects.create_user(username="current", password="testpass123")
@@ -264,7 +276,7 @@ class TestSFserializeGame(TestCase):
         self.assertFalse(result["involvedPlayer"])
 
 
-class TestTournamentSharedFunctions(TestCase):
+class TestTournamentSharedFunctions(PrintSuccessTestCase):
     def _create_users(self, count):
         return [User.objects.create_user(username=f"P{i}", password="testpass123") for i in range(count)]
 
@@ -304,6 +316,19 @@ class TestTournamentSharedFunctions(TestCase):
 
         self.assertEqual(result["byePlayers"], [])
         self.assertEqual(sorted(len(game) for game in result["gamesPlayers"]), [2, 4])
+
+    def test_create_next_round_main_tournament_uses_byes_for_leftovers(self):
+        """Verify non-MG Main tournament round creation end-to-end (logic is unchanged, only extracted)."""
+        users = self._create_users(6)
+        tournament = self._create_tournament(users, game_code="FCM", category="Main")
+
+        result = SF_createNextRoundGamesSetup(tournament)
+
+        # MainT: 6 players with maxGamePlayers=4 → 2 byes, 1 full game of 4
+        self.assertEqual(len(result["byePlayers"]), 2)
+        self.assertEqual(len(result["gamesPlayers"]), 1)
+        self.assertEqual(len(result["gamesPlayers"][0]), 4)
+        self.assertFalse(set(result["byePlayers"]).intersection(result["gamesPlayers"][0]))
 
     def test_set_next_round_multi_game_players_selects_top_14_and_groups_by_seed(self):
         users = self._create_users(16)
@@ -345,7 +370,7 @@ class TestTournamentSharedFunctions(TestCase):
         self.assertEqual(set(tournament.nextRoundPlayers.values_list("username", flat=True)), {"P0"})
 
 
-class TestSharedGameCreationHelpers(TestCase):
+class TestSharedGameCreationHelpers(PrintSuccessTestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.request = self.factory.post("/", data={})
