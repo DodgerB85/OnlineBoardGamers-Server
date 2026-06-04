@@ -11,7 +11,7 @@
 {% if request.use_new_design and MT_Creation %}
 
 {{ request.user.id|json_script:"user_id" }}{{ request.user.username|json_script:"username" }}
-<div class="nd-page nd-page-narrow" id="FCMallOptions">
+<div class="nd-page" id="FCMallOptions">
   <div class="nd-page-header">
     <h1>{% trans "Food Chain Magnate — Mini Tournament" %}</h1>
     <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newMiniTournaments' %}">&#8592; {% trans "Mini Tournaments" %}</a>
@@ -145,6 +145,7 @@
 
       <div id="individualOptionsView">
 
+        <div class="nd-opts-grid">
         <div class="nd-opts-section nd-opts-slate">
           <div class="nd-section-title">{% trans "Game Options" %}</div>
           <label class="nd-check-label">
@@ -362,6 +363,7 @@
             </div>
           </label>
         </div>
+        </div>
 
       </div>
 
@@ -467,7 +469,7 @@
 {% elif request.use_new_design %}
 
 {{ request.user.id|json_script:"user_id" }}{{ request.user.username|json_script:"username" }}
-<div class="nd-page nd-page-narrow" id="FCMallOptions">
+<div class="nd-page" id="FCMallOptions">
   <div class="nd-page-header">
     <h1>{% trans "Food Chain Magnate" %}</h1>
     <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newGamesPage' %}">&#8592; {% trans "New Game" %}</a>
@@ -713,6 +715,7 @@
 
       <div id="individualOptionsView">
 
+        <div class="nd-opts-grid">
         <div class="nd-opts-section nd-opts-slate">
           <div class="nd-section-title">{% trans "Game Options" %}</div>
           <label class="nd-check-label">
@@ -929,6 +932,7 @@
               <div class="nd-opt-help">{% trans "Drives along a road, affects directly connected houses" %}</div>
             </div>
           </label>
+        </div>
         </div>
 
       </div>

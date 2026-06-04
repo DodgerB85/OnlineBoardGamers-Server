@@ -7,7 +7,7 @@
     --color-brand-green: #9dcd8e;
 
     --color-nav-bg: #19343c;
-    --color-nav-link: #c8dfe0;
+    --color-nav-link: #add8e6;   /* original "lightblue" — brighter, stands out on the dark bar */
     --color-nav-link-hover: #ffffff;
 
     --color-page-bg: #eff8f7;
@@ -81,6 +81,14 @@ body.nd .nd-page-narrow {
 
 body.nd .nd-page-profile {
     max-width: 80%;
+}
+
+/* On tablets and below the 80% cap just wastes horizontal space and squeezes
+   the form fields; let the profile use the full width earlier. */
+@media (max-width: 900px) {
+    body.nd .nd-page-profile {
+        max-width: 100%;
+    }
 }
 
 body.nd .nd-page-header {
@@ -177,14 +185,16 @@ body.nd button.nd-button {
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
-    border: 1px solid var(--color-border-strong);
+    border: 2px solid #b8c2cc;
     background: var(--color-surface);
     color: var(--color-ink);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     cursor: pointer;
     line-height: 1.2;
     box-sizing: border-box;
 }
 
+/* White/secondary button hover: shift toward the primary teal. No underline. */
 body.nd .nd-button:hover {
     border-color: var(--color-accent-strong);
     color: var(--color-accent-strong);
@@ -192,29 +202,45 @@ body.nd .nd-button:hover {
 
 body.nd .nd-button-primary {
     background: var(--color-accent);
-    border-color: var(--color-accent);
+    border: 1px solid rgba(0, 0, 0, 0.15);
     color: var(--color-accent-ink);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
 }
 
 body.nd .nd-button-primary:hover {
     background: var(--color-accent-strong);
-    border-color: var(--color-accent-strong);
+    border-color: rgba(0, 0, 0, 0.15);
     color: #fff;
 }
 
+/* "Ghost" / reverse-nav links render as the same white/secondary button as
+   .nd-button — no separate borderless style. The distinct ghost look was
+   redundant (identical at rest, only an unwanted underline on hover). The
+   class is kept so existing template markup needs no churn. */
 body.nd .nd-button-ghost {
-    background: transparent;
-    border-color: transparent;
-    color: var(--color-accent-strong);
+    background: var(--color-surface);
+    border-color: #b8c2cc;
+    color: var(--color-ink);
 }
 
 body.nd .nd-button-ghost:hover {
-    background: rgba(147, 213, 208, 0.12);
+    background: var(--color-surface);
+    border-color: var(--color-accent-strong);
+    color: var(--color-accent-strong);
 }
 
 body.nd .nd-button-danger {
     background: var(--color-danger-bg);
-    border-color: rgba(181, 64, 64, 0.4);
+    border: 1px solid rgba(181, 64, 64, 0.5);
+    color: var(--color-danger);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Destructive buttons keep a red hover — without this, the base .nd-button:hover
+   would turn them teal, breaking the "red = destructive" cue. */
+body.nd .nd-button-danger:hover {
+    background: rgba(220, 80, 80, 0.24);
+    border-color: var(--color-danger);
     color: var(--color-danger);
 }
 
@@ -578,7 +604,7 @@ body.nd .nd-mod-wrap::after {
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.12s;
+    transition: opacity 0.1s;
     z-index: 30;
 }
 
@@ -690,7 +716,7 @@ body.nd .nd-game-card-body p {
 body.nd a.nd-create-tile {
     text-decoration: none;
     color: inherit;
-    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
 }
 
 body.nd a.nd-create-tile:hover {
@@ -727,6 +753,11 @@ body.nd .nd-map-editor-grid .nd-create-tile-label {
 @media (max-width: 480px) {
     body.nd .nd-page-profile {
         max-width: 100%;
+    }
+    /* Tighten the inline-gap (16px) radio/option rows so they don't feel
+       cramped wrapping on narrow phones. !important beats the inline style. */
+    body.nd .nd-row-flex {
+        gap: 8px !important;
     }
     body.nd .nd-card-grid-wide,
     body.nd .nd-map-editor-grid {
@@ -875,14 +906,52 @@ body.nd .nd-opts-section {
     margin-bottom: 8px;
 }
 
-/* Per-section color accents — muted tints + left border */
-body.nd .nd-opts-slate  { background: rgba(100,116,139,0.07); border-left-color: rgba(100,116,139,0.4); }
-body.nd .nd-opts-red    { background: rgba(185,60,60,0.06);   border-left-color: rgba(185,60,60,0.35); }
-body.nd .nd-opts-green  { background: rgba(80,145,80,0.06);   border-left-color: rgba(80,145,80,0.35); }
-body.nd .nd-opts-amber  { background: rgba(185,130,35,0.07);  border-left-color: rgba(185,130,35,0.4); }
-body.nd .nd-opts-blue   { background: rgba(55,100,200,0.06);  border-left-color: rgba(55,100,200,0.3); }
-body.nd .nd-opts-purple { background: rgba(139,92,246,0.06);  border-left-color: rgba(139,92,246,0.35); }
-body.nd .nd-opts-orange { background: rgba(185,90,30,0.07);   border-left-color: rgba(185,90,30,0.4); }
+/* Lay option sections out in responsive columns: one column when narrow,
+   several side-by-side on wider screens (uses available desktop width).
+   auto-fit keeps it fluid with no JS. align-items:start so uneven-height
+   sections don't stretch to match the tallest. */
+body.nd .nd-opts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+body.nd .nd-opts-grid .nd-opts-section {
+    margin-bottom: 0;
+}
+
+/* The create-form tab JS sets #individualOptionsView to display:inline-block,
+   which shrink-wraps the grid to ~2 columns. Force full container width so the
+   auto-fit grid can use all available columns on wide screens. (display:none
+   from the JS still hides it.) */
+body.nd #individualOptionsView,
+body.nd #scenarioOptionsView {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Create-game pages use the full page width so the option grid can spread into
+   several columns on desktop. Cap the simple form controls so they don't
+   stretch absurdly wide on the now-wider page (the option grid still spans
+   full width). */
+body.nd #FCMallOptions .nd-form-row > input[type="text"],
+body.nd #FCMallOptions .nd-form-row > input[type="email"],
+body.nd #FCMallOptions .nd-form-row > input[type="password"],
+body.nd #FCMallOptions .nd-form-row > input[type="number"],
+body.nd #FCMallOptions .nd-form-row > select,
+body.nd #FCMallOptions .nd-form-row > textarea {
+    max-width: 520px;
+}
+
+/* Per-section color accents — bolder tints + stronger left border so the
+   sections are clearly distinguished (the earlier 0.06–0.07 tints were too soft) */
+body.nd .nd-opts-slate  { background: rgba(100,116,139,0.14); border-left-color: rgba(100,116,139,0.7);  }
+body.nd .nd-opts-red    { background: rgba(185,60,60,0.13);   border-left-color: rgba(185,60,60,0.65);  }
+body.nd .nd-opts-green  { background: rgba(80,145,80,0.13);   border-left-color: rgba(80,145,80,0.65);  }
+body.nd .nd-opts-amber  { background: rgba(185,130,35,0.15);  border-left-color: rgba(185,130,35,0.7);  }
+body.nd .nd-opts-blue   { background: rgba(55,100,200,0.12);  border-left-color: rgba(55,100,200,0.6);  }
+body.nd .nd-opts-purple { background: rgba(139,92,246,0.13);  border-left-color: rgba(139,92,246,0.65); }
+body.nd .nd-opts-orange { background: rgba(185,90,30,0.15);   border-left-color: rgba(185,90,30,0.7);   }
 
 /* Full-width checkbox list — use instead of nd-form-row when there is no label column */
 body.nd .nd-check-list {

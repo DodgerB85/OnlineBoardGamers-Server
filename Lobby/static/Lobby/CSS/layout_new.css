@@ -98,19 +98,24 @@
     width: 25px;
     height: 3px;
     margin: 5px auto;
-    transition: all 0.3s ease;
+    transition: all 0.1s ease;
     background-color: white;
 }
 
 .hamburgerMenu {
     position: fixed;
-    top: -307px;
+    top: 0;
+    /* Hide fully above the viewport regardless of how many links it holds.
+       The old magic top:-307px assumed a fixed menu height; the logged-in
+       menu is taller (~376px) so its bottom poked ~11px below the slim bar.
+       translateY(-110%) is height-independent. */
+    transform: translateY(-110%);
     gap: 0;
     flex-direction: column;
     background-color: var(--color-nav-bg);
     width: 200px;
     text-align: center;
-    transition: 0.3s;
+    transition: transform 0.1s;
     z-index: 10;
     right: 0px;
     border-left: 1px solid rgba(147, 213, 208, 0.2);
@@ -133,7 +138,7 @@
 }
 
 .hamburgerMenu.active {
-    top: 80px;
+    transform: translateY(80px);
     right: 0px;
     margin: 0;
     z-index: 10;
@@ -262,6 +267,41 @@ body.nd .mainLayout {
     font-size: 17px;
     outline: none;
 }
+
+/* Slim logged-in top bar.
+   The logged-out bar keeps the taller 80px height (it holds the inline login
+   inputs + big logo). The logged-in bar has no login form, so it can be much
+   thinner. We flex-centre its left/right regions vertically instead of the
+   manual margin-top:25px hack, so everything stays centred at the shorter
+   height. */
+body.nd.ndAuthed .topBar {
+    height: 56px;
+}
+body.nd.ndAuthed {
+    padding-top: 56px;
+}
+body.nd.ndAuthed .hamburgerMenu.active {
+    transform: translateY(56px);
+}
+body.nd.ndAuthed #leftLoggedInLinks {
+    margin: 0 10px;
+    height: 56px;
+    align-items: center;
+}
+body.nd.ndAuthed #leftLoggedInAsInfo {
+    font-size: 13px;
+}
+body.nd.ndAuthed #logoLoggedIn {
+    margin-top: 0;
+}
+body.nd.ndAuthed #rightLinksLoggedIn {
+    margin-top: 0;
+    height: 56px;
+}
+/* keep the hamburger centred (no big vertical margin) in the slim bar */
+body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
+    margin: 0 16px;
+}
 /** END TOP BAR */
 
 #loginForm {
@@ -276,12 +316,13 @@ body.nd .mainLayout {
 
 #langSelectLoggedIn select,
 #langSelectLoggedOut select {
-    background-color: var(--color-nav-bg);
-    color: var(--color-nav-link);
-    border: 1px solid rgba(147, 213, 208, 0.3);
+    background-color: var(--color-nav-link);
+    color: var(--color-nav-bg);
+    border: 1px solid var(--color-nav-bg);
     border-radius: 4px;
-    padding: 2px 4px;
+    padding: 2px 6px;
     font-size: 14px;
+    font-weight: 600;
 }
 
 /** FOOTER — sticky to viewport bottom on short pages */
@@ -369,6 +410,15 @@ body.nd .splotterconImg {
     #langSelectLoggedIn,
     #langSelectLoggedOut {
         margin-right: 0;
+    }
+    /* slim logged-in bar: keep lang-select + hamburger on one centred row so
+       they fit the 56px height instead of stacking into a column */
+    body.nd.ndAuthed #rightLinksLoggedIn {
+        flex-direction: row;
+        align-items: center;
+        margin-top: 0;
+        height: 56px;
+        gap: 6px;
     }
 }
 

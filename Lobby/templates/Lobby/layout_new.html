@@ -76,7 +76,7 @@
         <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
     </head>
-    <body class="nd">
+    <body class="nd {% if user.is_authenticated %}ndAuthed{% else %}ndGuest{% endif %}">
         <div class="topBar">
             {% if user.is_authenticated %}
                 <!-- LOGGED IN TOP BAR -->
