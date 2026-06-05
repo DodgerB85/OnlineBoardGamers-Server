@@ -191,6 +191,12 @@ class GamePresenter:
             gp.save()
 
     def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray):
+        if self.gameObj.maxPlayers == 1:
+            solo_gp = self.gameObj.players.first()
+            if solo_gp and solo_gp.player:
+                self.gameObj.serverCurrentPlayerNamesInTurnOrder = [solo_gp.player.username]
+                self.gameObj.save()
+                return
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = playersInTurnOrderArray
         self.gameObj.save()
 
@@ -201,7 +207,6 @@ class GamePresenter:
             if self.gameObj.maxPlayers == 1:
                 solo_gp = self.gameObj.players.first()
                 if solo_gp and solo_gp.player:
-                    self.gameObj.players.all().update(is_current=False)
                     solo_gp.is_current = True
                     solo_gp.save()
                     self.gameObj.serverCurrentPlayerNamesInTurnOrder = [solo_gp.player.username]
