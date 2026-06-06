@@ -1804,6 +1804,3 @@ def getAllCurrentStackMoves(currentGame):
 @login_required()
 def castVote(request):
     return process_game_with_mutex(request, shared_cast_vote, mutex_prefix="processTurn_")
-
-# function add 2 numbers
-
