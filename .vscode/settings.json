@@ -13,5 +13,18 @@
   "eslint.run": "onType",
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
   "python.terminal.activateEnvironment": true,
-  "python.terminal.activateInCurrentTerminal": true
+  "python.terminal.activateInCurrentTerminal": true,
+
+  // 👇 ADD THESE LINES BELOW TO FIX THE MULTI-FOLDER JS/TS RUNTIME
+  "typescript.disableAutomaticTypeAcquisition": false,
+  "javascript.implicitProjectConfig.checkJs": true,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true
+  },
+     "codeium.enableIndexService": false,
+    "codeium.searchMaxWorkspaceFileCount": 100,
+    "devin.searchMaxWorkspaceFileCount": 100
 }

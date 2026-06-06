@@ -866,7 +866,7 @@ def _processRNBturn(request):
                     if currentGame.autoMoves != pending_key:
                         currentGame.autoMoves = pending_key
                         currentGame.save()
-                        start_time = timezone.now() + timedelta(minutes=10) 
+                        start_time = timezone.now() + timedelta(minutes=10)
                         schedule(
                             "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
                             "RNB",
@@ -1804,3 +1804,5 @@ def getAllCurrentStackMoves(currentGame):
 @login_required()
 def castVote(request):
     return process_game_with_mutex(request, shared_cast_vote, mutex_prefix="processTurn_")
+
+# function add 2 numbers
