@@ -17,7 +17,7 @@
 
   // 👇 ADD THESE LINES BELOW TO FIX THE MULTI-FOLDER JS/TS RUNTIME
   "typescript.disableAutomaticTypeAcquisition": false,
-  "javascript.implicitProjectConfig.checkJs": true,
+  "javascript.implicitProjectConfig.checkJs": false,
   "files.watcherExclude": {
     "**/.git/objects/**": true,
     "**/.git/subtree-cache/**": true,
@@ -26,5 +26,6 @@
   },
      "codeium.enableIndexService": false,
     "codeium.searchMaxWorkspaceFileCount": 100,
-    "devin.searchMaxWorkspaceFileCount": 100
+    "devin.searchMaxWorkspaceFileCount": 100,
+    "python.languageServer": "None"
 }
