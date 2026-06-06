@@ -49,6 +49,19 @@ if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter
 
 
+def _validateTurnOrderTransition(old_order, new_order, moved_player_name, game_id, username, turn, phase, action_name):
+    """Alert admin if new_order != old_order with moved_player_name removed. Does NOT block."""
+    if old_order is None:
+        old_order = []
+    expected_new = [p for p in old_order if p != moved_player_name]
+    if new_order != expected_new:
+        SN_sendAdminErrorMessage(
+            f"RNB turn order mismatch in {action_name} - gameID: {game_id} "
+            f"user: {username} turn: {turn} phase: {phase} "
+            f"old: {old_order} new: {new_order} expected: {expected_new}"
+        )
+
+
 def index(request):
     return HttpResponse("Hello, world. You're at RNB")
 
@@ -355,6 +368,16 @@ def _processRNBturn(request):
 
             # NO! This sets ALL POSSIBLE player to is_current, which triggers emails.
             presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+            _validateTurnOrderTransition(
+                currentGame.serverCurrentPlayerNamesInTurnOrder,
+                jsonData["allRemainingPlayersInTurnOrder"],
+                nameToUse,
+                currentGame.id,
+                request.user.username,
+                jsonData["turn"],
+                jsonData["phase"],
+                "saveStackMove",
+            )
             presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
             # Set transaction lock for client-side recovery
@@ -430,6 +453,8 @@ def _processRNBturn(request):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "immediateProcess": True,
                 "allStackData": getAllCurrentStackMoves(currentGame),
+                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
                 # "gameDataB64": base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
                 "gameDataB64": currentGame.gameData,
             }
@@ -598,6 +623,16 @@ def _processRNBturn(request):
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
             presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+            _validateTurnOrderTransition(
+                currentGame.serverCurrentPlayerNamesInTurnOrder,
+                jsonData["allRemainingPlayersInTurnOrder"],
+                nameToUse,
+                currentGame.id,
+                request.user.username,
+                jsonData["turn"],
+                jsonData["phase"],
+                "saveConflictMove(praying/TO)",
+            )
             presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
             # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
@@ -656,6 +691,16 @@ def _processRNBturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+        _validateTurnOrderTransition(
+            currentGame.serverCurrentPlayerNamesInTurnOrder,
+            jsonData["allRemainingPlayersInTurnOrder"],
+            nameToUse,
+            currentGame.id,
+            request.user.username,
+            jsonData["turn"],
+            jsonData["phase"],
+            "saveConflictMove(TO)",
+        )
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
         # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
@@ -850,6 +895,8 @@ def _processRNBturn(request):
             "latestUpdate": currentGame.latestUpdate,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "savingFromStackMove": False,
+            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
         }
 
         return JsonResponse(response_data, safe=False)
