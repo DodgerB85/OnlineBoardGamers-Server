@@ -44,6 +44,13 @@ from Lobby.models import Tournament, User
 from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
 from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen
 from Lobby.sharedFunctions.sharedRefs import OPEN, PENDING
+from siteUtils.auto_tournament_helpers import (
+    find_pending_tournament_to_open,
+    get_target_start_size,
+    is_pending_creation_day,
+    should_auto_start_game,
+    should_start_open_tournament,
+)
 
 # HLC 3-5 players
 # Bus 3-5 players
@@ -178,8 +185,7 @@ current_date = datetime.datetime.now()
 for tournament in TOURNAMENT_SCHEDULE:
     for tournament_month, tournament_day in tournament["dates"]:
         tournament_date = datetime.datetime(current_date.year, tournament_month, tournament_day)
-        days_until = (tournament_date - current_date).days
-        if days_until == 7:
+        if is_pending_creation_day(current_date, tournament_date):
             print(f"It is 7 days until {tournament['boxName']} tournament on {tournament_day}/{tournament_month}")
             create_pending_tournament_if_missing(tournament, tournament_date)
             message = f"New {tournament['boxName']} Tournament Opens for Signup in 7 days!\n[Click here to Play](https://www.OnlineBoardGamers.com/)"
@@ -207,16 +213,7 @@ for tournament in TOURNAMENT_SCHEDULE:
             tournament_date = datetime.datetime(current_date.year, tournament_month, tournament_day)
             tournament_name = get_tournament_name(tournament_date, name_code)
 
-            new_tournament = (
-                Tournament.objects.filter(
-                    tournamentCategory="Main",
-                    tournamentStatus=PENDING,
-                    gameCode=gameCode,
-                    tournamentName=tournament_name,
-                )
-                .order_by("-id")
-                .first()
-            )
+            new_tournament = find_pending_tournament_to_open(gameCode, tournament_name)
             if not new_tournament:
                 print(f"No pending tournament found for {box_name}; skipping open step safely.")
                 continue
@@ -359,7 +356,7 @@ for gameCode in GAME_CODES:
     print("There is an open tourny, and day > 7")
 
     # But if it's not an auto-tourny, continue
-    if gameCode in ["HLC", "BUS", "TGZ", "AQY", "IND"]:
+    if not should_auto_start_game(gameCode):
         continue
 
     # Now we only hit the DB further if we actually have a candidate to start
@@ -375,32 +372,14 @@ for gameCode in GAME_CODES:
         # Determine minimumPlayers logic
         maxGP = newTourny.maxGamePlayers
 
-        # Determine the "Threshold Multiple"
-        # This is the smallest perfect multiple that satisfies min players
-        threshold = 0
-        if totalPlayers > 25:
-            threshold = 25
-        elif totalPlayers >= (maxGP * maxGP) - maxGP + 1:
-            threshold = (maxGP * maxGP) - maxGP + 1
-        elif newTourny.tournamentType in ["TL", "RR", "PT"]:
-            threshold = maxGP * (3 if newTourny.tournamentType == "TL" else 2)
-        elif dayNumber >= 28:
-            threshold = maxGP
+        target_start_size = get_target_start_size(totalPlayers, maxGP, newTourny.tournamentType, dayNumber)
 
-        # Calculate the NEXT Perfect Multiple above that threshold
-        # This ensures signups are capped at a valid starting number
-        if threshold > 0:
-            # Round the threshold UP to the nearest multiple of maxGP
-            target_start_size = ((threshold + maxGP - 1) // maxGP) * maxGP
-
-            if totalPlayers > target_start_size:
-                target_start_size = ((totalPlayers + maxGP - 1) // maxGP) * maxGP
-
+        if target_start_size is not None:
             newTourny.maxTournamentPlayers = target_start_size
             newTourny.save()
 
             # START TRIGGER: Only if we hit that specific perfect multiple
-            if totalPlayers >= target_start_size and totalPlayers % maxGP == 0:
+            if should_start_open_tournament(totalPlayers, target_start_size, maxGP):
                 print(f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}")
                 # Use the admin ID directly if possible to avoid a User.objects.get hit
                 # Or fetch once outside the 'for' loop to save 4 hits
