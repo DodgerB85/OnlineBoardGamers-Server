@@ -1,5 +1,15 @@
-from django.test import SimpleTestCase
+import datetime
+
+from django.test import SimpleTestCase, TestCase
 from Lobby.sharedFunctions.tournyGenerator import _compute_game_groups
+from siteUtils.auto_tournament_helpers import (
+    find_pending_tournament_to_open,
+    get_target_start_size,
+    is_pending_creation_day,
+    should_auto_start_game,
+    should_start_open_tournament,
+)
+from Lobby.models import Tournament
 
 
 def make_tpda_round(groups):
@@ -90,3 +100,82 @@ class TournamentMatchmakingTests(SimpleTestCase):
         groups = _compute_game_groups(players, tpda, 3)
         self.assertEqual(set(groups[0]), {"A", "C", "D"})
         self.assertEqual(set(groups[1]), {"B", "E", "F"})
+
+
+class TournamentSchedulerHelperTests(SimpleTestCase):
+    def test_pending_creation_day_uses_calendar_dates(self):
+        tournament_date = datetime.datetime(2026, 6, 1, 0, 0)
+
+        self.assertTrue(is_pending_creation_day(datetime.datetime(2026, 5, 25, 0, 0), tournament_date))
+        self.assertTrue(is_pending_creation_day(datetime.datetime(2026, 5, 25, 23, 59), tournament_date))
+        self.assertFalse(is_pending_creation_day(datetime.datetime(2026, 5, 24, 23, 59), tournament_date))
+        self.assertFalse(is_pending_creation_day(datetime.datetime(2026, 5, 26, 0, 0), tournament_date))
+
+    def test_tgz_is_auto_started_but_hlc_is_not(self):
+        self.assertTrue(should_auto_start_game("TGZ"))
+        self.assertFalse(should_auto_start_game("HLC"))
+
+    def test_tgz_target_start_size_rounds_up_to_next_multiple(self):
+        self.assertEqual(get_target_start_size(13, 4, "RR", 7), 16)
+        self.assertEqual(get_target_start_size(7, 4, "RR", 7), 8)
+
+    def test_open_tournament_start_requires_exact_multiple(self):
+        self.assertFalse(should_start_open_tournament(7, 8, 4))
+        self.assertTrue(should_start_open_tournament(8, 8, 4))
+        self.assertFalse(should_start_open_tournament(14, 16, 4))
+
+
+class TournamentSchedulerQueryTests(TestCase):
+    def test_find_pending_tournament_uses_pd_status(self):
+        tournament = Tournament.objects.create(
+            tournamentCategory="Main",
+            tournamentStatus="PD",
+            gameCode="TGZ",
+            tournamentName="June 26 TGZ Tournament",
+            maxTournamentPlayers=8,
+            maxGamePlayers=4,
+            tournamentType="RR",
+        )
+
+        result = find_pending_tournament_to_open("TGZ", "June 26 TGZ Tournament")
+
+        self.assertEqual(result, tournament)
+
+    def test_find_pending_tournament_falls_back_to_single_pending_game(self):
+        tournament = Tournament.objects.create(
+            tournamentCategory="Main",
+            tournamentStatus="PD",
+            gameCode="TGZ",
+            tournamentName="Legacy TGZ Pending Name",
+            maxTournamentPlayers=8,
+            maxGamePlayers=4,
+            tournamentType="RR",
+        )
+
+        result = find_pending_tournament_to_open("TGZ", "June 26 TGZ Tournament")
+
+        self.assertEqual(result, tournament)
+
+    def test_find_pending_tournament_skips_ambiguous_fallback(self):
+        Tournament.objects.create(
+            tournamentCategory="Main",
+            tournamentStatus="PD",
+            gameCode="TGZ",
+            tournamentName="Legacy TGZ Pending Name 1",
+            maxTournamentPlayers=8,
+            maxGamePlayers=4,
+            tournamentType="RR",
+        )
+        Tournament.objects.create(
+            tournamentCategory="Main",
+            tournamentStatus="PD",
+            gameCode="TGZ",
+            tournamentName="Legacy TGZ Pending Name 2",
+            maxTournamentPlayers=8,
+            maxGamePlayers=4,
+            tournamentType="RR",
+        )
+
+        result = find_pending_tournament_to_open("TGZ", "June 26 TGZ Tournament")
+
+        self.assertIsNone(result)
