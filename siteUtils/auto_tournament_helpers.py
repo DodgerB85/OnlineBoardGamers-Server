@@ -4,9 +4,6 @@ from Lobby.models import Tournament
 from Lobby.sharedFunctions.sharedRefs import PENDING
 
 
-MANUAL_START_GAME_CODES = {"HLC", "BUS", "AQY", "IND"}
-
-
 def is_pending_creation_day(current_date, tournament_date):
     return (tournament_date.date() - current_date.date()).days == 7
 
@@ -35,11 +32,6 @@ def find_pending_tournament_to_open(game_code, tournament_name):
         return pending_qs.first()
 
     return None
-
-
-def should_auto_start_game(game_code):
-    return game_code not in MANUAL_START_GAME_CODES
-
 
 def get_target_start_size(total_players, max_game_players, tournament_type, day_number):
     if max_game_players <= 0:

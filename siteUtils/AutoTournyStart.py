@@ -48,7 +48,6 @@ from siteUtils.auto_tournament_helpers import (
     find_pending_tournament_to_open,
     get_target_start_size,
     is_pending_creation_day,
-    should_auto_start_game,
     should_start_open_tournament,
 )
 
@@ -341,7 +340,9 @@ for tournament in TOURNAMENT_SCHEDULE:
 #                    SF_startTournament(request, newTourny, gameCode)
 #                    newTourny.save()
 
-GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+
+#GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "AQY", "IND"]
 
 # for model, config in TOURNAMENT_CONFIG.items():
 for gameCode in GAME_CODES:
@@ -355,9 +356,6 @@ for gameCode in GAME_CODES:
 
     print("There is an open tourny, and day > 7")
 
-    # But if it's not an auto-tourny, continue
-    if not should_auto_start_game(gameCode):
-        continue
 
     # Now we only hit the DB further if we actually have a candidate to start
     startTime = int(newTourny.created)
@@ -365,36 +363,39 @@ for gameCode in GAME_CODES:
     diff_in_s = (now - startTime) // 1000
 
     # Must have been open at least 7 days
-    if diff_in_s > 604800:  # Note: 7 days is 604800, not 60400
-        # 3. OPTIMIZATION: Cache the count to avoid re-querying it later
-        totalPlayers = newTourny.startingPlayers.count()
+    if diff_in_s < 604800:  # Note: 7 days is 604800, not 60400
+        print("However, it has not been open for at least 7 days")
+        continue
 
-        # Determine minimumPlayers logic
-        maxGP = newTourny.maxGamePlayers
+    # 3. OPTIMIZATION: Cache the count to avoid re-querying it later
+    totalPlayers = newTourny.startingPlayers.count()
 
-        target_start_size = get_target_start_size(totalPlayers, maxGP, newTourny.tournamentType, dayNumber)
+    # Determine minimumPlayers logic
+    maxGP = newTourny.maxGamePlayers
 
-        if target_start_size is not None:
-            newTourny.maxTournamentPlayers = target_start_size
+    target_start_size = get_target_start_size(totalPlayers, maxGP, newTourny.tournamentType, dayNumber)
+
+    if target_start_size is not None:
+        newTourny.maxTournamentPlayers = target_start_size
+        newTourny.save()
+
+        # START TRIGGER: Only if we hit that specific perfect multiple
+        if should_start_open_tournament(totalPlayers, target_start_size, maxGP):
+            print(f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}")
+            # Use the admin ID directly if possible to avoid a User.objects.get hit
+            # Or fetch once outside the 'for' loop to save 4 hits
+            admin_user = User.objects.get(username="admin")
+
+            request = HttpRequest()
+            request.user = admin_user
+            request.META["HTTP_HOST"] = "www.onlineboardgamers.com"
+
+            # Set and Start
+            newTourny.maxTournamentPlayers = totalPlayers
+            SF_startAnyTournament(request, newTourny)
             newTourny.save()
-
-            # START TRIGGER: Only if we hit that specific perfect multiple
-            if should_start_open_tournament(totalPlayers, target_start_size, maxGP):
-                print(f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}")
-                # Use the admin ID directly if possible to avoid a User.objects.get hit
-                # Or fetch once outside the 'for' loop to save 4 hits
-                admin_user = User.objects.get(username="admin")
-
-                request = HttpRequest()
-                request.user = admin_user
-                request.META["HTTP_HOST"] = "www.onlineboardgamers.com"
-
-                # Set and Start
-                newTourny.maxTournamentPlayers = totalPlayers
-                SF_startAnyTournament(request, newTourny)
-                newTourny.save()
-            else:
-                print(f"{gameCode}: Not starting tournament, not at perfect multiple total - max Players set to: {target_start_size}")
+        else:
+            print(f"{gameCode}: Not starting tournament, not at perfect multiple total - max Players set to: {target_start_size}")
 
 print(f"DB hits: {len(connection.queries)}")
 
