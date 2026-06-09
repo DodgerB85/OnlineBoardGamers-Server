@@ -1567,13 +1567,26 @@ function calcTechIncome() {
 	return res
 }
 
-export function calcSpecsandgodsIncome() {
+function calcSpecsandgodsIncome() {
 	const store = useModelStore()
 	// god vars
 	let engaiTaken = false
 	let shadTaken = false
 	let OVIAused = false
 	let qamataPlayerIndex = -1
+
+	// Reset all values to 0
+	store.statsModeData.specsandgodsObj.herd = 0
+	store.statsModeData.specsandgodsObj.builder = 0
+	store.statsModeData.specsandgodsObj.shaman = 0
+	store.statsModeData.specsandgodsObj.rainCeremony = 0
+	store.statsModeData.specsandgodsObj.nomads = 0
+	store.statsModeData.specsandgodsObj.engai = 0
+	store.statsModeData.specsandgodsObj.shadipinyi = 0
+	store.statsModeData.specsandgodsObj.qamata = 0
+	store.statsModeData.specsandgodsObj.aja = 0
+	store.statsModeData.specsandgodsObj.ovia = 0
+	store.statsModeData.specsandgodsObj.ekwensu = 0
 
 	// spec vars
 	let builderPlayerIndex = -1
@@ -1630,6 +1643,7 @@ export function calcSpecsandgodsIncome() {
 
 		// Ovia
 		if (store.history[i][0] === rf.HIST_RAISE_MON) {
+			OVIAused = false
 			const histEntry3 = store.history[i][3]
 			for (let j = 1; j < histEntry3.length; j++) {
 				if (histEntry3[j][0] === -2) OVIAused = true
@@ -1643,6 +1657,7 @@ export function calcSpecsandgodsIncome() {
 			}
 		}
 	}
+	//alert(store.statsModeData.specsandgodsObj.ovia)
 }
 /*export const HERD = 0 // Change 2/4/5 cows => 3/6/9 cows
 export const NOMADS = 1 // allow adjacent monuments

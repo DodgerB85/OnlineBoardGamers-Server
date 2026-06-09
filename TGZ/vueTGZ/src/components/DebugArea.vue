@@ -52,7 +52,7 @@ function calcCmanIncome() {
 }
 
 function test() {
-	model.calcSpecsandgodsIncome()
+	//model.calcSpecsandgodsIncome()
 	//store.context.indexesToHighlightClick.splice(0)
 	//store.context.indexesToHighlightClick = map.expandWater(0)
 	//store.context.indexesToHighlightClick = map.getAllSquaresOfSameType(rf.WOOD_SQ)
