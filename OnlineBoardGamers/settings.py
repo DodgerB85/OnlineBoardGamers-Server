@@ -247,24 +247,23 @@ Q_CLUSTER = {
     "name": "obg_cluster",
     "label": "Django Q",  # Label in the admin panel
     "workers": 1,
-    "timeout": 90, # Process timeout - max time on task MUST BE LESS THAN RETRY VALUE
-    "retry": 180, # Must be bigger than time to complete longest task
-    "orm": "default", # Or your database alias
-    "poll": 10,        # Check DB every 60 seconds (replaces your 'sleeptime' idea)
-    "guard_cycle": 60, # Max allowed value
+    "timeout": 90,  # Process timeout - max time on task MUST BE LESS THAN RETRY VALUE
+    "retry": 180,  # Must be bigger than time to complete longest task
+    "orm": "default",  # Or your database alias
+    "poll": 10,  # Check DB every 60 seconds (replaces your 'sleeptime' idea)
+    "guard_cycle": 60,  # Max allowed value
     "cpu_affinity": 1,  # Forces the worker to stay on one core (Saves credits)
-    "bulking": 10, # Process up to 10 tasks in one go to minimize overhead
-    "save_limit": 50, # 0 is unlimited
+    "bulking": 10,  # Process up to 10 tasks in one go to minimize overhead
+    "save_limit": 50,  # 0 is unlimited
     "ack_failures": True,  # Cleanup failed tasks
-    "max_attempts": 3, # Don't retry failed tasks multiple times
-    "catch_up": False, # Don't try to catch up on missed tasks
-    "scheduler": True, # Disables the scheduler loop entirely
+    "max_attempts": 3,  # Don't retry failed tasks multiple times
+    "catch_up": False,  # Don't try to catch up on missed tasks
+    "scheduler": True,  # Disables the scheduler loop entirely
     "recycle": 500,
-    "sync": False, # If true then removes the whole point of async. Testing only.
+    "sync": False,  # If true then removes the whole point of async. Testing only.
     "benchmark": False,  # Disable performance testing
-
     ############################################
-    "queue_limit": 1, # Defaults to workers**2
+    "queue_limit": 1,  # Defaults to workers**2
 }
 
 # NB this oculd kill very long DB connections
@@ -442,14 +441,27 @@ LOGGING = {
         "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
     },
     "handlers": {
+        # The console handler for Docker/Kubernetes/Heroku
         "console": {
+            "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "standard",
         },
-        "file": {
-            "level": "DEBUG",  # Or logging.INFO
-            "class": "logging.FileHandler",
-            "filename": os.path.join(LOG_DIR, "custom_debug2.log"),
+        "general_log_file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(LOG_DIR, "general.log"),
+            "maxBytes": 11 * 1024 * 1024,  # 1 MB per file
+            "backupCount": 5,  # Keep 5 backup files
+            "formatter": "standard",
+            "encoding": "utf-8",
+        },
+        "fcm_file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(LOG_DIR, "FCM_views.log"),
+            "maxBytes": 11 * 1024 * 1024,  # 1 MB per file
+            "backupCount": 5,  # Keep 5 backup files (FCM_views.log.1, .2, etc.)
             "formatter": "standard",
             "encoding": "utf-8",
         },
@@ -459,29 +471,34 @@ LOGGING = {
         #    "level": "DEBUG",
         # },
         "Lobby.views": {
-            "handlers": ["file", "console"],
+            "handlers": ["general_log_file", "console"],
             "level": "DEBUG",
             "propagate": True,
         },
         "FCM.models": {
-            "handlers": ["file", "console"],
+            "handlers": ["general_log_file", "console"],
             "level": "DEBUG",
             "propagate": True,
         },
         "FCM.admin": {
-            "handlers": ["file", "console"],
+            "handlers": ["general_log_file", "console"],
             "level": "DEBUG",
             "propagate": True,
         },
         "Lobby.middleware": {  # Add this for DebugSlashMiddleware
-            "handlers": ["file", "console"],
+            "handlers": ["general_log_file", "console"],
             "level": "DEBUG",
             "propagate": False,  # Prevent propagation to root logger
         },
         "Lobby.utils": {
-            "handlers": ["file", "console"],
+            "handlers": ["general_log_file", "console"],
             "level": "DEBUG",
             "propagate": False,
+        },
+        "FCM.views": {
+            "handlers": ["fcm_file", "console"],
+            "level": "DEBUG",
+            "propagate": True,
         },
     },
     "root": {

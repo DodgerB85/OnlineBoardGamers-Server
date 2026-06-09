@@ -1,6 +1,7 @@
 import base64
 import gzip
 import json
+import logging
 import time
 from typing import TYPE_CHECKING, cast
 
@@ -38,6 +39,15 @@ if TYPE_CHECKING:
 
 FCMsuperUsers = ["BotKickStarter"]
 USE_NEW_CODE = False
+
+logger = logging.getLogger(__name__)
+
+# This wrapper is a bit pointless. 
+# BUT it does handily keep the loggin in one wrapper!
+# So this could easily be changed back to webhooks, or all sent to a different log, etc. 
+def log_expected_sync_reject(message):
+    logger.warning(message)
+
 
 FCM_DB_LOCK_NAME = "lockFCMgame_"
 
@@ -339,7 +349,6 @@ def showGame(request, game_id):
     )
 
 
-
 def showGameVue(request, game_id):
     result = build_show_game_data(
         request,
@@ -558,8 +567,6 @@ def test(request):
     return render(request, "FCM/test.html", {"gameID": 21})
 
 
-
-
 def processTurn(request):
     return process_game_with_mutex(request, _processTurn, mutex_prefix="processTurn_")
 
@@ -621,13 +628,13 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        # if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
         #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            # return JsonResponse({"syncError": True}, safe=False)
+        # return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
         presenter.deleteSinglePlayersMove(request.user.username)
@@ -650,7 +657,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
@@ -689,7 +696,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -769,7 +776,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -858,13 +865,13 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        # if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
         #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            # return JsonResponse({"syncError": True}, safe=False)
+        # return JsonResponse({"syncError": True}, safe=False)
 
         if currentGame.gameStatus == "FINISHED":
             return JsonResponse({"syncError": True}, safe=False)
@@ -932,24 +939,26 @@ def _processTurn(request):
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
 
         if oldPhase == rfFCM.PHASE_PAYDAY and jsonData["phase"] == rfFCM.PHASE_PAYDAY and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
-            turn = jsonData.get("turn", "N/A")
-            phase = jsonData.get("phase", "N/A")
-            message = (
-                f"******** DOUBLE PHASE SAVE PAYDAY (ok with kickout) ********* - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
-                f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
-            )
-            SN_sendAdminErrorMessage(message)
+            if not presenter.getMissingPlayersNamesArray():
+                turn = jsonData.get("turn", "N/A")
+                phase = jsonData.get("phase", "N/A")
+                message = (
+                    f"******** DOUBLE PHASE SAVE PAYDAY (ok with kickout) ********* - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                    f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
+                    f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
+                )
+                SN_sendAdminErrorMessage(message)
 
         if oldPhase == rfFCM.PHASE_CLEAN_UP and jsonData["phase"] == rfFCM.PHASE_CLEAN_UP and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
-            turn = jsonData.get("turn", "N/A")
-            phase = jsonData.get("phase", "N/A")
-            message = (
-                f"******** DOUBLE PHASE SAVE CLEANUP ********* - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
-                f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
-                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
-            )
-            SN_sendAdminErrorMessage(message)
+            if not presenter.getMissingPlayersNamesArray():
+                turn = jsonData.get("turn", "N/A")
+                phase = jsonData.get("phase", "N/A")
+                message = (
+                    f"******** DOUBLE PHASE SAVE CLEANUP ********* - gameID: {jsonData['gameID']} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} "
+                    f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
+                    f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
+                )
+                SN_sendAdminErrorMessage(message)
         ###########
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
@@ -1153,13 +1162,13 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        # if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
         #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            # return JsonResponse({"syncError": True}, safe=False)
+        # return JsonResponse({"syncError": True}, safe=False)
 
         if not continueFromStalledGame:
             currentGame.turn = jsonData["turn"]
@@ -1245,7 +1254,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # decompress the move data array
@@ -1310,13 +1319,13 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        # if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
         #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            # return JsonResponse({"syncError": True}, safe=False)
+        # return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
         # Phase first otherwise MOVE payday skip overwrites with phase 7
@@ -1351,12 +1360,12 @@ def _processTurn(request):
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
                     "FCM",
-                        playerListToNotify,
-                        jsonData["gameID"],
-                        presenter.getGameName(),
-                        currentGame,
-                        oldVer,
-                    )
+                    playerListToNotify,
+                    jsonData["gameID"],
+                    presenter.getGameName(),
+                    currentGame,
+                    oldVer,
+                )
 
         # End Game
         if jsonData["phase"] == rfFCM.PHASE_GAME_OVER:
@@ -1386,13 +1395,13 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         # Add turn/phase validation to prevent backward saves
-        #if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
+        # if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
         #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-            # return JsonResponse({"syncError": True}, safe=False)
+        # return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)
@@ -1556,7 +1565,7 @@ def _processTurn(request):
                 f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
                 f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {presenter.getArrayOfIsCurrentPlayers()}"
             )
-            SN_sendAdminErrorMessage(message)
+            log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
@@ -1606,7 +1615,7 @@ def _processTurn(request):
 
     elif jsonData["action"] == "saveAndUpdateNotifictions":
         currentGame.gameData = jsonData["data"]
-        #referringPhase = jsonData["referringPhase"]
+        # referringPhase = jsonData["referringPhase"]
 
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         trainingGame = False
@@ -1802,9 +1811,9 @@ def gameAdminGetMoveData(request):
     except Game.DoesNotExist:
         return render(request, "FCM/gameAdmin.html", {"gameID": 21})
 
-    #presenter = cast("FCMpresenter", currentGame.presenter())
+    # presenter = cast("FCMpresenter", currentGame.presenter())
 
-    #names = presenter.getAllPlayersOrderedySeatInArray(True)
+    # names = presenter.getAllPlayersOrderedySeatInArray(True)
 
     playersMoveDataArr = json.loads(currentGame.FCMplayersMoveData) if currentGame.FCMplayersMoveData else []
 
