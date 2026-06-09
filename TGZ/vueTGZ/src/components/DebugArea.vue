@@ -52,6 +52,7 @@ function calcCmanIncome() {
 }
 
 function test() {
+	model.calcSpecsandgodsIncome()
 	//store.context.indexesToHighlightClick.splice(0)
 	//store.context.indexesToHighlightClick = map.expandWater(0)
 	//store.context.indexesToHighlightClick = map.getAllSquaresOfSameType(rf.WOOD_SQ)
@@ -69,7 +70,7 @@ function test() {
 	//alert(JSON.stringify(map.getCraftsmanDataFromAnySq(48, true)))
 	//alert(store.players[0].craftsmen[1])
 	//alert(map.getAllUndepletedResourceSquaresToHighlight(store.players[0].craftsmen[1], 3))
-	store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([0], 3, 0)
+	//store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([0], 3, 0)
 }
 function test2() {
 	let res = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([0, 1], 3, -9)

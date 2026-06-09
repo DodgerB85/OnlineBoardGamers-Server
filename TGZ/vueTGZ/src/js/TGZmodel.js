@@ -18,19 +18,19 @@ export function getPlayer_gods(player) {
 
 export function has_god(player, godType) {
 	const gods = getPlayer_gods(player)
-	return gods.some(god => god[0] === godType)
+	return gods.some((god) => god[0] === godType)
 }
 
 export function get_godData(player, godType) {
 	const gods = getPlayer_gods(player)
-	const god = gods.find(g => g[0] === godType)
+	const god = gods.find((g) => g[0] === godType)
 	return god || [rf.NO_god, 0]
 }
 
 export function add_godToPlayer(player, godType, data = 0) {
 	if (!player.god) player.god = []
 	// Check if god already exists
-	const existingIndex = player.god.findIndex(g => g[0] === godType)
+	const existingIndex = player.god.findIndex((g) => g[0] === godType)
 	if (existingIndex === -1) {
 		// Check if first god is NO_god, replace it instead of pushing
 		if (player.god.length > 0 && player.god[0][0] === rf.NO_god) {
@@ -45,7 +45,7 @@ export function add_godToPlayer(player, godType, data = 0) {
 
 export function remove_godFromPlayer(player, godType) {
 	if (!player.god) return
-	const index = player.god.findIndex(g => g[0] === godType)
+	const index = player.god.findIndex((g) => g[0] === godType)
 	if (index !== -1) {
 		player.god.splice(index, 1)
 	}
@@ -53,7 +53,7 @@ export function remove_godFromPlayer(player, godType) {
 
 export function update_godData(player, godType, newData) {
 	const gods = getPlayer_gods(player)
-	const godIndex = gods.findIndex(g => g[0] === godType)
+	const godIndex = gods.findIndex((g) => g[0] === godType)
 	if (godIndex !== -1) {
 		player.god[godIndex][1] = newData
 	}
@@ -1087,7 +1087,7 @@ function processYEMOJAdifference(playerIndex, score) {
 	let playerObj = store.players[playerIndex]
 
 	let maxHistIndex = store.history.length
-	if (store.topMenuViews.showReplay) maxHistIndex = store.replayStep+1
+	if (store.topMenuViews.showReplay) maxHistIndex = store.replayStep + 1
 	maxHistIndex = Math.min(maxHistIndex, store.history.length)
 
 	//let yemojaAdjustments = []
@@ -1250,102 +1250,92 @@ export function endGame() {
 }
 
 export function endGame_core(simulateOnly) {
-  const store = useModelStore();
-  if (!simulateOnly) store.gameflow.phase = rf.PHASE_GAME_OVER;
+	const store = useModelStore()
+	if (!simulateOnly) store.gameflow.phase = rf.PHASE_GAME_OVER
 
-  // Step 1: Create overshoot array [overshootValue, playerIndex]
-  let overshoot = store.players.map((player, index) => [
-    getScore(index) - getVR(player),
-    index,
-  ]);
+	// Step 1: Create overshoot array [overshootValue, playerIndex]
+	let overshoot = store.players.map((player, index) => [getScore(index) - getVR(player), index])
 
-  // Step 2: Sort by overshoot (descending), XANGO, getScore (descending), turn order
-  overshoot.sort((a, b) => {
-    // Tiebreaker 1: Highest overshoot
-    if (a[0] !== b[0]) return b[0] - a[0];
+	// Step 2: Sort by overshoot (descending), XANGO, getScore (descending), turn order
+	overshoot.sort((a, b) => {
+		// Tiebreaker 1: Highest overshoot
+		if (a[0] !== b[0]) return b[0] - a[0]
 
-    // Tiebreaker 2: XANGO (at most one player has it)
-    const aIsXango = has_god(store.players[a[1]], rf.XANGO);
-    const bIsXango = has_god(store.players[b[1]], rf.XANGO);
-    if (aIsXango && !bIsXango) return -1;
-    if (!aIsXango && bIsXango) return 1;
+		// Tiebreaker 2: XANGO (at most one player has it)
+		const aIsXango = has_god(store.players[a[1]], rf.XANGO)
+		const bIsXango = has_god(store.players[b[1]], rf.XANGO)
+		if (aIsXango && !bIsXango) return -1
+		if (!aIsXango && bIsXango) return 1
 
-    // Tiebreaker 3: Highest getScore
-    const scoreDiff = getScore(b[1]) - getScore(a[1]);
-    if (scoreDiff !== 0) return scoreDiff;
+		// Tiebreaker 3: Highest getScore
+		const scoreDiff = getScore(b[1]) - getScore(a[1])
+		if (scoreDiff !== 0) return scoreDiff
 
-    // Tiebreaker 4: Turn order
-    return store.gameflow.fullTurnOrder.indexOf(a[1]) - store.gameflow.fullTurnOrder.indexOf(b[1]);
-  });
+		// Tiebreaker 4: Turn order
+		return store.gameflow.fullTurnOrder.indexOf(a[1]) - store.gameflow.fullTurnOrder.indexOf(b[1])
+	})
 
-  // Step 3: Assign tiebreaker codes for all tied groups
-  for (let i = 0; i < overshoot.length; i++) {
-    // Tiebreaker 1: Outright highest overshoot
-    if (
-      (i === 0 && overshoot.length > 1 && overshoot[0][0] > overshoot[1][0]) ||
-      (i > 0 && i < overshoot.length - 1 && overshoot[i - 1][0] > overshoot[i][0] && overshoot[i][0] > overshoot[i + 1][0]) ||
-      (i === overshoot.length - 1 && overshoot[i - 1][0] > overshoot[i][0])
-    ) {
-      overshoot[i].push(1); // Outright highest overshoot
-      continue;
-    }
+	// Step 3: Assign tiebreaker codes for all tied groups
+	for (let i = 0; i < overshoot.length; i++) {
+		// Tiebreaker 1: Outright highest overshoot
+		if ((i === 0 && overshoot.length > 1 && overshoot[0][0] > overshoot[1][0]) || (i > 0 && i < overshoot.length - 1 && overshoot[i - 1][0] > overshoot[i][0] && overshoot[i][0] > overshoot[i + 1][0]) || (i === overshoot.length - 1 && overshoot[i - 1][0] > overshoot[i][0])) {
+			overshoot[i].push(1) // Outright highest overshoot
+			continue
+		}
 
-    // Identify tied group
-    let startIdx = i;
-    let endIdx = i;
-    while (endIdx + 1 < overshoot.length && overshoot[endIdx + 1][0] === overshoot[startIdx][0]) {
-      endIdx++;
-    }
+		// Identify tied group
+		let startIdx = i
+		let endIdx = i
+		while (endIdx + 1 < overshoot.length && overshoot[endIdx + 1][0] === overshoot[startIdx][0]) {
+			endIdx++
+		}
 
-    // Process tied group
-    if (startIdx === endIdx) {
-      // Single player in group, no tiebreaker needed beyond overshoot
-      overshoot[startIdx].push(5); // Next in order
-    } else {
-      // Tiebreaker 2: XANGO (at most one player)
-      let xangoAssigned = false;
-      for (let j = startIdx; j <= endIdx; j++) {
-        if (has_god(store.players[overshoot[j][1]], rf.XANGO)) {
-          overshoot[j].push(2); // XANGO wins tied group
-          xangoAssigned = true;
-          break;
-        }
-      }
+		// Process tied group
+		if (startIdx === endIdx) {
+			// Single player in group, no tiebreaker needed beyond overshoot
+			overshoot[startIdx].push(5) // Next in order
+		} else {
+			// Tiebreaker 2: XANGO (at most one player)
+			let xangoAssigned = false
+			for (let j = startIdx; j <= endIdx; j++) {
+				if (has_god(store.players[overshoot[j][1]], rf.XANGO)) {
+					overshoot[j].push(2) // XANGO wins tied group
+					xangoAssigned = true
+					break
+				}
+			}
 
-      // Tiebreaker 3: Highest getScore
-      if (!xangoAssigned && endIdx > startIdx) {
-        if (getScore(overshoot[startIdx][1]) > getScore(overshoot[startIdx + 1][1])) {
-          overshoot[startIdx].push(3); // Highest score wins
-        }
-      }
+			// Tiebreaker 3: Highest getScore
+			if (!xangoAssigned && endIdx > startIdx) {
+				if (getScore(overshoot[startIdx][1]) > getScore(overshoot[startIdx + 1][1])) {
+					overshoot[startIdx].push(3) // Highest score wins
+				}
+			}
 
-      // Tiebreaker 4: Turn order
-      if (!overshoot[startIdx][2] && endIdx > startIdx) {
-        if (
-          store.gameflow.fullTurnOrder.indexOf(overshoot[startIdx][1]) <
-          store.gameflow.fullTurnOrder.indexOf(overshoot[startIdx + 1][1])
-        ) {
-          overshoot[startIdx].push(4); // Turn order wins
-        }
-      }
+			// Tiebreaker 4: Turn order
+			if (!overshoot[startIdx][2] && endIdx > startIdx) {
+				if (store.gameflow.fullTurnOrder.indexOf(overshoot[startIdx][1]) < store.gameflow.fullTurnOrder.indexOf(overshoot[startIdx + 1][1])) {
+					overshoot[startIdx].push(4) // Turn order wins
+				}
+			}
 
-      // Tiebreaker 5: Next in order for remaining players
-      for (let j = startIdx; j <= endIdx; j++) {
-        if (!overshoot[j][2]) {
-          overshoot[j].push(5); // Next in order
-        }
-      }
-    }
+			// Tiebreaker 5: Next in order for remaining players
+			for (let j = startIdx; j <= endIdx; j++) {
+				if (!overshoot[j][2]) {
+					overshoot[j].push(5) // Next in order
+				}
+			}
+		}
 
-    i = endIdx; // Skip to end of tied group
-  }
+		i = endIdx // Skip to end of tied group
+	}
 
-  // Step 4: Update gameflow if not simulating
-  if (!simulateOnly) {
-    store.gameflow.fullTurnOrder.splice(0, store.gameflow.fullTurnOrder.length, ...overshoot.map(item => item[1]));
-    store.gameflow.turnOrder.splice(0, store.gameflow.turnOrder.length, overshoot[0][1]);
-  }
-  return overshoot;
+	// Step 4: Update gameflow if not simulating
+	if (!simulateOnly) {
+		store.gameflow.fullTurnOrder.splice(0, store.gameflow.fullTurnOrder.length, ...overshoot.map((item) => item[1]))
+		store.gameflow.turnOrder.splice(0, store.gameflow.turnOrder.length, overshoot[0][1])
+	}
+	return overshoot
 }
 
 /*
@@ -1577,11 +1567,12 @@ function calcTechIncome() {
 	return res
 }
 
-function calcSpecsandgodsIncome() {
+export function calcSpecsandgodsIncome() {
 	const store = useModelStore()
 	// god vars
 	let engaiTaken = false
 	let shadTaken = false
+	let OVIAused = false
 	let qamataPlayerIndex = -1
 
 	// spec vars
@@ -1599,7 +1590,7 @@ function calcSpecsandgodsIncome() {
 			}
 		}
 		// HERD
-		if (store.history[i][0] === rf.HIST_ADD_HERD_COWS) store.statsModeData.specsandgodsObj.herd += (store.history[i][3][1] / 2)
+		if (store.history[i][0] === rf.HIST_ADD_HERD_COWS) store.statsModeData.specsandgodsObj.herd += store.history[i][3][1] / 2
 		// activate spec (NOMADS / BUILDER)
 		if (store.history[i][0] === rf.HIST_ACTIVATE_SPEC) {
 			if (store.history[i][3][0] === rf.NOMADS) store.statsModeData.specsandgodsObj.nomads += store.history[i][3][1]
@@ -1623,7 +1614,7 @@ function calcSpecsandgodsIncome() {
 		// Engai
 		if (store.history[i][0] === rf.HIST_REVENUES) {
 			if (engaiTaken) store.statsModeData.specsandgodsObj.engai += 2
-			if (qamataPlayerIndex >=0) {
+			if (qamataPlayerIndex >= 0) {
 				let entry = store.history[i][3].find((subArr) => subArr[0] === qamataPlayerIndex)
 				store.statsModeData.specsandgodsObj.qamata += entry[1]
 			}
@@ -1635,6 +1626,21 @@ function calcSpecsandgodsIncome() {
 			for (let j = 0; j < store.history[i][3][1].length; j++) totalBids += store.history[i][3][1][j]
 			// Shad gets totalBids / totalplayers+1 if that's an int, or an extra if it's not
 			store.statsModeData.specsandgodsObj.shadipinyi += Math.floor(totalBids / (store.players.length + 1)) + (totalBids % (store.players.length + 1) > 0 ? 1 : 0)
+		}
+
+		// Ovia
+		if (store.history[i][0] === rf.HIST_RAISE_MON) {
+			const histEntry3 = store.history[i][3]
+			for (let j = 1; j < histEntry3.length; j++) {
+				if (histEntry3[j][0] === -2) OVIAused = true
+			}
+			if (OVIAused) {
+				for (let j = 0; j < histEntry3.length; j++) {
+					for (let k = 0; k < histEntry3[j].length; k++) {
+						if (histEntry3[j][k].length === 3) store.statsModeData.specsandgodsObj.ovia++
+					}
+				}
+			}
 		}
 	}
 }
