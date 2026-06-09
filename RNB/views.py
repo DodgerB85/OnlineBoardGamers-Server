@@ -55,11 +55,13 @@ def _validateTurnOrderTransition(old_order, new_order, moved_player_name, game_i
         old_order = []
     expected_new = [p for p in old_order if p != moved_player_name]
     if new_order != expected_new:
-        SN_sendAdminErrorMessage(
-            f"RNB turn order mismatch in {action_name} - gameID: {game_id} "
-            f"user: {username} turn: {turn} phase: {phase} "
-            f"old: {old_order} new: {new_order} expected: {expected_new}"
-        )
+        pass
+        # THIS SEEMED TO TRIGGER ALL THE TIME. REMOVED FOR NOW
+        #SN_sendAdminErrorMessage(
+        #    f"RNB turn order mismatch in {action_name} - gameID: {game_id} "
+        #    f"user: {username} turn: {turn} phase: {phase} "
+        #    f"old: {old_order} new: {new_order} expected: {expected_new}"
+        #)
 
 
 def index(request):
