@@ -68,9 +68,7 @@ urlpatterns = [
     ),
     path(
         "robots.txt",
-        TemplateView.as_view(
-            template_name="Lobby/robots.txt", content_type="text/plain"
-        ),
+        TemplateView.as_view(template_name="Lobby/robots.txt", content_type="text/plain"),
     ),  # add the robots.txt file
     path("HC/<int:game_id>/show/", redirect_hc_to_hlc, name="redirect_hc_to_hlc"),
     path("", include("Lobby.urls")),
@@ -99,23 +97,51 @@ urlpatterns = [
     ),
     path(
         "reset/done/",
-        auth_views.PasswordResetCompleteView.as_view(
-            template_name="Lobby/password/password_reset_complete.html"
-        ),
+        auth_views.PasswordResetCompleteView.as_view(template_name="Lobby/password/password_reset_complete.html"),
         name="password_reset_complete",
     ),
     # Change Password
     path(
         "change-password/",
-        auth_views.PasswordChangeView.as_view(
-            template_name="Lobby/password/password_change.html", success_url="/"
-        ),
+        auth_views.PasswordChangeView.as_view(template_name="Lobby/password/password_change.html", success_url="/"),
         name="change_password",
     ),
     path("i18n/", include("django.conf.urls.i18n")),
+    # ICON REDIRECTS
     path(
         "favicon.ico",
-        RedirectView.as_view(url=settings.STATIC_URL + "Lobby/favicon.ico"),
+        RedirectView.as_view(
+            url=settings.STATIC_URL + "Lobby/favicon.ico",
+            permanent=True,
+        ),
+    ),
+    path(
+        "apple-touch-icon.png",
+        RedirectView.as_view(
+            url=settings.STATIC_URL + "Lobby/favicons/apple-touch-icon.png",
+            permanent=True,
+        ),
+    ),
+    path(
+        "apple-touch-icon-precomposed.png",
+        RedirectView.as_view(
+            url=settings.STATIC_URL + "Lobby/favicons/apple-touch-icon.png",
+            permanent=True,
+        ),
+    ),
+    path(
+        "apple-touch-icon-120x120.png",
+        RedirectView.as_view(
+            url=settings.STATIC_URL + "Lobby/favicons/apple-touch-icon.png",
+            permanent=True,
+        ),
+    ),
+    path(
+        "apple-touch-icon-120x120-precomposed.png",
+        RedirectView.as_view(
+            url=settings.STATIC_URL + "Lobby/favicons/apple-touch-icon.png",
+            permanent=True,
+        ),
     ),
 ]
 
