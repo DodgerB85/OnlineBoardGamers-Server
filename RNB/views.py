@@ -314,6 +314,9 @@ def _processRNBturn(request):
         nameToUse = request.user.username
         if request.user.username == "BotKickStarter":
             nameToUse = jsonData["BKSN"]
+        check_name = jsonData.get("checkName", "")
+        if check_name:
+            nameToUse = check_name
 
         # Remove flex time
         currentGame.kickoutFlexiData = SF_updateFlexiTime(
@@ -567,6 +570,9 @@ def _processRNBturn(request):
         nameToUse = request.user.username
         if request.user.username == "BotKickStarter":
             nameToUse = jsonData["BKSN"]
+        check_name = jsonData.get("checkName", "")
+        if check_name:
+            nameToUse = check_name
 
         # Remove flex time
         currentGame.kickoutFlexiData = SF_updateFlexiTime(
