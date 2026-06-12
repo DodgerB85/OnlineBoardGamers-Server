@@ -451,7 +451,7 @@ export const god_TEXT = [
     'Take the "Blacksmith" technology card', // Ogun
     'The first cattle you would pay to any craftsmen is paid to this card instead', // Ovia
     'After raising monuments, place a monument',// Oya
-    'You travel over orthognoally adjacent craftsmen and resources as one area',// simbi
+    'You travel over orthogonally adjacent craftsmen and resources as one area',// simbi
     'Monuments that are level 2 or higher require one less ritual good to upgrade', // Tiurakh
     'You may upgrade other players\' monuments', // Yemoja
     // Other
