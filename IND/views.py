@@ -243,7 +243,6 @@ def _processINDturn(request):
     presenter = cast("INDpresenter", currentGame.presenter())
 
     if jsonData["action"] == "save":
-        return
         # Check if old version is older than DB version, and if so, return
         if str(latest_update) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
