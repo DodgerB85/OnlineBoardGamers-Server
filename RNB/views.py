@@ -152,7 +152,29 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData["gameDataB64"] = returnData.pop("gameData")
     currentPlayersArr = []
     if currentGame.phase in rfRNB.MAIN_PHASES:
-        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
+        if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+            currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder)
+        # The below is meant to handle the case where the turn order is empty during a main phase but gameData exists
+        # This can happen if the game is loaded from a saved state where the turn order was not properly saved
+        # It is an attempt to fix the game eg going back to start of movement phase, but with just player A current again
+        elif currentGame.gameData:
+            # Turn order is empty during a main phase but gameData exists, meaning all
+            # players already submitted their moves and the client failed to save the
+            # phase transition (e.g. crash, network error). Auto-advance to the
+            # conflict-decision phase that follows this main phase.
+            next_phase = currentGame.phase + 1
+            if next_phase == rfRNB.MAX_PHASE_REACHED:
+                next_phase = rfRNB.PHASE_CONFLICT_PRODUCTION_DECISION
+                currentGame.turn += 1
+            currentGame.phase = next_phase
+            all_non_bot_names = []
+            for gp in currentGame.players.all():
+                if not gp.is_missing:
+                    all_non_bot_names.append(gp.player.username)
+            presenter.setCurrentPlayersFromArrInTurnOrder(all_non_bot_names)
+            currentPlayersArr = json.dumps(all_non_bot_names)
+        else:
+            currentPlayersArr = json.dumps([presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
     elif currentGame.phase in rfRNB.ALL_PHASE_CONFLICTS:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 
