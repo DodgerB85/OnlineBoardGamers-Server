@@ -8,7 +8,7 @@ import * as controller from "../js/TGZcontroller"
 import * as Bot from "../js/TGZbot"
 import * as IO from "../js/TGZ_IO"
 
-import { ref } from "vue"
+import { ref, computed } from "vue"
 
 import { useModelStore } from "../stores/TGZstore.js"
 const store = useModelStore()
@@ -17,6 +17,17 @@ const personal = usePersonalStore()
 
 const autoPass = ref(window.initData.autoPass || false)
 const confirmTournamentReplacement = ref(false)
+
+// --- Smooth Rotation ---
+const currentDegrees = ref(store.context.itemBeingAddedRotation * 90)
+
+const rotationStyle = computed(() => {
+	return {
+		transform: `rotate(${currentDegrees.value}deg)`,
+		transition: "transform 0.3s ease-in-out",
+	}
+})
+// --- End Smooth Rotation ---
 
 function rotateNewTile(dir) {
 	if (!rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded)) return
@@ -30,6 +41,7 @@ function rotateNewTile(dir) {
 	store.context.itemBeingAddedRotation += dir
 	if (store.context.itemBeingAddedRotation === 2) store.context.itemBeingAddedRotation = 0
 	else if (store.context.itemBeingAddedRotation === -1) store.context.itemBeingAddedRotation = 1
+	currentDegrees.value += dir * 90
 	store.context.indexesToHighlightClick.splice(0)
 	if (store.context.action === rf.ACT_BUILD_WATER) store.context.indexesToHighlightClick = map.getSpacesForResource()
 	else if (store.context.action === rf.ACT_BUILD_PRI_CRAFTSMAN) store.context.indexesToHighlightClick = map.getAllowedIndexesToPlacePriCraftsman(store.context.itemBeingAdded, store.context.range, store.context.itemBeingAddedRotation)[0]
@@ -1331,7 +1343,7 @@ function failedToJustPlaceCraftsmanFlag() {
 				<b>Place a water tile on any free area</b>
 				<div id="itemBeingAddedDiv">
 					<img class="rot_img rot_img_enabled" @click="rotateNewTile(-1)" :src="view.getImage('rot_anticlockwise')" />
-					<img class="newTileImg newTileWater" :src="view.getImage('res' + String(store.context.itemBeingAdded))" :class="'r' + String(store.context.itemBeingAddedRotation)" />
+					<img class="newTileImg newTileWater" :src="view.getImage('res' + String(store.context.itemBeingAdded))" :style="rotationStyle" />
 					<img class="rot_img rot_img_enabled" @click="rotateNewTile(1)" :src="view.getImage('rot_clockwise')" />
 				</div>
 				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
@@ -1402,7 +1414,7 @@ function failedToJustPlaceCraftsmanFlag() {
 				<template v-else>(to the common stock)</template>
 				<div id="itemBeingAddedDiv">
 					<img class="rot_img" :class="rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewTile(-1)" :src="view.getImage('rot_anticlockwise')" />
-					<img class="newTileImg newTileCraftsman" :src="view.getImage('craftsman' + String(store.context.itemBeingAdded))" :class="'r' + String(store.context.itemBeingAddedRotation)" alt="Craftsman" />
+					<img class="newTileImg newTileCraftsman" :src="view.getImage('craftsman' + String(store.context.itemBeingAdded))" :style="rotationStyle" alt="Craftsman" />
 					<img class="rot_img" :class="rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewTile(1)" :src="view.getImage('rot_clockwise')" />
 				</div>
 				<br />
