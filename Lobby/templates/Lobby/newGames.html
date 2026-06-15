@@ -52,6 +52,12 @@
         <img src="{% static "FCM/images/fcm-box.jpg" %}" alt="Food Chain Magnate">
       </div>
     </a>
+    <a href="{% url 'createRNBpage' %}" class="newGameLink">
+      <div id="createNewRNB">
+        {% translate "Roads & Boats" %}
+        <img src="{% static "RNB/images/RNBbox.jpg" %}" alt="Roads & Boats">
+      </div>
+    </a>
     <a href="{% url 'createHLCpage' %}" class="newGameLink">
       <div id="createNewHLC">
         {% translate "Horseless Carriage" %}

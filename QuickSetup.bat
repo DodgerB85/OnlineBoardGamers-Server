@@ -1,4 +1,84 @@
 @echo off
+setlocal enabledelayedexpansion
+
+echo ==================================================
+echo Analyzing system environments...
+echo ==================================================
+
+REM --- REQUIREMENTS CONFIGURATION ---
+set "MIN_PY_MAJOR=3"
+set "MIN_PY_MINOR=10"
+set "MIN_NODE_MAJOR=20"
+
+REM --- DETECT AND PARSE PYTHON VERSION ---
+set "PY_VERSION=Unknown"
+set "NEED_PY_WARN=0"
+for /f "tokens=2" %%i in ('python --version 2^>nul') do set "PY_VERSION=%%i"
+if "%PY_VERSION%"=="Unknown" (
+    set "NEED_PY_WARN=1"
+) else (
+    for /f "tokens=1,2 delims=." %%a in ("%PY_VERSION%") do (
+        set "PY_MAJOR=%%a"
+        set "PY_MINOR=%%b"
+    )
+    if !PY_MAJOR! lss %MIN_PY_MAJOR% set "NEED_PY_WARN=1"
+    if !PY_MAJOR! equ %MIN_PY_MAJOR% if !PY_MINOR! lss %MIN_PY_MINOR% set "NEED_PY_WARN=1"
+)
+
+REM --- DETECT AND PARSE NODE.JS VERSION ---
+set "NODE_VERSION=Unknown"
+set "NEED_NODE_WARN=0"
+for /f %%i in ('node -v 2^>nul') do set "NODE_VERSION=%%i"
+if "%NODE_VERSION%"=="Unknown" (
+    set "NEED_NODE_WARN=1"
+) else (
+    set "CLEAN_NODE=!NODE_VERSION:v=!"
+    for /f "tokens=1 delims=." %%a in ("!CLEAN_NODE!") do set "NODE_MAJOR=%%a"
+    if !NODE_MAJOR! lss %MIN_NODE_MAJOR% set "NEED_NODE_WARN=1"
+)
+
+REM --- DISPLAY CAUTION SCREEN IF REQ NOT MET ---
+if "%NEED_PY_WARN%"=="1" goto SHOW_CAUTION
+if "%NEED_NODE_WARN%"=="1" goto SHOW_CAUTION
+goto START_SETUP
+
+:SHOW_CAUTION
+echo .
+echo *******************************************************************************
+echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  CAUTION  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+echo *******************************************************************************
+echo  Your system environment does not meet the recommended requirements.
+echo  If this setup script fails or crashes, please update your tools.
+echo.
+if "%NEED_PY_WARN%"=="1" (
+echo  [-] PYTHON VERSION CHECK: FAILED
+echo      Detected: %PY_VERSION% ^| Required: %MIN_PY_MAJOR%.%MIN_PY_MINOR%.x or higher
+echo      * WHY: Django 5.2+ requires Python 3.10+. Older versions will block 'pip install'.
+echo      * FIX: Download Python 3.11+ from https://python.org
+echo             Ensure "Add python.exe to PATH" is checked during installation.
+echo             Delete the '.venv_local' folder before running this script again.
+echo.
+) else (
+echo  [+] PYTHON VERSION CHECK: PASSED ^(%PY_VERSION%^)
+echo.
+)
+if "%NEED_NODE_WARN%"=="1" (
+echo  [-] NODE.JS VERSION CHECK: FAILED
+echo      Detected: %NODE_VERSION% ^| Required: v%MIN_NODE_MAJOR%.x or higher
+echo      * WHY: Modern Vue components and Vite 6/7 will fail to compile on Node v12.
+echo      * FIX: Download the latest LTS version (v22+) from https://nodejs.org
+echo.
+) else (
+echo  [+] NODE.JS VERSION CHECK: PASSED ^(%NODE_VERSION%^)
+echo.
+)
+echo *******************************************************************************
+echo  Press ANY KEY to try running the script anyway...
+echo *******************************************************************************
+pause > nul
+echo.
+
+:START_SETUP
 echo Setting up local development environment...
 
 REM Create virtual environment if it doesn't exist

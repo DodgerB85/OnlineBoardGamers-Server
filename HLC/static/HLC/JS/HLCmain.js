@@ -104,6 +104,7 @@ function init() {
 			var temporaryMoveData = decompressObjectFromDB(global.temporaryMove.content)
 			M.players[global.pov].factory = Factory.import(temporaryMoveData)
 			Rules.removeFCIATTcomponentsFromPlay(M.players[global.pov].factory)
+			global.fullreset = compressObjectToDB(M.export())
 		}
 	}
 

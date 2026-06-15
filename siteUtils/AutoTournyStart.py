@@ -44,6 +44,12 @@ from Lobby.models import Tournament, User
 from Lobby.sharedFunctions.sharedFunctions import SF_startAnyTournament
 from Lobby.sharedFunctions.sharedNotifications import SN_sendTournamentOpen
 from Lobby.sharedFunctions.sharedRefs import OPEN, PENDING
+from siteUtils.auto_tournament_helpers import (
+    find_pending_tournament_to_open,
+    get_target_start_size,
+    is_pending_creation_day,
+    should_start_open_tournament,
+)
 
 # HLC 3-5 players
 # Bus 3-5 players
@@ -67,7 +73,7 @@ monthNumber = myDate.month
 TOURNAMENT_SCHEDULE = [
     {
         "gameCode": "AQY",
-        "name_code": "Aqy",
+        "name_code": "Antiquity",
         "boxName": "Antiquity",
         "dates": [(2, 1), (8, 1)],
         "minPlayers": 2,
@@ -75,7 +81,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "IND",
-        "name_code": "Ind",
+        "name_code": "Indonesia",
         "boxName": "Indonesia",
         "dates": [(3, 1), (9, 1)],
         "minPlayers": 3,
@@ -83,7 +89,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "HLC",
-        "name_code": "Hlc",
+        "name_code": "HLC",
         "boxName": "Horseless Carriage",
         "dates": [(4, 1), (10, 1)],
         "minPlayers": 3,
@@ -99,7 +105,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "FCM",
-        "name_code": "Fcm",
+        "name_code": "FCM",
         "boxName": "Food Chain Magnate",
         "dates": [(5, 15), (10, 15), (12, 1)],
         "minPlayers": 3,
@@ -107,7 +113,7 @@ TOURNAMENT_SCHEDULE = [
     },
     {
         "gameCode": "TGZ",
-        "name_code": "Tgz",
+        "name_code": "TGZ",
         "boxName": "The Great Zimbabwe",
         "dates": [(6, 1), (11, 15)],
         "minPlayers": 3,
@@ -117,7 +123,7 @@ TOURNAMENT_SCHEDULE = [
 
 
 def get_tournament_name(target_date, name_code):
-    return f"{target_date.strftime('%B')} {target_date.year} {name_code} Tournament"
+    return f"{target_date.strftime('%B')} {target_date.strftime('%y')} {name_code} Tournament"
 
 
 def create_pending_tournament_if_missing(tournament, tournament_date):
@@ -178,8 +184,7 @@ current_date = datetime.datetime.now()
 for tournament in TOURNAMENT_SCHEDULE:
     for tournament_month, tournament_day in tournament["dates"]:
         tournament_date = datetime.datetime(current_date.year, tournament_month, tournament_day)
-        days_until = (tournament_date - current_date).days
-        if days_until == 7:
+        if is_pending_creation_day(current_date, tournament_date):
             print(f"It is 7 days until {tournament['boxName']} tournament on {tournament_day}/{tournament_month}")
             create_pending_tournament_if_missing(tournament, tournament_date)
             message = f"New {tournament['boxName']} Tournament Opens for Signup in 7 days!\n[Click here to Play](https://www.OnlineBoardGamers.com/)"
@@ -207,16 +212,7 @@ for tournament in TOURNAMENT_SCHEDULE:
             tournament_date = datetime.datetime(current_date.year, tournament_month, tournament_day)
             tournament_name = get_tournament_name(tournament_date, name_code)
 
-            new_tournament = (
-                Tournament.objects.filter(
-                    tournamentCategory="Main",
-                    tournamentStatus=PENDING,
-                    gameCode=gameCode,
-                    tournamentName=tournament_name,
-                )
-                .order_by("-id")
-                .first()
-            )
+            new_tournament = find_pending_tournament_to_open(gameCode, tournament_name)
             if not new_tournament:
                 print(f"No pending tournament found for {box_name}; skipping open step safely.")
                 continue
@@ -344,7 +340,9 @@ for tournament in TOURNAMENT_SCHEDULE:
 #                    SF_startTournament(request, newTourny, gameCode)
 #                    newTourny.save()
 
-GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+
+#GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "AQY", "IND"]
 
 # for model, config in TOURNAMENT_CONFIG.items():
 for gameCode in GAME_CODES:
@@ -358,9 +356,6 @@ for gameCode in GAME_CODES:
 
     print("There is an open tourny, and day > 7")
 
-    # But if it's not an auto-tourny, continue
-    if gameCode in ["HLC", "BUS", "TGZ", "AQY", "IND"]:
-        continue
 
     # Now we only hit the DB further if we actually have a candidate to start
     startTime = int(newTourny.created)
@@ -368,54 +363,39 @@ for gameCode in GAME_CODES:
     diff_in_s = (now - startTime) // 1000
 
     # Must have been open at least 7 days
-    if diff_in_s > 604800:  # Note: 7 days is 604800, not 60400
-        # 3. OPTIMIZATION: Cache the count to avoid re-querying it later
-        totalPlayers = newTourny.startingPlayers.count()
+    if diff_in_s < 604800:  # Note: 7 days is 604800, not 60400
+        print("However, it has not been open for at least 7 days")
+        continue
 
-        # Determine minimumPlayers logic
-        maxGP = newTourny.maxGamePlayers
+    # 3. OPTIMIZATION: Cache the count to avoid re-querying it later
+    totalPlayers = newTourny.startingPlayers.count()
 
-        # Determine the "Threshold Multiple"
-        # This is the smallest perfect multiple that satisfies min players
-        threshold = 0
-        if totalPlayers > 25:
-            threshold = 25
-        elif totalPlayers >= (maxGP * maxGP) - maxGP + 1:
-            threshold = (maxGP * maxGP) - maxGP + 1
-        elif newTourny.tournamentType in ["TL", "RR", "PT"]:
-            threshold = maxGP * (3 if newTourny.tournamentType == "TL" else 2)
-        elif dayNumber >= 28:
-            threshold = maxGP
+    # Determine minimumPlayers logic
+    maxGP = newTourny.maxGamePlayers
 
-        # Calculate the NEXT Perfect Multiple above that threshold
-        # This ensures signups are capped at a valid starting number
-        if threshold > 0:
-            # Round the threshold UP to the nearest multiple of maxGP
-            target_start_size = ((threshold + maxGP - 1) // maxGP) * maxGP
+    target_start_size = get_target_start_size(totalPlayers, maxGP, newTourny.tournamentType, dayNumber)
 
-            if totalPlayers > target_start_size:
-                target_start_size = ((totalPlayers + maxGP - 1) // maxGP) * maxGP
+    if target_start_size is not None:
+        newTourny.maxTournamentPlayers = target_start_size
+        newTourny.save()
 
-            newTourny.maxTournamentPlayers = target_start_size
+        # START TRIGGER: Only if we hit that specific perfect multiple
+        if should_start_open_tournament(totalPlayers, target_start_size, maxGP):
+            print(f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}")
+            # Use the admin ID directly if possible to avoid a User.objects.get hit
+            # Or fetch once outside the 'for' loop to save 4 hits
+            admin_user = User.objects.get(username="admin")
+
+            request = HttpRequest()
+            request.user = admin_user
+            request.META["HTTP_HOST"] = "www.onlineboardgamers.com"
+
+            # Set and Start
+            newTourny.maxTournamentPlayers = totalPlayers
+            SF_startAnyTournament(request, newTourny)
             newTourny.save()
-
-            # START TRIGGER: Only if we hit that specific perfect multiple
-            if totalPlayers >= target_start_size and totalPlayers % maxGP == 0:
-                print(f"{gameCode}: Starting Tournament, perfect multiple total: {totalPlayers}")
-                # Use the admin ID directly if possible to avoid a User.objects.get hit
-                # Or fetch once outside the 'for' loop to save 4 hits
-                admin_user = User.objects.get(username="admin")
-
-                request = HttpRequest()
-                request.user = admin_user
-                request.META["HTTP_HOST"] = "www.onlineboardgamers.com"
-
-                # Set and Start
-                newTourny.maxTournamentPlayers = totalPlayers
-                SF_startAnyTournament(request, newTourny)
-                newTourny.save()
-            else:
-                print(f"{gameCode}: Not starting tournament, not at perfect multiple total - max Players set to: {target_start_size}")
+        else:
+            print(f"{gameCode}: Not starting tournament, not at perfect multiple total - max Players set to: {target_start_size}")
 
 print(f"DB hits: {len(connection.queries)}")
 

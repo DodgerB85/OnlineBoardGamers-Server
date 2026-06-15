@@ -112,21 +112,61 @@ User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_USERS_RNB = [
-    "admin",
-    "DodgerB",
-    "user1",
-    "durendal",
+ALLOWED_SPECIAL_USERS = [
+    "33",
+    "Acacia",
+    "Batch",
+    "Beezy",
     "Benkyo",
-    "vraid",
-    "JoshuaAcosta",
-    "massibull",
-    "phil",
-    "timmymayes",
-    "SaintJason",
-    "h",
-    "Jungy",
+    "BigBad",
+    "BotKickStarter",
+    "Brent",
+    "Burmer",
+    "DodgerB",
+    "Dopple",
     "Dycu",
+    "F1087",
+    "Ftep",
+    "Gauss",
+    "Hohohale",
+    "Jasonbartfast",
+    "JoshuaAcosta",
+    "Jungy",
+    "Juni",
+    "Kawlos",
+    "Lemem",
+    "Melk0r",
+    "PhasingPlayer",
+    "RJ_E",
+    "Rastko",
+    "RedWater",
+    "SaintJason",
+    "Shoopuffman",
+    "Steveth",
+    "Strange8ractor",
+    "TDUBZ",
+    "admin",
+    "burmer",
+    "craggybackhand",
+    "durendal",
+    "enavico",
+    "gdc",
+    "h",
+    "ha.steven",
+    "huddyrx",
+    "jmelliere",
+    "joshuastarr",
+    "kbbr",
+    "krieg90",
+    "looogic",
+    "massibull",
+    "michazhn",
+    "phil",
+    "siddhig",
+    "timmymayes",
+    "user1",
+    "vraid",
+    "waymost",
 ]
 
 ##########################
@@ -136,40 +176,6 @@ ALLOWED_USERS_RNB = [
 #
 ##########################
 
-# Replace with your NEW test token from BotFather
-# TEST_TOKEN = '8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y'
-#
-# @csrf_exempt
-# def telegram_test_webhook(request):
-#    if request.method == "POST":
-#        try:
-#            # 1. Log the raw body to see what Telegram is sending
-#            body = request.body.decode("utf-8")
-#            print(f"TELEGRAM DATA RECEIVED: {body}")
-#
-#            data = json.loads(body)
-#
-#            if "message" in data:
-#                chat_id = data["message"]["chat"]["id"]
-#                token = "8493876138:AAGMbcWGanK8etxAfW9bvAgE678aNXyAe1Y"
-#
-#                # 2. Direct API call to reply
-#                api_url = f"https://api.telegram.org/bot{token}/sendMessage"
-#                payload = {"chat_id": chat_id, "text": "DEBUG: Server received your message!"}
-#
-#                # Use a timeout so the thread doesn't hang
-#                response = requests.post(api_url, json=payload, timeout=5)
-#                print(f"TELEGRAM API RESPONSE: {response.status_code}")
-#
-#            return HttpResponse("OK", status=200)
-#
-#        except Exception as e:
-#            # This will print the EXACT error to your PythonAnywhere Error Log
-#            print(f"CRITICAL WEBHOOK ERROR: {str(e)}")
-#            return HttpResponse("Error", status=200) # Still return 200 to stop Telegram retries
-#
-#    return HttpResponse("Method Not Allowed", status=405)
-#
 
 # Constants
 API_TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
@@ -189,7 +195,9 @@ def send_telegram_msg(chat_id, text):
     url = BOT_URL + "sendMessage"
     payload = {"chat_id": chat_id, "text": text}
     try:
-        requests.post(url, json=payload, timeout=7)
+        response = requests.post(url, json=payload, timeout=7)
+        if response.status_code != 200:
+            logger.error(f"Telegram API error {response.status_code}: {response.text}")
     except Exception as e:
         print(f"Failed to send Telegram message: {e}")
 
@@ -205,19 +213,20 @@ def telegram_bot_response(request):
             message = data["message"]
             chat_id = message["chat"]["id"]
             chat_type = message["chat"]["type"]
-            text = message.get("text")
+            # Extract and clean text safely
+            text = message.get("text", "").strip()
             # user = message.get("from", {})
 
             # Handle Commands
-            if text and text.startswith("/start"):
+            if text.startswith("/start") or "/start" in text:
                 response = f"To easily add Telegram Notifications to your account, click this link:\nhttps://www.OnlineBoardGamers.com/addTGid/{chat_id}\nFor more information use /help"
                 send_telegram_msg(chat_id, response)
 
-            elif text and text.startswith("/help"):
+            elif text.startswith("/help") or "/help" in text:
                 response = f"To easily add Telegram Notifications to your account, click this link:\nhttps://www.OnlineBoardGamers.com/addTGid/{chat_id}\nYour Telegram ID is: {chat_id}\nEnter this ID in the Webhooks section of your profile page on OBG:\nhttps://www.onlineboardgamers.com"
                 send_telegram_msg(chat_id, response)
 
-            elif text == "/custom":
+            elif text.startswith("/custom") or "/custom" in text:
                 send_telegram_msg(
                     chat_id,
                     "This is a custom command, you can put whatever you want here.",
@@ -319,7 +328,6 @@ def telegram_bot_response(request):
 #################################
 
 
-@csrf_exempt
 @login_required
 def addTGid(request, TGid):
     try:
@@ -365,8 +373,8 @@ def addTGid(request, TGid):
             )
             return redirect("profile")
 
-    except User.DoesNotExist:
-        return HttpResponse(status=500)
+    except Profile.DoesNotExist:
+        return HttpResponse("Profile not found", status=500)
 
 
 GAME_NAMES_MODELS = {
@@ -410,60 +418,12 @@ def helpTournamentsMini(request):
     return render(request, "Lobby/tournamentsMiniHelp.html")
 
 
-# ALLOWED_USERS = ["admin", "DodgerB", "joshuastarr", "Lemem", "waymost", "timmymayes", "Ftep", "vraid", "RJ_E", "michazhn", "Dopple", "burmer", "siddhig", "Melk0r", "Steveth", "kbbr", "Brent", "Beezy", "durendal", "Gauss"]
-
-
 @login_required
 def indexSpecialRedirect(request):
-    # ALLOWED_USERS = [
-    #    "admin",
-    #    "user1",
-    #    "ha.steven",
-    #    "massibull",
-    #    "durendal",
-    #    "DodgerB",
-    #    "BotKickStarter",
-    #    "Rastko",
-    #    "Benkyo",
-    #    "vraid",
-    #    "F1087",
-    #    "krieg90",
-    #    "gdc",
-    #    "enavico",
-    #    "PhasingPlayer",
-    #    "Acacia",
-    # ]
-    # ALLOWED_USERS += [
-    #    "ha.steven",
-    #    "Kawlos",
-    #    "Jasonbartfast",
-    #    "Batch",
-    #    "Juni",
-    #    "TDUBZ",
-    #    "BigBad",
-    #    "massibull",
-    #    "durendal",
-    #    "DodgerB",
-    #    "BotKickStarter",
-    #    "33",
-    #    "Rastko",
-    #    "Burmer",
-    #    "phil",
-    # ]
-    # ALLOWED_USERS += ["Benkyo", "Steveth", "F1087", "krieg90", "gdc", "michazhn", "Hohohale"]
-    # "Jasonbartfast", "Kawlos", "Batch", "Juni", "TDUBZ", "BigBad",   '33',  'Steveth', ]
-    #'looogic',
-    #'phil', 'huddyrx', 'user1', 'craggybackhand', 'Strange8ractor', ]
 
-    # for game in results:
-    #    players = game.allPlayers.all()
-
-    if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect("index")
-
-    # return redirect('index')
+    return redirect("index")
     # return HttpResponseRedirect(reverse("RNB:showRNBgame"))
-    return HttpResponseRedirect(reverse("createRNBpage"))
+    # return HttpResponseRedirect(reverse("createRNBpage"))
 
 
 def set_language_custom(request):
@@ -1112,28 +1072,44 @@ def stats(request):
     userActivity = stats_data["userActivity"]
 
     # 2. Optimized ID exclusion (Avoids expensive NOT EXISTS subqueries)
-    excluded_game_ids = GamePlayer.objects.filter(player__username__in=rf.SHADOW_USERNAMES).values_list("game_id", flat=True)
+    # Cache this for 5 minutes since shadow games don't change frequently
+    excluded_game_ids = cache.get("stats_excluded_game_ids")
+    if excluded_game_ids is None:
+        excluded_game_ids = list(GamePlayer.objects.filter(player__username__in=rf.SHADOW_USERNAMES).values_list("game_id", flat=True))
+        cache.set("stats_excluded_game_ids", excluded_game_ids, 300)
 
     # 3. Batch Fetch ALL Counts (1 Query instead of 18)
-    game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB"]
+    game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
-    all_counts = (
-        Game.objects.filter(gameCode__in=game_codes)
-        .exclude(id__in=excluded_game_ids)
-        .values("gameCode")
-        .annotate(
-            active_count=Count("id", filter=Q(gameStatus="ACTIVE")),
-            finished_count=Count("id", filter=Q(gameStatus="FINISHED")),
+    # Cache game counts for 2 minutes
+    counts_map = cache.get("stats_game_counts")
+    if counts_map is None:
+        all_counts = (
+            Game.objects.filter(gameCode__in=game_codes)
+            .exclude(id__in=excluded_game_ids)
+            .values("gameCode")
+            .annotate(
+                active_count=Count("id", filter=Q(gameStatus="ACTIVE")),
+                finished_count=Count("id", filter=Q(gameStatus="FINISHED")),
+            )
         )
-    )
+        counts_map = {item["gameCode"]: item for item in all_counts}
+        cache.set("stats_game_counts", counts_map, 120)
 
-    counts_map = {item["gameCode"]: item for item in all_counts}
+    # 4. Batch Fetch Latest Games with prefetched relationships
+    # Cache latest games for 2 minutes
+    cache_key_active = "stats_latest_active_games"
+    cache_key_finished = "stats_latest_finished_games"
 
-    # 4. Batch Fetch Latest Games (2 Queries instead of 18)
-    # We fetch a larger slice and sort/slice in Python to minimize DB hits
-    raw_latest_active = Game.objects.filter(gameCode__in=game_codes, gameStatus="ACTIVE").exclude(id__in=excluded_game_ids).select_related("creator").order_by("-latestUpdate")[:50]
+    raw_latest_active = cache.get(cache_key_active)
+    if raw_latest_active is None:
+        raw_latest_active = list(Game.objects.filter(gameCode__in=game_codes, gameStatus="ACTIVE").exclude(id__in=excluded_game_ids).select_related("creator").prefetch_related("players__player", "invitedPlayers").order_by("-latestUpdate")[:10])
+        cache.set(cache_key_active, raw_latest_active, 120)
 
-    raw_latest_finished = Game.objects.filter(gameCode__in=game_codes, gameStatus="FINISHED").exclude(id__in=excluded_game_ids).select_related("creator").order_by("-latestUpdate")[:50]
+    raw_latest_finished = cache.get(cache_key_finished)
+    if raw_latest_finished is None:
+        raw_latest_finished = list(Game.objects.filter(gameCode__in=game_codes, gameStatus="FINISHED").exclude(id__in=excluded_game_ids).select_related("creator").prefetch_related("players__player", "invitedPlayers").order_by("-latestUpdate")[:10])
+        cache.set(cache_key_finished, raw_latest_finished, 120)
 
     # 5. Build the Game Stats List
     GAME_META = {
@@ -1158,32 +1134,82 @@ def stats(request):
     totalGames = sum(g["active"] for g in game_stats)
     finishedGames = sum(g["finished"] for g in game_stats)
 
-    # Serialize only the top 10 from our prefetched list
-    tenGamesJSON = [SF_fastSerializeGame(g, request.user) for g in raw_latest_active[:10]]
-    tenGamesFinishedJSON = [SF_fastSerializeGame(g, request.user) for g in raw_latest_finished[:10]]
+    # Serialize games using prefetched data to avoid additional queries
+    # Cache serialized data for 2 minutes to avoid expensive serialization on every request
+    serialized_cache_key = f"stats_serialized_games_{request.user.id}"
+    cached_serialized = cache.get(serialized_cache_key)
+
+    if cached_serialized is None:
+        tenGamesJSON = [
+            SF_serializeGame(
+                g,
+                request.user,
+                {
+                    "all_game_players": list(g.players.all()),
+                    "invited_users": list(g.invitedPlayers.all()),
+                },
+            )
+            for g in raw_latest_active
+        ]
+        tenGamesFinishedJSON = [
+            SF_serializeGame(
+                g,
+                request.user,
+                {
+                    "all_game_players": list(g.players.all()),
+                    "invited_users": list(g.invitedPlayers.all()),
+                },
+            )
+            for g in raw_latest_finished
+        ]
+        cached_serialized = {
+            "active": tenGamesJSON,
+            "finished": tenGamesFinishedJSON,
+        }
+        cache.set(serialized_cache_key, cached_serialized, 120)
+    else:
+        tenGamesJSON = cached_serialized["active"]
+        tenGamesFinishedJSON = cached_serialized["finished"]
 
     # 6. JSON Data Loading (Files)
-    def load_stat_json(path):
-        try:
-            with open(path) as f:
-                return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return []
+    # Cache all JSON file data for 5 minutes to avoid repeated disk I/O
+    stats_json_cache_key = "stats_json_files"
+    stats_json_data = cache.get(stats_json_cache_key)
 
-    base_path = "./Lobby/stats/"
-    fairPlayArr = load_stat_json(f"{base_path}fairPlayArr_E.json")
+    if stats_json_data is None:
 
-    win_data = {
-        "winArr": load_stat_json(f"{base_path}winArr_E.json"),
-        "win3mArr": load_stat_json(f"{base_path}win3mArr_E.json"),
-        "win1mArr": load_stat_json(f"{base_path}win1mArr_E.json"),
-    }
+        def load_stat_json(path):
+            try:
+                with open(path) as f:
+                    return json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                return []
 
-    p_stats = {}
-    for p in [2, 3, 4, 5, 6]:
-        p_stats[f"winArr{p}p"] = load_stat_json(f"{base_path}winArr{p}p_E.json")
-        p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
-        p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
+        base_path = "./Lobby/stats/"
+        fairPlayArr = load_stat_json(f"{base_path}fairPlayArr_E.json")
+
+        win_data = {
+            "winArr": load_stat_json(f"{base_path}winArr_E.json"),
+            "win3mArr": load_stat_json(f"{base_path}win3mArr_E.json"),
+            "win1mArr": load_stat_json(f"{base_path}win1mArr_E.json"),
+        }
+
+        p_stats = {}
+        for p in [2, 3, 4, 5, 6]:
+            p_stats[f"winArr{p}p"] = load_stat_json(f"{base_path}winArr{p}p_E.json")
+            p_stats[f"win3mArr{p}p"] = load_stat_json(f"{base_path}win3mArr{p}p_E.json")
+            p_stats[f"win1mArr{p}p"] = load_stat_json(f"{base_path}win1mArr{p}p_E.json")
+
+        stats_json_data = {
+            "fairPlayArr": fairPlayArr,
+            "win_data": win_data,
+            "p_stats": p_stats,
+        }
+        cache.set(stats_json_cache_key, stats_json_data, 300)
+    else:
+        fairPlayArr = stats_json_data["fairPlayArr"]
+        win_data = stats_json_data["win_data"]
+        p_stats = stats_json_data["p_stats"]
 
     return render(
         request,
@@ -1243,11 +1269,22 @@ def index(request):
     list_type = request.session.pop("listType", "current")
 
     # --- Step 1: Optimized Blacklist (2 Queries total) ---
-    profile = request.user.profile
-    blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
+    # Cache blacklist data per user for 5 minutes
+    blacklist_cache_key = f"user_blacklist_{user_id}"
+    blacklist_data = cache.get(blacklist_cache_key)
 
-    # Who blocked me?
-    blocked_by_user_ids = set(Profile.objects.filter(blacklistedPlayers=request.user).values_list("user_id", flat=True))
+    if blacklist_data is None:
+        profile = request.user.profile
+        blacklisted_players_ids = set(profile.blacklistedPlayers.values_list("id", flat=True))
+        blocked_by_user_ids = set(Profile.objects.filter(blacklistedPlayers=request.user).values_list("user_id", flat=True))
+        blacklist_data = {
+            "blacklisted": blacklisted_players_ids,
+            "blocked_by": blocked_by_user_ids,
+        }
+        cache.set(blacklist_cache_key, blacklist_data, 300)
+    else:
+        blacklisted_players_ids = blacklist_data["blacklisted"]
+        blocked_by_user_ids = blacklist_data["blocked_by"]
 
     # print_timestamp("Step 1: Blacklists fetched")
 
@@ -1287,8 +1324,9 @@ def index(request):
     #        "players__player", "invitedPlayers"
     #    )
 
-    player_game_ids = GamePlayer.objects.filter(player=user).values_list("game_id", flat=True)
-    invited_game_ids = Game.invitedPlayers.through.objects.filter(user=user).values_list("game_id", flat=True)
+    # Convert to lists immediately to avoid re-evaluation
+    player_game_ids = list(GamePlayer.objects.filter(player=user).values_list("game_id", flat=True))
+    invited_game_ids = list(Game.invitedPlayers.through.objects.filter(user=user).values_list("game_id", flat=True))
 
     # 2. Combine these IDs with the 'AVAILABLE' criteria in a single clean 'IN' clause
     # This avoids the messy JOIN logic in the main query
@@ -1307,9 +1345,8 @@ def index(request):
         .defer("gameData", "rewindData", "rewindTempData", "chatData")
     )
 
-    all_user_games = list(games_query)
-
-    all_user_games.sort(key=lambda game: game.latestUpdate, reverse=True)
+    # Sort in database instead of Python for better performance
+    all_user_games = list(games_query.order_by("-latestUpdate"))
 
     # print_timestamp("Step 2: Game queries complete")
 
@@ -1323,6 +1360,7 @@ def index(request):
     )
     my_move_games_data = []
     current_chat = finished_chat = False
+    finished_games_count = 0  # Track finished games for early exit optimization
 
     for game in all_user_games:
         # 1. Categorization Logic using local memory
@@ -1368,6 +1406,14 @@ def index(request):
         is_active = user_id in all_active_p_ids
         is_blacklisted_game = game.creator_id in blacklisted_players_ids or game.creator_id in blocked_by_user_ids
 
+        # Early skip optimizations to avoid expensive serialization
+        # Skip finished games beyond 10 (unless pending finish)
+        if status == "FINISHED" and not is_pending_finish and finished_games_count >= 10:
+            continue
+        # Skip blacklisted available games that user isn't involved in
+        if status == "AVAILABLE" and not is_involved and is_blacklisted_game:
+            continue
+
         player_context = {
             "all_game_players": all_game_players,
             "invited_users": list(game.invitedPlayers.all()),
@@ -1395,6 +1441,7 @@ def index(request):
                         current_chat = True
                 elif len(finished_games) < 10:
                     finished_games.append(serialized)
+                    finished_games_count += 1
                     if serialized["chatNotification"]:
                         finished_chat = True
 
@@ -1485,7 +1532,7 @@ def login_view(request):
             try:
                 body_sample = request.body.decode("utf-8")[:500]
                 debug_info["Raw_Body_Sample"] = body_sample
-            except Exception:
+            except (UnicodeDecodeError, AttributeError):
                 debug_info["Raw_Body_Status"] = "Not decodable"
 
             formatted_data = json.dumps(debug_info, indent=2)
@@ -1583,10 +1630,10 @@ def TGZmapEditor(request):
         return render(request, "Lobby/TGZmapEditor.html", {"mapData": request.POST["mapDataTGZ"]})
 
     else:
-        isSchismUser = False
-        ALLOWED_SCHISM_USERS = ["admin", "joshuastarr", "Lemem", "waymost"]
-        if request.user.username in ALLOWED_SCHISM_USERS:
-            isSchismUser = True
+        isSchismUser = True
+        #ALLOWED_SCHISM_USERS = ["admin", "joshuastarr", "Lemem", "waymost", "freddyknuckles", "RJ_E", "zach.chillman", "wsgosset"]
+        #if request.user.username in ALLOWED_SCHISM_USERS:
+        #    isSchismUser = True
         return render(request, "Lobby/TGZmapEditor.html", {"isSchismUser": isSchismUser})
 
 
@@ -1625,21 +1672,13 @@ def profile(request):
             profile = Profile.objects.get(user=request.user)
             profile.preferredRestaurantColour = request.POST["fcmResto"]
             profile.preferredHCcolour = request.POST["hcColour"]
-            try:
-                request.POST["highContrastBoardItems"]
-                profile.highContrastBoardItems = True
-            except Exception:
-                profile.highContrastBoardItems = False
+            profile.highContrastBoardItems = "highContrastBoardItems" in request.POST
 
             profile.preferredBusColour = request.POST["busColour"]
             profile.preferredBusBoard = request.POST["BusBoard"]
 
             profile.preferredTGZcolour = request.POST["tgzColour"]
-            try:
-                request.POST["TGZminimalText"]
-                profile.TGZminimalText = True
-            except Exception:
-                profile.TGZminimalText = False
+            profile.TGZminimalText = "TGZminimalText" in request.POST
 
             preferredCNScolour = request.POST["cnsColour"] if request.POST["cnsColour"] != "-1" else None
             profile.preferredCNScolour = preferredCNScolour
@@ -1665,11 +1704,7 @@ def profile(request):
 
             profile.liveNotification = request.POST["liveNotif"]
 
-            try:
-                request.POST["sendEmails"]
-                profile.sendEmailNotificationOnTurn = True
-            except Exception:
-                profile.sendEmailNotificationOnTurn = False
+            profile.sendEmailNotificationOnTurn = "sendEmails" in request.POST
 
             emailNotifications = [
                 int(request.POST["yourTurnEmail"]),
@@ -2203,8 +2238,6 @@ def createWEBpage(request, gameID=0):
 
 @login_required
 def createRNBpage(request, gameID=0):
-    if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect("index")
     experienced = SF_hasRequiredExperience(request, "RNB", Game)
     # Get settings debug flag for RNB map rendering
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
@@ -2222,14 +2255,12 @@ def createRNBpage(request, gameID=0):
             context.update(
                 {
                     "fillData": True,
-                    "gameName": f"Solo Map {map_id}",
-                    "gameDescription": f"Solo game on map {map_id}",
                     "gamePace": 30,  # Default pace
                     "playerNumber": 1,  # Solo play
                     "playerNames": [],  # No additional players
                     "kickoutDuration": 100,  # Default kickout duration
                     "startingOptions": [],  # No special starting options
-                    "selectedMapId": map_id,  # Pass selected map ID to template
+                    "selectedMapId": map_id,  # Pass uniqueID for matching
                 }
             )
 
@@ -2811,7 +2842,7 @@ def playerInfo(request, usernameToProfile):
             "jointWinPercentage": jointWinPercentage,
             "jointGameStats": jointGameStats,
         },
-        #using="jinja2",
+        # using="jinja2",
     )
 
     return response
@@ -2838,6 +2869,7 @@ def AllTournaments(request):
     )
 
 
+@login_required
 def joinGameLink(request, joinGameLink):
     gameCode = None
     numbers = None
@@ -2863,7 +2895,7 @@ def joinGameLink(request, joinGameLink):
 
     try:
         availableGame = Game.objects.get(id=numbers, gameCode=gameCode)
-    except Exception:
+    except Game.DoesNotExist:
         messages.error(request, (gettext("Sorry, the game no longer exists")))
         return HttpResponseRedirect(reverse("index"))
 
@@ -2915,7 +2947,7 @@ def joinGame(request, gameType):
 
     # Delete Training Game // Can never really fail
     if currentGame and action == "deleteTrgGame":
-        if request.user in current_players_list:
+        if request.user == currentGame.creator:
             currentGame.delete()
             messages.success(request, ("Game Deleted"))
             return JsonResponse(["Ok"], safe=False)
@@ -3085,8 +3117,8 @@ def checkJoinGame(request, gameType, gameID):
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Discord webhook failed (new user exp): {e}")
             messages.error(
                 request,
                 (
@@ -3140,8 +3172,8 @@ def checkJoinGame(request, gameType, gameID):
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Discord webhook failed (fair play): {e}")
             messages.error(
                 request,
                 (mark_safe(gettext('Your Fair Play rating is too low: {fairplay}%. Please see <a class="linkOther" href="/help/#navGameType">Help</a><br/><br/>').format(fairplay=fairPlayLastYear))),
@@ -3244,8 +3276,7 @@ def deleteGame(request, gameCode):
 
     # Delete Training Game // Can never really fail
     if jsonData["action"] == "deleteTrgGame":
-        user_is_player = currentGame.players.filter(player=request.user).exists()
-        if user_is_player:
+        if request.user == currentGame.creator:
             gameStatus = currentGame.gameStatus
             currentGame.delete()
             return JsonResponse(
@@ -3273,8 +3304,8 @@ def deleteGame(request, gameCode):
                     f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Discord webhook failed (delete game alert): {e}")
 
     return HttpResponse(status=204)  # No Content
 
@@ -3296,6 +3327,7 @@ def autoCompleteUsername(request):
         return render(request, "Lobby/index.html")
 
 
+@login_required
 def blacklistPlayer(request):
     if request.method != "PUT":
         return JsonResponse({"error": "Wrong request."}, status=400)
@@ -3806,6 +3838,7 @@ def setStopEmails(request):
 
 
 @login_required
+@require_POST
 def dataCheck(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -4035,12 +4068,15 @@ def deleteWebhook(request):
 @login_required
 @require_POST
 def sendAdminMessage(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"status": "error", "message": "Forbidden"}, status=403)
+
     try:
         data = json.loads(request.body.decode("utf-8"))
         message = data.get("message")
 
-        if message:  # Check if webhook URL is available
-            SN_sendAdminErrorMessage(message)  # Call your existing function
+        if message:
+            SN_sendAdminErrorMessage(message)
             return JsonResponse({"status": "success"}, status=200)
         else:
             return JsonResponse(
@@ -4060,15 +4096,18 @@ def BGH_API(request, options):
     response = requests.get(url)
     data = response.json()
     final_dictionary = {}
-    try:
-        final_dictionary = eval(data)
-    except Exception as e:
-        print("BGH API Error: " + str(e) + " Data: " + str(data))
+    if isinstance(data, dict):
+        final_dictionary = data
+    else:
+        try:
+            final_dictionary = json.loads(data) if isinstance(data, str) else {}
+        except (json.JSONDecodeError, TypeError) as e:
+            print(f"BGH API Error: {e} Data: {data}")
 
     try:
-        print(f"BGH API:: User: {request.user.username}   Options: {options}   Data: {final_dictionary['view_map_url']}")
-    except Exception:
-        print("BGH PRINT ERROR")
+        print(f"BGH API:: User: {request.user.username}   Options: {options}   Data: {final_dictionary.get('view_map_url', 'N/A')}")
+    except Exception as e:
+        print(f"BGH PRINT ERROR: {e}")
 
     return JsonResponse(final_dictionary)  # , safe=False)
 
@@ -4121,7 +4160,7 @@ def MiniTournament(request, Mini_Tournament_id):
     if request.method == "POST":
         try:
             Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
-        except Exception:
+        except Tournament.DoesNotExist:
             raise Http404(gettext("Tournament does not exist")) from None
         # First check if it is a person declining an invite
         if "declineInvite" in request.POST and request.POST["declineInvite"] == "true":
@@ -4151,7 +4190,7 @@ def MiniTournament(request, Mini_Tournament_id):
 
     try:
         Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
-    except Exception:
+    except Tournament.DoesNotExist:
         raise Http404(gettext("Tournament does not exist")) from None
 
     # Common items

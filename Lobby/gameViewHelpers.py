@@ -9,6 +9,7 @@ from django.utils.translation import gettext
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, Profile
+from Lobby.sharedFunctions.db_mutex import db_mutex
 
 
 def build_show_game_data(
@@ -84,6 +85,7 @@ def build_show_game_data(
                 False,
             )
         ),
+        "transactionID": currentGame.transactionID,
     }
 
     if not request.user.is_authenticated:
@@ -131,9 +133,12 @@ def build_show_game_data(
             else:
                 user_gp_all.save()
 
-    if user_gp and currentGame.gameStatus == "FINISHED" and user_gp.is_pending_finish:
-        user_gp.is_pending_finish = False
-        gp_updated = True
+    if user_gp_all and currentGame.gameStatus == "FINISHED" and user_gp_all.is_pending_finish:
+        user_gp_all.is_pending_finish = False
+        if user_gp and user_gp_all.id == user_gp.id:
+            gp_updated = True
+        else:
+            user_gp_all.save()
 
     if gp_updated:
         user_gp.save()
@@ -180,7 +185,7 @@ def build_show_game_data(
         zoomLevels = json.loads(currentGame.zoomLevels)
         if 0 <= pov < len(zoomLevels):
             myZoomLevel = zoomLevels[pov]
-            # Ind uses 0 to allow the game to set a default zoom according to 
+            # Ind uses 0 to allow the game to set a default zoom according to
             if myZoomLevel <= 0 and game_code != "IND":
                 myZoomLevel = default_zoom
     except (json.JSONDecodeError, IndexError, TypeError):
@@ -340,3 +345,24 @@ def shared_cast_vote(request):
         messages.success(request, msg)
 
     return JsonResponse(result)
+
+
+def process_game_with_mutex(request, inner_handler, mutex_prefix=""):
+    """Shared wrapper for all game-mutating views.
+
+    Checks for POST, parses the JSON body to extract ``gameID``, acquires
+    a ``db_mutex``, and delegates to *inner_handler*.  Returns a 503 if
+    the mutex cannot be acquired.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    gameID = jsonData["gameID"]
+
+    lock_name = mutex_prefix + str(gameID)
+    with db_mutex(lock_name, timeout=5, ttl=60) as acquired:
+        if acquired:
+            return inner_handler(request)
+        else:
+            return JsonResponse({"error": "System busy, please try again"}, status=503)

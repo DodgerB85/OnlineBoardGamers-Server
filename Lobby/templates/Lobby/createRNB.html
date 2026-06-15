@@ -153,7 +153,7 @@
                             </div>
                         </div>
                         <div class="singleChoiceDivText" id="selPlayer4" style="display: none;">
-                            <label class="choiceLabelText" for="player3">{% translate "Player 4" %}</label>
+                            <label class="choiceLabelText" for="player4">{% translate "Player 4" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
                                     <input type="text"
@@ -165,7 +165,7 @@
                             </div>
                         </div>
                         <div class="singleChoiceDivText" id="selPlayer5" style="display: none;">
-                            <label class="choiceLabelText" for="player3">{% translate "Player 5" %}</label>
+                            <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
                                     <input type="text"
@@ -177,7 +177,7 @@
                             </div>
                         </div>
                         <div class="singleChoiceDivText" id="selPlayer6" style="display: none;">
-                            <label class="choiceLabelText" for="player3">{% translate "Player 6" %}</label>
+                            <label class="choiceLabelText" for="player6">{% translate "Player 6" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
                                     <input type="text"
@@ -226,8 +226,7 @@
                                class="myCheckbox"
                                id="privateGame"
                                name="privateGame"
-                               value="1"
-                               required>
+                               value="1">
                         <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
                         <br />
                         <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
@@ -272,12 +271,39 @@
                     <fieldset id="basicOptions" class="optionsGroupTop">
                         <legend class="optionsHeader">{% translate "Game Options" %}</legend>
                         <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useSoloMineRules"
+                                   name="useSoloMineRules"
+                                   value="8">
+                            <label for="useSoloMineRules" class="checkboxLabel">{% translate "Solo mine rules (fixed output)" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Use solo rules; mines produce whatever they have more of, or gold if contents are equal" %}</span>
+                        </div>
+                        <br />
+                        <b>&c coming SOON&trade;</b>
+                    </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Map Selection" %}</legend>
+                        <div class="singleChoiceDiv">
                             <label class="choiceLabel" for="mapSelection">{% translate "Select Map" %}</label>
+                            <a id="viewHighscoresBtn"
+                               href="#"
+                               style="display: none;
+                                      margin-left: 10px;
+                                      width: auto;
+                                      padding: 6px 12px;
+                                      font-size: 14px;
+                                      text-decoration: none"
+                               class="registerbtn">{% translate "View Highscores" %}</a>
                             <br />
                             <div class="optionSelection">
                                 <select name="mapSelection"
                                         id="mapSelection"
                                         onchange="onMapSelectionChange();"
+                                        oninvalid="this.setCustomValidity('{% translate "Please Select a Map" %}')"
+                                        oninput="this.setCustomValidity('')"
                                         required>
                                     <option value="">Select Map (sorted by player count)</option>
                                 </select>
@@ -328,6 +354,9 @@
                         </div>
                     </fieldset>
                 </div>
+            </div>
+            <div>
+                <span id="mapPlayerCountWarning" class="cautionText" style="display: none;"></span>
             </div>
             <div>
                 <input type="submit"
@@ -398,10 +427,17 @@
         if (mapSelect) {
             for (var i = 0; i < mapSelect.options.length; i++) {
                 var option = mapSelect.options[i];
-                if (option.value && option.value.includes("{{ selectedMapId }}")) {
-                    mapSelect.selectedIndex = i;
-                    onMapSelectionChange();
-                    break;
+                if (option.value) {
+                    try {
+                        var mapData = JSON.parse(option.value);
+                        if (mapData.uniqueID == {{ selectedMapId }}) {
+                            mapSelect.selectedIndex = i;
+                            onMapSelectionChange();
+                            break;
+                        }
+                    } catch (e) {
+                        // Skip invalid JSON
+                    }
                 }
             }
         }

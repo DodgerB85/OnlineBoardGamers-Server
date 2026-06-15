@@ -429,6 +429,10 @@ body {
 	/*user-select: text !important;
   -webkit-user-select: none;*/
 	font-size: 16px;
+
+	width: fit-content;
+	min-width: 100%;
+	overflow-anchor: none; /* may not need this */
 }
 
 /*#actionAreaDiv {
@@ -452,6 +456,7 @@ body {
 	-ms-transition: all 0.2s ease-in-out;
 	-o-transition: all 0.2s ease-in-out;
 	transition: all 0.2s ease-in-out;
+	overflow-anchor: none; /* may not need this */
 }
 
 .slideC-enter-active,
@@ -482,10 +487,12 @@ body {
 	min-width: 1310px;
 	text-align: center;
 	min-height: 500px;
+	overflow-anchor: none; /* may not need this */
 }
 
 #mainAreaLessHistory {
 	min-width: 620px;
+	overflow-anchor: none; /* may not need this */
 }
 
 .fadeMainArea-enter-active,

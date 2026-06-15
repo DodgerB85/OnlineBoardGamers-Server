@@ -214,8 +214,10 @@ function hubRangeSqRightBorder(hubRange, index) {
 <template>
 	<!-- HIGHLIGHT SQUARES TO CLICK -->
 	<template v-if="personal.canPlay()">
-		<template v-for="(index, indexCount) in store.context.indexesToHighlightClick" :key="indexCount">
+		<TransitionGroup name="fade-sq">
 			<svg
+				v-for="index in store.context.indexesToHighlightClick"
+				:key="index"
 				class="higlightSquareToClick"
 				:style="{
 					width: (store.refSize * 38) / 240 + 'px',
@@ -234,7 +236,7 @@ function hubRangeSqRightBorder(hubRange, index) {
 					}"
 					oncontextmenu="return false;" />
 			</svg>
-		</template>
+		</TransitionGroup>
 	</template>
 
 	<!-- HIGHLIGHT SQUARES GREEN -->
@@ -468,5 +470,30 @@ function hubRangeSqRightBorder(hubRange, index) {
 .ghostDiv {
 	border: solid black;
 	border-radius: 100%;
+}
+
+/* Fade transition for highlight squares */
+/* Disable all mouse/touch interactions while fading out */
+.fade-sq-leave-active {
+	pointer-events: none;
+}
+
+/* Duration and timing of the animation */
+.fade-sq-enter-active,
+.fade-sq-leave-active {
+	transition:
+		opacity 0.4s ease,
+		transform 0.4s ease;
+}
+
+/* Starting state for entering / Ending state for leaving */
+.fade-sq-enter-from,
+.fade-sq-leave-to {
+	opacity: 0;
+}
+
+/* Absolute position is needed during leave so items don't "jump" */
+.fade-sq-leave-active {
+	position: absolute;
 }
 </style>

@@ -1,7 +1,5 @@
-import itertools
 import json
 import time
-from collections import defaultdict
 
 # from django.template.loader import render_to_string
 # from django.contrib.sites.shortcuts import get_current_site
@@ -40,6 +38,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     getCleanedAndSortedRoundData,
 )
 from Lobby.sharedFunctions.tournyGenerator import (
+    _compute_game_groups,
     multiGamePlayers4p,
     multiGamePlayersRound2,
 )
@@ -158,7 +157,8 @@ def SF_serializeGame(game, user, player_context):
     # 4. MyMove & Involved Logic
     is_my_move = False
     if user and game.gameStatus == "ACTIVE":
-        is_my_move = not current_players_str or user.username in current_players_str or any(s in current_players_str for s in rf.SHADOW_USERNAMES)
+        current_usernames = {u.strip() for u in current_players_str.split(",") if u.strip()} if current_players_str else set()
+        is_my_move = not current_players_str or user.username in current_usernames or any(s in current_usernames for s in rf.SHADOW_USERNAMES)
 
         # For HLC, if it is factory phase, AND you have submitted your move, set it back to false
         if game_code == "HLC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
@@ -169,7 +169,8 @@ def SF_serializeGame(game, user, player_context):
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
     # 5. Shadow/Delete Logic
-    is_deleteable = (any(name in all_usernames for name in rf.SHADOW_USERNAMES) and (user.id in all_ids if user else False)) or (game.maxPlayers == 1)
+    is_training_game = any(name in all_usernames for name in rf.SHADOW_USERNAMES) or game.maxPlayers == 1
+    is_deleteable = is_training_game and (user == game.creator if user else False)
 
     creator = game.creator.username if game.creator else "Unknown Creator"
     if creator == "Unknown Creator":
@@ -926,60 +927,15 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     # OTHERWISE -- NOT MG -- USE STANDARD MATCHMAKING
     else:
-        # Build dictionary of previous matchup counts (pairwise)
-        matchupCounts = defaultdict(int)
-        for round in TPDA:
-            for game in round:
-                if game[0] != "BYEPLAYERS":
-                    players = game[0]
-                    # Increment count for each pair in the game
-                    for pair in itertools.combinations(players, 2):
-                        matchupCounts[frozenset(pair)] += 1
-
         # Reverse allPlayersList to get best players to front, then create games starting from front
         allPlayersList.reverse()
 
-        # Create games, prioritizing new matchups and minimizing max pair repeats
-        while len(allPlayersList) >= tournamentObj.maxGamePlayers:
-            currentPlayers = [allPlayersList.pop(0)]
-            candidates = allPlayersList.copy()
-
-            # Try to find players, preferring those with least previous matchups with current group
-            while len(currentPlayers) < tournamentObj.maxGamePlayers and candidates:
-                # Calculate max matchup count for each candidate with current group
-                candidate_scores = {}
-                for candidate in candidates:
-                    # Find the maximum matchup count for any pair involving this candidate
-                    max_count = max(matchupCounts[frozenset({player, candidate})] for player in currentPlayers)
-                    candidate_scores[candidate] = max_count
-
-                # Prefer candidates with max_count == 0 (no previous matchups with group)
-                min_score = min(candidate_scores.values())
-                min_score_candidates = [c for c, s in candidate_scores.items() if s == min_score]
-
-                # If there are candidates with no previous matchups, prioritize them
-                if min_score == 0:
-                    min_score_candidates = [c for c in min_score_candidates if all(matchupCounts[frozenset({c, p})] == 0 for p in currentPlayers)]
-
-                # Select the first candidate in the original order (to respect points)
-                selected_candidate = next(c for c in candidates if c in min_score_candidates)
-
-                # Add the selected candidate
-                currentPlayers.append(selected_candidate)
-                allPlayersList.remove(selected_candidate)
-                candidates.remove(selected_candidate)
-
-            # Fill game if needed (edge case, though unlikely now)
-            while len(currentPlayers) < tournamentObj.maxGamePlayers and allPlayersList:
-                currentPlayers.append(allPlayersList.pop(0))
-
-            gamesPlayers.append(currentPlayers)
+        gamesPlayers = _compute_game_groups(allPlayersList, TPDA, tournamentObj.maxGamePlayers)
 
         # Handle remaining players (>2 for MiniT -- Byes have been removed first)
         # MT just make games if possible
         if tournamentObj.tournamentCategory == "Mini" and len(allPlayersList) >= 2:
-            currentPlayers = allPlayersList[:]
-            gamesPlayers.append(currentPlayers)
+            gamesPlayers.append(allPlayersList[:])
             allPlayersList.clear()
 
     ret["roundNumberString"] = roundNumberString
@@ -1303,3 +1259,60 @@ def SF_endAnyTournament(
 
 
 # End common main/mini functions
+
+
+# ---------------------------------------------------------------------------
+# Shared game-creation helpers
+# ---------------------------------------------------------------------------
+
+
+def SF_validatePlayers(request, usernames, max_players, allow_creator=True):
+    """Validate player usernames and return a list of User objects.
+
+    Returns an empty list when *usernames* is empty, ``None`` on any
+    validation error (after adding a Django message), or a list of ``User``
+    objects on success.
+    """
+    from django.contrib import messages
+    from django.shortcuts import get_object_or_404
+
+    if not usernames:
+        return []
+    existing_users = User.objects.filter(username__in=usernames)
+    existing_usernames = set(user.username for user in existing_users)
+    valid_players = []
+    for username in usernames:
+        if username not in existing_usernames:
+            messages.error(request, gettext("Error:Player '%s' does not exist") % username)
+            return None
+        if not allow_creator and username == request.user.username:
+            messages.error(request, gettext("Error: You cannot add yourself"))
+            return None
+        valid_players.append(get_object_or_404(User, username=username))
+    if len(valid_players) > max_players - 1:
+        messages.error(request, gettext("Error: Too many players for max %s") % max_players)
+        return None
+    return valid_players
+
+
+def SF_setupTrainingGameShadows(request, max_players, shadow_names=None):
+    """Set up SHADOW players for a training/practice game.
+
+    Returns ``(shadow_user_list, shadow_name_notes)`` where
+    *shadow_user_list* is a list of ``User`` objects and
+    *shadow_name_notes* is a JSON string of display names to store in
+    the creator's notes.
+    """
+    if shadow_names is None:
+        shadow_names = rf.SHADOW_PLAYER_NAMES
+    shadow_users = []
+    shadow_display = []
+    for i in range(1, max_players):
+        shadow_users.append(User.objects.get(username=shadow_names[i - 1]))
+        display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
+        shadow_display.append(display_name)
+    shadow_name_notes = json.dumps(shadow_display, separators=(",", ":"))
+    return shadow_users, shadow_name_notes
+
+
+

@@ -1139,6 +1139,8 @@ def SR_getRNBstartingOptionsHTML(startingOptionsArr):
         if option == rf.SO_EXPERIENCED_GAME:
             # usedOptions += 1
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+        if option == rfRNB.SO_USE_SOLO_MINE_RULES:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_useSokoMineRules.svg' title='" + gettext("Solo Mine Rules\nFixed Mine Output") + "'>"
 
     return startingOptionsHTML
 

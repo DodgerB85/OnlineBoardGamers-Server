@@ -19,7 +19,7 @@
       {% blocktranslate %}
         Roads & Boats Rules Available <a class='linkOther' href='https://www.splotter.nl/downloads/RB3Erules.pdf' target='_blank' download>here</a>
         <br />
-        &c Rules Available <a class="linkOther" href="/static/RNB/help/&C_Rules.pdf" target="_blank" download>here</a>
+        &c Rules Available <a class="linkOther" href="/static/RNB/help/&C_Rules.pdf" target="_blank" download>here</a> (coming SOON&trade;)
         <br />
         Player Aid Available <a class='linkOther' href='/static/RNB/help/RnB_Player_AId.jpg' target='_blank' downlod>here</a>
         {% endblocktranslate %}
@@ -31,7 +31,7 @@
         Roads & Boats has a lot of complex interactions with the goods, transporters, and buildings.
         To remove the need for lots of pointless and tedious interactions,
         certain shortcuts have been added to smoothen the user experience.
-        For example, the game will allow you to select a good you wish to ferry even when the
+        For example, the game will allow you to select a good you wish to ferry (move over a river with a boat) even when the
         transporter is already full, and then allow you to immediately drop it on the other side of the river.
         Such shortcuts are given in each of the phase sections below.
       {% endblocktranslate %}
@@ -40,25 +40,32 @@
       </h3>
       <div class="maxWidthContainerDiv">
         <div class="leftTextAlignDiv">
-          {% blocktranslate trimmed %}
-            <b>All Phases:</b> The only thing you really own on the map are your transporters!
-            Therefore, interacting with the map is almost always driven through your transporters.
-            You will start by selecting a transporter, and then interacting with other items using that transporter.
-          {% endblocktranslate %}
-          <br />
-          <img src="{% static 'RNB/help/transporterSelectHelp.jpg' %}"
-               alt="Transporter Help"
-               width="496"
-               height="443">
-          <br />
-          {% blocktranslate trimmed %}
-            You can select a transporter directly on the map.
-            You can also select it by clicking on a tile, and then clicking on the transporter in the Zoom Tile. If the Zoom Tile is still so crowded that you cannot select it, then each area of the tile is listed underneath, and will always display all items.
-            So alternatively you will always be able to select an item in this Zoom Area.
-            <br />
-            Once a transporter is selected, you can interact with goods/buildings either directly on the map,
-            or using the big tile in the Zoom Panel or below in the Zoom Area.
-          {% endblocktranslate %}
+          <div class="RNBsideBYsideWrapper">
+            <div class="RNBsideBYsideContainer">
+              <div class="RNBsideBYsideLeft">
+                <img src="{% static 'RNB/help/transporterSelectHelp.jpg' %}"
+                     alt="Transporter Help"
+                     width="496"
+                     height="443">
+              </div>
+              <div class="RNBsideBYsideRight">
+                {% blocktranslate trimmed %}
+                  <b>All Phases:</b> The only thing you really own on the map are your transporters!
+                  Therefore, interacting with the map is almost always driven through your transporters.
+                  You will start by selecting a transporter, and then interacting with other items using that transporter.
+                {% endblocktranslate %}
+                {% blocktranslate trimmed %}
+                  You can select a transporter directly on the map.
+                  You can also select it by clicking on a tile, and then clicking on the transporter in the Zoom Tile. If the Zoom Tile is still so crowded that you cannot select it, then each area of the tile is listed underneath, and will always display all items.
+                  So alternatively you will always be able to select an item in this Zoom Area.
+                  <br />
+                  <br />
+                  Once a transporter is selected, you can interact with goods/buildings either directly on the map,
+                  or using the big tile in the Zoom Panel or below in the Zoom Area.
+                {% endblocktranslate %}
+              </div>
+            </div>
+          </div>
           <br />
           <br />
           {% blocktranslate trimmed %}
@@ -128,7 +135,7 @@
                 as that is the equivalent of just “undoing” the action.
               </li>
               <li>
-                Geese cannot be following any of your transporters at the end of your movement phase - they must be on a tile. If any geese followers have only one possible location to be dropped, they will be dropped there automatically. If any geese are following a water transporter on a sea tile, then they cannot be dropped, and you must manually choose there destination before ending your turn.
+                Geese cannot be following any of your transporters at the end of your movement phase - they must be on a tile. If any geese followers have only one possible location to be dropped, they will be dropped there automatically. If any geese are following a water transporter on a sea tile, then they cannot be dropped, and you must manually choose their destination before ending your turn.
               </li>
             </ul>
           {% endblocktranslate %}
@@ -138,7 +145,7 @@
             <br />
             If you are able to build any buildings these will be displayed in the Build Panel which will appear just below that transporter.
             <br />
-            If you are able to start a build wall / bridge / road, or demolish wall action, these will be shown after the available buildings.
+            If you are able to start a build wall / bridge / road or demolish wall action, these will be shown after the available buildings.
             <br />
             Click a wall / bridge / road option, and your available choices will be highlighted on the map.
             <br />

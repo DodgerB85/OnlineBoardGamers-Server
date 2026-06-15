@@ -305,7 +305,7 @@ class BaseGame(models.Model):
 
     kickoutFlexiData = models.TextField(blank=True)
 
-    # TGZ only
+    # TGZ only PLUS holds RNB key to stop able to move pending sent multiple times
     autoMoves = models.CharField(max_length=30, blank=True, null=True, default=None)
 
     statsExcludedGame = models.BooleanField(blank=False, default=False)
@@ -389,6 +389,9 @@ class Game(BaseGame):
 
     # CURRENTLY RnB ONLY
     serverCurrentPlayerNamesInTurnOrder = models.JSONField(default=list, blank=True, null=True)
+
+    # RnB transaction recovery: set when server processes a stack move, cleared on final save
+    transactionID = models.CharField(max_length=64, blank=True, default="")
 
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)

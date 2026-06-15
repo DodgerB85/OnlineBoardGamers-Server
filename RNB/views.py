@@ -2,6 +2,7 @@ import base64
 import gzip
 import json
 import time
+import uuid
 from datetime import timedelta
 from typing import TYPE_CHECKING, cast
 
@@ -13,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Max
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render  # get_object_or_404,
+from django.shortcuts import render  # get_object_or_404,
 from django.utils import timezone
 from django.utils.translation import gettext
 from django_q.tasks import schedule
@@ -21,12 +22,13 @@ from django_q.tasks import schedule
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
     build_show_game_data,
+    process_game_with_mutex,
     shared_bug_entry,
+    shared_cast_vote,
     shared_save_notes,
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.db_mutex import db_mutex
 
 # from django.urls import reverse
 # from django.db.models import Q
@@ -43,10 +45,23 @@ from .models import RNBmap, RNBMapScore
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
-ALLOWED_USERS_RNB = ["admin", "DodgerB", "user1", "durendal", "Benkyo", "vraid", "JoshuaAcosta", "massibull", "phil", "timmymayes", "SaintJason", "h", "Jungy", "BotKickStarter", "Dycu"]
-
 if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter
+
+
+def _validateTurnOrderTransition(old_order, new_order, moved_player_name, game_id, username, turn, phase, action_name):
+    """Alert admin if new_order != old_order with moved_player_name removed. Does NOT block."""
+    if old_order is None:
+        old_order = []
+    expected_new = [p for p in old_order if p != moved_player_name]
+    if new_order != expected_new:
+        pass
+        # THIS SEEMED TO TRIGGER ALL THE TIME. REMOVED FOR NOW
+        #SN_sendAdminErrorMessage(
+        #    f"RNB turn order mismatch in {action_name} - gameID: {game_id} "
+        #    f"user: {username} turn: {turn} phase: {phase} "
+        #    f"old: {old_order} new: {new_order} expected: {expected_new}"
+        #)
 
 
 def index(request):
@@ -116,9 +131,6 @@ def RNBmapEditor(request, game_id=0):
 
 
 def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
-    if request.user.username not in ALLOWED_USERS_RNB:
-        return redirect("index")
-
     result = build_show_game_data(
         request,
         game_id,
@@ -140,11 +152,49 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData["gameDataB64"] = returnData.pop("gameData")
     currentPlayersArr = []
     if currentGame.phase in rfRNB.MAIN_PHASES:
-        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
+        #currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
+        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [])
+
+
+        # The below is meant to handle the case where the turn order is empty during a main phase but gameData exists
+        # This can happen if the game is loaded from a saved state where the turn order was not properly saved
+        # It is an attempt to fix the game eg going back to start of movement phase, but with just player A current again
+        #if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+        #    currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder)
+        #elif currentGame.gameData:
+        #    # Turn order is empty during a main phase but gameData exists, meaning all
+        #    # players already submitted their moves and the client failed to save the
+        #    # phase transition (e.g. crash, network error). Auto-advance to the
+        #    # conflict-decision phase that follows this main phase.
+        #    next_phase = currentGame.phase + 1
+        #    if next_phase == rfRNB.MAX_PHASE_REACHED:
+        #        next_phase = rfRNB.PHASE_CONFLICT_PRODUCTION_DECISION
+        #        currentGame.turn += 1
+        #    currentGame.phase = next_phase
+        #    all_non_bot_names = []
+        #    for gp in currentGame.players.all():
+        #        if not gp.is_missing:
+        #            all_non_bot_names.append(gp.player.username)
+        #    presenter.setCurrentPlayersFromArrInTurnOrder(all_non_bot_names)
+        #    currentPlayersArr = json.dumps(all_non_bot_names)
+        #else:
+        #    currentPlayersArr = json.dumps([presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
     elif currentGame.phase in rfRNB.ALL_PHASE_CONFLICTS:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 
     startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
+
+    mapName = "[No map name found]"
+    mapDescription = "[No map description found]"
+    uniqueID = startingMap[-1].get("UK", -1) if startingMap else -1
+
+    if uniqueID >= 0:
+        try:
+            currentMap = RNBmap.objects.get(uniqueID=uniqueID)
+            mapName = currentMap.name
+            mapDescription = currentMap.description
+        except RNBmap.DoesNotExist:
+            pass
 
     returnData.update(
         {
@@ -154,6 +204,9 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
             "currentPlayers": currentPlayersArr,
             "startingMap": startingMap,
+            "mapName": mapName,
+            "mapDescription": mapDescription,
+            "preferredRNBoptions": [-1, 1],
         }
     )
 
@@ -163,7 +216,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    preferredRNBoptions = json.loads(result["user_profile"].preferredRNBoptions) if result["user_profile"].preferredRNBoptions != "" else [-1]
+    profile_options = getattr(result["user_profile"], "preferredRNBoptions", "") or ""
+    preferredRNBoptions = json.loads(profile_options) if profile_options else [-1, 1]
     if len(preferredRNBoptions) < 2:
         preferredRNBoptions.extend([-1] * (2 - len(preferredRNBoptions)))
 
@@ -190,6 +244,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         {
             "currentMoveData": presenter.getCurrentMoveDataForPlayer(username),
             "allMyMoveData": presenter.getAllMyMoveDataForPlayer(username),
+            "allStackData": getAllCurrentStackMoves(currentGame),
             "trade": currentGame.playerTradeData,
         }
     )
@@ -212,18 +267,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
 
 def processRNBturn(request):
-    # processing a turn must be via POST
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return _processRNBturn(request)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    return process_game_with_mutex(request, _processRNBturn, mutex_prefix="processTurn_")
 
 
 @login_required()
@@ -281,6 +325,7 @@ def _processRNBturn(request):
     # END SAVE / CREATE
 
     elif jsonData["action"] == "saveStackMove":
+        #time.sleep(7)
         # We don't mind if we are "out of sync" as moves will only get processed in server order anyway
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
@@ -295,6 +340,9 @@ def _processRNBturn(request):
         nameToUse = request.user.username
         if request.user.username == "BotKickStarter":
             nameToUse = jsonData["BKSN"]
+        check_name = jsonData.get("checkName", "")
+        if check_name:
+            nameToUse = check_name
 
         # Remove flex time
         currentGame.kickoutFlexiData = SF_updateFlexiTime(
@@ -351,10 +399,36 @@ def _processRNBturn(request):
 
             # NO! This sets ALL POSSIBLE player to is_current, which triggers emails.
             presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+            _validateTurnOrderTransition(
+                currentGame.serverCurrentPlayerNamesInTurnOrder,
+                jsonData["allRemainingPlayersInTurnOrder"],
+                nameToUse,
+                currentGame.id,
+                request.user.username,
+                jsonData["turn"],
+                jsonData["phase"],
+                "saveStackMove",
+            )
             presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+
+            # Set transaction lock for client-side recovery
+            transaction_id = uuid.uuid4().hex
+            currentGame.transactionID = transaction_id
 
             # SAVE BEFORE NOTIFICATIONS
             currentGame.save()
+
+            # If the client disconnects before completing stack processing,
+            # notify the waiting players after a delay so the game doesn't freeze silently.
+            schedule(
+                "Lobby.sharedFunctions.sharedNotifications.SN_notifyStuckRNBTransaction",
+                currentGame.id,
+                transaction_id,
+                request.user.username,
+                next_run=timezone.now() + timedelta(minutes=5),
+                repeats=-1,  # Neg repeats for delete
+                schedule_type="O",
+            )
 
             ################ REWIND EVERY SAVE #######################
             # Don't save rewind if all players have moved - wait for client to process phase
@@ -382,6 +456,7 @@ def _processRNBturn(request):
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
                 "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
                 "gameDataB64": currentGame.gameData,
+                "transactionID": transaction_id,
             }
 
             return JsonResponse(response_data, safe=False)
@@ -409,6 +484,8 @@ def _processRNBturn(request):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "immediateProcess": True,
                 "allStackData": getAllCurrentStackMoves(currentGame),
+                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
                 # "gameDataB64": base64.b64encode(currentGame.gameDataBLOB or b"").decode("utf-8")
                 "gameDataB64": currentGame.gameData,
             }
@@ -519,6 +596,9 @@ def _processRNBturn(request):
         nameToUse = request.user.username
         if request.user.username == "BotKickStarter":
             nameToUse = jsonData["BKSN"]
+        check_name = jsonData.get("checkName", "")
+        if check_name:
+            nameToUse = check_name
 
         # Remove flex time
         currentGame.kickoutFlexiData = SF_updateFlexiTime(
@@ -555,7 +635,11 @@ def _processRNBturn(request):
 
         # Else if we are saving INTO a PRAYIUNG / TO phase, it is a single player single move, single next
         if savingPhase in (rfRNB.PHASE_CONFLICT_PRAYINGS + rfRNB.PHASE_CONFLICT_TURN_ORDERS):
+            # Set transaction lock for client-side recovery
+            transaction_id = uuid.uuid4().hex
+            currentGame.transactionID = transaction_id
             # Perform most of a normal save
+            # (schedule() call added after save below)
             db_latest_update = currentGame.latestUpdate
             latest_update = jsonData.get("latestUpdate", 0)
             game_id = currentGame.id
@@ -573,6 +657,16 @@ def _processRNBturn(request):
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
             presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+            _validateTurnOrderTransition(
+                currentGame.serverCurrentPlayerNamesInTurnOrder,
+                jsonData["allRemainingPlayersInTurnOrder"],
+                nameToUse,
+                currentGame.id,
+                request.user.username,
+                jsonData["turn"],
+                jsonData["phase"],
+                "saveConflictMove(praying/TO)",
+            )
             presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
             # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
@@ -586,6 +680,16 @@ def _processRNBturn(request):
 
             currentGame.save()
 
+            schedule(
+                "Lobby.sharedFunctions.sharedNotifications.SN_notifyStuckRNBTransaction",
+                currentGame.id,
+                transaction_id,
+                request.user.username,
+                next_run=timezone.now() + timedelta(minutes=5),
+                repeats=-1,  # Neg repeats for delete
+                schedule_type="O",
+            )
+
             response_data = {
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
@@ -593,9 +697,14 @@ def _processRNBturn(request):
                 "allStackData": getAllCurrentStackMoves(currentGame),
                 # "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
                 "isCurrentPlayersArr": presenter.getArrayOfIsCurrentPlayers(),
+                "transactionID": transaction_id,
             }
 
             return JsonResponse(response_data, safe=False)
+
+        # Set transaction lock for client-side recovery
+        transaction_id = uuid.uuid4().hex
+        currentGame.transactionID = transaction_id
 
         # Otherwise, you are saving INTO the start of a new main phase
         # Perform most of a normal save
@@ -616,6 +725,16 @@ def _processRNBturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+        _validateTurnOrderTransition(
+            currentGame.serverCurrentPlayerNamesInTurnOrder,
+            jsonData["allRemainingPlayersInTurnOrder"],
+            nameToUse,
+            currentGame.id,
+            request.user.username,
+            jsonData["turn"],
+            jsonData["phase"],
+            "saveConflictMove(TO)",
+        )
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
         # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
@@ -629,6 +748,16 @@ def _processRNBturn(request):
 
         currentGame.save()
 
+        schedule(
+            "Lobby.sharedFunctions.sharedNotifications.SN_notifyStuckRNBTransaction",
+            currentGame.id,
+            transaction_id,
+            request.user.username,
+            next_run=timezone.now() + timedelta(minutes=5),
+            repeats=-1,  # Neg repeats for delete
+            schedule_type="O",
+        )
+
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
@@ -636,6 +765,7 @@ def _processRNBturn(request):
             "allStackData": getAllCurrentStackMoves(currentGame),
             # "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
             "isCurrentPlayersArr": presenter.getArrayOfIsCurrentPlayers(),
+            "transactionID": transaction_id,
         }
 
         return JsonResponse(response_data, safe=False)
@@ -688,6 +818,11 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
+        # Clear transaction lock (idempotent: if already cleared, just proceed)
+        client_transaction_id = jsonData.get("transactionID", "")
+        if currentGame.transactionID and client_transaction_id and currentGame.transactionID == client_transaction_id:
+            currentGame.transactionID = ""
+
         gameDataB64 = jsonData["gameDataB64"]
         # raw_binary = base64.b64decode(gameDataStr)
         # currentGame.gameDataBLOB = raw_binary
@@ -732,8 +867,7 @@ def _processRNBturn(request):
                 playerListToNotify = [p for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "RnbBot"}]
                 if len(playerListToNotify) > 0:
                     if jsonData["currentPlayerNeedsToFixMove"]:
-                        # start_time = timezone.now() + timedelta(minutes=2)
-                        start_time = timezone.now() + timedelta(seconds=10)  # For debug
+                        start_time = timezone.now() + timedelta(minutes=2)
                         schedule(
                             "Lobby.sharedFunctions.sharedNotifications.SN_sendFixNextTurnNotificationWithValidation",
                             "RNB",
@@ -759,31 +893,27 @@ def _processRNBturn(request):
             # Pending players CAN pre-move -- but DON'T notify if a premove is already set
             pendingPlayersArr = jsonData["pendingPlayersArr"]
             if len(pendingPlayersArr) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-                # 1. Clean the list (strip whitespace)
-                # 3. Remove players who have a PreMove saved
-                # This keeps only players where playerHasPreMove returns False
-                # Debug print
-                # for pName in playerListToNotify:
-                #    if presenter.playerHasPreMove(pName):
-                #        print(f"{pName}: has premove: {presenter.getCurrentMoveDataForPlayer(pName)}")
-                playerListToNotify = [pName.strip() for pName in playerListToNotify if pName.strip() not in {request.user.username, "RnbBot"} and not presenter.playerHasPreMove(pName.strip())]
+                pendingPlayersArrToNotify = [pName.strip() for pName in pendingPlayersArr if pName.strip() not in {request.user.username, "RnbBot"} and not presenter.playerHasPreMove(pName.strip())]
 
-                if len(playerListToNotify) > 0:
-                    # start_time = timezone.now() + timedelta(minutes=2)
-                    start_time = timezone.now() + timedelta(seconds=10)  # For debug
-                    schedule(
-                        "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
-                        "RNB",
-                        playerListToNotify,
-                        currentGame.id,
-                        presenter.getGameName(),
-                        currentGame.latestUpdate,
-                        currentGame.turn,
-                        currentGame.phase,
-                        next_run=start_time,
-                        repeats=-1,  # Neg repeats for delete
-                        schedule_type="O",
-                    )
+                if len(pendingPlayersArrToNotify) > 0:
+                    pending_key = f"{currentGame.turn}:{currentGame.phase}"
+                    if currentGame.autoMoves != pending_key:
+                        currentGame.autoMoves = pending_key
+                        currentGame.save()
+                        start_time = timezone.now() + timedelta(minutes=10)
+                        schedule(
+                            "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
+                            "RNB",
+                            pendingPlayersArrToNotify,
+                            currentGame.id,
+                            presenter.getGameName(),
+                            currentGame.latestUpdate,
+                            currentGame.turn,
+                            currentGame.phase,
+                            next_run=start_time,
+                            repeats=-1,  # Neg repeats for delete
+                            schedule_type="O",
+                        )
 
             ################ REWIND EVERY SAVE #######################
 
@@ -799,6 +929,8 @@ def _processRNBturn(request):
             "latestUpdate": currentGame.latestUpdate,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "savingFromStackMove": False,
+            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
+            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
         }
 
         return JsonResponse(response_data, safe=False)
@@ -951,21 +1083,24 @@ def _processRNBturn(request):
             playerListToNotify = [p.strip() for p in pendingPlayersArr if p.strip() not in {request.user.username, "RnbBot"}]
 
             if len(playerListToNotify) > 0:
-                # start_time = timezone.now() + timedelta(minutes=2)
-                start_time = timezone.now() + timedelta(seconds=10)  # For debug
-                schedule(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
-                    "RNB",
-                    playerListToNotify,
-                    currentGame.id,
-                    presenter.getGameName(),
-                    currentGame.latestUpdate,
-                    currentGame.turn,
-                    currentGame.phase,
-                    next_run=start_time,
-                    repeats=-1,  # Neg repeats for delete
-                    schedule_type="O",
-                )
+                pending_key = f"{currentGame.turn}:{currentGame.phase}"
+                if currentGame.autoMoves != pending_key:
+                    currentGame.autoMoves = pending_key
+                    currentGame.save()
+                    start_time = timezone.now() + timedelta(minutes=10)
+                    schedule(
+                        "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
+                        "RNB",
+                        playerListToNotify,
+                        currentGame.id,
+                        presenter.getGameName(),
+                        currentGame.latestUpdate,
+                        currentGame.turn,
+                        currentGame.phase,
+                        next_run=start_time,
+                        repeats=-1,  # Neg repeats for delete
+                        schedule_type="O",
+                    )
 
         return JsonResponse(
             {
@@ -1114,21 +1249,24 @@ def performSaveGame(request, currentGame, jsonData):
             playerListToNotify = [p.strip() for p in pendingPlayersArr if p.strip() not in {request.user.username, "RnbBot"}]
 
             if len(playerListToNotify) > 0:
-                # start_time = timezone.now() + timedelta(minutes=2)
-                start_time = timezone.now() + timedelta(seconds=10)  # For debug
-                schedule(
-                    "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
-                    "RNB",
-                    playerListToNotify,
-                    currentGame.id,
-                    presenter.getGameName(),
-                    currentGame.latestUpdate,
-                    currentGame.turn,
-                    currentGame.phase,
-                    next_run=start_time,
-                    repeats=-1,  # Neg repeats for delete
-                    schedule_type="O",
-                )
+                pending_key = f"{currentGame.turn}:{currentGame.phase}"
+                if currentGame.autoMoves != pending_key:
+                    currentGame.autoMoves = pending_key
+                    currentGame.save()
+                    start_time = timezone.now() + timedelta(minutes=10)
+                    schedule(
+                        "Lobby.sharedFunctions.sharedNotifications.SN_sendPendingRNBturnNotificationWithValidation",
+                        "RNB",
+                        playerListToNotify,
+                        currentGame.id,
+                        presenter.getGameName(),
+                        currentGame.latestUpdate,
+                        currentGame.turn,
+                        currentGame.phase,
+                        next_run=start_time,
+                        repeats=-1,  # Neg repeats for delete
+                        schedule_type="O",
+                    )
 
     ################ REWIND EVERY SAVE #######################
 
@@ -1152,17 +1290,7 @@ def performSaveGame(request, currentGame, jsonData):
 
 @login_required()
 def sendChatMessageRNB(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
-
-    jsonData = json.loads(request.body)
-    gameID = jsonData["gameID"]
-
-    with db_mutex(str(gameID), timeout=5, ttl=60) as acquired:
-        if acquired:
-            return _sendChatMessageRNB(request)
-        else:
-            return JsonResponse({"error": "System busy, please try again"}, status=503)
+    return process_game_with_mutex(request, _sendChatMessageRNB, mutex_prefix="processChat_")
 
 
 @login_required()
@@ -1382,6 +1510,7 @@ def getRNBmaps(request):
             maps_data.append(
                 {
                     "id": map_obj.id,
+                    "uniqueID": map_obj.uniqueID,
                     "name": map_obj.name,
                     "description": map_obj.description,
                     "playerCount": map_obj.playerCount,
@@ -1551,6 +1680,8 @@ def RNBdata(request, dataType=1):
             "latestUpdate": currentGame.latestUpdate,
             "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
             "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+            "transactionID": currentGame.transactionID,
+            "allStackData": getAllCurrentStackMoves(currentGame),
         }
         # Send game data
         return JsonResponse(returnData)
@@ -1585,6 +1716,7 @@ def RNBdata(request, dataType=1):
                 "latestUpdate": currentGame.latestUpdate,
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
                 "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+                "transactionID": currentGame.transactionID,
             }
         )
 
@@ -1648,7 +1780,7 @@ def PclearPastMoveData(currentGame):
         gp.moveDataJSON = [
             m
             for m in moves
-            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT ) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)
+            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)
         ]
 
         gp.save(update_fields=["moveDataJSON"])
@@ -1702,3 +1834,7 @@ def getAllCurrentStackMoves(currentGame):
             currentStackMoves.append(entry)
 
     return currentStackMoves
+
+@login_required()
+def castVote(request):
+    return process_game_with_mutex(request, shared_cast_vote, mutex_prefix="processTurn_")

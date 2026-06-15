@@ -85,7 +85,7 @@ function getReasonUnableToEndPhase() {
 	if (store.context.gravesLeftToPlace > 0) return "Finish placing all graves"
 	if (city.getAvailableStorage(controller.currentPlayerIndex()) > 0 && store.context.resourcesToDiscard > 0) return "" // return "Finish storing all goods"
 	if (store.players[controller.currentPlayerIndex()].requiredRebuilds.length !== 0) {
-		let str = "Before ending the phase, you must readd: "
+		let str = "Before ending the phase, you must re-add: "
 		for (let i = 0; i < store.players[controller.currentPlayerIndex()].requiredRebuilds.length; i++) {
 			let bldgNum = store.players[controller.currentPlayerIndex()].requiredRebuilds[i].bldgNum
 			if (bldgNum > 20) bldgNum = 20

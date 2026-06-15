@@ -965,7 +965,7 @@ function flatmapResourceArray(array) {
 				<br />
 				<br />
 				Don't forget to set your Antiquity Preferences!
-				<a class="linkOther" href="/profileAQY" target="_blank">Antiquity Preferences</a>
+				<a class="linkOther" href="/profileAQY/" target="_blank">Antiquity Preferences</a>
 				<br />
 				<br />
 				For more information please see

@@ -14,7 +14,7 @@ import { usePersonalStore } from "../stores/TGZpersonal.js"
 const store = useModelStore()
 const personal = usePersonalStore()
 
-import { ref, reactive } from "vue"
+import { ref, reactive, onMounted } from "vue"
 
 const showWATERTOLLpopup = ref(0)
 const EKWENSUdata = reactive({
@@ -28,6 +28,73 @@ const EKWENSUdata = reactive({
 	popupPosition: { x: 0, y: 0 },
 })
 const popupPosition = ref({ x: 0, y: 0 })
+
+// --- Plop Animation Setup ---
+const isFullyMounted = ref(false)
+
+onMounted(() => {
+	setTimeout(() => {
+		isFullyMounted.value = true
+	}, 100)
+})
+
+// 4 separate plop directives for independent tweaking
+const vPlopMonument = {
+	mounted: (el) => {
+		if (!isFullyMounted.value) return
+		el.classList.add("monument-plop-active")
+		el.addEventListener(
+			"animationend",
+			() => {
+				el.classList.remove("monument-plop-active")
+			},
+			{ once: true }
+		)
+	},
+}
+
+const vPlopResource = {
+	mounted: (el) => {
+		if (!isFullyMounted.value) return
+		el.classList.add("resource-plop-active")
+		el.addEventListener(
+			"animationend",
+			() => {
+				el.classList.remove("resource-plop-active")
+			},
+			{ once: true }
+		)
+	},
+}
+
+const vPlopWater = {
+	mounted: (el) => {
+		if (!isFullyMounted.value) return
+		el.classList.add("water-plop-active")
+		el.addEventListener(
+			"animationend",
+			() => {
+				el.classList.remove("water-plop-active")
+			},
+			{ once: true }
+		)
+	},
+}
+
+const vPlopCraftsman = {
+	mounted: (el) => {
+		if (!isFullyMounted.value) return
+		el.classList.add("craftsman-plop-active")
+		el.addEventListener(
+			"animationend",
+			() => {
+				el.classList.remove("craftsman-plop-active")
+			},
+			{ once: true }
+		)
+	},
+}
+// --- End Plop Animation Setup ---
 
 let popupInterval
 
@@ -598,6 +665,7 @@ function localSelectEWKWENSUcows(val) {
 		<template v-for="(player, index1) in store.players" :key="index1">
 			<template v-for="(monument, index2) in player.monuments" :key="index2">
 				<div
+					v-plop-monument
 					class="monumentDiv"
 					:style="{
 						width: store.refSize / 6 + 'px',
@@ -630,6 +698,7 @@ function localSelectEWKWENSUcows(val) {
 		<!-- ADD PLAYER ADDED RESOURCES !! NB !! DOES NOT INCLUDE NATURAL -->
 		<template v-for="(resourceObj, index) in store.addedResources" :key="index">
 			<div
+				v-plop-resource
 				class="resourceDiv"
 				:style="{
 					width: store.refSize / 6 + 'px',
@@ -639,6 +708,8 @@ function localSelectEWKWENSUcows(val) {
 					'border-width': (store.refSize * 3) / 240 + 'px',
 				}"
 				:class="{ inMonRaiseProcess: store.context.itemsInMonumentUpgrade.includes(resourceObj[0]) }">
+				<!-- Ripple Effect (Behind Resource) -->
+				<div class="resource-ripple"></div>
 				<img class="resourceImg" :src="view.getImage('res' + String(resourceObj[1]))" alt="RRR" />
 				<div v-if="store.depletedResources.includes(resourceObj[0])" class="depletedDiv" :class="getDepletedResourceTimes(resourceObj[0]) === 1 ? 'crossBackground' : 'crossBackground_Atete'"></div>
 			</div>
@@ -666,23 +737,48 @@ function localSelectEWKWENSUcows(val) {
 
 		<!-- ADD PLAYER ADDED WATER -->
 		<template v-for="(waterObj, index) in store.addedWater" v-bind:key="index">
-			<img
-				class="waterImg"
+			<!-- Ripple: separate square element centered on the water tile -->
+			<div
+				v-plop-water
+				class="water-ripple"
+				:style="{
+					width: store.refSize / 6 + 'px',
+					height: store.refSize / 6 + 'px',
+					top: view.getIndexPos(waterObj[0], waterObj[1])[0] + 'px',
+					left: view.getIndexPos(waterObj[0], waterObj[1])[1] + (store.refSize / 6) / 2 + 'px',
+				}"></div>
+			<div
+				class="waterContainer"
 				:class="'r' + String(waterObj[1])"
-				:src="view.getImage('res' + String(rf.WATER_TILE))"
 				:style="{
 					width: (store.refSize * 2) / 6 + 'px',
 					height: store.refSize / 6 + 'px',
 					top: view.getIndexPos(waterObj[0], waterObj[1])[0] + 'px',
 					left: view.getIndexPos(waterObj[0], waterObj[1])[1] + 'px',
-					'border-width': (store.refSize * 0) / 240 + 'px',
-				}"
-				alt="RRR" />
+				}">
+				<div v-plop-water class="water-plop-wrapper">
+					<img
+						class="waterImg"
+						:src="view.getImage('res' + String(rf.WATER_TILE))"
+						:style="{ width: '100%', height: '100%', 'border-width': (store.refSize * 0) / 240 + 'px' }"
+						alt="RRR" />
+				</div>
+			</div>
 		</template>
 
 		<!-- ADD PLAYER CRAFTSMEN -->
 		<template v-for="(player, index1) in store.players" v-bind:key="index1">
 			<template v-for="(craftsmanData, index2) in player.craftsmen" v-bind:key="index2">
+				<!-- Ripple: square centered on the craftsman center, always circular -->
+				<div
+					v-plop-craftsman
+					class="craftsman-ripple"
+					:style="{
+						width: store.refSize / 6 + 'px',
+						height: store.refSize / 6 + 'px',
+						top: view.getIndexPos(craftsmanData[0], craftsmanData[2])[0] + (rf.FOUR_SIZE_TILES.includes(craftsmanData[1]) ? (store.refSize / 6) / 2 : 0) + 'px',
+						left: view.getIndexPos(craftsmanData[0], craftsmanData[2])[1] + (store.refSize / 6) / 2 + 'px',
+					}">‌</div>
 				<div
 					:class="['craftsmanDiv', { selectableTile: store.context.craftsmenIndexesToHighlight.includes(craftsmanData[0]) }, 'r' + String(craftsmanData[2]), { inMonRaiseProcess: shouldCmanShowInMonProcessBorder(craftsmanData) }, { mapInspectorMode: store.topMenuViews.mapInspectorMode }]"
 					:style="{
@@ -695,7 +791,10 @@ function localSelectEWKWENSUcows(val) {
 						'font-size': (store.refSize * 2) / 3 / 6 + 'px',
 					}"
 					@click="clickedCraftsman($event, craftsmanData, index1)">
-					<img class="craftsmanImg" :src="view.getImage('craftsman' + String(craftsmanData[1]))" alt="RRR" />
+					<!-- Plop Animation Wrapper -->
+					<div v-plop-craftsman class="craftsman-plop-wrapper">
+						<img class="craftsmanImg" :src="view.getImage('craftsman' + String(craftsmanData[1]))" alt="RRR" />
+					</div>
 					<!-- Add PRICE-->
 					<div
 						class="craftsmanPriceDiv"
@@ -879,8 +978,14 @@ function localSelectEWKWENSUcows(val) {
 	position: absolute;
 }
 
-.waterImg {
+.waterContainer {
 	position: absolute;
+	box-sizing: border-box;
+}
+
+.waterImg {
+	width: 100%;
+	height: 100%;
 	box-sizing: border-box;
 	border-style: solid;
 	border-color: black;
@@ -898,6 +1003,7 @@ function localSelectEWKWENSUcows(val) {
 	position: absolute;
 	box-sizing: border-box;
 	border-style: solid;
+	overflow: visible;
 }
 
 .craftsmanPriceDiv {
@@ -1095,5 +1201,177 @@ function localSelectEWKWENSUcows(val) {
 .fadeOut-enter,
 .fadeOut-leave-active {
 	opacity: 0;
+}
+
+/* --- Plop Animations for Map Elements --- */
+
+/* Monument Plop */
+.monument-plop-active {
+	animation: monument-plop 0.4s ease-out forwards;
+}
+
+@keyframes monument-plop {
+	0% {
+		transform: scale(0);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.2);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+/* Resource Plop */
+.resource-plop-active {
+	animation: resource-plop 0.4s ease-out forwards;
+}
+
+@keyframes resource-plop {
+	0% {
+		transform: scale(0.8);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.1);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+/* Water Plop */
+.water-plop-active {
+	animation: water-plop 0.4s ease-out forwards;
+}
+
+@keyframes water-plop {
+	0% {
+		transform: scale(0.8);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.1);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+/* Craftsman Plop */
+.craftsman-plop-active {
+	animation: craftsman-plop 0.4s ease-out forwards;
+}
+
+@keyframes craftsman-plop {
+	0% {
+		transform: scale(0.8);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.1);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+/* --- Ripple Effects --- */
+/* Hide ripples by default */
+.resource-ripple,
+.water-ripple,
+.craftsman-ripple {
+	opacity: 0;
+	pointer-events: none;
+	position: absolute;
+	border-radius: 50%;
+	transform-origin: center center;
+}
+
+/* Resource Ripple */
+.resource-ripple {
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.resource-ripple.resource-plop-active {
+	animation: resource-ripple-out 0.6s ease-out forwards;
+}
+
+@keyframes resource-ripple-out {
+	0% {
+		transform: scale(0.8);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(3);
+		opacity: 0;
+	}
+}
+
+/* Water Ripple - separate square element, always circular */
+.water-ripple {
+	border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.water-ripple.water-plop-active {
+	animation: water-ripple-out 0.6s ease-out forwards;
+}
+
+@keyframes water-ripple-out {
+	0% {
+		transform: scale(0.8);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(3);
+		opacity: 0;
+	}
+}
+
+/* Plop Wrappers - handle scale animation without affecting rotation on the outer element */
+.water-plop-wrapper,
+.craftsman-plop-wrapper {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+/* Craftsman Ripple - separate element at the same position as the craftsman */
+.craftsman-ripple {
+	position: absolute;
+	border: 2px solid rgba(255, 255, 255, 0.8);
+	border-radius: 50%;
+	box-sizing: border-box;
+	pointer-events: none;
+	transform-origin: center;
+	opacity: 0;
+}
+
+.craftsman-ripple.craftsman-plop-active {
+	animation: craftsman-ripple-out 0.6s ease-out forwards;
+}
+
+@keyframes craftsman-ripple-out {
+	0% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(3);
+		opacity: 0;
+	}
 }
 </style>

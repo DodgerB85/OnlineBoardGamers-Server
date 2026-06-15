@@ -65,6 +65,34 @@ class TournamentAdmin(admin.ModelAdmin):
     search_fields = ["tournamentName"]
     list_filter = ("tournamentCategory", "gameCode", "tournamentStatus")
 
+    def get_readonly_fields(self, request, obj=None):
+        fields = list(super().get_readonly_fields(request, obj))
+        if obj and obj.tournamentCategory == "Main":
+            fields.extend(["tournamentName", "tournament_name_note"])
+        return fields
+
+    @admin.display(description="")
+    def tournament_name_note(self, obj):
+        return format_html(
+            '<div style="color:#666; font-size:0.9em;">'
+            "Name structure is critical: must match the auto-scheduler format "
+            '(e.g., "June 26 TGZ Tournament") for pending/opening to work.'
+            "</div>"
+        )
+
+    def get_fields(self, request, obj=None):
+        fields = list(super().get_fields(request, obj))
+        if obj and obj.tournamentCategory == "Main":
+            fields = [f for f in fields if f not in ("tournamentName", "tournament_name_note")]
+            return ("tournamentName", "tournament_name_note") + tuple(fields)
+        # For non-Main, just move tournamentName to the top
+        fields = [f for f in fields if f != "tournamentName"]
+        return ("tournamentName",) + tuple(fields)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        return formfield
+
 
 class GamePlayerInline(admin.TabularInline):
     model = GamePlayer
@@ -348,6 +376,7 @@ class GameAdmin(admin.ModelAdmin):
                     "FCMplayersMoveData",
                     "ind_premove_display",
                     "currentPlayersInTurnOrder",
+                    "autoMoves",
                 ),
             },
         ),

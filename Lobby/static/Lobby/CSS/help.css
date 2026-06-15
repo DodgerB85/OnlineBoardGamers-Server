@@ -301,6 +301,32 @@
 }
 /** END CNS HELP **/
 
+/** RNB HELP **/
+.RNBsideBYsideWrapper {
+	text-align: center;
+}
+
+.RNBsideBYsideContainer {
+	display: inline-flex;
+	width: fit-content;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin: auto;
+}
+
+.RNBsideBYsideLeft {
+	flex: 0 0 auto;
+	padding-right: 10px;
+}
+
+.RNBsideBYsideRight {
+	flex: 1 1 100%;
+	max-width: 600px;
+	min-width: 450px;
+	text-align: left;
+}
+/** END RNB HELP **/
+
 /** AQY HELP **/
 #clickPlayers {
 	width: 300px;

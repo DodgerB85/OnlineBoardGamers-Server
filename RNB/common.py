@@ -6,13 +6,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, GamePlayer, User
-from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_getGameCreationJsonReturn,
+    SF_setupTrainingGameShadows,
+    SF_validatePlayers,
+)
 from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
 )  # Replace 'somewhere' with actual module
@@ -54,26 +57,6 @@ def create_rnb_game(
         if tournamentObj is not None and (is_main_tournament or is_mini_tournament):
             return tournamentObj.maxGamePlayers
         return 2
-
-    def validate_players(usernames, max_players, allow_creator=True):
-        """Validate player usernames and return a list of User objects."""
-        if not usernames:
-            return []
-        existing_users = User.objects.filter(username__in=usernames)
-        existing_usernames = set(user.username for user in existing_users)
-        valid_players = []
-        for username in usernames:
-            if username not in existing_usernames:
-                messages.error(request, gettext(f"Error:Player '{username}' does not exist"))
-                return None
-            if not allow_creator and username == request.user.username:
-                messages.error(request, gettext("Error: You cannot add yourself"))
-                return None
-            valid_players.append(get_object_or_404(User, username=username))
-        if len(valid_players) > max_players - 1:  # Account for creator in non-tournament games
-            messages.error(request, gettext(f"Error: Too many players for max {max_players}"))
-            return None
-        return valid_players
 
     #############################################
     #
@@ -138,7 +121,7 @@ def create_rnb_game(
             isTrainingGame = True
 
         if not isTrainingGame:
-            invited_usernames_objs = validate_players(invited_usernames, max_players, allow_creator=False)
+            invited_usernames_objs = SF_validatePlayers(request, invited_usernames, max_players, allow_creator=False)
             # If no invited playerrs, get []. If error, get None
             if invited_usernames_objs is None:
                 return HttpResponseRedirect(reverse("createRNBpage"))
@@ -152,18 +135,18 @@ def create_rnb_game(
             starting_options.append(rf.SO_TRAINING_GAME)
             game_status = "ACTIVE"
             stats_exclude = True
-            shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
-            shadow_display = []
-            for i in range(1, max_players):
-                all_players.append(User.objects.get(username=shadow_names[i - 1]))
-                display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
-                shadow_display.append(display_name)
-            shadowNameNotes = json.dumps(shadow_display, separators=(",", ":"))
+            # Only add shadow users for multi-player training games
+            if max_players > 1:
+                shadow_users, shadowNameNotes = SF_setupTrainingGameShadows(request, max_players)
+                all_players.extend(shadow_users)
         elif "learningGame" in request.POST:
             starting_options.append(int(request.POST.get("learningGame")))
             stats_exclude = True
         elif "experiencedGame" in request.POST:
             starting_options.append(int(request.POST.get("experiencedGame")))
+
+        if "useSoloMineRules" in request.POST:
+            starting_options.append(int(request.POST.get("useSoloMineRules")))
 
         all_players.append(request.user)
 
