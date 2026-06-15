@@ -446,6 +446,25 @@ def _processRNBturn(request):
             if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
                 setPlayerStackToCurrent(currentGame, currentGame.serverCurrentPlayerNamesInTurnOrder[0])
 
+            # Notify the next current player(s) NOW, in case the submitting client disconnects before
+            # completing saveAndUpdateNotifictionsAfterStack. The notification is a 2-minute validated
+            # task, so when the client DOES complete normally the second save bumps latestUpdate and
+            # this earlier task self-invalidates (no double notification). When all players have moved
+            # (empty list) there is no next player yet, so nothing is scheduled here.
+            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            nextCurrentPlayers = jsonData["allIsCurrentPlayers"]
+            if len(nextCurrentPlayers) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+                playerListToNotify = [p for p in nextCurrentPlayers if p.strip() not in {request.user.username, "RnbBot"}]
+                if len(playerListToNotify) > 0:
+                    presenter.sendYourTurnNotification(
+                        "RNB",
+                        playerListToNotify,
+                        currentGame.id,
+                        presenter.getGameName(),
+                        currentGame,
+                        oldVer,
+                    )
+
             response_data = {
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),

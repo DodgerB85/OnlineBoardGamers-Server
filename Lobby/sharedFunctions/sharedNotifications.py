@@ -450,7 +450,7 @@ def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, game
 
         # 2. Early Exit: Validate state before doing any player logic
         if not (expected_latestUpdate == current_game.latestUpdate and expected_turn == current_game.turn and expected_phase == current_game.phase):
-            print(f"{gameCode}: {gameID} has mismatched state. Skipping.")
+            print(f"{gameCode}: {gameID} has mismatched state. latestUpdate: {expected_latestUpdate!r} vs {current_game.latestUpdate!r}, turn: {expected_turn!r} vs {current_game.turn!r}, phase: {expected_phase!r} vs {current_game.phase!r}. Skipping.")
             return
 
         # 3. Efficient Player Fetch:
@@ -566,7 +566,7 @@ def SN_sendFixNextTurnNotificationWithValidation(gameCode, playerName, gameID, g
 
         # 2. Early Exit: Validate state before doing any player logic
         if not (expected_latestUpdate == current_game.latestUpdate and expected_turn == current_game.turn and expected_phase == current_game.phase):
-            print(f"{gameCode}: {gameID} has mismatched state. Skipping.")
+            print(f"{gameCode}: {gameID} has mismatched state. latestUpdate: {expected_latestUpdate!r} vs {current_game.latestUpdate!r}, turn: {expected_turn!r} vs {current_game.turn!r}, phase: {expected_phase!r} vs {current_game.phase!r}. Skipping.")
             return
 
         # 3. Check if the player is still isCurrent
@@ -657,7 +657,7 @@ def SN_sendPendingRNBturnNotificationWithValidation(gameCode, playerList, gameID
 
         # 2. Early Exit: Validate state before doing any player logic
         if not (expected_latestUpdate == current_game.latestUpdate and expected_turn == current_game.turn and expected_phase == current_game.phase):
-            print(f"{gameCode}: {gameID} has mismatched state. Skipping.")
+            print(f"{gameCode}: {gameID} has mismatched state. latestUpdate: {expected_latestUpdate!r} vs {current_game.latestUpdate!r}, turn: {expected_turn!r} vs {current_game.turn!r}, phase: {expected_phase!r} vs {current_game.phase!r}. Skipping.")
             return
 
         # 3. Efficient Player Fetch:
