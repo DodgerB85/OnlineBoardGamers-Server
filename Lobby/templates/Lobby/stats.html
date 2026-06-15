@@ -1,7 +1,9 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
   <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
@@ -9,7 +11,7 @@
     <script src="{% static 'Lobby/stats.js' %}"></script>
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
-  <div class="container">
+  {% if request.use_new_design %}<div class="nd-page nd-page-narrow" id="statsPage">{% else %}<div class="container" id="statsPage">{% endif %}
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -17,132 +19,183 @@
         {% endfor %}
       </div>
     {% endif %}
-    <h1>
-      <a class="linkOther" href="{% url 'FCM:FCMstats' %}">{% translate "Food Chain Magnate Stats" %}</a>
-    </h1>
-    <h1>
-      <a class="linkOther" href="{% url 'TGZ:TGZstats' %}">{% translate "The Great Zimbabwe Stats" %}</a>
-    </h1>
-    <h1>
-      <a class="linkOther" href="{% url 'AQY:AQYstats' %}">{% translate "Antiquity Stats" %}</a>
-    </h1>
-    <hr />
-    <h1>{% translate "Current Users" %}: {{ totalUsers }}</h1>
-    <h1>{% translate "Games (non-practice) in Progress" %}: {{ totalGames }}</h1>
-    <h2>
-      {% for game in game_stats %}
-        {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
-        {{ game.active }}
-      {% endfor %}
-    </h2>
-    <h1>{% translate "Finished Games (non-practice)" %}: {{ finishedGames }}</h1>
-    <h2>
-      {% for game in game_stats %}
-        {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
-        {{ game.finished }}
-      {% endfor %}
-    </h2>
-    <h1>{% translate "Active users in last 24hrs" %}: {{ userActvitiy }}</h1>
-    <hr />
-    <h1>{% translate "Top Players" %}</h1>
-    <div class="tab">
-      <button class="tablinks" id="FCM">
-        <img src="{% static 'FCM/images/burger_board.png' %}"
-             alt="FCM game"
-             title="FCM Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="HLC">
-        <img src="{% static 'HLC/images/icon_car.png' %}"
-             alt="HLC game"
-             title="HLC Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="BUS">
-        <img src="{% static 'BUS/images/bus_icon.png' %}"
-             alt="Bus game"
-             title="Bus Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="TGZ">
-        <img src="{% static 'TGZ/images/tgz_icon.png' %}"
-             alt="TGZ game"
-             title="TGZ Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="CNS">
-        <img src="{% static 'CNS/images/cns_icon.png' %}"
-             alt="CNS game"
-             title="CNS Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="AQY">
-        <img src="{% static 'AQY/images/aqy_icon.png' %}"
-             alt="AQY game"
-             title="AQY Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="IND">
-        <img src="{% static 'IND/images/ind_icon.png' %}"
-             alt="IND game"
-             title="IND Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="KFW">
-        <img src="{% static 'KFW/images/kfw_icon.png' %}"
-             alt="KFW game"
-             title="KFW Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="WEB">
-        <img src="{% static 'WEB/images/web_icon.png' %}"
-             alt="WEB game"
-             title="WEB Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-      <button class="tablinks" id="RNB">
-        <img src="{% static 'RNB/images/rnb_icon.png' %}"
-             alt="RNB game"
-             title="RNB Game"
-             class="statsIMG"
-             width="40"
-             height="40">
-      </button>
-    </div>
-    <div class="tab">
-      <button class="tablinks" id="fairPlay">{% translate "Fair Play League" %}</button>
-    </div>
-    <div class="tab">
-      <button class="tablinks" id="allPlayers">{% translate "All Players" %}</button>
-      <button class="tablinks" id="players2">{% translate "2 Player" %}</button>
-      <button class="tablinks" id="players3">{% translate "3 Player" %}</button>
-      <button class="tablinks" id="players4">{% translate "4 Player" %}</button>
-      <button class="tablinks" id="players5">{% translate "5 Player" %}</button>
-      <button class="tablinks" id="players6">{% translate "6 Player" %}</button>
-    </div>
-    <div class="tab">
-      <button class="tablinks" id="allTime">{% translate "All Time" %}</button>
-      <button class="tablinks" id="threeMonths">{% translate "Last 3 Months" %}</button>
-      <button class="tablinks" id="month">{% translate "Last Month" %}</button>
-    </div>
+
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% translate "Stats" %}</h1>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Per-Game Stats" %}</h2>
+        <p>{% translate "Detailed game-by-game stats:" %}</p>
+        <div class="nd-row-flex">
+          <a class="nd-button nd-button-sm" href="{% url 'FCM:FCMstats' %}">{% translate "Food Chain Magnate" %}</a>
+          <a class="nd-button nd-button-sm" href="{% url 'TGZ:TGZstats' %}">{% translate "The Great Zimbabwe" %}</a>
+          <a class="nd-button nd-button-sm" href="{% url 'AQY:AQYstats' %}">{% translate "Antiquity" %}</a>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Site overview" %}</h2>
+        <div class="nd-stats-grid">
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ totalUsers }}</div>
+            <div class="nd-stats-tile-label">{% translate "Current Users" %}</div>
+          </div>
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ totalGames }}</div>
+            <div class="nd-stats-tile-label">{% translate "Games in Progress" %}</div>
+          </div>
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ finishedGames }}</div>
+            <div class="nd-stats-tile-label">{% translate "Finished Games" %}</div>
+          </div>
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ userActvitiy }}</div>
+            <div class="nd-stats-tile-label">{% translate "Active last 24h" %}</div>
+          </div>
+        </div>
+        <div class="nd-stats-gamebreak" style="font-size:13px;color:var(--color-muted);margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;">
+          {% for game in game_stats %}
+            <span class="nd-game-stat" title="{{ game.name }}">
+              {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
+              <span>{{ game.active }} active / {{ game.finished }} finished</span>
+            </span>
+            {% if not forloop.last %}<span class="nd-game-stat-sep">&middot;</span>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Top Players" %}</h2>
+        <div class="tab nd-tabs" id="ndGameTabs">
+          <button class="nd-tab tablinks" id="FCM">
+            <img src="{% static 'FCM/images/burger_board.png' %}" alt="FCM game" title="FCM Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="HLC">
+            <img src="{% static 'HLC/images/icon_car.png' %}" alt="HLC game" title="HLC Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="BUS">
+            <img src="{% static 'BUS/images/bus_icon.png' %}" alt="Bus game" title="Bus Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="TGZ">
+            <img src="{% static 'TGZ/images/tgz_icon.png' %}" alt="TGZ game" title="TGZ Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="CNS">
+            <img src="{% static 'CNS/images/cns_icon.png' %}" alt="CNS game" title="CNS Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="AQY">
+            <img src="{% static 'AQY/images/aqy_icon.png' %}" alt="AQY game" title="AQY Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="IND">
+            <img src="{% static 'IND/images/ind_icon.png' %}" alt="IND game" title="IND Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="KFW">
+            <img src="{% static 'KFW/images/kfw_icon.png' %}" alt="KFW game" title="KFW Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="WEB">
+            <img src="{% static 'WEB/images/web_icon.png' %}" alt="WEB game" title="WEB Game" class="statsIMG" width="36" height="36">
+          </button>
+          <button class="nd-tab tablinks" id="RNB">
+            <img src="{% static 'RNB/images/rnb_icon.png' %}" alt="RNB game" title="RNB Game" class="statsIMG" width="36" height="36">
+          </button>
+        </div>
+        <div class="tab nd-tabs" id="ndFairPlayTabs">
+          <button class="nd-tab tablinks" id="fairPlay">{% translate "Fair Play League" %}</button>
+        </div>
+        <div class="tab nd-tabs" id="ndPlayerCountTabs">
+          <button class="nd-tab tablinks" id="allPlayers">{% translate "All Players" %}</button>
+          <button class="nd-tab tablinks" id="players2">{% translate "2 Player" %}</button>
+          <button class="nd-tab tablinks" id="players3">{% translate "3 Player" %}</button>
+          <button class="nd-tab tablinks" id="players4">{% translate "4 Player" %}</button>
+          <button class="nd-tab tablinks" id="players5">{% translate "5 Player" %}</button>
+          <button class="nd-tab tablinks" id="players6">{% translate "6 Player" %}</button>
+        </div>
+        <div class="tab nd-tabs" id="ndTimeTabs">
+          <button class="nd-tab tablinks" id="allTime">{% translate "All Time" %}</button>
+          <button class="nd-tab tablinks" id="threeMonths">{% translate "Last 3 Months" %}</button>
+          <button class="nd-tab tablinks" id="month">{% translate "Last Month" %}</button>
+        </div>
+      </div>
+    {% else %}
+      <h1>
+        <a class="linkOther" href="{% url 'FCM:FCMstats' %}">{% translate "Food Chain Magnate Stats" %}</a>
+      </h1>
+      <h1>
+        <a class="linkOther" href="{% url 'TGZ:TGZstats' %}">{% translate "The Great Zimbabwe Stats" %}</a>
+      </h1>
+      <h1>
+        <a class="linkOther" href="{% url 'AQY:AQYstats' %}">{% translate "Antiquity Stats" %}</a>
+      </h1>
+      <hr />
+      <h1>{% translate "Current Users" %}: {{ totalUsers }}</h1>
+      <h1>{% translate "Games (non-practice) in Progress" %}: {{ totalGames }}</h1>
+      <h2>
+        {% for game in game_stats %}
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
+          {{ game.active }}
+        {% endfor %}
+      </h2>
+      <h1>{% translate "Finished Games (non-practice)" %}: {{ finishedGames }}</h1>
+      <h2>
+        {% for game in game_stats %}
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
+          {{ game.finished }}
+        {% endfor %}
+      </h2>
+      <h1>{% translate "Active users in last 24hrs" %}: {{ userActvitiy }}</h1>
+      <hr />
+      <h1>{% translate "Top Players" %}</h1>
+      <div class="tab">
+        <button class="tablinks" id="FCM">
+          <img src="{% static 'FCM/images/burger_board.png' %}" alt="FCM game" title="FCM Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="HLC">
+          <img src="{% static 'HLC/images/icon_car.png' %}" alt="HLC game" title="HLC Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="BUS">
+          <img src="{% static 'BUS/images/bus_icon.png' %}" alt="Bus game" title="Bus Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="TGZ">
+          <img src="{% static 'TGZ/images/tgz_icon.png' %}" alt="TGZ game" title="TGZ Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="CNS">
+          <img src="{% static 'CNS/images/cns_icon.png' %}" alt="CNS game" title="CNS Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="AQY">
+          <img src="{% static 'AQY/images/aqy_icon.png' %}" alt="AQY game" title="AQY Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="IND">
+          <img src="{% static 'IND/images/ind_icon.png' %}" alt="IND game" title="IND Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="KFW">
+          <img src="{% static 'KFW/images/kfw_icon.png' %}" alt="KFW game" title="KFW Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="WEB">
+          <img src="{% static 'WEB/images/web_icon.png' %}" alt="WEB game" title="WEB Game" class="statsIMG" width="40" height="40">
+        </button>
+        <button class="tablinks" id="RNB">
+          <img src="{% static 'RNB/images/rnb_icon.png' %}" alt="RNB game" title="RNB Game" class="statsIMG" width="40" height="40">
+        </button>
+      </div>
+      <div class="tab">
+        <button class="tablinks" id="fairPlay">{% translate "Fair Play League" %}</button>
+      </div>
+      <div class="tab">
+        <button class="tablinks" id="allPlayers">{% translate "All Players" %}</button>
+        <button class="tablinks" id="players2">{% translate "2 Player" %}</button>
+        <button class="tablinks" id="players3">{% translate "3 Player" %}</button>
+        <button class="tablinks" id="players4">{% translate "4 Player" %}</button>
+        <button class="tablinks" id="players5">{% translate "5 Player" %}</button>
+        <button class="tablinks" id="players6">{% translate "6 Player" %}</button>
+      </div>
+      <div class="tab">
+        <button class="tablinks" id="allTime">{% translate "All Time" %}</button>
+        <button class="tablinks" id="threeMonths">{% translate "Last 3 Months" %}</button>
+        <button class="tablinks" id="month">{% translate "Last Month" %}</button>
+      </div>
+    {% endif %}
+
     <!-- FAIR PLAY -->
     {% for game in fairPlayArr %}
       <div id="fairPlayDiv{{ forloop.counter0 }}" class="statsDiv">
@@ -150,7 +203,7 @@
           <div class="playerStatsDiv">
             <h2>{% translate "Fair Play League" %}</h2>
             {% translate "This is a table of % completed games in the last year, along with total completed games in the last year" %}
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -179,7 +232,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -198,7 +251,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -224,7 +277,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -243,7 +296,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -269,7 +322,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -288,7 +341,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -316,7 +369,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 2p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -335,7 +388,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 2p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -361,7 +414,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 2p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -380,7 +433,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 2p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -406,7 +459,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 2p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -425,7 +478,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 2p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -453,7 +506,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 3p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -472,7 +525,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 3p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -498,7 +551,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 3p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -517,7 +570,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 3p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -543,7 +596,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 3p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -562,7 +615,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 3p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -590,7 +643,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 4p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -609,7 +662,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 4p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -635,7 +688,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 4p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -654,7 +707,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 4p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -680,7 +733,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 4p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -699,7 +752,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 4p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -727,7 +780,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 5p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -746,7 +799,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 5p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -772,7 +825,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 5p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -791,7 +844,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 5p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -817,7 +870,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 5p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -836,7 +889,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 5p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -857,14 +910,14 @@
         {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
       </div>
     {% endfor %}
-    <!-- END 2 PLAYERS -->
+    <!-- END 5 PLAYERS -->
     <!-- 6 PLAYERS -->
     {% for game in winArr6p %}
       <div id="winTotalsTotal6pDiv{{ forloop.counter0 }}" class="statsDiv">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 6p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -883,7 +936,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 6p" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -909,7 +962,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 6p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -928,7 +981,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 6p (Last 3 Months)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -954,7 +1007,7 @@
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 6p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -973,7 +1026,7 @@
           </div>
           <div class="playerStatsDiv">
             <h2>{% translate "Win Percentages 6p (Last Month)" %}</h2>
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Player" %}</th>
@@ -1032,7 +1085,7 @@
             </table>
           </div>
         {% else %}
-          <h1>No Current Games</h1>
+          {% if request.use_new_design %}<p class="nd-empty">No Current Games</p>{% else %}<h1>No Current Games</h1>{% endif %}
         {% endif %}
       </div>
       <!-- FINISHED GAMES -->
@@ -1057,14 +1110,14 @@
             </table>
           </div>
         {% else %}
-          <h1>No Current Games</h1>
+          {% if request.use_new_design %}<p class="nd-empty">No Finished Games</p>{% else %}<h1>No Finished Games</h1>{% endif %}
         {% endif %}
       </div>
-      {% include 'Lobby/donate/donateBanner.html' %}
+      {% if not request.use_new_design %}{% include 'Lobby/donate/donateBanner.html' %}{% endif %}
     </div>
     <br />
     <br />
-    {% include 'Lobby/common/homeButton.html' %}
+    {% if not request.use_new_design %}{% include 'Lobby/common/homeButton.html' %}{% endif %}
   </div>
   {% block script %}{% endblock %}
 {% endblock %}

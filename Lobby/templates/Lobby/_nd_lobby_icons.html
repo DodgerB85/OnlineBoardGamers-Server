@@ -1,0 +1,127 @@
+{% load static %}
+{% load i18n %}
+<div class="nd-icon-legend">
+  <h3>{% translate "What are the icons?" %}</h3>
+  <p style="font-size:14px;color:var(--color-muted);">
+    {% translate "The icons represent the options selected for that game. You can hover over the icon to see what it represents." %}
+  </p>
+
+  <h4>{% translate "Game Icons" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %}<span>{% translate "Food Chain Magnate" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %}<span>{% translate "Horseless Carriage" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %}<span>{% translate "Bus" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}<span>{% translate "The Great Zimbabwe" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="CNS" %}<span>{% translate "Cannes" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %}<span>{% translate "Antiquity" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="IND" %}<span>{% translate "Indonesia" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="KFW" %}<span>{% translate "Keyflower" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="WEB" %}<span>{% translate "Web" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="RNB" %}<span>{% translate "Roads & Boats" %}</span></div>
+  </div>
+
+  <h4>{% translate "All Games" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'Lobby/images/startingOptions/so_learningGame.svg' %}" title="{% translate "Learning Game" %}">
+      <span>{% translate "Learning Game - See" %} <a class="linkOther" href="/nd/help/#navGameType">{% translate "Help" %}</a></span>
+    </div>
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'Lobby/images/startingOptions/so_experiencedGame.svg' %}" title="{% translate "Experienced Game" %}">
+      <span>{% translate "Experienced Game - See" %} <a class="linkOther" href="/nd/help/#navGameType">{% translate "Help" %}</a></span>
+    </div>
+  </div>
+
+  <h4>{% translate "Food Chain Magnate" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_newMS.svg' %}" title="{% translate "New Milestones" %}"><span>{% translate "New Milestones" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_ketchupMS.svg' %}" title="{% translate "Ketchup Milestone" %}"><span>{% translate "Ketchup Milestone" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_reservePrice.jpg' %}" title="{% translate "New Reserve Cards" %}"><span>{% translate "New Reserve Cards" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_movieStars.svg' %}" title="{% translate "Movie Stars" %}"><span>{% translate "Movie Stars" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_massMarketeers.jpg' %}" title="{% translate "Mass Marketeers" %}"><span>{% translate "Mass Marketeers" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_GFC.jpg' %}" title="{% translate "Gourmet Food Critics" %}"><span>{% translate "Gourmet Food Critics" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_rural.jpg' %}" title="{% translate "Rural Marketeers" %}"><span>{% translate "Rural Marketeers" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/map23.jpg' %}" title="{% translate "New Districts" %}"><span>{% translate "New Districts" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_lobbyists.jpg' %}" title="{% translate "Lobbyists" %}"><span>{% translate "Lobbyists" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_nightShift.jpg' %}" title="{% translate "Night Shift Manager" %}"><span>{% translate "Night Shift Manager" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_coffee.svg' %}" title="{% translate "Coffee" %}"><span>{% translate "Coffee" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_fryChef.svg' %}" title="{% translate "Fry Chef" %}"><span>{% translate "Fry Chef" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_kimchi.svg' %}" title="{% translate "Kimchi" %}"><span>{% translate "Kimchi" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_sushi.svg' %}" title="{% translate "Sushi" %}"><span>{% translate "Sushi" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_noodles.svg' %}" title="{% translate "Noodles" %}"><span>{% translate "Noodles" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_strict.svg' %}" title="{% translate "Turn Order Payday/Fridge" %}"><span>{% translate "Turn Order Payday/Fridge" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_shortGame.svg' %}" title="{% translate "Short Game" %}"><span>{% translate "Short Game" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_noMS.svg' %}" title="{% translate "No Milestones" %}"><span>{% translate "No Milestones" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_noCEO.svg' %}" title="{% translate "No CFO Milestone" %}"><span>{% translate "No CFO Milestone" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_noRadio.svg' %}" title="{% translate "No Radio Milestone" %}"><span>{% translate "No Radio Milestone" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/hardchoices2.jpg' %}" title="{% translate "Hard Choices" %}"><span>{% translate "Hard Choices" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Sbox" width="50" height="50" src="{% static 'FCM/images/so_sandbox.svg' %}" title="{% translate "Sandbox Mode" %}"><span>{% translate "Sandbox Mode" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_randomMods.svg' %}" title="{% translate "Random Modules" %}"><span>{% translate "Random Modules" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_draftMods.jpg' %}" title="{% translate "Draft Modules" %}"><span>{% translate "Draft Modules" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_urbanPlanning.svg' %}" title="{% translate "Urban Planning" %}"><span>{% translate "Urban Planning" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_urbanPlanningPlus.svg' %}" title="{% translate "Urban Planning Plus" %}"><span>{% translate "Urban Planning Plus" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_jazz.svg' %}" title="{% translate "Jazz Musicians" %}"><span>{% translate "Jazz Musicians" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_dumplings.svg' %}" title="{% translate "Dumplings" %}"><span>{% translate "Dumplings" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_delivery.svg' %}" title="{% translate "Delivery Drivers" %}"><span>{% translate "Delivery Drivers" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'FCM/images/so_hawkers.svg' %}" title="{% translate "Hawker Truck Marketing" %}"><span>{% translate "Hawker Truck Marketing" %}</span></div>
+  </div>
+
+  <h4>{% translate "Horseless Carriage" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'HLC/images/s_car.jpg' %}" title="{% translate "Use Cars" %}"><span>{% translate "Use Cars" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'HLC/images/s_truck.jpg' %}" title="{% translate "Use Trucks" %}"><span>{% translate "Use Trucks" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'HLC/images/s_sports.jpg' %}" title="{% translate "Use Sports" %}"><span>{% translate "Use Sports" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'Lobby/images/startingOptions/HLC_moreMainlines.svg' %}" title="{% translate "Increase Mainlines" %}"><span>{% translate "Increase mainlines from removed vehicles" %}</span></div>
+  </div>
+
+  <h4>{% translate "The Great Zimbabwe" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'TGZ/images/so_schism.svg' %}" title="{% translate "Use Schism Expansion" %}"><span>{% translate "Use Schism Expansion" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'TGZ/images/so_customgods.jpg' %}" title="{% translate "Selected gods" %}"><span>{% translate "Selected gods" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'TGZ/images/so_customgodsVR.jpg' %}" title="{% translate "Selected gods with altered VR" %}"><span>{% translate "Selected gods with altered VR" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'TGZ/images/so_customSpecVR.jpg' %}" title="{% translate "Altered Spec VR" %}"><span>{% translate "Altered Spec VR" %}</span></div>
+  </div>
+
+  <h4>{% translate "Cannes" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'CNS/images/so_expansion.svg' %}" title="{% translate "Use Expansion" %}"><span>{% translate "Use Expansion" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'CNS/images/so_tableS.svg' %}" title="{% translate "Small Table" %}"><span>{% translate "Small Table" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'CNS/images/so_table.svg' %}" title="{% translate "Medium Table" %}"><span>{% translate "Medium Table" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'CNS/images/so_tableL.svg' %}" title="{% translate "Large Table" %}"><span>{% translate "Large Table" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'CNS/images/so_junkS.svg' %}" title="{% translate "Low Table Junk" %}"><span>{% translate "Low Table Junk" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'CNS/images/so_junk.svg' %}" title="{% translate "Medium Table Junk" %}"><span>{% translate "Medium Table Junk" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'CNS/images/so_junkL.svg' %}" title="{% translate "High Table Junk" %}"><span>{% translate "High Table Junk" %}</span></div>
+  </div>
+
+  <h4>{% translate "Indonesia" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'IND/images/so_hiddenMoney.svg' %}" title="{% translate "Players' money is hidden" %}"><span>{% translate "Hidden Money" %}</span></div>
+    <div class="nd-icon-cell"><img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'IND/images/so_aegean_map.svg' %}" title="{% translate "Use the fan made Aegean Map" %}"><span>{% translate "Use Aegean Map Expansion" %}</span></div>
+  </div>
+
+  <h4>{% translate "Keyflower" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'KFW/images/so_merchants.svg' %}" title="{% translate "Use Merchants Expansion" %}">
+      <span>{% translate "Use Merchants Expansion" %}</span>
+    </div>
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'KFW/images/so_promos.svg' %}" title="{% translate "Use Promo Tiles" %}">
+      <span>{% translate "Use Promo Tiles" %}</span>
+    </div>
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'KFW/images/so_infoHighPlus.svg' %}" title="{% translate "High Knowledge" %}&#10;{% translate "of Hidden Info" %}">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'KFW/images/so_infoHighMinus.svg' %}" title="{% translate "High Knowledge" %}&#10;{% translate "of Hidden Info" %}">
+      <span>{% translate "High Level of Hidden Info" %}</span>
+    </div>
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'KFW/images/so_infoMedPlus.svg' %}" title="{% translate "Medium Knowledge" %}&#10;{% translate "of Hidden Info" %}">
+      <img class="startingOptionHelpImg" alt="Str Opt" height="50" src="{% static 'KFW/images/so_infoMedMinus.svg' %}" title="{% translate "Medium Knowledge" %}&#10;{% translate "of Hidden Info" %}">
+      <span>{% translate "Medium Level" %}</span>
+    </div>
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'KFW/images/so_infoLow.svg' %}" title="{% translate "Low Knowledge" %}&#10;{% translate "of Hidden Info" %}">
+      <span>{% translate "Low Level" %}</span>
+    </div>
+  </div>
+</div>

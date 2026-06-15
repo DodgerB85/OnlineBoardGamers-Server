@@ -29,16 +29,40 @@
           {% endfor %}
         </div>
       {% endif %}
-      <h1>
-        {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=gameCode %}
-        {{ tournament.tournamentName }}
-      </h1>
-      {% if tournament.tournamentDescription %}
-        <h3>
-          <i>{{ tournament.tournamentDescription }}</i>
-        </h3>
+
+      {% if request.use_new_design %}
+        <div class="nd-page-header">
+          <h1>
+            {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=gameCode %}
+            {{ tournament.tournamentName }}
+          </h1>
+        </div>
+
+        {% if tournament.tournamentDescription %}
+          <p style="font-size:14px;color:var(--color-muted);margin-bottom:16px;font-style:italic;">
+            {{ tournament.tournamentDescription }}
+          </p>
+        {% endif %}
+
+        {% if startingOptionsHTML != "" %}
+          <div class="nd-card nd-section" style="padding:12px 14px;">
+            <div class="nd-mod-list-mobile nd-row-flex" style="gap:10px;">
+              {{ startingOptionsHTML|safe }}
+            </div>
+          </div>
+        {% endif %}
+      {% else %}
+        <h1>
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=gameCode %}
+          {{ tournament.tournamentName }}
+        </h1>
+        {% if tournament.tournamentDescription %}
+          <h3>
+            <i>{{ tournament.tournamentDescription }}</i>
+          </h3>
+        {% endif %}
+        {% if startingOptionsHTML != "" %}{{ startingOptionsHTML|safe }}{% endif %}
       {% endif %}
-      {% if startingOptionsHTML != "" %}{{ startingOptionsHTML|safe }}{% endif %}
       <!-- OPEN MainT -->
       {% if tournament.tournamentStatus == "PD" %}
         <h3>{% translate "This tournament has been created and is pending signup opening." %}</h3>
@@ -48,7 +72,7 @@
         <h3>{% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}</h3>
         <div class="tournamentSignupContainer">
           <div class="MTallRoundHolder">
-            <table class="generalTable">
+            <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
                 <th>{% translate "Current Players" %}</th>
@@ -73,69 +97,128 @@
           </div>
         </div>
       {% elif tournament.tournamentStatus == "OP" or tournament.tournamentStatus == "PR" %}
-        <h3>
-          {% blocktranslate trimmed %}
-            Before joining, please be aware that you should be making several moves per day.
-            <br />
-            Kickout is set at 1 day, but please make your moves as soon as possible.
-            <br />
-          {% endblocktranslate %}
-        </h3>
-        {% if invitedPlayerString != "" %}<h3>Invited Players: {{ invitedPlayerString }}</h3>{% endif %}
-        <h3>{% translate "Max Players" %}: {{ tournament.maxTournamentPlayers }}</h3>
-        <h3>{% translate "Players per game" %}: {{ tournament.maxGamePlayers }}</h3>
-        <h3>{% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}</h3>
-        <div class="tournamentSignupContainer">
-          <div class="MTallRoundHolder">
-            <table class="generalTable">
-              <tr>
-                <th>#</th>
-                <th>{% translate "Current Players" %}</th>
-              </tr>
-              {% for player in startingPlayers %}
-                <tr class="clickablePlayerRow"
-                    id="playerRow{{ player.username }}"
-                    onclick="window.location.href='/profile/{{ player.username }}';">
-                  <td>{{ forloop.counter }}</td>
-                  <td>
-                    <a href="{% url 'playerInfo' usernameToProfile=player.username %}">{{ player.username }}</a>
-                  </td>
-                </tr>
-              {% endfor %}
-              {% for i in openSlots %}
+        {% if request.use_new_design %}
+          <div class="nd-card nd-section">
+            <h2>{% translate "Join Tournament" %}</h2>
+            <p style="font-size:14px;color:var(--color-muted);margin-bottom:8px;">
+              {% blocktranslate trimmed %}
+                Before joining, please be aware that you should be making several moves per day.
+                Kickout is set at 1 day, but please make your moves as soon as possible.
+              {% endblocktranslate %}
+            </p>
+            {% if invitedPlayerString != "" %}<p style="font-size:14px;">Invited Players: {{ invitedPlayerString }}</p>{% endif %}
+            <p style="font-size:14px;">{% translate "Max Players" %}: {{ tournament.maxTournamentPlayers }} &middot; {% translate "Players per game" %}: {{ tournament.maxGamePlayers }} &middot; {% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}</p>
+            <div class="tournamentSignupContainer">
+              <table class="nd-table">
                 <tr>
-                  <td>{{ i }}</td>
-                  <td></td>
+                  <th>#</th>
+                  <th>{% translate "Current Players" %}</th>
                 </tr>
-              {% endfor %}
-            </table>
-          </div>
-        </div>
-        {% if not isSignedUp %}
-          <br />
-          <form action="{% url 'MainTournament' Main_Tournament_id=MainT_ID %}"
-                method="post">
-            {% csrf_token %}
-            <div>
-              <input type="checkbox"
-                     id="understand_movement"
-                     name="understand_movement"
-                     required>
-              <label for="understand_movement">I understand I need to move 1+ times a day</label>
+                {% for player in startingPlayers %}
+                  <tr class="clickablePlayerRow"
+                      id="playerRow{{ player.username }}"
+                      onclick="window.location.href='/profile/{{ player.username }}';">
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                      <a href="{% url 'playerInfo' usernameToProfile=player.username %}">{{ player.username }}</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+                {% for i in openSlots %}
+                  <tr>
+                    <td>{{ i }}</td>
+                    <td></td>
+                  </tr>
+                {% endfor %}
+              </table>
             </div>
-            <input class="registerbtn"
-                   type="submit"
-                   value="{% if isInvitedPlayer %}Accept Invite & Join Tournament{% else %}{% translate "Join Tournament" %}{% endif %}" />
-          </form>
-          {% if isInvitedPlayer %}
+            {% if not isSignedUp %}
+              <form action="{% url 'MainTournament' Main_Tournament_id=MainT_ID %}"
+                    method="post"
+                    style="margin-top:14px;">
+                {% csrf_token %}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                  <input type="checkbox"
+                         id="understand_movement"
+                         name="understand_movement"
+                         required
+                         style="margin:0;">
+                  <label for="understand_movement" style="font-size:14px;color:var(--color-ink);">I understand I need to move 1+ times a day</label>
+                </div>
+                <div class="nd-row-flex" style="gap:8px;">
+                  <button class="nd-button nd-button-primary" type="submit">{% if isInvitedPlayer %}Accept Invite &amp; Join Tournament{% else %}{% translate "Join Tournament" %}{% endif %}</button>
+                  {% if isInvitedPlayer %}
+                    <button class="nd-button" type="submit" name="declineInvite" value="true" formaction="{% url 'MainTournament' Main_Tournament_id=MainT_ID %}">{% translate "Decline Invite" %}</button>
+                  {% endif %}
+                </div>
+              </form>
+            {% endif %}
+          </div>
+        {% else %}
+          <h3>
+            {% blocktranslate trimmed %}
+              Before joining, please be aware that you should be making several moves per day.
+              <br />
+              Kickout is set at 1 day, but please make your moves as soon as possible.
+              <br />
+            {% endblocktranslate %}
+          </h3>
+          {% if invitedPlayerString != "" %}<h3>Invited Players: {{ invitedPlayerString }}</h3>{% endif %}
+          <h3>{% translate "Max Players" %}: {{ tournament.maxTournamentPlayers }}</h3>
+          <h3>{% translate "Players per game" %}: {{ tournament.maxGamePlayers }}</h3>
+          <h3>{% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}</h3>
+          <div class="tournamentSignupContainer">
+            <div class="MTallRoundHolder">
+              <table class="generalTable">
+                <tr>
+                  <th>#</th>
+                  <th>{% translate "Current Players" %}</th>
+                </tr>
+                {% for player in startingPlayers %}
+                  <tr class="clickablePlayerRow"
+                      id="playerRow{{ player.username }}"
+                      onclick="window.location.href='/profile/{{ player.username }}';">
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                      <a href="{% url 'playerInfo' usernameToProfile=player.username %}">{{ player.username }}</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+                {% for i in openSlots %}
+                  <tr>
+                    <td>{{ i }}</td>
+                    <td></td>
+                  </tr>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+          {% if not isSignedUp %}
+            <br />
             <form action="{% url 'MainTournament' Main_Tournament_id=MainT_ID %}"
                   method="post">
               {% csrf_token %}
-              <input type="hidden" name="declineInvite" value="true">
-              <input class="declineButton"
+              <div>
+                <input type="checkbox"
+                       id="understand_movement"
+                       name="understand_movement"
+                       required>
+                <label for="understand_movement">I understand I need to move 1+ times a day</label>
+              </div>
+              <input class="registerbtn"
                      type="submit"
-                     value="{% translate "Decline Invite" %}" />
+                     value="{% if isInvitedPlayer %}Accept Invite & Join Tournament{% else %}{% translate "Join Tournament" %}{% endif %}" />
             </form>
+            {% if isInvitedPlayer %}
+              <form action="{% url 'MainTournament' Main_Tournament_id=MainT_ID %}"
+                    method="post">
+                {% csrf_token %}
+                <input type="hidden" name="declineInvite" value="true">
+                <input class="declineButton"
+                       type="submit"
+                       value="{% translate "Decline Invite" %}" />
+              </form>
+            {% endif %}
           {% endif %}
         {% endif %}
         <!-- ////////////////////////////////////////////////////////////////// IP MainT -->
@@ -147,7 +230,7 @@
               {% for round in playersData.allMGdata %}
                 {% if round.0.0 == "Round 1" %}
                   <h2>{{ round.0.0 }}</h2>
-                  <table class="generalTable top14green">
+                  <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %} top14green">
                     <thead>
                       <tr>
                         <th>{{ round.1.0 }}</th>
@@ -199,7 +282,7 @@
                         Group B
                       {% endif %}
                     </h3>
-                    <table class="generalTable top2green">
+                    <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %} top2green">
                       <thead>
                         <tr>
                           <th>{{ groupData.0.0 }}</th>
@@ -244,7 +327,7 @@
                   {% endfor %}
                 {% elif round.0.0 == "Round 3" %}
                   <h2>Final</h2>
-                  <table class="generalTable top1green">
+                  <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %} top1green">
                     <thead>
                       <tr>
                         <th>{{ round.1.0 }}</th>
@@ -298,7 +381,7 @@
                 <h2>{% translate "Result" %}</h2>
                 <div class="MTallRoundHolder">
                   <div class="MTroundTableDiv">
-                    <table class="generalTable">
+                    <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
                       <tr>
                         <th>{% translate "Position" %}</th>
                         <th>{% translate "Player" %}</th>
@@ -349,7 +432,7 @@
                             Group B
                           {% endif %}
                         </h3>
-                        <table class="generalTable">
+                        <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
                           <thead>
                             <tr>
                               <th>Game</th>
@@ -381,7 +464,7 @@
                         </table>
                       {% endfor %}
                     {% else %}
-                      <table class="generalTable">
+                      <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
                         <thead>
                           <tr>
                             <th>Game</th>
@@ -423,7 +506,7 @@
             <div class="IPleftColumn">
               {% if tournament.tournamentType == "PT" %}
                 <h2>Points</h2>
-                <table class="generalTable">
+                <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
                   <tr>
                     <th>{% translate "Position" %}</th>
                     <th>{% translate "Points" %}</th>
@@ -446,7 +529,7 @@
                 </table>
               {% endif %}
               <h2>{% translate "Players" %}</h2>
-              <table class="generalTable">
+              <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
                 <tr>
                   <th>{{ playersData.headingRow.0 }}</th>
                   <th>{{ playersData.headingRow.1 }}</th>
@@ -470,7 +553,7 @@
                 <h2>{% translate "Result" %}</h2>
                 <div class="MTallRoundHolder">
                   <div class="MTroundTableDiv">
-                    <table class="generalTable">
+                    <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
                       <tr>
                         <th>{% translate "Position" %}</th>
                         <th>{% translate "Player" %}</th>
@@ -505,7 +588,7 @@
                 {% for round in roundsData %}
                   <div class="MTroundTableDiv">
                     <h2>{{ round.roundTitle }}</h2>
-                    <table class="generalTable">
+                    <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
                       <thead>
                         <tr>
                           <th>Game</th>

@@ -165,7 +165,9 @@ body.nd .nd-card-grid {
 }
 
 body.nd .nd-card-grid-wide {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    /* 5 cards per row at 1280px+ so the 10-card game list lands in 2
+       even rows. */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 body.nd .nd-map-editor-grid {
@@ -194,10 +196,13 @@ body.nd button.nd-button {
     box-sizing: border-box;
 }
 
-/* White/secondary button hover: shift toward the primary teal. No underline. */
+/* White/secondary button hover: match the primary button's hover state
+   (darker teal fill, white ink) so the two CTAs land on the exact same
+   hover look the user prefers. */
 body.nd .nd-button:hover {
+    background: var(--color-accent-strong);
     border-color: var(--color-accent-strong);
-    color: var(--color-accent-strong);
+    color: #fff;
 }
 
 body.nd .nd-button-primary {
@@ -634,25 +639,25 @@ body.nd .nd-mod-wrap:focus-within::after {
 
 /* ---------- LANDING / HERO ---------- */
 body.nd .nd-landing {
-    padding: 24px 0;
+    padding: 8px 0;
 }
 
 body.nd .nd-hero {
-    padding: 32px 0 40px;
+    padding: 12px 0 20px;
 }
 
 body.nd .nd-hero h1 {
-    font-size: 32px;
+    font-size: 28px;
     line-height: 1.2;
     max-width: 760px;
-    margin: 0 0 12px;
+    margin: 0 0 8px;
 }
 
 body.nd .nd-hero-sub {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--color-ink-soft);
     max-width: 760px;
-    margin: 0 0 20px;
+    margin: 0 0 12px;
 }
 
 body.nd .nd-hero-actions {
@@ -662,9 +667,25 @@ body.nd .nd-hero-actions {
 }
 
 body.nd .nd-features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
     gap: 12px;
+}
+
+/* .nd-feature cards: flex column so h3 sits at top, body fills the rest.
+   flex: 1 1 220px gives cards a 220px min target with equal growth so a
+   single row of 4 cards all share the same width. align-items: stretch
+   on .nd-features above makes them share the same height. min-height is
+   a safety net so the row picks the tallest natural content as the
+   baseline even if the browser collapses the flex container's height. */
+body.nd .nd-feature {
+    flex: 1 1 220px;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    min-height: 152px;
+    box-sizing: border-box;
 }
 
 body.nd .nd-feature h3 {
@@ -676,6 +697,9 @@ body.nd .nd-feature p {
     margin: 0;
     font-size: 14px;
     color: var(--color-ink-soft);
+    /* Take up the rest of the card so all 4 cards have matching text-block
+       heights even when line counts differ. */
+    flex: 1 0 auto;
 }
 
 body.nd .nd-game-card {
@@ -686,17 +710,25 @@ body.nd .nd-game-card {
 }
 
 body.nd .nd-game-card-img {
-    height: 180px;
+    height: 220px;
     overflow: hidden;
     flex-shrink: 0;
+    /* Background-image keeps the box centered without flex-item sizing
+       surprises. The img is still rendered for accessibility / right-click. */
+    background-color: var(--color-surface-soft);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
 }
 
 body.nd .nd-game-card-img img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    object-position: center top;
+    /* Hide the visual image — background-image above paints it. Kept in the
+       DOM so right-click and the Game Icons template can read src/title. */
     display: block;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
 }
 
 body.nd .nd-game-card-body {
@@ -963,4 +995,198 @@ body.nd .nd-check-list > .nd-check-label {
 }
 body.nd .nd-check-list > .nd-check-label:last-child {
     border-bottom: none;
+}
+
+/* Help page Q&A — readable type for the long, mostly-text help sections. */
+body.nd .nd-help-qa {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--color-ink);
+}
+body.nd .nd-help-qa p {
+    margin: 0 0 12px;
+}
+body.nd .nd-help-qa p:last-child {
+    margin-bottom: 0;
+}
+body.nd .nd-help-qa b u {
+    display: block;
+    margin: 16px 0 6px;
+    font-size: 15px;
+    color: var(--color-accent-strong);
+}
+body.nd .nd-help-qa b u:first-child {
+    margin-top: 0;
+}
+body.nd .nd-help-qa ul {
+    margin: 6px 0 12px;
+    padding-left: 22px;
+    line-height: 1.55;
+}
+body.nd .nd-help-kickouts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px 16px;
+    margin: 8px 0 12px;
+    font-size: 14px;
+}
+body.nd .nd-help-kickouts .helpStartingOptionSpan {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+body.nd .nd-help-kickouts .startingOptionHelpImg {
+    width: 36px;
+    height: 36px;
+}
+
+/* AllTournaments page: every row is clickable — show a pointer. */
+body.nd .allTournamentsContainer tbody tr,
+body.nd .allTournamentsDiv tbody tr {
+    cursor: pointer;
+}
+
+/* Stats page tiles (numbers above the per-game / fairplay / etc tabs) */
+body.nd .nd-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 8px 0 4px;
+}
+body.nd .nd-stats-tile {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    text-align: center;
+}
+body.nd .nd-stats-tile-num {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-accent-strong);
+    line-height: 1.2;
+}
+body.nd .nd-stats-tile-label {
+    font-size: 12px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+}
+body.nd .nd-stats-gamebreak {
+    line-height: 1.8;
+}
+
+/* Each game icon + "N active / N finished" cell: align icon vertically
+   with the text baseline so the row reads cleanly. */
+body.nd .nd-stats-gamebreak .gameIcon,
+body.nd .nd-stats-gamebreak .gameStatIcon {
+    vertical-align: -2px;
+    margin-right: 4px;
+}
+body.nd .nd-stats-gamebreak > .nd-game-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+body.nd .nd-stats-gamebreak > .nd-game-stat-sep {
+    color: var(--color-border-strong);
+    margin: 0 8px;
+}
+
+/* Empty-state text — small, not bold. */
+body.nd .nd-empty {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-muted);
+    margin: 8px 0;
+}
+
+/* Help page Game Help Pages — 4 columns for the first row, 3 columns for
+   the next two rows (4-3-3 split for 10 games). Implemented with flex so
+   the row rhythm is exact, not a grid auto-flow artifact. */
+body.nd .nd-help-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+body.nd .nd-help-pills .nd-button {
+    flex: 0 0 calc(25% - 6px);
+    text-align: center;
+    box-sizing: border-box;
+    width: auto;
+}
+body.nd .nd-help-pills .nd-button.nd-help-pill-wide {
+    flex-basis: calc(33.333% - 6px);
+}
+@media (max-width: 520px) {
+    body.nd .nd-help-pills .nd-button {
+        flex-basis: calc(50% - 4px);
+    }
+    body.nd .nd-help-pills .nd-button.nd-help-pill-wide {
+        flex-basis: calc(50% - 4px);
+    }
+}
+@media (max-width: 320px) {
+    body.nd .nd-help-pills .nd-button,
+    body.nd .nd-help-pills .nd-button.nd-help-pill-wide {
+        flex-basis: 100%;
+    }
+}
+
+/* Help page icon legend — table-like grid where each cell holds an icon and
+   a label side by side. Columns scale with the page width. */
+body.nd .nd-icon-legend h3 {
+    font-size: 15px;
+    color: var(--color-accent-strong);
+    margin: 0 0 4px;
+}
+body.nd .nd-icon-legend h4 {
+    font-size: 13px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 16px 0 8px;
+    font-weight: 600;
+}
+body.nd .nd-icon-grid {
+    display: grid;
+    /* Two-cell rows: icon (fixed) + label (fills). auto-fit so narrow pages
+       (mobile) collapse to a single column. */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 6px 14px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+body.nd .nd-icon-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+body.nd .nd-icon-cell .startingOptionHelpImg,
+body.nd .nd-icon-cell .gameIcon,
+body.nd .nd-icon-cell .gameStatIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-soft);
+    padding: 2px;
+    box-sizing: border-box;
+    display: block;
+    flex-shrink: 0;
+}
+body.nd .nd-icon-cell > span {
+    font-size: 13px;
+    color: var(--color-ink);
+    line-height: 1.4;
+}
+
+/* The KFW cells that carry two images (one cell for High/Med knowledge) sit
+   side-by-side in their cell before the text. */
+body.nd .nd-icon-cell img + img {
+    margin-left: 4px;
 }
