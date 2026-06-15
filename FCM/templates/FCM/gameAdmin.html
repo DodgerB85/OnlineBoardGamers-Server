@@ -6,7 +6,9 @@
         <meta charset="iso8859-1">
         <title>Food Chain Magnate</title>
         <link href="{% static 'FCM/FCM.css' %}" rel="stylesheet">
-        <link rel="icon" type="image/png" href="{% static 'Lobby/favicon.png' %}" />
+        <link rel="icon"
+              type="image/png"
+              href="{% static 'FCM/images/fcm_icon.png' %}" />
     </head>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     {% csrf_token %}
@@ -15,11 +17,11 @@
 Enter game data <br />
 
 <textarea id="inputData" name="inputData" rows="4" cols="50"></textarea>
-                                    <br />
-                                    <input type="button"
-                                           onclick="decompressData()"
-                                           value="Decompress to Model.export">
-                                    <br />
+                                        <br />
+                                        <input type="button"
+                                               onclick="decompressData()"
+                                               value="Decompress to Model.export">
+                                        <br />
     <textarea id="outputData" name="outputData" rows="4" cols="50"></textarea>
 
     <br /><br /><br />
