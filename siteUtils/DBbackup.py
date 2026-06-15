@@ -7,7 +7,7 @@ from pydrive2.drive import GoogleDrive
 
 # Configuration
 BACKUP_DIR_NAME = "~/mysql_backups"
-DAYS_TO_KEEP_BACKUP = 2
+DAYS_TO_KEEP_BACKUP = 1
 FILE_PREFIX = "my_db_backup_"
 FILE_SUFFIX_DATE_FORMAT = "%Y%m%d%H%M%S"
 USERNAME = str(config("G_DRIVE_USERNAME", default="driveID", cast=str))
