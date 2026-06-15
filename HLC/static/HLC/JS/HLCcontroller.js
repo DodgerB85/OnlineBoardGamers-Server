@@ -681,8 +681,8 @@ var Controller = function (_model, _view) {
 
 	this.enableFactoryExpansion = function () {
 		global.sandboxReset = compressObjectToDB(M.export())
-		//this.model.subphase = 0
-		//this.model.gameFlow.subphase = 0
+		this.model.subphase = 0
+		this.model.gameFlow.subphase = 0
 		global.undoExpansionReset = compressObjectToDB(M.export())
 		this.model.subphase = 1
 		$("#actions").empty()
