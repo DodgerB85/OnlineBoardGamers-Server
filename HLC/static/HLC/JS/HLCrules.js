@@ -93,6 +93,7 @@ var Rules = (function () {
 	}
 
 	self.removeFCIATTcomponentsFromPlay = function (factory) {
+		var expansionCollapsed = false
 		for (var i = 0; i < factory.factoryComponenetIndexesAddedThisTurn.length; i++) {
 			// find component in factory
 			let index = _.findIndex(
@@ -102,6 +103,41 @@ var Rules = (function () {
 				},
 				this
 			)
+			// If not found, the factory may be in a post-expansion state (NODATASFWET saved after
+			// expansion ran). Remove the most recent expansion tile from the grid, then collapse
+			// back to pre-expansion once and retry.
+			if (index === -1 && !expansionCollapsed && factory.factoryExpansions.length > 0) {
+				console.log("Removing expansion tile from grid")
+				var lastExp = factory.factoryExpansions[factory.factoryExpansions.length - 1]
+				var expIndex = lastExp[0]
+				var expRotation = lastExp[1]
+				var tableWidth = DIMENSIONS[FACTORY_EXPANSION_TILE][0]
+				var tableHeight = DIMENSIONS[FACTORY_EXPANSION_TILE][1]
+				if (expRotation % 2 === 1) {
+					tableWidth = DIMENSIONS[FACTORY_EXPANSION_TILE][1]
+					tableHeight = DIMENSIONS[FACTORY_EXPANSION_TILE][0]
+				}
+				for (var ey = 0; ey < tableHeight; ey++) {
+					for (var ex = expIndex; ex < expIndex + tableWidth; ex++) {
+						factory.factoryCoords[ex + ey * factory.width] = OUT_OF_BOUNDS
+					}
+				}
+				factory.factoryExpansions.pop()
+				factory.collapseFactoryAfterExpansion()
+				expansionCollapsed = true
+				index = _.findIndex(
+					factory.factoryComponents,
+					function (el) {
+						return el[1] == factory.factoryComponenetIndexesAddedThisTurn[i]
+					},
+					this
+				)
+			}
+			// If still not found after collapse attempt, skip to avoid a crash
+			if (index === -1) {
+				console.log("Component not found in factory:", factory.factoryComponenetIndexesAddedThisTurn[i])
+				continue
+			}
 			// get the name
 			var componentName = factory.factoryComponents[index][0]
 			// remove from available
