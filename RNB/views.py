@@ -415,7 +415,14 @@ def _processRNBturn(request):
             transaction_id = uuid.uuid4().hex
             currentGame.transactionID = transaction_id
 
-            # SAVE BEFORE NOTIFICATIONS
+            ################ REWIND EVERY SAVE #######################
+            # Don't save rewind if all players have moved - wait for client to process phase
+            if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+                doSaveRewind(currentGame, jsonData)
+
+            ################ END REWIND EVERY SAVE #######################
+
+            # Single save: transactionID + rewindData (and any earlier game-level changes)
             currentGame.save()
 
             # If the client disconnects before completing stack processing,
@@ -429,15 +436,6 @@ def _processRNBturn(request):
                 repeats=-1,  # Neg repeats for delete
                 schedule_type="O",
             )
-
-            ################ REWIND EVERY SAVE #######################
-            # Don't save rewind if all players have moved - wait for client to process phase
-            if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
-                doSaveRewind(currentGame, jsonData)
-
-            ################ END REWIND EVERY SAVE #######################
-
-            currentGame.save()
 
             # time.sleep(10)
             # print(f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}")
@@ -1164,31 +1162,34 @@ def _processRNBturn(request):
 
 
 def doSaveRewind(currentGame, jsonData):
-    # Need this as intially it is totally empty
-    # 1. Load existing history (safely handle empty string)
-    currentRewindData = []
+    new_b64_point = jsonData["gameDataB64"]
+
+    # Fast path: if the last rewind entry is already this exact point, nothing to do.
+    # This happens normally because saveStackMove and saveAndUpdateNotifictionsAfterStack
+    # both append the same gameDataB64 during a single turn save.
     if currentGame.rewindData:
         try:
             currentRewindData = json.loads(currentGame.rewindData)
+            if currentRewindData and currentRewindData[-1] == new_b64_point:
+                return
         except json.JSONDecodeError:
             currentRewindData = []
+    else:
+        currentRewindData = []
 
-    # 2. Prepare the new point (The B64 string from JS)
-    new_b64_point = jsonData["gameDataB64"]
-
-    # 3. Handle Temp Data (ensure it's also a B64 string)
+    # 1. Handle Temp Data (ensure it's also a B64 string)
     if currentGame.rewindTempData:
         # If temp exists and is different from last save, add it
         if not currentRewindData or currentRewindData[-1] != currentGame.rewindTempData:
             currentRewindData.append(currentGame.rewindTempData)
         currentGame.rewindTempData = ""  # Reset temp storage
 
-    # 4. Add the current save to history if it's different from the last point
+    # 2. Add the current save to history if it's different from the last point
     # We store it as a nested list [b64_string] to match your existing structure
     if not currentRewindData or currentRewindData[-1] != new_b64_point:
         currentRewindData.append(new_b64_point)
 
-        # 5. Maintain the 20-point limit
+        # 3. Maintain the 20-point limit
         if len(currentRewindData) > 20:
             currentRewindData = currentRewindData[-20:]
 
