@@ -1,14 +1,3 @@
-{# Shared wrapper for all *help.html pages (game help + lobby help +
-   tournaments help). Extends the design-selected layout and owns the
-   duplicated boilerplate (head CSS, nd-page/container wrapper, messages
-   block, nd-page-header). Each help file extends this partial and fills:
-     - page_id_attr   (optional, e.g. 'id="lobbyHelpPage"')
-     - page_title     (the <h1> in nd-page-header)
-     - page_action    (optional right-side action button)
-     - nd_body        (the new-design cards + trailing donate banner)
-     - legacy_body    (the old-design body + donate banner + home button)
-   The new/old branches differ only in the body they render, so the
-   wrapper / messages / header all live here once. #}
 {% extends base_template %}
 {% load static %}
 {% load i18n %}

@@ -435,12 +435,6 @@ body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); 
     padding-right: 12px;
 }
 
-/* my move state */
-.nd-table tbody tr.myMove td {
-    background: var(--color-positive-bg);
-    border-color: rgba(89, 122, 80, 0.25);
-}
-
 /* flexi-time warning */
 .nd-table tbody tr.kickoutRequired1 td {
     background: var(--color-warn-bg);

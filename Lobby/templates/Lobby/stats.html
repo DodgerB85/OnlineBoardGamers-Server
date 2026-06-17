@@ -11,7 +11,7 @@
     <script src="{% static 'Lobby/stats.js' %}"></script>
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow" id="statsPage">{% else %}<div class="container" id="statsPage">{% endif %}
+  {% if request.use_new_design %}<div class="nd-page" id="statsPage">{% else %}<div class="container" id="statsPage">{% endif %}
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -116,7 +116,6 @@
           <button class="nd-tab tablinks" id="threeMonths">{% translate "Last 3 Months" %}</button>
           <button class="nd-tab tablinks" id="month">{% translate "Last Month" %}</button>
         </div>
-      </div>
     {% else %}
       <h1>
         <a class="linkOther" href="{% url 'FCM:FCMstats' %}">{% translate "Food Chain Magnate Stats" %}</a>
@@ -198,11 +197,11 @@
 
     <!-- FAIR PLAY -->
     {% for game in fairPlayArr %}
-      <div id="fairPlayDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="fairPlayDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Fair Play League" %}</h2>
-            {% translate "This is a table of % completed games in the last year, along with total completed games in the last year" %}
+            <p class="nd-stats-hint">{% translate "This is a table of % completed games in the last year, along with total completed games in the last year" %}</p>
             <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
               <tr>
                 <th>#</th>
@@ -228,7 +227,7 @@
     <!-- END FAIR PLAY -->
     <!-- ALL PLAYERS -->
     {% for game in winArr %}
-      <div id="winTotalsTotalDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsTotalDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals" %}</h2>
@@ -269,11 +268,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win3mArr %}
-      <div id="winTotalsThreeMonthsDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsThreeMonthsDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals (Last 3 Months)" %}</h2>
@@ -314,11 +313,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win1mArr %}
-      <div id="winTotalsMonthDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsMonthDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals (Last Month)" %}</h2>
@@ -359,13 +358,13 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     <!-- END ALL PLAYERS -->
     <!-- 2 PLAYERS -->
     {% for game in winArr2p %}
-      <div id="winTotalsTotal2pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsTotal2pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 2p" %}</h2>
@@ -406,11 +405,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win3mArr2p %}
-      <div id="winTotalsThreeMonths2pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsThreeMonths2pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 2p (Last 3 Months)" %}</h2>
@@ -451,11 +450,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win1mArr2p %}
-      <div id="winTotalsMonth2pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsMonth2pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 2p (Last Month)" %}</h2>
@@ -496,13 +495,13 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     <!-- END 2 PLAYERS -->
     <!-- 3 PLAYERS -->
     {% for game in winArr3p %}
-      <div id="winTotalsTotal3pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsTotal3pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 3p" %}</h2>
@@ -543,11 +542,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win3mArr3p %}
-      <div id="winTotalsThreeMonths3pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsThreeMonths3pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 3p (Last 3 Months)" %}</h2>
@@ -588,11 +587,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win1mArr3p %}
-      <div id="winTotalsMonth3pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsMonth3pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 3p (Last Month)" %}</h2>
@@ -633,13 +632,13 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     <!-- END 3 PLAYERS -->
     <!-- 4 PLAYERS -->
     {% for game in winArr4p %}
-      <div id="winTotalsTotal4pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsTotal4pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 4p" %}</h2>
@@ -680,11 +679,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win3mArr4p %}
-      <div id="winTotalsThreeMonths4pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsThreeMonths4pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 4p (Last 3 Months)" %}</h2>
@@ -725,11 +724,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win1mArr4p %}
-      <div id="winTotalsMonth4pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsMonth4pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 4p (Last Month)" %}</h2>
@@ -770,13 +769,13 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     <!-- END 4 PLAYERS -->
     <!-- 5 PLAYERS -->
     {% for game in winArr5p %}
-      <div id="winTotalsTotal5pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsTotal5pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 5p" %}</h2>
@@ -817,11 +816,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win3mArr5p %}
-      <div id="winTotalsThreeMonths5pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsThreeMonths5pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 5p (Last 3 Months)" %}</h2>
@@ -862,11 +861,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win1mArr5p %}
-      <div id="winTotalsMonth5pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsMonth5pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 5p (Last Month)" %}</h2>
@@ -907,13 +906,13 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     <!-- END 5 PLAYERS -->
     <!-- 6 PLAYERS -->
     {% for game in winArr6p %}
-      <div id="winTotalsTotal6pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsTotal6pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 6p" %}</h2>
@@ -954,11 +953,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win3mArr6p %}
-      <div id="winTotalsThreeMonths6pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsThreeMonths6pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 6p (Last 3 Months)" %}</h2>
@@ -999,11 +998,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     {% for game in win1mArr6p %}
-      <div id="winTotalsMonth6pDiv{{ forloop.counter0 }}" class="statsDiv">
+      <div id="winTotalsMonth6pDiv{{ forloop.counter0 }}" class="statsDiv{% if request.use_new_design %} nd-stats-section{% endif %}">
         <div class="playerStatsContainer">
           <div class="playerStatsDiv">
             <h2>{% translate "Win Totals 6p (Last Month)" %}</h2>
@@ -1044,10 +1043,11 @@
             </table>
           </div>
         </div>
-        {% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}
+        <p class="nd-stats-hint">{% translate "Win stats are calculated hourly. You need to complete at least 5 games to be included in the % stats. Practice games do not count towards your win stats" %}</p>
       </div>
     {% endfor %}
     <!-- END 6 PLAYERS -->
+    {% if request.use_new_design %}</div>{% endif %}
     <hr />
     <form id="openInMapEditorForm" action="/FCMmapEditor/" method="post">
       {% csrf_token %}
@@ -1063,24 +1063,70 @@
     </form>
     <div class="{% if request.use_new_design %}nd-ten-games{% else %}largeTableContainer{% endif %}">
       <!-- CURRENT GAMES -->
-      {% if request.use_new_design %}<h2 class="nd-section-title" style="margin-top:24px">{% translate "Ten most recently active games" %}</h2>{% else %}<h1>{% translate "Ten most recently active games" %}</h1>{% endif %}
-      <div id="tenGamesListView">
-        {% if tenGames %}
-          <div class="{% if request.use_new_design %}nd-table-wrap{% else %}tableOnlyDiv{% endif %}">
-            <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
-              {% if request.use_new_design %}
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>{% translate "Name" %}</th>
-                    <th>{% translate "Players" %}</th>
-                    <th>{% translate "Options" %}</th>
-                    <th>{% translate "Status" %}</th>
-                    <th>{% translate "Last Move" %}</th>
-                  </tr>
-                </thead>
-                <tbody>
-              {% else %}
+      {% if request.use_new_design %}
+        <div class="nd-card nd-section">
+          <h2 class="nd-section-title">{% translate "Ten most recently active games" %}</h2>
+          <div id="tenGamesListView">
+            {% if tenGames %}
+              <div class="nd-table-wrap">
+                <table class="nd-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>{% translate "Name" %}</th>
+                      <th>{% translate "Players" %}</th>
+                      <th>{% translate "Options" %}</th>
+                      <th>{% translate "Status" %}</th>
+                      <th>{% translate "Last Move" %}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for game in tenGames %}
+                      {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="nd-empty">{% translate "No Current Games" %}</p>
+            {% endif %}
+          </div>
+        </div>
+        <!-- FINISHED GAMES -->
+        <div class="nd-card nd-section">
+          <h2 class="nd-section-title">{% translate "Ten most recently finished games" %}</h2>
+          <div id="tenGamesListView">
+            {% if tenGamesFinished %}
+              <div class="nd-table-wrap">
+                <table class="nd-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>{% translate "Name" %}</th>
+                      <th>{% translate "Players" %}</th>
+                      <th>{% translate "Options" %}</th>
+                      <th>{% translate "Status" %}</th>
+                      <th>{% translate "Last Activity" %}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for game in tenGamesFinished %}
+                      {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="nd-empty">{% translate "No Finished Games" %}</p>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <h1>{% translate "Ten most recently active games" %}</h1>
+        <div id="tenGamesListView">
+          {% if tenGames %}
+            <div class="tableOnlyDiv">
+              <table class="gamesTable">
                 <tr class="headingRow">
                   <td class="nameHeaderCurrent">{% translate "Name" %}</td>
                   <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
@@ -1090,36 +1136,21 @@
                   <td class="creatorHeader">{% translate "Creator" %}</td>
                   <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
                 </tr>
-              {% endif %}
-              {% for game in tenGames %}
-                {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
-              {% endfor %}
-              {% if request.use_new_design %}</tbody>{% endif %}
-            </table>
-          </div>
-        {% else %}
-          {% if request.use_new_design %}<p class="nd-empty">No Current Games</p>{% else %}<h1>No Current Games</h1>{% endif %}
-        {% endif %}
-      </div>
-      <!-- FINISHED GAMES -->
-      {% if request.use_new_design %}<h2 class="nd-section-title" style="margin-top:24px">{% translate "Ten most recently finished games" %}</h2>{% else %}<h1>{% translate "Ten most recently finished games" %}</h1>{% endif %}
-      <div id="tenGamesListView">
-        {% if tenGamesFinished %}
-          <div class="{% if request.use_new_design %}nd-table-wrap{% else %}tableOnlyDiv{% endif %}">
-            <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
-              {% if request.use_new_design %}
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>{% translate "Name" %}</th>
-                    <th>{% translate "Players" %}</th>
-                    <th>{% translate "Options" %}</th>
-                    <th>{% translate "Status" %}</th>
-                    <th>{% translate "Last Activity" %}</th>
-                  </tr>
-                </thead>
-                <tbody>
-              {% else %}
+                {% for game in tenGames %}
+                  {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+                {% endfor %}
+              </table>
+            </div>
+          {% else %}
+            <h1>{% translate "No Current Games" %}</h1>
+          {% endif %}
+        </div>
+        <!-- FINISHED GAMES -->
+        <h1>{% translate "Ten most recently finished games" %}</h1>
+        <div id="tenGamesListView">
+          {% if tenGamesFinished %}
+            <div class="tableOnlyDiv">
+              <table class="gamesTable">
                 <tr class="headingRow">
                   <td class="nameHeaderCurrent">{% translate "Name" %}</td>
                   <td class="playersHeader">{% translate "Players" %}</td>
@@ -1128,18 +1159,17 @@
                   <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
                   <td class="winnerHeader">{% translate "Winner" %}</td>
                 </tr>
-              {% endif %}
-              {% for game in tenGamesFinished %}
-                {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
-              {% endfor %}
-              {% if request.use_new_design %}</tbody>{% endif %}
-            </table>
-          </div>
-        {% else %}
-          {% if request.use_new_design %}<p class="nd-empty">No Finished Games</p>{% else %}<h1>No Finished Games</h1>{% endif %}
-        {% endif %}
-      </div>
-      {% if not request.use_new_design %}{% include 'Lobby/donate/donateBanner.html' %}{% endif %}
+                {% for game in tenGamesFinished %}
+                  {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                {% endfor %}
+              </table>
+            </div>
+          {% else %}
+            <h1>{% translate "No Finished Games" %}</h1>
+          {% endif %}
+        </div>
+        {% include 'Lobby/donate/donateBanner.html' %}
+      {% endif %}
     </div>
     <br />
     <br />

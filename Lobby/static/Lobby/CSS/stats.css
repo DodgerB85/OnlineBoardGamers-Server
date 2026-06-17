@@ -122,4 +122,153 @@
 	left: 15px;
 }
 
-/*** END PLAYER INFO **
+/*** END PLAYER INFO **/
+
+/* ============================================================
+   /nd/ (new design) overrides — stats page only
+   Loaded in addition to nd-components.css + layout_new.css so the
+   shared tokens (--color-* etc) and base components already exist;
+   rules here only need to override / extend for the stats page.
+   ============================================================ */
+
+/* Top Players data sections — fair play / win totals / win %.
+   These live inside the "Top Players" nd-card, so they appear as
+   sections separated by a border rather than individual cards. */
+body.nd .nd-stats-section {
+	border-top: 1px solid var(--color-border);
+	padding-top: 16px;
+	margin-top: 16px;
+}
+
+/* Pair of tables (Win Totals | Win Percentages) — 2-col on desktop. */
+body.nd .nd-stats-section .playerStatsContainer {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+	margin-bottom: 0;
+}
+
+body.nd .nd-stats-section .playerStatsDiv {
+	flex: none;
+	margin: 0;
+	min-width: 0;
+}
+
+body.nd .nd-stats-section .playerStatsDiv:first-child {
+	margin-right: 0;
+}
+
+/* Sub-section label (Win Totals / Win Percentages). */
+body.nd .nd-stats-section h2 {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--color-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	margin: 0 0 8px;
+}
+
+/* "Win stats are calculated hourly..." footnote. */
+body.nd .nd-stats-hint {
+	font-size: 12px;
+	color: var(--color-muted);
+	margin: 10px 0 0;
+	padding: 0;
+	line-height: 1.45;
+}
+
+body.nd .nd-stats-section .nd-table {
+	min-width: 220px;
+	font-size: 13px;
+}
+
+body.nd .nd-stats-section .nd-table th,
+body.nd .nd-stats-section .nd-table td {
+	padding: 6px 8px;
+}
+
+@media (max-width: 720px) {
+	body.nd .nd-stats-section .playerStatsContainer {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+}
+
+/* ============================================================
+   "Ten most recently ..." tables — new design
+   The shared nd-row09 rules in nd-components.css already collapse
+   the 6-col grid to a 2-col card at 980px. This file adds three
+   things the shared rules don't cover for the stats page:
+     1. data-label inline labels on each stacked field (so the user
+        still knows which is "Players" vs "Options" once the thead
+        is hidden at 980px)
+     2. ensure the .nd-table-wrap itself has rounded top corners
+        so it visually attaches to the card
+     3. ensure the options column (icons) wraps cleanly on mobile
+   ============================================================ */
+
+/* On desktop the labels are hidden — the thead above the table
+   already shows the column names. */
+body.nd .nd-ten-games .nd-table-wrap {
+	border-radius: 0 0 var(--radius-md) var(--radius-md);
+	overflow: hidden;
+}
+
+/* The starting-options icons sit side-by-side in a 36px grid. On
+   mobile they still need to fit — give the row a small wrap + shrink
+   the icon slightly so 4-5 icons don't push the row past the card. */
+body.nd .nd-ten-games .nd-col-options {
+	row-gap: 4px;
+}
+
+body.nd .nd-ten-games .nd-col-options img.startingMap {
+	width: 32px;
+	height: 32px;
+}
+
+/* ---- Mobile stacked-row labels ----
+   On <= 720px the table thead is hidden, so the user has no idea
+   which field is "Players" vs "Status" vs "Last Move". Inject a
+   small uppercase label from the data-label attribute on each
+   non-icon cell. Skip nd-col-icon (the icon doesn't need a label). */
+@media (max-width: 720px) {
+	body.nd .nd-ten-games .nd-row09 > td[data-label]::before {
+		content: attr(data-label);
+		display: block;
+		font-size: 11px;
+		font-weight: 600;
+		color: var(--color-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		margin-bottom: 4px;
+	}
+	/* Tighten the row a bit on mobile so the labels don't push the
+	   icons into awkward positions. */
+	body.nd .nd-ten-games .nd-row09 {
+		padding: 12px;
+	}
+	/* The starting options icons already live in a flex-wrap row; let
+	   them flow to a second line if the label pushes them down. */
+	body.nd .nd-ten-games .nd-col-options {
+		flex-wrap: wrap;
+	}
+	body.nd .nd-ten-games .nd-col-options img.startingMap {
+		width: 28px;
+		height: 28px;
+	}
+	/* Status pill is a single short label, so center it and trim
+	   vertical space. */
+	body.nd .nd-ten-games .nd-col-status {
+		text-align: left;
+	}
+}
+
+/* Above the 980px breakpoint the 6-col grid is in use and the
+   data-label pseudo-labels would be redundant with the visible
+   thead. Explicitly suppress them on wider screens. */
+@media (min-width: 721px) {
+	body.nd .nd-ten-games .nd-row09 > td[data-label]::before {
+		content: none;
+		display: none;
+	}
+}

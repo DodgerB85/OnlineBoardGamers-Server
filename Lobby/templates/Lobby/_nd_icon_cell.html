@@ -1,10 +1,10 @@
-{# Single icon cell for the lobby icon legend (used in help / lobbyHelp).
+{% comment %}Single icon cell for the lobby icon legend (used in help / lobbyHelp).
    Renders a fixed-size 50x50 image with a tooltip and a label below.
    img         — static path to the image (required)
    title       — tooltip text / alt (required)
    label       — text rendered under the icon (required; not translated here)
    alt         — alt text override (default: "Icon")
-   extra_img   — optional second image (used by KFW info-level cells) #}
+   extra_img   — optional second image (used by KFW info-level cells){% endcomment %}
 {% load static %}
 {% load i18n %}
 <div class="nd-icon-cell">
