@@ -1,12 +1,14 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% endif %}
 {% endblock %}
 {% block body %}
-  <div class="container">
+  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container">{% endif %}
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -14,166 +16,345 @@
         {% endfor %}
       </div>
     {% endif %}
-    <div id="CNShelpPage">
-      <h1>{% translate "Rules" %}</h1>
-      {% blocktranslate trimmed %}
-        Cannes Rules Available <a class="linkOther"
-    href="/static/CNS/Cannes_Rules.pdf"
-    target="_blank"
-    downlod>here</a>
-      {% endblocktranslate %}
-      <br />
-      {% blocktranslate trimmed %}
-        Cannes Expansion Rules Available <a class="linkOther"
-    href='/static/CNS/Cannes_Expansion_Rules.pdf'
-    target="_blank"
-    downlod>here</a>
-      {% endblocktranslate %}
-      <br />
-      {% blocktranslate trimmed %}
-        Cannes Resource Conversion Chart Available <a class="linkOther"
-    href='/static/CNS/Cannes_Resources.pdf'
-    target="_blank"
-    downlod>here</a>
-      {% endblocktranslate %}
-      <br />
-      {% blocktranslate trimmed %}
-        Cannes Example Plays Availalble <a class="linkOther"
-    href='/static/CNS/Cannes_Examples.pdf'
-    target="_blank"
-    downlod>here</a>
-      {% endblocktranslate %}
-      <br />
-      {% translate "How to play guide example.... Not Available. Please see Rules / Examples above" %}
-      <h1>{% translate "Cannes Help" %}</h1>
-      <b><u>{% translate "How do I use the website?" %}</u></b>
-      <br />
-      <div class="CNShelpSectionMax">
-        <div class="CNSsideBYsideContainer">
-          <div class="CNSsideBYsideLeft">
-            <img class="CNShelpImg"
-                 src="/static/CNS/help_image.jpg"
-                 alt="Help"
-                 width="492"
-                 height="304" />
-          </div>
-          <div class="CNSsideBYsideRight">
-            A. Main Action Area to confirm / undo
-            <br />
-            B. Number of Tiles in the Draw Pile
-            <br />
-            C. Number of Tiles in the Discard Pile
-            <br />
-            D. Side Action Area - Use to place tiles / increase prices / sell movies / pirate movies
-            <br />
-            E. Side Action Area during the Place Tiles phase
-            <br />
-            F. Rotate buttons - Only needed for party tiles with invitations
-            <br />
-            G. Store Tile Button (Expansion Only)
-          </div>
-        </div>
-        <br />
-        <b><u>{% translate "How does resource storage work?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          You can store up to 5 resources. As soon as you have 5 or fewer resources, they are automatically stored.
-          <br />
-          <br />
-          If you are using the expansion, and do not have a tile stored, then you will have the option to discard down to 3 resources if you wish,
-          in order to have enough space to store a tile later.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How does table size and table junk work?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          Tables come in small, medium, and large sizes.
-          <br />
-          A small table should theoretically just about fit all the tiles on it.
-          <br />
-          Medium and Large tables give a bit more space, whilst also providing boundaries to the playing area.
-          <br />
-          <br />
-          In the rules, you are not allowed to remove objects that are already in the playing area.
-          <br />
-          To simulate this, table junk can be added to block certain tile spaces from being used.
-          <br />
-          <b>Note:</b> Sometimes the table size, or the table size after the junk has blocked some space,
-          could be too small to fit all the tiles on. In this case, when trying to place a new tile with no available space,
-          the table size will increase by one tile around every edge, in order to allow the last few tiles to be placed.
-          <br />
-          <br />
-          <b>NOTE: In order to see the entire play area, click the "Table" Zoom button in the top right</b>
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "Why can/can’t I remove a link?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          Please check the rules.
-          <br />
-          After placing all 5 of your links, you'll be given the opportunity
-          to move some of them when it is time to place new ones on the board.
-          All of your links must always be connected to form a single network, so
-          you will only be able to remove a link if all the remaining links
-          are still connected.
-          <br />
-          <br />
-          Links are connected through adjacent tiles, as well as the entire Cannes tile.
-          Additionally, phone tiles are also connected to other phone tiles,
-          and adjacent party tiles effectively form one large tile,
-          which can be entered into through the invitations.
-          <br />
-          <br />
-          Cigars essentially act as wild links,
-          and can be used as though they were your own, to either extend your network,
-          or connect your player links into a single network.
-          Cigars can never be moved or removed once placed.
-          <br />
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How does hidden information stay hidden?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          Firstly, when looking at a replay, all the "Drawn Tiles" will remain hidden.
-          <br />
-          If a game has finished then these tiles will change to face up, as the game is already over.
-          <br />
-          Similarly, you cannot copy a game of Cannes into a Practice Game, as this could reveal information
-          about the tile order.
-          <br />
-          <br />
-          You can check the reserve to see the information that you have seen about the tile draw / discard piles.
-          The discard pile information will include all the tiles you have seen, plus the number of the unseen discards from your opponent(s).
-          The draw pile information will include ALL tiles that you haven't yet seen this shuffle.
-          Therefore, it will include all the tiles in the draw pile, plus the unseen tiles that have been discarded.
-          This is because if you have not yet seen a tile this shuffle, you won't know if this is because it is still in the draw pile,
-          or it has been discaded by someone else.
-          <br />
-          <br />
-          Rewinds should be used very cautiously, as if you rewind to a previous turn of one of the players, they will already know which tiles
-          they will be given on the following turn.
-          <br />
-          A single rewind if you realise you just messed up your turn is usually OK.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "When can I resign?" %}</u></b>
-        <br />
-        {% translate "You can resign during your &quot;place tiles&quot; phase." %}
-        <br />
-        <br />
+
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% translate "Cannes Help" %}</h1>
       </div>
-      {% translate "For further help contact" %}
-      <img id="contactEmailImg"
-           src="{% static 'Lobby/email.png' %}"
-           alt="Email Address"
-           width="400"
-           height="30">
-    </div>
-    {% include 'Lobby/donate/donateBanner.html' %}
-    {% include 'Lobby/common/homeButton.html' %}
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Rules" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% blocktranslate trimmed %}Cannes Rules Available <a class="linkOther" href="/static/CNS/Cannes_Rules.pdf" target="_blank" download>here</a>{% endblocktranslate %}</p>
+          <p>{% blocktranslate trimmed %}Cannes Expansion Rules Available <a class="linkOther" href='/static/CNS/Cannes_Expansion_Rules.pdf' target="_blank" download>here</a>{% endblocktranslate %}</p>
+          <p>{% blocktranslate trimmed %}Cannes Resource Conversion Chart Available <a class="linkOther" href='/static/CNS/Cannes_Resources.pdf' target="_blank" download>here</a>{% endblocktranslate %}</p>
+          <p>{% blocktranslate trimmed %}Cannes Example Plays Availalble <a class="linkOther" href='/static/CNS/Cannes_Examples.pdf' target="_blank" download>here</a>{% endblocktranslate %}</p>
+          <p>{% translate "How to play guide example.... Not Available. Please see Rules / Examples above" %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How do I use the website?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            <img class="CNShelpImg" src="/static/CNS/help_image.jpg" alt="Help" width="492" height="304" />
+          </p>
+          <ul>
+            <li>A. Main Action Area to confirm / undo</li>
+            <li>B. Number of Tiles in the Draw Pile</li>
+            <li>C. Number of Tiles in the Discard Pile</li>
+            <li>D. Side Action Area - Use to place tiles / increase prices / sell movies / pirate movies</li>
+            <li>E. Side Action Area during the Place Tiles phase</li>
+            <li>F. Rotate buttons - Only needed for party tiles with invitations</li>
+            <li>G. Store Tile Button (Expansion Only)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How does resource storage work?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              You can store up to 5 resources. As soon as you have 5 or fewer resources, they are automatically stored.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              If you are using the expansion, and do not have a tile stored, then you will have the option to discard down to 3 resources if you wish,
+              in order to have enough space to store a tile later.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How does table size and table junk work?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              Tables come in small, medium, and large sizes.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              A small table should theoretically just about fit all the tiles on it.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Medium and Large tables give a bit more space, whilst also providing boundaries to the playing area.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              In the rules, you are not allowed to remove objects that are already in the playing area.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              To simulate this, table junk can be added to block certain tile spaces from being used.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            <b>{% translate "Note:" %}</b>
+            {% blocktranslate trimmed %}
+              Sometimes the table size, or the table size after the junk has blocked some space,
+              could be too small to fit all the tiles on. In this case, when trying to place a new tile with no available space,
+              the table size will increase by one tile around every edge, in order to allow the last few tiles to be placed.
+            {% endblocktranslate %}
+          </p>
+          <p><b>{% translate "NOTE: In order to see the entire play area, click the \"Table\" Zoom button in the top right" %}</b></p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Why can/can’t I remove a link?" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "Please check the rules." %}</p>
+          <p>
+            {% blocktranslate trimmed %}
+              After placing all 5 of your links, you'll be given the opportunity
+              to move some of them when it is time to place new ones on the board.
+              All of your links must always be connected to form a single network, so
+              you will only be able to remove a link if all the remaining links
+              are still connected.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Links are connected through adjacent tiles, as well as the entire Cannes tile.
+              Additionally, phone tiles are also connected to other phone tiles,
+              and adjacent party tiles effectively form one large tile,
+              which can be entered into through the invitations.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Cigars essentially act as wild links,
+              and can be used as though they were your own, to either extend your network,
+              or connect your player links into a single network.
+              Cigars can never be moved or removed once placed.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How does hidden information stay hidden?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              Firstly, when looking at a replay, all the "Drawn Tiles" will remain hidden.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              If a game has finished then these tiles will change to face up, as the game is already over.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Similarly, you cannot copy a game of Cannes into a Practice Game, as this could reveal information
+              about the tile order.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              You can check the reserve to see the information that you have seen about the tile draw / discard piles.
+              The discard pile information will include all the tiles you have seen, plus the number of the unseen discards from your opponent(s).
+              The draw pile information will include ALL tiles that you haven't yet seen this shuffle.
+              Therefore, it will include all the tiles in the draw pile, plus the unseen tiles that have been discarded.
+              This is because if you have not yet seen a tile this shuffle, you won't know if this is because it is still in the draw pile,
+              or it has been discaded by someone else.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Rewinds should be used very cautiously, as if you rewind to a previous turn of one of the players, they will already know which tiles
+              they will be given on the following turn.
+            {% endblocktranslate %}
+          </p>
+          <p>{% translate "A single rewind if you realise you just messed up your turn is usually OK." %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "When can I resign?" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "You can resign during your \"place tiles\" phase." %}</p>
+        </div>
+      </div>
+
+      <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
+        {% translate "For further help contact" %}
+        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30" style="vertical-align:middle; max-width:100%;">
+      </p>
+
+      {% include "Lobby/donate/donateBanner.html" %}
+    {% else %}
+      <div id="CNShelpPage">
+        <h1>{% translate "Rules" %}</h1>
+        {% blocktranslate trimmed %}
+          Cannes Rules Available <a class="linkOther"
+      href="/static/CNS/Cannes_Rules.pdf"
+      target="_blank"
+      downlod>here</a>
+        {% endblocktranslate %}
+        <br />
+        {% blocktranslate trimmed %}
+          Cannes Expansion Rules Available <a class="linkOther"
+      href='/static/CNS/Cannes_Expansion_Rules.pdf'
+      target="_blank"
+      downlod>here</a>
+        {% endblocktranslate %}
+        <br />
+        {% blocktranslate trimmed %}
+          Cannes Resource Conversion Chart Available <a class="linkOther"
+      href='/static/CNS/Cannes_Resources.pdf'
+      target="_blank"
+      downlod>here</a>
+        {% endblocktranslate %}
+        <br />
+        {% blocktranslate trimmed %}
+          Cannes Example Plays Availalble <a class="linkOther"
+      href='/static/CNS/Cannes_Examples.pdf'
+      target="_blank"
+      downlod>here</a>
+        {% endblocktranslate %}
+        <br />
+        {% translate "How to play guide example.... Not Available. Please see Rules / Examples above" %}
+        <h1>{% translate "Cannes Help" %}</h1>
+        <b><u>{% translate "How do I use the website?" %}</u></b>
+        <br />
+        <br />
+        <div class="CNShelpSectionMax">
+          <div class="CNSsideBYsideContainer">
+            <div class="CNSsideBYsideLeft">
+              <img class="CNShelpImg"
+                   src="/static/CNS/help_image.jpg"
+                   alt="Help"
+                   width="492"
+                   height="304" />
+            </div>
+            <div class="CNSsideBYsideRight">
+              A. Main Action Area to confirm / undo
+              <br />
+              B. Number of Tiles in the Draw Pile
+              <br />
+              C. Number of Tiles in the Discard Pile
+              <br />
+              D. Side Action Area - Use to place tiles / increase prices / sell movies / pirate movies
+              <br />
+              E. Side Action Area during the Place Tiles phase
+              <br />
+              F. Rotate buttons - Only needed for party tiles with invitations
+              <br />
+              G. Store Tile Button (Expansion Only)
+            </div>
+          </div>
+          <br />
+          <b><u>{% translate "How does resource storage work?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            You can store up to 5 resources. As soon as you have 5 or fewer resources, they are automatically stored.
+            <br />
+            <br />
+            If you are using the expansion, and do not have a tile stored, then you will have the option to discard down to 3 resources if you wish,
+            in order to have enough space to store a tile later.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "How does table size and table junk work?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            Tables come in small, medium, and large sizes.
+            <br />
+            A small table should theoretically just about fit all the tiles on it.
+            <br />
+            Medium and Large tables give a bit more space, whilst also providing boundaries to the playing area.
+            <br />
+            <br />
+            In the rules, you are not allowed to remove objects that are already in the playing area.
+            <br />
+            To simulate this, table junk can be added to block certain tile spaces from being used.
+            <br />
+            <b>Note:</b> Sometimes the table size, or the table size after the junk has blocked some space,
+            could be too small to fit all the tiles on. In this case, when trying to place a new tile with no available space,
+            the table size will increase by one tile around every edge, in order to allow the last few tiles to be placed.
+            <br />
+            <br />
+            <b>NOTE: In order to see the entire play area, click the "Table" Zoom button in the top right</b>
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "Why can/can’t I remove a link?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            Please check the rules.
+            <br />
+            After placing all 5 of your links, you'll be given the opportunity
+            to move some of them when it is time to place new ones on the board.
+            All of your links must always be connected to form a single network, so
+            you will only be able to remove a link if all the remaining links
+            are still connected.
+            <br />
+            <br />
+            Links are connected through adjacent tiles, as well as the entire Cannes tile.
+            Additionally, phone tiles are also connected to other phone tiles,
+            and adjacent party tiles effectively form one large tile,
+            which can be entered into through the invitations.
+            <br />
+            <br />
+            Cigars essentially act as wild links,
+            and can be used as though they were your own, to either extend your network,
+            or connect your player links into a single network.
+            Cigars can never be moved or removed once placed.
+            <br />
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "How does hidden information stay hidden?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            Firstly, when looking at a replay, all the "Drawn Tiles" will remain hidden.
+            <br />
+            If a game has finished then these tiles will change to face up, as the game is already over.
+            <br />
+            Similarly, you cannot copy a game of Cannes into a Practice Game, as this could reveal information
+            about the tile order.
+            <br />
+            <br />
+            You can check the reserve to see the information that you have seen about the tile draw / discard piles.
+            The discard pile information will include all the tiles you have seen, plus the number of the unseen discards from your opponent(s).
+            The draw pile information will include ALL tiles that you haven't yet seen this shuffle.
+            Therefore, it will include all the tiles in the draw pile, plus the unseen tiles that have been discarded.
+            This is because if you have not yet seen a tile this shuffle, you won't know if this is because it is still in the draw pile,
+            or it has been discaded by someone else.
+            <br />
+            <br />
+            Rewinds should be used very cautiously, as if you rewind to a previous turn of one of the players, they will already know which tiles
+            they will be given on the following turn.
+            <br />
+            A single rewind if you realise you just messed up your turn is usually OK.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "When can I resign?" %}</u></b>
+          <br />
+          {% translate "You can resign during your &quot;place tiles&quot; phase." %}
+          <br />
+          <br />
+        </div>
+        {% translate "For further help contact" %}
+        <img id="contactEmailImg"
+             src="{% static 'Lobby/email.png' %}"
+             alt="Email Address"
+             width="400"
+             height="30">
+      </div>
+      {% include 'Lobby/donate/donateBanner.html' %}
+      {% include 'Lobby/common/homeButton.html' %}
+    {% endif %}
   </div>
 {% endblock %}

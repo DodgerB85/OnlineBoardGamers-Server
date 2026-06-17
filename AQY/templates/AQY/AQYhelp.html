@@ -1,12 +1,14 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-{% endblock head %}
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% endif %}
+{% endblock %}
 {% block body %}
-  <div class="container">
+  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container">{% endif %}
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -14,207 +16,388 @@
         {% endfor %}
       </div>
     {% endif %}
-    <div id="AQYhelpPage">
-      <h1>{% translate "Rules" %}</h1>
-      {% blocktranslate trimmed %}
-        Antiquity Rules Available <a class="linkOther"
-    href="https://tesera.ru/images/items/188574/Antiquity_Rules.pdf"
-    target="_blank"
-    download>here</a>
-      {% endblocktranslate %}
-      <h1>{% translate "Antiquity Help" %}</h1>
-      <h3>
-        <b><u>{% translate "Playing the Game" %}</u></b>
-      </h3>
-      <div class="a">
-        To switch between City and Country views, click on any player icon
-        <img id="clickPlayers"
-             width="300"
-             height="46"
-             alt="Player Boxes"
-             src="{% static 'AQY/images/help/clickPlayers.jpg' %}"
-             class="helpImage clickPlayers" />
-        <div class="sideBYsideContainerAQY">
-          <div class="sideBYsideLeftAQY">
-            During City Building:
-            <br />
-            <br />
-            <span class="greenArea">Use the green area for main actions: Reset Whole Turn / Undo / Finish Actions (and End Turn)</span>
-            <br />
-            <br />
-            <span class="purpleArea">Use the purple area to interact with your cities: (Re)move buildings, man and un-man buildings</span>
-            <br />
-            <br />
-            <span class="blueArea">Use the blue area to directly use buildings, eg Market, Faculty of Theology</span>
-            <br />
-            <br />
-            NOTE: You may MOVE unused buildings during city building on the turn they were built even without the Saint power.
-            This is effectively a shortcut to prevent you having to reset the whole turn just to place a building somewhere slightly different.
-            Using certain buildings or performing certain actions will lock in your buildings;
-            in this case you will need to reset your turn in order to perform your actions differently.
-          </div>
-          <div class="sideBYsideRightAQY">
-            <br />
-            <br />
-            <br />
-            <img id="helpCity"
-                 src="{% static 'AQY/images/help/helpCity.jpg' %}"
-                 width="600"
-                 height="415"
-                 alt="City Screen" />
-          </div>
-        </div>
-        <div class="sideBYsideContainerAQY">
-          <div class="sideBYsideLeftAQY">
-            <br />
-            To the right of the map you can find more map controls and information.
-            <br />
-            <br />
-            At the top is the hex detail area - mouse over or long press a map hex to view its contents in detail.
-            <br />
-            <br />
-            Next is the current Famine Level, followed by 3 map options. You can change the map hex display, the map resources display, and hide everything added to the map
-            to view the underlying terrain clearly.
-            <br />
-            These can be set permanently in your Antiquity Preferences.
-            <br />
-            <br />
-            In the Zone of Control area, you can toggle all ZoC lines and all ZoC overlaps.
-            <br />
-            You can then view the information for selected player(s) - either their ZoC outline, or the overlapping hexes / unique hexes for the selected players.
-          </div>
-          <div class="sideBYsideRightAQY">
-            <br />
-            <img id="helpZOC"
-                 src="{% static 'AQY/images/help/ZOCpanel.jpg' %}"
-                 width="125"
-                 height="500"
-                 alt="ZOC Panel" />
-          </div>
-        </div>
-        <br />
-        <img src="{% static 'AQY/images/icon-info.svg' %}"
-             width="38"
-             height="38"
-             id="infoIcon"
-             alt="Info Icon" />
-        Click the Info button to view Victory Progression
-        <br />
-        This will show you how close each player is to fulfilling each Saint's victory condition
-        <br />
-        <br />
-        Don't forget to set your
-        <a class="linkOther" href="{% url 'profileAQY' %}" target="_blank">Antiquity Preferences</a>!
-        <br />
-        <br />
-        <b>{% translate "Rewind" %}</b>
-        {% blocktranslate trimmed %}
-          is available to all players at all times. It should generally only be used to immediately correct a mistake after submitting your move.
-          <br />
-          Note that if you rewind the first player turn AFTER city building, it will undo everyone’s city building. Therefore, you should be very careful rewinding the game right after the City Build phase.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b>{% translate "Replay" %}</b>
-        {% blocktranslate trimmed %}
-          does not alter the game state in any way. You can view all the moves made from the
-          start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
-          Once you exit replay mode, the game will return to the same state as when you entered replay mode.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <h3>
-          <b><u>{% translate "Gameplay by Phase" %}</u></b>
-        </h3>
-        {% blocktranslate trimmed %}
-          <b>First city:</b> You can toggle the yellow hex highlights on and off to get an unobstructed view of the whole map.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        {% blocktranslate trimmed %}
-          <b>City Building:</b> Before you can finish your actions and end your turn, you must have completed any ongoing actions (eg board trading, un-manning, moving buildings, etc). If you are unable to end your turn, the reason will be given at the top (in place of the “Finish Actions” button), and if appropriate, there will be a button to stop the ongoing action.
-          <!--Even if you do not have the Saint Barbara power, you can still move most buildings in your city, if they were built on the current turn. This is essentially a shortcut to save you having to reset the whole turn, and redo all your actions simply to move a building around a bit.
-        Note that performing certain actions (eg removing graves) may no longer allow you to move buildings. In this case you will need to reset your whole turn in order to perform actions differently.-->
-          <br />
-          Buildings that have a food / luxury cost will auto-select their payment resources if there is only one option to make the payment.
-          <br />
-          See the detailed description later for player trading.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        {% blocktranslate trimmed %}
-          <b>Countryside Building:</b> When building a mine, you first select a resource before placing a mine. Therefore, if you select stone,  you will not be able to select any mountain hexes that have already been set to gold.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        {% blocktranslate trimmed %}
-          <b>Storage:</b> If possible, player turns will be automated here. So if you have no storage, then all resources will be lost. If you have the Saint Christofori unlimited storage power, then all resources will be kept. If you have enough storage capacity to keep all remaining resources, then they will be kept.
-          Check the history to see why a player turn was skipped.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        {% blocktranslate trimmed %}
-          <b>Harvest:</b> If you have no decisions to make for the entire harvest, then your turn will be automated. For example, if you have 1 manned wood resource next to a wood resource, and 1 manned grain resource on its own, then there is no choice as to which hexes you can harvest. Therefore, your turn will be automated. Check the history for details.
-          If any part of your harvest needs to be decided manually, then you will select ALL of your resource hexes that you will harvest (even from resource areas with no real choice).
-        {% endblocktranslate %}
-        <br />
-        <br />
-        {% blocktranslate trimmed %}
-          <b>Famine:</b> If you run out of of space, graves must be placed on top of eligible buildings. If you run out of space for graves as well, you will lose the game and be forced to resign.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        {% blocktranslate trimmed %}
-          <b>Pollution:</b>  If you run out of space, you must place graves instead. If you run out of space again, you will lose the game and be forced to resign.
-          Game End Check. The game end check is only performed at this point in the turn. If multiple players achieve their Saint victory condition, then the player with the most unpolluted hexes in their Zone of Control will win. If this is tied, then both players win. If you did not achieve your Saint victory condition, then you will simply lose, along with all other players who did not achieve theirs. Times were tough in Antiquity!
-        {% endblocktranslate %}
-        <h3>
-          <b><u>{% translate "Player trades" %}</u></b>
-        </h3>
-        {% blocktranslate trimmed %}
-          Player trades should be negotiated using the in game chat.
-          Resources and promises can be traded. Promises should only be traded if there is genuine intention to keep them; otherwise the whole thing is pointless.
-          The proposer will need to man their market, and can then propose a trade using the button in the "New Building" area.
-          (This is slightly different to the rules, where 'anyone' can propose a trade. In any case, someone is required to have a manned market, so for simplicity a manned market is required in order to propose trades. You can still negotiate a trade in chat without a market of course).
-          If the trade is accepted, the proposer’s actions taken during the city build phase up to the point they proposed the trade will be locked in. When the trade is accepted, the proposer’s city will revert to this point in time, but with any resources / promises from the trade exchanged.
-          The receiver will be able to accept the trade at any point, but when they do, their city build actions up to that point will be locked in. Therefore, for maximum flexibility you should reset your city build turn before accepting a trade.
-          When a trade is accepted, the resources are exchanged immediately. Promises will be displayed towards the top of your screen. If you have sent or received a promise, it will highlight during the nominal phase attached to it. The receiver can mark it as completed at any point.
-        {% endblocktranslate %}
-        <h3>
-          <b><u>{% translate "Rule points" %}</u></b>
-        </h3>
-        {% blocktranslate trimmed %}
-          Initial cities placed over water break up the continuous water. Therefore, any water tiles will be replaced with grass
-          <br />
-          Buildings with graves on do not count towards the Saint Barbara win condition
-          <br />
-          Cathedrals with graves on will stop your saint power and prevent you from winning
-          <br />
-        {% endblocktranslate %}
-        <h3>
-          <b><u>{% translate "When can I resign?" %}</u></b>
-        </h3>
-        {% blocktranslate trimmed %}
-          You can resign during your "City Build" phase.
-        {% endblocktranslate %}
+
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% translate "Antiquity Help" %}</h1>
       </div>
-      <br />
-      <br />
-      {% translate "For further help contact" %}
-      <img id="contactEmailImg"
-           src="{% static 'Lobby/email.png' %}"
-           alt="Email Address"
-           width="400"
-           height="30">
-    </div>
-    {% include "Lobby/donate/donateBanner.html" %}
-    {% include "Lobby/common/homeButton.html" %}
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Rules" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              Antiquity Rules Available <a class="linkOther" href="https://tesera.ru/images/items/188574/Antiquity_Rules.pdf" target="_blank" download>here</a>
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Playing the Game" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% translate "To switch between City and Country views, click on any player icon" %}
+            <img id="clickPlayers" width="300" height="46" alt="Player Boxes" src="{% static 'AQY/images/help/clickPlayers.jpg' %}" class="helpImage clickPlayers" />
+          </p>
+          <p><b>{% translate "During City Building:" %}</b></p>
+          <p><span class="greenArea">{% translate "Use the green area for main actions: Reset Whole Turn / Undo / Finish Actions (and End Turn)" %}</span></p>
+          <p><span class="purpleArea">{% translate "Use the purple area to interact with your cities: (Re)move buildings, man and un-man buildings" %}</span></p>
+          <p><span class="blueArea">{% translate "Use the blue area to directly use buildings, eg Market, Faculty of Theology" %}</span></p>
+          <p>
+            {% blocktranslate trimmed %}
+              NOTE: You may MOVE unused buildings during city building on the turn they were built even without the Saint power.
+              This is effectively a shortcut to prevent you having to reset the whole turn just to place a building somewhere slightly different.
+              Using certain buildings or performing certain actions will lock in your buildings;
+              in this case you will need to reset your turn in order to perform your actions differently.
+            {% endblocktranslate %}
+          </p>
+          <p><img id="helpCity" src="{% static 'AQY/images/help/helpCity.jpg' %}" width="600" height="415" alt="City Screen" /></p>
+          <p>{% translate "To the right of the map you can find more map controls and information." %}</p>
+          <p>{% translate "At the top is the hex detail area - mouse over or long press a map hex to view its contents in detail." %}</p>
+          <p>
+            {% blocktranslate trimmed %}
+              Next is the current Famine Level, followed by 3 map options. You can change the map hex display, the map resources display, and hide everything added to the map
+              to view the underlying terrain clearly.
+            {% endblocktranslate %}
+          </p>
+          <p>{% translate "These can be set permanently in your Antiquity Preferences." %}</p>
+          <p>{% translate "In the Zone of Control area, you can toggle all ZoC lines and all ZoC overlaps." %}</p>
+          <p>{% translate "You can then view the information for selected player(s) - either their ZoC outline, or the overlapping hexes / unique hexes for the selected players." %}</p>
+          <p><img id="helpZOC" src="{% static 'AQY/images/help/ZOCpanel.jpg' %}" width="125" height="500" alt="ZOC Panel" /></p>
+          <p>
+            <img src="{% static 'AQY/images/icon-info.svg' %}" width="38" height="38" id="infoIcon" alt="Info Icon" />
+            {% translate "Click the Info button to view Victory Progression" %}
+          </p>
+          <p>{% translate "This will show you how close each player is to fulfilling each Saint's victory condition" %}</p>
+          <p>
+            {% translate "Don't forget to set your" %}
+            <a class="linkOther" href="{% url 'profileAQY' %}" target="_blank">{% translate "Antiquity Preferences" %}</a>!
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Rewind / Replay" %}</h2>
+        <div class="nd-help-qa">
+          <b><u>{% translate "Rewind" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              is available to all players at all times. It should generally only be used to immediately correct a mistake after submitting your move.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Note that if you rewind the first player turn AFTER city building, it will undo everyone’s city building. Therefore, you should be very careful rewinding the game right after the City Build phase.
+            {% endblocktranslate %}
+          </p>
+          <b><u>{% translate "Replay" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              does not alter the game state in any way. You can view all the moves made from the
+              start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
+              Once you exit replay mode, the game will return to the same state as when you entered replay mode.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Gameplay by Phase" %}</h2>
+        <div class="nd-help-qa">
+          <b><u>{% translate "First city:" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              You can toggle the yellow hex highlights on and off to get an unobstructed view of the whole map.
+            {% endblocktranslate %}
+          </p>
+
+          <b><u>{% translate "City Building:" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              Before you can finish your actions and end your turn, you must have completed any ongoing actions (eg board trading, un-manning, moving buildings, etc). If you are unable to end your turn, the reason will be given at the top (in place of the “Finish Actions” button), and if appropriate, there will be a button to stop the ongoing action.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Buildings that have a food / luxury cost will auto-select their payment resources if there is only one option to make the payment.
+            {% endblocktranslate %}
+          </p>
+          <p>{% translate "See the detailed description later for player trading." %}</p>
+
+          <b><u>{% translate "Countryside Building:" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              When building a mine, you first select a resource before placing a mine. Therefore, if you select stone,  you will not be able to select any mountain hexes that have already been set to gold.
+            {% endblocktranslate %}
+          </p>
+
+          <b><u>{% translate "Storage:" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              If possible, player turns will be automated here. So if you have no storage, then all resources will be lost. If you have the Saint Christofori unlimited storage power, then all resources will be kept. If you have enough storage capacity to keep all remaining resources, then they will be kept.
+              Check the history to see why a player turn was skipped.
+            {% endblocktranslate %}
+          </p>
+
+          <b><u>{% translate "Harvest:" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              If you have no decisions to make for the entire harvest, then your turn will be automated. For example, if you have 1 manned wood resource next to a wood resource, and 1 manned grain resource on its own, then there is no choice as to which hexes you can harvest. Therefore, your turn will be automated. Check the history for details.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              If any part of your harvest needs to be decided manually, then you will select ALL of your resource hexes that you will harvest (even from resource areas with no real choice).
+            {% endblocktranslate %}
+          </p>
+
+          <b><u>{% translate "Famine:" %}</u></b>
+          <p>{% translate "If you run out of of space, graves must be placed on top of eligible buildings. If you run out of space for graves as well, you will lose the game and be forced to resign." %}</p>
+
+          <b><u>{% translate "Pollution:" %}</u></b>
+          <p>{% translate "If you run out of space, you must place graves instead. If you run out of space again, you will lose the game and be forced to resign." %}</p>
+          <p>
+            {% blocktranslate trimmed %}
+              Game End Check. The game end check is only performed at this point in the turn. If multiple players achieve their Saint victory condition, then the player with the most unpolluted hexes in their Zone of Control will win. If this is tied, then both players win. If you did not achieve your Saint victory condition, then you will simply lose, along with all other players who did not achieve theirs. Times were tough in Antiquity!
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Player trades" %}</h2>
+        <div class="nd-help-qa">
+          {% blocktranslate trimmed %}
+            Player trades should be negotiated using the in game chat.
+            Resources and promises can be traded. Promises should only be traded if there is genuine intention to keep them; otherwise the whole thing is pointless.
+            The proposer will need to man their market, and can then propose a trade using the button in the "New Building" area.
+            (This is slightly different to the rules, where 'anyone' can propose a trade. In any case, someone is required to have a manned market, so for simplicity a manned market is required in order to propose trades. You can still negotiate a trade in chat without a market of course).
+            If the trade is accepted, the proposer’s actions taken during the city build phase up to the point they proposed the trade will be locked in. When the trade is accepted, the proposer’s city will revert to this point in time, but with any resources / promises from the trade exchanged.
+            The receiver will be able to accept the trade at any point, but when they do, their city build actions up to that point will be locked in. Therefore, for maximum flexibility you should reset your city build turn before accepting a trade.
+            When a trade is accepted, the resources are exchanged immediately. Promises will be displayed towards the top of your screen. If you have sent or received a promise, it will highlight during the nominal phase attached to it. The receiver can mark it as completed at any point.
+          {% endblocktranslate %}
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Rule points" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "Initial cities placed over water break up the continuous water. Therefore, any water tiles will be replaced with grass" %}</p>
+          <p>{% translate "Buildings with graves on do not count towards the Saint Barbara win condition" %}</p>
+          <p>{% translate "Cathedrals with graves on will stop your saint power and prevent you from winning" %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "When can I resign?" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "You can resign during your \"City Build\" phase." %}</p>
+        </div>
+      </div>
+
+      <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
+        {% translate "For further help contact" %}
+        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30" style="vertical-align:middle; max-width:100%;">
+      </p>
+
+      {% include "Lobby/donate/donateBanner.html" %}
+    {% else %}
+      <div id="AQYhelpPage">
+        <h1>{% translate "Rules" %}</h1>
+        {% blocktranslate trimmed %}
+          Antiquity Rules Available <a class="linkOther"
+      href="https://tesera.ru/images/items/188574/Antiquity_Rules.pdf"
+      target="_blank"
+      download>here</a>
+        {% endblocktranslate %}
+        <h1>{% translate "Antiquity Help" %}</h1>
+        <h3>
+          <b><u>{% translate "Playing the Game" %}</u></b>
+        </h3>
+        <div class="a">
+          To switch between City and Country views, click on any player icon
+          <img id="clickPlayers"
+               width="300"
+               height="46"
+               alt="Player Boxes"
+               src="{% static 'AQY/images/help/clickPlayers.jpg' %}"
+               class="helpImage clickPlayers" />
+          <div class="sideBYsideContainerAQY">
+            <div class="sideBYsideLeftAQY">
+              During City Building:
+              <br />
+              <br />
+              <span class="greenArea">Use the green area for main actions: Reset Whole Turn / Undo / Finish Actions (and End Turn)</span>
+              <br />
+              <br />
+              <span class="purpleArea">Use the purple area to interact with your cities: (Re)move buildings, man and un-man buildings</span>
+              <br />
+              <br />
+              <span class="blueArea">Use the blue area to directly use buildings, eg Market, Faculty of Theology</span>
+              <br />
+              <br />
+              NOTE: You may MOVE unused buildings during city building on the turn they were built even without the Saint power.
+              This is effectively a shortcut to prevent you having to reset the whole turn just to place a building somewhere slightly different.
+              Using certain buildings or performing certain actions will lock in your buildings;
+              in this case you will need to reset your turn in order to perform your actions differently.
+            </div>
+            <div class="sideBYsideRightAQY">
+              <br />
+              <br />
+              <br />
+              <img id="helpCity"
+                   src="{% static 'AQY/images/help/helpCity.jpg' %}"
+                   width="600"
+                   height="415"
+                   alt="City Screen" />
+            </div>
+          </div>
+          <div class="sideBYsideContainerAQY">
+            <div class="sideBYsideLeftAQY">
+              <br />
+              To the right of the map you can find more map controls and information.
+              <br />
+              <br />
+              At the top is the hex detail area - mouse over or long press a map hex to view its contents in detail.
+              <br />
+              <br />
+              Next is the current Famine Level, followed by 3 map options. You can change the map hex display, the map resources display, and hide everything added to the map
+              to view the underlying terrain clearly.
+              <br />
+              These can be set permanently in your Antiquity Preferences.
+              <br />
+              <br />
+              In the Zone of Control area, you can toggle all ZoC lines and all ZoC overlaps.
+              <br />
+              You can then view the information for selected player(s) - either their ZoC outline, or the overlapping hexes / unique hexes for the selected players.
+            </div>
+            <div class="sideBYsideRightAQY">
+              <br />
+              <img id="helpZOC"
+                   src="{% static 'AQY/images/help/ZOCpanel.jpg' %}"
+                   width="125"
+                   height="500"
+                   alt="ZOC Panel" />
+            </div>
+          </div>
+          <br />
+          <img src="{% static 'AQY/images/icon-info.svg' %}"
+               width="38"
+               height="38"
+               id="infoIcon"
+               alt="Info Icon" />
+          Click the Info button to view Victory Progression
+          <br />
+          This will show you how close each player is to fulfilling each Saint's victory condition
+          <br />
+          <br />
+          Don't forget to set your
+          <a class="linkOther" href="{% url 'profileAQY' %}" target="_blank">Antiquity Preferences</a>!
+          <br />
+          <br />
+          <b>{% translate "Rewind" %}</b>
+          {% blocktranslate trimmed %}
+            is available to all players at all times. It should generally only be used to immediately correct a mistake after submitting your move.
+            <br />
+            Note that if you rewind the first player turn AFTER city building, it will undo everyone’s city building. Therefore, you should be very careful rewinding the game right after the City Build phase.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b>{% translate "Replay" %}</b>
+          {% blocktranslate trimmed %}
+            does not alter the game state in any way. You can view all the moves made from the
+            start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
+            Once you exit replay mode, the game will return to the same state as when you entered replay mode.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <h3>
+            <b><u>{% translate "Gameplay by Phase" %}</u></b>
+          </h3>
+          {% blocktranslate trimmed %}
+            <b>First city:</b> You can toggle the yellow hex highlights on and off to get an unobstructed view of the whole map.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>City Building:</b> Before you can finish your actions and end your turn, you must have completed any ongoing actions (eg board trading, un-manning, moving buildings, etc). If you are unable to end your turn, the reason will be given at the top (in place of the “Finish Actions” button), and if appropriate, there will be a button to stop the ongoing action.
+            <!--Even if you do not have the Saint Barbara power, you can still move most buildings in your city, if they were built on the current turn. This is essentially a shortcut to save you having to reset the whole turn, and redo all your actions simply to move a building around a bit.
+        Note that performing certain actions (eg removing graves) may no longer allow you to move buildings. In this case you will need to reset your whole turn in order to perform actions differently.-->
+            <br />
+            Buildings that have a food / luxury cost will auto-select their payment resources if there is only one option to make the payment.
+            <br />
+            See the detailed description later for player trading.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Countryside Building:</b> When building a mine, you first select a resource before placing a mine. Therefore, if you select stone,  you will not be able to select any mountain hexes that have already been set to gold.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Storage:</b> If possible, player turns will be automated here. So if you have no storage, then all resources will be lost. If you have the Saint Christofori unlimited storage power, then all resources will be kept. If you have enough storage capacity to keep all remaining resources, then they will be kept.
+            Check the history to see why a player turn was skipped.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Harvest:</b> If you have no decisions to make for the entire harvest, then your turn will be automated. For example, if you have 1 manned wood resource next to a wood resource, and 1 manned grain resource on its own, then there is no choice as to which hexes you can harvest. Therefore, your turn will be automated. Check the history for details.
+            If any part of your harvest needs to be decided manually, then you will select ALL of your resource hexes that you will harvest (even from resource areas with no real choice).
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Famine:</b> If you run out of of space, graves must be placed on top of eligible buildings. If you run out of space for graves as well, you will lose the game and be forced to resign.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Pollution:</b>  If you run out of space, you must place graves instead. If you run out of space again, you will lose the game and be forced to resign.
+            Game End Check. The game end check is only performed at this point in the turn. If multiple players achieve their Saint victory condition, then the player with the most unpolluted hexes in their Zone of Control will win. If this is tied, then both players win. If you did not achieve your Saint victory condition, then you will simply lose, along with all other players who did not achieve theirs. Times were tough in Antiquity!
+          {% endblocktranslate %}
+          <h3>
+            <b><u>{% translate "Player trades" %}</u></b>
+          </h3>
+          {% blocktranslate trimmed %}
+            Player trades should be negotiated using the in game chat.
+            Resources and promises can be traded. Promises should only be traded if there is genuine intention to keep them; otherwise the whole thing is pointless.
+            The proposer will need to man their market, and can then propose a trade using the button in the "New Building" area.
+            (This is slightly different to the rules, where 'anyone' can propose a trade. In any case, someone is required to have a manned market, so for simplicity a manned market is required in order to propose trades. You can still negotiate a trade in chat without a market of course).
+            If the trade is accepted, the proposer’s actions taken during the city build phase up to the point they proposed the trade will be locked in. When the trade is accepted, the proposer’s city will revert to this point in time, but with any resources / promises from the trade exchanged.
+            The receiver will be able to accept the trade at any point, but when they do, their city build actions up to that point will be locked in. Therefore, for maximum flexibility you should reset your city build turn before accepting a trade.
+            When a trade is accepted, the resources are exchanged immediately. Promises will be displayed towards the top of your screen. If you have sent or received a promise, it will highlight during the nominal phase attached to it. The receiver can mark it as completed at any point.
+          {% endblocktranslate %}
+          <h3>
+            <b><u>{% translate "Rule points" %}</u></b>
+          </h3>
+          {% blocktranslate trimmed %}
+            Initial cities placed over water break up the continuous water. Therefore, any water tiles will be replaced with grass
+            <br />
+            Buildings with graves on do not count towards the Saint Barbara win condition
+            <br />
+            Cathedrals with graves on will stop your saint power and prevent you from winning
+            <br />
+          {% endblocktranslate %}
+          <h3>
+            <b><u>{% translate "When can I resign?" %}</u></b>
+          </h3>
+          {% blocktranslate trimmed %}
+            You can resign during your "City Build" phase.
+          {% endblocktranslate %}
+        </div>
+        <br />
+        <br />
+        {% translate "For further help contact" %}
+        <img id="contactEmailImg"
+             src="{% static 'Lobby/email.png' %}"
+             alt="Email Address"
+             width="400"
+             height="30">
+      </div>
+      {% include "Lobby/donate/donateBanner.html" %}
+      {% include "Lobby/common/homeButton.html" %}
+    {% endif %}
   </div>
-</div>
-<script>
-  document.querySelector('.homeButton').addEventListener('click', function() {
-    window.location.href = this.getAttribute('data-url');
-  });
-</script>
-</div>
-{% endblock body %}
+{% endblock %}

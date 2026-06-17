@@ -7,7 +7,7 @@
   {% endif %}
 {% endblock head %}
 {% block body %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow" id="contactPage">{% else %}<div class="container" id="contactPage">{% endif %}
+  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container" id="contactPage">{% endif %}
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -22,39 +22,40 @@
       </div>
 
       <div class="nd-card nd-section">
-        <p style="font-size:15px; line-height:1.6;">
+        <p>
           <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
         </p>
-        <p style="margin-top:8px;">
+        <p style="text-align:center;margin:14px 0 4px;">
           <img id="contactEmailImg"
                src="{% static 'Lobby/email.png' %}"
                alt="Email Address"
                width="400"
                height="30"
-               style="vertical-align:middle; max-width:100%;">
+               style="vertical-align:middle;max-width:100%;">
         </p>
-      </div>
-
-      <div class="nd-card nd-section">
-        <p style="font-size:14px; color: var(--color-muted); margin: 0;">
+        <p class="contactPtext">
           {% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
         </p>
       </div>
-    {% else %}
-      <p>
-        <b>{% translate "For any questions / comments / suggestions, please contact" %}
-          <img id="contactEmailImg"
-               src="{% static 'Lobby/email.png' %}"
-               alt="Email Address"
-               width="400"
-               height="30">
-        </b>
-      </p>
-      <p class="contactPtext">
-        {% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
-      </p>
+
       {% include "Lobby/donate/donateBanner.html" %}
+    {% else %}
+      <div id="contactPage">
+        <p>
+          <b>{% translate "For any questions / comments / suggestions, please contact" %}
+            <img id="contactEmailImg"
+                 src="{% static 'Lobby/email.png' %}"
+                 alt="Email Address"
+                 width="400"
+                 height="30">
+          </b>
+        </p>
+        <p class="contactPtext">
+          {% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
+        </p>
+        {% include "Lobby/donate/donateBanner.html" %}
+      </div>
+      {% include "Lobby/common/homeButton.html" %}
     {% endif %}
   </div>
-  {% if not request.use_new_design %}{% include "Lobby/common/homeButton.html" %}{% endif %}
 {% endblock body %}

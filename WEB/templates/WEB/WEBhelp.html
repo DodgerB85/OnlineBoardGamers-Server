@@ -1,12 +1,14 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% endif %}
 {% endblock %}
 {% block body %}
-  <div class="container">
+  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container">{% endif %}
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -14,107 +16,183 @@
         {% endfor %}
       </div>
     {% endif %}
-    <div id="KFWhelpPage">
-      <h1>{% translate "Rules" %}</h1>
-      {% blocktranslate %}
-        Web Rules Available <a class='linkOther' href='/static/WEB/Web_Rules.pdf' target='_blank' downlod>here</a>
-        {% endblocktranslate %}
-      <br />
-      <h1>{% translate "Web Help" %}</h1>
-      <h3>
-        <b><u>{% translate "Playing the Game" %}</u></b>
-      </h3>
-      <div class="maxWidthContainerDiv">
-        <div class="leftTextAlignDiv">
-          <div class="imageWithTextDiv">
-            <img src="{% static 'WEB/images/icon-box.svg' %}"
-                 alt="Reserve"
-                 width="50"
-                 height="50"
-                 class="topMenuIconForHelp imageWithTextIconImg">
+
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% translate "Web Help" %}</h1>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Rules" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% blocktranslate %}Web Rules Available <a class='linkOther' href='/static/WEB/Web_Rules.pdf' target='_blank' downlod>here</a>{% endblocktranslate %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Playing the Game" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            <img src="{% static 'WEB/images/icon-box.svg' %}" alt="Reserve" width="50" height="50" class="topMenuIconForHelp imageWithTextIconImg" style="vertical-align:middle;">
+            {% blocktranslate trimmed %}You can view unused tiles in the Reserve.{% endblocktranslate %}
+          </p>
+          <p>{% blocktranslate trimmed %}This includes your opponents' unplcaed tiles, as well as face up tile stacks (as you haven't seen their action number){% endblocktranslate %}</p>
+          <p>{% blocktranslate trimmed %}You can also view each players remaining flex time.{% endblocktranslate %}</p>
+          <p>
+            <img src="{% static 'WEB/images/icon-rewind.svg' %}" alt="Reserve" width="50" height="50" class="topMenuIconForHelp imageWithTextIconImg" style="vertical-align:middle;">
+            {% blocktranslate trimmed %}Any player can rewind the game at any time.{% endblocktranslate %}
+          </p>
+          <p>
             {% blocktranslate trimmed %}
-              You can view unused tiles in the Reserve.
-              <br />
-              This includes your opponents' unplcaed tiles, as well as face up tile stacks (as you haven't seen their action number)
-              <br />
-              You can also view each players remaining flex time.
-            {% endblocktranslate %}
-          </div>
-          <div class="imageWithTextDiv">
-            <img src="{% static 'WEB/images/icon-rewind.svg' %}"
-                 alt="Reserve"
-                 width="50"
-                 height="50"
-                 class="topMenuIconForHelp imageWithTextIconImg">
-            {% blocktranslate trimmed %}
-              Any player can rewind the game at any time.
-              <br />
               If rewinding the game would "undo" revealing any hidden information, you will be informed
               before you rewind, and if you continue to rewind it will be recoded in the History.
             {% endblocktranslate %}
-          </div>
-          <div class="imageWithTextDiv">
-            <img src="{% static 'Lobby/images/help/WEBselectTile.jpg' %}"
-                 alt="Select a Tile"
-                 width="379"
-                 height="50"
-                 id="WEBselectTileImg">
-            <p>
-              {% blocktranslate trimmed %}
-                At the start of your turn, you must add a tile from your supply to the grid.
-                <br />
-                After selecting a tile, you may rotate it.
-                <br />
-                Be Careful! If you ever run out of tiles, you will not be able to take any more actions in the game.
-              {% endblocktranslate %}
-            </p>
-          </div>
-          <div class="imageWithTextDiv">
-            <img src="{% static 'Lobby/images/help/WEBnoSupply.jpg' %}"
-                 alt="No Supply"
-                 width="150"
-                 height="143">
-            <p>
-              {% blocktranslate trimmed %}
-                If a player takes the last tile in a supply pile, the game will end immediately.
-                <br />
-                You will get a warning before this happens.
-              {% endblocktranslate %}
-            </p>
-          </div>
+          </p>
+          <p>
+            <img src="{% static 'Lobby/images/help/WEBselectTile.jpg' %}" alt="Select a Tile" width="379" height="50" id="WEBselectTileImg" style="max-width:100%;">
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              At the start of your turn, you must add a tile from your supply to the grid.
+            {% endblocktranslate %}
+          </p>
+          <p>{% translate "After selecting a tile, you may rotate it." %}</p>
+          <p><b>{% translate "Be Careful!" %}</b> {% translate "If you ever run out of tiles, you will not be able to take any more actions in the game." %}</p>
+          <p>
+            <img src="{% static 'Lobby/images/help/WEBnoSupply.jpg' %}" alt="No Supply" width="150" height="143" style="max-width:100%;">
+          </p>
+          <p>{% translate "If a player takes the last tile in a supply pile, the game will end immediately." %}</p>
+          <p>{% translate "You will get a warning before this happens." %}</p>
         </div>
       </div>
-      <h3>
-        <b><u>{% translate "Gameplay" %}</u></b>
-      </h3>
-      <div class="maxWidthContainerDiv">
-        <div class="leftTextAlignDiv">
-          {% blocktranslate trimmed %}
-            <b>Game End:</b> The game will end when EITHER one supply pile runs out, OR only 1 player has tiles left in their supply.
-          {% endblocktranslate %}
-          <br />
-          <br />
-          {% blocktranslate trimmed %}
-            <b>Tied Scores:</b> If scores are tied at the end of the game, all tied player will jointly win.
-          {% endblocktranslate %}
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Gameplay" %}</h2>
+        <div class="nd-help-qa">
+          <b><u>{% translate "Game End:" %}</u></b>
+          <p>{% translate "The game will end when EITHER one supply pile runs out, OR only 1 player has tiles left in their supply." %}</p>
+
+          <b><u>{% translate "Tied Scores:" %}</u></b>
+          <p>{% translate "If scores are tied at the end of the game, all tied player will jointly win." %}</p>
         </div>
       </div>
-      <br />
-      <div class="WEBhelpSection">
-        <b><u>{% translate "When can I resign?" %}</u></b>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "When can I resign?" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "You can resign before adding a tile to the grid." %}</p>
+        </div>
+      </div>
+
+      <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
+        {% translate "For further help contact" %}
+        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30" style="vertical-align:middle; max-width:100%;">
+      </p>
+
+      {% include "Lobby/donate/donateBanner.html" %}
+    {% else %}
+      <div id="KFWhelpPage">
+        <h1>{% translate "Rules" %}</h1>
+        {% blocktranslate %}
+          Web Rules Available <a class='linkOther' href='/static/WEB/Web_Rules.pdf' target='_blank' downlod>here</a>
+          {% endblocktranslate %}
         <br />
-        {% translate "You can resign before adding a tile to the grid." %}
+        <h1>{% translate "Web Help" %}</h1>
+        <h3>
+          <b><u>{% translate "Playing the Game" %}</u></b>
+        </h3>
+        <div class="maxWidthContainerDiv">
+          <div class="leftTextAlignDiv">
+            <div class="imageWithTextDiv">
+              <img src="{% static 'WEB/images/icon-box.svg' %}"
+                   alt="Reserve"
+                   width="50"
+                   height="50"
+                   class="topMenuIconForHelp imageWithTextIconImg">
+              {% blocktranslate trimmed %}
+                You can view unused tiles in the Reserve.
+                <br />
+                This includes your opponents' unplcaed tiles, as well as face up tile stacks (as you haven't seen their action number)
+                <br />
+                You can also view each players remaining flex time.
+              {% endblocktranslate %}
+            </div>
+            <div class="imageWithTextDiv">
+              <img src="{% static 'WEB/images/icon-rewind.svg' %}"
+                   alt="Reserve"
+                   width="50"
+                   height="50"
+                   class="topMenuIconForHelp imageWithTextIconImg">
+              {% blocktranslate trimmed %}
+                Any player can rewind the game at any time.
+                <br />
+                If rewinding the game would "undo" revealing any hidden information, you will be informed
+                before you rewind, and if you continue to rewind it will be recoded in the History.
+              {% endblocktranslate %}
+            </div>
+            <div class="imageWithTextDiv">
+              <img src="{% static 'Lobby/images/help/WEBselectTile.jpg' %}"
+                   alt="Select a Tile"
+                   width="379"
+                   height="50"
+                   id="WEBselectTileImg">
+              <p>
+                {% blocktranslate trimmed %}
+                  At the start of your turn, you must add a tile from your supply to the grid.
+                  <br />
+                  After selecting a tile, you may rotate it.
+                  <br />
+                  Be Careful! If you ever run out of tiles, you will not be able to take any more actions in the game.
+                {% endblocktranslate %}
+              </p>
+            </div>
+            <div class="imageWithTextDiv">
+              <img src="{% static 'Lobby/images/help/WEBnoSupply.jpg' %}"
+                   alt="No Supply"
+                   width="150"
+                   height="143">
+              <p>
+                {% blocktranslate trimmed %}
+                  If a player takes the last tile in a supply pile, the game will end immediately.
+                  <br />
+                  You will get a warning before this happens.
+                {% endblocktranslate %}
+              </p>
+            </div>
+          </div>
+        </div>
+        <h3>
+          <b><u>{% translate "Gameplay" %}</u></b>
+        </h3>
+        <div class="maxWidthContainerDiv">
+          <div class="leftTextAlignDiv">
+            {% blocktranslate trimmed %}
+              <b>Game End:</b> The game will end when EITHER one supply pile runs out, OR only 1 player has tiles left in their supply.
+            {% endblocktranslate %}
+            <br />
+            <br />
+            {% blocktranslate trimmed %}
+              <b>Tied Scores:</b> If scores are tied at the end of the game, all tied player will jointly win.
+            {% endblocktranslate %}
+          </div>
+        </div>
+        <br />
+        <div class="WEBhelpSection">
+          <b><u>{% translate "When can I resign?" %}</u></b>
+          <br />
+          {% translate "You can resign before adding a tile to the grid." %}
+        </div>
+        <br />
+        <br />
+        {% translate "For further help contact" %}
+        <img id="contactEmailImg"
+             src="{% static 'Lobby/email.png' %}"
+             alt="Email Address"
+             width="400"
+             height="30">
       </div>
-      <br />
-      <br />
-      {% translate "For further help contact" %}
-      <img id="contactEmailImg"
-           src="{% static 'Lobby/email.png' %}"
-           alt="Email Address"
-           width="400"
-           height="30">
-    </div>
-    {% include 'Lobby/donate/donateBanner.html' %}
-    {% include 'Lobby/common/homeButton.html' %}
+      {% include 'Lobby/donate/donateBanner.html' %}
+      {% include 'Lobby/common/homeButton.html' %}
+    {% endif %}
   </div>
 {% endblock %}
