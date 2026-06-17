@@ -212,7 +212,7 @@ body.nd .mainLayout {
 }
 
 .topBarLink {
-    color: var(--color-nav-link);
+    color: var(--color-brand-blue);
     text-align: center;
     margin-left: 4px;
     margin-right: 10px;
@@ -236,6 +236,10 @@ body.nd .mainLayout {
     align-items: center;
     margin-top: 25px;
     margin-right: 20px;
+}
+
+#registerLink a {
+    color: var(--color-brand-blue);
 }
 
 #rightLoggedInHyperlinks {
@@ -307,6 +311,15 @@ body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
 #loginForm {
     display: flex;
     padding: 10px;
+}
+
+/* The "Login" submit in the top bar uses the same nd-button-primary style as
+   the landing page's Log in CTA so the two match visually. The shared button
+   rules expect flex parents; this lives in a flex row already via #loginForm
+   but its padding needs a slight nudge so it sits flush with the inputs. */
+#loginForm .loginSubmit {
+    margin: 0;
+    align-self: stretch;
 }
 
 #leftLoggedInAsInfo {

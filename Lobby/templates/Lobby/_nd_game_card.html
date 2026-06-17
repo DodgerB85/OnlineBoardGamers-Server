@@ -1,5 +1,5 @@
 {% load static i18n %}
-<div class="nd-card nd-game-card">
+<button type="button" class="nd-card nd-game-card nd-game-card-btn" data-nd-game-card="{{ full_id|default:'' }}" aria-expanded="false">
   <div class="nd-game-card-img" style="background-image:url('{% static img %}');">
     <img src="{% static img %}" alt="{{ title }}">
   </div>
@@ -8,4 +8,4 @@
     <p class="nd-muted nd-small">{{ players }} {% translate "players" %}</p>
     <p>{{ tagline }}</p>
   </div>
-</div>
+</button>

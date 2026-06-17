@@ -177,7 +177,8 @@ body.nd .nd-map-editor-grid {
 /* ---------- BUTTONS ---------- */
 body.nd .nd-button,
 body.nd a.nd-button,
-body.nd button.nd-button {
+body.nd button.nd-button,
+body.nd input.nd-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -194,6 +195,9 @@ body.nd button.nd-button {
     cursor: pointer;
     line-height: 1.2;
     box-sizing: border-box;
+    /* Inherit family so the input[type=submit] in the top bar login form
+       matches the rest of the new-design typography. */
+    font-family: inherit;
 }
 
 /* White/secondary button hover: match the primary button's hover state
@@ -459,6 +463,39 @@ body.nd .nd-credits-group {
     border-top: 1px solid var(--color-border);
     padding-top: 10px;
     margin-top: 10px;
+}
+
+/* Credits list (About page) — each row has the role on the left and the
+   name on the right. Wraps on narrow screens. */
+body.nd .nd-credits {
+    font-size: 14px;
+    line-height: 1.7;
+}
+body.nd .nd-credits .nd-credits-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+body.nd .nd-credits .nd-credits-row:last-child {
+    border-bottom: none;
+}
+body.nd .nd-credits .nd-credits-row > span:first-child {
+    color: var(--color-ink);
+}
+body.nd .nd-credits .nd-credits-row > span:last-child {
+    color: var(--color-accent-strong);
+    font-weight: 600;
+    text-align: right;
+}
+body.nd .nd-thanks {
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    line-height: 1.55;
 }
 
 /* Donate payment options row */
@@ -757,6 +794,23 @@ body.nd a.nd-create-tile:hover {
     border-color: var(--color-accent-strong);
 }
 
+/* Game card as <button> (landing-page expansion toggle). Reset button
+   defaults so the card visual matches the .nd-game-card div variant. */
+body.nd .nd-game-card-btn {
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
+    padding: 0;
+}
+body.nd .nd-game-card-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent-strong);
+}
+
 body.nd .nd-create-tile-label {
     padding: 10px 14px;
     font-weight: 600;
@@ -843,6 +897,63 @@ body.nd .nd-row-flex {
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
+}
+
+/* ---------- FLAVOUR TEXT (details/summary on landing) ---------- */
+/* Each game card can be clicked to expand its full description. The
+   <details> is hidden when JS-disabled would be unusable; default is open
+   so the SEO copy is visible. The 1-line summary inside the card stays
+   short. */
+body.nd .nd-game-flavour {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 8px 16px;
+}
+body.nd .nd-game-flavour > h2 {
+    grid-column: 1 / -1;
+}
+body.nd .nd-game-flavour details {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+    box-shadow: var(--shadow-sm);
+}
+body.nd .nd-game-flavour details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-accent-strong);
+    padding: 4px 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+body.nd .nd-game-flavour details summary::-webkit-details-marker { display: none; }
+body.nd .nd-game-flavour details summary::before {
+    content: "▸";
+    color: var(--color-muted);
+    font-size: 12px;
+    transition: transform 0.1s;
+    display: inline-block;
+    width: 12px;
+}
+body.nd .nd-game-flavour details[open] summary::before {
+    transform: rotate(90deg);
+}
+body.nd .nd-game-flavour .nd-flavour-body {
+    padding: 6px 0 4px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+}
+body.nd .nd-game-flavour .nd-flavour-body p {
+    margin: 0 0 10px;
+}
+body.nd .nd-game-flavour .nd-flavour-body p:last-child {
+    margin-bottom: 0;
 }
 
 /* Stacked form: label above input instead of side-by-side */
@@ -939,14 +1050,24 @@ body.nd .nd-opts-section {
 }
 
 /* Lay option sections out in responsive columns: one column when narrow,
-   several side-by-side on wider screens (uses available desktop width).
-   auto-fit keeps it fluid with no JS. align-items:start so uneven-height
-   sections don't stretch to match the tallest. */
+   2 on tablet, 3 on desktop. The first 3 sections (Game / Ketchup / Map)
+   then sit on a single row at typical laptop widths. align-items:start so
+   uneven-height sections don't stretch to match the tallest. */
 body.nd .nd-opts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: 1fr;
     gap: 12px;
     align-items: start;
+}
+@media (min-width: 720px) {
+    body.nd .nd-opts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (min-width: 1100px) {
+    body.nd .nd-opts-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 body.nd .nd-opts-grid .nd-opts-section {
     margin-bottom: 0;
@@ -975,15 +1096,16 @@ body.nd #FCMallOptions .nd-form-row > textarea {
     max-width: 520px;
 }
 
-/* Per-section color accents — bolder tints + stronger left border so the
-   sections are clearly distinguished (the earlier 0.06–0.07 tints were too soft) */
-body.nd .nd-opts-slate  { background: rgba(100,116,139,0.14); border-left-color: rgba(100,116,139,0.7);  }
-body.nd .nd-opts-red    { background: rgba(185,60,60,0.13);   border-left-color: rgba(185,60,60,0.65);  }
-body.nd .nd-opts-green  { background: rgba(80,145,80,0.13);   border-left-color: rgba(80,145,80,0.65);  }
-body.nd .nd-opts-amber  { background: rgba(185,130,35,0.15);  border-left-color: rgba(185,130,35,0.7);  }
-body.nd .nd-opts-blue   { background: rgba(55,100,200,0.12);  border-left-color: rgba(55,100,200,0.6);  }
-body.nd .nd-opts-purple { background: rgba(139,92,246,0.13);  border-left-color: rgba(139,92,246,0.65); }
-body.nd .nd-opts-orange { background: rgba(185,90,30,0.15);   border-left-color: rgba(185,90,30,0.7);   }
+/* Per-section color accents — match the original create-game form palette
+   (basicOptions yellow, expertOptions salmon, ketchup lightgreen, etc.) so
+   the redesigned form is visually familiar to existing users. */
+body.nd .nd-opts-slate  { background: #faf2d9; border-left-color: rgba(180,160,80,0.7);   }
+body.nd .nd-opts-red    { background: #c8e6c9; border-left-color: rgba(80,145,80,0.7);   }
+body.nd .nd-opts-green  { background: #e0e0e0; border-left-color: rgba(120,120,120,0.7); }
+body.nd .nd-opts-amber  { background: #d8e3c0; border-left-color: rgba(110,140,60,0.7);  }
+body.nd .nd-opts-blue   { background: #cde7e9; border-left-color: rgba(80,140,150,0.7);  }
+body.nd .nd-opts-purple { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
+body.nd .nd-opts-orange { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
 
 /* Full-width checkbox list — use instead of nd-form-row when there is no label column */
 body.nd .nd-check-list {
@@ -1011,9 +1133,13 @@ body.nd .nd-help-qa p:last-child {
 }
 body.nd .nd-help-qa b u {
     display: block;
-    margin: 16px 0 6px;
-    font-size: 15px;
-    color: var(--color-accent-strong);
+    margin: 22px 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-ink);
+    border-left: 3px solid var(--color-accent-strong);
+    padding-left: 10px;
+    text-decoration: none;
 }
 body.nd .nd-help-qa b u:first-child {
     margin-top: 0;
@@ -1189,4 +1315,165 @@ body.nd .nd-icon-cell > span {
    side-by-side in their cell before the text. */
 body.nd .nd-icon-cell img + img {
     margin-left: 4px;
+}
+
+/* ---------- 09 ROW GRID (shared — lobby + stats) ---------- */
+/* Row anatomy used by every .nd-table that emits rows with class .nd-row09.
+   Defined here (rather than lobby_new.css) so the stats page ten-games list
+   picks it up without loading lobby-specific CSS. */
+
+/* Hide thead on tables that don't have nd-row09 rows; show only when
+   nd-row09 rows are present. */
+body.nd .nd-table thead {
+    display: none;
+}
+body.nd .nd-table:has(.nd-row09) thead {
+    display: block;
+}
+body.nd .nd-table:has(.nd-row09) thead tr {
+    display: grid;
+    grid-template-columns: 72px minmax(180px, 1.4fr) minmax(150px, 1fr) minmax(220px, 1.1fr) 110px 170px;
+    gap: 12px;
+    padding: 6px 14px;
+    background: var(--color-surface-soft);
+    border-bottom: 2px solid var(--color-border-strong);
+}
+body.nd .nd-table:has(.nd-row09) thead th {
+    display: block;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    border: none;
+    text-align: left;
+}
+
+/* ---- 09 Six-column row grid ---- */
+body.nd .nd-table {
+    display: block;
+    width: 100%;
+}
+body.nd .nd-table tbody {
+    display: block;
+}
+/* Revert to normal table layout for tables that don't use nd-row09 (MT rows,
+   tournament list tables). display:block on the table turns tr/td cells into
+   anonymous inline-table boxes sized to content rather than stretching to
+   100% width. */
+body.nd .nd-table:not(:has(.nd-row09)) {
+    display: table;
+}
+body.nd .nd-table:not(:has(.nd-row09)) tbody {
+    display: table-row-group;
+}
+
+body.nd .nd-row09 {
+    display: grid;
+    grid-template-columns: 72px minmax(180px, 1.4fr) minmax(150px, 1fr) minmax(220px, 1.1fr) 110px 170px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    transition: background 0.1s;
+}
+body.nd .nd-row09:last-child {
+    border-bottom: none;
+}
+body.nd .nd-row09:hover {
+    background: var(--color-surface-soft);
+}
+body.nd .nd-row09 > td {
+    display: block;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+body.nd .nd-col-icon img {
+    width: 52px;
+    height: 52px;
+    border-radius: 6px;
+    object-fit: contain;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    padding: 2px;
+}
+body.nd .nd-col-game strong {
+    color: var(--color-ink);
+    font-size: 15px;
+}
+body.nd .nd-col-game small {
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+body.nd .nd-col-game a { color: var(--color-accent-strong); text-decoration: none; }
+body.nd .nd-col-game a:hover { text-decoration: underline; }
+body.nd .nd-col-players {
+    font-size: 13px;
+    color: var(--color-ink-soft);
+    line-height: 1.4;
+}
+body.nd .nd-col-players a {
+    color: var(--color-accent-strong);
+    text-decoration: none;
+}
+body.nd .nd-col-players a:hover { text-decoration: underline; }
+body.nd .nd-col-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+body.nd .nd-col-options img.startingMap {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+body.nd .nd-col-status {
+    text-align: center;
+}
+body.nd .nd-col-cta {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* State backgrounds via row classes */
+body.nd .nd-row09.myMove { background: var(--color-positive-bg); }
+body.nd .nd-row09.kickoutRequired1 { background: var(--color-warn-bg); }
+body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
+body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.30); }
+body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.32); }
+body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
+
+/* Mobile collapse (per 09 prototype) */
+@media (max-width: 980px) {
+    body.nd .nd-row09 {
+        grid-template-columns: 56px 1fr;
+        gap: 8px 10px;
+        padding: 12px;
+    }
+    body.nd .nd-col-icon img { width: 44px; height: 44px; }
+    body.nd .nd-col-players,
+    body.nd .nd-col-options,
+    body.nd .nd-col-status,
+    body.nd .nd-col-cta {
+        grid-column: 1 / -1;
+    }
+    body.nd .nd-col-cta {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+    /* thead uses the same 6-col grid; hide it when rows collapse to 2-col */
+    body.nd .nd-table:has(.nd-row09) thead {
+        display: none;
+    }
 }
