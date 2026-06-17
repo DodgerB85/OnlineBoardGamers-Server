@@ -24,6 +24,7 @@
     --color-accent-strong: #5c9896;
     --color-accent-ink: #19343c;
 
+    --color-amber: #d8a44a;
     --color-positive: #597a50;
     --color-positive-bg: rgba(157, 205, 142, 0.20);
     --color-warn: #b07a1d;
@@ -64,6 +65,13 @@ body.nd hr {
     border: none;
     border-top: 1px solid var(--color-border);
     margin: 16px 0;
+}
+
+body.nd #contactEmailImg {
+    max-width: 100%;
+    width: 400px;
+    height: 30px;
+    vertical-align: middle;
 }
 
 /* ---------- PAGE CONTAINERS ---------- */
@@ -518,6 +526,48 @@ body.nd .nd-donate-option-label {
     color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
+}
+
+/* ---------- CALLOUTS (info / warn / alert boxes used inside cards) ----------
+   Soft-fill box with an accent left bar. Drop into any card to highlight
+   a notice that belongs inline with the surrounding content. */
+body.nd .nd-callout {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    margin: 0 0 12px;
+    color: var(--color-ink-soft);
+    font-size: 14px;
+    line-height: 1.55;
+}
+body.nd .nd-callout:last-child {
+    margin-bottom: 0;
+}
+body.nd .nd-callout-warn {
+    border-left-color: var(--color-amber);
+    background: rgba(216, 164, 74, 0.08);
+}
+body.nd .nd-callout-alert {
+    border-left-color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+body.nd .nd-callout-info {
+    border-left-color: var(--color-accent);
+}
+
+/* Form action bar (right-aligned submit) and footer-link line. */
+body.nd .nd-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+body.nd .nd-form-footer-link {
+    font-size: 14px;
+    color: var(--color-muted);
+    margin-top: 14px;
+    margin-bottom: 0;
 }
 
 /* ---------- PILLS ---------- */
@@ -1322,13 +1372,12 @@ body.nd .nd-icon-cell img + img {
    Defined here (rather than lobby_new.css) so the stats page ten-games list
    picks it up without loading lobby-specific CSS. */
 
-/* Hide thead on tables that don't have nd-row09 rows; show only when
-   nd-row09 rows are present. */
-body.nd .nd-table thead {
-    display: none;
-}
+/* The 09-row variant (stats ten-games list) renders rows as a grid where
+   the first .nd-row09 row acts as the visual header. The original <thead>
+   is therefore hidden on those tables only — other nd-table consumers
+   (tournament lists, help pages) keep a normal visible thead. */
 body.nd .nd-table:has(.nd-row09) thead {
-    display: block;
+    display: none;
 }
 body.nd .nd-table:has(.nd-row09) thead tr {
     display: grid;

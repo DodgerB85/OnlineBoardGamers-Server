@@ -1,26 +1,11 @@
-{% extends base_template %}
+{% extends "Lobby/_nd_help_shell.html" %}
+
 {% load static %}
 {% load i18n %}
-{% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-  {% endif %}
-{% endblock %}
-{% block body %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container">{% endif %}
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
 
-    {% if request.use_new_design %}
-      <div class="nd-page-header">
-        <h1>{% translate "Web Help" %}</h1>
-      </div>
+{% block page_title %}{% translate "Web Help" %}{% endblock %}
+{% block nd_body %}
+
 
       <div class="nd-card nd-section">
         <h2>{% translate "Rules" %}</h2>
@@ -86,11 +71,16 @@
 
       <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
         {% translate "For further help contact" %}
-        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30" style="vertical-align:middle; max-width:100%;">
+        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30">
       </p>
 
       {% include "Lobby/donate/donateBanner.html" %}
-    {% else %}
+
+{% endblock %}
+
+{% block legacy_body %}
+
+
       <div id="KFWhelpPage">
         <h1>{% translate "Rules" %}</h1>
         {% blocktranslate %}
@@ -193,6 +183,5 @@
       </div>
       {% include 'Lobby/donate/donateBanner.html' %}
       {% include 'Lobby/common/homeButton.html' %}
-    {% endif %}
-  </div>
+
 {% endblock %}

@@ -1,0 +1,41 @@
+{# Shared wrapper for all *help.html pages (game help + lobby help +
+   tournaments help). Extends the design-selected layout and owns the
+   duplicated boilerplate (head CSS, nd-page/container wrapper, messages
+   block, nd-page-header). Each help file extends this partial and fills:
+     - page_id_attr   (optional, e.g. 'id="lobbyHelpPage"')
+     - page_title     (the <h1> in nd-page-header)
+     - page_action    (optional right-side action button)
+     - nd_body        (the new-design cards + trailing donate banner)
+     - legacy_body    (the old-design body + donate banner + home button)
+   The new/old branches differ only in the body they render, so the
+   wrapper / messages / header all live here once. #}
+{% extends base_template %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% endif %}
+{% endblock %}
+{% block body %}
+  <div class="{% if request.use_new_design %}nd-page nd-page-narrow{% else %}container{% endif %}" {% if request.use_new_design %}{% block page_id_attr %}{% endblock %}{% else %}{% block page_id_attr_legacy %}{% endblock %}{% endif %}>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% block page_title %}{% endblock %}</h1>
+        {% block page_action %}{% endblock %}
+      </div>
+      {% block nd_body %}{% endblock %}
+    {% else %}
+      {% block legacy_body %}{% endblock %}
+    {% endif %}
+  </div>
+{% endblock %}

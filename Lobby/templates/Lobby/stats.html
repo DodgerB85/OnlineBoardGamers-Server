@@ -1066,9 +1066,9 @@
       {% if request.use_new_design %}<h2 class="nd-section-title" style="margin-top:24px">{% translate "Ten most recently active games" %}</h2>{% else %}<h1>{% translate "Ten most recently active games" %}</h1>{% endif %}
       <div id="tenGamesListView">
         {% if tenGames %}
-          {% if request.use_new_design %}
-            <div class="nd-table-wrap">
-              <table class="nd-table">
+          <div class="{% if request.use_new_design %}nd-table-wrap{% else %}tableOnlyDiv{% endif %}">
+            <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
+              {% if request.use_new_design %}
                 <thead>
                   <tr>
                     <th></th>
@@ -1080,32 +1080,23 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for game in tenGames %}
-                    {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% else %}
-            <div class="tableOnlyDiv">
-              <table class="gamesTable">
-                <thead>
-                  <tr class="headingRow">
-                    <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-                    <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                    <td class="currentTurnHeader">{% translate "Current Turn" %}</td>
-                    <td class="playersHeader">{% translate "Players" %}</td>
-                    <td class="speedHeader">{% translate "Speed" %}</td>
-                    <td class="creatorHeader">{% translate "Creator" %}</td>
-                    <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
-                  </tr>
-                </thead>
-                {% for game in tenGames %}
-                  {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
-                {% endfor %}
-              </table>
-            </div>
-          {% endif %}
+              {% else %}
+                <tr class="headingRow">
+                  <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+                  <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
+                  <td class="currentTurnHeader">{% translate "Current Turn" %}</td>
+                  <td class="playersHeader">{% translate "Players" %}</td>
+                  <td class="speedHeader">{% translate "Speed" %}</td>
+                  <td class="creatorHeader">{% translate "Creator" %}</td>
+                  <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
+                </tr>
+              {% endif %}
+              {% for game in tenGames %}
+                {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+              {% endfor %}
+              {% if request.use_new_design %}</tbody>{% endif %}
+            </table>
+          </div>
         {% else %}
           {% if request.use_new_design %}<p class="nd-empty">No Current Games</p>{% else %}<h1>No Current Games</h1>{% endif %}
         {% endif %}
@@ -1114,9 +1105,9 @@
       {% if request.use_new_design %}<h2 class="nd-section-title" style="margin-top:24px">{% translate "Ten most recently finished games" %}</h2>{% else %}<h1>{% translate "Ten most recently finished games" %}</h1>{% endif %}
       <div id="tenGamesListView">
         {% if tenGamesFinished %}
-          {% if request.use_new_design %}
-            <div class="nd-table-wrap">
-              <table class="nd-table">
+          <div class="{% if request.use_new_design %}nd-table-wrap{% else %}tableOnlyDiv{% endif %}">
+            <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
+              {% if request.use_new_design %}
                 <thead>
                   <tr>
                     <th></th>
@@ -1128,31 +1119,22 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for game in tenGamesFinished %}
-                    {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% else %}
-            <div class="tableOnlyDiv">
-              <table class="gamesTable">
-                <thead>
-                  <tr class="headingRow">
-                    <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-                    <td class="playersHeader">{% translate "Players" %}</td>
-                    <td class="currentPlayersHeader">{% translate "All Players" %}</td>
-                    <td class="createdHeader">{% translate "Created" %}</td>
-                    <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
-                    <td class="winnerHeader">{% translate "Winner" %}</td>
-                  </tr>
-                </thead>
-                {% for game in tenGamesFinished %}
-                  {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
-                {% endfor %}
-              </table>
-            </div>
-          {% endif %}
+              {% else %}
+                <tr class="headingRow">
+                  <td class="nameHeaderCurrent">{% translate "Name" %}</td>
+                  <td class="playersHeader">{% translate "Players" %}</td>
+                  <td class="currentPlayersHeader">{% translate "All Players" %}</td>
+                  <td class="createdHeader">{% translate "Created" %}</td>
+                  <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
+                  <td class="winnerHeader">{% translate "Winner" %}</td>
+                </tr>
+              {% endif %}
+              {% for game in tenGamesFinished %}
+                {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+              {% endfor %}
+              {% if request.use_new_design %}</tbody>{% endif %}
+            </table>
+          </div>
         {% else %}
           {% if request.use_new_design %}<p class="nd-empty">No Finished Games</p>{% else %}<h1>No Finished Games</h1>{% endif %}
         {% endif %}

@@ -1,210 +1,190 @@
-{% extends base_template %}
+{% extends "Lobby/_nd_help_shell.html" %}
 {% load static %}
 {% load i18n %}
-{% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-  {% endif %}
-{% endblock %}
-{% block body %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container">{% endif %}
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
+{% block page_title %}{% translate "Food Chain Magnate Help" %}{% endblock %}
+{% block nd_body %}
+  <div class="nd-card nd-section">
+    <h2>{% translate "Rules Help" %}</h2>
+    <div class="nd-help-qa">
+      {% url 'FCM:FCMchinaHelp' as fcm_china_help_url %}
+      {% blocktranslate trimmed %}
+        Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf" target="_blank">here</a>
+        <br />
+        Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
+   target="_blank">here</a>
+        <br />
+        China Expansion rules available <a href="{{ fcm_china_help_url }}" target="_blank">here</a>
+        <br />
+        How to play guide example <a href="https://www.myboardgameguides.com/game-strategy/game-specific-strategy/food-chain-magnate-strategy-guide/"
+   target="_blank">here</a>
+      {% endblocktranslate %}
+    </div>
+  </div>
 
-    {% if request.use_new_design %}
-      <div class="nd-page-header">
-        <h1>{% translate "Food Chain Magnate Help" %}</h1>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Rules Help" %}</h2>
-        <div class="nd-help-qa">
-          {% url 'FCM:FCMchinaHelp' as fcm_china_help_url %}
-          {% blocktranslate trimmed %}
-            Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf" target="_blank">here</a>
-            <br />
-            Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
-       target="_blank">here</a>
-            <br />
-            China Expansion rules available <a href="{{ fcm_china_help_url }}" target="_blank">here</a>
-            <br />
-            How to play guide example <a href="https://www.myboardgameguides.com/game-strategy/game-specific-strategy/food-chain-magnate-strategy-guide/"
-       target="_blank">here</a>
-          {% endblocktranslate %}
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Game Play" %}</h2>
-        <div class="nd-help-qa">
-          <b><u>{% translate "How exactly does coffee work?" %}</u></b>
-          <p>
-            {% url "FCM:coffeeHelp" as the_url %}
-            {% blocktranslate trimmed %}
-              Please see the dedicated Coffee help page <a href="{{ the_url }}">Here</a>
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "What are the Expert Options?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Expert options appear in an orange panel. They are meant to allow players to automate decisions that are obvious choices to make, and thus allow games to progress a bit faster.
-            {% endblocktranslate %}
-          </p>
-          <p>
-            {% blocktranslate trimmed %}
-              You can select your preference for Order Of Business during restructuring. A note is added in history as turn order is resolved if the decision was automatic. Of course, it is very possible
-              to select "Earliest possible" and stll end up in last position - this just meant that everyone else had more open slots or an earlier turn order than you, and also chose to go early in turn order.
-            {% endblocktranslate %}
-          </p>
-          <p>
-            {% blocktranslate trimmed %}
-              You can select to autopay salary even if you don't have enough money, if you do end up having enough money after dinnertime. Similarly, if you have the Beer Milestone but no fridge, you can choose to pay
-              in as much food as possible, and then money. You also have the option of keeping all remaining food if you have a fridge and end up with less than 10 items.
-            {% endblocktranslate %}
-          </p>
-          <p>
-            <b>{% translate "Note:" %}</b>
-            {% blocktranslate trimmed %}
-              Even if you select an expert option, you still might end up playing that phase. For example, if you don't have enough money for salary, you will need to fire someone, and so
-              must play the salary phase. Also, if you end up with kimchi plus other items, you will be required to play the Cleanup phase. Game rewinds and player kickouts can also result
-              in phases needing to be played that you had selected to skip.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "Where do the scenarios come from?" %}</u></b>
-          <p>{% translate "They are suggested in the Ketchup Expansion manual." %}</p>
-
-          <b><u>{% translate "What is Sandbox Mode?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Sandbox mode is the answer to questions such as "Can I have an option so that new MS trainer gives a coach instead of a trainer?"
-              and "What if the 1x employees were actually unlimited?".
-            {% endblocktranslate %}
-          </p>
-          <p>
-            {% blocktranslate trimmed %}
-              Sandbox mode unlocks a panel under the player summaries allowing you to add and remove employees at will on your turn.
-            {% endblocktranslate %}
-          </p>
-          <p><b>{% translate "Note:" %}</b> {% translate "You must have 'Aid' turned on to view this." %}</p>
-          <p>
-            <b>{% translate "Note:" %}</b>
-            {% blocktranslate trimmed %}
-              This game will be automatically excluded from stats. There is no record in History of using the Sandbox panel. There is no built in limit on anyone doing anything with the Sandbox panel.
-              Try to make it clear in the game description what you are after if you select this option.
-            {% endblocktranslate %}
-          </p>
-          <p>
-            <b>{% translate "Note:" %}</b>
-            {% blocktranslate trimmed %}
-              Employees gained this way will not necesserily be saved if in the middle of a simultaneous move (eg choosing reserve cards). But no worries, it's Sandbox Mode. So just give yourself the employee again.
-              If you gain an employee this way during restructuring and place the employee in your structure, then it will be saved.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "When Can I resign?" %}</u></b>
-          <p>{% translate "You can resign during the \"Restructuring\" phase." %}</p>
-        </div>
-      </div>
-
-      <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
-        {% translate "For further help contact" %}
-        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30" style="vertical-align:middle; max-width:100%;">
+  <div class="nd-card nd-section">
+    <h2>{% translate "Game Play" %}</h2>
+    <div class="nd-help-qa">
+      <b><u>{% translate "How exactly does coffee work?" %}</u></b>
+      <p>
+        {% url "FCM:coffeeHelp" as the_url %}
+        {% blocktranslate trimmed %}
+          Please see the dedicated Coffee help page <a href="{{ the_url }}">Here</a>
+        {% endblocktranslate %}
       </p>
 
-      {% include "Lobby/donate/donateBanner.html" %}
-    {% else %}
-      <div id="FCMhelpPage">
-        <h1>{% translate "Rules Help" %}</h1>
-        {% url 'FCM:FCMchinaHelp' as fcm_china_help_url_old %}
+      <b><u>{% translate "What are the Expert Options?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
-          Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf" target="_blank">here</a>
-          <br />
-          Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
-      target="_blank">here</a>
-          <br />
-          China Expansion rules available <a href="{{ fcm_china_help_url_old }}" target="_blank">here</a>
-          <br />
-          How to play guide example <a href="https://www.myboardgameguides.com/game-strategy/game-specific-strategy/food-chain-magnate-strategy-guide/"
-      target="_blank">here</a>
+          Expert options appear in an orange panel. They are meant to allow players to automate decisions that are obvious choices to make, and thus allow games to progress a bit faster.
         {% endblocktranslate %}
-        <br />
-        <h1>{% translate "Game Play" %}</h1>
-        <div class="FCMhelpSection">
-          <b><u>{% translate "How exactly does coffee work?" %}</u></b>
-          <br />
-          {% url "FCM:coffeeHelp" as the_url %}
-          {% blocktranslate trimmed %}
-            Please see the dedicated Coffee help page <a href="{{ the_url }}">Here</a>
-          {% endblocktranslate %}
-          <br />
-          <br />
-          <b><u>{% translate "What are the Expert Options?" %}</u></b>
-          <br />
-          {% blocktranslate trimmed %}
-            Expert options appear in an orange panel. They are meant to allow players to automate decisions that are obvious choices to make, and thus allow games to progress a bit faster.
-            <br />
-            You can select your preference for Order Of Business during restructuring. A note is added in history as turn order is resolved if the decision was automatic. Of course, it is very possible
-            to select "Earliest possible" and stll end up in last position - this just meant that everyone else had more open slots or an earlier turn order than you, and also chose to go early in turn order.
-            <br />
-            You can select to autopay salary even if you don't have enough money, if you do end up having enough money after dinnertime. Similarly, if you have the Beer Milestone but no fridge, you can choose to pay
-            in as much food as possible, and then money. You also have the option of keeping all remaining food if you have a fridge and end up with less than 10 items.
-            <br />
-            <b>Note: </b>Even if you select an expert option, you still might end up playing that phase. For example, if you don't have enough money for salary, you will need to fire someone, and so
-            must play the salary phase. Also, if you end up with kimchi plus other items, you will be required to play the Cleanup phase. Game rewinds and player kickouts can also result
-            in phases needing to be played that you had selected to skip.
-          {% endblocktranslate %}
-          <br />
-          <br />
-          <b><u>{% translate "Where do the scenarios come from?" %}</u></b>
-          <br />
-          {% blocktranslate trimmed %}
-            They are suggested in the Ketchup Expansion manual.
-          {% endblocktranslate %}
-          <br />
-          <br />
-          <b><u>{% translate "What is Sandbox Mode?" %}</u></b>
-          <br />
-          {% blocktranslate trimmed %}
-            Sandbox mode is the answer to questions such as "Can I have an option so that new MS trainer gives a coach instead of a trainer?"
-            and "What if the 1x employees were actually unlimited?".
-            <br />
-            Sandbox mode unlocks a panel under the player summaries allowing you to add and remove employees at will on your turn.
-            <br />
-            <b>Note:</b> You must have 'Aid' turned on to view this.
-            <br />
-            <b>Note:</b> This game will be automatically excluded from stats. There is no record in History of using the Sandbox panel. There is no built in limit on anyone doing anything with the Sandbox panel.
-            Try to make it clear in the game description what you are after if you select this option.
-            <br />
-            <b>Note:</b> Employees gained this way will not necesserily be saved if in the middle of a simultaneous move (eg choosing reserve cards). But no worries, it's Sandbox Mode. So just give yourself the employee again.
-            If you gain an employee this way during restructuring and place the employee in your structure, then it will be saved.
-            <br />
-          {% endblocktranslate %}
-          <br />
-          <b><u>{% translate "When Can I resign?" %}</u></b>
-          <br />
-          {% blocktranslate trimmed %}
-            You can resign during the "Restructuring" phase.
-          {% endblocktranslate %}
-        </div>
-        <br />
-        <br />
-        {% translate "For further help contact" %}
-        <img id="contactEmailImg"
-             src="{% static 'Lobby/email.png' %}"
-             alt="Email Address"
-             width="400"
-             height="30">
-      </div>
-      {% include "Lobby/donate/donateBanner.html" %}
-      {% include "Lobby/common/homeButton.html" %}
-    {% endif %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          You can select your preference for Order Of Business during restructuring. A note is added in history as turn order is resolved if the decision was automatic. Of course, it is very possible
+          to select "Earliest possible" and stll end up in last position - this just meant that everyone else had more open slots or an earlier turn order than you, and also chose to go early in turn order.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          You can select to autopay salary even if you don't have enough money, if you do end up having enough money after dinnertime. Similarly, if you have the Beer Milestone but no fridge, you can choose to pay
+          in as much food as possible, and then money. You also have the option of keeping all remaining food if you have a fridge and end up with less than 10 items.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        <b>{% translate "Note:" %}</b>
+        {% blocktranslate trimmed %}
+          Even if you select an expert option, you still might end up playing that phase. For example, if you don't have enough money for salary, you will need to fire someone, and so
+          must play the salary phase. Also, if you end up with kimchi plus other items, you will be required to play the Cleanup phase. Game rewinds and player kickouts can also result
+          in phases needing to be played that you had selected to skip.
+        {% endblocktranslate %}
+      </p>
+
+      <b><u>{% translate "Where do the scenarios come from?" %}</u></b>
+      <p>{% translate "They are suggested in the Ketchup Expansion manual." %}</p>
+
+      <b><u>{% translate "What is Sandbox Mode?" %}</u></b>
+      <p>
+        {% blocktranslate trimmed %}
+          Sandbox mode is the answer to questions such as "Can I have an option so that new MS trainer gives a coach instead of a trainer?"
+          and "What if the 1x employees were actually unlimited?".
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          Sandbox mode unlocks a panel under the player summaries allowing you to add and remove employees at will on your turn.
+        {% endblocktranslate %}
+      </p>
+      <p><b>{% translate "Note:" %}</b> {% translate "You must have 'Aid' turned on to view this." %}</p>
+      <p>
+        <b>{% translate "Note:" %}</b>
+        {% blocktranslate trimmed %}
+          This game will be automatically excluded from stats. There is no record in History of using the Sandbox panel. There is no built in limit on anyone doing anything with the Sandbox panel.
+          Try to make it clear in the game description what you are after if you select this option.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        <b>{% translate "Note:" %}</b>
+        {% blocktranslate trimmed %}
+          Employees gained this way will not necesserily be saved if in the middle of a simultaneous move (eg choosing reserve cards). But no worries, it's Sandbox Mode. So just give yourself the employee again.
+          If you gain an employee this way during restructuring and place the employee in your structure, then it will be saved.
+        {% endblocktranslate %}
+      </p>
+
+      <b><u>{% translate "When Can I resign?" %}</u></b>
+      <p>{% translate "You can resign during the \"Restructuring\" phase." %}</p>
+    </div>
   </div>
+
+  <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
+    {% translate "For further help contact" %}
+    <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30">
+  </p>
+
+  {% include "Lobby/donate/donateBanner.html" %}
+{% endblock %}
+{% block legacy_body %}
+  <div id="FCMhelpPage">
+    <h1>{% translate "Rules Help" %}</h1>
+    {% url 'FCM:FCMchinaHelp' as fcm_china_help_url_old %}
+    {% blocktranslate trimmed %}
+      Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf" target="_blank">here</a>
+      <br />
+      Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
+  target="_blank">here</a>
+      <br />
+      China Expansion rules available <a href="{{ fcm_china_help_url_old }}" target="_blank">here</a>
+      <br />
+      How to play guide example <a href="https://www.myboardgameguides.com/game-strategy/game-specific-strategy/food-chain-magnate-strategy-guide/"
+  target="_blank">here</a>
+    {% endblocktranslate %}
+    <br />
+    <h1>{% translate "Game Play" %}</h1>
+    <div class="FCMhelpSection">
+      <b><u>{% translate "How exactly does coffee work?" %}</u></b>
+      <br />
+      {% url "FCM:coffeeHelp" as the_url %}
+      {% blocktranslate trimmed %}
+        Please see the dedicated Coffee help page <a href="{{ the_url }}">Here</a>
+      {% endblocktranslate %}
+      <br />
+      <br />
+      <b><u>{% translate "What are the Expert Options?" %}</u></b>
+      <br />
+      {% blocktranslate trimmed %}
+        Expert options appear in an orange panel. They are meant to allow players to automate decisions that are obvious choices to make, and thus allow games to progress a bit faster.
+        <br />
+        You can select your preference for Order Of Business during restructuring. A note is added in history as turn order is resolved if the decision was automatic. Of course, it is very possible
+        to select "Earliest possible" and stll end up in last position - this just meant that everyone else had more open slots or an earlier turn order than you, and also chose to go early in turn order.
+        <br />
+        You can select to autopay salary even if you don't have enough money, if you do end up having enough money after dinnertime. Similarly, if you have the Beer Milestone but no fridge, you can choose to pay
+        in as much food as possible, and then money. You also have the option of keeping all remaining food if you have a fridge and end up with less than 10 items.
+        <br />
+        <b>Note: </b>Even if you select an expert option, you still might end up playing that phase. For example, if you don't have enough money for salary, you will need to fire someone, and so
+        must play the salary phase. Also, if you end up with kimchi plus other items, you will be required to play the Cleanup phase. Game rewinds and player kickouts can also result
+        in phases needing to be played that you had selected to skip.
+      {% endblocktranslate %}
+      <br />
+      <br />
+      <b><u>{% translate "Where do the scenarios come from?" %}</u></b>
+      <br />
+      {% blocktranslate trimmed %}
+        They are suggested in the Ketchup Expansion manual.
+      {% endblocktranslate %}
+      <br />
+      <br />
+      <b><u>{% translate "What is Sandbox Mode?" %}</u></b>
+      <br />
+      {% blocktranslate trimmed %}
+        Sandbox mode is the answer to questions such as "Can I have an option so that new MS trainer gives a coach instead of a trainer?"
+        and "What if the 1x employees were actually unlimited?".
+        <br />
+        Sandbox mode unlocks a panel under the player summaries allowing you to add and remove employees at will on your turn.
+        <br />
+        <b>Note:</b> You must have 'Aid' turned on to view this.
+        <br />
+        <b>Note:</b> This game will be automatically excluded from stats. There is no record in History of using the Sandbox panel. There is no built in limit on anyone doing anything with the Sandbox panel.
+        Try to make it clear in the game description what you are after if you select this option.
+        <br />
+        <b>Note:</b> Employees gained this way will not necesserily be saved if in the middle of a simultaneous move (eg choosing reserve cards). But no worries, it's Sandbox Mode. So just give yourself the employee again.
+        If you gain an employee this way during restructuring and place the employee in your structure, then it will be saved.
+        <br />
+      {% endblocktranslate %}
+      <br />
+      <b><u>{% translate "When Can I resign?" %}</u></b>
+      <br />
+      {% blocktranslate trimmed %}
+        You can resign during the "Restructuring" phase.
+      {% endblocktranslate %}
+    </div>
+    <br />
+    <br />
+    {% translate "For further help contact" %}
+    <img id="contactEmailImg"
+         src="{% static 'Lobby/email.png' %}"
+         alt="Email Address"
+         width="400"
+         height="30">
+  </div>
+  {% include "Lobby/donate/donateBanner.html" %}
+  {% include "Lobby/common/homeButton.html" %}
 {% endblock %}

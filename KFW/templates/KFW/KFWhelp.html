@@ -1,26 +1,11 @@
-{% extends base_template %}
+{% extends "Lobby/_nd_help_shell.html" %}
+
 {% load static %}
 {% load i18n %}
-{% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-  {% endif %}
-{% endblock %}
-{% block body %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container">{% endif %}
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
 
-    {% if request.use_new_design %}
-      <div class="nd-page-header">
-        <h1>{% translate "Keyflower Help" %}</h1>
-      </div>
+{% block page_title %}{% translate "Keyflower Help" %}{% endblock %}
+{% block nd_body %}
+
 
       <div class="nd-card nd-section">
         <h2>{% translate "Rules" %}</h2>
@@ -52,14 +37,14 @@
             {% endblocktranslate %}
           </p>
           <p>
-            <img src="{% static 'Lobby/images/help/KFWmeepleHighlight.jpg' %}" alt="Info High" width="150" height="228" style="vertical-align:middle;max-width:100%;">
+            <img src="{% static 'Lobby/images/help/KFWmeepleHighlight.jpg' %}" alt="Info High" width="150" height="228">
             {% blocktranslate trimmed %}
               At the start of your turn, any workers used for bidding/actions since your last turn will have a highlight
               so you can easily see what moves other players have made.
             {% endblocktranslate %}
           </p>
           <p>
-            <img src="{% static 'Lobby/images/help/KFWvillageExpansion.jpg' %}" alt="Info High" width="150" height="228" style="vertical-align:middle;max-width:100%;">
+            <img src="{% static 'Lobby/images/help/KFWvillageExpansion.jpg' %}" alt="Info High" width="150" height="228">
             {% blocktranslate trimmed %}
               During village expansion, edges with roads on will have an additional icon so you can clearly
               see where the roads are in your village.
@@ -91,7 +76,7 @@
 
           <b><u>{% translate "High Knowledge Level:" %}</u></b>
           <p>
-            <img src="{% static 'Lobby/images/help/KFWinfoHigh.jpg' %}" alt="Info High" width="150" height="228" style="vertical-align:middle;max-width:100%;">
+            <img src="{% static 'Lobby/images/help/KFWinfoHigh.jpg' %}" alt="Info High" width="150" height="228">
             {% blocktranslate trimmed %}
               You will be shown the most detailed information that you could
               get from analysing the history.
@@ -105,7 +90,7 @@
 
           <b><u>{% translate "Medium Knowledge Level:" %}</u></b>
           <p>
-            <img src="{% static 'Lobby/images/help/KFWinfoMed.jpg' %}" alt="Info Med" width="150" height="228" style="vertical-align:middle;max-width:100%;">
+            <img src="{% static 'Lobby/images/help/KFWinfoMed.jpg' %}" alt="Info Med" width="150" height="228">
             {% blocktranslate trimmed %}
               This uses a more “gut feeling” approach.
               You won't be told how many hidden items a player has.
@@ -118,7 +103,7 @@
 
           <b><u>{% translate "Low Knowledge Level:" %}</u></b>
           <p>
-            <img src="{% static 'Lobby/images/help/KFWinfoLow.jpg' %}" alt="Info Low" width="150" height="228" style="vertical-align:middle;max-width:100%;">
+            <img src="{% static 'Lobby/images/help/KFWinfoLow.jpg' %}" alt="Info Low" width="150" height="228">
             {% blocktranslate trimmed %}
               This provides you with the least information - you will need to rely on gut and intuition.
               During the game, the history will only be displayed up to your last 2 turns.
@@ -308,11 +293,16 @@
 
       <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
         {% translate "For further help contact" %}
-        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30" style="vertical-align:middle; max-width:100%;">
+        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30">
       </p>
 
       {% include "Lobby/donate/donateBanner.html" %}
-    {% else %}
+
+{% endblock %}
+
+{% block legacy_body %}
+
+
       <div id="KFWhelpPage">
         <h1>{% translate "Rules" %}</h1>
         {% blocktranslate %}
@@ -713,6 +703,5 @@
   </div>
   {% include 'Lobby/donate/donateBanner.html' %}
   {% include 'Lobby/common/homeButton.html' %}
-    {% endif %}
-  </div>
+
 {% endblock %}
