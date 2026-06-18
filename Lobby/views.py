@@ -1937,6 +1937,7 @@ def profileRNB(request):
         RNBoptions = []
         RNBoptions.append(int(request.POST.get("rnbColour", -1)))
         RNBoptions.append(int(request.POST.get("playerAid", 1)))
+        RNBoptions.append(int(request.POST.get("colourOverlay", 0)))
 
         profile.preferredRNBoptions = json.dumps(RNBoptions, separators=(",", ":"))
 
@@ -1954,6 +1955,8 @@ def profileRNB(request):
 
         if len(preferredRNBoptions) < 2:
             preferredRNBoptions.extend([-1] * (2 - len(preferredRNBoptions)))
+        if len(preferredRNBoptions) < 3:
+            preferredRNBoptions.extend([0] * (3 - len(preferredRNBoptions)))
 
         # Check the default for playerAid
         if preferredRNBoptions[1] == -1:
@@ -1965,6 +1968,7 @@ def profileRNB(request):
             {
                 "colour": preferredRNBoptions[0],
                 "playerAid": preferredRNBoptions[1],
+                "colourOverlay": preferredRNBoptions[2],
             },
         )
 

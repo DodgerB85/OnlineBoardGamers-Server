@@ -220,6 +220,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     preferredRNBoptions = json.loads(profile_options) if profile_options else [-1, 1]
     if len(preferredRNBoptions) < 2:
         preferredRNBoptions.extend([-1] * (2 - len(preferredRNBoptions)))
+    if len(preferredRNBoptions) < 3:
+        preferredRNBoptions.extend([0] * (3 - len(preferredRNBoptions)))
 
     # Check the default for playerAid
     if preferredRNBoptions[1] == -1:

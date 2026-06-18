@@ -202,6 +202,61 @@
                 </div>
                 <br />
                 <br />
+                <!-- COLOUR OVERLAY -->
+                <label class="preferenceTitle">{% translate "Colour Overlay" %}</label>
+                <br />
+                <label class="preferenceExplanation">{% translate "Enhance colours if you have visual difficulties" %}</label>
+                <br />
+                <div class="favRestChoice">
+                    <label for="colourOverlay0">
+                        <img src="{% static 'RNB/help/colourOverlay_none.jpg' %}"
+                             width="189"
+                             height="120"
+                             alt="None" />
+                    </label>
+                    <br />
+                    <b>None (Recommended)</b>
+                    <br />
+                    <input type="radio"
+                           id="colourOverlay0"
+                           name="colourOverlay"
+                           value="0"
+                           {% if colourOverlay == 0 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="colourOverlay1">
+                        <img src="{% static 'RNB/help/colourOverlay_transparent.jpg' %}"
+                             width="189"
+                             height="120"
+                             alt="Transparent" />
+                    </label>
+                    <br />
+                    <b>Transparent</b>
+                    <br />
+                    <input type="radio"
+                           id="colourOverlay1"
+                           name="colourOverlay"
+                           value="1"
+                           {% if colourOverlay == 1 %}checked{% endif %} />
+                </div>
+                <div class="favRestChoice">
+                    <label for="colourOverlay2">
+                        <img src="{% static 'RNB/help/colourOverlay_full.jpg' %}"
+                             width="189"
+                             height="120"
+                             alt="Full" />
+                    </label>
+                    <br />
+                    <b>Full</b>
+                    <br />
+                    <input type="radio"
+                           id="colourOverlay2"
+                           name="colourOverlay"
+                           value="2"
+                           {% if colourOverlay == 2 %}checked{% endif %} />
+                </div>
+                <br />
+                <br />
                 <button type="submit" class="updateProfilebtn">{% translate "Update Roads & Boats Preferences" %}</button>
             </form>
         </div>
