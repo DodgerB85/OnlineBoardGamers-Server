@@ -1561,6 +1561,17 @@ body.nd .nd-col-cta {
     justify-content: center;
 }
 
+/* State backgrounds on the whole row. Keep these separate from the old td
+   cell-fill rules so the color reads as one continuous row state. */
+body.nd .nd-row09.myMove { background: var(--color-positive-bg); }
+body.nd .nd-row09.kickoutRequired1 { background: var(--color-warn-bg); }
+body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
+@media (hover: hover) {
+    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.30); }
+    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.32); }
+    body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
+}
+
 /* Mobile collapse (per 09 prototype) */
 @media (max-width: 980px) {
     body.nd .nd-row09 {
