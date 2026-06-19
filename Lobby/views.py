@@ -4384,7 +4384,7 @@ def createFCMminiTournament(request):
             tournamentDescription=request.POST["tournamentDescription"],
             tournamentStatus="OP",
             tournamentType=request.POST["tournamentFormat"],
-            startingOptions=json.dumps(startgOptions) if startgOptions else None,
+            startingOptions=json.dumps(startgOptions),
             maxTournamentPlayers=request.POST["totalPlayersMT"],
             maxGamePlayers=request.POST["playersPerGameMT"],
             roundsBeforeKnockout=4,
