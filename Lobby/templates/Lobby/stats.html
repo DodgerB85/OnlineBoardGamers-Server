@@ -69,36 +69,7 @@
       <div class="nd-card nd-section">
         <h2>{% translate "Top Players" %}</h2>
         <div class="tab nd-tabs" id="ndGameTabs">
-          <button class="nd-tab tablinks" id="FCM">
-            <img src="{% static 'FCM/images/burger_board.png' %}" alt="FCM game" title="FCM Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="HLC">
-            <img src="{% static 'HLC/images/icon_car.png' %}" alt="HLC game" title="HLC Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="BUS">
-            <img src="{% static 'BUS/images/bus_icon.png' %}" alt="Bus game" title="Bus Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="TGZ">
-            <img src="{% static 'TGZ/images/tgz_icon.png' %}" alt="TGZ game" title="TGZ Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="CNS">
-            <img src="{% static 'CNS/images/cns_icon.png' %}" alt="CNS game" title="CNS Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="AQY">
-            <img src="{% static 'AQY/images/aqy_icon.png' %}" alt="AQY game" title="AQY Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="IND">
-            <img src="{% static 'IND/images/ind_icon.png' %}" alt="IND game" title="IND Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="KFW">
-            <img src="{% static 'KFW/images/kfw_icon.png' %}" alt="KFW game" title="KFW Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="WEB">
-            <img src="{% static 'WEB/images/web_icon.png' %}" alt="WEB game" title="WEB Game" class="statsIMG" width="36" height="36">
-          </button>
-          <button class="nd-tab tablinks" id="RNB">
-            <img src="{% static 'RNB/images/rnb_icon.png' %}" alt="RNB game" title="RNB Game" class="statsIMG" width="36" height="36">
-          </button>
+          {% include 'Lobby/_nd_game_tabs.html' %}
         </div>
         <div class="tab nd-tabs" id="ndFairPlayTabs">
           <button class="nd-tab tablinks" id="fairPlay">{% translate "Fair Play League" %}</button>

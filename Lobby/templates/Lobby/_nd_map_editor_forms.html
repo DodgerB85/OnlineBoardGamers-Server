@@ -1,0 +1,3 @@
+<form id="openInMapEditorForm" action="{% url 'FCMmapEditor' %}" method="post">{% csrf_token %}<input type="hidden" id="mapData" name="mapData" value=""></form>
+<form id="openInMapEditorFormTGZ" action="{% url 'TGZmapEditor' %}" method="post">{% csrf_token %}<input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value=""></form>
+<form id="openInMapEditorFormAQY" action="{% url 'AQYmapEditor' %}" method="post">{% csrf_token %}<input type="hidden" id="mapDataAQY" name="mapDataAQY" value=""></form>

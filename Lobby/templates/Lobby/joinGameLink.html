@@ -26,31 +26,8 @@
     {% endcompress %}
     {% if request.use_new_design %}
     <div class="nd-page" id="lobbyPage">
-        {% if messages %}
-            <div style="margin-bottom: 12px;">
-                {% for message in messages %}
-                    <div class="nd-pill {% if message.tags == 'success' %}nd-pill-positive{% elif message.tags == 'error' %}nd-pill-danger{% endif %}" style="display:inline-block; margin-bottom: 4px;">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        <form id="openInMapEditorForm"
-              action="{% url 'FCMmapEditor' %}"
-              method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapData" name="mapData" value="" />
-        </form>
-        <form id="openInMapEditorFormTGZ"
-              action="{% url 'TGZmapEditor' %}"
-              method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="" />
-        </form>
-        <form id="openInMapEditorFormAQY"
-              action="{% url 'AQYmapEditor' %}"
-              method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="" />
-        </form>
+        {% include 'Lobby/_nd_messages.html' %}
+        {% include 'Lobby/_nd_map_editor_forms.html' %}
         <div id="learningGameConfirmDiv">
             <b>Note:</b>
             The creator has requested a Learning Game.
@@ -191,24 +168,6 @@
 	var global = {}
 	global.joinGameLink = true
         </script>
-        {% if request.use_new_design %}
-        <script>
-        (function() {
-          function wrapOne(img) {
-            if (!img.title) return;
-            if (img.classList.contains('startingMap')) return;
-            var p = img.parentNode;
-            if (!p || (p.classList && p.classList.contains('nd-mod-wrap'))) return;
-            var w = document.createElement('span');
-            w.className = 'nd-mod-wrap';
-            w.setAttribute('data-label', img.title);
-            p.insertBefore(w, img);
-            w.appendChild(img);
-          }
-          function start() { document.querySelectorAll('.startingOption').forEach(wrapOne); }
-          document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
-        })();
-        </script>
-        {% endif %}
+
     {% endblock script %}
 {% endblock body %}

@@ -166,7 +166,6 @@ body.nd {
     flex-direction: column;
     min-height: 100vh;
     box-sizing: border-box;
-    overflow-x: hidden;
     font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     color: var(--color-ink);
 }
@@ -461,5 +460,4 @@ body.nd .splotterconImg {
 
 html {
     display: block;
-    overflow-x: hidden;
 }

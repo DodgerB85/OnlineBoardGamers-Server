@@ -4,18 +4,18 @@
     id="tournamentRow{{ Mini_Tournament.Tournament_id }}"
     onclick="window.location.href='/MiniTournament/{{ Mini_Tournament.Tournament_id }}/';">
   <td class="nd-col-icon">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=Mini_Tournament.gameCode %}</td>
-  <td class="nd-col-game">
+  <td class="nd-col-game" data-label="{% translate "Name" %}">
     <strong>{{ Mini_Tournament.tournamentName }}</strong>
     {% if Mini_Tournament.tournamentDescription %}<br><small><i>{{ Mini_Tournament.tournamentDescription }}</i></small>{% endif %}
   </td>
-  <td class="nd-col-players">
+  <td class="nd-col-players" data-label="{% translate "Players" %}">
     {{ Mini_Tournament.maxTournamentPlayers }} total · {{ Mini_Tournament.maxGamePlayers }} per game
   </td>
-  <td class="nd-col-options">
+  <td class="nd-col-options" data-label="{% translate "Options" %}">
     {% if Mini_Tournament.startingOptionsHTML == "[None]" %}None{% else %}{{ Mini_Tournament.startingOptionsHTML|safe }}{% endif %}
   </td>
-  <td class="nd-col-status">{{ Mini_Tournament.tournamentType }}</td>
-  <td class="nd-col-cta">{{ Mini_Tournament.winnerHTML|safe }}</td>
+  <td class="nd-col-status" data-label="{% translate "Type" %}">{{ Mini_Tournament.tournamentType }}</td>
+  <td class="nd-col-cta" data-label="{% translate "Winner" %}">{{ Mini_Tournament.winnerHTML|safe }}</td>
 </tr>
 {% else %}
 <tr class="clickableGameRow {{ Mini_Tournament.gameCode }}"

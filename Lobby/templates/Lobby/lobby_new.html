@@ -60,18 +60,7 @@
         <script>try{if(localStorage.getItem('rnb_announce_dismissed')==='1')document.getElementById('rnbAnnounceBanner').style.display='none';}catch(e){}</script>
 
         <!-- hidden map editor forms (required by Lobby.js) -->
-        <form id="openInMapEditorForm" action="{% url 'FCMmapEditor' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapData" name="mapData" value="" />
-        </form>
-        <form id="openInMapEditorFormTGZ" action="{% url 'TGZmapEditor' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="" />
-        </form>
-        <form id="openInMapEditorFormAQY" action="{% url 'AQYmapEditor' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="" />
-        </form>
+        {% include 'Lobby/_nd_map_editor_forms.html' %}
 
         <!-- TABS -->
         <div class="nd-tabs">
@@ -427,41 +416,22 @@
         /* Wrap .startingOption images so CSS tooltip works.
            Runs on load AND watches for added rows (tab content, game creation). */
         (function () {
-            function wrapOne(img) {
-                if (!img.title) return;
-                if (img.classList.contains('startingMap')) return;
-                var parent = img.parentNode;
-                if (!parent || (parent.classList && parent.classList.contains('nd-mod-wrap'))) return;
-                var wrap = document.createElement('span');
-                wrap.className = 'nd-mod-wrap';
-                wrap.setAttribute('data-label', img.title);
-                parent.insertBefore(wrap, img);
-                wrap.appendChild(img);
-            }
-            function wrapAll(root) {
-                if (!root || !root.querySelectorAll) return;
-                root.querySelectorAll('.startingOption').forEach(wrapOne);
-            }
-            function start() {
-                var lobby = document.getElementById('lobbyPage') || document.body;
-                wrapAll(lobby);
-                if (typeof MutationObserver === 'undefined') return;
-                var mo = new MutationObserver(function (mutations) {
-                    mutations.forEach(function (m) {
-                        m.addedNodes.forEach(function (n) {
-                            if (n.nodeType !== 1) return;
-                            if (n.classList && n.classList.contains('startingOption')) wrapOne(n);
-                            else wrapAll(n);
-                        });
+            var lobby = document.getElementById('lobbyPage') || document.body;
+            if (typeof MutationObserver === 'undefined') return;
+            if (!window.ndWrapTooltips) return;
+            var mo = new MutationObserver(function (mutations) {
+                mutations.forEach(function (m) {
+                    m.addedNodes.forEach(function (n) {
+                        if (n.nodeType !== 1) return;
+                        if (n.classList && n.classList.contains('startingOption')) {
+                            window.ndWrapTooltips(n.parentNode);
+                        } else {
+                            window.ndWrapTooltips(n);
+                        }
                     });
                 });
-                mo.observe(lobby, { childList: true, subtree: true });
-            }
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', start);
-            } else {
-                start();
-            }
+            });
+            mo.observe(lobby, { childList: true, subtree: true });
         })();
         </script>
     {% endblock script %}

@@ -584,24 +584,6 @@
     global.chatArray = [];
 	  global.chatData = "{{ chatData }}";
     </script>
-    {% if request.use_new_design %}
-    <script>
-    (function() {
-      function wrapOne(img) {
-        if (!img.title) return;
-        if (img.classList.contains('startingMap')) return;
-        var p = img.parentNode;
-        if (!p || (p.classList && p.classList.contains('nd-mod-wrap'))) return;
-        var w = document.createElement('span');
-        w.className = 'nd-mod-wrap';
-        w.setAttribute('data-label', img.title);
-        p.insertBefore(w, img);
-        w.appendChild(img);
-      }
-      function start() { document.querySelectorAll('.startingOption').forEach(wrapOne); }
-      document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
-    })();
-    </script>
-    {% endif %}
+
   {% endblock %}
 {% endblock %}
