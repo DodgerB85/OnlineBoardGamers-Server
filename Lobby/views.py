@@ -1453,6 +1453,8 @@ def index(request):
 
     # print_timestamp("Step 3: Categorization complete")
 
+    waiting_game_is_available_for_others = any(g["gameStatus"] == "AVAILABLE" for g in waiting_games)
+
     current_games = sorted(
         current_games,
         key=lambda game: (
@@ -1504,6 +1506,7 @@ def index(request):
             "myMoveGamesData": my_move_games_data,
             "available_MT": available_MT,
             "current_MT": current_MT,
+            "waitingGameIsAvailableForOthers": waiting_game_is_available_for_others,
         },
     )
 
