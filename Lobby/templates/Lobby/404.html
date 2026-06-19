@@ -1,10 +1,44 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
 {% endblock head %}
 {% block body %}
+    {% if request.use_new_design %}
+        <div class="nd-page nd-page-narrow" style="margin-top: 24px;">
+            {% if messages %}
+                <div style="margin-bottom: 12px;">
+                    {% for message in messages %}
+                        <div class="nd-pill {% if message.tags == 'success' %}nd-pill-positive{% elif message.tags == 'error' %}nd-pill-danger{% endif %}" style="display:inline-block; margin-bottom: 4px;">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="nd-card nd-center">
+                <h1>{% translate "Sorry, the page you are requesting does not exist" %}</h1>
+                <h1>{% translate "Check there is a '/' at the end of the URL" %}</h1>
+                <p style="color: var(--color-muted); font-size: 15px; max-width: 520px; margin: 16px auto;">
+                    {% translate "If you were doing something that worked before, or expected to work (such as clicking on a game) then there is a chance the website is being updated." %}
+                    <br />
+                    {% translate "Please wait 5 minutes and try again." %}
+                </p>
+                <p style="color: var(--color-muted); font-size: 14px; margin: 12px auto 20px;">
+                    {% translate "If there is still a problem please email" %}
+                    <img id="contactEmailImg"
+                         src="{% static 'Lobby/email.png' %}"
+                         alt="Email Address"
+                         width="400"
+                         height="30">
+                </p>
+                <img src="{% static 'FCM/images/m_icon05.png' %}"
+                     width="200"
+                     height="200"
+                     alt="Error"
+                     style="margin: 8px auto 20px; display: block;">
+                <a class="nd-button nd-button-primary" href="{% url 'index' %}">{% translate "Home" %}</a>
+            </div>
+        </div>
+    {% else %}
     <div class="container">
         {% if messages %}
             <div class="messages">
@@ -36,4 +70,5 @@
         <br />
         <a href="{% url 'index' %}">{% translate "Home" %}</a>
     </div>
+    {% endif %}
 {% endblock body %}

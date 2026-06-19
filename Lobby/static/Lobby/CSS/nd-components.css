@@ -1526,3 +1526,55 @@ body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); 
         display: none;
     }
 }
+
+/* ---------- GAME LIST (shared mobile data-label treatment) ----------
+   Used by pages that render .nd-row09 game tables outside the lobby
+   (e.g. playerInfo). Mirrors .nd-ten-games in stats.css: on narrow
+   screens the thead is hidden by the rule above, so each stacked cell
+   pulls an uppercase label from its data-label attribute. */
+body.nd .nd-game-list .nd-table-wrap {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    overflow: hidden;
+}
+
+body.nd .nd-game-list .nd-col-options {
+    row-gap: 4px;
+}
+
+body.nd .nd-game-list .nd-col-options img.startingMap {
+    width: 32px;
+    height: 32px;
+}
+
+@media (max-width: 720px) {
+    body.nd .nd-game-list .nd-row09 > td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+    }
+    body.nd .nd-game-list .nd-row09 {
+        padding: 12px;
+    }
+    body.nd .nd-game-list .nd-col-options {
+        flex-wrap: wrap;
+    }
+    body.nd .nd-game-list .nd-col-options img.startingMap {
+        width: 28px;
+        height: 28px;
+    }
+    body.nd .nd-game-list .nd-col-status {
+        text-align: left;
+    }
+}
+
+@media (min-width: 721px) {
+    body.nd .nd-game-list .nd-row09 > td[data-label]::before {
+        content: none;
+        display: none;
+    }
+}

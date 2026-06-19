@@ -1,4 +1,4 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block description %}
     <meta name="description"
@@ -17,13 +17,94 @@
           content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
 {% endblock canonical %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+    {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />{% endif %}
 {% endblock head %}
 {% block body %}
     {% compress js %}
         <script src="{% static 'Lobby/Lobby.js' %}"></script>
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
+    {% if request.use_new_design %}
+    <div class="nd-page" id="lobbyPage">
+        {% if messages %}
+            <div style="margin-bottom: 12px;">
+                {% for message in messages %}
+                    <div class="nd-pill {% if message.tags == 'success' %}nd-pill-positive{% elif message.tags == 'error' %}nd-pill-danger{% endif %}" style="display:inline-block; margin-bottom: 4px;">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form id="openInMapEditorForm"
+              action="{% url 'FCMmapEditor' %}"
+              method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapData" name="mapData" value="" />
+        </form>
+        <form id="openInMapEditorFormTGZ"
+              action="{% url 'TGZmapEditor' %}"
+              method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="" />
+        </form>
+        <form id="openInMapEditorFormAQY"
+              action="{% url 'AQYmapEditor' %}"
+              method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="" />
+        </form>
+        <div id="learningGameConfirmDiv">
+            <b>Note:</b>
+            The creator has requested a Learning Game.
+            <br />
+            You will be expected to help / teach the other player.
+            <br />
+            This game will be excluded from stats.
+            <br />
+            <br />
+            Are you sure you want to join?
+            <br />
+            <div id="learningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</div>
+            <div id="learningCancel"
+                 class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
+        </div>
+        <div class="nd-page-header">
+            <h2>{% translate "The link allows you to join the following game:" %}</h2>
+        </div>
+        <div id="availableGamesListView">
+            {% if availableGamesList %}
+                <div class="nd-game-list">
+                    <div class="nd-table-wrap">
+                        <table class="nd-table gamesTable">
+                            <thead>
+                                <tr class="headingRow">
+                                    <th></th>
+                                    <th>{% translate "Name" %}</th>
+                                    <th>{% translate "Players" %}</th>
+                                    <th>{% translate "Options" %}</th>
+                                    <th>{% translate "Created" %}</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for gameEntry in availableGamesList %}
+                                    {% include "Lobby/gameDisplay/availableGameRow.html" with game=gameEntry %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                {% include "Lobby/_nd_empty.html" with message="No Available Games" %}
+            {% endif %}
+            {% url "lobbyHelp" as the_url %}
+            <p class="nd-muted" style="font-size:13px; margin-top: 12px;">
+                {% blocktranslate trimmed %}
+                    For icon explanations see
+                    <a href="{{ the_url }}">Help</a>
+                {% endblocktranslate %}
+            </p>
+        </div>
+    </div>
+    {% else %}
     <div class="container" id="lobbyPage">
         {% if messages %}
             <div class="messages">
@@ -104,10 +185,30 @@
         {% include "Lobby/donate/donateBanner.html" %}
         {% include "Lobby/splotterconSponsor.html" %}
     </div>
+    {% endif %}
     {% block script %}
         <script>
 	var global = {}
 	global.joinGameLink = true
         </script>
+        {% if request.use_new_design %}
+        <script>
+        (function() {
+          function wrapOne(img) {
+            if (!img.title) return;
+            if (img.classList.contains('startingMap')) return;
+            var p = img.parentNode;
+            if (!p || (p.classList && p.classList.contains('nd-mod-wrap'))) return;
+            var w = document.createElement('span');
+            w.className = 'nd-mod-wrap';
+            w.setAttribute('data-label', img.title);
+            p.insertBefore(w, img);
+            w.appendChild(img);
+          }
+          function start() { document.querySelectorAll('.startingOption').forEach(wrapOne); }
+          document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
+        })();
+        </script>
+        {% endif %}
     {% endblock script %}
 {% endblock body %}

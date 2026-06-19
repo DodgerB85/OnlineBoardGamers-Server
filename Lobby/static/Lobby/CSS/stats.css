@@ -272,3 +272,118 @@ body.nd .nd-ten-games .nd-col-options img.startingMap {
 		display: none;
 	}
 }
+
+/* ============================================================
+   /nd/ (new design) overrides — playerInfo page
+   stats.css is shared by stats.html and playerInfo.html, so the
+   /nd/ playerInfo rules live here next to the trophy CSS above.
+   ============================================================ */
+
+/* Player header: name + trophy row. */
+body.nd .nd-player-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin: 4px 0 16px;
+}
+body.nd .nd-player-header h1 {
+	margin: 0;
+}
+
+/* Inline row of big gold/silver/bronze tally trophies. */
+body.nd .nd-trophy-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+/* Per-game trophy breakdown strip. Soft-fill card so the game icon +
+   medal counts read as a grouped summary rather than loose floats. */
+body.nd .nd-trophy-detail {
+	margin: 0 0 16px;
+	padding: 12px 14px;
+	background: var(--color-surface-soft);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 14px;
+	align-items: center;
+}
+body.nd .nd-trophy-detail .trophyGameIcon {
+	width: 40px;
+	height: 40px;
+	vertical-align: middle;
+}
+body.nd .nd-trophy-detail .trophyHolderSummaryDiv,
+body.nd .nd-trophy-detail .trophyIMGsummary {
+	height: 40px;
+	width: 40px;
+}
+body.nd .nd-trophy-detail .trophyNumberSummaryDiv {
+	font-size: 30px;
+	top: 0;
+	left: 11px;
+}
+
+/* Per-game stat tables (Players/Games/Wins/Win%). These don't use
+   nd-row09, so nd-components.css keeps them as normal tables; just
+   tighten the padding so a 4-col table sits comfortably on mobile. */
+body.nd .nd-player-stats .nd-table th,
+body.nd .nd-player-stats .nd-table td {
+	padding: 6px 10px;
+}
+
+/* Sub-section labels inside the Joint Games card. */
+body.nd .nd-player-sub {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--color-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	margin: 0 0 8px;
+}
+body.nd .nd-player-sub:first-child {
+	margin-top: 0;
+}
+body.nd .nd-player-sub + .nd-player-sub {
+	margin-top: 14px;
+}
+
+/* Joint finished summary line ("Wins: X/Y (Z%)"). */
+body.nd .nd-joint-summary {
+	font-size: 13px;
+	color: var(--color-ink-soft);
+	margin: 0 0 10px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 10px;
+	align-items: center;
+}
+body.nd .nd-joint-summary .gameIcon {
+	width: 24px;
+	height: 24px;
+	vertical-align: middle;
+}
+
+/* Shrink the big tally trophies a bit on phones so the header doesn't
+   dominate. The number is absolutely positioned; recenter for the
+   smaller box. */
+@media (max-width: 480px) {
+	body.nd .nd-player-header {
+		align-items: flex-start;
+	}
+	body.nd .nd-trophy-row .trophyHolderDiv,
+	body.nd .nd-trophy-row .trophyIMG {
+		height: 72px;
+		width: 72px;
+	}
+	body.nd .nd-trophy-row .trophyNumberDiv {
+		font-size: 28px;
+		left: 28px;
+		top: 4px;
+	}
+}
