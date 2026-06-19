@@ -81,11 +81,13 @@ body.nd .nd-mt-layout {
 
 body.nd .nd-mt-layout .right-column {
 	grid-column: 1;
+	grid-row: 1;
 	min-width: 0;
 }
 
 body.nd #wholeMTchat {
 	grid-column: 2;
+	grid-row: 1;
 	background: var(--color-surface) !important;
 	border: 1px solid var(--color-border) !important;
 	border-radius: var(--radius-md) !important;
@@ -213,6 +215,7 @@ body.nd #messageList .chatentry .body {
 	body.nd .nd-mt-layout .right-column,
 	body.nd #wholeMTchat {
 		grid-column: auto;
+		grid-row: auto;
 		max-width: none;
 	}
 
