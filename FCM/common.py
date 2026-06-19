@@ -352,6 +352,7 @@ def create_fcm_game(
 
         if (
             "trainingGame" in request.POST
+            or "fcmAI" in request.POST
             or is_main_tournament
             or is_mini_tournament
             or is_tournament
