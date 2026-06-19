@@ -138,7 +138,8 @@ for gameCode in GAME_CODES:
             stalled_games += 1
             mock_request = MagicMock()
             mock_request.site = Site.objects.get_current()
-            message = f"NO CP: {gameCode} - ID: {game.id}"
+            game_url = f"https://www.onlineboardgamers.com/RNB/{game.id}/show/"
+            message = f"NO CP: {gameCode} - ID: {game.id}\n<{game_url}>"
             print(message)
             SN_sendAdminErrorMessage(message)
 
