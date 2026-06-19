@@ -8,8 +8,8 @@
   {% compress js %}
     <script src="{% static 'Lobby/Main_Tournament.js' %}"></script>
   {% endcompress %}
-  {% if request.use_new_design %}<div class="nd-page"><div class="containerFlex">{% else %}<div class="container containerFlex">{% endif %}
-    <div id="wholeMTchat">
+  {% if request.use_new_design %}<div class="nd-page"><div class="nd-mt-layout">{% else %}<div class="container containerFlex">{% endif %}
+    <div id="wholeMTchat"{% if request.use_new_design %} class="nd-mt-chat-sticky"{% endif %}>
       <div id="MTchatBox">
         <h2>{% translate "Send a message" %}</h2>
         <div>

@@ -375,6 +375,41 @@ body.nd .nd-form-row > textarea {
     resize: vertical;
 }
 
+body.nd .nd-register-form p {
+    margin: 0 0 12px;
+}
+
+body.nd .nd-register-form label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+body.nd .nd-register-form input[type="text"],
+body.nd .nd-register-form input[type="email"],
+body.nd .nd-register-form input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+}
+
+body.nd .nd-register-form .helptext {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+body.nd .nd-register-form .errorlist {
+    margin: 0 0 8px;
+    padding-left: 18px;
+    color: var(--color-danger);
+    font-size: 13px;
+}
+
 @media (max-width: 640px) {
     body.nd .nd-form-row {
         flex-direction: column;
@@ -1524,16 +1559,6 @@ body.nd .nd-col-cta {
     gap: 6px;
     align-items: center;
     justify-content: center;
-}
-
-/* State backgrounds via row classes */
-body.nd .nd-row09.myMove { background: var(--color-positive-bg); }
-body.nd .nd-row09.kickoutRequired1 { background: var(--color-warn-bg); }
-body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
-@media (hover: hover) {
-    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.30); }
-    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.32); }
-    body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
 }
 
 /* Mobile collapse (per 09 prototype) */

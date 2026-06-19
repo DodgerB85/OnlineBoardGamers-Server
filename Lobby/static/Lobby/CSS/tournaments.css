@@ -72,6 +72,143 @@
 	overflow: auto;
 }
 
+body.nd .nd-mt-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 300px;
+	gap: 20px;
+	align-items: start;
+}
+
+body.nd #wholeMTchat {
+	background: var(--color-surface) !important;
+	border: 1px solid var(--color-border) !important;
+	border-radius: var(--radius-md) !important;
+	padding: 16px !important;
+	box-shadow: var(--shadow-sm) !important;
+	box-sizing: border-box;
+	float: none !important;
+	width: auto !important;
+	min-width: 0 !important;
+	position: static;
+	left: auto !important;
+	margin-right: 0 !important;
+	overflow-y: visible !important;
+	max-height: none !important;
+}
+
+body.nd .nd-mt-chat-sticky#wholeMTchat {
+	position: sticky;
+	top: 90px;
+}
+
+body.nd #MTchatBox {
+	background: transparent !important;
+	border: none !important;
+	padding: 0 !important;
+	text-align: left;
+}
+
+body.nd #MTchatBox h2,
+body.nd #MTchatBox h3 {
+	font-size: 12px !important;
+	font-weight: 600 !important;
+	color: var(--color-muted) !important;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	margin: 0 0 8px !important;
+}
+
+body.nd #chatMessage {
+	width: 100% !important;
+	box-sizing: border-box !important;
+	background: var(--color-surface) !important;
+	border: 1px solid var(--color-border-strong) !important;
+	border-radius: var(--radius-sm) !important;
+	padding: 8px !important;
+	font-size: 14px;
+	font-family: inherit;
+	color: var(--color-ink);
+	resize: vertical;
+	margin-bottom: 8px !important;
+}
+
+body.nd #sendMessageButton {
+	display: block !important;
+	width: 100% !important;
+	background: var(--color-accent) !important;
+	color: var(--color-accent-ink) !important;
+	border: 1px solid var(--color-accent) !important;
+	border-radius: var(--radius-sm) !important;
+	padding: 8px 14px !important;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	font-family: inherit;
+	text-align: center;
+}
+
+@media (hover: hover) {
+	body.nd #sendMessageButton:hover {
+		background: var(--color-accent-strong) !important;
+		border-color: var(--color-accent-strong) !important;
+		color: #fff !important;
+	}
+}
+
+body.nd #messageList {
+	margin-top: 12px;
+	max-height: 400px;
+	overflow-y: auto;
+	background: transparent !important;
+}
+
+body.nd #messageList .chatentry {
+	background: var(--color-surface-soft);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	padding: 8px 10px;
+	margin-bottom: 6px;
+	font-size: 13px;
+}
+
+body.nd #messageList .chatentry .header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+	margin-bottom: 4px;
+	border-bottom: none;
+}
+
+body.nd #messageList .chatentry .header .bold {
+	font-weight: 600;
+	color: var(--color-ink);
+	font-size: 13px;
+}
+
+body.nd #messageList .chatentry .header .date {
+	font-size: 11px;
+	color: var(--color-muted);
+	float: none;
+	font-style: normal;
+}
+
+body.nd #messageList .chatentry .body {
+	color: var(--color-ink-soft);
+	line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+	body.nd .nd-mt-layout {
+		grid-template-columns: 1fr;
+	}
+
+	body.nd .nd-mt-chat-sticky#wholeMTchat {
+		position: static !important;
+		top: auto;
+	}
+}
+
 .IPcontainer {
 	display: flex;
 	width: 100%;

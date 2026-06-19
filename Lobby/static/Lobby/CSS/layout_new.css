@@ -255,7 +255,7 @@ body.nd .mainLayout {
     padding: 0px;
     position: absolute;
     left: 10px;
-    top: 40px;
+    top: 56px;
     color: var(--color-brand-blue);
 }
 
@@ -309,7 +309,19 @@ body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
 
 #loginForm {
     display: flex;
+    align-items: flex-start;
+    gap: 8px;
     padding: 10px;
+}
+
+#loginForm form {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+#loginForm .loginInput {
+    box-sizing: border-box;
 }
 
 /* The "Login" submit in the top bar uses the same nd-button-primary style as

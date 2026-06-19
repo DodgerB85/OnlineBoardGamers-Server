@@ -233,18 +233,6 @@ body.nd .nd-col-cta .deleteTrainingGame {
     padding-right: 12px;
 }
 
-/* flexi-time warning */
-.nd-table tbody tr.kickoutRequired1 td {
-    background: var(--color-warn-bg);
-    border-color: rgba(200, 140, 40, 0.25);
-}
-
-/* kickout danger */
-.nd-table tbody tr.kickoutRequired2 td {
-    background: var(--color-danger-bg);
-    border-color: rgba(180, 50, 50, 0.2);
-}
-
 /* game icon in rows */
 .nd-table .gameIcon {
     width: 38px;

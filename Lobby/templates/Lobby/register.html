@@ -44,7 +44,7 @@
       </div>
 
       <div class="nd-card nd-section">
-        <form method="post">
+        <form method="post" class="nd-register-form">
           {% csrf_token %}
           {{ form.as_p }}
           <div class="nd-form-actions">
