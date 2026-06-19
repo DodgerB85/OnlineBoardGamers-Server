@@ -732,7 +732,7 @@ def handler404(request, exception):
         if request.user.is_authenticated:
             message += "Email: " + request.user.email + "\n"
 
-        if request.user.is_authenticated and request.user.username != "Gamer" and request.user.username != "MMYCC":
+        if request.user.is_authenticated and exceptionData != "Game does not exist":
             requests.post(
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                 data={"content": message},
