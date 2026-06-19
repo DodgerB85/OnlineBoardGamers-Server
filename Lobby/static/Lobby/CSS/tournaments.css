@@ -74,12 +74,18 @@
 
 body.nd .nd-mt-layout {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) 300px;
+	grid-template-columns: minmax(0, 1fr) minmax(280px, min(32vw, 500px));
 	gap: 20px;
 	align-items: start;
 }
 
+body.nd .nd-mt-layout .right-column {
+	grid-column: 1;
+	min-width: 0;
+}
+
 body.nd #wholeMTchat {
+	grid-column: 2;
 	background: var(--color-surface) !important;
 	border: 1px solid var(--color-border) !important;
 	border-radius: var(--radius-md) !important;
@@ -88,6 +94,7 @@ body.nd #wholeMTchat {
 	box-sizing: border-box;
 	float: none !important;
 	width: auto !important;
+	max-width: 500px;
 	min-width: 0 !important;
 	position: static;
 	left: auto !important;
@@ -201,6 +208,12 @@ body.nd #messageList .chatentry .body {
 @media (max-width: 768px) {
 	body.nd .nd-mt-layout {
 		grid-template-columns: 1fr;
+	}
+
+	body.nd .nd-mt-layout .right-column,
+	body.nd #wholeMTchat {
+		grid-column: auto;
+		max-width: none;
 	}
 
 	body.nd .nd-mt-chat-sticky#wholeMTchat {
