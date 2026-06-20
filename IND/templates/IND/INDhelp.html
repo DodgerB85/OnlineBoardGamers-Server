@@ -195,11 +195,6 @@
         </div>
       </div>
 
-      <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
-        {% translate "For further help contact" %}
-        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30">
-      </p>
-
       {% include "Lobby/donate/donateBanner.html" %}
 
 {% endblock %}
@@ -392,12 +387,6 @@
         </div>
         <br />
         <br />
-        {% translate "For further help contact" %}
-        <img id="contactEmailImg"
-             src="{% static 'Lobby/email.png' %}"
-             alt="Email Address"
-             width="400"
-             height="30">
       </div>
       {% include 'Lobby/donate/donateBanner.html' %}
       {% include 'Lobby/common/homeButton.html' %}

@@ -3,7 +3,7 @@
    Loaded once from layout_new.html. */
 
 :root {
-    --color-brand-blue: #93d5d0;
+    --color-brand-blue: #a8dadc;
     --color-brand-green: #9dcd8e;
 
     --color-nav-bg: #19343c;
@@ -1166,13 +1166,13 @@ body.nd .nd-opts-section {
 
 /* Lay option sections out in responsive columns: one column when narrow,
    2 on tablet, 3 on desktop. The first 3 sections (Game / Ketchup / Map)
-   then sit on a single row at typical laptop widths. align-items:start so
-   uneven-height sections don't stretch to match the tallest. */
+   then sit on a single row at typical laptop widths. align-items:stretch
+   so cells in a row match the tallest sibling's height. */
 body.nd .nd-opts-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
-    align-items: start;
+    align-items: stretch;
 }
 @media (min-width: 720px) {
     body.nd .nd-opts-grid {

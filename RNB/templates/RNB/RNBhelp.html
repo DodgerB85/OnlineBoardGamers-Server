@@ -54,6 +54,12 @@
               or using the big tile in the Zoom Panel or below in the Zoom Area.
             {% endblocktranslate %}
           </p>
+          <p>
+            <img src="{% static 'RNB/help/transporterSelectHelp.jpg' %}"
+                 alt="Transporter Help"
+                 width="496" height="443"
+                 style="max-width:100%;">
+          </p>
 
           <b><u>{% translate "Production Phase:" %}</u></b>
           <p>
@@ -181,11 +187,6 @@
           <p>{% translate "You can resign during any of your Production turns (but not when presetting it)." %}</p>
         </div>
       </div>
-
-      <p style="font-size:14px; color: var(--color-muted); margin-top: 4px;">
-        {% translate "For further help contact" %}
-        <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30">
-      </p>
 
       {% include "Lobby/donate/donateBanner.html" %}
 
@@ -409,12 +410,6 @@
           </div>
           <br />
           <br />
-          {% translate "For further help contact" %}
-          <img id="contactEmailImg"
-               src="{% static 'Lobby/email.png' %}"
-               alt="Email Address"
-               width="400"
-               height="30">
         </div>
         {% include "Lobby/donate/donateBanner.html" %}
         {% include "Lobby/common/homeButton.html" %}

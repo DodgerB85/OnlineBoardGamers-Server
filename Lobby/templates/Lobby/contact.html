@@ -21,37 +21,9 @@
         <h1>{% translate "Contact" %}</h1>
       </div>
 
-      <div class="nd-card nd-section">
-        <p>
-          <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
-        </p>
-        <p style="text-align:center;margin:14px 0 4px;">
-          <img id="contactEmailImg"
-               src="{% static 'Lobby/email.png' %}"
-               alt="Email Address"
-               width="400"
-               height="30">
-        </p>
-        <p class="contactPtext">
-          {% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
-        </p>
-      </div>
-
       {% include "Lobby/donate/donateBanner.html" %}
     {% else %}
       <div id="contactPage">
-        <p>
-          <b>{% translate "For any questions / comments / suggestions, please contact" %}
-            <img id="contactEmailImg"
-                 src="{% static 'Lobby/email.png' %}"
-                 alt="Email Address"
-                 width="400"
-                 height="30">
-          </b>
-        </p>
-        <p class="contactPtext">
-          {% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
-        </p>
         {% include "Lobby/donate/donateBanner.html" %}
       </div>
       {% include "Lobby/common/homeButton.html" %}
