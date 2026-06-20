@@ -607,7 +607,7 @@ body.nd .nd-pill {
     gap: 4px;
     padding: 2px 8px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     background: var(--color-surface-soft);
     color: var(--color-muted);
@@ -660,7 +660,7 @@ body.nd .nd-tab {
     padding: 10px 16px;
     min-height: 44px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.01em;
     color: var(--color-muted);
@@ -687,7 +687,7 @@ body.nd .nd-tab.tablinks.active {
 }
 
 body.nd .nd-tab-count {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: inherit;
     opacity: 0.85;
@@ -1004,7 +1004,7 @@ body.nd .nd-map-editor-grid .nd-create-tile-label {
 
 /* ---------- UTILITY ---------- */
 body.nd .nd-muted { color: var(--color-muted); }
-body.nd .nd-small { font-size: 12px; }
+body.nd .nd-small { font-size: 13px; }
 body.nd .nd-center { text-align: center; }
 body.nd .nd-spacer { flex: 1; }
 body.nd .nd-row-flex {
@@ -1522,13 +1522,12 @@ body.nd .nd-col-game strong {
 }
 body.nd .nd-col-game small {
     color: var(--color-muted);
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.4;
 }
 body.nd .nd-col-game a { color: var(--color-accent-strong); text-decoration: none; }
 body.nd .nd-col-game a:hover { text-decoration: underline; }
 body.nd .nd-col-players {
-    font-size: 13px;
     color: var(--color-ink-soft);
     line-height: 1.4;
 }

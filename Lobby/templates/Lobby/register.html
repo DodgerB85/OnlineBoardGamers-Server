@@ -21,8 +21,7 @@
       </div>
 
       <div class="nd-card nd-section">
-        {% if request.session.show_bt_warning %}
-        <div id="btWarning" class="nd-callout nd-callout-warn">
+        <div id="btWarning" class="nd-callout nd-callout-warn" style="display:none">
           CAUTION: BtInternet is rejecting my emails as spam. Please add
           <img id="contactEmailImg"
                src="{% static 'Lobby/email.png' %}"
@@ -31,7 +30,6 @@
                height="30">
           to your safe senders / whitelist / allowed emails
         </div>
-        {% endif %}
         <div id="registerEmailInfoDiv" class="nd-callout nd-callout-info">
           A genuine email address is required to activate your account
           <br />
@@ -58,7 +56,6 @@
         </p>
       </div>
     {% else %}
-      {% if request.session.show_bt_warning %}
       <div id="btWarning">
         CAUTION: BtInternet is rejecting my emails as spam. Please add
         <img id="contactEmailImg"
@@ -68,7 +65,6 @@
              height="30">
         to your safe senders / whitelist / allowed emails
       </div>
-      {% endif %}
       <div id="registerEmailInfoDiv">
         A genuine email address is required to activate your account
         <br />

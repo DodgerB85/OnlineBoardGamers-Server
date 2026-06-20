@@ -210,7 +210,7 @@ body.nd .mainLayout {
     margin-left: 20px;
 }
 
-.topBarLink {
+body.nd .topBarLink {
     color: var(--color-brand-blue);
     text-align: center;
     margin-left: 4px;
@@ -220,7 +220,7 @@ body.nd .mainLayout {
     outline: none;
 }
 
-.topBarLink:hover {
+body.nd .topBarLink:hover {
     color: var(--color-nav-link-hover);
 }
 
@@ -395,6 +395,17 @@ body.nd .support a {
     gap: 10px;
     text-decoration: none;
     color: var(--color-brand-blue);
+    background: var(--color-nav-bg);
+    border: 1px solid rgba(147, 213, 208, 0.3);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+}
+
+@media (hover: hover) {
+    body.nd .support a:hover {
+        background: #1f3f49;
+        border-color: rgba(147, 213, 208, 0.5);
+    }
 }
 
 body.nd .support img {

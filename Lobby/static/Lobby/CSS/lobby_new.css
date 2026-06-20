@@ -183,7 +183,7 @@ body.nd .nd-col-cta .deleteTrainingGame {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 5px;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .nd-table thead tr {
@@ -404,7 +404,7 @@ body.nd .nd-col-cta .deleteTrainingGame {
         font-size: 12px;
     }
     .nd-table {
-        font-size: 13px;
+        font-size: 14px;
     }
     .nd-table tbody tr td {
         padding: 8px 6px;
