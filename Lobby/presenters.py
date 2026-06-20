@@ -307,6 +307,7 @@ class GamePresenter:
         self.gameObj.currentPlayersInTurnOrder = None  # Check this doesn't crash game load if game ended
         # RNB
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = None  # Check this doesn't crash game load if game ended
+        self.gameObj.transactionID = ""
 
     def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
         from django_q.tasks import async_task
