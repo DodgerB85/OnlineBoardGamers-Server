@@ -15,6 +15,7 @@ from django.utils.translation import gettext
 import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
 import RNB.RNBconstants as rfRNB
+from Lobby.sharedFunctions.availability import record_player_availability_for_turn_change
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
 )
@@ -200,8 +201,9 @@ class GamePresenter:
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = playersInTurnOrderArray
         self.gameObj.save()
 
-    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array):
+    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array, acting_username=None, old_latest_update=None):
         """Set current players by updating is_current on GamePlayer instances"""
+        record_player_availability_for_turn_change(self.gameObj, acting_username, old_latest_update)
         if not current_players_array or len(current_players_array) == 0:
             # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
             if self.gameObj.maxPlayers == 1:

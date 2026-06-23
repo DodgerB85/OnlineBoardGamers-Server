@@ -391,7 +391,7 @@ def _processKFWturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
 
         # If it is boat collection phase, and there is a submitted village, then that player has no pending tiles
         if currentGame.phase == 1 or currentGame.phase == 2 and not presenter.isTrainingGame():
@@ -521,12 +521,14 @@ def _processKFWturn(request):
         # currentGame.turn = jsonData["turn"]
         # currentGame.phase = jsonData["phase"]
 
+        acting_username = request.user.username
         if request.user.username not in KFW_SUPER_USERS:
             presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
-            presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
+            acting_username = jsonData["BKSN"]
+            presenter.updateSingleMove(acting_username, jsonData["moveData"])
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers())
+        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate)
 
         if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(
@@ -573,13 +575,15 @@ def _processKFWturn(request):
         currentGame.phase = jsonData["phase"]
 
         # If you're not a super user, and it's not a practice game, then save according to your login
+        acting_username = request.user.username
         if request.user.username not in KFW_SUPER_USERS and 102 not in json.loads(currentGame.startingOptions):
             presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
             # Otherwise, save according to the name sent by the game
-            presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
+            acting_username = jsonData["BKSN"]
+            presenter.updateSingleMove(acting_username, jsonData["moveData"])
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers())
+        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate)
 
         if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(

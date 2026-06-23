@@ -218,15 +218,10 @@ def _processTGZturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     # Helper function to update current players
-    def set_current_players(next_player_str):
+    def set_current_players(next_player_str, acting_username=None, old_latest_update=None):
         """Update current players for Game model"""
-        # Clear all is_current flags
-        currentGame.players.update(is_current=False)
-        # Set is_current for the next players
-        if next_player_str:
-            next_usernames = [name.strip() for name in next_player_str.split(",") if name.strip()]
-            for username in next_usernames:
-                currentGame.players.filter(player__username=username).update(is_current=True)
+        next_usernames = [name.strip() for name in next_player_str.split(",") if name.strip()] if next_player_str else []
+        presenter.setCurrentPlayersFromArrInTurnOrder(next_usernames, acting_username=acting_username, old_latest_update=old_latest_update)
 
     if jsonData["action"] == "setAutoPass":
         playerIndex = jsonData["playerNumber"]
@@ -402,7 +397,7 @@ def _processTGZturn(request):
         newLatestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.latestUpdate = newLatestUpdate
 
-        set_current_players(jsonData["nextPlayer"])
+        set_current_players(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()

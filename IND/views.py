@@ -284,7 +284,7 @@ def _processINDturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         nextPlayer = jsonData.get("nextPlayer", [])
-        presenter.setCurrentPlayersFromArrInTurnOrder(nextPlayer)
+        presenter.setCurrentPlayersFromArrInTurnOrder(nextPlayer, acting_username=request.user.username, old_latest_update=oldVer)
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
