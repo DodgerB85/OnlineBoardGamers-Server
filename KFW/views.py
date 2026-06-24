@@ -528,7 +528,7 @@ def _processKFWturn(request):
             acting_username = jsonData["BKSN"]
             presenter.updateSingleMove(acting_username, jsonData["moveData"])
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate)
+        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate, record_actor_only_availability=True)
 
         if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(
@@ -583,7 +583,7 @@ def _processKFWturn(request):
             acting_username = jsonData["BKSN"]
             presenter.updateSingleMove(acting_username, jsonData["moveData"])
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate)
+        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate, record_actor_only_availability=True)
 
         if request.user.username in KFW_SUPER_USERS:
             SF_updateFlexiTime(

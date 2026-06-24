@@ -36,7 +36,7 @@ def get_availability_hours_between(start_timestamp_ms, end_moment=None):
     return hours or [end_moment.hour]
 
 
-def record_player_availability_for_turn_change(game, acting_username=None, old_latest_update=None, now=None):
+def record_player_availability_for_turn_change(game, acting_username=None, old_latest_update=None, now=None, record_actor_only=False):
     if not acting_username or should_skip_availability_tracking(game):
         return
 
@@ -44,6 +44,8 @@ def record_player_availability_for_turn_change(game, acting_username=None, old_l
     current_usernames = {game_player.player.username for game_player in current_game_players if game_player.player}
     if acting_username not in current_usernames or should_skip_availability_username(acting_username):
         return
+    if record_actor_only:
+        current_game_players = [game_player for game_player in current_game_players if game_player.player and game_player.player.username == acting_username]
 
     turn_hours = get_availability_hours_between(old_latest_update or game.latestUpdate, now)
     move_hour = get_availability_hour(now)

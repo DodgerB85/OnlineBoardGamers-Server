@@ -201,9 +201,9 @@ class GamePresenter:
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = playersInTurnOrderArray
         self.gameObj.save()
 
-    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array, acting_username=None, old_latest_update=None):
+    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array, acting_username=None, old_latest_update=None, record_actor_only_availability=False):
         """Set current players by updating is_current on GamePlayer instances"""
-        record_player_availability_for_turn_change(self.gameObj, acting_username, old_latest_update)
+        record_player_availability_for_turn_change(self.gameObj, acting_username, old_latest_update, record_actor_only=record_actor_only_availability)
         if not current_players_array or len(current_players_array) == 0:
             # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
             if self.gameObj.maxPlayers == 1:

@@ -7,6 +7,7 @@ from django.utils import timezone
 from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.availability import (
     get_availability_hour,
+    get_availability_hours_between,
     normalize_availability_counts,
     record_player_availability_for_turn_change,
 )
@@ -45,6 +46,30 @@ class AvailabilityTrackingTests(TestCase):
         for hour in [22, 23, 0]:
             self.assertEqual(self.player_one.profile.availabilityTurnCounts[hour], 1)
             self.assertEqual(self.player_two.profile.availabilityTurnCounts[hour], 1)
+        self.assertEqual(self.player_one.profile.availabilityMoveCounts[0], 1)
+        self.assertEqual(sum(self.player_two.profile.availabilityMoveCounts), 0)
+
+    def test_includes_partial_start_hour_for_turn_availability(self):
+        examples = [
+            (datetime(2026, 1, 1, 15, 50, tzinfo=datetime_timezone.utc), datetime(2026, 1, 1, 16, 4, tzinfo=datetime_timezone.utc), [15, 16]),
+            (datetime(2026, 1, 1, 15, 5, tzinfo=datetime_timezone.utc), datetime(2026, 1, 1, 15, 50, tzinfo=datetime_timezone.utc), [15]),
+            (datetime(2026, 1, 1, 15, 30, tzinfo=datetime_timezone.utc), datetime(2026, 1, 1, 17, 20, tzinfo=datetime_timezone.utc), [15, 16, 17]),
+        ]
+
+        for start_moment, end_moment, expected_hours in examples:
+            start_timestamp_ms = str(int(start_moment.timestamp() * 1000))
+            self.assertEqual(get_availability_hours_between(start_timestamp_ms, end_moment), expected_hours)
+
+    def test_actor_only_recording_does_not_count_other_current_players(self):
+        now = datetime(2026, 1, 2, 0, 15, tzinfo=datetime_timezone.utc)
+
+        record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now, record_actor_only=True)
+
+        self.player_one.profile.refresh_from_db()
+        self.player_two.profile.refresh_from_db()
+        for hour in [22, 23, 0]:
+            self.assertEqual(self.player_one.profile.availabilityTurnCounts[hour], 1)
+            self.assertEqual(self.player_two.profile.availabilityTurnCounts[hour], 0)
         self.assertEqual(self.player_one.profile.availabilityMoveCounts[0], 1)
         self.assertEqual(sum(self.player_two.profile.availabilityMoveCounts), 0)
 

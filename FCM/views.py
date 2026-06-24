@@ -1039,7 +1039,7 @@ def _processTurn(request):
         # Before sending notifications, update the currentPlayers
         # If saving into phase 2/7/9, then update for simul players
         if jsonData["phase"] == rfFCM.PHASE_SETUP_RESERVE or jsonData["phase"] == rfFCM.PHASE_PAYDAY or jsonData["phase"] == rfFCM.PHASE_CLEAN_UP:
-            presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUse, old_latest_update=oldVer)
+            presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM())
 
         # Send Notifications - payday/fridge with moves are already removd
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
@@ -1216,7 +1216,7 @@ def _processTurn(request):
 
             oldVer = currentGame.latestUpdate
             if currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT1 and currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT2:
-                presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUpdate, old_latest_update=oldVer)
+                presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUpdate, old_latest_update=oldVer, record_actor_only_availability=True)
 
             if request.user.username in FCMsuperUsers:
                 flexName = jsonData["BKSN"]

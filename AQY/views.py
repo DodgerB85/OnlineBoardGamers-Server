@@ -699,7 +699,7 @@ def _processAQYturn(request):
             acting_username = jsonData["BKSN"]
             presenter.updateSingleMove(acting_username, jsonData["moveData"])
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayersArrayAQY(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate)
+        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayersArrayAQY(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate, record_actor_only_availability=True)
 
         if request.user.username in AQY_SUPER_USERS:
             SF_updateFlexiTime(
