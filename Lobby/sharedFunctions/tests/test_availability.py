@@ -43,17 +43,20 @@ class AvailabilityTrackingTests(TestCase):
 
         self.player_one.profile.refresh_from_db()
         self.player_two.profile.refresh_from_db()
-        for hour in [22, 23, 0]:
+        for hour in [23, 0]:
             self.assertEqual(self.player_one.profile.availabilityTurnCounts[hour], 1)
             self.assertEqual(self.player_two.profile.availabilityTurnCounts[hour], 1)
+        self.assertEqual(self.player_one.profile.availabilityTurnCounts[22], 0)
+        self.assertEqual(self.player_two.profile.availabilityTurnCounts[22], 0)
         self.assertEqual(self.player_one.profile.availabilityMoveCounts[0], 1)
         self.assertEqual(sum(self.player_two.profile.availabilityMoveCounts), 0)
 
-    def test_includes_partial_start_hour_for_turn_availability(self):
+    def test_excludes_partial_start_hour_for_turn_availability(self):
         examples = [
-            (datetime(2026, 1, 1, 15, 50, tzinfo=datetime_timezone.utc), datetime(2026, 1, 1, 16, 4, tzinfo=datetime_timezone.utc), [15, 16]),
+            (datetime(2026, 1, 1, 15, 50, tzinfo=datetime_timezone.utc), datetime(2026, 1, 1, 16, 4, tzinfo=datetime_timezone.utc), [16]),
             (datetime(2026, 1, 1, 15, 5, tzinfo=datetime_timezone.utc), datetime(2026, 1, 1, 15, 50, tzinfo=datetime_timezone.utc), [15]),
-            (datetime(2026, 1, 1, 15, 30, tzinfo=datetime_timezone.utc), datetime(2026, 1, 1, 17, 20, tzinfo=datetime_timezone.utc), [15, 16, 17]),
+            (datetime(2026, 1, 1, 15, 30, tzinfo=datetime_timezone.utc), datetime(2026, 1, 1, 17, 20, tzinfo=datetime_timezone.utc), [16, 17]),
+            (datetime(2026, 1, 1, 22, 30, tzinfo=datetime_timezone.utc), datetime(2026, 1, 2, 0, 15, tzinfo=datetime_timezone.utc), [23, 0]),
         ]
 
         for start_moment, end_moment, expected_hours in examples:
@@ -67,9 +70,11 @@ class AvailabilityTrackingTests(TestCase):
 
         self.player_one.profile.refresh_from_db()
         self.player_two.profile.refresh_from_db()
-        for hour in [22, 23, 0]:
+        for hour in [23, 0]:
             self.assertEqual(self.player_one.profile.availabilityTurnCounts[hour], 1)
             self.assertEqual(self.player_two.profile.availabilityTurnCounts[hour], 0)
+        self.assertEqual(self.player_one.profile.availabilityTurnCounts[22], 0)
+        self.assertEqual(self.player_two.profile.availabilityTurnCounts[22], 0)
         self.assertEqual(self.player_one.profile.availabilityMoveCounts[0], 1)
         self.assertEqual(sum(self.player_two.profile.availabilityMoveCounts), 0)
 

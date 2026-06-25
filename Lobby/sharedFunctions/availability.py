@@ -27,9 +27,12 @@ def get_availability_hours_between(start_timestamp_ms, end_moment=None):
     if start_moment > end_moment:
         return [end_moment.hour]
 
-    hours = []
-    cursor = start_moment.replace(minute=0, second=0, microsecond=0)
     final_hour = end_moment.replace(minute=0, second=0, microsecond=0)
+    if start_moment.replace(minute=0, second=0, microsecond=0) == final_hour:
+        return [end_moment.hour]
+
+    hours = []
+    cursor = start_moment.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
     while cursor <= final_hour and len(hours) < MAX_TRACKED_TURN_HOURS:
         hours.append(cursor.hour)
         cursor += timedelta(hours=1)
