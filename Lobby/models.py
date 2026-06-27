@@ -476,6 +476,8 @@ class GamePlayer(models.Model):
     currentMoveTime = models.CharField(max_length=15, blank=True)
     currentMoveData = models.TextField(blank=True)
 
+    availabilityAnchor = models.BigIntegerField(null=True, blank=True, default=None)
+
     class Meta:
         ordering = ["seat_order"]
         constraints = [models.UniqueConstraint(fields=["game", "player"], name="unique_game_player")]

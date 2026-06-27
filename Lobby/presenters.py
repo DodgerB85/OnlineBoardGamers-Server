@@ -237,15 +237,18 @@ class GamePresenter:
 
         for gp in game_players:
             if gp.player:
+                was_current = gp.is_current
                 gp.is_current = gp.player.username in current_players_array
                 # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
                 if self.gameObj.maxPlayers == 1:
                     gp.is_current = True
+                if gp.is_current and not was_current:
+                    gp.availabilityAnchor = int(time.time() * 1000)
                 to_update.append(gp)
         if len(to_update) > 0:
             from Lobby.models import GamePlayer
 
-            GamePlayer.objects.bulk_update(to_update, ["is_current"])
+            GamePlayer.objects.bulk_update(to_update, ["is_current", "availabilityAnchor"])
 
     ### THIS IS CURRENTLY RNB ONLY -- BUT SHOULD BE GENERALLY USEFUL
     # This takes in an array of names, and updates the current players for a STRICT SIMUL turn
