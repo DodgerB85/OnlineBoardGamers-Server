@@ -330,7 +330,7 @@ def _processHLCturn(request):
         currentGame.gameData = LZS.compressToEncodedURIComponent(json.dumps(DBgameDataRaw))
         # remove name from current players
         oldVer = currentGame.latestUpdate
-        presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersList, acting_username=name, old_latest_update=oldVer, record_actor_only_availability=True)
+        presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersList, acting_username=name, old_latest_update=oldVer)
 
         # It is ok for currentPlayersList to be 0 length here - then the JS should go to next phase
         # if len(currentPlayersList) == 0:

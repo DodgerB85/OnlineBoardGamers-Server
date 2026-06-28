@@ -1216,7 +1216,7 @@ def _processTurn(request):
 
             oldVer = currentGame.latestUpdate
             if currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT1 and currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT2:
-                presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUpdate, old_latest_update=oldVer, record_actor_only_availability=True)
+                presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUpdate, old_latest_update=oldVer)
 
             if request.user.username in FCMsuperUsers:
                 flexName = jsonData["BKSN"]

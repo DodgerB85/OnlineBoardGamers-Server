@@ -45,9 +45,8 @@ class AvailabilityTrackingTests(TestCase):
         self.player_two.profile.refresh_from_db()
         for hour in [23, 0]:
             self.assertEqual(self.player_one.profile.availabilityTurnCounts[hour], 1)
-            self.assertEqual(self.player_two.profile.availabilityTurnCounts[hour], 1)
         self.assertEqual(self.player_one.profile.availabilityTurnCounts[22], 0)
-        self.assertEqual(self.player_two.profile.availabilityTurnCounts[22], 0)
+        self.assertEqual(sum(self.player_two.profile.availabilityTurnCounts), 0)
         self.assertEqual(self.player_one.profile.availabilityMoveCounts[0], 1)
         self.assertEqual(sum(self.player_two.profile.availabilityMoveCounts), 0)
 
@@ -63,10 +62,10 @@ class AvailabilityTrackingTests(TestCase):
             start_timestamp_ms = str(int(start_moment.timestamp() * 1000))
             self.assertEqual(get_availability_hours_between(start_timestamp_ms, end_moment), expected_hours)
 
-    def test_actor_only_recording_does_not_count_other_current_players(self):
+    def test_recording_only_credits_the_actor(self):
         now = datetime(2026, 1, 2, 0, 15, tzinfo=datetime_timezone.utc)
 
-        record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now, record_actor_only=True)
+        record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now)
 
         self.player_one.profile.refresh_from_db()
         self.player_two.profile.refresh_from_db()
@@ -109,7 +108,7 @@ class AvailabilityTrackingTests(TestCase):
 
         # old_latest_update is 22:30, anchor is 20:00 → window should start from anchor (20:00)
         now = datetime(2026, 1, 2, 0, 15, tzinfo=datetime_timezone.utc)
-        record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now, record_actor_only=True)
+        record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now)
 
         self.player_one.profile.refresh_from_db()
         # Hours from 20:00 anchor to 00:15: [21, 22, 23, 0]
@@ -141,7 +140,7 @@ class AvailabilityTrackingTests(TestCase):
 
         # Actor redoes at 10:02 — old_latest_update is the rewind stamp
         now = datetime(2026, 1, 2, 10, 2, tzinfo=datetime_timezone.utc)
-        record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now, record_actor_only=True)
+        record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now)
 
         self.player_one.profile.refresh_from_db()
         # Window should be from anchor (13:00 d1) to 10:02 d2: [14..10] = 21 hours
