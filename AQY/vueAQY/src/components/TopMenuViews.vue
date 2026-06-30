@@ -378,7 +378,7 @@ function localCastVote(topic) {
 						<th>University</th>
 						<th>Alchemy</th>
 						<th>Philosophy</th>
-						<th>Brewey</th>
+						<th>Brewery</th>
 						<th>Forced Labour</th>
 						<th>Stable</th>
 						<th>Harbour</th>
@@ -389,7 +389,7 @@ function localCastVote(topic) {
 						<th>Cathedral</th>
 						<th>Market</th>
 						<th>Cart</th>
-						<th>Foutain</th>
+						<th>Fountain</th>
 						<th>Storage</th>
 					</tr>
 				</thead>
