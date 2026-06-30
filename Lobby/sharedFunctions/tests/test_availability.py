@@ -99,19 +99,16 @@ class AvailabilityTrackingTests(TestCase):
         self.assertEqual(len(normalize_availability_counts([1] * 30)), 24)
 
     def test_uses_anchor_as_window_start(self):
-        # anchor is older than old_latest_update → wider window
         anchor_time = datetime(2026, 1, 1, 20, 0, tzinfo=datetime_timezone.utc)
         anchor_ms = int(anchor_time.timestamp() * 1000)
         gp = self.game.players.get(player=self.player_one)
         gp.availabilityAnchor = anchor_ms
         gp.save()
 
-        # old_latest_update is 22:30, anchor is 20:00 → window should start from anchor (20:00)
         now = datetime(2026, 1, 2, 0, 15, tzinfo=datetime_timezone.utc)
         record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now)
 
         self.player_one.profile.refresh_from_db()
-        # Hours from 20:00 anchor to 00:15: [21, 22, 23, 0]
         for hour in [21, 22, 23, 0]:
             self.assertEqual(self.player_one.profile.availabilityTurnCounts[hour], 1)
         self.assertEqual(self.player_one.profile.availabilityTurnCounts[20], 0)
@@ -125,25 +122,36 @@ class AvailabilityTrackingTests(TestCase):
         expected_ms = int(now.timestamp() * 1000)
         self.assertEqual(gp.availabilityAnchor, expected_ms)
 
-    def test_anchor_survives_rewind_bump(self):
-        # Set anchor at T0 (start of turn), then simulate rewind bumping latestUpdate forward
+    def test_redo_after_rewind_only_counts_the_redo_hour(self):
         anchor_time = datetime(2026, 1, 1, 13, 0, tzinfo=datetime_timezone.utc)
         anchor_ms = int(anchor_time.timestamp() * 1000)
-        for gp in self.game.players.all():
+        current_game_players = list(self.game.players.all())
+        for gp in current_game_players:
             gp.availabilityAnchor = anchor_ms
             gp.save()
 
-        # Rewind bumps latestUpdate to day-2 10:00
+        first_now = datetime(2026, 1, 1, 16, 15, tzinfo=datetime_timezone.utc)
+        record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, first_now)
+
+        actor_gp = self.game.players.get(player=self.player_one)
+        other_gp = self.game.players.get(player=self.player_two)
+        self.assertGreater(actor_gp.availabilityAnchor, other_gp.availabilityAnchor)
+
         rewind_time = datetime(2026, 1, 2, 10, 0, tzinfo=datetime_timezone.utc)
         self.game.latestUpdate = str(int(rewind_time.timestamp() * 1000))
         self.game.save()
 
-        # Actor redoes at 10:02 — old_latest_update is the rewind stamp
         now = datetime(2026, 1, 2, 10, 2, tzinfo=datetime_timezone.utc)
         record_player_availability_for_turn_change(self.game, "player-one", self.game.latestUpdate, now)
 
         self.player_one.profile.refresh_from_db()
-        # Window should be from anchor (13:00 d1) to 10:02 d2: [14..10] = 21 hours
-        for hour in [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+        for hour in [14, 15, 16]:
             self.assertEqual(self.player_one.profile.availabilityTurnCounts[hour], 1, f"hour {hour} should be 1")
+        self.assertEqual(self.player_one.profile.availabilityTurnCounts[10], 1)
+        for hour in [17, 18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+            self.assertEqual(self.player_one.profile.availabilityTurnCounts[hour], 0, f"hour {hour} should stay 0")
         self.assertEqual(self.player_one.profile.availabilityTurnCounts[13], 0)
+        self.assertEqual(self.player_one.profile.availabilityMoveCounts[10], 1)
+
+        actor_gp.refresh_from_db()
+        self.assertEqual(actor_gp.availabilityAnchor, int(now.timestamp() * 1000))

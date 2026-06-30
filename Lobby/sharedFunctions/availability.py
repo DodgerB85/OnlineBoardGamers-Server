@@ -43,33 +43,51 @@ def record_player_availability_for_turn_change(game, acting_username=None, old_l
     if not acting_username or should_skip_availability_tracking(game):
         return
 
-    current_game_players = list(game.players.filter(is_current=True, player__username=acting_username).select_related("player__profile"))
-    if not current_game_players or should_skip_availability_username(acting_username):
+    game_player = game.players.filter(is_current=True, player__username=acting_username).select_related("player__profile").first()
+    if not game_player or should_skip_availability_username(acting_username):
         return
 
     now = now or timezone.now()
     base_start_ms = int(old_latest_update or game.latestUpdate)
     move_hour = get_availability_hour(now)
     epoch_ms = int(now.timestamp() * 1000)
+    player = game_player.player
+    if not player or should_skip_availability_username(player.username):
+        return
 
-    for game_player in current_game_players:
-        player = game_player.player
-        if not player or should_skip_availability_username(player.username):
-            continue
+    turn_hours = get_turn_hours_for_player(game, game_player, base_start_ms, now)
 
-        window_start_ms = min(base_start_ms, game_player.availabilityAnchor) if game_player.availabilityAnchor is not None else base_start_ms
-        turn_hours = get_availability_hours_between(window_start_ms, now)
+    profile = player.profile
+    profile.availabilityTurnCounts = increment_availability_counts(profile.availabilityTurnCounts, turn_hours)
+    profile.availabilityMoveCounts = increment_availability_counts(profile.availabilityMoveCounts, [move_hour])
+    profile.save(update_fields=["availabilityTurnCounts", "availabilityMoveCounts"])
 
-        profile = player.profile
-        profile.availabilityTurnCounts = increment_availability_counts(profile.availabilityTurnCounts, turn_hours)
-        update_fields = ["availabilityTurnCounts"]
-        if player.username == acting_username:
-            profile.availabilityMoveCounts = increment_availability_counts(profile.availabilityMoveCounts, [move_hour])
-            update_fields.append("availabilityMoveCounts")
-        profile.save(update_fields=update_fields)
+    game_player.availabilityAnchor = epoch_ms
+    game_player.save(update_fields=["availabilityAnchor"])
 
-        game_player.availabilityAnchor = epoch_ms
-        game_player.save(update_fields=["availabilityAnchor"])
+
+def get_turn_hours_for_player(game, game_player, base_start_ms, now):
+    if is_redo_after_rewind(game, game_player):
+        return [get_availability_hour(now)]
+
+    window_start_ms = min(base_start_ms, game_player.availabilityAnchor) if game_player.availabilityAnchor is not None else base_start_ms
+    return get_availability_hours_between(window_start_ms, now)
+
+
+def is_redo_after_rewind(game, game_player, margin_ms=60000):
+    if game_player.availabilityAnchor is None:
+        return False
+
+    relevant_anchors = [
+        current_gp.availabilityAnchor
+        for current_gp in game.players.filter(is_current=True)
+        if current_gp.availabilityAnchor is not None
+    ]
+    if len(relevant_anchors) == 0:
+        return False
+
+    earliest_anchor = min(relevant_anchors)
+    return game_player.availabilityAnchor > earliest_anchor + margin_ms
 
 
 def increment_availability_counts(raw_counts, hours):
