@@ -400,7 +400,7 @@ def _processRNBturn(request):
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
             # NO! This sets ALL POSSIBLE player to is_current, which triggers emails.
-            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
             _validateTurnOrderTransition(
                 currentGame.serverCurrentPlayerNamesInTurnOrder,
                 jsonData["allRemainingPlayersInTurnOrder"],
@@ -675,7 +675,7 @@ def _processRNBturn(request):
             newVer = (int(db_latest_update) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-            presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+            presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer)
             _validateTurnOrderTransition(
                 currentGame.serverCurrentPlayerNamesInTurnOrder,
                 jsonData["allRemainingPlayersInTurnOrder"],
@@ -743,7 +743,7 @@ def _processRNBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+        presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer)
         _validateTurnOrderTransition(
             currentGame.serverCurrentPlayerNamesInTurnOrder,
             jsonData["allRemainingPlayersInTurnOrder"],
@@ -853,7 +853,7 @@ def _processRNBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
         # Next, we can clear out old data
@@ -1234,7 +1234,7 @@ def performSaveGame(request, currentGame, jsonData):
     newVer = (int(db_latest_update) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=request.user.username, old_latest_update=oldVer)
     presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
     # SAVE BEFORE NOTIFICATIONS

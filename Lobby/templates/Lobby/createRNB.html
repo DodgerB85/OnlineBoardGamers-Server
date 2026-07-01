@@ -99,7 +99,7 @@
                             </div>
                         </div>
                         <div class="singleChoiceDiv">
-                            <label class="choiceLabel" for="pace">{% translate "Playing Speed" %}</label>
+                            <label class="choiceLabel" for="pace">{% translate "Playing Speed" %}<span class="paceHelpIcon">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.<br><b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.<br><b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
                             <div class="optionSelection">
                                 <select name="pace" id="pace" onchange="validateOptions(this.id)">
                                     <option value="10">{% translate "Live: Play the game in one session" %}</option>

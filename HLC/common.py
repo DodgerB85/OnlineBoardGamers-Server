@@ -92,7 +92,7 @@ def create_hlc_game(
         creator = User.objects.get(username="admin")
         host = creator
         game_pace = 30
-        kickout_duration = 100
+        kickout_duration = 50
         starting_options = (
             json.loads(tournamentObj.startingOptions)
             if tournamentObj.startingOptions != ""

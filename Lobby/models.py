@@ -59,6 +59,10 @@ class User(AbstractUser):
         return f"{self.username} {activeString}"
 
 
+def default_availability_counts():
+    return [0] * 24
+
+
 # 1. THE MODEL
 class Lock(models.Model):
     name = models.CharField(max_length=255, primary_key=True)
@@ -118,6 +122,8 @@ class Profile(models.Model):
     profileLanguage = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)
 
     blacklistedPlayers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="blacklistedPlayers_relName", blank=True)
+    availabilityMoveCounts = models.JSONField(default=default_availability_counts, blank=True)
+    availabilityTurnCounts = models.JSONField(default=default_availability_counts, blank=True)
 
     def __str__(self):
         return f"{self.user} : {self.email_confirmed} : {self.user.email}"
@@ -469,6 +475,8 @@ class GamePlayer(models.Model):
     # TODO, these two fields are currently used only in AQY. Remove from the Game model at some point.
     currentMoveTime = models.CharField(max_length=15, blank=True)
     currentMoveData = models.TextField(blank=True)
+
+    availabilityAnchor = models.BigIntegerField(null=True, blank=True, default=None)
 
     class Meta:
         ordering = ["seat_order"]

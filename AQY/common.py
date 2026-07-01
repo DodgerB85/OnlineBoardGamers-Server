@@ -90,7 +90,7 @@ def create_aqy_game(
         creator = User.objects.get(username="admin")
         host = creator
         game_pace = rf.PACE_STANDARD
-        kickout_duration = rf.KICKOUT_1_DAY
+        kickout_duration = rf.KICKOUT_12_HOURS
         starting_options = json.loads(tournamentObj.startingOptions) if tournamentObj.startingOptions != "" else []
 
         game_status = "ACTIVE"
