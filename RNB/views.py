@@ -842,6 +842,10 @@ def _processRNBturn(request):
         if currentGame.transactionID and client_transaction_id and currentGame.transactionID == client_transaction_id:
             currentGame.transactionID = ""
 
+        nameToUse = request.user.username
+        if request.user.username == "BotKickStarter":
+            nameToUse = jsonData["BKSN"]
+
         gameDataB64 = jsonData["gameDataB64"]
         # raw_binary = base64.b64decode(gameDataStr)
         # currentGame.gameDataBLOB = raw_binary
