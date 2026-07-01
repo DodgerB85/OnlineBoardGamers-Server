@@ -857,6 +857,7 @@ def _processTurn(request):
 
     # NEW
     elif jsonData["action"] == "saveNormal":
+        save_start_time = time.time()
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
@@ -1073,23 +1074,18 @@ def _processTurn(request):
         # You always want to save a rewind, even at the END of a pointless move
         # But if it is pointless, you want to delete the PREVIOUS rewind point
         # So first check if the move was pointless, and then remove the PREVIOUS rewind point
+        # Reuse the in-memory rewind array to avoid re-parsing the (potentially
+        # very large) rewindData JSON multiple times in one request.
         if jsonData["IPM"]:
-            currentRewindDataArray = load_rewind_data(currentGame)
             if len(currentRewindDataArray) > 0:
-                loadData = ""
-                if len(currentRewindDataArray) > 0:
-                    loadData = currentRewindDataArray.pop()
+                currentRewindDataArray.pop()
 
-                while loadData == currentGame.gameData and len(currentRewindDataArray) > 0:
-                    loadData = currentRewindDataArray.pop()
+            while len(currentRewindDataArray) > 0 and currentRewindDataArray[-1] == currentGame.gameData:
+                currentRewindDataArray.pop()
 
-                currentGame.rewindTempData = ""
-                currentGame.rewindData = json.dumps(currentRewindDataArray)
-                currentGame.save()
+            currentGame.rewindTempData = ""
 
         if jsonData["saveRewind"]:  # and not jsonData["IPM"]:  # and jsonData["phase"] != 9:
-            currentRewindDataArray = load_rewind_data(currentGame)
-
             # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
             # if len(currentGame.rewindTempData) > 0:
             #    if (
@@ -1116,7 +1112,8 @@ def _processTurn(request):
                         currentRewindDataArray.pop(0)
                 # MAYBE ADD AN INDENT TO THIS LINE????
                 # currentRewindData = json.dumps(currentRewindDataArray)
-            currentGame.rewindData = json.dumps(currentRewindDataArray)
+
+        currentGame.rewindData = json.dumps(currentRewindDataArray)
 
         ################ END REWIND EVERY SAVE #######################
 
@@ -1142,6 +1139,16 @@ def _processTurn(request):
             playersMoveDataArr = presenter.getOrScaffoldAllMoveData()
             compressedData = (base64.b64encode(gzip.compress(json.dumps(playersMoveDataArr, separators=(",", ":")).encode("utf-8"))).decode("utf-8"),)
             returnResponse.update({"sideData": compressedData})
+
+        save_duration = time.time() - save_start_time
+        logger.info(
+            "FCM saveNormal timing: gameID=%s user=%s duration=%.3fs rewindData_len=%s gameData_len=%s",
+            currentGame.id,
+            request.user.username,
+            save_duration,
+            len(currentGame.rewindData) if currentGame.rewindData else 0,
+            len(currentGame.gameData) if currentGame.gameData else 0,
+        )
 
         return JsonResponse(
             returnResponse,
