@@ -299,13 +299,34 @@ body.nd .nd-fcm-stats ul {
      2. ensure the .nd-table-wrap itself has rounded top corners
         so it visually attaches to the card
      3. ensure the options column (icons) wraps cleanly on mobile
+     4. restore desktop table headers hidden by the shared nd-row09 rules
    ============================================================ */
 
-/* On desktop the labels are hidden — the thead above the table
-   already shows the column names. */
+/* On desktop the labels are hidden — the restored thead above the table
+   shows the column names. */
 body.nd .nd-ten-games .nd-table-wrap {
 	border-radius: 0 0 var(--radius-md) var(--radius-md);
 	overflow: hidden;
+}
+
+body.nd .nd-ten-games .nd-table:has(.nd-row09) thead {
+	display: block;
+}
+
+body.nd .nd-ten-games .nd-table:has(.nd-row09) thead tr {
+	display: grid;
+	grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+	gap: 12px;
+	padding: 6px 14px;
+	background: var(--color-surface-soft);
+	border-bottom: 2px solid var(--color-border-strong);
+}
+
+body.nd .nd-ten-games .nd-table:has(.nd-row09) thead th {
+	display: block;
+	padding: 0;
+	border: none;
+	text-align: left;
 }
 
 /* The starting-options icons sit side-by-side in a 36px grid. On
@@ -321,11 +342,11 @@ body.nd .nd-ten-games .nd-col-options img.startingMap {
 }
 
 /* ---- Mobile stacked-row labels ----
-   On <= 720px the table thead is hidden, so the user has no idea
+   On <= 980px the rows stack and the table thead is hidden, so the user has no idea
    which field is "Players" vs "Status" vs "Last Move". Inject a
    small uppercase label from the data-label attribute on each
    non-icon cell. Skip nd-col-icon (the icon doesn't need a label). */
-@media (max-width: 720px) {
+@media (max-width: 980px) {
 	body.nd .nd-ten-games .nd-row09 > td[data-label]::before {
 		content: attr(data-label);
 		display: block;
@@ -355,12 +376,15 @@ body.nd .nd-ten-games .nd-col-options img.startingMap {
 	body.nd .nd-ten-games .nd-col-status {
 		text-align: left;
 	}
+	body.nd .nd-ten-games .nd-table:has(.nd-row09) thead {
+		display: none;
+	}
 }
 
 /* Above the 980px breakpoint the 6-col grid is in use and the
    data-label pseudo-labels would be redundant with the visible
    thead. Explicitly suppress them on wider screens. */
-@media (min-width: 721px) {
+@media (min-width: 981px) {
 	body.nd .nd-ten-games .nd-row09 > td[data-label]::before {
 		content: none;
 		display: none;
@@ -431,6 +455,26 @@ body.nd .nd-player-stats .nd-table td {
 	padding: 6px 10px;
 }
 
+body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead {
+	display: block;
+}
+
+body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead tr {
+	display: grid;
+	grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+	gap: 12px;
+	padding: 6px 14px;
+	background: var(--color-surface-soft);
+	border-bottom: 2px solid var(--color-border-strong);
+}
+
+body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead th {
+	display: block;
+	padding: 0;
+	border: none;
+	text-align: left;
+}
+
 /* Sub-section labels inside the Joint Games card. */
 body.nd .nd-player-sub {
 	font-size: 13px;
@@ -479,5 +523,11 @@ body.nd .nd-joint-summary .gameIcon {
 		font-size: 28px;
 		left: 28px;
 		top: 4px;
+	}
+}
+
+@media (max-width: 980px) {
+	body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead {
+		display: none;
 	}
 }
