@@ -43,7 +43,6 @@ Lobby/sharedFunctions/emailCounter.txt
 /FCM/static/FCM/JS/
 
 # Exclude any folder found anywhere in subdirectories
-vueIND/
 vueRNB/
 vuePPF/
 vueFCM/
