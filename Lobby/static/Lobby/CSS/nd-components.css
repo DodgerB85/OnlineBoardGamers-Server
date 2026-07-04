@@ -1225,6 +1225,30 @@ body.nd .nd-opts-grid .nd-opts-section {
     margin-bottom: 0;
 }
 
+/* Setup/Common/Expert cards on the create-game form, laid out the same way
+   as .nd-opts-grid: 1 column narrow, 2 tablet, 3 desktop. */
+body.nd .nd-setup-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 16px;
+}
+@media (min-width: 720px) {
+    body.nd .nd-setup-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (min-width: 1100px) {
+    body.nd .nd-setup-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+body.nd .nd-setup-cards-grid .nd-card,
+body.nd .nd-setup-cards-grid .nd-card + .nd-card {
+    margin-top: 0;
+}
+
 /* The create-form tab JS sets #individualOptionsView to display:inline-block,
    which shrink-wraps the grid to ~2 columns. Force full container width so the
    auto-fit grid can use all available columns on wide screens. (display:none
@@ -1282,6 +1306,21 @@ body.nd .nd-help-qa p {
 }
 body.nd .nd-help-qa p:last-child {
     margin-bottom: 0;
+}
+body.nd .nd-help-icon-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+body.nd .nd-help-menu-icon {
+    flex: 0 0 50px;
+    width: 50px;
+    height: 50px;
+    padding: 6px;
+    box-sizing: border-box;
+    object-fit: contain;
+    background: #111111;
+    border-radius: 5px;
 }
 body.nd .nd-help-qa b u {
     display: block;

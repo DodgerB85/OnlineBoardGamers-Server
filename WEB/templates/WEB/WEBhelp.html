@@ -17,14 +17,14 @@
       <div class="nd-card nd-section">
         <h2>{% translate "Playing the Game" %}</h2>
         <div class="nd-help-qa">
-          <p>
-            <img src="{% static 'WEB/images/icon-box.svg' %}" alt="Reserve" width="50" height="50" class="topMenuIconForHelp imageWithTextIconImg" style="vertical-align:middle;">
+          <p class="nd-help-icon-line">
+            <img src="{% static 'WEB/images/icon-box.svg' %}" alt="Reserve" width="50" height="50" class="nd-help-menu-icon topMenuIconForHelp imageWithTextIconImg">
             {% blocktranslate trimmed %}You can view unused tiles in the Reserve.{% endblocktranslate %}
           </p>
           <p>{% blocktranslate trimmed %}This includes your opponents' unplcaed tiles, as well as face up tile stacks (as you haven't seen their action number){% endblocktranslate %}</p>
           <p>{% blocktranslate trimmed %}You can also view each players remaining flex time.{% endblocktranslate %}</p>
-          <p>
-            <img src="{% static 'WEB/images/icon-rewind.svg' %}" alt="Reserve" width="50" height="50" class="topMenuIconForHelp imageWithTextIconImg" style="vertical-align:middle;">
+          <p class="nd-help-icon-line">
+            <img src="{% static 'WEB/images/icon-rewind.svg' %}" alt="Rewind" width="50" height="50" class="nd-help-menu-icon topMenuIconForHelp imageWithTextIconImg">
             {% blocktranslate trimmed %}Any player can rewind the game at any time.{% endblocktranslate %}
           </p>
           <p>
@@ -74,7 +74,7 @@
 {% block legacy_body %}
 
 
-      <div id="KFWhelpPage">
+      <div id="WEBhelpPage">
         <h1>{% translate "Rules" %}</h1>
         {% blocktranslate %}
           Web Rules Available <a class='linkOther' href='/static/WEB/Web_Rules.pdf' target='_blank' downlod>here</a>
