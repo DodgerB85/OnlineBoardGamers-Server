@@ -1071,6 +1071,43 @@ body.nd .nd-game-flavour .nd-flavour-body p:last-child {
     margin-bottom: 0;
 }
 
+/* ---------- GAME HELP CONTENT ---------- */
+body.nd .nd-fcm-china-help {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+body.nd .nd-fcm-china-help h2 {
+    border-top: 1px solid var(--color-border);
+    margin-top: 18px;
+    padding-top: 16px;
+}
+
+body.nd .nd-fcm-china-help h2:first-of-type {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body.nd .nd-fcm-china-help .FCMhelpSection br {
+    display: none;
+}
+
+body.nd .nd-fcm-china-help b u {
+    margin: 10px 0 6px;
+}
+
+body.nd .nd-fcm-china-help img {
+    max-width: 100%;
+    height: auto;
+}
+
+body.nd .nd-fcm-china-help .helpEmployeeImg {
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    margin: 6px 8px 8px 0;
+}
+
 /* Stacked form: label above input instead of side-by-side */
 body.nd .nd-stacked-form .nd-form-row {
     flex-direction: column;

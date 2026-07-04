@@ -1,12 +1,14 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% endif %}
 {% endblock %}
 {% block body %}
-  <div class="container">
+  <div class="{% if request.use_new_design %}nd-page nd-page-narrow{% else %}container{% endif %}">
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -14,8 +16,13 @@
         {% endfor %}
       </div>
     {% endif %}
-    <div id="FCMhelpPage">
-      <h1>{% translate "China Expansion Help" %}</h1>
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% translate "China Expansion Help" %}</h1>
+      </div>
+    {% endif %}
+    <div id="FCMhelpPage" class="{% if request.use_new_design %}nd-card nd-section nd-help-qa nd-fcm-china-help{% endif %}">
+      {% if not request.use_new_design %}<h1>{% translate "China Expansion Help" %}</h1>{% endif %}
       {% blocktranslate trimmed %}
         These modules are from the Chinese kickstarter (Modian) release from publisher Yikeguang (一刻馆).
         Splotter was unaware that these existed before I contacted them!
@@ -254,12 +261,13 @@
                   </div>
                   <br />
                 </div>
-                {% include 'Lobby/donate/donateBanner.html' %}
-                {% include 'Lobby/common/homeButton.html' %}
-                <script>
+                {% if not request.use_new_design %}
+                  {% include 'Lobby/common/homeButton.html' %}
+                  <script>
   document.querySelector('.homeButton').addEventListener('click', function() {
     window.location.href = this.getAttribute('data-url');
   });
-                </script>
+                  </script>
+                {% endif %}
               </div>
             {% endblock %}

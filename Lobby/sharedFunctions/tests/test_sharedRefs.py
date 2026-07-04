@@ -4,8 +4,10 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
+import FCM.FCMconstants as rfFCM
 from Lobby.sharedFunctions.sharedRefs import (
     SR_gamePaceString,
+    SR_getFCMstartingOptionsHTML,
     SR_getPointsForPosition,
     SR_getTimeNow,
     SR_getTournamentTypeDisplay,
@@ -49,6 +51,16 @@ class TestSRisThisMultiiWinnersGame(TestCase):
 
     def test_empty_string(self):
         self.assertFalse(SR_isThisMultiiWinnersGame(""))
+
+
+class TestSRgetFCMstartingOptionsHTML(TestCase):
+    def test_empty_options_return_empty_html(self):
+        self.assertEqual(SR_getFCMstartingOptionsHTML([]), "")
+
+    def test_known_option_renders_icon(self):
+        result = SR_getFCMstartingOptionsHTML([rfFCM.SO_NEW_MS])
+        self.assertIn("so_newMS.svg", result)
+        self.assertIn("New Milestones", result)
 
 
 class TestSRgetTournamentTypeDisplay(TestCase):
