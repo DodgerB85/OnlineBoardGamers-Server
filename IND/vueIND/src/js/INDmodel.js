@@ -394,7 +394,7 @@ export function completeMerger() {
 		// Resetting ongoing vars REMOVES the passed players. So need to reform the turn order
 		let currentPlayerIndex = store.gameflow.turnOrder[0]
 		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
-		if (currentPlayerIndex) {
+		if (currentPlayerIndex !== undefined) {
 			while (store.gameflow.turnOrder[0] !== currentPlayerIndex) store.gameflow.turnOrder.push(store.gameflow.turnOrder.shift())
 		}
 		if (store.gameflow.turnOrder.length > 0) store.gameflow.turnOrder.push(store.gameflow.turnOrder.shift())
