@@ -815,21 +815,19 @@ body.nd .nd-hero-actions {
 }
 
 body.nd .nd-features {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     align-items: stretch;
     gap: 12px;
 }
 
 /* .nd-feature cards: flex column so h3 sits at top, body fills the rest.
-   flex: 1 1 220px gives cards a 220px min target with equal growth so a
-   single row of 4 cards all share the same width. align-items: stretch
-   on .nd-features above makes them share the same height. min-height is
+   Grid (not flex) on .nd-features above sizes every column track equally
+   regardless of how many cards land in a row, avoiding the flex-wrap quirk
+   where a lone item on its own row stretches to fill it. min-height is
    a safety net so the row picks the tallest natural content as the
-   baseline even if the browser collapses the flex container's height. */
+   baseline even if the browser collapses the grid container's height. */
 body.nd .nd-feature {
-    flex: 1 1 220px;
-    min-width: 220px;
     display: flex;
     flex-direction: column;
     min-height: 152px;

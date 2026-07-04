@@ -353,6 +353,7 @@ body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
 body.nd .footer {
     flex-shrink: 0;
     width: 100%;
+    box-sizing: border-box;
     background-color: var(--color-nav-bg);
     color: var(--color-brand-blue);
     text-align: center;

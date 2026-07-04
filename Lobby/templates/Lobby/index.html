@@ -275,6 +275,17 @@
   </div>
   <script>
   (function () {
+    // Only one game's <details> flavour text should be open at a time.
+    var allDetails = document.querySelectorAll('.nd-game-flavour details');
+    allDetails.forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (!d.open) return;
+        allDetails.forEach(function (other) {
+          if (other !== d) other.open = false;
+        });
+      });
+    });
+
     // Game cards on the landing page are <button>s; clicking a card opens
     // (and scrolls to) the matching <details> in .nd-game-flavour below.
     var cards = document.querySelectorAll('[data-nd-game-card]');

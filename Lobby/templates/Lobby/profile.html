@@ -583,14 +583,14 @@
             </p>
             <span id="blacklistError" style="color:var(--color-danger); font-size:13px;"></span>
             <span id="blacklistSuccess" style="color:var(--color-positive); font-size:13px;"></span>
-            <div class="nd-row-flex" style="margin-bottom: 12px;">
-                <div class="autocomplete" style="flex:1; max-width: 300px;">
+            <div class="nd-row-flex" style="margin-bottom: 12px; flex-wrap: nowrap;">
+                <div class="autocomplete" style="flex:1; min-width: 0; max-width: 300px;">
                     <input type="text" name="blacklistPlayer" id="blacklistPlayer"
                            class="textInput" style="width:100%;"
                            placeholder="{% translate "Enter player name" %}" autocomplete="off" />
                 </div>
                 <button type="submit" id="addBlacklistButton" class="nd-button nd-button-primary nd-button-sm"
-                        style="padding-left: 14px; padding-right: 14px;"
+                        style="padding-left: 14px; padding-right: 14px; flex-shrink: 0;"
                         onclick="event.preventDefault(); addPlayerToBlacklist();">
                     {% translate "Blacklist player" %}
                 </button>
