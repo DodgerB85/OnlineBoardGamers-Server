@@ -329,7 +329,8 @@ def _processHLCturn(request):
         # repack game and save
         currentGame.gameData = LZS.compressToEncodedURIComponent(json.dumps(DBgameDataRaw))
         # remove name from current players
-        presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersList)
+        oldVer = currentGame.latestUpdate
+        presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersList, acting_username=name, old_latest_update=oldVer)
 
         # It is ok for currentPlayersList to be 0 length here - then the JS should go to next phase
         # if len(currentPlayersList) == 0:
@@ -425,7 +426,7 @@ def _processHLCturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
 
         currentGame.save()
 

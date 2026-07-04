@@ -297,13 +297,7 @@ def _processCNSturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        # Update current players
-        next_player_usernames = jsonData["nextPlayer"] if jsonData["nextPlayer"] else []
-        currentGame.players.exclude(is_kicked=True).update(is_current=False)
-
-        if next_player_usernames:
-            for username in next_player_usernames:
-                currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()

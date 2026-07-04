@@ -732,7 +732,7 @@ def handler404(request, exception):
         if request.user.is_authenticated:
             message += "Email: " + request.user.email + "\n"
 
-        if request.user.is_authenticated and request.user.username != "Gamer" and request.user.username != "MMYCC":
+        if request.user.is_authenticated and exceptionData != "Game does not exist":
             requests.post(
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                 data={"content": message},
@@ -1453,6 +1453,8 @@ def index(request):
 
     # print_timestamp("Step 3: Categorization complete")
 
+    waiting_game_is_available_for_others = any(g["gameStatus"] == "AVAILABLE" for g in waiting_games)
+
     current_games = sorted(
         current_games,
         key=lambda game: (
@@ -1505,6 +1507,7 @@ def index(request):
             "myMoveGamesData": my_move_games_data,
             "available_MT": available_MT,
             "current_MT": current_MT,
+            "waitingGameIsAvailableForOthers": waiting_game_is_available_for_others,
         },
     )
 
@@ -1938,6 +1941,7 @@ def profileRNB(request):
         RNBoptions = []
         RNBoptions.append(int(request.POST.get("rnbColour", -1)))
         RNBoptions.append(int(request.POST.get("playerAid", 1)))
+        RNBoptions.append(int(request.POST.get("colourOverlay", 0)))
 
         profile.preferredRNBoptions = json.dumps(RNBoptions, separators=(",", ":"))
 
@@ -1955,6 +1959,8 @@ def profileRNB(request):
 
         if len(preferredRNBoptions) < 2:
             preferredRNBoptions.extend([-1] * (2 - len(preferredRNBoptions)))
+        if len(preferredRNBoptions) < 3:
+            preferredRNBoptions.extend([0] * (3 - len(preferredRNBoptions)))
 
         # Check the default for playerAid
         if preferredRNBoptions[1] == -1:
@@ -1966,6 +1972,7 @@ def profileRNB(request):
             {
                 "colour": preferredRNBoptions[0],
                 "playerAid": preferredRNBoptions[1],
+                "colourOverlay": preferredRNBoptions[2],
             },
         )
 
@@ -4381,7 +4388,7 @@ def createFCMminiTournament(request):
             tournamentDescription=request.POST["tournamentDescription"],
             tournamentStatus="OP",
             tournamentType=request.POST["tournamentFormat"],
-            startingOptions=json.dumps(startgOptions) if startgOptions else None,
+            startingOptions=json.dumps(startgOptions),
             maxTournamentPlayers=request.POST["totalPlayersMT"],
             maxGamePlayers=request.POST["playersPerGameMT"],
             roundsBeforeKnockout=4,

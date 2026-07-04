@@ -200,7 +200,7 @@ def _processAQYturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
         currentGame.playerTradeData = ""
 
         if currentGame.phase == rfAQY.PHASE_ALL_RISE or currentGame.phase == rfAQY.PHASE_CITY_BUILDING:
@@ -692,12 +692,14 @@ def _processAQYturn(request):
             return JsonResponse({"syncError": True}, safe=False)
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
+        acting_username = request.user.username
         if request.user.username not in AQY_SUPER_USERS:
             presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
-            presenter.updateSingleMove(jsonData["BKSN"], jsonData["moveData"])
+            acting_username = jsonData["BKSN"]
+            presenter.updateSingleMove(acting_username, jsonData["moveData"])
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayersArrayAQY())
+        presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayersArrayAQY(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate)
 
         if request.user.username in AQY_SUPER_USERS:
             SF_updateFlexiTime(

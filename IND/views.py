@@ -283,7 +283,8 @@ def _processINDturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        nextPlayer = jsonData.get("nextPlayer", [])
+        presenter.setCurrentPlayersFromArrInTurnOrder(nextPlayer, acting_username=request.user.username, old_latest_update=oldVer)
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -301,8 +302,8 @@ def _processINDturn(request):
         else:
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-            if len(jsonData["nextPlayer"]) > 0 and jsonData["nextPlayer"][0] != "IndBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
-                playerListToNotify = [player.strip() for player in jsonData["nextPlayer"]]
+            if len(nextPlayer) > 0 and nextPlayer[0] != "IndBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
+                playerListToNotify = [player.strip() for player in nextPlayer]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 # Also remove the player if it is R&D phase and they have a pre move
@@ -446,7 +447,8 @@ def _processINDturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        nextPlayer = jsonData.get("nextPlayer", [])
+        presenter.setCurrentPlayersFromArrInTurnOrder(nextPlayer)
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -456,8 +458,8 @@ def _processINDturn(request):
 
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        if len(jsonData["nextPlayer"]) > 0 and jsonData["nextPlayer"][0] != "IndBot" and 102 not in loadedStartingOptions:
-            playerListToNotify = jsonData["nextPlayer"]
+        if len(nextPlayer) > 0 and nextPlayer[0] != "IndBot" and 102 not in loadedStartingOptions:
+            playerListToNotify = nextPlayer
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:

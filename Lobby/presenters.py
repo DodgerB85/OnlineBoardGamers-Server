@@ -15,6 +15,7 @@ from django.utils.translation import gettext
 import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
 import RNB.RNBconstants as rfRNB
+from Lobby.sharedFunctions.availability import record_player_availability_for_turn_change
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
 )
@@ -200,8 +201,9 @@ class GamePresenter:
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = playersInTurnOrderArray
         self.gameObj.save()
 
-    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array):
+    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array, acting_username=None, old_latest_update=None):
         """Set current players by updating is_current on GamePlayer instances"""
+        record_player_availability_for_turn_change(self.gameObj, acting_username, old_latest_update)
         if not current_players_array or len(current_players_array) == 0:
             # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
             if self.gameObj.maxPlayers == 1:
@@ -235,15 +237,18 @@ class GamePresenter:
 
         for gp in game_players:
             if gp.player:
+                was_current = gp.is_current
                 gp.is_current = gp.player.username in current_players_array
                 # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
                 if self.gameObj.maxPlayers == 1:
                     gp.is_current = True
+                if gp.is_current and not was_current:
+                    gp.availabilityAnchor = int(time.time() * 1000)
                 to_update.append(gp)
         if len(to_update) > 0:
             from Lobby.models import GamePlayer
 
-            GamePlayer.objects.bulk_update(to_update, ["is_current"])
+            GamePlayer.objects.bulk_update(to_update, ["is_current", "availabilityAnchor"])
 
     ### THIS IS CURRENTLY RNB ONLY -- BUT SHOULD BE GENERALLY USEFUL
     # This takes in an array of names, and updates the current players for a STRICT SIMUL turn
@@ -307,6 +312,7 @@ class GamePresenter:
         self.gameObj.currentPlayersInTurnOrder = None  # Check this doesn't crash game load if game ended
         # RNB
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = None  # Check this doesn't crash game load if game ended
+        self.gameObj.transactionID = ""
 
     def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
         from django_q.tasks import async_task

@@ -272,7 +272,7 @@ def _processBUSturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # Set current players via presenter
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()

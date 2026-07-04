@@ -220,6 +220,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     preferredRNBoptions = json.loads(profile_options) if profile_options else [-1, 1]
     if len(preferredRNBoptions) < 2:
         preferredRNBoptions.extend([-1] * (2 - len(preferredRNBoptions)))
+    if len(preferredRNBoptions) < 3:
+        preferredRNBoptions.extend([0] * (3 - len(preferredRNBoptions)))
 
     # Check the default for playerAid
     if preferredRNBoptions[1] == -1:
@@ -398,7 +400,7 @@ def _processRNBturn(request):
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
             # NO! This sets ALL POSSIBLE player to is_current, which triggers emails.
-            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
             _validateTurnOrderTransition(
                 currentGame.serverCurrentPlayerNamesInTurnOrder,
                 jsonData["allRemainingPlayersInTurnOrder"],
@@ -415,7 +417,14 @@ def _processRNBturn(request):
             transaction_id = uuid.uuid4().hex
             currentGame.transactionID = transaction_id
 
-            # SAVE BEFORE NOTIFICATIONS
+            ################ REWIND EVERY SAVE #######################
+            # Don't save rewind if all players have moved - wait for client to process phase
+            if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+                doSaveRewind(currentGame, jsonData)
+
+            ################ END REWIND EVERY SAVE #######################
+
+            # Single save: transactionID + rewindData (and any earlier game-level changes)
             currentGame.save()
 
             # If the client disconnects before completing stack processing,
@@ -430,21 +439,31 @@ def _processRNBturn(request):
                 schedule_type="O",
             )
 
-            ################ REWIND EVERY SAVE #######################
-            # Don't save rewind if all players have moved - wait for client to process phase
-            if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
-                doSaveRewind(currentGame, jsonData)
-
-            ################ END REWIND EVERY SAVE #######################
-
-            currentGame.save()
-
             # time.sleep(10)
             # print(f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}")
 
             # Now get the NEXT set of moves -- and set the next player's stack to current
             if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
                 setPlayerStackToCurrent(currentGame, currentGame.serverCurrentPlayerNamesInTurnOrder[0])
+
+            # Notify the next current player(s) NOW, in case the submitting client disconnects before
+            # completing saveAndUpdateNotifictionsAfterStack. The notification is a 2-minute validated
+            # task, so when the client DOES complete normally the second save bumps latestUpdate and
+            # this earlier task self-invalidates (no double notification). When all players have moved
+            # (empty list) there is no next player yet, so nothing is scheduled here.
+            loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            nextCurrentPlayers = jsonData["allIsCurrentPlayers"]
+            if len(nextCurrentPlayers) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+                playerListToNotify = [p for p in nextCurrentPlayers if p.strip() not in {request.user.username, "RnbBot"}]
+                if len(playerListToNotify) > 0:
+                    presenter.sendYourTurnNotification(
+                        "RNB",
+                        playerListToNotify,
+                        currentGame.id,
+                        presenter.getGameName(),
+                        currentGame,
+                        oldVer,
+                    )
 
             response_data = {
                 "latestUpdate": currentGame.latestUpdate,
@@ -656,7 +675,7 @@ def _processRNBturn(request):
             newVer = (int(db_latest_update) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-            presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+            presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer)
             _validateTurnOrderTransition(
                 currentGame.serverCurrentPlayerNamesInTurnOrder,
                 jsonData["allRemainingPlayersInTurnOrder"],
@@ -724,7 +743,7 @@ def _processRNBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]])
+        presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer)
         _validateTurnOrderTransition(
             currentGame.serverCurrentPlayerNamesInTurnOrder,
             jsonData["allRemainingPlayersInTurnOrder"],
@@ -823,6 +842,10 @@ def _processRNBturn(request):
         if currentGame.transactionID and client_transaction_id and currentGame.transactionID == client_transaction_id:
             currentGame.transactionID = ""
 
+        nameToUse = request.user.username
+        if request.user.username == "BotKickStarter":
+            nameToUse = jsonData["BKSN"]
+
         gameDataB64 = jsonData["gameDataB64"]
         # raw_binary = base64.b64decode(gameDataStr)
         # currentGame.gameDataBLOB = raw_binary
@@ -834,7 +857,7 @@ def _processRNBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
         # Next, we can clear out old data
@@ -1145,31 +1168,34 @@ def _processRNBturn(request):
 
 
 def doSaveRewind(currentGame, jsonData):
-    # Need this as intially it is totally empty
-    # 1. Load existing history (safely handle empty string)
-    currentRewindData = []
+    new_b64_point = jsonData["gameDataB64"]
+
+    # Fast path: if the last rewind entry is already this exact point, nothing to do.
+    # This happens normally because saveStackMove and saveAndUpdateNotifictionsAfterStack
+    # both append the same gameDataB64 during a single turn save.
     if currentGame.rewindData:
         try:
             currentRewindData = json.loads(currentGame.rewindData)
+            if currentRewindData and currentRewindData[-1] == new_b64_point:
+                return
         except json.JSONDecodeError:
             currentRewindData = []
+    else:
+        currentRewindData = []
 
-    # 2. Prepare the new point (The B64 string from JS)
-    new_b64_point = jsonData["gameDataB64"]
-
-    # 3. Handle Temp Data (ensure it's also a B64 string)
+    # 1. Handle Temp Data (ensure it's also a B64 string)
     if currentGame.rewindTempData:
         # If temp exists and is different from last save, add it
         if not currentRewindData or currentRewindData[-1] != currentGame.rewindTempData:
             currentRewindData.append(currentGame.rewindTempData)
         currentGame.rewindTempData = ""  # Reset temp storage
 
-    # 4. Add the current save to history if it's different from the last point
+    # 2. Add the current save to history if it's different from the last point
     # We store it as a nested list [b64_string] to match your existing structure
     if not currentRewindData or currentRewindData[-1] != new_b64_point:
         currentRewindData.append(new_b64_point)
 
-        # 5. Maintain the 20-point limit
+        # 3. Maintain the 20-point limit
         if len(currentRewindData) > 20:
             currentRewindData = currentRewindData[-20:]
 
@@ -1212,7 +1238,7 @@ def performSaveGame(request, currentGame, jsonData):
     newVer = (int(db_latest_update) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
+    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=request.user.username, old_latest_update=oldVer)
     presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
 
     # SAVE BEFORE NOTIFICATIONS

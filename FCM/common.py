@@ -159,7 +159,7 @@ def create_fcm_game(
         creator = User.objects.get(username="admin")
         host = creator
         game_pace = rf.PACE_STANDARD
-        kickout_duration = rf.KICKOUT_1_DAY
+        kickout_duration = rf.KICKOUT_12_HOURS
         player_Order_Seed = randint(1000, 32767)
         # TODO
         starting_options = (
@@ -352,6 +352,7 @@ def create_fcm_game(
 
         if (
             "trainingGame" in request.POST
+            or "fcmAI" in request.POST
             or is_main_tournament
             or is_mini_tournament
             or is_tournament

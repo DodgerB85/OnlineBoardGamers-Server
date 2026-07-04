@@ -6,6 +6,102 @@
   {% if not request.use_new_design %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   {% endif %}
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Online Board Gamers",
+  "url": "https://www.onlineboardgamers.com/",
+  "applicationCategory": "GameApplication",
+  "applicationSubCategory": "Board Games",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript",
+  "inLanguage": ["en", "zh-Hans"],
+  "description": "An online platform to play heavy strategy board games directly in your browser. Play asynchronously with full rules enforcement, tournaments, and sandbox practice modes. Games include Food Chain Magnate (with all Ketchup expansions), Horseless Carriage, The Great Zimbabwe, Bus, Cannes, Antiquity, Indonesia, Keyflower, Web, and Roads & Boats.",
+  "featureList": [
+    "Asynchronous turn-based play",
+    "Automated rules enforcement",
+    "Live-updating multiplayer games",
+    "Sandbox practice mode for solo play",
+    "Tournament support with mini and main tournaments",
+    "Food Chain Magnate Ketchup Mechanism expansion support",
+    "Chinese (Simplified) localization",
+    "Game replay and rewind functionality",
+    "Discord and Telegram integration for notifications"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "DodgerB"
+  },
+  "hasPart": [
+    {
+      "@type": "WebApplication",
+      "name": "Food Chain Magnate",
+      "url": "https://www.onlineboardgamers.com/FCM/help/",
+      "description": "Food Chain Magnate with all Ketchup expansions — a heavy economic strategy game by Splotter Spellen."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Horseless Carriage",
+      "url": "https://www.onlineboardgamers.com/HLC/help/",
+      "description": "Horseless Carriage — a strategy game about the dawn of the automobile industry by Splotter Spellen."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Bus",
+      "url": "https://www.onlineboardgamers.com/BUS/help/",
+      "description": "Bus — a classic route-building pickup-and-deliver game by Splotter Spellen."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "The Great Zimbabwe",
+      "url": "https://www.onlineboardgamers.com/TGZ/help/",
+      "description": "The Great Zimbabwe — a civilization-building economic game by Splotter Spellen."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Cannes",
+      "url": "https://www.onlineboardgamers.com/CNS/help/",
+      "description": "Cannes — a strategy game on the site."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Antiquity",
+      "url": "https://www.onlineboardgamers.com/AQY/help/",
+      "description": "Antiquity — a city-building survival strategy game by Splotter Spellen."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Indonesia",
+      "url": "https://www.onlineboardgamers.com/IND/help/",
+      "description": "Indonesia — an economic game about production and shipping by Splotter Spellen."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Keyflower",
+      "url": "https://www.onlineboardgamers.com/KFW/help/",
+      "description": "Keyflower — a tile-laying worker placement and bidding game."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Web",
+      "url": "https://www.onlineboardgamers.com/WEB/help/",
+      "description": "Web — a strategy game available on the site."
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Roads & Boats",
+      "url": "https://www.onlineboardgamers.com/RNB/help/",
+      "description": "Roads & Boats — a logistics and transportation strategy game by Splotter Spellen."
+    }
+  ]
+}
+  </script>
 {% endblock %}
 {% block body %}
 {% if request.use_new_design %}

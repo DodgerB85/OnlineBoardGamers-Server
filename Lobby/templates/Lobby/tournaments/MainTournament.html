@@ -102,8 +102,7 @@
             <h2>{% translate "Join Tournament" %}</h2>
             <p style="font-size:14px;color:var(--color-muted);margin-bottom:8px;">
               {% blocktranslate trimmed %}
-                Before joining, please be aware that you should be making several moves per day.
-                Kickout is set at 1 day, but please make your moves as soon as possible.
+                Before joining, please be aware: tournament games give you 12 hours per turn. After that, a personal 24-hour flex time bank starts being consumed &mdash; flex time never resets during a game. If you run out of flex, other players can vote to kick you out.
               {% endblocktranslate %}
             </p>
             {% if invitedPlayerString != "" %}<p style="font-size:14px;">Invited Players: {{ invitedPlayerString }}</p>{% endif %}
@@ -143,7 +142,7 @@
                          name="understand_movement"
                          required
                          style="margin:0;">
-                  <label for="understand_movement" style="font-size:14px;color:var(--color-ink);">I understand I need to move 1+ times a day</label>
+                  <label for="understand_movement" style="font-size:14px;color:var(--color-ink);">I understand: 12hr per turn + 24hr flex bank (used when I exceed 12hr; if it runs out I can be kicked)</label>
                 </div>
                 <div class="nd-row-flex" style="gap:8px;">
                   <button class="nd-button nd-button-primary" type="submit">{% if isInvitedPlayer %}Accept Invite &amp; Join Tournament{% else %}{% translate "Join Tournament" %}{% endif %}</button>
@@ -157,9 +156,7 @@
         {% else %}
           <h3>
             {% blocktranslate trimmed %}
-              Before joining, please be aware that you should be making several moves per day.
-              <br />
-              Kickout is set at 1 day, but please make your moves as soon as possible.
+              Before joining, please be aware: tournament games give you 12 hours per turn. After that, a personal 24-hour flex time bank starts being consumed &mdash; flex time never resets during a game. If you run out of flex, other players can vote to kick you out.
               <br />
             {% endblocktranslate %}
           </h3>
@@ -203,7 +200,7 @@
                        id="understand_movement"
                        name="understand_movement"
                        required>
-                <label for="understand_movement">I understand I need to move 1+ times a day</label>
+                <label for="understand_movement">I understand: 12hr per turn + 24hr flex bank (used when I exceed 12hr; if it runs out I can be kicked)</label>
               </div>
               <input class="registerbtn"
                      type="submit"
