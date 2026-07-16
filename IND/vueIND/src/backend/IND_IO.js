@@ -186,13 +186,16 @@ export async function saveGame(saveRewind, saveContext = false) {
 		WS.broadcastGameUpdate(wsConnecting).catch((err) => console.warn("Broadcast failed:", err))
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = "Error saving the game - Send all this to admin (eg on discord/email)"
 		const payloadInfo = `turn=${postData.turn}, phase=${postData.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`
 		const gameInfo = `Game ${personal.gameID} - User ${personal.name || 'unknown'} - ${payloadInfo}`
 		const errorName = error && error.name ? error.name : "Error"
 		const errorMsg = error && error.message ? error.message : String(error)
 		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
 		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
+		store.gameMessages.errorText += `<br/> ${errorName}`
+		store.gameMessages.errorText += `<br/> ${errorStack}`
+		store.gameMessages.errorText += `<br/> ${errorMsg}`
 		sendDiscordWebhook(`IND save error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
 	}
 }
