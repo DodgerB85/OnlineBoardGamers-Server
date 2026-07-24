@@ -82,6 +82,15 @@ EMAIL_TIMEOUT = 20  # This protects your CPU budget
 EMAIL_HOST_USER_TURN = []
 EMAIL_HOST_PASSWORD_TURN = []
 
+# Email notifications for 500 errors
+ADMINS = [
+    ('Admin', config('OBG_EMAIL_HOST_USER')),
+]
+MANAGERS = ADMINS
+
+# FIX: Format the email string so Gmail's SMTP does not drop it
+SERVER_EMAIL = f"root@{config('OBG_EMAIL_HOST_USER')}" 
+
 # Application definition
 
 AUTH_USER_MODEL = "Lobby.User"
