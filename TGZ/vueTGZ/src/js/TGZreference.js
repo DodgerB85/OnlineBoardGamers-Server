@@ -105,6 +105,9 @@ export const ACT_END_BUILD = 12
 export const ACT_CONFIRM_RESIGN = 13
 export const ACT_CONFIRM_KICKOUT = 14
 
+/** CHEAT ACTIONS */
+export const ACT_CHOOSE_CHEAT = 15
+
 /** SCHISM ACTIONS */
 export const ACT_CHOOSE_ANYANWU_MON = 30
 export const ACT_OYA_RUITUALGOOD = 31

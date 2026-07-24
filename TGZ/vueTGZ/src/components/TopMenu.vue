@@ -148,9 +148,9 @@ function clickedLoggedInDiv() {
 		personal.aidText = true
 		store.availablegods = [...rf.EVERYTHING_gods]
 	}*/
-		nameClickCounter.value++
+		if (store.context.action === rf.ACT_NONE) nameClickCounter.value++
 		if (nameClickCounter.value >= 5) {
-			store.allowMultiple_gods = true
+			store.context.action = rf.ACT_CHOOSE_CHEAT
 		}
 	}
 	/*if (personal.trainingGame && !rf.SCHISM_MAKERS.includes(personal.name)) {

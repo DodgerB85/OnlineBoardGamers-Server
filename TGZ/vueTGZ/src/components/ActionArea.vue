@@ -22,9 +22,12 @@ const confirmTournamentReplacement = ref(false)
 const currentDegrees = ref(store.context.itemBeingAddedRotation * 90)
 
 // Re-sync whenever rotation changes externally (e.g., when highlight squares are added)
-watch(() => store.context.itemBeingAddedRotation, (newRotation) => {
-	currentDegrees.value = newRotation * 90
-})
+watch(
+	() => store.context.itemBeingAddedRotation,
+	(newRotation) => {
+		currentDegrees.value = newRotation * 90
+	}
+)
 
 const rotationStyle = computed(() => {
 	return {
@@ -186,6 +189,21 @@ function unableToUseSpec(spec) {
 function localSetupUseSingleSpec(spec) {
 	if (unableToUseSpec(spec)) return
 	model.setupUseSingleSpec(spec)
+}
+
+function allowMultipleGods() {
+	store.allowMultiple_gods = true
+	store.context.action = rf.ACT_NONE
+}
+
+function enableAllGods() {
+	personal.aidText = true
+	store.availablegods = [...rf.EVERYTHING_gods]
+	store.context.action = rf.ACT_NONE
+}
+
+function cancelCheat() {
+	store.context.action = rf.ACT_NONE
 }
 
 function cmanDisplayInfo(cman, flag) {
@@ -754,7 +772,7 @@ function failedToJustPlaceCraftsmanFlag() {
 			<div v-if="model.anyoneHasSHADIPINYI(false)" class="biddingPlaque">
 				<img :src="view.getImage('shad_plaque')" alt="SHAD" />
 				<div class="shadOwnerDiv">
-						<img :src="view.getPlayerTribeImage(personal.getCorrectedColour(store.players[model.anyoneHasSHADIPINYI(true)].colour))" alt="TRIBE" />
+					<img :src="view.getPlayerTribeImage(personal.getCorrectedColour(store.players[model.anyoneHasSHADIPINYI(true)].colour))" alt="TRIBE" />
 				</div>
 				<div v-if="model.getCowsOnPlaque(0, store.context.selectedBid) > 0" class="cowsOnPlaqueDiv" :class="{ cowsOnPlaqueDivYellowBorder: isShadTheLastPlaque() }">
 					<img :src="view.getImage('cows1_bid')" alt="Cows" />
@@ -892,6 +910,52 @@ function failedToJustPlaceCraftsmanFlag() {
 					<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset</button>
 					<button class="actionsLineButton" @click="localEndPlayerTurn">End Turn</button>
 				</div>
+			</template>
+
+			<!-- CHEAT ACTION -->
+			<template v-if="store.context.action === rf.ACT_CHOOSE_CHEAT">
+				<h2>Cheat Options</h2>
+				(If you got here accidentally please CANCEL. Other players will be able to see your cheat in the History!)
+				<br />
+				<br />
+				<div class="cheatOptionsContainer">
+					<div class="cheatOptionDiv">
+						<span>
+							Allow choosing multiple gods
+							<br />
+							(Choosing the same one twice won't work)
+						</span>
+						<br />
+						<button class="actionsLineButton" @click="allowMultipleGods">
+							Allow Multiple
+							<br />
+							gods
+						</button>
+					</div>
+					<div class="cheatOptionDiv">
+						<span>
+							Unlock all gods for selection
+							<br />
+							This adds ALL gods to the Reserve
+							<br />
+							(even already chosen ones)
+							<br />
+							When you end your turn, all gods
+							<br />
+							will remain in the reserve
+							<br />
+							(So you only need to enable this once, then finish your turn)
+						</span>
+						<br />
+						<button class="actionsLineButton" @click="enableAllGods">
+							Enable All
+							<br />
+							gods
+						</button>
+					</div>
+				</div>
+				<br />
+				<button class="actionsLineButton" @click="cancelCheat">Cancel</button>
 			</template>
 
 			<!-- BID  -->
@@ -1052,10 +1116,11 @@ function failedToJustPlaceCraftsmanFlag() {
 						<br />
 					</span>
 					<span v-else-if="!model.has_god(controller.currentPlayerObj(), rf.NO_god)">
-						You adore: 
+						You adore:
 						<template v-for="(godData, index) in model.getPlayer_gods(controller.currentPlayerObj())" :key="index">
 							<span v-if="godData[0] !== rf.NO_god">
-								{{ rf.god_NAMES[godData[0]] }}<span v-if="index < model.getPlayer_gods(controller.currentPlayerObj()).filter(g => g[0] !== rf.NO_god).length - 1">, </span>
+								{{ rf.god_NAMES[godData[0]] }}
+								<span v-if="index < model.getPlayer_gods(controller.currentPlayerObj()).filter((g) => g[0] !== rf.NO_god).length - 1">,</span>
 							</span>
 						</template>
 						<br />
@@ -2270,6 +2335,18 @@ function failedToJustPlaceCraftsmanFlag() {
 #mapInspectBid {
 	vertical-align: middle;
 }
+
+.cheatOptionsContainer {
+	display: flex;
+	gap: 20px;
+	justify-content: center;
+}
+
+.cheatOptionDiv {
+	border: 2px solid black;
+	padding: 10px;
+}
+
 #bugSuccessText {
 	color: darkgreen;
 	background-color: lightblue;
