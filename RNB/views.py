@@ -873,7 +873,7 @@ def _processRNBturn(request):
         if jsonData["status"] == "FINISHED":
             presenter.endGame(
                 request,
-                jsonData["winner"],
+                jsonData["winnerUsername"],
                 jsonData["finalPositions"],
                 (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
                 jsonData["gameID"],
