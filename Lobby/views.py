@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import datetime
 import gzip
 import json
@@ -33,7 +34,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.core.mail import BadHeaderError, send_mail
+from django.core.mail import BadHeaderError, mail_admins, send_mail
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.validators import URLValidator
 from django.db import connection, transaction
@@ -390,10 +391,12 @@ GAME_NAMES_MODELS = {
     "RNB": "RNB",
 }
 
+
 def trigger_500_error(request):
     # This deliberately forces a 500 server error
     division_by_zero = 1 / 0
     return HttpResponse("This will not be reached.")
+
 
 def testLobby(request):
     # subject = 'Thank you for registering to our site'
@@ -754,44 +757,51 @@ def handler404(request, exception):
 
 
 def handler500(request, exception=None, *_, **_k):
+    # Capture the raw exception immediately in case formatting fails later
+    raw_traceback = traceback.format_exc()
+
+    # 1. Attempt to build your detailed diagnostic message safely
     try:
         message = "=== 500 ===================================\n"
         message += "500 ERROR\n"
-        if request.user.is_authenticated:
-            message += "User: " + request.user.username + "\n"
-            message += "Email: " + request.user.email + "\n"
+        if hasattr(request, "user") and request.user.is_authenticated:
+            message += f"User: {request.user.username}\n"
+            message += f"Email: {request.user.email}\n"
         else:
             message += "User Not Logged In\n"
-        message += "Path: " + request.path + "\n"
-        message += "Method: " + request.method + "\n"
-        message += "User Is Authenticated: " + str(request.user.is_authenticated) + "\n"
+        message += f"Path: {request.path}\n"
+        message += f"Method: {request.method}\n"
+        message += f"User Is Authenticated: {str(getattr(request, 'user', None) and request.user.is_authenticated)}\n"
+        message += f"\nException Traceback:\n{raw_traceback}\n"
 
-        # Get the traceback information for the exception
-        exception_traceback = traceback.format_exc()
-        message += "\nException Traceback:\n" + exception_traceback + "\n"
+        subject = f"Production 500 Error: {request.path}"
+    except Exception as format_error:
+        # Fallback if building the string failed (e.g., anonymous user object anomalies)
+        subject = "Production 500 Error (Diagnostic Formatting Failed)"
+        message = f"Failed to build full report: {str(format_error)}\n\nRaw Traceback:\n{raw_traceback}"
 
-        requests.post(
-            f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
-            data={"content": message},
-        )
-    except Exception as e:
-        # Handle any exceptions during error reporting
-        print("Error reporting failed:", str(e))
-        try:
-            requests.post(
-                f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
-                data={"content": str(e)},
-            )
-        except Exception as e:
-            print(f"DOUBLE FAILURE in 500: {str(e)}")
+    # 2. GUARANTEED EMAIL ATTEMPT (Isolated from Discord)
+    try:
+        mail_admins(subject, message, fail_silently=False)
+    except Exception as email_error:
+        # Log to PythonAnywhere error log if the SMTP server itself failed
+        print(f"CRITICAL: mail_admins failed to send: {str(email_error)}")
 
-    return render(
-        request,
-        "Lobby/500.html",
-        {
-            # "exception": exception
-        },
-    )
+    # 3. GUARANTEED DISCORD ATTEMPT (Isolated from Email)
+    try:
+        webhook_url = f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}"
+        # Discord has a 2000 character limit per message. Let's slice it so it doesn't drop the payload.
+        discord_payload = message if len(message) <= 1950 else f"{message[:1900]}\n...[TRUNCATED DUE TO LENGTH]..."
+
+        requests.post(webhook_url, data={"content": discord_payload}, timeout=5)
+    except Exception as discord_error:
+        print(f"CRITICAL: Discord webhook failed to send: {str(discord_error)}")
+        # Try a minimal fallback message to Discord just in case payload size was the issue
+        with contextlib.suppress(Exception):
+            requests.post(webhook_url, data={"content": f"500 Error reporting failed: {str(discord_error)}"}, timeout=5)
+
+    # 4. ALWAYS render the error page for the end-user
+    return render(request, "Lobby/500.html", status=500)
 
 
 @login_required
@@ -1637,8 +1647,8 @@ def TGZmapEditor(request):
 
     else:
         isSchismUser = True
-        #ALLOWED_SCHISM_USERS = ["admin", "joshuastarr", "Lemem", "waymost", "freddyknuckles", "RJ_E", "zach.chillman", "wsgosset"]
-        #if request.user.username in ALLOWED_SCHISM_USERS:
+        # ALLOWED_SCHISM_USERS = ["admin", "joshuastarr", "Lemem", "waymost", "freddyknuckles", "RJ_E", "zach.chillman", "wsgosset"]
+        # if request.user.username in ALLOWED_SCHISM_USERS:
         #    isSchismUser = True
         return render(request, "Lobby/TGZmapEditor.html", {"isSchismUser": isSchismUser})
 
@@ -4078,7 +4088,7 @@ def deleteWebhook(request):
 @login_required
 @require_POST
 def sendAdminMessage(request):
-    #if not request.user.is_superuser:
+    # if not request.user.is_superuser:
     #    return JsonResponse({"status": "error", "message": "Forbidden"}, status=403)
 
     try:
