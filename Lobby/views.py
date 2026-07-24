@@ -390,6 +390,10 @@ GAME_NAMES_MODELS = {
     "RNB": "RNB",
 }
 
+def trigger_500_error(request):
+    # This deliberately forces a 500 server error
+    division_by_zero = 1 / 0
+    return HttpResponse("This will not be reached.")
 
 def testLobby(request):
     # subject = 'Thank you for registering to our site'
