@@ -136,9 +136,10 @@ INSTALLED_APPS = [
 APPEND_SLASH = True
 
 MIDDLEWARE = [
-    "Lobby.middleware.ForceTrailingSlashMiddleware",
-    # This MUST come first
+    # 1. Always let security handle SSL/headers first
     "django.middleware.security.SecurityMiddleware",
+
+    "Lobby.middleware.ForceTrailingSlashMiddleware",
     # This must come before Authentication and CsrfView
     "django.contrib.sessions.middleware.SessionMiddleware",
     # This must come after Session and Authentication
