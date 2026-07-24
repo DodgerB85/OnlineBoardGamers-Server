@@ -88,8 +88,13 @@ ADMINS = [
 ]
 MANAGERS = ADMINS
 
-# FIX: Format the email string so Gmail's SMTP does not drop it
-SERVER_EMAIL = f"root@{config('OBG_EMAIL_HOST_USER')}" 
+# FIX: Safely splits "user@gmail.com" to produce "root@gmail.com"
+email_user = config('OBG_EMAIL_HOST_USER')
+if '@' in email_user:
+    email_domain = email_user.split('@')[-1]
+    SERVER_EMAIL = f"root@{email_domain}"
+else:
+    SERVER_EMAIL = f"root@{email_user}.com"
 
 # Application definition
 
