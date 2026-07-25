@@ -1,0 +1,110 @@
+{% load static %}
+{% load i18n %}
+<div class="nd-icon-legend">
+  <h3>{% translate "What are the icons?" %}</h3>
+  <p style="font-size:14px;color:var(--color-muted);">
+    {% translate "The icons represent the options selected for that game. You can hover over the icon to see what it represents." %}
+  </p>
+
+  <h4>{% translate "Game Icons" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %}<span>{% translate "Food Chain Magnate" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %}<span>{% translate "Horseless Carriage" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %}<span>{% translate "Bus" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}<span>{% translate "The Great Zimbabwe" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="CNS" %}<span>{% translate "Cannes" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %}<span>{% translate "Antiquity" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="IND" %}<span>{% translate "Indonesia" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="KFW" %}<span>{% translate "Keyflower" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="WEB" %}<span>{% translate "Web" %}</span></div>
+    <div class="nd-icon-cell">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="RNB" %}<span>{% translate "Roads & Boats" %}</span></div>
+  </div>
+
+  <h4>{% translate "All Games" %}</h4>
+  <div class="nd-icon-grid">
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'Lobby/images/startingOptions/so_learningGame.svg' %}" title="{% translate "Learning Game" %}">
+      <span>{% translate "Learning Game - See" %} <a class="linkOther" href="/nd/help/#navGameType">{% translate "Help" %}</a></span>
+    </div>
+    <div class="nd-icon-cell">
+      <img class="startingOptionHelpImg" alt="Str Opt" width="50" height="50" src="{% static 'Lobby/images/startingOptions/so_experiencedGame.svg' %}" title="{% translate "Experienced Game" %}">
+      <span>{% translate "Experienced Game - See" %} <a class="linkOther" href="/nd/help/#navGameType">{% translate "Help" %}</a></span>
+    </div>
+  </div>
+
+  <h4>{% translate "Food Chain Magnate" %}</h4>
+  <div class="nd-icon-grid">
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_newMS.svg" title=_("New Milestones") label=_("New Milestones") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_ketchupMS.svg" title=_("Ketchup Milestone") label=_("Ketchup Milestone") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_reservePrice.jpg" title=_("New Reserve Cards") label=_("New Reserve Cards") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_movieStars.svg" title=_("Movie Stars") label=_("Movie Stars") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_massMarketeers.jpg" title=_("Mass Marketeers") label=_("Mass Marketeers") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_GFC.jpg" title=_("Gourmet Food Critics") label=_("Gourmet Food Critics") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_rural.jpg" title=_("Rural Marketeers") label=_("Rural Marketeers") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/map23.jpg" title=_("New Districts") label=_("New Districts") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_lobbyists.jpg" title=_("Lobbyists") label=_("Lobbyists") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_nightShift.jpg" title=_("Night Shift Manager") label=_("Night Shift Manager") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_coffee.svg" title=_("Coffee") label=_("Coffee") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_fryChef.svg" title=_("Fry Chef") label=_("Fry Chef") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_kimchi.svg" title=_("Kimchi") label=_("Kimchi") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_sushi.svg" title=_("Sushi") label=_("Sushi") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_noodles.svg" title=_("Noodles") label=_("Noodles") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_strict.svg" title=_("Turn Order Payday/Fridge") label=_("Turn Order Payday/Fridge") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_shortGame.svg" title=_("Short Game") label=_("Short Game") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_noMS.svg" title=_("No Milestones") label=_("No Milestones") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_noCEO.svg" title=_("No CFO Milestone") label=_("No CFO Milestone") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_noRadio.svg" title=_("No Radio Milestone") label=_("No Radio Milestone") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/hardchoices2.jpg" title=_("Hard Choices") label=_("Hard Choices") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_sandbox.svg" title=_("Sandbox Mode") label=_("Sandbox Mode") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_randomMods.svg" title=_("Random Modules") label=_("Random Modules") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_draftMods.jpg" title=_("Draft Modules") label=_("Draft Modules") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_urbanPlanning.svg" title=_("Urban Planning") label=_("Urban Planning") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_urbanPlanningPlus.svg" title=_("Urban Planning Plus") label=_("Urban Planning Plus") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_jazz.svg" title=_("Jazz Musicians") label=_("Jazz Musicians") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_dumplings.svg" title=_("Dumplings") label=_("Dumplings") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_delivery.svg" title=_("Delivery Drivers") label=_("Delivery Drivers") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="FCM/images/so_hawkers.svg" title=_("Hawker Truck Marketing") label=_("Hawker Truck Marketing") %}
+  </div>
+
+  <h4>{% translate "Horseless Carriage" %}</h4>
+  <div class="nd-icon-grid">
+    {% include "Lobby/_nd_icon_cell.html" with img="HLC/images/s_car.jpg" title=_("Use Cars") label=_("Use Cars") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="HLC/images/s_truck.jpg" title=_("Use Trucks") label=_("Use Trucks") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="HLC/images/s_sports.jpg" title=_("Use Sports") label=_("Use Sports") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="Lobby/images/startingOptions/HLC_moreMainlines.svg" title=_("Increase Mainlines") label=_("Increase mainlines from removed vehicles") %}
+  </div>
+
+  <h4>{% translate "The Great Zimbabwe" %}</h4>
+  <div class="nd-icon-grid">
+    {% include "Lobby/_nd_icon_cell.html" with img="TGZ/images/so_schism.svg" title=_("Use Schism Expansion") label=_("Use Schism Expansion") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="TGZ/images/so_customgods.jpg" title=_("Selected gods") label=_("Selected gods") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="TGZ/images/so_customgodsVR.jpg" title=_("Selected gods with altered VR") label=_("Selected gods with altered VR") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="TGZ/images/so_customSpecVR.jpg" title=_("Altered Spec VR") label=_("Altered Spec VR") %}
+  </div>
+
+  <h4>{% translate "Cannes" %}</h4>
+  <div class="nd-icon-grid">
+    {% include "Lobby/_nd_icon_cell.html" with img="CNS/images/so_expansion.svg" title=_("Use Expansion") label=_("Use Expansion") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="CNS/images/so_tableS.svg" title=_("Small Table") label=_("Small Table") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="CNS/images/so_table.svg" title=_("Medium Table") label=_("Medium Table") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="CNS/images/so_tableL.svg" title=_("Large Table") label=_("Large Table") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="CNS/images/so_junkS.svg" title=_("Low Table Junk") label=_("Low Table Junk") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="CNS/images/so_junk.svg" title=_("Medium Table Junk") label=_("Medium Table Junk") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="CNS/images/so_junkL.svg" title=_("High Table Junk") label=_("High Table Junk") %}
+  </div>
+
+  <h4>{% translate "Indonesia" %}</h4>
+  <div class="nd-icon-grid">
+    {% include "Lobby/_nd_icon_cell.html" with img="IND/images/so_hiddenMoney.svg" title=_("Players' money is hidden") label=_("Hidden Money") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="IND/images/so_aegean_map.svg" title=_("Use the fan made Aegean Map") label=_("Use Aegean Map Expansion") %}
+  </div>
+
+  <h4>{% translate "Keyflower" %}</h4>
+  <div class="nd-icon-grid">
+    {% include "Lobby/_nd_icon_cell.html" with img="KFW/images/so_merchants.svg" title=_("Use Merchants Expansion") label=_("Use Merchants Expansion") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="KFW/images/so_promos.svg" title=_("Use Promo Tiles") label=_("Use Promo Tiles") %}
+    {% include "Lobby/_nd_icon_cell.html" with img="KFW/images/so_infoHighPlus.svg" title=_("High Knowledge of Hidden Info") label=_("High Level of Hidden Info") extra_img="KFW/images/so_infoHighMinus.svg" %}
+    {% include "Lobby/_nd_icon_cell.html" with img="KFW/images/so_infoMedPlus.svg" title=_("Medium Knowledge of Hidden Info") label=_("Medium Level") extra_img="KFW/images/so_infoMedMinus.svg" %}
+    {% include "Lobby/_nd_icon_cell.html" with img="KFW/images/so_infoLow.svg" title=_("Low Knowledge of Hidden Info") label=_("Low Level") %}
+  </div>
+</div>

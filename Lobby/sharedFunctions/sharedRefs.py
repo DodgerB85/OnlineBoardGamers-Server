@@ -705,9 +705,9 @@ def SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds):
 
 def SR_getFCMstartingOptionsHTML(startingOptionsArr):
     if not startingOptionsArr:
-        return "[None]"
+        return ""
     if len(startingOptionsArr) == 0:
-        return "[None]"
+        return ""
 
     # Reorder Options to have a better order
     preferred_order = [
@@ -817,7 +817,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
 
             startingOptionsHTML += f"<img class='startingOption' src='{folder}{img}' title='{label}'>"
 
-    return startingOptionsHTML or "[None]"
+    return startingOptionsHTML
     # usedOptions = 0
 
 

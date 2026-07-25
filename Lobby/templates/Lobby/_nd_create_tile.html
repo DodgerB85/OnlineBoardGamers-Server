@@ -1,0 +1,7 @@
+{% load static i18n %}
+<a class="nd-card nd-game-card nd-create-tile" href="{% url url %}">
+  <div class="nd-game-card-img" style="background-image:url('{% static img %}');">
+    <img src="{% static img %}" alt="{{ title }}">
+  </div>
+  <div class="nd-create-tile-label">{{ title }}</div>
+</a>

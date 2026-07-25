@@ -1,118 +1,242 @@
-{% extends "Lobby/layout.html" %}
-{% load static i18n %}
-{% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+{% extends "Lobby/_nd_help_shell.html" %}
+
+{% load static %}
+{% load i18n %}
+
+{% block page_title %}{% translate "Horseless Carriage Help" %}{% endblock %}
+{% block nd_body %}
+
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Rules" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              Horseless Carriage rules available
+              <a href="https://boardgamegeek.com/filepage/251309/first-edition-english-rulebook"
+                 target="_blank">here</a>
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              How to play guide example <a href="https://www.youtube.com/watch?v=It25avQY23A" target="_blank">here</a>
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Playing the Game" %}</h2>
+        <div class="nd-help-qa">
+          <ul>
+            <li>{% translate "The active player has a yellow highlight" %}</li>
+            <li>
+              {% blocktranslate trimmed %}
+                Click on a player's name to view their factory - their name will get a green border to show you are looking at
+                their factory. You can also click their name again as a shortcut to go back to the Market Board screen
+              {% endblocktranslate %}
+            </li>
+            <li>{% translate "If the pieces are obscuring the Tech Track, click the \"Hide Pieces\" button, next to the Min Specs board" %}</li>
+            <li>
+              {% blocktranslate trimmed %}
+                Factory building can be done simultaneously.
+              {% endblocktranslate %}
+              <br />
+              {% blocktranslate trimmed %}
+                If you are not first in turn order, you can submit your factory and it will be verified in turn order.
+              {% endblocktranslate %}
+              <br />
+              {% translate "In the lobby, you will show up under \"current players\" until your factory is verified" %}
+              <br />
+              {% translate "In this case the game won't have the green \"Your Move\" highlight until you need to make a move again." %}
+              <br />
+              {% blocktranslate trimmed %}
+                If previous players use up the components, factory building will be re-enabled and you will need to remove those
+                components.
+              {% endblocktranslate %}
+              <br />
+              {% blocktranslate trimmed %}
+                To prevent losing your factory mid-build, the game won't update live during this phase. Check the lobby or
+                refresh your game
+              {% endblocktranslate %}
+              <br />
+              - {% translate "you will also be sent a notification once you need to move, if you have enabled this in your profile." %}
+            </li>
+            <li>
+              {% translate "During factory building, a tech level summary is displayed." %}
+              <br />
+              {% translate "Your techs have a bar with a green outline" %}
+              <br />
+              {% translate "Techs you have access to this turn (but have not researched yourself) have a bar with a yellow outline" %}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How can I see which Market Windows have been placed?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              Any dealership with sales potential will be shown under the player names. Clicking on a dealership with a placed Market Window will show you the remaining squares it can sell to.
+              If the Market Window has not been placed, then all eligible squares will be highlighted.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              The Market Windows also have a name on them, in the top left, althought this can be obscured if other Market Windows are placed on top.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "I am second in Engineering Focus. Why can't I build techs from people with lower Engineering Focus?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              From the rulebook: "The player with the second highest engineering focus has access to every technology researched by at least two players; the third, to any researched by
+              three others; and the fourth to any research done by 4 players already."
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              So in fact, you can build techs you haven't researched, but it must have been researched by at least 2 players.
+              If there is a tech that has only been researched by one person,
+              then you will not have access to it, even if they
+              are lower in engineering focus.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Why do I have to have a set focus turn if there is only one slot left?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              You are probably missing a crucial point; you are now in the situation where if you were to go over 10 Gantt and there is only 1 clock left, then you can decide if the game ends or goes another round. Pretty important really! So I decided to leave the game as per the actual rules, rather than making a skip.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Additionally, the factory building phase happens before Gantt are increased, so it's basically impossible to know if someone below 10 Gantt will end up above or below 10 after the end of the factory building phase.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Similarly, if someone is on 10 Gantt or higher, they might wish to spend them all right now in order to reset their Gantt, for example, if they only have 5 Planning Departments, and wish to have the opportunity to decrease the punchclock number in a later turn.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "When can I resign?" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "You can resign during the Research phase." %}</p>
+        </div>
+      </div>
+
 {% endblock %}
-{% block body %}
-  <div class="container">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <div id="HLChelpPage">
-      <h1>{% translate "Rules" %}</h1>
-      {% blocktranslate trimmed %}
-        Horseless Carriage rules available
-        <a href="https://boardgamegeek.com/filepage/251309/first-edition-english-rulebook"
-           target="_blank">here</a>
-      {% endblocktranslate %}
-      <br />
-      {% blocktranslate trimmed %}
-        How to play guide example <a href="https://www.youtube.com/watch?v=It25avQY23A" target="_blank">here</a>
-      {% endblocktranslate %}
-      <br />
-      <h1>{% translate "Horseless Carriage Help" %}</h1>
-      <div class="HLChelpSection">
-        <b><u>{% translate "Playing the Game" %}</u></b>
+
+{% block legacy_body %}
+
+
+      <div id="HLChelpPage">
+        <h1>{% translate "Rules" %}</h1>
+        {% blocktranslate trimmed %}
+          Horseless Carriage rules available
+          <a href="https://boardgamegeek.com/filepage/251309/first-edition-english-rulebook"
+             target="_blank">here</a>
+        {% endblocktranslate %}
         <br />
-        <ul>
+        {% blocktranslate trimmed %}
+          How to play guide example <a href="https://www.youtube.com/watch?v=It25avQY23A" target="_blank">here</a>
+        {% endblocktranslate %}
+        <br />
+        <h1>{% translate "Horseless Carriage Help" %}</h1>
+        <div class="HLChelpSection">
+          <b><u>{% translate "Playing the Game" %}</u></b>
+          <br />
+          <ul>
+            {% blocktranslate trimmed %}
+              <li>The active player has a yellow highlight</li>
+              <li>
+                Click on a player's name to view their factory - their name will get a green border to show you are looking at
+                their factory. You can also click their name again as a shortcut to go back to the Market Board screen
+              </li>
+              <li>If the pieces are obscuring the Tech Track, click the "Hide Pieces" button, next to the Min Specs board</li>
+              <li>
+                Factory building can be done simultaneously.
+                <br />
+                If you are not first in turn order, you can submit your factory and it will be verified in turn order.
+                <br />
+                In the lobby, you will show up under "current players" until your factory is verified
+                <br />
+                In this case the game won't have the green "Your Move" highlight until you need to make a move again.
+                <br />
+                If previous players use up the components, factory building will be re-enabled and you will need to remove those
+                components.
+                <br />
+                To prevent losing your factory mid-build, the game won't update live during this phase. Check the lobby or
+                refresh your game
+                <br />
+                - you will also be sent a notification once you need to move, if you have enabled this in your profile.
+              </li>
+              <li>
+                During factory building, a tech level summary is displayed.
+                <br />
+                Your techs have a bar with a green outline
+                <br />
+                Techs you have access to this turn (but have not researched yourself) have a bar with a yellow outline
+              </li>
+            {% endblocktranslate %}
+          </ul>
+        </div>
+        <div class="HLChelpSection">
+          <b><u>{% translate "How can I see which Market Windows have been placed?" %}</u></b>
+          <br />
           {% blocktranslate trimmed %}
-            <li>The active player has a yellow highlight</li>
-            <li>
-              Click on a player's name to view their factory - their name will get a green border to show you are looking at
-              their factory. You can also click their name again as a shortcut to go back to the Market Board screen
-            </li>
-            <li>If the pieces are obscuring the Tech Track, click the "Hide Pieces" button, next to the Min Specs board</li>
-            <li>
-              Factory building can be done simultaneously.
-              <br />
-              If you are not first in turn order, you can submit your factory and it will be verified in turn order.
-              <br />
-              In the lobby, you will show up under "current players" until your factory is verified
-              <br />
-              In this case the game won't have the green "Your Move" highlight until you need to make a move again.
-              <br />
-              If previous players use up the components, factory building will be re-enabled and you will need to remove those
-              components.
-              <br />
-              To prevent losing your factory mid-build, the game won't update live during this phase. Check the lobby or
-              refresh your game
-              <br />
-              - you will also be sent a notification once you need to move, if you have enabled this in your profile.
-            </li>
-            <li>
-              During factory building, a tech level summary is displayed.
-              <br />
-              Your techs have a bar with a green outline
-              <br />
-              Techs you have access to this turn (but have not researched yourself) have a bar with a yellow outline
-            </li>
+            Any dealership with sales potential will be shown under the player names. Clicking on a dealership with a placed Market Window will show you the remaining squares it can sell to.
+            If the Market Window has not been placed, then all eligible squares will be highlighted.
+            <br />
+            The Market Windows also have a name on them, in the top left, althought this can be obscured if other Market Windows are placed on top.
           {% endblocktranslate %}
-        </ul>
+          <br />
+          <br />
+          <b><u>{% translate "I am second in Engineering Focus. Why can't I build techs from people with lower Engineering Focus?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            From the rulebook: "The player with the second highest engineering focus has access to every technology researched by at least two players; the third, to any researched by
+            three others; and the fourth to any research done by 4 players already."
+            <br />
+            So in fact, you can build techs you haven't researched, but it must have been researched by at least 2 players.
+            If there is a tech that has only been researched by one person,
+            then you will not have access to it, even if they
+            are lower in engineering focus.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "Why do I have to have a set focus turn if there is only one slot left?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            You are probably missing a crucial point; you are now in the situation where if you were to go over 10 Gantt and there is only 1 clock left, then you can decide if the game ends or goes another round. Pretty important really! So I decided to leave the game as per the actual rules, rather than making a skip.
+            <br />
+            Additionally, the factory building phase happens before Gantt are increased, so it's basically impossible to know if someone below 10 Gantt will end up above or below 10 after the end of the factory building phase.
+            <br />
+            Similarly, if someone is on 10 Gantt or higher, they might wish to spend them all right now in order to reset their Gantt, for example, if they only have 5 Planning Departments, and wish to have the opportunity to decrease the punchclock number in a later turn.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "When can I resign?" %}</u></b>
+          <br />
+          {% translate "You can resign during the Research phase." %}
+        </div>
+        <br />
+        <br />
       </div>
-      <div class="HLChelpSection">
-        <b><u>{% translate "How can I see which Market Windows have been placed?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          Any dealership with sales potential will be shown under the player names. Clicking on a dealership with a placed Market Window will show you the remaining squares it can sell to.
-          If the Market Window has not been placed, then all eligible squares will be highlighted.
-          <br />
-          The Market Windows also have a name on them, in the top left, althought this can be obscured if other Market Windows are placed on top.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "I am second in Engineering Focus. Why can't I build techs from people with lower Engineering Focus?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          From the rulebook: "The player with the second highest engineering focus has access to every technology researched by at least two players; the third, to any researched by
-          three others; and the fourth to any research done by 4 players already."
-          <br />
-          So in fact, you can build techs you haven't researched, but it must have been researched by at least 2 players.
-          If there is a tech that has only been researched by one person,
-          then you will not have access to it, even if they
-          are lower in engineering focus.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "Why do I have to have a set focus turn if there is only one slot left?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          You are probably missing a crucial point; you are now in the situation where if you were to go over 10 Gantt and there is only 1 clock left, then you can decide if the game ends or goes another round. Pretty important really! So I decided to leave the game as per the actual rules, rather than making a skip.
-          <br />
-          Additionally, the factory building phase happens before Gantt are increased, so it's basically impossible to know if someone below 10 Gantt will end up above or below 10 after the end of the factory building phase.
-          <br />
-          Similarly, if someone is on 10 Gantt or higher, they might wish to spend them all right now in order to reset their Gantt, for example, if they only have 5 Planning Departments, and wish to have the opportunity to decrease the punchclock number in a later turn.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "When can I resign?" %}</u></b>
-        <br />
-        {% translate "You can resign during the Research phase." %}
-      </div>
-      <br />
-      <br />
-      {% translate "For further help contact" %}
-      <img id="contactEmailImg"
-           src="{% static 'Lobby/email.png' %}"
-           alt="Email Address"
-           width="400"
-           height="30">
-    </div>
-    {% include 'Lobby/donate/donateBanner.html' %}
-    {% include 'Lobby/common/homeButton.html' %}
-  </div>
+      {% include "Lobby/donate/donateBanner.html" %}
+      {% include "Lobby/common/homeButton.html" %}
+
 {% endblock %}

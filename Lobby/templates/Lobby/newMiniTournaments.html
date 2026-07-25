@@ -1,11 +1,28 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
+  {% if not request.use_new_design %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
+  {% endif %}
 {% endblock %}
 {% block body %}
+{% if request.use_new_design %}
+<div class="nd-page">
+  <div class="nd-page-header">
+    <h1>{% trans "Create a Mini Tournament" %}</h1>
+    <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newGamesPage' %}">&#8592; {% trans "All games" %}</a>
+  </div>
+  <div class="nd-section">
+    <div class="nd-section-title">{% trans "Mini Tournaments" %}</div>
+    <div class="nd-card-grid nd-card-grid-wide">
+      {% include "Lobby/_nd_create_tile.html" with url="createFCMminiTournament" title="Food Chain Magnate" img="FCM/images/fcm-box.jpg" %}
+      {% include "Lobby/_nd_create_tile.html" with url="createTGZminiTournament" title="The Great Zimbabwe" img="TGZ/images/TGZ_box.jpg" %}
+    </div>
+  </div>
+</div>
+{% else %}
   <div class="container">
     <h1>Create a Mini Tournament</h1>
     <span class="size25text">See <a href="{% url 'helpTournamentsMini' %}" class="linkOther">Mini Tournaments Help</a></span>
@@ -68,4 +85,5 @@
     {% include 'Lobby/donate/donateBanner.html' %}
   </div>
   {% include 'Lobby/common/homeButton.html' %}
+{% endif %}
 {% endblock %}

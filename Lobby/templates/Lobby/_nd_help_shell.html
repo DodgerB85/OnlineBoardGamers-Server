@@ -1,0 +1,30 @@
+{% extends base_template %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
+  {% endif %}
+{% endblock %}
+{% block body %}
+  <div class="{% if request.use_new_design %}nd-page nd-page-narrow{% else %}container{% endif %}" {% if request.use_new_design %}{% block page_id_attr %}{% endblock %}{% else %}{% block page_id_attr_legacy %}{% endblock %}{% endif %}>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% block page_title %}{% endblock %}</h1>
+        {% block page_action %}{% endblock %}
+      </div>
+      {% block nd_body %}{% endblock %}
+    {% else %}
+      {% block legacy_body %}{% endblock %}
+    {% endif %}
+  </div>
+{% endblock %}

@@ -104,7 +104,8 @@ function show_playerStatsTab(listType) {
 		global.fairPlayList = true
 		document.getElementById(global.game).classList.add("active")
 		document.getElementById(listType).classList.add("active")
-		document.getElementById(divToDisplay).style.display = "block"
+		const fairEl = document.getElementById(divToDisplay)
+		if (fairEl) fairEl.style.display = "block"
 	} else {
 		if (listType === "FCM") global.game = "FCM"
 		else if (listType === "HLC") global.game = "HLC"
@@ -228,7 +229,8 @@ function show_playerStatsTab(listType) {
 			else if (global.game === "RNB") divToDisplay += "Div9"
 		}
 
-		document.getElementById(divToDisplay).style.display = "block"
+		const el = document.getElementById(divToDisplay)
+		if (el) el.style.display = "block"
 	}
 
 	//document.getElementById(listType).classList.add("active");

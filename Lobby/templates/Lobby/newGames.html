@@ -1,11 +1,49 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
+  {% endif %}
 {% endblock %}
 {% block body %}
+{% if request.use_new_design %}
+  <div class="nd-page">
+    <div class="nd-page-header">
+      <h1>{% translate "Start a new game" %}</h1>
+      <a class="nd-button nd-button-ghost" href="{% url 'newMiniTournaments' %}">
+        {% translate "Create a Mini Tournament" %}
+      </a>
+    </div>
+
+    <section class="nd-section">
+      <h2 class="nd-section-title">{% translate "Games" %}</h2>
+      <div class="nd-card-grid nd-card-grid-wide">
+        {% include "Lobby/_nd_create_tile.html" with url="createFCMpage" title="Food Chain Magnate" img="FCM/images/fcm-box.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createRNBpage" title="Roads & Boats" img="RNB/images/RNBbox.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createHLCpage" title="Horseless Carriage" img="HLC/images/hlc-box.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createTGZpage" title="The Great Zimbabwe" img="TGZ/images/TGZ_box.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createINDpage" title="Indonesia" img="IND/images/INDbox.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createAQYpage" title="Antiquity" img="AQY/images/AQYbox.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createBUSpage" title="Bus" img="BUS/images/bus-box.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createCNSpage" title="Cannes" img="CNS/images/CNSbox.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createWEBpage" title="Web" img="WEB/images/WEBbox.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="createKFWpage" title="Keyflower" img="KFW/images/KFWbox.jpg" %}
+      </div>
+    </section>
+
+    <section class="nd-section">
+      <h2 class="nd-section-title">{% translate "Map editors" %}</h2>
+      <div class="nd-card-grid nd-map-editor-grid">
+        {% include "Lobby/_nd_create_tile.html" with url="FCMmapEditor" title="FCM Map Editor" img="Lobby/images/createMap.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="RNB:RNBmapEditor" title="R&B Map Editor" img="Lobby/images/createMapRNB.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="TGZmapEditor" title="TGZ Map Editor" img="Lobby/images/createMapTGZ.jpg" %}
+        {% include "Lobby/_nd_create_tile.html" with url="AQYmapEditor" title="Antiquity Map Editor" img="Lobby/images/createMapAQY.jpg" %}
+      </div>
+    </section>
+  </div>
+{% else %}
   <div class="container">
     <b><a class="linkOther size25text" href="{% url 'newMiniTournaments' %}">{% translate "Click here to create a Mini Tournament" %}</a></b>
     <h1>Games</h1>
@@ -101,4 +139,5 @@
     {% include 'Lobby/donate/donateBanner.html' %}
   </div>
   {% include 'Lobby/common/homeButton.html' %}
+{% endif %}
 {% endblock %}

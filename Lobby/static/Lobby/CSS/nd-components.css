@@ -1,0 +1,1726 @@
+/* nd-components.css — shared design tokens + components for /nd/ design.
+   All component rules scoped under body.nd so the old design is untouched.
+   Loaded once from layout_new.html. */
+
+:root {
+    --color-brand-blue: #a8dadc;
+    --color-brand-green: #9dcd8e;
+
+    --color-nav-bg: #19343c;
+    --color-nav-link: #add8e6;   /* original "lightblue" — brighter, stands out on the dark bar */
+    --color-nav-link-hover: #ffffff;
+
+    --color-page-bg: #eff8f7;
+    --color-surface: #ffffff;
+    --color-surface-soft: #f8fbfb;
+    --color-border: #d8e9e7;
+    --color-border-strong: #b9d6d3;
+
+    --color-muted: #617f86;
+    --color-ink: #19343c;
+    --color-ink-soft: #2f4d56;
+
+    --color-accent: #93d5d0;
+    --color-accent-strong: #5c9896;
+    --color-accent-ink: #19343c;
+
+    --color-amber: #d8a44a;
+    --color-positive: #597a50;
+    --color-positive-bg: rgba(157, 205, 142, 0.20);
+    --color-warn: #b07a1d;
+    --color-warn-bg: rgba(255, 200, 100, 0.22);
+    --color-danger: #b54040;
+    --color-danger-bg: rgba(220, 80, 80, 0.14);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --shadow-sm: 0 1px 2px rgba(25, 52, 60, 0.06);
+    --shadow-md: 0 4px 12px rgba(25, 52, 60, 0.08);
+}
+
+/* ---------- BASE TYPOGRAPHY ---------- */
+body.nd h1, body.nd h2, body.nd h3, body.nd h4 {
+    color: var(--color-ink);
+    margin: 0 0 8px;
+    line-height: 1.2;
+}
+
+body.nd h1 { font-size: 26px; font-weight: 700; }
+body.nd h2 { font-size: 20px; font-weight: 700; }
+body.nd h3 { font-size: 17px; font-weight: 600; }
+body.nd h4 { font-size: 15px; font-weight: 600; }
+
+body.nd p {
+    margin: 0 0 12px;
+    color: var(--color-ink-soft);
+}
+
+body.nd a {
+    color: var(--color-accent-strong);
+}
+
+body.nd hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 16px 0;
+}
+
+body.nd #contactEmailImg {
+    max-width: 100%;
+    width: 400px;
+    height: 30px;
+    vertical-align: middle;
+}
+
+/* ---------- PAGE CONTAINERS ---------- */
+body.nd .nd-page {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body.nd .nd-page-narrow {
+    max-width: 720px;
+}
+
+body.nd .nd-page-profile {
+    max-width: 80%;
+}
+
+/* On tablets and below the 80% cap just wastes horizontal space and squeezes
+   the form fields; let the profile use the full width earlier. */
+@media (max-width: 900px) {
+    body.nd .nd-page-profile {
+        max-width: 100%;
+    }
+}
+
+body.nd .nd-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 4px 0 16px;
+}
+
+body.nd .nd-page-header h1 {
+    margin: 0;
+}
+
+body.nd .nd-page-subtitle {
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+body.nd .nd-section {
+    margin: 0 0 24px;
+}
+
+body.nd .nd-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 10px;
+}
+
+/* ---------- CARDS ---------- */
+body.nd .nd-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
+}
+
+body.nd .nd-card + .nd-card {
+    margin-top: 16px;
+}
+
+body.nd .nd-card-grid .nd-card,
+body.nd .nd-features .nd-card,
+body.nd .nd-map-editor-grid .nd-card {
+    margin-top: 0;
+}
+
+body.nd .nd-card-soft {
+    background: var(--color-surface-soft);
+}
+
+body.nd .nd-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: -4px 0 12px;
+}
+
+body.nd .nd-card-header h2,
+body.nd .nd-card-header h3 {
+    margin: 0;
+}
+
+body.nd .nd-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+body.nd .nd-card-grid-wide {
+    /* 5 cards per row at 1280px+ so the 10-card game list lands in 2
+       even rows. */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+body.nd .nd-map-editor-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+/* ---------- BUTTONS ---------- */
+body.nd .nd-button,
+body.nd a.nd-button,
+body.nd button.nd-button,
+body.nd input.nd-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 14px;
+    min-height: 44px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid #b8c2cc;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    line-height: 1.2;
+    box-sizing: border-box;
+    /* Inherit family so the input[type=submit] in the top bar login form
+       matches the rest of the new-design typography. */
+    font-family: inherit;
+}
+
+@media (hover: hover) {
+    body.nd .nd-button:hover {
+        background: var(--color-accent-strong);
+        border-color: var(--color-accent-strong);
+        color: #fff;
+    }
+}
+
+body.nd .nd-button-primary {
+    background: var(--color-accent);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    color: var(--color-accent-ink);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+@media (hover: hover) {
+    body.nd .nd-button-primary:hover {
+        background: var(--color-accent-strong);
+        border-color: rgba(0, 0, 0, 0.15);
+        color: #fff;
+    }
+}
+
+/* "Ghost" / reverse-nav links render as the same white/secondary button as
+   .nd-button — no separate borderless style. The distinct ghost look was
+   redundant (identical at rest, only an unwanted underline on hover). The
+   class is kept so existing template markup needs no churn. */
+body.nd .nd-button-ghost {
+    background: var(--color-surface);
+    border-color: #b8c2cc;
+    color: var(--color-ink);
+}
+
+@media (hover: hover) {
+    body.nd .nd-button-ghost:hover {
+        background: var(--color-surface);
+        border-color: var(--color-accent-strong);
+        color: var(--color-accent-strong);
+    }
+}
+
+body.nd .nd-button-danger {
+    background: var(--color-danger-bg);
+    border: 1px solid rgba(181, 64, 64, 0.5);
+    color: var(--color-danger);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Destructive buttons keep a red hover — without this, the base .nd-button:hover
+   would turn them teal, breaking the "red = destructive" cue. */
+@media (hover: hover) {
+    body.nd .nd-button-danger:hover {
+        background: rgba(220, 80, 80, 0.24);
+        border-color: var(--color-danger);
+        color: var(--color-danger);
+    }
+}
+
+body.nd .nd-button-sm {
+    padding: 8px 10px;
+    min-height: 36px;
+    font-size: 13px;
+}
+
+/* ---------- BASELINE INPUTS ---------- *
+   Cheap baseline styling for forms that haven't been migrated to .nd-form-row
+   yet (createXYZ pages). Specific component selectors win over these. */
+body.nd input[type="text"],
+body.nd input[type="email"],
+body.nd input[type="password"],
+body.nd input[type="number"],
+body.nd input[type="search"],
+body.nd input[type="url"],
+body.nd input[type="tel"],
+body.nd input[type="date"],
+body.nd textarea,
+body.nd select {
+    padding: 6px 8px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 14px;
+    font-family: inherit;
+}
+
+body.nd input[type="text"]:focus,
+body.nd input[type="email"]:focus,
+body.nd input[type="password"]:focus,
+body.nd input[type="number"]:focus,
+body.nd textarea:focus,
+body.nd select:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent-strong);
+}
+
+body.nd button {
+    font-family: inherit;
+}
+
+/* ---------- FORM ELEMENTS ---------- */
+body.nd .nd-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+body.nd .nd-form-row:last-child {
+    border-bottom: none;
+}
+
+body.nd .nd-form-row > label,
+body.nd .nd-form-label {
+    flex: 0 0 220px;
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+body.nd .nd-form-row .nd-form-help {
+    flex-basis: 100%;
+    color: var(--color-muted);
+    font-size: 12px;
+    margin: 0;
+    padding-left: 232px;
+}
+
+body.nd .nd-form-row > input[type="text"],
+body.nd .nd-form-row > input[type="email"],
+body.nd .nd-form-row > input[type="password"],
+body.nd .nd-form-row > input[type="number"],
+body.nd .nd-form-row > select,
+body.nd .nd-form-row > textarea {
+    flex: 1 1 220px;
+    padding: 8px 10px;
+    margin: 0;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+body.nd .nd-field {
+    flex: 1 1 220px;
+}
+
+body.nd .nd-form-row > input:focus,
+body.nd .nd-form-row > select:focus,
+body.nd .nd-form-row > textarea:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent-strong);
+}
+
+body.nd .nd-form-row > textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+body.nd .nd-register-form p {
+    margin: 0 0 12px;
+}
+
+body.nd .nd-register-form label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+body.nd .nd-register-form input[type="text"],
+body.nd .nd-register-form input[type="email"],
+body.nd .nd-register-form input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+}
+
+body.nd .nd-register-form .helptext {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+body.nd .nd-register-form .errorlist {
+    margin: 0 0 8px;
+    padding-left: 18px;
+    color: var(--color-danger);
+    font-size: 13px;
+}
+
+@media (max-width: 640px) {
+    body.nd .nd-form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    body.nd .nd-form-row > label,
+    body.nd .nd-form-label {
+        flex: 0 0 auto;
+    }
+    body.nd .nd-form-row .nd-form-help {
+        padding-left: 0;
+    }
+    /* In column-flex context flex-basis becomes min-height; override to content sizing */
+    body.nd .nd-field,
+    body.nd .nd-form-row > input[type="text"],
+    body.nd .nd-form-row > input[type="email"],
+    body.nd .nd-form-row > input[type="password"],
+    body.nd .nd-form-row > input[type="number"],
+    body.nd .nd-form-row > select,
+    body.nd .nd-form-row > textarea {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+}
+
+/* ---------- TABLES ---------- */
+body.nd .nd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+body.nd .nd-table th,
+body.nd .nd-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+body.nd .nd-table th {
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+@media (hover: hover) {
+    body.nd .nd-table tbody tr:hover {
+        background: var(--color-surface-soft);
+    }
+}
+
+body.nd .nd-table-scroll {
+    overflow-x: auto;
+}
+
+/* Constrain game and starting-option icons rendered inside table cells */
+body.nd .nd-table td .gameIcon {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+}
+body.nd .nd-table td .startingOption {
+    width: 38px;
+    height: 38px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* Changelog entry layout */
+body.nd .nd-log-entry {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+body.nd .nd-log-entry:last-child {
+    border-bottom: none;
+}
+body.nd .nd-log-date {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+body.nd .nd-log-text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--color-ink);
+}
+
+/* Credits list (About page) — each row has the role on the left and the
+   name on the right. Wraps on narrow screens. */
+body.nd .nd-credits {
+    font-size: 14px;
+    line-height: 1.7;
+}
+body.nd .nd-credits .nd-credits-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+body.nd .nd-credits .nd-credits-row:last-child {
+    border-bottom: none;
+}
+body.nd .nd-credits .nd-credits-row > span:first-child {
+    color: var(--color-ink);
+}
+body.nd .nd-credits .nd-credits-row > span:last-child {
+    color: var(--color-accent-strong);
+    font-weight: 600;
+    text-align: right;
+}
+body.nd .nd-thanks {
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    line-height: 1.55;
+}
+
+/* Donate payment options row */
+body.nd .nd-donate-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 4px;
+}
+body.nd .nd-donate-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 160px;
+}
+body.nd .nd-donate-option-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ---------- CALLOUTS (info / warn / alert boxes used inside cards) ----------
+   Soft-fill box with an accent left bar. Drop into any card to highlight
+   a notice that belongs inline with the surrounding content. */
+body.nd .nd-callout {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    margin: 0 0 12px;
+    color: var(--color-ink-soft);
+    font-size: 14px;
+    line-height: 1.55;
+}
+body.nd .nd-callout:last-child {
+    margin-bottom: 0;
+}
+body.nd .nd-callout-warn {
+    border-left-color: var(--color-amber);
+    background: rgba(216, 164, 74, 0.08);
+}
+body.nd .nd-callout-alert {
+    border-left-color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+body.nd .nd-callout-info {
+    border-left-color: var(--color-accent);
+}
+
+/* Form action bar (right-aligned submit) and footer-link line. */
+body.nd .nd-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+body.nd .nd-form-footer-link {
+    font-size: 14px;
+    color: var(--color-muted);
+    margin-top: 14px;
+    margin-bottom: 0;
+}
+
+/* ---------- PILLS ---------- */
+body.nd .nd-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+body.nd .nd-pill-positive {
+    background: var(--color-positive-bg);
+    color: var(--color-positive);
+    border-color: transparent;
+}
+
+body.nd .nd-pill-warn {
+    background: var(--color-warn-bg);
+    color: var(--color-warn);
+    border-color: transparent;
+}
+
+body.nd .nd-pill-danger {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    border-color: transparent;
+}
+
+body.nd .nd-pill-accent {
+    background: rgba(147, 213, 208, 0.22);
+    color: var(--color-accent-strong);
+    border-color: transparent;
+}
+
+/* ---------- TABS (09 dense-scoreboard look) ---------- */
+body.nd .nd-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: visible;
+    margin: 0 0 14px;
+    flex-wrap: wrap;
+    background: var(--color-surface-soft);
+    border-radius: 8px 8px 0 0;
+    border: 1px solid var(--color-border);
+    border-bottom: none;
+}
+
+body.nd .nd-tab {
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--color-border);
+    padding: 10px 16px;
+    min-height: 44px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--color-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.1s, color 0.1s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+body.nd .nd-tab:last-child { border-right: none; }
+
+@media (hover: hover) {
+    body.nd .nd-tab:hover {
+        color: var(--color-ink);
+        background: rgba(147, 213, 208, 0.12);
+    }
+}
+
+body.nd .nd-tab.active,
+body.nd .nd-tab.tablinks.active {
+    color: var(--color-accent-ink);
+    background: var(--color-accent);
+}
+
+body.nd .nd-tab-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: inherit;
+    opacity: 0.85;
+}
+
+body.nd .nd-tab.active .nd-tab-count {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    body.nd .nd-tabs {
+        gap: 1px;
+        overflow-x: visible;
+        flex-wrap: wrap;
+        padding-bottom: 4px;
+    }
+    body.nd .nd-tab {
+        padding: 8px 10px 6px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    body.nd .nd-tab-count {
+        display: none;
+    }
+    body.nd .nd-tab {
+        padding: 8px 8px 6px;
+        font-size: 12px;
+    }
+}
+
+/* ---------- MODULE-ICON TOOLTIPS ---------- */
+/* Wrapper around .startingOption so hover shows the title on desktop and a
+   readable label on mobile (where hover doesn't exist). */
+body.nd .nd-mod-wrap {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+}
+
+body.nd .nd-mod-wrap .startingOption,
+body.nd .nd-mod-wrap > img {
+    display: inline-block;
+    vertical-align: middle;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-soft);
+    padding: 2px;
+    box-sizing: border-box;
+}
+
+body.nd .nd-mod-wrap::after {
+    content: attr(data-label);
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-ink);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s;
+    z-index: 30;
+}
+
+body.nd .nd-mod-wrap:hover::after,
+body.nd .nd-mod-wrap:focus-within::after {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    /* Touch fallback: render the label inline under the icon when there's room. */
+    body.nd .nd-mod-list-mobile .nd-mod-wrap {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+    body.nd .nd-mod-list-mobile .nd-mod-wrap::after {
+        position: static;
+        transform: none;
+        opacity: 1;
+        background: transparent;
+        color: var(--color-muted);
+        padding: 0;
+        font-size: 11px;
+    }
+}
+
+/* ---------- LANDING / HERO ---------- */
+body.nd .nd-landing {
+    padding: 8px 0;
+}
+
+body.nd .nd-hero {
+    padding: 12px 0 20px;
+}
+
+body.nd .nd-hero h1 {
+    font-size: 28px;
+    line-height: 1.2;
+    max-width: 760px;
+    margin: 0 0 8px;
+}
+
+body.nd .nd-hero-sub {
+    font-size: 15px;
+    color: var(--color-ink-soft);
+    max-width: 760px;
+    margin: 0 0 12px;
+}
+
+body.nd .nd-hero-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+body.nd .nd-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    align-items: stretch;
+    gap: 12px;
+}
+
+/* .nd-feature cards: flex column so h3 sits at top, body fills the rest.
+   Grid (not flex) on .nd-features above sizes every column track equally
+   regardless of how many cards land in a row, avoiding the flex-wrap quirk
+   where a lone item on its own row stretches to fill it. min-height is
+   a safety net so the row picks the tallest natural content as the
+   baseline even if the browser collapses the grid container's height. */
+body.nd .nd-feature {
+    display: flex;
+    flex-direction: column;
+    min-height: 152px;
+    box-sizing: border-box;
+}
+
+body.nd .nd-feature h3 {
+    margin: 0 0 4px;
+    color: var(--color-accent-strong);
+}
+
+body.nd .nd-feature p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-ink-soft);
+    /* Take up the rest of the card so all 4 cards have matching text-block
+       heights even when line counts differ. */
+    flex: 1 0 auto;
+}
+
+body.nd .nd-game-card {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+body.nd .nd-game-card-img {
+    height: 220px;
+    overflow: hidden;
+    flex-shrink: 0;
+    /* Background-image keeps the box centered without flex-item sizing
+       surprises. The img is still rendered for accessibility / right-click. */
+    background-color: var(--color-surface-soft);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+body.nd .nd-game-card-img img {
+    /* Hide the visual image — background-image above paints it. Kept in the
+       DOM so right-click and the Game Icons template can read src/title. */
+    display: block;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.nd .nd-game-card-body {
+    padding: 12px 14px 14px;
+}
+
+body.nd .nd-game-card-body h3 {
+    margin: 0 0 2px;
+}
+
+body.nd .nd-game-card-body p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--color-ink-soft);
+}
+
+body.nd a.nd-create-tile {
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
+}
+
+@media (hover: hover) {
+    body.nd a.nd-create-tile:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--color-accent-strong);
+    }
+}
+
+/* Game card as <button> (landing-page expansion toggle). Reset button
+   defaults so the card visual matches the .nd-game-card div variant. */
+body.nd .nd-game-card-btn {
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
+    padding: 0;
+}
+@media (hover: hover) {
+    body.nd .nd-game-card-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--color-accent-strong);
+    }
+}
+
+body.nd .nd-create-tile-label {
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.nd .nd-map-editor-grid .nd-game-card-img {
+    height: 130px;
+}
+
+body.nd .nd-map-editor-grid .nd-game-card-img img {
+    height: 130px;
+}
+
+body.nd .nd-map-editor-grid .nd-create-tile-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink-soft);
+    padding: 8px 12px;
+}
+
+@media (max-width: 480px) {
+    body.nd .nd-page-profile {
+        max-width: 100%;
+    }
+    /* Tighten the inline-gap (16px) radio/option rows so they don't feel
+       cramped wrapping on narrow phones. !important beats the inline style. */
+    body.nd .nd-row-flex {
+        gap: 8px !important;
+    }
+    body.nd .nd-card-grid-wide,
+    body.nd .nd-map-editor-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    body.nd .nd-game-card-img {
+        height: 140px;
+        max-height: 140px;
+    }
+
+    body.nd .nd-game-card-img img {
+        height: 140px;
+    }
+
+    body.nd .nd-map-editor-grid .nd-game-card-img {
+        height: 110px;
+        max-height: 110px;
+    }
+
+    body.nd .nd-map-editor-grid .nd-game-card-img img {
+        height: 110px;
+    }
+
+    body.nd .nd-create-tile-label {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    body.nd .nd-hero {
+        padding: 16px 0 24px;
+    }
+    body.nd .nd-hero h1 {
+        font-size: 24px;
+    }
+    body.nd .nd-hero-sub {
+        font-size: 15px;
+    }
+}
+
+/* ---------- UTILITY ---------- */
+body.nd .nd-muted { color: var(--color-muted); }
+body.nd .nd-small { font-size: 13px; }
+body.nd .nd-center { text-align: center; }
+body.nd .nd-spacer { flex: 1; }
+body.nd .nd-row-flex {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ---------- FLAVOUR TEXT (details/summary on landing) ---------- */
+/* Each game card can be clicked to expand its full description. The
+   <details> is hidden when JS-disabled would be unusable; default is open
+   so the SEO copy is visible. The 1-line summary inside the card stays
+   short. */
+body.nd .nd-game-flavour {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    align-items: start;
+    gap: 8px 16px;
+}
+body.nd .nd-game-flavour > h2 {
+    grid-column: 1 / -1;
+}
+body.nd .nd-game-flavour details {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+    box-shadow: var(--shadow-sm);
+}
+body.nd .nd-game-flavour details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-accent-strong);
+    padding: 4px 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+body.nd .nd-game-flavour details summary::-webkit-details-marker { display: none; }
+body.nd .nd-game-flavour details summary::before {
+    content: "▸";
+    color: var(--color-muted);
+    font-size: 12px;
+    transition: transform 0.1s;
+    display: inline-block;
+    width: 12px;
+}
+body.nd .nd-game-flavour details[open] summary::before {
+    transform: rotate(90deg);
+}
+body.nd .nd-game-flavour .nd-flavour-body {
+    padding: 6px 0 4px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+}
+body.nd .nd-game-flavour .nd-flavour-body p {
+    margin: 0 0 10px;
+}
+body.nd .nd-game-flavour .nd-flavour-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* ---------- GAME HELP CONTENT ---------- */
+body.nd .nd-fcm-china-help {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+body.nd .nd-fcm-china-help h2 {
+    border-top: 1px solid var(--color-border);
+    margin-top: 18px;
+    padding-top: 16px;
+}
+
+body.nd .nd-fcm-china-help h2:first-of-type {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body.nd .nd-fcm-china-help .FCMhelpSection br {
+    display: none;
+}
+
+body.nd .nd-fcm-china-help b u {
+    margin: 10px 0 6px;
+}
+
+body.nd .nd-fcm-china-help img {
+    max-width: 100%;
+    height: auto;
+}
+
+body.nd .nd-fcm-china-help .helpEmployeeImg {
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    margin: 6px 8px 8px 0;
+}
+
+/* Stacked form: label above input instead of side-by-side */
+body.nd .nd-stacked-form .nd-form-row {
+    flex-direction: column;
+    align-items: stretch;
+}
+body.nd .nd-stacked-form .nd-form-label {
+    flex: 0 0 auto;
+    margin-bottom: 4px;
+}
+body.nd .nd-stacked-form .nd-form-row > input[type="text"],
+body.nd .nd-stacked-form .nd-form-row > input[type="email"],
+body.nd .nd-stacked-form .nd-form-row > input[type="password"],
+body.nd .nd-stacked-form .nd-form-row > input[type="number"],
+body.nd .nd-stacked-form .nd-form-row > select,
+body.nd .nd-stacked-form .nd-form-row > textarea {
+    flex: 0 0 auto;
+    width: 100%;
+}
+
+/* ---------- PROFILE COLOUR PICKERS ---------- */
+/* Each choice div is a flex-column: image/svg on top, radio centered below */
+body.nd .favRestChoice,
+body.nd .favHLCchoice,
+body.nd .favBusColour,
+body.nd .favBusMap,
+body.nd .favTGZchoice,
+body.nd .favCNSchoice,
+body.nd .favKFWchoice,
+body.nd .favWEBchoice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+body.nd .favRestChoice label,
+body.nd .favHLCchoice label,
+body.nd .favBusColour label,
+body.nd .favBusMap label,
+body.nd .favTGZchoice label,
+body.nd .favCNSchoice label,
+body.nd .favKFWchoice label,
+body.nd .favWEBchoice label {
+    cursor: pointer;
+    display: block;
+}
+
+/* Image size caps */
+body.nd .favRestChoice img { max-height: 90px; width: auto; display: block; }
+body.nd .favBusMap img { max-height: 182px; width: auto; display: block; }
+body.nd .favHLCchoice img { max-height: 80px; width: auto; display: block; }
+body.nd .favBusColour img { max-height: 60px; width: auto; display: block; }
+body.nd .favTGZchoice img { max-height: 100px; width: auto; display: block; }
+
+/* SVG swatch sizing */
+body.nd .cnsPrefSVG,
+body.nd .kfwPrefSVG,
+body.nd .webPrefSVG {
+    display: block;
+    width: 80px;
+    height: 20px;
+}
+
+/* Checkbox/radio option rows used in create-game forms */
+body.nd .nd-check-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--color-ink);
+    padding: 4px 0;
+    line-height: 1.4;
+}
+body.nd .nd-check-label input[type=checkbox],
+body.nd .nd-check-label input[type=radio] {
+    flex-shrink: 0;
+    margin-top: 3px;
+    accent-color: var(--color-accent);
+}
+body.nd .nd-opt-help {
+    font-size: 12px;
+    color: var(--color-muted);
+    margin-top: 2px;
+    line-height: 1.4;
+}
+body.nd .nd-opts-section {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+    margin-bottom: 8px;
+}
+
+/* Lay option sections out in responsive columns: one column when narrow,
+   2 on tablet, 3 on desktop. The first 3 sections (Game / Ketchup / Map)
+   then sit on a single row at typical laptop widths. align-items:stretch
+   so cells in a row match the tallest sibling's height. */
+body.nd .nd-opts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    align-items: stretch;
+}
+@media (min-width: 720px) {
+    body.nd .nd-opts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (min-width: 1100px) {
+    body.nd .nd-opts-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+body.nd .nd-opts-grid .nd-opts-section {
+    margin-bottom: 0;
+}
+
+/* Setup/Common/Expert cards on the create-game form, laid out the same way
+   as .nd-opts-grid: 1 column narrow, 2 tablet, 3 desktop. */
+body.nd .nd-setup-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 16px;
+}
+@media (min-width: 720px) {
+    body.nd .nd-setup-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (min-width: 1100px) {
+    body.nd .nd-setup-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+body.nd .nd-setup-cards-grid .nd-card,
+body.nd .nd-setup-cards-grid .nd-card + .nd-card {
+    margin-top: 0;
+}
+
+/* The create-form tab JS sets #individualOptionsView to display:inline-block,
+   which shrink-wraps the grid to ~2 columns. Force full container width so the
+   auto-fit grid can use all available columns on wide screens. (display:none
+   from the JS still hides it.) */
+body.nd #individualOptionsView,
+body.nd #scenarioOptionsView {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Create-game pages use the full page width so the option grid can spread into
+   several columns on desktop. Cap the simple form controls so they don't
+   stretch absurdly wide on the now-wider page (the option grid still spans
+   full width). */
+body.nd #FCMallOptions .nd-form-row > input[type="text"],
+body.nd #FCMallOptions .nd-form-row > input[type="email"],
+body.nd #FCMallOptions .nd-form-row > input[type="password"],
+body.nd #FCMallOptions .nd-form-row > input[type="number"],
+body.nd #FCMallOptions .nd-form-row > select,
+body.nd #FCMallOptions .nd-form-row > textarea {
+    max-width: 520px;
+}
+
+/* Per-section color accents — match the original create-game form palette
+   (basicOptions yellow, expertOptions salmon, ketchup lightgreen, etc.) so
+   the redesigned form is visually familiar to existing users. */
+body.nd .nd-opts-slate  { background: #faf2d9; border-left-color: rgba(180,160,80,0.7);   }
+body.nd .nd-opts-red    { background: #c8e6c9; border-left-color: rgba(80,145,80,0.7);   }
+body.nd .nd-opts-green  { background: #e0e0e0; border-left-color: rgba(120,120,120,0.7); }
+body.nd .nd-opts-amber  { background: #d8e3c0; border-left-color: rgba(110,140,60,0.7);  }
+body.nd .nd-opts-blue   { background: #cde7e9; border-left-color: rgba(80,140,150,0.7);  }
+body.nd .nd-opts-purple { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
+body.nd .nd-opts-orange { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
+
+/* Full-width checkbox list — use instead of nd-form-row when there is no label column */
+body.nd .nd-check-list {
+    padding: 4px 0;
+}
+body.nd .nd-check-list > .nd-check-label {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+body.nd .nd-check-list > .nd-check-label:last-child {
+    border-bottom: none;
+}
+
+/* Help page Q&A — readable type for the long, mostly-text help sections. */
+body.nd .nd-help-qa {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--color-ink);
+}
+body.nd .nd-help-qa p {
+    margin: 0 0 12px;
+}
+body.nd .nd-help-qa p:last-child {
+    margin-bottom: 0;
+}
+body.nd .nd-help-icon-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+body.nd .nd-help-menu-icon {
+    flex: 0 0 50px;
+    width: 50px;
+    height: 50px;
+    padding: 6px;
+    box-sizing: border-box;
+    object-fit: contain;
+    background: #111111;
+    border-radius: 5px;
+}
+body.nd .nd-help-qa b u {
+    display: block;
+    margin: 22px 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-ink);
+    border-left: 3px solid var(--color-accent-strong);
+    padding-left: 10px;
+    text-decoration: none;
+}
+body.nd .nd-help-qa b u:first-child {
+    margin-top: 0;
+}
+body.nd .nd-help-qa ul {
+    margin: 6px 0 12px;
+    padding-left: 22px;
+    line-height: 1.55;
+}
+body.nd .nd-help-kickouts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px 16px;
+    margin: 8px 0 12px;
+    font-size: 14px;
+}
+body.nd .nd-help-kickouts .helpStartingOptionSpan {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+body.nd .nd-help-kickouts .startingOptionHelpImg {
+    width: 36px;
+    height: 36px;
+}
+
+/* AllTournaments page: every row is clickable — show a pointer. */
+body.nd .allTournamentsContainer tbody tr,
+body.nd .allTournamentsDiv tbody tr {
+    cursor: pointer;
+}
+
+/* Stats page tiles (numbers above the per-game / fairplay / etc tabs) */
+body.nd .nd-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 8px 0 4px;
+}
+body.nd .nd-stats-tile {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    text-align: center;
+}
+body.nd .nd-stats-tile-num {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-accent-strong);
+    line-height: 1.2;
+}
+body.nd .nd-stats-tile-label {
+    font-size: 12px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+}
+body.nd .nd-stats-gamebreak {
+    line-height: 1.8;
+}
+
+/* Each game icon + "N active / N finished" cell: align icon vertically
+   with the text baseline so the row reads cleanly. */
+body.nd .nd-stats-gamebreak .gameIcon,
+body.nd .nd-stats-gamebreak .gameStatIcon {
+    vertical-align: -2px;
+    margin-right: 4px;
+}
+body.nd .nd-stats-gamebreak > .nd-game-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+body.nd .nd-stats-gamebreak > .nd-game-stat-sep {
+    color: var(--color-border-strong);
+    margin: 0 8px;
+}
+
+/* Empty-state text — small, not bold. */
+body.nd .nd-empty {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-muted);
+    margin: 8px 0;
+}
+
+/* Help page Game Help Pages — 4 columns for the first row, 3 columns for
+   the next two rows (4-3-3 split for 10 games). Implemented with flex so
+   the row rhythm is exact, not a grid auto-flow artifact. */
+body.nd .nd-help-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+body.nd .nd-help-pills .nd-button {
+    flex: 0 0 calc(25% - 6px);
+    text-align: center;
+    box-sizing: border-box;
+    width: auto;
+}
+body.nd .nd-help-pills .nd-button.nd-help-pill-wide {
+    flex-basis: calc(33.333% - 6px);
+}
+@media (max-width: 520px) {
+    body.nd .nd-help-pills .nd-button {
+        flex-basis: calc(50% - 4px);
+    }
+    body.nd .nd-help-pills .nd-button.nd-help-pill-wide {
+        flex-basis: calc(50% - 4px);
+    }
+}
+@media (max-width: 320px) {
+    body.nd .nd-help-pills .nd-button,
+    body.nd .nd-help-pills .nd-button.nd-help-pill-wide {
+        flex-basis: 100%;
+    }
+}
+
+/* Help page icon legend — table-like grid where each cell holds an icon and
+   a label side by side. Columns scale with the page width. */
+body.nd .nd-icon-legend h3 {
+    font-size: 15px;
+    color: var(--color-accent-strong);
+    margin: 0 0 4px;
+}
+body.nd .nd-icon-legend h4 {
+    font-size: 13px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 16px 0 8px;
+    font-weight: 600;
+}
+body.nd .nd-icon-grid {
+    display: grid;
+    /* Two-cell rows: icon (fixed) + label (fills). auto-fit so narrow pages
+       (mobile) collapse to a single column. */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 6px 14px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+body.nd .nd-icon-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+body.nd .nd-icon-cell .startingOptionHelpImg,
+body.nd .nd-icon-cell .gameIcon,
+body.nd .nd-icon-cell .gameStatIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-soft);
+    padding: 2px;
+    box-sizing: border-box;
+    display: block;
+    flex-shrink: 0;
+}
+body.nd .nd-icon-cell > span {
+    font-size: 13px;
+    color: var(--color-ink);
+    line-height: 1.4;
+}
+
+/* The KFW cells that carry two images (one cell for High/Med knowledge) sit
+   side-by-side in their cell before the text. */
+body.nd .nd-icon-cell img + img {
+    margin-left: 4px;
+}
+
+/* ---------- 09 ROW GRID (shared — lobby + stats) ---------- */
+/* Row anatomy used by every .nd-table that emits rows with class .nd-row09.
+   Defined here (rather than lobby_new.css) so the stats page ten-games list
+   picks it up without loading lobby-specific CSS. */
+
+/* The 09-row variant (stats ten-games list) renders rows as a grid where
+   the first .nd-row09 row acts as the visual header. The original <thead>
+   is therefore hidden on those tables only — other nd-table consumers
+   (tournament lists, help pages) keep a normal visible thead. */
+body.nd .nd-table:has(.nd-row09) thead {
+    display: none;
+}
+body.nd .nd-table:has(.nd-row09) thead tr {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    gap: 12px;
+    padding: 6px 14px;
+    background: var(--color-surface-soft);
+    border-bottom: 2px solid var(--color-border-strong);
+}
+body.nd .nd-table:has(.nd-row09) thead th {
+    display: block;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    border: none;
+    text-align: left;
+}
+
+/* ---- 09 Six-column row grid ---- */
+body.nd .nd-table {
+    display: block;
+    width: 100%;
+}
+body.nd .nd-table tbody {
+    display: block;
+}
+/* Revert to normal table layout for tables that don't use nd-row09 (MT rows,
+   tournament list tables). display:block on the table turns tr/td cells into
+   anonymous inline-table boxes sized to content rather than stretching to
+   100% width. */
+body.nd .nd-table:not(:has(.nd-row09)) {
+    display: table;
+}
+body.nd .nd-table:not(:has(.nd-row09)) tbody {
+    display: table-row-group;
+}
+
+body.nd .nd-row09 {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    transition: background 0.1s;
+}
+body.nd .nd-row09:last-child {
+    border-bottom: none;
+}
+@media (hover: hover) {
+    body.nd .nd-row09:hover {
+        background: var(--color-surface-soft);
+    }
+}
+body.nd .nd-row09 > td {
+    display: block;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+body.nd .nd-col-icon img {
+    width: 52px;
+    height: 52px;
+    border-radius: 6px;
+    object-fit: contain;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    padding: 2px;
+}
+body.nd .nd-col-game strong {
+    color: var(--color-ink);
+    font-size: 15px;
+}
+body.nd .nd-col-game small {
+    color: var(--color-muted);
+    font-size: 13px;
+    line-height: 1.4;
+}
+body.nd .nd-col-game a { color: var(--color-accent-strong); text-decoration: none; }
+body.nd .nd-col-game a:hover { text-decoration: underline; }
+body.nd .nd-col-players {
+    color: var(--color-ink-soft);
+    line-height: 1.4;
+}
+body.nd .nd-col-players a {
+    color: var(--color-accent-strong);
+    text-decoration: none;
+}
+body.nd .nd-col-players a:hover { text-decoration: underline; }
+body.nd .nd-col-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+body.nd .nd-col-options img.startingMap {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+body.nd .nd-col-status {
+    text-align: center;
+}
+body.nd .nd-col-cta {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* State backgrounds on the whole row. Keep these separate from the old td
+   cell-fill rules so the color reads as one continuous row state. */
+body.nd .nd-row09.myMove { background: var(--color-positive-bg); }
+body.nd .nd-row09.kickoutRequired1 { background: var(--color-warn-bg); }
+body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
+@media (hover: hover) {
+    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.30); }
+    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.32); }
+    body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
+}
+
+/* Mobile collapse (per 09 prototype) */
+@media (max-width: 980px) {
+    body.nd .nd-row09 {
+        grid-template-columns: 56px minmax(0, 1fr);
+        gap: 8px 10px;
+        padding: 12px;
+    }
+    body.nd .nd-col-icon img { width: 44px; height: 44px; }
+    body.nd .nd-col-players,
+    body.nd .nd-col-options,
+    body.nd .nd-col-status,
+    body.nd .nd-col-cta {
+        grid-column: 1 / -1;
+    }
+    body.nd .nd-col-cta {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+    /* thead uses the same 6-col grid; hide it when rows collapse to 2-col */
+    body.nd .nd-table:has(.nd-row09) thead {
+        display: none;
+    }
+}
+
+/* ---------- GAME LIST (shared mobile data-label treatment) ----------
+   On narrow screens .nd-row09 tables become stacked cards, so metadata
+   cells pull compact uppercase labels from their data-label attribute. */
+body.nd .nd-game-list .nd-table-wrap {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    overflow: hidden;
+}
+
+body.nd .nd-row09 .nd-col-options {
+    row-gap: 4px;
+}
+
+body.nd .nd-row09 .nd-col-options img.startingMap {
+    width: 32px;
+    height: 32px;
+}
+
+@media (max-width: 720px) {
+    body.nd .nd-row09 > td[data-label]:not(.nd-col-game)::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+    }
+    body.nd .nd-game-list .nd-row09 {
+        padding: 12px;
+    }
+    body.nd .nd-row09 .nd-col-options {
+        flex-wrap: wrap;
+    }
+    body.nd .nd-row09 .nd-col-options img.startingMap {
+        width: 28px;
+        height: 28px;
+    }
+    body.nd .nd-row09 .nd-col-status {
+        text-align: left;
+    }
+    body.nd .nd-row09 .nd-col-cta {
+        justify-content: flex-start;
+    }
+}
+
+@media (min-width: 721px) {
+    body.nd .nd-row09 > td[data-label]::before {
+        content: none;
+        display: none;
+    }
+}

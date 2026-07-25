@@ -1,10 +1,27 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
 {% endblock %}
 {% block body %}
+    {% if request.use_new_design %}
+        <div class="nd-page nd-page-narrow" style="margin-top: 24px;">
+            {% include 'Lobby/_nd_messages.html' %}
+            <div class="nd-card nd-center">
+                <h1>{% translate "Thank you!" %}</h1>
+                <p style="color: var(--color-ink-soft); font-size: 16px; margin: 8px auto 16px;">
+                    {% translate "Your support is greatly appreciated!" %}
+                </p>
+                <img src="{% static 'FCM/images/m_icon09.png' %}"
+                     width="200"
+                     height="200"
+                     alt="Thanks!!"
+                     style="margin: 8px auto 20px; display: block;">
+                <a class="nd-button nd-button-primary" href="{% url 'index' %}">{% translate "Home" %}</a>
+            </div>
+        </div>
+    {% else %}
     <div class="container">
         {% if messages %}
             <div class="messages">
@@ -23,4 +40,5 @@
         <br />
         {% include 'Lobby/common/homeButton.html' %}
     </div>
+    {% endif %}
 {% endblock %}

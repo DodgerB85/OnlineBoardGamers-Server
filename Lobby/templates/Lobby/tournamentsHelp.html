@@ -1,146 +1,283 @@
-{% extends "Lobby/layout.html" %}
+{% extends "Lobby/_nd_help_shell.html" %}
+
 {% load static %}
 {% load i18n %}
-{% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-{% endblock %}
-{% block body %}
-  <div class="container">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
+
+{% block page_id_attr %}id="lobbyHelpPage"{% endblock %}
+{% block page_id_attr_legacy %}id="lobbyHelpPage"{% endblock %}
+{% block page_title %}{% translate "Tournaments" %}{% endblock %}
+{% block page_action %}<a class="nd-button nd-button-sm nd-button-ghost" href="{% url 'helpTournamentsMini' %}">{% translate "Mini Tournaments Help" %} →</a>{% endblock %}
+{% block nd_body %}
+
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "When are the tournaments?" %}</h2>
+        <div class="nd-help-qa">
+          {% blocktranslate trimmed %}
+            Tournaments are run at regular intervals. They open on 1st or 15th of the month, and start 7 days later,
+            or once the tournament is full. The format is randomly chosen from Rounds, Two Lives, and Points.
+            The Great Zimbabwe will be 4 player, either rounds or multi-game.
+          {% endblocktranslate %}
+          <div class="nd-table-scroll" style="margin-top:12px;">
+            <table class="nd-table">
+              <thead>
+                <tr>
+                  <th>{% translate "Game" %}</th>
+                  <th>{% translate "Month" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{% translate "Antiquity" %}</td>
+                  <td>February, August</td>
+                </tr>
+                <tr>
+                  <td>{% translate "Indonesia" %}</td>
+                  <td>March, September</td>
+                </tr>
+                <tr>
+                  <td>{% translate "Horseless Carriage" %}</td>
+                  <td>April, October</td>
+                </tr>
+                <tr>
+                  <td>{% translate "Bus" %}</td>
+                  <td>May, November</td>
+                </tr>
+                <tr>
+                  <td>{% translate "Food Chain Magnate" %}</td>
+                  <td>15th May, 15th October, 1st December (Christmas Classic 2p Knockout)</td>
+                </tr>
+                <tr>
+                  <td>{% translate "The Great Zimbabwe" %}</td>
+                  <td>1st June, 15th November</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    {% endif %}
-    <div id="lobbyHelpPage">
-      <h1>{% translate "Tournaments" %}</h1>
-      For Mini Tournaments see <a href="{% url 'helpTournamentsMini' %}" class="linkOther">Mini Tournaments Help</a>
-      <br />
-      <div class="lobbyHelpSection">
-        <b><u>{% translate "When are the tournaments?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          Tournaments are run at regular intervals
-          <br />
-          They open on 1st or 15th of the month, and start 7 days later, or once the tournament is full.
-          <br />
-          The format is randomly chosen from Rounds, Two Lives, and Points.
-          <br />
-          The Great Zimbabwe will be 4 player, either rounds or multi-game.
-        {% endblocktranslate %}
-        <br />
-        <table class="generalTable tournamentMonthsTable">
-          <thead>
-            <tr>
-              <th>{% translate "Game" %}</th>
-              <th>{% translate "Month" %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{% translate "Antiquity" %}</td>
-              <td>February, August</td>
-            </tr>
-            <tr>
-              <td>{% translate "Indonesia" %}</td>
-              <td>March, September</td>
-            </tr>
-            <tr>
-              <td>{% translate "Horseless Carriage" %}</td>
-              <td>April, October</td>
-            </tr>
-            <tr>
-              <td>{% translate "Bus" %}</td>
-              <td>May, November</td>
-            </tr>
-            <tr>
-              <td>{% translate "Food Chain Magnate" %}</td>
-              <td>15th May, 15th October, 1st December (Christmas Classic 2p Knockout)</td>
-            </tr>
-            <tr>
-              <td>{% translate "The Great Zimbabwe" %}</td>
-              <td>1st June, 15th November</td>
-            </tr>
-          </tbody>
-        </table>
-        <br />
-        <br />
-        <b><u>{% translate "What are the formats?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          <b>Rounds</b> consists of (currently) 4 rounds, where all players are included in the games,
-          after which there is a short knockout of all players on top points to determine the overall winner.
-          <br />
-          <br />
-          <b>Points</b> functions the same as Rounds, except that instead of “winner takes all”, points
-          awards points per position - unlike the other formats which are winner takes all.
-          5 player games award 16 / 8 / 4 / 2 / 1 points, 4 player games award 8 / 4 / 2 / 1 points,
-          and 3 player games award 4 / 2 / 1 points per position
-          (note that in a single tournaments all games will have the same number of players).
-          <br />
-          <br />
-          <b>Multi-Game</b> has everyyone playing 4 games in round 1. The top 14 progress into two groups of 7 players in round 2,
-          and the top 2 from each group play a single game in the final. Currently applies to 4 player only.
-          <br />
-          <br />
-          <b>Knockout</b> is simply the winner moves to the next round. This format will not be used in the regular schedule above, in order to get all players more games.
-          <br />
-          <br />
-          <b>Two Lives</b> is like double elimination; once you've lose twice then you're out of the tournament.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How are game players decided?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          Initially game players are drawn randomly. After this, players are ranked by number of wins /
-          (or points in a points. tournament). In 2p, players will play the closest people to them that
-          thay haven't already played. For 3p+ the system will try to group people who haven’t played together,
-          but there’s a higher chance you might end up seeing the same person more than once.
-          <br />
-          If there are any players left over, they receive a "Bye", which counts as an automatic win
-          (or half max points in a points tournament), and progress to the next round. "Byes" will
-          generally be given to the lowest ranked players, and are limited to one per tournament.
-          Essentially "Byes" are given randomly to the lowest ranked player who hasn't yet had a "Bye".
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How do kickouts work?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          If someone is kicked out then they are ejected from the tournament.
-          They will lose both lives in Two Lives, and be removed from a Rounds/Points tournament.
-        {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "What else should I know?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          Players will not play the same person again until there's no other option
-          (currently applies to 2p games, and the first 2 players in larger playercounts).
-          <br />
-          Players will not receive two "byes" until there's no other option.
-          <br />
-          Kickout timer will be 12 hours per turn. After that, a personal 24-hour flex time bank starts being consumed. Flex time never resets during a game. If you run out of flex, you can be kicked out.
-          <br />
-          Notifications are sent out at the start of every new tournament game.
-          If you finish quickly there could be several days until your next game starts,
-          so it is strongly recommended to have at least one form of notification enabled in your profile.
-        {% endblocktranslate %}
-        <br />
-        <br />
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What are the formats?" %}</h2>
+        <div class="nd-help-qa">
+          <b><u>{% translate "Rounds" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              consists of (currently) 4 rounds, where all players are included in the games, after which there is a short knockout of all players on top points to determine the overall winner.
+            {% endblocktranslate %}
+          </p>
+
+          <b><u>{% translate "Points" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              functions the same as Rounds, except that instead of “winner takes all”, points awards points per position - unlike the other formats which are winner takes all.
+              5 player games award 16 / 8 / 4 / 2 / 1 points, 4 player games award 8 / 4 / 2 / 1 points,
+              and 3 player games award 4 / 2 / 1 points per position
+              (note that in a single tournaments all games will have the same number of players).
+            {% endblocktranslate %}
+          </p>
+
+          <b><u>{% translate "Multi-Game" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              has everyyone playing 4 games in round 1. The top 14 progress into two groups of 7 players in round 2,
+              and the top 2 from each group play a single game in the final. Currently applies to 4 player only.
+            {% endblocktranslate %}
+          </p>
+
+          <b><u>{% translate "Knockout" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              is simply the winner moves to the next round. This format will not be used in the regular schedule above, in order to get all players more games.
+            {% endblocktranslate %}
+          </p>
+
+          <b><u>{% translate "Two Lives" %}</u></b>
+          <p>
+            {% blocktranslate trimmed %}
+              is like double elimination; once you've lose twice then you're out of the tournament.
+            {% endblocktranslate %}
+          </p>
+        </div>
       </div>
-      <br />
-      <br />
-      {% translate "For further help contact" %}
-      <img id="contactEmailImg"
-           src="{% static 'Lobby/email.png' %}"
-           alt="Email Address"
-           width="400"
-           height="30">
-    </div>
-    {% include 'Lobby/common/homeButton.html' %}
-  </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How are game players decided?" %}</h2>
+        <div class="nd-help-qa">
+          {% blocktranslate trimmed %}
+            Initially game players are drawn randomly. After this, players are ranked by number of wins /
+            (or points in a points. tournament). In 2p, players will play the closest people to them that
+            thay haven't already played. For 3p+ the system will try to group people who haven’t played together,
+            but there’s a higher chance you might end up seeing the same person more than once.
+          {% endblocktranslate %}
+          <p>
+            {% blocktranslate trimmed %}
+              If there are any players left over, they receive a "Bye", which counts as an automatic win
+              (or half max points in a points tournament), and progress to the next round. "Byes" will
+              generally be given to the lowest ranked players, and are limited to one per tournament.
+              Essentially "Byes" are given randomly to the lowest ranked player who hasn't yet had a "Bye".
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How do kickouts work?" %}</h2>
+        <div class="nd-help-qa">
+          {% blocktranslate trimmed %}
+            If someone is kicked out then they are ejected from the tournament.
+            They will lose both lives in Two Lives, and be removed from a Rounds/Points tournament.
+          {% endblocktranslate %}
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What else should I know?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              Players will not play the same person again until there's no other option
+              (currently applies to 2p games, and the first 2 players in larger playercounts).
+            {% endblocktranslate %}
+          </p>
+          <p>{% translate "Players will not receive two \"byes\" until there's no other option." %}</p>
+          <p>
+            {% blocktranslate trimmed %}
+              Kickout timer will be 12 hours per turn. After that, a personal 24-hour flex time bank starts being consumed. Flex time never resets during a game. If you run out of flex, you can be kicked out.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Notifications are sent out at the start of every new tournament game.
+              If you finish quickly there could be several days until your next game starts,
+              so it is strongly recommended to have at least one form of notification enabled in your profile.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
 {% endblock %}
+
+{% block legacy_body %}        <h1>{% translate "Tournaments" %}</h1>
+        For Mini Tournaments see <a href="{% url 'helpTournamentsMini' %}" class="linkOther">Mini Tournaments Help</a>
+        <br />
+        <div class="lobbyHelpSection">
+          <b><u>{% translate "When are the tournaments?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            Tournaments are run at regular intervals
+            <br />
+            They open on 1st or 15th of the month, and start 7 days later, or once the tournament is full.
+            <br />
+            The format is randomly chosen from Rounds, Two Lives, and Points.
+            <br />
+            The Great Zimbabwe will be 4 player, either rounds or multi-game.
+          {% endblocktranslate %}
+          <br />
+          <table class="generalTable tournamentMonthsTable">
+            <thead>
+              <tr>
+                <th>{% translate "Game" %}</th>
+                <th>{% translate "Month" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{% translate "Antiquity" %}</td>
+                <td>February, August</td>
+              </tr>
+              <tr>
+                <td>{% translate "Indonesia" %}</td>
+                <td>March, September</td>
+              </tr>
+              <tr>
+                <td>{% translate "Horseless Carriage" %}</td>
+                <td>April, October</td>
+              </tr>
+              <tr>
+                <td>{% translate "Bus" %}</td>
+                <td>May, November</td>
+              </tr>
+              <tr>
+                <td>{% translate "Food Chain Magnate" %}</td>
+                <td>15th May, 15th October, 1st December (Christmas Classic 2p Knockout)</td>
+              </tr>
+              <tr>
+                <td>{% translate "The Great Zimbabwe" %}</td>
+                <td>1st June, 15th November</td>
+              </tr>
+            </tbody>
+          </table>
+          <br />
+          <br />
+          <b><u>{% translate "What are the formats?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            <b>Rounds</b> consists of (currently) 4 rounds, where all players are included in the games,
+            after which there is a short knockout of all players on top points to determine the overall winner.
+            <br />
+            <br />
+            <b>Points</b> functions the same as Rounds, except that instead of “winner takes all”, points
+            awards points per position - unlike the other formats which are winner takes all.
+            5 player games award 16 / 8 / 4 / 2 / 1 points, 4 player games award 8 / 4 / 2 / 1 points,
+            and 3 player games award 4 / 2 / 1 points per position
+            (note that in a single tournaments all games will have the same number of players).
+            <br />
+            <br />
+            <b>Multi-Game</b> has everyyone playing 4 games in round 1. The top 14 progress into two groups of 7 players in round 2,
+            and the top 2 from each group play a single game in the final. Currently applies to 4 player only.
+            <br />
+            <br />
+            <b>Knockout</b> is simply the winner moves to the next round. This format will not be used in the regular schedule above, in order to get all players more games.
+            <br />
+            <br />
+            <b>Two Lives</b> is like double elimination; once you've lose twice then you're out of the tournament.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "How are game players decided?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            Initially game players are drawn randomly. After this, players are ranked by number of wins /
+            (or points in a points. tournament). In 2p, players will play the closest people to them that
+            thay haven't already played. For 3p+ the system will try to group people who haven’t played together,
+            but there’s a higher chance you might end up seeing the same person more than once.
+            <br />
+            If there are any players left over, they receive a "Bye", which counts as an automatic win
+            (or half max points in a points tournament), and progress to the next round. "Byes" will
+            generally be given to the lowest ranked players, and are limited to one per tournament.
+            Essentially "Byes" are given randomly to the lowest ranked player who hasn't yet had a "Bye".
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "How do kickouts work?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            If someone is kicked out then they are ejected from the tournament.
+            They will lose both lives in Two Lives, and be removed from a Rounds/Points tournament.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>{% translate "What else should I know?" %}</u></b>
+          <br />
+          {% blocktranslate trimmed %}
+            Players will not play the same person again until there's no other option
+            (currently applies to 2p games, and the first 2 players in larger playercounts).
+            <br />
+            Players will not receive two "byes" until there's no other option.
+            <br />
+            Kickout timer will be 12 hours per turn. After that, a personal 24-hour flex time bank starts being consumed. Flex time never resets during a game. If you run out of flex, you can be kicked out.
+            <br />
+            Notifications are sent out at the start of every new tournament game.
+            If you finish quickly there could be several days until your next game starts,
+            so it is strongly recommended to have at least one form of notification enabled in your profile.
+          {% endblocktranslate %}
+          <br />
+          <br />
+        </div>
+        <br />
+        <br />
+      {% include "Lobby/common/homeButton.html" %}
+
+{% endblock %}
+

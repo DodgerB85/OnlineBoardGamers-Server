@@ -1,0 +1,486 @@
+/* layout_new.css — /nd/ design shell.
+   Mirrors layout.css structure so the topbar/hamburger look the same.
+   Differences from layout.css:
+   - Colours pulled from nd-components.css tokens via var(--...).
+   - Body is a flex column with min-height: 100vh so .footer is pinned to the
+     viewport bottom on short pages (sticky-footer pattern).
+   - .mainLayout uses flex: 1 instead of magic min-height/margin numbers.
+   - Hamburger positioning is pure CSS — the inline JS hack from layout.html
+     is not used; the click handler in layout_new.html only toggles classes.
+*/
+
+#logoLoggedOut {
+    padding: 0px;
+    margin-left: 10px;
+    width: 100%;
+    max-width: 700px;
+    height: auto;
+}
+@media only screen and (max-width: 1475px) {
+    #logoLoggedOut {
+        max-width: 400px;
+        height: auto;
+        margin-top: 15px;
+    }
+}
+
+@media only screen and (max-width: 1280px) {
+    #rightLoggedInHyperlinks {
+        display: none;
+    }
+    #rightLinksLoggedIn .hamburger {
+        display: block;
+        margin: 25px;
+    }
+    #langSelectLoggedIn {
+        margin-right: 50px;
+    }
+}
+
+@media only screen and (max-width: 1100px) {
+    #rightLoggedOutHyperlinks {
+        display: none;
+    }
+    #rightLinksLoggedOut .hamburger {
+        display: block;
+        margin: 25px;
+    }
+    #langSelectLoggedOut {
+        margin-right: 50px;
+    }
+}
+
+@media only screen and (max-width: 1170px) {
+    #logoLoggedOut {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 1370px) {
+    #logoLoggedIn {
+        width: 320px;
+        max-width: 90vw;
+        height: auto;
+    }
+}
+
+@media only screen and (max-width: 590px) {
+    #logoLoggedIn {
+        display: none;
+    }
+}
+
+#registerLinkTextShort {
+    display: none;
+}
+
+@media only screen and (max-width: 540px) {
+    .loginInput {
+        width: 70px;
+    }
+    #registerLinkTextLong {
+        display: none;
+    }
+    #registerLinkTextShort {
+        display: inline;
+    }
+}
+
+/** HAMBURGER MENU */
+.hamburger {
+    display: none;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    transition: all 0.1s ease;
+    background-color: white;
+}
+
+.hamburgerMenu {
+    position: fixed;
+    top: 0;
+    /* Hide fully above the viewport regardless of how many links it holds.
+       The old magic top:-307px assumed a fixed menu height; the logged-in
+       menu is taller (~376px) so its bottom poked ~11px below the slim bar.
+       translateY(-110%) is height-independent. */
+    transform: translateY(-110%);
+    gap: 0;
+    flex-direction: column;
+    background-color: var(--color-nav-bg);
+    width: 200px;
+    text-align: center;
+    transition: transform 0.1s;
+    z-index: 10;
+    right: 0px;
+    border-left: 1px solid rgba(147, 213, 208, 0.2);
+}
+
+.hamburgerLinkDiv {
+    border: 1px solid rgba(147, 213, 208, 0.15);
+    height: 45px;
+    line-height: 45px;
+}
+
+.hamburgerLinkDiv a {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.hamburgerLinkDiv a:hover {
+    background-color: rgba(147, 213, 208, 0.1);
+}
+
+.hamburgerMenu.active {
+    transform: translateY(80px);
+    right: 0px;
+    margin: 0;
+    z-index: 10;
+}
+
+.hamburger.active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active .bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.active .bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+/** END HAMBURGER MENU */
+
+body.nd {
+    background-color: var(--color-page-bg);
+    padding: 0;
+    margin: 0;
+    padding-top: 80px;            /* reserve space for fixed .topBar */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    color: var(--color-ink);
+}
+
+body.nd .mainLayout {
+    flex: 1 0 auto;
+    padding: 16px;
+    margin: 0;
+    background-color: var(--color-page-bg);
+}
+
+@media only screen and (max-width: 800px) {
+    body.nd .mainLayout {
+        padding: 8px;
+    }
+}
+
+/** TOP BAR */
+.topBar {
+    overflow: hidden;
+    background-color: var(--color-nav-bg);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 80px;
+    font-size: 20px;
+    z-index: 1000;
+    border-bottom: 2px solid rgba(147, 213, 208, 0.25);
+}
+
+#leftLoggedInLinks {
+    display: flex;
+    margin: 10px;
+    color: var(--color-brand-blue);
+}
+#leftLoggedInLinks a {
+    margin: 0px;
+}
+
+#logoLoggedIn {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+body.nd .topBarLink {
+    color: var(--color-brand-blue);
+    text-align: center;
+    margin-left: 4px;
+    margin-right: 10px;
+    text-decoration: none;
+    font-size: 17px;
+    outline: none;
+}
+
+body.nd .topBarLink:hover {
+    color: var(--color-nav-link-hover);
+}
+
+#rightLinksLoggedOut,
+#rightLinksLoggedIn {
+    position: fixed;
+    color: var(--color-brand-blue);
+    right: 0;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    margin-right: 20px;
+}
+
+#registerLink a {
+    color: var(--color-brand-blue);
+}
+
+#rightLoggedInHyperlinks {
+    margin-right: 20px;
+}
+
+#rightLinksLoggedIn a {
+    padding: 0px;
+    margin: 0px;
+}
+
+#registerLink {
+    margin-top: 0px;
+    padding: 0px;
+    position: absolute;
+    left: 10px;
+    top: 56px;
+    color: var(--color-brand-blue);
+}
+
+#registerLink a:hover {
+    color: var(--color-nav-link-hover);
+}
+
+#registerLink a {
+    color: var(--color-nav-link);
+    text-align: center;
+    text-decoration: none;
+    font-size: 17px;
+    outline: none;
+}
+
+/* Slim logged-in top bar.
+   The logged-out bar keeps the taller 80px height (it holds the inline login
+   inputs + big logo). The logged-in bar has no login form, so it can be much
+   thinner. We flex-centre its left/right regions vertically instead of the
+   manual margin-top:25px hack, so everything stays centred at the shorter
+   height. */
+body.nd.ndAuthed .topBar {
+    height: 56px;
+}
+body.nd.ndAuthed {
+    padding-top: 56px;
+}
+body.nd.ndAuthed .hamburgerMenu.active {
+    transform: translateY(56px);
+}
+body.nd.ndAuthed #leftLoggedInLinks {
+    margin: 0 10px;
+    height: 56px;
+    align-items: center;
+}
+body.nd.ndAuthed #leftLoggedInAsInfo {
+    font-size: 13px;
+}
+body.nd.ndAuthed #logoLoggedIn {
+    margin-top: 0;
+}
+body.nd.ndAuthed #rightLinksLoggedIn {
+    margin-top: 0;
+    height: 56px;
+}
+/* keep the hamburger centred (no big vertical margin) in the slim bar */
+body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
+    margin: 0 16px;
+}
+/** END TOP BAR */
+
+#loginForm {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px;
+}
+
+#loginForm form {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+#loginForm .loginInput {
+    box-sizing: border-box;
+}
+
+/* The "Login" submit in the top bar uses the same nd-button-primary style as
+   the landing page's Log in CTA so the two match visually. The shared button
+   rules expect flex parents; this lives in a flex row already via #loginForm
+   but its padding needs a slight nudge so it sits flush with the inputs. */
+#loginForm .loginSubmit {
+    margin: 0;
+    align-self: stretch;
+}
+
+#leftLoggedInAsInfo {
+    margin-left: 10px;
+    font-size: 16px;
+}
+
+#langSelectLoggedIn select,
+#langSelectLoggedOut select {
+    background-color: var(--color-nav-link);
+    color: var(--color-nav-bg);
+    border: 1px solid var(--color-nav-bg);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/** FOOTER — sticky to viewport bottom on short pages */
+body.nd .footer {
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--color-nav-bg);
+    color: var(--color-brand-blue);
+    text-align: center;
+    padding: 16px 5px;
+    border-top: 2px solid rgba(147, 213, 208, 0.2);
+    font-size: 13px;
+}
+
+body.nd .footer a {
+    color: var(--color-brand-blue);
+}
+
+body.nd .footer p {
+    color: var(--color-brand-blue);
+}
+
+/* Support strip: donate + sponsor side by side, vertically centred */
+body.nd .nd-support-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+}
+
+/* Donate section -------------------------------------------------- */
+body.nd .support {
+    display: flex;
+    align-items: center;
+    padding-right: 24px;
+    border-right: 1px solid rgba(147, 213, 208, 0.2);
+}
+
+body.nd .support a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--color-brand-blue);
+    background: var(--color-nav-bg);
+    border: 1px solid rgba(147, 213, 208, 0.3);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+}
+
+@media (hover: hover) {
+    body.nd .support a:hover {
+        background: #1f3f49;
+        border-color: rgba(147, 213, 208, 0.5);
+    }
+}
+
+body.nd .support img {
+    height: 40px;
+    width: auto;
+    display: block;
+}
+
+/* Sponsor section ------------------------------------------------- */
+body.nd .splotterconSponsorDiv {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 24px;
+    color: var(--color-brand-blue);
+}
+
+body.nd .splotterconImg {
+    height: 40px;
+    width: auto;
+    display: block;
+}
+
+@media only screen and (max-width: 768px) {
+    #rightLinksLoggedOut,
+    #rightLinksLoggedIn {
+        flex-direction: column;
+        align-items: flex-end;
+        margin-top: 8px;
+        margin-right: 10px;
+        gap: 2px;
+    }
+    #rightLinksLoggedIn .hamburger,
+    #rightLinksLoggedOut .hamburger {
+        margin: 0;
+    }
+    #langSelectLoggedIn,
+    #langSelectLoggedOut {
+        margin-right: 0;
+    }
+    /* slim logged-in bar: keep lang-select + hamburger on one centred row so
+       they fit the 56px height instead of stacking into a column */
+    body.nd.ndAuthed #rightLinksLoggedIn {
+        flex-direction: row;
+        align-items: center;
+        margin-top: 0;
+        height: 56px;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 720px) {
+    body.nd .support {
+        border-right: none;
+        border-bottom: 1px solid rgba(147, 213, 208, 0.2);
+        padding-right: 0;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+        justify-content: center;
+    }
+    body.nd .support a {
+        flex-direction: column;
+        align-items: center;
+    }
+    body.nd .splotterconSponsorDiv {
+        padding-left: 0;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    body.nd .splotterconImg {
+        max-width: 100%;
+        width: auto !important;
+    }
+}
+
+html {
+    display: block;
+}

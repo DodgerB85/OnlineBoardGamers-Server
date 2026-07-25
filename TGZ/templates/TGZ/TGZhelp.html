@@ -1,327 +1,569 @@
-{% extends "Lobby/layout.html" %}
+{% extends "Lobby/_nd_help_shell.html" %}
+
 {% load static %}
 {% load i18n %}
-{% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-{% endblock %}
-{% block body %}
-  <div class="container">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <div id="TGZhelpPage">
-      <h1>{% translate "Rules" %}</h1>
-      {% blocktranslate trimmed %}
-        The Great Zimbabwe rules available <a href="/static/TGZ/The_Great_Zimbabwe_rules.pdf" target="_blank">here</a>
-      {% endblocktranslate %}
-      <br />
-      {% blocktranslate trimmed %}
-        Fan made Schism Expansion rules available <a href="/static/TGZ/TGZ_Schism_Rules.pdf" target="_blank">here</a>
-      {% endblocktranslate %}
-      <br />
-      {% blocktranslate trimmed %}
-        How to play guide example <a href="https://www.youtube.com/watch?v=GMTNTNqvQyw" target="_blank">here</a>
-      {% endblocktranslate %}
-      <br />
-      <h1>{% translate "The Great Zimbabwe Help" %}</h1>
-      <div class="TGZhelpSection">
-        <b><u>{% translate "What are the symbols on the map?" %}</u></b>
-        <br />
-        {% blocktranslate %}
-      In The Great Zimbabwe Online the following symbols can help you whilst positioning tiles or raising
-      monuments<br />
-      <div class="intro_items_list_div">
-        <div class="intro_inRange"></div> Item in range<br />
-        <div class="intro_OutOfRange"></div> Item not in range<br />
-        <div class="intro_resNotUsed"></div> Resource not in range of another Craftsman of same type<br />
-        <div class="intro_resUsed"></div> Resource already in range of another Craftsman of same type<br />
-        <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" /></div>
-        Depleted Resource / No resource available for craftsman<br />
-        <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" />
-          <div class="crossBackground_Atete"></div>
-        </div>
-        Depleted Resource / No resource available for craftsman (for Atete)<br />
-        <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noCows.jpg" alt="NR" /></div>
-        Not enough cattle to pay craftsman (including any hub costs)<br />
 
-        <div class="intro_monumentDiv">3
-          <div class="intro_notEnoguhCraftsmenForMon">
-            <img src="/static/TGZ/images/noCmen.jpg" alt="NC" />
-          </div>
+{% block page_title %}{% translate "The Great Zimbabwe Help" %}{% endblock %}
+{% block nd_body %}
+
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Rules" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% blocktranslate trimmed %}The Great Zimbabwe rules available <a href="/static/TGZ/The_Great_Zimbabwe_rules.pdf" target="_blank">here</a>{% endblocktranslate %}</p>
+          <p>{% blocktranslate trimmed %}Fan made Schism Expansion rules available <a href="/static/TGZ/TGZ_Schism_Rules.pdf" target="_blank">here</a>{% endblocktranslate %}</p>
+          <p>{% blocktranslate trimmed %}How to play guide example <a href="https://www.youtube.com/watch?v=GMTNTNqvQyw" target="_blank">here</a>{% endblocktranslate %}</p>
         </div>
-        Not enough available Craftsmen/Resources to Raise Monument<br />
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What are the symbols on the map?" %}</h2>
+        <div class="nd-help-qa">
+          {% blocktranslate %}
+            In The Great Zimbabwe Online the following symbols can help you whilst positioning tiles or raising
+            monuments<br />
+            <div class="intro_items_list_div">
+              <div class="intro_inRange"></div> Item in range<br />
+              <div class="intro_OutOfRange"></div> Item not in range<br />
+              <div class="intro_resNotUsed"></div> Resource not in range of another Craftsman of same type<br />
+              <div class="intro_resUsed"></div> Resource already in range of another Craftsman of same type<br />
+              <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" /></div>
+              Depleted Resource / No resource available for craftsman<br />
+              <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" />
+                <div class="crossBackground_Atete"></div>
+              </div>
+              Depleted Resource / No resource available for craftsman (for Atete)<br />
+              <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noCows.jpg" alt="NR" /></div>
+              Not enough cattle to pay craftsman (including any hub costs)<br />
+
+              <div class="intro_monumentDiv">3
+                <div class="intro_notEnoguhCraftsmenForMon">
+                  <img src="/static/TGZ/images/noCmen.jpg" alt="NC" />
+                </div>
+              </div>
+              Not enough available Craftsmen/Resources to Raise Monument<br />
+          {% endblocktranslate %}
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What are the lines on the map as I move a new item?" %}</h2>
+        <div class="nd-help-qa">
+          <p><img class="TGZhelpImg" src="/static/TGZ/images/help/help_range.jpg" alt="Line Help" width="597" height="297" /></p>
+          <p>
+            {% blocktranslate trimmed %}
+              Each area at a different range (using hubs) from your item is enclosed by a coloured border.
+            {% endblocktranslate %}
+          </p>
+          <p>{% translate "NOTE: On touch devices, you can LONG PRESS in order to see this information." %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How can I view players' moves?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              Click on "History" from the top menu to open the history. All information is available in the history entry to see
+              what happened.
+              For any moves that occurred on the map, you can also click on the entry to highlight where it happened on the map.
+              You can click entries to see where monuments were built, how monuments were raised, where resources / water were
+              placed, etc.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How Can I Replay the Game / Copy to a New Game?" %}</h2>
+        <div class="nd-help-qa">
+          <p><img class="TGZhelpImg" src="/static/TGZ/images/help/help_replay.jpg" alt="Replay button" width="146" height="42" /></p>
+          <p>{% translate "Select \"Replay\" from the top menu to go through a \"live\" replay of the game at any point." %}</p>
+          <p>{% translate "You can use the on-screen arrows, or the Left / Right keyboard arrow keys to step throguh the game." %}</p>
+          <p>{% translate "You can also select any entry in \"History\" to jump to that point in time." %}</p>
+          <p>
+            {% blocktranslate trimmed %}
+              At any replay point during a player-action, you can click the "Copy Game" button to copy the game at
+              that point in the replay into a new Practice Game. It will then be available to select in the Lobby.
+            {% endblocktranslate %}
+          </p>
+          <p><img class="TGZhelpImg" src="/static/TGZ/images/help/help_spinoff.jpg" alt="Copy Button" width="471" height="186" /></p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What is the difference between Rewind and Replay?" %}</h2>
+        <div class="nd-help-qa">
+          <p><b>REWIND</b> {% translate "will literally roll the game back by one player turn." %}</p>
+          <p>{% translate "So in the bidding phase, it will go back to the last player to make an actual bid," %}</p>
+          <p>{% translate "or if at the first player to bid, it will rewind to the last player to take actions during the last actions phase." %}</p>
+          <p>{% translate "Similarly during actions, it will either rewind to the previous player's action turn," %}</p>
+          <p>{% translate "or if already at the first player, it will rewind to the last player who made an actual bid." %}</p>
+          <p>{% translate "This permanently alters the game state - once you rewind past a move, it no longer exists." %}</p>
+          <p>{% translate "To get back to where you were, simply make the same move(s) again." %}</p>
+          <p><b>REPLAY</b> {% translate "does not alter the game state in any way. You can view all the moves made from the start of the game, stepping through move by move, and viewing the game state exactly as it was at that time." %}</p>
+          <p>{% translate "Once you exit replay mode, the game will return to the same state as when you entered replay mode." %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What is the Map Inspector?" %}</h2>
+        <div class="nd-help-qa">
+          <p><img class="TGZhelpImg" src="/static/TGZ/images/help/help_MI.jpg" alt="Map Inspector Button" width="195" height="150" /></p>
+          <p>
+            {% blocktranslate trimmed %}
+              During your turn when you are not in the middle of an action, or at any point during someone else's turn,
+              you can click on the "Map Inspector" button to enable inspection of the map.
+            {% endblocktranslate %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              All monuments and craftsmen will be highlighted, and you can click an item to view which squares are accessible
+              and how many hubs it requires to get there.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Where can I view available / taken items?" %}</h2>
+        <div class="nd-help-qa">
+          <p><img class="TGZhelpImg" src="/static/TGZ/images/help/help_reserve.jpg" alt="Reserve Button" width="144" height="57" /></p>
+          <p>
+            {% blocktranslate trimmed %}
+              Click on "Reserve" from the top menu to view all items. Click an individual player's plaque to view their items.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What is the information when bidding?" %}</h2>
+        <div class="nd-help-qa">
+          <p><img class="TGZhelpImg" src="/static/TGZ/images/help/help_bid.jpg" alt="Bidding Info" width="535" height="252" /></p>
+          <p>
+            {% blocktranslate trimmed %}
+              When bidding, your bid selection (eg Bid 1) will also show how many cows
+              you would have for actions if all other players pass.
+              This could increase if bidding continues and more cows are put on on your plaque (or plaques with
+              Shadipinyi).
+            {% endblocktranslate %}
+          </p>
+          <p>{% translate "If you adore Elegua, eligible bids will also be marked with your total cost after this bonus." %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Why did I miss my bidding turn?" %}</h2>
+        <div class="nd-help-qa">
+          <p>
+            {% blocktranslate trimmed %}
+              Turns where you cannot do anything are skipped, For example if you do not have enough cows to make an increased
+              bid.
+              Check the history for the reason a player's turn was skipped.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What is the change with Dziva?" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "Dziva is considered a bit of a weak choice with the bonus as published." %}</p>
+          <p>{% translate "Therefore, there is a small change to allow you alter prices when you choose Dziva as well as at the start of your turn." %}</p>
+          <p>{% translate "There are a lot of discussions about this on BGG, and this addition has been sanctioned by Splotter." %}</p>
+          <p>{% translate "As Dziva is a bit weak without this, and definitely not overpowered with this, then there are no plans to make this a setup option." %}</p>
+          <p>{% translate "Dziva will always have this little extra ability." %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "What Hotkeys are there?" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "R / r = Rotate" %}</p>
+          <p>{% translate "Left Arrow Key = Back one step in Replay" %}</p>
+          <p>{% translate "Right Arrow Key = Forward one step in Replay" %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "How can I score points?" %}</h2>
+        <div class="nd-help-qa">
+          <p><img class="TGZhelpImg" src="/static/TGZ/images/help/help_scoring.jpg" alt="Scoring" width="403" height="205" /></p>
+          <p>{% translate "You score Victory Points based on the level of each of your monuments." %}</p>
+          <p>{% translate "In addition, you get Victory Points for each Craftsman you build." %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Who wins? (And what about Xango?)" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "Your Victory Requirement (VR) starts at 20 points." %}</p>
+          <p>{% translate "Taking gods, specialists, and technologies increases your VR, so you will need more points to win." %}</p>
+          <p>{% translate "You score Victory Points as above, giving you a score in the format VP / VR." %}</p>
+          <p>{% translate "When your VP equal or exceed your VR, you can win the game. This is checked during the \"Let Us Compare Mythologies\" phase." %}</p>
+          <p>{% translate "If multiple players exceed their VR in the same round (ie have more VP then VR) then ties are decided as follows:" %}</p>
+          <ul>
+            <li>{% translate "1st tiebreaker: Highest overshoot of VR" %}<br />{% translate "(Highest net score, once you calculate VP - VR)" %}</li>
+            <li>{% translate "2nd tiebreaker: If players tie on VP - VR (ie overshoot by the same amount) ties are won by Xango" %}<br />{% translate "In this context, you can think of Xango as being effectively -2.5 VR" %}</li>
+            <li>{% translate "3rd tiebreaker: Highest total VP" %}<br />{% translate "If players are still tied, ignore the VR and look at the VP. Highest wins." %}</li>
+            <li>{% translate "4th tiebreaker: Any remaining tied players are decided in turn order. Earliest wins." %}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "When can I resign?" %}</h2>
+        <div class="nd-help-qa">
+          <p>{% translate "You can resign during your actions phase; as long as no one has exceeded their VR." %}</p>
+        </div>
+      </div>
+
+      <div class="nd-card nd-section">
+        <h2>{% translate "Examples of Play" %}</h2>
+        <div class="nd-help-qa">
+          <p>The following examples of play are from TGZ Tournament Games</p>
+          <p><b>2024 Autumn Final</b></p>
+          <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
+            <iframe src="https://www.youtube-nocookie.com/embed/BZ4WWGEYxnI"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+          </div>
+          <p><b>2024 Autumn game A3</b></p>
+          <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
+            <iframe src="https://www.youtube-nocookie.com/embed/pVSyeE_ib1o"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+          </div>
+          <p><b>2024 Autumn game 20</b></p>
+          <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
+            <iframe src="https://www.youtube-nocookie.com/embed/2onb2ZJJ7G4"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+          </div>
+          <p>{% translate "For moe game analysis videos see" %} <a href="https://www.youtube.com/@steveth-b2g" target="_blank">Steveth's YouTube Channel</a></p>
+        </div>
+      </div>
+
+{% endblock %}
+
+{% block legacy_body %}
+
+
+      <div id="TGZhelpPage">
+        <h1>{% translate "Rules" %}</h1>
+        {% blocktranslate trimmed %}
+          The Great Zimbabwe rules available <a href="/static/TGZ/The_Great_Zimbabwe_rules.pdf" target="_blank">here</a>
         {% endblocktranslate %}
         <br />
+        {% blocktranslate trimmed %}
+          Fan made Schism Expansion rules available <a href="/static/TGZ/TGZ_Schism_Rules.pdf" target="_blank">here</a>
+        {% endblocktranslate %}
+        <br />
+        {% blocktranslate trimmed %}
+          How to play guide example <a href="https://www.youtube.com/watch?v=GMTNTNqvQyw" target="_blank">here</a>
+        {% endblocktranslate %}
+        <br />
+        <h1>{% translate "The Great Zimbabwe Help" %}</h1>
+        <div class="TGZhelpSection">
+          <b><u>{% translate "What are the symbols on the map?" %}</u></b>
+          <br />
+          {% blocktranslate %}
+        In The Great Zimbabwe Online the following symbols can help you whilst positioning tiles or raising
+        monuments<br />
+        <div class="intro_items_list_div">
+          <div class="intro_inRange"></div> Item in range<br />
+          <div class="intro_OutOfRange"></div> Item not in range<br />
+          <div class="intro_resNotUsed"></div> Resource not in range of another Craftsman of same type<br />
+          <div class="intro_resUsed"></div> Resource already in range of another Craftsman of same type<br />
+          <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" /></div>
+          Depleted Resource / No resource available for craftsman<br />
+          <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" />
+            <div class="crossBackground_Atete"></div>
+          </div>
+          Depleted Resource / No resource available for craftsman (for Atete)<br />
+          <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noCows.jpg" alt="NR" /></div>
+          Not enough cattle to pay craftsman (including any hub costs)<br />
+
+          <div class="intro_monumentDiv">3
+            <div class="intro_notEnoguhCraftsmenForMon">
+              <img src="/static/TGZ/images/noCmen.jpg" alt="NC" />
+            </div>
+          </div>
+          Not enough available Craftsmen/Resources to Raise Monument<br />
+          {% endblocktranslate %}
+          <br />
+        </div>
+        <b><u>{% translate "What are the lines on the map as I move a new item?" %}</u></b>
+        <br />
+        <img class="TGZhelpImg"
+             src="/static/TGZ/images/help/help_range.jpg"
+             alt="Line Help"
+             width="597"
+             height="297" />
+        <br />
+        {% blocktranslate trimmed %}
+          Each area at a different range (using hubs) from your item is enclosed by a coloured border.
+          <br />
+          NOTE: On touch devices, you can LONG PRESS in order to see this information.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "How can I view players' moves?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Click on "History" from the top menu to open the history. All information is available in the history entry to see
+          what happened.
+          For any moves that occurred on the map, you can also click on the entry to highlight where it happened on the map.
+          You can click entries to see where monuments were built, how monuments were raised, where resources / water were
+          placed, etc.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "How Can I Replay the Game / Copy to a New Game?" %}</u></b>
+        <br />
+        <img class="TGZhelpImg"
+             src="/static/TGZ/images/help/help_replay.jpg"
+             alt="Replay button"
+             width="146"
+             height="42" />
+        <br />
+        {% blocktranslate trimmed %}
+          Select "Replay" from the top menu to go through a "live" replay of the game at any point.
+          <br />
+          You can use the on-screen arrows, or the Left / Right keyboard arrow keys to step throguh the game.
+          <br />
+          You can also select any entry in "History" to jump to that point in time.
+          <br />
+          At any replay point during a player-action, you can click the "Copy Game" button to copy the game at
+          that point in the replay into a new Practice Game. It will then be available to select in the Lobby.
+        {% endblocktranslate %}
+        <br />
+        <img class="TGZhelpImg"
+             src="/static/TGZ/images/help/help_spinoff.jpg"
+             alt="Copy Button"
+             width="471"
+             height="186" />
+        <br />
+        <br />
+        <b><u>{% translate "What is the difference between Rewind and Replay?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          <b>REWIND</b> will literally roll the game back by one player turn.
+          <br />
+          So in the bidding phase, it will go back to the last player to make an actual bid,
+          <br />
+          or if at the first player to bid, it will rewind to the last player to take actions during the last actions
+          phase.
+          <br />
+          Similarly during actions, it will either rewind to the previous player's action turn,
+          <br />
+          or if already at the first player, it will rewind to the last player who made an actual bid.
+          <br />
+          This permanently alters the game state - once you rewind past a move, it no longer exists.
+          <br />
+          To get back to where you were, simply make the same move(s) again.
+          <br />
+          <br />
+          <b>REPLAY</b> does not alter the game state in any way. You can view all the moves made from the
+          <br />
+          start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
+          <br />
+          Once you exit replay mode, the game will return to the same state as when you entered replay mode.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "What is the Map Inspector?" %}</u></b>
+        <br />
+        <img class="TGZhelpImg"
+             src="/static/TGZ/images/help/help_MI.jpg"
+             alt="Map Inspector Button"
+             width="195"
+             height="150" />
+        <br />
+        {% blocktranslate trimmed %}
+          During your turn when you are not in the middle of an action, or at any point during someone else's turn,
+          you can click on the "Map Inspector" button to enable inspection of the map.
+          <br />
+          All monuments and craftsmen will be highlighted, and you can click an item to view which squares are accessible
+          and how many hubs it requires to get there.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "Where can I view available / taken items?" %}</u></b>
+        <br />
+        <img class="TGZhelpImg"
+             src="/static/TGZ/images/help/help_reserve.jpg"
+             alt="Reserve Button"
+             width="144"
+             height="57" />
+        <br />
+        {% blocktranslate trimmed %}
+          Click on "Reserve" from the top menu to view all items. Click an individual player's plaque to view their items.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "What is the information when bidding?" %}</u></b>
+        <br />
+        <img class="TGZhelpImg"
+             src="/static/TGZ/images/help/help_bid.jpg"
+             alt="Bidding Info"
+             width="535"
+             height="252" />
+        <br />
+        {% blocktranslate trimmed %}
+          When bidding, your bid selection (eg Bid 1) will also show how many cows
+          you would have for actions if all other players pass.
+          This could increase if bidding continues and more cows are put on on your plaque (or plaques with
+          Shadipinyi).
+          <br />
+          If you adore Elegua, eligible bids will also be marked with your total cost after this bonus.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "Why did I miss my bidding turn?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Turns where you cannot do anything are skipped, For example if you do not have enough cows to make an increased
+          bid.
+          Check the history for the reason a player's turn was skipped.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "What is the change with Dziva?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Dziva is considered a bit of a weak choice with the bonus as published.
+          <br />
+          Therefore, there is a small change to allow you alter prices when you choose Dziva as well as at the start of your turn.
+          <br />
+          There are a lot of discussions about this on BGG, and this addition has been sanctioned by Splotter.
+          <br />
+          As Dziva is a bit weak without this, and definitely not overpowered with this, then there are no plans to make this a setup option.
+          <br />
+          Dziva will always have this little extra ability.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "What Hotkeys are there?" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          R / r = Rotate
+          <br />
+          Left Arrow Key = Back one step in Replay
+          <br />
+          Right Arrow Key = Forward one step in Replay
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "How can I score points?" %}</u></b>
+        <br />
+        <img class="TGZhelpImg"
+             src="/static/TGZ/images/help/help_scoring.jpg"
+             alt="Scoring"
+             width="403"
+             height="205" />
+        <br />
+        {% blocktranslate trimmed %}
+          You score Victory Points based on the level of each of your monuments.
+          <br />
+          In addition, you get Victory Points for each Craftsman you build.
+        {% endblocktranslate %}
+        <br />
+        <br />
+        <b><u>{% translate "Who wins? (And what about Xango?)" %}</u></b>
+        <br />
+        {% blocktranslate trimmed %}
+          Your Victory Requirement (VR) starts at 20 points.
+          <br />
+          Taking gods, specialists, and technologies increases your VR, so you will need more points to win.
+          <br />
+          You score Victory Points as above, giving you a score in the format VP / VR.
+          <br />
+          When your VP equal or exceed your VR, you can win the game. This is checked during the "Let Us Compare
+          Mythologies" phase.
+          <br />
+          If multiple players exceed their VR in the same round (ie have more VP then VR) then ties are decided as follows:
+          <ul>
+            <li>
+              1st tiebreaker: Highest overshoot of VR
+              <br />
+              (Highest net score, once you calculate VP - VR)
+            </li>
+            <li>
+              2nd tiebreaker: If players tie on VP - VR (ie overshoot by the same amount) ties are won by Xango
+              <br />
+              In this context, you can think of Xango as being effectively -2.5 VR
+            </li>
+            <li>
+              3rd tiebreaker: Highest total VP
+              <br />
+              If players are still tied, ignore the VR and look at the VP. Highest wins.
+            </li>
+            <li>4th tiebreaker: Any remaining tied players are decided in turn order. Earliest wins.</li>
+          </ul>
+        {% endblocktranslate %}
+        <b><u>{% translate "When can I resign?" %}</u></b>
+        <br />
+        {% translate "You can resign during your actions phase; as long as no one has exceeded their VR." %}
       </div>
-      <b><u>{% translate "What are the lines on the map as I move a new item?" %}</u></b>
-      <br />
-      <img class="TGZhelpImg"
-           src="/static/TGZ/images/help/help_range.jpg"
-           alt="Line Help"
-           width="597"
-           height="297" />
-      <br />
-      {% blocktranslate trimmed %}
-        Each area at a different range (using hubs) from your item is enclosed by a coloured border.
-        <br />
-        NOTE: On touch devices, you can LONG PRESS in order to see this information.
-      {% endblocktranslate %}
+      <h1>{% translate "Examples of Play" %}</h1>
+      The following examples of play are from TGZ Tournament Games
       <br />
       <br />
-      <b><u>{% translate "How can I view players' moves?" %}</u></b>
+      2024 Autumn Final
       <br />
-      {% blocktranslate trimmed %}
-        Click on "History" from the top menu to open the history. All information is available in the history entry to see
-        what happened.
-        For any moves that occurred on the map, you can also click on the entry to highlight where it happened on the map.
-        You can click entries to see where monuments were built, how monuments were raised, where resources / water were
-        placed, etc.
-      {% endblocktranslate %}
-      <br />
-      <br />
-      <b><u>{% translate "How Can I Replay the Game / Copy to a New Game?" %}</u></b>
-      <br />
-      <img class="TGZhelpImg"
-           src="/static/TGZ/images/help/help_replay.jpg"
-           alt="Replay button"
-           width="146"
-           height="42" />
-      <br />
-      {% blocktranslate trimmed %}
-        Select "Replay" from the top menu to go through a "live" replay of the game at any point.
-        <br />
-        You can use the on-screen arrows, or the Left / Right keyboard arrow keys to step throguh the game.
-        <br />
-        You can also select any entry in "History" to jump to that point in time.
-        <br />
-        At any replay point during a player-action, you can click the "Copy Game" button to copy the game at
-        that point in the replay into a new Practice Game. It will then be available to select in the Lobby.
-      {% endblocktranslate %}
-      <br />
-      <img class="TGZhelpImg"
-           src="/static/TGZ/images/help/help_spinoff.jpg"
-           alt="Copy Button"
-           width="471"
-           height="186" />
+      <iframe width="560"
+              height="315"
+              src="https://www.youtube-nocookie.com/embed/BZ4WWGEYxnI"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
       <br />
       <br />
-      <b><u>{% translate "What is the difference between Rewind and Replay?" %}</u></b>
+      2024 Autumn game A3
       <br />
-      {% blocktranslate trimmed %}
-        <b>REWIND</b> will literally roll the game back by one player turn.
-        <br />
-        So in the bidding phase, it will go back to the last player to make an actual bid,
-        <br />
-        or if at the first player to bid, it will rewind to the last player to take actions during the last actions
-        phase.
-        <br />
-        Similarly during actions, it will either rewind to the previous player's action turn,
-        <br />
-        or if already at the first player, it will rewind to the last player who made an actual bid.
-        <br />
-        This permanently alters the game state - once you rewind past a move, it no longer exists.
-        <br />
-        To get back to where you were, simply make the same move(s) again.
-        <br />
-        <br />
-        <b>REPLAY</b> does not alter the game state in any way. You can view all the moves made from the
-        <br />
-        start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
-        <br />
-        Once you exit replay mode, the game will return to the same state as when you entered replay mode.
-      {% endblocktranslate %}
+      <iframe width="560"
+              height="315"
+              src="https://www.youtube-nocookie.com/embed/pVSyeE_ib1o"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
       <br />
       <br />
-      <b><u>{% translate "What is the Map Inspector?" %}</u></b>
+      2024 Autumn game 20
       <br />
-      <img class="TGZhelpImg"
-           src="/static/TGZ/images/help/help_MI.jpg"
-           alt="Map Inspector Button"
-           width="195"
-           height="150" />
-      <br />
-      {% blocktranslate trimmed %}
-        During your turn when you are not in the middle of an action, or at any point during someone else's turn,
-        you can click on the "Map Inspector" button to enable inspection of the map.
-        <br />
-        All monuments and craftsmen will be highlighted, and you can click an item to view which squares are accessible
-        and how many hubs it requires to get there.
-      {% endblocktranslate %}
+      <iframe width="560"
+              height="315"
+              src="https://www.youtube-nocookie.com/embed/2onb2ZJJ7G4"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
       <br />
       <br />
-      <b><u>{% translate "Where can I view available / taken items?" %}</u></b>
-      <br />
-      <img class="TGZhelpImg"
-           src="/static/TGZ/images/help/help_reserve.jpg"
-           alt="Reserve Button"
-           width="144"
-           height="57" />
-      <br />
-      {% blocktranslate trimmed %}
-        Click on "Reserve" from the top menu to view all items. Click an individual player's plaque to view their items.
-      {% endblocktranslate %}
+      For moe game analysis videos see <a href="https://www.youtube.com/@steveth-b2g" target="_blank">Steveth's YouTube Channel</a>
       <br />
       <br />
-      <b><u>{% translate "What is the information when bidding?" %}</u></b>
-      <br />
-      <img class="TGZhelpImg"
-           src="/static/TGZ/images/help/help_bid.jpg"
-           alt="Bidding Info"
-           width="535"
-           height="252" />
-      <br />
-      {% blocktranslate trimmed %}
-        When bidding, your bid selection (eg Bid 1) will also show how many cows
-        you would have for actions if all other players pass.
-        This could increase if bidding continues and more cows are put on on your plaque (or plaques with
-        Shadipinyi).
-        <br />
-        If you adore Elegua, eligible bids will also be marked with your total cost after this bonus.
-      {% endblocktranslate %}
-      <br />
-      <br />
-      <b><u>{% translate "Why did I miss my bidding turn?" %}</u></b>
-      <br />
-      {% blocktranslate trimmed %}
-        Turns where you cannot do anything are skipped, For example if you do not have enough cows to make an increased
-        bid.
-        Check the history for the reason a player's turn was skipped.
-      {% endblocktranslate %}
-      <br />
-      <br />
-      <b><u>{% translate "What is the change with Dziva?" %}</u></b>
-      <br />
-      {% blocktranslate trimmed %}
-        Dziva is considered a bit of a weak choice with the bonus as published.
-        <br />
-        Therefore, there is a small change to allow you alter prices when you choose Dziva as well as at the start of your turn.
-        <br />
-        There are a lot of discussions about this on BGG, and this addition has been sanctioned by Splotter.
-        <br />
-        As Dziva is a bit weak without this, and definitely not overpowered with this, then there are no plans to make this a setup option.
-        <br />
-        Dziva will always have this little extra ability.
-      {% endblocktranslate %}
-      <br />
-      <br />
-      <b><u>{% translate "What Hotkeys are there?" %}</u></b>
-      <br />
-      {% blocktranslate trimmed %}
-        R / r = Rotate
-        <br />
-        Left Arrow Key = Back one step in Replay
-        <br />
-        Right Arrow Key = Forward one step in Replay
-      {% endblocktranslate %}
-      <br />
-      <br />
-      <b><u>{% translate "How can I score points?" %}</u></b>
-      <br />
-      <img class="TGZhelpImg"
-           src="/static/TGZ/images/help/help_scoring.jpg"
-           alt="Scoring"
-           width="403"
-           height="205" />
-      <br />
-      {% blocktranslate trimmed %}
-        You score Victory Points based on the level of each of your monuments.
-        <br />
-        In addition, you get Victory Points for each Craftsman you build.
-      {% endblocktranslate %}
-      <br />
-      <br />
-      <b><u>{% translate "Who wins? (And what about Xango?)" %}</u></b>
-      <br />
-      {% blocktranslate trimmed %}
-        Your Victory Requirement (VR) starts at 20 points.
-        <br />
-        Taking gods, specialists, and technologies increases your VR, so you will need more points to win.
-        <br />
-        You score Victory Points as above, giving you a score in the format VP / VR.
-        <br />
-        When your VP equal or exceed your VR, you can win the game. This is checked during the "Let Us Compare
-        Mythologies" phase.
-        <br />
-        If multiple players exceed their VR in the same round (ie have more VP then VR) then ties are decided as follows:
-        <ul>
-          <li>
-            1st tiebreaker: Highest overshoot of VR
-            <br />
-            (Highest net score, once you calculate VP - VR)
-          </li>
-          <li>
-            2nd tiebreaker: If players tie on VP - VR (ie overshoot by the same amount) ties are won by Xango
-            <br />
-            In this context, you can think of Xango as being effectively -2.5 VR
-          </li>
-          <li>
-            3rd tiebreaker: Highest total VP
-            <br />
-            If players are still tied, ignore the VR and look at the VP. Highest wins.
-          </li>
-          <li>4th tiebreaker: Any remaining tied players are decided in turn order. Earliest wins.</li>
-        </ul>
-      {% endblocktranslate %}
-      <b><u>{% translate "When can I resign?" %}</u></b>
-      <br />
-      {% translate "You can resign during your actions phase; as long as no one has exceeded their VR." %}
     </div>
-    <h1>{% translate "Examples of Play" %}</h1>
-    The following examples of play are from TGZ Tournament Games
-    <br />
-    <br />
-    2024 Autumn Final
-    <br />
-    <iframe width="560"
-            height="315"
-            src="https://www.youtube-nocookie.com/embed/BZ4WWGEYxnI"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen></iframe>
-    <br />
-    <br />
-    2024 Autumn game A3
-    <br />
-    <iframe width="560"
-            height="315"
-            src="https://www.youtube-nocookie.com/embed/pVSyeE_ib1o"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen></iframe>
-    <br />
-    <br />
-    2024 Autumn game 20
-    <br />
-    <iframe width="560"
-            height="315"
-            src="https://www.youtube-nocookie.com/embed/2onb2ZJJ7G4"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen></iframe>
-    <br />
-    <br />
-    For moe game analysis videos see <a href="https://www.youtube.com/@steveth-b2g" target="_blank">Steveth's YouTube Channel</a>
-    <br />
-    <br />
-    {% translate "For further help contact" %}
-    <img id="contactEmailImg"
-         src="{% static 'Lobby/email.png' %}"
-         alt="Email Address"
-         width="400"
-         height="30">
-  </div>
-  {% include 'Lobby/donate/donateBanner.html' %}
-  {% include 'Lobby/common/homeButton.html' %}
-</div>
+    {% include 'Lobby/donate/donateBanner.html' %}
+    {% include 'Lobby/common/homeButton.html' %}
+
 {% endblock %}

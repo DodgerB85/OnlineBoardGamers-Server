@@ -1,7 +1,9 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    {% if not request.use_new_design %}
+        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    {% endif %}
     <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
@@ -9,6 +11,231 @@
         <script src="{% static 'Lobby/playerInfo.js' %}"></script>
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
+    {% if request.use_new_design %}
+    <div class="nd-page" id="playerInfoPage">
+        {% include 'Lobby/_nd_messages.html' %}
+        <div class="nd-player-header">
+            <div>
+                <h1>{{ usernameToProfile }}</h1>
+            </div>
+            {% if trophyHTML %}<div class="nd-trophy-row">{{ trophyHTML|safe }}</div>{% endif %}
+        </div>
+        {% if trophyDetailHTML %}<div class="nd-trophy-detail">{{ trophyDetailHTML|safe }}</div>{% endif %}
+
+        {# ── Player Stats ── #}
+        <div class="nd-card" style="margin-bottom: 16px;">
+            <div class="nd-card-header">
+                <h2>{% translate "Player Stats" %}</h2>
+            </div>
+            <div class="tab nd-tabs">
+                {% include 'Lobby/_nd_game_tabs.html' %}
+            </div>
+            <div class="nd-player-stats">
+                {% for game in allGamesArr %}
+                    <div id="playerStatsDiv{{ forloop.counter0 }}" class="playerStatsDiv">
+                        <div class="nd-table-scroll">
+                            <table class="nd-table">
+                                <thead>
+                                    <tr>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Games" %}</th>
+                                        <th>{% translate "Wins" %}</th>
+                                        <th>{% translate "Win %" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="clickablePlayerRow222 players2">
+                                        <td>2</td>
+                                        <td>{{ game.0 }}</td>
+                                        <td>{{ game.1 }}</td>
+                                        <td>{{ game.2 }} %</td>
+                                    </tr>
+                                    <tr class="clickablePlayerRow222 players3">
+                                        <td>3</td>
+                                        <td>{{ game.3 }}</td>
+                                        <td>{{ game.4 }}</td>
+                                        <td>{{ game.5 }} %</td>
+                                    </tr>
+                                    <tr class="clickablePlayerRow222 players4">
+                                        <td>4</td>
+                                        <td>{{ game.6 }}</td>
+                                        <td>{{ game.7 }}</td>
+                                        <td>{{ game.8 }} %</td>
+                                    </tr>
+                                    <tr class="clickablePlayerRow222 players5">
+                                        <td>5</td>
+                                        <td>{{ game.9 }}</td>
+                                        <td>{{ game.10 }}</td>
+                                        <td>{{ game.11 }} %</td>
+                                    </tr>
+                                    <tr class="clickablePlayerRow222 players6">
+                                        <td>6</td>
+                                        <td>{{ game.12 }}</td>
+                                        <td>{{ game.13 }}</td>
+                                        <td>{{ game.14 }} %</td>
+                                    </tr>
+                                    <tr class="clickablePlayerRow222 playersAll">
+                                        <td>All</td>
+                                        <td>{{ game.15 }}</td>
+                                        <td>{{ game.16 }}</td>
+                                        <td>{{ game.17 }} %</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="nd-stats-grid" style="margin-top: 14px;">
+                    <div class="nd-stats-tile">
+                        <div class="nd-stats-tile-num">{{ kickedOutGamesLastYear }}</div>
+                        <div class="nd-stats-tile-label">{% translate "Kickouts (last year)" %}</div>
+                    </div>
+                    <div class="nd-stats-tile">
+                        <div class="nd-stats-tile-num">{{ fairPlayLastYear }}%</div>
+                        <div class="nd-stats-tile-label">{% translate "Fair Play Rating" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include 'Lobby/_nd_map_editor_forms.html' %}
+
+        {# ── Joint Games ── #}
+        {% if activeJointGames or finishedJointGames %}
+            <div class="nd-card" style="margin-bottom: 16px;">
+                <div class="nd-card-header">
+                    <h2>{% translate "Joint Games" %}</h2>
+                </div>
+                {% if activeJointGames %}
+                    <div class="nd-player-sub">{% translate "Joint Current Games" %} ({{ activeJointGames|length }})</div>
+                    <div class="nd-game-list">
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
+                                        <th>{% translate "Status" %}</th>
+                                        <th>{% translate "Last Move" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for game in activeJointGames %}
+                                        {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="nd-empty">{% translate "No Joint Current Games" %}</p>
+                {% endif %}
+                {% if finishedJointGames %}
+                    <div class="nd-player-sub">
+                        {% translate "Joint Finished Games" %} ({{ finishedJointGames|length }}) - {% translate "Wins" %}: {{ jointWinTotal }}/{{ finishedJointGames|length }} ({{ jointWinPercentage }}%)
+                    </div>
+                    <div class="nd-joint-summary">
+                        {% for gameRow in jointGameStats %}
+                            <span class="nd-game-stat">
+                                {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=gameRow.0 %}
+                                {{ gameRow.1 }}/{{ gameRow.2 }} ({{ gameRow.3 }}%)
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <div class="nd-game-list">
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
+                                        <th>{% translate "Status" %}</th>
+                                        <th>{% translate "Last Activity" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for game in finishedJointGames %}
+                                        {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="nd-empty">{% translate "No Joint Finished Games" %}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {# ── Current Games ── #}
+        {% if activeOtherGames %}
+            <div class="nd-card" style="margin-bottom: 16px;">
+                <div class="nd-card-header">
+                    <h2>{% translate "Current Games" %} ({{ activeOtherGames|length }})</h2>
+                </div>
+                <div class="nd-game-list">
+                    <div class="nd-table-wrap">
+                        <table class="nd-table gamesTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>{% translate "Name" %}</th>
+                                    <th>{% translate "Players" %}</th>
+                                    <th>{% translate "Options" %}</th>
+                                    <th>{% translate "Status" %}</th>
+                                    <th>{% translate "Last Move" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for game in activeOtherGames %}
+                                    {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="nd-empty">{% translate "No Current Games" %}</p>
+        {% endif %}
+
+        {# ── Finished Games ── #}
+        {% if finishedOtherGames %}
+            <div class="nd-card" style="margin-bottom: 16px;">
+                <div class="nd-card-header">
+                    <h2>{% translate "Finished Games" %} ({{ finishedOtherGames|length }})</h2>
+                </div>
+                <div class="nd-game-list">
+                    <div class="nd-table-wrap">
+                        <table class="nd-table gamesTable">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>{% translate "Name" %}</th>
+                                    <th>{% translate "Players" %}</th>
+                                    <th>{% translate "Options" %}</th>
+                                    <th>{% translate "Status" %}</th>
+                                    <th>{% translate "Last Activity" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for game in finishedOtherGames %}
+                                    {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="nd-empty">{% translate "No Finished Games" %}</p>
+        {% endif %}
+    </div>
+    {% else %}
     <div class="container">
         {% if messages %}
             <div class="messages">
@@ -259,4 +486,5 @@
         {% include 'Lobby/donate/donateBanner.html' %}
         {% include 'Lobby/common/homeButton.html' %}
     </div>
+    {% endif %}
 {% endblock %}

@@ -8,6 +8,7 @@
 #AQYhelpPage,
 #INDhelpPage,
 #KFWhelpPage,
+#WEBhelpPage,
 #RNBhelpPage {
 	font-size: 23px;
 }
@@ -44,7 +45,7 @@
 .imageWithTextIconImg {
   margin-right: 10px; /* Add some space between the image and the text */
   width: 50px !important; /* Set the desired width of the image */
-  height: auto; /* Maintain aspect ratio */
+  height: 50px !important; /* Force height so SVGs without intrinsic dimensions render correctly */
   margin-bottom: 5px;
 }
 

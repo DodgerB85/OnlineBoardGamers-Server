@@ -1,4 +1,46 @@
 {% load static i18n %}
+{% if request.use_new_design %}
+<tr class="nd-row09 clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %}kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
+    id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
+    onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/show/';">
+  <td class="nd-col-icon">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}</td>
+  <td class="nd-col-game" data-label="{% translate "Name" %}">
+    {% if game.chatNotification %}<img class="startingOption" alt="Chat" width="20" height="20" src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
+    <a href="/{{ game.gameCode }}/{{ game.gameID }}/show/"><strong>{{ game.gameName }}</strong></a>
+    {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
+    <br><small class="nd-muted">{% translate "Turn" %} {{ game.currentTurn }} · {{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
+  </td>
+  <td class="nd-col-players" data-label="{% translate "Players" %}">
+    {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+  </td>
+  <td class="nd-col-options" data-label="{% translate "Options" %}">
+    {% if game.startingMap and game.gameCode == "FCM" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMap.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="FCM">{% endif %}
+    {% if game.startingMap and game.gameCode == "TGZ" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapTGZ.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="TGZ">{% endif %}
+    {% if game.startingMap and game.gameCode == "AQY" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">{% endif %}
+    {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
+    {% if game.startingOptionsHTML == "[None]" %}None{% else %}{{ game.startingOptionsHTML|safe }}{% endif %}
+  </td>
+  <td class="nd-col-status" data-label="{% translate "Status" %}">
+    {% if game.myMove %}
+      {% if game.kickoutRequiredNum == 2 %}<span class="nd-pill nd-pill-danger">{% translate "Kick risk" %}</span>
+      {% elif game.kickoutRequiredNum == 1 %}<span class="nd-pill nd-pill-warn">{% translate "Flexi" %}</span>
+      {% else %}<span class="nd-pill nd-pill-positive">{% translate "My turn" %}</span>{% endif %}
+    {% else %}
+      {% if game.kickoutRequiredNum == 2 %}<span class="nd-pill nd-pill-danger">{% translate "Kickout" %}</span>
+      {% elif game.kickoutRequiredNum == 1 %}<span class="nd-pill nd-pill-warn">{% translate "Flexi" %}</span>
+      {% else %}<span class="nd-pill">{{ game.currentPlayers }}</span>{% endif %}
+    {% endif %}
+  </td>
+  <td class="nd-col-cta" data-label="{% translate "Last Move" %}">
+    <span class="timeToConvertSpan nd-small nd-muted">{{ game.latestUpdate }}</span><br>
+    <span class="nd-small nd-muted">{{ game.latestUpdateElapsedTimeString }}</span>
+    {% if 'SHADOW' not in game.allPlayers %}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}
+    {% if game.deleteableGame %}
+      <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">{% translate "Delete" %}</div>
+    {% endif %}
+  </td>
+</tr>
+{% else %}
 <tr class="clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %} kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
     id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
     onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/show/';">
@@ -95,3 +137,4 @@
     {{ game.latestUpdateElapsedTimeString }}
   </td>
 </tr>
+{% endif %}

@@ -1,0 +1,31 @@
+/* OBG New Design overrides for FCM game shell */
+
+#top {
+    background-color: #19343c;
+    border-bottom: 2px solid rgba(147, 213, 208, 0.25);
+}
+
+#menu a {
+    color: #c8dfe0;
+}
+
+#menu a:hover,
+#menu span:hover {
+    color: #93d5d0;
+}
+
+.topMenuItem span {
+    color: #c8dfe0;
+}
+
+.topMenuItem:hover span {
+    color: #93d5d0;
+}
+
+#loggedInDiv {
+    color: #c8dfe0;
+}
+
+#liveDiv {
+    color: #93d5d0;
+}

@@ -1,15 +1,17 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
   {% compress js %}
     <script src="{% static 'FCM/FCMstats.js' %}"></script>
   {% endcompress %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
   <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  <div class="container">
+  <div class="{% if request.use_new_design %}nd-page{% else %}container{% endif %}">
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -17,48 +19,87 @@
         {% endfor %}
       </div>
     {% endif %}
-    <div id="FCMstatsPage">
-      <a class="linkOther" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
-      <br />
-      <br />
-      Data Generated: {{ basicData.time_string }}
-      <br />
-      <br />
-      <b>Note: Any game with a resigned/kicked player is not considered for these stats</b>
-      <br />
-      <br />
-      <b>Note:</b> These are stats of what happened historically.
-      <br />
-      They give an interesting insight into what has happened in previous games.
-      <br />
-      Be aware that part of the genius of Splotter games is that the winner will
-      <br />
-      almost always be the player who can read and respond to the current game state in the best way tactically.
-      <br />
-      Therefore, you should not use these stats to drive your strategy, but see them as
-      <br />
-      an interesting indication of how the game is being played.
-      <br />
-      <br />
-      Finished Games: {{ basicData.finishedGames_all }} (Non-practice, not stats excluded, etc)
-      <br />
-      <br />
-      Finished Games Old MS: {{ basicData.finishedGames_oldMS }}
-      <br />
-      Average Turns Old MS: {{ basicData.avg_turn_oldMS|floatformat:1 }}
-      <br />
-      <br />
-      Finished Games New MS: {{ basicData.finishedGames_newMS }}
-      <br />
-      Average Turns Old MS: {{ basicData.avg_turn_newMS|floatformat:1 }}
-      <br />
-      <br />
-      <br />
-      <b><u>Module Choices (could be multiple in 1 game)</u></b>
-      <br />
-      This shows how often a module / option is selected.
-      <br />
-      Note that the number of Original MS vs New MS can be seen from the number of finished games shown above.
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% translate "Food Chain Magnate Stats" %}</h1>
+        <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
+      </div>
+    {% endif %}
+    <div id="FCMstatsPage" class="{% if request.use_new_design %}nd-card nd-section nd-fcm-stats{% endif %}">
+      {% if request.use_new_design %}
+        <div class="nd-fcm-stats-summary">
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ basicData.finishedGames_all }}</div>
+            <div class="nd-stats-tile-label">{% translate "Finished games" %}</div>
+          </div>
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ basicData.finishedGames_oldMS }}</div>
+            <div class="nd-stats-tile-label">{% translate "Original MS games" %}</div>
+          </div>
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ basicData.avg_turn_oldMS|floatformat:1 }}</div>
+            <div class="nd-stats-tile-label">{% translate "Avg turns Original MS" %}</div>
+          </div>
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ basicData.finishedGames_newMS }}</div>
+            <div class="nd-stats-tile-label">{% translate "New MS games" %}</div>
+          </div>
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ basicData.avg_turn_newMS|floatformat:1 }}</div>
+            <div class="nd-stats-tile-label">{% translate "Avg turns New MS" %}</div>
+          </div>
+        </div>
+        <div class="nd-callout nd-callout-warn">
+          {% translate "Any game with a resigned/kicked player is not considered for these stats." %}
+        </div>
+        <div class="nd-callout nd-callout-info">
+          {% translate "These are historical stats. They show what has happened in previous games, but Food Chain Magnate still rewards reading and responding to the current game state." %}
+        </div>
+        <h2>{% translate "Module Choices" %}</h2>
+        <p>{% translate "This shows how often a module or option is selected. Original MS vs New MS can be read from the finished game counts above." %}</p>
+      {% else %}
+        <a class="linkOther" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
+        <br />
+        <br />
+        Data Generated: {{ basicData.time_string }}
+        <br />
+        <br />
+        <b>Note: Any game with a resigned/kicked player is not considered for these stats</b>
+        <br />
+        <br />
+        <b>Note:</b> These are stats of what happened historically.
+        <br />
+        They give an interesting insight into what has happened in previous games.
+        <br />
+        Be aware that part of the genius of Splotter games is that the winner will
+        <br />
+        almost always be the player who can read and respond to the current game state in the best way tactically.
+        <br />
+        Therefore, you should not use these stats to drive your strategy, but see them as
+        <br />
+        an interesting indication of how the game is being played.
+        <br />
+        <br />
+        Finished Games: {{ basicData.finishedGames_all }} (Non-practice, not stats excluded, etc)
+        <br />
+        <br />
+        Finished Games Old MS: {{ basicData.finishedGames_oldMS }}
+        <br />
+        Average Turns Old MS: {{ basicData.avg_turn_oldMS|floatformat:1 }}
+        <br />
+        <br />
+        Finished Games New MS: {{ basicData.finishedGames_newMS }}
+        <br />
+        Average Turns Old MS: {{ basicData.avg_turn_newMS|floatformat:1 }}
+        <br />
+        <br />
+        <br />
+        <b><u>Module Choices (could be multiple in 1 game)</u></b>
+        <br />
+        This shows how often a module / option is selected.
+        <br />
+        Note that the number of Original MS vs New MS can be seen from the number of finished games shown above.
+      {% endif %}
       <canvas class="bar_canvas" id="moduleChoiceBar" width="1400"></canvas>
       <script>
   const moduleLinkData = [
@@ -1693,14 +1734,10 @@
     </div>
     <br />
     <br />
-    {% translate "For further help contact" %}
-    <img id="contactEmailImg"
-         src="{% static 'Lobby/email.png' %}"
-         alt="Email Address"
-         width="400"
-         height="30">
   </div>
-  {% include 'Lobby/common/homeButton.html' %}
+  {% if not request.use_new_design %}
+    {% include 'Lobby/common/homeButton.html' %}
+  {% endif %}
   <form id="gameIdsForm"
         method="POST"
         action="/FCM/FCMstatGames/"

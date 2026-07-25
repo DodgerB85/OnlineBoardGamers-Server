@@ -136,6 +136,9 @@ INSTALLED_APPS = [
 APPEND_SLASH = True
 
 MIDDLEWARE = [
+    "Lobby.middleware.NewDesignMiddleware",
+    "Lobby.middleware.ForceTrailingSlashMiddleware",
+    # This MUST come first
     # 1. Always let security handle SSL/headers first
     "django.middleware.security.SecurityMiddleware",
 
@@ -201,6 +204,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "Lobby.context_processors.base_layout",
             ],
             "auto_reload": DEBUG,  # Always disable for performance
             "translation_engine": "django.utils.translation",
@@ -225,6 +229,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "Lobby.context_processors.base_layout",
             ],
             "loaders": [
                 (

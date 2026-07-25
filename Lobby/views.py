@@ -1497,9 +1497,10 @@ def index(request):
 
     # print_timestamp("Final prep complete")
 
+    template = "Lobby/lobby_new.html" if getattr(request, "use_new_design", False) else "Lobby/lobby.html"
     return render(
         request,
-        "Lobby/lobby.html",
+        template,
         {
             "availableGamesList": available_games,
             "currentGamesList": current_games,
@@ -4218,7 +4219,7 @@ def MiniTournament(request, Mini_Tournament_id):
     startingOptionsHTML = ""
     if Mini_Tournament.gameCode == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
-        if startingOptionsHTML == "[None]":
+        if startingOptionsHTML == "":
             startingOptionsHTML = "(No Starting Options)"
     elif Mini_Tournament.gameCode == "TGZ":
         startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
@@ -4562,7 +4563,7 @@ def MainTournament(request, Main_Tournament_id):
     startingOptionsHTML = ""
     if currentTournament.gameCode == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(currentTournament.startingOptions) if currentTournament.startingOptions else [])
-        if startingOptionsHTML == "[None]":
+        if startingOptionsHTML == "":
             startingOptionsHTML = "(No Starting Options)"
     elif currentTournament.gameCode == "TGZ":
         startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(currentTournament.startingOptions) if currentTournament.startingOptions else [])

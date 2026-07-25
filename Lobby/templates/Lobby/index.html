@@ -1,9 +1,11 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
   <link rel="canonical" href="https://www.onlineboardgamers.com/" />
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -102,6 +104,206 @@
   </script>
 {% endblock %}
 {% block body %}
+{% if request.use_new_design %}
+  <div class="nd-page nd-landing">
+    {% if messages %}
+      <div class="nd-messages">
+        {% for message in messages %}
+          <div class="nd-pill {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <section class="nd-hero">
+      <div class="nd-hero-text">
+        <h1>{% translate "Play Splotter & other classics online — free, live, with friends or solo." %}</h1>
+        <p class="nd-hero-sub">
+          {% translate "Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Antiquity, Indonesia, Bus, Cannes, Web, Roads & Boats and Keyflower — live updates, replays, stats, and regular tournaments." %}
+        </p>
+        <div class="nd-hero-actions">
+          <a class="nd-button nd-button-primary" href="{% url 'register' %}">{% translate "Create a free account" %}</a>
+          <a class="nd-button nd-button-primary" href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="nd-section">
+      <h2 class="nd-section-title">{% translate "What you get" %}</h2>
+      <div class="nd-features">
+        <div class="nd-card nd-feature">
+          <h3>{% translate "Live multiplayer" %}</h3>
+          <p>{% translate "Games update instantly between players. Get notified when it's your turn." %}</p>
+        </div>
+        <div class="nd-card nd-feature">
+          <h3>{% translate "Practice solo" %}</h3>
+          <p>{% translate "Start a hot-seat game and play every seat on a single device to learn the rules." %}</p>
+        </div>
+        <div class="nd-card nd-feature">
+          <h3>{% translate "Stats & rewind" %}</h3>
+          <p>{% translate "Review past moves, study other players' strategies, and track your stats over time." %}</p>
+        </div>
+        <div class="nd-card nd-feature">
+          <h3>{% translate "Tournaments" %}</h3>
+          <p>{% translate "Join open tournaments by skill bracket or community-run mini tournaments." %}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="nd-section">
+      <h2 class="nd-section-title">{% translate "Games available" %}</h2>
+      <div class="nd-card-grid nd-card-grid-wide">
+        {% include "Lobby/_nd_game_card.html" with title="Food Chain Magnate" img="FCM/images/fcm-box.jpg" players="2–6" tagline="Build a fast-food empire by out-advertising and out-producing your rivals." full_id="game-fcm" %}
+        {% include "Lobby/_nd_game_card.html" with title="Horseless Carriage" img="HLC/images/hlc-box.jpg" players="3–5" tagline="Race rivals to build and sell the most automobiles in a brand-new market." full_id="game-hlc" %}
+        {% include "Lobby/_nd_game_card.html" with title="The Great Zimbabwe" img="TGZ/images/TGZ_box.jpg" players="2–5" tagline="Raise monuments to your chosen god across an ancient African trade network." full_id="game-tgz" %}
+        {% include "Lobby/_nd_game_card.html" with title="Antiquity" img="AQY/images/AQYbox.jpg" players="2–4" tagline="Grow cities and please your patron saint before the land is depleted." full_id="game-aqy" %}
+        {% include "Lobby/_nd_game_card.html" with title="Indonesia" img="IND/images/INDbox.jpg" players="2–5" tagline="Ship goods, merge companies, and dominate an emerging economy." full_id="game-ind" %}
+        {% include "Lobby/_nd_game_card.html" with title="Bus" img="BUS/images/bus-box.jpg" players="3–5" tagline="Carry passengers across an expanding city — with time itself in play." full_id="game-bus" %}
+        {% include "Lobby/_nd_game_card.html" with title="Cannes" img="CNS/images/CNSbox.jpg" players="2–4" tagline="Produce films and work the network to win Cannes." full_id="game-cns" %}
+        {% include "Lobby/_nd_game_card.html" with title="Web" img="WEB/images/WEBbox.jpg" players="2–4" tagline="Connect computers, lay cable, and outmanoeuvre your opponents." full_id="game-web" %}
+        {% include "Lobby/_nd_game_card.html" with title="Roads & Boats" img="RNB/images/RNBbox.jpg" players="2–6" tagline="Build a civilisation by logistics and transport — there is no territory." full_id="game-rnb" %}
+        {% include "Lobby/_nd_game_card.html" with title="Keyflower" img="KFW/images/KFWbox.jpg" players="2–6" tagline="Bid for village tiles and use workers across four seasons." full_id="game-kfw" %}
+      </div>
+
+      <div class="nd-game-flavour">
+        <h2 class="nd-section-title">{% translate "About the games" %}</h2>
+
+        <details id="game-fcm">
+          <summary>Food Chain Magnate</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Build up your fast food empire by out advertising and out producing your opponents to win the match" %}</p>
+            <p>
+              {% blocktranslate trimmed %}
+                From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+              {% endblocktranslate %}
+            </p>
+            <p><i>{% translate "Food Chain Magnate is a heavy strategy game about building a fast food chain. The focus is on building your company using a card-driven (human) resource management system. Players compete on a variable city map through purchasing, marketing and sales, and on a job market for key staff members." %}</i></p>
+            <p>{% translate "Includes options for all expansion modules. Play with 2-6 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-rnb">
+          <summary>Roads &amp; Boats</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Build your civilisation through logistics and transport - manage goods, roads, boats and more to outproduce your rivals" %}</p>
+            <p>
+              {% blocktranslate trimmed %}
+                From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+              {% endblocktranslate %}
+            </p>
+            <p><i>{% translate "In Roads & Boats, each player builds a civilisation over a long period of time, like in many other games. Unlike most games, however, the emphasis is not on warfare, population growth, city or statebuilding, but on logistics, or rather: on transport. Each player starts the game with three donkeys, a pile of wooden boards, a number of stones and two geese. With these few resources, you try to build such diverse things as woodcutters, roads, boats, mines, a stock exchange... but beware! There is no concept of territory in this game: you cannot own land, nor will you ever keep it. Before you know it, someone else might settle in your place and take over your hard work!" %}</i></p>
+            <p>{% translate "Play with 2-6 people or solo, or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-hlc">
+          <summary>Horseless Carriage</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Compete to build and sell the most vehicles - research and influence the market to forge your path to victory" %}</p>
+            <p>
+              {% blocktranslate trimmed %}
+                From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+              {% endblocktranslate %}
+            </p>
+            <p><i>{% translate "Horseless Carriage is a game about the dawn of the automobile: a time when cars were invented, and no one quite knew yet what this new contraption would look like, and what features would be essential." %}</i></p>
+            <p>{% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-tgz">
+          <summary>The Great Zimbabwe</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Raise your monuments to establish your empire as having the best mythology" %}</p>
+            <p>
+              {% blocktranslate trimmed %}
+                From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+              {% endblocktranslate %}
+            </p>
+            <p><i>{% translate "The Great Zimbabwe is a game about building a trade based civilization in ancient Africa." %}</i></p>
+            <p>{% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-ind">
+          <summary>Indonesia</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Ship your goods as efficiently as possible to dominate the economy!" %}</p>
+            <p>{% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-aqy">
+          <summary>Antiquity</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Build up your cities to exploit the countryside and please your chosen Saint!" %}</p>
+            <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-bus">
+          <summary>Bus</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Transport as many passengers as you can - but with a time altering clock in the mix, the outcome can be hard to predict!" %}</p>
+            <p>{% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-cns">
+          <summary>Cannes</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Shift your network of connections to produce and release movies in Cannes" %}</p>
+            <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-web">
+          <summary>Web</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Connect servers up to computers to outscore and outmaneuver your opponents" %}</p>
+            <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+
+        <details id="game-kfw">
+          <summary>Keyflower</summary>
+          <div class="nd-flavour-body">
+            <p>{% translate "Bid for tiles and use actions with your workers. Build up your village to achieve the highest score at the end of Winter!" %}</p>
+            <p>{% translate "Play with 2-6 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+        </details>
+      </div>
+    </section>
+  </div>
+  <script>
+  (function () {
+    // Only one game's <details> flavour text should be open at a time.
+    var allDetails = document.querySelectorAll('.nd-game-flavour details');
+    allDetails.forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (!d.open) return;
+        allDetails.forEach(function (other) {
+          if (other !== d) other.open = false;
+        });
+      });
+    });
+
+    // Game cards on the landing page are <button>s; clicking a card opens
+    // (and scrolls to) the matching <details> in .nd-game-flavour below.
+    var cards = document.querySelectorAll('[data-nd-game-card]');
+    if (!cards.length) return;
+    cards.forEach(function (card) {
+      var targetId = card.getAttribute('data-nd-game-card');
+      if (!targetId) return;
+      card.addEventListener('click', function () {
+        var d = document.getElementById(targetId);
+        if (!d) return;
+        d.open = true;
+        d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        card.setAttribute('aria-expanded', 'true');
+      });
+    });
+  })();
+  </script>
+{% else %}
   <div class="container">
     {% if messages %}
       <div class="messages">
@@ -124,14 +326,9 @@
       <div class="indexRow">
         <div class="indexCol">
           <h2>{% translate "Food Chain Magnate" %}</h2>
-          <img class="indexBoxImage"
-               width="141"
-               height="199"
-               src="{% static 'FCM/images/fcm-box.jpg' %}"
-               alt="Horseless Carriage">
+          <img class="indexBoxImage" width="141" height="199" src="{% static 'FCM/images/fcm-box.jpg' %}" alt="Food Chain Magnate">
           {% translate "Build up your fast food empire by out advertising and out producing your opponents to win the match" %}
-          <br />
-          <br />
+          <br /><br />
           {% blocktranslate trimmed %}
             From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
             <br />
@@ -139,279 +336,110 @@
               The focus is on building your company using a card-driven (human) resource management system.
               Players compete on a variable city map through purchasing, marketing and sales, and on a job market for key
               staff members.
-            {% endblocktranslate %}
+          {% endblocktranslate %}
           </i>
           <br />
-          <img class="indexBoxImage"
-               width="141"
-               height="199"
-               src="{% static 'FCM/images/fcm-box2.jpg' %}"
-               alt="Horseless Carriage">
+          <img class="indexBoxImage" width="141" height="199" src="{% static 'FCM/images/fcm-box2.jpg' %}" alt="Food Chain Magnate">
           <br />
           {% translate "Includes options for all expansion modules" %}
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 2-6 people or start a practice game to play as all players on one device." %}
         </div>
         <div class="indexCol">
           <h2>{% translate "Roads & Boats" %}</h2>
-          <img class="indexBoxImage"
-               width="141"
-               height="199"
-               src="{% static 'RNB/images/RNBbox.jpg' %}"
-               alt="Roads & Boats">
+          <img class="indexBoxImage" width="141" height="199" src="{% static 'RNB/images/RNBbox.jpg' %}" alt="Roads & Boats">
           {% translate "Build your civilisation through logistics and transport - manage goods, roads, boats and more to outproduce your rivals" %}
-          <br />
-          <br />
+          <br /><br />
           {% blocktranslate trimmed %}
             From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
             <br />
             <i>In Roads & Boats, each player builds a civilisation over a long period of time, like in many other games. Unlike most games, however, the emphasis is not on warfare, population growth, city or statebuilding, but on logistics, or rather: on transport. Each player starts the game with three donkeys, a pile of wooden boards, a number of stones and two geese. With these few resources, you try to build such diverse things as woodcutters, roads, boats, mines, a stock exchange... but beware! There is no concept of territory in this game: you cannot own land, nor will you ever keep it. Before you know it, someone else might settle in your place and take over your hard work!
-            {% endblocktranslate %}
+          {% endblocktranslate %}
           </i>
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 2-6 people or solo, or start a practice game to play as all players on one device." %}
         </div>
       </div>
       <div class="indexRow">
         <div class="indexCol">
           <h2>{% translate "Horseless Carriage" %}</h2>
-          <img class="indexBoxImage"
-               width="141"
-               height="199"
-               src="{% static 'HLC/images/hlc-box.jpg' %}"
-               alt="Horseless Carriage">
+          <img class="indexBoxImage" width="141" height="199" src="{% static 'HLC/images/hlc-box.jpg' %}" alt="Horseless Carriage">
           {% translate "Compete to build and sell the most vehicles - research and influence the market to forge your path to victory" %}
-          <br />
-          <br />
+          <br /><br />
           {% blocktranslate trimmed %}
             From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
             <br />
             <i>Horseless Carriage is a game about the dawn of the automobile: a time when cars were invented,
               and no one quite knew yet what this new contraption would look like, and what features would be essential.
-              Early cars sometimes used levers or pedals to steer and a wheel to accelerate. Brakes were not always seen as
-              essential;
-              but sometimes an outside spot to take along an onboard mechanic was. This early, super innovative period occurs
-              in the development of many new product categories. Players are cast as aspiring industrialists trying to find
-              out what features the public will value when buying these new, expensive, and utterly unfamiliar horseless
-              carriages.
-            {% endblocktranslate %}
+          {% endblocktranslate %}
           </i>
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}
         </div>
         <div class="indexCol">
           <h2>{% translate "The Great Zimbabwe" %}</h2>
-          <img class="indexBoxImage"
-               width="141"
-               height="199"
-               src="{% static 'TGZ/images/TGZ_box.jpg' %}"
-               alt="The Great Zimbabwe">
+          <img class="indexBoxImage" width="141" height="199" src="{% static 'TGZ/images/TGZ_box.jpg' %}" alt="The Great Zimbabwe">
           {% translate "Raise your monuments to establish your empire as having the best mythology" %}
-          <br />
-          <br />
+          <br /><br />
           {% blocktranslate trimmed %}
             From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
             <br />
             <i>The Great Zimbabwe is a game about building a trade based civilization in ancient Africa.
-              It has been inspired by the old kingdoms surrounding the Great Zimbabwe,
-              a world heritage site in southern Africa.
-              <br />
-              As always in our games, we have used this history for inspiration; however, first and foremost we wanted to create a
-              highly playable and replayable Splotter game, so in many cases we took liberties with historical names, periods and artwork.
-              <br />
-              In the game, players strive to build the most impressive monuments to one god of their choice.
-              They can choose this god themselves - each of the twelve gods offers a unique blessing,
-              but each also requires a different amount of work to win the game.
-              Building the monuments is done by developing a logistics network stretching across the region. Through this network, players produce and obtain ritual goods to raise their monuments and bring honour to the god of their choice.
-            {% endblocktranslate %}
+          {% endblocktranslate %}
           </i>
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}
         </div>
       </div>
       <div class="indexRow">
         <div class="indexCol">
           <h2>{% translate "Indonesia" %}</h2>
-          <img class="indexBoxBusImage"
-               width="200"
-               height="157"
-               src="{% static 'IND/images/INDbox.jpg' %}"
-               alt="Indonesia">
+          <img class="indexBoxBusImage" width="200" height="157" src="{% static 'IND/images/INDbox.jpg' %}" alt="Indonesia">
           {% translate "Ship your goods as efficiently as possible to dominate the economy!" %}
-          <br />
-          <br />
-          {% blocktranslate trimmed %}
-            From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-            <br />
-            <i>Indonesia is a game in which two to five players build up an economy, trying to acquire the most money.
-              Players acquire production companies
-              and shipping companies, which deliver goods to cities. As cities receive goods, they grow,
-              increasing their demands. Production companies earn money for each good delivered to a city, up to the city's
-              capacity, but they must pay shipping companies for the distance traveled, even if they end up losing money.
-              Players can research advantages, like greater shipping capacity or the ability to merge companies,
-              possibly stealing ownership of lucrative plantations or shipping routes by buying out other players.
-              <br />
-              Players keep their money hidden, trying to accumulate the most by the end of the third era.
-              When only one type of a company is left, an era ends. New eras bring new cities, companies,
-              and types of goods. At the end of the third era, the player with the most money wins.
-              However, money earned from the last round of operations (selling/shipping goods) counts double,
-              so it can be important to control the timing.
-            {% endblocktranslate %}
-          </i>
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}
         </div>
         <div class="indexCol">
           <h2>{% translate "Antiquity" %}</h2>
-          <img class="indexBoxImage"
-               width="141"
-               height="199"
-               src="{% static 'AQY/images/AQYbox.jpg' %}"
-               alt="Antiquity">
+          <img class="indexBoxImage" width="141" height="199" src="{% static 'AQY/images/AQYbox.jpg' %}" alt="Antiquity">
           {% translate "Build up your cities to exploit the countryside and please your chosen Saint!" %}
-          <br />
-          <br />
-          {% blocktranslate trimmed %}
-            From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-            <br />
-            <i>Antiquity is a strategy game for 2-4 players. It is set in an environment loosely modeled on Italy in the late Middle Ages. Players choose their own victory condition: they can focus on population growth, trade, conquest, or city building by choosing their patron saint.
-              <br />
-              <br />
-              Each strategy requires a completely different style of play. Or you can choose to adore Santa Maria, the most powerful saint of all -- but you'll be expected to build a civilization twice as impressive as any other player.
-              <br />
-              While your economy is constantly improving, with more and more advanced cities bringing new options each turn, the land around your cities is slowly being depleted, forcing you to travel further and further to gather your raw materials -- until finally, there is no more land left to farm. Let's hope one of you has won the game before that time!
-            {% endblocktranslate %}
-          </i>
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}
         </div>
       </div>
       <div class="indexRow">
         <div class="indexCol">
           <h2>{% translate "Keyflower" %}</h2>
-          <img class="indexBoxBusImage"
-               width="200"
-               height="157"
-               src="{% static 'KFW/images/KFWbox.jpg' %}"
-               alt="Keyflower">
+          <img class="indexBoxBusImage" width="200" height="157" src="{% static 'KFW/images/KFWbox.jpg' %}" alt="Keyflower">
           {% translate "Bid for tiles and use actions with your workers. Build up your village to achieve the highest score at the end of Winter!" %}
-          <br />
-          <br />
-          {% blocktranslate trimmed %}
-            Published by <a href="https://boardgamegeek.com/boardgamepublisher/83/r-and-d-games"
-    target="_blank">R & D Games</a>
-            <br />
-            <i>In spring, summer and autumn, more workers will arrive on board the Keyflower and her sister boats,
-              with some of these workers possessing skills in the working of the key resources of iron, stone and wood.
-              In each of these seasons, village tiles are set out at random for auction.
-              In the winter no new workers arrive and the players select the village tiles for
-              auction from those they received at the beginning of the game. Each winter village tile offers VPs for certain combinations of resources, skills and workers. The player whose village and workers generate the most VPs wins the game.
-              <br />
-              <br />
-              Keyflower presents players with many different challenges and each game will be
-              different due to the mix of village tiles that appear in that particular game.
-              Throughout the game, players will need to be alert to the opportunities to best utilize
-              their various resources, transport and upgrade capability, skills and workers.
-            {% endblocktranslate %}
-          </i>
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 2-6 people or start a practice game to play as all players on one device." %}
         </div>
         <div class="indexCol">
           <h2>{% translate "Bus" %}</h2>
-          <img class="indexBoxBusImage"
-               width="200"
-               height="157"
-               src="{% static 'BUS/images/bus-box.jpg' %}"
-               alt="Bus">
+          <img class="indexBoxBusImage" width="200" height="157" src="{% static 'BUS/images/bus-box.jpg' %}" alt="Bus">
           {% translate "Transport as many passengers as you can - but with a time altering clock in the mix, the outcome can be hard to predict!" %}
-          <br />
-          <br />
-          {% blocktranslate trimmed %}
-            From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-            <br />
-            <i>Beep! Beep! Bus is a game about the development of public transport in a city that is expanding quickly.
-              The citizens are busy travelling up and down between their houses, the office and, most importantly: the pub.
-              Your task as a player will be to develop a busline which takes as many passengers as possible to the place they want to be.
-              You do this by expanding your busline, by developing new suburbs, by luring new potential passengers
-              to the city and by investing in more and more buses.
-              But you can also try to ride just a bit earlier than other companies and steal their passengers away.
-              <br />
-              <br />
-              Sometimes, something unexpected happens: time comes to a stand-still,
-              and all of a sudden the demand for transportation is completely different... but you cannot let this happen too often,
-              as the time-space continuum will rupture and the universe will collapse, thus ending the game.
-            {% endblocktranslate %}
-          </i>
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}
         </div>
       </div>
       <div class="indexRow">
         <div class="indexCol">
           <h2>{% translate "Cannes" %}</h2>
-          <img class="indexBoxImage"
-               width="141"
-               height="199"
-               src="{% static 'CNS/images/CNSbox.jpg' %}"
-               alt="Cannes">
+          <img class="indexBoxImage" width="141" height="199" src="{% static 'CNS/images/CNSbox.jpg' %}" alt="Cannes">
           {% translate "Shift your network of connections to produce and release movies in Cannes" %}
-          <br />
-          <br />
-          {% blocktranslate trimmed %}
-            From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-            <br />
-            <i>
-              It's the big screen, and you're playing in the big league.
-              Well, nearly. Maybe this year you'll make it big… Nominations are due to be published any day now,
-              and hey, who knows, maybe you will finally get that Oscar or Palme dÓr you so deserve.
-              Or will you? They say girlie movies like you've been making lately are going out of fashion,
-              that the modern public has a yearning for plotless action titles. Maybe it is time to invite
-              that rotten art critic over for drinks, and convince her of the value of your masterpieces… or tune
-              into the old boys network and really get the show on the road.
-            {% endblocktranslate %}
-          </i>
-          <br />
-          <br />
+          <br /><br />
           {% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}
         </div>
         <div class="indexCol">
           <h2>{% translate "Web" %}</h2>
-          <img class="indexBoxImage"
-               width="141"
-               height="199"
-               src="{% static 'WEB/images/WEBbox.jpg' %}"
-               alt="Web">
-          {% translate "Connecct servers up to computers to outscore and outmaneuver your opponents" %}
-          <br />
-          <br />
-          {% blocktranslate trimmed %}
-            From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-            <br />
-            <i>
-              At the headoffice of Splotter-4-all computer services the phones just won't stop ringing: complaints galore!
-              Everyone wants internet. Where are the connections?
-              Web is a game in which the players attempt to connect as many computers as possible.
-              More than anyone else, at least. If that isn't possible by connecting more computers yourself, there are other means.
-              Stealing computers from your neighbours, dumping uninteresting contracts on them...
-              <br />
-              By laying cards on the table, a grid of computers and modems develops. These are connected to each other by means of wooden "cables". Whoever connects a computer first, scores points! Winning this game requires concentration, puzzling and a bit of luck.
-            {% endblocktranslate %}
-          </i>
-          <br />
-          <br />
+          <img class="indexBoxImage" width="141" height="199" src="{% static 'WEB/images/WEBbox.jpg' %}" alt="Web">
+          {% translate "Connect servers up to computers to outscore and outmaneuver your opponents" %}
+          <br /><br />
           {% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}
         </div>
       </div>
     </div>
   </div>
-  <!-- <div class="indexColSingle or summat">-->
+{% endif %}
 {% endblock %}

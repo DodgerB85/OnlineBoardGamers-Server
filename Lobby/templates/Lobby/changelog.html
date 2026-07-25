@@ -1,13 +1,98 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
 {% endblock head %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
-  <div class="container" id="changelogPage">
+  {% if request.use_new_design %}<div class="nd-page nd-page-narrow" id="changelogPage">{% else %}<div class="container" id="changelogPage">{% endif %}
+  {% if request.use_new_design %}
+
+    <div class="nd-page-header">
+      <h1>Updates</h1>
+      <a class="nd-button nd-button-ghost" href="https://discord.gg/hCU7Fr77yV" target="_blank" rel="noopener">Join Discord for discussion ↗</a>
+    </div>
+
+    {% if user.username == 'admin' %}
+      <div class="nd-card nd-section">
+        <div class="nd-card-header"><h3>Add Update</h3></div>
+        <form method="post" style="padding: 4px 0;">
+          {% csrf_token %}
+          {% for field in changelogFormVar %}{{ field }}<br /><br />{% endfor %}
+          <input type="hidden" id="action" name="action" value="dooby">
+          <button type="submit" class="nd-button nd-button-primary">Add Update</button>
+        </form>
+      </div>
+    {% endif %}
+
+    <div class="nd-card nd-section">
+      {% if allChanges %}
+        {% for change in allChanges %}
+          <div class="nd-log-entry">
+            <div class="nd-log-date"><span class="timeToConvertSpan">{{ change.timestamp }}</span></div>
+            <div class="nd-log-text">{{ change.update }}</div>
+          </div>
+        {% endfor %}
+      {% else %}
+        {# Demo entries — shown when no real updates exist yet #}
+        <div class="nd-log-entry">
+          <div class="nd-log-date">May 2026</div>
+          <div class="nd-log-text">
+            <strong>Site redesign underway.</strong> New visual design rolling out under <code>/nd/</code> — cleaner lobby, better mobile layout, Outfit font throughout. The old design stays the default until the new one is fully tested. Feedback welcome on Discord.
+          </div>
+        </div>
+        <div class="nd-log-entry">
+          <div class="nd-log-date">Apr 2026</div>
+          <div class="nd-log-text">
+            <strong>Roads &amp; Boats: canals and bridges expansion options added.</strong> New creation options for the advanced map variants. Thanks to vraid and Benkyo for the extended playtesting.
+          </div>
+        </div>
+        <div class="nd-log-entry">
+          <div class="nd-log-date">Mar 2026</div>
+          <div class="nd-log-text">
+            <strong>Keyflower: winter tile rule clarification fixed.</strong> A corner case in the scoring of winter tiles with meeples was being resolved incorrectly. All current and future games use the corrected logic; finished games are unaffected.
+          </div>
+        </div>
+        <div class="nd-log-entry">
+          <div class="nd-log-date">Feb 2026</div>
+          <div class="nd-log-text">
+            <strong>FCM: new Ketchup expansion options.</strong> The Ketchup expansion pack is now selectable at game creation. Includes Luxury Meals, Outdoor Seating, and the full set of 24 new staff cards. See Help for a summary of the new rules.
+          </div>
+        </div>
+        <div class="nd-log-entry">
+          <div class="nd-log-date">Jan 2026</div>
+          <div class="nd-log-text">
+            <strong>Tournament system update.</strong> Main Tournaments can now have invited-player lists set at creation time. Invited players see an Accept / Decline prompt when they visit the tournament page. Mini Tournaments are unchanged.
+          </div>
+        </div>
+        <div class="nd-log-entry">
+          <div class="nd-log-date">Nov 2025</div>
+          <div class="nd-log-text">
+            <strong>Notification improvements.</strong> Email and browser notifications now batch moves made within a short window so you receive one message per turn sequence rather than one per move. Opt-out remains available in profile settings.
+          </div>
+        </div>
+        <div class="nd-log-entry">
+          <div class="nd-log-date">Sep 2025</div>
+          <div class="nd-log-text">
+            <strong>Indonesia: ship transfer rules tightened.</strong> A bug allowed ships to be transferred to a player who already owned the maximum allowed in a single transaction. This is now correctly blocked.
+          </div>
+        </div>
+        <div class="nd-log-entry">
+          <div class="nd-log-date">Aug 2025</div>
+          <div class="nd-log-text">
+            <strong>Antiquity: city growth display.</strong> The city tile adjacency highlight was not showing correctly for all map seeds. Fixed. Also: the famine track now stays visible in the sidebar throughout the whole game rather than disappearing after round 3.
+          </div>
+        </div>
+        <p style="margin-top:16px; font-size:13px; color:var(--color-muted); font-style:italic;">
+          These entries are placeholders — real updates will appear here once the changelog is populated.
+        </p>
+      {% endif %}
+    </div>
+
+  {% else %}
+
     {% if user.username == 'admin' %}
       Add Update
       <form method="post">
@@ -36,6 +121,8 @@
       <br />
     {% endfor %}
     {% include "Lobby/donate/donateBanner.html" %}
+
+  {% endif %}
   </div>
-  {% include "Lobby/common/homeButton.html" %}
+  {% if not request.use_new_design %}{% include "Lobby/common/homeButton.html" %}{% endif %}
 {% endblock body %}

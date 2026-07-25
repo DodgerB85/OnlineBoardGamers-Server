@@ -68,15 +68,16 @@ document.addEventListener("DOMContentLoaded", function () {
 			joinGame(gameName, _gameID)
 		}
 
-		joinGameDivs[i].onmouseenter = function () {
-			this.style.backgroundColor = "#5875f8"
-			this.style.color = "white"
-			this.style.cursor = "pointer"
-		}
-
-		joinGameDivs[i].onmouseleave = function () {
-			this.style.backgroundColor = "rgba(255, 255, 255, 0.05)"
-			this.style.color = "blue"
+		if (!document.body.classList.contains("nd")) {
+			joinGameDivs[i].onmouseenter = function () {
+				this.style.backgroundColor = "#5875f8"
+				this.style.color = "white"
+				this.style.cursor = "pointer"
+			}
+			joinGameDivs[i].onmouseleave = function () {
+				this.style.backgroundColor = "rgba(255, 255, 255, 0.05)"
+				this.style.color = "blue"
+			}
 		}
 	}
 
@@ -123,15 +124,16 @@ document.addEventListener("DOMContentLoaded", function () {
 				})
 		}
 
-		leaveDeclineDivs[i].onmouseenter = function () {
-			this.style.backgroundColor = "#eb5353"
-			this.style.color = "white"
-			this.style.cursor = "pointer"
-		}
-
-		leaveDeclineDivs[i].onmouseleave = function () {
-			this.style.backgroundColor = "rgba(255, 255, 255, 0.05)"
-			this.style.color = "blue"
+		if (!document.body.classList.contains("nd")) {
+			leaveDeclineDivs[i].onmouseenter = function () {
+				this.style.backgroundColor = "#eb5353"
+				this.style.color = "white"
+				this.style.cursor = "pointer"
+			}
+			leaveDeclineDivs[i].onmouseleave = function () {
+				this.style.backgroundColor = "rgba(255, 255, 255, 0.05)"
+				this.style.color = "blue"
+			}
 		}
 	}
 
@@ -414,11 +416,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	if (!global.joinGameLink) {
 		show_gamesList(global.listType)
-		setInterval(checkLobbyUpdates, 120000)
+		var pollInterval = null
+		function startLobbyPolling() {
+			if (pollInterval !== null) return
+			pollInterval = setInterval(checkLobbyUpdates, 120000)
+		}
+		function stopLobbyPolling() {
+			if (pollInterval === null) return
+			clearInterval(pollInterval)
+			pollInterval = null
+		}
+		startLobbyPolling()
+		document.addEventListener("visibilitychange", function () {
+			if (document.hidden) stopLobbyPolling()
+			else startLobbyPolling()
+		})
 	} else if (global.joinGameLink) document.getElementById("availableGamesListView").style.display = "block"
-	//show_gamesList("current");
-
-	//setInterval(checkLobbyUpdates, 5000);
 }) // END INIT LOBBY
 
 /*async function checkLobbyUpdates() {

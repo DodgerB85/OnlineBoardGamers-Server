@@ -1,11 +1,13 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load i18n %}
 {% load static %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
 {% endblock %}
 {% block body %}
-  <div class="container formsPage">
+  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container formsPage">{% endif %}
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -13,31 +15,61 @@
         {% endfor %}
       </div>
     {% endif %}
-    <form action="{% url 'myLogin' %}" method="post">
-      {% csrf_token %}
-      <h1>{% translate "Login" %}</h1>
+
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% translate "Login" %}</h1>
+      </div>
+
+      <div class="nd-card nd-section">
+        <form action="{% url 'myLogin' %}" method="post">
+          {% csrf_token %}
+          <div class="nd-form-row">
+            <label for="id_username" class="nd-form-label">{% translate "Username" %}</label>
+            <input id="id_username" type="text" name="username" placeholder="{% translate "Username" %}" required>
+          </div>
+          <div class="nd-form-row">
+            <label for="id_password" class="nd-form-label">{% translate "Password" %}</label>
+            <input id="id_password" type="password" name="password" placeholder="{% translate "Password" %}" required>
+          </div>
+          <input type="hidden" name="next" value="{{ request.GET.next }}" />
+          <div class="nd-form-row" style="border-bottom:none;justify-content:flex-end;">
+            <a class="nd-button" href="{% url 'password_reset' %}">{% translate "Forgot password?" %}</a>
+            <button type="submit" class="nd-button nd-button-primary">{% translate "Login" %}</button>
+          </div>
+        </form>
+        <p style="font-size:14px;color:var(--color-muted);margin-top:14px;margin-bottom:0;">
+          {% translate "No account yet?" %}
+          <a href="{% url 'register' %}">{% translate "Create a free account" %}</a>
+        </p>
+      </div>
+    {% else %}
+      <form action="{% url 'myLogin' %}" method="post">
+        {% csrf_token %}
+        <h1>{% translate "Login" %}</h1>
+        <hr>
+        <input class="registerInput"
+               type="text"
+               name="username"
+               placeholder="{% translate "Username" %}"
+               required>
+        <input class="registerInput"
+               type="password"
+               name="password"
+               placeholder="{% translate "Password" %}"
+               required>
+        <input type="hidden" name="next" value="{{ request.GET.next }}" />
+        <input class="registerbtn" type="submit" value="{% translate "Login" %}">
+        <hr>
+        <!--<p>By creating an account you agree to our <a href="#">Terms & Privacy</a>.</p>-->
+      </form>
+      <br />
+      <a class="resetpwdbtn" href="{% url 'password_reset' %}">{% translate "Forgotten your password? Click here to send a reset email" %}</a>
+      <br />
+      <br />
       <hr>
-      <input class="registerInput"
-             type="text"
-             name="username"
-             placeholder="{% translate "Username" %}"
-             required>
-      <input class="registerInput"
-             type="password"
-             name="password"
-             placeholder="{% translate "Password" %}"
-             required>
-      <input type="hidden" name="next" value="{{ request.GET.next }}" />
-      <input class="registerbtn" type="submit" value="{% translate "Login" %}">
-      <hr>
-      <!--<p>By creating an account you agree to our <a href="#">Terms & Privacy</a>.</p>-->
-    </form>
-    <br />
-    <a class="resetpwdbtn" href="{% url 'password_reset' %}">{% translate "Forgotten your password? Click here to send a reset email" %}</a>
-    <br />
-    <br />
-    <hr>
-    <br />
-    {% include 'Lobby/common/homeButton.html' %}
+      <br />
+      {% include 'Lobby/common/homeButton.html' %}
+    {% endif %}
   </div>
 {% endblock %}
