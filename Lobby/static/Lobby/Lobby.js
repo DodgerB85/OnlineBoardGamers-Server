@@ -191,6 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			e.preventDefault()
 			let form
 			if (this.getAttribute("data-game") === "FCM") {
+				document.getElementById("mapData").value = this.getAttribute("data-map")
 				form = document.getElementById("openInMapEditorForm")
 			}
 			if (this.getAttribute("data-game") === "TGZ") {

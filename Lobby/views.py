@@ -1636,7 +1636,13 @@ def logout_view(request):
 @login_required
 def FCMmapEditor(request):
     if request.method == "POST":
-        return render(request, "Lobby/FCMmapEditor.html", {"mapData": request.POST["mapData"]})
+        mapData = request.POST["mapData"]
+        # Parse the string representation of a list into a list of numbers
+        if mapData:
+            import json
+            mapDataList = json.loads(mapData)
+            return render(request, "Lobby/FCMmapEditor.html", {"mapData": mapDataList})
+        return render(request, "Lobby/FCMmapEditor.html", {"mapData": mapData})
 
     else:
         return render(request, "Lobby/FCMmapEditor.html")
