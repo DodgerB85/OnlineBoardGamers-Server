@@ -1,0 +1,5241 @@
+/**
+ * This is a reference file to store actions/etc as constants.
+ * It makes the code easier to read, and items easier to store, as they're just numbers
+ *
+ *
+ */
+
+export const DELETE_VOTE_TOPIC = "delete_game_votes"
+export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
+
+/** COLOURS 2E */
+export const BLUE = 0
+export const GREEN = 2
+export const ORANGE = 1
+export const PURPLE = 3
+export const YELLOW = 4
+
+/** RnD */
+export const RnD_BID_IDX = 0
+export const RnD_SLOTS_IDX = 1
+export const RnD_MERGER_IDX = 2
+export const RnD_EXPANSION_IDX = 3
+export const RnD_HULL_IDX = 4
+export const RnD_MERGER_SUBSIDY_IDX = 5
+export const RnD_SHIPPING_SUBSIDY_IDX = 6
+
+export const RND_BID_MULTIPLIER = [0, 1, 5, 25, 100, 400]
+
+export const MERGER_SUBSIDY_MULTIPLIER = 100
+export const SHIPPING_SUBSIDY_MULTIPLIER = 5
+
+export const RND_STRINGS = ["Bid Multiplier", "Slots", "Mergers", "Expansion", "Hull Capacity", "Merger Subsidy", "Shipping Subsidy"]
+
+export const BOT_NAME = "IndBot"
+
+/**ERAS - maybe pointless? */
+export const ERA_A = 0
+export const ERA_B = 1
+export const ERA_C = 2
+
+export const ERA_STRINGS = ["A", "B", "C"]
+
+/** PHASES */
+export const PHASE_NEW_ERA = 0
+export const PHASE_BID_TURN_ORDER = 1
+export const PHASE_MERGERS = 2
+export const PHASE_MERGER_BIDDING = 3
+export const PHASE_MERGER_REMOVE_SIAP_FAJI_TERRS = 4
+export const PHASE_ACQUISITIONS = 5
+export const PHASE_R_AND_D = 6
+export const PHASE_OPERATIONS = 7
+export const PHASE_CITY_GROWTH = 8
+export const PHASE_GAME_OVER = 9
+
+export const PHASE_MERGER_SHIP_REDEPLOYMENT = 10
+
+/** PRE-PHASES */
+export const PRE_PHASE_R_AND_D = 16
+/** ACTIONS */
+export const ACT_NONE = -1
+export const ACT_PLACE_CITY = 0
+export const ACT_ACQUIRE_COMPANY = 1
+export const ACT_PLACE_FIRST_COMPANY_GOOD = 2
+export const ACT_EXPAND_COMPANY = 3
+export const ACT_FREE_EXPANSION = 4
+export const ACT_DECIDE_PAID_EXPANSION = 5
+export const ACT_CONFIRM_ALL_DELIVERIES = 6
+
+export const ACT_CONFIRM_KICKOUT = 97
+export const ACT_CONFIRM_RESIGN = 98
+export const ACT_CONFIRM_END_TURN = 99
+
+/** HISTORY */
+// Non-player Actions
+export const HIST_NEW_GAME = 0
+export const HIST_NEW_TURN = 1
+export const HIST_SET_NEW_TURN_ORDER = 2
+export const HIST_AUTO_SKIP_MERGERS = 3
+export const HIST_SKIP_ACQUISITOIN_PHASE = 4
+export const HIST_REMOVE_COMPANY_NO_TERRS = 5
+export const HIST_NO_CITY_GROWTH = 6
+export const HIST_CITY_GROWTH = 7
+export const HIST_FINAL_INCOME = 8
+export const HIST_GAME_END = 9
+
+export const HIST_KICKOUT = 10
+export const HIST_RESIGN = 11
+export const HIST_REWIND = 12
+
+export const HIST_OPERATION_INCOME_SUMMARY = 13
+export const HIST_NEW_ERA = 14
+
+// Player Actions- 30+
+export const HIST_ADD_CITY = 30
+export const HIST_REMOVE_ERA_CARD = 31
+export const HIST_TURN_ORDER_BID = 32
+export const HIST_PASS_MERGER = 33
+export const HIST_MERGER_WITHOUT_BIDDING = 34
+export const HIST_MERGER_BIDDING = 35
+export const HIST_ACQUIRE_COMPANY = 36
+export const HIST_PLAYER_SKIP_ACQUISITOIN_PHASE = 37
+export const HIST_AUTO_SKIP_SINGLE_ACQUISITOIN = 38
+export const HIST_RND = 39
+export const HIST_OPERATE_SHIPPING = 40
+export const HIST_OPERATE_LAND = 41
+export const HIST_SKIP_OPERATE_LAND = 42
+export const HIST_AUTO_SKIP_SHIP_OPERATE = 43
+export const HIST_OPERATE_LAND_PAID_EXPANSION_ONLY = 44
+export const HIST_MANUAL_CITY_GROWTH = 45
+export const HIST_MERGER_REMOVE_SIAP_FAJI_TERRS = 46
+export const HIST_SKIP_ACQUISITOIN_NO_COMPANIES = 47
+export const HIST_MERGER_SHIP_REDEPLOYMENT = 48
+
+export const HIST_CITY_GROWTH_ENTRIES = [HIST_CITY_GROWTH, HIST_MANUAL_CITY_GROWTH, HIST_NO_CITY_GROWTH]
+export const ENTRIES_TO_IGNORE = [HIST_NEW_GAME, HIST_RESIGN, HIST_KICKOUT, HIST_REWIND]
+export const HIST_OPERATIONS_ENTRIES = [HIST_OPERATE_SHIPPING, HIST_OPERATE_LAND, HIST_SKIP_OPERATE_LAND, HIST_AUTO_SKIP_SHIP_OPERATE, HIST_OPERATE_LAND_PAID_EXPANSION_ONLY]
+// Goods
+export const GOOD_RICE = 0
+export const GOOD_SPICE = 1
+export const GOOD_RUBBER = 2
+export const GOOD_SIAP_FAJI = 3
+export const GOOD_OIL = 4
+
+// This is for GOODS (GOOD_VALUES is for companies)
+export const GOOD_INCOME = [20, 25, 30, 35, 40]
+
+export const COMPANY_SHIPPING = 0
+export const COMPANY_RICE = 1
+export const COMPANY_SPICE = 2
+export const COMPANY_RUBBER = 3
+export const COMPANY_SIAP_FAJI = 4
+export const COMPANY_OIL = 5
+
+// This is for COMPANIES
+export const GOOD_VALUES = [10, 20, 25, 30, 35, 40]
+
+export const LAND_COMPANIES = [COMPANY_RICE, COMPANY_SPICE, COMPANY_RUBBER, COMPANY_OIL, COMPANY_SIAP_FAJI]
+
+/*STORE
+
+24 company cards a/b/c
+15 city cards (5a 5b 5c)
+citySizeMarkers = [12,8,3]
+
+
+/***************************
+ *
+ *
+ * 	ONLY BORING STUFF BELOW HERE!
+ * 	EG LONG LISTS OF TERRITORIES, PAIRS, COMPANIES, CARDS, ETC
+ * 	KEEP ANYTHING SMALLER OR MORE IMPORTANT ABOVE THIS
+ */
+
+/** Map Data */
+
+// Selected Map
+export const MAP_OM_HEXES = 0
+export const MAP_OM_1E2E = 1
+export const MAP_OM_3E = 4
+export const MAP_AEGEAN = 2
+export const MAP_PHP = 3
+export const MAP_RANDOM_TASK = 9
+
+export const ORIGINAL_MAPS = [MAP_OM_HEXES, MAP_OM_1E2E, MAP_OM_3E]
+export const CUSTOM_MAPS = [MAP_AEGEAN, MAP_PHP] // (Doens't seem to be used)
+
+//26 PROVS, 116 TERRITORIES, 21 SEA ZONES
+
+// A
+export const PROVINCE_ACE = 0
+export const ACE_0 = 0
+export const ACE_1 = 1
+export const ACE_2 = 2
+export const ACE_3 = 3
+
+// SU
+export const PROVINCE_SUM_UTA = 1
+export const SUM_UTA_0 = 4
+export const SUM_UTA_1 = 5
+export const SUM_UTA_2 = 6
+export const SUM_UTA_3 = 7
+
+// SB
+export const PROVINCE_SUM_BAR = 2
+export const SUM_BAR_0 = 8
+export const SUM_BAR_1 = 9
+export const SUM_BAR_2 = 10
+export const SUM_BAR_3 = 11
+
+// R
+export const PROVINCE_RIA = 3
+export const RIA_0 = 12
+export const RIA_1 = 13
+export const RIA_2 = 14
+export const RIA_3 = 15
+export const RIA_4 = 16
+
+// J
+export const PROVINCE_JAM = 4
+export const JAM_0 = 17
+export const JAM_1 = 18
+export const JAM_2 = 19
+
+// B
+export const PROVINCE_BEN = 5
+export const BEN_0 = 20
+export const BEN_1 = 21
+export const BEN_2 = 22
+
+export const PROVINCE_SUM_SEL = 6
+export const SUM_SEL_0 = 23
+export const SUM_SEL_1 = 24
+export const SUM_SEL_2 = 25
+export const SUM_SEL_3 = 26
+export const SUM_SEL_4 = 27
+export const SUM_SEL_5 = 28
+export const SUM_SEL_6 = 29
+
+// L
+export const PROVINCE_LAM = 7
+export const LAM_0 = 30
+export const LAM_1 = 31
+export const LAM_2 = 32
+export const LAM_3 = 33
+
+// JB
+export const PROVINCE_JAW_BAR = 8
+export const JAW_BAR_0 = 34
+export const JAW_BAR_1 = 35
+export const JAW_BAR_2 = 36
+export const JAW_BAR_3 = 37
+export const JAW_BAR_4 = 38
+export const JAW_BAR_5 = 39
+export const JAW_BAR_6 = 40
+
+// JTE
+export const PROVINCE_JAW_TEN = 9
+export const JAW_TEN_0 = 41
+export const JAW_TEN_1 = 42
+export const JAW_TEN_2 = 43
+export const JAW_TEN_3 = 44
+
+// JTI
+export const PROVINCE_JAW_TIM = 10
+export const JAW_TIM_0 = 45
+export const JAW_TIM_1 = 46
+export const JAW_TIM_2 = 47
+export const JAW_TIM_3 = 48
+export const JAW_TIM_4 = 49
+export const JAW_TIM_5 = 50
+
+// KB
+export const PROVINCE_KAL_BAR = 11
+export const KAL_BAR_0 = 51
+export const KAL_BAR_1 = 52
+export const KAL_BAR_2 = 53
+
+// S
+export const PROVINCE_SAR = 12
+export const SAR_0 = 54
+export const SAR_1 = 55
+export const SAR_2 = 56
+export const SAR_3 = 57
+
+// KTI
+export const PROVINCE_KAL_TIM = 13
+export const KAL_TIM_0 = 58
+export const KAL_TIM_1 = 59
+export const KAL_TIM_2 = 60
+export const KAL_TIM_3 = 61
+export const KAL_TIM_4 = 62
+
+// KTE
+export const PROVINCE_KAL_TEN = 14
+export const KAL_TEN_0 = 63
+export const KAL_TEN_1 = 64
+export const KAL_TEN_2 = 65
+export const KAL_TEN_3 = 66
+export const KAL_TEN_4 = 67
+
+// KS
+export const PROVINCE_KAL_SEL = 15
+export const KAL_SEL_0 = 68
+export const KAL_SEL_1 = 69
+export const KAL_SEL_2 = 70
+
+// B
+export const PROVINCE_BAL = 16
+export const BAL_0 = 71
+export const BAL_1 = 72
+
+// NB
+export const PROVINCE_NUS_BAR = 17
+export const NUS_BAR_0 = 73
+export const NUS_BAR_1 = 74
+
+// NT
+export const PROVINCE_NUS_TIM = 18
+export const NUS_TIM_0 = 75
+export const NUS_TIM_1 = 76
+export const NUS_TIM_2 = 77
+export const NUS_TIM_3 = 78
+export const NUS_TIM_4 = 79
+export const NUS_TIM_5 = 80
+
+export const PROVINCE_SUL_SEL = 19
+export const SUL_SEL_0 = 81
+export const SUL_SEL_1 = 82
+export const SUL_SEL_2 = 83
+
+// ST
+export const PROVINCE_SUL_TENGAH = 20
+export const SUL_TENGAH_0 = 84
+export const SUL_TENGAH_1 = 85
+export const SUL_TENGAH_2 = 86
+export const SUL_TENGAH_3 = 87
+export const SUL_TENGAH_4 = 88
+
+// SLU
+export const PROVINCE_SUL_UTA = 21
+export const SUL_UTA_0 = 89
+export const SUL_UTA_1 = 90
+
+// STR
+export const PROVINCE_SUL_TENGGARA = 22
+export const SUL_TENGGARA_0 = 91
+export const SUL_TENGGARA_1 = 92
+export const SUL_TENGGARA_2 = 93
+
+// H
+export const PROVINCE_HAL = 23
+export const HAL_0 = 94
+export const HAL_1 = 95
+export const HAL_2 = 96
+export const HAL_3 = 97
+export const HAL_4 = 98
+export const HAL_5 = 99
+
+// M
+export const PROVINCE_MAL = 24
+export const MAL_0 = 100
+export const MAL_1 = 101
+export const MAL_2 = 102
+export const MAL_3 = 103
+export const MAL_4 = 104
+export const MAL_5 = 105
+export const MAL_6 = 106
+export const MAL_7 = 107
+export const MAL_8 = 108
+
+// P
+export const PROVINCE_PAP = 25
+export const PAP_0 = 109
+export const PAP_1 = 110
+export const PAP_2 = 111
+export const PAP_3 = 112
+export const PAP_4 = 113
+export const PAP_5 = 114
+export const PAP_6 = 115
+
+// SEA ZONES
+export const C_0 = 116
+export const C_1 = 117
+export const C_2 = 118
+export const C_3 = 119
+export const C_4 = 120
+export const C_5 = 121
+export const C_6 = 122
+export const C_7 = 123
+export const C_8 = 124
+export const C_9 = 125
+export const C_10 = 126
+export const C_11 = 127
+export const C_12 = 128
+export const C_13 = 129
+export const C_14 = 130
+export const C_15 = 131
+export const C_16 = 132
+export const C_17 = 133
+export const C_18 = 134
+export const C_19 = 135
+export const C_20 = 136
+
+export const OM_TERRITORY_COUNT = 137
+
+export const OM_TERRS_IN_PROVINCE = [
+	4, //ACE
+	4, //SUM_UTA
+	4, //SUM_BAR
+	5, //RIA
+	3, //JAM
+	3, //BEN
+	7, //SUM_SEL
+	4, //LAM
+	7, //JAW_BAR
+	4, //JAW_TEN
+	6, //JAW_TIM
+	3, //KAL_BAR
+	4, //SAR
+	5, //KAL_TIM
+	5, //KAL_TEN
+	3, //KAL_SEL
+	2, //BAL
+	2, //NUS_BAR
+	6, //NUS_TIM
+	3, //SUL_SEL
+	5, //SUL_TENGAH
+	2, //SUL_UTA
+	3, //SUL_TENGGARA
+	6, //HAL
+	9, //MAL
+	7, //PAP
+	21, //Sea Zones
+]
+
+export const OM_NEIGHBOUR_PAIRS = [
+	// Sea zones only first
+	[C_0, C_1],
+	[C_0, C_3],
+	[C_0, C_7],
+	[C_1, C_2],
+	[C_2, C_6],
+	[C_2, C_10],
+	[C_3, C_4],
+	[C_3, C_7],
+	[C_4, C_5],
+	[C_4, C_7],
+	[C_4, C_8],
+	[C_5, C_6],
+	[C_5, C_8],
+	//[C_5, C_9],
+	[C_6, C_8], // added this
+	[C_6, C_9],
+	[C_7, C_8],
+	[C_7, C_11],
+	[C_8, C_9],
+	[C_8, C_12],
+	[C_9, C_10],
+	[C_9, C_12],
+	[C_9, C_13],
+	[C_10, C_13],
+	[C_11, C_12],
+	[C_11, C_14],
+	[C_11, C_15],
+	[C_11, C_17],
+	[C_12, C_13],
+	[C_12, C_15],
+	[C_13, C_15],
+	[C_13, C_16],
+	[C_14, C_15],
+	[C_14, C_17],
+	[C_15, C_16],
+	[C_15, C_17],
+	[C_15, C_18],
+	[C_16, C_18],
+	[C_17, C_18],
+	[C_17, C_19],
+	[C_18, C_19],
+	[C_18, C_20],
+	[C_19, C_20],
+
+	// LAND NEIGHBOURS -  WATER CONNECTIONS FIRST
+	//ACE
+	[ACE_0, C_0],
+	[ACE_0, ACE_1],
+	[ACE_0, ACE_2],
+	[ACE_1, C_0],
+	[ACE_1, C_3],
+	[ACE_1, ACE_2],
+	[ACE_1, SUM_UTA_0],
+	[ACE_2, C_0],
+	[ACE_2, ACE_3],
+	//[ACE_2, SUM_UTA_0],
+	[ACE_2, SUM_UTA_2],
+	[ACE_3, C_0],
+	[ACE_3, SUM_UTA_3],
+	// SUM_UTA
+	[SUM_UTA_0, C_3],
+	[SUM_UTA_0, SUM_UTA_1],
+	[SUM_UTA_0, SUM_UTA_2],
+	[SUM_UTA_1, C_3],
+	[SUM_UTA_1, SUM_UTA_2],
+	[SUM_UTA_1, RIA_0],
+	[SUM_UTA_1, RIA_1],
+	[SUM_UTA_2, C_0],
+	[SUM_UTA_2, C_1],
+	[SUM_UTA_2, SUM_UTA_3],
+	[SUM_UTA_2, RIA_0],
+	[SUM_UTA_2, SUM_BAR_3],
+	[SUM_UTA_3, C_1],
+	[SUM_UTA_3, SUM_BAR_0],
+	//. SUM_BAR
+	[SUM_BAR_0, C_1],
+	[SUM_BAR_0, SUM_BAR_1],
+	[SUM_BAR_1, C_1],
+	[SUM_BAR_1, SUM_BAR_2],
+	[SUM_BAR_2, C_1],
+	[SUM_BAR_2, SUM_BAR_3],
+	[SUM_BAR_2, RIA_3],
+	[SUM_BAR_2, JAM_0],
+	[SUM_BAR_2, BEN_0],
+	[SUM_BAR_3, C_1],
+	[SUM_BAR_3, RIA_0],
+	[SUM_BAR_3, RIA_3],
+	// RIA
+	[RIA_0, RIA_1],
+	[RIA_0, RIA_3],
+	[RIA_1, C_3],
+	[RIA_1, C_4],
+	[RIA_1, RIA_3],
+	[RIA_1, RIA_4],
+	[RIA_2, C_4],
+	[RIA_2, RIA_4],
+	[RIA_3, RIA_4],
+	//[RIA_3, JAM_0],
+	[RIA_4, C_4],
+	[RIA_4, JAM_0],
+	[RIA_4, JAM_1],
+	// JAM
+	[JAM_0, JAM_1],
+	[JAM_0, BEN_0],
+	[JAM_0, BEN_1],
+	[JAM_0, SUM_SEL_0],
+	[JAM_1, C_4],
+	[JAM_1, JAM_2],
+	//[JAM_1, SUM_SEL_0],
+	[JAM_1, SUM_SEL_1],
+	[JAM_2, C_4],
+	[JAM_2, C_5],
+	[JAM_2, SUM_SEL_1],
+	// BEN
+	[BEN_0, C_1],
+	[BEN_0, BEN_1],
+	[BEN_1, C_1],
+	[BEN_1, BEN_2],
+	[BEN_1, SUM_SEL_0],
+	[BEN_1, SUM_SEL_2],
+	[BEN_2, C_1],
+	[BEN_2, C_2],
+	[BEN_2, SUM_SEL_2],
+	[BEN_2, LAM_0],
+	// SUM_SEL
+	[SUM_SEL_0, SUM_SEL_1],
+	[SUM_SEL_0, SUM_SEL_2],
+	[SUM_SEL_0, SUM_SEL_3],
+	[SUM_SEL_1, C_5],
+	[SUM_SEL_1, SUM_SEL_3],
+	[SUM_SEL_1, SUM_SEL_4],
+	[SUM_SEL_2, SUM_SEL_3],
+	[SUM_SEL_2, LAM_0],
+	[SUM_SEL_3, SUM_SEL_4],
+	[SUM_SEL_3, LAM_2],
+	[SUM_SEL_4, C_5],
+	[SUM_SEL_4, LAM_3],
+	[SUM_SEL_4, SUM_SEL_5],
+	[SUM_SEL_5, C_5],
+	[SUM_SEL_5, SUM_SEL_6],
+	[SUM_SEL_6, C_8],
+	//LAM
+	[LAM_0, C_2],
+	[LAM_0, LAM_1],
+	[LAM_0, LAM_2],
+	[LAM_1, C_2],
+	[LAM_1, C_6],
+	[LAM_1, LAM_2],
+	[LAM_1, LAM_3],
+	[LAM_2, LAM_3],
+	[LAM_3, C_5],
+	[LAM_3, C_6],
+	// JAW_BAR
+	[JAW_BAR_0, C_2],
+	[JAW_BAR_0, C_6],
+	[JAW_BAR_0, JAW_BAR_1],
+	[JAW_BAR_0, JAW_BAR_2],
+	[JAW_BAR_1, C_6],
+	[JAW_BAR_1, JAW_BAR_2],
+	[JAW_BAR_1, JAW_BAR_3],
+	[JAW_BAR_2, C_2],
+	[JAW_BAR_2, JAW_BAR_3],
+	[JAW_BAR_2, JAW_BAR_4],
+	[JAW_BAR_3, C_6],
+	[JAW_BAR_3, JAW_BAR_4],
+	[JAW_BAR_3, JAW_BAR_5],
+	[JAW_BAR_4, C_2],
+	[JAW_BAR_4, JAW_BAR_5],
+	[JAW_BAR_4, JAW_BAR_6],
+	[JAW_BAR_5, C_6],
+	[JAW_BAR_5, JAW_BAR_6],
+	[JAW_BAR_5, JAW_TEN_0],
+	[JAW_BAR_6, C_2],
+	[JAW_BAR_6, C_10],
+	[JAW_BAR_6, JAW_TEN_0],
+	// JAW_TEN
+	[JAW_TEN_0, C_6],
+	[JAW_TEN_0, C_10],
+	[JAW_TEN_0, JAW_TEN_1],
+	[JAW_TEN_1, C_6],
+	[JAW_TEN_1, C_9],
+	[JAW_TEN_1, C_10],
+	[JAW_TEN_1, JAW_TEN_2],
+	[JAW_TEN_1, JAW_TEN_3],
+	[JAW_TEN_2, C_9],
+	[JAW_TEN_2, JAW_TEN_3],
+	[JAW_TEN_2, JAW_TIM_0],
+	[JAW_TEN_2, JAW_TIM_1],
+	[JAW_TEN_3, C_10],
+	[JAW_TEN_3, JAW_TIM_1],
+	// JAW_TIM
+	[JAW_TIM_0, C_9],
+	[JAW_TIM_0, JAW_TIM_1],
+	[JAW_TIM_0, JAW_TIM_2],
+	[JAW_TIM_0, JAW_TIM_5],
+	[JAW_TIM_1, C_10],
+	[JAW_TIM_1, JAW_TIM_2],
+	[JAW_TIM_2, C_9],
+	[JAW_TIM_2, C_10],
+	[JAW_TIM_2, JAW_TIM_3],
+	[JAW_TIM_3, C_9],
+	[JAW_TIM_3, C_10],
+	[JAW_TIM_3, JAW_TIM_4],
+	[JAW_TIM_4, C_9],
+	[JAW_TIM_4, C_10],
+	[JAW_TIM_4, BAL_0],
+	[JAW_TIM_5, C_9],
+	// KAL_BAR
+	[KAL_BAR_0, C_7],
+	[KAL_BAR_0, C_8],
+	[KAL_BAR_0, KAL_BAR_1],
+	[KAL_BAR_0, SAR_3],
+	[KAL_BAR_1, C_8],
+	[KAL_BAR_1, KAL_BAR_2],
+	[KAL_BAR_1, SAR_3],
+	[KAL_BAR_1, KAL_TEN_0],
+	[KAL_BAR_2, SAR_3],
+	//[KAL_BAR_2, KAL_TEN_0],
+	[KAL_BAR_2, KAL_TEN_2],
+	[KAL_BAR_2, KAL_TIM_0],
+	// SAR
+	[SAR_0, C_7],
+	[SAR_0, SAR_1],
+	[SAR_0, SAR_2],
+	[SAR_1, C_11],
+	[SAR_1, SAR_2],
+	[SAR_1, KAL_TIM_1],
+	[SAR_2, C_7],
+	[SAR_2, SAR_3],
+	[SAR_2, KAL_TIM_0],
+	[SAR_2, KAL_TIM_1],
+	[SAR_3, C_7],
+	[SAR_3, KAL_TIM_0],
+	// KAL_TIM
+	[KAL_TIM_0, KAL_TIM_1],
+	[KAL_TIM_0, KAL_TIM_2],
+	[KAL_TIM_0, KAL_TIM_3],
+	[KAL_TIM_0, KAL_TEN_2],
+	[KAL_TIM_1, C_11],
+	[KAL_TIM_1, KAL_TIM_2],
+	[KAL_TIM_2, C_11],
+	[KAL_TIM_2, KAL_TIM_3],
+	[KAL_TIM_3, C_11],
+	[KAL_TIM_3, KAL_TIM_4],
+	[KAL_TIM_3, KAL_TEN_2],
+	[KAL_TIM_3, KAL_TEN_4],
+	[KAL_TIM_4, C_11],
+	[KAL_TIM_4, C_12],
+	[KAL_TIM_4, KAL_TEN_4],
+	[KAL_TIM_4, KAL_SEL_1],
+	// KAL_TEN
+	[KAL_TEN_0, C_8],
+	[KAL_TEN_0, KAL_TEN_1],
+	[KAL_TEN_0, KAL_TEN_2],
+	[KAL_TEN_1, C_8],
+	[KAL_TEN_1, C_12],
+	[KAL_TEN_1, KAL_TEN_2],
+	[KAL_TEN_1, KAL_TEN_3],
+	[KAL_TEN_2, KAL_TEN_3],
+	[KAL_TEN_2, KAL_TEN_4],
+	[KAL_TEN_3, C_12],
+	[KAL_TEN_3, KAL_TEN_4],
+	[KAL_TEN_4, C_12],
+	[KAL_TEN_4, KAL_SEL_0],
+	[KAL_TEN_4, KAL_SEL_1],
+	// KAL_SEL
+	[KAL_SEL_0, C_12],
+	[KAL_SEL_0, KAL_SEL_1],
+	[KAL_SEL_0, KAL_SEL_2],
+	[KAL_SEL_1, C_12],
+	[KAL_SEL_1, KAL_SEL_2],
+	[KAL_SEL_2, C_12],
+	// BAL
+	[BAL_0, C_10],
+	[BAL_0, C_13],
+	[BAL_0, C_9],
+	[BAL_0, BAL_1],
+	[BAL_1, C_13],
+	[BAL_1, NUS_BAR_0],
+	// NUS_BAR
+	[NUS_BAR_0, C_13],
+	[NUS_BAR_0, NUS_BAR_1],
+	[NUS_BAR_1, C_13],
+	[NUS_BAR_1, NUS_TIM_1],
+	// NUS_TIM
+	[NUS_TIM_0, C_16],
+	[NUS_TIM_0, NUS_TIM_1],
+	[NUS_TIM_0, NUS_TIM_4],
+	[NUS_TIM_1, C_16],
+	[NUS_TIM_1, NUS_TIM_2],
+	[NUS_TIM_2, C_13],
+	[NUS_TIM_3, C_16],
+	[NUS_TIM_3, NUS_TIM_4],
+	[NUS_TIM_4, C_16],
+	[NUS_TIM_4, NUS_TIM_5],
+	[NUS_TIM_4, MAL_6],
+	[NUS_TIM_5, C_16],
+	// SUL_SEL
+	[SUL_SEL_0, C_11],
+	[SUL_SEL_0, SUL_SEL_1],
+	[SUL_SEL_0, SUL_TENGAH_1],
+	[SUL_SEL_1, C_11],
+	[SUL_SEL_1, C_15],
+	[SUL_SEL_1, SUL_SEL_2],
+	[SUL_SEL_1, SUL_TENGAH_1],
+	[SUL_SEL_1, SUL_TENGAH_2],
+	[SUL_SEL_1, SUL_TENGGARA_0],
+	[SUL_SEL_2, C_15],
+	// SUL_TENGAH
+	[SUL_TENGAH_0, C_11],
+	[SUL_TENGAH_0, C_14],
+	[SUL_TENGAH_0, SUL_TENGAH_1],
+	[SUL_TENGAH_0, SUL_UTA_0],
+	[SUL_TENGAH_1, C_11],
+	[SUL_TENGAH_1, C_14],
+	[SUL_TENGAH_1, SUL_TENGAH_2],
+	[SUL_TENGAH_2, C_14],
+	[SUL_TENGAH_2, SUL_TENGAH_3],
+	[SUL_TENGAH_2, SUL_TENGAH_4],
+	[SUL_TENGAH_2, SUL_TENGGARA_0],
+	[SUL_TENGAH_3, C_14],
+	[SUL_TENGAH_4, C_14],
+	[SUL_TENGAH_4, SUL_UTA_0],
+	// SUL_UTA
+	[SUL_UTA_0, C_11],
+	[SUL_UTA_0, C_14],
+	[SUL_UTA_0, SUL_UTA_1],
+	[SUL_UTA_1, C_14],
+	// SUL_TENGGARA
+	[SUL_TENGGARA_0, C_14],
+	[SUL_TENGGARA_0, C_15],
+	[SUL_TENGGARA_0, SUL_TENGGARA_1],
+	[SUL_TENGGARA_1, C_15],
+	[SUL_TENGGARA_1, SUL_TENGGARA_2],
+	[SUL_TENGGARA_2, C_15],
+	// HAL
+	[HAL_0, C_17],
+	[HAL_0, HAL_1],
+	[HAL_1, C_17],
+	[HAL_1, HAL_2],
+	[HAL_2, C_17],
+	[HAL_2, HAL_3],
+	[HAL_2, HAL_4],
+	[HAL_2, HAL_5],
+	[HAL_3, C_17],
+	[HAL_4, C_17],
+	[HAL_4, HAL_5],
+	[HAL_5, C_17],
+	// MAL
+	[MAL_0, C_18],
+	[MAL_0, MAL_1],
+	[MAL_0, MAL_3],
+	[MAL_1, C_17],
+	[MAL_1, MAL_2],
+	[MAL_2, C_17],
+	[MAL_3, C_18],
+	[MAL_3, MAL_4],
+	[MAL_4, C_18],
+	[MAL_4, MAL_5],
+	[MAL_5, C_18],
+	[MAL_6, C_18],
+	[MAL_6, MAL_7],
+	[MAL_7, C_20],
+	[MAL_7, MAL_8],
+	[MAL_8, C_20],
+	[MAL_8, PAP_4],
+	// PAP
+	[PAP_0, C_19],
+	[PAP_0, PAP_2],
+	[PAP_1, C_19],
+	[PAP_1, PAP_2],
+	[PAP_2, C_19],
+	[PAP_2, PAP_3],
+	[PAP_3, C_19],
+	[PAP_3, C_20],
+	[PAP_3, PAP_4],
+	[PAP_3, PAP_5],
+	[PAP_4, C_20],
+	[PAP_4, PAP_5],
+	[PAP_4, PAP_6],
+	[PAP_5, C_19],
+	[PAP_5, PAP_6],
+	[PAP_6, C_20],
+]
+
+/* @vraid
+
+we now need some way to generate an array of neighbours
+so neighbours[0] would be ALL the neighbours of terrID 0, which is ACE_0
+
+Similarly, we need a way to generate an array of LAND neighbours
+so land_neighbors[2] would be all the land neighbours of terrID 2, which is ACE_2
+
+we also need a way to generate an array of SEA neighbours
+so sea_neighbors[4] would be all the sea neighbours of terrID 4, which is SUM_UTA_0
+
+*/
+
+/** DISPLAY / VISUAL STUFF */
+// rf.OM_PROVINCE_STRINGS[map.getProvinceFromTerrID(entry[3][0])]
+export const OM_PROVINCE_STRINGS = [
+	"Aceh", //0
+	"Sumatera Utara", //1
+	"Sumatera Barat", //2
+	"Riau", //3
+	"Jambi", //4
+	"Bengkulu", //5
+	"Sumatera Selatan", //6
+	"Lampung", //7
+	"Jawa Barat", //8
+	"Jawa Tengah", //9
+	"Jawa Timur", //10
+	"Kalimantan Barat", //11
+	"Sarawak", //12
+	"Kalimantan Timur", //13
+	"Kalimantan Tengah", //14
+	"Kalimantan Selatan", //15
+	"Bali", //16
+	"Nusa Tenggara Barat", //17
+	"Nusa Tenggara Timur", //18
+	"Sulawesi Selatan", //19
+	"Sulawesi Tengah", //20
+	"Sulawesi Utara", //21
+	"Sulawesi Tenggara", //22
+	"Halmahera", //23
+	"Maluku", //24
+	"Papua", //25
+]
+
+export const OM_POSSIBLE_CITY_PROVINCES = [PROVINCE_ACE, PROVINCE_SUM_UTA, PROVINCE_SUM_BAR, PROVINCE_JAM, PROVINCE_BEN, PROVINCE_SUM_SEL, PROVINCE_LAM, PROVINCE_JAW_BAR, PROVINCE_JAW_TEN, PROVINCE_JAW_TIM, PROVINCE_SAR, PROVINCE_KAL_SEL, PROVINCE_BAL, PROVINCE_NUS_BAR, PROVINCE_NUS_TIM, PROVINCE_SUL_SEL, PROVINCE_SUL_TENGAH, PROVINCE_SUL_UTA, PROVINCE_HAL, PROVINCE_MAL, PROVINCE_PAP]
+
+export const OM_PROVINCES_WITHOUT_CITY = [PROVINCE_RIA, PROVINCE_KAL_BAR, PROVINCE_KAL_TIM, PROVINCE_KAL_TEN, PROVINCE_SUL_TENGGARA]
+
+export const OM_TERR_ID_TO_PATH_ID = [
+	// ACE
+	"A0", //0
+	"A1",
+	"A2",
+	"A3",
+	// SUM_UTA
+	"SU0",
+	"SU1", // 5
+	"SU2",
+	"SU3",
+	//SUM_BAR
+	"SB0",
+	"SB1",
+	"SB2", // 10
+	"SB3",
+	// RIA
+	"R0",
+	"R1",
+	"R2",
+	"R3", // 15
+	"R4",
+	// JAM
+	"J0",
+	"J1",
+	"J2",
+	// BEN
+	"B0", // 20
+	"B1",
+	"B2",
+	// SUM_SEL
+	"SS0",
+	"SS1",
+	"SS2", // 25
+	"SS3",
+	"SS4",
+	"SS5",
+	"SS6",
+	// LAM
+	"L0", // 30
+	"L1",
+	"L2",
+	"L3",
+	// JAW_BAR
+	"JB0",
+	"JB1", // 35
+	"JB2",
+	"JB3",
+	"JB4",
+	"JB5",
+	"JB6", // 40
+	// JAW_TEN
+	"JTE0",
+	"JTE1",
+	"JTE2",
+	"JTE3",
+	// JAW_TIM
+	"JTI0", // 45
+	"JTI1",
+	"JTI2",
+	"JTI3",
+	"JTI4",
+	"JTI5", // 50
+	// KAL_BAR
+	"KB0",
+	"KB1",
+	"KB2",
+	// SAR
+	"S0",
+	"S1", // 55
+	"S2",
+	"S3",
+	// KAL_TIM
+	"KTI0",
+	"KTI1",
+	"KTI2", // 60
+	"KTI3",
+	"KTI4",
+	// KAL_TEN
+	"KTE0",
+	"KTE1",
+	"KTE2", // 65
+	"KTE3",
+	"KTE4",
+	// KAL_SEL
+	"KS0",
+	"KS1",
+	"KS2", // 70
+	// BAL
+	"BA0",
+	"BA1",
+	// NUS_BAR
+	"NB0",
+	"NB1",
+	// NUS_TIM
+	"NT0", // 75
+	"NT1",
+	"NT2",
+	"NT3",
+	"NT4",
+	"NT5", // 80
+	// SUL_SEL
+	"SSE0",
+	"SSE1",
+	"SSE2",
+	// SUL_TENGAH
+	"ST0",
+	"ST1", // 85
+	"ST2",
+	"ST3",
+	"ST4",
+	// SUL_UTA
+	"SLU0",
+	"SLU1", // 90
+	// SUL_TENGGARA
+	"STR0",
+	"STR1",
+	"STR2",
+	// HAL
+	"H0",
+	"H1", // 95
+	"H2",
+	"H3",
+	"H4",
+	"H5",
+	// MAL
+	"M0", // 100
+	"M1",
+	"M2",
+	"M3",
+	"M4",
+	"M5", // 105
+	"M6",
+	"M7",
+	"M8",
+	//PAP
+	"P0",
+	"P1", // 110
+	"P2",
+	"P3",
+	"P4",
+	"P5",
+	"P6", // 115
+	// SEA
+	"C0",
+	"C1",
+	"C2",
+	"C3",
+	"C4", // 120
+	"C5",
+	"C6",
+	"C7",
+	"C8",
+	"C9", // 125
+	"C10",
+	"C11",
+	"C12",
+	"C13",
+	"C14", // 130
+	"C15",
+	"C16",
+	"C17",
+	"C18",
+	"C19", // 135
+	"C20",
+]
+
+/** COMPANIES */
+
+/**
+ * Era A - 8
+ * HAL x2
+ * JAW_TIM
+ * LAM
+ * SUL_SEL
+ * BAL
+ * JAW_BAR
+ * MAL
+ *
+ * ERA B - 9
+ * JAW_BAR
+ * SUM_UTA
+ * ACE
+ * KAL_TIM
+ * JAW_TEN
+ * SUL_TENGAH
+ * KAL_BAR
+ * RIA
+ * SUM_BAR
+ *
+ * ERA C - 7
+ * SUL_TERNGGARA
+ * SUM_SEL
+ * PAP x2
+ * KAL_SEL
+ * MAL
+ * SAR
+ *
+ */
+
+export const ALL_COMPANIES = [
+	{
+		id: 0, // save
+		era: ERA_A, // NO NEED SAVE
+		type: COMPANY_SHIPPING, // NO NEED SAVE
+		typeText: "Shipping", // NO NEED SAVE
+		province: PROVINCE_HAL, // NO NEED SAVE
+		capacity: [3, 4, 5], // NO NEED SAVE
+		combinedCapacity: [3, 4, 5], // NO NEED SAVE
+		hullCapacity: 1, // NO NEED SAVE
+		territories: [], // save
+		ownerIndex: -1, // NO NEED SAVE (find from slots)
+		gfx: "c_comp_00", // NO NEED SAVE
+		shipGfx: "", // save
+		operated: false, // save
+		mergedThisPhase: false, // save
+		newExpansionsThisTurn: [], // save
+		incomeThisTurn: 0, // save
+	},
+	{
+		id: 1,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PROVINCE_JAW_TIM,
+		capacity: [2, 3, 3],
+		combinedCapacity: [2, 3, 3],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_01",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 2,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PROVINCE_LAM,
+		capacity: [2, 3, 4],
+		combinedCapacity: [2, 3, 4],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_02",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 3,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PROVINCE_SUL_SEL,
+		capacity: [3, 3, 4],
+		combinedCapacity: [3, 3, 4],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_03",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 4,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PROVINCE_BAL,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_04",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 5,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PROVINCE_JAW_BAR,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_05",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 6,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PROVINCE_HAL,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_06",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 7,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PROVINCE_MAL,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_07",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	// ERA B
+	{
+		id: 10,
+		era: ERA_B,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PROVINCE_JAW_BAR,
+		capacity: [0, 4, 5],
+		combinedCapacity: [0, 4, 5],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		shipGfx: "",
+		gfx: "c_comp_10",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 11,
+		era: ERA_B,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PROVINCE_SUM_UTA,
+		capacity: [0, 4, 5],
+		combinedCapacity: [0, 4, 5],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		shipGfx: "",
+		gfx: "c_comp_11",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 12,
+		era: ERA_B,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PROVINCE_ACE,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_12",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 13,
+		era: ERA_B,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PROVINCE_KAL_TIM,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_13",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 14,
+		era: ERA_B,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PROVINCE_JAW_TEN,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_14",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 15,
+		era: ERA_B,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PROVINCE_SUL_TENGAH,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_15",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 16,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: PROVINCE_KAL_BAR,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_16",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 17,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: PROVINCE_RIA,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_17",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 18,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: PROVINCE_SUM_BAR,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_18",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+
+	// ERA C
+
+	{
+		id: 20,
+		era: ERA_C,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PROVINCE_SUL_TENGGARA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_20",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 21,
+		era: ERA_C,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PROVINCE_SUM_SEL,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "c_comp_21",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 22,
+		era: ERA_C,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		goodValue: 30,
+		good: GOOD_RUBBER,
+		province: PROVINCE_PAP,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_22",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 23,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PROVINCE_KAL_SEL,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_23",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 24,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PROVINCE_MAL,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_24",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 25,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PROVINCE_PAP,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_25",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 26,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PROVINCE_SAR,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "c_comp_26",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+]
+
+/*
+COMPANIES BY PROVINCE
+====================
+
+HAL: Ship, spice // - // - 
+JAW_TIM: ship // - / -
+LAM: ship // - // -
+SUL_SEL: ship // - // -
+BAL: rice // - // -
+JAW_BAR: rice // ship // -
+MAL: spice // - // oil
+
+7 // - // 1
+
+
+SUM_UTA: - // ship // -
+ACE: - // rice // -
+KAL_TIM: - // rice // -
+JAW_TENGAH: - // spice // -
+SUL_TEN: - // rice // spice
+KAL_BAR: - // rubber // -
+RIA: - // rubber // -
+SUM_BAR: - // rubber // -
+
+// 9 // 1
+
+SUL_TENGGARA: - // - // rice
+SUM_SEL: - // - // spice
+PAP: - // - // rubber, oil
+KAL_SEL: - // - // oil
+SAR: - // - // oil
+
+// - // 6
+
+*/
+// M			M				XXX				B			B					M				M
+export const ALL_SHIP_GFX_ARRAY_FANCY = ["ship_djong1", "ship_djong2", "ship_djong3", "ship_masts", "ship_indonesian", "ship_barque", "ship_triple_mast"]
+export const ALL_SHIP_GFX_ARRAY_SIMPLE = ["ship_simple_cargo", "ship_simple_galleon", "ship_barque", "ship_simple_pirate", "ship_simple_doubleSail", "ship_simple_singleSail", "ship_simple_row"]
+// M 					M						XXX				B							B
+export const MAIN_FOUR_SHIP_GFX_ARRAY_FANCY = ["ship_djong1", "ship_djong2", "ship_triple_mast", "ship_barque"]
+export const BACkUP_TWO_SHIP_GFX_ARRAY_FANCY = ["ship_indonesian", "ship_masts"]
+
+export const MAIN_FOUR_SHIP_GFX_ARRAY_SIMPLE = ["ship_simple_cargo", "ship_simple_galleon", "ship_simple_singleSail", "ship_simple_row"]
+export const BACkUP_TWO_SHIP_GFX_ARRAY_SIMPLE = ["ship_simple_pirate", "ship_simple_doubleSail"]
+
+export const ALL_ERA_CARDS = [
+	{
+		id: 0,
+		era: ERA_A,
+		provinces: [PROVINCE_JAW_TIM, PROVINCE_JAW_BAR, PROVINCE_BAL],
+		gfx: "era_card_00",
+	},
+	{
+		id: 1,
+		era: ERA_A,
+		provinces: [PROVINCE_JAW_BAR, PROVINCE_SUL_SEL, PROVINCE_SUL_UTA],
+		gfx: "era_card_01",
+	},
+	{
+		id: 2,
+		era: ERA_A,
+		provinces: [PROVINCE_JAW_TEN, PROVINCE_BAL, PROVINCE_SUL_UTA],
+		gfx: "era_card_02",
+	},
+	{
+		id: 3,
+		era: ERA_A,
+		provinces: [PROVINCE_SUM_SEL, PROVINCE_JAW_TIM, PROVINCE_SUL_SEL],
+		gfx: "era_card_03",
+	},
+	{
+		id: 4,
+		era: ERA_A,
+		provinces: [PROVINCE_SUM_SEL, PROVINCE_JAW_BAR, PROVINCE_JAW_TEN],
+		gfx: "era_card_04",
+	},
+
+	// ERA B
+
+	{
+		id: 5,
+		era: ERA_B,
+		provinces: [PROVINCE_ACE, PROVINCE_SUM_UTA, PROVINCE_BEN],
+		gfx: "era_card_10",
+	},
+	{
+		id: 6,
+		era: ERA_B,
+		provinces: [PROVINCE_SUM_BAR, PROVINCE_LAM, PROVINCE_KAL_SEL],
+		gfx: "era_card_11",
+	},
+	{
+		id: 7,
+		era: ERA_B,
+		provinces: [PROVINCE_ACE, PROVINCE_LAM, PROVINCE_MAL],
+		gfx: "era_card_12",
+	},
+	{
+		id: 8,
+		era: ERA_B,
+		provinces: [PROVINCE_SUM_UTA, PROVINCE_KAL_SEL, PROVINCE_MAL],
+		gfx: "era_card_13",
+	},
+	{
+		id: 9,
+		era: ERA_B,
+		provinces: [PROVINCE_SUM_BAR, PROVINCE_BEN, PROVINCE_JAW_BAR],
+		gfx: "era_card_14",
+	},
+
+	// ERA C
+
+	{
+		id: 10,
+		era: ERA_C,
+		provinces: [PROVINCE_NUS_BAR, PROVINCE_HAL, PROVINCE_PAP],
+		gfx: "era_card_20",
+	},
+	{
+		id: 11,
+		era: ERA_C,
+		provinces: [PROVINCE_JAW_BAR, PROVINCE_NUS_TIM, PROVINCE_HAL],
+		gfx: "era_card_21",
+	},
+	{
+		id: 12,
+		era: ERA_C,
+		provinces: [PROVINCE_SAR, PROVINCE_SUL_TENGAH, PROVINCE_PAP],
+		gfx: "era_card_22",
+	},
+	{
+		id: 13,
+		era: ERA_C,
+		provinces: [PROVINCE_JAM, PROVINCE_SAR, PROVINCE_NUS_BAR],
+		gfx: "era_card_23",
+	},
+	{
+		id: 14,
+		era: ERA_C,
+		provinces: [PROVINCE_JAM, PROVINCE_SUL_TENGAH, PROVINCE_NUS_TIM],
+		gfx: "era_card_24",
+	},
+]
+
+export const ALL_PROVINCES = [
+	PROVINCE_ACE, // 0
+	PROVINCE_SUM_UTA, // 1
+	PROVINCE_SUM_BAR, // 2
+	PROVINCE_RIA, // 3
+	PROVINCE_JAM, // 4
+	PROVINCE_BEN, // 5
+	PROVINCE_SUM_SEL, // 6
+	PROVINCE_LAM, // 7
+	PROVINCE_JAW_BAR, // 8
+	PROVINCE_JAW_TEN, // 9
+	PROVINCE_JAW_TIM, // 10
+	PROVINCE_KAL_BAR, // 11
+	PROVINCE_SAR, // 12
+	PROVINCE_KAL_TIM, // 13
+	PROVINCE_KAL_TEN, // 14
+	PROVINCE_KAL_SEL, // 15
+	PROVINCE_BAL, // 16
+	PROVINCE_NUS_BAR, // 17
+	PROVINCE_NUS_TIM, // 18
+	PROVINCE_SUL_SEL, // 19
+	PROVINCE_SUL_TENGAH, // 20
+	PROVINCE_SUL_UTA, // 21
+	PROVINCE_SUL_TENGGARA, // 22
+	PROVINCE_HAL, // 23
+	PROVINCE_MAL, // 24
+	PROVINCE_PAP, // 25
+]
+
+/** AEGEAN EXPANSION INFO */
+
+/**
+ * Thrace = THRACE
+ * Troas = TROAS
+ * Thodes = THODES
+ * Thebes = THEBES
+ * Thera = THERA
+ *
+ * Abdera = AB
+ * Aeolia = AE
+ * Athos = ATHOS
+ * Athens = ATHENS
+ * Andros = AN
+ *
+ * Cydonia = CY
+ * Caria = CA
+ * Chios = CH
+ *
+ * Lydia = LY
+ * Lemnos = LE
+ * Lesbos = LES
+ *
+ * Ionia = I
+ *
+ * Kavala = KA
+ * Knossos = KN
+ * Kos = KO
+ *
+ * Macedon = M
+ *
+ * Euboea = EU
+ * Etea = ET
+ *
+ * Pella = P
+ *
+ * Sporades = SPO
+ * Samos = SA
+ * Sparta = SPA
+ *
+ * Heptanese = H
+ *
+ * Rithymna = R
+ * Rhodes = RH
+ *
+ * Naxos = N
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+/****************************************************************************** */
+/*																				*/
+/*																				*/
+/*																				*/
+/*								AEGEAN EXPANSION								*/
+/*																				*/
+/*																				*/
+/*																				*/
+/****************************************************************************** */
+
+export const AG_PROVINCE_THRACE = 0
+export const AG_PROVINCE_ABDERA = 1
+export const AG_PROVINCE_KAVALA = 2
+export const AG_PROVINCE_ATHOS = 3
+export const AG_PROVINCE_MACEDON = 4
+export const AG_PROVINCE_PELLA = 5
+export const AG_PROVINCE_TROAS = 6
+export const AG_PROVINCE_LYDIA = 7
+export const AG_PROVINCE_AEOLIA = 8
+export const AG_PROVINCE_LESBOS = 9
+export const AG_PROVINCE_LEMNOS = 10
+export const AG_PROVINCE_SPORADES = 11
+export const AG_PROVINCE_THEBES = 12
+export const AG_PROVINCE_IONIA = 13
+export const AG_PROVINCE_CHIOS = 14
+export const AG_PROVINCE_EUBOEA = 15
+export const AG_PROVINCE_ATHENS = 16
+export const AG_PROVINCE_CARIA = 17
+export const AG_PROVINCE_SAMOS = 18
+export const AG_PROVINCE_ANDROS = 19
+export const AG_PROVINCE_SPARTA = 20
+export const AG_PROVINCE_RHODES = 21
+export const AG_PROVINCE_KOS = 22
+export const AG_PROVINCE_NAXOS = 23
+export const AG_PROVINCE_THERA = 24
+export const AG_PROVINCE_HEPTANESE = 25
+export const AG_PROVINCE_ETEA = 26
+export const AG_PROVINCE_KNOSSOS = 27
+export const AG_PROVINCE_RITHYMNA = 28
+export const AG_PROVINCE_CYDONIA = 29
+
+export const AG_TERRITORY_COUNT = 163
+
+// SEAS
+export const AG_C0 = 137
+export const AG_C1 = 138
+export const AG_C2 = 139
+export const AG_C3 = 140
+export const AG_C4 = 141
+export const AG_C5 = 142
+export const AG_C6 = 143
+export const AG_C7 = 144
+export const AG_C8 = 145
+export const AG_C9 = 146
+export const AG_C10 = 147
+export const AG_C11 = 148
+export const AG_C12 = 149
+export const AG_C13 = 150
+export const AG_C14 = 151
+export const AG_C15 = 152
+export const AG_C16 = 153
+export const AG_C17 = 154
+export const AG_C18 = 155
+export const AG_C19 = 156
+export const AG_C20 = 157
+export const AG_C21 = 158
+export const AG_C22 = 159
+export const AG_C23 = 160
+export const AG_C24 = 161
+export const AG_C25 = 162
+
+// THRACE
+export const AG_THRACE0 = 0
+export const AG_THRACE1 = 1
+export const AG_THRACE2 = 2
+export const AG_THRACE3 = 3
+export const AG_THRACE4 = 4
+export const AG_THRACE5 = 5
+
+// ABDERA
+export const AG_AB0 = 6
+export const AG_AB1 = 7
+export const AG_AB2 = 8
+export const AG_AB3 = 9
+
+// KAVALA
+export const AG_KA0 = 10
+export const AG_KA1 = 11
+export const AG_KA2 = 12
+
+// ATHOS
+export const AG_ATHOS0 = 13
+export const AG_ATHOS1 = 14
+export const AG_ATHOS2 = 15
+export const AG_ATHOS3 = 16
+
+// MACEDEON
+export const AG_M0 = 17
+export const AG_M1 = 18
+export const AG_M2 = 19
+export const AG_M3 = 20
+export const AG_M4 = 21
+export const AG_M5 = 22
+
+// PELLA
+export const AG_P0 = 23
+export const AG_P1 = 24
+export const AG_P2 = 25
+export const AG_P3 = 26
+export const AG_P4 = 27
+
+// TROAS
+export const AG_TROAS0 = 28
+export const AG_TROAS1 = 29
+export const AG_TROAS2 = 30
+export const AG_TROAS3 = 31
+export const AG_TROAS4 = 32
+export const AG_TROAS5 = 33
+
+// LYDIA
+export const AG_LY0 = 34
+export const AG_LY1 = 35
+export const AG_LY2 = 36
+export const AG_LY3 = 37
+export const AG_LY4 = 38
+
+// AEOLIA
+export const AG_A0 = 39
+export const AG_A1 = 40
+export const AG_A2 = 41
+export const AG_A3 = 42
+
+// LESBOS
+export const AG_LES0 = 43
+export const AG_LES1 = 44
+export const AG_LES2 = 45
+
+// LEMNOS
+export const AG_LE0 = 46
+export const AG_LE1 = 47
+export const AG_LE2 = 48
+
+// SPORADES
+export const AG_SP0 = 49
+export const AG_SP1 = 50
+export const AG_SP2 = 51
+export const AG_SP3 = 52
+export const AG_SP4 = 53
+export const AG_SP5 = 54
+
+// THEBES
+export const AG_THEBES0 = 55
+export const AG_THEBES1 = 56
+export const AG_THEBES2 = 57
+export const AG_THEBES3 = 58
+export const AG_THEBES4 = 59
+
+// IONIA
+export const AG_I0 = 60
+export const AG_I1 = 61
+export const AG_I2 = 62
+export const AG_I3 = 63
+export const AG_I4 = 64
+
+// CHIOS
+export const AG_CH0 = 65
+export const AG_CH1 = 66
+export const AG_CH2 = 67
+
+// EUBOEA
+export const AG_EU0 = 68
+export const AG_EU1 = 69
+export const AG_EU2 = 70
+export const AG_EU3 = 71
+export const AG_EU4 = 72
+export const AG_EU5 = 73
+export const AG_EU6 = 74
+
+// ATHENS
+export const AG_ATHENS0 = 75
+export const AG_ATHENS1 = 76
+export const AG_ATHENS2 = 77
+export const AG_ATHENS3 = 78
+export const AG_ATHENS4 = 79
+
+// CARIA
+export const AG_CA0 = 80
+export const AG_CA1 = 81
+export const AG_CA2 = 82
+export const AG_CA3 = 83
+export const AG_CA4 = 84
+
+// SAMOS
+export const AG_SA0 = 85
+export const AG_SA1 = 86
+export const AG_SA2 = 87
+export const AG_SA3 = 88
+
+// ANDROS
+export const AG_AN0 = 89
+export const AG_AN1 = 90
+export const AG_AN2 = 91
+export const AG_AN3 = 92
+export const AG_AN4 = 93
+export const AG_AN5 = 94
+export const AG_AN6 = 95
+
+// SPARTA
+export const AG_SPA0 = 96
+export const AG_SPA1 = 97
+export const AG_SPA2 = 98
+export const AG_SPA3 = 99
+export const AG_SPA4 = 100
+export const AG_SPA5 = 101
+
+// RHODES
+export const AG_RH0 = 102
+export const AG_RH1 = 103
+export const AG_RH2 = 104
+export const AG_RH3 = 105
+
+// KOS
+export const AG_KO0 = 106
+export const AG_KO1 = 107
+export const AG_KO2 = 108
+export const AG_KO3 = 109
+export const AG_KO4 = 110
+
+// NAXOS
+export const AG_N0 = 111
+export const AG_N1 = 112
+export const AG_N2 = 113
+export const AG_N3 = 114
+export const AG_N4 = 115
+export const AG_N5 = 116
+
+// THERA
+export const AG_THERA0 = 117
+export const AG_THERA1 = 118
+export const AG_THERA2 = 119
+export const AG_THERA3 = 120
+export const AG_THERA4 = 121
+
+// HEPTAESE
+export const AG_H0 = 122
+export const AG_H1 = 123
+export const AG_H2 = 124
+
+// ETEA
+export const AG_ET0 = 125
+export const AG_ET1 = 126
+export const AG_ET2 = 127
+
+// KNOSSOS
+export const AG_KN0 = 128
+export const AG_KN1 = 129
+export const AG_KN2 = 130
+
+// RITHYMNA
+export const AG_R0 = 131
+export const AG_R1 = 132
+
+// CYDONIA
+export const AG_CY0 = 133
+export const AG_CY1 = 134
+export const AG_CY2 = 135
+export const AG_CY3 = 136
+
+export const AG_TERRS_IN_PROVINCE = [
+	6, // Thrace
+	4, // Abdera
+	3, // Kavalas
+	4, // Athos
+	6, // Macedeon
+	5, // Pellas
+	6, // Troas
+	5, // Lydia
+	4, // Aeolia
+	3, // Lesbos
+	3, // Lemnos
+	6, // Sporades
+	5, // Thebes
+	5, // Ionia
+	3, // Chios
+	7, // Euboea
+	5, // Athens
+	5, // Caria
+	4, // Samos
+	7, // Andros
+	6, // Sparta
+	4, // Rhodes
+	5, // Kos
+	6, // Naxos
+	5, // Thera
+	3, // Heptaese
+	3, // Etea
+	3, // Knossos
+	2, // Rithymna
+	4, // Cydonia
+]
+
+export const AG_NEIGHBOUR_PAIRS = [
+	// Sea zonEs only first
+	[AG_C0, AG_C1],
+	[AG_C0, AG_C5],
+	[AG_C1, AG_C2],
+	[AG_C1, AG_C5],
+	[AG_C2, AG_C3],
+	[AG_C2, AG_C5],
+	[AG_C3, AG_C4],
+	[AG_C3, AG_C5],
+	[AG_C3, AG_C6],
+	[AG_C4, AG_C6],
+	[AG_C4, AG_C7],
+	[AG_C5, AG_C6],
+	[AG_C5, AG_C9],
+	[AG_C6, AG_C7],
+	[AG_C6, AG_C9],
+	[AG_C6, AG_C10],
+	[AG_C6, AG_C13],
+	[AG_C6, AG_C14],
+	[AG_C8, AG_C9],
+	[AG_C8, AG_C10],
+	[AG_C9, AG_C10],
+	[AG_C10, AG_C11],
+	[AG_C10, AG_C12],
+	[AG_C10, AG_C13],
+	[AG_C11, AG_C12],
+	[AG_C11, AG_C18],
+	[AG_C12, AG_C13],
+	[AG_C12, AG_C18],
+	[AG_C12, AG_C20],
+	[AG_C12, AG_C21],
+	[AG_C13, AG_C14],
+	[AG_C13, AG_C21],
+	[AG_C13, AG_C22],
+	[AG_C14, AG_C15],
+	[AG_C14, AG_C17],
+	[AG_C14, AG_C22],
+	[AG_C15, AG_C16],
+	[AG_C15, AG_C17],
+	[AG_C17, AG_C22],
+	[AG_C17, AG_C24],
+	[AG_C18, AG_C19],
+	[AG_C18, AG_C20],
+	[AG_C19, AG_C20],
+	[AG_C19, AG_C25],
+	[AG_C20, AG_C21],
+	[AG_C20, AG_C23],
+	[AG_C21, AG_C22],
+	[AG_C21, AG_C23],
+	[AG_C22, AG_C23],
+	[AG_C22, AG_C24],
+	[AG_C23, AG_C24],
+	[AG_C24, AG_C25],
+
+	// THRACE
+	[AG_THRACE0, AG_C0],
+	[AG_THRACE0, AG_THRACE1],
+	[AG_THRACE0, AG_THRACE3],
+	[AG_THRACE1, AG_THRACE2],
+	[AG_THRACE1, AG_THRACE3],
+	[AG_THRACE2, AG_C1],
+	[AG_THRACE2, AG_AB0],
+	[AG_THRACE2, AG_THRACE3],
+	[AG_THRACE3, AG_C0],
+	[AG_THRACE3, AG_C1],
+	[AG_THRACE3, AG_THRACE4],
+	[AG_THRACE4, AG_C0],
+	[AG_THRACE4, AG_C1],
+	[AG_THRACE4, AG_THRACE5],
+	[AG_THRACE5, AG_C1],
+	[AG_THRACE5, AG_C5],
+
+	// ABDERA
+	[AG_AB0, AG_C1],
+	[AG_AB0, AG_AB1],
+	[AG_AB1, AG_C1],
+	[AG_AB1, AG_C2],
+	[AG_AB1, AG_AB2],
+	[AG_AB2, AG_C2],
+	[AG_AB2, AG_AB3],
+	[AG_AB2, AG_KA0],
+	[AG_AB3, AG_C2],
+
+	// KAVALA
+	[AG_KA0, AG_C2],
+	[AG_KA0, AG_KA1],
+	[AG_KA0, AG_KA2],
+	[AG_KA1, AG_C2],
+	[AG_KA1, AG_C3],
+	[AG_KA1, AG_ATHOS0],
+	[AG_KA2, AG_C2],
+	[AG_KA2, AG_C3],
+	[AG_ATHOS0, AG_C3],
+	[AG_ATHOS0, AG_ATHOS1],
+	[AG_ATHOS1, AG_C3],
+	[AG_ATHOS1, AG_ATHOS2],
+	[AG_ATHOS1, AG_ATHOS3],
+	[AG_ATHOS1, AG_M2],
+	[AG_ATHOS1, AG_M3],
+	[AG_ATHOS2, AG_M1],
+	[AG_ATHOS2, AG_M2],
+	[AG_ATHOS3, AG_C3],
+	[AG_ATHOS3, AG_M3],
+	[AG_ATHOS3, AG_M5],
+
+	// MACEDON
+	[AG_M0, AG_M1],
+	[AG_M0, AG_P0],
+	[AG_M0, AG_P1],
+	[AG_M1, AG_M2],
+	[AG_M1, AG_P0],
+	[AG_M2, AG_M3],
+	[AG_M2, AG_P0],
+	[AG_M3, AG_M4],
+	[AG_M3, AG_M5],
+	[AG_M3, AG_P0],
+	[AG_M3, AG_P2],
+	[AG_M4, AG_C4],
+	[AG_M4, AG_M5],
+	[AG_M4, AG_P2],
+	[AG_M4, AG_P3],
+	[AG_M4, AG_P4],
+	[AG_M5, AG_C3],
+	[AG_M5, AG_C4],
+
+	// PELLA
+	[AG_P0, AG_P1],
+	[AG_P0, AG_P2],
+	[AG_P1, AG_C4],
+	[AG_P1, AG_P2],
+	[AG_P1, AG_P3],
+	[AG_P2, AG_P3],
+	[AG_P3, AG_C4],
+	[AG_P3, AG_P4],
+	[AG_P4, AG_C4],
+
+	// TROAS
+	[AG_TROAS0, AG_C0],
+	[AG_TROAS0, AG_TROAS1],
+	[AG_TROAS0, AG_TROAS2],
+	[AG_TROAS1, AG_TROAS2],
+	[AG_TROAS1, AG_TROAS3],
+	[AG_TROAS1, AG_LY0],
+	[AG_TROAS2, AG_C0],
+	[AG_TROAS2, AG_TROAS3],
+	[AG_TROAS2, AG_TROAS4],
+	[AG_TROAS3, AG_TROAS4],
+	[AG_TROAS3, AG_LY0],
+	[AG_TROAS3, AG_A0],
+	[AG_TROAS3, AG_A1],
+	[AG_TROAS3, AG_A2],
+	[AG_TROAS4, AG_C0],
+	[AG_TROAS4, AG_C5],
+	[AG_TROAS4, AG_A2],
+	[AG_TROAS4, AG_A3],
+	[AG_TROAS4, AG_TROAS5],
+	[AG_TROAS5, AG_C5],
+	[AG_TROAS5, AG_C9],
+	[AG_TROAS5, AG_LE1],
+
+	// LYDIA
+	[AG_LY0, AG_LY1],
+	[AG_LY0, AG_A0],
+	[AG_LY1, AG_LY2],
+	[AG_LY1, AG_A0],
+	[AG_LY2, AG_C8],
+	[AG_LY2, AG_LY3],
+	[AG_LY2, AG_A0],
+	[AG_LY3, AG_C8],
+	[AG_LY3, AG_LY4],
+	[AG_LY3, AG_I0],
+	[AG_LY4, AG_C8],
+	[AG_LY4, AG_I0],
+	[AG_LY4, AG_I1],
+
+	// AEOLIA
+	[AG_A0, AG_C8],
+	[AG_A0, AG_A1],
+	[AG_A1, AG_C9],
+	[AG_A1, AG_A2],
+	[AG_A1, AG_A3],
+	[AG_A2, AG_A3],
+	[AG_A3, AG_C9],
+
+	// LESBOS
+	[AG_LES0, AG_C9],
+	[AG_LES0, AG_LES1],
+	[AG_LES0, AG_LES2],
+	[AG_LES1, AG_C9],
+	[AG_LES1, AG_LES2],
+	[AG_LES2, AG_C9],
+
+	// LEMNOS
+	[AG_LE0, AG_C3],
+	[AG_LE0, AG_C5],
+	[AG_LE0, AG_LE1],
+	[AG_LE1, AG_C5],
+	[AG_LE1, AG_LE2],
+	[AG_LE2, AG_C5],
+
+	// SPORADES
+	[AG_SP0, AG_C7],
+	[AG_SP0, AG_SP1],
+	[AG_SP1, AG_C6],
+	[AG_SP1, AG_SP2],
+	[AG_SP2, AG_C6],
+	[AG_SP2, AG_SP3],
+	[AG_SP3, AG_C6],
+	[AG_SP3, AG_SP4],
+	[AG_SP4, AG_C6],
+	[AG_SP4, AG_SP5],
+	[AG_SP5, AG_C6],
+
+	// THEBES
+	[AG_THEBES0, AG_C4],
+	[AG_THEBES0, AG_THEBES1],
+	[AG_THEBES0, AG_THEBES2],
+	[AG_THEBES1, AG_C7],
+	[AG_THEBES1, AG_THEBES2],
+	[AG_THEBES2, AG_C7],
+	[AG_THEBES2, AG_THEBES3],
+	[AG_THEBES3, AG_C7],
+	[AG_THEBES3, AG_C16],
+	[AG_THEBES3, AG_THEBES4],
+	[AG_THEBES4, AG_C7],
+	[AG_THEBES4, AG_C16],
+	[AG_THEBES4, AG_EU0],
+
+	// IONIA
+	[AG_I0, AG_I1],
+	[AG_I1, AG_C8],
+	[AG_I1, AG_I2],
+	[AG_I1, AG_CA0],
+	[AG_I2, AG_C8],
+	[AG_I2, AG_C10],
+	[AG_I2, AG_C11],
+	[AG_I2, AG_I3],
+	[AG_I2, AG_I4],
+	[AG_I2, AG_CA0],
+	[AG_I3, AG_C10],
+	[AG_I3, AG_I4],
+	[AG_I3, AG_CH2],
+	[AG_I4, AG_C10],
+	[AG_I4, AG_C11],
+
+	// CHIOS
+	[AG_CH0, AG_C10],
+	[AG_CH0, AG_CH1],
+	[AG_CH1, AG_C10],
+	[AG_CH1, AG_CH2],
+	[AG_CH2, AG_C10],
+
+	// EUBOEA
+	[AG_EU0, AG_C6],
+	[AG_EU0, AG_C7],
+	[AG_EU0, AG_C16],
+	[AG_EU0, AG_EU1],
+	[AG_EU0, AG_EU4],
+	[AG_EU1, AG_C14],
+	[AG_EU1, AG_C15],
+	[AG_EU1, AG_EU2],
+	[AG_EU2, AG_C14],
+	[AG_EU2, AG_C15],
+	[AG_EU2, AG_EU3],
+	[AG_EU3, AG_C14],
+	[AG_EU3, AG_C15],
+	[AG_EU4, AG_C16],
+	[AG_EU4, AG_EU5],
+	[AG_EU4, AG_ATHENS0],
+	[AG_EU4, AG_ATHENS1],
+	[AG_EU5, AG_C16],
+	[AG_EU5, AG_EU6],
+	[AG_EU6, AG_C16],
+
+	// ATHENS
+	[AG_ATHENS0, AG_C15],
+	[AG_ATHENS0, AG_ATHENS1],
+	[AG_ATHENS0, AG_ATHENS2],
+	[AG_ATHENS1, AG_C17],
+	[AG_ATHENS1, AG_ATHENS2],
+	[AG_ATHENS1, AG_SPA0],
+	[AG_ATHENS2, AG_C15],
+	[AG_ATHENS2, AG_ATHENS3],
+	[AG_ATHENS3, AG_C15],
+	[AG_ATHENS3, AG_ATHENS4],
+	[AG_ATHENS4, AG_C17],
+
+	// CARIA
+	[AG_CA0, AG_C11],
+	[AG_CA0, AG_CA1],
+	[AG_CA1, AG_C11],
+	[AG_CA1, AG_CA2],
+	[AG_CA1, AG_CA3],
+	[AG_CA2, AG_C11],
+	[AG_CA2, AG_CA3],
+	[AG_CA3, AG_C11],
+	[AG_CA3, AG_C18],
+	[AG_CA3, AG_CA4],
+	[AG_CA4, AG_C18],
+
+	// SAMOS
+	[AG_SA0, AG_C12],
+	[AG_SA0, AG_SA1],
+	[AG_SA1, AG_C12],
+	[AG_SA1, AG_SA2],
+	[AG_SA2, AG_C12],
+	[AG_SA2, AG_C13],
+	[AG_SA2, AG_SA3],
+	[AG_SA3, AG_C12],
+	[AG_SA3, AG_KO0],
+
+	// ANDROS
+	[AG_AN0, AG_C13],
+	[AG_AN0, AG_AN1],
+	[AG_AN1, AG_C13],
+	[AG_AN1, AG_AN2],
+	[AG_AN2, AG_C13],
+	[AG_AN2, AG_AN3],
+	[AG_AN3, AG_C13],
+	[AG_AN3, AG_AN4],
+	[AG_AN4, AG_C13],
+	[AG_AN4, AG_C14],
+	[AG_AN4, AG_AN5],
+	[AG_AN5, AG_C14],
+	[AG_AN5, AG_AN6],
+	[AG_AN6, AG_C14],
+
+	// SPARTA
+	[AG_SPA0, AG_C17],
+	[AG_SPA0, AG_SPA1],
+	[AG_SPA0, AG_SPA2],
+	[AG_SPA1, AG_C17],
+	[AG_SPA1, AG_SPA2],
+	[AG_SPA2, AG_C17],
+	[AG_SPA2, AG_SPA3],
+	[AG_SPA2, AG_SPA4],
+	[AG_SPA3, AG_C24],
+	[AG_SPA3, AG_SPA4],
+	[AG_SPA3, AG_SPA5],
+	[AG_SPA4, AG_C17],
+	[AG_SPA4, AG_SPA5],
+	[AG_SPA5, AG_C24],
+	[AG_SPA5, AG_H0],
+
+	// RHODES
+	[AG_RH0, AG_C18],
+	[AG_RH0, AG_RH1],
+	[AG_RH0, AG_KO2],
+	[AG_RH1, AG_C18],
+	[AG_RH1, AG_C19],
+	[AG_RH1, AG_RH2],
+	[AG_RH1, AG_RH3],
+	[AG_RH2, AG_C19],
+	[AG_RH3, AG_C19],
+
+	// KOS
+	[AG_KO0, AG_C12],
+	[AG_KO0, AG_KO1],
+	[AG_KO1, AG_C12],
+	[AG_KO1, AG_KO2],
+	[AG_KO2, AG_C18],
+	[AG_KO2, AG_KO3],
+	[AG_KO3, AG_C18],
+	[AG_KO3, AG_C20],
+	[AG_KO3, AG_KO4],
+	[AG_KO4, AG_C20],
+
+	// NAXOS
+	[AG_N0, AG_C21],
+	[AG_N0, AG_N1],
+	[AG_N1, AG_C21],
+	[AG_N1, AG_N2],
+	[AG_N2, AG_C21],
+	[AG_N2, AG_N3],
+	[AG_N3, AG_C22],
+	[AG_N3, AG_N4],
+	[AG_N4, AG_C22],
+	[AG_N4, AG_N5],
+	[AG_N5, AG_C22],
+	[AG_N5, AG_THERA1],
+
+	// THERA
+	[AG_THERA0, AG_C22],
+	[AG_THERA0, AG_THERA1],
+	[AG_THERA1, AG_C22],
+	[AG_THERA1, AG_THERA2],
+	[AG_THERA2, AG_C22],
+	[AG_THERA2, AG_C21],
+	[AG_THERA2, AG_THERA3],
+	[AG_THERA3, AG_C21],
+	[AG_THERA3, AG_THERA4],
+	[AG_THERA4, AG_C21],
+	[AG_THERA4, AG_C20],
+
+	// HEPTANESE
+	[AG_H0, AG_C24],
+	[AG_H0, AG_H1],
+	[AG_H1, AG_C24],
+	[AG_H1, AG_H2],
+	[AG_H2, AG_C24],
+
+	// ETEA
+	[AG_ET0, AG_C19],
+	[AG_ET0, AG_C20],
+	[AG_ET0, AG_ET1],
+	[AG_ET0, AG_ET2],
+	[AG_ET1, AG_C20],
+	[AG_ET1, AG_ET2],
+	[AG_ET1, AG_KN0],
+	[AG_ET2, AG_C19],
+	[AG_ET2, AG_KN0],
+
+	// KNOSSOS
+	[AG_KN0, AG_C19],
+	[AG_KN0, AG_C20],
+	[AG_KN0, AG_C23],
+	[AG_KN0, AG_C25],
+	[AG_KN0, AG_KN1],
+	[AG_KN0, AG_KN2],
+	[AG_KN1, AG_C23],
+	[AG_KN1, AG_KN2],
+	[AG_KN1, AG_R0],
+	[AG_KN2, AG_C25],
+	[AG_KN2, AG_R0],
+	[AG_KN2, AG_R1],
+
+	// RITHYMNA
+	[AG_R0, AG_C23],
+	[AG_R0, AG_R1],
+	[AG_R0, AG_CY0],
+	[AG_R1, AG_C25],
+	[AG_R1, AG_CY0],
+
+	// CYDONIA
+	[AG_CY0, AG_C23],
+	[AG_CY0, AG_CY1],
+	[AG_CY0, AG_CY2],
+	[AG_CY1, AG_C25],
+	[AG_CY1, AG_CY2],
+	[AG_CY2, AG_C23],
+	[AG_CY2, AG_C25],
+	[AG_CY2, AG_CY3],
+	[AG_CY3, AG_C23],
+	[AG_CY3, AG_C24],
+	[AG_CY3, AG_C25],
+]
+
+export const AG_PROVINCE_STRINGS = [
+	"Thrace",
+	"Abdera",
+	"Kavala",
+	"Athos",
+	"Macedon",
+	"Pella", // 5
+	"Troas",
+	"Lydia",
+	"Aeolia",
+	"Lesbos",
+	"Lemnos", //10
+	"Sporades",
+	"Thebes",
+	"Ionia",
+	"Chios",
+	"Euboea", //15
+	"Athens",
+	"Caria",
+	"Samos",
+	"Andros",
+	"Sparta", //20
+	"Rhodes",
+	"Kos",
+	"Naxos",
+	"Thera",
+	"Heptaneese", //25
+	"Etea",
+	"Knossos",
+	"Rithymna",
+	"Cydonia", //29
+]
+
+export const AG_TERR_ID_TO_PATH_ID = [
+	// Thrace
+	"THRACE0", //0
+	"THRACE1", //1
+	"THRACE2", //2
+	"THRACE3", //3
+	"THRACE4", //4
+	"THRACE5", //5
+	// Abdera
+	"AB0", //6
+	"AB1", //7
+	"AB2", //8
+	"AB3", //9
+	// Kavala
+	"KA0", //10
+	"KA1", //11
+	"KA2", //12
+	// Athos
+	"ATHOS0", //13
+	"ATHOS1", //14
+	"ATHOS2", //15
+	"ATHOS3", //16
+	// Macedon
+	"M0", //17
+	"M1", //18
+	"M2", //19
+	"M3", //20
+	"M4", //21
+	"M5", //22
+	// Pella
+	"P0", //23
+	"P1", //24
+	"P2", //25
+	"P3", //26
+	"P4", //27
+	// Troas
+	"TROAS0", //28
+	"TROAS1", //29
+	"TROAS2", //30
+	"TROAS3", //31
+	"TROAS4", //32
+	"TROAS5", //33
+	// Lydia
+	"LY0", //34
+	"LY1", //35
+	"LY2", //36
+	"LY3", //37
+	"LY4", //38
+	// Aeolia
+	"A0", //39
+	"A1", //40
+	"A2", //41
+	"A3", //42
+	// Lesbos
+	"LES0", //43
+	"LES1", //44
+	"LES2", //45
+	// Lemnos
+	"LE0", //46
+	"LE1", //47
+	"LE2", //48
+	// Sporades
+	"SP0", //49
+	"SP1", //50
+	"SP2", //51
+	"SP3", //52
+	"SP4", //53
+	"SP5", //54
+	// Thebes
+	"THEBES0", //55
+	"THEBES1", //56
+	"THEBES2", //57
+	"THEBES3", //58
+	"THEBES4", //59
+	// Ionia
+	"I0", //60
+	"I1", //61
+	"I2", //62
+	"I3", //63
+	"I4", //64
+	// Chios
+	"CH0", //65
+	"CH1", //66
+	"CH2", //67
+	// Euboea
+	"EU0", //68
+	"EU1", //69
+	"EU2", //70
+	"EU3", //71
+	"EU4", //72
+	"EU5", //73
+	"EU6", //74
+	// Athens
+	"ATHENS0", //75
+	"ATHENS1", //76
+	"ATHENS2", //77
+	"ATHENS3", //78
+	"ATHENS4", //79
+	// Caria
+	"CA0", //80
+	"CA1", //81
+	"CA2", //82
+	"CA3", //83
+	"CA4", //84
+	// Samos
+	"SA0", //85
+	"SA1", //86
+	"SA2", //87
+	"SA3", //88
+	// Andros
+	"AN0", //89
+	"AN1", //90
+	"AN2", //91
+	"AN3", //92
+	"AN4", //93
+	"AN5", //94
+	"AN6", //95
+	// Sparta
+	"SPA0", //96
+	"SPA1", //97
+	"SPA2", //98
+	"SPA3", //99
+	"SPA4", //100
+	"SPA5", //101
+	// Rhodes
+	"RH0", //102
+	"RH1", //103
+	"RH2", //104
+	"RH3", //105
+	// Kos
+	"KO0", //106
+	"KO1", //107
+	"KO2", //108
+	"KO3", //109
+	"KO4", //110
+	// Naxos
+	"N0", //111
+	"N1", //112
+	"N2", //113
+	"N3", //114
+	"N4", //115
+	"N5", //116
+	// Thera
+	"THERA0", //117
+	"THERA1", //118
+	"THERA2", //119
+	"THERA3", //120
+	"THERA4", //121
+	// Heptaneese
+	"H0", //122
+	"H1", //123
+	"H2", //124
+	// Etea
+	"ET0", //125
+	"ET1", //126
+	"ET2", //127
+	// Knossos
+	"KN0", //128
+	"KN1", //129
+	"KN2", //130
+	// Rithymna
+	"R0", //131
+	"R1", //132
+	// Cydonia
+	"CY0", //133
+	"CY1", //134
+	"CY2", //135
+	"CY3", //136
+	// SEA
+	"C0",
+	"C1",
+	"C2",
+	"C3",
+	"C4",
+	"C5",
+	"C6",
+	"C7",
+	"C8",
+	"C9",
+	"C10",
+	"C11",
+	"C12",
+	"C13",
+	"C14",
+	"C15",
+	"C16",
+	"C17",
+	"C18",
+	"C19",
+	"C20",
+	"C21",
+	"C22",
+	"C23",
+	"C24",
+	"C25",
+]
+
+export const AG_ALL_COMPANIES = [
+	// ERA A - 12 COMPS
+
+	{
+		id: 0,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: AG_PROVINCE_THRACE,
+		capacity: [5, 5, 6],
+		combinedCapacity: [5, 5, 6],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_00",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 1,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: AG_PROVINCE_NAXOS,
+		capacity: [5, 5, 6],
+		combinedCapacity: [5, 5, 6],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_01",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 2,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: AG_PROVINCE_ANDROS,
+		capacity: [5, 5, 6],
+		combinedCapacity: [5, 5, 6],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_02",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 3,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: AG_PROVINCE_SPORADES,
+		capacity: [5, 5, 6],
+		combinedCapacity: [5, 5, 6],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_03",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 4,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: AG_PROVINCE_THEBES,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_04",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 5,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: AG_PROVINCE_CARIA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_05",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 6,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: AG_PROVINCE_KAVALA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_06",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 7,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: AG_PROVINCE_PELLA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_07",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 8,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: AG_PROVINCE_RITHYMNA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_08",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 9,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: AG_PROVINCE_ABDERA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_09",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 10,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: AG_PROVINCE_ETEA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_10",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 11,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: AG_PROVINCE_HEPTANESE,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_11",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	// ERA B - 13 COMPANIES
+	{
+		id: 20,
+		era: ERA_B,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: AG_PROVINCE_EUBOEA,
+		capacity: [0, 5, 6],
+		combinedCapacity: [0, 5, 6],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_20",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 21,
+		era: ERA_B,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: AG_PROVINCE_KAVALA,
+		capacity: [0, 5, 6],
+		combinedCapacity: [0, 5, 6],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_21",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 22,
+		era: ERA_B,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: AG_PROVINCE_AEOLIA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_22",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 23,
+		era: ERA_B,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: AG_PROVINCE_ATHENS,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_23",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 24,
+		era: ERA_B,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: AG_PROVINCE_THRACE,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_24",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 25,
+		era: ERA_B,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: AG_PROVINCE_RHODES,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_25",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 26,
+		era: ERA_B,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: AG_PROVINCE_KOS,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_26",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 27,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: AG_PROVINCE_CHIOS,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_27",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 28,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: AG_PROVINCE_NAXOS,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_28",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 29,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: AG_PROVINCE_TROAS,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_29",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 30,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: AG_PROVINCE_LESBOS,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_30",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 31,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: AG_PROVINCE_SPORADES,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_31",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 32,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: AG_PROVINCE_SAMOS,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_32",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	// ERA C - 11 COMPANIES
+	{
+		id: 40,
+		era: ERA_C,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: AG_PROVINCE_SPARTA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_40",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 41,
+		era: ERA_C,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: AG_PROVINCE_ATHOS,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_41",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 42,
+		era: ERA_C,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: AG_PROVINCE_LEMNOS,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ag_c_comp_42",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 43,
+		era: ERA_C,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: AG_PROVINCE_IONIA,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_43",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 44,
+		era: ERA_C,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: AG_PROVINCE_CYDONIA,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_44",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 45,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: AG_PROVINCE_AEOLIA,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_45",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 46,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: AG_PROVINCE_EUBOEA,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_46",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 47,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: AG_PROVINCE_KNOSSOS,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_47",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 48,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: AG_PROVINCE_MACEDON,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_48",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 49,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: AG_PROVINCE_ANDROS,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_49",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 50,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: AG_PROVINCE_THERA,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ag_c_comp_50",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+]
+
+export const AG_ALL_ERA_CARDS = [
+	{
+		id: 0,
+		era: ERA_A,
+		provinces: [AG_PROVINCE_TROAS, AG_PROVINCE_ATHENS, AG_PROVINCE_CYDONIA],
+		gfx: "ag_era_card_00",
+	},
+	{
+		id: 1,
+		era: ERA_A,
+		provinces: [AG_PROVINCE_MACEDON, AG_PROVINCE_IONIA, AG_PROVINCE_RHODES],
+		gfx: "ag_era_card_01",
+	},
+	{
+		id: 2,
+		era: ERA_A,
+		provinces: [AG_PROVINCE_TROAS, AG_PROVINCE_ATHENS, AG_PROVINCE_KNOSSOS],
+		gfx: "ag_era_card_02",
+	},
+	{
+		id: 3,
+		era: ERA_A,
+		provinces: [AG_PROVINCE_MACEDON, AG_PROVINCE_RHODES, AG_PROVINCE_CYDONIA],
+		gfx: "ag_era_card_03",
+	},
+	{
+		id: 4,
+		era: ERA_A,
+		provinces: [AG_PROVINCE_IONIA, AG_PROVINCE_ATHENS, AG_PROVINCE_KNOSSOS],
+		gfx: "ag_era_card_04",
+	},
+	// ERA B
+	{
+		id: 10,
+		era: ERA_B,
+		provinces: [AG_PROVINCE_LEMNOS, AG_PROVINCE_CARIA, AG_PROVINCE_SPARTA],
+		gfx: "ag_era_card_10",
+	},
+	{
+		id: 11,
+		era: ERA_B,
+		provinces: [AG_PROVINCE_ABDERA, AG_PROVINCE_THEBES, AG_PROVINCE_ANDROS],
+		gfx: "ag_era_card_11",
+	},
+	{
+		id: 12,
+		era: ERA_B,
+		provinces: [AG_PROVINCE_ABDERA, AG_PROVINCE_CARIA, AG_PROVINCE_THERA],
+		gfx: "ag_era_card_12",
+	},
+	{
+		id: 13,
+		era: ERA_B,
+		provinces: [AG_PROVINCE_LEMNOS, AG_PROVINCE_THEBES, AG_PROVINCE_THERA],
+		gfx: "ag_era_card_13",
+	},
+	{
+		id: 14,
+		era: ERA_B,
+		//provinces: [AG_PROVINCE_ABDERA, AG_PROVINCE_THEBES, AG_PROVINCE_SPARTA],
+		provinces: [AG_PROVINCE_ABDERA, AG_PROVINCE_SPARTA, AG_PROVINCE_ANDROS],
+		gfx: "ag_era_card_14",
+	},
+	// ERA C
+	{
+		id: 20,
+		era: ERA_C,
+		provinces: [AG_PROVINCE_THRACE, AG_PROVINCE_SAMOS, AG_PROVINCE_HEPTANESE],
+		gfx: "ag_era_card_20",
+	},
+	{
+		id: 21,
+		era: ERA_C,
+		provinces: [AG_PROVINCE_LYDIA, AG_PROVINCE_SPORADES, AG_PROVINCE_ETEA],
+		gfx: "ag_era_card_21",
+	},
+	{
+		id: 22,
+		era: ERA_C,
+		provinces: [AG_PROVINCE_THRACE, AG_PROVINCE_LESBOS, AG_PROVINCE_HEPTANESE],
+		gfx: "ag_era_card_22",
+	},
+	{
+		id: 23,
+		era: ERA_C,
+		provinces: [AG_PROVINCE_LYDIA, AG_PROVINCE_SPORADES, AG_PROVINCE_SAMOS],
+		gfx: "ag_era_card_23",
+	},
+	{
+		id: 24,
+		era: ERA_C,
+		provinces: [AG_PROVINCE_LESBOS, AG_PROVINCE_SPORADES, AG_PROVINCE_ETEA],
+		gfx: "ag_era_card_24",
+	},
+]
+
+/****************************************************************************** */
+/*                                                                              */
+/*                                                                              */
+/*                                                                              */
+/*                              PHILIPPINE EXPANSION                            */
+/*                                                                              */
+/*                                                                              */
+/*                                                                              */
+/****************************************************************************** */
+
+// COR
+export const PH_PROVINCE_COR = 0
+export const PH_COR_0 = 0
+export const PH_COR_1 = 1
+export const PH_COR_2 = 2
+export const PH_COR_3 = 3
+export const PH_COR_4 = 4
+// ILO
+export const PH_PROVINCE_ILO = 1
+export const PH_ILO_0 = 5
+export const PH_ILO_1 = 6
+export const PH_ILO_2 = 7
+export const PH_ILO_3 = 8
+// CAG
+export const PH_PROVINCE_CAG = 2
+export const PH_CAG_0 = 9
+export const PH_CAG_1 = 10
+export const PH_CAG_2 = 11
+export const PH_CAG_3 = 12
+export const PH_CAG_4 = 13
+// LUZ
+export const PH_PROVINCE_LUZ = 3
+export const PH_LUZ_0 = 14
+export const PH_LUZ_1 = 15
+export const PH_LUZ_2 = 16
+// QUE
+export const PH_PROVINCE_QUE = 4
+export const PH_QUE_0 = 17
+export const PH_QUE_1 = 18
+export const PH_QUE_2 = 19
+export const PH_QUE_3 = 20
+export const PH_QUE_4 = 21
+export const PH_QUE_5 = 22
+export const PH_QUE_6 = 23
+// CAP
+export const PH_PROVINCE_CAP = 5
+export const PH_CAP_0 = 24
+export const PH_CAP_1 = 25
+export const PH_CAP_2 = 26
+// CAL
+export const PH_PROVINCE_CAL = 6
+export const PH_CAL_0 = 27
+export const PH_CAL_1 = 28
+export const PH_CAL_2 = 29
+export const PH_CAL_3 = 30
+// NBI
+export const PH_PROVINCE_NBI = 7
+export const PH_NBI_0 = 31
+export const PH_NBI_1 = 32
+export const PH_NBI_2 = 33
+export const PH_NBI_3 = 34
+// SBI
+export const PH_PROVINCE_SBI = 8
+export const PH_SBI_0 = 35
+export const PH_SBI_1 = 36
+export const PH_SBI_2 = 37
+export const PH_SBI_3 = 38
+// SAM
+export const PH_PROVINCE_SAM = 9
+export const PH_SAM_0 = 39
+export const PH_SAM_1 = 40
+export const PH_SAM_2 = 41
+export const PH_SAM_3 = 42
+export const PH_SAM_4 = 43
+// LEY
+export const PH_PROVINCE_LEY = 10
+export const PH_LEY_0 = 44
+export const PH_LEY_1 = 45
+export const PH_LEY_2 = 46
+// NCA
+export const PH_PROVINCE_NCA = 11
+export const PH_NCA_0 = 47
+export const PH_NCA_1 = 48
+export const PH_NCA_2 = 49
+// SCA
+export const PH_PROVINCE_SCA = 12
+export const PH_SCA_0 = 50
+export const PH_SCA_1 = 51
+export const PH_SCA_2 = 52
+export const PH_SCA_3 = 53
+// MIN
+export const PH_PROVINCE_MIN = 13
+export const PH_MIN_0 = 54
+export const PH_MIN_1 = 55
+export const PH_MIN_2 = 56
+export const PH_MIN_3 = 57
+export const PH_MIN_4 = 58
+// ZAM
+export const PH_PROVINCE_ZAM = 14
+export const PH_ZAM_0 = 59
+export const PH_ZAM_1 = 60
+export const PH_ZAM_2 = 61
+export const PH_ZAM_3 = 62
+export const PH_ZAM_4 = 63
+export const PH_ZAM_5 = 64
+// BAN
+export const PH_PROVINCE_BAN = 15
+export const PH_BAN_0 = 65
+export const PH_BAN_1 = 66
+export const PH_BAN_2 = 67
+export const PH_BAN_3 = 68
+export const PH_BAN_4 = 69
+export const PH_BAN_5 = 70
+// CMI
+export const PH_PROVINCE_CMI = 16
+export const PH_CMI_0 = 71
+export const PH_CMI_1 = 72
+export const PH_CMI_2 = 73
+// DAV
+export const PH_PROVINCE_DAV = 17
+export const PH_DAV_0 = 74
+export const PH_DAV_1 = 75
+export const PH_DAV_2 = 76
+// SOC
+export const PH_PROVINCE_SOC = 18
+export const PH_SOC_0 = 77
+export const PH_SOC_1 = 78
+export const PH_SOC_2 = 79
+// MIM
+export const PH_PROVINCE_MIM = 19
+export const PH_MIM_0 = 80
+export const PH_MIM_1 = 81
+export const PH_MIM_2 = 82
+export const PH_MIM_3 = 83
+export const PH_MIM_4 = 84
+export const PH_MIM_5 = 85
+export const PH_MIM_6 = 86
+// PAL
+export const PH_PROVINCE_PAL = 20
+export const PH_PAL_0 = 87
+export const PH_PAL_1 = 88
+export const PH_PAL_2 = 89
+export const PH_PAL_3 = 90
+export const PH_PAL_4 = 91
+export const PH_PAL_5 = 92
+// WVI
+export const PH_PROVINCE_WVI = 21
+export const PH_WVI_0 = 93
+export const PH_WVI_1 = 94
+export const PH_WVI_2 = 95
+export const PH_WVI_3 = 96
+export const PH_WVI_4 = 97
+export const PH_WVI_5 = 98
+export const PH_WVI_6 = 99
+// CVI
+export const PH_PROVINCE_CVI = 22
+export const PH_CVI_0 = 100
+export const PH_CVI_1 = 101
+export const PH_CVI_2 = 102
+export const PH_CVI_3 = 103
+export const PH_CVI_4 = 104
+export const PH_CVI_5 = 105
+// MAL
+export const PH_PROVINCE_MAL = 23
+export const PH_MAL_0 = 106
+export const PH_MAL_1 = 107
+export const PH_MAL_2 = 108
+export const PH_MAL_3 = 109
+export const PH_MAL_4 = 110
+export const PH_MAL_5 = 111
+// SEA ZONES
+export const PH_C_0 = 112
+export const PH_C_1 = 113
+export const PH_C_2 = 114
+export const PH_C_3 = 115
+export const PH_C_4 = 116
+export const PH_C_5 = 117
+export const PH_C_6 = 118
+export const PH_C_7 = 119
+export const PH_C_8 = 120
+export const PH_C_9 = 121
+export const PH_C_10 = 122
+export const PH_C_11 = 123
+export const PH_C_12 = 124
+export const PH_C_13 = 125
+export const PH_C_14 = 126
+export const PH_C_15 = 127
+
+export const PH_TERRITORY_COUNT = 128
+
+export const ALL_PROVINCES_PHP = [
+	PH_PROVINCE_COR, // 0
+	PH_PROVINCE_ILO, //1
+	PH_PROVINCE_CAG, //2
+	PH_PROVINCE_LUZ, //3
+	PH_PROVINCE_QUE, //4
+	PH_PROVINCE_CAP, //5
+	PH_PROVINCE_CAL, //6
+	PH_PROVINCE_NBI, //7
+	PH_PROVINCE_SBI, //8
+	PH_PROVINCE_SAM, //9
+	PH_PROVINCE_LEY, //10
+	PH_PROVINCE_NCA, //11
+	PH_PROVINCE_SCA, //12
+	PH_PROVINCE_MIN, //13
+	PH_PROVINCE_ZAM, //14
+	PH_PROVINCE_BAN, //15
+	PH_PROVINCE_CMI, //16
+	PH_PROVINCE_DAV, //17
+	PH_PROVINCE_SOC, //18
+	PH_PROVINCE_MIM, //19
+	PH_PROVINCE_PAL, //20
+	PH_PROVINCE_WVI, //21
+	PH_PROVINCE_CVI, //22
+	PH_PROVINCE_MAL, //23
+]
+
+export const PHP_TERRS_IN_PROVINCE = [
+	5, //COR = 0
+	4, //ILO = 1
+	5, //CAG
+	3, //LUZ
+	7, //QUE
+	3, //CAP = 5
+	4, //CAL
+	4, //NBI
+	4, //SBI
+	5, //SAM
+	3, //LEY = 10
+	3, //NCA
+	4, //SCA
+	5, //MIN
+	6, //ZAM
+	6, //BAN = 15
+	3, //CMI
+	3, //DAV
+	3, //SOC
+	7, //MIM
+	6, //PAL = 20
+	7, //WVI
+	6, //CVI
+	6, //MAL = 23
+]
+
+export const PHP_NEIGHBOUR_PAIRS = [
+	// Sea zones only first
+	[PH_C_0, PH_C_1],
+	[PH_C_0, PH_C_2],
+	[PH_C_1, PH_C_3],
+	[PH_C_2, PH_C_4],
+	[PH_C_3, PH_C_5],
+	[PH_C_3, PH_C_8],
+	[PH_C_4, PH_C_6],
+	[PH_C_4, PH_C_7],
+	[PH_C_5, PH_C_8],
+	[PH_C_5, PH_C_9],
+	[PH_C_5, PH_C_6],
+	[PH_C_6, PH_C_7],
+	[PH_C_6, PH_C_9],
+	[PH_C_6, PH_C_10],
+	[PH_C_7, PH_C_10],
+	[PH_C_7, PH_C_15],
+	[PH_C_8, PH_C_9],
+	[PH_C_8, PH_C_11],
+	[PH_C_8, PH_C_12],
+	[PH_C_9, PH_C_10],
+	[PH_C_9, PH_C_12],
+	[PH_C_9, PH_C_13],
+	[PH_C_10, PH_C_13],
+	[PH_C_11, PH_C_12],
+	[PH_C_12, PH_C_13],
+	[PH_C_12, PH_C_14],
+	[PH_C_14, PH_C_15],
+	// COR
+	[PH_COR_0, PH_C_0],
+	[PH_COR_0, PH_C_1],
+	[PH_COR_0, PH_COR_1],
+	[PH_COR_0, PH_COR_3],
+	[PH_COR_1, PH_C_0],
+	[PH_COR_1, PH_COR_2],
+	[PH_COR_1, PH_COR_3],
+	[PH_COR_1, PH_COR_4],
+	[PH_COR_2, PH_C_0],
+	[PH_COR_2, PH_C_2],
+	[PH_COR_2, PH_COR_4],
+	[PH_COR_3, PH_C_1],
+	[PH_COR_3, PH_COR_4],
+	[PH_COR_3, PH_ILO_0],
+	[PH_COR_3, PH_CAG_0],
+	[PH_COR_4, PH_C_2],
+	[PH_COR_4, PH_CAG_0],
+	[PH_COR_4, PH_CAG_1],
+	// ILO
+	[PH_ILO_0, PH_C_1],
+	[PH_ILO_0, PH_ILO_1],
+	[PH_ILO_0, PH_CAG_0],
+	[PH_ILO_1, PH_C_1],
+	[PH_ILO_1, PH_ILO_2],
+	[PH_ILO_1, PH_ILO_3],
+	[PH_ILO_1, PH_CAG_0],
+	[PH_ILO_1, PH_CAG_2],
+	[PH_ILO_2, PH_C_1],
+	[PH_ILO_2, PH_ILO_3],
+	[PH_ILO_2, PH_LUZ_0],
+	[PH_ILO_2, PH_QUE_0],
+	[PH_ILO_3, PH_CAG_2],
+	[PH_ILO_3, PH_CAG_4],
+	[PH_ILO_3, PH_QUE_0],
+	[PH_ILO_3, PH_QUE_1],
+	//CAG
+	[PH_CAG_0, PH_CAG_1],
+	[PH_CAG_0, PH_CAG_2],
+	[PH_CAG_1, PH_C_2],
+	[PH_CAG_1, PH_CAG_2],
+	[PH_CAG_1, PH_CAG_3],
+	[PH_CAG_2, PH_CAG_3],
+	[PH_CAG_2, PH_CAG_4],
+	[PH_CAG_3, PH_C_2],
+	[PH_CAG_3, PH_CAG_4],
+	[PH_CAG_4, PH_C_2],
+	[PH_CAG_4, PH_C_4],
+	[PH_CAG_4, PH_QUE_1],
+	// LUZ
+	[PH_LUZ_0, PH_C_1],
+	[PH_LUZ_0, PH_LUZ_1],
+	[PH_LUZ_0, PH_QUE_0],
+	[PH_LUZ_1, PH_C_1],
+	[PH_LUZ_1, PH_LUZ_2],
+	[PH_LUZ_1, PH_QUE_0],
+	[PH_LUZ_1, PH_QUE_2],
+	[PH_LUZ_2, PH_C_1],
+	[PH_LUZ_2, PH_QUE_2],
+	[PH_LUZ_2, PH_CAP_0],
+	[PH_LUZ_2, PH_CAP_1],
+	// QUE
+	[PH_QUE_0, PH_QUE_1],
+	[PH_QUE_0, PH_QUE_2],
+	[PH_QUE_1, PH_C_4],
+	[PH_QUE_1, PH_QUE_2],
+	[PH_QUE_1, PH_QUE_3],
+	[PH_QUE_2, PH_QUE_3],
+	[PH_QUE_2, PH_CAP_1],
+	[PH_QUE_3, PH_C_4],
+	[PH_QUE_3, PH_QUE_4],
+	[PH_QUE_3, PH_QUE_5],
+	[PH_QUE_4, PH_C_4],
+	[PH_QUE_4, PH_QUE_6],
+	[PH_QUE_4, PH_CAP_1],
+	[PH_QUE_5, PH_C_4],
+	[PH_QUE_6, PH_C_4],
+	[PH_QUE_6, PH_CAP_1],
+	[PH_QUE_6, PH_CAP_2],
+	[PH_QUE_6, PH_CAL_0],
+	[PH_QUE_6, PH_CAL_1],
+	// CAP
+	[PH_CAP_0, PH_C_3],
+	[PH_CAP_0, PH_CAP_1],
+	[PH_CAP_1, PH_C_3],
+	[PH_CAP_1, PH_CAP_2],
+	[PH_CAP_2, PH_C_3],
+	[PH_CAP_2, PH_CAL_0],
+	// CAL
+	[PH_CAL_0, PH_C_5],
+	[PH_CAL_0, PH_CAL_1],
+	[PH_CAL_0, PH_MIM_4],
+	[PH_CAL_1, PH_C_5],
+	[PH_CAL_1, PH_C_4],
+	[PH_CAL_1, PH_CAL_2],
+	[PH_CAL_1, PH_CAL_3],
+	[PH_CAL_2, PH_C_4],
+	[PH_CAL_2, PH_CAL_3],
+	[PH_CAL_2, PH_NBI_0],
+	[PH_CAL_2, PH_NBI_1],
+	[PH_CAL_3, PH_C_6],
+	[PH_CAL_3, PH_NBI_1],
+	// NBI
+	[PH_NBI_0, PH_C_4],
+	[PH_NBI_0, PH_NBI_1],
+	[PH_NBI_0, PH_NBI_2],
+	[PH_NBI_1, PH_C_6],
+	[PH_NBI_1, PH_NBI_2],
+	[PH_NBI_2, PH_C_6],
+	[PH_NBI_2, PH_NBI_3],
+	[PH_NBI_2, PH_SBI_0],
+	[PH_NBI_3, PH_C_4],
+	[PH_NBI_3, PH_C_6],
+	// SBI
+	[PH_SBI_0, PH_C_6],
+	[PH_SBI_0, PH_SBI_1],
+	[PH_SBI_0, PH_SBI_2],
+	[PH_SBI_1, PH_C_6],
+	[PH_SBI_1, PH_SAM_0],
+	[PH_SBI_2, PH_C_6],
+	[PH_SBI_2, PH_SBI_3],
+	[PH_SBI_2, PH_MIM_6],
+	[PH_SBI_3, PH_C_6],
+	[PH_SBI_3, PH_LEY_0],
+	// SAM
+	[PH_SAM_0, PH_C_6],
+	[PH_SAM_0, PH_SAM_1],
+	[PH_SAM_0, PH_SAM_2],
+	[PH_SAM_1, PH_C_6],
+	[PH_SAM_1, PH_SAM_2],
+	[PH_SAM_1, PH_SAM_3],
+	[PH_SAM_2, PH_C_6],
+	[PH_SAM_2, PH_C_10],
+	[PH_SAM_2, PH_SAM_3],
+	[PH_SAM_2, PH_SAM_4],
+	[PH_SAM_3, PH_C_6],
+	[PH_SAM_3, PH_C_10],
+	[PH_SAM_3, PH_SAM_4],
+	[PH_SAM_4, PH_C_10],
+	[PH_SAM_4, PH_LEY_1],
+	// LEY
+	[PH_LEY_0, PH_C_6],
+	[PH_LEY_0, PH_LEY_1],
+	[PH_LEY_1, PH_C_10],
+	[PH_LEY_1, PH_LEY_2],
+	[PH_LEY_2, PH_C_10],
+	[PH_LEY_2, PH_NCA_0],
+	// NCA
+	[PH_NCA_0, PH_C_7],
+	[PH_NCA_0, PH_C_10],
+	[PH_NCA_0, PH_NCA_1],
+	[PH_NCA_0, PH_NCA_2],
+	[PH_NCA_1, PH_C_10],
+	[PH_NCA_1, PH_NCA_2],
+	[PH_NCA_1, PH_MIN_4],
+	[PH_NCA_1, PH_SCA_0],
+	[PH_NCA_2, PH_C_7],
+	[PH_NCA_2, PH_SCA_0],
+	[PH_NCA_2, PH_SCA_2],
+	// SCA
+	[PH_SCA_0, PH_SCA_1],
+	[PH_SCA_0, PH_SCA_2],
+	[PH_SCA_0, PH_MIN_3],
+	[PH_SCA_0, PH_MIN_4],
+	[PH_SCA_0, PH_CMI_0],
+	[PH_SCA_1, PH_SCA_2],
+	[PH_SCA_1, PH_SCA_3],
+	[PH_SCA_1, PH_CMI_0],
+	[PH_SCA_1, PH_DAV_0],
+	[PH_SCA_1, PH_DAV_1],
+	[PH_SCA_2, PH_C_7],
+	[PH_SCA_2, PH_SCA_3],
+	[PH_SCA_3, PH_C_7],
+	[PH_SCA_3, PH_DAV_1],
+	// MIN
+	[PH_MIN_0, PH_C_10],
+	[PH_MIN_0, PH_C_13],
+	[PH_MIN_0, PH_MIN_1],
+	[PH_MIN_0, PH_ZAM_3],
+	[PH_MIN_0, PH_ZAM_5],
+	[PH_MIN_1, PH_C_10],
+	[PH_MIN_1, PH_MIN_2],
+	[PH_MIN_1, PH_ZAM_5],
+	[PH_MIN_1, PH_BAN_0],
+	[PH_MIN_2, PH_C_10],
+	[PH_MIN_2, PH_MIN_3],
+	[PH_MIN_2, PH_BAN_0],
+	[PH_MIN_2, PH_CMI_0],
+	[PH_MIN_3, PH_C_10],
+	[PH_MIN_3, PH_MIN_4],
+	[PH_MIN_3, PH_CMI_0],
+	[PH_MIN_4, PH_C_10],
+	// ZAM
+	[PH_ZAM_0, PH_C_12],
+	[PH_ZAM_0, PH_C_14],
+	[PH_ZAM_0, PH_ZAM_1],
+	[PH_ZAM_0, PH_BAN_3],
+	[PH_ZAM_1, PH_C_13],
+	[PH_ZAM_1, PH_C_14],
+	[PH_ZAM_1, PH_ZAM_2],
+	[PH_ZAM_2, PH_C_13],
+	[PH_ZAM_2, PH_C_14],
+	[PH_ZAM_2, PH_ZAM_4],
+	[PH_ZAM_3, PH_C_13],
+	[PH_ZAM_3, PH_ZAM_4],
+	[PH_ZAM_3, PH_ZAM_5],
+	[PH_ZAM_4, PH_C_13],
+	[PH_ZAM_4, PH_C_14],
+	[PH_ZAM_4, PH_ZAM_5],
+	[PH_ZAM_5, PH_C_14],
+	[PH_ZAM_5, PH_BAN_0],
+	// BAN
+	[PH_BAN_0, PH_C_14],
+	[PH_BAN_0, PH_BAN_1],
+	[PH_BAN_0, PH_CMI_0],
+	[PH_BAN_1, PH_C_14],
+	[PH_BAN_1, PH_BAN_2],
+	[PH_BAN_1, PH_CMI_0],
+	[PH_BAN_1, PH_CMI_1],
+	[PH_BAN_2, PH_C_14],
+	[PH_BAN_2, PH_CMI_1],
+	[PH_BAN_2, PH_SOC_0],
+	[PH_BAN_3, PH_C_12],
+	[PH_BAN_3, PH_C_14],
+	[PH_BAN_3, PH_BAN_4],
+	[PH_BAN_4, PH_C_12],
+	[PH_BAN_4, PH_BAN_5],
+	[PH_BAN_5, PH_C_11],
+	[PH_BAN_5, PH_C_12],
+	[PH_BAN_5, PH_MAL_2],
+	// CMI
+	[PH_CMI_0, PH_CMI_1],
+	[PH_CMI_0, PH_DAV_0],
+	[PH_CMI_1, PH_CMI_2],
+	[PH_CMI_1, PH_SOC_0],
+	[PH_CMI_1, PH_SOC_1],
+	[PH_CMI_1, PH_DAV_0],
+	[PH_CMI_2, PH_C_15],
+	[PH_CMI_2, PH_DAV_0],
+	[PH_CMI_2, PH_SOC_1],
+	[PH_CMI_2, PH_SOC_2],
+	// DAV
+	[PH_DAV_0, PH_C_15],
+	[PH_DAV_0, PH_DAV_1],
+	[PH_DAV_0, PH_DAV_2],
+	[PH_DAV_1, PH_C_15],
+	[PH_DAV_1, PH_DAV_2],
+	[PH_DAV_2, PH_C_15],
+	// SOC
+	[PH_SOC_0, PH_C_14],
+	[PH_SOC_0, PH_SOC_1],
+	[PH_SOC_1, PH_C_14],
+	[PH_SOC_1, PH_C_15],
+	[PH_SOC_1, PH_SOC_2],
+	[PH_SOC_2, PH_C_15],
+	// MIM
+	[PH_MIM_0, PH_C_3],
+	[PH_MIM_0, PH_MIM_1],
+	[PH_MIM_0, PH_PAL_0],
+	[PH_MIM_1, PH_C_3],
+	[PH_MIM_1, PH_C_5],
+	[PH_MIM_1, PH_MIM_2],
+	[PH_MIM_1, PH_MIM_3],
+	[PH_MIM_2, PH_C_5],
+	[PH_MIM_2, PH_MIM_3],
+	[PH_MIM_2, PH_MIM_4],
+	[PH_MIM_3, PH_C_5],
+	[PH_MIM_3, PH_MIM_5],
+	[PH_MIM_4, PH_C_5],
+	[PH_MIM_4, PH_MIM_6],
+	[PH_MIM_5, PH_C_5],
+	[PH_MIM_5, PH_MIM_6],
+	[PH_MIM_6, PH_C_5],
+	// PAL
+	[PH_PAL_0, PH_C_8],
+	[PH_PAL_0, PH_PAL_1],
+	[PH_PAL_1, PH_C_8],
+	[PH_PAL_1, PH_PAL_2],
+	[PH_PAL_2, PH_C_8],
+	[PH_PAL_2, PH_PAL_3],
+	[PH_PAL_3, PH_C_8],
+	[PH_PAL_3, PH_PAL_4],
+	[PH_PAL_4, PH_C_8],
+	[PH_PAL_4, PH_PAL_5],
+	[PH_PAL_5, PH_C_8],
+	[PH_PAL_5, PH_C_11],
+	[PH_PAL_5, PH_MAL_0],
+	// WVI
+	[PH_WVI_0, PH_C_5],
+	[PH_WVI_0, PH_C_9],
+	[PH_WVI_0, PH_WVI_1],
+	[PH_WVI_0, PH_WVI_2],
+	[PH_WVI_1, PH_C_9],
+	[PH_WVI_1, PH_WVI_2],
+	[PH_WVI_1, PH_WVI_3],
+	[PH_WVI_2, PH_C_9],
+	[PH_WVI_2, PH_WVI_4],
+	[PH_WVI_3, PH_C_9],
+	[PH_WVI_3, PH_WVI_5],
+	[PH_WVI_4, PH_C_9],
+	[PH_WVI_4, PH_WVI_6],
+	[PH_WVI_5, PH_C_9],
+	[PH_WVI_5, PH_WVI_6],
+	[PH_WVI_5, PH_CVI_2],
+	[PH_WVI_6, PH_C_9],
+	[PH_WVI_6, PH_CVI_2],
+	// CVI
+	[PH_CVI_0, PH_C_9],
+	[PH_CVI_0, PH_CVI_1],
+	[PH_CVI_1, PH_C_9],
+	[PH_CVI_1, PH_CVI_3],
+	[PH_CVI_1, PH_CVI_4],
+	[PH_CVI_2, PH_C_9],
+	[PH_CVI_2, PH_CVI_3],
+	[PH_CVI_3, PH_C_9],
+	[PH_CVI_4, PH_C_9],
+	[PH_CVI_4, PH_CVI_5],
+	[PH_CVI_5, PH_C_13],
+	// MAL
+	[PH_MAL_0, PH_C_11],
+	[PH_MAL_0, PH_MAL_1],
+	[PH_MAL_0, PH_MAL_3],
+	[PH_MAL_1, PH_C_11],
+	[PH_MAL_1, PH_MAL_2],
+	[PH_MAL_1, PH_MAL_3],
+	[PH_MAL_1, PH_MAL_4],
+	[PH_MAL_1, PH_MAL_5],
+	[PH_MAL_2, PH_C_11],
+	[PH_MAL_2, PH_MAL_5],
+	[PH_MAL_3, PH_C_11],
+	[PH_MAL_3, PH_MAL_4],
+	[PH_MAL_4, PH_MAL_5],
+	[PH_MAL_5, PH_C_11],
+]
+
+export const PHP_ONE_WAY_NEIGHBOUR_PAIRS = [
+	// [FROM terr, TO terr]
+	[PH_CAL_0, PH_MIM_4],
+	[PH_MIM_6, PH_SBI_2],
+	[PH_BAN_3, PH_ZAM_0],
+	[PH_PAL_0, PH_MIM_0],
+	[PH_MAL_0, PH_PAL_5],
+	[PH_WVI_6, PH_WVI_4],
+	[PH_WVI_4, PH_WVI_2],
+	[PH_MAL_2, PH_BAN_5],
+]
+
+export const PHP_PROVINCE_STRINGS = [
+	"Cordillera", // 0
+	"Ilocos",
+	"Cagayan Valley",
+	"Central Luzon",
+	"Quezon",
+	"Capital Region", // 5
+	"Calabrazon",
+	"North Bicol",
+	"South Bicol",
+	"Samar",
+	"Leyte", // 10
+	"North Caraga",
+	"South Caraga",
+	"Mindanao",
+	"Zamboanga",
+	"Bangsamoro", // 15
+	"Central Mindana",
+	"Davao",
+	"Soccsksargen",
+	"Mimaropa",
+	"Palawan", // 20
+	"West Visayas",
+	"Central Visayas",
+	"Malaysia",
+]
+
+export const PHP_TERR_ID_TO_PATH_ID = [
+	// COR
+	"COR0", // = 0
+	"COR1", // = 1
+	"COR2", // = 2
+	"COR3", // = 3
+	"COR4", // = 4
+
+	// ILO
+	"ILO0", // = 5
+	"ILO1", // = 6
+	"ILO2", // = 7
+	"ILO3", // = 8
+
+	// CAG
+	"CAG0", // = 9
+	"CAG1", // = 10
+	"CAG2", // = 11
+	"CAG3", // = 12
+	"CAG4", // = 13
+
+	// LUZ
+	"LUZ0", // = 14
+	"LUZ1", // = 15
+	"LUZ2", // = 16
+
+	// QUE
+	"QUE0", // = 17
+	"QUE1", // = 18
+	"QUE2", //.= 19
+	"QUE3", // = 20
+	"QUE4", // = 21
+	"QUE5", // = 22
+	"QUE6", // = 23
+
+	// CAP
+	"CAP0", // = 24
+	"CAP1", // = 25
+	"CAP2", // = 26
+
+	// CAL
+	"CAL0", // = 27
+	"CAL1", // = 28
+	"CAL2", // = 29
+	"CAL3", // = 30
+
+	// NBI
+	"NBI0", // = 31
+	"NBI1", // = 32
+	"NBI2", // = 33
+	"NBI3", // = 34
+
+	// SBI
+	"SBI0", // = 35
+	"SBI1", // = 36
+	"SBI2", // = 37
+	"SBI3", // = 38
+
+	// SAM
+	"SAM0", // = 39
+	"SAM1", // = 40
+	"SAM2", // = 41
+	"SAM3", // = 42
+	"SAM4", // = 43
+
+	// LEY
+	"LEY0", // = 44
+	"LEY1", // = 45
+	"LEY2", // = 46
+
+	// NCA
+	"NCA0", // = 47
+	"NCA1", // = 48
+	"NCA2", // = 49
+
+	// SCA
+	"SCA0", // = 50
+	"SCA1", // = 51
+	"SCA2", // = 52
+	"SCA3", // = 53
+
+	// MIN
+	"MIN0", //  = 54
+	"MIN1", //  = 55
+	"MIN2", // = 56
+	"MIN3", // = 57
+	"MIN4", // = 58
+
+	// ZAM
+	"ZAM0", // = 59
+	"ZAM1", // = 60
+	"ZAM2", // = 61
+	"ZAM3", // =62
+	"ZAM4", // =63
+	"ZAM5", //  =64
+
+	// BAN
+	"BAN0", // = 65
+	"BAN1", // = 66
+	"BAN2", // = 67
+	"BAN3", // = 68
+	"BAN4", // = 69
+	"BAN5", // = 70
+
+	// CMI
+	"CMI0", // = 71
+	"CMI1", // = 72
+	"CMI2", // = 73
+
+	// DAV
+	"DAV0", // = 74
+	"DAV1", // = 75
+	"DAV2", // = 76
+
+	// SOC
+	"SOC0", // = 77
+	"SOC1", // = 78
+	"SOC2", // = 79
+
+	// MIM
+	"MIM0", // = 80
+	"MIM1", // = 81
+	"MIM2", // = 82
+	"MIM3", // = 83
+	"MIM4", // =84
+	"MIM5", // = 85
+	"MIM6", // = 86
+
+	// PAL
+	"PAL0", // = 87
+	"PAL1", // =88
+	"PAL2", // =89
+	"PAL3", //  =90
+	"PAL4", //  =91
+	"PAL5", //  =92
+
+	// WVI
+	"WVI0", // = 93
+	"WVI1", // = 94
+	"WVI2", // = 95
+	"WVI3", // = 96
+	"WVI4", // = 97
+	"WVI5", // = 98
+	"WVI6", // = 99
+
+	// CVI
+	"CVI0", // = 100
+	"CVI1", // = 101
+	"CVI2", // = 102
+	"CVI3", // = 103
+	"CVI4", //  = 104
+	"CVI5", // = 105
+
+	// MAL
+	"MAL0", // =106
+	"MAL1", //  =107
+	"MAL2", //  =108
+	"MAL3", //  =109
+	"MAL4", //  =110
+	"MAL5", //  =111
+
+	// SEA ZONES
+	"C0", // =112
+	"C1", // = 113
+	"C2", // = 114
+	"C3", // = 115
+	"C4", // = 116
+	"C5", // = 117
+	"C6", // = 118
+	"C7", // = 119
+	"C8", //  = 120
+	"C9", // = 121
+	"C10", // = 122
+	"C11", // = 123
+	"C12", // = 124
+	"C13", // =125
+	"C14", // =126
+	"C15", // = 127
+]
+
+export const PH_ALL_COMPANIES = [
+	// ERA A - 9 COMPS
+
+	{
+		id: 0,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PH_PROVINCE_NBI,
+		capacity: [2, 3, 4],
+		combinedCapacity: [2, 3, 4],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_shipping_northbicol",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 1,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PH_PROVINCE_CAP,
+		capacity: [3, 4, 4],
+		combinedCapacity: [3, 4, 4],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_shipping_capitalregion",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 2,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PH_PROVINCE_NCA,
+		capacity: [2, 3, 4],
+		combinedCapacity: [2, 3, 4],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_shipping_northcaraga",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 3,
+		era: ERA_A,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PH_PROVINCE_ZAM,
+		capacity: [2, 3, 3],
+		combinedCapacity: [2, 3, 3],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_shipping_zamboanga",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 4,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PH_PROVINCE_SBI,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_rice_southbicol",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 5,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PH_PROVINCE_WVI,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_rice_westernvisayas",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 6,
+		era: ERA_A,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PH_PROVINCE_ZAM,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_rice_zamboanga",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 7,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PH_PROVINCE_CAG,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_spice_cagayanvalley",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 8,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PH_PROVINCE_LUZ,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_spice_centralluzon",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 9,
+		era: ERA_A,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PH_PROVINCE_SCA,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_a_spice_southcaraga",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+
+	// ERA B
+	{
+		id: 10,
+		era: ERA_B,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PH_PROVINCE_COR,
+		capacity: [0, 3, 4],
+		combinedCapacity: [0, 3, 4],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_shipping_cordillera",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 11,
+		era: ERA_B,
+		type: COMPANY_SHIPPING,
+		typeText: "Shipping",
+		province: PH_PROVINCE_MAL, // AND DAVAO
+		capacity: [0, 3, 4],
+		combinedCapacity: [0, 3, 4],
+		hullCapacity: 1,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_shipping_malaysiadavao",
+		shipGfx: "",
+		operated: false,
+		mergedThisPhase: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 12,
+		era: ERA_B,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PH_PROVINCE_MIN,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_rice_mindanao",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 13,
+		era: ERA_B,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PH_PROVINCE_CAL,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_rice_calabarzon",
+		goodsGfx: "prod_marker_rice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 14,
+		era: ERA_B,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PH_PROVINCE_BAN,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_spice_bangsamoro",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 15,
+		era: ERA_B,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PH_PROVINCE_CVI,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_spice_centralvisayas",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 16,
+		era: ERA_B,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PH_PROVINCE_LEY,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_spice_leyte",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 17,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: PH_PROVINCE_COR,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_rubber_cordillera",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 18,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: PH_PROVINCE_DAV,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_rubber_davao",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 19,
+		era: ERA_C,
+		type: COMPANY_RICE,
+		typeText: "Rice",
+		good: GOOD_RICE,
+		goodValue: 20,
+		province: PH_PROVINCE_SOC,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_rice_soccsksargen",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 20,
+		era: ERA_B,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: PH_PROVINCE_PAL,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_rubber_palawan",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	// ERA C
+	{
+		id: 30,
+		era: ERA_C,
+		type: COMPANY_SPICE,
+		typeText: "Spice",
+		good: GOOD_SPICE,
+		goodValue: 25,
+		province: PH_PROVINCE_QUE,
+		territories: [],
+		siapFaji: false,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_spice_quezon",
+		goodsGfx: "prod_marker_spice",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 31,
+		era: ERA_C,
+		type: COMPANY_RUBBER,
+		typeText: "Rubber",
+		good: GOOD_RUBBER,
+		goodValue: 30,
+		province: PH_PROVINCE_SAM,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_rubber_samar",
+		goodsGfx: "prod_marker_rubber",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 32,
+		era: ERA_B,
+		type: COMPANY_SIAP_FAJI,
+		typeText: "Siap Saji",
+		good: GOOD_SIAP_FAJI,
+		goodValue: 35,
+		province: PH_PROVINCE_MAL,
+		territories: [],
+		siapFaji: true,
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_b_siapfaji_malaysia",
+		goodsGfx: "prod_marker_siap_faji",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 33,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_BAN,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_bangsamoro",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 34,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_CAL,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_calabarzon",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 35,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_LUZ,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_centralluzon",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 36,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_CVI,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_centralvisayas",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 37,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_COR,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_cordillera",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 38,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_DAV,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_davao",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 39,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_LEY,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_leyte",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 40,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_MAL,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_malaysia",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 41,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_MIN,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_mindanao",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 42,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_PAL,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_palawan",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 43,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_CAG,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_cagayanvalley",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 44,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_SBI,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_southbicol",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 45,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_SCA,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_southcaraga",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 46,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 46,
+		province: PH_PROVINCE_WVI,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_westernvisayas",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+	{
+		id: 47,
+		era: ERA_C,
+		type: COMPANY_OIL,
+		typeText: "Oil",
+		good: GOOD_OIL,
+		goodValue: 40,
+		province: PH_PROVINCE_ZAM,
+		territories: [],
+		ownerIndex: -1,
+		gfx: "ph_companycard_era_c_oil_zamboanga",
+		goodsGfx: "prod_marker_oil",
+		operated: false,
+		mergedThisPhase: false,
+		markedForRemoval: false,
+		newExpansionsThisTurn: [],
+		incomeThisTurn: 0,
+	},
+]
+
+export const PH_ALL_ERA_CARDS = [
+	{
+		id: 0,
+		era: ERA_A,
+		provinces: [PH_PROVINCE_ZAM, PH_PROVINCE_NCA, PH_PROVINCE_CAP],
+		gfx: "ph_citycard_era_a_00",
+	},
+	{
+		id: 1,
+		era: ERA_A,
+		provinces: [PH_PROVINCE_ZAM, PH_PROVINCE_NBI, PH_PROVINCE_SAM],
+		gfx: "ph_citycard_era_a_01",
+	},
+	{
+		id: 2,
+		era: ERA_A,
+		provinces: [PH_PROVINCE_ZAM, PH_PROVINCE_WVI, PH_PROVINCE_MIM],
+		gfx: "ph_citycard_era_a_02",
+	},
+	{
+		id: 3,
+		era: ERA_A,
+		provinces: [PH_PROVINCE_NCA, PH_PROVINCE_WVI, PH_PROVINCE_SAM],
+		gfx: "ph_citycard_era_a_03",
+	},
+	{
+		id: 4,
+		era: ERA_A,
+		provinces: [PH_PROVINCE_MIM, PH_PROVINCE_NBI, PH_PROVINCE_CAP],
+		gfx: "ph_citycard_era_a_04",
+	},
+	// ERA B
+	{
+		id: 10,
+		era: ERA_B,
+		provinces: [PH_PROVINCE_ILO, PH_PROVINCE_COR, PH_PROVINCE_BAN],
+		gfx: "ph_citycard_era_b_00",
+	},
+	{
+		id: 11,
+		era: ERA_B,
+		provinces: [PH_PROVINCE_SOC, PH_PROVINCE_COR, PH_PROVINCE_MAL],
+		gfx: "ph_citycard_era_b_01",
+	},
+	{
+		id: 12,
+		era: ERA_B,
+		provinces: [PH_PROVINCE_CAL, PH_PROVINCE_COR, PH_PROVINCE_CAG],
+		gfx: "ph_citycard_era_b_02",
+	},
+	{
+		id: 13,
+		era: ERA_B,
+		provinces: [PH_PROVINCE_ILO, PH_PROVINCE_CAL, PH_PROVINCE_BAN],
+		gfx: "ph_citycard_era_b_03",
+	},
+	{
+		id: 14,
+		era: ERA_B,
+		provinces: [PH_PROVINCE_MAL, PH_PROVINCE_SOC, PH_PROVINCE_CAG],
+		gfx: "ph_citycard_era_b_04",
+	},
+	// ERA C
+	{
+		id: 20,
+		era: ERA_C,
+		provinces: [PH_PROVINCE_MAL, PH_PROVINCE_QUE, PH_PROVINCE_COR],
+		gfx: "ph_citycard_era_c_00",
+	},
+	{
+		id: 21,
+		era: ERA_C,
+		provinces: [PH_PROVINCE_MAL, PH_PROVINCE_MIN, PH_PROVINCE_DAV],
+		gfx: "ph_citycard_era_c_01",
+	},
+	{
+		id: 22,
+		era: ERA_C,
+		provinces: [PH_PROVINCE_CVI, PH_PROVINCE_MAL, PH_PROVINCE_ILO],
+		gfx: "ph_citycard_era_c_02",
+	},
+	{
+		id: 23,
+		era: ERA_C,
+		provinces: [PH_PROVINCE_QUE, PH_PROVINCE_CVI, PH_PROVINCE_MIN],
+		gfx: "ph_citycard_era_c_03",
+	},
+	{
+		id: 24,
+		era: ERA_C,
+		provinces: [PH_PROVINCE_COR, PH_PROVINCE_DAV, PH_PROVINCE_ILO],
+		gfx: "ph_citycard_era_c_04",
+	},
+]
+
+
+
+export const ALL_3E_PATHS = [
+	"M 851.11 419.97 C 855.97 405.25 863.24 392.46 873.7 381.91 L 874.47 382.5 C 887.37 389.62 898.71 399.17 911.29 406.72 C 924.35 414.54 937.24 422.8 951.49 428.37 L 951.11 429.32 C 948.62 433.25 945.63 436.94 943.63 441.18 C 941.76 445.12 937.71 445.74 934.29 447.43 C 922.08 453.61 913.05 463.1 906.19 474.84 C 901.65 482.77 894.98 489.58 891.06 497.57 C 886.14 507.44 876.92 512.37 870.69 520.49 L 870 521.24 C 869.54 521 869.34 520.56 869.19 520.05 C 869.19 519.93 868.45 520.05 867.57 520.05 C 866.2 519.12 864.77 521.18 862.96 520.68 C 862.15 516.37 861.78 511.94 861.22 507.57 C 861.03 506.44 860.34 504.76 861.78 503.88 C 866.95 500.7 865.51 495.95 864.64 491.14 C 866.26 488.83 868.63 487.46 871.37 486.4 C 863.46 482.09 859.47 473.04 850.68 470.6 C 850.31 460.05 852.42 449.63 846.44 440.89 C 849.06 436.76 851.86 433.89 854.17 431.64 C 854.98 426.59 854.17 422.78 851.11 419.97 Z",
+	"M 994.28 436.75 L 994.1 438.06 C 993.41 447.86 989.68 457.1 988.56 466.78 C 986.5 484.82 982.83 502.87 984.39 521.1 C 985.08 529.4 983.89 536.96 979.59 543.45 C 975.05 550.44 977.91 556.69 979.97 562.87 C 982.34 570.05 986.95 575.04 994.68 578.1 C 1000.41 580.37 1005.98 583 1011.48 585.77 C 1007.27 594.93 1005.54 604.82 1004.96 614.81 C 1004.4 624.43 1002.97 633.92 1002.16 643.53 C 1001.66 649.34 1002.54 654.08 1006.52 658.64 C 1008.36 660.74 1009.99 663 1011.68 665.24 C 1009.58 668.13 1006.09 672.19 1002.29 674.13 C 997.68 670.69 992.51 667.51 986.59 671.13 C 983.72 672.94 980.73 674.63 977.74 675.94 C 972.7 678.13 967.28 679.19 962.23 675.44 C 959.8 673.69 957.06 673.45 954.13 673.57 C 951.64 673.7 949.08 674.01 947.34 671.82 C 946.97 669.45 947.9 666.89 946.28 664.21 C 939.86 670.08 933.95 675.7 924.91 673.2 C 924.6 668.2 924.22 663.4 928.71 660.4 C 927.53 656.22 925.78 653.22 921.86 652.91 C 919.61 648.91 923.04 645.85 922.42 642.36 C 921.11 634.93 920.73 627.37 921.17 619.88 C 921.6 613.14 919.42 608.27 913.63 604.83 C 910.63 603.09 908.14 600.71 906.58 597.78 C 908.08 595.03 911.26 595.53 913.62 593.1 C 913.31 587.16 913 580.55 917.24 574.93 C 917.48 574.49 917.23 573.68 917.23 573.05 C 916.67 567.87 909.2 558.94 904.15 557.45 C 897.48 562.57 890.76 567.5 882.41 569.31 C 878.79 568.06 876.92 564.75 875.12 563.26 C 873.87 557.45 877.23 553.77 877.98 549.96 C 883.15 547.15 889.57 551.14 893.18 544.77 C 886.58 541.65 880.16 541.59 873.5 544.4 C 870.69 540.72 870.63 535.91 868.82 532.73 C 871.5 524.61 877.17 534.79 880.53 529.85 C 880.48 523.13 872.43 525.35 869.79 521.38 L 870.69 520.49 C 876.92 512.37 886.14 507.44 891.06 497.57 C 894.98 489.58 901.65 482.77 906.19 474.84 C 913.05 463.1 922.08 453.61 934.29 447.43 C 937.71 445.74 941.76 445.12 943.63 441.18 C 945.63 436.94 948.62 433.25 951.11 429.32 L 951.48 428.38 C 954.99 429.74 958.57 430.94 962.26 431.94 C 970.36 434.13 978.15 436.5 986.62 436.87 C 989.2 436.98 991.75 436.91 994.28 436.7 Z",
+	"M 1056.38 323.23 C 1059.75 325.97 1061.06 329.66 1061.37 333.84 C 1062.24 346.89 1068.22 358.44 1071.84 370.74 C 1073.7 376.96 1075.44 383.25 1077.06 389.16 C 1069.04 394.23 1067.04 405.21 1060.32 411.39 C 1057.7 413.82 1054.03 415.57 1052.66 419.32 L 1051.41 420.57 C 1050.66 421.32 1050.54 422.94 1049.54 423 C 1037.74 423.64 1027.66 429.69 1016.52 432.43 C 1009.15 434.26 1001.82 436.08 994.28 436.7 C 991.75 436.91 989.2 436.98 986.62 436.87 C 978.15 436.5 970.36 434.13 962.26 431.94 C 958.57 430.94 954.99 429.74 951.49 428.37 C 937.24 422.8 924.35 414.54 911.29 406.72 C 898.71 399.17 887.37 389.62 874.47 382.5 L 873.7 381.91 C 873.29 371.08 874.1 371.08 881.38 366.83 C 890.04 361.84 899.14 355.53 910.48 358.96 C 912.16 359.46 914.22 359.02 916.65 359.02 C 921.19 354.78 925.49 349.53 930.91 346.66 C 950.47 348.09 967.73 358.27 986.92 356.52 C 988.29 362.7 998.82 370.94 1004.49 370.94 C 1005.86 369.81 1006.17 368.19 1006.42 366.63 C 1004.93 364.69 1002.43 364.32 1000.5 362.63 C 1001.81 360.57 1004.24 359.45 1005.3 357.08 C 1001.81 346.9 998.13 336.66 1003.05 325.92 C 1007.16 324.55 1010.65 325.23 1014.58 326.42 C 1028.97 330.79 1043.24 331.6 1055.45 323.17 Z",
+	"M 994.1 438.06 L 994.28 436.75 C 1001.82 436.08 1009.15 434.26 1016.52 432.43 C 1027.66 429.69 1037.74 423.64 1049.5 423 C 1052.47 433.43 1055.65 443.04 1056.9 453.09 C 1057.46 457.59 1058.52 461.9 1059.64 466.14 C 1060.97 471.1 1060.78 475.68 1059.78 480.04 C 1058.1 487.39 1054.15 494.14 1051.3 501.11 C 1046.5 512.79 1042.33 524.65 1037.16 536.14 C 1035.67 539.38 1034.23 542.51 1032.3 545.63 C 1029.25 550.5 1026.57 555.56 1025.58 561.68 C 1024.58 567.86 1019.35 572.6 1015.86 577.91 C 1014.16 580.46 1012.72 583.08 1011.48 585.77 C 1005.98 583 1000.41 580.37 994.68 578.1 C 986.95 575.04 982.34 570.05 979.97 562.87 C 977.91 556.69 975.05 550.44 979.59 543.45 C 983.89 536.96 985.08 529.4 984.39 521.1 C 982.83 502.87 986.5 484.82 988.56 466.78 C 989.68 457.1 993.41 447.86 994.1 438.06 Z",
+	"M 1011.48 585.77 C 1022.31 591.23 1032.89 597.25 1043.96 602.26 C 1047.25 603.75 1050.67 605.06 1054.02 606.43 L 1053.87 607.87 C 1053.74 609.44 1052.87 610.68 1052.56 612.24 C 1047.61 637.86 1048.07 664.04 1044.66 689.72 C 1042.04 689.6 1040.86 691.04 1039.67 692.23 C 1035.5 696.6 1030.89 700.53 1026.4 704.53 C 1023.29 707.28 1018.87 709.28 1014.63 705.59 C 1015.31 701.35 1019.55 698.1 1017.18 693.48 C 1013.69 686.49 1015 679.68 1018.24 672.63 C 1015.71 670.43 1013.66 667.86 1011.68 665.24 C 1009.99 663 1008.36 660.74 1006.52 658.64 C 1002.54 654.08 1001.66 649.34 1002.16 643.53 C 1002.97 633.92 1004.4 624.43 1004.96 614.81 C 1005.54 604.82 1007.27 594.93 1011.48 585.77 Z",
+	"M 1054.05 606.44 C 1057.42 607.81 1057.29 607.81 1058.91 608.5 C 1067.14 612.24 1074.05 618.36 1082.59 621.61 C 1084.65 622.42 1086.7 623.29 1088.82 624.04 L 1090.13 624.48 C 1088.38 627.97 1086.64 631.35 1084.9 634.72 C 1082.78 638.9 1081.78 642.58 1082.41 647.27 C 1083.38 654.9 1083.32 662.63 1083.23 670.37 C 1083.19 673.08 1083.16 675.78 1083.16 678.49 C 1083.16 682.98 1079.3 683.86 1076.31 685.29 C 1070.7 687.98 1065.71 691.1 1064.78 698.47 C 1056.87 698.28 1050.14 696.66 1044.59 690.23 C 1048.07 664.04 1047.61 637.86 1052.56 612.24 C 1052.87 610.68 1053.74 609.44 1053.87 607.87 L 1053.99 606.5 Z",
+	"M 1043.96 602.26 C 1032.89 597.25 1022.31 591.23 1011.48 585.77 C 1012.72 583.08 1014.16 580.46 1015.86 577.91 C 1019.35 572.6 1024.58 567.86 1025.58 561.68 C 1026.57 555.56 1029.25 550.5 1032.3 545.63 C 1034.23 542.51 1035.67 539.38 1037.16 536.14 C 1042.33 524.65 1046.5 512.79 1051.3 501.11 C 1054.15 494.14 1058.1 487.39 1059.78 480.04 L 1061.45 480.07 C 1074.6 478.82 1087.49 482.25 1100.7 482.12 C 1117.27 481.93 1133.41 477.87 1149.92 477.49 C 1152.85 477.43 1155.46 476.85 1157.69 475.57 C 1171.29 487.23 1184.81 497.34 1199.33 505.71 L 1198.45 506.77 C 1195.84 512.2 1193.91 517.82 1192.16 523.63 C 1189.67 531.93 1184.94 538.93 1179.27 545.61 C 1173.04 552.91 1168.12 561.34 1161.89 568.77 C 1159.09 572.15 1155.35 574.02 1152.67 577.77 C 1151.67 579.2 1150.71 580.65 1149.81 582.1 L 1148 581.7 C 1134.54 578.02 1121.33 575.65 1108.63 584.64 C 1106.2 586.33 1105.08 587.89 1104.33 590.45 C 1100.92 602.39 1095.65 613.53 1090.13 624.48 L 1088.82 624.04 C 1086.7 623.29 1084.65 622.42 1082.59 621.61 C 1074.05 618.36 1067.14 612.24 1058.91 608.5 C 1057.29 607.81 1057.42 607.81 1054.05 606.44 C 1050.67 605.06 1047.25 603.75 1043.96 602.26 Z",
+	"M 1149.8 582.12 C 1142.44 593.97 1138.66 606.42 1140.22 621.04 C 1141.15 629.72 1138.66 638.52 1137.42 647.26 C 1135.92 658.19 1135.93 669.3 1134.81 680.35 C 1134.08 686.99 1131.73 693.46 1131.58 701.39 L 1130.57 701.58 C 1126.77 702.45 1123.78 698.71 1120.11 700.71 C 1117.11 694.4 1120.54 688.16 1117.36 682.85 C 1115.31 681.98 1113.06 681.23 1110.2 681.73 C 1109.26 684.85 1108.08 688.22 1103.84 689.97 C 1095.99 689.66 1097.49 677.11 1089.33 677.86 C 1087.21 675.05 1088.76 670.87 1084.46 670.37 L 1083.28 670.37 C 1083.32 662.63 1083.38 654.9 1082.41 647.27 C 1081.78 642.58 1082.78 638.9 1084.9 634.72 C 1086.64 631.35 1088.38 627.97 1090.07 624.6 C 1095.65 613.53 1100.92 602.39 1104.33 590.45 C 1105.08 587.89 1106.2 586.33 1108.63 584.64 C 1121.33 575.65 1134.54 578.02 1148 581.7 L 1149.8 582.12 Z",
+	"M 1061.37 333.84 C 1061.06 329.66 1059.75 325.97 1056.38 323.23 C 1062.54 309.16 1062.45 293.06 1077.56 287.7 C 1078.93 284.33 1075.07 282.64 1077.5 280.27 C 1081.61 277.46 1084.35 282.77 1088.09 282.14 C 1093.26 273.27 1103.66 269.34 1108.58 260.85 C 1108.83 257.85 1107.83 255.67 1107.34 253.11 C 1108.58 251.67 1109.89 250.23 1111.7 248.98 C 1119.48 243.55 1126.02 236.99 1130.51 228.44 C 1133.13 223.42 1136.1 218.6 1137.84 213.3 L 1139.29 214.58 C 1146.64 222.44 1156.99 225.88 1165.71 231.68 C 1168.51 233.55 1174.18 232.43 1178.61 231.49 C 1183.28 230.49 1188.08 229.74 1192.93 230.12 C 1197.67 230.43 1201.22 227.18 1205.39 225.81 C 1210.14 224.25 1214.68 222.31 1219.11 220.14 C 1222.96 234.86 1231.69 247.66 1237.92 260.64 C 1238.97 262.8 1241.49 267.63 1241.81 268.25 C 1235.42 270.46 1230.18 274.45 1225.09 279.31 C 1217.86 286.18 1212.07 293.86 1206.96 302.42 C 1201.67 311.28 1197.56 319.96 1197.56 330.64 C 1197.56 336.63 1195.82 349.62 1195.82 349.62 C 1193.17 349.48 1190.51 349.42 1187.84 349.5 C 1174.76 349.87 1161.68 350.87 1148.59 350.69 C 1143.92 350.63 1139.81 352.31 1136.13 355.06 C 1128.78 360.49 1122.24 367.05 1115.2 372.67 C 1104.55 381.22 1092.4 388.97 1077.08 389.22 C 1075.44 383.25 1073.7 376.96 1071.84 370.74 C 1068.22 358.44 1062.24 346.89 1061.37 333.84 Z",
+	"M 1290.95 359.35 C 1283.73 368.28 1279.8 378.45 1276.32 388.88 C 1275.57 391.13 1274.51 393.5 1272.64 395.13 C 1262.17 404.37 1258.19 418.04 1249.97 428.66 C 1242.06 438.96 1244.61 450.2 1243.99 461.31 C 1231.55 462.54 1219.08 463.33 1206.61 463.69 C 1204.3 462.32 1202.5 460.26 1200.94 458.69 C 1189.91 459.07 1179.26 456.64 1168.79 461.76 C 1166.99 463.88 1164.56 466.44 1163.12 469.44 C 1161.8 472.22 1160.03 474.17 1157.9 475.45 C 1155.46 476.85 1152.85 477.43 1149.92 477.49 C 1133.41 477.87 1117.27 481.93 1100.7 482.12 C 1087.49 482.25 1074.6 478.82 1061.45 480.07 L 1059.89 480.07 C 1060.78 475.68 1060.97 471.1 1059.64 466.14 C 1058.52 461.9 1057.46 457.59 1056.9 453.09 C 1055.65 443.04 1052.47 433.43 1049.54 423.75 C 1050.54 422.94 1050.66 421.32 1051.41 420.57 L 1052.66 419.32 C 1054.03 415.57 1057.7 413.82 1060.32 411.39 C 1067.04 405.21 1069.04 394.23 1077.06 389.17 C 1092.4 388.97 1104.55 381.22 1115.2 372.67 C 1122.24 367.05 1128.78 360.49 1136.13 355.06 C 1139.81 352.31 1143.92 350.63 1148.59 350.69 C 1161.68 350.87 1174.76 349.87 1187.84 349.5 C 1190.51 349.42 1193.17 349.48 1195.81 349.65 C 1206.37 350.33 1216.73 352.73 1227.09 354.92 C 1233.82 356.36 1240.49 357.61 1247.65 357.17 C 1261.36 356.29 1275.13 357.6 1288.77 359.41 L 1290.89 359.22 Z",
+	"M 1198.45 506.77 L 1199.33 505.71 C 1206.43 509.83 1213.53 514.57 1221.51 517.38 C 1223.5 518.07 1224.25 519.5 1224.75 521.69 C 1226.01 527.43 1226.16 532.99 1225.39 538.43 C 1224.56 544.12 1222.82 549.5 1220.33 554.84 C 1215.52 565.19 1211.13 575.73 1206.87 586.34 C 1204.72 591.7 1202.62 597.03 1200.52 602.36 C 1198.03 608.73 1200.77 615.6 1200.96 622.28 C 1201.21 632.33 1202.02 642.51 1198.6 652 C 1197.78 654.2 1196.79 656.37 1195.48 658.49 C 1193.99 660.93 1192.25 663.11 1190.5 665.36 C 1181.34 677.16 1172.13 688.9 1166.15 702.76 C 1163.72 701.96 1161.25 700.98 1158.55 700.45 C 1153 699.39 1149.64 696.4 1146.77 692.15 C 1145.96 690.96 1145.46 689.53 1143.47 689.72 C 1142.97 696.96 1136.68 698.27 1131.57 702.2 C 1131.57 701.94 1131.57 701.67 1131.58 701.4 C 1131.73 693.46 1134.08 686.99 1134.81 680.35 C 1135.93 669.3 1135.92 658.19 1137.42 647.26 C 1138.66 638.52 1141.15 629.72 1140.22 621.04 C 1138.66 606.42 1142.44 593.97 1149.8 582.12 C 1150.71 580.65 1151.67 579.2 1152.67 577.77 C 1155.35 574.02 1159.09 572.15 1161.89 568.77 C 1168.12 561.34 1173.04 552.91 1179.27 545.61 C 1184.94 538.93 1189.67 531.93 1192.16 523.63 C 1193.91 517.82 1195.84 512.2 1198.45 506.77 Z",
+	"M 1172.19 722.74 C 1173.37 713.17 1170.64 706.93 1165.79 703.45 C 1172.13 688.9 1181.34 677.16 1190.5 665.36 C 1192.25 663.11 1193.99 660.93 1195.48 658.49 C 1196.79 656.37 1197.78 654.2 1198.59 652.02 L 1199.72 652.18 C 1208.32 652.74 1216.98 652.31 1225.26 655.3 C 1226.57 660.49 1225.1 664.23 1225.64 668.48 C 1226.51 675.28 1225.52 682.15 1219.66 687.21 C 1217.29 689.27 1216.11 692.27 1215.3 695.26 C 1212.93 704.38 1210.38 713.37 1209.01 722.74 C 1208.69 724.97 1208.21 727.09 1206.78 728.75 C 1206.02 729.65 1204.97 730.41 1203.53 730.98 C 1198.17 733.04 1193.38 736.16 1189.02 740.1 C 1185.65 743.09 1182.04 746.65 1176.62 745.97 C 1174.06 741.22 1176.8 735.48 1173.56 730.86 C 1171.94 728.48 1171.82 725.74 1172.19 722.74 Z",
+	"M 1237.72 156.06 C 1238.66 155.4 1239.45 154.74 1240.12 154.04 L 1241.46 155.25 C 1251.18 163.86 1251.74 176.41 1255.04 188.15 C 1253.24 193.58 1251.99 199.64 1251.06 205.07 C 1247.69 208.19 1243.71 206.07 1240.22 208.2 C 1233.29 212.39 1226.36 216.58 1219.11 220.14 C 1214.68 222.31 1210.14 224.25 1205.39 225.81 C 1201.22 227.18 1197.67 230.43 1192.93 230.12 C 1188.08 229.74 1183.28 230.49 1178.61 231.49 C 1174.18 232.43 1168.51 233.55 1165.71 231.68 C 1156.99 225.88 1146.64 222.44 1139.29 214.58 L 1137.92 213.33 C 1138.92 210.03 1139.53 206.57 1139.29 202.78 C 1138.85 195.91 1144.21 189.73 1151 189.16 C 1163.58 188.16 1175.92 185.48 1188.38 183.6 C 1191.99 183.04 1195.86 181.67 1199.59 183.41 C 1197.1 188.66 1197.6 191.84 1201.15 192.84 C 1201.59 189.6 1201.84 186.22 1204.58 184.04 C 1208.57 182.98 1212.49 183.16 1216.85 184.22 C 1218.66 182.29 1220.65 180.29 1223.21 179.35 C 1225.95 164.8 1225.82 164.62 1237.72 156.06 Z",
+	"M 1206.78 728.75 C 1208.21 727.09 1208.69 724.97 1209.01 722.74 C 1210.38 713.37 1212.93 704.38 1215.3 695.26 C 1216.11 692.27 1217.29 689.27 1219.66 687.21 C 1225.52 682.15 1226.51 675.28 1225.64 668.48 C 1225.1 664.23 1226.57 660.49 1225.59 655.35 C 1237.2 658.42 1248.21 660.56 1258.91 660.97 L 1258.91 667.79 C 1260.96 671.22 1264.27 673.4 1266.88 676.84 C 1264.33 679.09 1263.89 683.27 1259.6 683.77 C 1256.67 690.14 1253.8 696.82 1252.56 704.06 C 1252.37 704.81 1251.94 706.81 1250.81 707.12 C 1242.22 709.74 1238.79 718.67 1231.5 722.8 C 1228.45 724.48 1224.9 724.79 1221.54 725.23 C 1216.55 725.86 1212.38 729.29 1207.21 729.04 Z M 1271.81 684.39 C 1272.74 685.64 1272.74 686.83 1273.24 687.83 C 1267.82 693.45 1272.56 701.81 1267.01 706.62 C 1272.12 712.8 1270.38 720.23 1271.38 726.66 C 1269.13 728.91 1266.7 726.85 1265.46 728.78 C 1261.28 730.35 1261.66 736.03 1257.17 737.4 C 1255.99 736.34 1256.49 735.15 1256.49 734.09 C 1256.74 727.91 1258.48 721.73 1254.24 715.8 C 1253.06 714.11 1253.18 710.12 1255.67 707.12 C 1258.23 703.94 1260.03 699.88 1260.22 695.38 C 1260.28 692.88 1261.53 691.07 1263.83 689.64 C 1266.51 687.95 1269.25 686.39 1271.81 684.39 Z",
+	"M 1258.91 660.97 C 1248.21 660.56 1237.2 658.42 1225.45 654.68 C 1216.98 652.31 1208.32 652.74 1199.72 652.18 L 1198.6 652.01 C 1202.02 642.51 1201.21 632.33 1200.96 622.28 C 1200.77 615.6 1198.03 608.73 1200.52 602.36 C 1202.62 597.03 1204.72 591.7 1206.85 586.39 L 1207.75 586.75 C 1210.99 587.81 1214.29 588.31 1217.72 588.75 C 1221.64 589.25 1226.63 588.43 1229.37 590.18 C 1237.09 595.18 1246.31 597.86 1253.04 603.85 C 1258.57 608.74 1264.58 612.83 1270.28 616.99 C 1272.22 618.42 1274.13 619.85 1275.97 621.33 C 1279.4 621.58 1281.21 618.89 1283.82 617.9 C 1286.56 619.08 1287.56 621.7 1289.12 624.76 C 1285.07 630.32 1290.43 638.44 1284.57 644.56 C 1279.46 640.31 1275.1 643 1270.24 644.93 C 1272.67 647.37 1275.73 648.37 1276.6 652.11 C 1274.17 657.23 1276.1 663.41 1273.8 669.97 C 1271.12 668.03 1269.69 671.9 1267.13 670.84 C 1262.9 668.91 1265.82 664.16 1262.71 661.04 C 1261.45 661.04 1260.18 661.02 1258.91 660.97 Z",
+	"M 1352.35 445.13 C 1351.71 454.33 1347.61 460.51 1339.69 464.17 C 1340.93 469.35 1342.99 474.28 1337.44 478.28 C 1335.89 479.41 1338.19 486.9 1340.44 490.02 C 1338.89 495.05 1336.52 499.37 1333.58 503.07 C 1329.77 507.86 1325.02 511.61 1319.88 514.5 C 1308.11 514.69 1298.39 517.31 1290.04 523.8 C 1284.06 528.49 1278.27 533.17 1270.73 535.17 C 1269.54 535.48 1268.36 536.36 1266.93 536.23 C 1254.03 535.48 1241.51 538.3 1228.92 540.54 C 1228.11 540.67 1227.06 540.98 1226.43 539.98 L 1225.4 538.55 C 1226.16 532.99 1226.01 527.43 1224.75 521.69 C 1224.25 519.5 1223.5 518.07 1221.51 517.38 C 1213.53 514.57 1206.43 509.83 1199.33 505.71 C 1184.81 497.34 1171.29 487.23 1158.58 476.18 C 1160.03 474.17 1161.8 472.22 1163.12 469.44 C 1164.56 466.44 1166.99 463.88 1168.79 461.76 C 1179.26 456.64 1189.91 459.07 1200.94 458.69 C 1202.5 460.26 1204.3 462.32 1206.61 463.69 C 1219.08 463.33 1231.55 462.54 1244.02 461.8 C 1249.18 461.49 1254.34 461.19 1259.5 460.93 C 1264.92 460.68 1270.53 461 1275.7 459.75 C 1286.11 457.25 1296.38 453.94 1306.91 452 C 1321.55 449.31 1335.51 441.88 1351.08 444.94 L 1352.33 445.13 Z",
+	"M 1270.28 616.99 C 1264.58 612.83 1258.57 608.74 1253.04 603.85 C 1246.31 597.86 1237.09 595.18 1229.37 590.18 C 1226.63 588.43 1221.64 589.25 1217.72 588.75 C 1214.29 588.31 1210.99 587.81 1207.75 586.75 L 1206.89 586.35 C 1211.13 575.73 1215.52 565.19 1220.33 554.84 C 1222.82 549.5 1224.56 544.12 1225.37 538.62 L 1226.43 539.98 C 1227.06 540.98 1228.11 540.67 1228.92 540.54 C 1241.51 538.3 1254.03 535.48 1266.93 536.23 C 1268.36 536.36 1269.54 535.48 1270.73 535.17 C 1278.27 533.17 1284.06 528.49 1290.04 523.8 C 1298.39 517.31 1308.11 514.69 1319.88 514.5 C 1325.02 511.61 1329.77 507.86 1333.58 503.07 C 1338.63 508.44 1343.37 513.06 1340.32 520.43 C 1342.19 521.42 1343.87 521.42 1345.55 520.49 C 1347.36 525.42 1343.81 528.67 1341.88 532.48 C 1342.5 533.47 1344.12 533.91 1344.31 535.35 C 1342.94 541.53 1335.4 540.09 1333.22 544.9 C 1330.6 544.4 1330.23 540.97 1325.99 541.09 C 1324.68 541.09 1319.32 546.46 1318.7 549.84 C 1317.39 557.14 1309.05 564.57 1301.88 564.82 C 1300.26 558.89 1300.2 558.89 1295.03 561.7 C 1296.09 565.14 1296.28 569.26 1295.59 574.13 C 1291.79 574.56 1286.43 572.75 1285.13 578.56 C 1284.32 582.24 1286.06 586.05 1285.63 590.17 C 1279.27 593.17 1272.42 595.48 1265 596.42 C 1267.19 599.48 1271.36 600.6 1277.59 599.66 L 1277.59 615.02 C 1275.1 616.84 1272.61 615.21 1270.74 616.65 Z",
+	"M 1323.34 265.75 L 1323.65 267 C 1324.15 268.81 1321.97 269.31 1321.41 270.93 C 1326.7 272.06 1332.31 270 1337.42 274.43 C 1337.98 283.73 1328.95 286.67 1324.4 293.16 C 1326.39 297.16 1330.57 295.09 1333.62 294.97 C 1337.98 294.72 1339.79 300.28 1343.9 298.28 C 1345.27 300.96 1346.27 303.02 1347.33 305.08 C 1346.33 308.58 1341.85 307.71 1340.35 310.39 C 1341.22 313.76 1343.71 312.14 1345.71 312.89 C 1346.52 314.2 1345.71 316.7 1347.64 317.51 C 1349.57 318.38 1350.07 315.7 1352.62 316.88 C 1353.44 325.12 1357.61 331.99 1366.71 335.36 C 1364.71 342.48 1374.68 345.91 1369.76 354.09 C 1364.92 356.33 1360.7 361.6 1354.52 365.78 C 1338.27 366.82 1321.83 361.78 1305.03 360.22 C 1300.3 359.78 1295.44 360.28 1290.95 359.35 L 1288.77 359.41 C 1275.13 357.6 1261.36 356.29 1247.65 357.17 C 1240.49 357.61 1233.82 356.36 1227.09 354.92 C 1216.73 352.73 1206.37 350.33 1195.81 349.65 C 1195.82 349.62 1197.56 336.63 1197.56 330.64 C 1197.56 319.96 1201.67 311.28 1206.96 302.42 C 1212.07 293.86 1217.86 286.18 1225.09 279.31 C 1230.18 274.45 1235.42 270.46 1241.81 268.25 C 1243.64 267.62 1245.55 267.14 1247.58 266.82 C 1258.48 265.14 1268.82 261.26 1279.41 258.39 C 1286.83 256.39 1294.99 257.08 1302.34 259.57 C 1309.25 261.9 1316.32 263.74 1323.35 265.69 Z M 1358.54 276.98 C 1357.73 278.23 1356.42 277.23 1355.36 277.8 C 1354.43 280.23 1354.12 283.23 1351.37 285.29 C 1346.95 281.86 1343.9 284.6 1340.91 287.98 C 1341.78 292.53 1347.76 291.53 1347.82 296.47 C 1353.87 290.72 1357.36 284.41 1361.22 278.61 C 1360.59 277.42 1359.85 277.61 1359.16 277.61 Z",
+	"M 1247.58 266.82 C 1245.55 267.14 1243.64 267.62 1241.82 268.25 C 1241.49 267.63 1238.97 262.8 1237.92 260.64 C 1231.69 247.66 1222.96 234.86 1219.41 220.62 C 1226.36 216.58 1233.29 212.39 1240.22 208.2 C 1243.71 206.07 1247.69 208.19 1251.06 205.07 C 1251.99 199.64 1253.24 193.58 1255.04 188.15 C 1251.74 176.41 1251.18 163.86 1241.46 155.25 L 1240.15 154.06 C 1241.29 152.83 1242.09 151.47 1242.64 149.69 C 1248.06 132.9 1259.58 121.72 1275.03 114.1 C 1277.34 112.98 1279.77 111.98 1282.01 110.42 C 1283.32 108.29 1281.63 105.61 1283.19 103.42 C 1287.12 102.86 1292.6 102.48 1293.35 98.43 C 1294.59 91.87 1301.44 89.18 1302.38 82.57 C 1303.56 85.56 1305.56 87.75 1306.8 89.81 C 1306.49 94.49 1304.69 98.24 1304.19 102.23 C 1306.56 103.11 1308.8 103.17 1311.1 102.48 C 1311.1 100.36 1311.35 98.42 1310.48 96.8 C 1312.29 94.49 1314.72 92.87 1316.02 90.93 C 1316.33 87.87 1315.77 85.25 1316.46 82.81 C 1317.46 82.94 1318.02 82.56 1318.64 82.31 C 1326.43 79.38 1327.8 80 1330.48 87.87 C 1332.28 93.05 1332.78 98.8 1335.9 103.42 C 1361.94 108.22 1355.96 110.34 1355.4 124.02 C 1354.03 124.95 1352.04 125.02 1351.54 128.01 C 1352.79 130.57 1353.41 134.13 1354.97 136.44 C 1364.38 136.81 1370.86 144.56 1379.95 143.31 C 1379.33 152.42 1371.35 147.8 1368.49 151.55 C 1368.49 154.05 1370.92 154.42 1372.23 154.48 C 1378.77 154.79 1383.44 150.55 1388.3 146.68 C 1391.85 149.05 1396.77 145.8 1399.58 149.98 C 1399.7 151.23 1398.21 152.29 1400.64 154.29 C 1401.76 155.29 1404.31 152.54 1405.68 153.29 C 1408.74 155.6 1407.12 159.1 1409.86 160.91 C 1419.14 158.35 1422.57 168.15 1429.42 170.65 C 1435.28 169.21 1441.07 167.77 1446.68 166.34 C 1448.86 169.77 1445 171.46 1446.06 175.2 C 1447.12 177.07 1449.61 180.07 1448.24 182.69 C 1438.89 189.56 1428.05 191.5 1421.2 199.99 C 1415.84 198.37 1410.92 197.12 1405.81 197.62 C 1401.64 198.06 1397.59 198.37 1395.72 193.63 C 1390.86 194.13 1387.68 197.12 1384.07 199 C 1381.39 200.43 1381.27 202.99 1383.32 205.8 C 1385.75 209.11 1388.5 212.42 1388.37 217.48 C 1395.23 217.48 1400.15 220.91 1403.01 226.9 C 1408.19 227.03 1412.98 227.09 1417.72 225.47 C 1420.4 227.09 1421.83 229.96 1424.45 231.27 C 1421.71 234.52 1418.15 235.89 1413.98 235.02 C 1410.24 234.27 1406.5 234.83 1402.77 234.9 C 1398.22 234.96 1393.36 236.96 1389.5 233.84 C 1386.63 235.52 1384.01 237.15 1381.52 238.71 C 1374.67 243.08 1368.88 242.08 1362.89 236.34 C 1361.4 234.84 1360.09 233.15 1356.85 232.47 C 1350.43 234.59 1351.24 244.58 1345.14 246.58 C 1339.97 247.89 1335.17 247.14 1331.12 250.58 C 1335.3 253.26 1338.78 250.2 1343.15 250.89 C 1349.44 258.19 1359.72 259.5 1368.75 263.68 C 1363.89 264.62 1360.03 266.99 1355.92 269.18 C 1351.43 271.62 1346.14 273.36 1341.03 269.49 C 1338.85 267.81 1336.05 267 1333.62 265.25 C 1330.75 267 1327.51 266.87 1324.89 266.13 C 1324.38 265.98 1323.87 265.84 1323.35 265.69 C 1316.32 263.74 1309.25 261.9 1302.34 259.57 C 1294.99 257.08 1286.83 256.39 1279.41 258.39 C 1268.82 261.26 1258.48 265.14 1247.58 266.82 Z M 1367.88 245.89 C 1364.45 243.39 1360.09 243.14 1356.66 240.77 L 1356.04 242.02 C 1357.1 246.08 1351.81 246.7 1351.81 250.26 C 1355.3 254.51 1355.79 254.45 1361.03 248.89 C 1363.27 248.39 1364.58 250.7 1366.63 250.76 C 1367.57 249.26 1367.88 247.58 1367.88 245.89 Z",
+	"M 1305.03 360.22 C 1321.83 361.78 1338.27 366.82 1354.38 365.83 L 1356.68 366.89 C 1360.92 368.89 1360.67 373.95 1363.78 377.13 C 1365.78 378.5 1368.71 376.44 1371.39 378.32 C 1373.57 390.43 1386.4 393.17 1392.88 401.79 C 1394.07 403.41 1396.5 402.6 1398.86 401.91 C 1402.17 406.41 1404.16 412.46 1410.77 414.52 C 1413.76 415.46 1410.58 420.02 1413.38 421.89 C 1416.06 423.26 1419.3 421.64 1422.6 423.2 C 1423.23 432.25 1414.69 435.25 1411.52 441.56 C 1406.97 440.31 1403.91 437.63 1400.11 436.13 C 1397.68 436.88 1398.31 439.87 1396.31 441.31 C 1394.2 440.94 1394.32 437.88 1392.14 437.44 C 1385.72 446.25 1379.24 436.26 1373.89 437.44 C 1368.4 433.76 1366.97 428.08 1363.42 423.83 C 1363.11 423.52 1361.61 423.33 1360.43 425.39 C 1361.24 430.2 1367.66 433.39 1366.35 440.44 C 1363.67 443.56 1360.49 440.75 1357.5 438.76 C 1354.26 439.88 1353.76 443.19 1352.39 444.5 L 1351.08 444.94 C 1335.51 441.88 1321.55 449.31 1306.91 452 C 1296.38 453.94 1286.11 457.25 1275.7 459.75 C 1270.53 461 1264.92 460.68 1259.5 460.93 C 1254.34 461.19 1249.18 461.49 1244.02 461.8 C 1244.61 450.2 1242.06 438.96 1249.97 428.66 C 1258.19 418.04 1262.17 404.37 1272.64 395.13 C 1274.51 393.5 1275.57 391.13 1276.32 388.88 C 1279.8 378.45 1283.73 368.28 1290.95 359.35 C 1295.44 360.28 1300.3 359.78 1305.03 360.22 Z",
+	"M 158.84 168.14 C 159.83 168.28 160.74 168.2 161.6 168 C 167.21 178.61 162.96 188.81 162.39 198.89 C 162.19 202.04 159.7 204.82 158.02 207.47 C 151.02 218.38 145.29 230.16 136.33 239.71 C 130.49 234.47 124.21 229.44 119.59 222.98 C 111.45 221.67 112.65 211.9 106.57 208.73 C 107.58 200.7 100.93 198.89 95.85 195.79 C 94.42 191.7 94.5 186.57 92.08 183.54 C 84.89 174.62 86.46 164.29 84.62 154.15 C 91.64 152.98 92.58 147.23 95.58 142.73 C 112.17 140.96 121.34 152.67 131.33 162.59 C 138.35 161.61 144.31 163.17 148.53 168.93 C 152.19 167.76 155.61 167.7 158.84 168.14 Z",
+	"M 132.46 317.57 C 130.09 318.98 127.29 320.15 129.34 323.74 C 132.94 322.51 135.61 323.32 138.59 324.88 C 142.94 327.05 145.29 332.43 150.94 331.95 L 150.93 340.36 C 148.19 340.17 145.64 341.28 142.16 341.02 C 136.96 334.83 130.57 329.44 121.81 330.47 C 119.57 328.55 119.2 326.08 117.22 325.64 C 114.55 325.32 112.18 325.94 109.95 325.13 C 108.53 320.92 106.79 317.02 103.69 314.29 C 104.88 310.52 109.85 309.98 108.93 306.08 C 116.39 305.1 120.29 309.44 123.08 314.27 C 125.81 315.14 127.12 312.24 129.36 313.36 C 129.79 315.09 132.02 315.71 132.46 317.57 Z",
+	"M 141.29 248.38 C 139.72 245.47 137.79 242.88 135.67 240.44 C 145.29 230.16 151.02 218.38 157.99 207.52 C 158.02 207.54 168.45 209.35 172.49 212.57 C 186.32 223.67 198.41 236.68 211.5 248.58 C 223.47 259.49 234.26 271.69 247.72 281.49 C 248.39 281.97 248.99 282.45 249.65 282.88 C 243.28 297.56 235.18 311.52 229.37 326.54 C 230.04 331.24 229.85 336.12 230.83 340.7 C 231.25 342.64 231.23 344.17 230.8 345.41 C 230.09 347.32 228.56 348.55 226.28 349.66 C 223.24 345.57 220.39 341.61 216.86 338.32 C 215.62 337.15 214.87 335.97 215.12 334.55 C 216.7 325.27 210.68 317.04 211.88 307.89 C 206.85 308.43 204.68 303.11 200.21 303.54 C 196.25 295.24 188.49 289.91 183.47 282.48 C 179.77 271.65 171.89 264.77 164.88 257.39 C 159.54 258.43 154.81 259.42 149.16 258.66 C 146.12 256.18 143.45 252.47 141.29 248.38 Z",
+	"M 248.72 280.07 C 247.79 281.36 247.72 281.36 247.72 281.36 C 234.26 271.69 223.47 259.49 211.5 248.58 C 198.41 236.68 186.32 223.67 172.49 212.57 C 168.45 209.35 158.02 207.54 158.02 207.54 C 159.7 204.82 162.19 202.04 162.39 198.89 C 162.96 188.81 167.21 178.61 161.95 168.58 C 164.43 167.29 166.66 165.39 169.41 164.89 C 174.69 163.91 179.91 164.1 184.94 165.16 C 187.74 165.72 188.48 169.37 189.53 171.73 C 196.55 171.06 202.21 167.36 207.87 164.71 C 212.34 170.29 215.68 175.55 221.02 178.53 C 232.07 184.73 234.84 195.07 235.88 206.45 C 235.94 206.88 236.68 207.25 237.37 207.94 C 238.67 206.7 240.41 207.14 242.34 207.08 C 244.01 210.61 247.36 212.59 251.33 214.15 C 248.26 219.48 246.71 224.92 246.02 230.46 C 245.53 234.37 245.48 238.33 245.62 242.34 C 245.8 247.66 246.41 252.36 249.14 257.31 C 253.1 264.55 253.89 272.59 248.72 280.07 Z",
+	"M 178.15 384.54 C 182.98 380.76 197.47 377.52 205.18 381.6 C 227.93 393.66 273.43 445.92 287.15 472.15 C 290.66 478.88 289.57 489.19 286.12 499.66 C 284.66 504.09 276.7 520.32 262.07 525.86 C 256.11 528.12 251.64 527.38 248.87 525.32 C 233.03 513.51 232.87 491.3 219.41 469.3 C 201.13 439.44 194.68 434.48 177.77 410.66 C 174.84 406.56 169.16 391.62 178.15 384.56 Z",
+	"M 280.53 539.81 C 281.02 539.69 281.96 539.01 281.77 538.02 L 283.14 537.4 C 286.56 537.72 286.24 540.93 287.54 542.91 C 292.06 549.91 290.06 558.75 294.27 565.87 C 296.69 565.63 299.24 566.31 301.67 565.27 C 303.71 568.73 300.22 573.3 303.57 576.28 C 307.66 579.94 306.23 582.96 303.05 586.05 C 305.29 587.23 304.73 588.59 304.23 589.64 C 298.51 590.86 293.23 589.25 287.89 588.12 C 284.6 587.44 282.43 584.96 281.87 582.48 C 279.84 572.71 272.9 566.02 267.32 558.09 C 270.63 551.42 270.71 542.2 280.53 539.81 Z",
+	"M 247.72 281.36 C 247.72 281.36 247.79 281.36 248.72 280.07 C 253.89 272.59 253.1 264.55 249.14 257.31 C 246.41 252.36 245.8 247.66 245.62 242.34 C 245.48 238.33 245.53 234.37 246.02 230.46 L 246.95 231.83 C 250.48 236.1 254.89 238.77 260.6 239.34 C 265.39 239.84 267.93 245.22 273.02 245.3 C 277.53 260.15 292.69 259.37 302.62 266.13 C 307.71 270.1 309.93 277.09 317.01 279.02 C 317.94 279.27 318.93 280.39 318.99 282 C 319.11 284.97 321.65 287.2 323.89 287.39 C 333.83 288.21 336.55 295.27 339.08 303.5 C 344.3 304 347.9 307.22 350.12 312.79 C 347.76 315.57 343.72 316.06 340.73 318.46 C 340.72 318.47 340.71 318.48 340.7 318.49 C 340.26 318.84 339.94 319.1 339.71 319.29 C 333.6 316.37 328.41 318.65 323.88 322.82 C 317.53 328.69 308.64 331.76 304.59 340.1 L 304.27 341.28 C 302.6 339.32 300.63 337.51 298.44 335.7 C 288.08 327.14 277.48 318.71 269.11 308 C 263.03 300.19 256.41 290.1 249.71 282.79 C 248.99 282.45 248.39 281.97 247.72 281.49 Z",
+	"M 230.8 345.41 C 231.23 344.17 231.25 342.64 230.83 340.7 C 229.85 336.12 230.04 331.24 229.37 326.54 C 235.18 311.52 243.28 297.56 249.71 282.91 C 256.41 290.1 263.03 300.19 269.11 308 C 277.48 318.71 288.08 327.14 298.44 335.7 C 300.63 337.51 302.6 339.32 304.17 341.35 C 305.73 343.36 306.91 345.6 307.55 348.27 C 309.1 354.58 312.69 358.86 318.71 361.28 C 325.73 364.14 330.63 369.65 334.78 375.6 C 342.28 386.37 352.26 394.93 361.07 404.53 C 366.09 410.04 370.3 416.05 374.52 421.99 C 379.91 429.61 389.22 433.4 393.8 441.82 C 391.56 443.21 388.91 443.99 386.28 444.77 C 378.02 447.18 369.77 449.77 361.43 452.07 C 359.98 452.47 358.52 452.87 357.06 453.25 C 348.73 455.4 342.57 460.09 337.15 466.32 C 333.97 469.97 330.24 473.05 327.25 476.88 C 324.64 474.71 321.73 472.79 317.94 473.21 C 313.65 473.64 310.92 471.78 308.69 468.68 C 306.82 470.53 305.02 472.08 302.47 472.57 C 297.2 465.01 298.33 457.59 302.76 450.24 C 299.1 446.52 293.13 448.06 289.35 443.04 C 289.8 434.82 289.32 425.91 285.36 417.24 C 281.9 409.51 282.66 400.05 275.47 393.6 C 274.66 392.86 272.37 390.19 273.43 387.66 L 274.67 387.04 C 279.15 385.38 277.48 381.48 277.86 377.96 C 275.87 377.21 273.45 378.45 271.71 377.39 C 266.63 368.35 260.18 361.6 249.31 361.27 C 248.81 359.66 249.87 358.05 248.7 356.81 C 242.05 354.76 237.15 350.11 231.82 346.21 L 230.85 345.47 Z",
+	"M 314.86 594.38 C 318.78 591.47 324.1 592.53 327.38 594.56 C 334.27 598.84 353.36 617.56 366.45 635.31 C 384.4 659.67 383.26 662.66 385.08 671.76 C 385.62 674.48 386.58 686.53 378.77 691.63 C 369.6 697.6 352.34 683.64 347.49 677.01 C 330.26 653.51 318.77 634.92 314.85 619.7 C 312.56 610.79 309.48 598.33 314.85 594.37 Z",
+	"M 438.72 379.51 C 441.48 379.64 443.97 380.39 446.23 381.59 C 443.3 390.65 433.6 393.35 429.17 400.89 C 425.71 406.78 421.62 412.2 416.99 417.16 C 414.21 420.15 411.22 422.98 408.06 425.65 C 407 426.51 407 427.56 406.75 428.74 C 404.99 436.3 399.98 439.85 394.07 442.21 C 389.22 433.4 379.91 429.61 374.52 421.99 C 370.3 416.05 366.09 410.04 361.07 404.53 C 352.26 394.93 342.28 386.37 334.78 375.6 C 330.63 369.65 325.73 364.14 318.71 361.28 C 312.69 358.86 309.1 354.58 307.55 348.27 C 306.91 345.6 305.73 343.36 304.17 341.35 L 304.59 340.1 C 308.64 331.76 317.53 328.69 323.88 322.82 C 328.41 318.65 333.6 316.37 339.71 319.29 C 339.94 319.1 340.26 318.84 340.7 318.49 C 342.4 321.56 345.01 320.76 347.12 321.88 C 348.8 321.2 349.37 318.42 351.85 318.61 C 354.21 318 354.39 321.71 355.33 321.46 C 358.87 320.91 360.74 319.43 364.28 320.18 C 363.2 330.75 371.26 338.56 374.22 348.83 C 382.55 351.32 386.75 360.67 395.76 362.97 C 394.52 357.96 391.43 354.06 389.69 349.67 C 394.49 341.14 401.95 339.61 411.08 341.54 C 408.96 346.36 410.88 349.71 414.48 352.81 C 417.71 355.53 420.56 358.76 423.47 361.67 C 422.34 366.24 421.03 370.38 423.08 373.36 C 428.35 377.39 433.07 379.25 438.72 379.51 Z M 444.24 356.12 C 442.37 356.83 441.11 358.5 438.39 358.96 C 435.95 357.51 432.08 358.14 428.88 356.25 C 423.83 359.82 425.13 364.74 424.93 369.84 C 427.11 371.45 428.44 374.55 431.8 375.48 C 440.66 377.95 443.55 375.93 445.67 366.77 C 446.09 364.95 445.2 362.71 447.18 360.91 C 447.83 360.33 448.82 356.21 444.87 356.12 L 444.25 356.12 L 444.24 356.12 Z",
+	"M 435.87 500.78 C 434.29 508.11 433 515.63 431.42 523.22 C 434.51 529.52 431.29 537.65 434.03 545.73 L 432.75 545.73 C 424.48 549.12 415.52 551.02 407.38 554.53 C 400.66 557.42 394.94 562.42 390.51 568.53 C 388.39 571.5 386.15 574.27 382.11 575.57 C 377.95 572.4 377.15 568.57 378.65 564.24 C 373.69 562.44 371.77 556.81 366.74 555.44 C 367.24 552.65 370.85 552.23 369.74 548.52 C 367.01 546.72 366.14 543.13 364.91 539.48 C 361.14 528.65 350.84 521.33 348.13 509.76 C 347.82 508.46 345.09 507.53 343.35 506.6 C 340.18 504.8 337.08 503 333.98 500.83 C 334.85 497.24 332.37 494.89 330.14 492.59 C 331.57 490.99 332.69 489.63 333.75 487.72 C 331.46 485.24 330.28 482.14 328.43 479.36 C 327.93 478.68 329.11 479.91 326.88 477.31 C 330.24 473.05 333.97 469.97 337.15 466.32 C 342.57 460.09 348.73 455.4 357.06 453.25 C 358.52 452.87 359.98 452.47 361.43 452.07 C 365.55 464.59 375.79 472.52 383.16 482.56 C 383.47 483.05 384.15 483.3 384.34 483.79 C 389.41 496.42 401.28 495.7 411.71 497.33 C 419.54 498.52 427.56 498.6 435.32 500.59 Z",
+	"M 417.03 417.19 L 418.08 418.31 C 420.93 420.6 422.79 424.07 426.7 425.25 C 428.07 425.68 428.75 427.6 429.43 429.4 C 432.09 436.64 434.68 443.88 438.71 450.75 C 441.62 455.7 444.9 461.77 444.08 468.45 C 443.89 469.87 444.14 471.17 445.32 472.16 C 440.69 481.22 438.01 490.84 435.87 500.77 C 427.56 498.6 419.54 498.52 411.71 497.33 C 401.28 495.7 389.41 496.42 384.34 483.79 C 384.15 483.3 383.47 483.05 383.16 482.56 C 375.79 472.52 365.55 464.59 361.47 452.21 C 369.77 449.77 378.02 447.18 386.28 444.77 C 388.91 443.99 391.56 443.21 394.05 442.22 C 399.98 439.85 404.99 436.3 406.75 428.74 C 407 427.56 407 426.51 408.06 425.65 C 411.22 422.98 414.21 420.15 416.99 417.16 Z",
+	"M 490.23 555.33 C 490.22 565.01 491.41 574.61 491.02 584.25 C 490.82 588.58 493.36 592.35 493.6 597.55 C 485.87 612.69 469.57 621.19 459.98 633.91 C 444.59 640.28 430.89 646.48 416.94 652.13 L 415.36 652.69 C 414.41 651.44 413.19 650.39 411.54 649.46 C 402.54 644.37 396.84 635.52 394.07 626.49 C 391.6 618.63 391.86 609.35 393.49 601.62 C 389.85 592.22 379.85 586.51 382.11 575.57 C 386.15 574.27 388.39 571.5 390.51 568.53 C 394.94 562.42 400.66 557.42 407.38 554.53 C 415.52 551.02 424.48 549.12 432.75 545.73 L 434.03 545.73 C 452.75 545.03 470.46 550.68 490.23 555.33 Z",
+	"M 416.94 652.13 C 430.89 646.48 444.59 640.28 459.43 634.14 L 459.91 634.84 C 464.83 640.85 471.41 644.31 478.12 647.5 C 477.22 648.79 476.29 649.4 475.97 650.89 C 474.16 659.48 468.3 665.71 463.26 672.69 C 457.77 680.29 452.29 687.82 446.75 695.36 C 440.32 690 434.1 684.44 428.08 678.75 C 422.06 673.17 419.09 666.42 417.74 658.81 C 417.31 656.41 416.63 654.39 415.36 652.69 L 416.94 652.13 Z",
+	"M 481.13 467.64 L 481.36 468.52 C 484.08 478.61 481.69 488.74 481.12 498.82 C 480.67 505.63 478.79 512.18 482.44 518.68 C 486.04 524.99 487.89 531.99 489.3 539.1 C 490.1 543 490.53 547.02 490.34 550.85 C 490.27 552.35 490.24 553.84 490.23 555.33 C 470.46 550.68 452.75 545.03 434.05 545.8 C 431.29 537.65 434.51 529.52 431.42 523.22 C 433 515.63 434.29 508.11 435.87 500.78 C 438.01 490.84 440.69 481.22 445.32 472.16 C 447.37 471.92 448.79 472.35 450.35 471.74 C 457.87 468.66 465.58 467.32 473.91 467.15 C 476.29 467.09 478.67 467.24 481.04 467.48 Z",
+	"M 464.72 396.13 C 466.21 397.99 467.33 400.1 469.69 401.09 C 470.91 410.24 470.11 408.94 470.28 417.23 C 471.89 419.15 474.37 419.65 476.48 420.89 C 476.98 422.63 475.17 423.61 475.11 425.59 C 477.53 427.94 479.2 431.1 481.24 433.95 C 485.9 433.59 489.37 437.24 493.85 437.07 L 495.09 436.45 C 500.25 436.09 505.28 436.59 510.68 439.7 C 513.41 443.97 519.12 447.14 521.41 453.26 C 518.66 460.8 510.83 462.33 505.6 466.84 L 505.05 467.92 C 497.14 469.91 489.42 468.34 481.67 467.54 C 478.67 467.24 476.29 467.09 473.91 467.15 C 465.58 467.32 457.87 468.66 450.35 471.74 C 448.79 472.35 447.37 471.92 445.94 472.23 C 444.14 471.17 443.89 469.87 444.08 468.45 C 444.9 461.77 441.62 455.7 438.71 450.75 C 434.68 443.88 432.09 436.64 429.43 429.4 C 428.75 427.6 428.07 425.68 426.7 425.25 C 422.79 424.07 420.93 420.6 418.08 418.31 L 417.03 417.19 C 421.62 412.2 425.71 406.78 429.17 400.89 C 433.6 393.35 443.3 390.65 446.11 381.81 C 449.32 383.24 451.96 385.75 454.18 388.75 C 455.23 390.12 456.03 391.79 457.4 393.09 C 460.44 392.41 462.87 393.84 464.72 396.13 Z M 468.77 392.26 C 468.35 392.27 468.08 392.72 468.27 393.1 C 468.87 394.34 468.92 399.95 469.25 400.95 C 469.65 402.22 471.34 403.09 471.15 405.49 C 470.91 408.48 470.61 413.71 471.33 414.81 C 471.71 415.41 476.99 417.44 479.02 418.67 C 479.48 418.95 479.41 420.18 479.27 421.15 C 479.19 421.67 479.73 422.06 480.19 421.81 L 485.27 419.06 C 486.15 418.59 486.45 417.47 485.92 416.62 L 484.93 415.04 C 484.65 414.58 484.52 414.06 484.55 413.54 C 484.69 411.38 484.93 403.55 484.66 399.63 C 484.47 396.83 479.4 397.85 478.16 396.87 C 475.5 394.77 476.32 392.95 474.22 392.25 C 472.94 391.83 470.63 392.2 468.78 392.25 L 468.77 392.26 Z M 459.31 380.82 L 461.53 384.4 C 462.2 385.48 463.12 386.38 464.21 387.02 L 466.98 388.65 C 467.27 388.82 467.6 388.91 467.93 388.91 L 474 388.91 C 474.45 388.91 474.88 389.07 475.22 389.35 L 483.18 397.32 C 483.56 397.63 484.16 398.15 484.65 398.15 L 487.38 397.04 C 488.18 397.04 488.64 396.3 488.59 395.5 C 488.17 388.18 485.66 382.76 485.66 382.76 C 485.52 382.15 484.98 381.73 484.35 381.73 L 480.71 381.77 C 480.38 381.74 480.06 381.65 479.74 381.51 L 473.62 378.73 C 473.23 378.55 472.8 378.46 472.38 378.46 L 459.17 378.46 C 458.46 378.51 458.94 380.21 459.31 380.81 L 459.31 380.82 Z M 497.17 405.45 L 496.09 406.73 C 495.37 407.57 495.02 408.68 495.1 409.78 L 495.21 411.21 C 495.31 412.58 496.05 413.83 497.2 414.58 L 498.67 415.54 C 500.06 416.43 501.62 416.99 503.25 417.18 L 510.74 418.01 C 511.67 418.11 512.51 418.62 513.03 419.41 L 516.02 423.87 C 516.81 425.04 518.13 425.74 519.55 425.74 L 519.55 425.74 C 520.25 425.74 520.74 425.04 520.5 424.38 L 519.44 421.53 C 518.65 419.37 517.45 417.38 515.9 415.68 L 512.95 412.42 C 511.27 410.57 508.85 409.53 506.35 409.58 L 504.73 409.61 C 503.58 409.63 502.57 408.85 502.31 407.72 L 501.89 405.89 C 501.74 405.21 501.23 404.67 500.58 404.47 L 500.58 404.47 C 499.34 404.09 498 404.48 497.17 405.46 L 497.17 405.45 Z M 476.55 427.99 L 489.3 420.66 C 489.96 420.28 490.25 419.47 489.97 418.75 L 488.52 415.03 C 488.31 414.49 488.31 413.9 488.5 413.36 L 488.94 412.13 C 489.2 411.45 489.89 411.05 490.6 411.18 L 491.17 411.28 C 491.75 411.39 492.24 411.78 492.48 412.33 L 493.62 415.04 C 493.82 415.52 494.11 415.96 494.48 416.34 L 496.78 418.74 C 497.23 419.21 497.84 419.51 498.49 419.57 L 508.19 420.45 C 509.12 420.53 510 420.95 510.65 421.63 C 510.65 421.63 517.57 430.45 521.18 432.54 C 521.87 432.95 522.04 433.88 522.04 434.68 L 522.04 438.5 C 522.04 439.55 520.9 439.21 520.01 438.66 L 515.36 435.81 C 514.86 435.51 514.29 435.34 513.71 435.32 L 484.36 434.63 C 483.22 434.31 482.05 434.11 480.79 434.2 C 479.34 432.17 478.06 429.96 476.56 428 L 476.55 427.99 Z",
+	"M 478.46 647.66 C 481.87 649.28 485.32 650.84 488.58 652.64 C 491.51 654.26 494.37 655.97 497.18 657.75 C 506.89 663.9 516.04 670.82 525.57 677.27 C 531.41 681.19 535.05 687.52 537.71 694.14 C 538.29 695.61 538.76 696.87 539.2 698.13 C 541.86 705.81 544.7 713.3 548.97 720.73 C 548.65 720.84 548.33 720.96 548.01 721.08 C 530.59 727.48 514.61 736.93 496.43 740.66 C 493.69 741.21 491.21 742.13 488.97 743.8 C 483.62 739.38 478.8 734.73 473.96 730.1 C 469 725.39 468.64 718.47 464.79 713.26 C 463.74 711.84 466.23 710.61 465.98 708.94 C 464.43 708.13 463.56 706.65 461.76 705.71 C 457.36 703.48 452.26 701.98 448.73 698.39 C 447.9 697.54 447.07 696.7 446.23 695.87 C 452.29 687.82 457.77 680.29 463.26 672.69 C 468.3 665.71 474.16 659.48 475.97 650.89 C 476.29 649.4 477.22 648.79 477.97 647.8 Z",
+	"M 491.02 584.25 C 491.41 574.61 490.22 565.01 490.23 555.33 C 499.53 553.71 511.39 555.47 520.97 547.2 C 521.41 547.63 521.8 548.08 522.16 548.54 C 526.07 553.99 525.79 560.11 528.15 565.21 C 528.89 566.88 529.26 568.99 530.19 570.66 C 534.4 578.58 536 587.06 535.79 596.02 C 535.66 602.39 539.25 607.84 542.04 613.23 C 544.33 617.69 545.68 622.14 546.98 626.91 C 547.71 629.55 548.5 632.18 549.35 634.8 C 541.3 638.21 533.53 640.55 525.7 642.2 C 514.7 644.53 506.61 651.38 497.77 657.18 C 494.37 655.97 491.51 654.26 488.58 652.64 C 485.32 650.84 481.87 649.28 478.46 647.66 C 471.41 644.31 464.83 640.85 459.91 634.84 L 459.44 634.13 C 469.57 621.19 485.87 612.69 493.6 597.55 C 493.36 592.35 490.82 588.58 491.02 584.25 Z",
+	"M 481.36 468.52 L 481.13 467.64 C 489.42 468.34 497.14 469.91 504.97 468.07 L 505.59 469.12 C 512.99 465 521.88 462.79 527.18 453.77 C 537.07 448.72 545.02 450.22 549.66 461.17 C 549.79 461.42 549.66 462.1 550.34 462.35 C 559.53 465.64 559.7 474.05 561.36 482.16 C 558.87 486.67 553.59 484.37 549.68 485.97 C 545.88 488 544.01 491.83 541.39 495.11 C 546.67 497.96 552.64 494.88 558.1 497.61 C 558.72 501.39 558.53 504.17 554.05 505.83 C 547.52 508.23 542.85 513.79 536.38 516.31 C 537.43 518.6 538.18 520.46 539.73 521.88 C 538.67 523.05 536.99 523.79 536.49 525.83 C 543.01 528.57 548.28 532.6 549.01 540.39 L 549.01 541.75 C 547.34 542.07 545.66 542.39 543.97 542.73 C 538.88 543.77 534.03 545.31 529.05 546.54 C 526.94 547.09 524.09 545.04 522.84 548.38 C 521.8 548.08 521.41 547.63 520.97 547.2 C 511.39 555.47 499.53 553.71 490.64 555.43 C 490.24 553.84 490.27 552.35 490.34 550.85 C 490.53 547.02 490.1 543 489.3 539.1 C 487.89 531.99 486.04 524.99 482.44 518.68 C 478.79 512.18 480.67 505.63 481.12 498.82 C 481.69 488.74 484.08 478.61 481.36 468.52 Z M 531.42 451.4 C 531.42 450.98 531.9 450.81 531.98 450.4 C 532.67 447.04 531.29 443.71 528.23 443.8 C 524.06 443.92 523.77 447.54 524.62 449.95 C 525.76 452.39 527.25 451.91 528.21 452.27 L 531.41 451.39 L 531.42 451.4 Z",
+	"M 559.83 662.24 C 561.34 667.83 563.24 673.03 565.66 677.83 L 564.84 678.33 C 554.7 681.09 546.99 687.94 538.71 693.74 L 537.85 694.31 C 535.05 687.52 531.41 681.19 525.57 677.27 C 516.04 670.82 506.89 663.9 497.19 657.76 C 506.61 651.38 514.7 644.53 525.7 642.2 C 533.53 640.55 541.3 638.21 548.77 635.01 C 549.45 635.11 549.55 635.42 549.65 635.73 C 552.55 644.51 556.06 653.12 559.77 661.62 Z",
+	"M 496.43 740.66 C 514.61 736.93 530.59 727.48 548 721.08 C 554.69 731.22 560.49 743.34 565.25 754.4 C 567.17 758.86 565.67 763.86 565.97 768.56 L 565.96 769.61 C 563.45 769.96 560.88 770.05 558.38 770.4 C 549.71 771.62 537.64 774 529.37 777 C 528.16 778.68 527.2 777.26 526.18 777.21 C 522.59 772.31 516.57 768.28 510.73 766.42 C 506.32 765.05 501.98 763 500.5 757.37 C 499.76 754.52 496.9 752.1 494.55 749.81 C 492.52 747.89 490.49 745.96 488.47 744.02 C 491.21 742.13 493.69 741.21 496.43 740.66 Z",
+	"M 610.72 749.69 C 610.79 750.05 610.86 750.42 610.92 750.78 C 613.26 764.2 608.89 777.18 609.36 790.42 C 606.36 790.42 603.72 791.13 600.53 792.44 C 594.44 795.09 589.58 798.79 584.29 802.36 C 577.39 807.05 571.97 812.48 567.67 819.34 C 565.38 813.95 560.98 810.48 555.95 808.06 C 556.76 805.48 556.77 803.45 556.1 801.24 C 551.12 799.39 548.77 793.51 542.87 793.69 C 542.44 788.37 538.53 784.53 532.32 782.78 C 531.34 780.94 530.54 778.91 529.37 777 C 537.64 774 549.71 771.62 558.38 770.4 C 560.88 770.05 563.45 769.96 565.97 769.67 C 569.16 769.31 572.29 768.64 575.17 766.79 C 586.05 759.7 610.74 749.85 610.74 749.85 Z",
+	"M 528.15 565.21 C 525.79 560.11 526.07 553.99 522.53 549.04 C 524.09 545.04 526.94 547.09 529.05 546.54 C 534.03 545.31 538.88 543.77 543.97 542.73 C 545.66 542.39 547.34 542.07 549 541.83 C 554.4 541.08 559.49 541.18 564.48 544.07 C 566.9 545.43 569.2 542.78 571.99 543.96 C 575.91 545.64 580.57 545.52 583.04 548.93 C 586.9 549.49 588.08 546.22 590.57 545.23 C 595.97 548.77 598.38 554.83 602.97 558.43 C 602.94 559.17 602.91 559.92 602.89 560.66 L 601.72 562.08 C 592.32 570.41 584.6 580.1 577.19 589.36 C 575.23 604.94 578.19 619.67 581.08 634.39 L 581.25 635.41 C 570.26 635.86 560.09 635.4 549.94 635.63 C 549.55 635.42 549.45 635.11 549.35 634.8 C 548.5 632.18 547.71 629.55 546.98 626.91 C 545.68 622.14 544.33 617.69 542.04 613.23 C 539.25 607.84 535.66 602.39 535.79 596.02 C 536 587.06 534.4 578.58 530.19 570.66 C 529.26 568.99 528.89 566.88 528.15 565.21 Z",
+	"M 565.66 677.83 C 568.39 683.24 571.79 688.15 576.06 692.58 C 586.47 703.3 597.64 713.34 605.82 726.03 C 608.11 729.56 610.09 732.84 609.46 737.23 C 608.92 741.16 609.8 745.13 610.56 748.92 L 610.71 749.69 C 610.74 749.85 586.05 759.7 575.17 766.79 C 572.29 768.64 569.16 769.31 565.97 769.67 L 565.97 768.56 C 565.67 763.86 567.17 758.86 565.25 754.4 C 560.49 743.34 554.69 731.22 548.01 721.08 C 548.33 720.96 548.65 720.84 548.97 720.73 C 544.7 713.3 541.86 705.81 539.2 698.13 C 538.76 696.87 538.29 695.61 537.79 694.35 L 538.71 693.74 C 546.99 687.94 554.7 681.09 564.84 678.33 L 565.65 677.84 Z",
+	"M 601.72 562.08 L 602.71 560.89 C 602.55 570.08 602.59 578.67 607.02 586.39 C 604.71 589.29 599.87 586.75 599.12 591.32 C 599.12 592.44 600.48 592.75 600.98 593.61 C 603.09 593.93 603.65 591.52 605.39 590.84 C 607.87 593.38 611.85 592.71 614.08 595.56 C 614.14 597.72 610.85 597.04 610.91 599.2 C 611.96 602.11 613.82 601.62 615.88 600.45 L 617.12 599.21 C 621.9 599.65 624.88 602.57 625.18 607.27 C 625.3 609.31 625.18 611.41 625.17 613.82 C 622.97 616.68 620.31 619.05 617.53 621.23 C 612.45 625.23 606.99 628.58 603.32 633.14 C 595.82 634.65 588.49 635.28 581.26 635.52 L 581.08 634.39 C 578.19 619.67 575.23 604.94 577.19 589.36 C 584.6 580.1 592.32 570.41 601.72 562.08 Z",
+	"M 536.21 398.48 C 547.05 397.11 566.57 395.19 579.82 393.8 C 590.88 392.61 597.38 391.62 608.13 392.76 C 612.51 393.21 617.48 395.2 621.82 399.5 C 629.66 407.29 629.34 419.01 629.13 425.86 C 628.69 441.11 623.99 440.9 624.1 451.28 C 624.22 460.97 631.42 465.61 636.66 481.64 C 637.84 485.24 637.21 494.21 635.66 497.56 C 629.81 510.15 606.41 528.15 595.68 529.06 C 595.68 529.06 588.66 530.11 585.41 528.59 C 582.27 527.14 578.09 523.51 575.25 510.26 C 571.25 491.63 576.94 486.83 573.64 474.06 C 571.36 465.2 568.86 452.41 556.3 449.4 C 538.51 445.16 529.62 426.56 528.56 415.7 C 527.19 401.56 533.83 398.76 536.21 398.47 Z",
+	"M 600.27 668.01 C 616.3 669.9 631.45 676.23 647.48 678.55 C 647.79 680.34 648.14 682.73 647.46 685.23 C 645.02 694.32 644.01 703.59 644.8 713.06 C 645.16 717.63 646.58 722.09 646.7 726.67 C 646.87 732.67 647.04 738.67 647.19 744.66 L 646.1 744.66 C 634.55 744.82 622.55 748.45 610.99 748.92 C 609.8 745.13 608.92 741.16 609.46 737.23 C 610.09 732.84 608.11 729.56 605.82 726.03 C 597.64 713.34 586.47 703.3 576.06 692.58 C 571.79 688.15 568.39 683.24 565.66 677.83 C 563.24 673.03 561.34 667.83 559.83 662.24 C 566.55 662.32 572.51 662.58 578.54 662.77 C 586.24 663.04 592.76 667.13 600.27 668.01 Z",
+	"M 647.48 678.55 C 631.45 676.23 616.3 669.9 600.27 668.01 C 592.76 667.13 586.24 663.04 578.54 662.77 C 572.51 662.58 566.55 662.32 559.83 662.24 C 556.06 653.12 552.55 644.51 549.65 635.73 C 560.09 635.4 570.26 635.86 580.65 635.54 C 588.49 635.28 595.82 634.65 603.32 633.14 C 606.99 628.58 612.45 625.23 617.53 621.23 L 618.38 622.16 C 619 622.59 619.25 623.64 620.24 623.4 C 627.58 621.68 635.46 624.42 642.99 620.91 C 649.82 624.88 658.15 622.85 665.6 625.34 C 664.97 627.38 664.04 629.36 663.6 631.89 C 664.96 634.49 667.88 636.66 668.05 640.19 C 671.47 641.49 675.57 641.75 677.49 645.83 C 676.67 649.3 676.67 652.76 676.72 656.28 C 665.71 661.03 656.94 669.48 647.97 678.49 Z",
+	"M 610.72 749.69 C 610.67 749.43 610.61 749.18 610.56 748.92 C 622.55 748.45 634.55 744.82 646.1 744.66 L 647.19 744.66 C 647.63 763.47 647.76 781.85 646.56 800.26 L 646.55 801.19 C 643.35 800.93 640.39 800.58 637.92 800.3 C 629.22 799.3 620.53 797.98 613.08 792.84 C 611.8 791.89 610.58 791.33 609.37 791.03 C 608.89 777.18 613.26 764.2 610.92 750.78 C 610.86 750.42 610.79 750.05 610.72 749.69 Z",
+	"M 646.55 801.19 L 646.56 800.26 C 647.76 781.85 647.63 763.47 647.2 745.07 C 651.01 745.41 654.8 745.36 658.53 745.8 C 666.17 746.74 674.37 748.36 682.14 747.14 C 682.48 749.24 682.56 751.3 683.31 753.27 C 685.9 760.14 682.78 766.5 682.52 773.12 C 682.33 775.53 685.06 776.09 685.93 778.01 C 683.44 783.01 682.06 788.21 681.24 793.52 C 680.64 797.46 679.96 801.38 679.24 805.3 C 677.33 805.07 659.94 802.89 646.54 801.3 Z",
+	"M 647.19 744.66 C 647.04 738.67 646.87 732.67 646.7 726.67 C 646.58 722.09 645.16 717.63 644.8 713.06 C 644.01 703.59 645.02 694.32 647.46 685.23 C 648.14 682.73 647.79 680.34 647.97 678.55 C 656.94 669.48 665.71 661.03 677.21 656.72 C 683.22 656.75 687.97 658.99 691.06 664.6 C 688.94 668.12 691.17 671.09 692.72 674.19 C 685.37 680.92 681 692.41 680.85 705.71 C 681.97 707.69 684.7 707.44 685.94 709.67 C 683.38 715.98 683.74 723.21 681.3 729.76 C 680.87 730.88 680.43 732.24 680.86 732.85 C 684.19 737.34 682.87 742.33 682.59 747.14 C 674.37 748.36 666.17 746.74 658.53 745.8 C 654.8 745.36 651.01 745.41 647.35 744.66 Z",
+	"M 653.25 586.36 C 650.26 590 646.52 592.84 642.05 594.99 C 639.87 597.65 640.98 600.37 642.03 603.03 C 647.18 605.33 652.35 600.46 657.81 603.5 C 660.54 608.57 667.43 610.5 677.62 608.61 C 678.99 608.86 680.42 610.34 680.41 611.08 C 680.33 620.11 684.29 628.47 685.09 637.13 C 686.12 648.14 691.39 655.14 702.82 655.66 C 704.68 655.72 706.55 655.66 709.03 655.67 C 714.36 662.6 722.43 666.21 730.88 669.38 C 732.81 668.51 733.87 666.72 735.11 665.37 C 732.26 660.6 724.74 661.02 723.82 654.27 C 727.32 647.35 731.31 640.74 738.15 635.32 C 732.63 632.09 727.35 631.58 722.19 630.96 C 715.42 630.14 709.58 628.02 706.05 621.65 C 702.53 615.27 701.73 608.1 699.88 601.23 C 699.33 599.19 702.5 598.88 701.51 596.22 C 700.96 590.04 691.21 585.63 696.45 577.35 C 694.59 575.18 692.1 575.86 688.69 574.55 C 687.01 573.31 684.97 570.34 681.99 568.17 C 679.81 570.21 676.95 570.01 674.46 570.88 C 672.16 574.89 678.86 579.36 673.76 583.24 C 669.97 582.06 668.79 579.52 670.17 575.57 C 661.85 569.98 655.19 575.23 648.29 578.62 C 648.16 582.45 653.63 581.97 653.25 585.68 Z",
+	"M 793.45 666.53 C 791.09 667.25 791.09 669.09 790.45 670.61 L 792.14 670.05 C 792.82 670.8 793.2 671.66 793.94 674.01 C 787.11 669.55 785.22 681.6 778.15 677.26 C 779.71 675.41 781.51 674.42 782.32 672.63 C 774.13 664.64 773.4 660.18 779.19 653.33 C 779.32 651.17 775.96 651.84 776.09 649.06 C 777.16 644.23 779.71 639.17 779.41 633.6 C 783.14 633.42 786.25 631.27 789.85 633.5 C 795.31 636.91 801.4 639.15 807.8 640.46 C 814.94 641.9 818.28 651.18 815.1 656.43 C 813.04 659.89 812.78 663.41 812.78 667.12 C 805.51 666.37 807.23 677.69 799.84 675.88 C 797.67 673.59 801.77 672.17 800.53 670.5 C 798.8 667.1 795.75 667.03 793.45 666.53 Z",
+	"M 641.54 823.19 C 641.18 822.89 640.36 823.17 639.74 823.19 C 637.12 827.78 636.99 833.83 638.22 839.76 C 631.69 839.87 626.98 836.77 623.07 832.99 C 618.04 828.1 612.64 825.36 605.12 826.52 C 604.73 835.18 609.94 842.61 609.86 851.58 C 600.54 850.39 599.81 841.42 594.54 837.08 C 589.21 832.62 581.75 830.19 579.22 823.26 C 577.1 822.53 575.61 823.98 573.89 823.62 C 570.82 819.36 567.48 821.25 567.11 819.96 C 571.97 812.48 577.39 807.05 584.29 802.36 C 589.58 798.79 594.44 795.09 600.53 792.5 C 603.72 791.13 606.36 790.42 609.02 790.95 C 610.58 791.33 611.8 791.89 613.08 792.77 C 620.53 797.98 629.22 799.3 637.92 800.3 C 640.39 800.58 643.35 800.93 646.54 801.3 C 659.94 802.89 677.33 805.07 679.24 805.31 C 677.69 813.76 675.96 822.17 674.46 830.62 C 674.02 834.08 672.4 836.43 671.03 838.53 C 666.43 839.44 663.57 836.59 661.71 834.74 C 655.88 828.97 647.5 828.28 641.54 823.19 Z",
+	"M 724.86 887.52 C 722.24 897.01 719.66 906.66 717.57 916.6 L 716.88 917.16 C 711.7 921.02 706.47 919.65 701.29 917.16 L 700.66 915.92 C 694.8 911.75 688.94 907.58 680.89 905.59 C 679.65 905.9 679.65 908.39 678.21 909.69 L 677.59 910.94 C 673.66 909.75 670.04 910.5 666.36 912.12 C 662.99 913.55 659.62 913.67 657.32 910.44 C 651.83 912.62 647.09 909.57 641.66 909.82 C 640.66 901.42 647.34 899.24 650.96 894.94 C 654.63 898.18 655.26 903.78 661.25 904.34 C 661.12 898.37 666.05 895.69 668.54 892.64 C 669.6 888.16 669.67 884.49 670.79 881.07 C 674.34 881.13 676.59 880.57 677.96 876.21 C 679.15 872.42 680.52 868.81 680.08 864.95 C 679.4 858.92 681.71 855.18 687.82 854 C 686.51 849.33 689.75 849.21 692.5 848.77 C 694.8 849.64 694.62 853.19 697.36 853.19 C 698.42 853 699.48 853.56 700.1 852.51 C 702.1 848.9 704.47 849.46 708.28 850.33 C 712.95 851.39 718.07 852.07 723.18 850.83 C 726.74 849.96 730.98 849.96 733.1 854.37 L 733.41 855.49 C 730.92 866.08 727.86 876.69 724.86 887.52 Z",
+	"M 750.93 946.43 C 741.83 947.11 732.81 948.96 723.18 948.96 C 721.25 948.09 720.5 944.73 717.5 944.54 C 711.02 944.17 710.89 940.06 711.45 935.33 C 717.94 932.1 719.38 926.25 720.69 920.4 C 719.57 919.18 718.23 918.23 717.74 917.17 C 719.66 906.66 722.24 897.01 724.86 887.52 L 726.3 887.98 C 737.71 892.21 750.44 892.96 761.1 898.8 C 765.84 901.36 770.23 903.47 774.64 905.52 L 774.26 906.65 C 769.27 917.72 764.66 928.98 755.05 937.26 C 752.87 939.19 752 942.74 751.19 945.85 Z",
+	"M 724.86 887.52 C 727.86 876.69 730.92 866.08 733.41 855.49 C 736.9 853.5 739.9 855.18 742.14 854.06 C 741.83 849.52 742.08 845.16 739.15 841.24 C 745.26 839.88 749.88 841.56 753.56 844.36 C 755.68 844.54 756.74 843.48 757.99 843.24 C 765.84 841.49 768.84 842.74 772.89 850.08 C 776.51 856.62 783.06 858.48 789.17 861.28 C 777.5 871.59 769.28 884.81 761.79 898.56 C 750.44 892.96 737.71 892.21 726.3 887.98 L 724.93 887.54 Z",
+	"M 793.1 962.28 L 791.1 961.41 L 788.61 961.41 C 782.62 961.41 781 955.74 777.38 952.69 C 771.33 952.44 765.34 952.13 760.54 947.65 C 758.86 946.1 757.17 946.16 754.93 946.22 C 753.61 946.26 752.29 946.33 750.97 946.43 C 752 942.74 752.87 939.19 755.05 937.26 C 764.66 928.98 769.27 917.72 774.26 906.65 L 774.64 905.53 C 781.62 908.77 788.67 911.86 795.53 915.36 C 796.03 915.61 796.78 915.36 797.4 915.36 L 802.39 917.85 C 803.28 917.78 804.18 917.79 805.07 917.87 C 807.68 918.08 810.22 918.83 812.31 919.9 C 815.57 921.56 818.9 922.96 822.29 924.19 C 817.05 930.11 817.3 940 811.81 945.97 C 808.57 949.52 806.63 954 801.14 955.37 C 797.66 956.24 796.16 960.2 793.13 962.32 Z",
+	"M 831.15 884.93 C 822.29 895.45 815.37 907.46 805.51 917.22 C 804.18 917.79 803.28 917.78 802.39 917.85 L 797.4 915.36 C 796.78 915.36 796.03 915.61 795.53 915.36 C 788.67 911.86 781.62 908.77 774.64 905.52 C 770.23 903.47 765.84 901.36 761.55 899.04 C 769.28 884.81 777.5 871.59 789.63 861.81 C 790.88 860.81 791.94 860.01 793.04 859.23 C 797.53 860.04 796.66 863.83 798.15 866.07 C 799.84 868.56 803.33 868.5 806.14 869.31 L 813.62 869.31 C 816.93 870.12 819.73 867.51 823.29 868.13 C 825.22 873.23 829.34 876.34 834.2 878.64 L 835.89 880.82 C 833.56 881.9 832.32 883.51 831.15 884.93 Z",
+	"M 851.1 954.69 C 850.17 957.25 848.11 960.14 849.46 963.2 C 844.18 966.57 838.07 965.14 834.7 963.9 C 827.78 964.33 832.77 973.23 825.59 974.1 C 816.74 967.07 803.51 969.81 793.1 962.34 C 796.16 960.2 797.66 956.24 801.14 955.37 C 806.63 954 808.57 949.52 811.81 945.97 C 817.3 940 817.05 930.11 822.29 924.19 C 833.76 928.36 845.82 930.61 857.28 934.65 C 856 941.54 853.6 948.11 851.1 954.69 Z",
+	"M 859.84 922.27 C 859.46 926.54 858.7 930.68 857.69 934.75 C 845.82 930.61 833.76 928.36 822.29 924.19 C 818.9 922.96 815.57 921.56 812.31 919.9 C 810.22 918.83 807.68 918.08 805.07 917.87 C 815.37 907.46 822.29 895.45 831.15 884.93 C 832.32 883.51 833.56 881.9 835.9 880.85 C 838.69 886.05 839.01 891.9 840.44 897.44 C 848.17 899.8 857.53 899.86 864.2 905.4 C 861.29 911.04 860.35 916.73 859.84 922.27 Z",
+	"M 897.88 905.47 C 895.76 921.46 896.64 939.07 890.96 954.63 C 889.56 958.42 889.27 963.57 885.03 964.77 C 884.55 964.91 884.01 964.99 883.41 965.02 C 872.62 965.45 861.83 967.38 852.1 966.32 C 850.77 965.3 849.96 964.29 849.5 963.3 C 848.11 960.14 850.17 957.25 851.1 954.69 C 853.6 948.11 856 941.54 857.69 934.75 C 858.7 930.68 859.46 926.54 859.84 922.27 C 860.35 916.73 861.29 911.04 864.46 905.96 C 864.86 905.34 865.12 904.96 865.39 904.59 C 873.93 906.4 881.54 901.98 890.15 900.18 C 891.02 902.79 893.83 903.6 895.95 904.6 C 896.08 904.66 896.79 905 897.88 905.47 Z",
+	"M 941.4 910.27 C 938.96 919.17 939.7 928.62 938.99 937.83 C 938.94 938.45 938.9 939.07 938.86 939.69 C 937.84 955.63 939.1 971.68 937.24 987.61 C 934.55 988.9 931.97 988.7 929.63 989.6 C 922.64 985.62 917.03 979.7 909.67 976.34 C 902.87 973.23 895.51 971.68 888.96 967.88 C 887.59 967.07 886.53 966.08 885.28 965.2 C 889.27 963.57 889.56 958.42 890.96 954.63 C 896.64 939.07 895.76 921.46 897.88 905.47 C 902.09 907.27 912.07 911.04 917.66 909.01 C 925.33 906.15 932.31 907.27 939.55 909.76 L 941.36 910.26 Z",
+	"M 937.24 987.61 C 939.1 971.68 937.84 955.63 938.86 939.69 L 940.23 939.69 C 952.02 939.69 962.63 944.36 973.23 948.53 C 980.78 951.52 988.2 953.88 996.37 953.32 L 997.3 953.32 C 995.2 961.92 995.05 970.24 995.93 978.9 C 996.74 986.74 998.36 995.01 996.3 1003.1 C 995.79 1003.13 995.45 1002.79 995.12 1002.42 C 992.44 999.37 988.82 997.56 987.32 996.13 C 969.67 994.7 953.27 990.78 937.55 987.98 Z",
+	"M 998.18 890.47 C 1002.17 891.16 1005.1 893.83 1006.97 898.56 C 1006.52 899.73 1006.16 900.42 1006.16 901.74 C 1006.29 912.82 1005.5 923.78 1003.14 934.52 C 1002.06 939.41 1000.66 944.24 998.86 949.03 C 998.34 950.45 997.88 951.88 997.48 953.32 L 996.37 953.32 C 988.2 953.88 980.78 951.52 973.23 948.53 C 962.63 944.36 952.02 939.69 940.23 939.69 L 938.92 939.69 C 938.9 939.07 938.94 938.45 938.99 937.83 C 939.7 928.62 938.96 919.17 941.4 910.27 C 942.4 906.65 943.92 903.12 946.28 899.74 C 947.91 897.38 948.66 893.89 949.9 891.28 C 951.84 887.3 951.21 882.19 955.27 879.27 C 961.82 878.83 968.49 876.84 974.79 878.59 C 977.85 884.31 974.41 890.78 978.53 895.45 L 993.81 895.45 C 996.06 894.39 995.5 891.03 998.18 890.47 Z",
+	"M 1042.64 942.23 C 1029.61 939.97 1016.64 937.8 1003.85 934.65 C 1005.5 923.78 1006.29 912.82 1006.16 901.74 C 1006.16 900.42 1006.52 899.73 1007.19 899.02 C 1009.65 899.25 1010.59 901.92 1013.77 901.74 C 1017.01 900.18 1021.13 899.43 1025.25 897.88 C 1029.24 898.69 1028.3 903.66 1031.3 905.47 C 1042.34 900.99 1053.25 908.95 1063.61 904.72 C 1065.85 909.08 1061.42 909.7 1061.92 913.06 C 1063.36 915.8 1062.36 918.85 1059.74 921.15 C 1061.98 927.56 1065.16 930.42 1069.28 929.68 C 1070.03 930.86 1071.34 931.36 1072.34 932.23 C 1073.15 932.91 1074.33 933.04 1074.83 934.09 C 1072.21 937.95 1072.84 943.43 1068.59 946.48 L 1067.76 946.96 C 1059.36 945.16 1050.99 943.68 1042.64 942.23 Z",
+	"M 1085.55 956.74 C 1082.97 960.38 1082.11 964.56 1081.94 968.44 C 1081.38 980.83 1079.01 992.77 1075.52 1004.54 C 1075.33 1005.16 1075.39 1005.97 1076.14 1006.4 C 1070.37 1008.42 1064.26 1008.41 1057.99 1004.47 C 1052.69 1001.11 1046.08 1002.23 1040.03 1002.67 C 1038.59 1002.79 1037.78 1002.79 1036.91 1001.86 L 1036.16 1002.42 C 1037.84 992.96 1038.03 983.94 1038.72 975.04 C 1039.53 964.21 1040.96 953.45 1042.52 942.68 C 1050.99 943.68 1059.36 945.16 1067.73 946.95 C 1069.28 952.08 1072.46 954.51 1078.08 954.13 C 1080.01 954.01 1083.06 954.88 1084.94 956.31 Z",
+	"M 1010.71 1006.15 C 1005.42 1007.01 1000.24 1007.19 996.14 1003.45 C 998.36 995.01 996.74 986.74 995.93 978.9 C 995.05 970.24 995.2 961.92 997.34 953.85 C 997.88 951.88 998.34 950.45 998.86 949.03 C 1000.66 944.24 1002.06 939.41 1003.14 934.52 C 1016.64 937.8 1029.61 939.97 1042.64 942.23 C 1040.96 953.45 1039.53 964.21 1038.72 975.04 C 1038.03 983.94 1037.84 992.96 1036.16 1002.36 C 1027.05 999.12 1019.26 1004.72 1010.71 1006.15 Z",
+	"M 1127.91 990.22 C 1127.64 995.99 1127.61 1001.72 1128.77 1007.29 L 1125.16 1007.77 L 1122.17 1008.83 L 1120.42 1007.77 L 1115.5 1007.46 L 1103.77 1007.46 C 1100.9 1006.53 1102.65 1003.17 1099.47 1001.24 C 1093.79 1001.05 1087.49 1002.05 1081.13 1004.85 C 1079.58 1005.52 1078.03 1006.11 1076.48 1006.59 C 1075.39 1005.97 1075.33 1005.16 1075.52 1004.54 C 1079.01 992.77 1081.38 980.83 1081.94 968.44 C 1082.11 964.56 1082.97 960.38 1085.55 956.74 C 1085.86 956.29 1086.19 955.86 1086.56 955.44 C 1093.98 962.1 1101.59 962.41 1109.88 957.93 C 1114 955.75 1118.62 956 1123.61 957.68 C 1123.29 968.01 1123.86 978.15 1127.91 987.74 C 1128.16 988.48 1127.91 989.42 1127.91 990.22 Z",
+	"M 1147.75 912.38 C 1148.62 913.06 1148.31 915.99 1145.38 915.37 C 1145.5 915.18 1142.38 914.56 1141.94 917.05 C 1138.95 917.11 1136.64 916.98 1133.65 918.04 C 1133.34 920.66 1135.27 922.9 1133.65 925.14 C 1127.91 925.76 1122.36 923.7 1117.43 923.95 C 1113.88 927.06 1114.25 930.67 1114.25 934.03 C 1099.28 933.1 1086.43 925.07 1071.65 926.5 C 1070.65 923.27 1067.47 921.71 1068.22 917.36 C 1074.33 917.54 1073.52 911.32 1075.89 907.77 C 1084.87 907.77 1093.61 908.02 1102.34 907.77 C 1112.75 907.46 1123.17 908.83 1133.59 906.22 C 1138.95 904.91 1143.57 909.14 1147.75 912.38 Z",
+	"M 1123.61 957.49 C 1124.04 956.87 1125.04 956.25 1125.42 956.44 C 1132.4 958.99 1138.51 957.74 1143.32 951.58 C 1145.81 953.26 1145.87 955.94 1147.25 957.74 L 1161.22 957.74 C 1162.9 960.92 1165.46 963.59 1168.14 966.14 C 1167.08 968.14 1164.77 967.89 1163.96 969.94 C 1165.46 973.05 1167.02 976.47 1169.51 979.83 C 1165.08 983.75 1163.09 988.61 1164.08 994.52 C 1164.33 995.89 1163.77 997.01 1162.96 998.32 C 1159.22 1004.1 1160.34 1009.02 1166.02 1013.19 C 1169.64 1015.86 1174.56 1017.42 1174.75 1023.77 C 1170.82 1028.99 1164.96 1023.77 1160.03 1026.07 C 1161.78 1022.89 1161.9 1019.97 1161.53 1016.92 C 1159.22 1015.61 1156.66 1014.74 1155.17 1014.18 C 1151.8 1013.25 1153.92 1016.98 1151.61 1016.36 C 1148.74 1017.17 1149.18 1012.81 1146.31 1013.75 C 1141.76 1016.48 1137.2 1017.79 1132.65 1017.6 C 1130.72 1014.26 1129.51 1010.81 1128.77 1007.3 C 1127.61 1001.72 1127.64 995.99 1127.91 990.22 C 1127.91 989.42 1128.16 988.48 1127.91 987.74 C 1123.86 978.15 1123.29 968.01 1123.61 957.68 Z",
+	"M 1551.1 457.45 C 1547.47 459.83 1543.97 462.47 1541.34 464.53 C 1531.06 466.56 1523.27 463.9 1517.42 456.29 L 1499.48 456.34 C 1494.86 463.48 1490.93 471.36 1484.05 476.88 C 1485.89 483.37 1480.13 488.83 1477.26 493.46 C 1474.6 490.29 1470.24 490.64 1467.22 489.3 C 1469.91 484.63 1463.63 480.58 1463.73 476.56 C 1464.16 474.12 1467.61 473.68 1467.54 471.05 C 1466.72 467.37 1466.45 463.81 1467.51 460.24 C 1470.64 457.49 1474.59 456.16 1478.34 454.22 C 1476.33 452.28 1475.26 450.23 1474.94 448.1 C 1477.36 440.85 1485.21 442.89 1489.34 439.13 C 1491.08 435.37 1489.82 431.19 1491.56 427.69 C 1493.19 427.74 1494.51 427.43 1495.58 428.24 C 1497.15 430.36 1495.47 433.05 1496.73 435.04 C 1499.36 436.22 1501.38 437.97 1503.89 438.9 C 1510.59 435.51 1511.88 426.13 1520.91 424.92 C 1516.56 419.49 1522.33 417.04 1523.32 413.73 C 1522.75 410.54 1519.29 409.05 1520.29 405.11 C 1524.05 405.35 1528.06 404.65 1531.33 405.46 C 1536.83 412.76 1537.81 420.74 1540.61 428.05 C 1543.7 436.16 1546.36 444.46 1549.52 452.58 C 1550.19 454.31 1550.87 455.8 1551.84 456.92 Z",
+	"M 1532.77 405.7 C 1538.66 404.87 1543.25 407.36 1546.59 413.16 C 1548.59 412.97 1550.16 412.09 1551.66 410.65 C 1552.91 409.39 1554.79 409.2 1557.3 409.38 C 1562.95 411.3 1563.15 416.61 1563.04 422.05 C 1569.25 420.84 1575.34 422.01 1580.59 418.19 C 1581.66 417.43 1585.23 416.92 1585.93 418.67 C 1587.57 422.85 1590.82 421.53 1593.65 421.71 C 1596.91 421.89 1600.48 420.76 1602.5 424.81 C 1603.32 426.43 1605.39 425.37 1606.83 425.42 C 1612.91 425.53 1618.93 425.39 1625.2 425.37 C 1629.92 428.36 1632.82 433.41 1636.65 437.59 C 1639.53 435.7 1641.41 433.64 1642.15 430.7 C 1649.17 428.74 1657.21 431.47 1662.77 424.2 C 1666.05 431.38 1674.57 428.92 1677.66 434.78 C 1685.81 432.07 1693.34 433.55 1701.24 434.09 C 1702.44 438.09 1704.02 440.64 1705.34 443.33 C 1709.55 451.7 1715.27 457.9 1723.99 459.71 C 1715.57 466.35 1704.91 468.26 1695.32 469.97 C 1686.92 471.43 1678.2 471.02 1669.61 471.29 C 1664.22 471.5 1659.94 467.07 1654.48 464.34 C 1654.47 461.34 1655.21 457.34 1650.06 455.73 C 1636.09 461.27 1621.34 457.69 1606.85 455.73 C 1599.07 454.69 1593.05 455.58 1587.55 460.53 L 1577.33 460.56 C 1570.85 454.33 1562.63 453.85 1556.94 459.05 C 1554.68 459 1553.19 458.32 1552.08 457.18 C 1550.87 455.8 1550.19 454.31 1549.52 452.58 C 1546.36 444.46 1543.7 436.16 1540.61 428.05 C 1537.81 420.74 1536.83 412.76 1531.58 405.79 Z",
+	"M 1701.24 434.09 C 1704.05 430.9 1709.01 431.07 1712.83 428.87 C 1716.08 426.99 1718.96 425.29 1720.39 421.35 C 1723.51 412.72 1723.88 412.72 1733.42 413.13 C 1734.48 413.13 1735.55 413.25 1736.55 413.12 C 1738.36 407.99 1734.03 409.57 1732.77 407.51 C 1733.01 403.82 1736.02 402.19 1738.14 399.75 C 1744.11 402.54 1747.86 398.41 1752.25 396.27 C 1751.99 394.21 1753.05 392.02 1751.41 390.34 C 1753.66 386.02 1756.66 382.76 1760.29 379.75 C 1763.94 384.43 1769.2 381.67 1774.22 382.9 C 1773.48 386.59 1775.56 389.64 1775.38 393.14 C 1774.07 395.65 1770.93 395.66 1768.93 397.6 C 1768.48 413.91 1762.99 427.11 1745.01 432.28 C 1743.78 439.34 1738.59 445.48 1737.86 453.42 C 1735.17 455.43 1732.66 458 1729.6 460.25 C 1727.7 460.26 1725.92 460.09 1724.25 459.76 C 1715.27 457.9 1709.55 451.7 1705.34 443.33 C 1704.02 440.64 1702.44 438.09 1701.56 435.22 Z",
+	"M 1514.86 570.83 C 1508.48 578.66 1509.45 588.34 1510.36 597.46 C 1511.07 604.95 1512.66 612.38 1512.68 619.94 L 1512.68 621.26 C 1508.94 621.36 1505.2 621.37 1501.46 621.41 C 1492.99 621.56 1484.58 621.09 1476.36 619.05 C 1475.42 618.8 1474.79 618.8 1473.48 618.62 C 1465.45 617.2 1459.04 613.72 1452.32 611.18 C 1448.14 609.57 1443.47 608.57 1438.61 609.12 C 1441.07 603.9 1441.38 599.78 1437.85 595.29 C 1435.59 592.42 1434.7 588.49 1435.62 584.17 C 1437.05 577.61 1437.03 570.86 1437.01 564.17 C 1437 562.11 1436.5 559.8 1438.88 558.55 C 1443.45 556.1 1444 551.66 1445.24 547.28 C 1446.67 542.34 1448.41 536.34 1453.36 534.51 C 1456.18 533.5 1458.49 531.56 1461.25 530.74 C 1463.96 535.54 1464.27 535.79 1467.79 536.6 C 1468.97 533.53 1467.9 531.22 1465.76 529.04 C 1458.34 521.5 1458.25 513.07 1462.55 504.06 C 1463.3 502.43 1464.11 500.87 1463.67 498.68 C 1459.84 499.19 1458.33 496.38 1456.88 493.45 C 1458.38 490.57 1456.23 485.83 1460.37 484.76 C 1464.2 485.62 1460.94 489.32 1464.59 490.62 C 1465.44 490.03 1466.07 489.46 1466.53 488.88 C 1470.24 490.64 1474.6 490.29 1476.84 493.73 C 1475.46 497.9 1476.72 502.39 1478.62 506.32 C 1480 509.26 1481.08 512.13 1480.9 515.13 C 1480.18 526.06 1482.09 535.81 1492.26 542.4 C 1495.28 543.77 1498.66 543.63 1501.48 541.19 C 1507.63 544.04 1511.23 552.09 1509.87 559.78 C 1511.26 561.65 1513.27 563.21 1514.91 565.02 C 1514.03 566.71 1513.79 568.39 1514.92 570.08 Z",
+	"M 1598.45 568.53 C 1600.66 573.21 1603.18 577.64 1607.89 580.37 C 1605.43 583.09 1602.89 585.81 1601.02 588.89 C 1594.69 590.41 1589.98 588.55 1585.28 589.31 C 1580.6 597.2 1577.68 606.83 1565.95 606.05 L 1563.43 603.56 C 1560.16 598.5 1554.07 597.58 1549.73 594.16 C 1548.67 595.1 1548.23 596.1 1548.43 597.6 C 1549.06 600.35 1553.01 599.65 1554.02 602.39 C 1553.34 605.21 1547.69 605.47 1550.22 609.97 C 1553.98 609.7 1555.78 605.26 1560.11 605.5 C 1561.7 611.18 1566.47 615.17 1569.12 620.47 C 1568.48 621.51 1567.36 621.73 1566.12 622.04 C 1561.24 623.29 1556.43 623.56 1551.63 623.43 C 1547.67 623.32 1543.71 622.94 1539.72 622.62 C 1530.71 621.89 1521.71 621.51 1512.68 621.4 L 1512.68 619.94 C 1512.66 612.38 1511.07 604.95 1510.36 597.46 C 1509.45 588.34 1508.48 578.66 1514.86 570.83 C 1523.39 565.95 1531.01 573.42 1539.63 570.57 C 1542.38 566.75 1546.51 562.93 1550.01 558.54 C 1553.7 553.97 1554.87 547.91 1558.18 542.96 C 1563.18 535.58 1565.87 535.19 1571.41 541.74 C 1574.49 543.04 1577.74 542.03 1582.2 542.58 C 1583.24 544.2 1584.33 545.82 1585.45 547.46 C 1589.93 553.99 1594.87 560.8 1598.45 568.53 Z",
+	"M 1607.89 580.37 C 1603.18 577.64 1600.66 573.21 1598.45 568.53 C 1594.87 560.8 1589.93 553.99 1585.45 547.46 C 1589.47 541.5 1598.44 542.1 1599.17 532.66 C 1610.78 537.25 1622.8 529.97 1633.67 537.38 C 1635.8 535.56 1639.31 535.55 1640.12 533.11 C 1639.73 529.61 1636.98 530.31 1635.41 529.12 L 1633.52 527.25 C 1635.77 525.19 1638.53 526.18 1641.04 525.98 C 1643.17 525.85 1646 526.72 1647.19 525.22 C 1650.62 520.9 1655.26 521.32 1659.59 520.87 C 1663.75 527.54 1675.04 527.08 1675.32 537.63 C 1672.69 540.7 1670.76 544.89 1668.83 549.02 C 1667.33 552.21 1665.7 552.34 1663 551.48 C 1658.54 550.05 1654.4 548.38 1654.51 542.88 C 1648.86 540.02 1643.17 546.22 1638.08 541.8 C 1636.01 544.37 1639.47 547.61 1636.66 549.61 C 1631.59 553.25 1629.22 558.7 1626.85 563.76 C 1624.59 564.58 1622.08 563.9 1620.27 566.03 C 1619.34 568.28 1619.47 570.97 1618.54 573.41 L 1616.03 575.91 C 1613.29 577.3 1610.73 578.9 1608.43 580.71 Z",
+	"M 1448.32 703.29 C 1445.24 701.86 1443.29 698.49 1439.02 698.25 C 1434.9 706.57 1427.62 702.03 1421.85 702.11 C 1418.65 702.43 1419.48 706.68 1416.03 706.57 C 1416.51 700.57 1410.23 695.52 1414.35 689.33 C 1410.26 686.4 1410.69 683.03 1411.12 679.09 C 1411.73 672.84 1415.97 665.52 1408.5 661.98 C 1406.61 659.17 1408.18 657.67 1408.11 655.98 C 1408.1 654.29 1407.85 652.54 1408.66 650.98 C 1416.8 648.89 1422.19 645.19 1427.31 637.74 C 1423.77 628.38 1430.71 620.18 1431.19 611.24 C 1433.64 610.08 1436.09 609.41 1438.5 609.13 C 1443.47 608.57 1448.14 609.57 1452.32 611.18 C 1459.04 613.72 1465.45 617.2 1472.72 618.43 C 1470.81 629.5 1469.52 640.06 1470.81 650.8 C 1471 652.11 1471.01 654.05 1470.63 654.43 C 1466 659.25 1465.83 666.25 1462.02 671.45 L 1459.53 675.2 C 1456.98 684.64 1453.12 693.65 1449.63 702.72 Z",
+	"M 1551.63 623.43 C 1551.17 628.85 1553.04 635.55 1552.5 641.2 C 1551.34 652.7 1546.35 660.52 1535.38 664.37 C 1533.97 662.43 1531.53 661.83 1525.96 660.71 C 1525.01 655.27 1531.47 656.57 1533.03 653.31 C 1531.02 652.01 1528.45 652.2 1527.19 650.08 L 1524.67 647.59 C 1520.09 647.16 1516.97 650.23 1514.15 652.74 C 1506.89 659.2 1498.06 662.78 1489.23 667.18 C 1493.19 671.92 1493.59 678.48 1498.87 682.84 C 1502.08 685.45 1501.71 690.77 1502.29 695.08 C 1503.38 703.82 1504.22 712.56 1505.57 721.81 C 1502.13 725.19 1502.83 729.44 1504.59 733.31 C 1503.6 736 1500.9 736.25 1499.78 738.44 C 1501.74 744.06 1500.94 750.25 1501.27 756.68 C 1500.09 757.08 1499.22 758.45 1498.32 759.75 C 1492.71 766.77 1486.32 768.79 1479.23 768.68 C 1471.08 768.58 1463.04 765.98 1454.65 769.06 C 1454.58 762.38 1455.91 757.8 1457.42 752.75 C 1451.52 748.39 1453.69 741.76 1453.55 735.76 C 1453.42 732.58 1453.6 729.58 1450.95 727.02 C 1443.03 719.42 1446.46 710.98 1449.63 702.72 C 1453.12 693.65 1456.98 684.64 1459.53 675.2 L 1462.02 671.45 C 1465.83 666.25 1466 659.25 1470.63 654.43 C 1471.01 654.05 1471 652.11 1470.81 650.8 C 1469.52 640.06 1470.81 629.5 1472.72 618.43 C 1474.79 618.8 1475.42 618.8 1476.36 619.05 C 1484.58 621.09 1492.99 621.56 1501.46 621.41 C 1505.2 621.37 1508.94 621.36 1512.68 621.4 C 1521.71 621.51 1530.71 621.89 1539.72 622.62 C 1543.71 622.94 1547.67 623.32 1551.63 623.43 Z",
+	"M 1552.5 641.2 C 1553.04 635.55 1551.17 628.85 1551.63 623.43 C 1556.43 623.56 1561.24 623.29 1566.12 622.04 C 1567.36 621.73 1568.48 621.51 1569.51 621.4 C 1575.34 620.77 1578.16 623.45 1582.45 630.56 C 1583.39 632.18 1584.15 633.86 1584.97 635.55 C 1587.3 640.54 1588.26 646.35 1593.1 649.89 C 1595.3 651.45 1591.6 652.84 1593.74 654.89 C 1598.58 656.44 1602.17 661.74 1608.38 663.04 C 1610.09 669.22 1605.66 678.35 1616.33 680.07 C 1616.91 686.44 1609.19 685.71 1607.83 691.97 C 1612.97 690.39 1614.98 692.94 1615.88 697.88 C 1612.93 698.14 1610.17 697.33 1608.29 699.21 C 1607.92 701.09 1608.87 703.08 1607.81 704.77 C 1606.22 705.31 1604.85 705.98 1603.4 706.5 C 1596.21 708.43 1589.13 708.45 1585.25 713.15 C 1578.75 721.04 1570.87 726.93 1562.54 732.46 C 1560.45 733.2 1558.95 732.48 1557.53 733.72 C 1554.89 731.54 1551.43 730.05 1549.54 727.37 C 1547.4 724.31 1544.46 724.7 1541.51 723.96 C 1538.54 716.28 1533.25 710.73 1526.53 707.5 C 1525.46 704.88 1525.33 702.76 1524.7 700.51 C 1528.2 696.5 1531.89 692.49 1532.94 686.93 C 1536.5 681.48 1535.1 676.93 1535.34 672.55 C 1535.57 668.59 1535.67 666.22 1535.02 664.65 C 1546.35 660.52 1551.34 652.7 1552.5 641.2 Z",
+	"M 1624.69 754.02 C 1627.45 753.89 1629.52 755.07 1632.22 756.5 C 1633.35 757.06 1635.62 759.18 1632.11 760.25 C 1628.6 760.2 1625.71 758.64 1623.44 755.9 C 1622.87 754.47 1618.67 755.35 1616.8 756.86 C 1610.79 761.75 1603.45 762.08 1596.88 765.79 C 1596.89 769.04 1593.82 771.67 1593.33 775.11 C 1594.59 778.73 1598.67 779.9 1599.87 783.34 C 1591.61 788.86 1591.11 788.86 1584.89 784.5 C 1583.7 786.19 1581.88 785.14 1580.19 785.39 C 1569.59 786.98 1561.23 778.51 1562.52 767.95 C 1563.31 761.7 1565.11 755.57 1564.28 749.2 C 1565.84 745.94 1569.79 744.68 1570.84 741.18 C 1570.03 736.87 1563.93 736.52 1562 733.71 C 1570.87 726.93 1578.75 721.04 1585.25 713.15 C 1589.13 708.45 1596.21 708.43 1602.04 706.91 C 1606.93 709.55 1609.35 717.01 1615.8 715.94 C 1618.19 718.43 1619.58 721.67 1622.28 723.92 C 1624.61 725.53 1627.68 723.9 1630.13 725.08 C 1630.82 727.26 1629.64 728.52 1628.01 729.96 C 1630.9 732.64 1631.79 735.95 1630.11 739.45 C 1632.75 743.38 1634.88 742.44 1636.56 737.75 C 1639.08 740.36 1640.9 743.17 1640.41 747.11 C 1640.11 749.73 1641.49 752.1 1642.25 754.6 C 1639.44 757.48 1638.56 756.55 1635.48 755.87 C 1635.17 755.81 1633.72 755 1633.47 754.81 C 1631.52 753.26 1630.39 752.51 1628.13 751.27 C 1625 751.02 1624.49 751.34 1624.69 754.02 Z",
+	"M 1498.33 759.75 C 1500.67 765.37 1507.02 771.98 1501.9 778.74 C 1500.71 780.3 1501.28 782.43 1501.23 784.3 C 1500.1 786.3 1497.34 786.06 1496.72 788.06 C 1493.86 797.19 1491.63 806.26 1497.61 814.93 L 1500.13 817.42 C 1501.77 821.91 1504.48 825.9 1505.75 830.4 C 1501.68 833.22 1500.29 828.67 1498.21 827.36 C 1489.68 826.45 1483.56 836.02 1475.33 830.74 C 1471.07 833.43 1470.27 839.25 1464.44 840.08 C 1460.86 838.09 1457.03 834.79 1451.33 836.86 C 1451.57 832.05 1446.55 832.07 1444.97 828.88 L 1442.45 825.14 C 1440.37 822.09 1437.35 819.1 1438.79 815.22 C 1440.78 809.96 1441.26 804.22 1444.83 799.52 C 1448.51 794.57 1450.44 788.94 1449.86 782.7 C 1449.34 777.45 1450.33 772.76 1454.21 768.94 C 1463.04 765.98 1471.08 768.58 1479.23 768.68 C 1486.32 768.79 1492.71 766.77 1497.58 760.76 Z",
+	"M 1608.26 487.28 C 1600.8 487.98 1594.09 490.44 1588.53 496.52 C 1587.47 499.08 1588.61 501.64 1590.12 504.2 C 1603.17 508.1 1612.07 505.07 1619.88 493.74 C 1616.67 490.88 1614.28 486.76 1608.95 487.27 Z",
+	"M 1604.48 771.95 C 1606.42 767.89 1625.11 767.62 1630.95 764.72 C 1639.23 760.6 1646.84 756.24 1648.77 751.44 C 1650.18 747.93 1646.21 743.31 1644.7 741.02 C 1642.14 737.17 1640.21 736.42 1639.2 732.85 C 1638.89 731.74 1638.91 728.29 1640.61 725.19 S 1644.55 721.2 1647.35 720.38 C 1648.78 719.97 1654.27 719.4 1659.77 720.38 C 1661.71 720.73 1669.75 723.86 1671.98 734.79 C 1673.48 742.12 1674.5 748.57 1675.44 771.94 C 1676.06 787.18 1674.72 795.21 1671.69 809.03 C 1669.73 817.98 1665.44 824.5 1659.36 831.92 C 1652.74 839.98 1646.8 842.7 1633.7 841.62 C 1612.73 839.88 1597.04 837.86 1581.07 829.05 C 1574.97 825.68 1572.61 811.54 1572.21 809.25 C 1571.18 803.12 1571.9 797.2 1573.02 795.35 C 1577.46 788.01 1595.52 793.72 1601.73 790.45 C 1605.21 788.62 1600 781.36 1604.48 771.94 Z",
+
+	"M 1965.96 327.74 C 1963.48 330.51 1960.82 332.76 1956.66 332.09 C 1953.8 331.69 1950.93 333.85 1950.73 335.74 C 1950.14 340.87 1945.88 341.85 1942.72 344.72 C 1941.63 352.15 1943.51 359.26 1946.57 366.38 C 1950.23 365.19 1953.69 364.49 1957.35 364.78 C 1961.7 365.09 1962.99 361.92 1964.17 358.68 C 1966.36 352.75 1965.37 345.52 1971.49 341.08 C 1972.19 340.57 1972.19 337.41 1970.51 335.65 C 1968.63 333.67 1966.36 331.59 1966.65 328.33 Z",
+	"M 1949.24 434.68 C 1951.02 440.92 1945.18 441.03 1941.73 443.58 C 1940.04 441.03 1939.05 439.81 1936.78 439.32 C 1932.37 438.4 1927.99 437.24 1923.59 436.46 C 1924.13 430.84 1929.56 428.26 1928.57 424.38 C 1932.13 420.94 1937.48 422.42 1939.56 417.77 C 1938.26 416.01 1935.7 417.97 1935.2 416.2 C 1936.19 411.28 1937.87 407.02 1939.35 402.65 C 1941.14 397.41 1948.65 399.89 1949.83 394.94 C 1955.67 393.56 1962.19 397.73 1965.56 391.02 C 1971.39 393.58 1969.91 400.38 1973.96 404.04 C 1974.75 404.82 1974.75 407.79 1973.96 408.78 C 1969.91 413.64 1970.3 419.46 1970.4 424.1 C 1963.58 429.17 1957.24 433.02 1949.24 434.68 Z",
+	"M 1900.78 431.33 C 1903.95 429.65 1907.22 428.76 1910.4 429.75 C 1910.49 432.51 1912.07 433.5 1912.75 435.76 C 1916.4 435.51 1920.01 435.86 1923.59 436.46 C 1927.99 437.24 1932.37 438.4 1936.78 439.32 C 1939.05 439.81 1940.04 441.03 1941.13 442.59 C 1947.3 448.44 1954 449.43 1959.92 451.49 C 1967.93 454.35 1970.1 457.62 1966.54 466.92 C 1971.48 470.47 1971.68 471.75 1976.72 473.92 C 1976.72 473.92 1978.9 473.92 1979.59 473.92 C 1982.26 474.23 1981.27 479.47 1980.48 478.87 C 1975.44 475.24 1966.24 472.65 1963.67 471.75 C 1963.07 471.55 1960.71 471.26 1960.21 470.99 C 1958.93 470.19 1957.14 467.71 1955.47 466.61 C 1952.01 466.61 1947.45 468 1945.18 466.31 C 1939.15 461.75 1932.73 463.16 1926.39 462.85 C 1922.64 467.81 1923.52 467.6 1924.92 472.84 C 1926.49 478.86 1929.96 485.5 1924.12 491.13 C 1930.15 498.83 1926.1 509.82 1932.52 517.42 C 1939.74 526.02 1945.38 535.82 1954.17 544 C 1950.41 544.69 1947.84 545.98 1945.17 544.87 C 1943.8 542.62 1943.69 540.25 1942.5 538.37 C 1941.32 538.66 1941.13 537.29 1940.03 537.11 C 1933.61 535.62 1929.35 531.85 1926.89 525.43 C 1924.03 518 1923.33 508.61 1912.74 506.54 C 1912.85 494.09 1908.99 482.41 1910.57 470.26 C 1899.89 469.77 1905.93 459.29 1901.08 455.16 C 1898.02 452.48 1899.99 447.92 1899.62 444.36 C 1902.38 442.58 1905.35 442.08 1906.34 439.62 C 1906.03 435.67 1902.28 435.28 1900.3 433.12 C 1900.3 432.59 1900.29 432.1 1900.25 431.59 Z M 1892.08 440.81 C 1891.89 441.58 1889.73 441.97 1889.63 443.66 C 1888.04 444.22 1886.73 443.47 1885.57 442.07 C 1888.23 440.81 1885.86 436.95 1888.74 435.47 C 1891.6 435.97 1892.08 437.74 1892.08 440.81 Z M 1891.99 460.38 C 1894.76 461.85 1892.18 464.93 1893.97 466.6 C 1893.77 468.39 1893.07 468.9 1891.89 469.2 C 1889.91 468.1 1888.93 466.31 1888.03 463.83 C 1889.22 462.53 1889.12 459.88 1891.99 460.38 Z M 1889.36 444.87 C 1890.29 445.31 1891.22 445.71 1892.08 446.25 C 1892.29 448.91 1891.7 451.2 1889.02 452.58 C 1888.33 450.41 1887.75 448.33 1889.02 446.25 L 1889.36 444.87 Z",
+	"M 1887.74 505.08 C 1890.01 504.98 1889.31 508.23 1891.5 508.13 C 1893.37 507.24 1894.06 505.56 1895.75 505.08 C 1898.62 507.95 1901.59 510.51 1903.47 513.38 C 1903.84 518.4 1899.79 521.57 1899.51 526.02 C 1901.97 532.06 1904.45 526.02 1907.59 526.02 C 1910.08 530.67 1916.12 530.76 1919.77 535.04 C 1917.3 538.18 1915.02 541.34 1911.65 543.01 C 1907.52 542.51 1907.32 538.27 1904.73 536.58 C 1901.86 538.66 1898.52 538.45 1895.84 540.05 C 1890.8 537.1 1890.5 532.24 1890.89 527.62 C 1883.88 525.43 1882.39 511.97 1887.74 505.08 Z M 1881.61 513.38 C 1878.15 513.85 1876.96 518 1873.5 518.68 C 1871.82 514.35 1875.57 509.81 1871.72 505.74 C 1874.49 503.48 1877.75 503.19 1880.52 500.92 C 1881.31 505.25 1883.19 509.04 1881.61 513.38 Z M 1882.09 532.15 C 1879.92 532.73 1879.42 531.17 1878.44 530.46 C 1876.47 531.26 1875.27 531.26 1873.69 530.18 C 1875.97 528.11 1873.1 524.22 1876.56 521.85 C 1877.46 526.12 1882.39 527.71 1882.09 532.15 Z",
+	"M 1926.18 594.23 C 1918.98 594.32 1911.46 593.04 1905.13 597.99 C 1901.07 597.79 1898.41 595.71 1895.83 593.63 C 1889.71 588.49 1890.8 580.19 1897.63 575.66 C 1901.18 573.27 1905.23 571.6 1907.69 568.05 C 1914.61 575.25 1925.59 575.83 1931.23 584.23 C 1931.73 585.02 1933.8 583.65 1934.99 585.02 C 1935.28 588.01 1938.35 590.19 1937.86 594.23 C 1934.1 594.23 1930.14 594.23 1926.18 594.23 Z",
+	"M 1783.72 595.21 C 1793.2 598.35 1802.99 598.45 1812.78 599.24 L 1815.27 597.98 C 1822.87 599.35 1830.58 595.3 1839.58 597.78 C 1828.6 604.29 1816.53 603.02 1807.25 608.26 C 1800.43 603.4 1793.3 606.27 1786.59 605.27 C 1784.21 602.69 1781.54 599.86 1783.72 595.21 Z M 1809.91 609.05 C 1808.44 614.77 1809.13 610.9 1808.82 618.43 C 1808.82 618.43 1812.3 623.67 1812.3 625.15 C 1812.49 628.14 1811.1 631.78 1812.09 634.54 C 1813.76 635.43 1815.45 635.43 1817.14 634.54 C 1819.22 628.23 1815.26 622.98 1813.87 617.45 C 1814.65 614.48 1816.94 611.62 1813.97 609.15 C 1813.29 608.84 1809.91 609.05 1809.91 609.05 Z",
+	"M 1737.84 588.96 C 1741.4 589.97 1745.55 590.66 1749.51 590.56 L 1751.98 591.75 C 1755.64 591.04 1758.3 593.52 1761.27 594.9 C 1764.53 596.37 1766.72 595.5 1768.09 592.43 C 1774.82 593.62 1776.89 596.27 1776.21 603.02 C 1770.76 603.11 1765.52 602.8 1760.48 606.47 C 1757.21 608.74 1751.98 609.14 1747.92 606.47 C 1742.59 610.9 1738.33 611.51 1725.68 609.85 C 1721.62 604.67 1722.13 598.84 1722.32 593.03 C 1726.57 588.39 1731.32 587.09 1737.84 588.96 Z",
+	"M 2067.57 674.9 C 2057.18 680.81 2050.76 690.8 2043.34 699.7 C 2042.94 700.19 2042.55 700.48 2042.16 701 C 2041.05 699.92 2040.01 698.7 2038.99 697.43 C 2038 696.14 2037.31 694.67 2035.83 693.48 C 2029.2 694.26 2022.38 694.17 2015.65 692 C 2015.37 694.98 2018.04 695.34 2017.63 697.54 C 2017.15 698.62 2017.05 700.67 2014.56 701.08 C 2006.95 698.2 1998.26 698.4 1990.65 693.75 C 1988.07 692.28 1983.73 693.58 1980.26 693.58 C 1979.57 690.31 1981.45 688.23 1982.83 686.86 C 1986.08 683.25 1987.73 680.1 1988.27 676.16 C 1988.62 673.61 1989.72 671.7 1991.24 670.16 C 1992.97 668.46 1994.86 667.31 1996.86 666.19 C 2000.64 664.01 2005.76 663.04 2006.48 657.9 C 2016.95 655.22 2025.05 665.12 2035.14 662.22 C 2038.3 665.5 2039.68 670.17 2044.63 671.15 L 2047.11 669.97 C 2053.22 670.55 2058.96 669.36 2065.39 666.4 C 2065.79 669.58 2066.89 672.17 2068.62 674.21 Z",
+	"M 1861.72 717.68 C 1866.26 718.27 1870.02 719.18 1874.47 715.02 C 1877.73 712.06 1882.98 710.74 1886.14 706.71 C 1884.66 701.46 1888.01 696.72 1887.02 691.68 C 1885.44 691.19 1884.26 689.22 1882.08 689.92 C 1880.5 690.6 1880.7 692.88 1878.92 693.66 C 1876.75 693.86 1876.25 691.39 1874.67 690.6 C 1875.76 688.63 1876.45 686.36 1878.52 685.06 C 1871.3 675.36 1863.1 672.12 1851.14 673.68 C 1847.09 674.28 1842.84 673.68 1838.78 673.79 C 1834.13 673.99 1829.48 674.6 1826.82 678.92 C 1824.54 678.05 1823.26 676.35 1820.79 675.96 C 1811.3 680.5 1809.91 688.72 1817.72 696.72 C 1820.39 699.39 1823.07 701.97 1824.06 706.01 C 1824.53 708.01 1826.32 709.87 1829.38 709.98 C 1832.65 710.09 1836.21 712.15 1837.89 714.8 C 1840.65 719.26 1845.5 719.96 1849.35 721.92 C 1853.91 724.19 1857.36 719.96 1861.02 717.77 Z",
+	"M 1982.64 685.47 C 1981.75 684.07 1979.37 685.77 1978.88 683.39 C 1974.03 686.86 1968.1 689.23 1968.89 697.32 C 1963.95 697.04 1959.2 696.82 1957.04 701.16 C 1948.03 699.5 1947.24 691.89 1945.36 685.96 C 1943.19 683.77 1940.82 685.86 1939.13 684.17 C 1939.14 681.2 1941.6 679.63 1942.8 677.36 C 1937.06 675.97 1935.48 679.14 1935.47 692.88 C 1932.4 695.94 1928.65 699.11 1927.46 704.04 L 1926.88 705.93 C 1926.28 703.85 1922.82 703.74 1923.12 700.99 C 1924.01 698.5 1926.37 696.82 1926.97 694.46 C 1925.48 689.72 1919.85 688.14 1919.36 682.78 C 1924.3 680.22 1927.56 674.89 1934.28 674.5 C 1933.1 669.86 1939.23 667.99 1937.25 662.63 L 1979.67 662.64 C 1981.95 659.87 1985.51 658.18 1988.87 656.5 C 1991.93 658.18 1991.34 661.15 1991.54 663.91 C 1991.74 665.9 1988.87 667.38 1990.85 669.46 C 1989.72 671.7 1988.62 673.61 1988.27 676.16 C 1987.73 680.1 1986.08 683.25 1983.51 686.13 Z M 1929.14 708.9 C 1932.9 703.54 1938.44 706.92 1942.99 705.94 L 1944.27 703.35 C 1946.06 698.5 1949.41 702.64 1951.79 702.46 C 1953.66 702.36 1955.24 705.53 1953.87 708.02 C 1951.29 708.4 1949.12 709.78 1946.94 709.9 C 1944.27 716.3 1943.58 717 1938.73 717.59 C 1937.94 715.7 1941.21 714.14 1939.33 712.06 C 1936.17 711.84 1935.37 715.7 1932.61 715.89 C 1930.32 714.04 1929.94 711.56 1929.14 708.9 Z M 1962.77 702.15 C 1960.09 703.06 1958.21 704.53 1959.4 708.5 C 1964.94 707.71 1971.17 710.09 1976.7 705.04 C 1972.85 700.78 1967.8 702.55 1963.36 702.15 Z",
+	"M 1910.4 429.75 C 1907.22 428.76 1903.95 429.65 1900.78 431.33 C 1900.11 430.1 1899.69 428.7 1898.43 427.56 C 1896.55 428.26 1895.05 430.05 1891.99 429.25 C 1892.88 423.22 1890.41 416.78 1894.57 410.87 C 1899.42 403.93 1900.51 396.14 1899.21 387.64 C 1903.07 383.86 1906.44 379.91 1908.52 374.49 C 1911.19 367.56 1917.6 362.8 1922.54 357.59 C 1925.61 357.87 1928.18 357.27 1930.85 358.07 C 1930.07 363.3 1925.21 367.08 1926.31 372.31 C 1924.93 375.09 1920.46 373.79 1920.09 376.47 C 1920.97 380.42 1924.62 377.15 1925.61 379.92 L 1928.09 381.11 C 1933.52 387.24 1934.51 394.85 1932.13 402.06 C 1930.06 408.4 1928.28 414.92 1925.21 420.34 C 1918.99 421.9 1916.02 427.76 1910.4 429.75 Z",
+	"M 2043.34 699.7 C 2050.76 690.8 2057.18 680.81 2067.57 674.9 C 2070.36 676.23 2072.72 677.71 2075.67 678.65 L 2075.67 687.56 C 2077.15 690.14 2077.75 693.11 2080.03 696.05 C 2081.61 696.64 2083.97 696.05 2086.75 696.33 C 2087.73 701.78 2092.08 705.85 2094.46 711.48 C 2091.29 713.94 2092.68 718.39 2089.81 722.05 C 2083.78 722.94 2078.33 721.55 2073 716.22 C 2068.45 711.76 2062.33 708.03 2055.8 707.53 C 2049.89 707.15 2045.73 704.6 2042.14 701.01 C 2042.55 700.48 2042.94 700.19 2043.34 699.7 Z",
+	"M 2260.35 627 C 2265.27 627.51 2270.55 624.01 2274.96 624.17 C 2281.66 641.42 2286.26 649.24 2291.37 652.85 C 2293.37 650.04 2290.77 648.23 2289.97 645.73 C 2291.37 643.92 2292.97 642.22 2294.77 640.91 C 2297.37 641.21 2299.67 640.61 2302.77 641.72 C 2300.27 650.54 2304.97 658.26 2305.67 666.69 C 2308.58 666.29 2308.88 664.48 2309.88 663.38 C 2314.78 662.58 2315.28 666.29 2314.08 668.39 C 2312.58 671.1 2312.68 673.81 2313.28 675.91 C 2314.58 680.13 2317.28 683.94 2321.28 687.15 C 2320.74 688.01 2320.22 688.89 2319.71 689.77 C 2316.11 696.01 2313.32 702.31 2310.55 708.57 C 2308.93 712.24 2307.32 715.87 2305.57 719.44 C 2303.37 723.95 2303.17 726.26 2296.27 730.67 C 2292.47 733.18 2281.76 734.38 2281.76 734.38 C 2279.86 730.67 2275.76 728.47 2273.76 724.65 C 2276.06 722.15 2276.46 719.64 2274.86 717.13 C 2271.56 723.05 2267.35 722.25 2262.75 718.94 C 2259.55 716.53 2255.75 715.13 2252.15 713.22 C 2250.05 708.91 2248.94 704.1 2247.24 699.88 C 2249.44 696.47 2252.15 693.67 2254.25 690.56 C 2253.25 688.75 2252.35 687.25 2250.45 687.15 C 2249.24 690.26 2247.74 693.16 2246.24 695.87 C 2243.84 696.07 2241.44 695.47 2239.84 697.48 C 2239.54 700.38 2243.14 700.89 2242.84 704.1 C 2239.34 706.9 2237.34 711.92 2232.94 714.63 L 2231.74 715.83 C 2231.94 717.94 2234.64 718.14 2234.94 720.74 C 2228.33 724.86 2227.23 733.18 2223.23 738.8 C 2218.63 739.2 2216.03 736.09 2212.53 735.69 C 2205.82 741.3 2204.02 740.9 2200.02 733.28 C 2197.62 728.67 2195.62 723.95 2192.72 719.54 C 2191.42 717.53 2190.51 714.83 2190.91 712.22 C 2199.32 711.12 2199.82 710.61 2200.02 702.19 C 2200.12 700.08 2201.02 697.68 2199.02 695.77 C 2198.82 695.57 2197.02 691.86 2200.72 691.36 C 2201.82 691.16 2201.62 688.95 2200.72 687.75 C 2195.82 686.54 2194.62 695.57 2189.51 692.46 C 2185.01 685.44 2185.61 676.42 2177.81 671.5 L 2171 671.5 C 2169.4 670.5 2168.3 668.09 2166.5 667.29 C 2160 667.99 2154 667.79 2146.49 667.89 C 2151.19 663.88 2152.5 659.97 2151.49 655.15 C 2154.9 655.76 2156.7 654.75 2158.6 652.95 C 2161.9 649.74 2166.2 648.94 2170.9 649.04 C 2177.81 649.24 2183.81 651.74 2189.41 655.46 C 2191.11 656.56 2192.52 657.26 2194.72 657.26 C 2196.02 655.66 2198.52 655.46 2199.32 654.45 C 2201.32 642.22 2211.93 639.41 2218.63 632.99 C 2221.53 632.99 2224.43 632.99 2226.83 632.99 C 2228.33 634.9 2228.23 636.7 2228.93 637.6 C 2233.44 639.41 2237.94 639.71 2241.94 641.21 C 2244.34 643.22 2242.44 648.03 2247.74 648.64 C 2248.04 643.62 2253.15 646.83 2255.25 644.22 C 2254.85 640.31 2253.05 636.4 2256.45 632.89 C 2258.35 632.79 2259.95 635.7 2262.15 633.49 C 2261.95 631.49 2259.95 630.18 2260.25 627.98 Z M 2228.33 738.59 C 2228.13 739.1 2228.53 739.9 2229.43 741.5 C 2230.23 743.01 2236.74 748.92 2237.54 749.12 C 2239.74 749.63 2244.64 749.33 2246.94 749.12 C 2247.24 749.12 2248.04 747.32 2246.94 747.22 C 2238.24 746.62 2229.23 736.49 2228.33 738.49 L 2228.33 738.49 L 2228.33 738.59 Z",
+	"M 2460.25 709.8 C 2470.76 709.97 2481.25 709.38 2491.67 710.01 C 2496.67 710.31 2501.57 710.41 2506.68 712.02 C 2512.98 713.92 2520.48 713.02 2526.39 708.21 C 2531.39 704.1 2537.79 704.5 2543.7 703.19 C 2555.2 700.59 2566.81 699.08 2578.41 697.68 L 2580.91 697.68 L 2581.11 987.11 L 2579.91 986.91 C 2575.11 985.91 2571.61 989.22 2567.81 990.82 C 2562.71 990.02 2559.9 985.61 2556.3 983.8 C 2548.7 984.7 2548.5 992.32 2544.1 995.63 C 2542.29 994.73 2540.69 994.73 2538.99 995.63 C 2539.19 999.34 2537.49 1002.45 2536.79 1007.47 C 2530.79 1000.15 2521.78 1001.85 2515.98 996.44 C 2513.58 998.94 2510.88 1001.25 2508.78 1004.36 C 2505.18 1002.96 2502.97 998.84 2498.57 1000.15 C 2488.27 1003.26 2477.16 999.14 2466.56 1004.26 C 2469.06 994.93 2475.46 987.81 2473.56 978.08 C 2479.86 972.67 2482.56 964.65 2486.57 957.73 C 2489.27 952.91 2491.87 949.4 2496.67 946.49 C 2503.48 942.48 2510.68 939.77 2517.78 936.66 C 2522.08 934.76 2525.39 936.06 2528.99 937.97 C 2531.89 939.47 2532.89 943.68 2536.99 942.98 C 2536.59 935.66 2528.89 933.96 2525.59 928.84 C 2528.99 926.64 2531.89 930.75 2535.09 929.34 C 2539.69 927.24 2543.8 927.74 2547.5 931.25 C 2549.3 932.95 2550 931.45 2550.9 929.54 C 2546.6 927.14 2542.9 924.03 2537.59 922.93 C 2533.39 922.02 2527.89 921.72 2525.79 916.31 L 2522.68 914.4 C 2522.08 914.4 2521.28 914.6 2520.88 914.4 C 2519.98 913.7 2519.18 912.8 2518.28 911.79 C 2521.68 909.39 2525.09 911.29 2527.99 911.89 C 2530.79 911.19 2532.19 909.19 2533.89 907.48 C 2536.19 910.39 2538.69 909.69 2541.69 908.28 C 2540.89 903.27 2534.19 905.17 2534.29 900.66 C 2529.79 900.36 2525.69 901.66 2523.39 897.95 C 2523.29 893.64 2527.99 897.55 2528.19 894.14 C 2529.09 890.73 2525.99 889.23 2523.99 887.62 C 2513.68 879.7 2510.48 873.58 2511.08 858.24 C 2507.08 854.93 2503.98 850.22 2500.57 846.2 C 2500.17 841.99 2505.98 839.08 2502.47 834.47 C 2499.07 834.87 2498.37 840.09 2493.97 838.68 C 2489.77 835.97 2490.67 830.76 2489.47 826.55 C 2487.07 817.82 2481.76 812.21 2473.86 808.5 C 2464.46 804.18 2456.25 798.47 2450.25 789.84 C 2452.4 785.62 2455.11 782.08 2456.85 777.91 C 2459.85 770.89 2462.15 763.57 2469.26 759.15 C 2471.36 757.85 2473.76 756.04 2474.56 752.53 C 2472.06 746.52 2473.46 739 2469.76 733.28 C 2465.26 726.46 2462.45 719.24 2460.65 711.42 L 2460.25 709.91 Z",
+	"M 2346.49 713.62 C 2334.59 713.32 2322.88 710.71 2311.08 708.81 C 2313.32 702.32 2316.11 696.01 2319.61 689.93 C 2323.68 691.36 2326.48 688.55 2329.69 688.95 C 2334.89 692.46 2341.29 694.57 2348.7 695.27 C 2354.4 684.04 2360.2 672 2373.81 666.79 C 2373.61 661.07 2375.71 655.36 2378.51 649.64 C 2380.31 648.84 2382.61 649.44 2384.31 649.24 C 2388.12 647.43 2390.12 644.42 2392.52 642.32 C 2391.52 633.19 2395.62 626.57 2399.92 621.06 C 2406.63 619.65 2411.43 621.36 2415.43 624.37 C 2417.23 624.37 2418.33 623.46 2418.93 622.96 C 2424.63 618.45 2430.54 614.94 2438.34 615.44 C 2441.14 615.64 2443.94 613.74 2445.15 610.63 C 2443.84 606.72 2438.24 608.42 2437.14 604.51 C 2439.14 596.69 2442.34 590.37 2452.05 591.27 C 2453.35 591.37 2454.65 590.77 2455.75 590.07 C 2464.96 584.25 2474.06 578.43 2484.47 574.42 C 2489.77 577.33 2490.47 584.25 2495.47 587.56 C 2496.97 587.56 2498.37 586.26 2499.77 586.96 C 2509.88 592.37 2522.58 591.27 2531.59 599.9 C 2533.49 601.7 2536.49 602.8 2538.89 604.41 C 2549.9 611.73 2563.21 614.74 2573.61 623.06 C 2574.91 624.07 2576.01 624.37 2577.41 624.27 C 2581.21 623.96 2581.21 626.57 2581.11 629.28 L 2581.11 697.68 L 2578.41 697.68 C 2566.81 699.08 2555.2 700.59 2543.7 703.19 C 2537.79 704.5 2531.39 704.1 2526.39 708.21 C 2520.48 713.02 2512.98 713.92 2506.68 712.02 C 2501.57 710.41 2496.67 710.31 2491.67 710.01 C 2481.25 709.38 2470.76 709.97 2460.25 709.8 C 2459.15 709.78 2458.05 709.75 2456.95 709.71 C 2449.05 709.51 2440.54 709.21 2433.04 712.42 C 2421.33 710.31 2410.13 710.92 2399.92 716.43 C 2387.82 722.95 2375.61 721.65 2364 717.13 C 2358.1 714.83 2352.7 713.72 2346.49 713.62 Z",
+	"M 2235.34 622.46 C 2231.04 623.46 2226.63 622.66 2222.33 622.96 L 2219.93 621.66 C 2216.83 621.86 2213.63 621.76 2210.52 620.05 C 2206.42 629.68 2194.82 623.26 2189.81 630.88 C 2186.81 625.67 2183.21 622.66 2179.01 621.66 C 2176.31 624.47 2173.11 625.77 2169.5 625.37 C 2167.7 623.06 2166.3 620.15 2164.1 617.95 C 2157.1 617.75 2147.09 603.31 2148.29 597.19 C 2143.89 586.16 2136.29 580.04 2126.38 576.93 C 2124.48 577.53 2125.68 580.74 2122.48 580.74 C 2120.78 579.94 2120.48 576.33 2116.28 576.33 C 2113.58 575.53 2113.28 581.34 2108.77 580.54 C 2105.17 574.82 2098.67 577.63 2092.66 576.63 C 2094.77 571.01 2097.57 566.3 2102.67 564.59 C 2108.57 562.69 2110.37 558.48 2111.27 553.26 C 2111.67 550.85 2112.27 548.65 2112.67 547.75 C 2112.57 543.23 2107.97 542.63 2108.17 539.12 C 2114.68 535.11 2121.68 533.81 2129.28 533 C 2137.49 532.2 2147.79 532 2150.49 520.37 C 2150.79 519.26 2152.19 517.46 2153.5 517.36 C 2159.7 516.66 2163.5 512.14 2166.9 508.73 C 2183.51 507.73 2199.02 508.83 2213.93 517.36 L 2219.93 517.36 C 2230.23 535.91 2248.74 534.31 2267.35 533.2 C 2268.85 536.41 2272.26 537.32 2275.26 539.02 C 2273.26 542.53 2269.36 544.14 2268.15 547.24 C 2274.66 553.26 2276.26 562.09 2282.86 567.3 C 2280.46 572.52 2278.86 577.23 2279.26 582.65 C 2279.46 585.75 2277.56 587.86 2274.46 588.96 C 2270.56 590.37 2269.86 593.38 2271.36 596.99 C 2272.96 600.7 2274.46 604.51 2276.26 608.02 C 2274.56 611.93 2274.26 616.34 2272.46 618.75 C 2271.26 621.96 2273.95 621.96 2274.95 624.16 C 2270.61 624.02 2265.41 627.42 2260.55 627.01 C 2258.73 626.8 2257.25 626.24 2255.85 625.07 C 2255.85 621.36 2259.45 622.66 2259.85 621.76 C 2260.65 618.85 2259.05 618.35 2258.15 617.15 C 2253.25 621.66 2246.14 621.06 2240.44 625.67 C 2240.04 621.76 2237.44 621.96 2235.34 622.46 Z M 2090.16 534.01 C 2086.16 531.6 2084.66 535.61 2081.86 537.82 C 2079.26 533.1 2075.26 532.8 2071.15 533.5 C 2067.35 535.51 2064.85 538.12 2066.25 543.13 C 2071.45 544.44 2076.66 540.93 2081.96 542.33 C 2085.26 540.12 2087.66 537.32 2090.26 534.71 Z M 2092.66 541.53 C 2082.76 543.83 2079.96 545.24 2076.96 549.25 C 2078.66 552.16 2080.46 555.07 2081.26 558.78 C 2082.16 562.39 2085.76 565.9 2089.36 568.3 C 2090.76 567.9 2092.16 568.91 2093.26 567.6 C 2095.27 565.1 2097.17 563.09 2100.57 561.69 C 2104.37 560.18 2103.97 554.87 2102.97 551.56 C 2101.57 546.94 2100.27 541.13 2093.26 541.53 Z",
+	"M 2311.08 708.81 C 2322.88 710.71 2334.59 713.32 2346.49 713.62 C 2352.7 713.72 2358.1 714.83 2364 717.13 C 2375.61 721.65 2387.82 722.95 2399.92 716.43 C 2410.13 710.92 2421.33 710.31 2433.04 712.42 C 2440.54 709.21 2449.05 709.51 2456.95 709.71 C 2458.05 709.75 2459.15 709.78 2460.25 709.8 L 2460.65 711.42 C 2462.45 719.24 2465.26 726.46 2469.76 733.28 C 2473.46 739 2472.06 746.52 2474.56 752.53 C 2473.76 756.04 2471.36 757.85 2469.26 759.15 C 2462.15 763.57 2459.85 770.89 2456.85 777.91 C 2455.11 782.08 2452.4 785.62 2449.4 789.01 C 2448.44 790.1 2447.44 791.17 2446.45 792.25 C 2444.95 793.95 2443.14 793.15 2441.44 793.45 C 2440.14 792.15 2441.24 790.54 2440.74 788.84 C 2434.04 787.54 2427.24 789.24 2419.73 789.04 C 2415.03 782.72 2407.53 780.42 2399.92 778.51 L 2398.72 776 L 2384.61 776 C 2382.71 764.27 2374.71 762.56 2365.2 763.57 C 2361.1 763.97 2357.1 763.47 2353.4 762.16 C 2346.89 759.86 2340.19 759.35 2333.49 759.86 C 2331.19 759.96 2329.29 759.15 2327.28 758.45 C 2321.58 756.35 2318.78 750.73 2315.38 747.82 C 2310.48 746.42 2306.37 749.12 2302.97 745.51 C 2300.37 742.71 2293.57 738.29 2295.07 736.19 C 2296.37 734.38 2307.27 738.09 2297.77 729.87 C 2303.21 725.91 2303.53 723.62 2305.57 719.44 C 2307.31 715.9 2308.91 712.29 2310.51 708.66 Z",
+	"M 2077.91 478.7 C 2056.2 484.76 2050.99 484.94 2033.78 517.98 C 2020.21 544.39 2007.34 573.51 2015.39 600.88 C 2016.21 603.39 2022.37 615.38 2036.21 620.66 C 2039.23 621.81 2060.57 623.58 2066.82 618.22 C 2091.65 595.27 2058.64 575.41 2051.63 557.53 C 2048.93 546.59 2053.99 536.02 2055.14 533.58 C 2059.21 516.03 2097.36 525.13 2112.93 521.11 C 2140.67 511.21 2130.13 484.38 2106.67 478.7 C 2096.07 476.28 2084.86 477.28 2077.92 478.7 Z",
+	"M 2357.74 515.69 C 2317.58 508.06 2282.93 546.42 2313.8 582.72 C 2319.11 597.91 2383.37 613.77 2394.42 612.28 C 2412.52 611.4 2436.49 613.77 2434 590.85 C 2432.55 583.11 2426.95 581.68 2419.49 573.18 C 2411.24 563.78 2413.25 558.35 2407.28 547.09 C 2397.23 528.11 2375.11 518.02 2357.74 515.68 Z",
+	"M 1964.4 911.49 C 1992.37 912.01 2001.25 922.31 2023.27 941.63 C 2091.66 1000.72 1963.37 1006.62 1937.24 1005.5 C 1906.19 1002.28 1905.15 993.45 1908.47 971.78 C 1911.95 957.59 1931.4 911.22 1964.41 911.49 Z",
+	"M 2100.98 931.8 C 2119.51 915.23 2131.7 909.09 2154 908.95 C 2197.34 910.18 2160.07 961.91 2139.69 980.4 C 2129.7 990.64 2090.83 1026.14 2084.28 992.89 C 2079.52 973.82 2084.77 944.63 2100.98 931.8 Z",
+	"M 2196.36 810.04 C 2228.11 796.39 2300.69 794.45 2322.25 823.34 C 2342.18 850.07 2324.56 917.19 2284.05 921.58 C 2255.72 912.87 2259.82 874.41 2194.33 859.62 C 2166.5 847.48 2181.01 818.56 2196.36 810.04 Z",
+	"M 1221.23 979.66 L 1221.23 980.52 C 1220.55 993.37 1211.63 1003.44 1209.01 1016.72 C 1203.21 1014.26 1195.91 1015.62 1191.85 1008.95 L 1184.98 1008.33 C 1184.55 1009.51 1182.92 1008.4 1182.43 1009.88 C 1178.05 1002.53 1176.43 994.44 1173.62 986.04 C 1178.92 983.19 1184.91 984 1190.9 982.82 C 1192.22 993.26 1201.32 986.64 1205.51 990.78 C 1208.81 986.21 1212.87 982.81 1216.42 979.1 C 1218.11 979.1 1219.73 979.29 1221.29 979.6 Z",
+	"M 1221.23 980.52 L 1221.23 979.66 C 1234.83 981.94 1243.7 992.13 1254.37 998.92 C 1252.94 1001.39 1253.25 1004.48 1251.19 1006.45 L 1246.82 1008.31 C 1245.83 1011.89 1242.52 1010.16 1240.52 1010.6 C 1232.91 1012.14 1230.29 1019.19 1225.05 1022.77 C 1224.37 1025.92 1227.55 1026.6 1228.05 1028.58 C 1227.11 1031.6 1224.99 1033.46 1221.87 1034.94 L 1210.58 1034.95 C 1210.64 1028.15 1219.38 1030.62 1220.12 1024.63 C 1217.87 1021.17 1211.95 1019.69 1209.07 1016.79 C 1211.63 1003.44 1220.55 993.37 1221.23 980.52 Z",
+	"M 1299 1031.51 C 1295.57 1035.04 1290.64 1032.69 1287.39 1035.47 C 1285.58 1033.25 1286.77 1029.79 1283.21 1029.98 C 1280.03 1029.67 1279.78 1033.99 1275.79 1033.62 C 1268.8 1030.48 1259.63 1033.88 1252.01 1029.37 C 1251.2 1028.44 1251.14 1027.27 1250.7 1026.22 C 1250.32 1025.42 1250.14 1024.06 1251.07 1022.89 C 1253.13 1022.76 1254.94 1023.62 1256.75 1023.93 C 1262.8 1025.04 1266.11 1022.88 1266.11 1017.01 C 1266.11 1011.82 1266.1 1006.7 1266.1 1000.89 C 1272.15 995.45 1276.95 987.73 1287 986.98 C 1292.31 992.05 1302.66 989.63 1305.85 997.91 C 1303.05 1005.69 1301.3 1013.41 1296.75 1020.09 C 1293.82 1024.35 1293.44 1028.55 1299 1031.51 Z",
+	"M 1372.25 1007.64 C 1373.81 1011.1 1377.37 1011.78 1380.36 1013.2 C 1379.74 1015.11 1379.3 1017.09 1376.12 1018.27 C 1374.25 1018.45 1374 1014.13 1370.25 1014.5 C 1367.07 1015.92 1365.2 1019.94 1361.4 1022.22 C 1357.78 1018.27 1353.41 1015.31 1353.28 1008.88 C 1353.28 1005.55 1349.22 1005.06 1346.16 1005.18 C 1343.73 1004.56 1346.04 1001.35 1342.42 1001.04 C 1341.61 1001.23 1339.74 1002.16 1337.8 1000.8 C 1335.62 1001.79 1334.43 1004.2 1332.69 1005.31 C 1319.89 1001.55 1318.21 1002.23 1311.16 1013.04 C 1312.22 1018.72 1313.41 1024.22 1313.6 1029.9 C 1313.66 1031.69 1312.85 1032.31 1311.67 1032.99 L 1310.42 1034.23 C 1311.42 1037.32 1313.17 1040.1 1314.73 1043.49 L 1324.34 1043.49 C 1325.65 1047.81 1329.64 1047.32 1333.95 1047.13 C 1338 1043.61 1342 1039.53 1344.12 1036.31 C 1352.41 1030.51 1362.4 1037.91 1368.39 1029.26 C 1379.56 1029.2 1384.23 1020.79 1389.54 1013.01 C 1390.04 1014.37 1391.66 1013.26 1392.22 1014.92 C 1392.16 1019.8 1383.42 1021.54 1386.36 1027.84 C 1393.35 1031.79 1398.09 1021.9 1404.52 1025.05 C 1405.46 1025.51 1406.4 1025.79 1407.35 1025.96 C 1407.52 1026.81 1407.91 1027.78 1408.57 1028.88 C 1413.32 1027.52 1419.06 1030.79 1424.49 1025.66 C 1418.21 1023.77 1412.76 1026.89 1407.35 1025.96 C 1406.75 1023.01 1408.79 1021.33 1411.69 1019.8 C 1414.94 1022.14 1417.74 1021.09 1420.24 1017.14 C 1423.49 1023.13 1428.17 1021.46 1432.66 1020.71 C 1433.34 1018.37 1434.9 1016.14 1433.09 1014.29 C 1429.91 1012.81 1427.85 1015.59 1425.17 1015.1 C 1423.17 1013.24 1421.8 1011.02 1421.48 1009.29 C 1421.23 1005.58 1424.73 1007.19 1425.16 1005.21 C 1422.73 1003.18 1421.04 1000.52 1419.29 997.62 C 1419.92 996.13 1422.29 995.52 1421.98 992.86 L 1410.37 992.86 C 1402.07 995.77 1407.38 1005.53 1400.27 1010.91 C 1400.45 1003.37 1401.7 997.01 1400.07 991.14 C 1396.45 990.03 1393.4 989.16 1390.03 990.52 C 1387.34 992.75 1386.41 996.46 1384.04 999.05 C 1376.99 997.94 1376.18 996.46 1377.86 986.39 C 1373.99 987.63 1371.05 985.9 1368.37 983.61 C 1363.82 984.73 1360.14 989.61 1354.64 986.21 C 1352.15 988.07 1351.03 990.35 1350.15 993.32 C 1354.4 994.43 1358.02 996.28 1357.71 1001.53 C 1359.7 1003.94 1363.26 1004.62 1364.57 1007.71 L 1372.06 1007.7 Z M 1347.28 984.8 C 1345.41 986.34 1342.91 984.67 1341.41 985.54 C 1338.98 989.19 1341.6 990.3 1343.04 990.79 C 1344.66 993.45 1340.23 995.3 1343.85 997.34 C 1349.09 995.36 1346.1 988.87 1349.71 985.97 C 1349.84 985.91 1348.59 985.41 1347.9 985.41 Z M 1407.35 1025.96 C 1412.76 1026.89 1418.21 1023.77 1424.49 1025.66 C 1419.06 1030.79 1413.32 1027.52 1408.57 1028.88 C 1407.91 1027.78 1407.52 1026.81 1407.35 1025.96 Z M 1425.9 983.53 C 1427.9 985.2 1427.22 987.11 1426.72 989.27 C 1424.53 989.71 1422.6 990.7 1422.1 987.24 C 1421.72 984.52 1423.35 984.03 1425.28 983.53 Z",
+	"M 1621.85 1013.72 C 1618.42 1013.41 1615.18 1014.53 1611.37 1015.27 C 1609.37 1012.49 1606.07 1010.83 1604.38 1007.55 L 1600.64 1006.32 C 1599.45 1005.21 1598.45 1003.91 1596.95 1003.23 C 1590.34 1009.47 1582.73 1004.04 1574.99 1005.28 C 1573.37 1005.9 1573.68 1008.74 1571.81 1010.16 C 1569.12 1009.11 1565.07 1012.14 1563.26 1007.57 L 1559.51 1006.33 C 1549.78 1000.59 1538.98 996.64 1528.81 989.98 C 1521.26 994.61 1512.27 993.87 1503.35 994.13 C 1497.61 994.31 1493.99 998.89 1490.25 1002.65 C 1488.56 1002.72 1487.06 1001.17 1485.25 1002.16 C 1483.69 1003.03 1485.88 1005.68 1483.38 1006.3 L 1480.89 1007.54 C 1480.14 1009.02 1479.39 1010.5 1478.46 1012.36 C 1480.64 1015.38 1479.27 1019.28 1479.71 1023.1 C 1480.96 1024.53 1483.45 1022.61 1484.7 1024.83 C 1487.95 1031.01 1492.25 1028.78 1496.5 1026.06 C 1497.31 1025.57 1497.81 1024.52 1498.99 1024.7 C 1504.67 1027.11 1510.54 1033.04 1515.15 1024.02 C 1519.33 1025.31 1522.95 1024.39 1526.39 1024.94 C 1530.63 1025.62 1533.19 1028.64 1534.5 1032.23 C 1538.74 1032.41 1535.37 1028.58 1538.62 1028.33 C 1544.49 1036.24 1553.97 1032.9 1562.71 1033.51 C 1564.27 1031.23 1562.2 1028.32 1564.2 1025.48 C 1566.82 1030.36 1571.38 1029.68 1575.75 1029.86 C 1578.06 1029.98 1581.05 1028.25 1582.61 1031.65 L 1583.86 1032.89 C 1588.1 1031.83 1586.23 1026.58 1589.16 1025.1 C 1594.65 1026.33 1599.83 1027.81 1603.64 1022.38 C 1608.82 1022.38 1614.56 1023.92 1618.68 1022.06 C 1626.41 1018.48 1633.96 1018.47 1641.89 1019.27 L 1642.51 1018.04 C 1643.63 1015.07 1645.5 1012.23 1643.82 1008.71 C 1643.26 1007.54 1644.13 1006.49 1645.63 1006.3 L 1648.12 1007.53 L 1648.12 1012.54 C 1653.55 1014.2 1655.11 1010.74 1656.86 1007.53 L 1660.6 1006.29 C 1664.6 1003.88 1668.78 1001.72 1672.71 998.2 C 1673.58 999.93 1675.26 1000.11 1675.95 1001.04 C 1674.08 1005.92 1669.34 1008.14 1665.66 1011.73 C 1670.03 1012.9 1674.96 1011.54 1676.33 1016.23 C 1679.7 1015.86 1683.2 1017.03 1685.57 1014.25 C 1685.56 1009.68 1684.25 1004.49 1691.12 1003.07 C 1691.99 1002.88 1692.8 1001.59 1693.11 1000.1 C 1694.48 994.05 1699.1 991.39 1705.53 990.65 C 1702.9 988.86 1702.47 985.96 1699.78 985.22 C 1698.53 985.22 1697.97 986.33 1697.41 987.13 C 1693.67 992.14 1689.05 994.61 1683.06 991.34 C 1680.25 989.79 1678.94 992.7 1676.26 992.76 C 1673.64 987.2 1668.33 989.3 1664.22 989.31 C 1656.73 990.54 1658.23 998.45 1654.24 1002.03 C 1647.74 995.67 1656.73 991.04 1655.48 985.11 C 1653.42 983.87 1651.48 982.21 1650.05 980.23 C 1648.67 978.38 1647.36 976.9 1645.12 976.47 C 1638.07 983.57 1637.57 987.71 1643.13 993.21 C 1641.63 995.92 1639.63 997.96 1636.26 998.15 L 1635.02 999.39 C 1633.52 1002.6 1630.4 1003.77 1627.53 1004.89 C 1623.29 1006.49 1621.79 1009.46 1621.92 1013.6 Z M 1460.43 1023.92 C 1456.74 1017.43 1456.43 1011.01 1460.23 1004.52 L 1460.86 1002.73 C 1462.85 1005.26 1466.29 1005.88 1468.28 1007.54 C 1468.85 1012.48 1464.17 1013.29 1462.73 1016.32 C 1463.17 1018.97 1464.79 1022 1460.43 1023.92 Z M 1473.96 1011.31 C 1475.46 1013.1 1474.65 1015.45 1475.59 1017.61 C 1477.27 1021.44 1474.34 1024.28 1469.6 1024.28 C 1469.16 1021.38 1470.53 1018.29 1468.16 1015.51 C 1469.47 1013.53 1471.28 1011.99 1473.34 1010.69 Z",
+	"M 1522.05 1097.77 C 1519.3 1096.91 1518.11 1094.87 1516.93 1092.27 C 1512.99 1083.57 1511.31 1082.76 1501.45 1083.57 C 1500.01 1083.69 1498.7 1083.51 1497.27 1081.78 C 1496.52 1078.94 1497.7 1075.23 1496.83 1071.9 C 1492.89 1068.87 1490.15 1072.09 1486.65 1073.2 C 1483.6 1069.99 1479.91 1067.02 1476.98 1062.95 C 1473.48 1064.62 1471.49 1067.83 1469.12 1070.61 C 1461.13 1066.48 1461.07 1066.23 1450.96 1068.27 C 1448.28 1068.83 1446.09 1068.83 1443.41 1068.27 C 1433.49 1065.87 1426.69 1072.05 1418.76 1077.49 C 1423.76 1083.97 1429.19 1089.16 1436.55 1092.92 C 1441.42 1093.42 1447.72 1088.41 1452.22 1095.45 C 1455.71 1095.08 1458.52 1092.48 1462.76 1092.23 C 1464.39 1092.73 1465.95 1094.33 1467.76 1095.32 C 1468.88 1103.6 1473.13 1107.43 1482.92 1108.97 C 1485.86 1117.67 1491.35 1123.17 1501.46 1121.81 C 1503.77 1121.5 1504.77 1123.29 1506.39 1123.97 C 1508.45 1124.83 1510.14 1126.68 1512.82 1126.13 C 1514.38 1124.58 1512.32 1122.23 1513.88 1120.63 C 1520.06 1119.58 1525.86 1119.26 1528.6 1111.48 C 1530.78 1105.3 1527.98 1102.46 1524.54 1099 L 1522.05 1097.77 Z",
+	"M 1788.48 1051.34 C 1788.79 1052.51 1786.92 1052.64 1787.23 1053.81 L 1785.36 1053.81 L 1784.74 1055.05 C 1777.12 1056.28 1772.88 1062.59 1767.39 1066.91 C 1765.09 1068.7 1761.59 1070.25 1761.66 1074.2 L 1760.41 1076.67 C 1758.23 1080.32 1753.42 1080.57 1750.99 1084.03 C 1749.18 1086.56 1746.56 1088.35 1746.56 1092.12 C 1746.56 1094.53 1743.94 1095.89 1742.32 1097.68 C 1739.33 1101.02 1734.52 1103.25 1735.4 1109.05 C 1727.6 1111.28 1720.3 1110.79 1712.81 1109.62 C 1711.31 1111.97 1708.51 1113.7 1706.88 1116.23 C 1702.52 1122.9 1695.84 1122.84 1689.35 1122.17 C 1685.23 1121.74 1681.11 1120.07 1676.81 1120.63 C 1677.43 1111.36 1685.54 1108.7 1690.09 1103.7 C 1689.53 1101.16 1688.35 1099.93 1686.22 1099.5 L 1684.98 1100.73 C 1683.85 1101.85 1682.48 1101.17 1680.05 1101.66 C 1683.48 1095.92 1683.22 1090.54 1680.48 1085.11 C 1686.9 1081.21 1683.84 1072.75 1688.71 1067.99 C 1691.39 1067.99 1694.14 1067.99 1697.13 1067.99 C 1700.12 1061.44 1706.36 1058.35 1710.54 1053.22 L 1714.29 1051.98 C 1716.47 1051.92 1718.65 1052.41 1720.52 1050.75 C 1725.2 1046.54 1731.01 1046.79 1737.06 1047.1 C 1742.3 1040.92 1750.85 1040.3 1757.27 1035.85 C 1759.06 1034.58 1760.92 1034.27 1762.63 1034.57 C 1763.97 1034.84 1765.04 1035.35 1765.95 1036.03 C 1772.81 1041.09 1781.61 1043.25 1787.29 1050.1 L 1788.48 1051.28 Z M 1651.86 1143.43 C 1653.79 1143.74 1653.04 1141.39 1654.85 1140.71 C 1661.96 1137.99 1669.33 1134.84 1670.45 1125.39 C 1670.45 1125.39 1670.32 1124.15 1669.13 1123.59 C 1664.46 1126.25 1662.96 1132.18 1658.41 1134.78 C 1654.54 1134.84 1650.92 1134.35 1647.49 1136.02 C 1645.55 1138.18 1648.55 1141.52 1645.62 1143.43 L 1651.86 1143.43 Z M 1669.94 1118.1 C 1675 1116.92 1671.25 1110.44 1675.93 1109.08 C 1674 1107.22 1671.94 1107.16 1669.94 1106.92 C 1668.69 1109.57 1669.88 1112.72 1667.51 1115.13 C 1666.51 1116.18 1668.57 1117.17 1669.26 1118.1 Z",
+	"M 1763.49 984.02 C 1760.75 985.69 1758.5 988.03 1754.63 985.44 C 1752.95 984.27 1749.77 985.26 1746.89 985.26 C 1744.9 989.95 1743.34 995.08 1740.1 999.28 C 1747.78 1004.22 1756.2 995.94 1763.69 1001.19 C 1766.81 999.27 1770.68 999.4 1774.17 999.08 C 1779.47 998.53 1781.28 995.44 1781.47 991.42 C 1781.65 987.04 1778.47 985.12 1774.16 984.57 C 1770.86 984.14 1767.49 984.08 1764.18 984.02 Z M 1739.17 1006.26 C 1737.85 1004.91 1735.92 1003.98 1735.29 1001.51 C 1740.35 997.12 1739.22 991.13 1738.97 985.01 C 1732.85 986.13 1733.29 992 1730.42 995.15 C 1728.43 995.46 1729.36 992.25 1726.18 992.93 C 1722.31 994.97 1721.5 999.91 1719.82 1004.36 C 1721.94 1006.15 1723.56 1003.98 1725.19 1003.67 C 1726.87 1004.66 1727.06 1006.08 1726.37 1008 C 1729.62 1008.12 1731.93 1008.18 1734.17 1008.74 L 1739.17 1006.26 Z",
+	"M 1762.83 1034.05 C 1763.39 1031.4 1761.64 1028.25 1764.13 1026.08 C 1767.19 1023.43 1766.5 1020.03 1766.56 1016.75 C 1771.12 1012.98 1776.73 1013.17 1782.16 1012.36 C 1789.46 1011.25 1797.01 1011.68 1804 1008.71 L 1807.74 1006.24 C 1813.36 1006.24 1818.98 1006.23 1824.59 1006.23 C 1827.84 1006.23 1831.33 1006.91 1833.89 1004.37 C 1836.76 1001.59 1839.63 1002.58 1842.69 1003.81 L 1845.18 1005.05 C 1848.49 1007.33 1851.24 1005.79 1853.92 1003.81 C 1856.29 1002.02 1858.29 999.98 1861.28 998.68 C 1870.39 994.66 1879.19 995.65 1888.18 998.18 C 1889.17 1000.21 1891.17 1001.51 1891.49 1004.17 C 1889.05 1007.32 1886 1010.16 1883.13 1013 C 1875.77 1020.48 1866.91 1025.61 1855.8 1024.81 C 1851.99 1024.57 1848.81 1025.99 1847.81 1029.2 C 1845.63 1036.55 1840.14 1037.23 1833.96 1037.17 C 1830.1 1037.18 1826.54 1037.12 1823.23 1040.14 C 1819.18 1043.97 1813.75 1045.64 1808.38 1047.07 C 1804.58 1048.06 1800.77 1049.17 1797.78 1051.95 L 1788.48 1051.34 L 1787.29 1050.1 C 1781.61 1043.25 1772.81 1041.09 1765.95 1036.03 C 1765.04 1035.35 1763.97 1034.84 1762.83 1034.6 Z",
+	"M 1862.7 961.74 C 1859.77 965.02 1858.27 970.88 1855.28 976.38 C 1850.16 971.75 1843.98 970.15 1837.18 969.6 C 1828.07 968.86 1824.39 976.21 1818.34 980.54 C 1819.9 970.53 1823.45 961.69 1830.25 954.16 C 1836.24 955.7 1842.23 957.12 1848.53 955.32 C 1849.97 953.72 1850.47 951.18 1852.15 949.27 C 1855.71 949.88 1859.2 948.89 1862.76 947.9 C 1865.38 949.57 1867.13 951.92 1868.94 954.33 C 1871.68 953.95 1873.68 954.57 1875.31 957.29 C 1876.43 959.14 1876.74 961.67 1878.93 962.91 C 1878.93 962.91 1872.19 965.38 1870.69 963.53 C 1867.94 960.19 1864.2 960.07 1862.7 961.68 Z",
+]

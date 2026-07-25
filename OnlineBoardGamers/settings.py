@@ -82,6 +82,20 @@ EMAIL_TIMEOUT = 20  # This protects your CPU budget
 EMAIL_HOST_USER_TURN = []
 EMAIL_HOST_PASSWORD_TURN = []
 
+# Email notifications for 500 errors
+ADMINS = [
+    ('Admin', config('OBG_EMAIL_HOST_USER')),
+]
+MANAGERS = ADMINS
+
+# FIX: Safely splits "user@gmail.com" to produce "root@gmail.com"
+email_user = config('OBG_EMAIL_HOST_USER')
+if '@' in email_user:
+    email_domain = email_user.split('@')[-1]
+    SERVER_EMAIL = f"root@{email_domain}"
+else:
+    SERVER_EMAIL = f"root@{email_user}.com"
+
 # Application definition
 
 AUTH_USER_MODEL = "Lobby.User"
@@ -125,7 +139,10 @@ MIDDLEWARE = [
     "Lobby.middleware.NewDesignMiddleware",
     "Lobby.middleware.ForceTrailingSlashMiddleware",
     # This MUST come first
+    # 1. Always let security handle SSL/headers first
     "django.middleware.security.SecurityMiddleware",
+
+    "Lobby.middleware.ForceTrailingSlashMiddleware",
     # This must come before Authentication and CsrfView
     "django.contrib.sessions.middleware.SessionMiddleware",
     # This must come after Session and Authentication
