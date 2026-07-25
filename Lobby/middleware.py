@@ -2,7 +2,6 @@ import re
 
 from django.http import HttpResponsePermanentRedirect
 
-
 # Local-path href/action/src that should be left alone (not prefixed with /nd).
 _ND_SKIP_PREFIXES = (
     "/nd/",
@@ -33,10 +32,7 @@ def _should_prefix(path_bytes):
     # Skip protocol-relative //example.com
     if path_bytes.startswith(b"//"):
         return False
-    for skip in _ND_SKIP_PREFIXES:
-        if path_bytes.startswith(skip.encode("ascii")):
-            return False
-    return True
+    return all(not path_bytes.startswith(skip.encode("ascii")) for skip in _ND_SKIP_PREFIXES)
 
 
 def _prefix_nd(match):
