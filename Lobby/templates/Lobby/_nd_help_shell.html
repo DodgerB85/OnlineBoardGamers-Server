@@ -6,10 +6,10 @@
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   {% endif %}
   <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   <div class="{% if request.use_new_design %}nd-page nd-page-narrow{% else %}container{% endif %}"
-       {% if request.use_new_design %}{% block page_id_attr %}{% endblock %}{% else %}{% block page_id_attr_legacy %}{% endblock %}{% endif %}>
+       {% if request.use_new_design %}{% block page_id_attr %}{% endblock page_id_attr %}{% else %}{% block page_id_attr_legacy %}{% endblock page_id_attr_legacy %}{% endif %}>
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -20,13 +20,17 @@
     {% if request.use_new_design %}
       <div class="nd-page-header">
         <h1>
-          {% block page_title %}{% endblock %}
+          {% block page_title %}
+          {% endblock page_title %}
         </h1>
-        {% block page_action %}{% endblock %}
+        {% block page_action %}
+        {% endblock page_action %}
       </div>
-      {% block nd_body %}{% endblock %}
+      {% block nd_body %}
+      {% endblock nd_body %}
     {% else %}
-      {% block legacy_body %}{% endblock %}
+      {% block legacy_body %}
+      {% endblock legacy_body %}
     {% endif %}
   </div>
-{% endblock %}
+{% endblock body %}

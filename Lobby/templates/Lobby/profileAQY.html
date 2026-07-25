@@ -3,7 +3,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     <script src="{% url 'javascript-catalog' %}"></script>
     <div class="container formsPage">
@@ -368,12 +368,12 @@
                 <button type="submit" class="updateProfilebtn">{% translate "Update Antiquity Preferences" %}</button>
             </form>
         </div>
-        {% include 'Lobby/common/homeButton.html' %}
+        {% include "Lobby/common/homeButton.html" %}
     </div>
     {% block script %}
         <script>
     var global = {};
     global.halt = true;
         </script>
-    {% endblock %}
-{% endblock %}
+    {% endblock script %}
+{% endblock body %}

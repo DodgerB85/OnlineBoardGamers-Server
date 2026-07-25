@@ -4,7 +4,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     <div class="container">
         {% if messages %}
@@ -1387,4 +1387,4 @@
         <!-- END FIXED ROUND 1-->
         {% include 'Lobby/common/homeButton.html' %}
     </div>
-{% endblock %}
+{% endblock body %}

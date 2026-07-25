@@ -2,7 +2,7 @@
 {% load static i18n compress %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
-{% endblock %}
+{% endblock head %}
 {% block body %}
     <div class="container" id="HLCgameSummaryPage">
         {% if messages %}
@@ -13,7 +13,7 @@
             </div>
         {% endif %}
         <h1>{% translate "Horseless Carriage Game Summary" %}</h1>
-        <a class="linkOther" href="/HLC/{{ gameID }}/">Back to Game</a>
+        <a class="linkOther" href="{% url 'HLC:showHLCgame' game_id=gameID %}">Back to Game</a>
         <br />
         <br />
         <!--<b>NOTE: GAMES CREATED BEFORE 11 MARCH MIGHT HAVE MISSING OR INCOMPLETE INFORMATION</b><br /><br />-->
@@ -21,8 +21,8 @@
             <canvas id="gameMoneySummary" class="HLCsummaryGraph"></canvas>
             <canvas id="gameIncomeSummary" class="HLCsummaryGraph"></canvas>
         </div>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/common/homeButton.html' %}
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/common/homeButton.html" %}
     </div>
     <script>
 	var global = {};
@@ -58,4 +58,4 @@
     {% else %}
         <script src="{% static 'HLC/HLCdist/HLCmain.js' %}"></script>
     {% endif %}
-{% endblock %}
+{% endblock body %}

@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block page_title %}
   {% translate "Keyflower Help" %}
-{% endblock %}
+{% endblock page_title %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "Rules" %}</h2>
@@ -456,7 +456,7 @@
          height="30" />
   </p>
 </div>
-{% endblock %}
+{% endblock nd_body %}
 {% block legacy_body %}
   <div id="KFWhelpPage">
     <h1>{% translate "Rules" %}</h1>
@@ -850,6 +850,6 @@
 <br />
 <br />
 </div>
-{% include 'Lobby/donate/donateBanner.html' %}
-{% include 'Lobby/common/homeButton.html' %}
-{% endblock %}
+{% include "Lobby/donate/donateBanner.html" %}
+{% include "Lobby/common/homeButton.html" %}
+{% endblock legacy_body %}

@@ -9,7 +9,7 @@
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   {% endif %}
   <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   <div class="{% if request.use_new_design %}nd-page{% else %}container{% endif %}">
     {% if messages %}
@@ -22,10 +22,12 @@
     {% if request.use_new_design %}
       <div class="nd-page-header">
         <h1>{% translate "Antiquity Stats" %}</h1>
-        <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'stats' %}">&#8592; {% translate "Back to Main Stats" %}</a>
+        <a class="nd-button nd-button-ghost nd-button-sm"
+           href="{% url 'stats' %}">← {% translate "Back to Main Stats" %}</a>
       </div>
     {% endif %}
-    <div id="AQYstatsPage" class="{% if request.use_new_design %}nd-card nd-section nd-aqy-stats{% endif %}">
+    <div id="AQYstatsPage"
+         class="{% if request.use_new_design %}nd-card nd-section nd-aqy-stats{% endif %}">
       {% if request.use_new_design %}
         <div class="nd-aqy-stats-summary">
           <div class="nd-stats-tile">
@@ -268,8 +270,8 @@
       {% endfor %}
     </div>
   </div>
-  {% include 'Lobby/common/homeButton.html' %}
-  <form id="gameIdsForm" method="post" action="/AQY/AQYstatGames/">
+  {% include "Lobby/common/homeButton.html" %}
+  <form id="gameIdsForm" method="post" action="{% url 'AQY:AQYstatGames' %}">
     {% csrf_token %}
     <input type="hidden" id="gameIdsInput" name="game_ids">
   </form>
@@ -292,4 +294,4 @@
     //  console.log(this);
     //}
   </script>
-{% endblock %}
+{% endblock body %}

@@ -3,39 +3,43 @@
 {% load i18n %}
 {% block page_title %}
   {% translate "Cannes Help" %}
-{% endblock %}
+{% endblock page_title %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "Rules" %}</h2>
     <div class="nd-help-qa">
       <p>
+        {% static 'CNS/Cannes_Rules.pdf' as cannes_rules_url %}
         {% blocktranslate trimmed %}
           Cannes Rules Available <a class="linkOther"
-    href="/static/CNS/Cannes_Rules.pdf"
+    href="{{ cannes_rules_url }}"
     target="_blank"
     download>here</a>
         {% endblocktranslate %}
       </p>
       <p>
+        {% static 'CNS/Cannes_Expansion_Rules.pdf' as cannes_expansion_rules_url %}
         {% blocktranslate trimmed %}
           Cannes Expansion Rules Available <a class="linkOther"
-    href='/static/CNS/Cannes_Expansion_Rules.pdf'
+    href="{{ cannes_expansion_rules_url }}"
     target="_blank"
     download>here</a>
         {% endblocktranslate %}
       </p>
       <p>
+        {% static 'CNS/Cannes_Resources.pdf' as cannes_resources_url %}
         {% blocktranslate trimmed %}
           Cannes Resource Conversion Chart Available <a class="linkOther"
-    href='/static/CNS/Cannes_Resources.pdf'
+    href="{{ cannes_resources_url }}"
     target="_blank"
     download>here</a>
         {% endblocktranslate %}
       </p>
       <p>
+        {% static 'CNS/Cannes_Examples.pdf' as cannes_examples_url %}
         {% blocktranslate trimmed %}
           Cannes Example Plays Availalble <a class="linkOther"
-    href='/static/CNS/Cannes_Examples.pdf'
+    href="{{ cannes_examples_url }}"
     target="_blank"
     download>here</a>
         {% endblocktranslate %}
@@ -48,7 +52,7 @@
     <div class="nd-help-qa">
       <p>
         <img class="CNShelpImg"
-             src="/static/CNS/help_image.jpg"
+             src="{% static 'CNS/help_image.jpg' %}"
              alt="Help"
              width="492"
              height="304" />
@@ -207,34 +211,38 @@
            height="30" />
     </p>
   </div>
-{% endblock %}
+{% endblock nd_body %}
 {% block legacy_body %}
   <div id="CNShelpPage">
     <h1>{% translate "Rules" %}</h1>
+    {% static 'CNS/Cannes_Rules.pdf' as cannes_rules_url %}
     {% blocktranslate trimmed %}
       Cannes Rules Available <a class="linkOther"
-    href="/static/CNS/Cannes_Rules.pdf"
+    href="{{ cannes_rules_url }}"
     target="_blank"
     downlod>here</a>
     {% endblocktranslate %}
     <br />
+    {% static 'CNS/Cannes_Expansion_Rules.pdf' as cannes_expansion_rules_url %}
     {% blocktranslate trimmed %}
       Cannes Expansion Rules Available <a class="linkOther"
-    href='/static/CNS/Cannes_Expansion_Rules.pdf'
+    href="{{ cannes_expansion_rules_url }}"
     target="_blank"
     downlod>here</a>
     {% endblocktranslate %}
     <br />
+    {% static 'CNS/Cannes_Resources.pdf' as cannes_resources_url %}
     {% blocktranslate trimmed %}
       Cannes Resource Conversion Chart Available <a class="linkOther"
-    href='/static/CNS/Cannes_Resources.pdf'
+    href="{{ cannes_resources_url }}"
     target="_blank"
     downlod>here</a>
     {% endblocktranslate %}
     <br />
+    {% static 'CNS/Cannes_Examples.pdf' as cannes_examples_url %}
     {% blocktranslate trimmed %}
       Cannes Example Plays Availalble <a class="linkOther"
-    href='/static/CNS/Cannes_Examples.pdf'
+    href="{{ cannes_examples_url }}"
     target="_blank"
     downlod>here</a>
     {% endblocktranslate %}
@@ -248,7 +256,7 @@
       <div class="CNSsideBYsideContainer">
         <div class="CNSsideBYsideLeft">
           <img class="CNShelpImg"
-               src="/static/CNS/help_image.jpg"
+               src="{% static 'CNS/help_image.jpg' %}"
                alt="Help"
                width="492"
                height="304" />
@@ -363,6 +371,6 @@
       <br />
     </div>
   </div>
-  {% include 'Lobby/donate/donateBanner.html' %}
-  {% include 'Lobby/common/homeButton.html' %}
-{% endblock %}
+  {% include "Lobby/donate/donateBanner.html" %}
+  {% include "Lobby/common/homeButton.html" %}
+{% endblock legacy_body %}

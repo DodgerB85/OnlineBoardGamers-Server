@@ -2,7 +2,7 @@
 {% load static i18n compress %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     {% compress js %}
         <script src="{% static 'Lobby/playerInfo.js' %}"></script>
@@ -21,6 +21,6 @@
         <br />
         <br />
         {{ godsVRhtml|safe }}
-        {% include 'Lobby/common/homeButton.html' %}
+        {% include "Lobby/common/homeButton.html" %}
     </div>
-{% endblock %}
+{% endblock body %}

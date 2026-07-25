@@ -4,56 +4,60 @@
   {% if not request.use_new_design %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   {% endif %}
-{% endblock %}
+{% endblock head %}
 {% block body %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container formsPage">{% endif %}
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    {% if request.use_new_design %}
-      <div class="nd-page-header">
-        <h1>{% translate "Register" %}</h1>
-      </div>
-
-      <div class="nd-card nd-section">
-        <div id="btWarning" class="nd-callout nd-callout-warn" style="display:none">
-          CAUTION: BtInternet is rejecting my emails as spam. Please add
-          <img id="contactEmailImg"
-               src="{% static 'Lobby/email.png' %}"
-               alt="Email Address"
-               width="400"
-               height="30">
-          to your safe senders / whitelist / allowed emails
+  {% if request.use_new_design %}
+    <div class="nd-page nd-page-narrow">
+    {% else %}
+      <div class="container formsPage">
+      {% endif %}
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+          {% endfor %}
         </div>
-        <div id="registerEmailInfoDiv" class="nd-callout nd-callout-info">
-          A genuine email address is required to activate your account
-          <br />
-          Please check your spam folder, and add
-          <img id="contactEmailImg"
-               src="{% static 'Lobby/email.png' %}"
-               alt="Email Address"
-               width="400"
-               height="30">
-          to your safe senders / whitelist / allowed emails
+      {% endif %}
+      {% if request.use_new_design %}
+        <div class="nd-page-header">
+          <h1>{% translate "Register" %}</h1>
         </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <form method="post" class="nd-register-form">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <div class="nd-form-actions">
-            <button type="submit" class="nd-button nd-button-primary">{% translate "Register" %}</button>
+        <div class="nd-card nd-section">
+          <div id="btWarning"
+               class="nd-callout nd-callout-warn"
+               style="display:none">
+            CAUTION: BtInternet is rejecting my emails as spam. Please add
+            <img id="contactEmailImg"
+                 src="{% static 'Lobby/email.png' %}"
+                 alt="Email Address"
+                 width="400"
+                 height="30">
+            to your safe senders / whitelist / allowed emails
           </div>
-        </form>
-        <p class="nd-form-footer-link">
-          {% translate "Already have an account?" %} <a href="{% url 'myLogin' %}">{% translate "Log In here" %}</a>.
-        </p>
+          <div id="registerEmailInfoDiv" class="nd-callout nd-callout-info">
+            A genuine email address is required to activate your account
+            <br />
+            Please check your spam folder, and add
+            <img id="contactEmailImg"
+                 src="{% static 'Lobby/email.png' %}"
+                 alt="Email Address"
+                 width="400"
+                 height="30">
+            to your safe senders / whitelist / allowed emails
+          </div>
+        </div>
+        <div class="nd-card nd-section">
+          <form method="post" class="nd-register-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="nd-form-actions">
+              <button type="submit" class="nd-button nd-button-primary">{% translate "Register" %}</button>
+            </div>
+          </form>
+          <p class="nd-form-footer-link">
+            {% translate "Already have an account?" %} <a href="{% url 'myLogin' %}">{% translate "Log In here" %}</a>.
+          </p>
+        </div>
       </div>
     {% else %}
       <div id="btWarning">
@@ -83,7 +87,7 @@
         <br />
         <br />
       </form>
-      {% include 'Lobby/common/homeButton.html' %}
+      {% include "Lobby/common/homeButton.html" %}
     {% endif %}
   </div>
   {% if not request.use_new_design %}
@@ -95,5 +99,5 @@
   {% endif %}
   {% block script %}
     <script src="{% static 'Lobby/register.js' %}"></script>
-  {% endblock %}
-{% endblock %}
+  {% endblock script %}
+{% endblock body %}

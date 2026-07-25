@@ -1,21 +1,26 @@
 {% extends "Lobby/_nd_help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% static 'TGZ/The_Great_Zimbabwe_rules.pdf' as rules_pdf %}
+{% static 'TGZ/TGZ_Schism_Rules.pdf' as schism_pdf %}
+{% static 'TGZ/images/noIvory.jpg' as no_ivory %}
+{% static 'TGZ/images/noCows.jpg' as no_cows %}
+{% static 'TGZ/images/noCmen.jpg' as no_cmen %}
 {% block page_title %}
   {% translate "The Great Zimbabwe Help" %}
-{% endblock %}
+{% endblock page_title %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "Rules" %}</h2>
     <div class="nd-help-qa">
       <p>
         {% blocktranslate trimmed %}
-          The Great Zimbabwe rules available <a href="/static/TGZ/The_Great_Zimbabwe_rules.pdf" target="_blank">here</a>
+          The Great Zimbabwe rules available <a href="{{ rules_pdf }}" target="_blank">here</a>
         {% endblocktranslate %}
       </p>
       <p>
         {% blocktranslate trimmed %}
-          Fan made Schism Expansion rules available <a href="/static/TGZ/TGZ_Schism_Rules.pdf" target="_blank">here</a>
+          Fan made Schism Expansion rules available <a href="{{ schism_pdf }}" target="_blank">here</a>
         {% endblocktranslate %}
       </p>
       <p>
@@ -36,18 +41,18 @@
               <div class="intro_OutOfRange"></div> Item not in range<br />
               <div class="intro_resNotUsed"></div> Resource not in range of another Craftsman of same type<br />
               <div class="intro_resUsed"></div> Resource already in range of another Craftsman of same type<br />
-              <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" /></div>
+              <div class="intro_imgDiv"><img class="intro_img" src="{{ no_ivory }}" alt="NR" /></div>
               Depleted Resource / No resource available for craftsman<br />
-              <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" />
+              <div class="intro_imgDiv"><img class="intro_img" src="{{ no_ivory }}" alt="NR" />
                 <div class="crossBackground_Atete"></div>
               </div>
               Depleted Resource / No resource available for craftsman (for Atete)<br />
-              <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noCows.jpg" alt="NR" /></div>
+              <div class="intro_imgDiv"><img class="intro_img" src="{{ no_cows }}" alt="NR" /></div>
               Not enough cattle to pay craftsman (including any hub costs)<br />
 
               <div class="intro_monumentDiv">3
                 <div class="intro_notEnoguhCraftsmenForMon">
-                  <img src="/static/TGZ/images/noCmen.jpg" alt="NC" />
+                  <img src="{{ no_cmen }}" alt="NC" />
                 </div>
               </div>
               Not enough available Craftsmen/Resources to Raise Monument<br />
@@ -59,7 +64,7 @@
     <div class="nd-help-qa">
       <p>
         <img class="TGZhelpImg"
-             src="/static/TGZ/images/help/help_range.jpg"
+             src="{% static 'TGZ/images/help/help_range.jpg' %}"
              alt="Line Help"
              width="597"
              height="297" />
@@ -91,7 +96,7 @@
     <div class="nd-help-qa">
       <p>
         <img class="TGZhelpImg"
-             src="/static/TGZ/images/help/help_replay.jpg"
+             src="{% static 'TGZ/images/help/help_replay.jpg' %}"
              alt="Replay button"
              width="146"
              height="42" />
@@ -109,7 +114,7 @@
       </p>
       <p>
         <img class="TGZhelpImg"
-             src="/static/TGZ/images/help/help_spinoff.jpg"
+             src="{% static 'TGZ/images/help/help_spinoff.jpg' %}"
              alt="Copy Button"
              width="471"
              height="186" />
@@ -143,7 +148,7 @@
     <div class="nd-help-qa">
       <p>
         <img class="TGZhelpImg"
-             src="/static/TGZ/images/help/help_MI.jpg"
+             src="{% static 'TGZ/images/help/help_MI.jpg' %}"
              alt="Map Inspector Button"
              width="195"
              height="150" />
@@ -167,7 +172,7 @@
     <div class="nd-help-qa">
       <p>
         <img class="TGZhelpImg"
-             src="/static/TGZ/images/help/help_reserve.jpg"
+             src="{% static 'TGZ/images/help/help_reserve.jpg' %}"
              alt="Reserve Button"
              width="144"
              height="57" />
@@ -184,7 +189,7 @@
     <div class="nd-help-qa">
       <p>
         <img class="TGZhelpImg"
-             src="/static/TGZ/images/help/help_bid.jpg"
+             src="{% static 'TGZ/images/help/help_bid.jpg' %}"
              alt="Bidding Info"
              width="535"
              height="252" />
@@ -241,7 +246,7 @@
     <div class="nd-help-qa">
       <p>
         <img class="TGZhelpImg"
-             src="/static/TGZ/images/help/help_scoring.jpg"
+             src="{% static 'TGZ/images/help/help_scoring.jpg' %}"
              alt="Scoring"
              width="403"
              height="205" />
@@ -370,16 +375,16 @@
            height="30" />
     </p>
   </div>
-{% endblock %}
+{% endblock nd_body %}
 {% block legacy_body %}
   <div id="TGZhelpPage">
     <h1>{% translate "Rules" %}</h1>
     {% blocktranslate trimmed %}
-      The Great Zimbabwe rules available <a href="/static/TGZ/The_Great_Zimbabwe_rules.pdf" target="_blank">here</a>
+      The Great Zimbabwe rules available <a href="{{ rules_pdf }}" target="_blank">here</a>
     {% endblocktranslate %}
     <br />
     {% blocktranslate trimmed %}
-      Fan made Schism Expansion rules available <a href="/static/TGZ/TGZ_Schism_Rules.pdf" target="_blank">here</a>
+      Fan made Schism Expansion rules available <a href="{{ schism_pdf }}" target="_blank">here</a>
     {% endblocktranslate %}
     <br />
     {% blocktranslate trimmed %}
@@ -398,18 +403,18 @@
           <div class="intro_OutOfRange"></div> Item not in range<br />
           <div class="intro_resNotUsed"></div> Resource not in range of another Craftsman of same type<br />
           <div class="intro_resUsed"></div> Resource already in range of another Craftsman of same type<br />
-          <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" /></div>
+          <div class="intro_imgDiv"><img class="intro_img" src="{{ no_ivory }}" alt="NR" /></div>
           Depleted Resource / No resource available for craftsman<br />
-          <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noIvory.jpg" alt="NR" />
+          <div class="intro_imgDiv"><img class="intro_img" src="{{ no_ivory }}" alt="NR" />
             <div class="crossBackground_Atete"></div>
           </div>
           Depleted Resource / No resource available for craftsman (for Atete)<br />
-          <div class="intro_imgDiv"><img class="intro_img" src="/static/TGZ/images/noCows.jpg" alt="NR" /></div>
+          <div class="intro_imgDiv"><img class="intro_img" src="{{ no_cows }}" alt="NR" /></div>
           Not enough cattle to pay craftsman (including any hub costs)<br />
 
           <div class="intro_monumentDiv">3
             <div class="intro_notEnoguhCraftsmenForMon">
-              <img src="/static/TGZ/images/noCmen.jpg" alt="NC" />
+              <img src="{{ no_cmen }}" alt="NC" />
             </div>
           </div>
           Not enough available Craftsmen/Resources to Raise Monument<br />
@@ -419,7 +424,7 @@
     <b><u>{% translate "What are the lines on the map as I move a new item?" %}</u></b>
     <br />
     <img class="TGZhelpImg"
-         src="/static/TGZ/images/help/help_range.jpg"
+         src="{% static 'TGZ/images/help/help_range.jpg' %}"
          alt="Line Help"
          width="597"
          height="297" />
@@ -445,7 +450,7 @@
     <b><u>{% translate "How Can I Replay the Game / Copy to a New Game?" %}</u></b>
     <br />
     <img class="TGZhelpImg"
-         src="/static/TGZ/images/help/help_replay.jpg"
+         src="{% static 'TGZ/images/help/help_replay.jpg' %}"
          alt="Replay button"
          width="146"
          height="42" />
@@ -462,7 +467,7 @@
     {% endblocktranslate %}
     <br />
     <img class="TGZhelpImg"
-         src="/static/TGZ/images/help/help_spinoff.jpg"
+         src="{% static 'TGZ/images/help/help_spinoff.jpg' %}"
          alt="Copy Button"
          width="471"
          height="186" />
@@ -498,7 +503,7 @@
     <b><u>{% translate "What is the Map Inspector?" %}</u></b>
     <br />
     <img class="TGZhelpImg"
-         src="/static/TGZ/images/help/help_MI.jpg"
+         src="{% static 'TGZ/images/help/help_MI.jpg' %}"
          alt="Map Inspector Button"
          width="195"
          height="150" />
@@ -515,7 +520,7 @@
     <b><u>{% translate "Where can I view available / taken items?" %}</u></b>
     <br />
     <img class="TGZhelpImg"
-         src="/static/TGZ/images/help/help_reserve.jpg"
+         src="{% static 'TGZ/images/help/help_reserve.jpg' %}"
          alt="Reserve Button"
          width="144"
          height="57" />
@@ -528,7 +533,7 @@
     <b><u>{% translate "What is the information when bidding?" %}</u></b>
     <br />
     <img class="TGZhelpImg"
-         src="/static/TGZ/images/help/help_bid.jpg"
+         src="{% static 'TGZ/images/help/help_bid.jpg' %}"
          alt="Bidding Info"
          width="535"
          height="252" />
@@ -581,7 +586,7 @@
     <b><u>{% translate "How can I score points?" %}</u></b>
     <br />
     <img class="TGZhelpImg"
-         src="/static/TGZ/images/help/help_scoring.jpg"
+         src="{% static 'TGZ/images/help/help_scoring.jpg' %}"
          alt="Scoring"
          width="403"
          height="205" />
@@ -673,6 +678,6 @@
   <br />
   <br />
 </div>
-{% include 'Lobby/donate/donateBanner.html' %}
-{% include 'Lobby/common/homeButton.html' %}
-{% endblock %}
+{% include "Lobby/donate/donateBanner.html" %}
+{% include "Lobby/common/homeButton.html" %}
+{% endblock legacy_body %}

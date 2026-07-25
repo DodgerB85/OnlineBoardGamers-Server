@@ -74,19 +74,19 @@
 
 body.nd .nd-mt-layout {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(280px, min(32vw, 500px));
+	grid-template-columns: minmax(280px, min(32vw, 500px)) minmax(0, 1fr);
 	gap: 20px;
 	align-items: start;
 }
 
 body.nd .nd-mt-layout .right-column {
-	grid-column: 1;
+	grid-column: 2;
 	grid-row: 1;
 	min-width: 0;
 }
 
 body.nd #wholeMTchat {
-	grid-column: 2;
+	grid-column: 1;
 	grid-row: 1;
 	background: var(--color-surface) !important;
 	border: 1px solid var(--color-border) !important;

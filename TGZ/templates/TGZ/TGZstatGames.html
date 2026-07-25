@@ -5,7 +5,7 @@
     {% compress js %}
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
-{% endblock %}
+{% endblock head %}
 {% block body %}
     <div class="container">
         {% if messages %}
@@ -31,7 +31,7 @@
                         </tr>
                     </thead>
                     {% for game in finishedGamesList %}
-                        {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                        {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
                     {% endfor %}
                 </table>
             </div>
@@ -39,17 +39,19 @@
             <div class="pagination">
                 <span class="step-links">
                     {% if z > 1 %}
-                        <a href="#" onclick="submitForm('1')">&laquo; first</a>
+                        <a href="#" onclick="submitForm('1')">« first</a>
                         <a href="#" onclick="submitForm('{{ page|add:'-1' }}')">previous</a>
                     {% endif %}
                     <span class="current">{% translate "Page" %} {{ page }} {% translate "of" %} {{ num_pages }}. {% translate "Total Games:" %} {{ total_games_count }}</span>
                     {% if page < num_pages %}
                         <a href="#" onclick="submitForm('{{ page|add:'1' }}')">next</a>
-                        <a href="#" onclick="submitForm('{{ num_pages }}')">last &raquo;</a>
+                        <a href="#" onclick="submitForm('{{ num_pages }}')">last »</a>
                     {% endif %}
                 </span>
             </div>
-            <form id="paginationForm" method="post" action="/TGZ/TGZstatGames/">
+            <form id="paginationForm"
+                  method="post"
+                  action="{% url 'TGZ:TGZstatGames' %}">
                 {% csrf_token %}
                 <input type="hidden" name="game_ids" value="{{ game_ids_json }}" />
                 <input type="hidden" id="pageInput" name="page" value="{{ page }}" />
@@ -61,6 +63,6 @@
 			}
             </script>
         </div>
-        {% include 'Lobby/common/homeButton.html' %}
+        {% include "Lobby/common/homeButton.html" %}
     </div>
-{% endblock %}
+{% endblock body %}

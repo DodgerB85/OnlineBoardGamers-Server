@@ -65,15 +65,15 @@ function addMessageToDisplay(messageArr, timestamp) {
 	let header = document.createElement("div")
 	header.className = "header"
 
-	let dateSpan = document.createElement("span")
-	dateSpan.className = "date"
-	dateSpan.textContent = giveFormattedDate(timestamp * 1000) + " " // Assuming giveFormattedDate is defined elsewhere
-	header.appendChild(dateSpan)
-
 	let usernameSpan = document.createElement("span")
 	usernameSpan.className = "bold"
 	usernameSpan.textContent = messageArr[0]
 	header.appendChild(usernameSpan)
+
+	let dateSpan = document.createElement("span")
+	dateSpan.className = "date"
+	dateSpan.textContent = giveFormattedDate(timestamp * 1000) + " " // Assuming giveFormattedDate is defined elsewhere
+	header.appendChild(dateSpan)
 
 	div.appendChild(header)
 	//messageArr[2] = messageArr[2].replace(/=-NEWLINE-=/g, "\n")

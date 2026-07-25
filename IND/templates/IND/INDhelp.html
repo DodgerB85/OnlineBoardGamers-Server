@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block page_title %}
   {% translate "Indonesia Help" %}
-{% endblock %}
+{% endblock page_title %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "Rules" %}</h2>
@@ -47,7 +47,7 @@
       </p>
       <p>
         {% translate "Don't forget to set your" %}
-        <a class="linkOther" href="/profileIND" target="_blank">{% translate "Indonesia Preferences" %}</a>!
+        <a class="linkOther" href="{% url 'profileIND' %}" target="_blank">{% translate "Indonesia Preferences" %}</a>!
       </p>
       <p>
         <img src="{% static 'IND/images/icon-rewind.svg' %}"
@@ -238,7 +238,7 @@
            height="30" />
     </p>
   </div>
-{% endblock %}
+{% endblock nd_body %}
 {% block legacy_body %}
   <div id="INDhelpPage">
     <h1>{% translate "Rules" %}</h1>
@@ -275,7 +275,7 @@
     <br />
     <br />
     Don't forget to set your
-    <a class="linkOther" href="/profileIND" target="_blank">Indonesia Preferences</a>!
+    <a class="linkOther" href="{% url 'profileIND' %}" target="_blank">Indonesia Preferences</a>!
     <br />
     <br />
     <img src="{% static 'IND/images/icon-rewind.svg' %}"
@@ -426,6 +426,6 @@
     <br />
     <br />
   </div>
-  {% include 'Lobby/donate/donateBanner.html' %}
-  {% include 'Lobby/common/homeButton.html' %}
-{% endblock %}
+  {% include "Lobby/donate/donateBanner.html" %}
+  {% include "Lobby/common/homeButton.html" %}
+{% endblock legacy_body %}

@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block page_title %}
   {% translate "Roads & Boats Help" %}
-{% endblock %}
+{% endblock page_title %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "Rules" %}</h2>
@@ -243,7 +243,7 @@
            height="30" />
     </p>
   </div>
-{% endblock %}
+{% endblock nd_body %}
 {% block legacy_body %}
   <div id="RNBhelpPage">
     <h1>{% translate "Rules" %}</h1>
@@ -464,4 +464,4 @@
     {% include "Lobby/donate/donateBanner.html" %}
     {% include "Lobby/common/homeButton.html" %}
   </div>
-{% endblock %}
+{% endblock legacy_body %}

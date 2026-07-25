@@ -2,121 +2,132 @@
 {% load static i18n compress %}
 {% block head %}
   {% if not request.use_new_design %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   {% endif %}
-{% endblock %}
+{% endblock head %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
-  {% if request.use_new_design %}<div class="nd-page">{% else %}<div class="container">{% endif %}
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <!--<p><span style="background-color: yellow; color: darkred; font-size: 25px;">Note: Tournaments are still in testing phase. Just be aware that whilst everything should work as intended, I can't test more than 5 players, so new issues may be discovered.
+  {% if request.use_new_design %}
+    <div class="nd-page">
+    {% else %}
+      <div class="container">
+      {% endif %}
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <!--<p><span style="background-color: yellow; color: darkred; font-size: 25px;">Note: Tournaments are still in testing phase. Just be aware that whilst everything should work as intended, I can't test more than 5 players, so new issues may be discovered.
 If anything does happen then I will keep the tournament going if at all possible, but be aware that worst case, you should still get a few fun games of FCM!</span><br />
 -->
-    {% if request.use_new_design %}
-    <div class="nd-page-header">
-      <h1>{% translate "Tournaments" %}</h1>
-      <a class="nd-button nd-button-ghost" href="{% url 'MiniTournaments' %}">Mini Tournaments →</a>
-    </div>
-    <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
-      Regular tournaments run for FCM, Horseless Carriage, Bus, Indonesia, Antiquity, and The Great Zimbabwe.
-      See <a href="{% url 'helpTournaments' %}">Tournaments Help</a> or check Discord for upcoming events.
-    </p>
-    {% else %}
-    <h1>{% translate "Tournaments" %}</h1>
-    <p class="size25text">
-      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %}
-      Horseless Carrige,
-      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %}
-      Bus,
-      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %}
-      Indonesia, and
-      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %}
-      Antiquity Tournaments run at regular intervals
-      <br />
-      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %}
-      {% translate "Food Chain Magnate Tournaments will run at regular intervals" %}
-      <br />
-      {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}
-      {% translate "The Great Zimbabwe Tournaments will run at regular intervals" %}
-      <br />
-      {% translate "For more information on tournaments, see" %} <a class="linkOther" id="helpLink2" href="{% url 'helpTournaments' %}">Tournaments Help</a> and check the Discord!
-    </p>
-    <p class="size25text">
-      <a class="linkOther" href="{% url 'MiniTournaments' %}">{% translate "Click here for Mini Tournaments" %}</a>
-    </p>
-    {% endif %}
-    {% if request.use_new_design %}
-    <div class="nd-card">
-      <div class="nd-table-scroll">
-      <table class="nd-table">
-    {% else %}
-    <div class="allTournamentsContainer">
-      <div class="allTournamentsDiv">
-        <table class="generalTable">
-    {% endif %}
-          <tr>
-            <th>{% translate "Game" %}</th>
-            <th>{% translate "Name" %}</th>
-            <th>{% translate "Total Players" %}</th>
-            <th>{% translate "Players per Game" %}</th>
-            <th>{% translate "Format" %}</th>
-            <th>{% translate "Starting Options" %}</th>
-            <th>{% translate "Created" %}</th>
-            <th>{% translate "Winner" %}</th>
-          </tr>
-          {% for tourny in tournamentsJson %}
-            <tr onclick="window.location.href='{{ tourny.tournamentLink }}';">
-              <td>
-                {% if tourny.gameCode == 'FCM' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %}
-                {% elif tourny.gameCode == 'HLC' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %}
-                {% elif tourny.gameCode == 'BUS' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %}
-                {% elif tourny.gameCode == 'TGZ' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}
-                {% elif tourny.gameCode == 'AQY' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %}
-                {% elif tourny.gameCode == 'IND' %}
-                  {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="IND" %}
-                {% endif %}
-              </td>
-              <td>{{ tourny.tournamentName }}</td>
-              <td>{{ tourny.maxTournamentPlayers }}</td>
-              <td>{{ tourny.maxGamePlayers }}</td>
-              <td>{{ tourny.tournamentType }}</td>
-              <td>{{ tourny.startingOptionsHTML|safe }}</td>
-              <td>
-                <span class="timeToConvertSpan">{{ tourny.createdTS }}</span>
-              </td>
-              <td>{{ tourny.winnerHTML|safe }}</td>
-            </tr>
-          {% endfor %}
-        </table>
-    {% if request.use_new_design %}
+      {% if request.use_new_design %}
+        <div class="nd-page-header">
+          <h1>{% translate "Tournaments" %}</h1>
+          <a class="nd-button nd-button-ghost" href="{% url 'MiniTournaments' %}">Mini Tournaments →</a>
+        </div>
+        <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
+          Regular tournaments run for FCM, Horseless Carriage, Bus, Indonesia, Antiquity, and The Great Zimbabwe.
+          See <a href="{% url 'helpTournaments' %}">Tournaments Help</a> or check Discord for upcoming events.
+        </p>
+      {% else %}
+        <h1>{% translate "Tournaments" %}</h1>
+        <p class="size25text">
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %}
+          Horseless Carrige,
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %}
+          Bus,
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %}
+          Indonesia, and
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %}
+          Antiquity Tournaments run at regular intervals
+          <br />
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %}
+          {% translate "Food Chain Magnate Tournaments will run at regular intervals" %}
+          <br />
+          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}
+          {% translate "The Great Zimbabwe Tournaments will run at regular intervals" %}
+          <br />
+          {% translate "For more information on tournaments, see" %} <a class="linkOther" id="helpLink2" href="{% url 'helpTournaments' %}">Tournaments Help</a> and check the Discord!
+        </p>
+        <p class="size25text">
+          <a class="linkOther" href="{% url 'MiniTournaments' %}">{% translate "Click here for Mini Tournaments" %}</a>
+        </p>
+      {% endif %}
+      {% if request.use_new_design %}
+        <div class="nd-card">
+          <div class="nd-table-scroll">
+            <table class="nd-table">
+            {% else %}
+              <div class="allTournamentsContainer">
+                <div class="allTournamentsDiv">
+                  <table class="generalTable">
+                  {% endif %}
+                  <tr>
+                    <th>{% translate "Game" %}</th>
+                    <th>{% translate "Name" %}</th>
+                    <th>{% translate "Total Players" %}</th>
+                    <th>{% translate "Players per Game" %}</th>
+                    <th>{% translate "Format" %}</th>
+                    <th>{% translate "Starting Options" %}</th>
+                    <th>{% translate "Created" %}</th>
+                    <th>{% translate "Winner" %}</th>
+                  </tr>
+                  {% for tourny in tournamentsJson %}
+                    <tr onclick="window.location.href='{{ tourny.tournamentLink }}';">
+                      <td>
+                        {% if tourny.gameCode == 'FCM' %}
+                          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %}
+                        {% elif tourny.gameCode == 'HLC' %}
+                          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %}
+                        {% elif tourny.gameCode == 'BUS' %}
+                          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %}
+                        {% elif tourny.gameCode == 'TGZ' %}
+                          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}
+                        {% elif tourny.gameCode == 'AQY' %}
+                          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %}
+                        {% elif tourny.gameCode == 'IND' %}
+                          {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="IND" %}
+                        {% endif %}
+                      </td>
+                      <td>{{ tourny.tournamentName }}</td>
+                      <td>{{ tourny.maxTournamentPlayers }}</td>
+                      <td>{{ tourny.maxGamePlayers }}</td>
+                      <td>{{ tourny.tournamentType }}</td>
+                      <td>{{ tourny.startingOptionsHTML|safe }}</td>
+                      <td>
+                        <span class="timeToConvertSpan">{{ tourny.createdTS }}</span>
+                      </td>
+                      <td>{{ tourny.winnerHTML|safe }}</td>
+                    </tr>
+                  {% endfor %}
+                </table>
+                {% if request.use_new_design %}
+                </div>
+              </div>
+            {% else %}
+            </div>
+          </div>
+        {% endif %}
+        <p {% if not request.use_new_design %}class="size25text"{% else %}style="font-size:13px;color:var(--color-muted);margin-top:12px;"{% endif %}>
+          {% if not request.use_new_design %}
+            {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}
+          {% endif %}
+          Old TGZ Tournaments were run externally. View them on the <a href="{% url 'TGZtournaments' %}"
+    {% if not request.use_new_design %}class="linkOther"{% endif %}>Old TGZ Tournaments Page</a>
+        </p>
+        <br />
+        <br />
+        {% if not request.use_new_design %}
+          {% include 'Lobby/donate/donateBanner.html' %}
+        {% endif %}
       </div>
-    </div>
-    {% else %}
-      </div>
-    </div>
-    {% endif %}
-    <p {% if not request.use_new_design %}class="size25text"{% else %}style="font-size:13px;color:var(--color-muted);margin-top:12px;"{% endif %}>
-      {% if not request.use_new_design %}{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %}{% endif %}
-      Old TGZ Tournaments were run externally. View them on the <a href="{% url 'TGZtournaments' %}" {% if not request.use_new_design %}class="linkOther"{% endif %}>Old TGZ Tournaments Page</a>
-    </p>
-    <br />
-    <br />
-    {% if not request.use_new_design %}{% include 'Lobby/donate/donateBanner.html' %}{% endif %}
-  </div>
-  {% if not request.use_new_design %}{% include 'Lobby/common/homeButton.html' %}{% endif %}
-  {% block script %}{% endblock %}
-
-{% endblock %}
+      {% if not request.use_new_design %}
+        {% include 'Lobby/common/homeButton.html' %}
+      {% endif %}
+      {% block script %}
+      {% endblock script %}
+    {% endblock body %}

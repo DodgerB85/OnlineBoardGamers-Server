@@ -3,7 +3,7 @@
 {% block head %}
   <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
   <div class="container">
     {% if messages %}
@@ -16,22 +16,37 @@
     <div id="playerNumberArea">
       <img class="playerCountFixed"
            src="{% static 'Lobby/images/playerFilled.svg' %}"
-           id="1player">
+           id="1player"
+           height="50"
+           width="50"
+           alt="1 player">
       <img class="playerCount"
            src="{% static 'Lobby/images/playerFilled.svg' %}"
-           id="2player">
+           id="2player"
+           height="50"
+           width="50"
+           alt="2 players">
       <img class="playerCount"
            src="{% static 'Lobby/images/playerOutline.svg' %}"
-           id="3player">
+           id="3player"
+           height="50"
+           width="50"
+           alt="3 players">
       <img class="playerCount"
            src="{% static 'Lobby/images/playerOutline.svg' %}"
-           id="4player">
+           id="4player"
+           height="50"
+           width="50"
+           alt="4 players">
       <img class="playerCount"
            src="{% static 'Lobby/images/playerOutline.svg' %}"
-           id="5player">
+           id="5player"
+           height="50"
+           width="50"
+           alt="5 players">
     </div>
     <div id="topButtons">
-      <form id="mapSubmit" action="/createTGZpage/" method="post">
+      <form id="mapSubmit" action="{% url 'createTGZpage' %}" method="post">
         {% csrf_token %}
         <input type="hidden" id="mapData" name="mapData" value="">
         <input type="button"
@@ -82,5 +97,6 @@
       {% compress js %}
         <script src="{% static 'Lobby/createTGZmap.js' %}"></script>
       {% endcompress %}
-    {% endblock %}
-  {% endblock %}
+    {% endblock script %}
+  </div>
+{% endblock body %}

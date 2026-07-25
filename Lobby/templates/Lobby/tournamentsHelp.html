@@ -1,15 +1,19 @@
 {% extends "Lobby/_nd_help_shell.html" %}
 {% load static %}
 {% load i18n %}
-{% block page_id_attr %}id="lobbyHelpPage"{% endblock %}
-{% block page_id_attr_legacy %}id="lobbyHelpPage"{% endblock %}
+{% block page_id_attr %}
+  id="lobbyHelpPage"
+{% endblock page_id_attr %}
+{% block page_id_attr_legacy %}
+  id="lobbyHelpPage"
+{% endblock page_id_attr_legacy %}
 {% block page_title %}
   {% translate "Tournaments" %}
-{% endblock %}
+{% endblock page_title %}
 {% block page_action %}
   <a class="nd-button nd-button-sm nd-button-ghost"
      href="{% url 'helpTournamentsMini' %}">{% translate "Mini Tournaments Help" %} →</a>
-{% endblock %}
+{% endblock page_action %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "When are the tournaments?" %}</h2>
@@ -159,7 +163,7 @@
            height="30" />
     </p>
   </div>
-{% endblock %}
+{% endblock nd_body %}
 {% block legacy_body %}
   <h1>{% translate "Tournaments" %}</h1>
   For Mini Tournaments see <a href="{% url 'helpTournamentsMini' %}" class="linkOther">Mini Tournaments Help</a>
@@ -281,4 +285,4 @@
   <br />
   <br />
   {% include "Lobby/common/homeButton.html" %}
-{% endblock %}
+{% endblock legacy_body %}

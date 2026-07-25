@@ -4,7 +4,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     <div class="container">
         <div class="container">
@@ -35,7 +35,7 @@
                             <td>5</td>
                             <td>4</td>
                             <td>
-                                <a href='/TGZ/1951/'>-7</a>
+                                <a href="{% url 'TGZ:redirectLegacyTGZ' 1951 %}">-7</a>
                             </td>
                         </tr>
                         <tr>
@@ -2192,4 +2192,4 @@
                    value="Home" />
         </div>
     </div>
-{% endblock %}
+{% endblock body %}

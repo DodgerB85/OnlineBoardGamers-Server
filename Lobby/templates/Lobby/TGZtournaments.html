@@ -3,7 +3,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
-{% endblock %}
+{% endblock head %}
 {% block body %}
     {% compress js %}
         <script src="{% static 'Lobby/TGZtournaments.js' %}"></script>
@@ -54,7 +54,7 @@
                         </tr>
                     </thead>
                     {% for game in activeGames %}
-                        {% include 'Lobby/gameDisplay/currentGameRow.html' with game=game %}
+                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
                     {% endfor %}
                 </table>
             </div>
@@ -76,13 +76,13 @@
                         </tr>
                     </thead>
                     {% for game in finishedGames %}
-                        {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
+                        {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
                     {% endfor %}
                 </table>
             </div>
         {% else %}
             <h2>{% translate "No Finished Games" %}</h2>
         {% endif %}
-        {% include 'Lobby/common/homeButton.html' %}
+        {% include "Lobby/common/homeButton.html" %}
     </div>
-{% endblock %}
+{% endblock body %}
