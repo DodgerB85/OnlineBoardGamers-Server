@@ -3,16 +3,15 @@ import math
 import os
 import sys
 import time
+from datetime import timedelta
 from pathlib import Path
 from unittest.mock import MagicMock
 
-# from django.db import connections
 import django
-from decouple import config  # , Csv
+from decouple import config
 from django.db import OperationalError, transaction
-
-# from itertools import chain
 from django.db.models import Count, Q
+from django.utils import timezone
 
 ###### SET UP PARAMS HERE
 ACTUALLY_DELETE_ITEMS = True
@@ -27,15 +26,9 @@ PRINT_TIME = True
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 if DEBUG:
-    os.environ["LOCAL_DB_NAME"] = str(
-        config("LOCAL_DB_NAME", default="password", cast=str)
-    )
-    os.environ["LOCAL_DB_USER"] = str(
-        config("LOCAL_DB_USER", default="password", cast=str)
-    )
-    os.environ["LOCAL_DB_PWD"] = str(
-        config("LOCAL_DB_PWD", default="password", cast=str)
-    )
+    os.environ["LOCAL_DB_NAME"] = str(config("LOCAL_DB_NAME", default="password", cast=str))
+    os.environ["LOCAL_DB_USER"] = str(config("LOCAL_DB_USER", default="password", cast=str))
+    os.environ["LOCAL_DB_PWD"] = str(config("LOCAL_DB_PWD", default="password", cast=str))
     os.environ["LOCAL_DB_HOST"] = "127.0.0.1"
 
 sys.path.append(os.path.join(BASE_DIR, "OnlineBoardGamers"))
@@ -61,6 +54,7 @@ from Lobby.models import (
     Tournament,
 )  # Unused; consider removing unless needed
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
+from user_visit.models import UserVisit
 
 GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
 
@@ -69,6 +63,7 @@ deleted_games = 0  # Unused; consider removing unless used elsewhere
 deleted_practice_games = 0
 stalled_games = 0
 deleted_tournaments = 0
+deleted_user_visits = 0
 
 # Calculate the cutoff timestamp once in MS (to match your DB storage)
 cutoff_ms = (int(time.time()) - (DAYS_TO_DELETE_GAME * 24 * 60 * 60)) * 1000
@@ -96,16 +91,10 @@ for gameCode in GAME_CODES:
 
     # FETCH: Annotate with a count of players where is_current is True
     games_to_check = (
-        Game.objects.annotate(
-            current_player_count=Count("players", filter=Q(players__is_current=True))
-        )
+        Game.objects.annotate(current_player_count=Count("players", filter=Q(players__is_current=True)))
         .filter(
             # Group everything else inside one set of parentheses
-            Q(gameCode=gameCode)
-            & (
-                Q(latestUpdate__lt=cutoff_ms, gameStatus__in=MONITORED_STATUSES)
-                | Q(gameStatus="ACTIVE", current_player_count=0)
-            )
+            Q(gameCode=gameCode) & (Q(latestUpdate__lt=cutoff_ms, gameStatus__in=MONITORED_STATUSES) | Q(gameStatus="ACTIVE", current_player_count=0))
         )
         .prefetch_related("players__player")
     )
@@ -129,9 +118,7 @@ for gameCode in GAME_CODES:
             if ACTUALLY_DELETE_ITEMS:
                 ids_to_delete.append(game.id)
             else:
-                print(
-                    f"WOULD DELETE: {gameCode} - ID: {game.id} ({days_since_update} days old)"
-                )
+                print(f"WOULD DELETE: {gameCode} - ID: {game.id} ({days_since_update} days old)")
 
         # CHECK FOR STALLED (ACTIVE but no current player)
         elif game.gameStatus == "ACTIVE" and game.current_player_count == 0:
@@ -167,13 +154,33 @@ for gameCode in GAME_CODES:
         for game_id in ids_to_delete:
             print(f"WOULD DELETE: {gameCode} - ID: {game_id}")
 
-# 2. Process Mini Tournaments (Bulk)
-mt_cutoff = (
-    cutoff_ms  # Assuming 'created' is also in MS; adjust if it's a DateTimeField
-)
-old_tournaments = Tournament.objects.filter(
-    tournamentStatus__in=["OP", "PR"], tournamentCategory="Mini", created__lt=mt_cutoff
-)
+# 3. Check FINISHED games for proper winner marking
+SINGLE_WINNER_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "IND"]
+AT_LEAST_ONE_WINNER_GAMES = ["AQY", "KFW", "RNB", "WEB"]
+
+finished_games = Game.objects.filter(gameStatus="FINISHED").prefetch_related("players")
+winner_check_issues = 0
+
+for game in finished_games:
+    winner_count = game.players.filter(winner=True).count()
+
+    if game.gameCode in SINGLE_WINNER_GAMES:
+        if winner_count != 1:
+            winner_check_issues += 1
+            game_url = f"https://www.onlineboardgamers.com/{game.gameCode}/{game.id}/show/"
+            message = f"WINNER CHECK FAILED: {game.gameCode} - ID: {game.id} has {winner_count} winner(s), expected exactly 1\n<{game_url}>"
+            print(message)
+            SN_sendAdminErrorMessage(message)
+    elif game.gameCode in AT_LEAST_ONE_WINNER_GAMES and winner_count < 1:
+        winner_check_issues += 1
+        game_url = f"https://www.onlineboardgamers.com/{game.gameCode}/{game.id}/show/"
+        message = f"WINNER CHECK FAILED: {game.gameCode} - ID: {game.id} has {winner_count} winner(s), expected at least 1\n<{game_url}>"
+        print(message)
+        SN_sendAdminErrorMessage(message)
+
+# 4. Process Mini Tournaments (Bulk)
+mt_cutoff = cutoff_ms  # Assuming 'created' is also in MS; adjust if it's a DateTimeField
+old_tournaments = Tournament.objects.filter(tournamentStatus__in=["OP", "PR"], tournamentCategory="Mini", created__lt=mt_cutoff)
 
 deleted_tournaments = old_tournaments.count()
 if ACTUALLY_DELETE_ITEMS and deleted_tournaments > 0:
@@ -192,10 +199,48 @@ else:
     for mt in old_tournaments:
         print(f"WOULD DELETE MT: {mt.gameCode} - ID: {mt.id}")
 
-print(
-    f"****** \nDeleted Tota: {deleted_games}\nDeleted NON practice games: {deleted_games - deleted_practice_games}\nDeleted practice games: {deleted_practice_games} \n{stalled_games} stalled games\nDeleted tournaments: {deleted_tournaments}"
-)
+# 5. Delete UserVisits older than 7 days
+USER_VISIT_DAYS_TO_DELETE = 7
 
+# This creates a native Django datetime object instead of an integer
+user_visit_cutoff = timezone.now() - timedelta(days=USER_VISIT_DAYS_TO_DELETE)
+
+# The filter will now work perfectly without crashing
+old_user_visits_qs = UserVisit.objects.filter(timestamp__lt=user_visit_cutoff)
+deleted_user_visits = old_user_visits_qs.count()
+
+if ACTUALLY_DELETE_ITEMS and deleted_user_visits > 0:
+    rows_deleted_total = 0
+    chunk_size = 5000  # Smaller chunks prevent MySQL 1213 deadlocks
+
+    print(f"Starting deletion of {deleted_user_visits} user visits...")
+
+    while True:
+        # Fetch just the primary keys of the first X items to keep locks minimal
+        pk_list = list(old_user_visits_qs.values_list("pk", flat=True)[:chunk_size])
+        if not pk_list:
+            break  # No more rows left to delete
+
+        for attempt in range(3):
+            try:
+                with transaction.atomic():
+                    # Delete exactly that specific ID chunk
+                    # ._raw_delete() or a direct filter delete works best here
+                    deleted_count, _ = UserVisit.objects.filter(pk__in=pk_list).delete()
+                    rows_deleted_total += deleted_count
+                break  # Success! Break the retry loop and get next chunk
+            except OperationalError as e:
+                if "1213" in str(e) and attempt < 2:
+                    time.sleep(2)
+                    continue  # Retry this exact chunk
+                print(f"Error deleting UserVisits chunk: {e}")
+                break
+else:
+    print(f"WOULD DELETE {deleted_user_visits} user_visits older than {USER_VISIT_DAYS_TO_DELETE} days")
+
+# Print Summary (Ensure other variables exist in your main script context)
+print("******")
+print(f"Deleted user_visits: {deleted_user_visits if not ACTUALLY_DELETE_ITEMS else rows_deleted_total}")
 
 # Calculate and print execution time
 calc_time = time.perf_counter() - start_calc_time
