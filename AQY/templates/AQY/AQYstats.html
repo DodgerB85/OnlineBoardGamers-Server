@@ -1,15 +1,17 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
   {% compress js %}
     <script src="{% static 'AQY/AQYstats.js' %}"></script>
   {% endcompress %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
   <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  <div class="container">
+  <div class="{% if request.use_new_design %}nd-page{% else %}container{% endif %}">
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -17,34 +19,57 @@
         {% endfor %}
       </div>
     {% endif %}
-    <div id="AQYstatsPage">
-      <a class="linkOther" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
-      <br />
-      <br />
-      Data Generated: {{ timeString }}
-      <br />
-      <br />
-      <b>Note: Any game with a resigned/kicked player is not considered for these stats</b>
-      <br />
-      <br />
-      <b>Note:</b> These are stats of what happened historically.
-      <br />
-      They give an interesting insight into what has happened in previous games.
-      <br />
-      Be aware that part of the genius of Splotter games is that the winner will
-      <br />
-      almost always be the player who can read and respond to the current game state in the best way tactically.
-      <br />
-      Therefore, you should not use these stats to drive your strategy, but see them as
-      <br />
-      an interesting indication of how the game is being played.
-      <br />
-      <b>Click a green/red/grey section of the bar chart to view those games
+    {% if request.use_new_design %}
+      <div class="nd-page-header">
+        <h1>{% translate "Antiquity Stats" %}</h1>
+        <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'stats' %}">&#8592; {% translate "Back to Main Stats" %}</a>
+      </div>
+    {% endif %}
+    <div id="AQYstatsPage" class="{% if request.use_new_design %}nd-card nd-section nd-aqy-stats{% endif %}">
+      {% if request.use_new_design %}
+        <div class="nd-aqy-stats-summary">
+          <div class="nd-stats-tile">
+            <div class="nd-stats-tile-num">{{ total_games }}</div>
+            <div class="nd-stats-tile-label">{% translate "Finished games" %}</div>
+          </div>
+        </div>
+        <div class="nd-callout nd-callout-warn">
+          {% translate "Any game with a resigned/kicked player is not considered for these stats." %}
+        </div>
+        <div class="nd-callout nd-callout-info">
+          {% translate "These are historical stats. They show what has happened in previous games, but Antiquity still rewards reading and responding to the current game state." %}
+        </div>
+        <h2>{% translate "Saint Statistics" %}</h2>
+        <p>{% translate "Select a player count to compare how often each saint was available, picked, and won." %}</p>
+      {% else %}
+        <a class="linkOther" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
         <br />
-      Click an entry in the table to view those games</b>
-      <br />
-      NOTE: In 3+ player games, the same Saint could win and lose (multiple times).
-      <br />
+        <br />
+        Data Generated: {{ timeString }}
+        <br />
+        <br />
+        <b>Note: Any game with a resigned/kicked player is not considered for these stats</b>
+        <br />
+        <br />
+        <b>Note:</b> These are stats of what happened historically.
+        <br />
+        They give an interesting insight into what has happened in previous games.
+        <br />
+        Be aware that part of the genius of Splotter games is that the winner will
+        <br />
+        almost always be the player who can read and respond to the current game state in the best way tactically.
+        <br />
+        Therefore, you should not use these stats to drive your strategy, but see them as
+        <br />
+        an interesting indication of how the game is being played.
+        <br />
+        <b>Click a green/red/grey section of the bar chart to view those games
+          <br />
+        Click an entry in the table to view those games</b>
+        <br />
+        NOTE: In 3+ player games, the same Saint could win and lose (multiple times).
+        <br />
+      {% endif %}
       <div class="tab">
         <button class="tablinks" id="players2tab">{% translate "2 Player" %}</button>
         <button class="tablinks" id="players3tab">{% translate "3 Player" %}</button>

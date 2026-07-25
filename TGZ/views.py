@@ -886,6 +886,10 @@ def TGZstats(request):
                 "spec_stats": player_data_schism["spec_stats"],
             }
 
+    total_og = sum(v["finishedGamesCount"] for v in all_data.values())
+    total_sch = sum(v["finishedGamesCount"] for v in all_data_schism.values())
+    total_games = total_og + total_sch
+
     return render(
         request,
         "TGZ/TGZstats.html",
@@ -893,6 +897,9 @@ def TGZstats(request):
             "timeString": timeString,
             "all_data": all_data,
             "all_data_schism": all_data_schism,
+            "total_og": total_og,
+            "total_sch": total_sch,
+            "total_games": total_games,
         },
     )
 
