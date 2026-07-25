@@ -9,8 +9,9 @@
     <h2>{% translate "Rules" %}</h2>
     <div class="nd-help-qa">
       <p>
+        {% static 'BUS/Bus_Rules.pdf' as bus_rules_url %}
         {% blocktranslate trimmed %}
-          Bus rules available <a href="{% static 'BUS/Bus_Rules.pdf' %}" target="_blank">here</a>
+          Bus rules available <a href="{{ bus_rules_url }}" target="_blank">here</a>
         {% endblocktranslate %}
       </p>
       <p>
@@ -111,8 +112,9 @@
 {% block legacy_body %}
   <div id="BusHelpPage">
     <h1>{% translate "Rules" %}</h1>
+    {% static 'BUS/Bus_Rules.pdf' as bus_rules_url %}
     {% blocktranslate trimmed %}
-      Bus rules available <a href="{% static 'BUS/Bus_Rules.pdf' %}" target="_blank">here</a>
+      Bus rules available <a href="{{ bus_rules_url }}" target="_blank">here</a>
     {% endblocktranslate %}
     <br />
     {% blocktranslate trimmed %}

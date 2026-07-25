@@ -36,6 +36,15 @@ else:
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 30 * 24 * 60 * 60
 
+
+#### TEMPORARY DUAL TEMPLATE FIX
+# Provides fallback context variables during offline asset compression
+COMPRESS_OFFLINE_CONTEXT = {
+    'base_template': 'Lobby/layout.html',  # Falls back to old layout for compression
+    'use_new_design': False,
+}
+### END FIX
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = False  # Handled by cloudflare
 
