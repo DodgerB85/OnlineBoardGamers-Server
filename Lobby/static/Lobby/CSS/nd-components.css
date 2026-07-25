@@ -1251,10 +1251,20 @@ body.nd .nd-setup-cards-grid {
     body.nd .nd-setup-cards-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+    body.nd .nd-setup-cards-grid .nd-card:nth-last-child(1):nth-child(odd) {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 8px);
+    }
 }
 @media (min-width: 1100px) {
     body.nd .nd-setup-cards-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+    body.nd .nd-setup-cards-grid .nd-card:nth-last-child(1):nth-child(odd) {
+        grid-column: auto;
+        justify-self: auto;
+        width: auto;
     }
 }
 body.nd .nd-setup-cards-grid .nd-card,
