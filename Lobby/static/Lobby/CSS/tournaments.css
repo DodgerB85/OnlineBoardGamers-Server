@@ -223,6 +223,77 @@ body.nd #messageList .chatentry .body {
 		position: static !important;
 		top: auto;
 	}
+
+	/* IP (In Progress) layout: collapse fixed-width left column to full width */
+	body.nd .IPcontainer {
+		flex-direction: column;
+	}
+	body.nd .IPleftColumn,
+	body.nd .IPleftColumnMG {
+		width: 100% !important;
+		box-sizing: border-box;
+	}
+	body.nd .IPrightColumn {
+		padding: 12px 0;
+	}
+
+	/* MG (multi-game) tables: collapse rows into stacked cards */
+	body.nd .nd-mt-mg-table {
+		display: block;
+	}
+	body.nd .nd-mt-mg-table thead {
+		display: none;
+	}
+	body.nd .nd-mt-mg-table tbody {
+		display: block;
+	}
+	body.nd .nd-mt-mg-table tbody tr {
+		display: block;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		padding: 12px;
+		margin-bottom: 8px;
+	}
+	body.nd .nd-mt-mg-table tbody tr td {
+		display: block;
+		border: none;
+		padding: 4px 0;
+		font-size: 13px;
+	}
+	body.nd .nd-mt-mg-table tbody tr td.IPplayerNameTD {
+		font-weight: 600;
+		font-size: 15px;
+		padding-bottom: 6px;
+		margin-bottom: 4px;
+		border-bottom: 1px solid var(--color-border);
+		max-width: none;
+		white-space: normal;
+		overflow: visible;
+		text-overflow: clip;
+	}
+	body.nd .nd-mt-mg-table tbody tr td.IPpointsTD {
+		max-width: none !important;
+		padding: 4px 0 !important;
+		display: flex;
+		justify-content: space-between;
+	}
+	/* Label cells (columns beyond name/position) get a label prefix */
+	body.nd .nd-mt-mg-table tbody tr td.IPpointsTD::before {
+		content: attr(data-label);
+		font-size: 11px;
+		font-weight: 600;
+		color: var(--color-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+}
+
+/* MiniTournament PT mode: single column on small screens */
+@media (max-width: 600px) {
+	body.nd .nd-mini-pt-grid {
+		grid-template-columns: 1fr !important;
+	}
 }
 
 .IPcontainer {

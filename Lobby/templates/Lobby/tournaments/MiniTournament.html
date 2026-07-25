@@ -120,7 +120,7 @@
         </div>
         {% endif %}
 
-        <div style="display: grid; grid-template-columns: {% if tournament.tournamentType == 'PT' %}1fr 1fr{% else %}1fr{% endif %}; gap: 16px; margin-bottom: 16px;">
+        <div class="{% if tournament.tournamentType == 'PT' and request.use_new_design %}nd-mini-pt-grid{% endif %}" style="display: grid; grid-template-columns: {% if tournament.tournamentType == 'PT' %}1fr 1fr{% else %}1fr{% endif %}; gap: 16px; margin-bottom: 16px;">
           {% if tournament.tournamentType == "PT" %}
           <div class="nd-card">
             <h3 style="margin-bottom: 10px;">{% translate "Points" %}</h3>

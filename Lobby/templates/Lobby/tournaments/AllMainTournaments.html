@@ -55,6 +55,7 @@ If anything does happen then I will keep the tournament going if at all possible
     {% endif %}
     {% if request.use_new_design %}
     <div class="nd-card">
+      <div class="nd-table-scroll">
       <table class="nd-table">
     {% else %}
     <div class="allTournamentsContainer">
@@ -101,6 +102,7 @@ If anything does happen then I will keep the tournament going if at all possible
           {% endfor %}
         </table>
     {% if request.use_new_design %}
+      </div>
     </div>
     {% else %}
       </div>

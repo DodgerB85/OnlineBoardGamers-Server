@@ -227,7 +227,7 @@
               {% for round in playersData.allMGdata %}
                 {% if round.0.0 == "Round 1" %}
                   <h2>{{ round.0.0 }}</h2>
-                  <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %} top14green">
+                  <table class="{% if request.use_new_design %}nd-table nd-mt-mg-table{% else %}generalTable{% endif %} top14green">
                     <thead>
                       <tr>
                         <th>{{ round.1.0 }}</th>
@@ -244,25 +244,25 @@
                         <td class="IPplayerNameTD">
                           <a href={% url 'playerInfo' usernameToProfile=playerEntry.0 %}>{{ playerEntry.0 }}</a>
                         </td>
-                        <td class="IPpointsTD">{{ playerEntry.1 }}</td>
-                        <td class="IPpointsTD">{{ playerEntry.2 }}</td>
+                        <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.1 }}"{% endif %}>{{ playerEntry.1 }}</td>
+                        <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.2 }}"{% endif %}>{{ playerEntry.2 }}</td>
                         {% if playerEntry.3 %}
-                          <td class="IPpointsTD">
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.3 }}"{% endif %}>
                             <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/show/">{{ playerEntry.3.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.4 %}
-                          <td class="IPpointsTD">
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.4 }}"{% endif %}>
                             <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/show/">{{ playerEntry.4.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.5 %}
-                          <td class="IPpointsTD">
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.5 }}"{% endif %}>
                             <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/show/">{{ playerEntry.5.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.6 %}
-                          <td class="IPpointsTD">
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.6 }}"{% endif %}>
                             <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/show/">{{ playerEntry.6.0 }}</a>
                           </td>
                         {% endif %}
@@ -279,7 +279,7 @@
                         Group B
                       {% endif %}
                     </h3>
-                    <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %} top2green">
+                    <table class="{% if request.use_new_design %}nd-table nd-mt-mg-table{% else %}generalTable{% endif %} top2green">
                       <thead>
                         <tr>
                           <th>{{ groupData.0.0 }}</th>
@@ -296,25 +296,25 @@
                           <td class="IPplayerNameTD">
                             <a href={% url 'playerInfo' usernameToProfile=playerEntry.0 %}>{{ playerEntry.0 }}</a>
                           </td>
-                          <td class="IPpointsTD">{{ playerEntry.1 }}</td>
-                          <td class="IPpointsTD">{{ playerEntry.2 }}</td>
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ groupData.0.1 }}"{% endif %}>{{ playerEntry.1 }}</td>
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ groupData.0.2 }}"{% endif %}>{{ playerEntry.2 }}</td>
                           {% if playerEntry.3 %}
-                            <td class="IPpointsTD">
+                            <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ groupData.0.3 }}"{% endif %}>
                               <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/show/">{{ playerEntry.3.0 }}</a>
                             </td>
                           {% endif %}
                           {% if playerEntry.4 %}
-                            <td class="IPpointsTD">
+                            <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ groupData.0.4 }}"{% endif %}>
                               <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/show/">{{ playerEntry.4.0 }}</a>
                             </td>
                           {% endif %}
                           {% if playerEntry.5 %}
-                            <td class="IPpointsTD">
+                            <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ groupData.0.5 }}"{% endif %}>
                               <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/show/">{{ playerEntry.5.0 }}</a>
                             </td>
                           {% endif %}
                           {% if playerEntry.6 %}
-                            <td class="IPpointsTD">
+                            <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ groupData.0.6 }}"{% endif %}>
                               <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/show/">{{ playerEntry.6.0 }}</a>
                             </td>
                           {% endif %}
@@ -324,7 +324,7 @@
                   {% endfor %}
                 {% elif round.0.0 == "Round 3" %}
                   <h2>Final</h2>
-                  <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %} top1green">
+                  <table class="{% if request.use_new_design %}nd-table nd-mt-mg-table{% else %}generalTable{% endif %} top1green">
                     <thead>
                       <tr>
                         <th>{{ round.1.0 }}</th>
@@ -341,25 +341,25 @@
                           id="playerRow{{ playerEntry.2 }}"
                           onclick="window.location.href='/profile/{{ playerEntry.2 }}';">
                         <td class="IPplayerNameTD">{{ playerEntry.0 }}</td>
-                        <td class="IPpointsTD">{{ playerEntry.1 }}</td>
-                        <td class="IPpointsTD">{{ playerEntry.2 }}</td>
+                        <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.1 }}"{% endif %}>{{ playerEntry.1 }}</td>
+                        <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.2 }}"{% endif %}>{{ playerEntry.2 }}</td>
                         {% if playerEntry.3 %}
-                          <td class="IPpointsTD">
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.3 }}"{% endif %}>
                             <a href="/{{ gameCode }}/{{ playerEntry.3.1 }}/show/">{{ playerEntry.3.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.4 %}
-                          <td class="IPpointsTD">
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.4 }}"{% endif %}>
                             <a href="/{{ gameCode }}/{{ playerEntry.4.1 }}/show/">{{ playerEntry.4.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.5 %}
-                          <td class="IPpointsTD">
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.5 }}"{% endif %}>
                             <a href="/{{ gameCode }}/{{ playerEntry.5.1 }}/show/">{{ playerEntry.5.0 }}</a>
                           </td>
                         {% endif %}
                         {% if playerEntry.6 %}
-                          <td class="IPpointsTD">
+                          <td class="IPpointsTD"{% if request.use_new_design %} data-label="{{ round.1.6 }}"{% endif %}>
                             <a href="/{{ gameCode }}/{{ playerEntry.6.1 }}/show/">{{ playerEntry.6.0 }}</a>
                           </td>
                         {% endif %}
