@@ -74,18 +74,7 @@ body.nd #contactEmailImg {
     vertical-align: middle;
 }
 
-/* Help page icons with black background */
-body.nd .topMenuIconForHelp {
-    width: 38px;
-    height: 38px;
-    border: 1px solid #eee;
-    border-radius: 5px;
-    margin-left: 0;
-    cursor: pointer;
-    text-align: center;
-    background-color: black;
-    vertical-align: middle;
-}
+
 
 /* ---------- PAGE CONTAINERS ---------- */
 body.nd .nd-page {
@@ -1542,6 +1531,27 @@ body.nd .nd-icon-cell > span {
    side-by-side in their cell before the text. */
 body.nd .nd-icon-cell img + img {
     margin-left: 4px;
+}
+
+/* ---------- IFRAMES (YouTube embeds, etc.) ---------- */
+body.nd iframe {
+    border: none;
+    display: block;
+}
+
+/* Responsive iframe wrappers used in help pages */
+body.nd .nd-help-qa div[style*="position:relative"] {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+body.nd .nd-help-qa iframe[style*="position:absolute"] {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* ---------- 09 ROW GRID (shared — lobby + stats) ---------- */
