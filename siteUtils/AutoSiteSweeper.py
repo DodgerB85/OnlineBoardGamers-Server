@@ -128,7 +128,8 @@ for gameCode in GAME_CODES:
             game_url = f"https://www.onlineboardgamers.com/{gameCode}/{game.id}/show/"
             message = f"NO CP: {gameCode} - ID: {game.id}\n<{game_url}>"
             print(message)
-            SN_sendAdminErrorMessage(message)
+            if not DEBUG:
+                SN_sendAdminErrorMessage(message)
 
     # BULK DELETE: One query for all old games in this model
     if ids_to_delete and ACTUALLY_DELETE_ITEMS:
@@ -170,13 +171,85 @@ for game in finished_games:
             game_url = f"https://www.onlineboardgamers.com/{game.gameCode}/{game.id}/show/"
             message = f"WINNER CHECK FAILED: {game.gameCode} - ID: {game.id} has {winner_count} winner(s), expected exactly 1\n<{game_url}>"
             print(message)
-            SN_sendAdminErrorMessage(message)
+            if not DEBUG:
+                SN_sendAdminErrorMessage(message)
     elif game.gameCode in AT_LEAST_ONE_WINNER_GAMES and winner_count < 1:
         winner_check_issues += 1
         game_url = f"https://www.onlineboardgamers.com/{game.gameCode}/{game.id}/show/"
         message = f"WINNER CHECK FAILED: {game.gameCode} - ID: {game.id} has {winner_count} winner(s), expected at least 1\n<{game_url}>"
         print(message)
-        SN_sendAdminErrorMessage(message)
+        if not DEBUG:
+            SN_sendAdminErrorMessage(message)
+
+    # Check that cleared fields are blank/empty
+    field_check_issues = []
+    if game.rewindData != "":
+        field_check_issues.append(f"rewindData='{game.rewindData[:50]}...'")
+    if game.rewindTempData != "":
+        field_check_issues.append(f"rewindTempData='{game.rewindTempData[:50]}...'")
+    if game.kickoutFlexiData != "":
+        field_check_issues.append(f"kickoutFlexiData='{game.kickoutFlexiData[:50]}...'")
+    if game.activeVotes is not None:
+        field_check_issues.append(f"activeVotes={game.activeVotes}")
+    if game.transactionID != "":
+        field_check_issues.append(f"transactionID='{game.transactionID[:50]}...'")
+
+    # Game-specific field checks (check all fields regardless of gameCode)
+    if game.autoMoves is not None:
+        field_check_issues.append(f"autoMoves={game.autoMoves}")
+    if game.playerTradeData != "":
+        field_check_issues.append(f"playerTradeData='{game.playerTradeData[:50]}...'")
+    if game.playersPreMoveData != "":
+        field_check_issues.append(f"playersPreMoveData='{game.playersPreMoveData[:50]}...'")
+    if game.FCMplayersMoveData != "":
+        field_check_issues.append(f"FCMplayersMoveData='{game.FCMplayersMoveData[:50]}...'")
+    if game.currentPlayersInTurnOrder is not None:
+        field_check_issues.append(f"currentPlayersInTurnOrder={game.currentPlayersInTurnOrder}")
+    if game.serverCurrentPlayerNamesInTurnOrder is not None:
+        field_check_issues.append(f"serverCurrentPlayerNamesInTurnOrder={game.serverCurrentPlayerNamesInTurnOrder}")
+
+    # Check GamePlayer objects for cleared fields
+    for gp in game.players.all():
+        if gp.moveDataJSON not in [None, [], {}]:
+            field_check_issues.append(f"GP {gp.id} moveDataJSON={gp.moveDataJSON}")
+        if gp.currentMoveTime != "":
+            field_check_issues.append(f"GP {gp.id} currentMoveTime='{gp.currentMoveTime}'")
+        if gp.currentMoveData != "":
+            field_check_issues.append(f"GP {gp.id} currentMoveData='{gp.currentMoveData[:50]}...'")
+
+    if field_check_issues:
+        game_url = f"https://www.onlineboardgamers.com/{game.gameCode}/{game.id}/show/"
+        message = f"FIELD CHECK FAILED: {game.gameCode} - ID: {game.id} has non-blank fields: {', '.join(field_check_issues)}\n<{game_url}>"
+        print(message)
+        #if not DEBUG:
+        #    SN_sendAdminErrorMessage(message)
+
+        # Fix the fields if ACTUALLY_DELETE_ITEMS is True
+        if ACTUALLY_DELETE_ITEMS:
+            game.rewindData = ""
+            game.rewindTempData = ""
+            game.kickoutFlexiData = ""
+            game.activeVotes = None
+            game.transactionID = ""
+            game.autoMoves = None
+            game.playerTradeData = ""
+            game.playersPreMoveData = ""
+            game.FCMplayersMoveData = ""
+            game.currentPlayersInTurnOrder = None
+            game.serverCurrentPlayerNamesInTurnOrder = None
+            game.save()
+
+            # Fix GamePlayer fields
+            for gp in game.players.all():
+                if gp.moveDataJSON not in [None, [], {}]:
+                    gp.moveDataJSON = None
+                if gp.currentMoveTime != "":
+                    gp.currentMoveTime = ""
+                if gp.currentMoveData != "":
+                    gp.currentMoveData = ""
+                gp.save()
+
+            print(f"FIXED: {game.gameCode} - ID: {game.id}")
 
 # 4. Process Mini Tournaments (Bulk)
 mt_cutoff = cutoff_ms  # Assuming 'created' is also in MS; adjust if it's a DateTimeField
@@ -209,8 +282,8 @@ user_visit_cutoff = timezone.now() - timedelta(days=USER_VISIT_DAYS_TO_DELETE)
 old_user_visits_qs = UserVisit.objects.filter(timestamp__lt=user_visit_cutoff)
 deleted_user_visits = old_user_visits_qs.count()
 
+rows_deleted_total = 0
 if ACTUALLY_DELETE_ITEMS and deleted_user_visits > 0:
-    rows_deleted_total = 0
     chunk_size = 5000  # Smaller chunks prevent MySQL 1213 deadlocks
 
     print(f"Starting deletion of {deleted_user_visits} user visits...")
