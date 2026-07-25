@@ -1,192 +1,200 @@
 {% extends "Lobby/_nd_help_shell.html" %}
-
 {% load static %}
 {% load i18n %}
-
-{% block page_title %}{% translate "Bus Help" %}{% endblock %}
-{% block nd_body %}
-
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Rules" %}</h2>
-        <div class="nd-help-qa">
-          <p>{% blocktranslate trimmed %}Bus rules available <a href="/static/BUS/Bus_Rules.pdf" target="_blank">here</a>{% endblocktranslate %}</p>
-          <p>{% blocktranslate trimmed %}How to play guide example <a href="https://www.youtube.com/watch?v=CKW0tYoIU_k" target="_blank">here</a>{% endblocktranslate %}</p>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Playing the Game" %}</h2>
-        <div class="nd-help-qa">
-          <ul>
-            {% url 'profile' as profile_url %}
-            {% blocktranslate trimmed %}
-              <li>
-                Check your connection to the live update server by looking at the circle next to your name in the upper right.
-                <br />
-                Orange = Connecting, Green = Connected, Red = Disconncedted
-              </li>
-              <li>The active player has a green background in the Players table</li>
-              <li>
-                In addition, after actions have been chosen, the current move is highlighted in green in the action selection area
-              </li>
-              <li>During the "Choose Actions" phase, any player that has passed will have an orange background</li>
-              <li>
-                Place buildings, lines, and passengers directly on the board. Vrrooomm by selecting passengers
-                and destinations on the board
-              </li>
-              <li>Choose your actions in the upper right area or next to the board</li>
-              <li>
-                The Players table is in order of the "Choose Actions" phase. So top player picks first
-                <br />
-                If no one
-                chooses the "Starting Player" choice, then the player on the 2nd line will become the new start
-                player.
-              </li>
-              <li>
-                To view another player's actions, open the "History" tab and select a "board" action to
-                highlight that move
-              </li>
-              <li>Score is calculated as you play - Time Stone deductions happen immediately, not at the end</li>
-              <li>Any player can rewind at any time. Please be courteous. Misuse will result in alteration of this feature</li>
-              <li>
-                You can change which board you are playing on from the menu. Select a preference in your <a class="linkOther" href="{{ profile_url }}">Profile</a>
-                <br />
-                <b>NOTE: THE CHANGE IS COSMETIC ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS
-                  <br />
-                  THE ORIGINAL BOARD IS ROTATED 90 DEGREES FROM THE 20TH ANNIVERSARY BOARD
-                </b>
-              </li>
-            {% endblocktranslate %}
-          </ul>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "How can I find other players' moves?" %}</h2>
-        <div class="nd-help-qa">
-          <p>
-            {% blocktranslate trimmed %}
-              Click on History from the top menu to open the history, and then click on an entry to highlight where it happened on the board.
-              You can click entries to see where buildings or lines were added, and to see where passengers were VRROOOMM'd from and to.
-            {% endblocktranslate %}
-          </p>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Why did I miss my turn?" %}</h2>
-        <div class="nd-help-qa">
-          <p>
-            {% blocktranslate trimmed %}
-              Turns where you cannot do anything are skipped. For example, during VRROOOMM if you either have no possible destination buildings, or no available passengers to move.
-              During Line Expansion, Add Passengers and New Buildings then players are skipped if they would have 0 actions. In this case, it means that the Max number of Buses is too low
-              for these players to have any actions.
-              Check the history for the reason a player's turn was skipped.
-            {% endblocktranslate %}
-          </p>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "When can I resign?" %}</h2>
-        <div class="nd-help-qa">
-          <p>{% translate "You can resign during your \"Choose Actions\" phase." %}</p>
-        </div>
-      </div>
-
+{% block page_title %}
+  {% translate "Bus Help" %}
 {% endblock %}
-
-{% block legacy_body %}
-
-
-      <div id="BusHelpPage">
-        <h1>{% translate "Rules" %}</h1>
+{% block nd_body %}
+  <div class="nd-card nd-section">
+    <h2>{% translate "Rules" %}</h2>
+    <div class="nd-help-qa">
+      <p>
         {% blocktranslate trimmed %}
           Bus rules available <a href="/static/BUS/Bus_Rules.pdf" target="_blank">here</a>
         {% endblocktranslate %}
-        <br />
+      </p>
+      <p>
         {% blocktranslate trimmed %}
           How to play guide example <a href="https://www.youtube.com/watch?v=CKW0tYoIU_k" target="_blank">here</a>
         {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "Playing the Game" %}</h2>
+    <div class="nd-help-qa">
+      <ul>
+        {% url 'profile' as profile_url %}
+        {% blocktranslate trimmed %}
+          <li>
+            Check your connection to the live update server by looking at the circle next to your name in the upper right.
+            <br />
+            Orange = Connecting, Green = Connected, Red = Disconncedted
+          </li>
+          <li>The active player has a green background in the Players table</li>
+          <li>
+            In addition, after actions have been chosen, the current move is highlighted in green in the action selection area
+          </li>
+          <li>During the "Choose Actions" phase, any player that has passed will have an orange background</li>
+          <li>
+            Place buildings, lines, and passengers directly on the board. Vrrooomm by selecting passengers
+            and destinations on the board
+          </li>
+          <li>Choose your actions in the upper right area or next to the board</li>
+          <li>
+            The Players table is in order of the "Choose Actions" phase. So top player picks first
+            <br />
+            If no one
+            chooses the "Starting Player" choice, then the player on the 2nd line will become the new start
+            player.
+          </li>
+          <li>
+            To view another player's actions, open the "History" tab and select a "board" action to
+            highlight that move
+          </li>
+          <li>Score is calculated as you play - Time Stone deductions happen immediately, not at the end</li>
+          <li>Any player can rewind at any time. Please be courteous. Misuse will result in alteration of this feature</li>
+          <li>
+            You can change which board you are playing on from the menu. Select a preference in your <a class="linkOther" href="{{ profile_url }}">Profile</a>
+            <br />
+            <b>NOTE: THE CHANGE IS COSMETIC ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS
+              <br />
+              THE ORIGINAL BOARD IS ROTATED 90 DEGREES FROM THE 20TH ANNIVERSARY BOARD
+            </b>
+          </li>
+        {% endblocktranslate %}
+      </ul>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "How can I find other players' moves?" %}</h2>
+    <div class="nd-help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          Click on History from the top menu to open the history, and then click on an entry to highlight where it happened on the board.
+          You can click entries to see where buildings or lines were added, and to see where passengers were VRROOOMM'd from and to.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "Why did I miss my turn?" %}</h2>
+    <div class="nd-help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          Turns where you cannot do anything are skipped. For example, during VRROOOMM if you either have no possible destination buildings, or no available passengers to move.
+          During Line Expansion, Add Passengers and New Buildings then players are skipped if they would have 0 actions. In this case, it means that the Max number of Buses is too low
+          for these players to have any actions.
+          Check the history for the reason a player's turn was skipped.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "When can I resign?" %}</h2>
+    <div class="nd-help-qa">
+      <p>{% translate "You can resign during your \"Choose Actions\" phase." %}</p>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "Further Help" %}</h2>
+    <p>
+      <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30" />
+    </p>
+  </div>
+{% endblock %}
+{% block legacy_body %}
+  <div id="BusHelpPage">
+    <h1>{% translate "Rules" %}</h1>
+    {% blocktranslate trimmed %}
+      Bus rules available <a href="/static/BUS/Bus_Rules.pdf" target="_blank">here</a>
+    {% endblocktranslate %}
+    <br />
+    {% blocktranslate trimmed %}
+      How to play guide example <a href="https://www.youtube.com/watch?v=CKW0tYoIU_k" target="_blank">here</a>
+    {% endblocktranslate %}
+    <br />
+    <h1>{% translate "Bus Help" %}</h1>
+    <div class="BusHelpSection">
+      <b><u>{% translate "Playing the Game" %}</u></b>
+      <br />
+      <ul>
+        {% url 'profile' as profile_url %}
+        {% blocktranslate trimmed %}
+          <li>
+            Check your connection to the live update server by looking at the circle next to your name in the upper right.
+            <br />
+            Orange = Connecting, Green = Connected, Red = Disconncedted
+          </li>
+          <li>The active player has a green background in the Players table</li>
+          <li>
+            In addition, after actions have been chosen, the current move is highlighted in green in the action selection area
+          </li>
+          <li>During the "Choose Actions" phase, any player that has passed will have an orange background</li>
+          <li>
+            Place buildings, lines, and passengers directly on the board. Vrrooomm by selecting passengers
+            and destinations on the board
+          </li>
+          <li>Choose your actions in the upper right area or next to the board</li>
+          <li>
+            The Players table is in order of the "Choose Actions" phase. So top player picks first
+            <br />
+            If no one
+            chooses the "Starting Player" choice, then the player on the 2nd line will become the new start
+            player.
+          </li>
+          <li>
+            To view another player's actions, open the "History" tab and select a "board" action to
+            highlight that move
+          </li>
+          <li>Score is calculated as you play - Time Stone deductions happen immediately, not at the end</li>
+          <li>Any player can rewind at any time. Please be courteous. Misuse will result in alteration of this feature</li>
+          <li>
+            You can change which board you are playing on from the menu. Select a preference in your <a class="linkOther" href="{{ profile_url }}">Profile</a>
+            <br />
+            <b>NOTE: THE CHANGE IS COSMETIC ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS
+              <br />
+              THE ORIGINAL BOARD IS ROTATED 90 DEGREES FROM THE 20TH ANNIVERSARY BOARD
+            </b>
+          </li>
+        {% endblocktranslate %}
+      </ul>
+    </div>
+    <div class="BusHelpSection">
+      <b><u>{% translate "How can I find other players' moves?" %}</u></b>
+      <br />
+      {% blocktranslate trimmed %}
+        Click on History from the top menu to open the history, and then click on an entry to highlight where it happened on the board.
+        You can click entries to see where buildings or lines were added, and to see where passengers were VRROOOMM'd from and to.
+      {% endblocktranslate %}
+      <br />
+      <br />
+      <div class="BusHelpSection">
+        <b><u>{% translate "Why did I miss my turn?" %}</u></b>
         <br />
-        <h1>{% translate "Bus Help" %}</h1>
-        <div class="BusHelpSection">
-          <b><u>{% translate "Playing the Game" %}</u></b>
-          <br />
-          <ul>
-            {% url 'profile' as profile_url %}
-            {% blocktranslate trimmed %}
-              <li>
-                Check your connection to the live update server by looking at the circle next to your name in the upper right.
-                <br />
-                Orange = Connecting, Green = Connected, Red = Disconncedted
-              </li>
-              <li>The active player has a green background in the Players table</li>
-              <li>
-                In addition, after actions have been chosen, the current move is highlighted in green in the action selection area
-              </li>
-              <li>During the "Choose Actions" phase, any player that has passed will have an orange background</li>
-              <li>
-                Place buildings, lines, and passengers directly on the board. Vrrooomm by selecting passengers
-                and destinations on the board
-              </li>
-              <li>Choose your actions in the upper right area or next to the board</li>
-              <li>
-                The Players table is in order of the "Choose Actions" phase. So top player picks first
-                <br />
-                If no one
-                chooses the "Starting Player" choice, then the player on the 2nd line will become the new start
-                player.
-              </li>
-              <li>
-                To view another player's actions, open the "History" tab and select a "board" action to
-                highlight that move
-              </li>
-              <li>Score is calculated as you play - Time Stone deductions happen immediately, not at the end</li>
-              <li>Any player can rewind at any time. Please be courteous. Misuse will result in alteration of this feature</li>
-              <li>
-                You can change which board you are playing on from the menu. Select a preference in your <a class="linkOther" href="{{ profile_url }}">Profile</a>
-                <br />
-                <b>NOTE: THE CHANGE IS COSMETIC ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS
-                  <br />
-                  THE ORIGINAL BOARD IS ROTATED 90 DEGREES FROM THE 20TH ANNIVERSARY BOARD
-                </b>
-              </li>
-            {% endblocktranslate %}
-          </ul>
-        </div>
-        <div class="BusHelpSection">
-          <b><u>{% translate "How can I find other players' moves?" %}</u></b>
-          <br />
-          {% blocktranslate trimmed %}
-            Click on History from the top menu to open the history, and then click on an entry to highlight where it happened on the board.
-            You can click entries to see where buildings or lines were added, and to see where passengers were VRROOOMM'd from and to.
-          {% endblocktranslate %}
-          <br />
-          <br />
-          <div class="BusHelpSection">
-            <b><u>{% translate "Why did I miss my turn?" %}</u></b>
-            <br />
-            {% blocktranslate trimmed %}
-              Turns where you cannot do anything are skipped. For example, during VRROOOMM if you either have no possible destination buildings, or no available passengers to move.
-              During Line Expansion, Add Passengers and New Buildings then players are skipped if they would have 0 actions. In this case, it means that the Max number of Buses is too low
-              for these players to have any actions.
-              Check the history for the reason a player's turn was skipped.
-            {% endblocktranslate %}
-            <br />
-            <br />
-          </div>
-          <div class="BusHelpSection">
-            <b><u>{% translate "When can I resign?" %}</u></b>
-            <br />
-            {% translate "You can resign during your &quot;Choose Actions&quot; phase." %}
-          </div>
-        </div>
+        {% blocktranslate trimmed %}
+          Turns where you cannot do anything are skipped. For example, during VRROOOMM if you either have no possible destination buildings, or no available passengers to move.
+          During Line Expansion, Add Passengers and New Buildings then players are skipped if they would have 0 actions. In this case, it means that the Max number of Buses is too low
+          for these players to have any actions.
+          Check the history for the reason a player's turn was skipped.
+        {% endblocktranslate %}
         <br />
         <br />
       </div>
-      {% include "Lobby/donate/donateBanner.html" %}
-      {% include "Lobby/common/homeButton.html" %}
-
+      <div class="BusHelpSection">
+        <b><u>{% translate "When can I resign?" %}</u></b>
+        <br />
+        {% translate "You can resign during your &quot;Choose Actions&quot; phase." %}
+      </div>
+    </div>
+    <br />
+    <br />
+  </div>
+  {% include "Lobby/donate/donateBanner.html" %}
+  {% include "Lobby/common/homeButton.html" %}
 {% endblock %}

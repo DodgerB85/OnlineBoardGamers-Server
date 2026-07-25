@@ -21,8 +21,11 @@
         <h1>{% translate "China Expansion Help" %}</h1>
       </div>
     {% endif %}
-    <div id="FCMhelpPage" class="{% if request.use_new_design %}nd-card nd-section nd-help-qa nd-fcm-china-help{% endif %}">
-      {% if not request.use_new_design %}<h1>{% translate "China Expansion Help" %}</h1>{% endif %}
+    <div id="FCMhelpPage"
+         class="{% if request.use_new_design %}nd-card nd-section nd-help-qa nd-fcm-china-help{% endif %}">
+      {% if not request.use_new_design %}
+        <h1>{% translate "China Expansion Help" %}</h1>
+      {% endif %}
       {% blocktranslate trimmed %}
         These modules are from the Chinese kickstarter (Modian) release from publisher Yikeguang (一刻馆).
         Splotter was unaware that these existed before I contacted them!
@@ -260,6 +263,19 @@
                     </ul>
                   </div>
                   <br />
+                  {% if request.use_new_design %}
+                    <div class="nd-card nd-section">
+                      <h2>{% translate "Further Help" %}</h2>
+                      <p>
+                        <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+                        <img id="contactEmailImg"
+                             src="{% static 'Lobby/email.png' %}"
+                             alt="Email Address"
+                             width="400"
+                             height="30" />
+                      </p>
+                    </div>
+                  {% endif %}
                 </div>
                 {% if not request.use_new_design %}
                   {% include 'Lobby/common/homeButton.html' %}

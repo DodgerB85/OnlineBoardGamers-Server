@@ -71,8 +71,10 @@
         {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com/">{% endblock %}
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <link href="{% static 'Lobby/CSS/nd-components.css' %}?v=2" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
+              rel="stylesheet">
+        <link href="{% static 'Lobby/CSS/nd-components.css' %}?v=2"
+              rel="stylesheet">
         <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
     </head>
@@ -153,7 +155,9 @@
                                placeholder="{% translate " Password" %}"
                                required>
                         <input type="hidden" name="next" value="{{ request.GET.next }}" />
-                        <input class="nd-button nd-button-primary loginSubmit" type="submit" value="{% translate " Login" %}">
+                        <input class="nd-button nd-button-primary loginSubmit"
+                               type="submit"
+                               value="{% translate " Login" %}">
                     </form>
                     <a href="{% url 'index' %}">
                         <img id="logoLoggedOut"
@@ -267,9 +271,12 @@
             <div class="content">
                 <p>
                     {% blocktranslate trimmed %}
-                        Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, and Indonesia are board games by Jeroen Doumen
+                        Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, Indonesia, and Roads & Boats are board games by Jeroen Doumen
                         and Joris Wiersinga, published by
-                        <a href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>. Permission Provided.
+                        <a href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>.
+                        <br />
+                        Keyflower designed and published by <a href="https://uk.linkedin.com/in/richard-breese-34153b13"
+    target="_blank">R&D Games</a>. Permission Provided.
                     {% endblocktranslate %}
                 </p>
                 <p>

@@ -74,6 +74,19 @@ body.nd #contactEmailImg {
     vertical-align: middle;
 }
 
+/* Help page icons with black background */
+body.nd .topMenuIconForHelp {
+    width: 38px;
+    height: 38px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    margin-left: 0;
+    cursor: pointer;
+    text-align: center;
+    background-color: black;
+    vertical-align: middle;
+}
+
 /* ---------- PAGE CONTAINERS ---------- */
 body.nd .nd-page {
     width: 100%;

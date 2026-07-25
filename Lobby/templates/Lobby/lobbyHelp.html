@@ -1,468 +1,120 @@
 {% extends "Lobby/_nd_help_shell.html" %}
-
 {% load static %}
 {% load i18n %}
-
 {% block page_id_attr %}id="lobbyHelpPage"{% endblock %}
 {% block page_id_attr_legacy %}id="lobbyHelpPage"{% endblock %}
-{% block page_title %}{% translate "Games Help" %}{% endblock %}
-{% block nd_body %}
-
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Game Help Pages" %}</h2>
-        <div class="nd-help-pills">
-          <a class="nd-button nd-button-sm" href="{% url 'FCM:FCMhelp' %}">Food Chain Magnate</a>
-          <a class="nd-button nd-button-sm" href="{% url 'HLC:HLChelp' %}">Horseless Carriage</a>
-          <a class="nd-button nd-button-sm" href="{% url 'BUS:BUShelp' %}">Bus</a>
-          <a class="nd-button nd-button-sm" href="{% url 'TGZ:TGZhelp' %}">The Great Zimbabwe</a>
-          <a class="nd-button nd-button-sm nd-help-pill-wide" href="{% url 'CNS:CNShelp' %}">Cannes</a>
-          <a class="nd-button nd-button-sm nd-help-pill-wide" href="{% url 'AQY:AQYhelp' %}">Antiquity</a>
-          <a class="nd-button nd-button-sm nd-help-pill-wide" href="{% url 'IND:INDhelp' %}">Indonesia</a>
-          <a class="nd-button nd-button-sm nd-help-pill-wide" href="{% url 'KFW:KFWhelp' %}">Keyflower</a>
-          <a class="nd-button nd-button-sm nd-help-pill-wide" href="{% url 'WEB:WEBhelp' %}">Web</a>
-          <a class="nd-button nd-button-sm nd-help-pill-wide" href="{% url 'RNB:RNBhelp' %}">Roads &amp; Boats</a>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Profile Setup" %}</h2>
-        <div class="nd-help-qa">
-          <b><u>{% translate "What are the notifications?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              All games update live, so you can set whether you wish to hear a beep, bell, or nothing if a game has an update
-              whilst the game page is open.
-            {% endblocktranslate %}
-          </p>
-          <p>
-            {% blocktranslate trimmed %}
-              In addition, you can add email notifications, discord notifications, and slack notifications.
-              Notifications will be sent when it is your turn, when you are invited to a game, when a game finishes, etc.
-              You will also be notified when your turn is about to expire and you could be kicked out of a game.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "Email Notifications" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              It is recommended that you use discord / slack / telegram notifications.
-              The email system can occasionally have issues, but it is usually reliable.
-              Make sure you check your junk/spam folders to ensure emails are being delivered properly.
-              If you don't need email notifications, then please disable them, as they can lead to cost issues.
-              Some important emails will still be sent.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "How can I add a Discord Notification?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              You can add Discord notifications to one of your servers, or an existing server where you have administrator
-              privileges.
-            {% endblocktranslate %}
-          </p>
-          <p>
-            {% blocktranslate trimmed %}
-              To set up your own free server,
-              <a href="https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server-"
-                 target="_blank">click here</a>.
-              To set up a webhook and find the URL to copy into your Online Board Gamers Profile,
-              <a href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
-                 target="_blank">click here</a>.
-              Follow the guide to set up a webhook and "Copy Webhook URL". Then paste the link in to your profile on Online Board Gamers.
-              Note that Discord notifications have to be sent to a channel, not to your private messages.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "How can I add a Slack Notification?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Create a slack app and enable/create an incoming Webhook. Set it to post to a channel or your private messages. Then
-              paste the link in to your profile on Online Board Gamers.
-              For details on each step,
-              <a href="https://api.slack.com/messaging/webhooks" target="_blank">click here</a>.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "How can I add a Telegram Notification?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Start by initiating a chat with @OnlineBoardGamers_Bot using this link:
-            {% endblocktranslate %}
-          </p>
-          <p><a href="https://t.me/OnlineBoardGamers_Bot?start=OBG" target="_blank">https://t.me/OnlineBoardGamers_Bot?start=OBG</a></p>
-          <p>
-            {% blocktranslate trimmed %}
-              Send any message to the bot. Then you should be able to click the link in the reply from the bot to add Telegram notifications to your profile.
-              If this doesn't work, you can add your User ID to your profile page manually.
-              The easiest way to do this is to search for the "userinfobot" in the search bar on Telegram.
-              Say anything to it, such as "/start", or "hello", and it should reply with your details, starting with a 10 digit user ID.
-              Copy and paste this into your profile, and then add and test the webhook.
-            {% endblocktranslate %}
-          </p>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Lobby" %}</h2>
-        <div class="nd-help-qa">
-          {% include 'Lobby/_nd_lobby_icons.html' %}
-          <p>{% translate "<b>Note:</b> There are no specific starting options for Horseless Carriage, Bus, and Antiquity" %}</p>
-
-          <b><u>{% translate "What are the kickout icons?" %}</u></b>
-          <p>{% translate "Kickout icons indicate how long someone has to be inactive before they can be kicked out - this is the hard limit on the speed of a game." %}</p>
-          <div class="nd-help-kickouts">
-            <span class="helpStartingOptionSpan">
-              <img class="startingOptionHelpImg" src="/static/Lobby/images/kickout5.svg" width="50" height="50" alt="KO" title="{% translate "Kickout after 5 Minutes" %}">
-              {% translate "Kickout after 5 Minutes" %}
-            </span>
-            <span class="helpStartingOptionSpan">
-              <img class="startingOptionHelpImg" src="/static/Lobby/images/kickout10.svg" width="50" height="50" alt="KO" title="{% translate "Kickout after 10 Minutes" %}">
-              {% translate "Kickout after 10 Minutes" %}
-            </span>
-            <span class="helpStartingOptionSpan">
-              <img class="startingOptionHelpImg" src="/static/Lobby/images/kickout20.svg" width="50" height="50" alt="KO" title="{% translate "Kickout after 20 Minutes" %}">
-              {% translate "Kickout after 20 Minutes" %}
-            </span>
-            <span class="helpStartingOptionSpan">
-              <img class="startingOptionHelpImg" src="/static/Lobby/images/kickout50.svg" width="50" height="50" alt="KO" title="{% translate "Kickout after 12 Hours" %}">
-              {% translate "Kickout after 12 Hours" %}
-            </span>
-            <span class="helpStartingOptionSpan">
-              <img class="startingOptionHelpImg" src="/static/Lobby/images/kickout100.svg" width="50" height="50" alt="KO" title="{% translate "Kickout after 1 day" %}">
-              {% translate "Kickout after 1 day" %}
-            </span>
-            <span class="helpStartingOptionSpan">
-              <img class="startingOptionHelpImg" src="/static/Lobby/images/kickout200.svg" width="50" height="50" alt="KO" title="{% translate "Kickout after 2 days" %}">
-              {% translate "Kickout after 2 days" %}
-            </span>
-            <span class="helpStartingOptionSpan">
-              <img class="startingOptionHelpImg" src="/static/Lobby/images/kickout300.svg" width="50" height="50" alt="KO" title="{% translate "Kickout after 3 days" %}">
-              {% translate "Kickout after 3 days" %}
-            </span>
-            <span class="helpStartingOptionSpan">
-              <img class="startingOptionHelpImg" src="/static/Lobby/images/kickout500.svg" width="50" height="50" alt="KO" title="{% translate "Kickout after 5 days" %}">
-              {% translate "Kickout after 5 days" %}
-            </span>
-          </div>
-          <p>{% translate 'See "General Gameplay" for how kickouts work' %}</p>
-
-          <b><u>{% translate "What are the times displayed in the lobby?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Times are displayed according to the timezone of your device - so all times will be in local time,
-              in 24 hour format. To be precise, it uses the country setting in your browser.
-            {% endblocktranslate %}
-          </p>
-          <p>
-            {% blocktranslate trimmed %}
-              The elapsed times underneath the date/times, eg 1h 5m 23s, indicates the amount of time that has passed
-              since the last move was made, or since the game was created.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "What are the game columns?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Available Games - Games that are available to join and are not waiting for a repsonse from invited players
-            {% endblocktranslate %}
-          </p>
-          <p>{% translate "Current Games - Games you are currently playing" %}</p>
-          <p>{% translate "Waiting Games - Games you have joined, but are waiting for more players (either invited players or open to anyone)" %}</p>
-          <p>{% translate "Invitations - Games you have been invited to play" %}</p>
-          <p>
-            {% blocktranslate trimmed %}
-              Finished Games - Your finished games. Games you have resigned or been kicked from will stop showing under "Current Games" but will show here once they are finished
-            {% endblocktranslate %}
-          </p>
-          <p>
-            {% blocktranslate trimmed %}
-              If you create a game open to anyone, it will be shown under your "Waiting Games" and also visible in "Available Games".
-              If you create a game and invite other players, it will be shown under your "Waiting Games" only, until all invited players have responded.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "How can I leave a game that hasn't started?" %}</u></b>
-          <p>
-            {% translate 'Under "Waiting Games" there is a "Leave" button on the right. If you are not waiting for specific players to join, you can also see the game under "Available Games", with a "Leave" button on the left.' %}
-          </p>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2 id="navGameType">{% translate "Game Setup" %}</h2>
-        <div class="nd-help-qa">
-          <b><u>{% translate "What is a Practice Game?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              With a Practice Game, you will play as any number of players on the same device.
-              You will make ALL the moves, and it otherwise functions as a normal game.
-              This is useful for learning a game, testing strategies or trying new options!
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "What is a Learning Game?" %}</u></b>
-          <p>{% translate 'Tick the "Request Learning Game" option to request help with learning the game.' %}</p>
-          <ul>
-            <li>{% translate "When someone tries to join this game, it will notify them that the creator has requested a learning game" %}</li>
-            <li>{% translate "Use the in-game chat, discord, or another convenient method to chat with your trainer" %}</li>
-            <li>{% translate "This game will be excluded from the stats" %}</li>
-            <li>{% translate "2 Player Only" %}</li>
-            <li>
-              <b>
-                {% translate "Be aware that this does not force the person joining the game to help you; it is just a request. Usually people will only join these games if they are willing to help out though." %}
-              </b>
-            </li>
-          </ul>
-
-          <b><u>{% translate "What is an Experienced Game?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              An Experienced Game requires a minimum experience level in order to join.
-              This is to ensure only players with experience of the game, and experience of this site join the game.
-              The aim is to reduce the chance of someone abandoning the game and needing to be kicked out.
-              You need to have a Fair Play rating of at least <b>80%</b> in order to join an Experienced Game.
-              There is no required skill level; just a willingness to finish the game!
-            {% endblocktranslate %}
-          </p>
-          <ul>
-            <li>{% translate "Food Chain Magnate requires 2 finished, non-practice games" %}</li>
-            <li>{% translate "Horseless Carriage requires 1 finished, non-practice game" %}</li>
-            <li>{% translate "Bus requires 1 finished, non-practice game" %}</li>
-            <li>{% translate "The Great Zimbabwe requires 2 finished, non-practice games" %}</li>
-            <li>{% translate "Cannes requires 2 finished, non-practice games" %}</li>
-            <li>{% translate "Antiquity requires 2 finished, non-practice games" %}</li>
-          </ul>
-          <p>
-            {% blocktranslate trimmed %}
-              If you do not yet meet these requirements, and are unable to join an available game, then try starting your own game
-              and allowing anyone to join. Learning Games do count towards your experience level.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "What does the Playing Speed option do?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              The Playing Speed option mainly gives other players an idea of how fast you want the game to play. It is also
-              linked to the options for the length of time before an inactive player is removed.
-              Please note that often with 4 or more random players then more than 1 or 2 moves a day could be difficult,
-              especially if people are in different time zones. With 2 or 3 players however,
-              it is certainly possible to play several games in an evening!
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "How much time do I have left in a game?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              You can see a timer counting down to the next kickout in the top right, underneath where it says who you are logged
-              in as.
-              In fact, any game that is within 20 minutes of a kickout will display the timer.
-              No one will be kicked out until a player enters the game who isn't currently required to move,
-              and then they need to also confirm that they would like to proceed with the kickout.
-              All games will auto-update live, but if you are playing with 5/10/20 minute kickout
-              and your opponent doesn't appear to be moving,
-              then it is worth refreshing the game,
-              in case you lost internet signal at the same time the game update signal arrived.
-            {% endblocktranslate %}
-          </p>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "General Gameplay" %}</h2>
-        <div class="nd-help-qa">
-          <b><u>{% translate "How do kickouts work?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              For every game with a kickout of 12 hours or above each player is alloted a "Flex-Time" of 24 hours.
-              If someone is inactive for longer than the kickout duration set during game creation, then their Flex-Time will start reducing.
-              Once they have used all their Flex-Time, the game will have a bold yellow highlight in your "Current Games" list.
-              You can click on the game to enter it, and will then be asked if you wish to kick the player, or allow them more time.
-              If you do kickout the player, they will be replaced by a passive Bot, who just passes every move.
-              Flex-Time is on a per-game basis - each player has 24 hours of Flex-Time for the whole game.
-              Remaining Flex-Time can be viewed at the bottom of the "Reserve" screen, or underneath the board in Bus.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "What if I don't want to use kickouts" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              No player is ever forced to kick another player.
-              In order to kickout another player, you must enter a game that has timed out, and then confirm
-              that you would like to proceed with the kickout. So if you don't wish to use the kickout
-              then simply agree not to actively kick any player who hasn't moved.
-              The longest timer is 5 days. If you are playing with friends you can agree not to kick anyone out
-              if they go over this limit. For games with random players, it is not really fair to make people wait
-              more than 5 days for a single move. If you do need some extra time, then ask the other players using the
-              in-game chat, and most people are fine to wait a bit longer.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "What is the penalty for being kicked out?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Everyone makes mistakes, the first kickout in a year will only count as a loss, and not a kickout.
-              Any further kicks will negate a win for your statistics.
-              In addition, if you are kicked out of a tournament game you will be removed from the tournament.
-            {% endblocktranslate %}
-          </p>
-
-          <b><u>{% translate "When can I resign?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Resignation is available in all games, although it is discouraged in 3p+ games.
-              Resigning could unbalance the game for the remaning players, so it is stronly encouraged to stay in the game,
-              and try to meet an alternate objective (eg don't come last, sell the most trucks, use all the marketeers, etc).
-            {% endblocktranslate %}
-          </p>
-          <p>
-            <b>FCM:</b> {% translate "You can resign during any Restructure phase. You can also resign at the confirmation options when placing your initial restaurant. This will allow you to exit games you didn't mean to join. It will still count as a loss in your statistics." %}
-          </p>
-          <p><b>HLC:</b> {% translate "You can resign during the Research phase." %}</p>
-          <p><b>Bus:</b> {% translate "You can resign during your 'Choose Actions' phase." %}</p>
-          <p><b>TGZ:</b> {% translate "You can resign during your actions phase; as long as no one has exceeded their VR. In this case the game will end in the current round anyway." %}</p>
-          <p><b>CNS:</b> {% translate "You can resign during your 'place tiles' phase." %}</p>
-          <p><b>AQY:</b> {% translate "You can resign during your 'City Build' phase." %}</p>
-          <p><b>IND:</b> {% translate "You can resign during your 'Turn Order Bid' phase." %}</p>
-          <p><b>KFW:</b> {% translate "You can resign during your 'Bidding and Actions' phase, as long as at least one other player hasn't passed yet." %}</p>
-          <p><b>Web:</b> {% translate "You can resign before adding a tile to the grid." %}</p>
-
-          <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
-          <p>
-            {% blocktranslate trimmed %}
-              Please note that although resigning is discourageed in 3p+ games, at Online Board Gamers players will never be penalised
-              if they choose to resign. Sometimes it is a valid (and best!) option. It will count as a loss.
-            {% endblocktranslate %}
-          </p>
-        </div>
-      </div>
-
-      <div class="nd-card nd-section">
-        <h2>{% translate "Tournaments" %}</h2>
-        <p>{% translate "See" %} <a href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %}</a> {% translate "page" %}</p>
-      </div>
-
+{% block page_title %}
+  {% translate "Games Help" %}
 {% endblock %}
-
-{% block legacy_body %}
-
-
-
-      <h1>{% translate "Games Help" %}</h1>
-      <a class="linkOther" href="{% url 'FCM:FCMhelp' %}">{% translate "Food Chain Magnate Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'HLC:HLChelp' %}">{% translate "Horseless Carriage Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'BUS:BUShelp' %}">{% translate "Bus Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'TGZ:TGZhelp' %}">{% translate "The Great Zimbabwe Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'CNS:CNShelp' %}">{% translate "Cannes Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'AQY:AQYhelp' %}">{% translate "Antiquity Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'IND:INDhelp' %}">{% translate "Indonesia Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'KFW:KFWhelp' %}">{% translate "Keyflower Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'WEB:WEBhelp' %}">{% translate "Web Help Page" %}</a>
-      <br />
-      <a class="linkOther" href="{% url 'RNB:RNBhelp' %}">{% translate "Roads & Boats Help Page" %}</a>
-      <br />
-      <h1>{% translate "Website Help" %}</h1>
-      <h2>{% translate "Profile Setup" %}</h2>
-      <div class="lobbyHelpSection">
-        <b><u>{% translate "What are the notifications?" %}</u></b>
-        <br />
+{% block nd_body %}
+  <div class="nd-card nd-section">
+    <h2>{% translate "Game Help Pages" %}</h2>
+    <div class="nd-help-pills">
+      <a class="nd-button nd-button-sm" href="{% url 'FCM:FCMhelp' %}">Food Chain Magnate</a>
+      <a class="nd-button nd-button-sm" href="{% url 'HLC:HLChelp' %}">Horseless Carriage</a>
+      <a class="nd-button nd-button-sm" href="{% url 'BUS:BUShelp' %}">Bus</a>
+      <a class="nd-button nd-button-sm" href="{% url 'TGZ:TGZhelp' %}">The Great Zimbabwe</a>
+      <a class="nd-button nd-button-sm nd-help-pill-wide"
+         href="{% url 'CNS:CNShelp' %}">Cannes</a>
+      <a class="nd-button nd-button-sm nd-help-pill-wide"
+         href="{% url 'AQY:AQYhelp' %}">Antiquity</a>
+      <a class="nd-button nd-button-sm nd-help-pill-wide"
+         href="{% url 'IND:INDhelp' %}">Indonesia</a>
+      <a class="nd-button nd-button-sm nd-help-pill-wide"
+         href="{% url 'KFW:KFWhelp' %}">Keyflower</a>
+      <a class="nd-button nd-button-sm nd-help-pill-wide"
+         href="{% url 'WEB:WEBhelp' %}">Web</a>
+      <a class="nd-button nd-button-sm nd-help-pill-wide"
+         href="{% url 'RNB:RNBhelp' %}">Roads &amp; Boats</a>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "Profile Setup" %}</h2>
+    <div class="nd-help-qa">
+      <b><u>{% translate "What are the notifications?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           All games update live, so you can set whether you wish to hear a beep, bell, or nothing if a game has an update
           whilst the game page is open.
-          <br />
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
           In addition, you can add email notifications, discord notifications, and slack notifications.
-          <br />
           Notifications will be sent when it is your turn, when you are invited to a game, when a game finishes, etc.
-          <br />
           You will also be notified when your turn is about to expire and you could be kicked out of a game.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "Email Notifications" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "Email Notifications" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           It is recommended that you use discord / slack / telegram notifications.
-          <br />
-          THe email system can occasionally have issues, but it is usually reliable.
-          <br />
+          The email system can occasionally have issues, but it is usually reliable.
           Make sure you check your junk/spam folders to ensure emails are being delivered properly.
-          <br />
           If you don't need email notifications, then please disable them, as they can lead to cost issues.
-          <br />
           Some important emails will still be sent.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How can I add a Discord Notification?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "How can I add a Discord Notification?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           You can add Discord notifications to one of your servers, or an existing server where you have administrator
           privileges.
-          <br />
-          To set up your own free server, <a href="https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server-"
-    target="_blank">click
-          here</a>.
-          <br />
-          To set up a webhook and find the URL to copy into your Online Board Gamers Profile, <a href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
-    target="_blank">click
-          here</a>.
-          <br />
-          Follow the guide to set up a webhook and "Copy Webhook URL". Then paste the link in to your profile on Online Board
-          Gamers.
-          <br />
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          To set up your own free server,
+          <a href="https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server-"
+             target="_blank">click here</a>.
+          To set up a webhook and find the URL to copy into your Online Board Gamers Profile,
+          <a href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
+             target="_blank">click here</a>.
+          Follow the guide to set up a webhook and "Copy Webhook URL". Then paste the link in to your profile on Online Board Gamers.
           Note that Discord notifications have to be sent to a channel, not to your private messages.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How can I add a Slack Notification?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "How can I add a Slack Notification?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           Create a slack app and enable/create an incoming Webhook. Set it to post to a channel or your private messages. Then
           paste the link in to your profile on Online Board Gamers.
-          <br />
-          For details on each step, <a href="https://api.slack.com/messaging/webhooks" target="_blank">click here</a>.
+          For details on each step,
+          <a href="https://api.slack.com/messaging/webhooks" target="_blank">click here</a>.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How can I add a Telegram Notification?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "How can I add a Telegram Notification?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           Start by initiating a chat with @OnlineBoardGamers_Bot using this link:
-          <br />
-          <a href="https://t.me/OnlineBoardGamers_Bot?start=OBG" target="_blank">https://t.me/OnlineBoardGamers_Bot?start=OBG</a>
-          <br />
-          Send any message to the bot. Then you should be able to click the link in the reply from the bot to add Telegram notifications to your profile.
-          <br />
-          If this doesn't work, you can add your User ID to your profile page manually.
-          <br />
-          The easiest way to do this is to search for the "userinfobot" in the search bar on Telegram.
-          <br />
-          Say anything to it, such as "/start", or "hello", and it should reply with your details, starting with a 10 digit user ID.
-          <br />
-          Copy and paste this into your profile, and then add and test the webhook.
-          <br />
         {% endblocktranslate %}
-        <br />
-      </div>
-      <h2>{% translate "Lobby" %}</h2>
-      <div class="lobbyHelpSection">
-        {% include 'Lobby/lobby_icons.html' %}
-        <br />
+      </p>
+      <p>
+        <a href="https://t.me/OnlineBoardGamers_Bot?start=OBG" target="_blank">https://t.me/OnlineBoardGamers_Bot?start=OBG</a>
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          Send any message to the bot. Then you should be able to click the link in the reply from the bot to add Telegram notifications to your profile.
+          If this doesn't work, you can add your User ID to your profile page manually.
+          The easiest way to do this is to search for the "userinfobot" in the search bar on Telegram.
+          Say anything to it, such as "/start", or "hello", and it should reply with your details, starting with a 10 digit user ID.
+          Copy and paste this into your profile, and then add and test the webhook.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "Lobby" %}</h2>
+    <div class="nd-help-qa">
+      {% include 'Lobby/_nd_lobby_icons.html' %}
+      <p>
         {% translate "<b>Note:</b> There are no specific starting options for Horseless Carriage, Bus, and Antiquity" %}
-        <br />
-        <br />
-        <b><u>{% translate "What are the kickout icons?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "What are the kickout icons?" %}</u></b>
+      <p>
         {% translate "Kickout icons indicate how long someone has to be inactive before they can be kicked out - this is the hard limit on the speed of a game." %}
-        <br />
+      </p>
+      <div class="nd-help-kickouts">
         <span class="helpStartingOptionSpan">
           <img class="startingOptionHelpImg"
                src="/static/Lobby/images/kickout5.svg"
@@ -470,7 +122,8 @@
                height="50"
                alt="KO"
                title="{% translate "Kickout after 5 Minutes" %}">
-        {% translate "Kickout after 5 Minutes" %}</span>
+          {% translate "Kickout after 5 Minutes" %}
+        </span>
         <span class="helpStartingOptionSpan">
           <img class="startingOptionHelpImg"
                src="/static/Lobby/images/kickout10.svg"
@@ -478,7 +131,8 @@
                height="50"
                alt="KO"
                title="{% translate "Kickout after 10 Minutes" %}">
-        {% translate "Kickout after 10 Minutes" %}</span>
+          {% translate "Kickout after 10 Minutes" %}
+        </span>
         <span class="helpStartingOptionSpan">
           <img class="startingOptionHelpImg"
                src="/static/Lobby/images/kickout20.svg"
@@ -486,7 +140,8 @@
                height="50"
                alt="KO"
                title="{% translate "Kickout after 20 Minutes" %}">
-        {% translate "Kickout after 20 Minutes" %}</span>
+          {% translate "Kickout after 20 Minutes" %}
+        </span>
         <span class="helpStartingOptionSpan">
           <img class="startingOptionHelpImg"
                src="/static/Lobby/images/kickout50.svg"
@@ -494,7 +149,8 @@
                height="50"
                alt="KO"
                title="{% translate "Kickout after 12 Hours" %}">
-        {% translate "Kickout after 12 Hours" %}</span>
+          {% translate "Kickout after 12 Hours" %}
+        </span>
         <span class="helpStartingOptionSpan">
           <img class="startingOptionHelpImg"
                src="/static/Lobby/images/kickout100.svg"
@@ -502,7 +158,8 @@
                height="50"
                alt="KO"
                title="{% translate "Kickout after 1 day" %}">
-        {% translate "Kickout after 1 day" %}</span>
+          {% translate "Kickout after 1 day" %}
+        </span>
         <span class="helpStartingOptionSpan">
           <img class="startingOptionHelpImg"
                src="/static/Lobby/images/kickout200.svg"
@@ -510,7 +167,8 @@
                height="50"
                alt="KO"
                title="{% translate "Kickout after 2 days" %}">
-        {% translate "Kickout after 2 days" %}</span>
+          {% translate "Kickout after 2 days" %}
+        </span>
         <span class="helpStartingOptionSpan">
           <img class="startingOptionHelpImg"
                src="/static/Lobby/images/kickout300.svg"
@@ -518,7 +176,8 @@
                height="50"
                alt="KO"
                title="{% translate "Kickout after 3 days" %}">
-        {% translate "Kickout after 3 days" %}</span>
+          {% translate "Kickout after 3 days" %}
+        </span>
         <span class="helpStartingOptionSpan">
           <img class="startingOptionHelpImg"
                src="/static/Lobby/images/kickout500.svg"
@@ -526,119 +185,113 @@
                height="50"
                alt="KO"
                title="{% translate "Kickout after 5 days" %}">
-        {% translate "Kickout after 5 days" %}</span>
-        <br />
-        See "General Gameplay" for how kickouts work
-        <br />
-        <br />
-        <b><u>{% translate "What are the times displayed in the lobby?" %}</u></b>
-        <br />
+          {% translate "Kickout after 5 days" %}
+        </span>
+      </div>
+      <p>{% translate 'See "General Gameplay" for how kickouts work' %}</p>
+      <b><u>{% translate "What are the times displayed in the lobby?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           Times are displayed according to the timezone of your device - so all times will be in local time,
-          in 24 hour format. Tp be preciese, it uses the country setting in your browser.
-          <br />
+          in 24 hour format. To be precise, it uses the country setting in your browser.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
           The elapsed times underneath the date/times, eg 1h 5m 23s, indicates the amount of time that has passed
           since the last move was made, or since the game was created.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "What are the game columns?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "What are the game columns?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           Available Games - Games that are available to join and are not waiting for a repsonse from invited players
-          <br />
-          Current Games - Games you are currently playing
-          <br />
-          Waiting Games - Games you have joined, but are waiting for more players (either invited players or open to anyone)
-          <br />
-          Invitations - Games you have been invited to play
-          <br />
-          Finished Games - Your finished games. Games you have resigned or been kicked from will stop showing under "Current Games" but will show here once they are finished
-          <br />
         {% endblocktranslate %}
-        <br />
+      </p>
+      <p>{% translate "Current Games - Games you are currently playing" %}</p>
+      <p>
+        {% translate "Waiting Games - Games you have joined, but are waiting for more players (either invited players or open to anyone)" %}
+      </p>
+      <p>{% translate "Invitations - Games you have been invited to play" %}</p>
+      <p>
+        {% blocktranslate trimmed %}
+          Finished Games - Your finished games. Games you have resigned or been kicked from will stop showing under "Current Games" but will show here once they are finished
+        {% endblocktranslate %}
+      </p>
+      <p>
         {% blocktranslate trimmed %}
           If you create a game open to anyone, it will be shown under your "Waiting Games" and also visible in "Available Games".
-          <br />
           If you create a game and invite other players, it will be shown under your "Waiting Games" only, until all invited players have responded.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How can I leave a game that hasn't started?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "How can I leave a game that hasn't started?" %}</u></b>
+      <p>
         {% translate 'Under "Waiting Games" there is a "Leave" button on the right. If you are not waiting for specific players to join, you can also see the game under "Available Games", with a "Leave" button on the left.' %}
-        <br />
-        <br />
-      </div>
-      <h2 id="navGameType">{% translate "Game Setup" %}</h2>
-      <div class="lobbyHelpSection">
-        <b><u>{% translate "What is a Practice Game?" %}</u></b>
-        <br />
+      </p>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2 id="navGameType">{% translate "Game Setup" %}</h2>
+    <div class="nd-help-qa">
+      <b><u>{% translate "What is a Practice Game?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           With a Practice Game, you will play as any number of players on the same device.
-          <br />
           You will make ALL the moves, and it otherwise functions as a normal game.
-          <br />
           This is useful for learning a game, testing strategies or trying new options!
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "What is a Learning Game?" %}</u></b>
-        <br />
-        {% blocktranslate trimmed %}
-          Tick the "Request Learning Game" option to request help with learning the game.
-          <br />
-          <ul>
-            <li>When someone tries to join this game, it will notify them that the creator has requested a learning game</li>
-            <li>Use the in-game chat, discord, or another convenient method to chat with your trainer</li>
-            <li>This game will be excluded from the stats</li>
-            <li>2 Player Only</li>
-            <li>
-              <b>Be aware that this does not force the person joining the game to help you; it is just a request.
-                Usually people will only join these games if they are willing to help out though.
-              </b>
-            </li>
-          </ul>
-        {% endblocktranslate %}
-        <b><u>{% translate "What is an Experienced Game?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "What is a Learning Game?" %}</u></b>
+      <p>{% translate 'Tick the "Request Learning Game" option to request help with learning the game.' %}</p>
+      <ul>
+        <li>
+          {% translate "When someone tries to join this game, it will notify them that the creator has requested a learning game" %}
+        </li>
+        <li>{% translate "Use the in-game chat, discord, or another convenient method to chat with your trainer" %}</li>
+        <li>{% translate "This game will be excluded from the stats" %}</li>
+        <li>{% translate "2 Player Only" %}</li>
+        <li>
+          <b>
+            {% translate "Be aware that this does not force the person joining the game to help you; it is just a request. Usually people will only join these games if they are willing to help out though." %}
+          </b>
+        </li>
+      </ul>
+      <b><u>{% translate "What is an Experienced Game?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           An Experienced Game requires a minimum experience level in order to join.
           This is to ensure only players with experience of the game, and experience of this site join the game.
           The aim is to reduce the chance of someone abandoning the game and needing to be kicked out.
-          <br />
           You need to have a Fair Play rating of at least <b>80%</b> in order to join an Experienced Game.
-          <br />
-          <br />
           There is no required skill level; just a willingness to finish the game!
-          <br />
-          <ul>
-            <li>Food Chain Magnate requires 2 finished, non-practice games</li>
-            <li>Horseless Carriage requires 1 finished, non-practice game</li>
-            <li>Bus requires 1 finished, non-practice game</li>
-            <li>The Great Zimbabwe requires 2 finished, non-practice games</li>
-            <li>Cannes requires 2 finished, non-practice games</li>
-            <li>Antiquity requires 2 finished, non-practice games</li>
-          </ul>
+        {% endblocktranslate %}
+      </p>
+      <ul>
+        <li>{% translate "Food Chain Magnate requires 2 finished, non-practice games" %}</li>
+        <li>{% translate "Horseless Carriage requires 1 finished, non-practice game" %}</li>
+        <li>{% translate "Bus requires 1 finished, non-practice game" %}</li>
+        <li>{% translate "The Great Zimbabwe requires 2 finished, non-practice games" %}</li>
+        <li>{% translate "Cannes requires 2 finished, non-practice games" %}</li>
+        <li>{% translate "Antiquity requires 2 finished, non-practice games" %}</li>
+      </ul>
+      <p>
+        {% blocktranslate trimmed %}
           If you do not yet meet these requirements, and are unable to join an available game, then try starting your own game
           and allowing anyone to join. Learning Games do count towards your experience level.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "What does the Playing Speed option do?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "What does the Playing Speed option do?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           The Playing Speed option mainly gives other players an idea of how fast you want the game to play. It is also
           linked to the options for the length of time before an inactive player is removed.
           Please note that often with 4 or more random players then more than 1 or 2 moves a day could be difficult,
-          especially if
-          people are in different time zones. With 2 or 3 players however,
+          especially if people are in different time zones. With 2 or 3 players however,
           it is certainly possible to play several games in an evening!
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "How much time do I have left in a game?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "How much time do I have left in a game?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           You can see a timer counting down to the next kickout in the top right, underneath where it says who you are logged
           in as.
@@ -650,99 +303,501 @@
           then it is worth refreshing the game,
           in case you lost internet signal at the same time the game update signal arrived.
         {% endblocktranslate %}
-        <br />
-      </div>
-      <h2>{% translate "General Gameplay" %}</h2>
-      <div class="lobbyHelpSection">
-        <b><u>{% translate "How do kickouts work?" %}</u></b>
-        <br />
+      </p>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "General Gameplay" %}</h2>
+    <div class="nd-help-qa">
+      <b><u>{% translate "How do kickouts work?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           For every game with a kickout of 12 hours or above each player is alloted a "Flex-Time" of 24 hours.
           If someone is inactive for longer than the kickout duration set during game creation, then their Flex-Time will start reducing.
           Once they have used all their Flex-Time, the game will have a bold yellow highlight in your "Current Games" list.
-          You can click on the game to enter it, and will then be asked if you wish to kick the player, or allow them more
-          time.
-          <br />
+          You can click on the game to enter it, and will then be asked if you wish to kick the player, or allow them more time.
           If you do kickout the player, they will be replaced by a passive Bot, who just passes every move.
-          <br />
           Flex-Time is on a per-game basis - each player has 24 hours of Flex-Time for the whole game.
-          <br />
           Remaining Flex-Time can be viewed at the bottom of the "Reserve" screen, or underneath the board in Bus.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "What if I don't want to use kickouts" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "What if I don't want to use kickouts" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           No player is ever forced to kick another player.
           In order to kickout another player, you must enter a game that has timed out, and then confirm
           that you would like to proceed with the kickout. So if you don't wish to use the kickout
           then simply agree not to actively kick any player who hasn't moved.
-          <br />
           The longest timer is 5 days. If you are playing with friends you can agree not to kick anyone out
           if they go over this limit. For games with random players, it is not really fair to make people wait
           more than 5 days for a single move. If you do need some extra time, then ask the other players using the
           in-game chat, and most people are fine to wait a bit longer.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "What is the penalty for being kicked out?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "What is the penalty for being kicked out?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           Everyone makes mistakes, the first kickout in a year will only count as a loss, and not a kickout.
           Any further kicks will negate a win for your statistics.
           In addition, if you are kicked out of a tournament game you will be removed from the tournament.
         {% endblocktranslate %}
-        <br />
-        <br />
-        <b><u>{% translate "When can I resign?" %}</u></b>
-        <br />
+      </p>
+      <b><u>{% translate "When can I resign?" %}</u></b>
+      <p>
         {% blocktranslate trimmed %}
           Resignation is available in all games, although it is discouraged in 3p+ games.
           Resigning could unbalance the game for the remaning players, so it is stronly encouraged to stay in the game,
           and try to meet an alternate objective (eg don't come last, sell the most trucks, use all the marketeers, etc).
-          <br />
-          <b><u>Food Chain Magnate</b></u>: You can resign during any Restructure phase.
-            You can also resign at the confirmation options when placing your initial restaurant.
-            This will allow you to exit games you didn't mean to join. It will still count as a loss in your
-            statistics.
-            <br />
-            <b><u>Horseless Carriage</b></u>:  You can resign during the Research phase.
-              <br />
-              <b><u>Bus</b></u>: You can resign during your "Choose Actions" phase.
-                <br />
-                <b><u>The Great Zimbabwe</b></u>: You can resign during your actions phase; as long as no one has exceeded their VR. In this case the game will end in the current round anyway.
-                  <br />
-                  <b><u>Cannes</b></u>: You can resign during your "place tiles" phase.
-                    <br />
-                    <b><u>Antiquity</b></u>: You can resign during your "City Build" phase.
-                      <br />
-                      <b><u>Indonesia</b></u>: You can resign during your "Turn Order Bid" phase.
-                        <br />
-                        <b><u>Keyflower</b></u>: You can resign during your "Bidding and Actions" phase, as long as at least one other player hasn't passed yet.
-                          <br />
-                          <b><u>Web</b></u>: You can resign before adding a tile to the grid.
-                          {% endblocktranslate %}
-                          <br />
-                          <br />
-                          <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
-                          <br />
-                          {% blocktranslate trimmed %}
-                            Please note that although resigning is discourageed in 3p+ games, at Online Board Gamers players will never be penalised
-                            if they choose to resign.
-                            Sometimes it is a valid (and best!) option. It will count as a loss.
-                          {% endblocktranslate %}
-                          <br />
-                          <br />
-                        </div>
-                        <h2>{% translate "Tournaments" %}</h2>
-                        <div class="lobbyHelpSection">
-                          See <a class="linkOther" href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %}</a> page
-                        </div>
-                        <br />
-                        <br />
-                      {% include 'Lobby/donate/donateBanner.html' %}
-                      {% include 'Lobby/common/homeButton.html' %}
-
+        {% endblocktranslate %}
+      </p>
+      <p>
+        <b>FCM:</b> {% translate "You can resign during any Restructure phase. You can also resign at the confirmation options when placing your initial restaurant. This will allow you to exit games you didn't mean to join. It will still count as a loss in your statistics." %}
+      </p>
+      <p>
+        <b>HLC:</b> {% translate "You can resign during the Research phase." %}
+      </p>
+      <p>
+        <b>Bus:</b> {% translate "You can resign during your 'Choose Actions' phase." %}
+      </p>
+      <p>
+        <b>TGZ:</b> {% translate "You can resign during your actions phase; as long as no one has exceeded their VR. In this case the game will end in the current round anyway." %}
+      </p>
+      <p>
+        <b>CNS:</b> {% translate "You can resign during your 'place tiles' phase." %}
+      </p>
+      <p>
+        <b>AQY:</b> {% translate "You can resign during your 'City Build' phase." %}
+      </p>
+      <p>
+        <b>IND:</b> {% translate "You can resign during your 'Turn Order Bid' phase." %}
+      </p>
+      <p>
+        <b>KFW:</b> {% translate "You can resign during your 'Bidding and Actions' phase, as long as at least one other player hasn't passed yet." %}
+      </p>
+      <p>
+        <b>Web:</b> {% translate "You can resign before adding a tile to the grid." %}
+      </p>
+      <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
+      <p>
+        {% blocktranslate trimmed %}
+          Please note that although resigning is discourageed in 3p+ games, at Online Board Gamers players will never be penalised
+          if they choose to resign. Sometimes it is a valid (and best!) option. It will count as a loss.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "Tournaments" %}</h2>
+    <p>
+      {% translate "See" %} <a href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %}</a> {% translate "page" %}
+    </p>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "Further Help" %}</h2>
+    <p>
+      <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30" />
+    </p>
+  </div>
 {% endblock %}
-
+{% block legacy_body %}
+  <h1>{% translate "Games Help" %}</h1>
+  <a class="linkOther" href="{% url 'FCM:FCMhelp' %}">{% translate "Food Chain Magnate Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'HLC:HLChelp' %}">{% translate "Horseless Carriage Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'BUS:BUShelp' %}">{% translate "Bus Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'TGZ:TGZhelp' %}">{% translate "The Great Zimbabwe Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'CNS:CNShelp' %}">{% translate "Cannes Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'AQY:AQYhelp' %}">{% translate "Antiquity Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'IND:INDhelp' %}">{% translate "Indonesia Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'KFW:KFWhelp' %}">{% translate "Keyflower Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'WEB:WEBhelp' %}">{% translate "Web Help Page" %}</a>
+  <br />
+  <a class="linkOther" href="{% url 'RNB:RNBhelp' %}">{% translate "Roads & Boats Help Page" %}</a>
+  <br />
+  <h1>{% translate "Website Help" %}</h1>
+  <h2>{% translate "Profile Setup" %}</h2>
+  <div class="lobbyHelpSection">
+    <b><u>{% translate "What are the notifications?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      All games update live, so you can set whether you wish to hear a beep, bell, or nothing if a game has an update
+      whilst the game page is open.
+      <br />
+      In addition, you can add email notifications, discord notifications, and slack notifications.
+      <br />
+      Notifications will be sent when it is your turn, when you are invited to a game, when a game finishes, etc.
+      <br />
+      You will also be notified when your turn is about to expire and you could be kicked out of a game.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "Email Notifications" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      It is recommended that you use discord / slack / telegram notifications.
+      <br />
+      THe email system can occasionally have issues, but it is usually reliable.
+      <br />
+      Make sure you check your junk/spam folders to ensure emails are being delivered properly.
+      <br />
+      If you don't need email notifications, then please disable them, as they can lead to cost issues.
+      <br />
+      Some important emails will still be sent.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "How can I add a Discord Notification?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      You can add Discord notifications to one of your servers, or an existing server where you have administrator
+      privileges.
+      <br />
+      To set up your own free server, <a href="https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server-"
+    target="_blank">click
+      here</a>.
+      <br />
+      To set up a webhook and find the URL to copy into your Online Board Gamers Profile, <a href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
+    target="_blank">click
+      here</a>.
+      <br />
+      Follow the guide to set up a webhook and "Copy Webhook URL". Then paste the link in to your profile on Online Board
+      Gamers.
+      <br />
+      Note that Discord notifications have to be sent to a channel, not to your private messages.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "How can I add a Slack Notification?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      Create a slack app and enable/create an incoming Webhook. Set it to post to a channel or your private messages. Then
+      paste the link in to your profile on Online Board Gamers.
+      <br />
+      For details on each step, <a href="https://api.slack.com/messaging/webhooks" target="_blank">click here</a>.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "How can I add a Telegram Notification?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      Start by initiating a chat with @OnlineBoardGamers_Bot using this link:
+      <br />
+      <a href="https://t.me/OnlineBoardGamers_Bot?start=OBG" target="_blank">https://t.me/OnlineBoardGamers_Bot?start=OBG</a>
+      <br />
+      Send any message to the bot. Then you should be able to click the link in the reply from the bot to add Telegram notifications to your profile.
+      <br />
+      If this doesn't work, you can add your User ID to your profile page manually.
+      <br />
+      The easiest way to do this is to search for the "userinfobot" in the search bar on Telegram.
+      <br />
+      Say anything to it, such as "/start", or "hello", and it should reply with your details, starting with a 10 digit user ID.
+      <br />
+      Copy and paste this into your profile, and then add and test the webhook.
+      <br />
+    {% endblocktranslate %}
+    <br />
+  </div>
+  <h2>{% translate "Lobby" %}</h2>
+  <div class="lobbyHelpSection">
+    {% include 'Lobby/lobby_icons.html' %}
+    <br />
+    {% translate "<b>Note:</b> There are no specific starting options for Horseless Carriage, Bus, and Antiquity" %}
+    <br />
+    <br />
+    <b><u>{% translate "What are the kickout icons?" %}</u></b>
+    <br />
+    {% translate "Kickout icons indicate how long someone has to be inactive before they can be kicked out - this is the hard limit on the speed of a game." %}
+    <br />
+    <span class="helpStartingOptionSpan">
+      <img class="startingOptionHelpImg"
+           src="/static/Lobby/images/kickout5.svg"
+           width="50"
+           height="50"
+           alt="KO"
+           title="{% translate "Kickout after 5 Minutes" %}">
+    {% translate "Kickout after 5 Minutes" %}</span>
+    <span class="helpStartingOptionSpan">
+      <img class="startingOptionHelpImg"
+           src="/static/Lobby/images/kickout10.svg"
+           width="50"
+           height="50"
+           alt="KO"
+           title="{% translate "Kickout after 10 Minutes" %}">
+    {% translate "Kickout after 10 Minutes" %}</span>
+    <span class="helpStartingOptionSpan">
+      <img class="startingOptionHelpImg"
+           src="/static/Lobby/images/kickout20.svg"
+           width="50"
+           height="50"
+           alt="KO"
+           title="{% translate "Kickout after 20 Minutes" %}">
+    {% translate "Kickout after 20 Minutes" %}</span>
+    <span class="helpStartingOptionSpan">
+      <img class="startingOptionHelpImg"
+           src="/static/Lobby/images/kickout50.svg"
+           width="50"
+           height="50"
+           alt="KO"
+           title="{% translate "Kickout after 12 Hours" %}">
+    {% translate "Kickout after 12 Hours" %}</span>
+    <span class="helpStartingOptionSpan">
+      <img class="startingOptionHelpImg"
+           src="/static/Lobby/images/kickout100.svg"
+           width="50"
+           height="50"
+           alt="KO"
+           title="{% translate "Kickout after 1 day" %}">
+    {% translate "Kickout after 1 day" %}</span>
+    <span class="helpStartingOptionSpan">
+      <img class="startingOptionHelpImg"
+           src="/static/Lobby/images/kickout200.svg"
+           width="50"
+           height="50"
+           alt="KO"
+           title="{% translate "Kickout after 2 days" %}">
+    {% translate "Kickout after 2 days" %}</span>
+    <span class="helpStartingOptionSpan">
+      <img class="startingOptionHelpImg"
+           src="/static/Lobby/images/kickout300.svg"
+           width="50"
+           height="50"
+           alt="KO"
+           title="{% translate "Kickout after 3 days" %}">
+    {% translate "Kickout after 3 days" %}</span>
+    <span class="helpStartingOptionSpan">
+      <img class="startingOptionHelpImg"
+           src="/static/Lobby/images/kickout500.svg"
+           width="50"
+           height="50"
+           alt="KO"
+           title="{% translate "Kickout after 5 days" %}">
+    {% translate "Kickout after 5 days" %}</span>
+    <br />
+    See "General Gameplay" for how kickouts work
+    <br />
+    <br />
+    <b><u>{% translate "What are the times displayed in the lobby?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      Times are displayed according to the timezone of your device - so all times will be in local time,
+      in 24 hour format. Tp be preciese, it uses the country setting in your browser.
+      <br />
+      The elapsed times underneath the date/times, eg 1h 5m 23s, indicates the amount of time that has passed
+      since the last move was made, or since the game was created.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "What are the game columns?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      Available Games - Games that are available to join and are not waiting for a repsonse from invited players
+      <br />
+      Current Games - Games you are currently playing
+      <br />
+      Waiting Games - Games you have joined, but are waiting for more players (either invited players or open to anyone)
+      <br />
+      Invitations - Games you have been invited to play
+      <br />
+      Finished Games - Your finished games. Games you have resigned or been kicked from will stop showing under "Current Games" but will show here once they are finished
+      <br />
+    {% endblocktranslate %}
+    <br />
+    {% blocktranslate trimmed %}
+      If you create a game open to anyone, it will be shown under your "Waiting Games" and also visible in "Available Games".
+      <br />
+      If you create a game and invite other players, it will be shown under your "Waiting Games" only, until all invited players have responded.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "How can I leave a game that hasn't started?" %}</u></b>
+    <br />
+    {% translate 'Under "Waiting Games" there is a "Leave" button on the right. If you are not waiting for specific players to join, you can also see the game under "Available Games", with a "Leave" button on the left.' %}
+    <br />
+    <br />
+  </div>
+  <h2 id="navGameType">{% translate "Game Setup" %}</h2>
+  <div class="lobbyHelpSection">
+    <b><u>{% translate "What is a Practice Game?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      With a Practice Game, you will play as any number of players on the same device.
+      <br />
+      You will make ALL the moves, and it otherwise functions as a normal game.
+      <br />
+      This is useful for learning a game, testing strategies or trying new options!
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "What is a Learning Game?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      Tick the "Request Learning Game" option to request help with learning the game.
+      <br />
+      <ul>
+        <li>When someone tries to join this game, it will notify them that the creator has requested a learning game</li>
+        <li>Use the in-game chat, discord, or another convenient method to chat with your trainer</li>
+        <li>This game will be excluded from the stats</li>
+        <li>2 Player Only</li>
+        <li>
+          <b>Be aware that this does not force the person joining the game to help you; it is just a request.
+            Usually people will only join these games if they are willing to help out though.
+          </b>
+        </li>
+      </ul>
+    {% endblocktranslate %}
+    <b><u>{% translate "What is an Experienced Game?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      An Experienced Game requires a minimum experience level in order to join.
+      This is to ensure only players with experience of the game, and experience of this site join the game.
+      The aim is to reduce the chance of someone abandoning the game and needing to be kicked out.
+      <br />
+      You need to have a Fair Play rating of at least <b>80%</b> in order to join an Experienced Game.
+      <br />
+      <br />
+      There is no required skill level; just a willingness to finish the game!
+      <br />
+      <ul>
+        <li>Food Chain Magnate requires 2 finished, non-practice games</li>
+        <li>Horseless Carriage requires 1 finished, non-practice game</li>
+        <li>Bus requires 1 finished, non-practice game</li>
+        <li>The Great Zimbabwe requires 2 finished, non-practice games</li>
+        <li>Cannes requires 2 finished, non-practice games</li>
+        <li>Antiquity requires 2 finished, non-practice games</li>
+      </ul>
+      If you do not yet meet these requirements, and are unable to join an available game, then try starting your own game
+      and allowing anyone to join. Learning Games do count towards your experience level.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "What does the Playing Speed option do?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      The Playing Speed option mainly gives other players an idea of how fast you want the game to play. It is also
+      linked to the options for the length of time before an inactive player is removed.
+      Please note that often with 4 or more random players then more than 1 or 2 moves a day could be difficult,
+      especially if
+      people are in different time zones. With 2 or 3 players however,
+      it is certainly possible to play several games in an evening!
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "How much time do I have left in a game?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      You can see a timer counting down to the next kickout in the top right, underneath where it says who you are logged
+      in as.
+      In fact, any game that is within 20 minutes of a kickout will display the timer.
+      No one will be kicked out until a player enters the game who isn't currently required to move,
+      and then they need to also confirm that they would like to proceed with the kickout.
+      All games will auto-update live, but if you are playing with 5/10/20 minute kickout
+      and your opponent doesn't appear to be moving,
+      then it is worth refreshing the game,
+      in case you lost internet signal at the same time the game update signal arrived.
+    {% endblocktranslate %}
+    <br />
+  </div>
+  <h2>{% translate "General Gameplay" %}</h2>
+  <div class="lobbyHelpSection">
+    <b><u>{% translate "How do kickouts work?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      For every game with a kickout of 12 hours or above each player is alloted a "Flex-Time" of 24 hours.
+      If someone is inactive for longer than the kickout duration set during game creation, then their Flex-Time will start reducing.
+      Once they have used all their Flex-Time, the game will have a bold yellow highlight in your "Current Games" list.
+      You can click on the game to enter it, and will then be asked if you wish to kick the player, or allow them more
+      time.
+      <br />
+      If you do kickout the player, they will be replaced by a passive Bot, who just passes every move.
+      <br />
+      Flex-Time is on a per-game basis - each player has 24 hours of Flex-Time for the whole game.
+      <br />
+      Remaining Flex-Time can be viewed at the bottom of the "Reserve" screen, or underneath the board in Bus.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "What if I don't want to use kickouts" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      No player is ever forced to kick another player.
+      In order to kickout another player, you must enter a game that has timed out, and then confirm
+      that you would like to proceed with the kickout. So if you don't wish to use the kickout
+      then simply agree not to actively kick any player who hasn't moved.
+      <br />
+      The longest timer is 5 days. If you are playing with friends you can agree not to kick anyone out
+      if they go over this limit. For games with random players, it is not really fair to make people wait
+      more than 5 days for a single move. If you do need some extra time, then ask the other players using the
+      in-game chat, and most people are fine to wait a bit longer.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "What is the penalty for being kicked out?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      Everyone makes mistakes, the first kickout in a year will only count as a loss, and not a kickout.
+      Any further kicks will negate a win for your statistics.
+      In addition, if you are kicked out of a tournament game you will be removed from the tournament.
+    {% endblocktranslate %}
+    <br />
+    <br />
+    <b><u>{% translate "When can I resign?" %}</u></b>
+    <br />
+    {% blocktranslate trimmed %}
+      Resignation is available in all games, although it is discouraged in 3p+ games.
+      Resigning could unbalance the game for the remaning players, so it is stronly encouraged to stay in the game,
+      and try to meet an alternate objective (eg don't come last, sell the most trucks, use all the marketeers, etc).
+      <br />
+      <b><u>Food Chain Magnate</b></u>: You can resign during any Restructure phase.
+        You can also resign at the confirmation options when placing your initial restaurant.
+        This will allow you to exit games you didn't mean to join. It will still count as a loss in your
+        statistics.
+        <br />
+        <b><u>Horseless Carriage</b></u>:  You can resign during the Research phase.
+          <br />
+          <b><u>Bus</b></u>: You can resign during your "Choose Actions" phase.
+            <br />
+            <b><u>The Great Zimbabwe</b></u>: You can resign during your actions phase; as long as no one has exceeded their VR. In this case the game will end in the current round anyway.
+              <br />
+              <b><u>Cannes</b></u>: You can resign during your "place tiles" phase.
+                <br />
+                <b><u>Antiquity</b></u>: You can resign during your "City Build" phase.
+                  <br />
+                  <b><u>Indonesia</b></u>: You can resign during your "Turn Order Bid" phase.
+                    <br />
+                    <b><u>Keyflower</b></u>: You can resign during your "Bidding and Actions" phase, as long as at least one other player hasn't passed yet.
+                      <br />
+                      <b><u>Web</b></u>: You can resign before adding a tile to the grid.
+                      {% endblocktranslate %}
+                      <br />
+                      <br />
+                      <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
+                      <br />
+                      {% blocktranslate trimmed %}
+                        Please note that although resigning is discourageed in 3p+ games, at Online Board Gamers players will never be penalised
+                        if they choose to resign.
+                        Sometimes it is a valid (and best!) option. It will count as a loss.
+                      {% endblocktranslate %}
+                      <br />
+                      <br />
+                    </div>
+                    <h2>{% translate "Tournaments" %}</h2>
+                    <div class="lobbyHelpSection">
+                      See <a class="linkOther" href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %}</a> page
+                    </div>
+                    <br />
+                    <br />
+                    {% include 'Lobby/donate/donateBanner.html' %}
+                    {% include 'Lobby/common/homeButton.html' %}
+                  {% endblock %}
