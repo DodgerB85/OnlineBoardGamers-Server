@@ -1554,6 +1554,46 @@ body.nd .nd-help-qa iframe[style*="position:absolute"] {
     height: 100% !important;
 }
 
+/* ---------- AQY HELP SIDE-BY-SIDE LAYOUT ---------- */
+body.nd .sideBYsideContainerAQY {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    margin: 12px 0;
+    gap: 16px;
+}
+
+body.nd .sideBYsideLeftAQY {
+    flex: 1 1 400px;
+    min-width: 0;
+}
+
+body.nd .sideBYsideRightAQY {
+    flex: 0 0 auto;
+}
+
+body.nd .sideBYsideRightAQY img {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 720px) {
+    body.nd .sideBYsideContainerAQY {
+        flex-direction: column;
+    }
+    body.nd .sideBYsideLeftAQY,
+    body.nd .sideBYsideRightAQY {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}
+
+/* AQY info icon - align with text */
+body.nd #infoIcon {
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
 /* ---------- 09 ROW GRID (shared — lobby + stats) ---------- */
 /* Row anatomy used by every .nd-table that emits rows with class .nd-row09.
    Defined here (rather than lobby_new.css) so the stats page ten-games list

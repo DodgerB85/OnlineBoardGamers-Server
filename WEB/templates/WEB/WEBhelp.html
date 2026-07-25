@@ -52,32 +52,29 @@
           before you rewind, and if you continue to rewind it will be recoded in the History.
         {% endblocktranslate %}
       </p>
-      <p>
+      <div class="imageWithTextDiv">
         <img src="{% static 'Lobby/images/help/WEBselectTile.jpg' %}"
              alt="Select a Tile"
              width="379"
              height="50"
-             id="WEBselectTileImg"
-             style="max-width:100%">
-      </p>
-      <p>
+             id="WEBselectTileImg">
         {% blocktranslate trimmed %}
           At the start of your turn, you must add a tile from your supply to the grid.
+          After selecting a tile, you may rotate it.
+          Be Careful! If you ever run out of tiles, you will not be able to take any more actions in the game.
         {% endblocktranslate %}
-      </p>
-      <p>{% translate "After selecting a tile, you may rotate it." %}</p>
-      <p>
-        <b>{% translate "Be Careful!" %}</b> {% translate "If you ever run out of tiles, you will not be able to take any more actions in the game." %}
-      </p>
-      <p>
+      </div>
+      <br />
+      <div class="imageWithTextDiv">
         <img src="{% static 'Lobby/images/help/WEBnoSupply.jpg' %}"
              alt="No Supply"
              width="150"
-             height="143"
-             style="max-width:100%">
-      </p>
-      <p>{% translate "If a player takes the last tile in a supply pile, the game will end immediately." %}</p>
-      <p>{% translate "You will get a warning before this happens." %}</p>
+             height="143">
+        {% blocktranslate trimmed %}
+          If a player takes the last tile in a supply pile, the game will end immediately.
+          You will get a warning before this happens.
+        {% endblocktranslate %}
+      </div>
     </div>
   </div>
   <div class="nd-card nd-section">

@@ -30,55 +30,63 @@
              src="{% static 'AQY/images/help/clickPlayers.jpg' %}"
              class="helpImage clickPlayers" />
       </p>
-      <p>
-        <b>{% translate "During City Building:" %}</b>
-      </p>
-      <p>
-        <span class="greenArea">{% translate "Use the green area for main actions: Reset Whole Turn / Undo / Finish Actions (and End Turn)" %}</span>
-      </p>
-      <p>
-        <span class="purpleArea">{% translate "Use the purple area to interact with your cities: (Re)move buildings, man and un-man buildings" %}</span>
-      </p>
-      <p>
-        <span class="blueArea">{% translate "Use the blue area to directly use buildings, eg Market, Faculty of Theology" %}</span>
-      </p>
-      <p>
-        {% blocktranslate trimmed %}
-          NOTE: You may MOVE unused buildings during city building on the turn they were built even without the Saint power.
-          This is effectively a shortcut to prevent you having to reset the whole turn just to place a building somewhere slightly different.
-          Using certain buildings or performing certain actions will lock in your buildings;
-          in this case you will need to reset your turn in order to perform your actions differently.
-        {% endblocktranslate %}
-      </p>
-      <p>
-        <img id="helpCity"
-             src="{% static 'AQY/images/help/helpCity.jpg' %}"
-             width="600"
-             height="415"
-             alt="City Screen" />
-      </p>
-      <p>{% translate "To the right of the map you can find more map controls and information." %}</p>
-      <p>
-        {% translate "At the top is the hex detail area - mouse over or long press a map hex to view its contents in detail." %}
-      </p>
-      <p>
-        {% blocktranslate trimmed %}
-          Next is the current Famine Level, followed by 3 map options. You can change the map hex display, the map resources display, and hide everything added to the map
-          to view the underlying terrain clearly.
-        {% endblocktranslate %}
-      </p>
-      <p>{% translate "These can be set permanently in your Antiquity Preferences." %}</p>
-      <p>{% translate "In the Zone of Control area, you can toggle all ZoC lines and all ZoC overlaps." %}</p>
-      <p>
-        {% translate "You can then view the information for selected player(s) - either their ZoC outline, or the overlapping hexes / unique hexes for the selected players." %}
-      </p>
-      <p>
-        <img id="helpZOC"
-             src="{% static 'AQY/images/help/ZOCpanel.jpg' %}"
-             width="125"
-             height="500"
-             alt="ZOC Panel" />
-      </p>
+      <div class="sideBYsideContainerAQY">
+        <div class="sideBYsideLeftAQY">
+          <p>
+            <b>{% translate "During City Building:" %}</b>
+          </p>
+          <p>
+            <span class="greenArea">{% translate "Use the green area for main actions: Reset Whole Turn / Undo / Finish Actions (and End Turn)" %}</span>
+          </p>
+          <p>
+            <span class="purpleArea">{% translate "Use the purple area to interact with your cities: (Re)move buildings, man and un-man buildings" %}</span>
+          </p>
+          <p>
+            <span class="blueArea">{% translate "Use the blue area to directly use buildings, eg Market, Faculty of Theology" %}</span>
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              NOTE: You may MOVE unused buildings during city building on the turn they were built even without the Saint power.
+              This is effectively a shortcut to prevent you having to reset the whole turn just to place a building somewhere slightly different.
+              Using certain buildings or performing certain actions will lock in your buildings;
+              in this case you will need to reset your turn in order to perform your actions differently.
+            {% endblocktranslate %}
+          </p>
+        </div>
+        <div class="sideBYsideRightAQY">
+          <img id="helpCity"
+               src="{% static 'AQY/images/help/helpCity.jpg' %}"
+               width="600"
+               height="415"
+               alt="City Screen" />
+        </div>
+      </div>
+      <div class="sideBYsideContainerAQY">
+        <div class="sideBYsideLeftAQY">
+          <p>{% translate "To the right of the map you can find more map controls and information." %}</p>
+          <p>
+            {% translate "At the top is the hex detail area - mouse over or long press a map hex to view its contents in detail." %}
+          </p>
+          <p>
+            {% blocktranslate trimmed %}
+              Next is the current Famine Level, followed by 3 map options. You can change the map hex display, the map resources display, and hide everything added to the map
+              to view the underlying terrain clearly.
+            {% endblocktranslate %}
+          </p>
+          <p>{% translate "These can be set permanently in your Antiquity Preferences." %}</p>
+          <p>{% translate "In the Zone of Control area, you can toggle all ZoC lines and all ZoC overlaps." %}</p>
+          <p>
+            {% translate "You can then view the information for selected player(s) - either their ZoC outline, or the overlapping hexes / unique hexes for the selected players." %}
+          </p>
+        </div>
+        <div class="sideBYsideRightAQY">
+          <img id="helpZOC"
+               src="{% static 'AQY/images/help/ZOCpanel.jpg' %}"
+               width="125"
+               height="500"
+               alt="ZOC Panel" />
+        </div>
+      </div>
       <p>
         <img src="{% static 'AQY/images/icon-info.svg' %}"
              width="38"
