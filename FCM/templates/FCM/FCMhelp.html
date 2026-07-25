@@ -1,7 +1,9 @@
 {% extends "Lobby/_nd_help_shell.html" %}
 {% load static %}
 {% load i18n %}
-{% block page_title %}{% translate "Food Chain Magnate Help" %}{% endblock %}
+{% block page_title %}
+  {% translate "Food Chain Magnate Help" %}
+{% endblock %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "Rules Help" %}</h2>
@@ -11,16 +13,15 @@
         Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf" target="_blank">here</a>
         <br />
         Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
-   target="_blank">here</a>
+    target="_blank">here</a>
         <br />
         China Expansion rules available <a href="{{ fcm_china_help_url }}" target="_blank">here</a>
         <br />
         How to play guide example <a href="https://www.myboardgameguides.com/game-strategy/game-specific-strategy/food-chain-magnate-strategy-guide/"
-   target="_blank">here</a>
+    target="_blank">here</a>
       {% endblocktranslate %}
     </div>
   </div>
-
   <div class="nd-card nd-section">
     <h2>{% translate "Game Play" %}</h2>
     <div class="nd-help-qa">
@@ -31,7 +32,6 @@
           Please see the dedicated Coffee help page <a href="{{ the_url }}">Here</a>
         {% endblocktranslate %}
       </p>
-
       <b><u>{% translate "What are the Expert Options?" %}</u></b>
       <p>
         {% blocktranslate trimmed %}
@@ -58,10 +58,8 @@
           in phases needing to be played that you had selected to skip.
         {% endblocktranslate %}
       </p>
-
       <b><u>{% translate "Where do the scenarios come from?" %}</u></b>
       <p>{% translate "They are suggested in the Ketchup Expansion manual." %}</p>
-
       <b><u>{% translate "What is Sandbox Mode?" %}</u></b>
       <p>
         {% blocktranslate trimmed %}
@@ -74,7 +72,9 @@
           Sandbox mode unlocks a panel under the player summaries allowing you to add and remove employees at will on your turn.
         {% endblocktranslate %}
       </p>
-      <p><b>{% translate "Note:" %}</b> {% translate "You must have 'Aid' turned on to view this." %}</p>
+      <p>
+        <b>{% translate "Note:" %}</b> {% translate "You must have 'Aid' turned on to view this." %}
+      </p>
       <p>
         <b>{% translate "Note:" %}</b>
         {% blocktranslate trimmed %}
@@ -89,10 +89,20 @@
           If you gain an employee this way during restructuring and place the employee in your structure, then it will be saved.
         {% endblocktranslate %}
       </p>
-
       <b><u>{% translate "When Can I resign?" %}</u></b>
       <p>{% translate "You can resign during the \"Restructuring\" phase." %}</p>
     </div>
+  </div>
+  <div class="nd-card nd-section">
+    <h2>{% translate "Further Help" %}</h2>
+    <p>
+      <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30" />
+    </p>
   </div>
 {% endblock %}
 {% block legacy_body %}
@@ -103,12 +113,12 @@
       Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf" target="_blank">here</a>
       <br />
       Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
-  target="_blank">here</a>
+    target="_blank">here</a>
       <br />
       China Expansion rules available <a href="{{ fcm_china_help_url_old }}" target="_blank">here</a>
       <br />
       How to play guide example <a href="https://www.myboardgameguides.com/game-strategy/game-specific-strategy/food-chain-magnate-strategy-guide/"
-  target="_blank">here</a>
+    target="_blank">here</a>
     {% endblocktranslate %}
     <br />
     <h1>{% translate "Game Play" %}</h1>
