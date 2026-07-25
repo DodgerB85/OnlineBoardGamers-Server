@@ -289,6 +289,195 @@ body.nd .nd-fcm-stats ul {
 }
 
 /* ============================================================
+   TGZ stats page — /nd/ wrapper around legacy chart/table content
+   ============================================================ */
+body.nd #TGZstatsPage.nd-tgz-stats {
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+body.nd .nd-tgz-stats-summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+body.nd .nd-tgz-stats h2 {
+	margin-top: 16px;
+}
+
+body.nd .nd-tgz-stats .bar_canvas {
+	display: block;
+	max-width: 100% !important;
+	height: auto !important;
+	margin: 12px auto 24px;
+}
+
+body.nd .nd-tgz-stats .tab {
+	display: flex;
+	align-items: stretch;
+	flex-wrap: wrap;
+	gap: 0;
+	margin: 12px 0 0;
+	background: var(--color-surface-soft);
+	border: 1px solid var(--color-border);
+	border-bottom: none;
+	border-radius: 8px 8px 0 0;
+}
+
+body.nd .nd-tgz-stats .tablinks {
+	background: transparent;
+	border: none;
+	border-right: 1px solid var(--color-border);
+	color: var(--color-muted);
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	min-height: 40px;
+	padding: 8px 12px;
+}
+
+body.nd .nd-tgz-stats .tablinks.active {
+	background: var(--color-accent);
+	color: var(--color-accent-ink);
+}
+
+body.nd .nd-tgz-stats .statsDiv,
+body.nd .nd-tgz-stats .statsDiv_schism {
+	background: var(--color-surface-soft);
+	border: 1px solid var(--color-border);
+	border-radius: 0 0 var(--radius-md) var(--radius-md);
+	margin-bottom: 16px;
+	overflow-x: auto;
+	padding: 12px;
+}
+
+body.nd .nd-tgz-stats .TGZstatsTable {
+	background: var(--color-surface);
+	border-collapse: collapse;
+	font-size: 13px;
+	margin: 0 auto 12px;
+	max-width: 100%;
+	width: 100%;
+}
+
+body.nd .nd-tgz-stats .TGZstatsTable th,
+body.nd .nd-tgz-stats .TGZstatsTable td {
+	border: 1px solid var(--color-border);
+	padding: 6px 8px;
+}
+
+body.nd .nd-tgz-stats .TGZstatsTable th {
+	background: var(--color-surface-soft);
+	color: var(--color-ink);
+}
+
+body.nd .nd-tgz-stats .clickableStatTD:hover {
+	background: var(--color-positive-bg);
+}
+
+body.nd .nd-tgz-stats ul {
+	margin: 8px 0 12px;
+	padding-left: 22px;
+}
+
+body.nd .nd-tgz-stats .specNoteSpan {
+	font-size: 13px;
+	color: var(--color-muted);
+}
+
+/* ============================================================
+   AQY stats page — /nd/ wrapper around legacy chart/table content
+   ============================================================ */
+body.nd #AQYstatsPage.nd-aqy-stats {
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+body.nd .nd-aqy-stats-summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+body.nd .nd-aqy-stats h2 {
+	margin-top: 16px;
+}
+
+body.nd .nd-aqy-stats .bar_canvas {
+	display: block;
+	max-width: 100% !important;
+	height: auto !important;
+	margin: 12px auto 24px;
+}
+
+body.nd .nd-aqy-stats .tab {
+	display: flex;
+	align-items: stretch;
+	flex-wrap: wrap;
+	gap: 0;
+	margin: 12px 0 0;
+	background: var(--color-surface-soft);
+	border: 1px solid var(--color-border);
+	border-bottom: none;
+	border-radius: 8px 8px 0 0;
+}
+
+body.nd .nd-aqy-stats .tablinks {
+	background: transparent;
+	border: none;
+	border-right: 1px solid var(--color-border);
+	color: var(--color-muted);
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	min-height: 40px;
+	padding: 8px 12px;
+}
+
+body.nd .nd-aqy-stats .tablinks.active {
+	background: var(--color-accent);
+	color: var(--color-accent-ink);
+}
+
+body.nd .nd-aqy-stats .statsDiv {
+	background: var(--color-surface-soft);
+	border: 1px solid var(--color-border);
+	border-radius: 0 0 var(--radius-md) var(--radius-md);
+	margin-bottom: 16px;
+	overflow-x: auto;
+	padding: 12px;
+}
+
+body.nd .nd-aqy-stats .generalTable {
+	background: var(--color-surface);
+	border-collapse: collapse;
+	font-size: 13px;
+	margin: 0 auto 12px;
+	max-width: 100%;
+	width: 100%;
+}
+
+body.nd .nd-aqy-stats .generalTable th,
+body.nd .nd-aqy-stats .generalTable td {
+	border: 1px solid var(--color-border);
+	padding: 6px 8px;
+}
+
+body.nd .nd-aqy-stats .generalTable th {
+	background: var(--color-surface-soft);
+	color: var(--color-ink);
+}
+
+body.nd .nd-aqy-stats .clickableStatTD:hover {
+	background: var(--color-positive-bg);
+}
+
+/* ============================================================
    "Ten most recently ..." tables — new design
    The shared nd-row09 rules in nd-components.css already collapse
    the 6-col grid to a 2-col card at 980px. This file adds three

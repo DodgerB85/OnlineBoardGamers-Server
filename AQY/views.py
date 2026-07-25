@@ -1097,12 +1097,15 @@ def AQYstats(request):
                 "saint_stats": player_data["saint_stats"],
             }
 
+    total_games = all_data["combined_2_3_4"]["finishedGamesCount"]
+
     return render(
         request,
         "AQY/AQYstats.html",
         {
             "timeString": timeString,
             "all_data": all_data,
+            "total_games": total_games,
         },
     )
 
