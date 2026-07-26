@@ -4,6 +4,9 @@
 {% block page_title %}
   {% translate "Food Chain Magnate Help" %}
 {% endblock page_title %}
+{% block page_action %}
+  <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'createFCMpage' %}">&#8592; {% trans "New Game" %}</a>
+{% endblock page_action %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "Rules Help" %}</h2>

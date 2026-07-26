@@ -26,8 +26,11 @@ If anything does happen then I will keep the tournament going if at all possible
 -->
       {% if request.use_new_design %}
         <div class="nd-page-header">
-          <h1>{% translate "Tournaments" %}</h1>
-          <a class="nd-button nd-button-ghost" href="{% url 'MiniTournaments' %}">Mini Tournaments →</a>
+          <div>
+            <h1>{% translate "Tournaments" %}</h1>
+            <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'MiniTournaments' %}">Mini Tournaments &#8594;</a>
+          </div>
+          <a class="nd-button nd-button-ghost" href="{% url 'index' %}">&#8592; {% translate "Lobby" %}</a>
         </div>
         <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
           Regular tournaments run for FCM, Horseless Carriage, Bus, Indonesia, Antiquity, and The Great Zimbabwe.

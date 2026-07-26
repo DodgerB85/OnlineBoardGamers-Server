@@ -591,12 +591,20 @@ body.nd .nd-player-header {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: center;
 	gap: 12px;
 	margin: 4px 0 16px;
+	text-align: center;
 }
 body.nd .nd-player-header h1 {
 	margin: 0;
+}
+body.nd .nd-player-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
 }
 
 /* Inline row of big gold/silver/bronze tally trophies. */
@@ -619,6 +627,7 @@ body.nd .nd-trophy-detail {
 	flex-wrap: wrap;
 	gap: 10px 14px;
 	align-items: center;
+	justify-content: center;
 }
 body.nd .nd-trophy-detail .trophyGameIcon {
 	width: 40px;
@@ -701,7 +710,7 @@ body.nd .nd-joint-summary .gameIcon {
    smaller box. */
 @media (max-width: 480px) {
 	body.nd .nd-player-header {
-		align-items: flex-start;
+		align-items: center;
 	}
 	body.nd .nd-trophy-row .trophyHolderDiv,
 	body.nd .nd-trophy-row .trophyIMG {

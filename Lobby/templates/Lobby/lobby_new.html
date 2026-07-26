@@ -155,11 +155,11 @@
                 {% if availableGamesList or available_MT %}
                     {% if availableGamesList %}
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
-                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Game Name" %}</th>
                                         <th>{% translate "Players" %}</th>
                                         <th>{% translate "Options" %}</th>
                                         <th>{% translate "Created" %}</th>
@@ -179,11 +179,11 @@
                     {% if available_MT %}
                         <p class="nd-section-label">Available Mini Tournaments</p>
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
-                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Game Name" %}</th>
                                         <th>{% translate "Players" %}</th>
                                         <th>{% translate "Options" %}</th>
                                         <th>{% translate "Format" %}</th>
@@ -209,11 +209,12 @@
                 {% if currentGamesList or current_MT %}
                     {% if currentGamesList %}
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-lobby-games-table nd-current-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
-                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Game Name" %}</th>
+                                        <th>{% translate "Current Turn" %}</th>
                                         <th>{% translate "Players" %}</th>
                                         <th>{% translate "Options" %}</th>
                                         <th>{% translate "Status" %}</th>
@@ -222,7 +223,7 @@
                                 </thead>
                                 <tbody>
                                     {% for game in currentGamesList %}
-                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
+                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game showCurrentTurnColumn=True %}
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -239,11 +240,11 @@
                     {% if current_MT %}
                         <p class="nd-section-label">Current Mini Tournaments</p>
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
-                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Game Name" %}</th>
                                         <th>{% translate "Players" %}</th>
                                         <th>{% translate "Options" %}</th>
                                         <th>{% translate "Format" %}</th>
@@ -278,7 +279,7 @@
                 {% if waitingGamesList or waiting_MT %}
                     {% if waitingGamesList %}
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -296,11 +297,16 @@
                                 </tbody>
                             </table>
                         </div>
+                        {% if waitingGameIsAvailableForOthers %}
+                            <p class="nd-muted" style="margin-top:8px;padding:0 14px 14px;">
+                                {% translate "Public games you have created that are waiting for players appear here for you, but will show in the Available Games list for others." %}
+                            </p>
+                        {% endif %}
                     {% endif %}
                     {% if waiting_MT %}
                         <p class="nd-section-label">Waiting Mini Tournaments</p>
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -328,7 +334,7 @@
                 {% if invitaionsGamesList or invitations_MT %}
                     {% if invitaionsGamesList %}
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -350,7 +356,7 @@
                     {% if invitations_MT %}
                         <p class="nd-section-label">Invited Mini Tournaments</p>
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -377,11 +383,11 @@
             <div id="finishedGamesListView">
                 {% if finishedGamesList %}
                     <div class="nd-table-wrap">
-                        <table class="nd-table gamesTable">
+                        <table class="nd-table gamesTable nd-lobby-games-table">
                             <thead>
                                 <tr class="headingRow">
                                     <th></th>
-                                    <th>{% translate "Name" %}</th>
+                                    <th>{% translate "Game Name" %}</th>
                                     <th>{% translate "Players" %}</th>
                                     <th>{% translate "Options" %}</th>
                                     <th>{% translate "Status" %}</th>

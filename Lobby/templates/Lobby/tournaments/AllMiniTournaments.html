@@ -20,9 +20,12 @@
             {% endif %}
             {% if request.use_new_design %}
                 <div class="nd-page-header">
-                    <h1>{% translate "Mini Tournaments" %}</h1>
-                    <a class="nd-button nd-button-primary"
-                       href="{% url 'newMiniTournaments' %}">+ Create Mini Tournament</a>
+                    <div>
+                        <h1>{% translate "Mini Tournaments" %}</h1>
+                        <a class="nd-button nd-button-primary nd-button-sm"
+                           href="{% url 'newMiniTournaments' %}">Create Mini Tournament</a>
+                    </div>
+                    <a class="nd-button nd-button-ghost" href="{% url 'AllTournaments' %}">&#8592; {% trans "Tournaments" %}</a>
                 </div>
                 <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
                     Faster-paced tournaments with a smaller player pool. Anyone can create or join.
