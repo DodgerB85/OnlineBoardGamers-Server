@@ -2,154 +2,204 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
 {% endblock head %}
 {% block body %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow" id="aboutPage">{% else %}<div class="container" id="aboutPage">{% endif %}
   {% if request.use_new_design %}
-
-    <div class="nd-page-header">
-      <h1>About Online Board Gamers</h1>
-    </div>
-
-    <div class="nd-card nd-section">
-      <div class="nd-card-header"><h2>What is this?</h2></div>
-      <p>Online Board Gamers is a place to play Splotter Spellen board games online against other players.</p>
-      <p style="margin-top:8px;">Games update live — make your move, your opponent sees it immediately. You can also run a solo practice game where you control all players on your own device.</p>
-    </div>
-
-    <div class="nd-card nd-section">
-      <div class="nd-card-header"><h2>{% translate "Current Games" %}</h2></div>
-      <ul style="margin: 4px 0 0; padding-left: 20px; line-height: 2.1; font-size: 15px;">
-        <li>{% translate "Food Chain Magnate — with all Ketchup Expansions" %}</li>
-        <li>{% translate "Horseless Carriage" %}</li>
-        <li>{% translate "Bus" %}</li>
-        <li>{% translate "The Great Zimbabwe" %}</li>
-        <li>{% translate "Cannes" %}</li>
-        <li>{% translate "Antiquity" %}</li>
-        <li>{% translate "Indonesia" %}</li>
-        <li>{% translate "Keyflower" %}</li>
-        <li>{% translate "Web" %}</li>
-        <li>{% translate "Roads &amp; Boats" %}</li>
-      </ul>
-    </div>
-
-    <div class="nd-card nd-section">
-      <div class="nd-card-header"><h2>{% translate "Credits" %}</h2></div>
-      <div class="nd-credits">
-        <div class="nd-credits-row"><span>Website Design / Game Programming</span><span>DodgerB</span></div>
-        <div class="nd-credits-row"><span>FCM Chief Playtester</span><span>looogic</span></div>
-        <div class="nd-credits-row"><span>Live-updating Games Support</span><span>Jonny</span></div>
-        <div class="nd-credits-row"><span>Backend Assistance</span><span>hcarver</span></div>
-
-        <div class="nd-credits-row"><span>Chinese (Hans) Lobby &amp; FCM</span><span>庄生</span></div>
-        <div class="nd-credits-row"><span>Chinese (Hans) HLC</span><span>陈斌华</span></div>
-
-        <div class="nd-credits-row"><span>Cannes Coding Assistance</span><span>Rastko</span></div>
-        <div class="nd-credits-row"><span>Antiquity Coding</span><span>kbbr &amp; Rastko</span></div>
-        <div class="nd-credits-row"><span>Antiquity Chief Playtester</span><span>massibull</span></div>
-        <div class="nd-credits-row"><span>Antiquity Additional Playtesters</span><span>F1087 &amp; gdc</span></div>
-
-        <div class="nd-credits-row"><span>Indonesia Coding Consultant</span><span>vraid</span></div>
-        <div class="nd-credits-row"><span>Indonesia Ship Icons</span><span>PhasingPlayer</span></div>
-        <div class="nd-credits-row"><span>Keyflower Additional Coding</span><span>vraid</span></div>
-        <div class="nd-credits-row"><span>Web playtester</span><span>Burmer</span></div>
-
-        <div class="nd-credits-row"><span>Roads &amp; Boats Consulting &amp; Coding</span><span>vraid</span></div>
-        <div class="nd-credits-row"><span>Roads &amp; Boats Chief Playtester</span><span>Benkyo</span></div>
-        <div class="nd-credits-row"><span>Roads &amp; Boats Additional Playtesters</span><span>SaintJason, Dycu, Jungy</span></div>
-      </div>
-      <div style="padding-top:16px; font-size:14px; line-height:1.6;">
-        <strong>{% translate "Thanks to all the Playtesters!" %}</strong>
-        <div class="nd-thanks" style="margin-top:6px; color: var(--color-muted); font-size:13px;">
-          looogic, Benkyo, massibull, F1087, gdc, vraid, PhasingPlayer, Phil, Burmer, ha.steven, JoshuaAcosta, s4lm, Steveth, enavico, krieg90, your_average_euro
+    <div class="nd-page nd-page-narrow" id="aboutPage">
+    {% else %}
+      <div class="container" id="aboutPage">
+      {% endif %}
+      {% if request.use_new_design %}
+        <div class="nd-page-header">
+          <h1>About Online Board Gamers</h1>
         </div>
-      </div>
-      <p style="padding-top:12px; color: var(--color-muted); font-size:13px; margin: 0;">
-        {% translate "Thank you to everyone for your feedback, comments and suggestions — you have helped to make this site what it is!" %}
-      </p>
-    </div>
-
-  {% else %}
-
-    {% blocktranslate trimmed %}
-      <h1>Welcome to Online Board Gamers!</h1>
-      Online Board Gamers is a website to play board games online.
-      <br />
-      You can play live against other players with automatic updates, or
-      play a "practice" game where you make all the moves on your device.
-      <h2>Current Games</h2>
-    {% endblocktranslate %}
-    <b>
-      <div id="aboutCurrentGames">
-        <ul>
-          <li>{% translate "Food Chain Magnate - With all Ketchup Expansions" %}</li>
-          <li>{% translate "Horseless Carriage" %}</li>
-          <li>{% translate "Bus" %}</li>
-          <li>{% translate "The Great Zimbabwe" %}</li>
-          <li>{% translate "Cannes" %}</li>
-          <li>{% translate "Antiquity" %}</li>
-          <li>{% translate "Indonesia" %}</li>
-          <li>{% translate "Keyflower" %}</li>
-          <li>{% translate "Web" %}</li>
-          <li>{% translate "Roads & Boats" %}</li>
-        </ul>
-      </div>
-      <h2>{% translate "Credits" %}</h2>
-      Website Design / Game Programming - DodgerB
-      <br />
-      FCM Chief Playtester - looogic
-      <br />
-      Live-updating Games Support - Jonny
-      <br />
-      Backend Assistance - hcarver
-      <br />
-      <br />
-      Chinese (Hans) Lobby & FCM - 庄生
-      <br />
-      Chinese (Hans) HLC - 陈斌华
-      <br />
-      <br />
-      Cannes Coding Assistance - Rastko
-      <br />
-      <br />
-      Antiquity Coding Assistance - kbbr & Rastko
-      <br />
-      Antiquity Chief Playtester - massibull
-      <br />
-      Antiquity Additional Playtesters - F1087 & gdc
-      <br />
-      <br />
-      Indonesia Coding Consultant - vraid
-      <br />
-      Indonesia Ship Icons - PhasingPlayer
-      <br />
-      <br>
-      Keyflower Additional Coding - vraid
-      <br />
-      <br>
-      Web playtester - Burmer
-      <br />
-      <br />
-      Roads & Boats Consulting & Additional Coding - vraid
-      <br />
-      Roads & Boats Chief Playtester - Benkyo
-      <br />
-      Roads & Boats Additional Playtesters - SaintJason, Dycu, Jungy
-      <br />
-      <br />
-      <b><u>{% translate "Thanks to all the Playtesters!" %}</u></b>
-      <br />
-      looogic, Benkyo, massibull,  F1087, gdc, vraid, PhasingPlayer, Phil, Burmer, ha.steven, JoshuaAcosta, s4lm, Steveth, enavico
-      <br />
-      krieg90, your_average_euro
-      <br />
-      <br />
-      {% translate "Thank you to everyone for your feedback, comments and suggestions - you have helped to make this site what it is!" %}
-      <br />
-    </b>
-    <br />
-    <!--
+        <div class="nd-card nd-section">
+          <div class="nd-card-header">
+            <h2>What is this?</h2>
+          </div>
+          <p>Online Board Gamers is a place to play Splotter Spellen board games online against other players.</p>
+          <p style="margin-top:8px;">
+            Games update live — make your move, your opponent sees it immediately. You can also run a solo practice game where you control all players on your own device.
+          </p>
+        </div>
+        <div class="nd-card nd-section">
+          <div class="nd-card-header">
+            <h2>{% translate "Current Games" %}</h2>
+          </div>
+          <ul style="margin: 4px 0 0;
+                     padding-left: 20px;
+                     line-height: 2.1;
+                     font-size: 15px">
+            <li>{% translate "Food Chain Magnate — with all Ketchup Expansions" %}</li>
+            <li>{% translate "Horseless Carriage" %}</li>
+            <li>{% translate "Bus" %}</li>
+            <li>{% translate "The Great Zimbabwe" %}</li>
+            <li>{% translate "Cannes" %}</li>
+            <li>{% translate "Antiquity" %}</li>
+            <li>{% translate "Indonesia" %}</li>
+            <li>{% translate "Keyflower" %}</li>
+            <li>{% translate "Web" %}</li>
+            <li>{% translate "Roads &amp; Boats" %}</li>
+          </ul>
+        </div>
+        <div class="nd-card nd-section">
+          <div class="nd-card-header">
+            <h2>{% translate "Credits" %}</h2>
+          </div>
+          <div class="nd-credits">
+            <div class="nd-credits-row">
+              <span>Website Design / Game Programming</span><span>DodgerB</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>FCM Chief Playtester</span><span>looogic</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Live-updating Games Support</span><span>Jonny</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Backend Assistance</span><span>hcarver</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>New Site Design</span><span>Mihai</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Chinese (Hans) Lobby &amp; FCM</span><span>庄生</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Chinese (Hans) HLC</span><span>陈斌华</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Cannes Coding Assistance</span><span>Rastko</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Antiquity Coding</span><span>kbbr &amp; Rastko</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Antiquity Chief Playtester</span><span>massibull</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Antiquity Additional Playtesters</span><span>F1087 &amp; gdc</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Indonesia Coding Consultant</span><span>vraid</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Indonesia Ship Icons</span><span>PhasingPlayer</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Keyflower Additional Coding</span><span>vraid</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Web playtester</span><span>Burmer</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Roads &amp; Boats Consulting &amp; Coding</span><span>vraid</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Roads &amp; Boats Chief Playtester</span><span>Benkyo</span>
+            </div>
+            <div class="nd-credits-row">
+              <span>Roads &amp; Boats Additional Playtesters</span><span>SaintJason, Dycu, Jungy</span>
+            </div>
+          </div>
+          <div style="padding-top:16px; font-size:14px; line-height:1.6;">
+            <strong>{% translate "Thanks to all the Playtesters!" %}</strong>
+            <div class="nd-thanks"
+                 style="margin-top:6px;
+                        color: var(--color-muted);
+                        font-size:13px">
+              looogic, Benkyo, massibull, F1087, gdc, vraid, PhasingPlayer, Phil, Burmer, ha.steven, JoshuaAcosta, s4lm, Steveth, enavico, krieg90, your_average_euro
+            </div>
+          </div>
+          <p style="padding-top:12px;
+                    color: var(--color-muted);
+                    font-size:13px;
+                    margin: 0">
+            {% translate "Thank you to everyone for your feedback, comments and suggestions — you have helped to make this site what it is!" %}
+          </p>
+        </div>
+      {% else %}
+        {% blocktranslate trimmed %}
+          <h1>Welcome to Online Board Gamers!</h1>
+          Online Board Gamers is a website to play board games online.
+          <br />
+          You can play live against other players with automatic updates, or
+          play a "practice" game where you make all the moves on your device.
+          <h2>Current Games</h2>
+        {% endblocktranslate %}
+        <b>
+          <div id="aboutCurrentGames">
+            <ul>
+              <li>{% translate "Food Chain Magnate - With all Ketchup Expansions" %}</li>
+              <li>{% translate "Horseless Carriage" %}</li>
+              <li>{% translate "Bus" %}</li>
+              <li>{% translate "The Great Zimbabwe" %}</li>
+              <li>{% translate "Cannes" %}</li>
+              <li>{% translate "Antiquity" %}</li>
+              <li>{% translate "Indonesia" %}</li>
+              <li>{% translate "Keyflower" %}</li>
+              <li>{% translate "Web" %}</li>
+              <li>{% translate "Roads & Boats" %}</li>
+            </ul>
+          </div>
+          <h2>{% translate "Credits" %}</h2>
+          Website Design / Game Programming - DodgerB
+          <br />
+          FCM Chief Playtester - looogic
+          <br />
+          Live-updating Games Support - Jonny
+          <br />
+          Backend Assistance - hcarver
+          <br />
+          <br />
+          Chinese (Hans) Lobby & FCM - 庄生
+          <br />
+          Chinese (Hans) HLC - 陈斌华
+          <br />
+          <br />
+          Cannes Coding Assistance - Rastko
+          <br />
+          <br />
+          Antiquity Coding Assistance - kbbr & Rastko
+          <br />
+          Antiquity Chief Playtester - massibull
+          <br />
+          Antiquity Additional Playtesters - F1087 & gdc
+          <br />
+          <br />
+          Indonesia Coding Consultant - vraid
+          <br />
+          Indonesia Ship Icons - PhasingPlayer
+          <br />
+          <br>
+          Keyflower Additional Coding - vraid
+          <br />
+          <br>
+          Web playtester - Burmer
+          <br />
+          <br />
+          Roads & Boats Consulting & Additional Coding - vraid
+          <br />
+          Roads & Boats Chief Playtester - Benkyo
+          <br />
+          Roads & Boats Additional Playtesters - SaintJason, Dycu, Jungy
+          <br />
+          <br />
+          <b><u>{% translate "Thanks to all the Playtesters!" %}</u></b>
+          <br />
+          looogic, Benkyo, massibull,  F1087, gdc, vraid, PhasingPlayer, Phil, Burmer, ha.steven, JoshuaAcosta, s4lm, Steveth, enavico
+          <br />
+          krieg90, your_average_euro
+          <br />
+          <br />
+          {% translate "Thank you to everyone for your feedback, comments and suggestions - you have helped to make this site what it is!" %}
+          <br />
+        </b>
+        <br />
+        <!--
 Food Chain Magnate is a board game by Jeroen Doumen and Joris Wiersinga, published by <a href="https://www.splottershop.com/">Splotter Spellen</a>.<br />
 <br />
 
@@ -160,9 +210,8 @@ Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.p
 Ketchup Expansion rules available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf">here</a>
 <br />
 <br />-->
-    {% include "Lobby/donate/donateBanner.html" %}
-    {% include "Lobby/common/homeButton.html" %}
-
-  {% endif %}
-  </div>
-{% endblock body %}
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/common/homeButton.html" %}
+      {% endif %}
+    </div>
+  {% endblock body %}

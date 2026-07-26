@@ -1,0 +1,79 @@
+{% extends base_template %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
+{% endblock head %}
+{% block body %}
+  {% if request.use_new_design %}
+    <div class="nd-page nd-page-narrow">
+    {% else %}
+      <div class="container" id="feedbackPage">
+      {% endif %}
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if request.use_new_design %}
+        <div class="nd-page-header">
+          <h1>{% translate "Feedback" %}</h1>
+        </div>
+        <div class="nd-card nd-section">
+          <p>{% translate "We'd love to hear your thoughts on the new lobby design!" %}</p>
+          <div class="nd-form-actions"
+               style="justify-content: center;
+                      margin: 20px 0">
+            <a href="{% url 'discordInviteLink' %}"
+               class="nd-button nd-button-primary"
+               target="_blank">{% translate "Join our Discord" %}</a>
+          </div>
+          <form method="post" class="nd-stacked-form">
+            {% csrf_token %}
+            <div class="nd-form-row">
+              <label for="feedback" class="nd-form-label">{% translate "Your Feedback" %}</label>
+              <textarea id="feedback"
+                        name="feedback"
+                        rows="6"
+                        required
+                        placeholder="{% translate 'Tell us what you think about the new lobby design...' %}"></textarea>
+            </div>
+            <div class="nd-form-actions">
+              <button type="submit" class="nd-button nd-button-primary">{% translate "Send Feedback" %}</button>
+            </div>
+          </form>
+        </div>
+      {% else %}
+        <div id="feedbackPage">
+          <h1>{% translate "Feedback" %}</h1>
+          <p>{% translate "We'd love to hear your thoughts on the new lobby design!" %}</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="{% url 'discordInviteLink' %}"
+               class="buttonDiv"
+               target="_blank">{% translate "Join the Discord" %}</a>
+          </div>
+          <form method="post" style="margin-top: 20px;">
+            {% csrf_token %}
+            <div>
+              <label for="feedback">{% translate "Your Feedback" %}</label>
+              <br>
+              <textarea id="feedback"
+                        name="feedback"
+                        rows="6"
+                        style="width: 100%;
+                               max-width: 600px"
+                        required
+                        placeholder="{% translate 'Tell us what you think about the new lobby design...' %}"></textarea>
+            </div>
+            <br>
+            <button type="submit" class="buttonDiv">{% translate "Send Feedback" %}</button>
+          </form>
+        </div>
+        {% include "Lobby/common/homeButton.html" %}
+      {% endif %}
+    </div>
+  {% endblock body %}

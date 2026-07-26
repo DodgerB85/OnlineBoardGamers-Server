@@ -703,6 +703,53 @@ def changelog_view(request):
 def contact(request):
     return render(request, "Lobby/contact.html")
 
+@login_required
+def feedback(request):
+    from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
+
+    if request.method == "POST":
+        feedback_text = request.POST.get("feedback", "")
+        if not feedback_text.strip():
+            messages.error(request, gettext("Please enter some feedback."))
+            return render(request, "Lobby/feedback.html")
+
+        username = request.user.username if request.user.is_authenticated else "Anonymous"
+        email = request.user.email if request.user.is_authenticated else "Not provided"
+
+        # Send email to admin
+        subject = "New Lobby Design Feedback"
+        message = render_to_string(
+            "Lobby/gameEmails/email_feedback.html",
+            {
+                "username": username,
+                "email": email,
+                "feedback": feedback_text,
+                "domain": "www.OnlineBoardGamers.com",
+            },
+        )
+
+        # Send to admin via email
+        try:
+            adminUser = User.objects.get(username="admin")
+            adminUser.email_user(subject, message)
+        except Exception as e:
+            error_message = f"FEEDBACK EMAIL SEND FAILED. User: {username}. Error: {e}"
+            SN_sendAdminErrorMessage(error_message)
+
+        # Send to Discord webhook
+        discord_message = (
+            f"NEW LOBBY DESIGN FEEDBACK\n"
+            f"User: {username}\n"
+            f"Email: {email}\n"
+            f"Feedback: {feedback_text}"
+        )
+        SN_sendAdminErrorMessage(discord_message)
+
+        messages.success(request, gettext("Thank you for your feedback!"))
+        return redirect("/")
+
+    return render(request, "Lobby/feedback.html")
+
 
 def handler404(request, exception):
     if not request.path.endswith("/") and not request.path.startswith("/nextGame"):

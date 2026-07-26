@@ -82,7 +82,20 @@
         </div>
         <script>try{if(localStorage.getItem('rnb_announce_dismissed')==='1')document.getElementById('rnbAnnounceBanner').style.display='none';}catch(e){}</script>
         <div class="nd-news-banner">
-            <span>Testing the new design. Please provide feedback! <a href="../">Use old design</a></span>
+            <div style="display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        flex-wrap: wrap">
+                <span>Testing the new design. Please provide feedback!</span>
+                <a href="{% url 'feedback' %}"
+                   class="nd-button nd-button-primary"
+                   style="padding: 6px 12px;
+                          font-size: 14px">Give feedback</a>
+                <a href="../"
+                   class="nd-button"
+                   style="padding: 6px 12px;
+                          font-size: 14px">Use old design</a>
+            </div>
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
         {% include 'Lobby/_nd_map_editor_forms.html' %}

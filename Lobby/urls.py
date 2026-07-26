@@ -85,6 +85,7 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("changelog/", views.changelog_view, name="changelog"),
     path("contact/", views.contact, name="contact"),
+    path("feedback/", views.feedback, name="feedback"),
     path("stats/", views.stats, name="stats"),
     path("AllTournaments/", views.AllTournaments, name="AllTournaments"),
     path("TGZtournaments/", views.TGZtournaments, name="TGZtournaments"),
