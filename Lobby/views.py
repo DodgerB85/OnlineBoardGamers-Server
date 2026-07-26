@@ -37,7 +37,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import BadHeaderError, mail_admins, send_mail
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.validators import URLValidator
-from django.db import connection, transaction
+from django.db import IntegrityError, connection, transaction
 from django.db.models import Count, Max, Prefetch, Q
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import TruncDate
@@ -2516,7 +2516,11 @@ class registerView(View):
                 return render(request, self.template_name, {"form": form})
             user = form.save(commit=False)
             user.is_active = False  # Deactivate account till it is confirmed
-            user.save()
+            try:
+                user.save()
+            except IntegrityError:
+                messages.error(request, gettext("Username already taken"))
+                return render(request, self.template_name, {"form": form})
 
             current_site = get_current_site(request)
             subject = gettext("Activate Your Online Gaming Account")
