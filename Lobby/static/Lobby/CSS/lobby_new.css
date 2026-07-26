@@ -166,6 +166,23 @@ body.nd .nd-last-move .nd-mod-wrap {
     grid-column: 2;
     grid-row: 1;
 }
+@media (min-width: 721px) {
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 40px;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move-text {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move > .startingOption,
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move > .nd-mod-wrap {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: center;
+        justify-self: center;
+    }
+}
 body.nd .nd-no-options {
     display: none;
 }
