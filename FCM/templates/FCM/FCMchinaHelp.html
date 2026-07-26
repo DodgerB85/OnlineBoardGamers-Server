@@ -19,6 +19,7 @@
     {% if request.use_new_design %}
       <div class="nd-page-header">
         <h1>{% translate "China Expansion Help" %}</h1>
+        <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'FCM:FCMhelp' %}">&#8592; {% trans "FCM Help" %}</a>
       </div>
     {% endif %}
     <div id="FCMhelpPage"

@@ -6,26 +6,29 @@
 {% block page_title %}
   {% translate "Games Help" %}
 {% endblock %}
+{% block page_action %}
+  <a class="nd-button nd-button-ghost" href="{% url 'index' %}">&#8592; {% translate "Lobby" %}</a>
+{% endblock %}
 {% block nd_body %}
   <div class="nd-card nd-section">
     <h2>{% translate "Game Help Pages" %}</h2>
     <div class="nd-help-pills">
-      <a class="nd-button nd-button-sm" href="{% url 'FCM:FCMhelp' %}">Food Chain Magnate</a>
-      <a class="nd-button nd-button-sm" href="{% url 'HLC:HLChelp' %}">Horseless Carriage</a>
-      <a class="nd-button nd-button-sm" href="{% url 'BUS:BUShelp' %}">Bus</a>
-      <a class="nd-button nd-button-sm" href="{% url 'TGZ:TGZhelp' %}">The Great Zimbabwe</a>
+      <a class="nd-button nd-button-sm" href="{% url 'FCM:FCMhelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %} Food Chain Magnate</a>
+      <a class="nd-button nd-button-sm" href="{% url 'HLC:HLChelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %} Horseless Carriage</a>
+      <a class="nd-button nd-button-sm" href="{% url 'BUS:BUShelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %} Bus</a>
+      <a class="nd-button nd-button-sm" href="{% url 'TGZ:TGZhelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %} The Great Zimbabwe</a>
       <a class="nd-button nd-button-sm nd-help-pill-wide"
-         href="{% url 'CNS:CNShelp' %}">Cannes</a>
+         href="{% url 'CNS:CNShelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="CNS" %} Cannes</a>
       <a class="nd-button nd-button-sm nd-help-pill-wide"
-         href="{% url 'AQY:AQYhelp' %}">Antiquity</a>
+         href="{% url 'AQY:AQYhelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %} Antiquity</a>
       <a class="nd-button nd-button-sm nd-help-pill-wide"
-         href="{% url 'IND:INDhelp' %}">Indonesia</a>
+         href="{% url 'IND:INDhelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="IND" %} Indonesia</a>
       <a class="nd-button nd-button-sm nd-help-pill-wide"
-         href="{% url 'KFW:KFWhelp' %}">Keyflower</a>
+         href="{% url 'KFW:KFWhelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="KFW" %} Keyflower</a>
       <a class="nd-button nd-button-sm nd-help-pill-wide"
-         href="{% url 'WEB:WEBhelp' %}">Web</a>
+         href="{% url 'WEB:WEBhelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="WEB" %} Web</a>
       <a class="nd-button nd-button-sm nd-help-pill-wide"
-         href="{% url 'RNB:RNBhelp' %}">Roads &amp; Boats</a>
+         href="{% url 'RNB:RNBhelp' %}">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="RNB" %} Roads &amp; Boats</a>
     </div>
   </div>
   <div class="nd-card nd-section">

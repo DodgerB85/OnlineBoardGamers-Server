@@ -2,6 +2,7 @@
     function wrapOne(img) {
         if (!img.title) return;
         if (img.classList.contains('startingMap')) return;
+        if (img.closest('.TGZinfoContainer')) return;
         var parent = img.parentNode;
         if (!parent || (parent.classList && parent.classList.contains('nd-mod-wrap'))) return;
         var wrap = document.createElement('span');

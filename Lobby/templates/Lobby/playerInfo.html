@@ -15,10 +15,10 @@
         <div class="nd-page" id="playerInfoPage">
             {% include "Lobby/_nd_messages.html" %}
             <div class="nd-player-header">
-                <div>
+                <div class="nd-player-title">
                     <h1>{{ usernameToProfile }}</h1>
+                    {% if trophyHTML %}<div class="nd-trophy-row">{{ trophyHTML|safe }}</div>{% endif %}
                 </div>
-                {% if trophyHTML %}<div class="nd-trophy-row">{{ trophyHTML|safe }}</div>{% endif %}
             </div>
             {% if trophyDetailHTML %}<div class="nd-trophy-detail">{{ trophyDetailHTML|safe }}</div>{% endif %}
             {# ── Player Stats ── #}

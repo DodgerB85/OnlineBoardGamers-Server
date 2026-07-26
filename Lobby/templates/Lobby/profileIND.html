@@ -1,10 +1,229 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    {% if not request.use_new_design %}
+        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+    {% endif %}
     <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
+    {% if request.use_new_design %}
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <div class="nd-page nd-page-profile">
+        {% include 'Lobby/_nd_messages.html' %}
+        <div class="nd-page-header">
+            <h1>{% translate "Indonesia Preferences" %}</h1>
+            <a class="nd-button nd-button-ghost" href="{% url 'profile' %}">&#8592; {% translate "Profile" %}</a>
+        </div>
+        <p class="nd-muted" style="margin-bottom:16px;">{% trans "Note: These settings are cosmetic and do not affect gameplay. Refresh any open games for these settings to take effect." %}</p>
+        <div class="nd-card">
+            <svg class="defsSVG">
+                <defs>
+                <filter id="f_black" x="-50%" y="-50%" width="200%" height="200%">
+                <feComponentTransfer in="SourceAlpha">
+                <feFuncA type="table" tableValues="0 1" />
+                </feComponentTransfer>
+                <feComponentTransfer>
+                <feFuncA type="table" tableValues="0 1" />
+                </feComponentTransfer>
+                </filter>
+                <filter id="f_col_0" x="-50%" y="-50%" width="200%" height="200%">
+                <feFlood flood-color="#84C3E2" />
+                <feComposite in2="SourceAlpha" operator="in" />
+                </filter>
+                <filter id="f_col_1" x="-50%" y="-50%" width="200%" height="200%">
+                <feFlood flood-color="#3E7139" />
+                <feComposite in2="SourceAlpha" operator="in" />
+                </filter>
+                <filter id="f_col_2" x="-50%" y="-50%" width="200%" height="200%">
+                <feFlood flood-color="#D65A1E" />
+                <feComposite in2="SourceAlpha" operator="in" />
+                </filter>
+                <filter id="f_col_3" x="-50%" y="-50%" width="200%" height="200%">
+                <feFlood flood-color="#92385C" />
+                <feComposite in2="SourceAlpha" operator="in" />
+                </filter>
+                <filter id="f_col_4" x="-50%" y="-50%" width="200%" height="200%">
+                <feFlood flood-color="#ECC81C" />
+                <feComposite in2="SourceAlpha" operator="in" />
+                </filter>
+                </defs>
+            </svg>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" id="action" name="action" value="updateProfileFavourites">
+                <div class="nd-form-row">
+                    <label class="nd-form-label">{% translate "Favourite Colour" %}</label>
+                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="favRestChoice">
+                            <label for="indRadM1"><b>{% translate "None" %}</b></label>
+                            <input type="radio" id="indRadM1" name="indColour" value="-1" {% if colour == -1 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indRad0">
+                                <svg class="indColourChoiceSVG" width="100" height="100">
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_col_0)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
+                                </svg>
+                            </label>
+                            <input type="radio" id="indRad0" name="indColour" value="0" {% if colour == 0 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indRad1">
+                                <svg class="indColourChoiceSVG" width="100" height="100">
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_col_1)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
+                                </svg>
+                            </label>
+                            <input type="radio" id="indRad1" name="indColour" value="1" {% if colour == 1 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indRad2">
+                                <svg class="indColourChoiceSVG" width="100" height="100">
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_col_2)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
+                                </svg>
+                            </label>
+                            <input type="radio" id="indRad2" name="indColour" value="2" {% if colour == 2 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indRad3">
+                                <svg class="indColourChoiceSVG" width="100" height="100">
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_col_3)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
+                                </svg>
+                            </label>
+                            <input type="radio" id="indRad3" name="indColour" value="3" {% if colour == 3 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indRad4">
+                                <svg class="indColourChoiceSVG" width="100" height="100">
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                    <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                    <image filter="url(#f_col_4)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
+                                </svg>
+                            </label>
+                            <input type="radio" id="indRad4" name="indColour" value="4" {% if colour == 4 %}checked{% endif %} />
+                        </div>
+                    </div>
+                </div>
+                <div class="nd-form-row">
+                    <label class="nd-form-label">{% translate "Map Display Type" %}</label>
+                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="nd-form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose the 2nd edition map, 3rd edition map, or a hex style map" %}</div>
+                        <div class="favRestChoice">
+                            <label for="indMap0"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}" width="230" height="152" alt="2nd Edition" /></label>
+                            <b>2nd Edition</b>
+                            <input type="radio" id="indMap0" name="mapType" value="0" {% if mapType == 0 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indMap05"><img src="{% static 'Lobby/images/INDprofile/OM_map_3e_icon.jpg' %}" width="230" height="152" alt="3rd Edition" /></label>
+                            <b>3rd Edition</b>
+                            <input type="radio" id="indMap05" name="mapType" value="4" {% if mapType == 4 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indMap1"><img src="{% static 'Lobby/images/INDprofile/OM_map_hex_icon.jpg' %}" width="230" height="152" alt="Hex map" /></label>
+                            <b>Hex map</b>
+                            <input type="radio" id="indMap1" name="mapType" value="2" {% if mapType == 2 %}checked{% endif %} />
+                        </div>
+                    </div>
+                </div>
+                <div class="nd-form-row">
+                    <label class="nd-form-label">{% translate "City Size Colours" %}</label>
+                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="favRestChoice">
+                            <label for="indCitySize0"><div class="cityMarker greenCity"></div><div class="cityMarker orangeCity"></div><div class="cityMarker redCity"></div></label>
+                            <b>Green &gt; Orange &gt; Red</b>
+                            <input type="radio" id="indCitySize0" name="citySizeColour" value="0" {% if citySizeColour == 0 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indCitySize1"><div class="cityMarker orangeCity"></div><div class="cityMarker greenCity"></div><div class="cityMarker redCity"></div></label>
+                            <b>Orange &gt; Green &gt; Red</b>
+                            <input type="radio" id="indCitySize1" name="citySizeColour" value="1" {% if citySizeColour == 1 %}checked{% endif %} />
+                        </div>
+                    </div>
+                </div>
+                <div class="nd-form-row">
+                    <label class="nd-form-label">{% translate "Ship Icon Style" %}</label>
+                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="favRestChoice">
+                            <label for="shipIcon0"><img src="{% static 'Lobby/images/INDprofile/shipsSimple.jpg' %}" width="448" height="152" alt="Simple Ships" /></label>
+                            <b>Simple Ships</b>
+                            <input type="radio" id="shipIcon0" name="shipIcon" value="0" {% if shipIcon == 0 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="shipIcon1"><img src="{% static 'Lobby/images/INDprofile/shipsFancy.jpg' %}" width="448" height="152" alt="Fancy Ships" /></label>
+                            <b>Fancy Ships</b>
+                            <input type="radio" id="shipIcon1" name="shipIcon" value="1" {% if shipIcon == 1 %}checked{% endif %} />
+                        </div>
+                    </div>
+                </div>
+                <div class="nd-form-row">
+                    <label class="nd-form-label">{% translate "Goods Icon Style" %}</label>
+                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="favRestChoice">
+                            <label for="goodsIcon1"><img src="{% static 'Lobby/images/INDprofile/icons1e.jpg' %}" width="187" height="152" alt="1st Edition" /></label>
+                            <b>1st Edition</b>
+                            <input type="radio" id="goodsIcon1" name="goodsIcon" value="1" {% if goodsIcon == 1 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="goodsIcon2"><img src="{% static 'Lobby/images/INDprofile/icons2e.jpg' %}" width="187" height="152" alt="2nd Edition" /></label>
+                            <b>2nd Edition</b>
+                            <input type="radio" id="goodsIcon2" name="goodsIcon" value="2" {% if goodsIcon == 2 %}checked{% endif %} />
+                        </div>
+                    </div>
+                </div>
+                <div class="nd-form-row">
+                    <label class="nd-form-label">{% translate "Territory Outline" %}</label>
+                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="favRestChoice">
+                            <label for="indOutline0"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon_outline.jpg' %}" width="230" height="152" alt="Show Outline" /></label>
+                            <b>Show Outline</b>
+                            <input type="radio" id="indOutline0" name="indOutline" value="1" {% if indOutline == 1 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="indOutline1"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}" width="230" height="152" alt="Hide Outline" /></label>
+                            <b>Hide Outline</b>
+                            <input type="radio" id="indOutline1" name="indOutline" value="0" {% if indOutline == 0 %}checked{% endif %} />
+                        </div>
+                    </div>
+                </div>
+                <div class="nd-form-row" style="border-bottom:none;">
+                    <label class="nd-form-label">{% translate "Player Table Style" %}</label>
+                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="favRestChoice">
+                            <label for="playerTableStyle0"><img src="{% static 'Lobby/images/INDprofile/playerTableStyle0.jpg' %}" width="145" height="191" alt="Icons" /></label>
+                            <b>Icons</b>
+                            <input type="radio" id="playerTableStyle0" name="playerTableStyle" value="0" {% if playerTableStyle == 0 %}checked{% endif %} />
+                        </div>
+                        <div class="favRestChoice">
+                            <label for="playerTableStyle1"><img src="{% static 'Lobby/images/INDprofile/playerTableStyle1.jpg' %}" width="145" height="191" alt="Text" /></label>
+                            <b>Text</b>
+                            <input type="radio" id="playerTableStyle1" name="playerTableStyle" value="1" {% if playerTableStyle == 1 %}checked{% endif %} />
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:16px;">
+                    <button type="submit" class="nd-button nd-button-primary">{% translate "Update Indonesia Preferences" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
     <script src="{% url 'javascript-catalog' %}"></script>
     <div class="container formsPage">
         {% if messages %}
@@ -14,7 +233,6 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <!--<h1>Please click "Update Profile" to save changes</h1>-->
         <h1>Indonesia Settings</h1>
         <b>Note: These settings are cosmetic and do not affect gameplay
             <br />
@@ -22,10 +240,7 @@
         <div class="profilePreferenceDiv">
             <form method="post">
                 {% csrf_token %}
-                <input type="hidden"
-                       id="action"
-                       name="action"
-                       value="updateProfileFavourites">
+                <input type="hidden" id="action" name="action" value="updateProfileFavourites">
                 <label class="preferenceTitle">{% translate "Favourite Colour" %}</label>
                 <br />
                 <svg class="defsSVG">
@@ -62,306 +277,101 @@
                 </svg>
                 <div>
                     <div class="favRestChoice">
-                        <label for="indRadM1">
-                            <b>{% translate "None" %}</b>
-                        </label>
+                        <label for="indRadM1"><b>{% translate "None" %}</b></label>
                         <br />
-                        <input type="radio"
-                               id="indRadM1"
-                               name="indColour"
-                               value="-1"
-                               {% if colour == -1 %}checked{% endif %} />
+                        <input type="radio" id="indRadM1" name="indColour" value="-1" {% if colour == -1 %}checked{% endif %} />
                     </div>
                     <div class="favRestChoice">
                         <label for="indRad0">
                             <svg class="indColourChoiceSVG" width="100" height="100">
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_col_0)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="0"
-                                       y="0"
-                                       width="100"
-                                       height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                <image filter="url(#f_col_0)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
                             </svg>
                         </label>
                         <br />
-                        <input type="radio"
-                               id="indRad0"
-                               name="indColour"
-                               value="0"
-                               {% if colour == 0 %}checked{% endif %} />
+                        <input type="radio" id="indRad0" name="indColour" value="0" {% if colour == 0 %}checked{% endif %} />
                     </div>
                     <div class="favRestChoice">
                         <label for="indRad1">
                             <svg class="indColourChoiceSVG" width="100" height="100">
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_col_1)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="0"
-                                       y="0"
-                                       width="100"
-                                       height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                <image filter="url(#f_col_1)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
                             </svg>
                         </label>
                         <br />
-                        <input type="radio"
-                               id="indRad1"
-                               name="indColour"
-                               value="1"
-                               {% if colour == 1 %}checked{% endif %} />
+                        <input type="radio" id="indRad1" name="indColour" value="1" {% if colour == 1 %}checked{% endif %} />
                     </div>
                     <div class="favRestChoice">
                         <label for="indRad2">
                             <svg class="indColourChoiceSVG" width="100" height="100">
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_col_2)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="0"
-                                       y="0"
-                                       width="100"
-                                       height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                <image filter="url(#f_col_2)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
                             </svg>
                         </label>
                         <br />
-                        <input type="radio"
-                               id="indRad2"
-                               name="indColour"
-                               value="2"
-                               {% if colour == 2 %}checked{% endif %} />
+                        <input type="radio" id="indRad2" name="indColour" value="2" {% if colour == 2 %}checked{% endif %} />
                     </div>
                     <div class="favRestChoice">
                         <label for="indRad3">
                             <svg class="indColourChoiceSVG" width="100" height="100">
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_col_3)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="0"
-                                       y="0"
-                                       width="100"
-                                       height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                <image filter="url(#f_col_3)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
                             </svg>
                         </label>
                         <br />
-                        <input type="radio"
-                               id="indRad3"
-                               name="indColour"
-                               value="3"
-                               {% if colour == 3 %}checked{% endif %} />
+                        <input type="radio" id="indRad3" name="indColour" value="3" {% if colour == 3 %}checked{% endif %} />
                     </div>
                     <div class="favRestChoice">
                         <label for="indRad4">
                             <svg class="indColourChoiceSVG" width="100" height="100">
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="-2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="-2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_black)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="2"
-                                       y="2"
-                                       width="100"
-                                       height="100" />
-                                <image filter="url(#f_col_4)"
-                                       xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}"
-                                       alt="Ship"
-                                       x="0"
-                                       y="0"
-                                       width="100"
-                                       height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="-2" y="2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="-2" width="100" height="100" />
+                                <image filter="url(#f_black)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="2" y="2" width="100" height="100" />
+                                <image filter="url(#f_col_4)" xlink:href="{% static 'Lobby/images/INDprofile/ship_barque.png' %}" alt="Ship" x="0" y="0" width="100" height="100" />
                             </svg>
                         </label>
                         <br />
-                        <input type="radio"
-                               id="indRad4"
-                               name="indColour"
-                               value="4"
-                               {% if colour == 4 %}checked{% endif %} />
+                        <input type="radio" id="indRad4" name="indColour" value="4" {% if colour == 4 %}checked{% endif %} />
                     </div>
                 </div>
                 <br />
                 <label class="preferenceTitle">{% translate "Select Map Display Type" %}</label>
                 <br />
-                <label class="preferenceExplanation">
-                    {% translate "You can choose the 2nd edition map, 3rd edition map, or a hex style map" %}
-                </label>
+                <label class="preferenceExplanation">{% trans "You can choose the 2nd edition map, 3rd edition map, or a hex style map" %}</label>
                 <br />
                 <div class="favRestChoice">
-                    <label for="indMap0">
-                        <img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}"
-                             width="230"
-                             height="152"
-                             alt="2nd Edition" />
-                    </label>
+                    <label for="indMap0"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}" width="230" height="152" alt="2nd Edition" /></label>
                     <br />
                     <b>2nd Edition</b>
                     <br />
-                    <input type="radio"
-                           id="indMap0"
-                           name="mapType"
-                           value="0"
-                           {% if mapType == 0 %}checked{% endif %} />
+                    <input type="radio" id="indMap0" name="mapType" value="0" {% if mapType == 0 %}checked{% endif %} />
                 </div>
                 <div class="favRestChoice">
-                    <label for="indMap05">
-                        <img src="{% static 'Lobby/images/INDprofile/OM_map_3e_icon.jpg' %}"
-                             width="230"
-                             height="152"
-                             alt="3rd Edition" />
-                    </label>
+                    <label for="indMap05"><img src="{% static 'Lobby/images/INDprofile/OM_map_3e_icon.jpg' %}" width="230" height="152" alt="3rd Edition" /></label>
                     <br />
                     <b>3rd Edition</b>
                     <br />
-                    <input type="radio"
-                           id="indMap05"
-                           name="mapType"
-                           value="4"
-                           {% if mapType == 4 %}checked{% endif %} />
+                    <input type="radio" id="indMap05" name="mapType" value="4" {% if mapType == 4 %}checked{% endif %} />
                 </div>
                 <div class="favRestChoice">
-                    <label for="indMap1">
-                        <img src="{% static 'Lobby/images/INDprofile/OM_map_hex_icon.jpg' %}"
-                             width="230"
-                             height="152"
-                             alt="Solid Colour" />
-                    </label>
+                    <label for="indMap1"><img src="{% static 'Lobby/images/INDprofile/OM_map_hex_icon.jpg' %}" width="230" height="152" alt="Hex map" /></label>
                     <br />
                     <b>Hex map</b>
                     <br />
-                    <input type="radio"
-                           id="indMap1"
-                           name="mapType"
-                           value="2"
-                           {% if mapType == 2 %}checked{% endif %} />
+                    <input type="radio" id="indMap1" name="mapType" value="2" {% if mapType == 2 %}checked{% endif %} />
                 </div>
                 <br />
                 <br />
@@ -369,34 +379,18 @@
                 <br />
                 <br />
                 <div class="favRestChoice">
-                    <label for="indCitySize0">
-                        <div class="cityMarker greenCity"></div>
-                        <div class="cityMarker orangeCity"></div>
-                        <div class="cityMarker redCity"></div>
-                    </label>
+                    <label for="indCitySize0"><div class="cityMarker greenCity"></div><div class="cityMarker orangeCity"></div><div class="cityMarker redCity"></div></label>
                     <br />
-                    <b>Green > Orange > Red</b>
+                    <b>Green &gt; Orange &gt; Red</b>
                     <br />
-                    <input type="radio"
-                           id="indCitySize0"
-                           name="citySizeColour"
-                           value="0"
-                           {% if citySizeColour == 0 %}checked{% endif %} />
+                    <input type="radio" id="indCitySize0" name="citySizeColour" value="0" {% if citySizeColour == 0 %}checked{% endif %} />
                 </div>
                 <div class="favRestChoice">
-                    <label for="indCitySize1">
-                        <div class="cityMarker orangeCity"></div>
-                        <div class="cityMarker greenCity"></div>
-                        <div class="cityMarker redCity"></div>
-                    </label>
+                    <label for="indCitySize1"><div class="cityMarker orangeCity"></div><div class="cityMarker greenCity"></div><div class="cityMarker redCity"></div></label>
                     <br />
-                    <b>Orange > Green > Red</b>
+                    <b>Orange &gt; Green &gt; Red</b>
                     <br />
-                    <input type="radio"
-                           id="indCitySize1"
-                           name="citySizeColour"
-                           value="1"
-                           {% if citySizeColour == 1 %}checked{% endif %} />
+                    <input type="radio" id="indCitySize1" name="citySizeColour" value="1" {% if citySizeColour == 1 %}checked{% endif %} />
                 </div>
                 <br />
                 <br />
@@ -404,36 +398,18 @@
                 <br />
                 <br />
                 <div class="favRestChoice">
-                    <label for="shipIcon0">
-                        <img src="{% static 'Lobby/images/INDprofile/shipsSimple.jpg' %}"
-                             width="448"
-                             height="152"
-                             alt="Simple Ships" />
-                    </label>
+                    <label for="shipIcon0"><img src="{% static 'Lobby/images/INDprofile/shipsSimple.jpg' %}" width="448" height="152" alt="Simple Ships" /></label>
                     <br />
                     <b>Simple Ships</b>
                     <br />
-                    <input type="radio"
-                           id="shipIcon0"
-                           name="shipIcon"
-                           value="0"
-                           {% if shipIcon == 0 %}checked{% endif %} />
+                    <input type="radio" id="shipIcon0" name="shipIcon" value="0" {% if shipIcon == 0 %}checked{% endif %} />
                 </div>
                 <div class="favRestChoice">
-                    <label for="shipIcon1">
-                        <img src="{% static 'Lobby/images/INDprofile/shipsFancy.jpg' %}"
-                             width="448"
-                             height="152"
-                             alt="Fancy Ships" />
-                    </label>
+                    <label for="shipIcon1"><img src="{% static 'Lobby/images/INDprofile/shipsFancy.jpg' %}" width="448" height="152" alt="Fancy Ships" /></label>
                     <br />
                     <b>Fancy Ships</b>
                     <br />
-                    <input type="radio"
-                           id="shipIcon1"
-                           name="shipIcon"
-                           value="1"
-                           {% if shipIcon == 1 %}checked{% endif %} />
+                    <input type="radio" id="shipIcon1" name="shipIcon" value="1" {% if shipIcon == 1 %}checked{% endif %} />
                 </div>
                 <br />
                 <br />
@@ -441,36 +417,18 @@
                 <br />
                 <br />
                 <div class="favRestChoice">
-                    <label for="goodsIcon1">
-                        <img src="{% static 'Lobby/images/INDprofile/icons1e.jpg' %}"
-                             width="187"
-                             height="152"
-                             alt="1st Edition" />
-                    </label>
+                    <label for="goodsIcon1"><img src="{% static 'Lobby/images/INDprofile/icons1e.jpg' %}" width="187" height="152" alt="1st Edition" /></label>
                     <br />
                     <b>1st Edition</b>
                     <br />
-                    <input type="radio"
-                           id="goodsIcon1"
-                           name="goodsIcon"
-                           value="1"
-                           {% if goodsIcon == 1 %}checked{% endif %} />
+                    <input type="radio" id="goodsIcon1" name="goodsIcon" value="1" {% if goodsIcon == 1 %}checked{% endif %} />
                 </div>
                 <div class="favRestChoice">
-                    <label for="goodsIcon2">
-                        <img src="{% static 'Lobby/images/INDprofile/icons2e.jpg' %}"
-                             width="187"
-                             height="152"
-                             alt="2nd Edition" />
-                    </label>
+                    <label for="goodsIcon2"><img src="{% static 'Lobby/images/INDprofile/icons2e.jpg' %}" width="187" height="152" alt="2nd Edition" /></label>
                     <br />
                     <b>2nd Edition</b>
                     <br />
-                    <input type="radio"
-                           id="goodsIcon2"
-                           name="goodsIcon"
-                           value="2"
-                           {% if goodsIcon == 2 %}checked{% endif %} />
+                    <input type="radio" id="goodsIcon2" name="goodsIcon" value="2" {% if goodsIcon == 2 %}checked{% endif %} />
                 </div>
                 <br />
                 <br />
@@ -478,36 +436,18 @@
                 <br />
                 <br />
                 <div class="favRestChoice">
-                    <label for="indOutline0">
-                        <img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon_outline.jpg' %}"
-                             width="230"
-                             height="152"
-                             alt="Solid Colour" />
-                    </label>
+                    <label for="indOutline0"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon_outline.jpg' %}" width="230" height="152" alt="Show Outline" /></label>
                     <br />
                     <b>Show Outline</b>
                     <br />
-                    <input type="radio"
-                           id="indOutline0"
-                           name="indOutline"
-                           value="1"
-                           {% if indOutline == 1 %}checked{% endif %} />
+                    <input type="radio" id="indOutline0" name="indOutline" value="1" {% if indOutline == 1 %}checked{% endif %} />
                 </div>
                 <div class="favRestChoice">
-                    <label for="indOutline1">
-                        <img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}"
-                             width="230"
-                             height="152"
-                             alt="Solid Colour" />
-                    </label>
+                    <label for="indOutline1"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}" width="230" height="152" alt="Hide Outline" /></label>
                     <br />
                     <b>Hide Outline</b>
                     <br />
-                    <input type="radio"
-                           id="indOutline1"
-                           name="indOutline"
-                           value="0"
-                           {% if indOutline == 0 %}checked{% endif %} />
+                    <input type="radio" id="indOutline1" name="indOutline" value="0" {% if indOutline == 0 %}checked{% endif %} />
                 </div>
                 <br />
                 <br />
@@ -515,36 +455,18 @@
                 <br />
                 <br />
                 <div class="favRestChoice">
-                    <label for="playerTableStyle0">
-                        <img src="{% static 'Lobby/images/INDprofile/playerTableStyle0.jpg' %}"
-                             width="145"
-                             height="191"
-                             alt="Solid Colour" />
-                    </label>
+                    <label for="playerTableStyle0"><img src="{% static 'Lobby/images/INDprofile/playerTableStyle0.jpg' %}" width="145" height="191" alt="Icons" /></label>
                     <br />
                     <b>Icons</b>
                     <br />
-                    <input type="radio"
-                           id="playerTableStyle0"
-                           name="playerTableStyle"
-                           value="0"
-                           {% if playerTableStyle == 0 %}checked{% endif %} />
+                    <input type="radio" id="playerTableStyle0" name="playerTableStyle" value="0" {% if playerTableStyle == 0 %}checked{% endif %} />
                 </div>
                 <div class="favRestChoice">
-                    <label for="playerTableStyle1">
-                        <img src="{% static 'Lobby/images/INDprofile/playerTableStyle1.jpg' %}"
-                             width="145"
-                             height="191"
-                             alt="Solid Colour" />
-                    </label>
+                    <label for="playerTableStyle1"><img src="{% static 'Lobby/images/INDprofile/playerTableStyle1.jpg' %}" width="145" height="191" alt="Text" /></label>
                     <br />
                     <b>Text</b>
                     <br />
-                    <input type="radio"
-                           id="playerTableStyle1"
-                           name="playerTableStyle"
-                           value="1"
-                           {% if playerTableStyle == 1 %}checked{% endif %} />
+                    <input type="radio" id="playerTableStyle1" name="playerTableStyle" value="1" {% if playerTableStyle == 1 %}checked{% endif %} />
                 </div>
                 <br />
                 <br />
@@ -553,6 +475,7 @@
         </div>
         {% include "Lobby/common/homeButton.html" %}
     </div>
+    {% endif %}
     {% block script %}
         <script>
     var global = {};

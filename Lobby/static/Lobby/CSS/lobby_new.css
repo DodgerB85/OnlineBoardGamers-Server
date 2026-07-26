@@ -112,10 +112,169 @@ body.nd .colourGuideDiv { display: none; }
 .nd-table-wrap {
     margin-bottom: 10px;
     border: 1px solid var(--color-border);
-    border-radius: 0 0 8px 8px;
-    border-top: none;
+    border-radius: 8px;
     background: var(--color-surface);
     overflow: visible;
+}
+
+/* The shared nd-row09 rules hide table headers. Lobby tables opt back in
+   explicitly rather than relying on a :has() override. */
+body.nd .nd-table.nd-lobby-games-table {
+    border-collapse: separate;
+}
+body.nd .nd-table.nd-lobby-games-table thead {
+    display: block;
+}
+body.nd .nd-table.nd-lobby-games-table thead tr {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    gap: 12px;
+    padding: 8px 14px 6px;
+    background: var(--color-surface-soft);
+    border-bottom: 2px solid var(--color-border-strong);
+}
+body.nd .nd-table.nd-current-games-table thead tr,
+body.nd .nd-table.nd-current-games-table .nd-row09 {
+    grid-template-columns: 64px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
+}
+body.nd .nd-table.nd-lobby-games-table thead th {
+    display: block;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    border: none;
+    text-align: left;
+}
+body.nd .nd-last-move {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    column-gap: 6px;
+    align-items: center;
+}
+body.nd .nd-last-move-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+body.nd .nd-last-move-text .timeToConvertSpan br {
+    display: none;
+}
+body.nd .nd-last-move .nd-mod-wrap {
+    grid-column: 2;
+    grid-row: 1;
+}
+body.nd .nd-no-options {
+    display: none;
+}
+
+@media (max-width: 980px) {
+    body.nd .nd-table.gamesTable .nd-row09 > td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+    }
+}
+
+/* Keep lobby rows aligned with their visible headers on tablet-width screens.
+   The shared layout switches rows to cards at 980px, which leaves every
+   column clustered on the left while the six-column header remains visible. */
+@media (min-width: 721px) and (max-width: 980px) {
+    body.nd .nd-table.nd-lobby-games-table .nd-row09 {
+        grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+        gap: 12px;
+        padding: 10px 14px;
+    }
+    body.nd .nd-table.nd-current-games-table .nd-row09 {
+        grid-template-columns: 64px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-players,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-turn,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-options,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-status,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-cta {
+        grid-column: auto;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-row09 > td[data-label]::before {
+        content: none;
+        display: none;
+    }
+}
+
+/* On phones the rows become cards. Their visible data labels are the column
+   headers; a separate six-column header would be unreadable and misaligned. */
+@media (max-width: 720px) {
+    body.nd .nd-no-options {
+        display: inline;
+        color: var(--color-muted);
+    }
+    body.nd .nd-table.nd-lobby-games-table thead {
+        display: none;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-row09 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 10px;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-icon {
+        grid-column: auto;
+        align-self: center;
+        justify-self: center;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-icon img {
+        width: 60px;
+        height: 60px;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-game {
+        grid-column: auto;
+        align-self: center;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-row09 > .nd-col-game[data-label]::before {
+        content: none;
+        display: none;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-players,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-turn,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-options,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-status,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-cta {
+        grid-column: auto;
+        align-self: center;
+        text-align: center;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-options,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-cta {
+        justify-content: center;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-status,
+    body.nd .nd-table.nd-lobby-games-table .nd-col-cta {
+        text-align: center;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-row09 > .nd-col-options[data-label]::before,
+    body.nd .nd-table.nd-lobby-games-table .nd-row09 > .nd-last-move[data-label]::before {
+        content: none;
+        display: none;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move {
+        display: grid;
+        grid-template-columns: max-content 40px;
+        width: fit-content;
+        justify-self: center;
+        justify-items: center;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move-text {
+        grid-area: 1 / 1;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move .nd-mod-wrap {
+        grid-area: 1 / 2;
+        align-self: center;
+    }
 }
 
 

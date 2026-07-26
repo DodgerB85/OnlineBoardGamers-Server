@@ -3,7 +3,7 @@
   <tr class="nd-row09 gameRow {% if not game.involvedPlayer %}otherWaitingGame{% endif %} {% if game.learningGame %}learningGame{% endif %}"
       id="{{ game.gameCode }}gamesRow{{ game.gameID }}">
     <td class="nd-col-icon">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}</td>
-    <td class="nd-col-game" data-label="{% translate "Name" %}">
+    <td class="nd-col-game" data-label="{% translate "Game Name" %}">
       <strong>{{ game.gameName }}</strong>
       {% if game.gameDescription %}
         <br>
@@ -58,8 +58,8 @@
              data-game="RNB"
              data-gameID="{{ game.gameID }}">
       {% endif %}
-      {% if game.startingOptionsHTML == "[None]" %}
-        None
+      {% if game.gameCode != "TGZ" and not game.startingMap and not game.startingOptionsHTML or game.gameCode != "TGZ" and not game.startingMap and game.startingOptionsHTML == "[None]" %}
+        <span class="nd-no-options">{% translate "No options" %}</span>
       {% else %}
         {{ game.startingOptionsHTML|safe }}
       {% endif %}

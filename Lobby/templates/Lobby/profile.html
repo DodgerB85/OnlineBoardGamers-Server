@@ -544,10 +544,16 @@
                     <button type="submit" class="nd-button nd-button-primary">{% translate "Save Game Preferences" %}</button>
                 </div>
             </form>
-            <div style="border-top: 1px solid var(--color-border); padding-top: 14px; display:flex; gap:8px; flex-wrap:wrap;">
-                <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'profileAQY' %}">{% translate "Antiquity Preferences" %}</a>
-                <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'profileIND' %}">{% translate "Indonesia Preferences" %}</a>
-                <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'profileRNB' %}">{% translate "Roads &amp; Boats Preferences" %}</a>
+            <div class="nd-card-header" style="border-top:1px solid var(--color-border);padding-top:16px;margin-top:16px;">
+                <h2>{% translate "Individual Game Preferences" %}</h2>
+            </div>
+            <p class="nd-muted" style="font-size:13px;margin:0 0 12px;">
+                {% translate "Click these buttons to set up more detailed preferences for the following games:" %}
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a class="nd-button nd-button-ghost" href="{% url 'profileAQY' %}">{% translate "Antiquity Preferences" %} &rarr;</a>
+                <a class="nd-button nd-button-ghost" href="{% url 'profileIND' %}">{% translate "Indonesia Preferences" %} &rarr;</a>
+                <a class="nd-button nd-button-ghost" href="{% url 'profileRNB' %}">{% translate "Roads & Boats Preferences" %} &rarr;</a>
             </div>
         </div>
 

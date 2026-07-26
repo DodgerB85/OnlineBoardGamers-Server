@@ -225,7 +225,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		customTGZinfos[i].onclick = function (e) {
 			e.stopPropagation() // stops the browser from redirecting.
 			e.preventDefault()
-			window.location.href = "/showTGZoptions/" + this.parentNode.parentNode.id.slice(11) // Replace 'another_page' with the actual URL name or path for the destination page
+			const ndPrefix = document.body.classList.contains("nd") ? "/nd" : ""
+			window.location.href = ndPrefix + "/showTGZoptions/" + this.parentNode.parentNode.id.slice(11)
 		}
 
 		customTGZinfos[i].addEventListener("contextmenu", function (event) {
@@ -233,6 +234,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		})
 
 		customTGZinfos[i].addEventListener("touchstart", function (event) {
+			if (document.body.classList.contains("nd")) return
+
 			event.preventDefault()
 			const TGZinfoPopup = this.querySelector(".TGZinfoPopup")
 			// Calculate the left position of the pop-up
@@ -253,6 +256,11 @@ document.addEventListener("DOMContentLoaded", function () {
 			this.style.cursor = "pointer"
 
 			const TGZinfoPopup = this.querySelector(".TGZinfoPopup")
+			if (document.body.classList.contains("nd")) {
+				TGZinfoPopup.style.left = ""
+				TGZinfoPopup.style.display = "block"
+				return
+			}
 			// Calculate the left position of the pop-up
 			const popupWidth = 625
 			const screenWidth = window.innerWidth
