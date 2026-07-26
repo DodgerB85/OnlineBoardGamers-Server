@@ -43,7 +43,7 @@
       <span class="timeToConvertSpan nd-small nd-muted">{{ game.latestUpdate }}</span>
       <span class="nd-small nd-muted">{{ game.latestUpdateElapsedTimeString }}</span>
     </span>
-    {% if 'SHADOW' not in game.allPlayers %}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}
+    {% if game.maxPlayers != 1 and 'SHADOW' not in game.allPlayers %}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}
     {% if game.deleteableGame %}
       <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">{% translate "Delete" %}</div>
     {% endif %}

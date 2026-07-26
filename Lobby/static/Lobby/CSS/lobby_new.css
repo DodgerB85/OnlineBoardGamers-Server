@@ -166,6 +166,11 @@ body.nd .nd-last-move .nd-mod-wrap {
     grid-column: 2;
     grid-row: 1;
 }
+body.nd .nd-last-move .deleteTrainingGame {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: stretch;
+}
 @media (min-width: 721px) {
     body.nd .nd-table.nd-lobby-games-table .nd-last-move {
         display: grid;

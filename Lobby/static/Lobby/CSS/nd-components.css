@@ -342,6 +342,16 @@ body.nd .nd-form-row .nd-form-help {
     margin: 0;
     padding-left: 232px;
 }
+body.nd .nd-page-profile .nd-field > .nd-form-help {
+    font-size: 14px;
+}
+body.nd .nd-profile-game-preferences {
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
 
 body.nd .nd-form-row > input[type="text"],
 body.nd .nd-form-row > input[type="email"],
@@ -1196,8 +1206,6 @@ body.nd .nd-check-label:has(input:disabled) {
     background: var(--color-surface-soft);
     color: var(--color-muted);
     border-radius: var(--radius-sm);
-    padding: 8px;
-    margin: -4px;
 }
 body.nd .nd-check-label input[type=checkbox]:disabled ~ div,
 body.nd .nd-check-label input[type=radio]:disabled ~ div {
@@ -1208,12 +1216,8 @@ body.nd .nd-check-label input[type=checkbox]:disabled,
 body.nd .nd-check-label input[type=radio]:disabled {
     cursor: not-allowed;
 }
-/* FCM Game Options already use coloured sections; disabled choices should
-   remain muted there without adding a second shaded row or extra spacing. */
 body.nd #FCMallOptions #nonExpertOptions .nd-check-label:has(input:disabled) {
     background: transparent;
-    padding: 4px 0;
-    margin: 0;
 }
 body.nd .nd-opt-help {
     font-size: 12px;
