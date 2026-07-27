@@ -138,7 +138,8 @@ def SF_serializeGame(game, user, player_context):
     pending_finish_ids = {gp.player.id for gp in all_game_players if gp.is_pending_finish and gp.player}
 
     # Get current players from is_current flag
-    current_players_str = ", ".join([gp.player.username for gp in all_game_players if gp.is_current and gp.player])
+    current_player_usernames = [gp.player.username for gp in all_game_players if gp.is_current and gp.player]
+    current_players_str = ", ".join(current_player_usernames)
 
     # Winner from GamePlayer
     winner_gp = next((gp for gp in all_game_players if gp.winner), None)
@@ -264,6 +265,8 @@ def SF_serializeGame(game, user, player_context):
         "startingMap": game.startingMap if hasattr(game, "startingMap") else "",
         "latestUpdate": game.latestUpdate,
         "currentPlayers": current_players_str,
+        "currentPlayersSplit": [u for u in current_player_usernames],
+        "currentPlayersOnlyOthers": ", ".join([u for u in current_player_usernames if u != (user.username if user else None)]),
         "kickoutRequiredNum": kickoutRequiredNum,
     }
 
