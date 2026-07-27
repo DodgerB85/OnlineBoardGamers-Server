@@ -554,32 +554,15 @@ function clearPressTimer() {
 // END TFZ INFO
 
 function fadeOutAndRemove(element) {
-	const tableCells = element.getElementsByTagName("td")
-	const currentHeight = element.offsetHeight + 0
-	const duration = 500 // Adjust the duration for the desired fade-out and height reduction speed
+	const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 420
 
-	element.style.transition = `opacity ${duration}ms`
-	element.style.opacity = "0"
-
-	setTimeout(() => {
-		element.style.minHeight = `${currentHeight}px`
-		element.style.height = `${currentHeight}px`
-
-		// Remove all the TDs within the TR
-		while (tableCells.length > 0) {
-			tableCells[0].remove()
-		}
-
-		setTimeout(() => {
-			element.style.transition = `height 0.5s ease-out, min-height 0.5s step-end`
-			element.style.height = "0"
-			element.style.minHeight = `${currentHeight}px`
-
-			element.addEventListener("transitionend", () => {
-				element.remove()
-			})
-		}, 0)
-	}, duration + 100) // Adjust the delay to ensure sufficient time between TR removals
+	element.animate(
+		[
+			{ opacity: 1, transform: "translateY(0) scale(1)" },
+			{ opacity: 0, transform: "translateY(-6px) scale(0.98)" },
+		],
+		{ duration, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" },
+	).finished.then(() => element.remove())
 }
 
 function show_gamesList(listType) {
