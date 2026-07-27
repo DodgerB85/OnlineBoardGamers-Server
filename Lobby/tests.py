@@ -1,6 +1,7 @@
 import datetime
+from unittest.mock import patch
 
-from django.test import SimpleTestCase, TestCase
+from django.test import RequestFactory, SimpleTestCase, TestCase
 from Lobby.sharedFunctions.tournyGenerator import _compute_game_groups
 from siteUtils.auto_tournament_helpers import (
     find_pending_tournament_to_open,
@@ -10,6 +11,7 @@ from siteUtils.auto_tournament_helpers import (
     should_start_open_tournament,
 )
 from Lobby.models import Tournament
+from Lobby.views import BGH_API
 
 
 def make_tpda_round(groups):
@@ -17,6 +19,19 @@ def make_tpda_round(groups):
     # Returns a single round in TPDA format: [[players, gameId, [winner], "name"], ...]
     return [[group, 0, [], "test"] for group in groups]
 
+
+class BGHAPIParsingTests(SimpleTestCase):
+    @patch("Lobby.views.requests.get")
+    def test_parses_bgh_json_string_with_trailing_commas(self, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.headers = {"Content-Type": "application/json"}
+        mock_get.return_value.json.return_value = '{\n"map_tiles": [\n{"tile_letter": "A",\n},\n],\n}'
+        request = RequestFactory().get("/BGH_API/test/")
+        request.user = type("User", (), {"username": "tester"})()
+
+        response = BGH_API.__wrapped__(request, "2,1,F,F,F,secret-token")
+
+        self.assertJSONEqual(response.content, {"map_tiles": [{"tile_letter": "A"}]})
 
 class TournamentMatchmakingTests(SimpleTestCase):
 

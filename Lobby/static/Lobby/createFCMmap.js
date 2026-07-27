@@ -796,11 +796,8 @@ async function generateBGHmap() {
     let apartmentTiles = (document.getElementById("BGH_apartmentTiles").checked ? 'T' : 'F');
     let parkTile = (document.getElementById("BGH_parkTile").checked ? 'T' : 'F');
 
-    let url = 'http://api.BoardGameHelpers.com/api/FoodChainMagnate/GenerateMap/'
     let options = `${playerCount},${mapOption},${newBasicTiles},${apartmentTiles},${parkTile},fcmmgapi4829`;
     let csrftoken = getCookie('csrftoken')
-    console.log(url + options)
-    console.log(options)
     startAPIfetch()
     try {
         const response = await fetch('../BGH_API/' + options, {
@@ -817,10 +814,6 @@ async function generateBGHmap() {
         const data = await response.json()
         //const data1 = await response.json()
         //const data = await JSON.parse(JSON.stringify(data1))
-        console.log(data)
-
-
-
         let startingHouses = data["total_number_of_starting_houses"];
         let beerSpots = data["total_number_of_beer_spots"]
         let cokeSpots = data["total_number_of_soda_spots"];
