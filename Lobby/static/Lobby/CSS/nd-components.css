@@ -452,7 +452,7 @@ body.nd .nd-register-form .errorlist {
 body.nd .nd-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 body.nd .nd-table th,
@@ -1023,7 +1023,7 @@ body.nd .nd-map-editor-grid .nd-create-tile-label {
 
 /* ---------- UTILITY ---------- */
 body.nd .nd-muted { color: var(--color-muted); }
-body.nd .nd-small { font-size: 13px; }
+body.nd .nd-small { font-size: 14px; }
 body.nd .nd-center { text-align: center; }
 body.nd .nd-spacer { flex: 1; }
 body.nd .nd-row-flex {
@@ -1720,7 +1720,7 @@ body.nd .nd-col-game strong {
 }
 body.nd .nd-col-game small {
     color: var(--color-muted);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.4;
 }
 body.nd .nd-col-game a { color: var(--color-accent-strong); text-decoration: none; }
@@ -1994,7 +1994,7 @@ body.nd .nd-tgz-options .diffVR {
 	body.nd .nd-register-form label { font-size: 16px; }
 	body.nd .nd-register-form .helptext { font-size: 14px; }
 	body.nd .nd-register-form .errorlist { font-size: 15px; }
-	body.nd .nd-table { font-size: 16px; }
+	body.nd .nd-table { font-size: 18px; }
 	body.nd .nd-table th { font-size: 14px; }
 	body.nd .nd-log-date { font-size: 14px; }
 	body.nd .nd-log-text { font-size: 16px; }
@@ -2034,7 +2034,7 @@ body.nd .nd-tgz-options .diffVR {
 	body.nd .TGZinfoPopup { font-size: 15px; }
 	body.nd .TGZinfoPopup .diffVR { font-size: 16px; }
 	body.nd .nd-tgz-options .diffVR { font-size: 16px; }
-	body.nd .nd-col-game small { font-size: 15px; }
+	body.nd .nd-col-game small { font-size: 16px; }
 	body.nd .nd-table:has(.nd-row09) thead th { font-size: 13px; }
 	body.nd .nd-help-pills .nd-button { font-size: 16px; }
 	body.nd .nd-page-header .nd-page-subtitle { font-size: 16px; }
