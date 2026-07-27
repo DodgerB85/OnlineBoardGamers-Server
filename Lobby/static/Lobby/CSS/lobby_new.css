@@ -620,3 +620,59 @@ body.nd .nd-col-cta .deleteTrainingGame {
         width: 100%;
     }
 }
+
+/* Desktop-only (≥769px) font bump, centering, column adjustments */
+@media (min-width: 769px) {
+    .nd-notice { font-size: 16px; }
+    .nd-news-banner { font-size: 16px; }
+    .nd-news-dismiss { font-size: 18px; }
+    .nd-empty-msg { font-size: 17px; }
+    .nd-empty-cta { font-size: 16px; }
+    .nd-empty-hint { font-size: 14px; }
+    body.nd .nd-table.nd-lobby-games-table thead th { font-size: 13px; }
+    .nd-table { font-size: 18px; }
+    .nd-table thead th,
+    .nd-table thead td { font-size: 14px; }
+    body.nd .nd-col-cta .buttonDiv,
+    body.nd .nd-col-cta .copyGameLinkButtonInTable { font-size: 15px; }
+    body.nd .nd-col-cta .deleteTrainingGame { font-size: 13px; }
+    .buttonDiv.Join,
+    .buttonDiv.Leave { font-size: 15px; }
+    .nd-empty { font-size: 16px; }
+    .nd-section-label { font-size: 15px; }
+    .nd-open-all-btn { font-size: 16px; }
+    .nd-colour-guide { font-size: 15px; }
+    .nd-colour-guide strong { font-size: 13px; }
+    #learningGameConfirmDiv { font-size: 16px; }
+    .learningGameConfirmButtons { font-size: 16px; }
+
+    /* Desktop current-games column widths */
+    body.nd .nd-table.nd-lobby-games-table thead tr {
+        grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+    }
+    body.nd .nd-table.nd-current-games-table thead tr,
+    body.nd .nd-table.nd-current-games-table .nd-row09 {
+        grid-template-columns: 64px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(80px, 0.5fr) minmax(150px, 0.925fr);
+    }
+
+    /* Header centering */
+    body.nd .nd-table.nd-lobby-games-table thead th {
+        text-align: center;
+    }
+    .nd-table thead th,
+    .nd-table thead td {
+        text-align: center;
+    }
+
+    /* Last-move flex for desktop */
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move-text {
+        text-align: center;
+    }
+}
