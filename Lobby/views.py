@@ -4171,22 +4171,16 @@ def sendAdminMessage(request):
 @login_required
 def BGH_API(request, options):
     url = "http://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/" + options
-
     response = requests.get(url)
     data = response.json()
     final_dictionary = {}
     if isinstance(data, dict):
         final_dictionary = data
-    else:
+    elif isinstance(data, str):
         try:
-            final_dictionary = json.loads(data) if isinstance(data, str) else {}
-        except (json.JSONDecodeError, TypeError) as e:
-            print(f"BGH API Error: {e} Data: {data}")
-
-    try:
-        print(f"BGH API:: User: {request.user.username}   Options: {options}   Data: {final_dictionary.get('view_map_url', 'N/A')}")
-    except Exception as e:
-        print(f"BGH PRINT ERROR: {e}")
+            final_dictionary = json.loads(re.sub(r",(\r?\n\s*[}\]])", r"\1", data))
+        except (json.JSONDecodeError, TypeError):
+            pass
 
     return JsonResponse(final_dictionary)  # , safe=False)
 
