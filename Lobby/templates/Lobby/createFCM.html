@@ -5,6 +5,89 @@
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
     <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet" />
     {% endif %}
+    <style>
+        .paceHelpIcon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-muted, #666);
+            font-weight: 700;
+            font-size: 11px;
+            border: 1px solid var(--color-border-strong, #999);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .paceHelpIcon .paceTooltip {
+            visibility: hidden;
+            width: 300px;
+            background: #333;
+            color: #fff;
+            text-align: left;
+            padding: 8px 12px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 100;
+            bottom: auto;
+            top: 100%;
+            left: 50%;
+            margin-left: -150px;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.25s;
+            font-size: 13px;
+            font-weight: normal;
+            line-height: 1.5;
+            pointer-events: auto;
+        }
+        .paceHelpIcon .paceTooltip::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -6px;
+            border: 6px solid transparent;
+            border-bottom-color: #333;
+        }
+        .paceHelpIcon .paceTooltip b {
+            color: #fff;
+        }
+        .paceHelpIcon.is-open .paceTooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        @media (hover: hover) {
+            .paceHelpIcon:hover:not(.is-dismissed) .paceTooltip {
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+        .paceHelpIcon:focus-visible {
+            outline: 2px solid var(--color-accent-strong, #5875f8);
+            outline-offset: 2px;
+        }
+        @media (max-width: 720px) {
+            .paceHelpIcon .paceTooltip {
+                position: fixed;
+                top: 50%;
+                right: 16px;
+                bottom: auto;
+                left: 16px;
+                width: auto;
+                max-height: calc(100dvh - 32px);
+                margin: 0;
+                overflow-y: auto;
+                transform: translateY(-50%);
+            }
+            .paceHelpIcon .paceTooltip::after {
+                display: none;
+            }
+        }
+    </style>
 {% endblock head %}
 {% block body %}
 
@@ -293,8 +376,9 @@
           <option value="40">{% trans "Standard: At least one move a day" %}</option>
           <option value="50">{% trans "Casual: Just take your time" %}</option>
         </select>
-        <div class="nd-form-help">{% trans "Alters kickout options. All games update 'live'" %}</div>
-        <div class="nd-form-help">{% trans "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</div>
+        <span class="paceHelpIcon" role="button" tabindex="0" aria-expanded="false">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.<br><b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.<br><b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
+        <div class="nd-form-help" style="padding-left:0">{% trans "Alters kickout options. All games update 'live'" %}</div>
+        <div class="nd-form-help" style="padding-left:0">{% trans "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</div>
       </div>
       <div class="nd-form-row">
         <label class="nd-form-label" for="playerNumber">{% trans "Number of players" %}</label>
@@ -736,7 +820,7 @@
                                     </div>
                                 </div>
                                 <div class="FCMsingleChoiceDiv">
-                                    <label class="choiceLabel" for="pace">{% translate "Playing Speed" %}<span class="paceHelpIcon">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.<br><b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.<br><b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
+                                    <label class="choiceLabel" for="pace">{% translate "Playing Speed" %}<span class="paceHelpIcon" role="button" tabindex="0" aria-expanded="false">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.<br><b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.<br><b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
                                     <div class="optionSelection">
                                         <select name="pace" id="pace" onchange="validateOptions(this.id)">
                                             <option value="10">{% translate "Live: Play the game in one session" %}</option>
@@ -1648,6 +1732,28 @@
         {% endcompress %}
         <script>
 	    var global = {};
+	    document.querySelectorAll(".paceHelpIcon").forEach((icon) => {
+	        const toggleTooltip = () => {
+	            const isOpen = icon.classList.contains("is-open")
+	            icon.classList.toggle("is-open", !isOpen)
+	            icon.classList.toggle("is-dismissed", isOpen)
+	            icon.setAttribute("aria-expanded", String(!isOpen))
+	        }
+
+	        icon.addEventListener("click", (event) => {
+	            event.preventDefault()
+	            event.stopPropagation()
+	            toggleTooltip()
+	        })
+	        icon.addEventListener("keydown", (event) => {
+	            if (event.key === "Enter" || event.key === " ") {
+	                event.preventDefault()
+	                toggleTooltip()
+	            }
+	        })
+	        icon.addEventListener("mouseleave", () => icon.classList.remove("is-dismissed"))
+	    })
+
 	    global.player2normText = '{% translate "Leave blank to invite anybody" %}';
 	    global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
 	    {% if experienced %}
