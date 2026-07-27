@@ -103,7 +103,7 @@
         <div class="nd-tabs">
             <button class="nd-tab tablinks" id="available" data-nd-tab="available">
                 <span class="nd-tab-label">{% translate "Available" %}</span>
-                <span class="nd-tab-count">{{ availableCount }}</span>
+                <span class="nd-tab-count">({{ availableCount }})</span>
             </button>
             <button class="nd-tab tablinks" id="current" data-nd-tab="current">
                 {% if currentChat %}
@@ -115,15 +115,15 @@
                          title="New Chat Message" />
                 {% endif %}
                 <span class="nd-tab-label">{% translate "Current" %}</span>
-                <span class="nd-tab-count" id="currentCount">{{ currentCount }}</span>
+                <span class="nd-tab-count" id="currentCount">({{ currentCount }})</span>
             </button>
             <button class="nd-tab tablinks" id="waiting" data-nd-tab="waiting">
                 <span class="nd-tab-label">{% translate "Waiting" %}</span>
-                <span class="nd-tab-count">{{ waitingCount }}</span>
+                <span class="nd-tab-count">({{ waitingCount }})</span>
             </button>
             <button class="nd-tab tablinks" id="invitations" data-nd-tab="invitations">
                 <span class="nd-tab-label">{% translate "Invitations" %}</span>
-                <span class="nd-tab-count">{{ invitationsCount }}</span>
+                <span class="nd-tab-count">({{ invitationsCount }})</span>
             </button>
             <button class="nd-tab tablinks" id="finished" data-nd-tab="finished">
                 {% if finishedChat %}
@@ -135,7 +135,7 @@
                          title="New Chat Message" />
                 {% endif %}
                 <span class="nd-tab-label">{% translate "Finished" %}</span>
-                <span class="nd-tab-count" id="finishedCount">{{ finishedCount }}</span>
+                <span class="nd-tab-count" id="finishedCount">({{ finishedCount }})</span>
             </button>
         </div>
         <!-- learning game confirmation (used by Lobby.js) -->
