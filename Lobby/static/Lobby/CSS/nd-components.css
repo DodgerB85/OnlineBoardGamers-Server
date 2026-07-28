@@ -16,21 +16,21 @@
     --color-border: #d8e9e7;
     --color-border-strong: #b9d6d3;
 
-    --color-muted: #617f86;
+    --color-muted: #4b6770;
     --color-ink: #19343c;
-    --color-ink-soft: #2f4d56;
+    --color-ink-soft: #1f3840;
 
-    --color-accent: #93d5d0;
-    --color-accent-strong: #5c9896;
+    --color-accent: #6fb3ae;
+    --color-accent-strong: #3d807d;
     --color-accent-ink: #19343c;
 
     --color-amber: #d8a44a;
-    --color-positive: #597a50;
-    --color-positive-bg: rgba(157, 205, 142, 0.20);
+    --color-positive: #3d6634;
+    --color-positive-bg: rgba(157, 205, 142, 0.35);
     --color-warn: #b07a1d;
     --color-warn-bg: rgba(255, 200, 100, 0.22);
-    --color-danger: #b54040;
-    --color-danger-bg: rgba(220, 80, 80, 0.14);
+    --color-danger: #8f2626;
+    --color-danger-bg: rgba(220, 80, 80, 0.27);
 
     --radius-sm: 4px;
     --radius-md: 8px;
@@ -116,6 +116,7 @@ body.nd .nd-page-header h1 {
 
 body.nd .nd-page-subtitle {
     color: var(--color-muted);
+    font-weight: 600;
     font-size: 14px;
 }
 
@@ -125,10 +126,10 @@ body.nd .nd-section {
 
 body.nd .nd-section-title {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--color-muted);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     margin: 0 0 10px;
 }
 
@@ -338,7 +339,7 @@ body.nd .nd-form-label {
 body.nd .nd-form-row .nd-form-help {
     flex-basis: 100%;
     color: var(--color-muted);
-    font-size: 12px;
+    font-size: 13px;
     margin: 0;
     padding-left: 232px;
 }
@@ -452,7 +453,7 @@ body.nd .nd-register-form .errorlist {
 body.nd .nd-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 body.nd .nd-table th,
@@ -467,8 +468,8 @@ body.nd .nd-table th {
     color: var(--color-muted);
     font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 600;
+    letter-spacing: 0.06em;
+    font-weight: 700;
 }
 
 @media (hover: hover) {
@@ -621,7 +622,7 @@ body.nd .nd-pill {
     padding: 2px 8px;
     border-radius: 999px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     background: var(--color-surface-soft);
     color: var(--color-muted);
     border: 1px solid var(--color-border);
@@ -712,23 +713,32 @@ body.nd .nd-tab.active .nd-tab-count {
 @media (max-width: 768px) {
     body.nd .nd-tabs {
         gap: 1px;
-        overflow-x: visible;
-        flex-wrap: wrap;
+        overflow-x: auto;
+        flex-wrap: nowrap;
         padding-bottom: 4px;
+    }
+    body.nd .nd-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+    body.nd .nd-tabs::-webkit-scrollbar-track {
+        background: var(--color-surface-soft);
+    }
+    body.nd .nd-tabs::-webkit-scrollbar-thumb {
+        background: var(--color-border-strong);
+        border-radius: 3px;
     }
     body.nd .nd-tab {
         padding: 8px 10px 6px;
         font-size: 13px;
+        flex: 1 0 0%;
     }
 }
 
 @media (max-width: 480px) {
-    body.nd .nd-tab-count {
-        display: none;
-    }
     body.nd .nd-tab {
         padding: 8px 8px 6px;
         font-size: 12px;
+        flex: 1 0 0%;
     }
 }
 
@@ -961,6 +971,219 @@ body.nd .nd-map-editor-grid .nd-create-tile-label {
     padding: 8px 12px;
 }
 
+/* ---------- MAP EDITORS ---------- */
+body.nd .nd-map-editor {
+    max-width: 1440px;
+}
+
+body.nd .nd-map-editor-workspace {
+    display: grid;
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+}
+
+body.nd .nd-map-editor-sidebar,
+body.nd .nd-map-editor-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    min-width: 0;
+}
+
+body.nd .nd-map-editor-main > .nd-card {
+    min-width: 0;
+}
+
+body.nd .nd-map-editor-section-title {
+    margin: 0 0 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-ink);
+}
+
+body.nd .nd-map-editor-player-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+body.nd .nd-map-editor-player-picker .playerCountFixed,
+body.nd .nd-map-editor-player-picker .playerCount {
+    width: 44px;
+    height: 44px;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    box-sizing: border-box;
+}
+
+body.nd .nd-map-editor-player-picker .playerCount {
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    body.nd .nd-map-editor-player-picker .playerCount:hover {
+        background: rgba(147, 213, 208, 0.12);
+    }
+}
+
+body.nd .nd-map-editor-actions {
+    display: grid;
+    gap: 8px;
+}
+
+body.nd .nd-map-editor-actions .nd-button,
+body.nd .nd-map-editor-actions .nd-button input {
+    width: 100%;
+}
+
+body.nd .nd-map-editor-help,
+body.nd .nd-map-editor-note {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+body.nd .nd-map-editor #availableMapTiles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 80px;
+    padding: 12px;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+body.nd .nd-map-editor #availableMapTiles img {
+    padding: 6px;
+    border-radius: var(--radius-sm);
+}
+
+@media (hover: hover) {
+    body.nd .nd-map-editor #availableMapTiles img:hover {
+        box-shadow: 0 0 0 2px var(--color-accent);
+    }
+}
+
+body.nd .nd-map-editor #boardArea,
+body.nd .nd-map-editor #boardAreaAQY {
+    margin: 0;
+    padding: 16px;
+    height: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+body.nd .nd-map-editor #boardArea {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+body.nd .nd-map-editor #board {
+    flex: 0 0 auto;
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+}
+
+body.nd .nd-map-editor #boardAQYcanvas {
+    flex: 0 0 auto;
+}
+
+body.nd .nd-map-editor-board-scale {
+    flex: 0 0 auto;
+    position: relative;
+}
+
+body.nd .nd-map-editor .boardTile {
+    border-radius: var(--radius-sm);
+}
+
+body.nd .nd-map-editor .boardTile.over {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-strong);
+}
+
+body.nd .nd-map-editor #board .tileDiv,
+body.nd .nd-map-editor .availableTileAQY {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+body.nd .nd-map-editor .AQYavailableTileFieldset {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+body.nd .nd-map-editor .boardHex {
+    stroke: var(--color-border-strong);
+    stroke-width: 12px;
+}
+
+body.nd .nd-map-editor .boardHexSelectable:hover,
+body.nd .nd-map-editor .yellowBoardHexOutlineHover {
+    stroke: var(--color-amber);
+}
+
+body.nd .nd-map-editor .boardHex.over,
+body.nd .nd-map-editor .yellowBoardHexOutlineHoverEmpty {
+    stroke: var(--color-accent);
+}
+
+body.nd .nd-map-editor #invalidMapCautionSpanAQY,
+body.nd .nd-map-editor #BGHerrorSpan {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+body.nd .nd-map-editor .BGHoptionsDiv {
+    display: grid;
+    gap: 6px;
+    margin-top: 14px;
+}
+
+body.nd .nd-map-editor .BGHoptionMainTitle {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+body.nd .nd-map-editor .BGHoptionTitle {
+    color: var(--color-ink-soft);
+}
+
+body.nd .nd-map-editor .BGHstatsDiv {
+    line-height: 1.6;
+}
+
+body.nd .nd-map-editor .BGH_drinkSpot {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+}
+
+@media (max-width: 800px) {
+    body.nd .nd-map-editor-workspace {
+        grid-template-columns: 1fr;
+    }
+
+}
+
 @media (max-width: 480px) {
     body.nd .nd-page-profile {
         max-width: 100%;
@@ -1014,7 +1237,7 @@ body.nd .nd-map-editor-grid .nd-create-tile-label {
 
 /* ---------- UTILITY ---------- */
 body.nd .nd-muted { color: var(--color-muted); }
-body.nd .nd-small { font-size: 13px; }
+body.nd .nd-small { font-size: 14px; }
 body.nd .nd-center { text-align: center; }
 body.nd .nd-spacer { flex: 1; }
 body.nd .nd-row-flex {
@@ -1708,11 +1931,10 @@ body.nd .nd-col-icon img {
 }
 body.nd .nd-col-game strong {
     color: var(--color-ink);
-    font-size: 15px;
 }
 body.nd .nd-col-game small {
     color: var(--color-muted);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.4;
 }
 body.nd .nd-col-game a { color: var(--color-accent-strong); text-decoration: none; }
@@ -1759,12 +1981,12 @@ body.nd .nd-col-cta {
 
 /* State backgrounds on the whole row. Keep these separate from the old td
    cell-fill rules so the color reads as one continuous row state. */
-body.nd .nd-row09.myMove { background: var(--color-positive-bg); }
-body.nd .nd-row09.kickoutRequired1 { background: var(--color-warn-bg); }
+body.nd .nd-row09.myMove { background: rgba(157, 205, 142, 0.35); }
+body.nd .nd-row09.kickoutRequired1 { background: rgba(255, 200, 100, 0.30); }
 body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
 @media (hover: hover) {
-    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.30); }
-    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.32); }
+    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.22); }
+    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.16); }
     body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
 }
 
@@ -1923,6 +2145,7 @@ body.nd .nd-tgz-options {
     gap: 14px;
     align-items: flex-start;
 }
+
 body.nd .nd-tgz-options > br,
 body.nd .nd-tgz-options .godAndVRdiv > br {
     display: none;
@@ -1944,8 +2167,135 @@ body.nd .nd-tgz-options .godOptionImg {
     border-radius: var(--radius-sm);
 }
 body.nd .nd-tgz-options .diffVR {
-    margin-top: 6px;
-    color: var(--color-danger);
-    font-size: 14px;
-    font-weight: 600;
+	margin-top: 6px;
+	color: var(--color-danger);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+/* Desktop-only (≥769px) font bump */
+@media (min-width: 769px) {
+	body.nd { font-size: 18px; }
+	body.nd h1 { font-size: 28px; }
+	body.nd h2 { font-size: 22px; }
+	body.nd h3 { font-size: 19px; }
+	body.nd h4 { font-size: 17px; }
+	body.nd .nd-page-subtitle { font-size: 16px; }
+	body.nd .nd-section-title { font-size: 15px; }
+	body.nd .nd-button,
+	body.nd a.nd-button,
+	body.nd button.nd-button,
+	body.nd input.nd-button { font-size: 16px; }
+	body.nd .nd-button-sm { font-size: 15px; }
+	body.nd input[type="text"],
+	body.nd input[type="email"],
+	body.nd input[type="password"],
+	body.nd input[type="number"],
+	body.nd input[type="search"],
+	body.nd input[type="url"],
+	body.nd input[type="tel"],
+	body.nd input[type="date"],
+	body.nd textarea,
+	body.nd select { font-size: 16px; }
+	body.nd .nd-form-row > label,
+	body.nd .nd-form-label { font-size: 16px; }
+	body.nd .nd-form-row .nd-form-help { font-size: 14px; }
+	body.nd .nd-form-row > input[type="text"],
+	body.nd .nd-form-row > input[type="email"],
+	body.nd .nd-form-row > input[type="password"],
+	body.nd .nd-form-row > input[type="number"],
+	body.nd .nd-form-row > select,
+	body.nd .nd-form-row > textarea { font-size: 16px; }
+	body.nd .nd-register-form label { font-size: 16px; }
+	body.nd .nd-register-form .helptext { font-size: 14px; }
+	body.nd .nd-register-form .errorlist { font-size: 15px; }
+	body.nd .nd-table { font-size: 18px; }
+	body.nd .nd-table th { font-size: 14px; }
+	body.nd .nd-log-date { font-size: 14px; }
+	body.nd .nd-log-text { font-size: 16px; }
+	body.nd .nd-credits { font-size: 16px; }
+	body.nd .nd-donate-option-label { font-size: 14px; }
+	body.nd .nd-callout { font-size: 16px; }
+	body.nd .nd-form-footer-link { font-size: 16px; }
+	body.nd .nd-pill { font-size: 15px; }
+	body.nd .nd-tab { font-size: 17px; }
+	body.nd .nd-tab-count { font-size: 15px; }
+	body.nd .nd-mod-wrap::after { font-size: 14px; }
+	@media (hover: none) {
+		body.nd .nd-mod-list-mobile .nd-mod-wrap::after { font-size: 13px; }
+	}
+	body.nd .nd-hero h1 { font-size: 30px; }
+	body.nd .nd-hero-sub { font-size: 17px; }
+	body.nd .nd-feature p { font-size: 16px; }
+	body.nd .nd-game-card-body p { font-size: 15px; }
+	body.nd .nd-create-tile-label { font-size: 16px; }
+	body.nd .nd-map-editor-grid .nd-create-tile-label { font-size: 15px; }
+	body.nd .nd-small { font-size: 15px; }
+	body.nd .nd-game-flavour details summary { font-size: 17px; }
+	body.nd .nd-game-flavour details summary::before { font-size: 14px; }
+	body.nd .nd-game-flavour .nd-flavour-body { font-size: 16px; }
+	body.nd .nd-fcm-china-help { font-size: 17px; }
+	body.nd .nd-check-label { font-size: 16px; }
+	body.nd .nd-opt-help { font-size: 14px; }
+	body.nd .nd-help-qa { font-size: 17px; }
+	body.nd .nd-help-qa b u { font-size: 19px; }
+	body.nd .nd-help-kickouts { font-size: 16px; }
+	body.nd .nd-stats-tile-num { font-size: 26px; }
+	body.nd .nd-stats-tile-label { font-size: 14px; }
+	body.nd .nd-empty { font-size: 16px; }
+	body.nd .nd-icon-legend h3 { font-size: 17px; }
+	body.nd .nd-icon-legend h4 { font-size: 15px; }
+	body.nd .nd-icon-cell > span { font-size: 15px; }
+	body.nd .TGZinfoPopup { font-size: 15px; }
+	body.nd .TGZinfoPopup .diffVR { font-size: 16px; }
+	body.nd .nd-tgz-options .diffVR { font-size: 16px; }
+	body.nd .nd-col-game small { font-size: 16px; }
+	body.nd .nd-table:has(.nd-row09) thead th { font-size: 13px; }
+	body.nd .nd-help-pills .nd-button { font-size: 16px; }
+	body.nd .nd-page-header .nd-page-subtitle { font-size: 16px; }
+	body.nd .nd-hero-actions .nd-button { font-size: 16px; }
+	body.nd .nd-profile-game-preferences .nd-form-label { font-size: 16px; }
+	body.nd .nd-opts-section .nd-check-label { font-size: 15px; }
+
+	/* Column width adjustments */
+	body.nd .nd-table:has(.nd-row09) thead tr {
+		grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+	}
+	body.nd .nd-row09 {
+		grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+	}
+
+	/* Header centering */
+	body.nd .nd-table:has(.nd-row09) thead th {
+		text-align: center;
+	}
+
+	/* Row cell centering */
+	body.nd .nd-row09 > td {
+		text-align: center;
+	}
+	body.nd .nd-col-game strong {
+		display: block;
+	}
+	body.nd .nd-col-game small {
+		display: block;
+	}
+	body.nd .nd-col-players {
+		text-align: center;
+	}
+	body.nd .nd-col-options {
+		justify-content: center;
+	}
+
+	/* Last-move flex (centered, handles missing icon) */
+	body.nd .nd-last-move {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+	}
+	body.nd .nd-last-move-text {
+		text-align: center;
+	}
 }

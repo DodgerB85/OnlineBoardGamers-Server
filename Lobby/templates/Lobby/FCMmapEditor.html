@@ -1,10 +1,108 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
   <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
+  {% if request.use_new_design %}
+  <div class="nd-page nd-map-editor">
+    {% include "Lobby/_nd_messages.html" %}
+    <div class="nd-page-header">
+      <div>
+        <h1>{% translate "Food Chain Magnate Map Editor" %}</h1>
+        <p class="nd-map-editor-help">{% translate "Build a map by dragging tiles to the board, then click placed tiles to rotate them." %}</p>
+      </div>
+      <form id="mapSubmit" action="{% url 'createFCMpage' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="mapData" name="mapData" value="">
+        <input type="button" onclick="createGameWithMap()" class="nd-button nd-button-primary" value="{% translate "Create a game with this map" %}">
+      </form>
+    </div>
+
+    <div class="nd-map-editor-workspace">
+      <aside class="nd-map-editor-sidebar">
+        <section class="nd-card">
+          <h2 class="nd-map-editor-section-title">{% translate "Players" %}</h2>
+          <div id="playerNumberArea" class="nd-map-editor-player-picker">
+            <img class="playerCountFixed" src="{% static 'Lobby/images/playerFilled.svg' %}" id="1player" alt="1 player">
+            <img class="playerCount" src="{% static 'Lobby/images/playerFilled.svg' %}" id="2player" alt="2 players">
+            <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="3player" alt="3 players">
+            <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="4player" alt="4 players">
+            <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="5player" alt="5 players">
+            <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="6player" alt="6 players">
+          </div>
+        </section>
+
+        <section class="nd-card">
+          <h2 class="nd-map-editor-section-title">{% translate "Map actions" %}</h2>
+          <div class="nd-map-editor-actions">
+            <input type="button" onclick="fillMap(true)" class="nd-button" value="{% translate "Complete with random tiles" %}">
+            <input type="button" onclick="fillMap(false)" class="nd-button" value="{% translate "Complete with base-game tiles" %}">
+            <input type="button" onclick="shuffleCurrentBoard()" class="nd-button" value="{% translate "Shuffle the current board" %}">
+            <input type="button" onclick="clearMap()" class="nd-button nd-button-danger" value="{% translate "Clear map" %}">
+          </div>
+        </section>
+
+        <section class="nd-card">
+          <span class="BGHoptionMainTitle">
+            {% blocktranslate trimmed %}
+              Generate a map using <a href="https://boardgamehelpers.com/FoodChainMagnate/" target="_blank" rel="noopener">BoardGameHelpers</a>
+            {% endblocktranslate %}
+          </span>
+          <div id="BGHerrorDiv"><span id="BGHerrorSpan">{% translate "Error generating map" %}</span></div>
+          <div class="BGHoptionsDiv">
+            <span class="BGHoptionTitle"><b>{% translate "Map Type" %}</b></span>
+            <label><input type="radio" class="myCheckbox" id="BGHmapType1" name="BGH_map_type" value="1"> {% translate "Random" %}</label>
+            <label><input type="radio" class="myCheckbox" id="BGHmapType2" name="BGH_map_type" value="2" checked> {% translate "Balanced" %}</label>
+            <label><input type="radio" class="myCheckbox" id="BGHmapType3" name="BGH_map_type" value="3"> {% translate "Interesting" %}</label>
+          </div>
+          <div class="BGHoptionsDiv">
+            <span class="BGHoptionTitle"><b>{% translate "Tile Options" %}</b></span>
+            <label><input type="checkbox" class="myCheckbox individualOpt" id="BGH_expTiles" name="BGH_expTiles" value="1"> {% translate "Use Normal Expansion Tiles" %}</label>
+            <label><input type="checkbox" class="myCheckbox individualOpt" id="BGH_apartmentTiles" name="BGH_apartmentTiles" value="1"> {% translate "Use Apartment Tiles" %}</label>
+            <label><input type="checkbox" class="myCheckbox individualOpt" id="BGH_parkTile" name="BGH_parkTile" value="1"> {% translate "Use Park Tile" %}</label>
+          </div>
+          <p><button class="nd-button nd-button-primary" id="BGHgenerateButton" onclick="generateBGHmap()">{% translate "Generate Map" %}</button> <span id="BGHspinnerDiv"><img src="{% static 'Lobby/images/spinner.gif' %}" id="BGHspinnerImg" alt="{% translate "Generating map" %}"></span></p>
+        </section>
+
+        <section class="nd-card" id="BGHstatsContainer">
+          <h2 class="nd-map-editor-section-title">{% translate "Stats" %}</h2>
+          <div class="BGHstatsDiv">
+            <img class="BGH_drinkSpot" src="{% static 'Lobby/images/BGH_lemonadeSpot.jpg' %}" alt="{% translate "Lemonades" %}"> <span id="BGH_lemonadeSpots" class="drinkSpotsSpan"></span><br>
+            <img class="BGH_drinkSpot" src="{% static 'Lobby/images/BGH_cokeSpot.jpg' %}" alt="{% translate "Cokes" %}"> <span id="BGH_coksSpots" class="drinkSpotsSpan"></span><br>
+            <img class="BGH_drinkSpot" src="{% static 'Lobby/images/BGH_beerSpot.jpg' %}" alt="{% translate "Beers" %}"> <span id="BGH_beerSpots" class="drinkSpotsSpan"></span>
+          </div>
+          <div class="BGHstatsDiv">
+            {% translate "Houses" %}: <span id="nbHouses"></span><br>
+            {% translate "Disconnected Paths" %}: <span id="nbPathSystems"></span><br>
+            {% translate "Neighbourhoods" %}: <span id="nbNeighbourhoods"></span>
+          </div>
+        </section>
+
+        <section class="nd-card" id="BGHBalanceDiv">
+          <h2 class="nd-map-editor-section-title">{% translate "Balance Issues" %}</h2>
+          <ul id="balanceIssuesUL"></ul>
+          <p class="nd-map-editor-note"><b>{% translate "Note: No map is 100% balanced!" %}</b></p>
+        </section>
+      </aside>
+
+      <main class="nd-map-editor-main">
+        <section class="nd-card">
+          <h2 class="nd-map-editor-section-title">{% translate "Available tiles" %}</h2>
+          <div id="availableMapTiles"></div>
+        </section>
+        <section class="nd-card">
+          <h2 class="nd-map-editor-section-title">{% translate "Map" %} <span id="BGHnameSpan"></span></h2>
+          <div id="boardArea"><div id="board"></div></div>
+        </section>
+        <p class="nd-map-editor-note"><a href="https://www.boardgamehelpers.com/Articles/Food_Chain_Magnate_Map_Balancing_Statistics" target="_blank" rel="noopener">{% translate "How are maps balanced? What do the stats mean?" %}</a></p>
+      </main>
+    </div>
+  </div>
+  {% else %}
   <div class="container">
     {% if messages %}
       <div class="messages">
@@ -181,6 +279,7 @@
       <div id="board"></div>
     </div>
   </div>
+  {% endif %}
   {% block script %}
     {% compress js %}
       <script src="{% static 'Lobby/createFCMmap.js' %}"></script>

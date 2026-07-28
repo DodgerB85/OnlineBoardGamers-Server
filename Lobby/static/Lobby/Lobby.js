@@ -175,6 +175,37 @@ document.addEventListener("DOMContentLoaded", function () {
 						}
 						const gameRow = document.getElementById(result.gameType + "gamesRow" + String(result.gameID))
 						fadeOutAndRemove(gameRow)
+						if (result.gameStatus === "ACTIVE") {
+							setTimeout(function () {
+								var tbody = document.querySelector("#currentGamesListView .nd-current-games-table tbody")
+								if (!tbody || tbody.rows.length === 0) {
+									var wrap = document.querySelector("#currentGamesListView .nd-table-wrap")
+									if (wrap) wrap.remove()
+									var emptyP = document.querySelector("#currentGamesListView > p.nd-empty")
+									if (emptyP) emptyP.remove()
+									var view = document.getElementById("currentGamesListView")
+									var colourGuide = view.querySelector(".nd-colour-guide, .colourGuideDiv")
+									if (colourGuide) {
+										var card = document.createElement("div")
+										card.className = "nd-empty-card"
+										var msg = document.createElement("p")
+										msg.className = "nd-empty-msg"
+										msg.textContent = "No current games or mini tournaments."
+										card.appendChild(msg)
+										var link = document.createElement("a")
+										link.className = "nd-empty-cta"
+										link.href = "/newGames/"
+										link.textContent = "Start a new game"
+										card.appendChild(link)
+										var hint = document.createElement("p")
+										hint.className = "nd-empty-hint"
+										hint.innerHTML = 'Need a refresher on the icons? <a href="/help/">See Help</a>.'
+										card.appendChild(hint)
+										view.insertBefore(card, colourGuide)
+									}
+								}
+							}, 1200)
+						}
 					}
 				})
 				.catch((error) => {
@@ -554,15 +585,56 @@ function clearPressTimer() {
 // END TFZ INFO
 
 function fadeOutAndRemove(element) {
-	const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 420
+	if (element.classList.contains("nd-row09")) {
+		const currentHeight = element.offsetHeight
+		const duration = 500
 
-	element.animate(
-		[
-			{ opacity: 1, transform: "translateY(0) scale(1)" },
-			{ opacity: 0, transform: "translateY(-6px) scale(0.98)" },
-		],
-		{ duration, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" },
-	).finished.then(() => element.remove())
+		element.style.transition = `opacity ${duration}ms`
+		element.style.opacity = "0"
+
+		setTimeout(() => {
+			element.style.boxSizing = "border-box"
+			element.style.height = `${currentHeight}px`
+			element.style.minHeight = "0"
+			element.style.overflow = "hidden"
+			void element.offsetHeight
+
+			element.style.transition = "height 0.5s ease-out, padding 0.5s ease-out, border-width 0.5s ease-out"
+			element.style.height = "0"
+			element.style.paddingBlock = "0"
+			element.style.borderBottomWidth = "0"
+			element.addEventListener("transitionend", (event) => {
+				if (event.target === element && event.propertyName === "height") element.remove()
+			})
+		}, duration + 100)
+		return
+	}
+
+	const tableCells = element.getElementsByTagName("td")
+	const currentHeight = element.offsetHeight + 0
+	const duration = 500
+
+	element.style.transition = `opacity ${duration}ms`
+	element.style.opacity = "0"
+
+	setTimeout(() => {
+		element.style.minHeight = `${currentHeight}px`
+		element.style.height = `${currentHeight}px`
+
+		while (tableCells.length > 0) {
+			tableCells[0].remove()
+		}
+
+		setTimeout(() => {
+			element.style.transition = "height 0.5s ease-out, min-height 0.5s step-end"
+			element.style.height = "0"
+			element.style.minHeight = `${currentHeight}px`
+
+			element.addEventListener("transitionend", () => {
+				element.remove()
+			})
+		}, 0)
+	}, duration + 100)
 }
 
 function show_gamesList(listType) {

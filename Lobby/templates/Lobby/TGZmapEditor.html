@@ -1,10 +1,62 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% if not request.use_new_design %}
+    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+  {% endif %}
   <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
+  {% if request.use_new_design %}
+  <div class="nd-page nd-map-editor">
+    {% include "Lobby/_nd_messages.html" %}
+    <div class="nd-page-header">
+      <div>
+        <h1>{% translate "The Great Zimbabwe Map Editor" %}</h1>
+        <p class="nd-map-editor-help">{% translate "Build a map by dragging tiles to the board, then click placed tiles to rotate them." %}</p>
+      </div>
+      <form id="mapSubmit" action="{% url 'createTGZpage' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="mapData" name="mapData" value="">
+        <input type="button" class="nd-button nd-button-primary" onclick="createGameWithMap()" value="{% translate "Create a game with this map" %}">
+      </form>
+    </div>
+
+    <div class="nd-map-editor-workspace">
+      <aside class="nd-map-editor-sidebar">
+        <section class="nd-card">
+          <h2 class="nd-map-editor-section-title">{% translate "Players" %}</h2>
+          <div id="playerNumberArea" class="nd-map-editor-player-picker">
+            <img class="playerCountFixed" src="{% static 'Lobby/images/playerFilled.svg' %}" id="1player" height="50" width="50" alt="1 player">
+            <img class="playerCount" src="{% static 'Lobby/images/playerFilled.svg' %}" id="2player" height="50" width="50" alt="2 players">
+            <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="3player" height="50" width="50" alt="3 players">
+            <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="4player" height="50" width="50" alt="4 players">
+            <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="5player" height="50" width="50" alt="5 players">
+          </div>
+        </section>
+        <section class="nd-card">
+          <h2 class="nd-map-editor-section-title">{% translate "Map actions" %}</h2>
+          <div class="nd-map-editor-actions">
+            <input type="button" onclick="fillMap()" class="nd-button" value="{% translate "Complete with random tiles" %}">
+            <input type="button" onclick="shuffleCurrentBoard()" class="nd-button" value="{% translate "Shuffle the current board" %}">
+            <input type="button" onclick="clearMap()" class="nd-button nd-button-danger" value="{% translate "Clear map" %}">
+          </div>
+        </section>
+      </aside>
+
+      <main class="nd-map-editor-main">
+        <section class="nd-card">
+          <h2 class="nd-map-editor-section-title">{% translate "Available tiles" %}</h2>
+          <div id="availableMapTiles"></div>
+        </section>
+        <section class="nd-card">
+          <h2 class="nd-map-editor-section-title">{% translate "Map" %}</h2>
+          <div id="boardArea"><div id="board"></div></div>
+        </section>
+      </main>
+    </div>
+  </div>
+  {% else %}
   <div class="container">
     {% if messages %}
       <div class="messages">
@@ -74,7 +126,9 @@
     <div id="boardArea">
       <div id="board"></div>
     </div>
-    {% block script %}
+  </div>
+  {% endif %}
+  {% block script %}
       <script>
   document.addEventListener('DOMContentLoaded', function () {
 
@@ -97,6 +151,5 @@
       {% compress js %}
         <script src="{% static 'Lobby/createTGZmap.js' %}"></script>
       {% endcompress %}
-    {% endblock script %}
-  </div>
+  {% endblock script %}
 {% endblock body %}

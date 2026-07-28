@@ -1,7 +1,9 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
+       {% if not request.use_new_design %}
        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+       {% endif %}
        <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
@@ -126,6 +128,65 @@
 </image>
 </pattern>
 </svg>
+{% if request.use_new_design %}
+<div class="nd-page nd-map-editor">
+       {% include "Lobby/_nd_messages.html" %}
+       <div class="nd-page-header">
+              <div>
+                     <h1>{% translate "Antiquity Map Editor" %}</h1>
+                     <p class="nd-map-editor-help">{% translate "Build a map by dragging tiles to the board, then click placed tiles to rotate them." %}</p>
+              </div>
+              <form id="mapSubmit" action="{% url 'createAQYpage' %}" method="post">
+                     {% csrf_token %}
+                     <input type="hidden" id="mapData" name="mapData" value="">
+                     <input type="button" class="nd-button nd-button-primary" onclick="createGameWithMap()" value="{% translate "Create a game with this map" %}">
+              </form>
+       </div>
+
+       <div class="nd-map-editor-workspace">
+              <aside class="nd-map-editor-sidebar">
+                     <section class="nd-card">
+                            <h2 class="nd-map-editor-section-title">{% translate "Players" %}</h2>
+                            <div id="playerNumberArea" class="nd-map-editor-player-picker">
+                                   <img class="playerCountFixed" src="{% static 'Lobby/images/playerFilled.svg' %}" id="1player" alt="1 player" width="50" height="50">
+                                   <img class="playerCount" src="{% static 'Lobby/images/playerFilled.svg' %}" id="2player" alt="2 players" width="50" height="50">
+                                   <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="3player" alt="3 players" width="50" height="50">
+                                   <img class="playerCount" src="{% static 'Lobby/images/playerOutline.svg' %}" id="4player" alt="4 players" width="50" height="50">
+                            </div>
+                     </section>
+                     <section class="nd-card">
+                            <h2 class="nd-map-editor-section-title">{% translate "Map actions" %}</h2>
+                            <div class="nd-map-editor-actions">
+                                   <input type="button" class="nd-button" onclick="fillMap()" value="{% translate "Complete with random tiles" %}">
+                                   <input type="button" class="nd-button" onclick="shuffleCurrentBoard()" value="{% translate "Shuffle the current board" %}">
+                                   <input type="button" class="nd-button nd-button-danger" onclick="clearMap()" value="{% translate "Clear map" %}">
+                            </div>
+                     </section>
+                     <section class="nd-card">
+                            <h2 class="nd-map-editor-section-title">{% translate "Tile options" %}</h2>
+                            <p class="nd-map-editor-note">{% translate "Antiquity had a print run with mirrored tiles. Enable this option to include them." %}</p>
+                            <p class="nd-map-editor-note">{% translate "A single physical game has two copies of each double-sided tile, so use at most two tiles from each pair below." %}</p>
+                            <div id="mirrorCheckboxDiv">
+                                   <input type="checkbox" onchange="renderAvailableTiles()" class="myCheckbox" id="useMirrors" name="useMirrors" value="true">
+                                   <label for="useMirrors">{% translate "Use Mirrored Tiles" %}</label>
+                            </div>
+                     </section>
+              </aside>
+
+              <main class="nd-map-editor-main">
+                     <section class="nd-card">
+                            <h2 class="nd-map-editor-section-title">{% translate "Available tiles" %}</h2>
+                            <div id="availableMapTiles"></div>
+                     </section>
+                     <section class="nd-card">
+                            <h2 class="nd-map-editor-section-title">{% translate "Map" %}</h2>
+                            <span id="invalidMapCautionSpanAQY">{% translate "Caution: You cannot make this map from a single physical game" %}</span>
+                            <div id="boardAreaAQY"><div class="nd-map-editor-board-scale"><div id="boardAQYcanvas"></div></div></div>
+                     </section>
+              </main>
+       </div>
+</div>
+{% else %}
 <div class="container">
        {% if messages %}
               <div class="messages">
@@ -203,6 +264,7 @@
               <div id="boardAQYcanvas"></div>
        </div>
 </div>
+{% endif %}
 {% block script %}
        {% compress js %}
               <script src="{% static 'Lobby/createAQYmap.js' %}"></script>

@@ -101,7 +101,8 @@ body.nd .colourGuideDiv { display: none; }
 }
 .nd-empty-hint {
     margin: 6px 0 0;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 600;
     color: var(--color-muted);
 }
 .nd-empty-hint a {
@@ -141,9 +142,9 @@ body.nd .nd-table.nd-lobby-games-table thead th {
     display: block;
     padding: 0;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.07em;
     color: var(--color-muted);
     border: none;
     text-align: left;
@@ -199,10 +200,10 @@ body.nd .nd-no-options {
         content: attr(data-label);
         display: block;
         font-size: 11px;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--color-muted);
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.06em;
         margin-bottom: 4px;
     }
 }
@@ -229,6 +230,9 @@ body.nd .nd-no-options {
     body.nd .nd-table.nd-lobby-games-table .nd-row09 > td[data-label]::before {
         content: none;
         display: none;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-players {
+        overflow-wrap: anywhere;
     }
 }
 
@@ -364,7 +368,7 @@ body.nd .nd-col-cta .deleteTrainingGame {
     line-height: 1.2;
     cursor: pointer;
     box-sizing: border-box;
-    background: var(--color-danger-bg);
+    background: var(--color-surface);
     color: var(--color-danger);
     border: 2px solid var(--color-danger);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -542,8 +546,8 @@ body.nd .nd-col-cta .deleteTrainingGame {
     margin-bottom: 8px;
     color: var(--color-muted);
     text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.05em;
+    font-size: 12px;
+    letter-spacing: 0.06em;
 }
 .nd-colour-guide-grid {
     display: flex;
@@ -618,5 +622,61 @@ body.nd .nd-col-cta .deleteTrainingGame {
     body.nd .nd-col-cta .copyGameLinkButtonInTable {
         flex: 1 1 100%;
         width: 100%;
+    }
+}
+
+/* Desktop-only (≥769px) font bump, centering, column adjustments */
+@media (min-width: 769px) {
+    .nd-notice { font-size: 16px; }
+    .nd-news-banner { font-size: 16px; }
+    .nd-news-dismiss { font-size: 18px; }
+    .nd-empty-msg { font-size: 17px; }
+    .nd-empty-cta { font-size: 16px; }
+    .nd-empty-hint { font-size: 14px; }
+    body.nd .nd-table.nd-lobby-games-table thead th { font-size: 13px; }
+    .nd-table { font-size: 18px; }
+    .nd-table thead th,
+    .nd-table thead td { font-size: 14px; }
+    body.nd .nd-col-cta .buttonDiv,
+    body.nd .nd-col-cta .copyGameLinkButtonInTable { font-size: 15px; }
+    body.nd .nd-col-cta .deleteTrainingGame { font-size: 13px; }
+    .buttonDiv.Join,
+    .buttonDiv.Leave { font-size: 15px; }
+    .nd-empty { font-size: 16px; }
+    .nd-section-label { font-size: 15px; }
+    .nd-open-all-btn { font-size: 16px; }
+    .nd-colour-guide { font-size: 15px; }
+    .nd-colour-guide strong { font-size: 13px; }
+    #learningGameConfirmDiv { font-size: 16px; }
+    .learningGameConfirmButtons { font-size: 16px; }
+
+    /* Desktop current-games column widths */
+    body.nd .nd-table.nd-lobby-games-table thead tr {
+        grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+    }
+    body.nd .nd-table.nd-current-games-table thead tr,
+    body.nd .nd-table.nd-current-games-table .nd-row09 {
+        grid-template-columns: 64px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(80px, 0.5fr) minmax(150px, 0.925fr);
+    }
+
+    /* Header centering */
+    body.nd .nd-table.nd-lobby-games-table thead th {
+        text-align: center;
+    }
+    .nd-table thead th,
+    .nd-table thead td {
+        text-align: center;
+    }
+
+    /* Last-move flex for desktop */
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-last-move-text {
+        text-align: center;
     }
 }
