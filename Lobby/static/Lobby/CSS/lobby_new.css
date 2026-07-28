@@ -231,6 +231,9 @@ body.nd .nd-no-options {
         content: none;
         display: none;
     }
+    body.nd .nd-table.nd-lobby-games-table .nd-col-players {
+        overflow-wrap: anywhere;
+    }
 }
 
 /* On phones the rows become cards. Their visible data labels are the column

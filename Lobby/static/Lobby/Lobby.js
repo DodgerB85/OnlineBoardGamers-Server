@@ -175,6 +175,37 @@ document.addEventListener("DOMContentLoaded", function () {
 						}
 						const gameRow = document.getElementById(result.gameType + "gamesRow" + String(result.gameID))
 						fadeOutAndRemove(gameRow)
+						if (result.gameStatus === "ACTIVE") {
+							setTimeout(function () {
+								var tbody = document.querySelector("#currentGamesListView .nd-current-games-table tbody")
+								if (!tbody || tbody.rows.length === 0) {
+									var wrap = document.querySelector("#currentGamesListView .nd-table-wrap")
+									if (wrap) wrap.remove()
+									var emptyP = document.querySelector("#currentGamesListView > p.nd-empty")
+									if (emptyP) emptyP.remove()
+									var view = document.getElementById("currentGamesListView")
+									var colourGuide = view.querySelector(".nd-colour-guide, .colourGuideDiv")
+									if (colourGuide) {
+										var card = document.createElement("div")
+										card.className = "nd-empty-card"
+										var msg = document.createElement("p")
+										msg.className = "nd-empty-msg"
+										msg.textContent = "No current games or mini tournaments."
+										card.appendChild(msg)
+										var link = document.createElement("a")
+										link.className = "nd-empty-cta"
+										link.href = "/newGames/"
+										link.textContent = "Start a new game"
+										card.appendChild(link)
+										var hint = document.createElement("p")
+										hint.className = "nd-empty-hint"
+										hint.innerHTML = 'Need a refresher on the icons? <a href="/help/">See Help</a>.'
+										card.appendChild(hint)
+										view.insertBefore(card, colourGuide)
+									}
+								}
+							}, 1200)
+						}
 					}
 				})
 				.catch((error) => {
