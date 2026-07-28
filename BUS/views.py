@@ -179,7 +179,10 @@ def _sendChatMessage(request):
     jsonData = json.loads(request.body)
 
     if jsonData["action"] == "sendChatMessage":
-        currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
+        try:
+            currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="BUS")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
         presenter = cast("BUSpresenter", currentGame.presenter())
 
         # Remove chat notification for current user

@@ -1036,7 +1036,10 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = Game.objects.get(id=game_id, gameCode="AQY")
+        try:
+            currentGame = Game.objects.get(id=game_id, gameCode="AQY")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
         presenter = cast("AQYpresenter", currentGame.presenter())
 
         currentChatData = []

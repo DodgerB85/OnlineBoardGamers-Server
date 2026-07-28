@@ -946,7 +946,10 @@ def _sendChatMessage(request):
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
-        currentGame = Game.objects.get(id=game_id, gameCode="KFW")
+        try:
+            currentGame = Game.objects.get(id=game_id, gameCode="KFW")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
 
         currentChatData = []
         base64_data = currentGame.chatData if currentGame.chatData else ""
