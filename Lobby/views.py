@@ -1687,7 +1687,11 @@ def FCMmapEditor(request):
         # Parse the string representation of a list into a list of numbers
         if mapData:
             import json
-            mapDataList = json.loads(mapData)
+            try:
+                mapDataList = json.loads(mapData)
+            except json.JSONDecodeError:
+                # Fallback for old comma-separated format
+                mapDataList = [int(x) for x in mapData.split(",")]
             return render(request, "Lobby/FCMmapEditor.html", {"mapData": mapDataList})
         return render(request, "Lobby/FCMmapEditor.html", {"mapData": mapData})
 

@@ -724,7 +724,7 @@ function createGameWithMap() {
         alert("Please create a valid map first");
     }
     else {
-        document.getElementById("mapData").value = boardTiles;
+        document.getElementById("mapData").value = JSON.stringify(boardTiles);
         document.getElementById("mapSubmit").submit();
 
 
