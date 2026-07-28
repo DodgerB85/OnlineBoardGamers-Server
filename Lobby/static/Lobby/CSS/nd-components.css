@@ -986,7 +986,13 @@ body.nd .nd-map-editor-workspace {
 body.nd .nd-map-editor-sidebar,
 body.nd .nd-map-editor-main {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
+    min-width: 0;
+}
+
+body.nd .nd-map-editor-main > .nd-card {
+    min-width: 0;
 }
 
 body.nd .nd-map-editor-section-title {
@@ -1068,16 +1074,35 @@ body.nd .nd-map-editor #boardArea,
 body.nd .nd-map-editor #boardAreaAQY {
     margin: 0;
     padding: 16px;
+    height: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
     background: var(--color-surface-soft);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     box-shadow: none;
 }
 
+body.nd .nd-map-editor #boardArea {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 body.nd .nd-map-editor #board {
+    flex: 0 0 auto;
     background-color: var(--color-surface);
     border: 2px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
+}
+
+body.nd .nd-map-editor #boardAQYcanvas {
+    flex: 0 0 auto;
+}
+
+body.nd .nd-map-editor-board-scale {
+    flex: 0 0 auto;
+    position: relative;
 }
 
 body.nd .nd-map-editor .boardTile {
@@ -1157,10 +1182,6 @@ body.nd .nd-map-editor .BGH_drinkSpot {
         grid-template-columns: 1fr;
     }
 
-    body.nd .nd-map-editor #boardArea,
-    body.nd .nd-map-editor #boardAreaAQY {
-        overflow-x: auto;
-    }
 }
 
 @media (max-width: 480px) {
@@ -2124,6 +2145,7 @@ body.nd .nd-tgz-options {
     gap: 14px;
     align-items: flex-start;
 }
+
 body.nd .nd-tgz-options > br,
 body.nd .nd-tgz-options .godAndVRdiv > br {
     display: none;

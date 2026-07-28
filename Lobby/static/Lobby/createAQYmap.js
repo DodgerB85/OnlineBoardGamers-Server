@@ -9,6 +9,22 @@ var availableTiles
 var boardTiles
 var playerCount = 2
 
+function resizeMapForEditor() {
+	let board = document.getElementById("boardAQYcanvas")
+	let scaleContainer = board.parentElement
+	if (!scaleContainer.classList.contains("nd-map-editor-board-scale")) return
+
+	let boardArea = scaleContainer.parentElement
+	let areaStyle = window.getComputedStyle(boardArea)
+	let availableWidth = boardArea.clientWidth - parseFloat(areaStyle.paddingLeft) - parseFloat(areaStyle.paddingRight)
+	let scale = Math.min(1, availableWidth / board.offsetWidth)
+
+	scaleContainer.style.width = board.offsetWidth * scale + "px"
+	scaleContainer.style.height = board.offsetHeight * scale + "px"
+	board.style.transformOrigin = "top left"
+	board.style.transform = "scale(" + scale + ")"
+}
+
 function init() {
 	availableTiles = [0, 1, 2, 3, 4, 5, 6, 7]
 
@@ -27,6 +43,7 @@ function init() {
 	}
 	renderAvailableTiles()
 	renderBoard(playerCount)
+	window.addEventListener("resize", resizeMapForEditor)
 
 	window.addEventListener("mousemove", function (event) {
 		// do logic here
@@ -458,6 +475,7 @@ function renderBoard(playerCount) {
 	boardAQYcanvas.appendChild(mapSVG)
 	// Verify the board
 	checkValidMap(true)
+	resizeMapForEditor()
 }
 
 function changePlayerNumberGraphics(playerNumber) {
