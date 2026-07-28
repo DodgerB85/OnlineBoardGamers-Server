@@ -16,21 +16,21 @@
     --color-border: #d8e9e7;
     --color-border-strong: #b9d6d3;
 
-    --color-muted: #617f86;
+    --color-muted: #4b6770;
     --color-ink: #19343c;
-    --color-ink-soft: #2f4d56;
+    --color-ink-soft: #1f3840;
 
-    --color-accent: #93d5d0;
-    --color-accent-strong: #5c9896;
+    --color-accent: #6fb3ae;
+    --color-accent-strong: #3d807d;
     --color-accent-ink: #19343c;
 
     --color-amber: #d8a44a;
-    --color-positive: #597a50;
-    --color-positive-bg: rgba(157, 205, 142, 0.20);
+    --color-positive: #3d6634;
+    --color-positive-bg: rgba(157, 205, 142, 0.35);
     --color-warn: #b07a1d;
     --color-warn-bg: rgba(255, 200, 100, 0.22);
-    --color-danger: #b54040;
-    --color-danger-bg: rgba(220, 80, 80, 0.14);
+    --color-danger: #8f2626;
+    --color-danger-bg: rgba(220, 80, 80, 0.27);
 
     --radius-sm: 4px;
     --radius-md: 8px;
@@ -116,6 +116,7 @@ body.nd .nd-page-header h1 {
 
 body.nd .nd-page-subtitle {
     color: var(--color-muted);
+    font-weight: 600;
     font-size: 14px;
 }
 
@@ -125,10 +126,10 @@ body.nd .nd-section {
 
 body.nd .nd-section-title {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--color-muted);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     margin: 0 0 10px;
 }
 
@@ -338,7 +339,7 @@ body.nd .nd-form-label {
 body.nd .nd-form-row .nd-form-help {
     flex-basis: 100%;
     color: var(--color-muted);
-    font-size: 12px;
+    font-size: 13px;
     margin: 0;
     padding-left: 232px;
 }
@@ -467,8 +468,8 @@ body.nd .nd-table th {
     color: var(--color-muted);
     font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 600;
+    letter-spacing: 0.06em;
+    font-weight: 700;
 }
 
 @media (hover: hover) {
@@ -621,7 +622,7 @@ body.nd .nd-pill {
     padding: 2px 8px;
     border-radius: 999px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     background: var(--color-surface-soft);
     color: var(--color-muted);
     border: 1px solid var(--color-border);
@@ -1767,12 +1768,12 @@ body.nd .nd-col-cta {
 
 /* State backgrounds on the whole row. Keep these separate from the old td
    cell-fill rules so the color reads as one continuous row state. */
-body.nd .nd-row09.myMove { background: var(--color-positive-bg); }
-body.nd .nd-row09.kickoutRequired1 { background: var(--color-warn-bg); }
+body.nd .nd-row09.myMove { background: rgba(157, 205, 142, 0.35); }
+body.nd .nd-row09.kickoutRequired1 { background: rgba(255, 200, 100, 0.30); }
 body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
 @media (hover: hover) {
-    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.30); }
-    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.32); }
+    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.22); }
+    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.16); }
     body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
 }
 

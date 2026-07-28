@@ -554,15 +554,56 @@ function clearPressTimer() {
 // END TFZ INFO
 
 function fadeOutAndRemove(element) {
-	const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 420
+	if (element.classList.contains("nd-row09")) {
+		const currentHeight = element.offsetHeight
+		const duration = 500
 
-	element.animate(
-		[
-			{ opacity: 1, transform: "translateY(0) scale(1)" },
-			{ opacity: 0, transform: "translateY(-6px) scale(0.98)" },
-		],
-		{ duration, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" },
-	).finished.then(() => element.remove())
+		element.style.transition = `opacity ${duration}ms`
+		element.style.opacity = "0"
+
+		setTimeout(() => {
+			element.style.boxSizing = "border-box"
+			element.style.height = `${currentHeight}px`
+			element.style.minHeight = "0"
+			element.style.overflow = "hidden"
+			void element.offsetHeight
+
+			element.style.transition = "height 0.5s ease-out, padding 0.5s ease-out, border-width 0.5s ease-out"
+			element.style.height = "0"
+			element.style.paddingBlock = "0"
+			element.style.borderBottomWidth = "0"
+			element.addEventListener("transitionend", (event) => {
+				if (event.target === element && event.propertyName === "height") element.remove()
+			})
+		}, duration + 100)
+		return
+	}
+
+	const tableCells = element.getElementsByTagName("td")
+	const currentHeight = element.offsetHeight + 0
+	const duration = 500
+
+	element.style.transition = `opacity ${duration}ms`
+	element.style.opacity = "0"
+
+	setTimeout(() => {
+		element.style.minHeight = `${currentHeight}px`
+		element.style.height = `${currentHeight}px`
+
+		while (tableCells.length > 0) {
+			tableCells[0].remove()
+		}
+
+		setTimeout(() => {
+			element.style.transition = "height 0.5s ease-out, min-height 0.5s step-end"
+			element.style.height = "0"
+			element.style.minHeight = `${currentHeight}px`
+
+			element.addEventListener("transitionend", () => {
+				element.remove()
+			})
+		}, 0)
+	}, duration + 100)
 }
 
 function show_gamesList(listType) {

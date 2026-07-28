@@ -101,7 +101,8 @@ body.nd .colourGuideDiv { display: none; }
 }
 .nd-empty-hint {
     margin: 6px 0 0;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 600;
     color: var(--color-muted);
 }
 .nd-empty-hint a {
@@ -141,9 +142,9 @@ body.nd .nd-table.nd-lobby-games-table thead th {
     display: block;
     padding: 0;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.07em;
     color: var(--color-muted);
     border: none;
     text-align: left;
@@ -199,10 +200,10 @@ body.nd .nd-no-options {
         content: attr(data-label);
         display: block;
         font-size: 11px;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--color-muted);
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.06em;
         margin-bottom: 4px;
     }
 }
@@ -364,7 +365,7 @@ body.nd .nd-col-cta .deleteTrainingGame {
     line-height: 1.2;
     cursor: pointer;
     box-sizing: border-box;
-    background: var(--color-danger-bg);
+    background: var(--color-surface);
     color: var(--color-danger);
     border: 2px solid var(--color-danger);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -542,8 +543,8 @@ body.nd .nd-col-cta .deleteTrainingGame {
     margin-bottom: 8px;
     color: var(--color-muted);
     text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.05em;
+    font-size: 12px;
+    letter-spacing: 0.06em;
 }
 .nd-colour-guide-grid {
     display: flex;
