@@ -971,6 +971,198 @@ body.nd .nd-map-editor-grid .nd-create-tile-label {
     padding: 8px 12px;
 }
 
+/* ---------- MAP EDITORS ---------- */
+body.nd .nd-map-editor {
+    max-width: 1440px;
+}
+
+body.nd .nd-map-editor-workspace {
+    display: grid;
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+}
+
+body.nd .nd-map-editor-sidebar,
+body.nd .nd-map-editor-main {
+    display: grid;
+    gap: 16px;
+}
+
+body.nd .nd-map-editor-section-title {
+    margin: 0 0 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-ink);
+}
+
+body.nd .nd-map-editor-player-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+body.nd .nd-map-editor-player-picker .playerCountFixed,
+body.nd .nd-map-editor-player-picker .playerCount {
+    width: 44px;
+    height: 44px;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    box-sizing: border-box;
+}
+
+body.nd .nd-map-editor-player-picker .playerCount {
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    body.nd .nd-map-editor-player-picker .playerCount:hover {
+        background: rgba(147, 213, 208, 0.12);
+    }
+}
+
+body.nd .nd-map-editor-actions {
+    display: grid;
+    gap: 8px;
+}
+
+body.nd .nd-map-editor-actions .nd-button,
+body.nd .nd-map-editor-actions .nd-button input {
+    width: 100%;
+}
+
+body.nd .nd-map-editor-help,
+body.nd .nd-map-editor-note {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+body.nd .nd-map-editor #availableMapTiles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 80px;
+    padding: 12px;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+body.nd .nd-map-editor #availableMapTiles img {
+    padding: 6px;
+    border-radius: var(--radius-sm);
+}
+
+@media (hover: hover) {
+    body.nd .nd-map-editor #availableMapTiles img:hover {
+        box-shadow: 0 0 0 2px var(--color-accent);
+    }
+}
+
+body.nd .nd-map-editor #boardArea,
+body.nd .nd-map-editor #boardAreaAQY {
+    margin: 0;
+    padding: 16px;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+body.nd .nd-map-editor #board {
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+}
+
+body.nd .nd-map-editor .boardTile {
+    border-radius: var(--radius-sm);
+}
+
+body.nd .nd-map-editor .boardTile.over {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-strong);
+}
+
+body.nd .nd-map-editor #board .tileDiv,
+body.nd .nd-map-editor .availableTileAQY {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+body.nd .nd-map-editor .AQYavailableTileFieldset {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+body.nd .nd-map-editor .boardHex {
+    stroke: var(--color-border-strong);
+    stroke-width: 12px;
+}
+
+body.nd .nd-map-editor .boardHexSelectable:hover,
+body.nd .nd-map-editor .yellowBoardHexOutlineHover {
+    stroke: var(--color-amber);
+}
+
+body.nd .nd-map-editor .boardHex.over,
+body.nd .nd-map-editor .yellowBoardHexOutlineHoverEmpty {
+    stroke: var(--color-accent);
+}
+
+body.nd .nd-map-editor #invalidMapCautionSpanAQY,
+body.nd .nd-map-editor #BGHerrorSpan {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+body.nd .nd-map-editor .BGHoptionsDiv {
+    display: grid;
+    gap: 6px;
+    margin-top: 14px;
+}
+
+body.nd .nd-map-editor .BGHoptionMainTitle {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+body.nd .nd-map-editor .BGHoptionTitle {
+    color: var(--color-ink-soft);
+}
+
+body.nd .nd-map-editor .BGHstatsDiv {
+    line-height: 1.6;
+}
+
+body.nd .nd-map-editor .BGH_drinkSpot {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+}
+
+@media (max-width: 800px) {
+    body.nd .nd-map-editor-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    body.nd .nd-map-editor #boardArea,
+    body.nd .nd-map-editor #boardAreaAQY {
+        overflow-x: auto;
+    }
+}
+
 @media (max-width: 480px) {
     body.nd .nd-page-profile {
         max-width: 100%;
