@@ -17,6 +17,10 @@
 	}
 }
 
+.mobileQuickNav {
+	display: none;
+}
+
 @media only screen and (max-width: 1280px) {
 	#rightLoggedInHyperlinks {
 		display: none;
@@ -29,6 +33,39 @@
 
 	#langSelectLoggedIn {
 		margin-right: 50px;
+	}
+
+	.mobileQuickNav {
+		display: flex;
+		position: fixed;
+		top: 80px;
+		left: 0;
+		right: 0;
+		height: 44px;
+		background-color: #333;
+		border-top: 1px solid #555;
+		z-index: 999;
+	}
+
+	.mobileQuickNav a {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0;
+		border-right: 1px solid #555;
+	}
+
+	.mobileQuickNav a:last-child {
+		border-right: 0;
+	}
+
+	.mobileQuickNav ~ .mainLayout {
+		margin-top: 124px;
+	}
+
+	.mobileQuickNav ~ .hamburgerMenu.active {
+		top: 124px;
 	}
 }
 

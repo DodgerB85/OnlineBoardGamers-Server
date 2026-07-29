@@ -24,17 +24,54 @@
     }
 }
 
+body.nd .mobileQuickNav {
+    display: none;
+}
+
 @media only screen and (max-width: 1280px) {
-    #rightLoggedInHyperlinks {
-        display: none;
+	#rightLoggedInHyperlinks {
+		display: none;
     }
     #rightLinksLoggedIn .hamburger {
         display: block;
         margin: 25px;
     }
-    #langSelectLoggedIn {
-        margin-right: 50px;
-    }
+	#langSelectLoggedIn {
+		margin-right: 50px;
+	}
+
+	body.nd.ndAuthed {
+		padding-top: 100px;
+	}
+
+	body.nd .mobileQuickNav {
+		display: flex;
+		position: fixed;
+		top: 56px;
+		left: 0;
+		right: 0;
+		height: 44px;
+		background-color: var(--color-nav-bg);
+		border-top: 1px solid rgba(147, 213, 208, 0.2);
+		z-index: 999;
+	}
+
+	body.nd .mobileQuickNav a {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0;
+		border-right: 1px solid rgba(147, 213, 208, 0.2);
+	}
+
+	body.nd .mobileQuickNav a:last-child {
+		border-right: 0;
+	}
+
+	body.nd.ndAuthed .hamburgerMenu.active {
+		transform: translateY(100px);
+	}
 }
 
 @media only screen and (max-width: 1100px) {
