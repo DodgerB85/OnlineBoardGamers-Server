@@ -212,20 +212,16 @@
             {% endif %}
         </div>
         {% if user.is_authenticated %}
+            <nav class="mobileQuickNav" aria-label="{% translate "Primary navigation" %}">
+                <a class="topBarLink" href="{% url 'newGamesPage' %}">{% translate "New Game" %}</a>
+                <a class="topBarLink"
+                   href="{% url 'playerInfo' usernameToProfile=user.username %}">{% translate "My Games" %}</a>
+                <a class="topBarLink" href="{% url 'stats' %}">{% translate "Stats" %}</a>
+            </nav>
             <!-- Hamburger logged in -->
             <div class="hamburgerMenu">
                 <div class="hamburgerLinkDiv">
-                    <a class="topBarLink" href="{% url 'newGamesPage' %}">{% translate "New Game" %}</a>
-                </div>
-                <div class="hamburgerLinkDiv">
-                    <a class="topBarLink"
-                       href="{% url 'playerInfo' usernameToProfile=user.username %}">{% translate "My Games" %}</a>
-                </div>
-                <div class="hamburgerLinkDiv">
                     <a class="topBarLink" href="{% url 'AllTournaments' %}">{% translate "Tournaments" %}</a>
-                </div>
-                <div class="hamburgerLinkDiv">
-                    <a class="topBarLink" href="{% url 'stats' %}">{% translate "Stats" %}</a>
                 </div>
                 <div class="hamburgerLinkDiv">
                     <a class="topBarLink" href="{% url 'lobbyHelp' %}">{% translate "Help" %}</a>
