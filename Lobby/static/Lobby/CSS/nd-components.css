@@ -1958,6 +1958,13 @@ body.nd .nd-col-status a {
     text-decoration: none;
 }
 body.nd .nd-col-status a:hover { text-decoration: underline; }
+body.nd .nd-col-status .nd-status-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
 body.nd .nd-col-options {
     display: flex;
     flex-wrap: wrap;
