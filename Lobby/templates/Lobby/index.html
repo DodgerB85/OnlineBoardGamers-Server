@@ -113,7 +113,7 @@
           {% endfor %}
         </div>
       {% endif %}
-      <section class="nd-hero">
+      <section class="nd-card nd-hero">
         <div class="nd-hero-text">
           <h1>{% translate "Play Splotter & other classics online — free, live, with friends or solo." %}</h1>
           <p class="nd-hero-sub">
@@ -121,7 +121,7 @@
           </p>
           <div class="nd-hero-actions">
             <a class="nd-button nd-button-primary" href="{% url 'register' %}">{% translate "Create a free account" %}</a>
-            <a class="nd-button nd-button-primary" href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
+            <a class="nd-button" href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
           </div>
         </div>
       </section>
