@@ -52,17 +52,20 @@ function getBoardImgSrc() {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return view.getImage("Board_20A")
 	if (personal.selectedBoard === rf.BOARD_OG) return view.getImage("Board_origV2")
 	if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return view.getImage("Board_20AC")
+	if (personal.selectedBoard === rf.BOARD_PITTS) return view.getImage("Board_Pitts")
 }
 
 function getBoardWidth() {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return 800
 	if (personal.selectedBoard === rf.BOARD_OG) return 817
 	if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return 1035
+	if (personal.selectedBoard === rf.BOARD_PITTS) return 800
 }
 
 function getWholeBoardMinWidth() {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return (store.refSize * (getBoardWidth() + 279 + 8)) / 100
 	if (personal.selectedBoard === rf.BOARD_OG) return (store.refSize * (getBoardWidth() + 279 + 9)) / 100
+	if (personal.selectedBoard === rf.BOARD_PITTS) return (store.refSize * (getBoardWidth() + 279 + 8)) / 100
 	// WHY IS THIS REPEATED????? TODO
 	if (personal.selectedBoard === rf.BOARD_OG) return (store.refSize * (getBoardWidth() + 0 + 9)) / 100
 }

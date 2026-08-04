@@ -17,10 +17,10 @@ const plopAnimationRef = ref(null)
 function ghostBuilding(e, junction, building, add) {
 	if (!add) {
 		ghostBuildingRef.value.style.display = "none"
-		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
+		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
 		if (personal.selectedBoard === rf.BOARD_OG) e.target.style.border = String((store.refSize * 3) / 100) + "px solid yellow"
 	} else {
-		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) {
+		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) {
 			ghostBuildingRef.value.src = view.getImage("building" + String(store.context.selectedBuildingType))
 			ghostBuildingRef.value.style.display = "block"
 			ghostBuildingRef.value.style.top = view.getBuildingPos(junction, building)[0] + "px"
@@ -37,16 +37,16 @@ function ghostBuilding(e, junction, building, add) {
 			ghostBuildingRef.value.style.height = (store.refSize * 30) / 100 + "px"
 			ghostBuildingRef.value.style.transform = "rotate(" + view.getBuildingPos(junction, building)[2] + "deg)"
 		}
-		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) e.target.style.border = String((store.refSize * 5) / 100) + "px solid lightgreen"
+		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) e.target.style.border = String((store.refSize * 5) / 100) + "px solid lightgreen"
 		if (personal.selectedBoard === rf.BOARD_OG) e.target.style.border = String((store.refSize * 3) / 100) + "px solid lightgreen"
 	}
 }
 function mouseOverVromBuilding(e, junction, add) {
 	if (!add) {
-		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
+		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
 		if (personal.selectedBoard === rf.BOARD_OG) e.target.style.border = String((store.refSize * 3) / 100) + "px solid yellow"
 	} else {
-		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) e.target.style.border = String((store.refSize * 5) / 100) + "px solid lightgreen"
+		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) e.target.style.border = String((store.refSize * 5) / 100) + "px solid lightgreen"
 		if (personal.selectedBoard === rf.BOARD_OG) e.target.style.border = String((store.refSize * 3) / 100) + "px solid lightgreen"
 	}
 }
@@ -205,12 +205,13 @@ function clickedVromBldg(junction, buildingIndex) {
 function getBuildingRadius() {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return 32
 	if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return 29
+	if (personal.selectedBoard === rf.BOARD_PITTS) return 32
 }
 </script>
 
 <template>
 	<!-- Add highlight circles to empty building spots -->
-	<template v-if="personal.canPlay() && (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE)">
+	<template v-if="personal.canPlay() && (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS)">
 		<template v-for="(line, index) in model.getEmptyBuildingSpots()" v-bind:key="index">
 			<div
 				class="buildingSpotDiv"
@@ -230,7 +231,7 @@ function getBuildingRadius() {
 	</template>
 
 	<!-- Render the buildings and pax on the map -->
-	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE">
+	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS">
 		<template v-for="(line, index) in model.getBuildingsToDisplay()" v-bind:key="index">
 			<div
 				class="buildingDiv"
@@ -313,7 +314,7 @@ function getBuildingRadius() {
 
 	<!-- Add highlight circles to VROM building spots -->
 	<!-- FOR junction in playersJunctions, if junction includes(reqBld) then add a circle there-->
-	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE">
+	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS">
 		<template v-for="(line, index) in model.getVromBuildings()" v-bind:key="index">
 			<div
 				class="buildingSpotDiv"
@@ -368,7 +369,7 @@ function getBuildingRadius() {
 	<div class="plop-animation" ref="plopAnimationRef"></div>
 
 	<!-- HISTORY HELPER -- BUILDINGS (ADD BLDG / VROM TO) -->
-	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE">
+	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS">
 		<template v-for="(line, index) in store.historyHelpers.buildingsToHighlight" v-bind:key="index">
 			<div
 				class="history_buildingSpotDiv"

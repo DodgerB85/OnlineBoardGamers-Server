@@ -219,7 +219,7 @@ function clickedEntry(index) {
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
 				builds
 				<template v-for="(line, index) in entry[3]" v-bind:key="index">
-					<img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="hist_buildingImg" :src="view.getImage('building' + String(line[0]))" alt="buildingHist" />
+					<img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="hist_buildingImg" :src="view.getImage('building' + String(line[0]))" alt="buildingHist" />
 					<img v-if="personal.selectedBoard === rf.BOARD_OG" class="hist_buildingImg_orig" :src="view.getImage('building' + String(line[0]) + '_orig')" alt="buildingHist" />
 				</template>
 			</div>

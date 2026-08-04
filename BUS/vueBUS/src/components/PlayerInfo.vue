@@ -66,7 +66,7 @@ function getPlayerIndexOrderForTable() {
       <!-- REPLAY MODE< PHASE ALTER TIME-->
       <template v-if="store.topMenuViews.showReplay && store.gameflow.phase === rf.PHASE_ALTER_TIME">
         Destination:
-        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="buildingDesireImg"
+        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding) + '_orig')" alt="desiredBldg">
@@ -75,7 +75,7 @@ function getPlayerIndexOrderForTable() {
       <template v-else-if="store.gameflow.phase === rf.PHASE_ALTER_TIME && !store.context.confirmEndTurn">
         <span v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">Expected
         </span>Destination:
-        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="buildingDesireImg"
+        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String((store.desiredBuilding === 3) ? 1 : store.desiredBuilding + 1))"
           alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
@@ -83,7 +83,7 @@ function getPlayerIndexOrderForTable() {
           alt="desiredBldg">
 
         Altering Time would keep Destination as:
-        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="buildingDesireImg"
+        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding) + '_orig')" alt="desiredBldg">
@@ -91,7 +91,7 @@ function getPlayerIndexOrderForTable() {
       <!-- PHASE ALTER TIME // CLICKED AN OPTION-->
       <template v-else-if="store.gameflow.phase === rf.PHASE_ALTER_TIME && store.context.confirmEndTurn">
         Destination:
-        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="buildingDesireImg"
+        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding) + '_orig')" alt="desiredBldg">
@@ -101,7 +101,7 @@ function getPlayerIndexOrderForTable() {
       <template v-else-if="store.gameflow.phase !== rf.PHASE_VROM">
         <span v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">Expected
         </span>Destination:
-        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="buildingDesireImg"
+        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String((store.desiredBuilding === 3) ? 1 : store.desiredBuilding + 1))"
           alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
@@ -110,7 +110,7 @@ function getPlayerIndexOrderForTable() {
 
         <template v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">
           Altering Time would keep Destination as:
-          <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="buildingDesireImg"
+          <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
             :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
           <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
             :src="view.getImage('building' + String(store.desiredBuilding) + '_orig')" alt="desiredBldg">
@@ -119,7 +119,7 @@ function getPlayerIndexOrderForTable() {
       <!-- NOT PHASE VROM-->
       <template v-else-if="store.gameflow.phase === rf.PHASE_VROM">
         Destination:
-        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="buildingDesireImg"
+        <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding) + '_orig')" alt="desiredBldg">

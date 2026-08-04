@@ -23,6 +23,9 @@ export function initGame() {
 	personal.trainingGame = false
 	if (window.initData.startingOptions.includes(102)) personal.trainingGame = true
 
+	store.USE_PITTS_MAP = false
+	if (window.initData.startingOptions.includes(3)) store.USE_PITTS_MAP = true
+
 	personal.liveWS = false
 	personal.pov = -9 // Also denotes involved player
 	personal.superuser = false
@@ -34,8 +37,13 @@ export function initGame() {
 	if (window.initData.name != undefined) {
 		personal.name = window.initData.name
 		store.chatData = funcs.decompressChatData(window.initData.chatData)
-		personal.selectedBoard = window.initData.preferredBusBoard
+		if (store.USE_PITTS_MAP) {
+			personal.selectedBoard = rf.BOARD_PITTS
+		} else {
+			personal.selectedBoard = window.initData.preferredBusBoard
+		}
 		if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) store.topMenuViews.displayRightActionSelection = false
+		if (personal.selectedBoard === rf.BOARD_PITTS) store.topMenuViews.displayRightActionSelection = true
 	}
 
 	// Set up Involved Player data

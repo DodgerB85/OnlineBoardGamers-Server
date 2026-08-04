@@ -121,12 +121,12 @@ function selectedEndJunction(junction) {
 }
 
 function getStrokeWidthForBusLine() {
-	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return 2
+	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) return 2
 	if (personal.selectedBoard === rf.BOARD_OG) return 3
 }
 
 function getStrokeColourForBusLine(line) {
-	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return "black"
+	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) return "black"
 	if (personal.selectedBoard === rf.BOARD_OG) {
 		return "white"
 		return rf.getColourNameFromNumber(personal.getCorrectedColour(line))

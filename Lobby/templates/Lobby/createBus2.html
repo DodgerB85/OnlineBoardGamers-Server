@@ -209,8 +209,9 @@
                         <label for="usePittsburghMap" class="checkboxLabel">{% translate "Use Pittsburgh Map" %}</label>
                         <br />
                         <span class="inlineHelp">
+                            {% static 'BUS/Bus_Pitts_Rules.pdf' as pitts_rules_url %}
                             {% blocktranslate trimmed %}
-                                Play on the custom Pittsburgh map with special rules.
+                                Play on the custom Pittsburgh map with special <a class="linkOther" href="{{ pitts_rules_url }}" target="_blank">rules</a>.
                                 <br />
                                 Game will be excluded from stats
                             {% endblocktranslate %}

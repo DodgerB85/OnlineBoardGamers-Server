@@ -64,6 +64,7 @@ function getActionSelectionWidth() {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return 279
 	if (personal.selectedBoard === rf.BOARD_OG) return 279
 	if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return 0
+	if (personal.selectedBoard === rf.BOARD_PITTS) return 279
 }
 
 function getPointerRotation() {

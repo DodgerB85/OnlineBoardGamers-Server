@@ -222,7 +222,7 @@ function passKickout() {
 
 				<template v-if="(store.gameflow.phase === rf.PHASE_SETUP_BLDGS || store.gameflow.phase === rf.PHASE_ADD_BLDGS) && store.context.buildingsLeftToPlace > 0">
 					<br />
-					<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE">
+					<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS">
 						<template v-for="i in [1, 2, 3]" v-bind:key="i">
 							<img
 								class="buildingOptionImg"
