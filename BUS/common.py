@@ -134,6 +134,10 @@ def create_bus_game(
         elif "experiencedGame" in request.POST:
             starting_options.append(int(request.POST.get("experiencedGame")))
 
+        if "usePittsburghMap" in request.POST:
+            starting_options.append(int(request.POST["usePittsburghMap"]))
+            stats_exclude = True
+
         all_players.append(request.user)
 
     with transaction.atomic():

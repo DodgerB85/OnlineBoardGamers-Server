@@ -2091,6 +2091,43 @@ def createBUSpage(request, gameID=0):
 
 
 @login_required
+def createBUSpage2(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "BUS", Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createBus2.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = Game.objects.get(id=gameID, gameCode="BUS")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
+
+        playerNames = []
+        for gp in currentGame.players.exclude(is_kicked=True).select_related("player"):
+            if request.user != gp.player and gp.player:
+                playerNames.append(gp.player.username)
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createBus2.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.presenter().getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": currentGame.startingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
 def createCNSpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "CNS", Game)
     if request.method != "POST" and gameID == 0:
