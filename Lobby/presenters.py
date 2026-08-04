@@ -1429,6 +1429,12 @@ class RNBpresenter(GamePresenter):
             presetMoves = gp.moveDataJSON if gp and gp.moveDataJSON else []
             for entry in presetMoves:
                 if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
+                    # conflictPreset is a 3-element array: [conflictDecision, prayingDecision, turnOrderDecision]
+                    # conflictDecision: 0 = Wait & See, 1 = No conflict, 2 = Call conflict
+                    # Wait & See means the player hasn't made a firm decision yet — keep lobby green.
+                    conflict_preset = entry.get("conflictPreset", [])
+                    if len(conflict_preset) and conflict_preset[0] == 0:
+                        continue
                     return False
 
         return not currentPlayersList or loggedInPlayerUsername in currentPlayersList or currentPlayersList[0] in rf.SHADOW_USERNAMES

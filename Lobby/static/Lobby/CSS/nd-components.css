@@ -809,25 +809,26 @@ body.nd .nd-mod-wrap:focus-within::after {
 
 /* ---------- LANDING / HERO ---------- */
 body.nd .nd-landing {
-    padding: 8px 0;
+    padding: 8px 0 16px;
 }
 
 body.nd .nd-hero {
-    padding: 12px 0 20px;
+    padding: 24px;
+    margin-bottom: 28px;
 }
 
 body.nd .nd-hero h1 {
-    font-size: 28px;
+    font-size: 30px;
     line-height: 1.2;
     max-width: 760px;
-    margin: 0 0 8px;
+    margin: 0 0 10px;
 }
 
 body.nd .nd-hero-sub {
     font-size: 15px;
     color: var(--color-ink-soft);
     max-width: 760px;
-    margin: 0 0 12px;
+    margin: 0 0 16px;
 }
 
 body.nd .nd-hero-actions {
@@ -853,6 +854,7 @@ body.nd .nd-feature {
     display: flex;
     flex-direction: column;
     min-height: 152px;
+    padding: 18px;
     box-sizing: border-box;
 }
 
@@ -937,6 +939,10 @@ body.nd .nd-game-card-btn {
     color: inherit;
     transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
     padding: 0;
+}
+body.nd .nd-game-card-btn:focus-visible {
+    outline: 3px solid var(--color-accent-strong);
+    outline-offset: 3px;
 }
 @media (hover: hover) {
     body.nd .nd-game-card-btn:hover {
@@ -1225,7 +1231,8 @@ body.nd .nd-map-editor .BGH_drinkSpot {
 
 @media (max-width: 640px) {
     body.nd .nd-hero {
-        padding: 16px 0 24px;
+        padding: 18px;
+        margin-bottom: 24px;
     }
     body.nd .nd-hero h1 {
         font-size: 24px;
@@ -1958,6 +1965,13 @@ body.nd .nd-col-status a {
     text-decoration: none;
 }
 body.nd .nd-col-status a:hover { text-decoration: underline; }
+body.nd .nd-col-status .nd-status-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
 body.nd .nd-col-options {
     display: flex;
     flex-wrap: wrap;

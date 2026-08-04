@@ -14,6 +14,15 @@
       <br><small class="nd-muted">{% translate "Turn" %} {{ game.currentTurn }} · {{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
     {% endif %}
   </td>
+  <td class="nd-col-status" data-label="{% translate "Turn status" %}">
+    <span class="nd-status-wrap">
+      {% if game.kickoutRequiredNum == 2 %}<span class="nd-pill nd-pill-danger">{% translate "Kick risk" %}</span>
+      {% elif game.kickoutRequiredNum == 1 %}<span class="nd-pill nd-pill-warn">{% translate "Flexi" %}</span>
+      {% elif game.myMove %}<span class="nd-pill nd-pill-positive">{% translate "My turn" %}</span>
+      {% endif %}
+      {% for cp in game.currentPlayersSplit %}<a href="{% url 'playerInfo' usernameToProfile=cp %}">{{ cp }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+    </span>
+  </td>
   {% if showCurrentTurnColumn %}
   <td class="nd-col-turn" data-label="{% translate "Current Turn" %}"><small class="nd-muted">{{ game.currentTurn }}</small></td>
   {% endif %}
@@ -26,12 +35,6 @@
     {% if game.startingMap and game.gameCode == "AQY" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">{% endif %}
     {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
     {% if game.gameCode != "TGZ" and not game.startingMap and not game.startingOptionsHTML or game.gameCode != "TGZ" and not game.startingMap and game.startingOptionsHTML == "[None]" %}<span class="nd-no-options">{% translate "No options" %}</span>{% else %}{{ game.startingOptionsHTML|safe }}{% endif %}
-  </td>
-   <td class="nd-col-status" data-label="{% translate "Turn status" %}">
-    {% if game.kickoutRequiredNum == 2 %}<span class="nd-pill nd-pill-danger">{% translate "Kick risk" %}</span>
-    {% elif game.kickoutRequiredNum == 1 %}<span class="nd-pill nd-pill-warn">{% translate "Flexi" %}</span>
-    {% elif game.myMove %}<span class="nd-pill nd-pill-positive">{% translate "My turn" %}</span>
-    {% else %}{% for cp in game.currentPlayersSplit %}<a href="{% url 'playerInfo' usernameToProfile=cp %}">{{ cp }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
   </td>
   <td class="nd-col-cta nd-last-move" data-label="{% translate "Last Move" %}">
     <span class="nd-last-move-text">
