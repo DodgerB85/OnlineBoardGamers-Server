@@ -1908,14 +1908,59 @@ body.nd .nd-row09 {
     grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
     align-items: center;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--color-border);
+    position: relative;
+    padding: 14px;
     background: var(--color-surface);
     transition: background 0.1s;
 }
-body.nd .nd-row09:last-child {
-    border-bottom: none;
+body.nd .nd-row-divider {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -10px;
+    height: 20px;
+    display: grid;
+    grid-template-columns: repeat(var(--nd-divider-count), 20px);
+    justify-content: center;
+    column-gap: clamp(12px, 2vw, 24px);
+    align-items: center;
+    pointer-events: none;
+    z-index: 1;
 }
+body.nd .nd-row-divider::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--nd-divider-color, var(--color-muted));
+    opacity: 0.25;
+}
+body.nd .nd-row-divider-icon {
+    justify-self: center;
+    width: var(--nd-divider-size);
+    height: var(--nd-divider-size);
+    background: var(--nd-divider-color, var(--color-muted));
+    -webkit-mask: var(--nd-divider-icon) center / contain no-repeat;
+    mask: var(--nd-divider-icon) center / contain no-repeat;
+    transform: rotate(var(--nd-divider-rotation));
+}
+body.nd .nd-row-divider-tile {
+    -webkit-mask: none;
+    mask: none;
+    background-color: var(--nd-divider-color, var(--color-muted));
+    background-image: linear-gradient(var(--nd-divider-color, var(--color-muted)), var(--nd-divider-color, var(--color-muted))), var(--nd-divider-icon);
+    background-size: cover;
+    background-blend-mode: color;
+    border-radius: 2px;
+}
+body.nd .nd-row-divider-ind .nd-row-divider-icon {
+    transform: translateY(-5px) rotate(var(--nd-divider-rotation));
+}
+body.nd .nd-row09.myMove .nd-row-divider { --nd-divider-color: var(--color-positive); }
+body.nd .nd-row09.kickoutRequired1 .nd-row-divider { --nd-divider-color: var(--color-warn); }
+body.nd .nd-row09.kickoutRequired2 .nd-row-divider { --nd-divider-color: var(--color-danger); }
 @media (hover: hover) {
     body.nd .nd-row09:hover {
         background: var(--color-surface-soft);
