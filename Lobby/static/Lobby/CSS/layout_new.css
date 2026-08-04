@@ -69,8 +69,12 @@ body.nd .mobileQuickNav {
 		border-right: 0;
 	}
 
-	body.nd.ndAuthed .hamburgerMenu.active {
+	body.nd.ndAuthed .mobileQuickNav ~ .hamburgerMenu.active {
 		transform: translateY(100px);
+	}
+
+	body.nd.ndAuthed .mobileQuickNav ~ .mainLayout {
+		margin-top: 44px;
 	}
 }
 
