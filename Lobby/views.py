@@ -740,10 +740,14 @@ def feedback(request):
         discord_message = (
             f"NEW LOBBY DESIGN FEEDBACK\n"
             f"User: {username}\n"
-            f"Email: {email}\n"
+            #f"Email: {email}\n"
             f"Feedback: {feedback_text}"
         )
-        SN_sendAdminErrorMessage(discord_message)
+        requests.post(
+            "https://discord.com/api/webhooks/1534150843979534397/Kcm_rierS-jR5PPbkRMS1qUPqoWcevKiJ7IL9MHyU4JT3mcHOsKzpQ9y3jrd6_21WF79",
+            data={"content": discord_message},
+            timeout=5,
+        )
 
         messages.success(request, gettext("Thank you for your feedback!"))
         return redirect("/")
