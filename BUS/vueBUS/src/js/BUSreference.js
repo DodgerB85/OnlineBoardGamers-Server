@@ -54,8 +54,8 @@ export const HIST_VROM = 20
 // PITTS vars
 export const PITTS_BRIDGE_LINE_IDS = [36, 24, 40, 44, 11, 2, 47, 54, 68]
 
-// FROM->TO
-export const PITTS_ONE_WAY_JUNCTION_IDS = [[9, 17], [(17, 18)], [(19, 20)], [(20, 21)], [(21, 12)], [(13, 12)], [(12, 10)], [(10, 20)], [(10, 9)]]
+// FROM->TO (one-way streets)
+export const PITTS_ONE_WAY_JUNCTION_IDS = [[9, 17], [17, 18], [19, 20], [20, 21], [21, 12], [13, 12], [12, 10], [10, 20], [10, 9]]
 
 export function getColourNameFromNumber(colour) {
 	const personal = usePersonalStore()

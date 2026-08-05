@@ -334,7 +334,7 @@ export function getEmptyBuildingSpots(forceReturn) {
 	const store = useModelStore()
 	if (!forceReturn && store.context.buildingsLeftToPlace === 0) return
 
-	if (store.gameflow.phase === 0) return getEmptyBuildingSpotsByNumber(1)
+	if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) return getEmptyBuildingSpotsByNumber(1)
 	let options = []
 	options = getEmptyBuildingSpotsByNumber(1)
 	if (options.length === 0) options = getEmptyBuildingSpotsByNumber(2)

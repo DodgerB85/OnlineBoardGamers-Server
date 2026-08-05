@@ -286,39 +286,56 @@ function toggleStatsExcludeDropdown() {
 			<span>{{ controller.currentPlayerObj().displayName }}</span>
 		</div>
 	</div>
-	<transition name="slideL">
-		<div
-			class="boardSelectBubbleL"
-			@click="changeBoard(1)"
-			v-if="store.topMenuViews.selectingBoard"
-			:style="{
-				left: getMapBubblePosition(0) + 'px',
-			}">
-			<img class="gameBoardSelectImg" :src="view.getImage('Board_orig')" />
-		</div>
-	</transition>
+	<!-- Show message for Pittsburgh map -->
 	<transition name="slideC">
 		<div
 			class="boardSelectBubbleC"
-			@click="changeBoard(0)"
-			v-if="store.topMenuViews.selectingBoard"
+			@click="store.topMenuViews.selectingBoard = false"
+			v-if="store.topMenuViews.selectingBoard && personal.selectedBoard === rf.BOARD_PITTS"
 			:style="{
 				left: getMapBubblePosition(1) + 'px',
 			}">
-			<img class="gameBoardSelectImg" :src="view.getImage('Board_20A')" />
+			<div class="pittsMapMessage">
+				Board Options for Original Board Only
+			</div>
 		</div>
 	</transition>
-	<transition name="slideR">
-		<div
-			class="boardSelectBubbleR"
-			@click="changeBoard(2)"
-			v-if="store.topMenuViews.selectingBoard"
-			:style="{
-				left: getMapBubblePosition(2) + 'px',
-			}">
-			<img class="gameBoardSelectImg" :src="view.getImage('Board_20AC')" />
-		</div>
-	</transition>
+	<!-- Show 3 map options for non-Pittsburgh maps -->
+	<template v-if="personal.selectedBoard !== rf.BOARD_PITTS">
+		<transition name="slideL">
+			<div
+				class="boardSelectBubbleL"
+				@click="changeBoard(1)"
+				v-if="store.topMenuViews.selectingBoard"
+				:style="{
+					left: getMapBubblePosition(0) + 'px',
+				}">
+				<img class="gameBoardSelectImg" :src="view.getImage('Board_orig')" />
+			</div>
+		</transition>
+		<transition name="slideC">
+			<div
+				class="boardSelectBubbleC"
+				@click="changeBoard(0)"
+				v-if="store.topMenuViews.selectingBoard"
+				:style="{
+					left: getMapBubblePosition(1) + 'px',
+				}">
+				<img class="gameBoardSelectImg" :src="view.getImage('Board_20A')" />
+			</div>
+		</transition>
+		<transition name="slideR">
+			<div
+				class="boardSelectBubbleR"
+				@click="changeBoard(2)"
+				v-if="store.topMenuViews.selectingBoard"
+				:style="{
+					left: getMapBubblePosition(2) + 'px',
+				}">
+				<img class="gameBoardSelectImg" :src="view.getImage('Board_20AC')" />
+			</div>
+		</transition>
+	</template>
 </template>
 
 <style scoped>
@@ -326,6 +343,14 @@ function toggleStatsExcludeDropdown() {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.pittsMapMessage {
+	color: white;
+	padding: 10px;
+	text-align: center;
+	font-size: 14px;
+	font-weight: bold;
 }
 
 .gameBoardSelectImg {

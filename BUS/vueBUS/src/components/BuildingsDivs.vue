@@ -181,13 +181,21 @@ function addPassengerToJunction(junction) {
 }
 function clickedPaxToVrom(junction) {
 	if (!model.canPlayerVrom()) return
-	if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		if (!store.context.eligibleJunctionsToVromPitts.includes(junction)) return
+	} else {
+		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
+	}
 	store.context.selectedPaxToVromJunction = junction
 }
 
 function mouseOverPaxNumber(e, junction, entering) {
 	if (!model.canPlayerVrom()) return
-	if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		if (!store.context.eligibleJunctionsToVromPitts.includes(junction)) return
+	} else {
+		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
+	}
 	if (entering) document.getElementById("passengerImg" + String(junction)).classList.add("onHover")
 	else document.getElementById("passengerImg" + String(junction)).classList.remove("onHover")
 }
@@ -291,8 +299,8 @@ function getBuildingRadius() {
 					height: (store.refSize * 311) / 1000 + 'px',
 				}"
 				:class="{
-					selectablePaxToVrom: model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(index),
-					notSelectablePaxToVrom: !model.canPlayerVrom() || !controller.currentPlayerObj().playerJunctions.includes(index),
+					selectablePaxToVrom: personal.selectedBoard === rf.BOARD_PITTS ? store.context.eligibleJunctionsToVromPitts.includes(index) : model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(index),
+					notSelectablePaxToVrom: personal.selectedBoard === rf.BOARD_PITTS ? !store.context.eligibleJunctionsToVromPitts.includes(index) : !model.canPlayerVrom() || !controller.currentPlayerObj().playerJunctions.includes(index),
 					selectedPaxToVrom: store.context.selectedPaxToVromJunction === index,
 				}" />
 			<!-- Add the number of pax ADD THE PAX CLICK HERE AS IT COVERS BASICALLY THE WHOLE PAX -->
@@ -307,7 +315,7 @@ function getBuildingRadius() {
 					height: (store.refSize * 311) / 1000 + 'px',
 				}"
 				:class="{
-					selectablePaxToVromNumber: model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(index),
+					selectablePaxToVromNumber: personal.selectedBoard === rf.BOARD_PITTS ? store.context.eligibleJunctionsToVromPitts.includes(index) : model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(index),
 				}"
 				@click="clickedPaxToVrom(index)"
 				@mouseover="mouseOverPaxNumber($event, index, true)"

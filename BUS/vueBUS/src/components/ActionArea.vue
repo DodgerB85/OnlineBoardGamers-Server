@@ -15,45 +15,45 @@ const personal = usePersonalStore()
 
 function getActionText() {
 	let phaseStr = ""
-	if (store.gameflow.phase === 0) {
+	if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) {
 		phaseStr = "Place 2 buildings on Number 1 Locations" // TO: 2 bldgs on zone 1 per player
 		phaseStr += "<br/>Remaining Buildings: " + store.context.buildingsLeftToPlace
 	}
-	if (store.gameflow.phase === 1) {
+	if (store.gameflow.phase === rf.PHASE_SETUP_LINES) {
 		phaseStr = "Place a Bus Line" // TO then reverse TO,eg 1,2,3,4,3,2,1, place 1 line
 		phaseStr += "<br/>Remaining Lines: " + store.context.linesLeftToPlace
 		if (store.context.endJunctionsOptions.length > 0) phaseStr += "<br/>Choose a junction where your lines will meet"
 	}
-	if (store.gameflow.phase === 2) {
+	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) {
 		phaseStr = "Choose an Action in the upper right area or next to the board"
 		phaseStr += "<br/>Actions are chosen A to F. The 'A' square has the highest number of actions. Actions are resolved Left to Right"
 		phaseStr += "<br/>Once you have chosen at least 2 actions this round, you will have the option to pass"
 		if (controller.currentPlayerObj().remainingActions === 0 && !store.context.actionChosen) phaseStr += "<br/><br/><span style='color: red'>YOU HAVE NO ACTIONS REMAINING - YOU MUST PASS</span>"
 	}
-	if (store.gameflow.phase === 3) {
+	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) {
 		phaseStr = "Expand your bus line from either end" // 5p: +1 to maxNumBus
 		phaseStr += "<br/>Remaining Lines: " + store.context.linesLeftToPlace
 	}
-	if (store.gameflow.phase === 4) phaseStr = "AddBus"
-	if (store.gameflow.phase === 5) {
+	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = "AddBus"
+	if (store.gameflow.phase === rf.PHASE_ADD_PAX) {
 		phaseStr = "Choose one of the two stations to add a Passenger"
 		phaseStr += "<br/>Remaining Passengers: " + store.context.passengersLeftToPlace
 	}
-	if (store.gameflow.phase === 6) {
+	if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) {
 		phaseStr = "Choose a location to add a Building" // (GE check)
 		phaseStr += "<br/>Remaining Buildings: " + store.context.buildingsLeftToPlace
 	}
 
 	// PHASE 7 IN TEMPLATE
-	//if (store.gameflow.phase === 7) {phaseStr = 'Choose to stop time, or pass' // AND POSSIBLE IMMEDIATE GAME END
+	//if (store.gameflow.phase === rf.PHASE_ALTER_TIME) {phaseStr = 'Choose to stop time, or pass' // AND POSSIBLE IMMEDIATE GAME END
 
-	if (store.gameflow.phase === 8) {
+	if (store.gameflow.phase === rf.PHASE_VROM) {
 		phaseStr = "Choose a passenger to move to their desired destination"
 		phaseStr += "<br/>Remaining Moves: " + store.context.remainingVroms
 	}
-	if (store.gameflow.phase === 9) phaseStr = "ChangeStartPlayer" // GE check, if no more bldg spots
-	if (store.gameflow.phase === 10) phaseStr = "GameEndCheck" // bldg spots, only 1 player with action markers
-	if (store.gameflow.phase === 11) phaseStr = "GameFinished"
+	if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) phaseStr = "ChangeStartPlayer" // GE check, if no more bldg spots
+	if (store.gameflow.phase === rf.PHASE_GAME_END_CHECK) phaseStr = "GameEndCheck" // bldg spots, only 1 player with action markers
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = "GameFinished"
 	return phaseStr
 }
 
@@ -145,7 +145,7 @@ function passKickout() {
 }
 </script>
 
-<template>{{ personal.canPlay() }}
+<template>
 	<template v-if="personal.name == undefined">
 		<div id="loggedOutText">
 			Please

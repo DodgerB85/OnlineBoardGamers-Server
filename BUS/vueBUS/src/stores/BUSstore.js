@@ -73,6 +73,7 @@ export const useModelStore = defineStore("model", () => {
 		confirmResign: false,
 		historyObj: [],
 		action: -1,
+		eligibleJunctionsToVromPitts: [],
 	})
 	const topMenuViews = reactive({
 		showNotes: false,
@@ -125,9 +126,11 @@ export const useModelStore = defineStore("model", () => {
 		context.confirmEndTurn = false
 		context.confirmResign = false
 		context.historyObj.splice(0, context.historyObj.length)
+		context.eligibleJunctionsToVromPitts.splice(0)
 		rewindErrorText.value = ""
 		successText.value = ""
 		topMenuViews.errorText = ""
+
 	}
 
 	return {

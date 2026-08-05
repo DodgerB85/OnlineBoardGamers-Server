@@ -1077,18 +1077,18 @@ export function getLineSVGpoints(lineID, index, raw) {
 export function phaseStr() {
 	const store = useModelStore()
 	var phaseStr = "333"
-	if (store.gameflow.phase === 0) phaseStr = "Setup Buildings" // TO: 2 bldgs on zone 1 per player
-	if (store.gameflow.phase === 1) phaseStr = "Setup Lines" // TO then reverse TO,eg 1,2,3,4,4,3,2,1, place 1 line
-	if (store.gameflow.phase === 2) phaseStr = "Choose Actions" // TO: At least 2 actions, then can pass
-	if (store.gameflow.phase === 3) phaseStr = "Line Expansion" // 5p: +1 to maxNumBus
-	if (store.gameflow.phase === 4) phaseStr = "Add a Bus"
-	if (store.gameflow.phase === 5) phaseStr = "Add Passengers"
-	if (store.gameflow.phase === 6) phaseStr = "Add Buildings" // (GE check)
-	if (store.gameflow.phase === 7) phaseStr = "Alter Time" // AND POSSIBLE IMMEDIATE GAME END
-	if (store.gameflow.phase === 8) phaseStr = "VRROOOMM!!"
-	if (store.gameflow.phase === 9) phaseStr = "Change Start Player" // GE check, if no more bldg spots
-	if (store.gameflow.phase === 10) phaseStr = "Game End Check" // bldg spots, only 1 player with action markers
-	if (store.gameflow.phase === 11) phaseStr = "Game Finished"
+	if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) phaseStr = "Setup Buildings" // TO: 2 bldgs on zone 1 per player
+	if (store.gameflow.phase === rf.PHASE_SETUP_LINES) phaseStr = "Setup Lines" // TO then reverse TO,eg 1,2,3,4,4,3,2,1, place 1 line
+	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) phaseStr = "Choose Actions" // TO: At least 2 actions, then can pass
+	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) phaseStr = "Line Expansion" // 5p: +1 to maxNumBus
+	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = "Add a Bus"
+	if (store.gameflow.phase === rf.PHASE_ADD_PAX) phaseStr = "Add Passengers"
+	if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) phaseStr = "Add Buildings" // (GE check)
+	if (store.gameflow.phase === rf.PHASE_ALTER_TIME) phaseStr = "Alter Time" // AND POSSIBLE IMMEDIATE GAME END
+	if (store.gameflow.phase === rf.PHASE_VROM) phaseStr = "VRROOOMM!!"
+	if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) phaseStr = "Change Start Player" // GE check, if no more bldg spots
+	if (store.gameflow.phase === rf.PHASE_GAME_END_CHECK) phaseStr = "Game End Check" // bldg spots, only 1 player with action markers
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = "Game Finished"
 
 	return phaseStr
 }

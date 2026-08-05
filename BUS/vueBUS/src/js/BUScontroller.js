@@ -3,17 +3,27 @@ import * as funcs from "./BUSfuncs.js"
 import * as Bot from "./BUSbot"
 import * as IO from "../backend/BUS_IO"
 import * as model from "./BUSmodel"
+import * as view from "./BUSview.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
 function canPlayerVrom(forceCheck) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	if (!forceCheck) {
 		if (store.context.remainingVroms === 0) return false
 		if (store.gameflow.phase !== rf.PHASE_VROM) return false
 	}
+
 	let player = currentPlayerObj()
+
+	// Pittsburgh map: use network traversal to check if passengers can reach buildings
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		return canPlayerVromPitts(player, store)
+	}
+
+	// Other boards: use simple anyPax/anyBldg logic
 	let anyPax = false
 	// If no pax on owned junctions, cannot vrom
 	for (let i = 0; i < player.playerJunctions.length; i++) {
@@ -42,6 +52,110 @@ function canPlayerVrom(forceCheck) {
 		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([2])
 		return false
 	}
+	return true
+}
+
+function canPlayerVromPitts(player, store) {
+	// Find all junctions with passengers
+	let paxJunctions = []
+	for (let i = 0; i < player.playerJunctions.length; i++) {
+		if (store.junctions[player.playerJunctions[i]][rf.paxIdx] > 0) {
+			paxJunctions.push(player.playerJunctions[i])
+		}
+	}
+
+	if (paxJunctions.length === 0) {
+		store.context.turnEndingErrorMessage = "No available passengers in your network"
+		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([1])
+		return false
+	}
+
+	// Set up eligible junctions for Pittsburgh VROM
+	setUpPlayerVromPitts(paxJunctions, player, store)
+
+	// Check if any passenger can reach a building with the desired type
+	if (store.context.eligibleJunctionsToVromPitts.length === 0) {
+		store.context.turnEndingErrorMessage = "No passengers can reach the desired building type"
+		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([2])
+		return false
+	}
+
+	return true
+}
+
+function setUpPlayerVromPitts(paxJunctions, player, store) {
+	// Clear previous eligible junctions
+	store.context.eligibleJunctionsToVromPitts = []
+
+	// For each passenger, check if they can reach a building with the desired type
+	for (const paxJunction of paxJunctions) {
+		if (canReachBuildingFromJunction(paxJunction, player, store)) {
+			store.context.eligibleJunctionsToVromPitts.push(paxJunction)
+		}
+	}
+}
+
+function canReachBuildingFromJunction(startJunction, player, store) {
+	const visited = new Set()
+	const junctionsToVisit = [startJunction]
+
+	while (junctionsToVisit.length > 0) {
+		const currentJunction = junctionsToVisit.shift()
+
+		if (visited.has(currentJunction)) continue
+		visited.add(currentJunction)
+
+		// Check if this junction has the desired building with space
+		for (let j = 0; j < store.junctions[currentJunction].length - 1; j++) {
+			if (store.junctions[currentJunction][j] === store.desiredBuilding && store.junctions[currentJunction][j] < 10) {
+				return true
+			}
+		}
+
+		// Get all lines around this junction that the player has built
+		const linesAroundJunction = view.getLinesAroundJunction(currentJunction)
+
+		for (const lineID of linesAroundJunction) {
+			// Check if this player has built this line
+			if (store.lines[lineID].includes(player.colour)) {
+				const junctionsAtEnd = view.getJunctionsAtEndOfLine(lineID)
+				const otherJunction = junctionsAtEnd[0] === currentJunction ? junctionsAtEnd[1] : junctionsAtEnd[0]
+
+				// Check if movement is allowed (respect one-way streets)
+				if (canTravelOnLine(currentJunction, otherJunction)) {
+					if (!visited.has(otherJunction) && player.playerJunctions.includes(otherJunction)) {
+						junctionsToVisit.push(otherJunction)
+					}
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+function canTravelOnLine(fromJunction, toJunction) {
+	const personal = usePersonalStore()
+
+	// Only apply one-way restrictions on Pittsburgh map
+	if (personal.selectedBoard !== rf.BOARD_PITTS) {
+		return true
+	}
+
+	// Check if this line is a one-way street
+	for (let i = 0; i < rf.PITTS_ONE_WAY_JUNCTION_IDS.length; i++) {
+		const oneWay = rf.PITTS_ONE_WAY_JUNCTION_IDS[i]
+		if (oneWay[0] === fromJunction && oneWay[1] === toJunction) {
+			// This is the allowed direction
+			return true
+		}
+		if (oneWay[0] === toJunction && oneWay[1] === fromJunction) {
+			// This is the reverse direction - not allowed
+			return false
+		}
+	}
+
+	// Not a one-way street, movement is allowed
 	return true
 }
 
@@ -105,7 +219,7 @@ export function currentPlayerObj() {
 	const store = useModelStore()
 	if (store.gameflow.turnOrder.length > 0) return store.players[store.gameflow.turnOrder[0]]
 	else {
-		if (!store.topMenuViews.generatingReplay && !store.gameflow.phase === 0) alert("CP() Error")
+		if (!store.topMenuViews.generatingReplay && store.gameflow.phase !== rf.PHASE_SETUP_BLDGS) alert("CP() Error")
 		return 0
 	}
 }

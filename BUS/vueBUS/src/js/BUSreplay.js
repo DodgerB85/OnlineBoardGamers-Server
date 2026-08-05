@@ -109,7 +109,7 @@ async function resetDataForReplay() {
 		}
 	}
 	store.gameflow.turn = 0
-	store.gameflow.phase = 0
+	store.gameflow.phase = rf.PHASE_SETUP_BLDGS
 	store.gameflow.turnOrder.splice(0)
 	store.gameflow.fullTurnOrder.splice(0)
 	for (let i = 0; i < store.players.length; i++) {
