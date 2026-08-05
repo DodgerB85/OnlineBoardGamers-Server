@@ -18,10 +18,10 @@ High contrast / colour blind ? ---
 //import * as IO from "./backend/BUS_IO"
 //import * as WS from "./backend/BUSwebsocket"
 //import * as funcs from "./js/BUSfuncs.js"
-import * as controller from "./js/BUScontroller.js"
+//import * as controller from "./js/BUScontroller.js"
 import * as replay from "./js/BUSreplay"
 import * as view from "./js/BUSview.js"
-import { initGame } from "./js/BUSmodel.js"
+import * as model from "./js/BUSmodel.js"
 
 import TopMenu from "./components/TopMenu.vue"
 import GameBoard from "./components/GameBoard.vue"
@@ -39,8 +39,7 @@ const store = useModelStore()
 import { usePersonalStore } from "./stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
-initGame()
-controller.startPlayerTurn() // Will return early anyway if ineligiible
+model.initGame()
 
 document.addEventListener("keyup", function (event) {
 	if (store.topMenuViews.showChat) return

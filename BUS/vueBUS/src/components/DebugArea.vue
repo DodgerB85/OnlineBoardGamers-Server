@@ -1,14 +1,20 @@
 <script setup>
-import * as WS from "../backend/BUSwebsocket"
 import * as funcs from "../js/BUSfuncs.js"
 import * as rf from "../js/BUSreference.js"
 import * as model from "../js/BUSmodel.js"
+import * as controller from "../js/BUScontroller.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
 
-import { usePersonalStore } from "../stores/BUSpersonal.js"
-const personal = usePersonalStore()
+//import { usePersonalStore } from "../stores/BUSpersonal.js"
+//const personal = usePersonalStore()
+
+import { ref } from "vue"
+
+// Positioning tool state
+const showAllJunctions = ref(false)
+const showAllBuildings = ref(false)
 
 function test() {
 	alert(store.players[0].name)
@@ -60,6 +66,39 @@ function modifyPlayerScore(playerIndex, operation) {
 		store.players[playerIndex].timeStones++
 	}
 }
+
+// Positioning tool functions
+function toggleAllJunctions() {
+	showAllJunctions.value = !showAllJunctions.value
+}
+
+function toggleAllBuildings() {
+	showAllBuildings.value = !showAllBuildings.value
+}
+
+function addPaxToAllJunctions() {
+	for (let i = 0; i < store.junctions.length; i++) {
+		store.junctions[i][rf.paxIdx]++
+	}
+}
+
+function addBuildingsToAllSpots() {
+	for (let i = 0; i < store.junctions.length; i++) {
+		for (let j = 0; j < 5; j++) {
+			if (store.junctions[i][j] === 0) {
+				store.junctions[i][j] = 1 // Pub
+			}
+		}
+	}
+}
+
+function addLinesToAllOptions() {
+	// Add a line between every junction (lines 0-69 for Pittsburgh)
+	for (let lineID = 0; lineID < 70; lineID++) {
+		model.addLine_core(controller.currentPlayerIndex(), lineID)
+		store.context.linesLeftToPlace--
+	}
+}
 </script>
 
 <template>
@@ -95,6 +134,14 @@ function modifyPlayerScore(playerIndex, operation) {
 	<button @click="addPax(1)">Add Pax</button>
 	<button @click="exportLoc()">export</button>
 	<button @click="importLoc()">import</button>
+	
+	<br /><br />
+	<!-- Positioning Tool Controls -->
+	<button @click="toggleAllJunctions">Highlight All Junctions</button>
+	<button @click="toggleAllBuildings" style="margin-left: 10px;">Highlight All Buildings</button>
+	<button @click="addPaxToAllJunctions" style="margin-left: 10px;">Add Pax</button>
+	<button @click="addBuildingsToAllSpots" style="margin-left: 10px;">Add Buildings</button>
+	<button @click="addLinesToAllOptions" style="margin-left: 10px;">Add Lines</button>
 </template>
 
 <style scoped>

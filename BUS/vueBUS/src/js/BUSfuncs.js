@@ -5,6 +5,7 @@ import * as view from "./BUSview.js"
 
 //import { usePersonalStore } from "../stores/BUSpersonal.js"
 import { useModelStore } from "../stores/BUSstore.js"
+import { usePersonalStore } from "../stores/BUSpersonal.js"
 
 export function removeItemAll(arr, value) {
 	var arrCopy = [...arr]
@@ -179,17 +180,17 @@ export var LZString = (function () {
 					? ""
 					: i._compress(o, 6, function (o) {
 							return e.charAt(o)
-					  })
+						})
 			},
 			decompressFromEncodedURIComponent: function (r) {
 				return null == r
 					? ""
 					: "" == r
-					? null
-					: ((r = r.replace(/ /g, "+")),
-					  i._decompress(r.length, 32, function (n) {
-							return o(e, r.charAt(n))
-					  }))
+						? null
+						: ((r = r.replace(/ /g, "+")),
+							i._decompress(r.length, 32, function (n) {
+								return o(e, r.charAt(n))
+							}))
 			},
 			compress: function (o) {
 				return i._compress(o, 16, function (o) {
@@ -217,30 +218,30 @@ export var LZString = (function () {
 					else {
 						if (Object.prototype.hasOwnProperty.call(p, a)) {
 							if (a.charCodeAt(0) < 256) {
-								for (e = 0; h > e; e++) (m <<= 1), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++
-								for (t = a.charCodeAt(0), e = 0; 8 > e; e++) (m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1)
+								for (e = 0; h > e; e++) ((m <<= 1), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++)
+								for (t = a.charCodeAt(0), e = 0; 8 > e; e++) ((m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1))
 							} else {
-								for (t = 1, e = 0; h > e; e++) (m = (m << 1) | t), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t = 0)
-								for (t = a.charCodeAt(0), e = 0; 16 > e; e++) (m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1)
+								for (t = 1, e = 0; h > e; e++) ((m = (m << 1) | t), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t = 0))
+								for (t = a.charCodeAt(0), e = 0; 16 > e; e++) ((m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1))
 							}
-							l--, 0 == l && ((l = Math.pow(2, h)), h++), delete p[a]
-						} else for (t = s[a], e = 0; h > e; e++) (m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1)
-						l--, 0 == l && ((l = Math.pow(2, h)), h++), (s[c] = f++), (a = String(u))
+							;(l--, 0 == l && ((l = Math.pow(2, h)), h++), delete p[a])
+						} else for (t = s[a], e = 0; h > e; e++) ((m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1))
+						;(l--, 0 == l && ((l = Math.pow(2, h)), h++), (s[c] = f++), (a = String(u)))
 					}
 				if ("" !== a) {
 					if (Object.prototype.hasOwnProperty.call(p, a)) {
 						if (a.charCodeAt(0) < 256) {
-							for (e = 0; h > e; e++) (m <<= 1), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++
-							for (t = a.charCodeAt(0), e = 0; 8 > e; e++) (m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1)
+							for (e = 0; h > e; e++) ((m <<= 1), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++)
+							for (t = a.charCodeAt(0), e = 0; 8 > e; e++) ((m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1))
 						} else {
-							for (t = 1, e = 0; h > e; e++) (m = (m << 1) | t), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t = 0)
-							for (t = a.charCodeAt(0), e = 0; 16 > e; e++) (m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1)
+							for (t = 1, e = 0; h > e; e++) ((m = (m << 1) | t), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t = 0))
+							for (t = a.charCodeAt(0), e = 0; 16 > e; e++) ((m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1))
 						}
-						l--, 0 == l && ((l = Math.pow(2, h)), h++), delete p[a]
-					} else for (t = s[a], e = 0; h > e; e++) (m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1)
-					l--, 0 == l && ((l = Math.pow(2, h)), h++)
+						;(l--, 0 == l && ((l = Math.pow(2, h)), h++), delete p[a])
+					} else for (t = s[a], e = 0; h > e; e++) ((m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1))
+					;(l--, 0 == l && ((l = Math.pow(2, h)), h++))
 				}
-				for (t = 2, e = 0; h > e; e++) (m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1)
+				for (t = 2, e = 0; h > e; e++) ((m = (m << 1) | (1 & t)), v == r - 1 ? ((v = 0), d.push(n(m)), (m = 0)) : v++, (t >>= 1))
 				for (;;) {
 					if (((m <<= 1), v == r - 1)) {
 						d.push(n(m))
@@ -254,10 +255,10 @@ export var LZString = (function () {
 				return null == o
 					? ""
 					: "" == o
-					? null
-					: i._decompress(o.length, 32768, function (r) {
-							return o.charCodeAt(r)
-					  })
+						? null
+						: i._decompress(o.length, 32768, function (r) {
+								return o.charCodeAt(r)
+							})
 			},
 			_decompress: function (o, n, e) {
 				var t,
@@ -276,14 +277,14 @@ export var LZString = (function () {
 					w = [],
 					A = { val: e(0), position: n, index: 1 }
 				for (i = 0; 3 > i; i += 1) f[i] = i
-				for (p = 0, c = Math.pow(2, 2), a = 1; a != c; ) (u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1)
+				for (p = 0, c = Math.pow(2, 2), a = 1; a != c; ) ((u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1))
 				switch ((t = p)) {
 					case 0:
-						for (p = 0, c = Math.pow(2, 8), a = 1; a != c; ) (u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1)
+						for (p = 0, c = Math.pow(2, 8), a = 1; a != c; ) ((u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1))
 						l = r(p)
 						break
 					case 1:
-						for (p = 0, c = Math.pow(2, 16), a = 1; a != c; ) (u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1)
+						for (p = 0, c = Math.pow(2, 16), a = 1; a != c; ) ((u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1))
 						l = r(p)
 						break
 					case 2:
@@ -291,15 +292,15 @@ export var LZString = (function () {
 				}
 				for (f[3] = l, s = l, w.push(l); ; ) {
 					if (A.index > o) return ""
-					for (p = 0, c = Math.pow(2, m), a = 1; a != c; ) (u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1)
+					for (p = 0, c = Math.pow(2, m), a = 1; a != c; ) ((u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1))
 					switch ((l = p)) {
 						case 0:
-							for (p = 0, c = Math.pow(2, 8), a = 1; a != c; ) (u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1)
-							;(f[d++] = r(p)), (l = d - 1), h--
+							for (p = 0, c = Math.pow(2, 8), a = 1; a != c; ) ((u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1))
+							;((f[d++] = r(p)), (l = d - 1), h--)
 							break
 						case 1:
-							for (p = 0, c = Math.pow(2, 16), a = 1; a != c; ) (u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1)
-							;(f[d++] = r(p)), (l = d - 1), h--
+							for (p = 0, c = Math.pow(2, 16), a = 1; a != c; ) ((u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1))
+							;((f[d++] = r(p)), (l = d - 1), h--)
 							break
 						case 2:
 							return w.join("")
@@ -309,7 +310,7 @@ export var LZString = (function () {
 						if (l !== d) return null
 						v = s + s.charAt(0)
 					}
-					w.push(v), (f[d++] = s + v.charAt(0)), h--, (s = v), 0 == h && ((h = Math.pow(2, m)), m++)
+					;(w.push(v), (f[d++] = s + v.charAt(0)), h--, (s = v), 0 == h && ((h = Math.pow(2, m)), m++))
 				}
 			},
 		}
@@ -507,6 +508,8 @@ export function exportBUSmodel(forGameOver, saveContext) {
 
 export function importBUSmodel(inputBase64, forGameOver, restoreContext) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
+
 	let inputModel = null
 
 	try {
@@ -586,9 +589,23 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext) {
 	}
 
 	// 1 junctions
-	store.junctions.splice(0)
-	store.junctions = [...rf.initialJunctionsStateArray]
 	store.junctions = decompressJunctions(inputModel[1])
+	
+	// If junctions is empty (new game), initialize with default state
+	if (store.junctions.length === 0) {
+		if (personal.selectedBoard === rf.BOARD_PITTS) {
+			store.junctions = [...rf.initialJunctionsStateArrayPitts]
+		} else {
+			store.junctions = [...rf.initialJunctionsStateArray]
+		}
+	}
+	
+	// Detect board from junctions length and set selectedBoard
+	if (store.junctions.length === 38) {
+		personal.selectedBoard = rf.BOARD_PITTS
+	} else if (store.junctions.length === 36) {
+		personal.selectedBoard = rf.BOARD_20A_CAPSTONE
+	}
 
 	// 2 lines
 	store.lines.splice(0)
@@ -922,5 +939,5 @@ var module
 "function" == typeof define && define.amd
 	? define(function () {
 			return LZString
-	  })
+		})
 	: "undefined" != typeof module && null != module && (module.exports = LZString)

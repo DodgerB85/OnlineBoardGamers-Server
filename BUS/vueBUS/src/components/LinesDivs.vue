@@ -97,12 +97,22 @@ function addNewLine(lineID) {
 	markLineAsAnimated(lineID, lineIndex)
 
 	let endJuncs = view.getJunctionsAtEndOfLine(lineID)
+	console.log("addNewLine debug:", {
+		turn: store.gameflow.turn,
+		startedEqual: startedEqual,
+		playerEndJunctions: controller.currentPlayerObj().endJunctions,
+		endJuncs: endJuncs,
+		condition1: controller.currentPlayerObj().endJunctions[0] === endJuncs[0] && controller.currentPlayerObj().endJunctions[1] === endJuncs[1],
+		condition2: controller.currentPlayerObj().endJunctions[1] === endJuncs[0] && controller.currentPlayerObj().endJunctions[0] === endJuncs[1]
+	})
+	// Don't offer end junction selection on turn 0 otherwise FIRST line placed will trigger it
 	if (store.gameflow.turn !== 0 && !startedEqual) {
 		//console(`player.endJunctions: ${controller.currentPlayerObj().endJunctions}  -- endJuncs: ${endJuncs}`)
 
 		// ELSE find the new end junctions possibilities
 		if ((controller.currentPlayerObj().endJunctions[0] === endJuncs[0] && controller.currentPlayerObj().endJunctions[1] === endJuncs[1]) || (controller.currentPlayerObj().endJunctions[1] === endJuncs[0] && controller.currentPlayerObj().endJunctions[0] === endJuncs[1])) {
 			// Need to highlight which junction to pick
+			console.log("Setting endJunctionsOptions:", [lineID, [...endJuncs]])
 			store.context.endJunctionsOptions = [lineID, [...endJuncs]]
 			return
 		}

@@ -19,6 +19,8 @@ import { computed } from "vue"
 const forwardChars = ["A", "B", "C", "D", "E", "F"]
 const reverseChars = ["F", "E", "D", "C", "B", "A"]
 
+
+
 const computedReverseCharsLineExpansion = computed(() => {
 	if (store.gameflow.phase !== rf.PHASE_CHOOSE_ACTIONS) return reverseChars
 	let chars = []
@@ -59,7 +61,7 @@ function getBoardWidth() {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return 800
 	if (personal.selectedBoard === rf.BOARD_OG) return 817
 	if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return 1035
-	if (personal.selectedBoard === rf.BOARD_PITTS) return 800
+	if (personal.selectedBoard === rf.BOARD_PITTS) return 828
 }
 
 function getWholeBoardMinWidth() {
@@ -99,29 +101,26 @@ function getPointerRotation() {
 	else if (store.desiredBuilding === 3) targetRotation = 130
 	else return [1815, 3336, 0]
 
-	// 2. Normalize the target relative to the current rotation
-	// to find the shortest displacement
-	let rotationDiff = (targetRotation - currentRotation) % 360
-
-	if (rotationDiff > 180) rotationDiff -= 360
-	if (rotationDiff < -180) rotationDiff += 360
-
-	// 3. Calculate the absolute new rotation
-	// DO NOT NORMALIZE THIS. If it's 371, leave it at 371.
-	const finalRotation = currentRotation + rotationDiff
-
-	store.pointerRotation = finalRotation
-
-	// 4. Return position array
-	const coords = {
-		1: [1815, 3336],
-		2: [1805, 3340],
-		3: [1814, 3350],
-	}
-
-	const [x, y] = coords[store.desiredBuilding] || [1815, 3336]
-	return [x, y, finalRotation]
+    // 2. Normalize the target relative to the current rotation
+    // to find the shortest displacement
+    let rotationDiff = (targetRotation - currentRotation) % 360
+    if (rotationDiff > 180) rotationDiff -= 360
+    if (rotationDiff < -180) rotationDiff += 360
+    // 3. Calculate the absolute new rotation
+    // DO NOT NORMALIZE THIS. If it's 371, leave it at 371.
+    const finalRotation = currentRotation + rotationDiff
+    store.pointerRotation = finalRotation
+    // 4. Return position array
+    const coords = {
+        1: [1815, 3336],
+        2: [1805, 3340],
+        3: [1814, 3350],
+    }
+    const [x, y] = coords[store.desiredBuilding] || [1815, 3336]
+    return [x, y, finalRotation]
 }
+
+
 
 function getCorrectedBusIndex(position) {
 	if (position === 0) return 1
@@ -149,7 +148,6 @@ function getCorrectedBusIndex(position) {
 					}"
 					:class="{ rightActionSelection: store.topMenuViews.displayRightActionSelection }">
 					<img id="gameBoardImg" :src="getBoardImgSrc()" :class="{ rightActionSelection: store.topMenuViews.displayRightActionSelection }" />
-					>
 
 					<scoreDiv />
 					<BuildingsDivs v-if="personal.selectedBoard !== rf.BOARD_OG" />

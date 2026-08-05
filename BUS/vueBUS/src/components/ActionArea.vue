@@ -145,7 +145,7 @@ function passKickout() {
 }
 </script>
 
-<template>
+<template>{{ personal.canPlay() }}
 	<template v-if="personal.name == undefined">
 		<div id="loggedOutText">
 			Please

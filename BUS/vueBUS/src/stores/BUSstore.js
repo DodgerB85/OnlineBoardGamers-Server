@@ -22,7 +22,17 @@ export const useModelStore = defineStore("model", () => {
 	const statsExcludeVotesData = ref({})
 
 	const players = reactive([])
-	const junctions = reactive([...rf.initialJunctionsStateArray])
+	const junctions = reactive([])
+
+	function initializeJunctions(board) {
+		if (board === rf.BOARD_PITTS) {
+			junctions.splice(0)
+			junctions.push(...rf.initialJunctionsStateArrayPitts)
+		} else {
+			junctions.splice(0)
+			junctions.push(...rf.initialJunctionsStateArray)
+		}
+	}
 
 	const refSize = ref(120)
 	const desiredBuilding = ref(1)
@@ -148,5 +158,6 @@ export const useModelStore = defineStore("model", () => {
 		USE_PITTS_MAP,
 		turnResetData,
 		resetVarsOnTurnEnd,
+		initializeJunctions,
 	}
 })

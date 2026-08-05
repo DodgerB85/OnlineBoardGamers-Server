@@ -89,7 +89,11 @@ async function resetDataForReplay() {
 	}
 	for (let i = 0; i < store.junctions.length; i++) {
 		for (let j = 0; j < store.junctions[i].length; j++) {
-			store.junctions[i][j] = rf.initialJunctionsStateArray[i][j]
+			if (personal.selectedBoard === rf.BOARD_PITTS) {
+				store.junctions[i][j] = rf.initialJunctionsStateArrayPitts[i][j]
+			} else {
+				store.junctions[i][j] = rf.initialJunctionsStateArray[i][j]
+			}
 		}
 	}
 	store.desiredBuilding = 1

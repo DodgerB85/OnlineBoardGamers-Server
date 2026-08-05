@@ -23,11 +23,16 @@ function ghostBuilding(e, junction, building, add) {
 		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) {
 			ghostBuildingRef.value.src = view.getImage("building" + String(store.context.selectedBuildingType))
 			ghostBuildingRef.value.style.display = "block"
-			ghostBuildingRef.value.style.top = view.getBuildingPos(junction, building)[0] + "px"
-			ghostBuildingRef.value.style.left = view.getBuildingPos(junction, building)[1] + "px"
+			const position = view.getBuildingPos(junction, building)
+			ghostBuildingRef.value.style.top = position[0] + "px"
+			ghostBuildingRef.value.style.left = position[1] + "px"
 
-			ghostBuildingRef.value.style.width = (store.refSize * getBuildingRadius()) / 100 + "px"
-			ghostBuildingRef.value.style.height = (store.refSize * getBuildingRadius()) / 100 + "px"
+			// Make ghost building slightly larger to fill highlight circle
+			const ghostSize = (store.refSize * getBuildingRadius()) / 100
+			ghostBuildingRef.value.style.width = (ghostSize * 1.1) + "px"
+			ghostBuildingRef.value.style.height = (ghostSize * 1.1) + "px"
+			// Center the ghost building in the highlight circle
+			ghostBuildingRef.value.style.transform = "translate(-5%, -5%)"
 		} else if (personal.selectedBoard === rf.BOARD_OG) {
 			ghostBuildingRef.value.src = view.getImage("building" + String(store.context.selectedBuildingType) + "_orig")
 			ghostBuildingRef.value.style.display = "block"
@@ -205,7 +210,7 @@ function clickedVromBldg(junction, buildingIndex) {
 function getBuildingRadius() {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return 32
 	if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return 29
-	if (personal.selectedBoard === rf.BOARD_PITTS) return 32
+	if (personal.selectedBoard === rf.BOARD_PITTS) return 34
 }
 </script>
 
@@ -335,32 +340,64 @@ function getBuildingRadius() {
 
 	<!-- Add highlight circles for pax placement -->
 	<template v-if="store.context.passengersLeftToPlace > 0 && store.remainingPassengers > 0 && personal.canPlay()">
-		<div
-			ref="junction10"
-			:style="{
-				top: view.getBuildingPos(10, -1, true)[0] + 'px',
-				left: view.getBuildingPos(10, -1, true)[1] + 'px',
-				width: (store.refSize * 32) / 100 + 'px',
-				height: (store.refSize * 32) / 100 + 'px',
-				border: String((store.refSize * 5) / 100) + 'px solid yellow',
-			}"
-			class="paxJuncOption"
-			@mouseover="highlight($event, true)"
-			@mouseleave="highlight($event, false)"
-			@click="addPassengerToJunction(10)"></div>
-		<div
-			ref="junction25"
-			:style="{
-				top: view.getBuildingPos(25, -1, true)[0] + 'px',
-				left: view.getBuildingPos(25, -1, true)[1] + 'px',
-				width: (store.refSize * 32) / 100 + 'px',
-				height: (store.refSize * 32) / 100 + 'px',
-				border: String((store.refSize * 5) / 100) + 'px solid yellow',
-			}"
-			class="paxJuncOption"
-			@mouseover="highlight($event, true)"
-			@mouseleave="highlight($event, false)"
-			@click="addPassengerToJunction(25)"></div>
+		<!-- Standard board uses junctions 10 and 25 -->
+		<template v-if="personal.selectedBoard !== rf.BOARD_PITTS">
+			<div
+				ref="junction10"
+				:style="{
+					top: view.getBuildingPos(10, -1, true)[0] + 'px',
+					left: view.getBuildingPos(10, -1, true)[1] + 'px',
+					width: (store.refSize * 32) / 100 + 'px',
+					height: (store.refSize * 32) / 100 + 'px',
+					border: String((store.refSize * 5) / 100) + 'px solid yellow',
+				}"
+				class="paxJuncOption"
+				@mouseover="highlight($event, true)"
+				@mouseleave="highlight($event, false)"
+				@click="addPassengerToJunction(10)"></div>
+			<div
+				ref="junction25"
+				:style="{
+					top: view.getBuildingPos(25, -1, true)[0] + 'px',
+					left: view.getBuildingPos(25, -1, true)[1] + 'px',
+					width: (store.refSize * 32) / 100 + 'px',
+					height: (store.refSize * 32) / 100 + 'px',
+					border: String((store.refSize * 5) / 100) + 'px solid yellow',
+				}"
+				class="paxJuncOption"
+				@mouseover="highlight($event, true)"
+				@mouseleave="highlight($event, false)"
+				@click="addPassengerToJunction(25)"></div>
+		</template>
+		<!-- Pittsburgh map uses junctions 10 and 26 -->
+		<template v-else>
+			<div
+				ref="junction10"
+				:style="{
+					top: view.getBuildingPos(5, -1, true)[0] + 'px',
+					left: view.getBuildingPos(5, -1, true)[1] + 'px',
+					width: (store.refSize * 32) / 100 + 'px',
+					height: (store.refSize * 32) / 100 + 'px',
+					border: String((store.refSize * 5) / 100) + 'px solid yellow',
+				}"
+				class="paxJuncOption"
+				@mouseover="highlight($event, true)"
+				@mouseleave="highlight($event, false)"
+				@click="addPassengerToJunction(5)"></div>
+			<div
+				ref="junction26"
+				:style="{
+					top: view.getBuildingPos(30, -1, true)[0] + 'px',
+					left: view.getBuildingPos(30, -1, true)[1] + 'px',
+					width: (store.refSize * 32) / 100 + 'px',
+					height: (store.refSize * 32) / 100 + 'px',
+					border: String((store.refSize * 5) / 100) + 'px solid yellow',
+				}"
+				class="paxJuncOption"
+				@mouseover="highlight($event, true)"
+				@mouseleave="highlight($event, false)"
+				@click="addPassengerToJunction(30)"></div>
+		</template>
 	</template>
 
 	<img class="ghostImg" ref="ghostBuildingRef" src="" alt="GI Image" />

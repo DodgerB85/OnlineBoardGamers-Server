@@ -26,6 +26,13 @@ export function initGame() {
 	store.USE_PITTS_MAP = false
 	if (window.initData.startingOptions.includes(3)) store.USE_PITTS_MAP = true
 
+	// Initialize junctions based on board selection
+	if (store.USE_PITTS_MAP) {
+		store.initializeJunctions(rf.BOARD_PITTS)
+	} else {
+		store.initializeJunctions(window.initData.preferredBusBoard)
+	}
+
 	personal.liveWS = false
 	personal.pov = -9 // Also denotes involved player
 	personal.superuser = false
@@ -120,6 +127,10 @@ export function initGame() {
 			}
 			// 3p remove one timestone
 			if (store.players.length === 3) store.remainingTimeStones--
+			
+			// Set initial phase for new game
+			store.gameflow.phase = rf.PHASE_SETUP_BLDGS
+			store.gameflow.turn = 0
 		} // End NEW GAME
 		WS.StartWebSocket().catch(() => {
 			console.log("WebSocket background task initialized.")
@@ -140,7 +151,10 @@ export function initGame() {
 
 		// Append the <h1> element to the body
 		body.appendChild(heading)
-	} else if (window.initData.gameData === "") IO.saveGame(true)
+	} else if (window.initData.gameData === "") {
+		// New game - save and then call startPlayerTurn to set up the turn
+		IO.saveGame(true)
+	}
 	else {
 		// FInally, impport data
 		funcs.importBUSmodel(window.initData.gameData, personal.finishedGame, false)
@@ -149,6 +163,10 @@ export function initGame() {
 			personal.votedToExclude = store.statsExcludeVotesData[personal.name]
 		}
 	}
+	
+	// Call startPlayerTurn after initialization for all cases
+
+		controller.startPlayerTurn()
 } // end initGame
 
 export function maxBuses() {

@@ -85,6 +85,7 @@ export function getImage(image) {
 	if (image === "Board_orig") return new URL(`../../../static/BUS/images/Board_orig.jpg`, import.meta.url).href
 	if (image === "Board_origV2") return new URL(`../../../static/BUS/images/Board_origV2.jpg`, import.meta.url).href
 	if (image === "Board_20AC") return new URL(`../../../static/BUS/images/Board_20AC.jpg`, import.meta.url).href
+	if (image === "Board_Pitts") return new URL(`../../../static/BUS/images/Board_Pitts.jpg`, import.meta.url).href
 }
 
 export function getBuildingPos(junctionID, buildingSlot, outline) {
@@ -188,6 +189,120 @@ export function getBuildingPos(junctionID, buildingSlot, outline) {
 		if (junctionID === 33) return [shift + (store.refSize * 2114) / 400, shift + (store.refSize * 1957) / 400]
 		if (junctionID === 34) return [shift + (store.refSize * 2677) / 400, shift + (store.refSize * 2457) / 400]
 		if (junctionID === 35) return [shift + (store.refSize * 2078) / 400, shift + (store.refSize * 2621) / 400]
+	}
+
+	// USING PITTSBURGH BOARD
+	else if (personal.selectedBoard === rf.BOARD_PITTS) {
+		// Get pos for actual junctions
+		if (buildingSlot === -1) {
+			let shift = 0
+			if (outline) shift = (store.refSize * -22) / 400
+			if (junctionID === 0) return [shift + (store.refSize * 223) / 400, shift + (store.refSize * 600) / 400]
+			if (junctionID === 1) return [shift + (store.refSize * 185) / 400, shift + (store.refSize * 1120) / 400]
+			if (junctionID === 2) return [shift + (store.refSize * 421) / 400, shift + (store.refSize * 1480) / 400]
+			if (junctionID === 3) return [shift + (store.refSize * 566) / 400, shift + (store.refSize * 1710) / 400]
+			if (junctionID === 4) return [shift + (store.refSize * 206) / 400, shift + (store.refSize * 2087) / 400]
+			if (junctionID === 5) return [shift + (store.refSize * 482) / 400, shift + (store.refSize * 2580) / 400]
+			if (junctionID === 6) return [shift + (store.refSize * 796) / 400, shift + (store.refSize * 357) / 400]
+			if (junctionID === 7) return [shift + (store.refSize * 652) / 400, shift + (store.refSize * 817) / 400]
+			if (junctionID === 8) return [shift + (store.refSize * 809) / 400, shift + (store.refSize * 1167) / 400]
+			if (junctionID === 9) return [shift + (store.refSize * 982) / 400, shift + (store.refSize * 1443) / 400]
+			if (junctionID === 10) return [shift + (store.refSize * 936) / 400, shift + (store.refSize * 1973) / 400]
+
+			if (junctionID === 11) return [shift + (store.refSize * 669) / 400, shift + (store.refSize * 2107) / 400]
+			if (junctionID === 12) return [shift + (store.refSize * 929) / 400, shift + (store.refSize * 2477) / 400]
+			if (junctionID === 13) return [shift + (store.refSize * 942) / 400, shift + (store.refSize * 2933) / 400]
+			if (junctionID === 14) return [shift + (store.refSize * 996) / 400, shift + (store.refSize * 780) / 400]
+			if (junctionID === 15) return [shift + (store.refSize * 986) / 400, shift + (store.refSize * 263) / 400]
+			if (junctionID === 16) return [shift + (store.refSize * 1306) / 400, shift + (store.refSize * 623) / 400]
+			if (junctionID === 17) return [shift + (store.refSize * 1149) / 400, shift + (store.refSize * 790) / 400]
+			if (junctionID === 18) return [shift + (store.refSize * 1366) / 400, shift + (store.refSize * 1243) / 400]
+			if (junctionID === 19) return [shift + (store.refSize * 1332) / 400, shift + (store.refSize * 1727) / 400]
+			if (junctionID === 20) return [shift + (store.refSize * 1356) / 400, shift + (store.refSize * 2177) / 400]
+			if (junctionID === 21) return [shift + (store.refSize * 1379) / 400, shift + (store.refSize * 2657) / 400]
+			if (junctionID === 22) return [shift + (store.refSize * 1349) / 400, shift + (store.refSize * 3120) / 400]
+			if (junctionID === 23) return [shift + (store.refSize * 1426) / 400, shift + (store.refSize * 83) / 400]
+			if (junctionID === 24) return [shift + (store.refSize * 1529) / 400, shift + (store.refSize * 1057) / 400]
+			if (junctionID === 25) return [shift + (store.refSize * 1502) / 400, shift + (store.refSize * 1557) / 400]
+			if (junctionID === 26) return [shift + (store.refSize * 1889) / 400, shift + (store.refSize * 1833) / 400]
+			if (junctionID === 27) return [shift + (store.refSize * 1892) / 400, shift + (store.refSize * 2163) / 400]
+			if (junctionID === 28) return [shift + (store.refSize * 1876) / 400, shift + (store.refSize * 2590) / 400]
+			if (junctionID === 29) return [shift + (store.refSize * 1876) / 400, shift + (store.refSize * 3020) / 400]
+			if (junctionID === 30) return [shift + (store.refSize * 1990) / 400, shift + (store.refSize * 97) / 400]
+			if (junctionID === 31) return [shift + (store.refSize * 1779) / 400, shift + (store.refSize * 523) / 400]
+			if (junctionID === 32) return [shift + (store.refSize * 1959) / 400, shift + (store.refSize * 940) / 400]
+			if (junctionID === 33) return [shift + (store.refSize * 1932) / 400, shift + (store.refSize * 1407) / 400]
+			if (junctionID === 34) return [shift + (store.refSize * 2298) / 400, shift + (store.refSize * 470) / 400]
+			if (junctionID === 35) return [shift + (store.refSize * 2393) / 400, shift + (store.refSize * 1440) / 400]
+			if (junctionID === 36) return [shift + (store.refSize * 2305) / 400, shift + (store.refSize * 1957) / 400]
+			if (junctionID === 37) return [shift + (store.refSize * 2288) / 400, shift + (store.refSize * 2270) / 400]
+
+			return [100, 100]
+		}
+
+		// Get pos for buildings, or highlight outline
+		let shift = 0
+		if (outline) shift = (store.refSize * -22) / 400
+		if (junctionID === 0) return [shift + (store.refSize * 95) / 400, shift + (store.refSize * 567) / 400]
+		if (junctionID === 1) return [shift + (store.refSize * 74) / 400, shift + (store.refSize * 1190) / 400]
+		if (junctionID === 2) return [shift + (store.refSize * 434) / 400, shift + (store.refSize * 1330) / 400]
+		if (junctionID === 3 && buildingSlot === 0) return [shift + (store.refSize * 564) / 400, shift + (store.refSize * 1853) / 400]
+		if (junctionID === 3 && buildingSlot === 4) return [shift + (store.refSize * 434) / 400, shift + (store.refSize * 1703) / 400]
+		if (junctionID === 4 && buildingSlot === 2) return [shift + (store.refSize * 430) / 400, shift + (store.refSize * 1991) / 400]
+		if (junctionID === 4 && buildingSlot === 4) return [shift + (store.refSize * 64) / 400, shift + (store.refSize * 2058) / 400]
+		// 5
+		if (junctionID === 6) return [shift + (store.refSize * 708) / 400, shift + (store.refSize * 260) / 400]
+		if (junctionID === 7 && buildingSlot === 2) return [shift + (store.refSize * 582) / 400, shift + (store.refSize * 657) / 400]
+		if (junctionID === 7 && buildingSlot === 3) return [shift + (store.refSize * 448) / 400, shift + (store.refSize * 820) / 400]
+		if (junctionID === 8 && buildingSlot === 0) return [shift + (store.refSize * 670) / 400, shift + (store.refSize * 1150) / 400]
+		if (junctionID === 8 && buildingSlot === 3) return [shift + (store.refSize * 802) / 400, shift + (store.refSize * 947) / 400]
+		if (junctionID === 9 && buildingSlot === 0) return [shift + (store.refSize * 835) / 400, shift + (store.refSize * 1643) / 400]
+		if (junctionID === 9 && buildingSlot === 1) return [shift + (store.refSize * 835) / 400, shift + (store.refSize * 1403) / 400]
+		if (junctionID === 10 && buildingSlot === 0) return [shift + (store.refSize * 797) / 400, shift + (store.refSize * 2033) / 400]
+		if (junctionID === 10 && buildingSlot === 1) return [shift + (store.refSize * 1040) / 400, shift + (store.refSize * 1883) / 400]
+		if (junctionID === 11) return [shift + (store.refSize * 531) / 400, shift + (store.refSize * 2187) / 400]
+		if (junctionID === 12) return [shift + (store.refSize * 775) / 400, shift + (store.refSize * 2413) / 400]
+		if (junctionID === 13) return [shift + (store.refSize * 872) / 400, shift + (store.refSize * 3040) / 400]
+		if (junctionID === 14 && buildingSlot === 0) return [shift + (store.refSize * 852) / 400, shift + (store.refSize * 793) / 400]
+		if (junctionID === 14 && buildingSlot === 2) return [shift + (store.refSize * 989) / 400, shift + (store.refSize * 513) / 400]
+		if (junctionID === 15) return  [shift + (store.refSize * 1158) / 400, shift + (store.refSize * 290) / 400]
+		if (junctionID === 16 && buildingSlot === 2) return [shift + (store.refSize * 1449) / 400, shift + (store.refSize * 490) / 400]
+		if (junctionID === 16 && buildingSlot === 3) return [shift + (store.refSize * 1469) / 400, shift + (store.refSize * 690) / 400]
+		// TODO convention center
+		//if (junctionID === 17) return [shift + (store.refSize * 2658) / 400, shift + (store.refSize * 1846) / 400, -35]
+		// CORRECT UP TO HERE
+		if (junctionID === 18 && buildingSlot === 0) return [shift + (store.refSize * 1262) / 400, shift + (store.refSize * 1387) / 400]
+		if (junctionID === 18 && buildingSlot === 2) return [shift + (store.refSize * 1174) / 400, shift + (store.refSize * 1207) / 400]
+		if (junctionID === 19 && buildingSlot === 0) return [shift + (store.refSize * 1225) / 400, shift + (store.refSize * 1814) / 400]
+		if (junctionID === 19 && buildingSlot === 1) return [shift + (store.refSize * 1249) / 400, shift + (store.refSize * 1547) / 400]
+		if (junctionID === 20 && buildingSlot === 0) return [shift + (store.refSize * 1249) / 400, shift + (store.refSize * 2271) / 400]
+		if (junctionID === 20 && buildingSlot === 1) return [shift + (store.refSize * 1489) / 400, shift + (store.refSize * 2057) / 400]
+		if (junctionID === 21 && buildingSlot === 2) return [shift + (store.refSize * 1488) / 400, shift + (store.refSize * 2750) / 400]
+		if (junctionID === 21 && buildingSlot === 3) return [shift + (store.refSize * 1261) / 400, shift + (store.refSize * 2723) / 400]
+		if (junctionID === 22) return [shift + (store.refSize * 1265) / 400, shift + (store.refSize * 2963) / 400]
+		if (junctionID === 23) return [shift + (store.refSize * 1481) / 400, shift + (store.refSize * 300) / 400]
+		if (junctionID === 24 && buildingSlot === 0) return [shift + (store.refSize * 1615) / 400, shift + (store.refSize * 937) / 400]
+		if (junctionID === 24 && buildingSlot === 2) return [shift + (store.refSize * 1645) / 400, shift + (store.refSize * 1150) / 400]
+		if (junctionID === 25 && buildingSlot === 0) return [shift + (store.refSize * 1618) / 400, shift + (store.refSize * 1387) / 400]
+		if (junctionID === 25 && buildingSlot === 2) return [shift + (store.refSize * 1698) / 400, shift + (store.refSize * 1577) / 400]
+		if (junctionID === 26 && buildingSlot === 2) return [shift + (store.refSize * 2005) / 400, shift + (store.refSize * 1753) / 400]
+		if (junctionID === 26 && buildingSlot === 3) return [shift + (store.refSize * 1751) / 400, shift + (store.refSize * 1873) / 400]
+		if (junctionID === 27) return [shift + (store.refSize * 2005) / 400, shift + (store.refSize * 2058) / 400]
+		if (junctionID === 28 && buildingSlot === 2) return [shift + (store.refSize * 1769) / 400, shift + (store.refSize * 2491) / 400]
+		if (junctionID === 28 && buildingSlot === 4) return [shift + (store.refSize * 1992) / 400, shift + (store.refSize * 2658) / 400]
+		if (junctionID === 29) return [shift + (store.refSize * 2019) / 400, shift + (store.refSize * 3025) / 400]
+		// 30
+		if (junctionID === 31 && buildingSlot === 0) return [shift + (store.refSize * 1932) / 400, shift + (store.refSize * 607) / 400]
+		if (junctionID === 31 && buildingSlot === 2) return [shift + (store.refSize * 1762) / 400, shift + (store.refSize * 340) / 400]
+		if (junctionID === 32) return [shift + (store.refSize * 2109) / 400, shift + (store.refSize * 930) / 400]
+		if (junctionID === 33 && buildingSlot === 0) return [shift + (store.refSize * 2059) / 400, shift + (store.refSize * 1317) / 400]
+		if (junctionID === 33 && buildingSlot === 3) return [shift + (store.refSize * 2032) / 400, shift + (store.refSize * 1523) / 400]
+		if (junctionID === 34) return [shift + (store.refSize * 2125) / 400, shift + (store.refSize * 387) / 400]
+		if (junctionID === 35) return [shift + (store.refSize * 2272) / 400, shift + (store.refSize * 1543) / 400]
+		if (junctionID === 36) return [shift + (store.refSize * 2439) / 400, shift + (store.refSize * 1974) / 400]
+		if (junctionID === 37) return [shift + (store.refSize * 2359) / 400, shift + (store.refSize * 2394) / 400]
+
+		return [0, 0]
 	}
 
 	// USING ORIGINAL BOARD
@@ -395,6 +510,166 @@ export function getBuildingPos(junctionID, buildingSlot, outline) {
 export function getLineSVGpoints(lineID, index, raw) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		// If highlighting, get index and +1
+		if (index === 10) {
+			index = store.lines[lineID].length
+		}
+
+		let lineWidth = (store.refSize * 25) / 400
+
+		let coords = []
+		// TODO: Add Pittsburgh line coordinates (70 lines total)
+		// Use draggable line tool to get coordinates in format [x1, y1, x2, y2]
+		if (lineID === 0) coords = [737, 275, 1117, 245]
+		if (lineID === 1) coords = [1257, 283, 1487, 446]
+		if (lineID === 2) coords = [1617, 535, 1710, 600]
+		if (lineID === 3) coords = [1837, 579, 2087, 333]
+		if (lineID === 4) coords = [2223, 299, 2557, 486]
+		if (lineID === 5) coords = [2713, 639, 2947, 939]
+		if (lineID === 6) coords = [460, 768, 627, 382]
+		if (lineID === 7) coords = [713, 368, 843, 642]
+		if (lineID === 8) coords = [927, 643, 1137, 326]
+		if (lineID === 9) coords =[950, 738, 1180, 845]
+		if (lineID === 10) coords = [1287, 812, 1490, 548]
+		if (lineID === 11) coords = [1300, 912, 1447, 998]
+		if (lineID === 12) coords = [1547, 968, 1720, 708]
+		if (lineID === 13) coords = [1573, 1025, 1977, 1018]
+		if (lineID === 14) coords = [1837, 708, 1993, 945]
+		if (lineID === 15) coords =[2103, 1008, 2470, 1008]
+		if (lineID === 16) coords =[2233, 805, 2467, 955]
+		if (lineID === 17) coords =[2153, 365, 2160, 632]
+		if (lineID === 18) coords = [2233, 715, 2537, 595]
+		if (lineID === 19) coords = [2570, 898, 2620, 662]
+		if (lineID === 20) coords = [2607, 1013, 2930, 1009]
+		if (lineID === 21) coords = [500, 834, 803, 741]
+		if (lineID === 22) coords = [507, 907, 777, 1031]
+		if (lineID === 23) coords = [913, 1037, 1150, 917]
+		if (lineID === 24) coords = [850, 1091, 857, 1218]
+		if (lineID === 25) coords = [943, 1199, 1433, 1060]
+		if (lineID === 26) coords =[923, 1271, 1233, 1425]
+		if (lineID === 27) coords = [1347, 1349, 1460, 1116]
+		if (lineID === 28) coords = [1377, 1439, 1717, 1399]
+		if (lineID === 29) coords = [1573, 1110, 1740, 1324]
+		if (lineID === 30) coords = [1867, 1403, 2157, 1416]
+		if (lineID === 31) coords = [2077, 1099, 2210, 1343]
+		if (lineID === 32) coords = [2317, 1423, 2643, 1436]
+		if (lineID === 33) coords = [2573, 1103, 2687, 1359]
+		if (lineID === 34) coords = [2797, 1437, 3123, 1430]
+		if (lineID === 35) coords = [3040, 1103, 3137, 1336]
+		if (lineID === 36) coords = [330, 1030, 410, 889]
+		if (lineID === 37) coords = [187, 1403, 283, 1149]
+		if (lineID === 38) coords = [393, 1133, 627, 1326]
+		if (lineID === 39) coords = [220, 1479, 617, 1403]
+		if (lineID === 40) coords = [717, 1358, 823, 1265]
+		if (lineID === 41) coords = [767, 1428, 1047, 1578]
+		if (lineID === 42) coords =[610, 1745, 670, 1465]
+		if (lineID === 43) coords =[1037, 1935, 1110, 1695]
+		if (lineID === 44) coords = [1160, 1576, 1270, 1469]
+		if (lineID === 45) coords = [1190, 1611, 1550, 1578]
+		if (lineID === 46) coords = [1503, 1908, 1590, 1651]
+		if (lineID === 47) coords = [1663, 1546, 1750, 1446]
+		if (lineID === 48) coords =[1673, 1655, 1850, 1885]
+		if (lineID === 49) coords = [147, 1599, 160, 1949]
+		if (lineID === 50) coords = [220, 1561, 520, 1794]
+		if (lineID === 51) coords = [670, 1886, 930, 2003]
+		if (lineID === 52) coords = [1087, 2034, 1400, 2021]
+		if (lineID === 53) coords = [1553, 2003, 1823, 1966]
+		if (lineID === 54) coords = [1957, 1953, 2170, 1959]
+		if (lineID === 55) coords = [2230, 1857, 2240, 1514]
+		if (lineID === 56) coords = [2290, 1957, 2580, 1944]
+		if (lineID === 57) coords =[2663, 1844, 2703, 1551]
+		if (lineID === 58) coords =[2727, 1941, 3020, 1941]
+		if (lineID === 59) coords = [3103, 1851, 3163, 1527]
+		if (lineID === 60) coords = [253, 2019, 517, 1887]
+		if (lineID === 61) coords = [243, 2139, 470, 2333]
+		if (lineID === 62) coords = [543, 2268, 577, 1961]
+		if (lineID === 63) coords = [600, 2323, 943, 2089]
+		if (lineID === 64) coords = [1077, 2111, 1437, 2421]
+		if (lineID === 65) coords = [1473, 2098, 1497, 2368]
+		if (lineID === 66) coords = [1590, 2458, 1940, 2398]
+		if (lineID === 67) coords = [1930, 2061, 1993, 2278]
+		if (lineID === 68) coords = [2077, 2378, 2280, 2375]
+		if (lineID === 69) coords = [2253, 2053, 2303, 2266]
+		if (lineID === 70) coords = [2390, 2295, 2597, 2018]
+
+		let x1 = (store.refSize * coords[0]) / 400
+		let y1 = (store.refSize * coords[1]) / 400
+		let x2 = (store.refSize * coords[2]) / 400
+		let y2 = (store.refSize * coords[3]) / 400
+
+		let deltaY = Math.abs(y1 - y2)
+		let deltaX = Math.abs(x1 - x2)
+
+		let topPercent = deltaX / (deltaX + deltaY)
+		let leftPercent = deltaY / (deltaX + deltaY)
+
+		let trigFactor = Math.min(topPercent, leftPercent)
+		lineWidth = lineWidth + trigFactor * 1.41 * lineWidth
+
+		if (index === 2) index = -1
+		else if (index === 3) index = 2
+		else if (index === 4) index = -2
+
+		if (y1 > y2) {
+			x1 = index * lineWidth * leftPercent + x1
+			y1 = index * lineWidth * topPercent + y1
+			x2 = index * lineWidth * leftPercent + x2
+			y2 = index * lineWidth * topPercent + y2
+		} else {
+			x1 = -(index * lineWidth * leftPercent) + x1
+			y1 = index * lineWidth * topPercent + y1
+			x2 = -(index * lineWidth * leftPercent) + x2
+			y2 = index * lineWidth * topPercent + y2
+		}
+
+		// Calculate perpendicular offset for polygon width
+		const origX1 = (store.refSize * coords[0]) / 400
+		const origY1 = (store.refSize * coords[1]) / 400
+		const origX2 = (store.refSize * coords[2]) / 400
+		const origY2 = (store.refSize * coords[3]) / 400
+		
+		const origDeltaX = origX2 - origX1
+		const origDeltaY = origY2 - origY1
+		const origLength = Math.sqrt(origDeltaX * origDeltaX + origDeltaY * origDeltaY)
+		
+		let x11 = x1
+		let y11 = y1
+		let x22 = x2
+		let y22 = y2
+		
+		if (origLength > 0) {
+			const offsetX = (origDeltaY / origLength) * lineWidth / 2
+			const offsetY = (origDeltaX / origLength) * lineWidth / 2
+			
+			x11 = x1 - offsetX
+			y11 = y1 + offsetY
+			x22 = x2 - offsetX
+			y22 = y2 + offsetY
+		}
+		
+		if (raw) return [x1, y1, x11, y11, x2, y2, x22, y22]
+		
+		// Calculate polygon points for display
+		if (origLength > 0) {
+			const offsetX = (origDeltaY / origLength) * lineWidth / 2
+			const offsetY = (origDeltaX / origLength) * lineWidth / 2
+			
+			const p1x = x1 - offsetX
+			const p1y = y1 + offsetY
+			const p2x = x2 - offsetX
+			const p2y = y2 + offsetY
+			const p3x = x2 + offsetX
+			const p3y = y2 - offsetY
+			const p4x = x1 + offsetX
+			const p4y = y1 - offsetY
+			
+			return `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y} ${p4x},${p4y}`
+		}
+
+		return `${x1},${y1} ${x2},${y2}`
+	}
 
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) {
 		// If highlighting, get index and +1
@@ -1048,28 +1323,28 @@ export function getJunctionsAtEndOfLine(lineID) {
 		if (lineID === 3) return [3, 4]
 		if (lineID === 4) return [4, 5]
 		if (lineID === 5) return [5, 13]
-		if (lineID === 6) return [0, 6]
+		if (lineID === 6) return [6, 0]
 		if (lineID === 7) return [0, 7]
-		if (lineID === 8) return [1, 7]
-		if (lineID === 9) return [7, 9]
-		if (lineID === 10) return [2, 8]
+		if (lineID === 8) return [7, 1]
+		if (lineID === 9) return [7, 8]
+		if (lineID === 10) return [8, 2]
 		if (lineID === 11) return [8, 9]
-		if (lineID === 12) return [3, 9]
+		if (lineID === 12) return [9,3]
 		if (lineID === 13) return [9, 10]
 		if (lineID === 14) return [3, 10]
 		if (lineID === 15) return [10, 12]
 		if (lineID === 16) return [11, 12]
 		if (lineID === 17) return [4, 11]
-		if (lineID === 18) return [5, 11]
-		if (lineID === 19) return [5, 12]
+		if (lineID === 18) return [11, 5]
+		if (lineID === 19) return [12, 5]
 		if (lineID === 20) return [12, 13]
 		if (lineID === 21) return [6, 7]
-		if (lineID === 22) return [6, 1]
-		if (lineID === 23) return [8, 14]
+		if (lineID === 22) return [6, 14]
+		if (lineID === 23) return [14, 8]
 		if (lineID === 24) return [14, 17]
-		if (lineID === 25) return [7, 9]
+		if (lineID === 25) return [17, 9]
 		if (lineID === 26) return [17, 18]
-		if (lineID === 27) return [9, 18]
+		if (lineID === 27) return [18, 9]
 		if (lineID === 28) return [18, 19]
 		if (lineID === 29) return [9, 19]
 		if (lineID === 30) return [19, 20]
@@ -1078,41 +1353,41 @@ export function getJunctionsAtEndOfLine(lineID) {
 		if (lineID === 33) return [12, 21]
 		if (lineID === 34) return [21, 22]
 		if (lineID === 35) return [13, 22]
-		if (lineID === 36) return [6, 15]
-		if (lineID === 37) return [15, 23]
+		if (lineID === 36) return [15, 6]
+		if (lineID === 37) return [23, 15]
 		if (lineID === 38) return [15, 16]
-		if (lineID === 39) return [16, 23]
+		if (lineID === 39) return [23, 16]
 		if (lineID === 40) return [16, 17]
 		if (lineID === 41) return [16, 24]
-		if (lineID === 42) return [16, 31]
-		if (lineID === 43) return [24, 32]
-		if (lineID === 44) return [18, 24]
+		if (lineID === 42) return [31, 16]
+		if (lineID === 43) return [32, 24]
+		if (lineID === 44) return [24, 18]
 		if (lineID === 45) return [24, 25]
-		if (lineID === 46) return [25, 33]
-		if (lineID === 47) return [19, 25]
+		if (lineID === 46) return [33, 25]
+		if (lineID === 47) return [25, 19]
 		if (lineID === 48) return [25, 26]
 		if (lineID === 49) return [23, 30]
 		if (lineID === 50) return [23, 31]
 		if (lineID === 51) return [31, 32]
 		if (lineID === 52) return [32, 33]
-		if (lineID === 53) return [26, 33]
-		if (lineID === 54) return [25, 27]
-		if (lineID === 55) return [20, 27]
+		if (lineID === 53) return [33, 26]
+		if (lineID === 54) return [26, 27]
+		if (lineID === 55) return [27, 20]
 		if (lineID === 56) return [27, 28]
-		if (lineID === 57) return [21, 28]
+		if (lineID === 57) return [28, 21]
 		if (lineID === 58) return [28, 29]
-		if (lineID === 59) return [22, 29]
+		if (lineID === 59) return [29, 22]
 		if (lineID === 60) return [30, 31]
 		if (lineID === 61) return [30, 34]
-		if (lineID === 62) return [31, 34]
-		if (lineID === 63) return [32, 34]
+		if (lineID === 62) return [34, 31]
+		if (lineID === 63) return [34, 32]
 		if (lineID === 64) return [32, 35]
 		if (lineID === 65) return [33, 35]
 		if (lineID === 66) return [35, 36]
 		if (lineID === 67) return [26, 36]
 		if (lineID === 68) return [36, 37]
 		if (lineID === 69) return [27, 37]
-		if (lineID === 70) return [28, 37]
+		if (lineID === 70) return [37, 28]
 	}
 	alert("no junction found AEOL")
 	return "none"
@@ -1169,7 +1444,7 @@ export function getLinesAroundJunction(junctionID) {
 		if (junctionID === 6) return [6, 21, 22, 36]
 		if (junctionID === 7) return [7, 8, 9, 21]
 		if (junctionID === 8) return [9, 10, 11, 23]
-		if (junctionID === 9) return [11, 12, 13, 27, 29]
+		if (junctionID === 9) return [11, 12, 13, 25, 27, 29]
 		if (junctionID === 10) return [13, 14, 15, 31]
 		if (junctionID === 11) return [16, 17, 18]
 		if (junctionID === 12) return [15, 16, 19, 20, 33]
@@ -1227,13 +1502,12 @@ export function getLineEndCircleData() {
 			let startCorrectedX = correctedX + 20
 			let startCorrectedY = correctedY + 20
 			// Find the start points
-			let otherJunction = getJunctionsAtEndOfLine(endLine).find(j => j !== store.players[i].endJunctions[j])
-			let otherJunctionIndex = getJunctionsAtEndOfLine(endLine).indexOf(otherJunction)
-			let shiftStart = 0
-			if (otherJunctionIndex === 1) shiftStart = 4
-			startCorrectedX =  rawPoints[0 + shift] + (rawPoints[2 + shift] - rawPoints[0 + shift]) / 2
+			//let otherJunction = getJunctionsAtEndOfLine(endLine).find((j) => j !== store.players[i].endJunctions[j])
+			//let otherJunctionIndex = getJunctionsAtEndOfLine(endLine).indexOf(otherJunction)
+			//let shiftStart = 0
+			//if (otherJunctionIndex === 1) shiftStart = 4
+			startCorrectedX = rawPoints[0 + shift] + (rawPoints[2 + shift] - rawPoints[0 + shift]) / 2
 			startCorrectedY = rawPoints[1 + shift] + (rawPoints[3 + shift] - rawPoints[1 + shift]) / 2
-
 
 			ret.push([store.players[i].colour, correctedX, correctedY, startCorrectedX, startCorrectedY])
 		}
@@ -1246,24 +1520,22 @@ export function getLineEndCircleData() {
 export function getCircleStartPosition(lineID, playerColor, endJunction) {
 	const store = useModelStore()
 	const junctions = getJunctionsAtEndOfLine(lineID)
-	
+
 	// Find the OTHER junction (not the endJunction)
-	const otherJunction = junctions.find(j => j !== endJunction)
+	const otherJunction = junctions.find((j) => j !== endJunction)
 	if (!otherJunction) return null
-	
+
 	// Get the line position for this player
 	const lineOffset = store.lines[lineID].indexOf(playerColor)
 	const rawPoints = getLineSVGpoints(lineID, lineOffset, true)
-	
+
 	// Find which junction index corresponds to the other junction
 	const otherJunctionIndex = junctions.indexOf(otherJunction)
 	const shift = otherJunctionIndex === 1 ? 4 : 0
-	
+
 	// Calculate position at the other end of the line
 	const startX = rawPoints[0 + shift] + (rawPoints[2 + shift] - rawPoints[0 + shift]) / 2
 	const startY = rawPoints[1 + shift] + (rawPoints[3 + shift] - rawPoints[1 + shift]) / 2
-	
+
 	return { x: startX, y: startY }
 }
-
-
