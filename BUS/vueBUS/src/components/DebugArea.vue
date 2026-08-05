@@ -102,7 +102,7 @@ function addLinesToAllOptions() {
 </script>
 
 <template>
-	{{ funcs.exportBUSmodel(false, false).length }} // {{ funcs.exportModel(false, false).length }}
+	{{ funcs.exportBUSmodel(false, false).length }}
 	<br />
 	{{ store.actionAreaData }}
 	<br />

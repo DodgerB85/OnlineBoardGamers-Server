@@ -422,6 +422,7 @@ export function decompressActionArea(compressed) {
 
 export function exportBUSmodel(forGameOver, saveContext) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	let temp = []
 
 	// 0 - players
@@ -468,7 +469,12 @@ export function exportBUSmodel(forGameOver, saveContext) {
 	// 5 - desired Building
 	temp.push(store.desiredBuilding)
 
-	// 6 - gameflow // NOT GAME ENDED
+	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus)
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		temp.push([store.jeroenStatus, store.jorisStatus])
+	}
+
+	// 7 - gameflow // NOT GAME ENDED
 	if (!forGameOver) {
 		temp.push([
 			//store.gameflow.turn, // from history
@@ -480,7 +486,7 @@ export function exportBUSmodel(forGameOver, saveContext) {
 		])
 	}
 
-	// 7 - context
+	// 8 - context
 	if (saveContext) temp.push(JSON.parse(JSON.stringify(store.context)))
 
 	// FROM HSITORY
@@ -622,7 +628,18 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext) {
 	// 5 - desiredBuilding
 	store.desiredBuilding = inputModel[5]
 
-	// 6 - gameflow
+	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus)
+	let pittsStatusIndex = 6
+	if (personal.selectedBoard === rf.BOARD_PITTS && inputModel.length > 6 && Array.isArray(inputModel[6]) && inputModel[6].length === 2) {
+		store.jeroenStatus = inputModel[6][0]
+		store.jorisStatus = inputModel[6][1]
+		pittsStatusIndex = 7
+	} else {
+		store.jeroenStatus = -1
+		store.jorisStatus = -1
+	}
+
+	// 7 - gameflow (was 6, now 7 if Pittsburgh data present)
 	store.gameflow.turn = 0
 	store.gameflow.phase = rf.PHASE_CHOOSE_ACTIONS
 	store.gameflow.fullTurnOrder = []
@@ -631,15 +648,15 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext) {
 	store.gameflow.gameEnded = 0
 
 	if (!forGameOver) {
-		store.gameflow.phase = inputModel[6][0]
-		store.gameflow.fullTurnOrder = [...inputModel[6][1]]
-		store.gameflow.turnOrder = [...inputModel[6][2]]
-		store.gameflow.fullActionTurnOrder = [...inputModel[6][3]]
+		store.gameflow.phase = inputModel[pittsStatusIndex][0]
+		store.gameflow.fullTurnOrder = [...inputModel[pittsStatusIndex][1]]
+		store.gameflow.turnOrder = [...inputModel[pittsStatusIndex][2]]
+		store.gameflow.fullActionTurnOrder = [...inputModel[pittsStatusIndex][3]]
 		store.gameflow.gameEnded = 0
 	} else store.gameflow.gameEnded = 3
 
-	// 8 - context
-	if (restoreContext && inputModel.length >= 8) Object.assign(store.context, inputModel[7])
+	// 8 - context (was 7, now 8 if Pittsburgh data present)
+	if (restoreContext && inputModel.length >= pittsStatusIndex + 1) Object.assign(store.context, inputModel[pittsStatusIndex + 1])
 
 	store.remainingPassengers = 11
 	store.remainingTimeStones = 5
@@ -754,78 +771,7 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext) {
 	}
 }
 
-export function exportModel(saveContext) {
-	const store = useModelStore()
-	let temp = []
-
-	// 0 - players
-	let tempPlayers = []
-	for (let i = 0; i < store.players.length; i++) {
-		tempPlayers.push([
-			store.players[i].name, // 0
-			store.players[i].displayName, // 1
-			store.players[i].colour, // 2
-			store.players[i].score, // 3
-			store.players[i].remainingActions, // 4
-			store.players[i].timeStones, // 5
-			store.players[i].buses, // 6
-			JSON.parse(JSON.stringify(store.players[i].endJunctions)), // 7
-			JSON.parse(JSON.stringify(store.players[i].endLines)), // 8
-			JSON.parse(JSON.stringify(store.players[i].playerJunctions)), // 9
-			store.players[i].passActionsFlag ? 1 : 0, // 10
-			store.players[i].maxScore, // 11
-		])
-	}
-	temp.push(tempPlayers)
-	//temp.push(JSON.parse(JSON.stringify(players)))
-
-	// 1
-	// MIGHT NEED TO DO THIS LIKE ABOVE
-	/*let tempJunctions = []
-    for (let i = 0; i < junctions.length; i++) {
-      tempJunctions.push([junctions[i].id, [...junctions[i].buildings], junctions[i].passengers])
-    }*/
-	temp.push(JSON.parse(JSON.stringify(store.junctions)))
-
-	// 2
-	temp.push(store.remainingTimeStones)
-
-	// 3
-	temp.push(store.remainingPassengers)
-
-	// 4
-	temp.push(JSON.parse(JSON.stringify(store.lines)))
-	//temp.push(lines.map(o => ({...o})));
-
-	// 5
-	temp.push(JSON.parse(JSON.stringify(store.actionAreaData)))
-
-	// 6
-	//temp.push(JSON.parse(JSON.stringify(gameflow)))
-	//temp.push([gameflow.turn, gameflow.phase, [...gameflow.turnOrder], [...gameflow.fullTurnOrder]])
-	temp.push([
-		store.gameflow.turn, // 0
-		store.gameflow.phase, // 1
-		JSON.parse(JSON.stringify(store.gameflow.turnOrder)), // 2
-		JSON.parse(JSON.stringify(store.gameflow.fullTurnOrder)), // 3
-		JSON.parse(JSON.stringify(store.gameflow.fullActionTurnOrder)), // 7
-		store.gameflow.gameEnded,
-	])
-
-	// 7
-	temp.push(store.desiredBuilding)
-
-	// 8
-	temp.push(JSON.parse(JSON.stringify(store.history)))
-
-	// 9
-	if (saveContext) temp.push(JSON.parse(JSON.stringify(store.context)))
-
-	var step1 = JSON.stringify(temp)
-	var step2 = LZString.compressToEncodedURIComponent(step1)
-	return step2
-}
-
+// This is the old method. Use to view old games only
 export function importModel(input, restoreContext) {
 	const store = useModelStore()
 	var step1 = LZString.decompressFromEncodedURIComponent(input)

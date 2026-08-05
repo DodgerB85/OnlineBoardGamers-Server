@@ -42,6 +42,9 @@ export const useModelStore = defineStore("model", () => {
 	const USE_PITTS_MAP = false
 	const lines = reactive(Array.from({ length: 80 }, () => []))
 
+	const jeroenStatus = ref(-1)
+	const jorisStatus = ref(-1)
+
 	const actionAreaData = reactive([[-1, -1, -1, -1, -1, -1], [-1], [-1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1], [-1], [-1, -1, -1, -1, -1, -1], [-1]])
 
 	const gameflow = reactive({
