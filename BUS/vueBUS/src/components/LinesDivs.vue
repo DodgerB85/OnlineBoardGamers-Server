@@ -248,6 +248,18 @@ const lineEndCircles = computed(() => {
 				</g>
 			</g>
 		</g>
+		
+		<!-- render the bridges (Pittsburgh) -->
+		<g v-for="bridgeLineID in store.bridges" v-bind:key="`bridge-${bridgeLineID}`">
+			<polygon
+				:data-line-id="bridgeLineID"
+				:points="view.getLineSVGpoints(bridgeLineID, 0)"
+				:style="{
+					stroke: 'black',
+					'stroke-width': 2,
+					fill: 'white',
+				}"></polygon>
+		</g>
 
 		<!-- Add Line End circles -->
 		<!-- Add Line End circles -->

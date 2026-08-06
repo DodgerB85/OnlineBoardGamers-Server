@@ -197,8 +197,11 @@ export function getWinnerName(returnScores) {
 		const bIsBot = b.displayName === rf.BOT_NAME
 		if (aIsBot && !bIsBot) return 1
 		if (!aIsBot && bIsBot) return -1
-		
-		return cmp(Math.floor(b.score), Math.floor(a.score)) || cmp(b.timeStones, a.timeStones) || cmp(b.maxScore, a.maxScore)
+
+		// Primary: higher score wins
+		// Secondary: more timestones wins (not fewer)
+		// Tertiary: lower maxScore wins (reached score first)
+		return cmp(Math.floor(b.score), Math.floor(a.score)) || cmp(b.timeStones, a.timeStones) || cmp(a.maxScore, b.maxScore)
 	})
 
 	if (returnScores) return resArr
@@ -249,7 +252,8 @@ export function increaseScore(player) {
 
 export function decreaseScore(player) {
 	const store = useModelStore()
-	let newScore = Math.floor(player.score) - 1 + 0.5 + player.timeStones / 10
+	//    let newScore = Math.floor(player.score) - 1 + 0.5 + player.timeStones / 10
+	let newScore = Math.floor(player.score) - 1 + 0.5 - player.timeStones
 	for (let i = 0; i < store.players.length; i++) {
 		if (Math.floor(store.players[i].score) === Math.floor(newScore)) newScore -= 0.1
 		newScore = Math.round(newScore * 10) / 10
@@ -396,14 +400,30 @@ export async function moveAllPassengersOntoCorrectBuilding(bldgNum) {
 
 export function getLinePlacementOptions() {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	if (store.context.linesLeftToPlace === 0) return
 	if (store.context.endJunctionsOptions.length > 0) return
+	
+	// Pittsburgh bridge expansion option
+	if (personal.selectedBoard === rf.BOARD_PITTS && store.context.bridgeExpansionOption) {
+		// Player has a bridge expansion choice - show both options
+		// For now, return empty to indicate special handling needed
+		// The UI will need to show the bridge expansion choice
+		return []
+	}
+	
 	let possibilities = []
 	// First Line
 	if (controller.currentPlayerObj().endJunctions.length === 0) {
 		possibilities = Array(70)
 			.fill()
 			.map((_, i) => i)
+		
+		// Pittsburgh: remove bridge lines from first line placement options
+		if (personal.selectedBoard === rf.BOARD_PITTS) {
+			possibilities = possibilities.filter(lineID => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
+		}
+		
 		return possibilities
 	}
 
@@ -454,18 +474,15 @@ export function getLinePlacementOptions() {
 			for (let k = 0; k < store.lines[localPossibilities[j]].length; k++) {
 				// player index of ppl who have lines here - alert(JSON.stringify(lines[localPossibilities[j]]))
 				let removed = false
-				// Go thru the lines.
-				for (let m = 0; m < store.lines[localPossibilities[j]].length; m++) {
-					let otherEndLines = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endLines
-					let otherEndJuncs = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endJunctions
-					// alert(otherEndJuncs)
-					// if the other end lines dont include it remove it
-					if (!otherEndLines.includes(localPossibilities[j])) {
-						//alert(22)
-						localPossibilities.splice(j, 1)
-						removed = true
-						break
-					}
+				let otherEndLines = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endLines
+				let otherEndJuncs = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endJunctions
+				// alert(otherEndJuncs)
+				// if the other end lines dont include it remove it
+				if (!otherEndLines.includes(localPossibilities[j])) {
+					//alert(22)
+					localPossibilities.splice(j, 1)
+					removed = true
+					break
 				}
 				// To be more precise, you need to find the line that is in the same array position as the matching junciton
 				// and allow just that line
@@ -495,6 +512,53 @@ export function getLinePlacementOptions() {
 			//} || localPossibilities.length === occupiedRoads) {
 			localPossibilities = [...localPossibilitiesWithoutOwnLines]
 		}
+		
+		// Pittsburgh forced bridge continuation logic
+		if (personal.selectedBoard === rf.BOARD_PITTS) {
+			// Check if the only empty street from this end junction is a bridge space
+			let bridgeOnlyOption = null
+			let hasNonBridgeOption = false
+			
+			for (const lineID of localPossibilities) {
+				if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
+					if (!bridgeOnlyOption) bridgeOnlyOption = lineID
+				} else {
+					hasNonBridgeOption = true
+					break
+				}
+			}
+			
+			// If only bridge option exists and bridge markers are available, force bridge
+			if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers > 0) {
+				localPossibilities = [bridgeOnlyOption]
+			} else if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers === 0) {
+				// No bridge markers available, standard rules apply (already have localPossibilities)
+			}
+		}
+		
+		// Pittsburgh bridge placement logic
+		if (personal.selectedBoard === rf.BOARD_PITTS) {
+			// Bridges may not be placed during the first line marker placements (initial setup)
+			if (store.gameflow.turn === 0) {
+				// Remove bridge lines from options during turn 0
+				for (let j = localPossibilities.length - 1; j >= 0; j--) {
+					if (rf.PITTS_BRIDGE_LINE_IDS.includes(localPossibilities[j])) {
+						localPossibilities.splice(j, 1)
+					}
+				}
+			} else if (store.remainingBridgeMarkers > 0) {
+				// Check if any of the lines around this end junction are bridge lines
+				for (const lineID of localPossibilities) {
+					if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
+						// Bridge may be placed on unoccupied bridge space at end of player's line
+						if (store.lines[lineID].length === 0) {
+							// Already included in localPossibilities, no need to add
+						}
+					}
+				}
+			}
+		}
+		
 		possibilities = possibilities.concat(localPossibilities)
 	}
 	//let lines = getLinesAroundJunction(junc)
@@ -580,7 +644,65 @@ export function getBuildingsToDisplay() {
 
 export function addLine_core(playerIndex, lineID) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	let player = store.players[playerIndex]
+	
+	// Pittsburgh bridge placement - don't add to lines, add to bridges
+	if (personal.selectedBoard === rf.BOARD_PITTS && rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
+		// Add the junctions to the players junctions
+		player.playerJunctions = player.playerJunctions.concat(view.getJunctionsAtEndOfLine(lineID))
+		player.playerJunctions = [...new Set(player.playerJunctions)]
+
+		// Alter the players endJunctions and endLines
+		let endJuncs = view.getJunctionsAtEndOfLine(lineID)
+		let startedEqual = false
+		if (player.endJunctions[0] === player.endJunctions[1]) startedEqual = true
+		
+		// IF First Line
+		if (player.endJunctions.length === 0) {
+			player.endJunctions = [...endJuncs]
+			player.endLines = [lineID, lineID]
+		} else {
+			// ELSE find the new end junctions possibilities
+			if ((player.endJunctions[0] === endJuncs[0] && player.endJunctions[1] === endJuncs[1]) || (player.endJunctions[1] === endJuncs[0] && player.endJunctions[0] === endJuncs[1])) {
+				// Need to highlight which junction to pick
+				return startedEqual
+			}
+
+			for (let i = 0; i < player.endJunctions.length; i++) {
+				if (player.endJunctions[i] === endJuncs[0]) {
+					player.endJunctions[i] = endJuncs[1]
+					player.endLines[i] = lineID
+					
+					// Place bridge marker
+					store.remainingBridgeMarkers--
+					store.bridges.push(lineID)
+					// Track which end has the bridge (the end we just expanded from)
+					store.bridgeEnds[lineID] = i
+					// Set bridge expansion option for next turn
+					store.context.bridgeExpansionOption = { lineID: lineID, endIndex: i }
+					
+					return startedEqual
+				} else if (player.endJunctions[i] === endJuncs[1]) {
+					player.endJunctions[i] = endJuncs[0]
+					player.endLines[i] = lineID
+					
+					// Place bridge marker
+					store.remainingBridgeMarkers--
+					store.bridges.push(lineID)
+					// Track which end has the bridge (the end we just expanded from)
+					store.bridgeEnds[lineID] = i
+					// Set bridge expansion option for next turn
+					store.context.bridgeExpansionOption = { lineID: lineID, endIndex: i }
+					
+					return startedEqual
+				}
+			}
+		}
+		return startedEqual
+	}
+	
+	// Regular line placement (non-bridge)
 	// Add To Model
 	store.lines[lineID].push(player.colour)
 
@@ -617,6 +739,37 @@ export function addLine_core(playerIndex, lineID) {
 			}
 		}
 	}
+}
+
+export function chooseBridgeExpansion(expandFromBridge) {
+	const store = useModelStore()
+	const player = controller.currentPlayerObj()
+	
+	if (!store.context.bridgeExpansionOption) return
+	
+	const { lineID, endIndex } = store.context.bridgeExpansionOption
+	
+	if (expandFromBridge) {
+		// Expand from the far end of the bridge
+		// The bridge is at endIndex, so the far end is the other end
+		const bridgeEndJunction = player.endJunctions[endIndex]
+		
+		// Set the end junctions to expand from the bridge end
+		player.endJunctions = [bridgeEndJunction, bridgeEndJunction]
+		player.endLines = [lineID, lineID]
+	} else {
+		// Expand from the last line marker before the bridge
+		// This means expanding from the other end of the line
+		const otherEndIndex = endIndex === 0 ? 1 : 0
+		const otherEndJunction = player.endJunctions[otherEndIndex]
+		
+		// Set the end junctions to expand from the other end
+		player.endJunctions = [otherEndJunction, otherEndJunction]
+		player.endLines = [lineID, lineID]
+	}
+	
+	// Clear the bridge expansion option
+	store.context.bridgeExpansionOption = null
 }
 
 export function getJunctionsReachableFromJunction(playerIndex, junctionID) {

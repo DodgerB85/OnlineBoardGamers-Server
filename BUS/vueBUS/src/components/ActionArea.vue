@@ -92,7 +92,7 @@ function localEndPlayerTurn() {
 }
 function resetPlayerTurn() {
 	store.resetVarsOnTurnEnd()
-	funcs.importBUSmodel(store.turnResetData, false, false)
+	funcs.importBUSmodel(store.turnResetData, false, true)
 	controller.startPlayerTurn()
 	if (personal.yourTurnAudioType > 0) {
 		let beep

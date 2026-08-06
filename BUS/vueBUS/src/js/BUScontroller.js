@@ -96,6 +96,7 @@ function setUpPlayerVromPitts(paxJunctions, player, store) {
 }
 
 function canReachBuildingFromJunction(startJunction, player, store) {
+	const personal = usePersonalStore()
 	const visited = new Set()
 	const junctionsToVisit = [startJunction]
 
@@ -116,11 +117,24 @@ function canReachBuildingFromJunction(startJunction, player, store) {
 		const linesAroundJunction = view.getLinesAroundJunction(currentJunction)
 
 		for (const lineID of linesAroundJunction) {
-			// Check if this player has built this line
-			if (store.lines[lineID].includes(player.colour)) {
-				const junctionsAtEnd = view.getJunctionsAtEndOfLine(lineID)
-				const otherJunction = junctionsAtEnd[0] === currentJunction ? junctionsAtEnd[1] : junctionsAtEnd[0]
+			const junctionsAtEnd = view.getJunctionsAtEndOfLine(lineID)
+			const otherJunction = junctionsAtEnd[0] === currentJunction ? junctionsAtEnd[1] : junctionsAtEnd[0]
 
+			// Check if this player has built this line
+			let canUseLine = store.lines[lineID].includes(player.colour)
+			
+			// Pittsburgh bridge usage: any player can use a bridge if it's connected to their line
+			if (personal.selectedBoard === rf.BOARD_PITTS && !canUseLine) {
+				if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID) && store.bridges.includes(lineID)) {
+					// Bridge exists - check if it's connected to player's line
+					// A bridge is connected if either end junction is in the player's network
+					if (player.playerJunctions.includes(junctionsAtEnd[0]) || player.playerJunctions.includes(junctionsAtEnd[1])) {
+						canUseLine = true
+					}
+				}
+			}
+
+			if (canUseLine) {
 				// Check if movement is allowed (respect one-way streets)
 				if (canTravelOnLine(currentJunction, otherJunction)) {
 					if (!visited.has(otherJunction) && player.playerJunctions.includes(otherJunction)) {
@@ -297,7 +311,7 @@ export function startPlayerTurn() {
 	}
 
 	// Save Reset
-	store.turnResetData = funcs.exportBUSmodel(false)
+	store.turnResetData = funcs.exportBUSmodel(false, true)
 }
 
 export function endPlayerChooseActionTurn() {

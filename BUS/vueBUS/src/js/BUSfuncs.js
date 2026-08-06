@@ -442,9 +442,9 @@ export function exportBUSmodel(forGameOver, saveContext) {
 		if (!forGameOver) {
 			// 4 - endJunctions //  NOT gameover - just needed for next options
 			tempPlayer.push(store.players[i].endJunctions)
-			// 5 - endLines // NOT gameover
+			// 6 - endLines // NOT gameover
 			tempPlayer.push(store.players[i].endLines)
-			// 6 - passActionsFlag // NOT gameover
+			// 7 - passActionsFlag // NOT gameover
 			tempPlayer.push(store.players[i].passActionsFlag === true ? 1 : 0)
 		}
 		// remainingActions - from hist
@@ -469,9 +469,9 @@ export function exportBUSmodel(forGameOver, saveContext) {
 	// 5 - desired Building
 	temp.push(store.desiredBuilding)
 
-	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus)
+	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus, bridges, remainingBridgeMarkers, bridgeEnds)
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
-		temp.push([store.jeroenStatus, store.jorisStatus])
+		temp.push([store.jeroenStatus, store.jorisStatus, store.bridges, store.remainingBridgeMarkers, store.bridgeEnds])
 	}
 
 	// 7 - gameflow // NOT GAME ENDED
@@ -628,15 +628,28 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext) {
 	// 5 - desiredBuilding
 	store.desiredBuilding = inputModel[5]
 
-	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus)
+	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus, bridges, remainingBridgeMarkers, bridgeEnds)
 	let pittsStatusIndex = 6
-	if (personal.selectedBoard === rf.BOARD_PITTS && inputModel.length > 6 && Array.isArray(inputModel[6]) && inputModel[6].length === 2) {
+	if (personal.selectedBoard === rf.BOARD_PITTS && inputModel.length > 6 && Array.isArray(inputModel[6]) && inputModel[6].length >= 2) {
 		store.jeroenStatus = inputModel[6][0]
 		store.jorisStatus = inputModel[6][1]
+		// Import bridge data if available (newer format)
+		if (inputModel[6].length >= 5) {
+			store.bridges.splice(0)
+			store.bridges.push(...inputModel[6][2])
+			store.remainingBridgeMarkers = inputModel[6][3]
+			Object.assign(store.bridgeEnds, inputModel[6][4])
+		}
 		pittsStatusIndex = 7
 	} else {
 		store.jeroenStatus = -1
 		store.jorisStatus = -1
+		// Reset bridge data if not present
+		store.bridges.splice(0)
+		store.remainingBridgeMarkers = 5
+		for (const key in store.bridgeEnds) {
+			delete store.bridgeEnds[key]
+		}
 	}
 
 	// 7 - gameflow (was 6, now 7 if Pittsburgh data present)

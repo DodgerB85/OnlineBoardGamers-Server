@@ -45,6 +45,17 @@ export const useModelStore = defineStore("model", () => {
 	const jeroenStatus = ref(-1)
 	const jorisStatus = ref(-1)
 
+	// Bridge tracking for Pittsburgh
+	// Array of line IDs that have bridges placed on them
+	const bridges = reactive([])
+
+	// Bridge markers available for Pittsburgh (5 total, shared)
+	const remainingBridgeMarkers = ref(5)
+
+	// Track which end of each line has a bridge (for expansion options)
+	// Format: { lineID: 0 | 1 } where 0 = first end, 1 = second end
+	const bridgeEnds = reactive({})
+
 	const actionAreaData = reactive([[-1, -1, -1, -1, -1, -1], [-1], [-1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1], [-1], [-1, -1, -1, -1, -1, -1], [-1]])
 
 	const gameflow = reactive({
@@ -77,6 +88,8 @@ export const useModelStore = defineStore("model", () => {
 		historyObj: [],
 		action: -1,
 		eligibleJunctionsToVromPitts: [],
+		// Bridge expansion option for Pittsburgh
+		bridgeExpansionOption: null,
 	})
 	const topMenuViews = reactive({
 		showNotes: false,
@@ -165,5 +178,11 @@ export const useModelStore = defineStore("model", () => {
 		turnResetData,
 		resetVarsOnTurnEnd,
 		initializeJunctions,
+		// Pittsburgh variables
+		bridges,
+		remainingBridgeMarkers,
+		bridgeEnds,
+		jeroenStatus,
+		jorisStatus,
 	}
 })
