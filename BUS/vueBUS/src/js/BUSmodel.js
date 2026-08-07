@@ -252,7 +252,6 @@ export function increaseScore(player) {
 export function decreaseScore(player) {
 	const store = useModelStore()
 	let newScore = Math.floor(player.score) - 1 + 0.5 + player.timeStones / 10
-	//let newScore = Math.floor(player.score) - 1 + 0.5 - player.timeStones
 	for (let i = 0; i < store.players.length; i++) {
 		if (Math.floor(store.players[i].score) === Math.floor(newScore)) newScore -= 0.1
 		newScore = Math.round(newScore * 10) / 10
