@@ -669,9 +669,7 @@ export function addLine_core(playerIndex, lineID) {
 
 			for (let i = 0; i < player.endJunctions.length; i++) {
 				if (player.endJunctions[i] === endJuncs[0]) {
-					player.endJunctions[i] = endJuncs[1]
-					player.endLines[i] = lineID
-
+					// A bridge does not extend the player's line, so endJunctions/endLines stay unchanged
 					// Place bridge marker
 					store.remainingBridgeMarkers--
 					store.bridges.push(lineID)
@@ -682,9 +680,7 @@ export function addLine_core(playerIndex, lineID) {
 
 					return startedEqual
 				} else if (player.endJunctions[i] === endJuncs[1]) {
-					player.endJunctions[i] = endJuncs[0]
-					player.endLines[i] = lineID
-
+					// A bridge does not extend the player's line, so endJunctions/endLines stay unchanged
 					// Place bridge marker
 					store.remainingBridgeMarkers--
 					store.bridges.push(lineID)
@@ -749,8 +745,11 @@ export function chooseBridgeExpansion(expandFromBridge) {
 
 	if (expandFromBridge) {
 		// Expand from the far end of the bridge
-		// The bridge is at endIndex, so the far end is the other end
-		const bridgeEndJunction = player.endJunctions[endIndex]
+		// The player's end junction is still at the near end of the bridge
+		// (it is not moved when the bridge is placed), so the far end is
+		// the other junction of the bridge line
+		const nearJunction = player.endJunctions[endIndex]
+		const bridgeEndJunction = view.getJunctionsAtEndOfLine(lineID).find((j) => j !== nearJunction)
 
 		// Set the end junctions to expand from the bridge end
 		player.endJunctions = [bridgeEndJunction, bridgeEndJunction]

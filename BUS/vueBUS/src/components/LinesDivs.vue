@@ -70,7 +70,17 @@ function markLineAsAnimated(lineID, lineIndex) {
 	animatedLines.value.add(lineKey)
 }
 
+function isBridgeSpace(lineID) {
+	return personal.selectedBoard === rf.BOARD_PITTS && rf.PITTS_BRIDGE_LINE_IDS.includes(lineID) && store.lines[lineID].length === 0
+}
+
 function changeFillColor(e) {
+	if (isBridgeSpace(Number(e.target.dataset.lineId))) {
+		e.target.style.fill = "white"
+		e.target.style.stroke = "yellow"
+		e.target.style["fill-opacity"] = 1
+		return
+	}
 	e.target.style.fill = rf.getColourNameFromNumber(personal.getCorrectedColour(controller.currentPlayerObj().colour))
 	e.target.style.stroke = rf.getColourNameFromNumber(personal.getCorrectedColour(controller.currentPlayerObj().colour))
 	e.target.style["fill-opacity"] = 1
@@ -106,7 +116,8 @@ function addNewLine(lineID) {
 		condition2: controller.currentPlayerObj().endJunctions[1] === endJuncs[0] && controller.currentPlayerObj().endJunctions[0] === endJuncs[1]
 	})
 	// Don't offer end junction selection on turn 0 otherwise FIRST line placed will trigger it
-	if (store.gameflow.turn !== 0 && !startedEqual) {
+	// (and never for bridge placements - a bridge does not move the player's end junctions)
+	if (store.gameflow.turn !== 0 && !startedEqual && !isBridgeSpace(lineID)) {
 		//console(`player.endJunctions: ${controller.currentPlayerObj().endJunctions}  -- endJuncs: ${endJuncs}`)
 
 		// ELSE find the new end junctions possibilities
@@ -178,8 +189,17 @@ const lineEndCircles = computed(() => {
 			const targetJuncIndex = junctions.indexOf(player.endJunctions[j])
 			const shiftTarget = targetJuncIndex === 1 ? 4 : 0
 
-			const correctedX = rawPoints[0 + shiftTarget] + (rawPoints[2 + shiftTarget] - rawPoints[0 + shiftTarget]) / 2
-			const correctedY = rawPoints[1 + shiftTarget] + (rawPoints[3 + shiftTarget] - rawPoints[1 + shiftTarget]) / 2
+			// On the Pitts board the raw points are already the edge midpoints
+			// (x1,y1) / (x2,y2), so averaging them with the following corner point
+			// would push the animation off the line centreline.
+			const useRawMidpoint = personal.selectedBoard === rf.BOARD_PITTS
+
+			const correctedX = useRawMidpoint
+				? rawPoints[0 + shiftTarget]
+				: rawPoints[0 + shiftTarget] + (rawPoints[2 + shiftTarget] - rawPoints[0 + shiftTarget]) / 2
+			const correctedY = useRawMidpoint
+				? rawPoints[1 + shiftTarget]
+				: rawPoints[1 + shiftTarget] + (rawPoints[3 + shiftTarget] - rawPoints[1 + shiftTarget]) / 2
 
 			// START POSITION (The other end of the line)
 			// Use the index that ISN'T the target junction
@@ -188,8 +208,12 @@ const lineEndCircles = computed(() => {
 
 			const shiftStart = shiftTarget === 4 ? 0 : 4
 
-			const startCorrectedX = rawPoints[0 + shiftStart] + (rawPoints[2 + shiftStart] - rawPoints[0 + shiftStart]) / 2
-			const startCorrectedY = rawPoints[1 + shiftStart] + (rawPoints[3 + shiftStart] - rawPoints[1 + shiftStart]) / 2
+			const startCorrectedX = useRawMidpoint
+				? rawPoints[0 + shiftStart]
+				: rawPoints[0 + shiftStart] + (rawPoints[2 + shiftStart] - rawPoints[0 + shiftStart]) / 2
+			const startCorrectedY = useRawMidpoint
+				? rawPoints[1 + shiftStart]
+				: rawPoints[1 + shiftStart] + (rawPoints[3 + shiftStart] - rawPoints[1 + shiftStart]) / 2
 			ret.push({
 				id: `p${i}-l${j}-${endLine}`, // Stable ID for the key!
 				colour: player.colour,
@@ -277,7 +301,7 @@ const lineEndCircles = computed(() => {
 		</motion.g>
 
 		<!-- render the Lines option -->
-		<polygon class="lineOption" v-for="(option, index) in model.getLinePlacementOptions(personal.getCorrectedColour(controller.currentPlayerObj().colour))" v-bind:key="index" :points="view.getLineSVGpoints(option, 10, false)" style="fill: white; stroke: yellow; stroke-width: 3" @mouseover="changeFillColor" @mouseout="resetFillColor" @click="addNewLine(option)" />
+		<polygon class="lineOption" v-for="(option, index) in model.getLinePlacementOptions(personal.getCorrectedColour(controller.currentPlayerObj().colour))" v-bind:key="index" :data-line-id="option" :points="view.getLineSVGpoints(option, 10, false)" style="fill: white; stroke: yellow; stroke-width: 3" @mouseover="changeFillColor" @mouseout="resetFillColor" @click="addNewLine(option)" />
 
 		<!-- Render the HISTORY HIGHLIGH -->
 		<polygon class="lineHistory" v-for="(line, index) in store.historyHelpers.linesToHighlight" v-bind:key="index" :points="view.getLineSVGpoints(line[0], line[1], false)" />
