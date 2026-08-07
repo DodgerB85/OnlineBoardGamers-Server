@@ -273,9 +273,10 @@ export function findPossibleJourneys(graph, productionAreas, shippingCompanies) 
 	function isSinkReachable() {
 		let nodeReached = new Array(graph.nodes.length)
 		nodeReached.fill(false)
-		let nodeList = [graph.source]
-		while (nodeList.length > 0) {
-			const node = nodeList.shift()
+		const nodeList = [graph.source]
+		let head = 0
+		while (head < nodeList.length) {
+			const node = nodeList[head++]
 			if (node === graph.sink) {
 				return true
 			}
@@ -298,42 +299,84 @@ export function findPossibleJourneys(graph, productionAreas, shippingCompanies) 
 		if (!isSinkReachable() || initial.length === 0) {
 			return noPath
 		} else {
-			const toVisit = [initial.map((n) => [0, edgeSpareCapacity(n, false), graph.edgeNodes[n][1], [graph.source], [n], [false]])]
-			let firstNonEmptyBinIndex = 0
-			function validPath(node, visitedNodes) {
-				return function (n) {
-					const isReversed = edgeReversed(n, node)
-					return !visitedNodes.includes(edgeOtherNode(n, node)) && (!edgeIsLimited(n, isReversed) || edgeSpareCapacity(n, isReversed) > 0)
+			// Min-heap of candidate partial paths, keyed by [cost, capacity, node, visitedSet, visitedEdges, reversed],
+			// so popping the globally cheapest candidate is O(log n).
+			const heap = []
+			function heapPush(a, b, c, d, e, f) {
+				let i = heap.length
+				const entry = [a, b, c, d, e, f]
+				heap.push(entry)
+				while (i > 0) {
+					const parent = (i - 1) >> 1
+					if (heap[parent][0] <= heap[i][0]) break
+					;[heap[parent], heap[i]] = [heap[i], heap[parent]]
+					i = parent
 				}
 			}
-			function newPath(cost, capacity, node, n, visitedNodes, visitedEdges, reversed) {
-				const isReversed = edgeReversed(n, node)
-				const reverseFactor = isReversed ? -1 : 1
-				return [cost + graph.edgeCost[n] * reverseFactor, newCapacity(capacity, n, isReversed), edgeOtherNode(n, node), visitedNodes.concat(node), visitedEdges.concat([n]), reversed.concat([isReversed])]
+			function heapPop() {
+				const top = heap[0]
+				const last = heap.pop()
+				if (heap.length > 0) {
+					heap[0] = last
+					let i = 0
+					for (;;) {
+						const l = 2 * i + 1
+						const r = l + 1
+						let smallest = i
+						if (l < heap.length && heap[l][0] < heap[smallest][0]) smallest = l
+						if (r < heap.length && heap[r][0] < heap[smallest][0]) smallest = r
+						if (smallest === i) break
+						;[heap[i], heap[smallest]] = [heap[smallest], heap[i]]
+						i = smallest
+					}
+				}
+				return top
 			}
-			while (firstNonEmptyBinIndex != -1) {
-				const currentPath = toVisit[firstNonEmptyBinIndex].shift()
+
+			// Best (cheapest) cost each node has been reached at so far. Any partial
+			// path that reaches a node at a cost that is NOT strictly better than the
+			// best-known is dominated and discarded, pruning the exponential duplicate
+			// enumeration.
+			const bestKnown = new Array(graph.nodes.length).fill(Infinity)
+			for (const n of initial) {
+				const target = graph.edgeNodes[n][1]
+				if (0 < bestKnown[target]) {
+					bestKnown[target] = 0
+					heapPush(0, edgeSpareCapacity(n, false), target, new Set([graph.source]), [n], [false])
+				}
+			}
+
+			function validPath(node, visitedSet) {
+				return function (n) {
+					const isReversed = edgeReversed(n, node)
+					return !visitedSet.has(edgeOtherNode(n, node)) && (!edgeIsLimited(n, isReversed) || edgeSpareCapacity(n, isReversed) > 0)
+				}
+			}
+
+			while (heap.length > 0) {
+				const currentPath = heapPop()
 				const cost = currentPath[0]
 				const capacity = currentPath[1]
 				const node = currentPath[2]
-				const visitedNodes = currentPath[3]
+				const visitedSet = currentPath[3]
 				const visitedEdges = currentPath[4]
 				const reversed = currentPath[5]
 				if (node === graph.sink) {
 					return [capacity, visitedEdges, reversed]
 				}
 				// shuffling prevents order bias otherwise present in shipping companies
-				const outgoing = funcs.shuffle(graph.nodeEdges[node].filter(validPath(node, visitedNodes)))
+				const outgoing = funcs.shuffle(graph.nodeEdges[node].filter(validPath(node, visitedSet)))
 				for (const edge of outgoing) {
-					const direction = newPath(cost, capacity, node, edge, visitedNodes, visitedEdges, reversed)
-					const binIndex = direction[0]
-					while (toVisit.length-1 < binIndex)
-					{
-						toVisit.push([])
-					}
-					toVisit[binIndex].push(direction)
+					const isReversed = edgeReversed(edge, node)
+					const reverseFactor = isReversed ? -1 : 1
+					const nextCost = cost + graph.edgeCost[edge] * reverseFactor
+					const target = edgeOtherNode(edge, node)
+					if (nextCost >= bestKnown[target]) continue
+					bestKnown[target] = nextCost
+					const nextVisited = new Set(visitedSet)
+					nextVisited.add(node)
+					heapPush(nextCost, newCapacity(capacity, edge, isReversed), target, nextVisited, visitedEdges.concat([edge]), reversed.concat([isReversed]))
 				}
-				firstNonEmptyBinIndex = toVisit.findIndex((bin) => bin.length > 0)
 			}
 			return noPath
 		}
@@ -400,32 +443,59 @@ export function findPossibleJourneys(graph, productionAreas, shippingCompanies) 
 	return journeys
 }
 
+// Bounded memo of the max-shipping solve. During a shipping operation the same
+// inputs recur across the several getCheapestMaxPossibleShipmentsFromSlotIDX
+// call sites, so re-solving each time is wasted work. The cache key includes
+// every input that can affect the result. Callers copy the returned array, so
+// sharing is safe.
+let maxShippingMemo = new Map()
+let maxShippingMemoOrder = []
+const MAX_SHIPPING_MEMO_SIZE = 16
+
 export function getCheapestMaxPossibleShipmentsFromSlotIDX(cities, activeCompanies, playerCosts, unfavouredPlayerSubsidies, playerSlots, playerIndex, slotIDX, subtractedRoutes) {
 	const mapData = useModelStore().mapData
+
+	const memoKey = JSON.stringify([playerIndex, slotIDX, playerCosts, unfavouredPlayerSubsidies, mapData, cities, activeCompanies, playerSlots, subtractedRoutes])
+	const memoHit = maxShippingMemo.get(memoKey)
+	if (memoHit !== undefined) {
+		return memoHit.slice()
+	}
 
 	const subtractedGoodMarkers = subtractedRoutes.map((route) => route[0])
 
 	const activeSlot = playerSlots[playerIndex][slotIDX]
+	let result
 	if (activeSlot.length === 0) {
-		return []
+		result = []
+	} else {
+		const activeCompany = model.slotCompanies(activeSlot, activeCompanies)
+		if (activeCompany.type === rf.COMPANY_SHIPPING) {
+			result = []
+		} else {
+			const currentGood = activeCompany[0].good
+
+			const allProductionAreas = contiguousProductionAreas(mapData, activeCompany)
+			const productionAreas = subtractGoodMarkers(subtractedGoodMarkers, allProductionAreas)
+			const productionCapacity = productionAreas.map((a) => a.length)
+			const shippingCompanies = allPlayerShippingCompanies(playerSlots, activeCompanies)
+			
+			const cityTerritory = cities.map((city) => city.territory)
+			const cityCapacity = cities.map((city) => city.size - city.receivedGoods.filter((good) => good === currentGood).length)
+
+			const graph = createShippingGraph(mapData, cityTerritory, cityCapacity, playerCosts, unfavouredPlayerSubsidies, allProductionAreas, productionCapacity, shippingCompanies, [])
+
+			result = findPossibleJourneys(graph, productionAreas, shippingCompanies)
+		}
 	}
-	const activeCompany = model.slotCompanies(activeSlot, activeCompanies)
-	if (activeCompany.type === rf.COMPANY_SHIPPING) {
-		return []
+
+	maxShippingMemo.set(memoKey, result)
+	maxShippingMemoOrder.push(memoKey)
+	if (maxShippingMemoOrder.length > MAX_SHIPPING_MEMO_SIZE) {
+		const oldest = maxShippingMemoOrder.shift()
+		maxShippingMemo.delete(oldest)
 	}
-	const currentGood = activeCompany[0].good
 
-	const allProductionAreas = contiguousProductionAreas(mapData, activeCompany)
-	const productionAreas = subtractGoodMarkers(subtractedGoodMarkers, allProductionAreas)
-	const productionCapacity = productionAreas.map((a) => a.length)
-	const shippingCompanies = allPlayerShippingCompanies(playerSlots, activeCompanies)
-	
-	const cityTerritory = cities.map((city) => city.territory)
-	const cityCapacity = cities.map((city) => city.size - city.receivedGoods.filter((good) => good === currentGood).length)
-
-	const graph = createShippingGraph(mapData, cityTerritory, cityCapacity, playerCosts, unfavouredPlayerSubsidies, allProductionAreas, productionCapacity, shippingCompanies, [])
-
-	return findPossibleJourneys(graph, productionAreas, shippingCompanies)
+	return result
 }
 
 export function completeCurrentPath(cityTerritory, activeCompanies, playerCosts, unfavouredPlayerSubsidies, playerSlots, playerIndex, slotIDX, currentGoodJourney) {
