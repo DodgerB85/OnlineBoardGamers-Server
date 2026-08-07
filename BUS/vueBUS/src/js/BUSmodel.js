@@ -396,19 +396,128 @@ export async function moveAllPassengersOntoCorrectBuilding(bldgNum) {
 	}
 }
 
+// Compute the line placement options currently open at a single junction for the
+// current player (mirrors the historical logic used for each end junction).
+function getJunctionLineOptions(junctionID) {
+	const store = useModelStore()
+	const player = controller.currentPlayerObj()
+
+	let localPossibilities = view.getLinesAroundJunction(junctionID)
+
+	// Remove any roads which already have this player
+	for (let j = localPossibilities.length - 1; j >= 0; j--) {
+		if (store.lines[localPossibilities[j]].includes(player.colour)) localPossibilities.splice(j, 1)
+	}
+	// Save this for later in case all other options run out
+	let localPossibilitiesWithoutOwnLines = [...localPossibilities]
+
+	// If all remaining options are occupied, allow all of them
+	let occupiedRoads = 0
+	let spliceAtTheEnd = false
+	for (let j = localPossibilities.length - 1; j >= 0; j--) {
+		// Find any roads that are occupied
+		if (store.lines[localPossibilities[j]].length > 0) occupiedRoads++
+	}
+	if (occupiedRoads > 0 && occupiedRoads === localPossibilitiesWithoutOwnLines.length) spliceAtTheEnd = true
+
+	// Remove any roads that would be in the MIDDLE of another player's roads
+	for (let j = localPossibilities.length - 1; j >= 0; j--) {
+		// First do this removal
+		for (let k = 0; k < store.lines[localPossibilities[j]].length; k++) {
+			// Get player of this colour
+			let otherEndJuncs = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endJunctions
+			// If this player doesn't have junctionID in their endJunctions, remove it
+			if (!otherEndJuncs.includes(junctionID)) {
+				localPossibilities.splice(j, 1)
+				break
+			} else occupiedRoads++
+		}
+	}
+
+	// Remove lines that are in the middle of someone else's line
+	for (let j = localPossibilities.length - 1; j >= 0; j--) {
+		// EACH localpossibility[j] is a line ID
+		for (let k = 0; k < store.lines[localPossibilities[j]].length; k++) {
+			// player of ppl who have lines here
+			let removed = false
+			let otherEndLines = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endLines
+			let otherEndJuncs = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endJunctions
+			// if the other end lines don't include it remove it
+			if (!otherEndLines.includes(localPossibilities[j])) {
+				localPossibilities.splice(j, 1)
+				removed = true
+				break
+			}
+			// To be more precise, you need to find the line that is in the same array position as the matching junction
+			// and allow just that line (a junction AND line must match)
+			if (otherEndJuncs.includes(junctionID)) {
+				let idx1 = otherEndJuncs.indexOf(junctionID)
+				let otherEndLine = otherEndLines[idx1]
+				if (junctionID === otherEndJuncs[idx1] && otherEndLine !== localPossibilities[j]) {
+					// but need to ignore the case when both junctions are the same
+					if (otherEndJuncs[0] !== otherEndJuncs[1]) {
+						localPossibilities.splice(j, 1)
+						removed = true
+						break
+					}
+				}
+			}
+			if (removed) break
+		}
+	}
+
+	// Now, if there are no options, allow all the options from before any removal
+	if (spliceAtTheEnd) localPossibilities.splice(0)
+	if (localPossibilities.length === 0) {
+		localPossibilities = [...localPossibilitiesWithoutOwnLines]
+	}
+
+	return localPossibilities
+}
+
+// Apply the Pittsburgh-specific rules for which line options at a single junction count
+// as legal placements (bridge spaces, forced bridge continuation).
+function applyPittJunctionRules(localPossibilities) {
+	const store = useModelStore()
+
+	// A street that already has a bridge placed on it is not a legal placement for a
+	// line marker - the only way forward is via the "expanding after a bridge" options
+	localPossibilities = localPossibilities.filter((lineID) => !store.bridges.includes(lineID))
+
+	// Bridges may not be placed during the first line marker placements (initial setup)
+	if (store.gameflow.turn === 0) {
+		// Remove bridge lines from options during turn 0
+		localPossibilities = localPossibilities.filter((lineID) => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
+	}
+
+	// Check if the only empty street from this end junction is a bridge space
+	let bridgeOnlyOption = null
+	let hasNonBridgeOption = false
+
+	for (const lineID of localPossibilities) {
+		if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
+			if (!bridgeOnlyOption) bridgeOnlyOption = lineID
+		} else {
+			hasNonBridgeOption = true
+			break
+		}
+	}
+
+	// If only bridge option exists and bridge markers are available, force bridge
+	if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers > 0) {
+		localPossibilities = [bridgeOnlyOption]
+	} else if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers === 0) {
+		// No bridge markers available, standard rules apply (already have localPossibilities)
+	}
+
+	return localPossibilities
+}
+
 export function getLinePlacementOptions() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (store.context.linesLeftToPlace === 0) return
 	if (store.context.endJunctionsOptions.length > 0) return
-
-	// Pittsburgh bridge expansion option
-	if (personal.selectedBoard === rf.BOARD_PITTS && store.context.bridgeExpansionOption) {
-		// Player has a bridge expansion choice - show both options
-		// For now, return empty to indicate special handling needed
-		// The UI will need to show the bridge expansion choice
-		return []
-	}
 
 	let possibilities = []
 	// First Line
@@ -430,135 +539,41 @@ export function getLinePlacementOptions() {
 	// Otherwise, get the roads around each end junction
 	//currentPlayer().endJunctions.forEach((junc) => possibilities = possibilities.concat(getLinesAroundJunction(junc)))
 	for (let i = 0; i < controller.currentPlayerObj().endJunctions.length; i++) {
-		let localPossibilities = view.getLinesAroundJunction(controller.currentPlayerObj().endJunctions[i])
+		let localPossibilities = getJunctionLineOptions(controller.currentPlayerObj().endJunctions[i])
 
-		// Now remove any roads which already have the player
-		for (let j = localPossibilities.length - 1; j >= 0; j--) {
-			if (store.lines[localPossibilities[j]].includes(controller.currentPlayerObj().colour)) localPossibilities.splice(j, 1)
-		}
-		// Save this for later in case all other options run out
-		let localPossibilitiesWithoutOwnLines = [...localPossibilities]
-
-		// NEW CODE - if all remaining options are occupied, allow all of them
-		let occupiedRoads = 0
-		let spliceAtTheEnd = false
-		for (let j = localPossibilities.length - 1; j >= 0; j--) {
-			// Find any roads that are occupied
-			if (store.lines[localPossibilities[j]].length > 0) occupiedRoads++
-		}
-		//alert(`occupiedRoads: ${occupiedRoads}  -- localPossibilitiesWithoutOwnLines: ${localPossibilitiesWithoutOwnLines}`)
-		if (occupiedRoads > 0 && occupiedRoads === localPossibilitiesWithoutOwnLines.length) spliceAtTheEnd = true
-
-		// Now remove any roads that would be in the MIDDLE of another players roads
-		// We are working on a single junction, and localPossibilities has only options without our lines
-		// for each line ID, see if that player has an end junction that is the same as this junciton
-		for (let j = localPossibilities.length - 1; j >= 0; j--) {
-			// First do this removal
-			for (let k = 0; k < store.lines[localPossibilities[j]].length; k++) {
-				// Get player of this colour
-				let otherEndJuncs = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endJunctions
-				// If this player doesn't have controller.currentPlayerObj().endJunctions[i] in their endJunctions, remove it
-				if (!otherEndJuncs.includes(controller.currentPlayerObj().endJunctions[i])) {
-					localPossibilities.splice(j, 1)
-					break
-				} else occupiedRoads++
-			}
-		}
-		//alert(localPossibilities.length + " " + occupiedRoads)
-
-		// Now remove lines that are in the middle of someone else's line
-		for (let j = localPossibilities.length - 1; j >= 0; j--) {
-			// EACH localpossibility[j] is a line ID
-			for (let k = 0; k < store.lines[localPossibilities[j]].length; k++) {
-				// player index of ppl who have lines here - alert(JSON.stringify(lines[localPossibilities[j]]))
-				let removed = false
-				let otherEndLines = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endLines
-				let otherEndJuncs = controller.getPlayerByColour(store.lines[localPossibilities[j]][k]).endJunctions
-				// alert(otherEndJuncs)
-				// if the other end lines dont include it remove it
-				if (!otherEndLines.includes(localPossibilities[j])) {
-					//alert(22)
-					localPossibilities.splice(j, 1)
-					removed = true
-					break
-				}
-				// To be more precise, you need to find the line that is in the same array position as the matching junciton
-				// and allow just that line
-				// Or rather, a junction AND line must match
-				// So if there is a matching junction, find the matching line, and allow it
-				if (otherEndJuncs.includes(controller.currentPlayerObj().endJunctions[i])) {
-					let idx1 = otherEndJuncs.indexOf(controller.currentPlayerObj().endJunctions[i])
-					let otherEndLine = otherEndLines[idx1]
-					//alert(`endjunctions[i]: ${controller.currentPlayerObj().endJunctions[i]}   otherendjuncs[idx1]: ${otherEndJuncs[idx1]}`)
-					//alert(`otherendline: ${otherEndLine}   localpossibilities[j]: ${localPossibilities[j]}`)
-					if (controller.currentPlayerObj().endJunctions[i] === otherEndJuncs[idx1] && otherEndLine !== localPossibilities[j]) {
-						// but need to ignore the case when both junctions are the same
-						if (otherEndJuncs[0] !== otherEndJuncs[1]) {
-							localPossibilities.splice(j, 1)
-							removed = true
-							break
-						}
-					}
-				}
-				if (removed) break
-			}
-		}
-		//alert(localPossibilities)
-		// Now, if there are no options, allow all options (ie use localPossibilitiesWithoutOwnLines)
-		if (spliceAtTheEnd) localPossibilities.splice(0)
-		if (localPossibilities.length === 0) {
-			//} || localPossibilities.length === occupiedRoads) {
-			localPossibilities = [...localPossibilitiesWithoutOwnLines]
-		}
-
-		// Pittsburgh forced bridge continuation logic
+		// Pittsburgh bridge rules
 		if (personal.selectedBoard === rf.BOARD_PITTS) {
-			// Check if the only empty street from this end junction is a bridge space
-			let bridgeOnlyOption = null
-			let hasNonBridgeOption = false
-
-			for (const lineID of localPossibilities) {
-				if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
-					if (!bridgeOnlyOption) bridgeOnlyOption = lineID
-				} else {
-					hasNonBridgeOption = true
-					break
-				}
-			}
-
-			// If only bridge option exists and bridge markers are available, force bridge
-			if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers > 0) {
-				localPossibilities = [bridgeOnlyOption]
-			} else if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers === 0) {
-				// No bridge markers available, standard rules apply (already have localPossibilities)
-			}
-		}
-
-		// Pittsburgh bridge placement logic
-		if (personal.selectedBoard === rf.BOARD_PITTS) {
-			// Bridges may not be placed during the first line marker placements (initial setup)
-			if (store.gameflow.turn === 0) {
-				// Remove bridge lines from options during turn 0
-				for (let j = localPossibilities.length - 1; j >= 0; j--) {
-					if (rf.PITTS_BRIDGE_LINE_IDS.includes(localPossibilities[j])) {
-						localPossibilities.splice(j, 1)
-					}
-				}
-			} else if (store.remainingBridgeMarkers > 0) {
-				// Check if any of the lines around this end junction are bridge lines
-				for (const lineID of localPossibilities) {
-					if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
-						// Bridge may be placed on unoccupied bridge space at end of player's line
-						if (store.lines[lineID].length === 0) {
-							// Already included in localPossibilities, no need to add
-						}
-					}
-				}
-			}
+			localPossibilities = applyPittJunctionRules(localPossibilities)
 		}
 
 		possibilities = possibilities.concat(localPossibilities)
 	}
+
+	// Pittsburgh: "Expanding After a Bridge" - if a bridge exists at the end of the player's
+	// bus line, also offer line placement options from the other end of that bridge
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		const player = controller.currentPlayerObj()
+		for (let i = 0; i < player.endJunctions.length; i++) {
+			const endJunction = player.endJunctions[i]
+
+			// Find the bridge spaces that sit at this end junction and have a bridge placed on them
+			const bridgedLineIDs = view
+				.getLinesAroundJunction(endJunction)
+				.filter((lineID) => rf.PITTS_BRIDGE_LINE_IDS.includes(lineID) && store.bridges.includes(lineID))
+
+			for (const bridgeLineID of bridgedLineIDs) {
+				const otherEndJunction = view.getJunctionsAtEndOfLine(bridgeLineID).find((jun) => jun !== endJunction)
+				if (otherEndJunction === undefined) continue
+
+				// get the options from the other end of the bridge, also subject to the
+				// Pittsburgh bridge rules, then remove the bridge line itself
+				let bridgeEndOptions = applyPittJunctionRules(getJunctionLineOptions(otherEndJunction))
+				bridgeEndOptions = bridgeEndOptions.filter((line) => line !== bridgeLineID)
+				possibilities = possibilities.concat(bridgeEndOptions)
+			}
+		}
+	}
+
 	//let lines = getLinesAroundJunction(junc)
 
 	possibilities = [...new Set(possibilities)]
@@ -730,6 +745,35 @@ export function addLine_core(playerIndex, lineID) {
 				player.endJunctions[i] = endJuncs[0]
 				player.endLines[i] = lineID
 				return startedEqual
+			}
+		}
+
+		// Pittsburgh: "Expanding After a Bridge" - if this new line (a non-bridge line)
+		// sits at the far end of a bridge attached to one of the player's end junctions,
+		// its own junctions won't match the player's end junctions directly (the end
+		// junction is on the near side of the bridge). Extend the end across the bridge
+		// so the end junction moves to the far end of this new line (away from the bridge).
+		if (personal.selectedBoard === rf.BOARD_PITTS) {
+			for (let i = 0; i < player.endJunctions.length; i++) {
+				let endJunction = player.endJunctions[i]
+				const bridgedLineIDs = view
+					.getLinesAroundJunction(endJunction)
+					.filter((id) => rf.PITTS_BRIDGE_LINE_IDS.includes(id) && store.bridges.includes(id))
+
+				for (let bridgeLineID of bridgedLineIDs) {
+					const bridgeFarEnd = view.getJunctionsAtEndOfLine(bridgeLineID).find((j) => j !== endJunction)
+					if (bridgeFarEnd === undefined) continue
+
+					if (endJuncs[0] === bridgeFarEnd) {
+						player.endJunctions[i] = endJuncs[1]
+						player.endLines[i] = lineID
+						return startedEqual
+					} else if (endJuncs[1] === bridgeFarEnd) {
+						player.endJunctions[i] = endJuncs[0]
+						player.endLines[i] = lineID
+						return startedEqual
+					}
+				}
 			}
 		}
 	}
