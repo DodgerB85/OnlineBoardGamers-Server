@@ -127,7 +127,7 @@ export function initGame() {
 			}
 			// 3p remove one timestone
 			if (store.players.length === 3) store.remainingTimeStones--
-			
+
 			// Set initial phase for new game
 			store.gameflow.phase = rf.PHASE_SETUP_BLDGS
 			store.gameflow.turn = 0
@@ -154,8 +154,7 @@ export function initGame() {
 	} else if (window.initData.gameData === "") {
 		// New game - save and then call startPlayerTurn to set up the turn
 		IO.saveGame(true)
-	}
-	else {
+	} else {
 		// FInally, impport data
 		funcs.importBUSmodel(window.initData.gameData, personal.finishedGame, false)
 		if (window.initData.pov != undefined) {
@@ -163,10 +162,10 @@ export function initGame() {
 			personal.votedToExclude = store.statsExcludeVotesData[personal.name]
 		}
 	}
-	
+
 	// Call startPlayerTurn after initialization for all cases
 
-		controller.startPlayerTurn()
+	controller.startPlayerTurn()
 } // end initGame
 
 export function maxBuses() {
@@ -252,8 +251,8 @@ export function increaseScore(player) {
 
 export function decreaseScore(player) {
 	const store = useModelStore()
-	//    let newScore = Math.floor(player.score) - 1 + 0.5 + player.timeStones / 10
-	let newScore = Math.floor(player.score) - 1 + 0.5 - player.timeStones
+	let newScore = Math.floor(player.score) - 1 + 0.5 + player.timeStones / 10
+	//let newScore = Math.floor(player.score) - 1 + 0.5 - player.timeStones
 	for (let i = 0; i < store.players.length; i++) {
 		if (Math.floor(store.players[i].score) === Math.floor(newScore)) newScore -= 0.1
 		newScore = Math.round(newScore * 10) / 10
@@ -403,7 +402,7 @@ export function getLinePlacementOptions() {
 	const personal = usePersonalStore()
 	if (store.context.linesLeftToPlace === 0) return
 	if (store.context.endJunctionsOptions.length > 0) return
-	
+
 	// Pittsburgh bridge expansion option
 	if (personal.selectedBoard === rf.BOARD_PITTS && store.context.bridgeExpansionOption) {
 		// Player has a bridge expansion choice - show both options
@@ -411,19 +410,19 @@ export function getLinePlacementOptions() {
 		// The UI will need to show the bridge expansion choice
 		return []
 	}
-	
+
 	let possibilities = []
 	// First Line
 	if (controller.currentPlayerObj().endJunctions.length === 0) {
 		possibilities = Array(70)
 			.fill()
 			.map((_, i) => i)
-		
+
 		// Pittsburgh: remove bridge lines from first line placement options
 		if (personal.selectedBoard === rf.BOARD_PITTS) {
-			possibilities = possibilities.filter(lineID => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
+			possibilities = possibilities.filter((lineID) => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
 		}
-		
+
 		return possibilities
 	}
 
@@ -512,13 +511,13 @@ export function getLinePlacementOptions() {
 			//} || localPossibilities.length === occupiedRoads) {
 			localPossibilities = [...localPossibilitiesWithoutOwnLines]
 		}
-		
+
 		// Pittsburgh forced bridge continuation logic
 		if (personal.selectedBoard === rf.BOARD_PITTS) {
 			// Check if the only empty street from this end junction is a bridge space
 			let bridgeOnlyOption = null
 			let hasNonBridgeOption = false
-			
+
 			for (const lineID of localPossibilities) {
 				if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
 					if (!bridgeOnlyOption) bridgeOnlyOption = lineID
@@ -527,7 +526,7 @@ export function getLinePlacementOptions() {
 					break
 				}
 			}
-			
+
 			// If only bridge option exists and bridge markers are available, force bridge
 			if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers > 0) {
 				localPossibilities = [bridgeOnlyOption]
@@ -535,7 +534,7 @@ export function getLinePlacementOptions() {
 				// No bridge markers available, standard rules apply (already have localPossibilities)
 			}
 		}
-		
+
 		// Pittsburgh bridge placement logic
 		if (personal.selectedBoard === rf.BOARD_PITTS) {
 			// Bridges may not be placed during the first line marker placements (initial setup)
@@ -558,7 +557,7 @@ export function getLinePlacementOptions() {
 				}
 			}
 		}
-		
+
 		possibilities = possibilities.concat(localPossibilities)
 	}
 	//let lines = getLinesAroundJunction(junc)
@@ -646,7 +645,7 @@ export function addLine_core(playerIndex, lineID) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	let player = store.players[playerIndex]
-	
+
 	// Pittsburgh bridge placement - don't add to lines, add to bridges
 	if (personal.selectedBoard === rf.BOARD_PITTS && rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
 		// Add the junctions to the players junctions
@@ -657,7 +656,7 @@ export function addLine_core(playerIndex, lineID) {
 		let endJuncs = view.getJunctionsAtEndOfLine(lineID)
 		let startedEqual = false
 		if (player.endJunctions[0] === player.endJunctions[1]) startedEqual = true
-		
+
 		// IF First Line
 		if (player.endJunctions.length === 0) {
 			player.endJunctions = [...endJuncs]
@@ -673,7 +672,7 @@ export function addLine_core(playerIndex, lineID) {
 				if (player.endJunctions[i] === endJuncs[0]) {
 					player.endJunctions[i] = endJuncs[1]
 					player.endLines[i] = lineID
-					
+
 					// Place bridge marker
 					store.remainingBridgeMarkers--
 					store.bridges.push(lineID)
@@ -681,12 +680,12 @@ export function addLine_core(playerIndex, lineID) {
 					store.bridgeEnds[lineID] = i
 					// Set bridge expansion option for next turn
 					store.context.bridgeExpansionOption = { lineID: lineID, endIndex: i }
-					
+
 					return startedEqual
 				} else if (player.endJunctions[i] === endJuncs[1]) {
 					player.endJunctions[i] = endJuncs[0]
 					player.endLines[i] = lineID
-					
+
 					// Place bridge marker
 					store.remainingBridgeMarkers--
 					store.bridges.push(lineID)
@@ -694,14 +693,14 @@ export function addLine_core(playerIndex, lineID) {
 					store.bridgeEnds[lineID] = i
 					// Set bridge expansion option for next turn
 					store.context.bridgeExpansionOption = { lineID: lineID, endIndex: i }
-					
+
 					return startedEqual
 				}
 			}
 		}
 		return startedEqual
 	}
-	
+
 	// Regular line placement (non-bridge)
 	// Add To Model
 	store.lines[lineID].push(player.colour)
@@ -744,16 +743,16 @@ export function addLine_core(playerIndex, lineID) {
 export function chooseBridgeExpansion(expandFromBridge) {
 	const store = useModelStore()
 	const player = controller.currentPlayerObj()
-	
+
 	if (!store.context.bridgeExpansionOption) return
-	
+
 	const { lineID, endIndex } = store.context.bridgeExpansionOption
-	
+
 	if (expandFromBridge) {
 		// Expand from the far end of the bridge
 		// The bridge is at endIndex, so the far end is the other end
 		const bridgeEndJunction = player.endJunctions[endIndex]
-		
+
 		// Set the end junctions to expand from the bridge end
 		player.endJunctions = [bridgeEndJunction, bridgeEndJunction]
 		player.endLines = [lineID, lineID]
@@ -762,12 +761,12 @@ export function chooseBridgeExpansion(expandFromBridge) {
 		// This means expanding from the other end of the line
 		const otherEndIndex = endIndex === 0 ? 1 : 0
 		const otherEndJunction = player.endJunctions[otherEndIndex]
-		
+
 		// Set the end junctions to expand from the other end
 		player.endJunctions = [otherEndJunction, otherEndJunction]
 		player.endLines = [lineID, lineID]
 	}
-	
+
 	// Clear the bridge expansion option
 	store.context.bridgeExpansionOption = null
 }
