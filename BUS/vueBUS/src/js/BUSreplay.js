@@ -102,6 +102,9 @@ async function resetDataForReplay() {
 	store.remainingPassengers = 11
 
 	for (let i = 0; i < store.lines.length; i++) store.lines[i].splice(0)
+	store.bridges.splice(0)
+	store.remainingBridgeMarkers = 5
+	for (const key in store.bridgeEnds) delete store.bridgeEnds[key]
 	// actionAreaData
 	for (let i = 0; i < store.actionAreaData.length; i++) {
 		for (let j = 0; j < store.actionAreaData[i].length; j++) {

@@ -22,6 +22,7 @@ function getActionText() {
 	if (store.gameflow.phase === rf.PHASE_SETUP_LINES) {
 		phaseStr = "Place a Bus Line" // TO then reverse TO,eg 1,2,3,4,3,2,1, place 1 line
 		phaseStr += "<br/>Remaining Lines: " + store.context.linesLeftToPlace
+		if (personal.selectedBoard === rf.BOARD_PITTS) phaseStr += "<br/><span style='color: #ff9900'>You may not place a Bridge during setup</span>"
 		if (store.context.endJunctionsOptions.length > 0) phaseStr += "<br/>Choose a junction where your lines will meet"
 	}
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) {
@@ -33,6 +34,7 @@ function getActionText() {
 	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) {
 		phaseStr = "Expand your bus line from either end" // 5p: +1 to maxNumBus
 		phaseStr += "<br/>Remaining Lines: " + store.context.linesLeftToPlace
+		if (personal.selectedBoard === rf.BOARD_PITTS) phaseStr += "<br/>Remaining Bridges: <span style='color: " + (store.remainingBridgeMarkers > 0 ? "green" : "red") + "'>" + store.remainingBridgeMarkers + "</span>"
 	}
 	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = "AddBus"
 	if (store.gameflow.phase === rf.PHASE_ADD_PAX) {

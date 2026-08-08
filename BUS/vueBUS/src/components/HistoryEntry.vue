@@ -61,6 +61,28 @@ function historyHighlightVroms(entry3, index) {
 	store.historyHelpers.junctionsToHighlight = [...junctions]
 }
 
+function isBridgeEntry(entry3) {
+	if (entry3.length === 0) return false
+	return getBridgeCount(entry3) === entry3.length
+}
+
+function getBridgeCount(entry3) {
+	if (personal.selectedBoard !== rf.BOARD_PITTS) return 0
+	let bridgeCount = 0
+	for (let i = 0; i < entry3.length; i++) {
+		if (entry3[i].length > 0 && rf.PITTS_BRIDGE_LINE_IDS.includes(entry3[i][0])) bridgeCount++
+	}
+	return bridgeCount
+}
+
+function getAddLineText(entry3) {
+	if (isBridgeEntry(entry3)) return "places a bridge"
+	let bridgeCount = getBridgeCount(entry3)
+	if (bridgeCount > 0) return "adds " + entry3.length + " lines (including " + bridgeCount + " bridge" + (bridgeCount > 1 ? "s" : "") + ")"
+	if (entry3.length === 1) return "adds 1 line"
+	return "adds " + entry3.length + " lines"
+}
+
 function getActionText(entry3) {
 	let text = ""
 
@@ -245,8 +267,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
-				<span v-if="entry[3].length === 1">adds 1 line</span>
-				<span v-else>adds {{ entry[3].length }} lines</span>
+				<span>{{ getAddLineText(entry[3]) }}</span>
 			</div>
 		</template>
 		<template v-if="entry[0] === rf.HIST_ADD_LINE && entry[3].length === 0">
