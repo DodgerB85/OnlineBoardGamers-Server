@@ -54,6 +54,29 @@ export const HIST_VROM = 20
 // PITTS vars
 export const PITTS_BRIDGE_LINE_IDS = [36, 24, 40, 44, 11, 2, 47, 54, 68]
 
+// Splotter Designers (Pittsburgh)
+export const DESIGNER_JEROEN = 0
+export const DESIGNER_JORIS = 1
+export const DESIGNER_NOT_ARRIVED = -1 // Still in the Netherlands
+export const DESIGNER_REMOVED = -2 // Returned to the Netherlands after Splotter Con
+export const DESIGNER_CON_FLAG = 100 // Added to the status when the designer has attended Splotter Con
+export const DESIGNER_JEROEN_COLOUR = "#30343D"
+export const DESIGNER_JORIS_COLOUR = "#697687"
+export const PITTS_AIRPORT_JUNCTION = 30 // The Airport in Moon Township, also functions as a Train Station
+
+// Splotter Convention (Pittsburgh): the convention centre is junction 17
+export const PITTS_CONVENTION_JUNCTION = 17
+// Destination-spot markers used in VROOMM history/destination lists (not real building slots)
+export const VROM_DEST_JEROEN_CON = -2 // Jeroen's pub spot at the convention centre
+export const VROM_DEST_JORIS_CON = -3 // Joris's office spot at the convention centre
+export const VROM_DEST_AIRPORT = -4 // One-way ride to the Airport (automatic removal)
+// Positions of the two convention spots, in the same 400-based board space as getBuildingPos [top, left]
+export const PITTS_CONVENTION_JEROEN_SPOT = [1396, 750]
+export const PITTS_CONVENTION_JORIS_SPOT = [1252, 798]
+// The destination building type each designer's convention spot represents (1 = office, 2 = pub)
+export const DESIGNER_JEROEN_BUILDING_TYPE = 2
+export const DESIGNER_JORIS_BUILDING_TYPE = 1
+
 // FROM->TO (one-way streets)
 export const PITTS_ONE_WAY_JUNCTION_IDS = [[9, 17], [17, 18], [19, 20], [20, 21], [21, 12], [13, 12], [12, 10], [10, 20], [10, 9]]
 

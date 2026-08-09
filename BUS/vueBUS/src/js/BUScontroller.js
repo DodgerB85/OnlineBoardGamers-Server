@@ -62,10 +62,10 @@ function canPlayerVromPitts(player, store) {
 	let networkJunctions = [...player.playerJunctions]
 	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = model.getPlayerNetworkJunctionsPitts(player)
 
-	// Find all junctions with passengers
+	// Find all junctions with passengers (or Splotter Designers)
 	let paxJunctions = []
 	for (let i = 0; i < networkJunctions.length; i++) {
-		if (store.junctions[networkJunctions[i]][rf.paxIdx] > 0) {
+		if (store.junctions[networkJunctions[i]][rf.paxIdx] > 0 || funcs.getDesignerStatusJunction(store.jeroenStatus) === networkJunctions[i] || funcs.getDesignerStatusJunction(store.jorisStatus) === networkJunctions[i]) {
 			paxJunctions.push(networkJunctions[i])
 		}
 	}
@@ -103,6 +103,18 @@ function setUpPlayerVromPitts(paxJunctions, player, store) {
 
 function canReachBuildingFromJunction(startJunction, player, store) {
 	const personal = usePersonalStore()
+
+	// Splotter Designer special rides (Pittsburgh):
+	// - a designer can ride to their matching convention-centre spot when that destination type is currently desired
+	// - a designer who attended the Splotter Con can always be flown to the Airport
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		const jeroenHere = funcs.getDesignerStatusJunction(store.jeroenStatus) === startJunction && store.jeroenStatus !== rf.DESIGNER_REMOVED
+		const jorisHere = funcs.getDesignerStatusJunction(store.jorisStatus) === startJunction && store.jorisStatus !== rf.DESIGNER_REMOVED
+		if (jeroenHere && !funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE) return true
+		if (jorisHere && !funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE) return true
+		if ((jeroenHere && funcs.hasDesignerAttendedCon(store.jeroenStatus)) || (jorisHere && funcs.hasDesignerAttendedCon(store.jorisStatus))) return true
+	}
+
 	const visited = new Set()
 	const junctionsToVisit = [startJunction]
 
@@ -398,12 +410,14 @@ export function endPlayerTurn() {
 			//startPlayerTurn()
 		}
 	}
-	// Now skip players if there are no pax left to add
+	// Now skip players if there are no pax left to add (but not if they can still place a Designer at the Airport)
 	if (store.gameflow.phase === rf.PHASE_ADD_PAX && store.remainingPassengers <= 0 && store.gameflow.turnOrder.length > 0) {
 		do {
+			const paxCount = maxBuses() - (store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length)
+			const canPlaceDesigner = paxCount >= 2 && !funcs.designerArrivedThisRound() && (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED || store.jorisStatus === rf.DESIGNER_NOT_ARRIVED)
+			if (canPlaceDesigner) break
 			store.history.push([rf.HIST_ADD_PAX, store.gameflow.turnOrder[0], Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [-1]])
 			store.gameflow.turnOrder.shift()
-			//Bot.updateTurnOrder()
 		} while (store.gameflow.turnOrder.length > 0)
 	}
 
@@ -585,9 +599,12 @@ export function endCurrentPhase() {
 			}
 		}
 	}
-	// Now skip players if there are no pax left to add
+	// Now skip players if there are no pax left to add (but not if they can still place a Designer at the Airport)
 	else if (store.gameflow.phase === rf.PHASE_ADD_PAX && store.remainingPassengers <= 0 && store.gameflow.turnOrder.length > 0) {
 		do {
+			const paxCount = maxBuses() - (store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length)
+			const canPlaceDesigner = paxCount >= 2 && !funcs.designerArrivedThisRound() && (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED || store.jorisStatus === rf.DESIGNER_NOT_ARRIVED)
+			if (canPlaceDesigner) break
 			store.history.push([rf.HIST_ADD_PAX, store.gameflow.turnOrder[0], Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [-1]])
 			store.gameflow.turnOrder.shift()
 			// Bot.updateTurnOrder()

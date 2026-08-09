@@ -102,6 +102,8 @@ async function resetDataForReplay() {
 	store.remainingPassengers = 11
 
 	for (let i = 0; i < store.lines.length; i++) store.lines[i].splice(0)
+	store.jeroenStatus = rf.DESIGNER_NOT_ARRIVED
+	store.jorisStatus = rf.DESIGNER_NOT_ARRIVED
 	store.bridges.splice(0)
 	store.remainingBridgeMarkers = 5
 	for (const key in store.bridgeEnds) delete store.bridgeEnds[key]
@@ -335,8 +337,14 @@ function replayAddPax(historyIndex, playerIndex, entry3) {
 	performReplayEndTurn(historyIndex)
 
 	for (let i = 0; i < entry3.length; i++) {
+		// Designer markers are [junction, designer] arrays - place the designer at that junction
+		if (Array.isArray(entry3[i])) {
+			if (entry3[i][1] === rf.DESIGNER_JEROEN) store.jeroenStatus = entry3[i][0]
+			else if (entry3[i][1] === rf.DESIGNER_JORIS) store.jorisStatus = entry3[i][0]
+			continue
+		}
 		if (entry3[i].length != undefined) alert("Anomaly detected. Please submit bug report")
-		if (entry3[i].length == undefined && entry3[i] !== -1) {
+		if (entry3[i] !== -1) {
 			store.junctions[entry3[i]][rf.paxIdx]++
 			store.remainingPassengers--
 		}
@@ -366,6 +374,27 @@ function replayVrom(historyIndex, playerIndex, entry3) {
 	performReplayEndTurn(historyIndex)
 
 	for (let i = 0; i < entry3.length; i++) {
+		// Splotter Designer move: [origin, junction, buildingIndex, designerIdx]
+		if (entry3[i].length > 3) {
+			const designerIdx = entry3[i][3]
+			if (entry3[i][2] === rf.VROM_DEST_AIRPORT) {
+				if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.DESIGNER_REMOVED
+				else store.jorisStatus = rf.DESIGNER_REMOVED
+			} else if (entry3[i][2] < 0) {
+				if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
+				else store.jorisStatus = rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
+			} else {
+				if (designerIdx === rf.DESIGNER_JEROEN) {
+					const attended = funcs.hasDesignerAttendedCon(store.jeroenStatus)
+					store.jeroenStatus = (attended ? rf.DESIGNER_CON_FLAG : 0) + entry3[i][1]
+				} else {
+					const attended = funcs.hasDesignerAttendedCon(store.jorisStatus)
+					store.jorisStatus = (attended ? rf.DESIGNER_CON_FLAG : 0) + entry3[i][1]
+				}
+			}
+			model.increaseScore(store.players[playerIndex])
+			continue
+		}
 		if (entry3[i].length > 1) {
 			// Remove a pax from the junction
 			store.junctions[entry3[i][0]][rf.paxIdx]--

@@ -622,15 +622,15 @@ export function canPlayerVrom(forceCheck) {
 	// Pittsburgh: network includes placed bridges joined to the player's line
 	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = getPlayerNetworkJunctionsPitts(player)
 	let anyPax = false
-	// If no pax on owned junctions, cannot vrom
+	// If no pax (or Splotter Designer) on owned junctions, cannot vrom
 	for (let i = 0; i < networkJunctions.length; i++) {
-		if (store.junctions[networkJunctions[i]][rf.paxIdx] > 0) {
+		if (junctionHasMovableToken(networkJunctions[i])) {
 			anyPax = true
 			break
 		}
 	}
 	if (!anyPax) {
-		store.context.turnEndingErrorMessage = "No available passengers in your network"
+		store.context.turnEndingErrorMessage = "No available passengers or designers in your network"
 		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([1])
 		return false
 	}
@@ -643,7 +643,14 @@ export function canPlayerVrom(forceCheck) {
 			}
 		}
 	}
-	if (!anyBldg) {
+	// The convention centre always offers its spot of the matching destination type (Pittsburgh),
+	// and an attended designer can always be flown to the Airport
+	let specialDest = false
+	if (personal.selectedBoard === rf.BOARD_PITTS && !anyBldg) {
+		if (networkJunctions.includes(rf.PITTS_CONVENTION_JUNCTION) && (store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE || store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)) specialDest = true
+		if (attendedDesignerInNetwork(networkJunctions)) specialDest = true
+	}
+	if (!anyBldg && !specialDest) {
 		store.context.turnEndingErrorMessage = "No available buildings of the desired type in your network"
 		// if the end isn't a single item, push a single item
 		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([2])
@@ -652,12 +659,31 @@ export function canPlayerVrom(forceCheck) {
 	return true
 }
 
+// Does this junction contain a passenger, or a Splotter Designer?
+function junctionHasMovableToken(junction) {
+	const store = useModelStore()
+	if (store.junctions[junction][rf.paxIdx] > 0) return true
+	if (funcs.getDesignerStatusJunction(store.jeroenStatus) === junction) return true
+	if (funcs.getDesignerStatusJunction(store.jorisStatus) === junction) return true
+	return false
+}
+
+// Is any designer that has attended the Splotter Con sitting within the player's network?
+function attendedDesignerInNetwork(networkJunctions) {
+	const store = useModelStore()
+	for (let i = 0; i < networkJunctions.length; i++) {
+		if (funcs.getDesignerStatusJunction(store.jeroenStatus) === networkJunctions[i] && funcs.hasDesignerAttendedCon(store.jeroenStatus)) return true
+		if (funcs.getDesignerStatusJunction(store.jorisStatus) === networkJunctions[i] && funcs.hasDesignerAttendedCon(store.jorisStatus)) return true
+	}
+	return false
+}
+
 export function getVromBuildings() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (store.context.selectedPaxToVromJunction === -1) return
 	let ret = []
-	// Pittsburgh: buildings on the far side of bridges joined to the player's network are targets
+	// Pittsburgh: buildings on the far side of bridges added to the player's network are targets
 	let networkJunctions = [...controller.currentPlayerObj().playerJunctions]
 	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = getPlayerNetworkJunctionsPitts(controller.currentPlayerObj())
 	for (let i = 0; i < networkJunctions.length; i++) {
@@ -666,6 +692,21 @@ export function getVromBuildings() {
 			// need [junction.id, [bld idx, bldidx]]
 			for (let j = 0; j < store.junctions[networkJunctions[i]].length - 1; j++) if (store.junctions[networkJunctions[i]][j] === store.desiredBuilding) retLine[1].push(j)
 			ret.push(retLine)
+		}
+	}
+	// Splotter Designer destinations (Pittsburgh convention centre / Airport)
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		const origin = store.context.selectedPaxToVromJunction
+		console.log("VROMBLDGS", { origin, jeroenStatus: store.jeroenStatus, jorisStatus: store.jorisStatus, desiredBuilding: store.desiredBuilding, ret })
+		if (funcs.getDesignerStatusJunction(store.jeroenStatus) === origin && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
+			if (!funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
+				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JEROEN_CON]])
+			if (funcs.hasDesignerAttendedCon(store.jeroenStatus)) ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
+		}
+		if (funcs.getDesignerStatusJunction(store.jorisStatus) === origin && store.jorisStatus !== rf.DESIGNER_REMOVED) {
+			if (!funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE)
+				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JORIS_CON]])
+			if (funcs.hasDesignerAttendedCon(store.jorisStatus)) ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
 		}
 	}
 	return ret

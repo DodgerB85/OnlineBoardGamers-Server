@@ -60,6 +60,8 @@ export function getImage(image) {
 	if (image === "building2") return new URL(`../../../static/BUS/images/building2.png`, import.meta.url).href
 	if (image === "building3") return new URL(`../../../static/BUS/images/building3.png`, import.meta.url).href
 	if (image === "passenger") return new URL(`../../../static/BUS/images/passenger.png`, import.meta.url).href
+	if (image === "jeroen") return new URL(`../../../static/BUS/images/jeroen.png`, import.meta.url).href
+	if (image === "joris") return new URL(`../../../static/BUS/images/joris.png`, import.meta.url).href
 
 	if (image === "building1_orig") return new URL(`../../../static/BUS/images/building1_orig.jpg`, import.meta.url).href
 	if (image === "building2_orig") return new URL(`../../../static/BUS/images/building2_orig.jpg`, import.meta.url).href
@@ -505,6 +507,21 @@ export function getBuildingPos(junctionID, buildingSlot, outline) {
 	alert("JID: " + String(junctionID))
 	alert("BSl:" + String(buildingSlot))
 	return [0, 0]
+}
+
+// Get the position of a VROOMM destination spot, including the special convention/airport spots
+export function getVromDestinationPos(junctionID, spotSlot, outline) {
+	const store = useModelStore()
+	if (spotSlot === rf.VROM_DEST_JEROEN_CON) {
+		return [(store.refSize * rf.PITTS_CONVENTION_JEROEN_SPOT[0]) / 400, (store.refSize * rf.PITTS_CONVENTION_JEROEN_SPOT[1]) / 400]
+	}
+	if (spotSlot === rf.VROM_DEST_JORIS_CON) {
+		return [(store.refSize * rf.PITTS_CONVENTION_JORIS_SPOT[0]) / 400, (store.refSize * rf.PITTS_CONVENTION_JORIS_SPOT[1]) / 400]
+	}
+	if (spotSlot === rf.VROM_DEST_AIRPORT) {
+		return getBuildingPos(junctionID, -1, true)
+	}
+	return getBuildingPos(junctionID, spotSlot, outline)
 }
 
 export function getLineSVGpoints(lineID, index, raw) {

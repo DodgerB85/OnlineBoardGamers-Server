@@ -54,7 +54,9 @@ function historyHighlightVroms(entry3, index) {
 	for (let i = 0; i < entry3.length; i++) {
 		if (entry3[i].length > 1) {
 			junctions.push(entry3[i][0])
-			buildings.push([-1, entry3[i][1], entry3[i][2]])
+			// Splotter Designer move [origin, junction, destination, designerIdx] - highlight the destination instead
+			if (entry3[i].length > 3) junctions.push(entry3[i][1])
+			else buildings.push([-1, entry3[i][1], entry3[i][2]])
 		}
 	}
 	historyHighlightBuildings(buildings)
@@ -113,10 +115,12 @@ function getAddPassengersText(entry3) {
 	if (entry3[0] === -1) return "adds no Passengers - none remaining"
 	let junction10 = 0
 	let junction25 = 0
+	let designers = []
 	let runOut = false
 	for (let i = 0; i < entry3.length; i++) {
-		if (entry3[i] === 10) junction10++
-		else if (entry3[i] === 25) junction25++
+		if (Array.isArray(entry3[i])) designers.push(entry3[i])
+		else if (entry3[i] === 10 || (personal.selectedBoard === rf.BOARD_PITTS && entry3[i] === 5)) junction10++
+		else if (entry3[i] === 25 || (personal.selectedBoard === rf.BOARD_PITTS && entry3[i] === 30)) junction25++
 		else if (entry3[i] === -1) runOut = true
 	}
 	if (junction10 >= 2) text += "adds " + String(junction10) + " passengers to the top station"
@@ -124,8 +128,14 @@ function getAddPassengersText(entry3) {
 
 	if (junction10 > 0 && junction25 > 0) text += ", and "
 
-	if (junction25 >= 2) text += "adds " + String(junction25) + " passengers to the bottom station"
-	else if (junction25 === 1) text += " adds a passenger to the bottom station"
+	if (junction25 >= 2) text += "adds " + String(junction25) + " passengers to the " + (personal.selectedBoard === rf.BOARD_PITTS ? "Airport" : "bottom station")
+	else if (junction25 === 1) text += " adds a passenger to the " + (personal.selectedBoard === rf.BOARD_PITTS ? "Airport" : "bottom station")
+
+	for (let i = 0; i < designers.length; i++) {
+		if (designers[i][1] === rf.DESIGNER_JEROEN) text += ", brings the designer Jeroen into play at the Airport"
+		else if (designers[i][1] === rf.DESIGNER_JORIS) text += ", brings the designer Joris into play at the Airport"
+		else text += ", brings a designer into play at the Airport"
+	}
 
 	if (runOut) text += ", but then ran out of Passengers"
 
@@ -138,8 +148,23 @@ function getAlterTimeText(entry1, entry3) {
 }
 function geVromText(entry3) {
 	// We know that there is at least 1 valid VROM, and it either ends in VROM or unable
-	if (entry3.length === 1) return "moves 1 Passenger"
-	if (entry3[entry3.length - 1].length !== 1) return "moves " + String(entry3.length) + " Passengers"
+	let designerMoves = 0
+	for (let i = 0; i < entry3.length; i++) {
+		if (entry3[i].length > 3) designerMoves++
+	}
+	if (entry3.length === 1 && designerMoves === 0) return "moves 1 Passenger"
+	if (designerMoves === entry3.length && entry3[entry3.length - 1].length !== 1) return designerMoves === 1 ? "moves 1 Designer" : "moves " + String(designerMoves) + " Designers"
+	if (entry3.length === 1 && designerMoves === 0) return "moves 1 Passenger"
+	if (entry3[entry3.length - 1].length !== 1) {
+		if (designerMoves === 0) return "moves " + String(entry3.length) + " Passengers"
+		let paxNum = entry3.length - designerMoves
+		let text = ""
+		if (paxNum > 1) text += "moves " + String(paxNum) + " Passengers"
+		else if (paxNum === 1) text += "moves 1 Passenger"
+		if (designerMoves > 1) text += " and " + String(designerMoves) + " Designers"
+		else text += " and 1 Designer"
+		return text
+	}
 	// Now there must be some valid and then unable
 	let movedPaxNum = entry3.length - 1
 	let text = ""

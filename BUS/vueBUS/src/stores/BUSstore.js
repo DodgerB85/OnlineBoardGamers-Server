@@ -81,6 +81,7 @@ export const useModelStore = defineStore("model", () => {
 		turnEndingErrorMessage: "",
 		//subphase: 0,
 		selectedPaxToVromJunction: -1,
+		selectedDesignerToVrom: -1,
 		endJunctionsOptions: [],
 		actionChosen: false,
 		confirmEndTurn: false,
@@ -137,6 +138,7 @@ export const useModelStore = defineStore("model", () => {
 		context.turnEndingErrorMessage = ""
 		//context.subphase = 0
 		context.selectedPaxToVromJunction = -1
+		context.selectedDesignerToVrom = -1
 		context.endJunctionsOptions = []
 		context.actionChosen = false
 		context.confirmEndTurn = false

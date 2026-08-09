@@ -3,6 +3,7 @@ import * as rf from "../js/BUSreference.js"
 import * as view from "../js/BUSview.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
+import * as funcs from "../js/BUSfuncs.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
@@ -133,11 +134,12 @@ function highlight(e, entering) {
 	else e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
 }
 
-function playPassengerPlopAnimation(junction) {
+function playPassengerPlopAnimation(junction, image) {
+	if (image === undefined) image = "passenger"
 	const position = view.getBuildingPos(junction, -1)
 	
 	// Set up the animation element with passenger image at same position as pax number
-	plopAnimationRef.value.style.backgroundImage = `url(${view.getImage('passenger')})`
+	plopAnimationRef.value.style.backgroundImage = `url(${view.getImage(image)})`
 	plopAnimationRef.value.style.backgroundSize = 'contain'
 	plopAnimationRef.value.style.backgroundRepeat = 'no-repeat'
 	plopAnimationRef.value.style.backgroundPosition = 'center'
@@ -179,6 +181,19 @@ function addPassengerToJunction(junction) {
 		store.context.historyObj.push(-1)
 	}
 }
+
+// Bring a Splotter Designer into play at the Airport (junction 30), instead of two regular passengers
+function addDesignerToJunction(designerIdx) {
+	if (store.context.passengersLeftToPlace < 2) return
+	if (funcs.designerArrivedThisRound()) return
+	const designerStatus = designerIdx === rf.DESIGNER_JEROEN ? store.jeroenStatus : store.jorisStatus
+	if (designerStatus !== rf.DESIGNER_NOT_ARRIVED) return
+	if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.PITTS_AIRPORT_JUNCTION
+	else store.jorisStatus = rf.PITTS_AIRPORT_JUNCTION
+	store.context.passengersLeftToPlace -= 2
+	store.context.historyObj.push([rf.PITTS_AIRPORT_JUNCTION, designerIdx])
+	playPassengerPlopAnimation(rf.PITTS_AIRPORT_JUNCTION, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
+}
 function clickedPaxToVrom(junction) {
 	if (!model.canPlayerVrom()) return
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
@@ -186,7 +201,27 @@ function clickedPaxToVrom(junction) {
 	} else {
 		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
 	}
+	store.context.selectedDesignerToVrom = -1
 	store.context.selectedPaxToVromJunction = junction
+}
+
+// Selection of a Splotter Designer to be moved during VRROOOMM
+function clickedDesignerToVrom(designerIdx, junction) {
+	if (!model.canPlayerVrom()) return
+	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		if (!store.context.eligibleJunctionsToVromPitts.includes(junction)) return
+	} else {
+		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
+	}
+	if (funcs.getDesignerStatusJunction(designerIdx === rf.DESIGNER_JEROEN ? store.jeroenStatus : store.jorisStatus) !== junction) return
+	console.log("DESIGNER CLICK", { designerIdx, junction, jeroenStatus: store.jeroenStatus, jorisStatus: store.jorisStatus, desiredBuilding: store.desiredBuilding, eligible: store.context.eligibleJunctionsToVromPitts })
+	store.context.selectedDesignerToVrom = designerIdx
+	store.context.selectedPaxToVromJunction = junction
+}
+
+function designerSelectableForVrom(junction) {
+	if (personal.selectedBoard === rf.BOARD_PITTS) return model.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction)
+	return model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
 }
 
 function mouseOverPaxNumber(e, junction, entering) {
@@ -200,7 +235,58 @@ function mouseOverPaxNumber(e, junction, entering) {
 	else document.getElementById("passengerImg" + String(junction)).classList.remove("onHover")
 }
 
+function mouseOverDesignerNumber(e, junction, designerIdx, entering) {
+	if (!designerSelectableForVrom(junction)) return
+	if (entering) document.getElementById("designerImg" + String(designerIdx) + "x" + String(junction)).classList.add("onHover")
+	else document.getElementById("designerImg" + String(designerIdx) + "x" + String(junction)).classList.remove("onHover")
+}
+
+function getDesignerStatus(designerIdx) {
+	if (designerIdx === rf.DESIGNER_JEROEN) return store.jeroenStatus
+	return store.jorisStatus
+}
+function setDesignerStatus(designerIdx, status) {
+	if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = status
+	else store.jorisStatus = status
+}
+
 function clickedVromBldg(junction, buildingIndex) {
+	const origin = store.context.selectedPaxToVromJunction
+	// SPLOTTER DESIGNER DESTINATIONS - convention centre spots and the Airport
+	if (buildingIndex < 0) {
+		let designerIdx = store.context.selectedDesignerToVrom
+		if (buildingIndex === rf.VROM_DEST_JEROEN_CON && funcs.getDesignerStatusJunction(store.jeroenStatus) === origin && !funcs.hasDesignerAttendedCon(store.jeroenStatus)) designerIdx = rf.DESIGNER_JEROEN
+		else if (buildingIndex === rf.VROM_DEST_JORIS_CON && funcs.getDesignerStatusJunction(store.jorisStatus) === origin && !funcs.hasDesignerAttendedCon(store.jorisStatus)) designerIdx = rf.DESIGNER_JORIS
+		else if (buildingIndex === rf.VROM_DEST_AIRPORT) {
+			if (funcs.getDesignerStatusJunction(store.jeroenStatus) === origin) designerIdx = rf.DESIGNER_JEROEN
+			else if (funcs.getDesignerStatusJunction(store.jorisStatus) === origin) designerIdx = rf.DESIGNER_JORIS
+		}
+		if (designerIdx === -1) return
+		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
+		if (buildingIndex === rf.VROM_DEST_AIRPORT) setDesignerStatus(designerIdx, rf.DESIGNER_REMOVED)
+		else setDesignerStatus(designerIdx, rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION)
+		store.context.remainingVroms--
+		controller.currentPlayerObj().score++
+		playPassengerPlopAnimation(junction, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
+		store.context.selectedPaxToVromJunction = -1
+		store.context.selectedDesignerToVrom = -1
+		model.canPlayerVrom()
+		return
+	}
+	// A designer rides to any normal building destination too
+	if (store.context.selectedDesignerToVrom !== -1) {
+		const designerIdx = store.context.selectedDesignerToVrom
+		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
+		const attended = funcs.hasDesignerAttendedCon(getDesignerStatus(designerIdx))
+		setDesignerStatus(designerIdx, (attended ? rf.DESIGNER_CON_FLAG : 0) + junction)
+		store.context.remainingVroms--
+		controller.currentPlayerObj().score++
+		playPassengerPlopAnimation(junction, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
+		store.context.selectedPaxToVromJunction = -1
+		store.context.selectedDesignerToVrom = -1
+		model.canPlayerVrom()
+		return
+	}
 	store.context.historyObj.push([store.context.selectedPaxToVromJunction, junction, buildingIndex])
 	// Remove a pax from the junction
 	store.junctions[store.context.selectedPaxToVromJunction][rf.paxIdx]--
@@ -212,6 +298,7 @@ function clickedVromBldg(junction, buildingIndex) {
 	controller.currentPlayerObj().score++
 	// reset vars
 	store.context.selectedPaxToVromJunction = -1
+	store.context.selectedDesignerToVrom = -1
 	model.canPlayerVrom()
 }
 
@@ -325,6 +412,50 @@ function getBuildingRadius() {
 		</div>
 	</template>
 
+	<!-- Display any Splotter Designers waiting on junctions -->
+	<template v-for="(junction, index) in store.junctions" v-bind:key="'jeroen' + index">
+		<img
+			v-if="personal.selectedBoard === rf.BOARD_PITTS && funcs.getDesignerStatusJunction(store.jeroenStatus) === index"
+			class="designerImg"
+			:id="'designerImg' + String(rf.DESIGNER_JEROEN) + 'x' + String(index)"
+			:src="view.getImage('jeroen')"
+			alt="Jeroen"
+			:class="{
+				selectablePaxToVrom: designerSelectableForVrom(index),
+				selectedPaxToVrom: store.context.selectedPaxToVromJunction === index && store.context.selectedDesignerToVrom === rf.DESIGNER_JEROEN,
+			}"
+			:style="{
+				top: view.getBuildingPos(index, -1)[0] + 'px',
+				left: view.getBuildingPos(index, -1)[1] + (store.refSize * 120) / 400 + 'px',
+				width: (store.refSize * 184) / 1000 + 'px',
+				height: (store.refSize * 311) / 1000 + 'px',
+			}"
+			@click="clickedDesignerToVrom(rf.DESIGNER_JEROEN, index)"
+			@mouseover="mouseOverDesignerNumber($event, index, rf.DESIGNER_JEROEN, true)"
+			@mouseleave="mouseOverDesignerNumber($event, index, rf.DESIGNER_JEROEN, false)" />
+	</template>
+	<template v-for="(junction, index) in store.junctions" v-bind:key="'joris' + index">
+		<img
+			v-if="personal.selectedBoard === rf.BOARD_PITTS && funcs.getDesignerStatusJunction(store.jorisStatus) === index"
+			class="designerImg"
+			:id="'designerImg' + String(rf.DESIGNER_JORIS) + 'x' + String(index)"
+			:src="view.getImage('joris')"
+			alt="Joris"
+			:class="{
+				'selectablePaxToVrom': designerSelectableForVrom(index),
+				selectedPaxToVrom: store.context.selectedPaxToVromJunction === index && store.context.selectedDesignerToVrom === rf.DESIGNER_JORIS,
+			}"
+			:style="{
+				top: view.getBuildingPos(index, -1)[0] + 'px',
+				left: view.getBuildingPos(index, -1)[1] + (store.refSize * 180) / 400 + 'px',
+				width: (store.refSize * 184) / 1000 + 'px',
+				height: (store.refSize * 311) / 1000 + 'px',
+			}"
+			@click="clickedDesignerToVrom(rf.DESIGNER_JORIS, index)"
+			@mouseover="mouseOverDesignerNumber($event, index, rf.DESIGNER_JORIS, true)"
+			@mouseleave="mouseOverDesignerNumber($event, index, rf.DESIGNER_JORIS, false)" />
+	</template>
+
 	<!-- Add highlight circles to VROM building spots -->
 	<!-- FOR junction in playersJunctions, if junction includes(reqBld) then add a circle there-->
 	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS">
@@ -334,8 +465,8 @@ function getBuildingRadius() {
 				v-for="(building, index) in line[1]"
 				v-bind:key="index"
 				:style="{
-					top: view.getBuildingPos(line[0], building, true)[0] + 'px',
-					left: view.getBuildingPos(line[0], building, true)[1] + 'px',
+					top: view.getVromDestinationPos(line[0], building, true)[0] + 'px',
+					left: view.getVromDestinationPos(line[0], building, true)[1] + 'px',
 					border: String((store.refSize * 5) / 100) + 'px solid yellow',
 					width: (store.refSize * getBuildingRadius()) / 100 + 'px',
 					height: (store.refSize * getBuildingRadius()) / 100 + 'px',
@@ -405,6 +536,39 @@ function getBuildingRadius() {
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="addPassengerToJunction(30)"></div>
+			<!-- SPLOTTER DESIGNER ARRIVAL - at the Airport (junction 30) instead of two passengers -->
+			<div
+				v-if="store.context.passengersLeftToPlace >= 2 && !funcs.designerArrivedThisRound() && store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED"
+				class="designerArrivalOption"
+				:style="{
+					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 70) / 400 + 'px',
+					left: view.getBuildingPos(30, -1, true)[1] - (store.refSize * 55) / 400 + 'px',
+					width: (store.refSize * 28) / 100 + 'px',
+					height: (store.refSize * 28) / 100 + 'px',
+					border: String((store.refSize * 5) / 100) + 'px solid ' + rf.DESIGNER_JEROEN_COLOUR,
+				}"
+				title="Bring Jeroen into play at the Airport (uses two of your passenger placements)"
+				@mouseover="highlight($event, true)"
+				@mouseleave="highlight($event, false)"
+				@click="addDesignerToJunction(rf.DESIGNER_JEROEN)">
+				<img class="designerArrivalImg" :src="view.getImage('jeroen')" alt="Jeroen" />
+			</div>
+			<div
+				v-if="store.context.passengersLeftToPlace >= 2 && !funcs.designerArrivedThisRound() && store.jorisStatus === rf.DESIGNER_NOT_ARRIVED"
+				class="designerArrivalOption"
+				:style="{
+					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 70) / 400 + 'px',
+					left: view.getBuildingPos(30, -1, true)[1] + (store.refSize * 25) / 400 + 'px',
+					width: (store.refSize * 28) / 100 + 'px',
+					height: (store.refSize * 28) / 100 + 'px',
+					border: String((store.refSize * 5) / 100) + 'px solid ' + rf.DESIGNER_JORIS_COLOUR,
+				}"
+				title="Bring Joris into play at the Airport (takes two of your passenger placements)"
+				@mouseover="highlight($event, true)"
+				@mouseleave="highlight($event, false)"
+				@click="addDesignerToJunction(rf.DESIGNER_JORIS)">
+				<img class="designerArrivalImg" :src="view.getImage('joris')" alt="Joris" />
+			</div>
 		</template>
 	</template>
 
@@ -476,12 +640,12 @@ function getBuildingRadius() {
 				v-for="(building, index) in line[1]"
 				v-bind:key="index"
 				:style="{
-					top: view.getBuildingPos(line[0], building, true)[0] + 'px',
-					left: view.getBuildingPos(line[0], building, true)[1] + 'px',
+					top: view.getVromDestinationPos(line[0], building, true)[0] + 'px',
+					left: view.getVromDestinationPos(line[0], building, true)[1] + 'px',
 					border: String((store.refSize * 12) / 400) + 'px solid yellow',
 					width: (store.refSize * 30) / 100 + 'px',
 					height: (store.refSize * 30) / 100 + 'px',
-					transform: 'rotate(' + view.getBuildingPos(line[0], building, true)[2] + 'deg)',
+					transform: 'rotate(' + view.getVromDestinationPos(line[0], building, true)[2] + 'deg)',
 				}"
 				@mouseover="mouseOverVromBuilding($event, line[0], true)"
 				@mouseleave="mouseOverVromBuilding($event, line[0], false)"
@@ -617,6 +781,40 @@ function getBuildingRadius() {
 .passengerImg {
 	position: absolute;
 	filter: drop-shadow(2px 0 0 black) drop-shadow(0 2px 0 black) drop-shadow(-2px 0 0 black) drop-shadow(0 -2px 0 black);
+}
+
+.designerImg {
+	position: absolute;
+	z-index: 6;
+	filter: drop-shadow(2px 0 0 black) drop-shadow(0 2px 0 black) drop-shadow(-2px 0 0 black) drop-shadow(0 -2px 0 black);
+}
+
+.designerImg.selectablePaxToVrom:hover {
+	cursor: pointer;
+}
+
+.designerArrivalOption {
+	position: absolute;
+	z-index: 10;
+	border-radius: 100%;
+	border-color: yellow;
+	background-color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.designerArrivalOption:hover {
+	cursor: pointer;
+	border-color: lightgreen;
+}
+
+.designerArrivalImg {
+	width: 90%;
+	height: 90%;
+	object-fit: contain;
+	padding: 2px;
 }
 
 .selectablePaxToVrom {
